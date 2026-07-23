@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 
 from runtime_agent import InputTransition
+from th08_corridor_adapter import prewarm_th08_corridor
 from th08_live_dodge_agent import build_parser as build_agent_parser
 from th08_live_dodge_agent import run as run_agent
 from th08_runtime_agent import (
@@ -112,6 +113,7 @@ class AgentHotkey:
             / "artifacts"
             / "runtime_reports"
         )
+        prewarm_th08_corridor()
 
     def _open_target(self) -> tuple[int, ProcessReader, dict[str, object]]:
         pid = self.api.find_pid(TARGET_EXE)

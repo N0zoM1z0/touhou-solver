@@ -16,9 +16,31 @@ CORPUS = (
     / "runtime_reports"
     / "lunatic_route2_fullrun_20260723.regressions.json"
 )
+ROBUST_NO_BOMB_CORPUS = (
+    ROOT
+    / "artifacts"
+    / "runtime_reports"
+    / "lunatic_route2_fullrun_robust_viability_20260723_194644.regressions.json"
+)
 
 
 class Th08FullrunRegressionTests(unittest.TestCase):
+    def test_robust_fullrun_retains_all_hard_no_bomb_failures(self) -> None:
+        summary = load_and_validate(ROBUST_NO_BOMB_CORPUS)
+        self.assertEqual(summary.case_count, 90)
+        self.assertEqual(summary.deathbomb_count, 0)
+        self.assertEqual(
+            summary.stage_counts,
+            {
+                "Stage 1": 1,
+                "Stage 2": 5,
+                "Stage 3": 10,
+                "Stage 4A / Reimu": 28,
+                "Stage 5": 13,
+                "Final B / Kaguya": 33,
+            },
+        )
+
     def test_every_retained_native_hit_is_a_valid_unique_witness(self) -> None:
         summary = load_and_validate(CORPUS)
         self.assertEqual(summary.case_count, 91)

@@ -118,30 +118,44 @@ TH08_VIABILITY_ACTIONS = (
 
 
 def lower_bullets(
-    bullets: tuple[BulletSnapshot, ...], *, snapshot_lag: int
+    bullets: tuple[BulletSnapshot, ...],
+    *,
+    snapshot_lag: int,
+    forecast_frames: int = 0,
 ) -> tuple[MovingAabbHazard, ...]:
     lag = max(0, snapshot_lag)
+    forecast = max(0, forecast_frames)
     read_uncertainty = 0.2 * math.sqrt(lag)
-    return tuple(
-        MovingAabbHazard(
-            x=bullet.x + bullet.vx * lag,
-            y=bullet.y + bullet.vy * lag,
-            velocity_x=bullet.vx,
-            velocity_y=bullet.vy,
-            half_width=bullet.half_width,
-            half_height=bullet.half_height,
-            base_uncertainty=read_uncertainty
-            + (3.0 if bullet.transform_flags else 0.0),
-            uncertainty_per_frame=0.35 if bullet.transform_flags else 0.05,
+    hazards = []
+    for bullet in bullets:
+        growth = 0.35 if bullet.transform_flags else 0.05
+        hazards.append(
+            MovingAabbHazard(
+                x=bullet.x + bullet.vx * (lag + forecast),
+                y=bullet.y + bullet.vy * (lag + forecast),
+                velocity_x=bullet.vx,
+                velocity_y=bullet.vy,
+                half_width=bullet.half_width,
+                half_height=bullet.half_height,
+                base_uncertainty=(
+                    read_uncertainty
+                    + (3.0 if bullet.transform_flags else 0.0)
+                    + growth * forecast
+                ),
+                uncertainty_per_frame=growth,
+            )
         )
-        for bullet in bullets
-    )
+    return tuple(hazards)
 
 
 def lower_lasers(
-    lasers: tuple[LaserSnapshot, ...], *, snapshot_lag: int
+    lasers: tuple[LaserSnapshot, ...],
+    *,
+    snapshot_lag: int,
+    forecast_frames: int = 0,
 ) -> tuple[SegmentHazard, ...]:
     lag = max(0, snapshot_lag)
+    forecast = max(0, forecast_frames)
     return tuple(
         SegmentHazard(
             origin_x=laser.origin_x,
@@ -150,7 +164,7 @@ def lower_lasers(
             tail=laser.tail,
             head=laser.head,
             half_width=laser.half_width,
-            base_uncertainty=min(12.0, 0.4 * lag),
+            base_uncertainty=min(12.0, 0.4 * lag) + 0.4 * forecast,
             uncertainty_per_frame=0.4,
         )
         for laser in lasers
@@ -161,17 +175,19 @@ def lower_enemy_bodies(
     bodies: tuple[EnemyBodySnapshot, ...],
     *,
     snapshot_lag: int,
+    forecast_frames: int = 0,
 ) -> tuple[MovingAabbHazard, ...]:
     lag = max(0, snapshot_lag)
+    forecast = max(0, forecast_frames)
     return tuple(
         MovingAabbHazard(
-            x=body.x + body.vx * lag,
-            y=body.y + body.vy * lag,
+            x=body.x + body.vx * (lag + forecast),
+            y=body.y + body.vy * (lag + forecast),
             velocity_x=body.vx,
             velocity_y=body.vy,
             half_width=body.half_width,
             half_height=body.half_height,
-            base_uncertainty=0.5 * math.sqrt(lag),
+            base_uncertainty=0.5 * math.sqrt(lag) + 0.5 * forecast,
             uncertainty_per_frame=0.5,
         )
         for body in bodies
@@ -186,6 +202,7 @@ def plan_th08_corridor(
     lasers: tuple[LaserSnapshot, ...],
     enemy_bodies: tuple[EnemyBodySnapshot, ...] = (),
     snapshot_lag: int = 0,
+    forecast_frames: int = 0,
     preferred_x: float = 192.0,
     preferred_y: float = 368.0,
     required_gate_lane: str | None = None,
@@ -211,16 +228,39 @@ def plan_th08_corridor(
         start_y=player_y,
         bounds=TH08_PLAYFIELD,
         aabbs=(
-            lower_bullets(bullets, snapshot_lag=snapshot_lag)
+            lower_bullets(
+                bullets,
+                snapshot_lag=snapshot_lag,
+                forecast_frames=forecast_frames,
+            )
             + lower_enemy_bodies(
                 enemy_bodies,
                 snapshot_lag=snapshot_lag,
+                forecast_frames=forecast_frames,
             )
         ),
-        segments=lower_lasers(lasers, snapshot_lag=snapshot_lag),
+        segments=lower_lasers(
+            lasers,
+            snapshot_lag=snapshot_lag,
+            forecast_frames=forecast_frames,
+        ),
         preferred_x=preferred_x,
         preferred_y=preferred_y,
         required_gate_lane=required_gate_lane,
         config=config,
         robust_control=robust_control,
+    )
+
+
+def prewarm_th08_corridor() -> None:
+    """Populate transition geometry before the F8 gameplay handoff."""
+
+    plan_th08_corridor(
+        player_x=192.0,
+        player_y=400.0,
+        bullets=(),
+        lasers=(),
+        control_delay_candidates=(1, 2, 3),
+        nominal_control_delay=2,
+        active_action="stay",
     )

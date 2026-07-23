@@ -24,6 +24,7 @@ PHASE_COUNTER_JUMP_MIN = 1750
 PHASE_COUNTER_JUMP_MAX = 1850
 DEATH_WINDOW_FRAMES = 240
 CLUSTER_GAP_FRAMES = 600
+BOMB_INPUT_BIT = 0x02
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,7 @@ class TraceProvenance:
     summary: dict[str, object] | None
     runtime_errors: tuple[dict[str, object], ...]
     wall_auto_confirm_frames: tuple[int, ...]
+    controller_configs: tuple[dict[str, object], ...]
 
 
 def _nearest_bullet(row: dict[str, object]) -> dict[str, object] | None:
@@ -397,6 +399,45 @@ def _compact_decision(
             and corridor.get("planning_mode") is not None
             else None
         ),
+        "corridor_source_frame": (
+            int(corridor["source_frame"])
+            if isinstance(corridor, dict)
+            and corridor.get("source_frame") is not None
+            else None
+        ),
+        "corridor_snapshot_frame": (
+            int(corridor["snapshot_frame"])
+            if isinstance(corridor, dict)
+            and corridor.get("snapshot_frame") is not None
+            else None
+        ),
+        "corridor_forecast_lead_frames": (
+            int(corridor["forecast_lead_frames"])
+            if isinstance(corridor, dict)
+            and corridor.get("forecast_lead_frames") is not None
+            else None
+        ),
+        "corridor_solve_ms": (
+            float(corridor.get("solve_ms", 0.0))
+            if isinstance(corridor, dict)
+            else None
+        ),
+        "corridor_age": (
+            int(corridor.get("age", 0))
+            if isinstance(corridor, dict)
+            else None
+        ),
+        "corridor_stale": (
+            bool(corridor.get("stale"))
+            if isinstance(corridor, dict)
+            else None
+        ),
+        "corridor_policy_status": (
+            str(corridor.get("policy_status"))
+            if isinstance(corridor, dict)
+            and corridor.get("policy_status") is not None
+            else None
+        ),
         "viability": viability,
         "spell": row.get("spell"),
     }
@@ -420,6 +461,7 @@ def read_trace(
     summary = None
     runtime_errors = []
     wall_auto_confirm_frames = []
+    controller_configs = []
     decisions = []
     with path.open("rb") as source:
         for binary_line in source:
@@ -448,6 +490,8 @@ def read_trace(
                 runtime_errors.append(row)
             elif kind == "auto_confirm_wall_pulse":
                 wall_auto_confirm_frames.append(int(row["frame"]))
+            elif kind == "controller_config":
+                controller_configs.append(row)
     return (
         TraceProvenance(
             path=str(path),
@@ -460,6 +504,7 @@ def read_trace(
             summary=summary,
             runtime_errors=tuple(runtime_errors),
             wall_auto_confirm_frames=tuple(wall_auto_confirm_frames),
+            controller_configs=tuple(controller_configs),
         ),
         decisions,
     )
@@ -486,6 +531,151 @@ def _resource_range(
         "end": values[-1],
         "min": min(values),
         "max": max(values),
+    }
+
+
+def _no_bomb_verification(
+    decisions: list[dict[str, object]],
+    provenance: list[TraceProvenance],
+) -> dict[str, object]:
+    mask_violations = [
+        int(row["frame"])
+        for row in decisions
+        if int(row["mask"]) & BOMB_INPUT_BIT
+    ]
+    flag_violations = [
+        int(row["frame"]) for row in decisions if bool(row["bomb"])
+    ]
+    action_violations = [
+        int(row["frame"])
+        for row in decisions
+        if "bomb" in str(row["action"]).lower()
+    ]
+    controller_configs = [
+        config
+        for trace in provenance
+        for config in trace.controller_configs
+    ]
+    configured_disabled = bool(controller_configs) and all(
+        config.get("bomb_policy") == "disabled"
+        for config in controller_configs
+    )
+    return {
+        "passed": (
+            configured_disabled
+            and not mask_violations
+            and not flag_violations
+            and not action_violations
+        ),
+        "bomb_input_bit": BOMB_INPUT_BIT,
+        "controller_policy_disabled": configured_disabled,
+        "decision_count_checked": len(decisions),
+        "mask_violation_frames": mask_violations,
+        "bomb_flag_violation_frames": flag_violations,
+        "bomb_action_violation_frames": action_violations,
+        "resource_note": (
+            "Bomb stock can decrease after a native hit because TH08 resets "
+            "the respawn stock. Only input mask, decision flag, action, and "
+            "controller configuration prove Bomb use."
+        ),
+    }
+
+
+def _robust_viability_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object]:
+    unique_solutions: dict[int, dict[str, object]] = {}
+    policy_rows = []
+    queries = []
+    for row in decisions:
+        if row.get("corridor_planning_mode") == "robust_viability":
+            policy_rows.append(row)
+        source = row.get("corridor_source_frame")
+        if source is not None:
+            unique_solutions.setdefault(int(source), row)
+        viability = row.get("viability")
+        if isinstance(viability, dict) and viability:
+            queries.append(viability)
+
+    unique_rows = list(unique_solutions.values())
+    available = [
+        query for query in queries if bool(query.get("available"))
+    ]
+    constrained = [
+        row
+        for row in decisions
+        if isinstance(row.get("robust_control"), dict)
+        and bool(row["robust_control"].get("viability_constrained"))
+    ]
+    return {
+        "policy_decision_count": len(policy_rows),
+        "decision_without_query_count": len(policy_rows) - len(queries),
+        "unique_solution_count": len(unique_rows),
+        "solve_ms": _percentiles(
+            float(row["corridor_solve_ms"])
+            for row in unique_rows
+            if row.get("corridor_solve_ms") is not None
+        ),
+        "first_observed_age_frames": _percentiles(
+            float(row["corridor_age"])
+            for row in unique_rows
+            if row.get("corridor_age") is not None
+        ),
+        "forecast_lead_frames": _percentiles(
+            float(row["corridor_forecast_lead_frames"])
+            for row in unique_rows
+            if row.get("corridor_forecast_lead_frames") is not None
+        ),
+        "policy_status_counts": dict(
+            Counter(
+                str(row["corridor_policy_status"])
+                for row in policy_rows
+                if row.get("corridor_policy_status") is not None
+            )
+        ),
+        "reported_stale_solution_count": sum(
+            bool(row.get("corridor_stale")) for row in unique_rows
+        ),
+        "query_count": len(queries),
+        "available_query_count": len(available),
+        "unavailable_reason_counts": dict(
+            Counter(
+                str(query.get("reason", "unspecified"))
+                for query in queries
+                if not bool(query.get("available"))
+            )
+        ),
+        "support_covered_query_count": sum(
+            bool(query.get("support_covers_current", True))
+            for query in available
+        ),
+        "support_uncovered_query_count": sum(
+            not bool(query.get("support_covers_current", True))
+            for query in available
+        ),
+        "viable_query_count": sum(
+            bool(query.get("state_viable")) for query in available
+        ),
+        "empty_action_set_count": sum(
+            not bool(query.get("state_viable"))
+            or int(query.get("safe_action_count", 0)) == 0
+            for query in available
+        ),
+        "constrained_decision_count": len(constrained),
+        "constrained_decision_fraction": (
+            len(constrained) / len(decisions) if decisions else None
+        ),
+        "safe_action_count": _percentiles(
+            int(query.get("safe_action_count", 0))
+            for query in available
+        ),
+        "selected_repair_volume": _percentiles(
+            int(query.get("selected_repair_volume", 0))
+            for query in available
+        ),
+        "policy_age_frames": _percentiles(
+            int(query.get("age", 0)) for query in queries
+        ),
     }
 
 
@@ -754,6 +944,12 @@ def _death_ledger(
                 "bombs": next_bombs,
                 "power": next_power,
             },
+            "post_hit_bomb_stock_decrease": max(
+                0.0,
+                bombs_at_hit - next_bombs,
+            ),
+            # V1 regression readers require this compatibility field. A stock
+            # reset is not evidence that the controller pressed Bomb.
             "observed_bomb_cost": max(0.0, bombs_at_hit - next_bombs),
             "deathbomb_requested": "+deathbomb" in str(row["action"]),
             "action": row["action"],
@@ -1100,8 +1296,8 @@ def build_dossier(
                     bool(death["deathbomb_requested"])
                     for death in stage_deaths
                 ),
-                "observed_bomb_spend_at_deaths": sum(
-                    float(death["observed_bomb_cost"])
+                "post_hit_bomb_stock_decrease": sum(
+                    float(death["post_hit_bomb_stock_decrease"])
                     for death in stage_deaths
                 ),
                 "resources": {
@@ -1156,6 +1352,9 @@ def build_dossier(
                     ),
                     "status": "not_one_to_one_with_spell_cards",
                 },
+                "robust_viability": _robust_viability_summary(
+                    stage_decisions
+                ),
             }
         )
     stage_reports.sort(key=lambda stage: int(stage["first_frame"]))
@@ -1186,7 +1385,7 @@ def build_dossier(
         for factor in death["contributing_factors"]
     )
     return {
-        "schema": "th08-lunatic-run-dossier-v1",
+        "schema": "th08-lunatic-run-dossier-v2",
         "run_id": run_id,
         "acceptance_target": {
             "difficulty": "Lunatic",
@@ -1226,8 +1425,9 @@ def build_dossier(
             "deathbomb_count": sum(
                 bool(death["deathbomb_requested"]) for death in deaths
             ),
-            "observed_bomb_spend_at_deaths": sum(
-                float(death["observed_bomb_cost"]) for death in deaths
+            "post_hit_bomb_stock_decrease": sum(
+                float(death["post_hit_bomb_stock_decrease"])
+                for death in deaths
             ),
             "primary_cause_counts": dict(cause_counts),
             "contributing_factor_counts": dict(contributing_counts),
@@ -1245,6 +1445,13 @@ def build_dossier(
                     "without the restoring press"
                 ),
             ],
+        },
+        "control_policy": {
+            "no_bomb_verification": _no_bomb_verification(
+                decisions,
+                provenance,
+            ),
+            "robust_viability": _robust_viability_summary(decisions),
         },
         "stages": stage_reports,
         "death_clusters": _death_clusters(deaths),
@@ -1274,6 +1481,9 @@ def _format_number(value: object) -> str:
 def render_markdown(dossier: dict[str, object]) -> str:
     totals = dossier["totals"]
     integrity = dossier["integrity"]
+    control_policy = dossier["control_policy"]
+    no_bomb = control_policy["no_bomb_verification"]
+    viability = control_policy["robust_viability"]
     spell_attribution_resolved = (
         integrity["spell_attribution"] == "resolved_live_spell_state"
     )
@@ -1287,9 +1497,13 @@ def render_markdown(dossier: dict[str, object]) -> str:
         f"{dossier['completion_probe']['enemy_manager_frame']}.",
         "- Native phase-2 hit edges, including Last-Spell-saveable edges: "
         f"{totals['death_count']}.",
-        f"- Deathbomb requests at those edges: "
-        f"{totals['deathbomb_count']}; observed Bomb spend: "
-        f"{_format_number(totals['observed_bomb_spend_at_deaths'])}.",
+        f"- Deathbomb requests at those edges: {totals['deathbomb_count']}.",
+        "- Hard no-Bomb input verification: "
+        f"{'passed' if no_bomb['passed'] else 'FAILED'} across "
+        f"{no_bomb['decision_count_checked']} decisions.",
+        "- Post-hit Bomb-stock decreases: "
+        f"{_format_number(totals['post_hit_bomb_stock_decrease'])}; this is "
+        "respawn-stock reset telemetry, not evidence of Bomb input.",
         f"- Agent decisions: {totals['decision_count']}.",
         f"- Raw trace size: {integrity['raw_trace_bytes']} bytes across "
         f"{integrity['trace_count']} segments.",
@@ -1307,10 +1521,9 @@ def render_markdown(dossier: dict[str, object]) -> str:
         "The run is valid for stage-, death-, resource-, projectile-, latency-, "
         "and route-level analysis. Spell names below are the statically "
         "reachable Lunatic route inventory; unavailable runtime hit counts "
-        "remain explicitly unresolved instead of guessed. Because the "
-        "no-life patch "
-        "allows post-hit resource resets to repeat, observed Bomb spend is a "
-        "failure metric, not a feasible finite-stock route budget.",
+        "remain explicitly unresolved instead of guessed. The no-life patch "
+        "allows post-hit resource resets to repeat, so resource-stock changes "
+        "must not be interpreted as Bomb commands.",
         "",
         "## Trace Integrity",
         "",
@@ -1335,16 +1548,30 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"{runtime_error} | "
             f"`{item['sha256']}` |"
         )
+    interruptions = integrity["foreground_interruption_count"]
+    if interruptions:
+        lines.extend(
+            [
+                "",
+                f"Foreground interruptions: {interruptions}. Interruption "
+                "intervals are excluded from agent-controlled scoring.",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "",
+                "The route is one continuous agent-controlled trace with no "
+                "foreground interruption or manual re-arm gap.",
+            ]
+        )
     lines.extend(
         [
-            "",
-            "The segment gap is a foreground-loss/manual-rearm interval. It is "
-            "not scored as agent-controlled play.",
             "",
             "## Stage Summary",
             "",
             "| Stage | Frames | Decisions | Native hits | Deathbombs | "
-            "Bomb spend | "
+            "Post-hit Bomb-stock decrease | "
             "Power start/end/min | Max bullets | Max lasers |",
             "| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: |",
         ]
@@ -1355,7 +1582,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"| {stage['stage_label']} | {stage['first_frame']}.."
             f"{stage['last_frame']} | {stage['decision_count']} | "
             f"{stage['death_count']} | {stage['deathbomb_count']} | "
-            f"{_format_number(stage['observed_bomb_spend_at_deaths'])} | "
+            f"{_format_number(stage['post_hit_bomb_stock_decrease'])} | "
             f"{_format_number(power['start'])}/"
             f"{_format_number(power['end'])}/"
             f"{_format_number(power['min'])} | "
@@ -1474,7 +1701,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"{stage['boundary_occupancy']['bottom_decisions']}/"
                 f"{stage['boundary_occupancy']['side_decisions']}.",
                 "",
-                "| Frame | Bombs | Power | Bomb cost | Bullets | Pipeline | "
+                "| Frame | Bombs | Power | Post-hit stock drop | Bullets | Pipeline | "
                 "Corridor slack | Cause | Factors |",
                 "| ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |",
             ]
@@ -1485,7 +1712,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"| {death['frame']} | "
                 f"{_format_number(death['resources_at_hit']['bombs'])} | "
                 f"{_format_number(death['resources_at_hit']['power'])} | "
-                f"{_format_number(death['observed_bomb_cost'])} | "
+                f"{_format_number(death['post_hit_bomb_stock_decrease'])} | "
                 f"{death['active_bullets']} | "
                 f"{_format_number(death['pipeline_clearance_at_hit'])} | "
                 f"{_format_number(death['minimum_corridor_slack_240f'])} | "
@@ -1534,41 +1761,70 @@ def render_markdown(dossier: dict[str, object]) -> str:
         lines.append("")
 
     stalls = dossier["observed_auto_confirm_stalls"]["frames"]
+    solve_ms = viability["solve_ms"] or {
+        "median": None,
+        "p95": None,
+        "max": None,
+    }
+    policy_age = viability["first_observed_age_frames"] or {
+        "median": None,
+        "p95": None,
+        "max": None,
+    }
+    stalls_text = ", ".join(str(frame) for frame in stalls) or "none"
+    final_summary = dossier["provenance"][-1].get("summary") or {}
+    termination_reason = final_summary.get("termination_reason", "missing")
+    sensor_gap_count = int(
+        totals["primary_cause_counts"].get(
+            "sensor_gap_or_unmodeled_hazard",
+            0,
+        )
+    )
     lines.extend(
         [
             "## Runtime And Harness Findings",
             "",
-            f"- Observed auto-Z stall frames: "
-            f"{', '.join(str(frame) for frame in stalls)}.",
-            "- Auto-Z was frame-driven, but dialogue can freeze the enemy "
-            "manager counter. The post-run fix adds a foreground-checked "
-            "wall-clock release/press edge and restores held Z without a new "
-            "gameplay frame.",
-            "- The first segment stopped on foreground loss at frame 158850. "
-            "The continuation begins at 160535; that interval is excluded from "
-            "agent scoring.",
-            "- Gameplay scene unload at frame 209373 also froze the counter. "
-            "The post-run loop now checks scene state while waiting for frame "
-            "advance and emits `gameplay_ended` without an external stop.",
-            "- The post-run recorder now persists active flags, exact ID, "
-            "enemy pointer, and decoded name from `g_spell_card_state`.",
-            "- 56 of 91 hit edges have no observed same-frame bullet overlap. "
-            "The "
-            "highest-priority model fix remains injecting enemy-ECL same-frame "
-            "emissions and exact transforms into the committed-input horizon.",
+            f"- Observed auto-Z stall frames: {stalls_text}.",
+            "- Route termination: "
+            f"`{termination_reason}` "
+            f"at completion probe frame "
+            f"{dossier['completion_probe']['enemy_manager_frame']}.",
+            "- Unique robust solutions observed: "
+            f"{viability['unique_solution_count']}; solve time median/p95/max "
+            f"{_format_number(solve_ms['median'])}/"
+            f"{_format_number(solve_ms['p95'])}/"
+            f"{_format_number(solve_ms['max'])} ms.",
+            "- First-observed policy age median/p95/max: "
+            f"{_format_number(policy_age['median'])}/"
+            f"{_format_number(policy_age['p95'])}/"
+            f"{_format_number(policy_age['max'])} frames.",
+            "- Viability queries available: "
+            f"{viability['available_query_count']}/"
+            f"{viability['query_count']}; robustly constrained decisions: "
+            f"{viability['constrained_decision_count']}/"
+            f"{totals['decision_count']}.",
+            "- Robust-policy decisions without any usable query: "
+            f"{viability['decision_without_query_count']}/"
+            f"{viability['policy_decision_count']}.",
+            "- Live spell attribution was recorded at every hit edge; exact "
+            "per-spell counts are preserved below.",
+            f"- `{sensor_gap_count}` hit edges remain in the "
+            "`sensor_gap_or_unmodeled_hazard` class and require executor-level "
+            "same-frame emission/transform evidence.",
             "",
             "## Next Regression Work",
             "",
-            "1. Explain the five active-laser/no-overlap and twenty sensor-gap "
-            "cases with exact same-frame ECL/transform executor traces.",
-            "2. Replay all 91 retained witnesses through the integrated "
-            "executor before deduplicating equivalent root causes.",
-            "3. Physically validate gate-first local ordering and fixed-expiry "
-            "lane commitment on the same Lunatic Final B route.",
-            "4. Add Bomb/Power/item state to phase-level component search, then "
-            "compare native hits, "
-            "Bomb "
-            "spend, Power curve, per-spell exposure, and cluster recurrence.",
+            "1. Keep robust backward-reachability solves within the finite "
+            "policy horizon, then verify nonzero live query and constrained-"
+            "decision counts.",
+            f"2. Replay all {totals['death_count']} retained witnesses through "
+            "the integrated executor and preserve one regression per concrete "
+            "failure.",
+            "3. Re-run focused Stage 4A and Final B practices before another "
+            "full Lunatic route; compare hit frames, policy age, action-set "
+            "exhaustion, and cluster recurrence.",
+            "4. Add item/Power state and finite Bomb resources only after the "
+            "no-Bomb movement policy has passed physical validation.",
         ]
     )
     return "\n".join(lines)
@@ -1589,6 +1845,7 @@ def write_death_csv(
         "bombs",
         "power",
         "observed_bomb_cost",
+        "post_hit_bomb_stock_decrease",
         "deathbomb_requested",
         "active_bullets",
         "active_lasers",
@@ -1635,6 +1892,9 @@ def write_death_csv(
                     "bombs": death["resources_at_hit"]["bombs"],
                     "power": death["resources_at_hit"]["power"],
                     "observed_bomb_cost": death["observed_bomb_cost"],
+                    "post_hit_bomb_stock_decrease": death[
+                        "post_hit_bomb_stock_decrease"
+                    ],
                     "deathbomb_requested": death["deathbomb_requested"],
                     "active_bullets": death["active_bullets"],
                     "active_lasers": death["active_lasers"],
@@ -1770,6 +2030,9 @@ def main(argv: list[str] | None = None) -> int:
                 "schema": "th08-live-death-regressions-v1",
                 "run_id": args.run_id,
                 "case_count": len(dossier["deaths"]),
+                "no_bomb_verification": dossier["control_policy"][
+                    "no_bomb_verification"
+                ],
                 "cases": dossier["deaths"],
             },
             indent=2,

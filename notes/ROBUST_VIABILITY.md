@@ -104,6 +104,42 @@ safe action names/count, per-action repair volume, selected repair volume, and
 the learned delay support. Empty queried action sets are explicit viability
 exhaustion events.
 
+### Forecasted Rolling Epoch
+
+The first complete Lunatic run showed that the original snapshot-anchored
+policy was usually dead on arrival: solve age had a 152-frame median for an
+80-frame horizon. The rolling executor therefore separates three clocks:
+
+```text
+snapshot frame s
+policy epoch e = s + estimated solve lead
+live query age = current frame - e
+```
+
+The lead is a bounded rolling p90 of solve durations in game frames, shifted
+earlier by an overlap allowance. Hazards are projected from `s` to `e`;
+uncertainty growth over that forecast interval is added before the ordinary
+within-policy growth. A result can arrive before `e` and wait, or after `e`
+and still be queried at its positive age. The prior policy remains active
+while its successor is computed.
+
+This timing component is game-neutral. A game adapter supplies forecastable
+hazard motion and uncertainty. Missing future emissions remain a model defect,
+not something the epoch shift can prove away. With one worker, uninterrupted
+coverage additionally requires solve throughput at least as fast as policy
+horizon consumption; the trace records pending/queryable/expired status so a
+coverage gap is visible.
+
+### Lazy Repair Volume
+
+Repair volume ranks actions only after the backward viability recurrence has
+admitted them. Materializing it for every lattice state/action repeated work
+that the live controller never queried. The kernel now stores viability and
+safe-action masks only. A query computes the identical worst-delay
+neighborhood state-action count for its safe actions on demand. Survival
+semantics and action ordering are unchanged, while the global build avoids the
+full repair tensor and its repeated successor gathers.
+
 ## Approximation Boundary
 
 This first kernel is a finite-horizon lattice abstraction, not yet a proof over
@@ -137,6 +173,12 @@ and runtime adapter without changing the backward-induction kernel.
    runs complete with hard no-Bomb.
 5. Re-run complete Stage 3, then complete Lunatic, then Extra, retaining the
    full artifact set required by `AGENTS.md`.
+
+The `194644` complete run is discovery evidence, not acceptance: it recorded
+90 hits and only 563 robustly constrained decisions. After sparse exact
+clearance, lazy repair scoring, transition prewarm, and forecasted epochs, the
+next gate is focused Stage 4A and Final-B practice. Acceptance requires live
+query coverage and hit reduction, not synthetic timing alone.
 
 Bomb/resource dynamic programming is a later outer layer. A no-Bomb successor
 is always preferred; a Bomb edge is considered only when the no-Bomb kernel is

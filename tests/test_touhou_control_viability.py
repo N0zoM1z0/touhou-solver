@@ -44,6 +44,40 @@ class RobustViabilityTests(unittest.TestCase):
         self.assertEqual(policy.layer_count, 2)
         self.assertEqual(policy.horizon_frames, 4)
 
+    def test_repair_volume_is_computed_exactly_for_the_queried_state(
+        self,
+    ) -> None:
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("right", 1.0, 0.0),
+        )
+        policy = build_robust_viability_policy(
+            x_axis=np.asarray([0.0, 1.0, 2.0], dtype=np.float32),
+            y_axis=np.asarray([0.0, 1.0], dtype=np.float32),
+            clearance_volume=np.full((5, 2, 3), 100.0, dtype=np.float32),
+            actions=actions,
+            delay_frames=(0, 1),
+            nominal_delay=1,
+            config=ViabilityConfig(
+                frames_per_layer=2,
+                repair_radius_cells=0,
+            ),
+        )
+        first = policy.query(
+            frame=0,
+            x=1.0,
+            y=0.0,
+            active_action="stay",
+        )
+        terminal_predecessor = policy.query(
+            frame=2,
+            x=1.0,
+            y=0.0,
+            active_action="stay",
+        )
+        self.assertEqual(first.repair_volume("stay"), 2)
+        self.assertEqual(terminal_predecessor.repair_volume("stay"), 1)
+
     def test_action_is_rejected_when_one_delay_branch_crosses_hazard(
         self,
     ) -> None:

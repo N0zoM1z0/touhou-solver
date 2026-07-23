@@ -1,0 +1,54 @@
+{
+  "schema": "th08-robust-viability-performance-v1",
+  "date": "2026-07-23",
+  "physical_run_before_fix": {
+    "run_id": "lunatic_route2_fullrun_robust_viability_20260723_194644",
+    "unique_solution_count": 1064,
+    "solve_ms": {
+      "median": 2455.9473999979673,
+      "p95": 4038.6423000018112,
+      "max": 6141.658700013068
+    },
+    "first_observed_age_frames": {
+      "median": 152.0,
+      "p95": 259.0,
+      "max": 3899.0
+    },
+    "policy_horizon_frames": 80,
+    "constrained_decision_count": 563,
+    "decision_count": 69092
+  },
+  "optimized_synthetic_stress": {
+    "aabbs": 1500,
+    "segments": 250,
+    "forecast_frames": 80,
+    "actions": 17,
+    "policy_horizon_frames": 80,
+    "delay_support": [1, 2, 3],
+    "windows_python": {
+      "cold_ms": 3587.745500000892,
+      "warm_samples_ms": [
+        1247.3227000009501,
+        1188.4728000004543,
+        1226.9630999944638,
+        1368.4941999963485
+      ],
+      "warm_median_ms": 1237.142899997707
+    },
+    "wsl_python": {
+      "cold_ms": 1370.7685330009554,
+      "warm_samples_ms": [
+        961.4428399945609,
+        870.4047500068555,
+        857.6147740095621,
+        941.6097729990724
+      ],
+      "warm_median_ms": 906.007261502964
+    }
+  },
+  "rejected_active_action_batch": {
+    "reason": "Large temporary arrays improved WSL slightly but saturated Windows memory bandwidth.",
+    "windows_warm_median_ms": 1903.019650002534
+  },
+  "interpretation": "The optimized benchmark demonstrates throughput improvement only. Physical focused runs must verify policy coverage, conservative forecast behavior, and native hit reduction."
+}

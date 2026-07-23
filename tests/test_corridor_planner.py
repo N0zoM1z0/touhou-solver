@@ -14,6 +14,8 @@ from corridor_planner import (
     MovingAabbHazard,
     RobustControlSpec,
     SegmentHazard,
+    _aabb_clearance_field,
+    _aabb_clearance_volume,
     _segment_clearance_field,
     plan_corridor,
 )
@@ -32,6 +34,60 @@ CONFIG = CorridorConfig(
 
 
 class CorridorPlannerTests(unittest.TestCase):
+    def test_sparse_aabb_volume_matches_dense_geometry_below_cap(
+        self,
+    ) -> None:
+        grid_x, grid_y = np.meshgrid(
+            np.arange(0.0, 49.0, 8.0, dtype=np.float32),
+            np.arange(0.0, 41.0, 8.0, dtype=np.float32),
+        )
+        hazards = (
+            MovingAabbHazard(
+                x=-5.0,
+                y=4.0,
+                velocity_x=2.5,
+                velocity_y=1.25,
+                half_width=3.0,
+                half_height=5.0,
+                base_uncertainty=0.5,
+                uncertainty_per_frame=0.25,
+            ),
+            MovingAabbHazard(
+                x=52.0,
+                y=36.0,
+                velocity_x=-1.5,
+                velocity_y=-2.0,
+                half_width=7.0,
+                half_height=2.0,
+            ),
+        )
+        cap = 12.0
+        actual = _aabb_clearance_volume(
+            grid_x,
+            grid_y,
+            hazards,
+            horizon_frames=8,
+            player_radius=2.0,
+            clearance_cap=cap,
+        )
+        dense = np.stack(
+            [
+                _aabb_clearance_field(
+                    grid_x,
+                    grid_y,
+                    hazards,
+                    frame=frame,
+                    player_radius=2.0,
+                )
+                for frame in range(9)
+            ]
+        )
+        np.testing.assert_allclose(
+            actual,
+            np.minimum(dense, cap),
+            atol=2e-5,
+        )
+
     def test_vectorized_segment_field_matches_scalar_finite_geometry(
         self,
     ) -> None:

@@ -6,11 +6,14 @@ from __future__ import annotations
 import unittest
 
 from th08_run_dossier import (
+    TraceProvenance,
     _classify_death,
     _death_clusters,
     _nearest_bullet,
     _nearest_laser,
+    _no_bomb_verification,
     _robust_control_unsafe,
+    _robust_viability_summary,
     _spell_attribution,
     _viability_action_set_empty,
 )
@@ -41,6 +44,101 @@ def _row(
 
 
 class Th08RunDossierTests(unittest.TestCase):
+    def test_no_bomb_verification_uses_input_not_stock_reset(self) -> None:
+        provenance = [
+            TraceProvenance(
+                path="trace.jsonl",
+                sha256="0" * 64,
+                size_bytes=1,
+                parse_errors=0,
+                decision_count=1,
+                first_frame=1,
+                last_frame=1,
+                summary=None,
+                runtime_errors=(),
+                wall_auto_confirm_frames=(),
+                controller_configs=({"bomb_policy": "disabled"},),
+            )
+        ]
+        verification = _no_bomb_verification(
+            [
+                {
+                    "frame": 1,
+                    "mask": 0x15,
+                    "bomb": False,
+                    "action": "left_focus",
+                }
+            ],
+            provenance,
+        )
+        self.assertTrue(verification["passed"])
+        self.assertEqual(verification["mask_violation_frames"], [])
+
+    def test_no_bomb_verification_rejects_bomb_input_bit(self) -> None:
+        provenance = [
+            TraceProvenance(
+                path="trace.jsonl",
+                sha256="0" * 64,
+                size_bytes=1,
+                parse_errors=0,
+                decision_count=1,
+                first_frame=1,
+                last_frame=1,
+                summary=None,
+                runtime_errors=(),
+                wall_auto_confirm_frames=(),
+                controller_configs=({"bomb_policy": "disabled"},),
+            )
+        ]
+        verification = _no_bomb_verification(
+            [
+                {
+                    "frame": 2,
+                    "mask": 0x02,
+                    "bomb": False,
+                    "action": "stay",
+                }
+            ],
+            provenance,
+        )
+        self.assertFalse(verification["passed"])
+        self.assertEqual(verification["mask_violation_frames"], [2])
+
+    def test_robust_viability_summary_exposes_missing_queries(self) -> None:
+        rows = [
+            {
+                "corridor_planning_mode": "robust_viability",
+                "corridor_source_frame": 100,
+                "corridor_solve_ms": 800.0,
+                "corridor_age": 81,
+                "corridor_stale": False,
+                "viability": {},
+                "robust_control": {"viability_constrained": False},
+            },
+            {
+                "corridor_planning_mode": "robust_viability",
+                "corridor_source_frame": 120,
+                "corridor_solve_ms": 600.0,
+                "corridor_age": 60,
+                "corridor_stale": False,
+                "viability": {
+                    "available": True,
+                    "state_viable": True,
+                    "safe_action_count": 2,
+                    "selected_repair_volume": 5,
+                    "age": 60,
+                    "support_covers_current": True,
+                },
+                "robust_control": {"viability_constrained": True},
+            },
+        ]
+        summary = _robust_viability_summary(rows)
+        self.assertEqual(summary["unique_solution_count"], 2)
+        self.assertEqual(summary["decision_without_query_count"], 1)
+        self.assertEqual(summary["available_query_count"], 1)
+        self.assertEqual(summary["constrained_decision_count"], 1)
+        self.assertEqual(summary["solve_ms"]["median"], 700.0)
+
     def test_global_viability_exhaustion_requires_available_empty_query(
         self,
     ) -> None:

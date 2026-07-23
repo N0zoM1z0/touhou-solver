@@ -238,10 +238,13 @@ def load_and_validate(path: Path) -> CorpusSummary:
     schema = payload.get("schema")
     if schema not in EXPECTED_SCHEMAS:
         raise CorpusError(f"{path}: unexpected schema {payload.get('schema')!r}")
+    verification = payload.get("no_bomb_verification")
     if schema == "th08-practice-death-regressions-v1":
-        verification = payload.get("no_bomb_verification")
         if not isinstance(verification, dict) or not verification.get("passed"):
             raise CorpusError(f"{path}: practice corpus did not pass no-Bomb gate")
+    if isinstance(verification, dict):
+        if not verification.get("passed"):
+            raise CorpusError(f"{path}: corpus did not pass no-Bomb gate")
         for key in (
             "mask_violation_frames",
             "bomb_flag_violation_frames",
@@ -277,7 +280,14 @@ def load_and_validate(path: Path) -> CorpusSummary:
                 and not int(case["mask"]) & 0x02
                 and not bool(case["deathbomb_requested"]),
                 case_id=case_id,
-                message="practice case violates hard no-Bomb policy",
+                message="case violates verified hard no-Bomb policy",
+            )
+        elif isinstance(verification, dict):
+            _require(
+                not int(case["mask"]) & 0x02
+                and not bool(case["deathbomb_requested"]),
+                case_id=case_id,
+                message="case violates verified hard no-Bomb policy",
             )
         stage_counts[str(case["stage_label"])] += 1
         cause_counts[str(case["primary_cause_class"])] += 1

@@ -759,3 +759,62 @@ Status: observed | inferred | unknown | fixed
 - **Status:** open. Current upper-bound treatment is conservative and produced
   a physical improvement, but its computation cost and tail calibration are
   not yet general enough for other machines or games.
+
+## CE-0042: The backward policy normally arrived after its own horizon
+
+- **Observed symptom:** The uninterrupted `194644` Lunatic Final-B run
+  completed 69,092 hard-no-Bomb decisions with 90 native hit edges. Of 64,412
+  robust-mode decisions, 63,653 had no usable policy query and only 563 were
+  actually constrained by backward viability. The 1,064 unique solves took
+  2,456/4,039/6,142 ms at median/p95/max; their first observed ages were
+  152/259/3,899 frames against an 80-frame policy.
+- **Invalid assumption:** An asynchronous result remains useful merely because
+  the worker returns a complete policy. A policy whose hazard epoch is the
+  observation frame has already expired when solve time exceeds its horizon.
+  The old trace `stale` flag also only noticed a missing reachable waypoint,
+  so 484 reported stale solutions understated the actual loss of guidance.
+- **Correction:** The neutral async timing layer estimates solve-frame p90.
+  A submission at snapshot `s` builds hazards for a future policy epoch
+  `e = s + lead`, with an eight-frame intended overlap. Bullet, laser, and
+  enemy uncertainty is grown through the forecast interval. Trace status now
+  distinguishes `pending_future_epoch`, `queryable`, `expired`, and
+  `outside_policy_horizon`. The daemon prewarms transition geometry before F8.
+- **Performance correction:** Moving-AABB clearance is exact below its cap but
+  scatters only into nearby lattice cells, grouped by conservative influence
+  radius. Repair-space volume is still exact, but is computed lazily for live
+  queried states instead of materialized for every state/action. A Windows
+  1,500-AABB/250-laser/80-frame-forecast benchmark is 1,237 ms warm median,
+  versus the physical run's 2,456 ms median before these changes.
+- **Rejected optimization:** Combining all 17 active-action batches into one
+  large NumPy operation improved WSL slightly but regressed Windows warm time
+  from about 1,497 to 1,903 ms because of large temporary arrays and memory
+  bandwidth. It was removed.
+- **Regressions:** `test_sparse_aabb_volume_matches_dense_geometry_below_cap`,
+  `test_repair_volume_is_computed_exactly_for_the_queried_state`,
+  `test_future_policy_epoch_is_pending_then_queryable_then_expired`,
+  `test_future_policy_does_not_replace_active_policy_before_epoch`, and
+  `test_touhou_control_async_policy.py`.
+- **Evidence:** The 90 individual cases remain executable in
+  `lunatic_route2_fullrun_robust_viability_20260723_194644.regressions.json`;
+  the complete death ledger and per-spell attribution are in the matching
+  dossier and run note.
+- **Status:** offline fixed; focused Stage 4A/Final-B physical validation is
+  required. A single worker can still have a short coverage gap if a
+  forecasted solve remains slower than the full policy horizon.
+
+## CE-0043: Respawn Bomb stock reset was reported as Bomb use
+
+- **Observed symptom:** The no-life patch allowed Bomb stock to fall by 44
+  units across post-hit reset windows even though the controller requested
+  zero deathbombs. The first dossier renderer labelled this as observed Bomb
+  spend.
+- **Invalid assumption:** A resource decrease after a hit proves a Bomb input.
+  TH08 resets respawn stock independently of the injected input mask.
+- **Correction:** Dossier v2 verifies no-Bomb from controller configuration,
+  the native Bomb input bit, decision Bomb flag, and action name. The `194644`
+  trace passes all four checks across all 69,092 decisions. Resource change is
+  retained separately as `post_hit_bomb_stock_decrease`.
+- **Regressions:** `test_no_bomb_verification_uses_input_not_stock_reset` and
+  `test_no_bomb_verification_rejects_bomb_input_bit`.
+- **Status:** reporting fixed. The run is a verified hard-no-Bomb failure
+  corpus, not a finite-resource Bomb route.

@@ -1202,3 +1202,39 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   dimension, intermediate collision checking, continuous sampling margin,
   hard first-action guidance, repair-volume ordering, and asynchronous layer
   queries. All 240 tests pass. Physical acceptance is still pending.
+
+## 2026-07-23: Complete Lunatic Discovery Run And Async Epoch Repair
+
+- Completed one uninterrupted Sakuya/Remilia Lunatic Final-B trace,
+  `194644`, through frame 225,973: 69,092 decisions, zero Bomb input, zero
+  auto-Z stalls, exact live spell attribution, and 90 hit edges. Stage hits
+  were `1/5/10/28/13/33`; Stage 4A and Final B are the dominant focused
+  targets.
+- The robust layer was effectively absent. Solve median/p95/max was
+  2,456/4,039/6,142 ms and first-observed policy age 152/259/3,899 frames.
+  Only 759 policy queries existed, 563 decisions were constrained, and 63,653
+  robust-mode decisions had no query. The local controller therefore produced
+  almost the whole route.
+- Dossier v2 proves hard no-Bomb from input/config evidence. The 44-unit
+  post-hit Bomb-stock decrease is a respawn reset and is no longer called Bomb
+  spend. All 90 deaths are retained in CSV and executable JSON regressions.
+- Replaced dense grid-by-hazard clearance with exact-below-cap neighborhood
+  scatter and conservative influence-radius grouping. Repair volume moved
+  from a full tensor to exact per-query evaluation. The hotkey daemon now
+  prewarms transition geometry before F8.
+- Added game-neutral `touhou_control.async_policy.AsyncPolicyLead`. Each
+  asynchronous solve targets a forecasted future epoch based on rolling solve
+  p90 minus overlap; the TH08 adapter projects bullets/enemies and grows
+  bullet/laser/enemy uncertainty through that lead. Live traces explicitly
+  label pending, queryable, expired, and outside-horizon policies.
+- A deterministic Windows stress benchmark with 1,500 AABBs, 250 lasers,
+  80 forecast frames, and the full 17-action/80-frame kernel measured
+  1,237 ms warm median after optimization. The equivalent WSL median was
+  906 ms. Synthetic timing is not physical acceptance.
+- Rejected one cross-platform optimization: one large active-action batch
+  reduced WSL time but regressed Windows warm time to about 1,903 ms. The
+  small-batch implementation remains.
+- Current checkpoint is offline-corrected only. The next physical sequence is
+  focused Stage 4A, focused Final B, complete Lunatic, then Extra. The first
+  acceptance signal is nonzero sustained live viability coverage together
+  with fewer hits; resource-aware Bomb/item search remains later.

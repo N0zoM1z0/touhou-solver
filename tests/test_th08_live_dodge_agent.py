@@ -33,10 +33,12 @@ from th08_live_dodge_agent import (
     UP,
     _auto_confirm_eligible,
     _action_name_from_mask,
+    _corridor_policy_status,
     _corridor_target,
     _corridor_viability_query,
     _estimate_live_action_hold,
     _frozen_auto_confirm_eligible,
+    _stage_corridor_solution,
     choose_action,
     decode_enemy_body,
     decode_player_lethal_aabb,
@@ -655,6 +657,91 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(query.layer, 1)
         self.assertTrue(query.available)
         self.assertGreater(query.safe_action_count, 0)
+
+    def test_future_policy_epoch_is_pending_then_queryable_then_expired(
+        self,
+    ) -> None:
+        actions = (ControlAction("stay", 0.0, 0.0),)
+        plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=CorridorBounds(0.0, 96.0, 0.0, 96.0),
+            config=CorridorConfig(
+                grid_step=8.0,
+                frames_per_layer=4,
+                horizon_frames=16,
+            ),
+            robust_control=RobustControlSpec(
+                actions=actions,
+                delay_frames=(1,),
+                nominal_delay=1,
+                active_action="stay",
+            ),
+        )
+        solution = CorridorSolution(
+            120,
+            plan,
+            800.0,
+            snapshot_frame=72,
+            forecast_lead_frames=48,
+            context_key=(3, 57),
+        )
+        self.assertEqual(
+            _corridor_policy_status(
+                solution,
+                current_frame=119,
+                max_age_frames=15,
+            ),
+            "pending_future_epoch",
+        )
+        self.assertEqual(
+            _corridor_policy_status(
+                solution,
+                current_frame=120,
+                max_age_frames=15,
+            ),
+            "queryable",
+        )
+        self.assertEqual(
+            _corridor_policy_status(
+                solution,
+                current_frame=136,
+                max_age_frames=15,
+            ),
+            "expired",
+        )
+
+    def test_future_policy_does_not_replace_active_policy_before_epoch(
+        self,
+    ) -> None:
+        plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=CorridorBounds(0.0, 96.0, 0.0, 96.0),
+            config=CorridorConfig(
+                grid_step=8.0,
+                frames_per_layer=4,
+                horizon_frames=16,
+            ),
+        )
+        active = CorridorSolution(100, plan, 10.0, context_key=(3, 57))
+        future = CorridorSolution(120, plan, 8.0, context_key=(3, 57))
+        staged_active, pending = _stage_corridor_solution(
+            active,
+            future,
+            current_frame=119,
+            context_key=(3, 57),
+        )
+        self.assertIs(staged_active, active)
+        self.assertIs(pending, future)
+        staged_active, pending = _stage_corridor_solution(
+            staged_active,
+            pending,
+            current_frame=120,
+            context_key=(3, 57),
+        )
+        self.assertIs(staged_active, future)
+        self.assertIsNone(pending)
 
     def test_ce_frame_1420_commits_away_before_bottom_edge_trap(self) -> None:
         bullet = Bullet(

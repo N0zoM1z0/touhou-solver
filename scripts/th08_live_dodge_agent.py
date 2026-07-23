@@ -41,6 +41,7 @@ from th08_runtime_agent import (
     send_transitions,
     verify_target,
 )
+from touhou_control.async_policy import AsyncPolicyLead
 from touhou_control.delay import AdaptiveControlDelay
 from touhou_control.viability import ViabilityQuery
 
@@ -121,9 +122,10 @@ ITEM_SAFETY_CLEARANCE = 8.0
 CORRIDOR_REPLAN_FRAMES = 24
 CORRIDOR_LOOKAHEAD_FRAMES = 16
 CORRIDOR_MAX_AGE_FRAMES = (
-    TH08_CORRIDOR_CONFIG.horizon_frames
-    - TH08_CORRIDOR_CONFIG.frames_per_layer
+    TH08_CORRIDOR_CONFIG.horizon_frames - 1
 )
+CORRIDOR_POLICY_LEAD_INITIAL_FRAMES = 80
+CORRIDOR_POLICY_OVERLAP_FRAMES = 8
 CORRIDOR_MIN_COMMIT_FRAMES = 32
 STAGE_TRANSITION_TIMEOUT_SECONDS = 90.0
 TERMINAL_INACTIVE_GRACE_SECONDS = 5.0
@@ -247,6 +249,8 @@ class CorridorSolution:
     source_frame: int
     plan: CorridorPlan
     solve_ms: float
+    snapshot_frame: int | None = None
+    forecast_lead_frames: int = 0
     required_gate_lane: str | None = None
     constraint_honored: bool = False
     context_key: tuple[int, int | None] | None = None
@@ -1752,6 +1756,8 @@ def _project_player_for_read_lag(
 def _solve_corridor(
     *,
     source_frame: int,
+    snapshot_frame: int,
+    forecast_lead_frames: int,
     player_x: float,
     player_y: float,
     bullets: tuple[Bullet, ...],
@@ -1772,6 +1778,7 @@ def _solve_corridor(
         lasers=lasers,
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
+        forecast_frames=forecast_lead_frames,
         required_gate_lane=required_gate_lane,
         control_delay_candidates=control_delay_candidates,
         nominal_control_delay=nominal_control_delay,
@@ -1793,6 +1800,7 @@ def _solve_corridor(
             lasers=lasers,
             enemy_bodies=enemy_bodies,
             snapshot_lag=snapshot_lag,
+            forecast_frames=forecast_lead_frames,
             control_delay_candidates=control_delay_candidates,
             nominal_control_delay=nominal_control_delay,
             active_action=active_action,
@@ -1801,6 +1809,8 @@ def _solve_corridor(
         source_frame=source_frame,
         plan=plan,
         solve_ms=(time.perf_counter() - started) * 1000.0,
+        snapshot_frame=snapshot_frame,
+        forecast_lead_frames=forecast_lead_frames,
         required_gate_lane=required_gate_lane,
         constraint_honored=constraint_honored,
         context_key=context_key,
@@ -1843,6 +1853,40 @@ def _corridor_viability_query(
         y=player_y,
         active_action=active_action,
     )
+
+
+def _corridor_policy_status(
+    solution: CorridorSolution | None,
+    *,
+    current_frame: int,
+    max_age_frames: int,
+) -> str:
+    if solution is None or solution.plan.viability_policy is None:
+        return "unavailable"
+    age = current_frame - solution.source_frame
+    if age < 0:
+        return "pending_future_epoch"
+    if age > max_age_frames:
+        return "expired"
+    if age >= solution.plan.viability_policy.horizon_frames:
+        return "outside_policy_horizon"
+    return "queryable"
+
+
+def _stage_corridor_solution(
+    active: CorridorSolution | None,
+    candidate: CorridorSolution,
+    *,
+    current_frame: int,
+    context_key: tuple[int, int | None],
+) -> tuple[CorridorSolution | None, CorridorSolution | None]:
+    """Keep the active policy until a matching future epoch is reached."""
+
+    if candidate.context_key != context_key:
+        return active, None
+    if candidate.source_frame <= current_frame:
+        return candidate, None
+    return active, candidate
 
 
 def _write_run_summary(
@@ -1918,6 +1962,7 @@ def run(args: argparse.Namespace) -> int:
     corridor_executor: ThreadPoolExecutor | None = None
     corridor_future: Future[CorridorSolution] | None = None
     corridor_solution: CorridorSolution | None = None
+    corridor_pending_solution: CorridorSolution | None = None
     corridor_last_submit = -1000000
     corridor_commitment = CorridorCommitment()
     corridor_context: tuple[int, int | None] | None = None
@@ -1939,6 +1984,10 @@ def run(args: argparse.Namespace) -> int:
         maximum=LIVE_CONTROL_DELAY_MAX,
         window=LIVE_CONTROL_DELAY_WINDOW,
         guard_frames=LIVE_CONTROL_DELAY_GUARD_FRAMES,
+    )
+    corridor_policy_lead = AsyncPolicyLead(
+        initial_frames=CORRIDOR_POLICY_LEAD_INITIAL_FRAMES,
+        overlap_frames=CORRIDOR_POLICY_OVERLAP_FRAMES,
     )
     previous_iteration_ms: float | None = None
     previous_trace_ms: float | None = None
@@ -1984,6 +2033,16 @@ def run(args: argparse.Namespace) -> int:
                     ),
                     "viability_horizon_frames": (
                         TH08_CORRIDOR_CONFIG.horizon_frames
+                    ),
+                    "viability_max_query_age_frames": (
+                        args.corridor_max_age
+                    ),
+                    "async_policy_epoch": "forecasted_solve_completion",
+                    "async_policy_initial_lead_frames": (
+                        corridor_policy_lead.frames
+                    ),
+                    "async_policy_overlap_frames": (
+                        corridor_policy_lead.overlap_frames
                     ),
                     "viability_quantifiers": (
                         "exists_action_forall_delay"
@@ -2228,6 +2287,7 @@ def run(args: argparse.Namespace) -> int:
             )
             if corridor_commitment.set_context(corridor_context):
                 corridor_solution = None
+                corridor_pending_solution = None
                 if (
                     corridor_future is not None
                     and corridor_future.cancel()
@@ -2286,11 +2346,40 @@ def run(args: argparse.Namespace) -> int:
             )
             corridor_started = time.perf_counter()
             corridor_updated = False
+            if corridor_pending_solution is not None:
+                pending_candidate = corridor_pending_solution
+                (
+                    corridor_solution,
+                    corridor_pending_solution,
+                ) = _stage_corridor_solution(
+                    corridor_solution,
+                    corridor_pending_solution,
+                    current_frame=counter_after_read,
+                    context_key=corridor_context,
+                )
+                if corridor_solution is pending_candidate:
+                    corridor_commitment.accept(
+                        corridor_solution,
+                        current_frame=counter_after_read,
+                    )
+                    corridor_updated = True
             if corridor_future is not None and corridor_future.done():
                 completed_solution = corridor_future.result()
                 corridor_future = None
-                if completed_solution.context_key == corridor_context:
-                    corridor_solution = completed_solution
+                corridor_policy_lead.observe(completed_solution.solve_ms)
+                (
+                    corridor_solution,
+                    corridor_pending_solution,
+                ) = _stage_corridor_solution(
+                    corridor_solution,
+                    completed_solution,
+                    current_frame=counter_after_read,
+                    context_key=corridor_context,
+                )
+                if (
+                    corridor_pending_solution is None
+                    and corridor_solution is completed_solution
+                ):
                     corridor_commitment.accept(
                         completed_solution,
                         current_frame=counter_after_read,
@@ -2299,14 +2388,28 @@ def run(args: argparse.Namespace) -> int:
             if (
                 corridor_executor is not None
                 and corridor_future is None
+                and corridor_pending_solution is None
                 and counter_after_read - corridor_last_submit
                 >= args.corridor_every
             ):
+                forecast_lead_frames = corridor_policy_lead.frames
+                forecast_player_x, forecast_player_y = (
+                    _project_player_for_read_lag(
+                        float(player["x"]),
+                        float(player["y"]),
+                        previous_mask,
+                        snapshot_lag + forecast_lead_frames,
+                    )
+                )
                 corridor_future = corridor_executor.submit(
                     _solve_corridor,
-                    source_frame=counter_after_read,
-                    player_x=projected_player_x,
-                    player_y=projected_player_y,
+                    source_frame=(
+                        counter_after_read + forecast_lead_frames
+                    ),
+                    snapshot_frame=counter_after_read,
+                    forecast_lead_frames=forecast_lead_frames,
+                    player_x=forecast_player_x,
+                    player_y=forecast_player_y,
                     bullets=bullets,
                     lasers=lasers,
                     enemy_bodies=enemy_bodies,
@@ -2584,28 +2687,50 @@ def run(args: argparse.Namespace) -> int:
                     record["hit_contact_observation"] = (
                         hit_contact_observation
                     )
-                if corridor_solution is not None:
+                corridor_report_solution = (
+                    corridor_solution or corridor_pending_solution
+                )
+                if corridor_report_solution is not None:
+                    corridor_policy_status = _corridor_policy_status(
+                        corridor_report_solution,
+                        current_frame=counter_at_action,
+                        max_age_frames=args.corridor_max_age,
+                    )
                     corridor_record = {
-                        "source_frame": corridor_solution.source_frame,
-                        "age": counter_at_action
-                        - corridor_solution.source_frame,
-                        "solve_ms": corridor_solution.solve_ms,
-                        "reachable": corridor_solution.plan.reachable,
-                        "planning_mode": (
-                            corridor_solution.plan.planning_mode
+                        "source_frame": corridor_report_solution.source_frame,
+                        "snapshot_frame": (
+                            corridor_report_solution.snapshot_frame
                         ),
-                        "lane": corridor_solution.plan.lane,
+                        "forecast_lead_frames": (
+                            corridor_report_solution.forecast_lead_frames
+                        ),
+                        "age": counter_at_action
+                        - corridor_report_solution.source_frame,
+                        "solve_ms": corridor_report_solution.solve_ms,
+                        "reachable": corridor_report_solution.plan.reachable,
+                        "planning_mode": (
+                            corridor_report_solution.plan.planning_mode
+                        ),
+                        "lane": corridor_report_solution.plan.lane,
                         "bottleneck_clearance": (
-                            corridor_solution.plan.bottleneck_clearance
+                            corridor_report_solution.plan.bottleneck_clearance
                         ),
                         "initial_safe_action_count": (
-                            corridor_solution.plan.initial_safe_action_count
+                            corridor_report_solution.plan
+                            .initial_safe_action_count
                         ),
                         "initial_repair_volume": (
-                            corridor_solution.plan.initial_repair_volume
+                            corridor_report_solution.plan
+                            .initial_repair_volume
                         ),
-                        "stale": corridor_target is None
-                        and corridor_solution.plan.reachable,
+                        "policy_status": corridor_policy_status,
+                        "stale": corridor_policy_status
+                        in ("expired", "outside_policy_horizon"),
+                        "guidance_unavailable": viability_query is None,
+                        "lead_estimate_frames": corridor_policy_lead.frames,
+                        "lead_sample_count": (
+                            corridor_policy_lead.sample_count
+                        ),
                         "commitment": {
                             "active_lane": corridor_commitment.active_lane(
                                 counter_at_action
@@ -2614,15 +2739,31 @@ def run(args: argparse.Namespace) -> int:
                                 corridor_commitment.expires_frame
                             ),
                             "required_gate_lane": (
-                                corridor_solution.required_gate_lane
+                                corridor_report_solution.required_gate_lane
                             ),
                             "constraint_honored": (
-                                corridor_solution.constraint_honored
+                                corridor_report_solution.constraint_honored
                             ),
                             "context": corridor_context,
                         },
                     }
+                    if (
+                        corridor_solution is not None
+                        and corridor_pending_solution is not None
+                    ):
+                        corridor_record["next_policy"] = {
+                            "source_frame": (
+                                corridor_pending_solution.source_frame
+                            ),
+                            "frames_until_epoch": max(
+                                0,
+                                corridor_pending_solution.source_frame
+                                - counter_at_action,
+                            ),
+                            "solve_ms": corridor_pending_solution.solve_ms,
+                        }
                     if viability_query is not None:
+                        assert corridor_solution is not None
                         policy = corridor_solution.plan.viability_policy
                         assert policy is not None
                         corridor_record["viability"] = {
@@ -2668,12 +2809,14 @@ def run(args: argparse.Namespace) -> int:
                             ),
                             "reason": viability_query.reason,
                         }
-                    if corridor_solution.plan.gate is not None:
+                    if corridor_report_solution.plan.gate is not None:
                         corridor_record["gate"] = {
-                            "frame": corridor_solution.plan.gate.frame,
-                            "x": corridor_solution.plan.gate.x,
-                            "y": corridor_solution.plan.gate.y,
-                            "clearance": corridor_solution.plan.gate.clearance,
+                            "frame": corridor_report_solution.plan.gate.frame,
+                            "x": corridor_report_solution.plan.gate.x,
+                            "y": corridor_report_solution.plan.gate.y,
+                            "clearance": (
+                                corridor_report_solution.plan.gate.clearance
+                            ),
                         }
                     if corridor_target is not None:
                         travel_frames = _minimum_travel_frames(

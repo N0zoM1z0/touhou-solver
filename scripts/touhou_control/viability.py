@@ -87,7 +87,6 @@ class RobustViabilityPolicy:
     config: ViabilityConfig
     viable: np.ndarray
     safe_action_masks: np.ndarray
-    repair_volumes: np.ndarray
 
     @property
     def layer_count(self) -> int:
@@ -184,14 +183,12 @@ class RobustViabilityPolicy:
         repair_volumes = tuple(
             (
                 action.name,
-                int(
-                    self.repair_volumes[
-                        layer,
-                        action_index,
-                        row,
-                        column,
-                        index,
-                    ]
+                self._repair_volume(
+                    layer=layer,
+                    row=row,
+                    column=column,
+                    active_action_index=action_index,
+                    selected_action_index=index,
                 ),
             )
             for index, action in enumerate(self.actions)
@@ -214,6 +211,84 @@ class RobustViabilityPolicy:
                 else "robust action set is empty"
             ),
         )
+
+    def _repair_volume(
+        self,
+        *,
+        layer: int,
+        row: int,
+        column: int,
+        active_action_index: int,
+        selected_action_index: int,
+    ) -> int:
+        """Compute the exact worst-branch repair score for one query."""
+
+        active = self.actions[active_action_index]
+        selected = self.actions[selected_action_index]
+        x = float(self.x_axis[column])
+        y = float(self.y_axis[row])
+        x_start = float(self.x_axis[0])
+        y_start = float(self.y_axis[0])
+        x_end = float(self.x_axis[-1])
+        y_end = float(self.y_axis[-1])
+        x_step = float(self.x_axis[1] - self.x_axis[0])
+        y_step = float(self.y_axis[1] - self.y_axis[0])
+        branch_volumes = []
+        for delay in self.delay_frames:
+            selected_frames = self.config.frames_per_layer - delay
+            target_x = (
+                x
+                + active.velocity_x * delay
+                + selected.velocity_x * selected_frames
+            )
+            target_y = (
+                y
+                + active.velocity_y * delay
+                + selected.velocity_y * selected_frames
+            )
+            inside = (
+                x_start <= target_x <= x_end
+                and y_start <= target_y <= y_end
+            )
+            if not inside and not self.config.clamp_to_bounds:
+                branch_volumes.append(0)
+                continue
+            target_x = min(x_end, max(x_start, target_x))
+            target_y = min(y_end, max(y_start, target_y))
+            target_column = int(np.rint((target_x - x_start) / x_step))
+            target_row = int(np.rint((target_y - y_start) / y_step))
+            radius = self.config.repair_radius_cells
+            row_start = max(0, target_row - radius)
+            row_end = min(len(self.y_axis), target_row + radius + 1)
+            column_start = max(0, target_column - radius)
+            column_end = min(
+                len(self.x_axis),
+                target_column + radius + 1,
+            )
+            if layer + 1 == self.layer_count:
+                branch_volumes.append(
+                    int(
+                        np.count_nonzero(
+                            self.viable[
+                                layer + 1,
+                                selected_action_index,
+                                row_start:row_end,
+                                column_start:column_end,
+                            ]
+                        )
+                    )
+                )
+                continue
+            masks = self.safe_action_masks[
+                layer + 1,
+                selected_action_index,
+                row_start:row_end,
+                column_start:column_end,
+            ]
+            branch_volumes.append(
+                sum(int(value).bit_count() for value in masks.flat)
+            )
+        return min(branch_volumes, default=0)
 
     def viable_state_count(self, layer: int) -> int:
         if not 0 <= layer <= self.layer_count:
@@ -353,31 +428,6 @@ def _build_transition_batch(
     )
 
 
-def _neighbor_sum(values: np.ndarray, radius: int) -> np.ndarray:
-    if radius == 0:
-        return values.astype(np.uint16)
-    rows, columns = values.shape
-    result = np.zeros(values.shape, dtype=np.uint16)
-    for dy in range(-radius, radius + 1):
-        source_row_start = max(0, -dy)
-        source_row_end = min(rows, rows - dy)
-        target_row_start = source_row_start + dy
-        target_row_end = source_row_end + dy
-        for dx in range(-radius, radius + 1):
-            source_column_start = max(0, -dx)
-            source_column_end = min(columns, columns - dx)
-            target_column_start = source_column_start + dx
-            target_column_end = source_column_end + dx
-            result[
-                target_row_start:target_row_end,
-                target_column_start:target_column_end,
-            ] += values[
-                source_row_start:source_row_end,
-                source_column_start:source_column_end,
-            ].astype(np.uint16)
-    return result
-
-
 @lru_cache(maxsize=4)
 def _cached_transition_batches(
     *,
@@ -498,10 +548,6 @@ def build_robust_viability_policy(
         (layer_count, action_count, rows, columns),
         dtype=np.uint32,
     )
-    repair_volumes = np.zeros(
-        (layer_count, action_count, rows, columns, action_count),
-        dtype=np.uint16,
-    )
     terminal_safe = (
         clearance_volume[horizon_frames] > config.required_clearance
     )
@@ -512,32 +558,6 @@ def build_robust_viability_policy(
         current_safe = (
             clearance_volume[start_frame] > config.required_clearance
         )
-        next_action_counts = np.zeros(
-            (action_count, rows, columns),
-            dtype=np.uint16,
-        )
-        if layer + 1 == layer_count:
-            next_action_counts[:] = viable[layer + 1].astype(np.uint16)
-        else:
-            for action_index in range(action_count):
-                masks = safe_action_masks[layer + 1, action_index]
-                counts = np.zeros((rows, columns), dtype=np.uint16)
-                for bit_index in range(action_count):
-                    counts += ((masks & (1 << bit_index)) != 0).astype(
-                        np.uint16
-                    )
-                next_action_counts[action_index] = counts
-        next_repair = np.stack(
-            [
-                _neighbor_sum(
-                    next_action_counts[action_index],
-                    config.repair_radius_cells,
-                )
-                for action_index in range(action_count)
-            ],
-            axis=0,
-        )
-
         physical_frames = (
             start_frame
             + np.arange(
@@ -586,17 +606,6 @@ def build_robust_viability_policy(
                 np.where(robust, action_bits, np.uint32(0)),
                 axis=0,
             )
-            branch_repair = next_repair[
-                selected_indices,
-                transition.terminal_rows,
-                transition.terminal_columns,
-            ]
-            worst_repair = np.min(branch_repair, axis=1)
-            repair_volumes[layer, active_index] = np.where(
-                robust,
-                worst_repair,
-                np.uint16(0),
-            ).transpose(1, 2, 0)
             viable[layer, active_index] = (
                 safe_action_masks[layer, active_index] != 0
             )
@@ -610,7 +619,6 @@ def build_robust_viability_policy(
         config=config,
         viable=viable,
         safe_action_masks=safe_action_masks,
-        repair_volumes=repair_volumes,
     )
 
 

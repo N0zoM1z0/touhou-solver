@@ -64,6 +64,19 @@ class Th08CorridorAdapterTests(unittest.TestCase):
             straight.uncertainty_per_frame,
         )
 
+    def test_future_policy_epoch_projects_and_inflates_bullet(self) -> None:
+        present = lower_bullets(
+            (Bullet(10.0, 20.0, 2.0, -1.0, 3.0, 4.0),),
+            snapshot_lag=1,
+        )[0]
+        future = lower_bullets(
+            (Bullet(10.0, 20.0, 2.0, -1.0, 3.0, 4.0),),
+            snapshot_lag=1,
+            forecast_frames=12,
+        )[0]
+        self.assertEqual((future.x, future.y), (36.0, 7.0))
+        self.assertGreater(future.base_uncertainty, present.base_uncertainty)
+
     def test_laser_uncertainty_accounts_for_snapshot_age(self) -> None:
         hazard = lower_lasers(
             (Laser(12.0, 34.0, 0.5, 4.0, 80.0, 6.0),),
@@ -96,6 +109,34 @@ class Th08CorridorAdapterTests(unittest.TestCase):
             (12.0, 18.0),
         )
         self.assertGreater(hazard.uncertainty_per_frame, 0.0)
+
+    def test_future_policy_epoch_inflates_laser_and_enemy_uncertainty(
+        self,
+    ) -> None:
+        laser = lower_lasers(
+            (Laser(12.0, 34.0, 0.5, 4.0, 80.0, 6.0),),
+            snapshot_lag=0,
+            forecast_frames=10,
+        )[0]
+        enemy = lower_enemy_bodies(
+            (
+                EnemyBody(
+                    0x5826C0,
+                    100.0,
+                    80.0,
+                    2.0,
+                    -1.0,
+                    12.0,
+                    18.0,
+                    5,
+                ),
+            ),
+            snapshot_lag=0,
+            forecast_frames=10,
+        )[0]
+        self.assertEqual(laser.base_uncertainty, 4.0)
+        self.assertEqual((enemy.x, enemy.y), (120.0, 70.0))
+        self.assertEqual(enemy.base_uncertainty, 5.0)
 
 
 if __name__ == "__main__":

@@ -37,6 +37,9 @@ def summarize_progress(
         if kind == "runtime_error":
             runtime_error = row
             continue
+        if kind == "auto_confirm_wall_pulse":
+            auto_confirm_events += 1
+            continue
         if kind != "decision":
             continue
         decision_count += 1

@@ -39,6 +39,7 @@ ADDR_ROUTE_ID = 0x0164D0B1
 ADDR_ENGINE_FLAGS = 0x0164D0B4
 ADDR_STAGE_ROUTE_INDEX = 0x0164D2CC
 ADDR_ENEMY_MANAGER_FRAME = 0x0164D30C
+ADDR_SPELL_CARD_STATE = 0x004EA670
 ADDR_RUN_STATE_INNER_POINTER = 0x0160F510
 ADDR_DIFFICULTY_INDEX = 0x0160F538
 ADDR_PLAYER = 0x017D5EF8
@@ -53,6 +54,9 @@ PLAYER_BOMB_INDEX_OFFSET = 0xFE0
 PLAYER_BOMB_TIMER_OFFSET = 0xFF4
 PLAYER_PREDEATH_COUNTER_OFFSET = 0xE2A68
 PLAYER_BOMB_LOCKOUT_OFFSET = 0xE2A6C
+
+SPELL_STATE_PREFIX_SIZE = 68
+SPELL_STATE_ACTIVE_FLAG = 0x01
 
 PROCESS_VM_READ = 0x0010
 PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
@@ -316,6 +320,22 @@ def verify_target(reader: ProcessReader) -> dict[str, object]:
     }
 
 
+def decode_spell_state(blob: bytes) -> dict[str, object]:
+    if len(blob) < SPELL_STATE_PREFIX_SIZE:
+        raise ValueError(
+            f"spell state prefix requires {SPELL_STATE_PREFIX_SIZE} bytes"
+        )
+    flags, enemy_pointer, spell_id = struct.unpack_from("<III", blob)
+    encoded_name = blob[20:68].split(b"\0", 1)[0]
+    return {
+        "active": bool(flags & SPELL_STATE_ACTIVE_FLAG),
+        "flags": flags,
+        "enemy_pointer": enemy_pointer,
+        "spell_id": spell_id,
+        "name": encoded_name.decode("shift_jis", errors="replace"),
+    }
+
+
 def observe_state(reader: ProcessReader) -> dict[str, object]:
     engine_flags = reader.u32(ADDR_ENGINE_FLAGS)
     inner = reader.u32(ADDR_RUN_STATE_INNER_POINTER)
@@ -339,6 +359,9 @@ def observe_state(reader: ProcessReader) -> dict[str, object]:
         "input_previous": reader.u16(ADDR_PREVIOUS_INPUT),
         "rng_state": reader.u16(ADDR_GAMEPLAY_RNG),
         "rng_calls": reader.u32(ADDR_GAMEPLAY_RNG + 4),
+        "spell": decode_spell_state(
+            reader.read(ADDR_SPELL_CARD_STATE, SPELL_STATE_PREFIX_SIZE)
+        ),
         "player": {
             "phase": reader.u8(ADDR_PLAYER),
             "focus_logic": reader.u8(ADDR_PLAYER + 3),

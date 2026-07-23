@@ -370,4 +370,78 @@ Status: observed | inferred | unknown | fixed
   reports its JSON decode-error count instead of silently hiding corruption.
 - **Regression:** `test_stream_loader_counts_corrupt_json_lines`; the named
   mutex requires physical Windows startup verification.
-- **Status:** code-fixed; pending duplicate-launch and clean-run verification.
+- **Status:** fixed and physically verified. A primary daemon retained the
+  mutex, a second launch exited, and only one controller process remained.
+
+## CE-0024: Frame-driven auto-confirm deadlocked on dialogue
+
+- **Observed symptom:** The full Lunatic run stalled at sampled empty-scene
+  frames 19,382, 27,728, 42,137, 68,117, 74,880, 128,708, and 151,701.
+  The operator had to press Z for most dialogue transitions.
+- **Invalid assumption:** A fresh Z edge scheduled by enemy-manager frame
+  could advance a dialogue that itself freezes that frame counter. Requiring
+  player phase 0 also excluded observed phase-3 transition scenes.
+- **Correction:** While the counter is frozen, use wall-clock idle/interval
+  thresholds, recheck gameplay and foreground ownership, exclude active Bomb,
+  and issue one complete Z release/press edge. Phase 0 and 3 empty scenes are
+  eligible, and a complete pulse cannot strand Z released.
+- **Regression:** `test_auto_confirm_uses_wall_clock_when_game_frame_is_frozen`
+  plus the existing fresh-edge/reset tests.
+- **Status:** code-fixed; physical full-run verification pending.
+
+## CE-0025: A frozen frame counter hid gameplay-scene unload
+
+- **Observed symptom:** Final B combat ended at manager frame 209,373 with
+  engine flags `0x1AA10`, gameplay inactive, and resources unavailable. The
+  controller kept waiting for frame advance until an external stop was written.
+- **Invalid assumption:** Gameplay state needed checking only after the enemy
+  manager counter changed.
+- **Correction:** Poll `g_engine_flags` in the frozen-counter branch and end
+  with `gameplay_ended` as soon as bit `0x04` clears. This same check runs
+  before any wall-clock auto-confirm edge.
+- **Status:** code-fixed; physical completion verification pending.
+
+## CE-0026: The full trace could not attribute hits to exact spell cards
+
+- **Observed symptom:** The route manifest identifies 37 reachable Lunatic
+  Final-B spells, but every one of the 91 runtime hit edges remains
+  spell-unresolved. Approximate `+1800` manager-counter jumps are not one-to-one
+  with ECL opcode `0x94` and cannot substitute for the live spell ID.
+- **Invalid assumption:** Stage, frame, and static phase markers would be
+  sufficient to recover exact spell ownership after the run.
+- **Correction:** Every observation and decision now records
+  `g_spell_card_state` flags, enemy pointer, exact ID, and decoded Shift-JIS
+  name. Active attribution is gated by flags bit `0x01`; stale ID/name bytes
+  remain visible after finish. The `spell_card_start` and finish sites carry
+  the same layout/lifetime comments in IDA.
+- **Regression:** `test_decode_spell_state_exposes_active_id_and_shift_jis_name`
+  and `test_decode_spell_state_rejects_truncated_prefix`.
+- **Status:** recorder and IDA fixed; physical spell transition trace pending.
+
+## CE-0027: An 80-frame corridor did not produce a run-level feasible route
+
+- **Observed symptom:** The completed no-life-decrement Lunatic Final-B run
+  produced 91 native phase-2 edges by stage: `2/4/13/21/22/29`. The agent
+  requested 62 deathbombs and observed 98 Bomb units consumed after hit edges;
+  Power fell to 19 at completion and reached 3 in Final B. These resources are
+  replenished/recycled by patched death handling and are therefore impossible
+  as a finite-stock acceptance route.
+- **Invalid assumption:** Repeated coarse gate waypoints over an 80-frame
+  horizon would approximate whole-phase topology well enough for global
+  survival and resource planning.
+- **Evidence:** `notes/runs/2026-07-23_lunatic_route2_final_b.md`,
+  `artifacts/runtime_reports/lunatic_route2_fullrun_20260723.dossier.json`,
+  `.deaths.csv`, and `.regressions.json`. Of 91 edges, 74 had a missed
+  corridor deadline, 68 used fast movement, 32 were at a playfield boundary,
+  and 18 occurred with active lasers. The densest recurrent clusters are five
+  hits at Stage-3 frames 66,537..67,877 and five at Final-B frames
+  187,413..189,223.
+- **Correction:** First close exact laser, transform, and same-frame ECL
+  emission gaps. Then make the global state a connected safe component across
+  full spell/phase boundaries, with Bomb/Power/item state in the resource
+  search; the local MPC must preserve that selected component instead of
+  choosing a late waypoint.
+- **Regression:** The companion JSON contains one retained witness for each
+  native hit. Cases remain separate until executor replay proves equivalent
+  root causes.
+- **Status:** full-run dataset captured; solver correction open.

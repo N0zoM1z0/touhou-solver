@@ -859,3 +859,52 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   smoke agent, not a Lunatic/Extra acceptance result: native spatial-bucket
   extraction, dynamic multi-action path search, items, graze objective, and
   executor/runtime differential parity are still required.
+
+## 2026-07-23: First Complete Sakuya/Remilia Lunatic Final-B Run
+
+### Completion And Provenance
+
+- The no-life-decrement run completed all six route resources and unloaded
+  gameplay at enemy-manager frame 209,373 with engine flags `0x1AA10`.
+  Observed stage entries were Stage 1 frame 1, Stage 2 frame 19,384, Stage 3
+  frame 42,139, Stage 4A/Reimu frame 68,119, Stage 5 frame 110,428, and
+  Final B/Kaguya frame 151,703.
+- Two valid trace segments contain 53,335 decisions and zero JSON decode
+  errors. Segment 1 covers frames 1..158,850 and ended fail-closed on foreground
+  loss; segment 2 covers 160,535..209,373. The 1,685-frame operator/manual-rearm
+  gap is excluded from controlled-play scoring. SHA-256 values and byte sizes
+  are pinned in the generated dossier.
+- The run produced 91 native phase-2 hit edges: Stage 1 `2`, Stage 2 `4`,
+  Stage 3 `13`, Stage 4A `21`, Stage 5 `22`, and Final B `29`. At 62 edges the
+  controller requested a deathbomb. The observed 98 Bomb-unit spend is not a
+  feasible budget because patched death recovery permits repeated resource
+  resets.
+
+### Failure Structure
+
+- Primary classifications are 35 observed bullet overlaps, 18 collisions
+  already visible in the committed-input prefix, 18 active-laser unresolved
+  cases, and 20 sensor-gap/unmodeled-hazard cases.
+- Cross-cutting contributors are stronger: 74/91 missed a corridor deadline,
+  68/91 were in fast mode, 32/91 were at a side/bottom boundary, 16/91 had
+  more than 1,000 bullets, and 14/91 exceeded the modeled action lag. This
+  rejects the current assumption that repeated local corridor waypoints are a
+  run-level plan.
+- The highest recurrent windows are Stage-3 frames 66,537..67,877 and Final-B
+  frames 187,413..189,223, with five hit edges each. Exact per-spell assignment
+  is unavailable for this completed run; all 37 statically reachable spell
+  cards remain listed without fabricated runtime counts.
+
+### Durable Outputs And Post-Run Fixes
+
+- `scripts/th08_run_dossier.py` streams multiple large JSONL segments and emits
+  the review Markdown, provenance/hit JSON dossier, 91-row CSV, and 91-case
+  regression input under `notes/runs/` and `artifacts/runtime_reports/`.
+- Live observations now decode `g_spell_card_state` flags, owner pointer,
+  exact spell ID, and Shift-JIS name. IDA comments pin the layout at
+  `spell_card_start` and the active-bit lifetime at `spell_card_finish`.
+- Auto-confirm now has a foreground-gated wall-clock path when dialogue freezes
+  the manager frame. The same frozen-counter branch detects gameplay scene
+  unload instead of waiting forever. The full suite passes 183 tests plus six
+  subtests; the fixes still require the next physical full-run recurrence
+  check.

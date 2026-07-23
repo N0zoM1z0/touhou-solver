@@ -24,6 +24,10 @@ from corridor_planner import CorridorPlan
 from runtime_agent import input_transitions
 from th08_corridor_adapter import plan_th08_corridor
 from th08_runtime_agent import (
+    ADDR_ENGINE_FLAGS,
+    ADDR_ENEMY_MANAGER_FRAME,
+    ADDR_PLAYER,
+    PLAYER_BOMB_ACTIVE_OFFSET,
     SUPPORTED_INPUT_MASK,
     TARGET_EXE,
     ProcessReader,
@@ -212,6 +216,27 @@ class AutoConfirmPulse:
             return mask, None
         self.released = True
         return mask & ~SHOT, "release"
+
+    def frozen_pulse_due(
+        self,
+        *,
+        now: float,
+        last_progress: float,
+        last_pulse: float,
+        eligible: bool,
+    ) -> bool:
+        if self.interval_frames <= 0 or not eligible:
+            return False
+        frame_seconds = 1.0 / 60.0
+        return (
+            now - last_progress >= self.idle_frames * frame_seconds
+            and now - last_pulse
+            >= max(0.05, self.interval_frames * frame_seconds)
+        )
+
+    def mark_full_pulse(self, *, frame: int) -> None:
+        self.released = False
+        self.next_release_frame = frame + self.interval_frames
 
 
 def _action(
@@ -1084,6 +1109,9 @@ def run(args: argparse.Namespace) -> int:
         interval_frames=args.auto_confirm_every,
         idle_frames=args.auto_confirm_idle_frames,
     )
+    last_frame_progress = time.perf_counter()
+    last_frozen_confirm = float("-inf")
+    frozen_confirm_eligible = False
     if not args.local_only:
         corridor_executor = ThreadPoolExecutor(
             max_workers=1,
@@ -1146,10 +1174,47 @@ def run(args: argparse.Namespace) -> int:
             if args.stop_file is not None and args.stop_file.exists():
                 termination_reason = "external_stop"
                 break
-            counter = reader.u32(0x0164D30C)
+            counter = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
             if counter == previous_counter:
+                now = time.perf_counter()
+                engine_flags = reader.u32(ADDR_ENGINE_FLAGS)
+                if not engine_flags & 0x04:
+                    termination_reason = "gameplay_ended"
+                    break
+                bomb_active = reader.u32(
+                    ADDR_PLAYER + PLAYER_BOMB_ACTIVE_OFFSET
+                )
+                if auto_confirm.frozen_pulse_due(
+                    now=now,
+                    last_progress=last_frame_progress,
+                    last_pulse=last_frozen_confirm,
+                    eligible=frozen_confirm_eligible and not bomb_active,
+                ):
+                    _require_foreground(api, pid)
+                    send_scan_key(api, scan_code=0x2C, pressed=False)
+                    time.sleep(0.04)
+                    send_scan_key(api, scan_code=0x2C, pressed=True)
+                    previous_mask |= SHOT
+                    auto_confirm.mark_full_pulse(frame=counter)
+                    last_frozen_confirm = time.perf_counter()
+                    output.write(
+                        json.dumps(
+                            {
+                                "kind": "auto_confirm_wall_pulse",
+                                "frame": counter,
+                                "stage_route_index": state[
+                                    "stage_route_index"
+                                ],
+                                "player_phase": state["player"]["phase"],
+                                "spell": state["spell"],
+                            }
+                        )
+                        + "\n"
+                    )
+                    output.flush()
                 time.sleep(args.poll_ms / 1000.0)
                 continue
+            last_frame_progress = time.perf_counter()
             if previous_counter is not None and counter != previous_counter + 1:
                 gaps += 1
             state = observe_state(reader)
@@ -1282,7 +1347,8 @@ def run(args: argparse.Namespace) -> int:
             auto_confirm_mask, auto_confirm_event = auto_confirm.apply(
                 frame=counter_at_action,
                 eligible=(
-                    phase_now == 0
+                    phase_now in (0, 3)
+                    and not player["bomb_active"]
                     and not bullets
                     and not lasers
                     and not items
@@ -1291,6 +1357,13 @@ def run(args: argparse.Namespace) -> int:
             )
             if auto_confirm_event is not None:
                 decision = replace(decision, mask=auto_confirm_mask)
+            frozen_confirm_eligible = (
+                phase_now in (0, 3)
+                and not player["bomb_active"]
+                and not bullets
+                and not lasers
+                and not items
+            )
             transitions = input_transitions(
                 previous_mask,
                 decision.mask,
@@ -1339,6 +1412,7 @@ def run(args: argparse.Namespace) -> int:
                     },
                     "resources": resources,
                     "stage_route_index": state["stage_route_index"],
+                    "spell": state["spell"],
                     "active_bullets": len(bullets),
                     "active_lasers": len(lasers),
                     "active_items": len(items),

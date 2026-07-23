@@ -130,6 +130,9 @@ python th08/scripts/th08_runtime_agent.py capture-replay-bombs \
 # Physically control active route-2 gameplay from native projectile memory.
 python th08/scripts/th08_live_dodge_agent.py \
   th08/artifacts/runtime_reports/live_dodge.jsonl --duration 60 --armed
+
+# Stitch a completed multi-segment run into review and regression artifacts.
+python th08/scripts/th08_run_dossier.py --help
 ```
 
 The curated model, address map, evidence distinctions, and remaining unknowns

@@ -49,6 +49,37 @@ class LiveDodgeAgentTests(unittest.TestCase):
         mask, event = pulse.apply(frame=14, eligible=True, mask=0x05)
         self.assertEqual((mask, event), (0x05, None))
 
+    def test_auto_confirm_uses_wall_clock_when_game_frame_is_frozen(self) -> None:
+        pulse = AutoConfirmPulse(interval_frames=15, idle_frames=20)
+        self.assertFalse(
+            pulse.frozen_pulse_due(
+                now=10.2,
+                last_progress=10.0,
+                last_pulse=0.0,
+                eligible=True,
+            )
+        )
+        self.assertTrue(
+            pulse.frozen_pulse_due(
+                now=10.34,
+                last_progress=10.0,
+                last_pulse=0.0,
+                eligible=True,
+            )
+        )
+        self.assertFalse(
+            pulse.frozen_pulse_due(
+                now=10.34,
+                last_progress=10.0,
+                last_pulse=10.2,
+                eligible=True,
+            )
+        )
+        pulse.released = True
+        pulse.mark_full_pulse(frame=400)
+        self.assertFalse(pulse.released)
+        self.assertEqual(pulse.next_release_frame, 415)
+
     def test_clear_field_returns_finite_clearance(self) -> None:
         decision = choose_action(
             player_x=192.0,

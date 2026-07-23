@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import struct
 import unittest
 from unittest.mock import patch
 
@@ -10,6 +11,24 @@ import th08_runtime_agent
 
 
 class Th08RuntimeAgentTests(unittest.TestCase):
+    def test_decode_spell_state_exposes_active_id_and_shift_jis_name(self) -> None:
+        blob = bytearray(th08_runtime_agent.SPELL_STATE_PREFIX_SIZE)
+        struct.pack_into("<III", blob, 0, 0x05, 0x12345678, 145)
+        name = "禁薬「蓬莱の薬」".encode("shift_jis")
+        blob[20 : 20 + len(name)] = name
+
+        state = th08_runtime_agent.decode_spell_state(bytes(blob))
+
+        self.assertTrue(state["active"])
+        self.assertEqual(state["flags"], 0x05)
+        self.assertEqual(state["enemy_pointer"], 0x12345678)
+        self.assertEqual(state["spell_id"], 145)
+        self.assertEqual(state["name"], "禁薬「蓬莱の薬」")
+
+    def test_decode_spell_state_rejects_truncated_prefix(self) -> None:
+        with self.assertRaisesRegex(ValueError, "requires 68 bytes"):
+            th08_runtime_agent.decode_spell_state(b"\0" * 67)
+
     def test_recovery_releases_gameplay_keys_and_fast_forward_control(self) -> None:
         api = object()
         with (

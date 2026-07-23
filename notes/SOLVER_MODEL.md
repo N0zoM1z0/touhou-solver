@@ -367,9 +367,11 @@ difficulty and team, then presses F8 on the final Sakuya/Remilia confirmation
 page. `scripts/th08_agent_hotkey.py` verifies executable identity, runtime
 patch, `g_difficulty_index` in `{3,4}`, route ID 2, and foreground ownership;
 it starts the waiting agent before sending the final confirm. F9 creates a
-safe-stop request. The agent releases all injected keys, pauses gameplay, and
-emits a bounded first-hit report rather than leaving an uncontrolled process
-running.
+safe-stop request. The long-run profile retains every native phase-2 edge,
+resources, stage/spell identity, nearby projectiles, corridor state, and
+latency until F9, scene unload, foreground loss, or duration. Raw JSONL stays
+local; `scripts/th08_run_dossier.py` stitches trace segments into compact
+provenance, per-stage/per-spell, hit-ledger, and regression artifacts.
 
 ## Cross-Game Boundary
 

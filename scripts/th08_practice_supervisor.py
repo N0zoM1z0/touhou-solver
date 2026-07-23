@@ -22,7 +22,6 @@ from th08_automation.practice_menu import (
     MenuTap,
     PracticeStage,
     build_practice_menu_plan,
-    forward_menu_steps,
     parse_practice_stage,
 )
 from th08_practice_compare import compare_dossiers
@@ -533,27 +532,35 @@ def _navigate_title_cursor(
         mode=mode,
         timeout_seconds=timeout_seconds,
     )
-    taps = _menu_forward_taps(
-        current=state["cursor"],
-        target=target,
-        option_count=option_count,
-        purpose=purpose,
-        tap_gap_ms=tap_gap_ms,
-        key=direction_key,
-    )
-    drive_menu_plan(api, pid, taps, hold_ms=hold_ms)
+    if not 0 <= target < option_count:
+        raise ValueError(f"target cursor {target} outside menu option count")
+    taps: list[MenuTap] = []
+    visited = [state["cursor"]]
     deadline = time.perf_counter() + timeout_seconds
-    while time.perf_counter() < deadline:
+    max_attempts = option_count * 3
+    for attempt in range(max_attempts):
+        if state["cursor"] == target:
+            return state, tuple(taps)
+        tap = MenuTap(
+            direction_key,
+            f"{purpose} feedback step {attempt + 1}",
+            tap_gap_ms,
+        )
+        drive_menu_plan(api, pid, (tap,), hold_ms=hold_ms)
+        taps.append(tap)
         state = _read_title_menu_state(api, pid)
+        visited.append(state["cursor"])
         if (
             state["mode"] == mode
             and state["substate"] == 1
             and state["cursor"] == target
         ):
-            return state, taps
-        time.sleep(0.02)
-    raise TimeoutError(
-        f"title cursor did not reach {target} in mode {mode}; last={state}"
+            return state, tuple(taps)
+        if time.perf_counter() >= deadline:
+            break
+    raise RuntimeError(
+        f"title cursor {target} is not reachable in mode {mode}; "
+        f"visited={visited} last={state}"
     )
 
 
@@ -599,22 +606,6 @@ def _validate_practice_selection(
             f"{state['difficulty_cursor']} route={state['route_id']}"
         )
     return state
-
-
-def _menu_forward_taps(
-    *,
-    current: int,
-    target: int,
-    option_count: int,
-    purpose: str,
-    tap_gap_ms: int,
-    key: str = "down",
-) -> tuple[MenuTap, ...]:
-    count = forward_menu_steps(current, target, option_count)
-    return tuple(
-        MenuTap(key, f"{purpose} ({index + 1}/{count})", tap_gap_ms)
-        for index in range(count)
-    )
 
 
 def _stop_batch_process(process: subprocess.Popen[bytes] | None) -> None:

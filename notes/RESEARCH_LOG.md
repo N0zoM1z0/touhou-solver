@@ -1421,3 +1421,39 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Practice dossiers now report recovery-guided and recovery-selected query
   counts so the next randomized stage can physically accept or reject the
   correction.
+
+## 2026-07-24: Final-B Recovery Trial And Phase-Exact Laser Integration
+
+- Randomized unattended Final-B run `20260724_014545` physically covered
+  frames `2..74588` with 16,696 decisions, 42 hit edges, and zero Bomb input.
+  The post-stage no-save Right action, refreshed patch byte zero, and verified
+  process kill all passed.
+- Compared with baseline `20260723_234414`, policy support improved but total
+  hits rose from 37 to 42. Recovery was selected on 810 empty-kernel queries;
+  its selection rate was 2.17 percent in alive 60-frame pre-hit windows versus
+  5.24 percent outside. This is not causal evidence that recovery added hits,
+  so CE-0058 keeps it soft and defers acceptance until the hazard oracle is
+  corrected.
+- Session `20260724_014341` exposed title-menu input overrun: seven queued
+  Down taps wrapped the eight-row stage cursor back to zero. CE-0057 replaces
+  counted batches with one-edge native cursor feedback and was physically
+  accepted by the next launch.
+- The live decoder now retains laser maximum length, target/current width,
+  speed, five lifecycle thresholds, `Th08Timer`, mode flags, phase, slot, and
+  collision/graze byte. IDA inspection of `timer_current` (`0x0040D3B0`) and
+  `timer_elapsed_float` (`0x0040B8C0`) corrected the integer timer offset to
+  laser `+0x590`; fractional elapsed remains `+0x58C`. Both sites carry durable
+  IDA comments.
+- `th08_laser_model.py` now reproduces non-alpha warning/fade longitudinal
+  ramps, alpha-mode full-length geometry, collision enable/disable gates, and
+  both same-update phase fallthrough calls. Each collision call owns its exact
+  box, fixing the prior pool-executor ambiguity at boundaries.
+- The game-neutral corridor layer gained `SegmentTrajectoryHazard`: adapters
+  may supply a finite per-frame segment or absence without embedding TH08
+  phases in the solver. TH08 lowers projected lethal laser boxes into this
+  primitive and keeps the native AABB/static-segment kernel for the rest of
+  the volume.
+- A synthetic 52-laser, 80-frame robust solve retained the native viability
+  backend and completed in about 174 ms after warmup; time-indexed clearance
+  construction was about 35 ms. The full 282-test suite passes. Physical
+  acceptance remains required on laser-heavy Final-B phases.

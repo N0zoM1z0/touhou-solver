@@ -6,9 +6,8 @@ and advanced in the laser loop inside bullet_manager_update (0x00431B7A).
 The rotated-rectangle player test is player_test_collision_and_graze
 (0x0044A6A0).
 
-The active-phase rectangle is modeled. Non-alpha warmup/fade branches
-temporarily overwrite the longitudinal size with a width ramp; LaserState does
-not yet retain enough native fields to reproduce that phase geometry.
+The model retains every native lifecycle field used by the collision branches,
+including the flag-selected alpha/width ramp and the two fallthrough calls.
 """
 
 from __future__ import annotations
@@ -46,6 +45,8 @@ class LaserState:
     fade_frames: int
     collision_enable_frame: int
     collision_disable_frame: int
+    flags: int = 0
+    current_width: float = 0.0
     phase: LaserPhase = LaserPhase.WARMUP
     timer: int = 0
     timer_fraction: float = 0.0
@@ -67,6 +68,7 @@ class LaserCollisionBox:
 class LaserCollisionCheck:
     graze_enabled: bool
     phase: LaserPhase
+    collision_box: LaserCollisionBox
 
 
 @dataclass(frozen=True)
@@ -91,6 +93,7 @@ def spawn_laser_state(
     fade_frames: int,
     collision_enable_frame: int,
     collision_disable_frame: int,
+    flags: int = 0,
 ) -> LaserState:
     """Construct the runtime state initialized by 0x00430F20."""
 
@@ -119,15 +122,23 @@ def spawn_laser_state(
         fade_frames=fade_frames,
         collision_enable_frame=collision_enable_frame,
         collision_disable_frame=collision_disable_frame,
+        flags=flags,
+        current_width=width if not warmup_frames else 1.2,
         phase=phase,
     )
 
 
-def laser_collision_box(laser: LaserState) -> LaserCollisionBox:
-    """Build the active-phase local rectangle passed to 0x0044A6A0."""
+def laser_collision_box(
+    laser: LaserState,
+    *,
+    longitudinal_size: float | None = None,
+) -> LaserCollisionBox:
+    """Build the laser-local rectangle passed to ``0x0044A6A0``."""
 
     visible_length = laser.head_distance - laser.tail_distance
     collision_length = visible_length * (0.7 if laser.tail_distance > 0.0 else 1.0)
+    if longitudinal_size is not None:
+        collision_length = longitudinal_size
     return LaserCollisionBox(
         center_x=laser.origin_x
         + laser.tail_distance
@@ -210,8 +221,30 @@ def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult
     checks: list[LaserCollisionCheck] = []
 
     if current.phase == LaserPhase.WARMUP:
+        if current.flags & 1:
+            phase_box = box
+        else:
+            ramp_frames = min(current.warmup_frames, 30)
+            ramp_start = current.warmup_frames - ramp_frames
+            if ramp_start >= current.timer:
+                current_width = 1.2
+            elif current.warmup_frames:
+                current_width = (
+                    (current.timer + current.timer_fraction)
+                    * current.width
+                    / current.warmup_frames
+                )
+            else:
+                current_width = current.width
+            current = replace(current, current_width=current_width)
+            phase_box = laser_collision_box(
+                current,
+                longitudinal_size=current_width / 2.0,
+            )
         if current.timer >= current.collision_enable_frame:
-            checks.append(LaserCollisionCheck(False, LaserPhase.WARMUP))
+            checks.append(
+                LaserCollisionCheck(False, LaserPhase.WARMUP, phase_box)
+            )
         if current.timer < current.warmup_frames:
             timer, fraction = _advance_timer(
                 current.timer, current.timer_fraction, time_scale
@@ -219,13 +252,22 @@ def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult
             current = replace(current, timer=timer, timer_fraction=fraction)
             if current.tail_distance >= LASER_TAIL_CULL_DISTANCE:
                 current = replace(current, active=False)
-            return LaserStepResult(current, box, tuple(checks))
-        current = replace(current, phase=LaserPhase.ACTIVE, timer=0, timer_fraction=0.0)
+            return LaserStepResult(current, phase_box, tuple(checks))
+        current = replace(
+            current,
+            phase=LaserPhase.ACTIVE,
+            timer=0,
+            timer_fraction=0.0,
+            current_width=current.width,
+        )
+        box = phase_box
 
     if current.phase == LaserPhase.ACTIVE:
         checks.append(
             LaserCollisionCheck(
-                current.timer % LASER_GRAZE_PERIOD == 0, LaserPhase.ACTIVE
+                current.timer % LASER_GRAZE_PERIOD == 0,
+                LaserPhase.ACTIVE,
+                box,
             )
         )
         if current.timer < current.active_frames:
@@ -240,12 +282,34 @@ def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult
         if current.fade_frames == 0:
             return LaserStepResult(replace(current, active=False), box, tuple(checks))
 
+    if current.flags & 1:
+        phase_box = box
+    else:
+        current_width = (
+            current.width
+            - (current.timer + current.timer_fraction)
+            * current.width
+            / current.fade_frames
+            if current.fade_frames > 0
+            else 0.0
+        )
+        current = replace(current, current_width=max(current_width, 0.0))
+        phase_box = laser_collision_box(
+            current,
+            longitudinal_size=current.current_width / 2.0,
+        )
     if current.timer < current.collision_disable_frame:
-        checks.append(LaserCollisionCheck(False, LaserPhase.FADE))
+        checks.append(
+            LaserCollisionCheck(False, LaserPhase.FADE, phase_box)
+        )
     if current.timer >= current.fade_frames:
-        return LaserStepResult(replace(current, active=False), box, tuple(checks))
+        return LaserStepResult(
+            replace(current, active=False),
+            phase_box,
+            tuple(checks),
+        )
     timer, fraction = _advance_timer(current.timer, current.timer_fraction, time_scale)
     current = replace(current, timer=timer, timer_fraction=fraction)
     if current.tail_distance >= LASER_TAIL_CULL_DISTANCE:
         current = replace(current, active=False)
-    return LaserStepResult(current, box, tuple(checks))
+    return LaserStepResult(current, phase_box, tuple(checks))

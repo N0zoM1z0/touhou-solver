@@ -252,12 +252,14 @@ policy-chain algorithms.
 
 ## Implementation Order And Gates
 
-1. Extend live laser snapshots with all lifecycle fields and flags. Correct
-   `th08_laser_model.py` for active, warmup, fade, and boundary-call size
-   vectors. Differentially test it against native captured records.
-2. Replace static segment lowering with a time-indexed rotated-rectangle laser
-   oracle. Remove arbitrary future inflation where exact ECL/runtime evolution
-   is available.
+1. **Code-complete, physical differential pending.** Live laser snapshots now
+   retain all collision-relevant lifecycle fields and flags.
+   `th08_laser_model.py` covers active, warmup, fade, and boundary-call size
+   vectors. Retained native differential fixtures are still required.
+2. **Code-complete for instantiated records.** Static lowering is replaced by
+   game-neutral `SegmentTrajectoryHazard` samples generated from the native
+   lifecycle. Future ECL-driven origin/angle mutation remains an oracle input,
+   so a small bounded field uncertainty remains until step 3 supplies it.
 3. Implement the enemy ECL VM executor that turns the existing static route
    graph into actual frame-ordered spawn/mutation events. Connect its output to
    the existing bullet, laser, item, and player executor.
@@ -270,8 +272,9 @@ policy-chain algorithms.
 7. Require repeated clean focused passes before Final B, then full Lunatic,
    then Extra physical acceptance.
 
-The next code checkpoint is steps 1 and 2. It is deliberately phase-generic;
-there will be no spell-specific coordinate or timing exception.
+The next code checkpoint is step 3 plus the adaptive refinement in step 4.
+The implementation remains phase-generic; there is no spell-specific
+coordinate or timing exception.
 
 ## Recovery Outside The Strict Kernel
 

@@ -79,6 +79,22 @@ class SegmentHazard:
 
 
 @dataclass(frozen=True)
+class SegmentTrajectoryHazard:
+    """A finite time-indexed segment trajectory supplied by a game adapter."""
+
+    samples: tuple[SegmentHazard | None, ...]
+
+    def __post_init__(self) -> None:
+        if not self.samples:
+            raise ValueError("segment trajectory must contain at least one frame")
+
+    def sample(self, frame: int) -> SegmentHazard | None:
+        if frame < 0 or frame >= len(self.samples):
+            return None
+        return self.samples[frame]
+
+
+@dataclass(frozen=True)
 class CorridorConfig:
     grid_step: float = 8.0
     frames_per_layer: int = 4
@@ -513,9 +529,15 @@ def _clearance_field(
     bounds: CorridorBounds,
     aabbs: tuple[MovingAabbHazard, ...],
     segments: tuple[SegmentHazard, ...],
+    segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
     frame: int,
     config: CorridorConfig,
 ) -> tuple[np.ndarray, np.ndarray]:
+    frame_segments = segments + tuple(
+        sample
+        for trajectory in segment_trajectories
+        if (sample := trajectory.sample(frame)) is not None
+    )
     hazard_clearance = np.minimum(
         _aabb_clearance_field(
             grid_x,
@@ -527,7 +549,7 @@ def _clearance_field(
         _segment_clearance_field(
             grid_x,
             grid_y,
-            segments,
+            frame_segments,
             frame=frame,
             player_radius=config.player_radius,
         ),
@@ -550,6 +572,7 @@ def _hazard_clearance_volume(
     *,
     aabbs: tuple[MovingAabbHazard, ...],
     segments: tuple[SegmentHazard, ...],
+    segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
     config: CorridorConfig,
 ) -> np.ndarray:
     """Build physical-frame clearance without treating legal bounds as hazards."""
@@ -564,6 +587,23 @@ def _hazard_clearance_volume(
         segments=segments,
     )
     if native_volume is not None:
+        if segment_trajectories:
+            for frame in range(config.horizon_frames + 1):
+                frame_segments = tuple(
+                    sample
+                    for trajectory in segment_trajectories
+                    if (sample := trajectory.sample(frame)) is not None
+                )
+                native_volume[frame] = np.minimum(
+                    native_volume[frame],
+                    _segment_clearance_field(
+                        grid_x,
+                        grid_y,
+                        frame_segments,
+                        frame=frame,
+                        player_radius=config.player_radius,
+                    ),
+                )
         return native_volume
 
     volume = _aabb_clearance_volume(
@@ -575,12 +615,17 @@ def _hazard_clearance_volume(
         clearance_cap=config.danger_radius,
     )
     for frame in range(config.horizon_frames + 1):
+        frame_segments = segments + tuple(
+            sample
+            for trajectory in segment_trajectories
+            if (sample := trajectory.sample(frame)) is not None
+        )
         volume[frame] = np.minimum(
             volume[frame],
             _segment_clearance_field(
                 grid_x,
                 grid_y,
-                segments,
+                frame_segments,
                 frame=frame,
                 player_radius=config.player_radius,
             ),
@@ -643,6 +688,7 @@ def _plan_robust_corridor(
     bounds: CorridorBounds,
     aabbs: tuple[MovingAabbHazard, ...],
     segments: tuple[SegmentHazard, ...],
+    segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
     preferred_x: float | None,
     preferred_y: float | None,
     required_gate_lane: str | None,
@@ -658,6 +704,7 @@ def _plan_robust_corridor(
         grid_y,
         aabbs=aabbs,
         segments=segments,
+        segment_trajectories=segment_trajectories,
         config=config,
     )
     clearance_finished = time.perf_counter()
@@ -858,6 +905,7 @@ def plan_corridor(
     bounds: CorridorBounds,
     aabbs: tuple[MovingAabbHazard, ...] = (),
     segments: tuple[SegmentHazard, ...] = (),
+    segment_trajectories: tuple[SegmentTrajectoryHazard, ...] = (),
     preferred_x: float | None = None,
     preferred_y: float | None = None,
     required_gate_lane: str | None = None,
@@ -880,6 +928,7 @@ def plan_corridor(
             bounds=bounds,
             aabbs=aabbs,
             segments=segments,
+            segment_trajectories=segment_trajectories,
             preferred_x=preferred_x,
             preferred_y=preferred_y,
             required_gate_lane=required_gate_lane,
@@ -909,6 +958,7 @@ def plan_corridor(
             bounds=bounds,
             aabbs=aabbs,
             segments=segments,
+            segment_trajectories=segment_trajectories,
             frame=frame,
             config=config,
         )

@@ -116,7 +116,7 @@ def step_laser_pool(
         result = step_laser(slots[index], time_scale=time_scale)
         for check in result.checks:
             direct = laser_overlaps_player(
-                result.collision_box,
+                check.collision_box,
                 player_x=player_x,
                 player_y=player_y,
                 player_half_width=player_half_width,
@@ -131,7 +131,7 @@ def step_laser_pool(
                 check.graze_enabled
                 and effective_player_state not in (PLAYER_SPAWNING, PLAYER_DEAD)
                 and laser_overlaps_player(
-                    result.collision_box,
+                    check.collision_box,
                     player_x=player_x,
                     player_y=player_y,
                     player_half_width=player_half_width,

@@ -13,8 +13,10 @@ from corridor_planner import (
     MovingAabbHazard,
     RobustControlSpec,
     SegmentHazard,
+    SegmentTrajectoryHazard,
     plan_corridor,
 )
+from th08_laser_model import LaserState, step_laser
 from th08_movement_model import ROUTE2_MOVEMENT_PROFILE
 from touhou_control.viability import ControlAction
 
@@ -36,6 +38,8 @@ class LaserSnapshot(Protocol):
     tail: float
     head: float
     half_width: float
+    state: LaserState | None
+    uncertainty: float
 
 
 class EnemyBodySnapshot(Protocol):
@@ -153,22 +157,83 @@ def lower_lasers(
     *,
     snapshot_lag: int,
     forecast_frames: int = 0,
-) -> tuple[SegmentHazard, ...]:
+    horizon_frames: int = TH08_CORRIDOR_CONFIG.horizon_frames,
+) -> tuple[SegmentTrajectoryHazard, ...]:
     lag = max(0, snapshot_lag)
     forecast = max(0, forecast_frames)
-    return tuple(
-        SegmentHazard(
-            origin_x=laser.origin_x,
-            origin_y=laser.origin_y,
-            angle=laser.angle,
-            tail=laser.tail,
-            head=laser.head,
-            half_width=laser.half_width,
-            base_uncertainty=min(12.0, 0.4 * lag) + 0.4 * forecast,
-            uncertainty_per_frame=0.4,
-        )
-        for laser in lasers
-    )
+    if horizon_frames < 0:
+        raise ValueError("laser trajectory horizon cannot be negative")
+    trajectories: list[SegmentTrajectoryHazard] = []
+    for laser in lasers:
+        state = laser.state
+        if state is None:
+            sample = SegmentHazard(
+                origin_x=laser.origin_x,
+                origin_y=laser.origin_y,
+                angle=laser.angle,
+                tail=laser.tail,
+                head=laser.head,
+                half_width=laser.half_width,
+                base_uncertainty=(
+                    laser.uncertainty
+                    + min(12.0, 0.4 * lag)
+                    + 0.4 * forecast
+                ),
+                uncertainty_per_frame=0.4,
+            )
+            trajectories.append(
+                SegmentTrajectoryHazard((sample,) * (horizon_frames + 1))
+            )
+            continue
+        for _ in range(lag + forecast):
+            state = step_laser(state).laser
+        per_frame: list[tuple[SegmentHazard, ...]] = []
+        for frame in range(horizon_frames + 1):
+            result = step_laser(state)
+            state = result.laser
+            frame_segments: list[SegmentHazard] = []
+            seen: set[tuple[float, float, float]] = set()
+            for check in result.checks:
+                box = check.collision_box
+                center_distance = box.center_x - state.origin_x
+                half_length = box.width / 2.0
+                geometry = (
+                    center_distance - half_length,
+                    center_distance + half_length,
+                    box.height / 2.0,
+                )
+                if geometry in seen:
+                    continue
+                seen.add(geometry)
+                frame_segments.append(
+                    SegmentHazard(
+                        origin_x=state.origin_x,
+                        origin_y=state.origin_y,
+                        angle=state.angle,
+                        tail=geometry[0],
+                        head=geometry[1],
+                        half_width=geometry[2],
+                        base_uncertainty=(
+                            laser.uncertainty
+                            + min(6.0, 0.08 * (forecast + frame))
+                        ),
+                    )
+                )
+            per_frame.append(tuple(frame_segments))
+        for check_index in range(max(map(len, per_frame), default=0)):
+            trajectories.append(
+                SegmentTrajectoryHazard(
+                    tuple(
+                        (
+                            frame_segments[check_index]
+                            if check_index < len(frame_segments)
+                            else None
+                        )
+                        for frame_segments in per_frame
+                    )
+                )
+            )
+    return tuple(trajectories)
 
 
 def lower_enemy_bodies(
@@ -239,10 +304,11 @@ def plan_th08_corridor(
                 forecast_frames=forecast_frames,
             )
         ),
-        segments=lower_lasers(
+        segment_trajectories=lower_lasers(
             lasers,
             snapshot_lag=snapshot_lag,
             forecast_frames=forecast_frames,
+            horizon_frames=config.horizon_frames,
         ),
         preferred_x=preferred_x,
         preferred_y=preferred_y,

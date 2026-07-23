@@ -28,6 +28,25 @@ from th08_live_dodge_agent import (
     EnemyBody,
     GameplaySceneGuard,
     Item,
+    LASER_ACTIVE_OFFSET,
+    LASER_ANGLE_OFFSET,
+    LASER_COLLISION_DISABLE_FRAME_OFFSET,
+    LASER_COLLISION_ENABLE_FRAME_OFFSET,
+    LASER_CURRENT_WIDTH_OFFSET,
+    LASER_FADE_FRAMES_OFFSET,
+    LASER_FLAGS_OFFSET,
+    LASER_HEAD_OFFSET,
+    LASER_MAXIMUM_LENGTH_OFFSET,
+    LASER_ORIGIN_OFFSET,
+    LASER_PHASE_OFFSET,
+    LASER_POOL_SIZE,
+    LASER_SPEED_OFFSET,
+    LASER_STRIDE,
+    LASER_TAIL_OFFSET,
+    LASER_TIMER_OFFSET,
+    LASER_WARMUP_FRAMES_OFFSET,
+    LASER_ACTIVE_FRAMES_OFFSET,
+    LASER_WIDTH_OFFSET,
     LEFT,
     Laser,
     RIGHT,
@@ -41,8 +60,10 @@ from th08_live_dodge_agent import (
     _estimate_live_action_hold,
     _frozen_auto_confirm_eligible,
     _stage_corridor_solution,
+    build_laser_collision_frames,
     choose_action,
     decode_enemy_body,
+    decode_lasers,
     decode_player_lethal_aabb,
 )
 from touhou_control.viability import ControlAction
@@ -337,6 +358,35 @@ class LiveDodgeAgentTests(unittest.TestCase):
             decode_player_lethal_aabb(bytes(blob)),
             (190.5, 398.5, 193.5, 401.5),
         )
+
+    def test_native_laser_decoder_retains_lifecycle_and_quarter_width(self) -> None:
+        blob = bytearray(LASER_POOL_SIZE * LASER_STRIDE)
+        struct.pack_into("<I", blob, LASER_ACTIVE_OFFSET, 1)
+        struct.pack_into("<ff", blob, LASER_ORIGIN_OFFSET, 100.0, 200.0)
+        struct.pack_into("<f", blob, LASER_ANGLE_OFFSET, 0.25)
+        struct.pack_into("<f", blob, LASER_TAIL_OFFSET, 4.0)
+        struct.pack_into("<f", blob, LASER_HEAD_OFFSET, 84.0)
+        struct.pack_into("<f", blob, LASER_MAXIMUM_LENGTH_OFFSET, 120.0)
+        struct.pack_into("<f", blob, LASER_WIDTH_OFFSET, 16.0)
+        struct.pack_into("<f", blob, LASER_CURRENT_WIDTH_OFFSET, 8.0)
+        struct.pack_into("<f", blob, LASER_SPEED_OFFSET, 3.0)
+        struct.pack_into("<iiiii", blob, LASER_WARMUP_FRAMES_OFFSET, 10, 5, 20, 10, 5)
+        struct.pack_into("<i", blob, LASER_TIMER_OFFSET, 4)
+        struct.pack_into("<H", blob, LASER_FLAGS_OFFSET, 0)
+        blob[LASER_PHASE_OFFSET] = 0
+        lasers = decode_lasers(bytes(blob))
+        self.assertEqual(len(lasers), 1)
+        laser = lasers[0]
+        self.assertEqual(laser.half_width, 4.0)
+        self.assertEqual(laser.slot, 0)
+        self.assertIsNotNone(laser.state)
+        assert laser.state is not None
+        self.assertEqual(laser.state.current_width, 8.0)
+        self.assertEqual(laser.state.collision_enable_frame, 5)
+        frames = build_laser_collision_frames(lasers, horizon=2)
+        self.assertEqual(frames[0], ())
+        self.assertEqual(len(frames[1]), 1)
+        self.assertLess(frames[1][0].head - frames[1][0].tail, 10.0)
 
     def test_incoming_bullet_forces_lateral_motion(self) -> None:
         decision = choose_action(

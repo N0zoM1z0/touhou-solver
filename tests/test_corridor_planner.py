@@ -14,6 +14,7 @@ from corridor_planner import (
     MovingAabbHazard,
     RobustControlSpec,
     SegmentHazard,
+    SegmentTrajectoryHazard,
     _aabb_clearance_field,
     _aabb_clearance_volume,
     _hazard_clearance_volume,
@@ -96,6 +97,7 @@ class CorridorPlannerTests(unittest.TestCase):
             grid_y,
             aabbs=aabbs,
             segments=segments,
+            segment_trajectories=(),
             config=config,
         )
         reference = _aabb_clearance_volume(
@@ -235,6 +237,31 @@ class CorridorPlannerTests(unittest.TestCase):
                 - hazard.uncertainty_per_frame * 4,
             )
         np.testing.assert_allclose(actual, expected, atol=2e-5)
+
+    def test_time_indexed_segment_only_blocks_present_frames(self) -> None:
+        segment = SegmentHazard(0.0, 48.0, 0.0, 0.0, 96.0, 2.0)
+        trajectory = SegmentTrajectoryHazard((None, segment, None))
+        grid_x, grid_y = np.meshgrid(
+            np.asarray([40.0, 48.0], dtype=np.float32),
+            np.asarray([40.0, 48.0], dtype=np.float32),
+        )
+        config = CorridorConfig(
+            grid_step=8.0,
+            frames_per_layer=1,
+            horizon_frames=2,
+            danger_radius=12.0,
+        )
+        volume = _hazard_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs=(),
+            segments=(),
+            segment_trajectories=(trajectory,),
+            config=config,
+        )
+        self.assertGreater(volume[0, 1, 1], 0.0)
+        self.assertLessEqual(volume[1, 1, 1], 0.0)
+        self.assertGreater(volume[2, 1, 1], 0.0)
 
     def test_clear_field_reaches_preferred_region_without_touching_boundary(self) -> None:
         plan = plan_corridor(

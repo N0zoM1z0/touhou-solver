@@ -794,6 +794,21 @@ def _behavior_slice(
         if row["corridor_slack"] is not None
     ]
     count = len(rows)
+    recovery_guided = 0
+    recovery_selected = 0
+    for row in rows:
+        viability = row.get("viability")
+        if not isinstance(viability, dict) or bool(
+            viability.get("state_viable")
+        ):
+            continue
+        repair_volumes = viability.get("repair_volumes", {})
+        if isinstance(repair_volumes, dict) and any(
+            int(volume) > 0 for volume in repair_volumes.values()
+        ):
+            recovery_guided += 1
+        if int(viability.get("selected_repair_volume", 0)) > 0:
+            recovery_selected += 1
     return {
         "sample_count": count,
         "fast_fraction": sum(
@@ -822,6 +837,8 @@ def _behavior_slice(
             for row in rows
         )
         / count,
+        "recovery_guided_fraction": recovery_guided / count,
+        "recovery_selected_fraction": recovery_selected / count,
     }
 
 
@@ -1432,6 +1449,11 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "during the 60 frames preceding a hit versus "
             f"{_format(behavior['alive_outside_preceding_hit_60f'].get('bottom_8px_fraction'))} "
             "outside those windows.",
+            "- Soft recovery was selected on "
+            f"{_format(behavior['alive_preceding_hit_60f'].get('recovery_selected_fraction'))} "
+            "of alive decisions in the 60-frame pre-hit windows versus "
+            f"{_format(behavior['alive_outside_preceding_hit_60f'].get('recovery_selected_fraction'))} "
+            "outside; correlation alone is not a causal acceptance result.",
             "- Later hits cannot estimate an initial-stock clear rate because "
             f"Power falls from 128 to "
             f"{_format(totals['resources']['power']['end'])} after respawns. "

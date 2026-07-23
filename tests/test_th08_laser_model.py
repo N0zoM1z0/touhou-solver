@@ -106,6 +106,10 @@ class LaserModelTests(unittest.TestCase):
             [(LaserPhase.WARMUP, False), (LaserPhase.ACTIVE, True)],
         )
         self.assertEqual((result.laser.phase, result.laser.timer), (LaserPhase.ACTIVE, 1))
+        self.assertEqual(
+            [check.collision_box.width for check in result.checks],
+            [8.0, 8.0],
+        )
 
     def test_active_transition_falls_through_to_fade(self) -> None:
         laser = replace(_laser(warmup_frames=0), timer=20)
@@ -115,6 +119,41 @@ class LaserModelTests(unittest.TestCase):
             [(LaserPhase.ACTIVE, True), (LaserPhase.FADE, False)],
         )
         self.assertEqual((result.laser.phase, result.laser.timer), (LaserPhase.FADE, 1))
+        self.assertEqual(
+            [check.collision_box.width for check in result.checks],
+            [100.0, 8.0],
+        )
+
+    def test_non_alpha_warning_uses_short_ramped_longitudinal_box(self) -> None:
+        before_enable = step_laser(replace(_laser(), timer=4))
+        self.assertEqual(before_enable.checks, ())
+        enabled = step_laser(replace(_laser(), timer=5))
+        self.assertEqual(len(enabled.checks), 1)
+        self.assertEqual(enabled.checks[0].phase, LaserPhase.WARMUP)
+        self.assertAlmostEqual(enabled.checks[0].collision_box.width, 4.0)
+        self.assertAlmostEqual(enabled.checks[0].collision_box.height, 8.0)
+
+    def test_alpha_flag_keeps_full_length_during_warmup_and_fade(self) -> None:
+        warmup = step_laser(replace(_laser(flags=1), timer=5))
+        fading = step_laser(
+            replace(
+                _laser(flags=1, warmup_frames=0),
+                phase=LaserPhase.FADE,
+                timer=2,
+            )
+        )
+        self.assertEqual(warmup.checks[0].collision_box.width, 100.0)
+        self.assertEqual(fading.checks[0].collision_box.width, 100.0)
+
+    def test_fade_collision_stops_at_disable_threshold(self) -> None:
+        enabled = step_laser(
+            replace(_laser(warmup_frames=0), phase=LaserPhase.FADE, timer=4)
+        )
+        disabled = step_laser(
+            replace(_laser(warmup_frames=0), phase=LaserPhase.FADE, timer=5)
+        )
+        self.assertEqual(len(enabled.checks), 1)
+        self.assertEqual(disabled.checks, ())
 
 
 if __name__ == "__main__":

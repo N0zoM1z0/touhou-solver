@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 
 from th08_corridor_adapter import (
     TH08_CORRIDOR_CONFIG,
@@ -13,6 +14,7 @@ from th08_corridor_adapter import (
     lower_lasers,
 )
 from th08_live_dodge_agent import Bullet, EnemyBody, Laser
+from th08_laser_model import spawn_laser_state
 
 
 class Th08CorridorAdapterTests(unittest.TestCase):
@@ -78,14 +80,58 @@ class Th08CorridorAdapterTests(unittest.TestCase):
         self.assertGreater(future.base_uncertainty, present.base_uncertainty)
 
     def test_laser_uncertainty_accounts_for_snapshot_age(self) -> None:
-        hazard = lower_lasers(
+        trajectory = lower_lasers(
             (Laser(12.0, 34.0, 0.5, 4.0, 80.0, 6.0),),
             snapshot_lag=5,
         )[0]
+        hazard = trajectory.sample(0)
+        self.assertIsNotNone(hazard)
         self.assertEqual(hazard.origin_x, 12.0)
         self.assertEqual(hazard.head, 80.0)
         self.assertEqual(hazard.base_uncertainty, 2.0)
         self.assertGreater(hazard.uncertainty_per_frame, 0.0)
+
+    def test_lifecycle_laser_trajectory_omits_disabled_warning_frames(
+        self,
+    ) -> None:
+        state = replace(
+            spawn_laser_state(
+                origin_x=12.0,
+                origin_y=34.0,
+                angle=0.0,
+                speed=0.0,
+                tail_distance=0.0,
+                head_distance=80.0,
+                maximum_length=80.0,
+                width=16.0,
+                warmup_frames=10,
+                active_frames=20,
+                fade_frames=10,
+                collision_enable_frame=5,
+                collision_disable_frame=5,
+            ),
+            timer=4,
+        )
+        trajectory = lower_lasers(
+            (
+                Laser(
+                    12.0,
+                    34.0,
+                    0.0,
+                    0.0,
+                    80.0,
+                    4.0,
+                    state,
+                ),
+            ),
+            snapshot_lag=0,
+            horizon_frames=2,
+        )[0]
+        self.assertIsNone(trajectory.sample(0))
+        enabled = trajectory.sample(1)
+        self.assertIsNotNone(enabled)
+        assert enabled is not None
+        self.assertLess(enabled.head - enabled.tail, 10.0)
 
     def test_enemy_body_keeps_native_half_extents_and_motion(self) -> None:
         hazard = lower_enemy_bodies(
@@ -113,11 +159,13 @@ class Th08CorridorAdapterTests(unittest.TestCase):
     def test_future_policy_epoch_inflates_laser_and_enemy_uncertainty(
         self,
     ) -> None:
-        laser = lower_lasers(
+        laser_trajectory = lower_lasers(
             (Laser(12.0, 34.0, 0.5, 4.0, 80.0, 6.0),),
             snapshot_lag=0,
             forecast_frames=10,
         )[0]
+        laser = laser_trajectory.sample(0)
+        self.assertIsNotNone(laser)
         enemy = lower_enemy_bodies(
             (
                 EnemyBody(

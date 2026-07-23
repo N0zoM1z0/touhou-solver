@@ -594,15 +594,17 @@ Recovered runtime offsets:
 | `+0x56C` | speed |
 | `+0x570..+0x580` | warmup/collision-enable/active/fade/collision-disable frames |
 | `+0x584` | allocated/active |
-| `+0x588` | timer |
+| `+0x588..+0x593` | `Th08Timer`; fraction `+0x58C`, integer current `+0x590` |
 | `+0x594/+0x596` | flags and packed type/color |
 | `+0x598/+0x599` | phase and collision/graze byte |
 
 IDA Local Types contains the verified 1436-byte `Th08Laser` layout.
 `scripts/th08_laser_model.py` implements the observed kinematics, phase
-fallthrough, collision schedule, active rotated hit geometry, and graze
-expansion. Its warmup/fade size-vector behavior is incomplete as of
-2026-07-24 and must not be treated as phase-exact future occupancy.
+fallthrough, collision schedule, active/warmup/fade rotated hit geometry, flag
+selected alpha/width ramps, and graze expansion. The live adapter lowers each
+future collision call into a game-neutral time-indexed segment trajectory.
+Future ECL-driven origin/angle mutations remain dependent on the executable
+ECL oracle and are not yet phase-exact.
 
 ## Built-In ECL Callbacks
 

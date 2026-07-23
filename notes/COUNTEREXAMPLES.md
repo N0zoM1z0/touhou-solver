@@ -984,8 +984,9 @@ Status: observed | inferred | unknown | fixed
   warning-before-enable, active, fade-before-disable, fade-after-disable, and
   both phase-fallthrough boundary calls. The coarse planner may not report a
   true empty set until 4/2-pixel refinement also finds none.
-- **Status:** native cause confirmed and IDA/documentation corrected; runtime
-  model and physical acceptance remain open.
+- **Status:** lifecycle-aware runtime decoding, local projection, and
+  time-indexed corridor lowering are code-complete as of 2026-07-24. Physical
+  differential acceptance on laser-heavy phases remains open.
 
 ## CE-0050: The patcher's Python could not import the planner
 
@@ -1095,3 +1096,36 @@ Status: observed | inferred | unknown | fixed
   recovery-guided/selected query counts, preserve hard no-Bomb, and improve
   former hit-window warning or kernel occupancy without adding local
   collisions.
+
+## CE-0057: Batched stage-menu taps wrapped past Final B
+
+- **Observed symptom:** Unattended session `20260724_014341` requested Stage
+  6B, sent seven queued Down taps, and observed cursor zero instead of seven.
+  It failed closed before final confirmation.
+- **Invalid assumption:** Every synthetic title-menu tap is consumed exactly
+  once, so a precomputed modular tap count is sufficient.
+- **Correction:** Send one direction edge, read native title mode/substate/
+  cursor, and repeat until the requested cursor is observed. Bound the attempt
+  count to three complete menu cycles and retain the visited cursor sequence
+  when failing.
+- **Status:** code-fixed and physically accepted by the immediately following
+  Final-B launch `20260724_014545`.
+
+## CE-0058: Soft recovery engaged but did not establish aggregate improvement
+
+- **Observed symptom:** Final-B run `20260724_014545` completed with 42 hits
+  and zero Bomb, versus 37 hits in baseline `20260723_234414`. It selected
+  soft recovery on 810 empty-kernel decisions, yet still had 8,119 empty
+  queries.
+- **Measured separation:** Recovery selection occurred on 2.17 percent of
+  alive decisions within 60 frames before a hit and 5.24 percent outside
+  those windows. Bottom and fast-mode pre-hit occupancy improved, while
+  nonpositive pipeline clearance and negative corridor slack worsened.
+- **Conclusion:** This one physical run neither accepts nor causally rejects
+  recovery. The dominant remaining defect is an invalid hazard oracle:
+  allocated warning/fading lasers were still treated as static full-length
+  capsules at twice their native active half-width.
+- **Correction gate:** Preserve recovery as soft, never as a claimed safe
+  action. Re-evaluate it only after the phase-exact laser model and adaptive
+  lattice reduce false empty sets; compare repeated phase-level trials rather
+  than one aggregate RNG-dependent hit count.

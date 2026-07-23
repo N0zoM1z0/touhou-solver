@@ -24,6 +24,11 @@ import numpy as np
 from corridor_planner import CorridorPlan
 from runtime_agent import input_transitions
 from th08_corridor_adapter import TH08_CORRIDOR_CONFIG, plan_th08_corridor
+from th08_laser_model import (
+    LaserPhase,
+    LaserState,
+    step_laser,
+)
 from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
     ADDR_ENEMY_MANAGER_FRAME,
@@ -66,8 +71,21 @@ LASER_ORIGIN_OFFSET = 0x0548
 LASER_ANGLE_OFFSET = 0x0554
 LASER_TAIL_OFFSET = 0x0558
 LASER_HEAD_OFFSET = 0x055C
+LASER_MAXIMUM_LENGTH_OFFSET = 0x0560
 LASER_WIDTH_OFFSET = 0x0564
+LASER_CURRENT_WIDTH_OFFSET = 0x0568
+LASER_SPEED_OFFSET = 0x056C
+LASER_WARMUP_FRAMES_OFFSET = 0x0570
+LASER_COLLISION_ENABLE_FRAME_OFFSET = 0x0574
+LASER_ACTIVE_FRAMES_OFFSET = 0x0578
+LASER_FADE_FRAMES_OFFSET = 0x057C
+LASER_COLLISION_DISABLE_FRAME_OFFSET = 0x0580
 LASER_ACTIVE_OFFSET = 0x0584
+LASER_TIMER_OFFSET = 0x0590
+LASER_TIMER_FRACTION_OFFSET = 0x058C
+LASER_FLAGS_OFFSET = 0x0594
+LASER_PHASE_OFFSET = 0x0598
+LASER_COLLISION_FLAG_OFFSET = 0x0599
 
 ITEM_MANAGER_BASE = 0x01653648
 ITEM_POOL_SIZE = 2096
@@ -168,6 +186,10 @@ class Laser:
     tail: float
     head: float
     half_width: float
+    state: LaserState | None = None
+    slot: int = -1
+    collision_flag: int = 0
+    uncertainty: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -579,11 +601,94 @@ def decode_lasers(blob: bytes) -> tuple[Laser, ...]:
         angle = struct.unpack_from("<f", blob, base + LASER_ANGLE_OFFSET)[0]
         tail = struct.unpack_from("<f", blob, base + LASER_TAIL_OFFSET)[0]
         head = struct.unpack_from("<f", blob, base + LASER_HEAD_OFFSET)[0]
-        width = struct.unpack_from("<f", blob, base + LASER_WIDTH_OFFSET)[0]
-        if not _finite((origin_x, origin_y, angle, tail, head, width)):
+        maximum_length, width, current_width, speed = struct.unpack_from(
+            "<ffff",
+            blob,
+            base + LASER_MAXIMUM_LENGTH_OFFSET,
+        )
+        (
+            warmup_frames,
+            collision_enable_frame,
+            active_frames,
+            fade_frames,
+            collision_disable_frame,
+        ) = struct.unpack_from(
+            "<iiiii",
+            blob,
+            base + LASER_WARMUP_FRAMES_OFFSET,
+        )
+        timer = struct.unpack_from("<i", blob, base + LASER_TIMER_OFFSET)[0]
+        timer_fraction = struct.unpack_from(
+            "<f",
+            blob,
+            base + LASER_TIMER_FRACTION_OFFSET,
+        )[0]
+        flags = struct.unpack_from("<H", blob, base + LASER_FLAGS_OFFSET)[0]
+        phase_value = blob[base + LASER_PHASE_OFFSET]
+        collision_flag = blob[base + LASER_COLLISION_FLAG_OFFSET]
+        if not _finite(
+            (
+                origin_x,
+                origin_y,
+                angle,
+                tail,
+                head,
+                maximum_length,
+                width,
+                current_width,
+                speed,
+                timer_fraction,
+            )
+        ):
             continue
+        if (
+            phase_value not in tuple(int(phase) for phase in LaserPhase)
+            or min(
+                maximum_length,
+                width,
+                warmup_frames,
+                collision_enable_frame,
+                active_frames,
+                fade_frames,
+                collision_disable_frame,
+                timer,
+            )
+            < 0
+        ):
+            continue
+        state = LaserState(
+            origin_x=origin_x,
+            origin_y=origin_y,
+            angle=angle,
+            tail_distance=tail,
+            head_distance=head,
+            maximum_length=maximum_length,
+            width=width,
+            speed=speed,
+            warmup_frames=warmup_frames,
+            active_frames=active_frames,
+            fade_frames=fade_frames,
+            collision_enable_frame=collision_enable_frame,
+            collision_disable_frame=collision_disable_frame,
+            flags=flags,
+            current_width=current_width,
+            phase=LaserPhase(phase_value),
+            timer=timer,
+            timer_fraction=timer_fraction,
+        )
         lasers.append(
-            Laser(origin_x, origin_y, angle, tail, head, min(abs(width) * 0.5, 64.0))
+            Laser(
+                origin_x,
+                origin_y,
+                angle,
+                tail,
+                head,
+                min(abs(width) * 0.25, 64.0),
+                state,
+                index,
+                collision_flag,
+                0.75,
+            )
         )
     return tuple(lasers)
 
@@ -854,6 +959,76 @@ def _build_bullet_frames(
     return tuple(frames)
 
 
+def _collision_segment(
+    state: LaserState,
+    *,
+    box,
+    slot: int,
+    collision_flag: int,
+    uncertainty: float,
+) -> Laser:
+    center_distance = box.center_x - state.origin_x
+    half_length = box.width / 2.0
+    return Laser(
+        origin_x=state.origin_x,
+        origin_y=state.origin_y,
+        angle=state.angle,
+        tail=center_distance - half_length,
+        head=center_distance + half_length,
+        half_width=box.height / 2.0,
+        slot=slot,
+        collision_flag=collision_flag,
+        uncertainty=uncertainty,
+    )
+
+
+def build_laser_collision_frames(
+    lasers: tuple[Laser, ...],
+    *,
+    horizon: int,
+    snapshot_lag: int = 0,
+) -> tuple[tuple[Laser, ...], ...]:
+    """Project allocated records into the lethal segments for each update."""
+
+    if horizon < 0 or snapshot_lag < 0:
+        raise ValueError("laser projection horizon and lag cannot be negative")
+    states = [laser.state for laser in lasers]
+    frames: list[tuple[Laser, ...]] = []
+    total_frames = snapshot_lag + horizon
+    for elapsed in range(1, total_frames + 1):
+        projected: list[Laser] = []
+        for index, laser in enumerate(lasers):
+            state = states[index]
+            if state is None:
+                if elapsed > snapshot_lag:
+                    projected.append(laser)
+                continue
+            result = step_laser(state)
+            states[index] = result.laser
+            if elapsed <= snapshot_lag:
+                continue
+            seen: set[tuple[float, float, float]] = set()
+            for check in result.checks:
+                segment = _collision_segment(
+                    state,
+                    box=check.collision_box,
+                    slot=laser.slot,
+                    collision_flag=laser.collision_flag,
+                    uncertainty=laser.uncertainty,
+                )
+                geometry = (
+                    segment.tail,
+                    segment.head,
+                    segment.half_width,
+                )
+                if geometry not in seen:
+                    seen.add(geometry)
+                    projected.append(segment)
+        if elapsed > snapshot_lag:
+            frames.append(tuple(projected))
+    return tuple(frames)
+
+
 def _hazards_for_positions(
     positions_x: np.ndarray,
     positions_y: np.ndarray,
@@ -956,7 +1131,14 @@ def _hazards_for_positions(
             distance - half_widths[None, :] - PLAYER_RADIUS
         )
         collisions += (clearance <= 0.0).sum(axis=1, dtype=np.int32)
-        robust_clearance = clearance - min(12.0, 0.4 * step)
+        uncertainty = np.fromiter(
+            (
+                laser.uncertainty + min(6.0, 0.08 * step)
+                for laser in lasers
+            ),
+            dtype=np.float64,
+        )
+        robust_clearance = clearance - uncertainty[None, :]
         minimum = np.minimum(minimum, robust_clearance.min(axis=1))
         danger = np.maximum(56.0 - robust_clearance, 0.0)
         risk += (
@@ -1019,6 +1201,10 @@ def _control_prefix_hazards(
         horizon=frames,
         snapshot_lag=-max(0, snapshot_lag),
     )
+    laser_frames = build_laser_collision_frames(
+        lasers,
+        horizon=frames,
+    )
     risk = 0.0
     collisions = 0
     minimum = math.inf
@@ -1034,7 +1220,7 @@ def _control_prefix_hazards(
             np.asarray([y], dtype=np.float32),
             step=step,
             bullet_frame=bullet_frames[step - 1],
-            lasers=lasers,
+            lasers=laser_frames[step - 1],
             enemy_bodies=enemy_bodies,
         )
         risk += _boundary_risk(x, y) + float(hazard_risk[0])
@@ -1066,6 +1252,10 @@ def _robust_action_certificates(
         horizon=maximum_step,
         snapshot_lag=-max(0, snapshot_lag),
     )
+    laser_frames = build_laser_collision_frames(
+        lasers,
+        horizon=maximum_step,
+    )
     action_count = len(actions)
     risk_by_delay: dict[int, np.ndarray] = {}
     collisions_by_delay: dict[int, np.ndarray] = {}
@@ -1089,7 +1279,7 @@ def _robust_action_certificates(
                     np.asarray([prefix_y], dtype=np.float32),
                     step=step,
                     bullet_frame=bullet_frames[step - 1],
-                    lasers=lasers,
+                    lasers=laser_frames[step - 1],
                     enemy_bodies=enemy_bodies,
                 )
             )
@@ -1124,7 +1314,7 @@ def _robust_action_certificates(
                     positions_y,
                     step=step,
                     bullet_frame=bullet_frames[step - 1],
-                    lasers=lasers,
+                    lasers=laser_frames[step - 1],
                     enemy_bodies=enemy_bodies,
                 )
             )
@@ -1396,6 +1586,14 @@ def choose_action(
             control_delay_frames - max(0, snapshot_lag),
         ),
     )
+    laser_frames = build_laser_collision_frames(
+        lasers,
+        horizon=horizon,
+        snapshot_lag=max(
+            0,
+            control_delay_frames - max(0, snapshot_lag),
+        ),
+    )
     neutral = _PLANNER_ACTIONS[0]
     beam = [
         SearchNode(
@@ -1507,7 +1705,7 @@ def choose_action(
             positions_y,
             step=control_delay_frames + step,
             bullet_frame=bullet_frames[step - 1],
-            lasers=lasers,
+            lasers=laser_frames[step - 1],
             enemy_bodies=enemy_bodies,
         )
         for draft_index, draft in enumerate(drafts):
@@ -2960,6 +3158,43 @@ def run(args: argparse.Namespace) -> int:
                             laser.tail,
                             laser.head,
                             laser.half_width,
+                            laser.slot,
+                            (
+                                laser.state.maximum_length
+                                if laser.state is not None
+                                else None
+                            ),
+                            (
+                                laser.state.width
+                                if laser.state is not None
+                                else None
+                            ),
+                            (
+                                laser.state.current_width
+                                if laser.state is not None
+                                else None
+                            ),
+                            (
+                                laser.state.speed
+                                if laser.state is not None
+                                else None
+                            ),
+                            (
+                                int(laser.state.phase)
+                                if laser.state is not None
+                                else None
+                            ),
+                            (
+                                laser.state.timer
+                                if laser.state is not None
+                                else None
+                            ),
+                            (
+                                laser.state.flags
+                                if laser.state is not None
+                                else None
+                            ),
+                            laser.collision_flag,
                         ]
                         for laser in lasers
                     ]

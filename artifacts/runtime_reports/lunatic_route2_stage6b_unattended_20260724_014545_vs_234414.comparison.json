@@ -1,0 +1,784 @@
+{
+  "schema": "th08-practice-comparison-v2",
+  "baseline_run_id": "lunatic_route2_finalb_policy_epoch_reset_20260723_234414",
+  "candidate_run_id": "lunatic_route2_stage6b_unattended_20260724_014545",
+  "scope_compatibility": {
+    "same_stage_route_index": true,
+    "candidate_selected_frame_epoch_index": 0,
+    "candidate_frame_epoch_count": 1,
+    "candidate_pre_scope_decisions_excluded": 0,
+    "candidate_raw_summary_scope_valid": true
+  },
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 37,
+    "candidate": 42,
+    "delta": 5,
+    "reduction_fraction": -0.13513513513513514
+  },
+  "robust_viability": {
+    "counts": {
+      "policy_decision_count": {
+        "baseline": 17493,
+        "candidate": 16459,
+        "delta": -1034,
+        "reduction_fraction": 0.059109358028925855
+      },
+      "decision_without_query_count": {
+        "baseline": 680,
+        "candidate": 530,
+        "delta": -150,
+        "reduction_fraction": 0.22058823529411764
+      },
+      "unique_solution_count": {
+        "baseline": 911,
+        "candidate": 997,
+        "delta": 86,
+        "reduction_fraction": -0.09440175631174534
+      },
+      "query_count": {
+        "baseline": 16813,
+        "candidate": 15929,
+        "delta": -884,
+        "reduction_fraction": 0.0525783619817998
+      },
+      "available_query_count": {
+        "baseline": 16813,
+        "candidate": 15929,
+        "delta": -884,
+        "reduction_fraction": 0.0525783619817998
+      },
+      "support_uncovered_query_count": {
+        "baseline": 813,
+        "candidate": 399,
+        "delta": -414,
+        "reduction_fraction": 0.5092250922509225
+      },
+      "viable_query_count": {
+        "baseline": 8521,
+        "candidate": 7810,
+        "delta": -711,
+        "reduction_fraction": 0.08344091069123342
+      },
+      "empty_action_set_count": {
+        "baseline": 8292,
+        "candidate": 8119,
+        "delta": -173,
+        "reduction_fraction": 0.020863482875060298
+      },
+      "constrained_decision_count": {
+        "baseline": 8164,
+        "candidate": 7568,
+        "delta": -596,
+        "reduction_fraction": 0.07300342969132778
+      },
+      "serial_worker_serviceable_count": {
+        "baseline": 17353,
+        "candidate": 16344,
+        "delta": -1009,
+        "reduction_fraction": 0.058145565608252174
+      },
+      "queryable_policy_decisions": {
+        "baseline": 16817,
+        "candidate": 15933,
+        "delta": -884,
+        "reduction_fraction": 0.0525658559790688
+      },
+      "expired_policy_decisions": {
+        "baseline": 255,
+        "candidate": 202,
+        "delta": -53,
+        "reduction_fraction": 0.20784313725490197
+      }
+    },
+    "solve_ms": {
+      "median": {
+        "baseline": 208.13579999958165,
+        "candidate": 218.2228000019677,
+        "delta": 10.087000002386048,
+        "reduction_fraction": -0.04846355121226777
+      },
+      "p95": {
+        "baseline": 369.28769999940414,
+        "candidate": 378.838500007987,
+        "delta": 9.550800008582883,
+        "reduction_fraction": -0.025862762308623582
+      },
+      "max": {
+        "baseline": 609.3216000008397,
+        "candidate": 770.8549000089988,
+        "delta": 161.53330000815913,
+        "reduction_fraction": -0.265103518417756
+      }
+    },
+    "backend_counts": {
+      "baseline": {
+        "native": 911
+      },
+      "candidate": {
+        "native": 997
+      }
+    },
+    "solver_phase_ms": {
+      "baseline": {
+        "clearance": {
+          "median": 104.87879998981953,
+          "p95": 193.09509999584407,
+          "max": 346.20210000139195
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 17.670899993390776,
+          "max": 63.50709999969695
+        },
+        "viability": {
+          "median": 81.21010000468232,
+          "p95": 303.985400008969,
+          "max": 376.00609999208245
+        }
+      },
+      "candidate": {
+        "clearance": {
+          "median": 112.0183999883011,
+          "p95": 223.76329998951405,
+          "max": 418.7454000057187
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 17.76770001742989,
+          "max": 50.20719999447465
+        },
+        "viability": {
+          "median": 79.19950000359677,
+          "p95": 312.661100004334,
+          "max": 404.6576999826357
+        }
+      }
+    },
+    "serial_coverage_margin_frames": {
+      "baseline": {
+        "median": 32.0,
+        "p95": 32.0,
+        "max": 32.0
+      },
+      "candidate": {
+        "median": 32.0,
+        "p95": 32.0,
+        "max": 32.0
+      }
+    }
+  },
+  "prehit_behavior": {
+    "fast_fraction": {
+      "baseline": 0.26059850374064836,
+      "candidate": 0.19053708439897699,
+      "delta": -0.07006141934167137,
+      "reduction_fraction": 0.26884812589483464
+    },
+    "bottom_8px_fraction": {
+      "baseline": 0.47256857855361595,
+      "candidate": 0.3989769820971867,
+      "delta": -0.07359159645642926,
+      "reduction_fraction": 0.1557268083326023
+    },
+    "nonpositive_pipeline_fraction": {
+      "baseline": 0.1172069825436409,
+      "candidate": 0.1918158567774936,
+      "delta": 0.0746088742338527,
+      "reduction_fraction": -0.6365565652718072
+    },
+    "negative_corridor_slack_fraction": {
+      "baseline": 0.24087591240875914,
+      "candidate": 0.3118279569892473,
+      "delta": 0.07095204458048818,
+      "reduction_fraction": -0.2945584881068751
+    }
+  },
+  "input_visible_next_observation_fraction": {
+    "baseline": 0.8588595664467483,
+    "candidate": 0.8774185936762624,
+    "delta": 0.01855902722951408,
+    "reduction_fraction": -0.021608919495763445
+  },
+  "per_phase": {
+    "nonspell": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 6,
+        "candidate": 8,
+        "delta": 2,
+        "reduction_fraction": -0.3333333333333333
+      },
+      "decision_count": {
+        "baseline": 8588,
+        "candidate": 7661,
+        "delta": -927,
+        "reduction_fraction": 0.10794131346064276
+      },
+      "query_count": {
+        "baseline": 8049,
+        "candidate": 7224,
+        "delta": -825,
+        "reduction_fraction": 0.10249720462169214
+      },
+      "empty_action_set_count": {
+        "baseline": 3298,
+        "candidate": 2943,
+        "delta": -355,
+        "reduction_fraction": 0.10764099454214676
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 237.40080000425223,
+          "candidate": 261.7828500078758,
+          "delta": 24.38205000362359,
+          "reduction_fraction": -0.10270416107775066
+        },
+        "p95": {
+          "baseline": 377.4917000118876,
+          "candidate": 403.6303000175394,
+          "delta": 26.138600005651824,
+          "reduction_fraction": -0.06924284694161141
+        },
+        "max": {
+          "baseline": 430.80609999014996,
+          "candidate": 458.10469999560155,
+          "delta": 27.29860000545159,
+          "reduction_fraction": -0.06336632653547791
+        }
+      }
+    },
+    "150": {
+      "spell_name": "薬符「壺中の大銀河」",
+      "hit_count": {
+        "baseline": 3,
+        "candidate": 2,
+        "delta": -1,
+        "reduction_fraction": 0.3333333333333333
+      },
+      "decision_count": {
+        "baseline": 878,
+        "candidate": 847,
+        "delta": -31,
+        "reduction_fraction": 0.03530751708428246
+      },
+      "query_count": {
+        "baseline": 840,
+        "candidate": 795,
+        "delta": -45,
+        "reduction_fraction": 0.05357142857142857
+      },
+      "empty_action_set_count": {
+        "baseline": 68,
+        "candidate": 29,
+        "delta": -39,
+        "reduction_fraction": 0.5735294117647058
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 299.5124999943073,
+          "candidate": 287.14560001390055,
+          "delta": -12.366899980406743,
+          "reduction_fraction": 0.041290096342028446
+        },
+        "p95": {
+          "baseline": 356.01129999849945,
+          "candidate": 340.2141999977175,
+          "delta": -15.797100000781938,
+          "reduction_fraction": 0.044372467954945594
+        },
+        "max": {
+          "baseline": 400.06240000366233,
+          "candidate": 365.3847000095993,
+          "delta": -34.677699994063005,
+          "reduction_fraction": 0.08668072779082851
+        }
+      }
+    },
+    "154": {
+      "spell_name": "神宝「ブリリアントドラゴンバレッタ」",
+      "hit_count": {
+        "baseline": 3,
+        "candidate": 6,
+        "delta": 3,
+        "reduction_fraction": -1.0
+      },
+      "decision_count": {
+        "baseline": 748,
+        "candidate": 813,
+        "delta": 65,
+        "reduction_fraction": -0.08689839572192513
+      },
+      "query_count": {
+        "baseline": 731,
+        "candidate": 797,
+        "delta": 66,
+        "reduction_fraction": -0.09028727770177838
+      },
+      "empty_action_set_count": {
+        "baseline": 504,
+        "candidate": 448,
+        "delta": -56,
+        "reduction_fraction": 0.1111111111111111
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 208.13579999958165,
+          "candidate": 219.1338000120595,
+          "delta": 10.99800001247786,
+          "reduction_fraction": -0.05284050130972166
+        },
+        "p95": {
+          "baseline": 322.433599998476,
+          "candidate": 335.01179999439046,
+          "delta": 12.578199995914474,
+          "reduction_fraction": -0.03901020239818036
+        },
+        "max": {
+          "baseline": 371.67169999156613,
+          "candidate": 353.8432999921497,
+          "delta": -17.828399999416433,
+          "reduction_fraction": 0.04796813962381583
+        }
+      }
+    },
+    "158": {
+      "spell_name": "神宝「ブディストダイアモンド」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 3,
+        "delta": 2,
+        "reduction_fraction": -2.0
+      },
+      "decision_count": {
+        "baseline": 716,
+        "candidate": 1050,
+        "delta": 334,
+        "reduction_fraction": -0.4664804469273743
+      },
+      "query_count": {
+        "baseline": 701,
+        "candidate": 1032,
+        "delta": 331,
+        "reduction_fraction": -0.47218259629101283
+      },
+      "empty_action_set_count": {
+        "baseline": 590,
+        "candidate": 940,
+        "delta": 350,
+        "reduction_fraction": -0.5932203389830508
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 90.041100003873,
+          "candidate": 100.18889998900704,
+          "delta": 10.147799985134043,
+          "reduction_fraction": -0.11270186597784289
+        },
+        "p95": {
+          "baseline": 291.5818000037689,
+          "candidate": 279.93900000001304,
+          "delta": -11.642800003755838,
+          "reduction_fraction": 0.03992978986893334
+        },
+        "max": {
+          "baseline": 330.74499999929685,
+          "candidate": 358.2897000014782,
+          "delta": 27.544700002181344,
+          "reduction_fraction": -0.08328077522635233
+        }
+      }
+    },
+    "162": {
+      "spell_name": "神宝「サラマンダーシールド」",
+      "hit_count": {
+        "baseline": 7,
+        "candidate": 6,
+        "delta": -1,
+        "reduction_fraction": 0.14285714285714285
+      },
+      "decision_count": {
+        "baseline": 1381,
+        "candidate": 1218,
+        "delta": -163,
+        "reduction_fraction": 0.11803041274438812
+      },
+      "query_count": {
+        "baseline": 1351,
+        "candidate": 1198,
+        "delta": -153,
+        "reduction_fraction": 0.11324944485566248
+      },
+      "empty_action_set_count": {
+        "baseline": 783,
+        "candidate": 745,
+        "delta": -38,
+        "reduction_fraction": 0.04853128991060025
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 150.2050999988569,
+          "candidate": 158.60080000129528,
+          "delta": 8.395700002438389,
+          "reduction_fraction": -0.05589490638135644
+        },
+        "p95": {
+          "baseline": 186.1704000039026,
+          "candidate": 206.3225999881979,
+          "delta": 20.152199984295294,
+          "reduction_fraction": -0.10824599390597459
+        },
+        "max": {
+          "baseline": 224.0592000016477,
+          "candidate": 298.60519999056123,
+          "delta": 74.54599998891354,
+          "reduction_fraction": -0.3327067131738636
+        }
+      }
+    },
+    "166": {
+      "spell_name": "神宝「ライフスプリングインフィニティ」",
+      "hit_count": {
+        "baseline": 6,
+        "candidate": 7,
+        "delta": 1,
+        "reduction_fraction": -0.16666666666666666
+      },
+      "decision_count": {
+        "baseline": 1153,
+        "candidate": 1090,
+        "delta": -63,
+        "reduction_fraction": 0.05464006938421509
+      },
+      "query_count": {
+        "baseline": 1131,
+        "candidate": 1072,
+        "delta": -59,
+        "reduction_fraction": 0.052166224580017684
+      },
+      "empty_action_set_count": {
+        "baseline": 1043,
+        "candidate": 996,
+        "delta": -47,
+        "reduction_fraction": 0.045062320230105465
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 99.51869999349583,
+          "candidate": 120.1248999859672,
+          "delta": 20.606199992471375,
+          "reduction_fraction": -0.2070585728493049
+        },
+        "p95": {
+          "baseline": 219.86260000267066,
+          "candidate": 199.74260000162758,
+          "delta": -20.12000000104308,
+          "reduction_fraction": 0.09151169867362018
+        },
+        "max": {
+          "baseline": 286.719700001413,
+          "candidate": 332.74399998481385,
+          "delta": 46.02429998340085,
+          "reduction_fraction": -0.1605201874275609
+        }
+      }
+    },
+    "170": {
+      "spell_name": "神宝「蓬莱の玉の枝  -夢色の郷-」",
+      "hit_count": {
+        "baseline": 7,
+        "candidate": 7,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 2140,
+        "candidate": 1864,
+        "delta": -276,
+        "reduction_fraction": 0.12897196261682242
+      },
+      "query_count": {
+        "baseline": 2124,
+        "candidate": 1848,
+        "delta": -276,
+        "reduction_fraction": 0.12994350282485875
+      },
+      "empty_action_set_count": {
+        "baseline": 873,
+        "candidate": 749,
+        "delta": -124,
+        "reduction_fraction": 0.1420389461626575
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 207.8252000064822,
+          "candidate": 217.93240000260994,
+          "delta": 10.107199996127747,
+          "reduction_fraction": -0.048633178246971484
+        },
+        "p95": {
+          "baseline": 277.80239999992773,
+          "candidate": 300.5182000051718,
+          "delta": 22.71580000524409,
+          "reduction_fraction": -0.08176963195872318
+        },
+        "max": {
+          "baseline": 342.238900004304,
+          "candidate": 378.8566000002902,
+          "delta": 36.617699995986186,
+          "reduction_fraction": -0.10699455846639783
+        }
+      }
+    },
+    "174": {
+      "spell_name": "「永夜返し  -待宵-」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 1,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 385,
+        "candidate": 296,
+        "delta": -89,
+        "reduction_fraction": 0.23116883116883116
+      },
+      "query_count": {
+        "baseline": 343,
+        "candidate": 257,
+        "delta": -86,
+        "reduction_fraction": 0.25072886297376096
+      },
+      "empty_action_set_count": {
+        "baseline": 197,
+        "candidate": 144,
+        "delta": -53,
+        "reduction_fraction": 0.26903553299492383
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 281.77129999676254,
+          "candidate": 302.5590000033844,
+          "delta": 20.78770000662189,
+          "reduction_fraction": -0.07377507931737808
+        },
+        "p95": {
+          "baseline": 326.07030001236126,
+          "candidate": 317.0559999998659,
+          "delta": -9.014300012495369,
+          "reduction_fraction": 0.02764526549076576
+        },
+        "max": {
+          "baseline": 339.39639999880455,
+          "candidate": 375.87710001389496,
+          "delta": 36.480700015090406,
+          "reduction_fraction": -0.10748699754982345
+        }
+      }
+    },
+    "178": {
+      "spell_name": "「永夜返し  -子の四つ-」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 1,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 277,
+        "candidate": 315,
+        "delta": 38,
+        "reduction_fraction": -0.1371841155234657
+      },
+      "query_count": {
+        "baseline": 231,
+        "candidate": 278,
+        "delta": 47,
+        "reduction_fraction": -0.20346320346320346
+      },
+      "empty_action_set_count": {
+        "baseline": 137,
+        "candidate": 204,
+        "delta": 67,
+        "reduction_fraction": -0.48905109489051096
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 288.05889999784995,
+          "candidate": 308.97319997893646,
+          "delta": 20.914299981086515,
+          "reduction_fraction": -0.0726042485798655
+        },
+        "p95": {
+          "baseline": 413.7053000013111,
+          "candidate": 406.166700005997,
+          "delta": -7.538599995314144,
+          "reduction_fraction": 0.018222149910311163
+        },
+        "max": {
+          "baseline": 438.47310000273865,
+          "candidate": 422.6308999932371,
+          "delta": -15.84220000950154,
+          "reduction_fraction": 0.03613038065368797
+        }
+      }
+    },
+    "182": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 488,
+        "candidate": 430,
+        "delta": -58,
+        "reduction_fraction": 0.11885245901639344
+      },
+      "query_count": {
+        "baseline": 438,
+        "candidate": 395,
+        "delta": -43,
+        "reduction_fraction": 0.09817351598173515
+      },
+      "empty_action_set_count": {
+        "baseline": 348,
+        "candidate": 319,
+        "delta": -29,
+        "reduction_fraction": 0.08333333333333333
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 126.43384999682894,
+          "candidate": 148.05449999403208,
+          "delta": 21.620649997203145,
+          "reduction_fraction": -0.17100365129864675
+        },
+        "p95": {
+          "baseline": 274.99220000754576,
+          "candidate": 318.00239998847246,
+          "delta": 43.0101999809267,
+          "reduction_fraction": -0.15640516341825877
+        },
+        "max": {
+          "baseline": 299.1403999913018,
+          "candidate": 366.61710002226755,
+          "delta": 67.47670003096573,
+          "reduction_fraction": -0.225568662851717
+        }
+      }
+    },
+    "186": {
+      "spell_name": "「永夜返し  -寅の四つ-」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 1,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 386,
+        "candidate": 383,
+        "delta": -3,
+        "reduction_fraction": 0.007772020725388601
+      },
+      "query_count": {
+        "baseline": 335,
+        "candidate": 342,
+        "delta": 7,
+        "reduction_fraction": -0.020895522388059702
+      },
+      "empty_action_set_count": {
+        "baseline": 169,
+        "candidate": 161,
+        "delta": -8,
+        "reduction_fraction": 0.047337278106508875
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 371.6779500027769,
+          "candidate": 435.359499999322,
+          "delta": 63.68154999654507,
+          "reduction_fraction": -0.171335291738639
+        },
+        "p95": {
+          "baseline": 606.1371999967378,
+          "candidate": 588.9116000034846,
+          "delta": -17.225599993253127,
+          "reduction_fraction": 0.028418648440230752
+        },
+        "max": {
+          "baseline": 609.3216000008397,
+          "candidate": 770.8549000089988,
+          "delta": 161.53330000815913,
+          "reduction_fraction": -0.265103518417756
+        }
+      }
+    },
+    "190": {
+      "spell_name": "「永夜返し  -世明け-」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 0,
+        "delta": -1,
+        "reduction_fraction": 1.0
+      },
+      "decision_count": {
+        "baseline": 583,
+        "candidate": 729,
+        "delta": 146,
+        "reduction_fraction": -0.2504288164665523
+      },
+      "query_count": {
+        "baseline": 539,
+        "candidate": 691,
+        "delta": 152,
+        "reduction_fraction": -0.2820037105751391
+      },
+      "empty_action_set_count": {
+        "baseline": 282,
+        "candidate": 441,
+        "delta": 159,
+        "reduction_fraction": -0.5638297872340425
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 193.95250000525266,
+          "candidate": 190.1310000102967,
+          "delta": -3.821499994955957,
+          "reduction_fraction": 0.01970327783788537
+        },
+        "p95": {
+          "baseline": 363.0758999934187,
+          "candidate": 286.6572999919299,
+          "delta": -76.41860000148881,
+          "reduction_fraction": 0.21047555071232768
+        },
+        "max": {
+          "baseline": 394.35770000272896,
+          "candidate": 347.26949999458157,
+          "delta": -47.088200008147396,
+          "reduction_fraction": 0.11940479419527385
+        }
+      }
+    }
+  },
+  "candidate_primary_cause_counts": {
+    "modeled_committed_prefix_collision": 20,
+    "observed_bullet_overlap": 13,
+    "active_laser_without_observed_overlap": 1,
+    "observed_laser_overlap": 7,
+    "observed_multiple_hazard_overlap": 1
+  },
+  "candidate_planner_failure_counts": {
+    "global_viability_kernel_exhausted_before_hit": 35,
+    "robust_action_set_exhausted_before_hit": 6,
+    "missing_pre_hit_alive_decision": 1
+  }
+}

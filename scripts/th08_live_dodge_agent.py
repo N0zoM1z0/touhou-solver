@@ -304,6 +304,23 @@ class AutoConfirmPulse:
         self.next_release_frame = frame + self.interval_frames
 
 
+def _auto_confirm_eligible(
+    *,
+    player_phase: int,
+    bomb_active: bool,
+    active_bullets: int,
+    active_lasers: int,
+) -> bool:
+    """Allow residual collectible items; only live hazards make a Z edge unsafe."""
+
+    return (
+        player_phase in (0, 3)
+        and not bomb_active
+        and active_bullets == 0
+        and active_lasers == 0
+    )
+
+
 @dataclass(frozen=True)
 class SceneGuardDecision:
     status: str
@@ -1664,23 +1681,21 @@ def run(args: argparse.Namespace) -> int:
                 last_bomb_counter = counter_at_action
             auto_confirm_mask, auto_confirm_event = auto_confirm.apply(
                 frame=counter_at_action,
-                eligible=(
-                    phase_now in (0, 3)
-                    and not player["bomb_active"]
-                    and not bullets
-                    and not lasers
-                    and not items
+                eligible=_auto_confirm_eligible(
+                    player_phase=phase_now,
+                    bomb_active=bool(player["bomb_active"]),
+                    active_bullets=len(bullets),
+                    active_lasers=len(lasers),
                 ),
                 mask=decision.mask,
             )
             if auto_confirm_event is not None:
                 decision = replace(decision, mask=auto_confirm_mask)
-            frozen_confirm_eligible = (
-                phase_now in (0, 3)
-                and not player["bomb_active"]
-                and not bullets
-                and not lasers
-                and not items
+            frozen_confirm_eligible = _auto_confirm_eligible(
+                player_phase=phase_now,
+                bomb_active=bool(player["bomb_active"]),
+                active_bullets=len(bullets),
+                active_lasers=len(lasers),
             )
             transitions = input_transitions(
                 previous_mask,

@@ -517,3 +517,22 @@ Status: observed | inferred | unknown | fixed
   `test_scene_guard_reports_transition_timeout`.
 - **Status:** ordering corrected after the `151557` physical boundary test;
   full-route acceptance pending.
+
+## CE-0031: Frozen collectible items deadlocked auto-confirm
+
+- **Observed symptom:** The stable-stage-identity run stopped advancing at
+  Stage-2 frame 28,459. The last decision contained zero bullets, zero lasers,
+  Bomb inactive, and eight items; the following probe observed the same frozen
+  manager counter. No wall-clock auto-confirm record was emitted.
+- **Invalid assumption:** A collectible item makes a fresh Z edge unsafe, or
+  will continue updating during a dialogue that freezes the game timeline.
+- **Correction:** Auto-confirm eligibility is now a pure hazard policy:
+  player phase 0/3, Bomb inactive, and zero bullets/lasers. Items are
+  deliberately not an input. The controller still waits 20 empty frames and
+  requires foreground ownership before a complete release/press edge.
+- **Evidence:**
+  `notes/runs/2026-07-23_lunatic_route2_transition_guard_partials.md` and the
+  tracked `152539` summary.
+- **Regression:**
+  `test_auto_confirm_hazard_policy_does_not_gate_on_residual_items`.
+- **Status:** code-fixed; unattended full-route acceptance pending.

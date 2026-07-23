@@ -951,3 +951,9 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   195 tests pass. The next clean run remains responsible for full provenance,
   per-hit CSV, executable regressions, and stage/spell/resource review before
   further planner correction.
+- The stable-identity `152539` trace then physically validated Stage 1 to
+  Stage 2: the inactive interval was 0.295 seconds and the expected stage
+  matched. It stopped at Stage-2 frame 28,459 because eight frozen collectible
+  items kept the old auto-confirm predicate false forever despite zero bullets
+  and lasers. Auto-confirm now models only actual hazards and Bomb state;
+  collectible count is absent by construction. All 196 tests pass.

@@ -18,6 +18,7 @@ from th08_live_dodge_agent import (
     Laser,
     RIGHT,
     UP,
+    _auto_confirm_eligible,
     _corridor_target,
     choose_action,
 )
@@ -81,6 +82,34 @@ class LiveDodgeAgentTests(unittest.TestCase):
         pulse.mark_full_pulse(frame=400)
         self.assertFalse(pulse.released)
         self.assertEqual(pulse.next_release_frame, 415)
+
+    def test_auto_confirm_hazard_policy_does_not_gate_on_residual_items(
+        self,
+    ) -> None:
+        self.assertTrue(
+            _auto_confirm_eligible(
+                player_phase=0,
+                bomb_active=False,
+                active_bullets=0,
+                active_lasers=0,
+            )
+        )
+        self.assertFalse(
+            _auto_confirm_eligible(
+                player_phase=0,
+                bomb_active=False,
+                active_bullets=1,
+                active_lasers=0,
+            )
+        )
+        self.assertFalse(
+            _auto_confirm_eligible(
+                player_phase=3,
+                bomb_active=True,
+                active_bullets=0,
+                active_lasers=0,
+            )
+        )
 
     def test_scene_guard_waits_for_nonfinal_stage_transition(self) -> None:
         guard = GameplaySceneGuard({0: 1, 1: 2}, 90.0, 5.0)

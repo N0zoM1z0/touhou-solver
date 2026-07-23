@@ -84,3 +84,29 @@ of the following:
    as `route_complete`.
 5. The completed raw trace receives the same dossier, per-hit CSV, executable
    regression corpus, and review Markdown treatment as the first full run.
+
+## Residual-Item Auto-Confirm Partial
+
+The stable-identity trace
+`artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_152539.jsonl`
+proved the corrected Stage-1 boundary:
+
+- Controlled frames: `2..28459`
+- Decisions: `8,864`
+- Stage transition: index 0 to 1 at frame `20277`
+- Scene unload: 0.295 seconds, `expected_stage_matched=true`
+- Native hit edges: `4533`, `4942`, `13858`, `22077`, `23170`
+- Tracked summary SHA-256:
+  `3d4f1292d2afa62524f2f8040096021a3f59a354a38667204c421d43727384b2`
+- Termination: deliberate `external_stop`
+
+It then froze at a Stage-2 dialogue on frame 28,459. The last snapshot had
+phase 3, zero bullets, zero lasers, Bomb inactive, and eight collectible items.
+The following runtime probe showed the same frozen counter with phase 0. Since
+the eligibility predicate required `not items`, no wall-clock Z edge could ever
+be produced and frozen items could never leave. The trace was stopped rather
+than accepting an operator key press.
+
+Items are not hazards and Z is already the held shot key. The corrected policy
+therefore depends only on player phase 0/3, Bomb inactivity, and zero active
+bullets/lasers. Collectible count is deliberately absent from the predicate.

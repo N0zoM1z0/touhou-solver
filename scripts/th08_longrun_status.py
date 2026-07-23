@@ -27,6 +27,7 @@ def summarize_progress(
     previous_stage = None
     decision_count = 0
     auto_confirm_events = 0
+    scene_events: list[dict[str, object]] = []
     runtime_error = None
 
     for row in rows:
@@ -36,6 +37,15 @@ def summarize_progress(
             continue
         if kind == "runtime_error":
             runtime_error = row
+            continue
+        if kind in (
+            "scene_inactive",
+            "scene_resumed",
+            "auto_confirm_transition_pulse",
+        ):
+            scene_events.append(row)
+            if kind == "auto_confirm_transition_pulse":
+                auto_confirm_events += 1
             continue
         if kind == "auto_confirm_wall_pulse":
             auto_confirm_events += 1
@@ -70,6 +80,7 @@ def summarize_progress(
         "hit_count": len(hit_frames),
         "hit_frames": hit_frames,
         "stage_transitions": stage_transitions,
+        "scene_events": scene_events,
         "auto_confirm_events": auto_confirm_events,
         "complete": summary is not None,
         "termination_reason": (

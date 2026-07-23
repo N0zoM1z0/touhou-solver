@@ -46,6 +46,22 @@ class Th08LongrunStatusTests(unittest.TestCase):
                     "termination_reason": "gameplay_ended",
                 },
                 {
+                    "kind": "scene_inactive",
+                    "frame": 4990,
+                    "transition_from_stage": 0,
+                    "expected_stage": 1,
+                },
+                {
+                    "kind": "auto_confirm_transition_pulse",
+                    "frame": 4990,
+                },
+                {
+                    "kind": "scene_resumed",
+                    "frame": 5000,
+                    "stage_route_index": 1,
+                    "expected_stage_matched": True,
+                },
+                {
                     "kind": "auto_confirm_wall_pulse",
                     "frame": 5000,
                 },
@@ -56,7 +72,15 @@ class Th08LongrunStatusTests(unittest.TestCase):
         self.assertEqual(status["hit_frames"], [5000])
         self.assertEqual(status["latest"]["stage_label"], "Stage 2")
         self.assertEqual(status["latest"]["resources"]["power"], 80.0)
-        self.assertEqual(status["auto_confirm_events"], 2)
+        self.assertEqual(status["auto_confirm_events"], 3)
+        self.assertEqual(
+            [event["kind"] for event in status["scene_events"]],
+            [
+                "scene_inactive",
+                "auto_confirm_transition_pulse",
+                "scene_resumed",
+            ],
+        )
         self.assertEqual(
             [entry["stage_route_index"] for entry in status["stage_transitions"]],
             [0, 1],

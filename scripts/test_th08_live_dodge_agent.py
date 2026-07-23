@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import math
+import struct
 import unittest
 
 from corridor_planner import CorridorBounds, CorridorConfig, plan_corridor
@@ -12,6 +13,13 @@ from th08_live_dodge_agent import (
     Bullet,
     CorridorCommitment,
     CorridorSolution,
+    ENEMY_BODY_READ_OFFSET,
+    ENEMY_BODY_READ_SIZE,
+    ENEMY_CONTACT_SIZE_OFFSET,
+    ENEMY_FLAGS_OFFSET,
+    ENEMY_POSITION_OFFSET,
+    ENEMY_VELOCITY_OFFSET,
+    EnemyBody,
     GameplaySceneGuard,
     Item,
     LEFT,
@@ -22,6 +30,8 @@ from th08_live_dodge_agent import (
     _corridor_target,
     _frozen_auto_confirm_eligible,
     choose_action,
+    decode_enemy_body,
+    decode_player_lethal_aabb,
 )
 
 
@@ -216,6 +226,85 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(decision.min_clearance, 9999.0)
         self.assertEqual(decision.immediate_clearance, 9999.0)
         self.assertTrue(math.isfinite(decision.score))
+
+    def test_native_enemy_body_window_decodes_scaled_lethal_extents(
+        self,
+    ) -> None:
+        blob = bytearray(ENEMY_BODY_READ_SIZE)
+        struct.pack_into(
+            "<ff",
+            blob,
+            ENEMY_VELOCITY_OFFSET - ENEMY_BODY_READ_OFFSET,
+            1.5,
+            -0.5,
+        )
+        struct.pack_into(
+            "<ff",
+            blob,
+            ENEMY_CONTACT_SIZE_OFFSET - ENEMY_BODY_READ_OFFSET,
+            32.0,
+            24.0,
+        )
+        struct.pack_into(
+            "<ff",
+            blob,
+            ENEMY_POSITION_OFFSET - ENEMY_BODY_READ_OFFSET,
+            178.0,
+            120.0,
+        )
+        struct.pack_into(
+            "<I",
+            blob,
+            ENEMY_FLAGS_OFFSET - ENEMY_BODY_READ_OFFSET,
+            0x05,
+        )
+        body = decode_enemy_body(bytes(blob), pointer=0x5826C0)
+        self.assertIsNotNone(body)
+        assert body is not None
+        self.assertEqual((body.half_width, body.half_height), (24.0, 18.0))
+        self.assertEqual((body.vx, body.vy), (1.5, -0.5))
+        struct.pack_into(
+            "<I",
+            blob,
+            ENEMY_FLAGS_OFFSET - ENEMY_BODY_READ_OFFSET,
+            0x01,
+        )
+        self.assertIsNone(
+            decode_enemy_body(bytes(blob), pointer=0x5826C0)
+        )
+
+    def test_enemy_body_is_a_local_planner_hazard(self) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(
+                EnemyBody(
+                    0x5826C0,
+                    192.0,
+                    365.0,
+                    0.0,
+                    0.0,
+                    16.0,
+                    16.0,
+                    5,
+                ),
+            ),
+            previous_direction=0,
+            can_bomb=False,
+        )
+        self.assertIn("down", decision.action)
+        self.assertFalse(decision.bomb)
+
+    def test_native_player_lethal_aabb_decoder_uses_exact_offsets(self) -> None:
+        blob = bytearray(0x14)
+        struct.pack_into("<ff", blob, 0, 190.5, 398.5)
+        struct.pack_into("<ff", blob, 0x0C, 193.5, 401.5)
+        self.assertEqual(
+            decode_player_lethal_aabb(bytes(blob)),
+            (190.5, 398.5, 193.5, 401.5),
+        )
 
     def test_incoming_bullet_forces_lateral_motion(self) -> None:
         decision = choose_action(

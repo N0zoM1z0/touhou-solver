@@ -236,41 +236,64 @@ def _segment_clearance_field(
     frame: int,
     player_radius: float,
 ) -> np.ndarray:
-    minimum = np.full(grid_x.shape, np.inf, dtype=np.float32)
-    for hazard in hazards:
-        cosine = math.cos(hazard.angle)
-        sine = math.sin(hazard.angle)
-        start_x = hazard.origin_x + cosine * hazard.tail
-        start_y = hazard.origin_y + sine * hazard.tail
-        end_x = hazard.origin_x + cosine * hazard.head
-        end_y = hazard.origin_y + sine * hazard.head
-        segment_x = end_x - start_x
-        segment_y = end_y - start_y
-        length_sq = segment_x * segment_x + segment_y * segment_y
-        if length_sq <= 1e-9:
-            distance = np.hypot(grid_x - start_x, grid_y - start_y)
-        else:
-            projection = np.clip(
-                (
-                    (grid_x - start_x) * segment_x
-                    + (grid_y - start_y) * segment_y
-                )
-                / length_sq,
-                0.0,
-                1.0,
-            )
-            distance = np.hypot(
-                grid_x - (start_x + projection * segment_x),
-                grid_y - (start_y + projection * segment_y),
-            )
-        uncertainty = (
-            hazard.base_uncertainty + hazard.uncertainty_per_frame * frame
-        )
-        clearance = (
-            distance - hazard.half_width - player_radius - uncertainty
-        )
-        minimum = np.minimum(minimum, clearance)
-    return minimum
+    if not hazards:
+        return np.full(grid_x.shape, np.inf, dtype=np.float32)
+    origin_x = np.fromiter(
+        (hazard.origin_x for hazard in hazards),
+        dtype=np.float32,
+    )
+    origin_y = np.fromiter(
+        (hazard.origin_y for hazard in hazards),
+        dtype=np.float32,
+    )
+    angle = np.fromiter(
+        (hazard.angle for hazard in hazards),
+        dtype=np.float32,
+    )
+    tail = np.fromiter(
+        (hazard.tail for hazard in hazards),
+        dtype=np.float32,
+    )
+    head = np.fromiter(
+        (hazard.head for hazard in hazards),
+        dtype=np.float32,
+    )
+    cosine = np.cos(angle)
+    sine = np.sin(angle)
+    start_x = origin_x + cosine * tail
+    start_y = origin_y + sine * tail
+    segment_x = cosine * (head - tail)
+    segment_y = sine * (head - tail)
+    length_sq = segment_x * segment_x + segment_y * segment_y
+    flat_x = grid_x.reshape(-1, 1)
+    flat_y = grid_y.reshape(-1, 1)
+    numerator = (
+        (flat_x - start_x[None, :]) * segment_x[None, :]
+        + (flat_y - start_y[None, :]) * segment_y[None, :]
+    )
+    projection = np.divide(
+        numerator,
+        length_sq[None, :],
+        out=np.zeros_like(numerator),
+        where=length_sq[None, :] > 1e-9,
+    )
+    projection = np.clip(projection, 0.0, 1.0)
+    distance = np.hypot(
+        flat_x - (start_x + projection * segment_x),
+        flat_y - (start_y + projection * segment_y),
+    )
+    occupied_radius = np.fromiter(
+        (
+            hazard.half_width
+            + player_radius
+            + hazard.base_uncertainty
+            + hazard.uncertainty_per_frame * frame
+            for hazard in hazards
+        ),
+        dtype=np.float32,
+    )
+    clearance = distance - occupied_radius[None, :]
+    return clearance.min(axis=1).reshape(grid_x.shape).astype(np.float32)
 
 
 def _clearance_field(

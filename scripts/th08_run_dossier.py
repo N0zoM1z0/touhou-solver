@@ -152,6 +152,112 @@ def _nearest_laser(row: dict[str, object]) -> dict[str, object] | None:
     return min(candidates, key=lambda candidate: candidate["clearance"])
 
 
+def _nearest_enemy_body(
+    row: dict[str, object],
+) -> dict[str, object] | None:
+    hit_observation = row.get("hit_contact_observation")
+    if (
+        isinstance(hit_observation, dict)
+        and hit_observation.get("stable")
+        and isinstance(hit_observation.get("player_lethal_aabb"), list)
+    ):
+        player_aabb = hit_observation["player_lethal_aabb"]
+        if len(player_aabb) >= 4:
+            candidates = []
+            player_left, player_top, player_right, player_bottom = map(
+                float,
+                player_aabb[:4],
+            )
+            for body in hit_observation.get("enemy_bodies", ()):
+                if not isinstance(body, list) or len(body) < 8:
+                    continue
+                x = float(body[1])
+                y = float(body[2])
+                half_width = float(body[5])
+                half_height = float(body[6])
+                dx = max(
+                    player_left - (x + half_width),
+                    (x - half_width) - player_right,
+                )
+                dy = max(
+                    player_top - (y + half_height),
+                    (y - half_height) - player_bottom,
+                )
+                clearance = (
+                    max(dx, dy)
+                    if dx <= 0.0 and dy <= 0.0
+                    else math.hypot(max(dx, 0.0), max(dy, 0.0))
+                )
+                candidates.append(
+                    {
+                        "pointer": int(body[0]),
+                        "x_at_observation": x,
+                        "y_at_observation": y,
+                        "velocity_x": float(body[3]),
+                        "velocity_y": float(body[4]),
+                        "half_width": half_width,
+                        "half_height": half_height,
+                        "flags": int(body[7]),
+                        "observation_frame": int(
+                            hit_observation["frame_after"]
+                        ),
+                        "player_lethal_aabb": [
+                            player_left,
+                            player_top,
+                            player_right,
+                            player_bottom,
+                        ],
+                        "exact_same_epoch": True,
+                        "aabb_clearance": clearance,
+                    }
+                )
+            if candidates:
+                return min(
+                    candidates,
+                    key=lambda candidate: candidate["aabb_clearance"],
+                )
+
+    player = row["player"]
+    action_frame = int(row["frame"])
+    snapshot_frame = int(
+        row.get("enemy_body_snapshot_frame", action_frame)
+    )
+    elapsed = max(0, action_frame - snapshot_frame)
+    candidates = []
+    for body in row.get("enemy_bodies", ()):
+        if not isinstance(body, list) or len(body) < 8:
+            continue
+        x = float(body[1]) + float(body[3]) * elapsed
+        y = float(body[2]) + float(body[4]) * elapsed
+        dx = abs(float(player["x"]) - x) - (2.0 + float(body[5]))
+        dy = abs(float(player["y"]) - y) - (2.0 + float(body[6]))
+        if dx <= 0.0 and dy <= 0.0:
+            clearance = max(dx, dy)
+        else:
+            clearance = math.hypot(max(dx, 0.0), max(dy, 0.0))
+        candidates.append(
+            {
+                "pointer": int(body[0]),
+                "x_at_snapshot": float(body[1]),
+                "y_at_snapshot": float(body[2]),
+                "velocity_x": float(body[3]),
+                "velocity_y": float(body[4]),
+                "projected_x_at_action": x,
+                "projected_y_at_action": y,
+                "half_width": float(body[5]),
+                "half_height": float(body[6]),
+                "flags": int(body[7]),
+                "snapshot_frame": snapshot_frame,
+                "elapsed_frames": elapsed,
+                "exact_same_epoch": False,
+                "aabb_clearance": clearance,
+            }
+        )
+    if not candidates:
+        return None
+    return min(candidates, key=lambda candidate: candidate["aabb_clearance"])
+
+
 def _spell_attribution(row: dict[str, object]) -> dict[str, object]:
     spell = row.get("spell")
     if not isinstance(spell, dict):
@@ -207,6 +313,12 @@ def _compact_decision(
         "active_bullets": int(row.get("active_bullets", 0)),
         "active_lasers": int(row.get("active_lasers", 0)),
         "active_items": int(row.get("active_items", 0)),
+        "active_enemy_bodies": int(
+            row.get("active_enemy_bodies", 0)
+        ),
+        "enemy_body_snapshot_frame": int(
+            row.get("enemy_body_snapshot_frame", row["frame"])
+        ),
         "action": str(row.get("action", "")),
         "mask": int(row.get("mask", 0)),
         "bomb": bool(row.get("bomb")),
@@ -233,6 +345,10 @@ def _compact_decision(
     if compact["hit_started"]:
         compact["nearby_bullets"] = row.get("nearby_bullets", [])
         compact["lasers"] = row.get("lasers", [])
+        compact["enemy_bodies"] = row.get("enemy_bodies", [])
+        compact["hit_contact_observation"] = row.get(
+            "hit_contact_observation"
+        )
     return compact
 
 
@@ -324,12 +440,32 @@ def _classify_death(
     list[str],
     dict[str, object] | None,
     dict[str, object] | None,
+    dict[str, object] | None,
 ]:
     nearest_bullet = _nearest_bullet(row)
     nearest_laser = _nearest_laser(row)
+    nearest_enemy_body = _nearest_enemy_body(row)
     pipeline = float(row["pipeline_clearance"])
     lasers = int(row["active_lasers"])
-    if (
+    exact_enemy_overlap = (
+        nearest_enemy_body is not None
+        and bool(nearest_enemy_body.get("exact_same_epoch"))
+        and float(nearest_enemy_body["aabb_clearance"]) <= 0.0
+    )
+    exact_overlaps = sum(
+        (
+            exact_enemy_overlap,
+            nearest_laser is not None
+            and float(nearest_laser["clearance"]) <= 0.0,
+            nearest_bullet is not None
+            and float(nearest_bullet["aabb_clearance"]) <= 0.0,
+        )
+    )
+    if exact_overlaps > 1:
+        primary = "observed_multiple_hazard_overlap"
+    elif exact_enemy_overlap:
+        primary = "observed_enemy_body_overlap"
+    elif (
         nearest_laser is not None
         and float(nearest_laser["clearance"]) <= 0.0
     ):
@@ -367,7 +503,13 @@ def _classify_death(
         contributing.append("pool_density_over_1000")
     if "_fast" in str(row["action"]):
         contributing.append("fast_mode")
-    return primary, contributing, nearest_bullet, nearest_laser
+    return (
+        primary,
+        contributing,
+        nearest_bullet,
+        nearest_laser,
+        nearest_enemy_body,
+    )
 
 
 def _death_ledger(
@@ -410,10 +552,13 @@ def _death_ledger(
                 next_power = power
                 break
 
-        primary, contributing, nearest_bullet, nearest_laser = _classify_death(
-            row,
-            window=window,
-        )
+        (
+            primary,
+            contributing,
+            nearest_bullet,
+            nearest_laser,
+            nearest_enemy_body,
+        ) = _classify_death(row, window=window)
         pipeline_samples = [
             float(sample["pipeline_clearance"]) for sample in window
         ]
@@ -446,6 +591,7 @@ def _death_ledger(
             "active_bullets": row["active_bullets"],
             "active_lasers": row["active_lasers"],
             "active_items": row["active_items"],
+            "active_enemy_bodies": row["active_enemy_bodies"],
             "snapshot_lag": row["snapshot_lag"],
             "action_lag": row["action_lag"],
             "read_ms": row["read_ms"],
@@ -468,6 +614,14 @@ def _death_ledger(
                 nearest_laser
                 if nearest_laser is not None
                 and float(nearest_laser["clearance"]) <= 0.0
+                else None
+            ),
+            "nearest_observed_enemy_body": nearest_enemy_body,
+            "observed_enemy_body_contact_candidate": (
+                nearest_enemy_body
+                if nearest_enemy_body is not None
+                and bool(nearest_enemy_body.get("exact_same_epoch"))
+                and float(nearest_enemy_body["aabb_clearance"]) <= 0.0
                 else None
             ),
             "primary_cause_class": primary,
@@ -963,6 +1117,14 @@ def render_markdown(dossier: dict[str, object]) -> str:
         ]
     )
     interpretations = {
+        "observed_enemy_body_overlap": (
+            "A captured lethal enemy-body AABB overlaps the player at action "
+            "time."
+        ),
+        "observed_multiple_hazard_overlap": (
+            "More than one captured native hazard family overlaps at the hit "
+            "edge; the trace does not invent a single causal winner."
+        ),
         "observed_bullet_overlap": (
             "A bullet overlaps the native player AABB in the hit observation."
         ),

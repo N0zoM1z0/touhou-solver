@@ -35,6 +35,15 @@ class LaserSnapshot(Protocol):
     half_width: float
 
 
+class EnemyBodySnapshot(Protocol):
+    x: float
+    y: float
+    vx: float
+    vy: float
+    half_width: float
+    half_height: float
+
+
 TH08_PLAYFIELD = CorridorBounds(8.0, 376.0, 16.0, 432.0)
 TH08_CORRIDOR_CONFIG = CorridorConfig(
     # This layer preserves long-horizon connectivity. The local MPC retains
@@ -92,12 +101,34 @@ def lower_lasers(
     )
 
 
+def lower_enemy_bodies(
+    bodies: tuple[EnemyBodySnapshot, ...],
+    *,
+    snapshot_lag: int,
+) -> tuple[MovingAabbHazard, ...]:
+    lag = max(0, snapshot_lag)
+    return tuple(
+        MovingAabbHazard(
+            x=body.x + body.vx * lag,
+            y=body.y + body.vy * lag,
+            velocity_x=body.vx,
+            velocity_y=body.vy,
+            half_width=body.half_width,
+            half_height=body.half_height,
+            base_uncertainty=0.5 * math.sqrt(lag),
+            uncertainty_per_frame=0.5,
+        )
+        for body in bodies
+    )
+
+
 def plan_th08_corridor(
     *,
     player_x: float,
     player_y: float,
     bullets: tuple[BulletSnapshot, ...],
     lasers: tuple[LaserSnapshot, ...],
+    enemy_bodies: tuple[EnemyBodySnapshot, ...] = (),
     snapshot_lag: int = 0,
     preferred_x: float = 192.0,
     preferred_y: float = 368.0,
@@ -108,7 +139,13 @@ def plan_th08_corridor(
         start_x=player_x,
         start_y=player_y,
         bounds=TH08_PLAYFIELD,
-        aabbs=lower_bullets(bullets, snapshot_lag=snapshot_lag),
+        aabbs=(
+            lower_bullets(bullets, snapshot_lag=snapshot_lag)
+            + lower_enemy_bodies(
+                enemy_bodies,
+                snapshot_lag=snapshot_lag,
+            )
+        ),
         segments=lower_lasers(lasers, snapshot_lag=snapshot_lag),
         preferred_x=preferred_x,
         preferred_y=preferred_y,

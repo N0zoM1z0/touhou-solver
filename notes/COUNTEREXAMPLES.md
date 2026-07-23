@@ -553,3 +553,53 @@ Status: observed | inferred | unknown | fixed
   `notes/runs/2026-07-23_lunatic_route2_transition_guard_partials.md`.
 - **Regression:** `test_frozen_auto_confirm_only_excludes_an_active_bomb`.
 - **Status:** code-fixed; practice-stage physical verification pending.
+
+## CE-0033: The projectile-only hazard set drove into an enemy body
+
+- **Observed symptom:** The first authoritative hit of fresh Stage-3 no-Bomb
+  practice occurred at frame 4,885 in spell 35 with player
+  `(178.775,156)`, zero active bullets, zero lasers, and projectile pipeline
+  clearance `9999`. The active spell owner pointer was `0x5826C0`.
+- **Invalid assumption:** Bullets, lasers, and playfield bounds form a complete
+  lethal-hazard set. Enemy sprite/body contact was absent from local MPC and
+  corridor occupancy.
+- **Static evidence:** Contact-enabled enemy flag `+0x3324 & 0x04` reaches
+  `0x42CF7A`; `enemy_test_player_contact_at_position` scales size
+  `enemy+0x2D70` by 1.5; `player_test_deadly_aabb_contact` compares
+  `center +/- size/2` with the live player lethal rectangle and invokes
+  `player_dead_handler`.
+- **Correction:** The live adapter now captures the active spell owner's
+  position, velocity, full contact size, contact/disable flags, and motion.
+  It lowers the owner to a time-indexed AABB with half-extents
+  `0.75 * contact_size` and feeds it to committed-prefix, local, and global
+  planners. Trace rows retain the geometry and snapshot frame; hit edges also
+  capture the native player rectangle and body geometry in one stable manager
+  frame. Scanning all 480 enemy slots remains a separate generalization task
+  for nonspell and multi-enemy contact.
+- **Regression:** `LUN-S2-F4885-T1` in
+  `lunatic_route2_stage3_practice_20260723_160344.regressions.json`, plus
+  `test_projectile_free_active_spell_promotes_enemy_body_candidate`.
+- **Status:** spell-owner path code-fixed and unit-tested; exact runtime
+  overlap in the new telemetry and physical no-hit recurrence remain open.
+
+## CE-0034: Spell-50 corridor solutions arrived hundreds of frames stale
+
+- **Observed symptom:** Spell 50 produced six hits from frames 25,115..26,700
+  with 180-200 lasers and repeated bottom-boundary occupation. Its 32 unique
+  asynchronous corridor solves took 895 ms median, 2.99 s p95, and 3.20 s
+  maximum; result age was 193 frames p95. Hit-frame action lag reached
+  8-11 frames in this cluster.
+- **Invalid assumption:** A correct global corridor computed from an old
+  snapshot remains actionable in a dense, rapidly changing laser pattern.
+  Background computation hid wall-clock cost but did not preserve freshness.
+- **Correction in progress:** Finite laser-segment fields in both local and
+  global planners are vectorized. On the preserved frame-25,433 snapshot, the
+  global component fell from 64.8 ms median to 32.7 ms median. This reduces
+  cost but does not yet enforce a cooperative hard deadline, reject every
+  over-age result, or certify a retained connected component.
+- **Regressions:** The six spell-50 cases in the Stage-3 practice corpus must
+  retain solve latency/age, action lag, laser geometry, and boundary factors.
+  A future successful fresh run must compare first divergence rather than
+  merging post-respawn hits.
+- **Status:** geometry hot path optimized and regression-tested; live
+  freshness acceptance and the complete bounded-latency policy remain open.

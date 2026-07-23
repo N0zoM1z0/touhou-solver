@@ -46,3 +46,16 @@ remain useful for discovery but are not equivalent independent trials.
 - **Final:** repeat the same process for Extra, then validate executable input
   playback rather than accepting only an offline plan.
 
+## Stage-3 Correction Gate
+
+The `20260723_160344` corpus is the fixed baseline: 16 scoped native hits and
+zero Bomb input. The next fresh Stage-3 run must preserve the hard no-Bomb
+invariant and must not reproduce the spell-35 first hit at frame 4,885 after
+the active spell-owner AABB enters the planner. Runtime telemetry must contain
+the owner's position, velocity, contact extents, flags, and snapshot frame.
+
+Spell 50 remains a separate acceptance gate. Compare unique corridor solve
+time and solution age with the baseline (895 ms median solve, 2.99 s p95,
+193-frame p95 age), and treat a later post-respawn hit only as discovery
+evidence. A complete checkpoint result requires a fresh attempt from full
+practice resources.

@@ -979,3 +979,64 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - For causal regression, the first hit of each fresh practice attempt is
   authoritative. Later post-respawn hits are discovery evidence because death
   still changes state even under the no-life-decrement patch.
+
+## 2026-07-23: Stage-3 No-Bomb Practice Review
+
+- Scoped the `160344` thprac trace to Stage-3 manager frames `54..26858`.
+  The following frame regression `26858 -> 1` marks a new practice/menu
+  timeline; 287 decisions after it are excluded. The agent's raw
+  `last_frame=345` summary is therefore not valid as a Stage-3 boundary.
+- Verified the hard no-Bomb invariant across all 7,487 scoped decisions:
+  controller policy is disabled, input mask bit `0x02` is never set,
+  `bomb` is always false, and no action contains Bomb. Bomb-stock changes
+  after hits are thprac respawn-state mutations rather than input.
+- Recorded 16 native hit edges. Primary classes are six committed-prefix
+  collisions, five observed bullet overlaps, three active-laser cases without
+  a persisted segment overlap, one exact laser overlap, and one enemy-body
+  contact candidate. Fourteen hits use fast mode, 11 follow a missed corridor
+  deadline, six exceed modeled action lag, and five occupy a side/bottom
+  boundary.
+- The canonical fresh-attempt hit is frame 4,885 in spell 35
+  `産霊「ファーストピラミッド」`: player `(178.775,156)`, zero bullets,
+  zero lasers, projectile pipeline clearance `9999`, and live owner pointer
+  `0x5826C0`. IDA proves the contact path
+  `0x42CF7A -> 0x42C290 -> 0x44A360`; exact runtime overlap remains a
+  candidate because the trace lacks owner position, contact size, and flags.
+- Corrected and persisted IDA prototypes for
+  `enemy_test_player_contact_at_position` and
+  `player_test_deadly_aabb_contact`. The latter is `__thiscall` on player
+  state, receives full hazard size, and constructs `center +/- size/2`.
+  Because the former scales enemy `+0x2D70` by 1.5, planner half-extents must
+  be `0.75 * contact_size`.
+- Spell 50 `虚史「幻想郷伝説」` contains the final six discovery hits with
+  180-200 active lasers. Its 32 unique corridor results took 895 ms median,
+  2.99 s p95, and 3.20 s maximum; solution age reached 193 frames p95.
+  This is a planner freshness failure in addition to incomplete laser
+  witnesses, not merely a waypoint-scoring problem.
+- Added `scripts/th08_practice_dossier.py` and focused tests. Durable outputs
+  are the scoped dossier, 16-row death CSV, 16-case regression JSON, and
+  `notes/runs/2026-07-23_lunatic_route2_stage3_nobomb.md`.
+- REA independently covered the shipped executable and both collision
+  functions as Evidence
+  `ev_d0f27bd5ad4f901c2cc242681ed1658f5f790af3994d42dcd56c6eea69eee9e5`
+  and
+  `ev_686af513e3df698b5342223078b06605432486fe9d179a60bb22ab85434635d9`.
+- Implemented the first correction without paying the roughly 10 MB cost of
+  scanning all 480 enemy slots per decision. The live sensor reads the active
+  spell owner's 1,500-byte movement/contact/flag window, filters it with the
+  native contact gates, and lowers the resulting moving AABB into committed
+  input-prefix, local MPC, and global corridor checks. Trace rows now persist
+  owner geometry plus its snapshot frame. A new hit edge additionally retries
+  a native player lethal-rectangle and spell-owner capture until both belong
+  to one stable manager frame; projected overlap alone is not promoted to an
+  exact dynamic witness.
+- Vectorized finite laser-segment clearance in both local and global planners.
+  On the preserved frame-25,433 spell-50 snapshot, the global solve fell from
+  64.8 ms median before the change (three runs, 52.6..79.7 ms) to 32.7 ms
+  median afterward (ten runs, 65.7 ms maximum). A local field containing 44
+  nearby bullets and all 200 lasers took 21.0 ms median. These are offline
+  component measurements, not a claim that the live hard deadline is solved.
+- All 208 unit tests pass. Both the historical full-run corpus and this
+  16-case practice corpus pass the generalized regression validator. Physical
+  acceptance still requires a fresh no-Bomb Stage-3 run in which frame 4,885's
+  spell-35 contact does not recur and spell-50 plan age is measured again.

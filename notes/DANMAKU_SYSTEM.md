@@ -335,6 +335,34 @@ positions. The 22 shipped records use only `(5,15,0,1)`, `(0,15,0,1)`, and
 `HistoricalHitboxTrail` and TH08 lowering preserve nonzero future cases while
 excluding shipped visual-only history from search hashes.
 
+### Enemy-Body Lethal AABB
+
+**Observed** in `enemy_manager_update` (`0x0042C660`): every active enemy whose
+flags at `+0x3324` have contact bit `0x04` set reaches the body-contact consumer
+at `0x0042CF7A`, unless one of the surrounding invulnerability/disabled-state
+guards excludes the whole damage block. The consumer passes position
+`enemy+0x2D88` and contact size `enemy+0x2D70` to
+`enemy_test_player_contact_at_position` (`0x0042C290`).
+
+That helper scales the contact-size vector by 1.5, then calls
+`player_test_deadly_aabb_contact` (`0x0044A360`) with the global player state.
+The latter constructs a hazard rectangle as `center +/- scaled_size/2`, tests
+it against the player's live lethal rectangle at player offsets
+`+0x38C/+0x390/+0x398/+0x39C`, and calls `player_dead_handler` on overlap while
+the player is in normal phase 0. Therefore the planner-visible enemy half
+extents are exactly `0.75 * enemy_contact_size`; `+0x2D70` stores full size,
+not half size.
+
+This is a separate hazard family from bullets and lasers. The Stage-3
+no-Bomb practice run hit at frame 4,885 during spell 35 with zero bullets and
+zero lasers, positive projectile-model clearance, and a live spell owner at
+`0x5826C0`. Static control flow makes enemy-body contact the strong candidate,
+but the baseline trace did not capture the owner's position/size/flags at that
+frame. The corrected sensor now captures the native player lethal rectangle
+and spell-owner AABB in a stable manager-frame epoch on every new hit edge;
+exact runtime overlap remains intentionally unresolved until the next run
+produces that evidence.
+
 **Observed, presentation-only** for opcode `0x9F`: enemy byte `+0x332F`
 selects one of four linked render lists. `enemy_manager_render` consumes layers
 0/1 in its early wrapper and 2/3 in its late wrapper. The 38 shipped writes use
@@ -966,3 +994,8 @@ bucket reset, and solver-critical phase ordering are also named/commented.
   `ev_e97b8a031969fbddae5e602d0d1ac8d9dc567a23ec31ef07a6925a503582e3df`
 - Player-shot selection, cadence, initialization/update, and Remilia callbacks:
   `ev_d3ee55dd161e311c6750c0bb9341a85ebeb0e01a139bed11faba302b73060f41`
+- Stage-3 enemy-body follow-up executable overview:
+  `ev_d0f27bd5ad4f901c2cc242681ed1658f5f790af3994d42dcd56c6eea69eee9e5`
+- Independent batch decompilation of the enemy contact-size scaler and lethal
+  player AABB consumer:
+  `ev_686af513e3df698b5342223078b06605432486fe9d179a60bb22ab85434635d9`

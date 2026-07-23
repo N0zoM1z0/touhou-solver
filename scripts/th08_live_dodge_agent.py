@@ -71,6 +71,19 @@ ITEM_ACTIVE_OFFSET = 0x02D5
 ITEM_MOTION_STATE_OFFSET = 0x02D7
 ITEM_FULL_VALUE_OFFSET = 0x02D8
 
+ENEMY_VELOCITY_OFFSET = 0x2D4C
+ENEMY_CONTACT_SIZE_OFFSET = 0x2D70
+ENEMY_POSITION_OFFSET = 0x2D88
+ENEMY_FLAGS_OFFSET = 0x3324
+ENEMY_BODY_READ_OFFSET = ENEMY_VELOCITY_OFFSET
+ENEMY_BODY_READ_SIZE = ENEMY_FLAGS_OFFSET + 4 - ENEMY_BODY_READ_OFFSET
+ENEMY_ACTIVE_FLAG = 0x00000001
+ENEMY_CONTACT_ENABLED_FLAG = 0x00000004
+ENEMY_CONTACT_BLOCKING_FLAGS = 0x00000830
+
+PLAYER_LETHAL_AABB_OFFSET = 0x038C
+PLAYER_LETHAL_AABB_SIZE = 0x14
+
 SHOT = 0x01
 BOMB = 0x02
 FOCUS = 0x04
@@ -136,6 +149,18 @@ class Laser:
     tail: float
     head: float
     half_width: float
+
+
+@dataclass(frozen=True)
+class EnemyBody:
+    pointer: int
+    x: float
+    y: float
+    vx: float
+    vy: float
+    half_width: float
+    half_height: float
+    flags: int
 
 
 @dataclass(frozen=True)
@@ -522,6 +547,127 @@ def decode_items(blob: bytes) -> tuple[Item, ...]:
     return tuple(items)
 
 
+def decode_enemy_body(blob: bytes, *, pointer: int) -> EnemyBody | None:
+    if len(blob) < ENEMY_BODY_READ_SIZE:
+        raise ValueError(
+            f"enemy body window requires {ENEMY_BODY_READ_SIZE} bytes"
+        )
+    velocity_offset = ENEMY_VELOCITY_OFFSET - ENEMY_BODY_READ_OFFSET
+    contact_offset = ENEMY_CONTACT_SIZE_OFFSET - ENEMY_BODY_READ_OFFSET
+    position_offset = ENEMY_POSITION_OFFSET - ENEMY_BODY_READ_OFFSET
+    flags_offset = ENEMY_FLAGS_OFFSET - ENEMY_BODY_READ_OFFSET
+    vx, vy = struct.unpack_from("<ff", blob, velocity_offset)
+    contact_width, contact_height = struct.unpack_from(
+        "<ff",
+        blob,
+        contact_offset,
+    )
+    x, y = struct.unpack_from("<ff", blob, position_offset)
+    flags = struct.unpack_from("<I", blob, flags_offset)[0]
+    if (
+        not flags & ENEMY_ACTIVE_FLAG
+        or not flags & ENEMY_CONTACT_ENABLED_FLAG
+        or flags & ENEMY_CONTACT_BLOCKING_FLAGS
+    ):
+        return None
+    if not _finite((x, y, vx, vy, contact_width, contact_height)):
+        return None
+    if contact_width < 0.0 or contact_height < 0.0:
+        return None
+    return EnemyBody(
+        pointer=pointer,
+        x=x,
+        y=y,
+        vx=vx,
+        vy=vy,
+        # Native path: full contact size * 1.5, then center +/- size/2.
+        half_width=0.75 * contact_width,
+        half_height=0.75 * contact_height,
+        flags=flags,
+    )
+
+
+def read_spell_enemy_bodies(
+    reader: ProcessReader,
+    spell: dict[str, object],
+) -> tuple[EnemyBody, ...]:
+    if not bool(spell.get("active")):
+        return ()
+    pointer = int(spell.get("enemy_pointer", 0))
+    if pointer == 0:
+        return ()
+    blob = reader.read(
+        pointer + ENEMY_BODY_READ_OFFSET,
+        ENEMY_BODY_READ_SIZE,
+    )
+    body = decode_enemy_body(blob, pointer=pointer)
+    return (body,) if body is not None else ()
+
+
+def decode_player_lethal_aabb(
+    blob: bytes,
+) -> tuple[float, float, float, float] | None:
+    if len(blob) < PLAYER_LETHAL_AABB_SIZE:
+        raise ValueError(
+            f"player lethal AABB requires {PLAYER_LETHAL_AABB_SIZE} bytes"
+        )
+    left, top = struct.unpack_from("<ff", blob, 0)
+    right, bottom = struct.unpack_from("<ff", blob, 0x0C)
+    if not _finite((left, top, right, bottom)):
+        return None
+    if left > right or top > bottom:
+        return None
+    return left, top, right, bottom
+
+
+def _serialized_enemy_bodies(
+    bodies: tuple[EnemyBody, ...],
+) -> list[list[float | int]]:
+    return [
+        [
+            body.pointer,
+            body.x,
+            body.y,
+            body.vx,
+            body.vy,
+            body.half_width,
+            body.half_height,
+            body.flags,
+        ]
+        for body in bodies
+    ]
+
+
+def capture_hit_contact_observation(
+    reader: ProcessReader,
+    spell: dict[str, object],
+    *,
+    attempts: int = 3,
+) -> dict[str, object]:
+    observation: dict[str, object] = {}
+    for _ in range(max(1, attempts)):
+        frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+        player_blob = reader.read(
+            ADDR_PLAYER + PLAYER_LETHAL_AABB_OFFSET,
+            PLAYER_LETHAL_AABB_SIZE,
+        )
+        enemy_bodies = read_spell_enemy_bodies(reader, spell)
+        frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+        player_aabb = decode_player_lethal_aabb(player_blob)
+        observation = {
+            "frame_before": frame_before,
+            "frame_after": frame_after,
+            "stable": frame_before == frame_after,
+            "player_lethal_aabb": (
+                list(player_aabb) if player_aabb is not None else None
+            ),
+            "enemy_bodies": _serialized_enemy_bodies(enemy_bodies),
+        }
+        if observation["stable"]:
+            break
+    return observation
+
+
 def _aabb_clearance(
     px: float, py: float, bullet_x: float, bullet_y: float, bullet: Bullet
 ) -> float:
@@ -649,6 +795,7 @@ def _hazards_for_positions(
     step: int,
     bullet_frame: tuple[np.ndarray, ...],
     lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     count = positions_x.size
     risk = np.zeros(count, dtype=np.float64)
@@ -690,35 +837,99 @@ def _hazards_for_positions(
             minimum = np.minimum(minimum, robust_clearance.min(axis=1))
             danger = np.maximum(44.0 - robust_clearance, 0.0)
             risk += np.square(danger).sum(axis=1) * time_weight
-    for laser in lasers:
-        cosine = math.cos(laser.angle)
-        sine = math.sin(laser.angle)
-        start_x = laser.origin_x + cosine * laser.tail
-        start_y = laser.origin_y + sine * laser.tail
-        end_x = laser.origin_x + cosine * laser.head
-        end_y = laser.origin_y + sine * laser.head
-        segment_x = end_x - start_x
-        segment_y = end_y - start_y
+    if lasers:
+        origin_x = np.fromiter(
+            (laser.origin_x for laser in lasers),
+            dtype=np.float64,
+        )
+        origin_y = np.fromiter(
+            (laser.origin_y for laser in lasers),
+            dtype=np.float64,
+        )
+        angle = np.fromiter(
+            (laser.angle for laser in lasers),
+            dtype=np.float64,
+        )
+        tail = np.fromiter(
+            (laser.tail for laser in lasers),
+            dtype=np.float64,
+        )
+        head = np.fromiter(
+            (laser.head for laser in lasers),
+            dtype=np.float64,
+        )
+        half_widths = np.fromiter(
+            (laser.half_width for laser in lasers),
+            dtype=np.float64,
+        )
+        cosine = np.cos(angle)
+        sine = np.sin(angle)
+        start_x = origin_x + cosine * tail
+        start_y = origin_y + sine * tail
+        segment_x = cosine * (head - tail)
+        segment_y = sine * (head - tail)
         length_sq = segment_x * segment_x + segment_y * segment_y
-        if length_sq <= 1e-9:
-            distance = np.hypot(positions_x - start_x, positions_y - start_y)
-        else:
-            projection = np.clip(
-                ((positions_x - start_x) * segment_x + (positions_y - start_y) * segment_y)
-                / length_sq,
-                0.0,
-                1.0,
-            )
-            distance = np.hypot(
-                positions_x - (start_x + projection * segment_x),
-                positions_y - (start_y + projection * segment_y),
-            )
-        clearance = distance - laser.half_width - PLAYER_RADIUS
-        collisions += (clearance <= 0.0).astype(np.int32)
+        flat_x = positions_x[:, None]
+        flat_y = positions_y[:, None]
+        numerator = (
+            (flat_x - start_x[None, :]) * segment_x[None, :]
+            + (flat_y - start_y[None, :]) * segment_y[None, :]
+        )
+        projection = np.divide(
+            numerator,
+            length_sq[None, :],
+            out=np.zeros_like(numerator),
+            where=length_sq[None, :] > 1e-9,
+        )
+        projection = np.clip(projection, 0.0, 1.0)
+        distance = np.hypot(
+            flat_x - (start_x + projection * segment_x),
+            flat_y - (start_y + projection * segment_y),
+        )
+        clearance = (
+            distance - half_widths[None, :] - PLAYER_RADIUS
+        )
+        collisions += (clearance <= 0.0).sum(axis=1, dtype=np.int32)
         robust_clearance = clearance - min(12.0, 0.4 * step)
-        minimum = np.minimum(minimum, robust_clearance)
+        minimum = np.minimum(minimum, robust_clearance.min(axis=1))
         danger = np.maximum(56.0 - robust_clearance, 0.0)
-        risk += 2.0 * np.square(danger) * time_weight
+        risk += (
+            2.0 * np.square(danger).sum(axis=1) * time_weight
+        )
+    if enemy_bodies:
+        body_x = np.fromiter(
+            (body.x + body.vx * step for body in enemy_bodies),
+            dtype=np.float32,
+        )
+        body_y = np.fromiter(
+            (body.y + body.vy * step for body in enemy_bodies),
+            dtype=np.float32,
+        )
+        half_width = np.fromiter(
+            (body.half_width for body in enemy_bodies),
+            dtype=np.float32,
+        )
+        half_height = np.fromiter(
+            (body.half_height for body in enemy_bodies),
+            dtype=np.float32,
+        )
+        dx = np.abs(positions_x[:, None] - body_x[None, :]) - (
+            PLAYER_RADIUS + half_width[None, :]
+        )
+        dy = np.abs(positions_y[:, None] - body_y[None, :]) - (
+            PLAYER_RADIUS + half_height[None, :]
+        )
+        overlap = (dx <= 0.0) & (dy <= 0.0)
+        clearance = np.where(
+            overlap,
+            np.maximum(dx, dy),
+            np.hypot(np.maximum(dx, 0.0), np.maximum(dy, 0.0)),
+        )
+        collisions += (clearance <= 0.0).sum(axis=1, dtype=np.int32)
+        robust_clearance = clearance - min(12.0, 0.5 * step)
+        minimum = np.minimum(minimum, robust_clearance.min(axis=1))
+        danger = np.maximum(64.0 - robust_clearance, 0.0)
+        risk += 2.0 * np.square(danger).sum(axis=1) * time_weight
     return risk, collisions, minimum
 
 
@@ -729,6 +940,7 @@ def _control_prefix_hazards(
     input_mask: int,
     bullets: tuple[Bullet, ...],
     lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
     frames: int,
 ) -> tuple[float, int, float]:
@@ -757,6 +969,7 @@ def _control_prefix_hazards(
             step=step,
             bullet_frame=bullet_frames[step - 1],
             lasers=lasers,
+            enemy_bodies=enemy_bodies,
         )
         risk += _boundary_risk(x, y) + float(hazard_risk[0])
         collisions += int(hazard_collisions[0])
@@ -882,6 +1095,7 @@ def choose_action(
     lasers: tuple[Laser, ...],
     previous_direction: int,
     can_bomb: bool,
+    enemy_bodies: tuple[EnemyBody, ...] = (),
     items: tuple[Item, ...] = (),
     power: float = 0.0,
     bombs: float = 0.0,
@@ -913,6 +1127,7 @@ def choose_action(
         input_mask=delayed_mask,
         bullets=bullets,
         lasers=lasers,
+        enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         frames=control_delay_frames,
     )
@@ -948,6 +1163,7 @@ def choose_action(
     if (
         not bullets
         and not lasers
+        and not enemy_bodies
         and not selected_items
         and target_x is None
     ):
@@ -1027,6 +1243,7 @@ def choose_action(
             step=control_delay_frames + step,
             bullet_frame=bullet_frames[step - 1],
             lasers=lasers,
+            enemy_bodies=enemy_bodies,
         )
         for draft_index, draft in enumerate(drafts):
             node, action, x, y, transition_risk, collected_mask, item_utility = draft
@@ -1183,6 +1400,7 @@ def _solve_corridor(
     player_y: float,
     bullets: tuple[Bullet, ...],
     lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
     required_gate_lane: str | None = None,
     context_key: tuple[int, int | None] | None = None,
@@ -1193,6 +1411,7 @@ def _solve_corridor(
         player_y=player_y,
         bullets=bullets,
         lasers=lasers,
+        enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         required_gate_lane=required_gate_lane,
     )
@@ -1206,6 +1425,7 @@ def _solve_corridor(
             player_y=player_y,
             bullets=bullets,
             lasers=lasers,
+            enemy_bodies=enemy_bodies,
             snapshot_lag=snapshot_lag,
         )
     return CorridorSolution(
@@ -1577,6 +1797,10 @@ def run(args: argparse.Namespace) -> int:
             item_blob = reader.read(
                 ITEM_MANAGER_BASE, ITEM_POOL_SIZE * ITEM_STRIDE
             )
+            enemy_bodies = read_spell_enemy_bodies(
+                reader,
+                state["spell"],
+            )
             counter_after_read = reader.u32(0x0164D30C)
             read_ms = (time.perf_counter() - read_started) * 1000.0
             snapshot_lag = max(0, counter_after_read - int(state["enemy_manager_frame"]))
@@ -1632,6 +1856,7 @@ def run(args: argparse.Namespace) -> int:
                     player_y=projected_player_y,
                     bullets=bullets,
                     lasers=lasers,
+                    enemy_bodies=enemy_bodies,
                     snapshot_lag=snapshot_lag,
                     required_gate_lane=(
                         corridor_commitment.active_lane(counter_after_read)
@@ -1654,6 +1879,7 @@ def run(args: argparse.Namespace) -> int:
                 player_y=float(player["y"]),
                 bullets=bullets,
                 lasers=lasers,
+                enemy_bodies=enemy_bodies,
                 previous_direction=previous_direction,
                 can_bomb=can_bomb,
                 items=items,
@@ -1679,8 +1905,13 @@ def run(args: argparse.Namespace) -> int:
             predeath_now = reader.i32(0x017D5EF8 + 0xE2A68)
             counter_at_action = reader.u32(0x0164D30C)
             hit_started = phase_now == 2 and previous_action_phase != 2
+            hit_contact_observation = None
             if hit_started:
                 hit_count += 1
+                hit_contact_observation = capture_hit_contact_observation(
+                    reader,
+                    state["spell"],
+                )
                 if (
                     args.stop_after_hits
                     and hit_count >= args.stop_after_hits
@@ -1769,6 +2000,8 @@ def run(args: argparse.Namespace) -> int:
                     "active_bullets": len(bullets),
                     "active_lasers": len(lasers),
                     "active_items": len(items),
+                    "active_enemy_bodies": len(enemy_bodies),
+                    "enemy_body_snapshot_frame": counter_after_read,
                     "action": decision.action,
                     "mask": decision.mask,
                     "focused": decision.planned_focus,
@@ -1782,7 +2015,12 @@ def run(args: argparse.Namespace) -> int:
                     "hit_started": hit_started,
                     "hit_count": hit_count,
                     "auto_confirm": auto_confirm_event,
+                    "enemy_bodies": _serialized_enemy_bodies(enemy_bodies),
                 }
+                if hit_contact_observation is not None:
+                    record["hit_contact_observation"] = (
+                        hit_contact_observation
+                    )
                 if corridor_solution is not None:
                     corridor_record = {
                         "source_frame": corridor_solution.source_frame,

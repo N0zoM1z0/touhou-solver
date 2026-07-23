@@ -1,0 +1,1330 @@
+{
+  "schema": "th08-practice-death-regressions-v1",
+  "run_id": "lunatic_route2_stage3_practice_20260723_160344",
+  "scope": {
+    "stage_route_index": 2,
+    "stage_label": "Stage 3",
+    "first_frame": 54,
+    "last_frame": 26858,
+    "observed_frame_span": 26804,
+    "decision_count": 7487,
+    "end_event": {
+      "reason": "frame_counter_regression",
+      "previous_frame": 26858,
+      "next_frame": 1,
+      "stage_route_index": 2
+    },
+    "post_scope_decision_count_excluded": 287,
+    "scene_events": [
+      {
+        "kind": "scene_inactive",
+        "frame": 26858,
+        "engine_flags": 98817,
+        "stage_route_index": 2,
+        "transition_from_stage": 2,
+        "expected_stage": 3,
+        "status": "stage_transition"
+      }
+    ],
+    "raw_summary_is_scope_valid": false
+  },
+  "no_bomb_verification": {
+    "passed": true,
+    "bomb_input_bit": 2,
+    "controller_policy_disabled": true,
+    "decision_count_checked": 7487,
+    "mask_violation_frames": [],
+    "bomb_flag_violation_frames": [],
+    "bomb_action_violation_frames": [],
+    "resource_note": "Bomb stock changes after a hit are thprac respawn-state changes, not Bomb input; the mask, decision flag, and action are the controller evidence."
+  },
+  "case_count": 16,
+  "cases": [
+    {
+      "case_id": "LUN-S2-F4885-T1",
+      "frame": 4885,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 178.7745819091797,
+        "y": 156.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 128.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 112.0
+      },
+      "observed_bomb_cost": 1.0,
+      "deathbomb_requested": false,
+      "action": "down",
+      "mask": 37,
+      "active_bullets": 0,
+      "active_lasers": 0,
+      "active_items": 2,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 2,
+      "read_ms": 8.483400000841357,
+      "plan_ms": 21.44929999485612,
+      "pipeline_clearance_at_hit": 9999.0,
+      "minimum_pipeline_clearance_240f": 12.110044479370117,
+      "minimum_corridor_slack_240f": -2.5,
+      "corridor_lane": "center",
+      "nearest_observed_bullet": null,
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "enemy_body_contact_candidate",
+      "contributing_factors": [
+        "corridor_deadline_miss"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 35,
+        "spell_name": "産霊「ファーストピラミッド」",
+        "flags": 5,
+        "enemy_pointer": 5777088
+      },
+      "enemy_body_evidence": {
+        "confidence": "strong static candidate; exact runtime overlap not yet captured",
+        "enemy_pointer": 5777088,
+        "canonical_fresh_attempt_sample": true,
+        "native_path": [
+          {
+            "address": "0x42cf7a",
+            "meaning": "enemy manager invokes player contact using enemy +0x2d88 position, +0x2d70 contact size, and +0x3324 contact flags"
+          },
+          {
+            "address": "0x42c33f",
+            "meaning": "enemy contact size is scaled by 1.5"
+          },
+          {
+            "address": "0x44a360",
+            "name": "player_test_deadly_aabb_contact",
+            "meaning": "enemy AABB versus player lethal rectangle; overlap calls player_dead_handler"
+          }
+        ],
+        "missing_runtime_field": "active enemy position/contact-size/flags at the hit frame"
+      },
+      "sample_role": "canonical_fresh_attempt_causal_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F5974-T1",
+      "frame": 5974,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 263.67138671875,
+        "y": 389.38519287109375,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 114.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 114.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_fast",
+      "mask": 17,
+      "active_bullets": 203,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "read_ms": 8.404899999732152,
+      "plan_ms": 12.133099997299723,
+      "pipeline_clearance_at_hit": -1.3464539051055908,
+      "minimum_pipeline_clearance_240f": -1.3464539051055908,
+      "minimum_corridor_slack_240f": -10.615518703846753,
+      "corridor_lane": "right",
+      "nearest_observed_bullet": {
+        "slot": 428,
+        "x": 270.0254821777344,
+        "y": 387.6166687011719,
+        "velocity_x": 0.32788437604904175,
+        "velocity_y": 2.175429105758667,
+        "half_width": 3.0,
+        "half_height": 3.0,
+        "transform_flags": 0,
+        "center_distance": 6.595620277235774,
+        "aabb_clearance": 1.354095458984375
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "corridor_deadline_miss",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 35,
+        "spell_name": "産霊「ファーストピラミッド」",
+        "flags": 1,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F7341-T1",
+      "frame": 7341,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 41.460208892822266,
+        "y": 288.61871337890625,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 13
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 114.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 98.0
+      },
+      "observed_bomb_cost": 1.0,
+      "deathbomb_requested": false,
+      "action": "down_fast",
+      "mask": 33,
+      "active_bullets": 440,
+      "active_lasers": 0,
+      "active_items": 32,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 1,
+      "action_lag": 3,
+      "read_ms": 10.261500006890856,
+      "plan_ms": 29.49500000977423,
+      "pipeline_clearance_at_hit": -2.8880977630615234,
+      "minimum_pipeline_clearance_240f": -2.8880977630615234,
+      "minimum_corridor_slack_240f": -5.134947776794434,
+      "corridor_lane": "left",
+      "nearest_observed_bullet": {
+        "slot": 295,
+        "x": 42.303253173828125,
+        "y": 292.9783630371094,
+        "velocity_x": -2.7752816677093506,
+        "velocity_y": 2.828289031982422,
+        "half_width": 3.0,
+        "half_height": 3.0,
+        "transform_flags": 0,
+        "center_distance": 4.4404131341585,
+        "aabb_clearance": -0.640350341796875
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 295,
+        "x": 42.303253173828125,
+        "y": 292.9783630371094,
+        "velocity_x": -2.7752816677093506,
+        "velocity_y": 2.828289031982422,
+        "half_width": 3.0,
+        "half_height": 3.0,
+        "transform_flags": 0,
+        "center_distance": 4.4404131341585,
+        "aabb_clearance": -0.640350341796875
+      },
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "observed_bullet_overlap",
+      "contributing_factors": [
+        "corridor_deadline_miss",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "no_active_spell_at_hit",
+        "spell_id": null,
+        "spell_name": null,
+        "flags": 0
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F13729-T1",
+      "frame": 13729,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 250.82876586914062,
+        "y": 394.77606201171875,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 114.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 98.0
+      },
+      "observed_bomb_cost": 1.0,
+      "deathbomb_requested": false,
+      "action": "up_fast",
+      "mask": 17,
+      "active_bullets": 324,
+      "active_lasers": 0,
+      "active_items": 1,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "read_ms": 8.972400013590232,
+      "plan_ms": 12.875700005679391,
+      "pipeline_clearance_at_hit": -3.9372894763946533,
+      "minimum_pipeline_clearance_240f": -3.9372894763946533,
+      "minimum_corridor_slack_240f": -4.55518053575458,
+      "corridor_lane": "center",
+      "nearest_observed_bullet": {
+        "slot": 917,
+        "x": 249.14901733398438,
+        "y": 387.4180908203125,
+        "velocity_x": 0.4170360267162323,
+        "velocity_y": 3.437293767929077,
+        "half_width": 3.0,
+        "half_height": 3.0,
+        "transform_flags": 0,
+        "center_distance": 7.547270711649602,
+        "aabb_clearance": 2.35797119140625
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "corridor_deadline_miss",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "no_active_spell_at_hit",
+        "spell_id": null,
+        "spell_name": null,
+        "flags": 0
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F14937-T1",
+      "frame": 14937,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 69.84335327148438,
+        "y": 307.1048583984375,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 110.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 110.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "right_fast",
+      "mask": 129,
+      "active_bullets": 293,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 2,
+      "read_ms": 8.707600005436689,
+      "plan_ms": 17.29699999850709,
+      "pipeline_clearance_at_hit": -1.8665039539337158,
+      "minimum_pipeline_clearance_240f": -3.3685736656188965,
+      "minimum_corridor_slack_240f": -21.313454216078306,
+      "corridor_lane": "left",
+      "nearest_observed_bullet": {
+        "slot": 347,
+        "x": 75.906982421875,
+        "y": 302.78192138671875,
+        "velocity_x": -1.2573710680007935,
+        "velocity_y": 0.9894522428512573,
+        "half_width": 3.0,
+        "half_height": 3.0,
+        "transform_flags": 0,
+        "center_distance": 7.446837105829211,
+        "aabb_clearance": 1.063629150390625
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "corridor_deadline_miss",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 38,
+        "spell_name": "始符「エフェメラリティ137」",
+        "flags": 5,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F16585-T1",
+      "frame": 16585,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 305.0399475097656,
+        "y": 418.77886962890625,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 108.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 108.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_fast",
+      "mask": 17,
+      "active_bullets": 482,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "read_ms": 8.756800001719967,
+      "plan_ms": 10.68910000321921,
+      "pipeline_clearance_at_hit": -1.2252686023712158,
+      "minimum_pipeline_clearance_240f": -1.791723370552063,
+      "minimum_corridor_slack_240f": -17.23743657666948,
+      "corridor_lane": "right",
+      "nearest_observed_bullet": {
+        "slot": 1332,
+        "x": 302.8921813964844,
+        "y": 416.2877502441406,
+        "velocity_x": 0.8609871864318848,
+        "velocity_y": 1.465847134590149,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 3.2891602372815942,
+        "aabb_clearance": -1.508880615234375
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1332,
+        "x": 302.8921813964844,
+        "y": 416.2877502441406,
+        "velocity_x": 0.8609871864318848,
+        "velocity_y": 1.465847134590149,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 3.2891602372815942,
+        "aabb_clearance": -1.508880615234375
+      },
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "observed_bullet_overlap",
+      "contributing_factors": [
+        "corridor_deadline_miss",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 42,
+        "spell_name": "野符「GHQクライシス」",
+        "flags": 5,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F17242-T1",
+      "frame": 17242,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 8.0,
+        "y": 410.8787841796875,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 101.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 101.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_fast",
+      "mask": 17,
+      "active_bullets": 461,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "read_ms": 8.975399992777966,
+      "plan_ms": 13.794599988614209,
+      "pipeline_clearance_at_hit": 1.6290099620819092,
+      "minimum_pipeline_clearance_240f": -2.9685420989990234,
+      "minimum_corridor_slack_240f": -10.204399774314147,
+      "corridor_lane": "left",
+      "nearest_observed_bullet": {
+        "slot": 1333,
+        "x": 7.539012908935547,
+        "y": 412.1930847167969,
+        "velocity_x": -0.21559536457061768,
+        "velocity_y": 1.686275601387024,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 1.3928011343957392,
+        "aabb_clearance": -2.685699462890625
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1333,
+        "x": 7.539012908935547,
+        "y": 412.1930847167969,
+        "velocity_x": -0.21559536457061768,
+        "velocity_y": 1.686275601387024,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 1.3928011343957392,
+        "aabb_clearance": -2.685699462890625
+      },
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "observed_bullet_overlap",
+      "contributing_factors": [
+        "playfield_boundary",
+        "corridor_deadline_miss",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 42,
+        "spell_name": "野符「GHQクライシス」",
+        "flags": 1,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F21658-T1",
+      "frame": 21658,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 106.50328063964844,
+        "y": 408.0084228515625,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 85.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 85.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "right_fast",
+      "mask": 129,
+      "active_bullets": 417,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "read_ms": 8.14890000037849,
+      "plan_ms": 11.85809999878984,
+      "pipeline_clearance_at_hit": -1.6795990467071533,
+      "minimum_pipeline_clearance_240f": -1.6795990467071533,
+      "minimum_corridor_slack_240f": -12.153229112388832,
+      "corridor_lane": "center",
+      "nearest_observed_bullet": {
+        "slot": 461,
+        "x": 114.48712158203125,
+        "y": 407.948486328125,
+        "velocity_x": -0.4634370803833008,
+        "velocity_y": 2.9260268211364746,
+        "half_width": 3.0,
+        "half_height": 3.0,
+        "transform_flags": 0,
+        "center_distance": 7.984065917820935,
+        "aabb_clearance": 2.9838409423828125
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "corridor_deadline_miss",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "no_active_spell_at_hit",
+        "spell_id": null,
+        "spell_name": null,
+        "flags": 8
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F23093-T1",
+      "frame": 23093,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 75.22201538085938,
+        "y": 388.08184814453125,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 70.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 4.0,
+        "power": 54.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_fast",
+      "mask": 17,
+      "active_bullets": 379,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "read_ms": 11.443499999586493,
+      "plan_ms": 15.437800000654534,
+      "pipeline_clearance_at_hit": 0.7586410641670227,
+      "minimum_pipeline_clearance_240f": 0.7586410641670227,
+      "minimum_corridor_slack_240f": -0.6956306520136906,
+      "corridor_lane": "left",
+      "nearest_observed_bullet": {
+        "slot": 1454,
+        "x": 77.45326232910156,
+        "y": 385.0880126953125,
+        "velocity_x": -1.2726038694381714,
+        "velocity_y": 2.151854991912842,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 3.7338336386399047,
+        "aabb_clearance": -1.00616455078125
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1454,
+        "x": 77.45326232910156,
+        "y": 385.0880126953125,
+        "velocity_x": -1.2726038694381714,
+        "velocity_y": 2.151854991912842,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 3.7338336386399047,
+        "aabb_clearance": -1.00616455078125
+      },
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "observed_bullet_overlap",
+      "contributing_factors": [
+        "corridor_deadline_miss",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 46,
+        "spell_name": "国体「三種の神器　郷」",
+        "flags": 5,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F23500-T1",
+      "frame": 23500,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 363.32684326171875,
+        "y": 422.2777099609375,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 55.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 39.0
+      },
+      "observed_bomb_cost": 1.0,
+      "deathbomb_requested": false,
+      "action": "up",
+      "mask": 21,
+      "active_bullets": 347,
+      "active_lasers": 0,
+      "active_items": 1,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "read_ms": 8.53839999763295,
+      "plan_ms": 12.161299993749708,
+      "pipeline_clearance_at_hit": 2.3146326541900635,
+      "minimum_pipeline_clearance_240f": -1.628576397895813,
+      "minimum_corridor_slack_240f": -6.586762090438533,
+      "corridor_lane": "right",
+      "nearest_observed_bullet": {
+        "slot": 901,
+        "x": 365.9811096191406,
+        "y": 421.86572265625,
+        "velocity_x": 0.920312762260437,
+        "velocity_y": 2.3244407176971436,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 2.6860497827414256,
+        "aabb_clearance": -1.345733642578125
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 901,
+        "x": 365.9811096191406,
+        "y": 421.86572265625,
+        "velocity_x": 0.920312762260437,
+        "velocity_y": 2.3244407176971436,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 2.6860497827414256,
+        "aabb_clearance": -1.345733642578125
+      },
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "observed_bullet_overlap",
+      "contributing_factors": [
+        "corridor_deadline_miss"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 46,
+        "spell_name": "国体「三種の神器　郷」",
+        "flags": 1,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F25115-T1",
+      "frame": 25115,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 213.72840881347656,
+        "y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 28
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 55.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 39.0
+      },
+      "observed_bomb_cost": 1.0,
+      "deathbomb_requested": false,
+      "action": "right_fast",
+      "mask": 129,
+      "active_bullets": 233,
+      "active_lasers": 180,
+      "active_items": 0,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 8,
+      "read_ms": 8.903199995984323,
+      "plan_ms": 134.61619999725372,
+      "pipeline_clearance_at_hit": 0.7065756320953369,
+      "minimum_pipeline_clearance_240f": -2.428948163986206,
+      "minimum_corridor_slack_240f": -2.1529692102641853,
+      "corridor_lane": "left",
+      "nearest_observed_bullet": {
+        "slot": 1273,
+        "x": 201.18238830566406,
+        "y": 430.26025390625,
+        "velocity_x": 0.08501912653446198,
+        "velocity_y": 2.798708915710449,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 12.66607070299113,
+        "aabb_clearance": 8.5460205078125
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": {
+        "slot": 85,
+        "origin_x": 296.9736328125,
+        "origin_y": 97.28399658203125,
+        "angle": 1.855034351348877,
+        "tail": 222.5,
+        "head": 372.5,
+        "half_width": 4.0,
+        "closest_x": 200.3304134456966,
+        "closest_y": 428.0857969822497,
+        "center_distance": 13.958053773331695,
+        "clearance": 7.958053773331695
+      },
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "active_laser_without_observed_overlap",
+      "contributing_factors": [
+        "playfield_boundary",
+        "corridor_deadline_miss",
+        "action_lag_over_model",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 50,
+        "spell_name": "虚史「幻想郷伝説」",
+        "flags": 5,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F25433-T1",
+      "frame": 25433,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 105.8897705078125,
+        "y": 414.1102294921875,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 26
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 39.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 4.0,
+        "power": 24.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "down_left_fast",
+      "mask": 97,
+      "active_bullets": 335,
+      "active_lasers": 200,
+      "active_items": 7,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 11,
+      "read_ms": 8.499000003212132,
+      "plan_ms": 172.64559998875484,
+      "pipeline_clearance_at_hit": 1.657280683517456,
+      "minimum_pipeline_clearance_240f": -6.849898338317871,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "left",
+      "nearest_observed_bullet": {
+        "slot": 576,
+        "x": 108.78041076660156,
+        "y": 436.16046142578125,
+        "velocity_x": -0.7299970388412476,
+        "velocity_y": 2.7031655311584473,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 22.23889676739855,
+        "aabb_clearance": 18.05023193359375
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": {
+        "slot": 86,
+        "origin_x": 203.24391174316406,
+        "origin_y": 194.04046630859375,
+        "angle": 1.9298328161239624,
+        "tail": 137.5,
+        "head": 287.5,
+        "half_width": 4.0,
+        "closest_x": 118.82855801793866,
+        "closest_y": 418.96619823828127,
+        "center_distance": 13.82000921473051,
+        "clearance": 7.82000921473051
+      },
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "active_laser_without_observed_overlap",
+      "contributing_factors": [
+        "action_lag_over_model",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 50,
+        "spell_name": "虚史「幻想郷伝説」",
+        "flags": 1,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F25742-T1",
+      "frame": 25742,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 171.16555786132812,
+        "y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 23
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 24.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 8.0
+      },
+      "observed_bomb_cost": 1.0,
+      "deathbomb_requested": false,
+      "action": "left_fast",
+      "mask": 65,
+      "active_bullets": 333,
+      "active_lasers": 190,
+      "active_items": 7,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 10,
+      "read_ms": 9.09549999050796,
+      "plan_ms": 154.06099999381695,
+      "pipeline_clearance_at_hit": -5.619250297546387,
+      "minimum_pipeline_clearance_240f": -6.999266624450684,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "left",
+      "nearest_observed_bullet": {
+        "slot": 1358,
+        "x": 165.9540252685547,
+        "y": 448.9450378417969,
+        "velocity_x": -0.22648872435092926,
+        "velocity_y": 2.7908246517181396,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 17.728349596774876,
+        "aabb_clearance": 13.001608206253003
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": {
+        "slot": 77,
+        "origin_x": 194.86834716796875,
+        "origin_y": 192.1288299560547,
+        "angle": 1.660552740097046,
+        "tail": 80.0,
+        "head": 230.0,
+        "half_width": 4.0,
+        "closest_x": 174.25207965777102,
+        "closest_y": 421.2029871932864,
+        "center_distance": 11.229519239408907,
+        "clearance": 5.229519239408907
+      },
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "playfield_boundary",
+        "action_lag_over_model",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 50,
+        "spell_name": "虚史「幻想郷伝説」",
+        "flags": 1,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F26067-T1",
+      "frame": 26067,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 153.6568603515625,
+        "y": 432.0,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 22
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 10.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 10.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "left_fast",
+      "mask": 65,
+      "active_bullets": 280,
+      "active_lasers": 200,
+      "active_items": 6,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 8,
+      "read_ms": 8.459799995762296,
+      "plan_ms": 134.5100999897113,
+      "pipeline_clearance_at_hit": -1.8761628866195679,
+      "minimum_pipeline_clearance_240f": -6.824287414550781,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 664,
+        "x": 153.69268798828125,
+        "y": 418.0810852050781,
+        "velocity_x": -0.28802311420440674,
+        "velocity_y": 2.1810646057128906,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 13.918960905464456,
+        "aabb_clearance": 9.918914794921875
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": {
+        "slot": 46,
+        "origin_x": 197.7136688232422,
+        "origin_y": 192.5142364501953,
+        "angle": 1.7503111362457275,
+        "tail": 145.0,
+        "head": 295.0,
+        "half_width": 4.0,
+        "closest_x": 154.23553428761744,
+        "closest_y": 432.1050109850553,
+        "center_distance": 0.5881248432531982,
+        "clearance": -5.4118751567468015
+      },
+      "observed_laser_contact_candidate": {
+        "slot": 46,
+        "origin_x": 197.7136688232422,
+        "origin_y": 192.5142364501953,
+        "angle": 1.7503111362457275,
+        "tail": 145.0,
+        "head": 295.0,
+        "half_width": 4.0,
+        "closest_x": 154.23553428761744,
+        "closest_y": 432.1050109850553,
+        "center_distance": 0.5881248432531982,
+        "clearance": -5.4118751567468015
+      },
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "observed_laser_overlap",
+      "contributing_factors": [
+        "playfield_boundary",
+        "action_lag_over_model",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 50,
+        "spell_name": "虚史「幻想郷伝説」",
+        "flags": 1,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F26378-T1",
+      "frame": 26378,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 110.54412841796875,
+        "y": 409.0001220703125,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 1.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 1.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "down_left_fast",
+      "mask": 97,
+      "active_bullets": 279,
+      "active_lasers": 190,
+      "active_items": 7,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 0,
+      "action_lag": 10,
+      "read_ms": 8.801800009678118,
+      "plan_ms": 161.75879999354947,
+      "pipeline_clearance_at_hit": 2.649137020111084,
+      "minimum_pipeline_clearance_240f": -6.239283561706543,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "left",
+      "nearest_observed_bullet": {
+        "slot": 1394,
+        "x": 103.96983337402344,
+        "y": 407.0441589355469,
+        "velocity_x": -0.6618834137916565,
+        "velocity_y": 2.0980730056762695,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 6.859092294859872,
+        "aabb_clearance": 2.5742950439453125
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": {
+        "slot": 7,
+        "origin_x": 205.8841094970703,
+        "origin_y": 195.16893005371094,
+        "angle": 2.01958966255188,
+        "tail": 205.0,
+        "head": 355.0,
+        "half_width": 4.0,
+        "closest_x": 104.34706008172657,
+        "closest_y": 406.0158141129298,
+        "center_distance": 6.878208338553966,
+        "clearance": 0.8782083385539661
+      },
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "active_laser_without_observed_overlap",
+      "contributing_factors": [
+        "action_lag_over_model",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 50,
+        "spell_name": "虚史「幻想郷伝説」",
+        "flags": 1,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S2-F26700-T1",
+      "frame": 26700,
+      "trace_index": 0,
+      "trace_path": "artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_160344.jsonl",
+      "stage_route_index": 2,
+      "stage_label": "Stage 3",
+      "player": {
+        "x": 205.2020263671875,
+        "y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 25
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 1.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 1.0
+      },
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "right_fast",
+      "mask": 129,
+      "active_bullets": 249,
+      "active_lasers": 200,
+      "active_items": 7,
+      "active_enemy_bodies": 0,
+      "snapshot_lag": 1,
+      "action_lag": 10,
+      "read_ms": 8.852099999785423,
+      "plan_ms": 156.42749999824446,
+      "pipeline_clearance_at_hit": -0.8993561267852783,
+      "minimum_pipeline_clearance_240f": -7.052735328674316,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "center",
+      "nearest_observed_bullet": {
+        "slot": 698,
+        "x": 191.53738403320312,
+        "y": 424.7994079589844,
+        "velocity_x": -0.004357363097369671,
+        "velocity_y": 2.7999966144561768,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 15.445742968755356,
+        "aabb_clearance": 10.180820244796365
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": {
+        "slot": 6,
+        "origin_x": 191.99978637695312,
+        "origin_y": 192.00001525878906,
+        "angle": 1.5707896947860718,
+        "tail": 137.5,
+        "head": 287.5,
+        "half_width": 4.0,
+        "closest_x": 192.00137805955052,
+        "closest_y": 432.0000875468161,
+        "center_distance": 13.200648307927288,
+        "clearance": 7.200648307927288
+      },
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": null,
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "playfield_boundary",
+        "action_lag_over_model",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 50,
+        "spell_name": "虚史「幻想郷伝説」",
+        "flags": 1,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    }
+  ]
+}

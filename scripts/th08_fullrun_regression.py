@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate retained TH08 full-run failure witnesses as executable regressions."""
+"""Validate retained TH08 live failure witnesses as executable regressions."""
 
 from __future__ import annotations
 
@@ -10,13 +10,19 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-EXPECTED_SCHEMA = "th08-live-death-regressions-v1"
+EXPECTED_SCHEMAS = {
+    "th08-live-death-regressions-v1",
+    "th08-practice-death-regressions-v1",
+}
 PRIMARY_CAUSES = {
+    "observed_enemy_body_overlap",
+    "observed_multiple_hazard_overlap",
     "observed_bullet_overlap",
     "observed_laser_overlap",
     "active_laser_without_observed_overlap",
     "modeled_committed_prefix_collision",
     "sensor_gap_or_unmodeled_hazard",
+    "enemy_body_contact_candidate",
 }
 
 
@@ -34,6 +40,7 @@ class CorpusSummary:
     deathbomb_count: int
     exact_bullet_witnesses: int
     exact_laser_witnesses: int
+    exact_enemy_body_witnesses: int
 
 
 def _require(
@@ -69,7 +76,24 @@ def validate_case(case: dict[str, object]) -> None:
 
     bullet = case.get("observed_bullet_contact_candidate")
     laser = case.get("observed_laser_contact_candidate")
-    if cause == "observed_bullet_overlap":
+    enemy = case.get("observed_enemy_body_contact_candidate")
+    overlap_count = sum(
+        isinstance(witness, dict) for witness in (bullet, laser, enemy)
+    )
+    if cause == "observed_multiple_hazard_overlap":
+        _require(
+            overlap_count >= 2,
+            case_id=case_id,
+            message="multiple-overlap cause has fewer than two witnesses",
+        )
+    elif cause == "observed_enemy_body_overlap":
+        _require(
+            isinstance(enemy, dict)
+            and float(enemy["aabb_clearance"]) <= 0.0,
+            case_id=case_id,
+            message="enemy-body cause lacks an overlapping AABB witness",
+        )
+    elif cause == "observed_bullet_overlap":
         _require(
             isinstance(bullet, dict)
             and float(bullet["aabb_clearance"]) <= 0.0,
@@ -77,9 +101,9 @@ def validate_case(case: dict[str, object]) -> None:
             message="bullet-overlap cause lacks an overlapping AABB witness",
         )
         _require(
-            laser is None,
+            laser is None and enemy is None,
             case_id=case_id,
-            message="native-priority laser witness must outrank bullet overlap",
+            message="another exact witness must not be hidden by bullet cause",
         )
     elif cause == "observed_laser_overlap":
         _require(
@@ -105,9 +129,23 @@ def validate_case(case: dict[str, object]) -> None:
             message="committed-prefix cause has positive pipeline clearance",
         )
         _require(
-            bullet is None and laser is None,
+            bullet is None and laser is None and enemy is None,
             case_id=case_id,
             message="observed contact must outrank modeled prefix collision",
+        )
+    elif cause == "enemy_body_contact_candidate":
+        _require(
+            isinstance(case.get("enemy_body_evidence"), dict),
+            case_id=case_id,
+            message="enemy-body candidate lacks static evidence",
+        )
+        _require(
+            int(case["active_bullets"]) == 0
+            and int(case["active_lasers"]) == 0
+            and float(case["pipeline_clearance_at_hit"]) > 0.0
+            and overlap_count == 0,
+            case_id=case_id,
+            message="enemy-body candidate contains a higher-priority witness",
         )
     else:
         _require(
@@ -116,7 +154,10 @@ def validate_case(case: dict[str, object]) -> None:
             message="sensor-gap cause has nonpositive modeled clearance",
         )
         _require(
-            bullet is None and laser is None and int(case["active_lasers"]) == 0,
+            bullet is None
+            and laser is None
+            and enemy is None
+            and int(case["active_lasers"]) == 0,
             case_id=case_id,
             message="sensor-gap cause contains an observed higher-priority witness",
         )
@@ -178,8 +219,20 @@ def validate_case(case: dict[str, object]) -> None:
 
 def load_and_validate(path: Path) -> CorpusSummary:
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if payload.get("schema") != EXPECTED_SCHEMA:
+    schema = payload.get("schema")
+    if schema not in EXPECTED_SCHEMAS:
         raise CorpusError(f"{path}: unexpected schema {payload.get('schema')!r}")
+    if schema == "th08-practice-death-regressions-v1":
+        verification = payload.get("no_bomb_verification")
+        if not isinstance(verification, dict) or not verification.get("passed"):
+            raise CorpusError(f"{path}: practice corpus did not pass no-Bomb gate")
+        for key in (
+            "mask_violation_frames",
+            "bomb_flag_violation_frames",
+            "bomb_action_violation_frames",
+        ):
+            if verification.get(key) != []:
+                raise CorpusError(f"{path}: nonempty no-Bomb violation {key}")
     cases = payload.get("cases")
     if not isinstance(cases, list):
         raise CorpusError(f"{path}: cases must be a list")
@@ -193,6 +246,7 @@ def load_and_validate(path: Path) -> CorpusSummary:
     deathbomb_count = 0
     bullet_witnesses = 0
     laser_witnesses = 0
+    enemy_body_witnesses = 0
     for case in cases:
         if not isinstance(case, dict):
             raise CorpusError(f"{path}: non-object case")
@@ -201,6 +255,14 @@ def load_and_validate(path: Path) -> CorpusSummary:
             raise CorpusError(f"{path}: duplicate case ID {case_id}")
         seen.add(case_id)
         validate_case(case)
+        if schema == "th08-practice-death-regressions-v1":
+            _require(
+                bool(case.get("bomb_input_verified_absent"))
+                and not int(case["mask"]) & 0x02
+                and not bool(case["deathbomb_requested"]),
+                case_id=case_id,
+                message="practice case violates hard no-Bomb policy",
+            )
         stage_counts[str(case["stage_label"])] += 1
         cause_counts[str(case["primary_cause_class"])] += 1
         factor_counts.update(
@@ -209,6 +271,9 @@ def load_and_validate(path: Path) -> CorpusSummary:
         deathbomb_count += bool(case["deathbomb_requested"])
         bullet_witnesses += case["observed_bullet_contact_candidate"] is not None
         laser_witnesses += case["observed_laser_contact_candidate"] is not None
+        enemy_body_witnesses += (
+            case.get("observed_enemy_body_contact_candidate") is not None
+        )
 
     return CorpusSummary(
         run_id=str(payload["run_id"]),
@@ -219,6 +284,7 @@ def load_and_validate(path: Path) -> CorpusSummary:
         deathbomb_count=deathbomb_count,
         exact_bullet_witnesses=bullet_witnesses,
         exact_laser_witnesses=laser_witnesses,
+        exact_enemy_body_witnesses=enemy_body_witnesses,
     )
 
 

@@ -209,8 +209,10 @@ physics are intentionally not claimed as a complete native callback inventory.
 Enemy/ECL execution expands procedural commands, so each bullet must retain its
 spawn mode, transform program, timers, and active flags. Lasers require their
 origin, angle, tail/head distances, maximum length, width, warmup/active/fade
-timers, collision window, and runtime phase. A snapshot-only velocity model is
-insufficient.
+timers, collision window, and runtime phase. Contact-enabled enemy bodies are
+also hostile geometry: TH08 scales the native full contact size by 1.5 before
+the player AABB test, so the corresponding planner half-extents are
+`0.75 * contact_size`. A snapshot-only velocity model is insufficient.
 
 ## Collision And Graze Constraints
 
@@ -364,9 +366,10 @@ full-phase component graph driven by deterministic ECL execution.
 ## Counterexample-Guided Agent Refinement
 
 Every live miss is a model/planner counterexample. Preserve a bounded pre/post
-window of native player, Bullet, Laser, Item, resource, RNG, input, frame, and
-read/action-lag state. Classify it as world-model discrepancy, sensing/latency,
-planner/corridor choice, objective/resource error, or control/runtime error.
+window of native player, Bullet, Laser, EnemyBody, Item, resource, RNG, input,
+frame, and read/action-lag state. Classify it as world-model discrepancy,
+sensing/latency, planner/corridor choice, objective/resource error, or
+control/runtime error.
 Reduce reproducible failures into fixtures and regression tests before changing
 heuristics. The durable ledger is `notes/COUNTEREXAMPLES.md`.
 

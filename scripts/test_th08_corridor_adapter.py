@@ -8,9 +8,10 @@ import unittest
 from th08_corridor_adapter import (
     TH08_CORRIDOR_CONFIG,
     lower_bullets,
+    lower_enemy_bodies,
     lower_lasers,
 )
-from th08_live_dodge_agent import Bullet, Laser
+from th08_live_dodge_agent import Bullet, EnemyBody, Laser
 
 
 class Th08CorridorAdapterTests(unittest.TestCase):
@@ -54,6 +55,29 @@ class Th08CorridorAdapterTests(unittest.TestCase):
         self.assertEqual(hazard.origin_x, 12.0)
         self.assertEqual(hazard.head, 80.0)
         self.assertEqual(hazard.base_uncertainty, 2.0)
+        self.assertGreater(hazard.uncertainty_per_frame, 0.0)
+
+    def test_enemy_body_keeps_native_half_extents_and_motion(self) -> None:
+        hazard = lower_enemy_bodies(
+            (
+                EnemyBody(
+                    0x5826C0,
+                    100.0,
+                    80.0,
+                    2.0,
+                    -1.0,
+                    12.0,
+                    18.0,
+                    5,
+                ),
+            ),
+            snapshot_lag=3,
+        )[0]
+        self.assertEqual((hazard.x, hazard.y), (106.0, 77.0))
+        self.assertEqual(
+            (hazard.half_width, hazard.half_height),
+            (12.0, 18.0),
+        )
         self.assertGreater(hazard.uncertainty_per_frame, 0.0)
 
 

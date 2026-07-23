@@ -3,12 +3,17 @@
 
 from __future__ import annotations
 
+import math
 import unittest
+
+import numpy as np
 
 from corridor_planner import (
     CorridorBounds,
     CorridorConfig,
     MovingAabbHazard,
+    SegmentHazard,
+    _segment_clearance_field,
     plan_corridor,
 )
 
@@ -25,6 +30,69 @@ CONFIG = CorridorConfig(
 
 
 class CorridorPlannerTests(unittest.TestCase):
+    def test_vectorized_segment_field_matches_scalar_finite_geometry(
+        self,
+    ) -> None:
+        grid_x, grid_y = np.meshgrid(
+            np.asarray([0.0, 10.0, 20.0], dtype=np.float32),
+            np.asarray([0.0, 10.0], dtype=np.float32),
+        )
+        hazards = (
+            SegmentHazard(0.0, 0.0, 0.0, 0.0, 20.0, 2.0, 1.0, 0.5),
+            SegmentHazard(
+                10.0,
+                -10.0,
+                math.pi / 2.0,
+                0.0,
+                20.0,
+                1.0,
+            ),
+            SegmentHazard(20.0, 10.0, 0.0, 0.0, 0.0, 3.0),
+        )
+        actual = _segment_clearance_field(
+            grid_x,
+            grid_y,
+            hazards,
+            frame=4,
+            player_radius=2.0,
+        )
+        expected = np.full(grid_x.shape, np.inf, dtype=np.float64)
+        for hazard in hazards:
+            cosine = math.cos(hazard.angle)
+            sine = math.sin(hazard.angle)
+            start_x = hazard.origin_x + cosine * hazard.tail
+            start_y = hazard.origin_y + sine * hazard.tail
+            end_x = hazard.origin_x + cosine * hazard.head
+            end_y = hazard.origin_y + sine * hazard.head
+            segment_x = end_x - start_x
+            segment_y = end_y - start_y
+            length_sq = segment_x**2 + segment_y**2
+            if length_sq <= 1e-9:
+                distance = np.hypot(grid_x - start_x, grid_y - start_y)
+            else:
+                projection = np.clip(
+                    (
+                        (grid_x - start_x) * segment_x
+                        + (grid_y - start_y) * segment_y
+                    )
+                    / length_sq,
+                    0.0,
+                    1.0,
+                )
+                distance = np.hypot(
+                    grid_x - (start_x + projection * segment_x),
+                    grid_y - (start_y + projection * segment_y),
+                )
+            expected = np.minimum(
+                expected,
+                distance
+                - hazard.half_width
+                - 2.0
+                - hazard.base_uncertainty
+                - hazard.uncertainty_per_frame * 4,
+            )
+        np.testing.assert_allclose(actual, expected, atol=2e-5)
+
     def test_clear_field_reaches_preferred_region_without_touching_boundary(self) -> None:
         plan = plan_corridor(
             start_x=48.0,

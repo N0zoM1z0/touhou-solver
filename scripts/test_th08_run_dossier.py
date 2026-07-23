@@ -41,24 +41,26 @@ def _row(
 class Th08RunDossierTests(unittest.TestCase):
     def test_native_overlap_outranks_positive_pipeline_model(self) -> None:
         row = _row(100)
-        primary, contributing, nearest, laser = _classify_death(
+        primary, contributing, nearest, laser, enemy = _classify_death(
             row,
             window=[row],
         )
         self.assertEqual(primary, "observed_bullet_overlap")
         self.assertEqual(nearest["slot"], 17)
         self.assertIsNone(laser)
+        self.assertIsNone(enemy)
         self.assertEqual(contributing, [])
 
     def test_missing_witness_stays_explicitly_unmodeled(self) -> None:
         row = _row(100, bullets=0, pipeline=8.0, slack=-2.0)
-        primary, contributing, nearest, laser = _classify_death(
+        primary, contributing, nearest, laser, enemy = _classify_death(
             row,
             window=[row],
         )
         self.assertEqual(primary, "sensor_gap_or_unmodeled_hazard")
         self.assertIsNone(nearest)
         self.assertIsNone(laser)
+        self.assertIsNone(enemy)
         self.assertIn("corridor_deadline_miss", contributing)
 
     def test_overlap_witness_outranks_closer_nonoverlapping_center(self) -> None:
@@ -77,8 +79,62 @@ class Th08RunDossierTests(unittest.TestCase):
         row["lasers"] = [[100.0, 400.0, 0.0, 0.0, 200.0, 5.0]]
         nearest = _nearest_laser(row)
         self.assertLessEqual(nearest["clearance"], 0.0)
-        primary, _, _, _ = _classify_death(row, window=[row])
+        primary, _, _, _, _ = _classify_death(row, window=[row])
         self.assertEqual(primary, "observed_laser_overlap")
+
+    def test_projected_enemy_body_overlap_is_not_an_exact_witness(self) -> None:
+        row = _row(103, bullets=0)
+        row["enemy_body_snapshot_frame"] = 100
+        row["active_enemy_bodies"] = 1
+        row["enemy_bodies"] = [
+            [
+                0x5826C0,
+                186.0,
+                400.0,
+                2.0,
+                0.0,
+                12.0,
+                10.0,
+                5,
+            ]
+        ]
+        primary, _, _, _, enemy = _classify_death(
+            row,
+            window=[row],
+        )
+        self.assertEqual(primary, "sensor_gap_or_unmodeled_hazard")
+        self.assertEqual(enemy["projected_x_at_action"], 192.0)
+        self.assertFalse(enemy["exact_same_epoch"])
+        self.assertLessEqual(enemy["aabb_clearance"], 0.0)
+
+    def test_stable_hit_epoch_enemy_body_overlap_is_exact(self) -> None:
+        row = _row(104, bullets=0)
+        row["active_enemy_bodies"] = 1
+        row["hit_contact_observation"] = {
+            "frame_before": 104,
+            "frame_after": 104,
+            "stable": True,
+            "player_lethal_aabb": [190.5, 398.5, 193.5, 401.5],
+            "enemy_bodies": [
+                [
+                    0x5826C0,
+                    204.0,
+                    400.0,
+                    -1.0,
+                    0.0,
+                    12.0,
+                    10.0,
+                    5,
+                ]
+            ],
+        }
+        primary, _, _, _, enemy = _classify_death(
+            row,
+            window=[row],
+        )
+        self.assertEqual(primary, "observed_enemy_body_overlap")
+        self.assertTrue(enemy["exact_same_epoch"])
+        self.assertLessEqual(enemy["aabb_clearance"], 0.0)
 
     def test_live_spell_attribution_is_gated_by_active_flag(self) -> None:
         row = {

@@ -1708,3 +1708,31 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   solve median/p95 to 1255/1565 ms and produced three hits, two with exact
   laser overlap. Lifecycle caching is accepted but insufficient; global
   segment-trajectory clearance needs exact spatial/time indexing.
+
+## 2026-07-24: Exact Native Segment-Trajectory Rasterization
+
+- Profiling a deterministic 200-trajectory, 81-frame workload assigned 780 of
+  832 ms to Python's repeated segment matrix construction and reduction. The
+  static native volume builder consumed only 3 ms, confirming that lifecycle
+  projection and input injection were not the immediate bottleneck.
+- Added C ABI `touhou_segment_trajectory_clearance_v1`. The adapter flattens
+  authoritative finite samples frame-major, preserving lifecycle gaps. The
+  kernel updates the existing volume using exact finite-segment distance and a
+  conservative per-segment raster rectangle derived from frame maximum
+  clearance plus occupied radius.
+- A mixed AABB/static/moving/degenerate/lifecycle-gap regression matches the
+  scalar framewise volume within `3e-5`. The full Linux suite passes 303 tests;
+  focused Windows corridor and TH08 adapter suites pass 15 and 9 tests.
+- Retained 200-trajectory benchmarks report warm clearance/whole-solve medians
+  of 43.66/79.76 ms on Linux and 74.13/115.88 ms on Windows. The optimization
+  retains all 200 trajectories and the 80-frame horizon.
+- Random original-game Stage-1 run `20260724_070946` completed frames
+  `2..20786`, hard no-Bomb, with four hits and automatic no-save termination.
+  Against `064421`, hits remained four, cadence remained 3/4 frames, and
+  global solve median changed 220.53 to 216.93 ms. This is a sparse-phase
+  non-regression gate, not dense-laser acceptance.
+- The four Stage-1 witnesses become CE-0077. Endpoint distance to a viable
+  next-layer cell did not establish a collision-free bridge back to the
+  kernel; the canonical frame-1,444 path chattered near a boundary after the
+  gate became infeasible. The next general planning correction must make
+  recovery path-aware rather than adding a spell-specific steering rule.

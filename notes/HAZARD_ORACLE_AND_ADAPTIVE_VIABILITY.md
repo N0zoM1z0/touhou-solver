@@ -411,3 +411,17 @@ but each translated/rotated trajectory is still reduced against the full
 time-grid volume. The next acceptable optimization is an exact spatial/time
 index or tiled reduction in the game-neutral segment-trajectory builder, with
 scalar-volume equality tests for finite lifecycle samples.
+
+That optimization is now implemented in the optional native backend. Active
+samples are packed frame-major, so absent lifecycle frames consume no spatial
+work. Each finite segment rasterizes only the grid rectangle in which its
+exact clearance can improve the already capped frame volume. The bound is
+derived from the frame's current maximum clearance plus occupied radius, so it
+is conservative even when cells already have negative clearance.
+
+A 200-trajectory retained benchmark reduced warm clearance to 43.66 ms on
+Linux and 74.13 ms on Windows; whole robust solves were 79.76 and 115.88 ms.
+Mixed scalar-volume equality holds within `3e-5` on both platforms. Stage 1
+physically establishes sparse-phase non-regression only. A fresh Stage-3 or
+Stage-6B dense-laser trial is still required before claiming that control
+cadence and laser survival are repaired.

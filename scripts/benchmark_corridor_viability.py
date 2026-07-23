@@ -10,7 +10,12 @@ import time
 from dataclasses import replace
 from pathlib import Path
 
-from corridor_planner import MovingAabbHazard, RobustControlSpec, SegmentHazard
+from corridor_planner import (
+    MovingAabbHazard,
+    RobustControlSpec,
+    SegmentHazard,
+    SegmentTrajectoryHazard,
+)
 from corridor_planner import plan_corridor
 from th08_corridor_adapter import (
     TH08_CORRIDOR_CONFIG,
@@ -65,10 +70,37 @@ def _segments(
     )
 
 
+def _segment_trajectories(
+    count: int,
+    horizon_frames: int,
+) -> tuple[SegmentTrajectoryHazard, ...]:
+    trajectories = []
+    for index in range(count):
+        samples = []
+        for frame in range(horizon_frames + 1):
+            if (frame + index) % 17 == 0:
+                samples.append(None)
+                continue
+            samples.append(
+                SegmentHazard(
+                    origin_x=192.0 + (index % 9 - 4) * 3.0,
+                    origin_y=100.0 + (index % 20) * 12.0,
+                    angle=(index % 32) * 0.17 + frame * 0.002,
+                    tail=0.0,
+                    head=80.0 + (index % 5) * 30.0,
+                    half_width=3.0 + index % 4,
+                    base_uncertainty=frame * 0.05,
+                )
+            )
+        trajectories.append(SegmentTrajectoryHazard(tuple(samples)))
+    return tuple(trajectories)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--aabbs", type=int, default=1500)
     parser.add_argument("--segments", type=int, default=250)
+    parser.add_argument("--trajectory-segments", type=int, default=0)
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--forecast-frames", type=int, default=80)
     parser.add_argument(
@@ -88,6 +120,7 @@ def main() -> int:
     if (
         args.aabbs < 0
         or args.segments < 0
+        or args.trajectory_segments < 0
         or args.runs < 1
         or args.forecast_frames < 0
         or tuple(sorted(set(args.delay_support)))
@@ -101,6 +134,10 @@ def main() -> int:
 
     aabbs = _aabbs(args.aabbs, args.forecast_frames)
     segments = _segments(args.segments, args.forecast_frames)
+    segment_trajectories = _segment_trajectories(
+        args.trajectory_segments,
+        TH08_CORRIDOR_CONFIG.horizon_frames,
+    )
     robust_control = RobustControlSpec(
         actions=TH08_VIABILITY_ACTIONS,
         delay_frames=tuple(args.delay_support),
@@ -122,6 +159,7 @@ def main() -> int:
             bounds=TH08_PLAYFIELD,
             aabbs=aabbs,
             segments=segments,
+            segment_trajectories=segment_trajectories,
             preferred_x=192.0,
             preferred_y=368.0,
             config=config,
@@ -135,6 +173,7 @@ def main() -> int:
     report = {
         "aabbs": args.aabbs,
         "segments": args.segments,
+        "trajectory_segments": args.trajectory_segments,
         "runs": args.runs,
         "forecast_frames": args.forecast_frames,
         "danger_radius": args.danger_radius,

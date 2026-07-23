@@ -57,6 +57,69 @@ struct Sample {
     bool inside;
 };
 
+struct SegmentGeometry {
+    float start_x;
+    float start_y;
+    float vector_x;
+    float vector_y;
+    float length_squared;
+    float min_x;
+    float max_x;
+    float min_y;
+    float max_y;
+};
+
+inline SegmentGeometry segment_geometry(
+    float origin_x,
+    float origin_y,
+    float angle,
+    float tail,
+    float head
+) {
+    const float cosine = std::cos(angle);
+    const float sine = std::sin(angle);
+    const float length = head - tail;
+    const float vector_x = cosine * length;
+    const float vector_y = sine * length;
+    const float start_x = origin_x + cosine * tail;
+    const float start_y = origin_y + sine * tail;
+    const float end_x = start_x + vector_x;
+    const float end_y = start_y + vector_y;
+    return {
+        start_x,
+        start_y,
+        vector_x,
+        vector_y,
+        vector_x * vector_x + vector_y * vector_y,
+        std::min(start_x, end_x),
+        std::max(start_x, end_x),
+        std::min(start_y, end_y),
+        std::max(start_y, end_y),
+    };
+}
+
+inline float segment_clearance(
+    float sample_x,
+    float sample_y,
+    const SegmentGeometry& segment,
+    float occupied_radius
+) {
+    float projection = 0.0F;
+    if (segment.length_squared > 1e-9F) {
+        projection = (
+            (sample_x - segment.start_x) * segment.vector_x
+            + (sample_y - segment.start_y) * segment.vector_y
+        ) / segment.length_squared;
+        projection = std::min(1.0F, std::max(0.0F, projection));
+    }
+    const float closest_x = segment.start_x + projection * segment.vector_x;
+    const float closest_y = segment.start_y + projection * segment.vector_y;
+    return std::hypot(
+        sample_x - closest_x,
+        sample_y - closest_y
+    ) - occupied_radius;
+}
+
 struct TransitionTable {
     double x_start;
     double x_step;
@@ -361,27 +424,15 @@ TOUHOU_EXPORT int touhou_clearance_volume_v1(
         return 3;
     }
 
-    struct SegmentGeometry {
-        float start_x;
-        float start_y;
-        float vector_x;
-        float vector_y;
-        float length_squared;
-    };
     std::vector<SegmentGeometry> segment_geometry(segment_count);
     for (int index = 0; index < segment_count; ++index) {
-        const float cosine = std::cos(segment_angle[index]);
-        const float sine = std::sin(segment_angle[index]);
-        const float length = segment_head[index] - segment_tail[index];
-        const float vector_x = cosine * length;
-        const float vector_y = sine * length;
-        segment_geometry[index] = {
-            segment_origin_x[index] + cosine * segment_tail[index],
-            segment_origin_y[index] + sine * segment_tail[index],
-            vector_x,
-            vector_y,
-            vector_x * vector_x + vector_y * vector_y,
-        };
+        segment_geometry[index] = ::segment_geometry(
+            segment_origin_x[index],
+            segment_origin_y[index],
+            segment_angle[index],
+            segment_tail[index],
+            segment_head[index]
+        );
     }
 
     for (int frame = 0; frame < frame_count; ++frame) {
@@ -441,27 +492,10 @@ TOUHOU_EXPORT int touhou_clearance_volume_v1(
                 }
                 for (int index = 0; index < segment_count; ++index) {
                     const SegmentGeometry& segment = segment_geometry[index];
-                    float projection = 0.0F;
-                    if (segment.length_squared > 1e-9F) {
-                        projection = (
-                            (sample_x - segment.start_x) * segment.vector_x
-                            + (sample_y - segment.start_y) * segment.vector_y
-                        ) / segment.length_squared;
-                        projection = std::min(
-                            1.0F,
-                            std::max(0.0F, projection)
-                        );
-                    }
-                    const float closest_x = (
-                        segment.start_x + projection * segment.vector_x
-                    );
-                    const float closest_y = (
-                        segment.start_y + projection * segment.vector_y
-                    );
-                    const float clearance = std::hypot(
-                        sample_x - closest_x,
-                        sample_y - closest_y
-                    ) - (
+                    const float clearance = segment_clearance(
+                        sample_x,
+                        sample_y,
+                        segment,
                         player_radius
                         + segment_half_width[index]
                         + segment_base_uncertainty[index]
@@ -476,6 +510,182 @@ TOUHOU_EXPORT int touhou_clearance_volume_v1(
                     row_count,
                     column_count
                 )] = best;
+            }
+        }
+    }
+    return 0;
+}
+
+TOUHOU_EXPORT int touhou_segment_trajectory_clearance_v1(
+    float x_start,
+    float x_step,
+    int column_count,
+    float y_start,
+    float y_step,
+    int row_count,
+    int frame_count,
+    float player_radius,
+    const std::int32_t* frame_offsets,
+    const float* segment_origin_x,
+    const float* segment_origin_y,
+    const float* segment_angle,
+    const float* segment_tail,
+    const float* segment_head,
+    const float* segment_half_width,
+    const float* segment_base_uncertainty,
+    const float* segment_uncertainty_per_frame,
+    int segment_sample_count,
+    float* inout
+) {
+    if (
+        inout == nullptr || frame_offsets == nullptr
+        || x_step <= 0.0F || y_step <= 0.0F
+        || column_count < 2 || row_count < 2 || frame_count < 1
+        || player_radius < 0.0F || segment_sample_count < 0
+    ) {
+        return 1;
+    }
+    if (
+        frame_offsets[0] != 0
+        || frame_offsets[frame_count] != segment_sample_count
+    ) {
+        return 2;
+    }
+    if (
+        segment_sample_count > 0
+        && (
+            segment_origin_x == nullptr || segment_origin_y == nullptr
+            || segment_angle == nullptr || segment_tail == nullptr
+            || segment_head == nullptr || segment_half_width == nullptr
+            || segment_base_uncertainty == nullptr
+            || segment_uncertainty_per_frame == nullptr
+        )
+    ) {
+        return 3;
+    }
+
+    std::vector<SegmentGeometry> geometry(segment_sample_count);
+    std::vector<float> occupied_radius(segment_sample_count);
+    for (int frame = 0; frame < frame_count; ++frame) {
+        const int begin = frame_offsets[frame];
+        const int end = frame_offsets[frame + 1];
+        if (begin < 0 || end < begin || end > segment_sample_count) {
+            return 4;
+        }
+        for (int index = begin; index < end; ++index) {
+            geometry[index] = segment_geometry(
+                segment_origin_x[index],
+                segment_origin_y[index],
+                segment_angle[index],
+                segment_tail[index],
+                segment_head[index]
+            );
+            occupied_radius[index] = (
+                player_radius
+                + segment_half_width[index]
+                + segment_base_uncertainty[index]
+                + frame * segment_uncertainty_per_frame[index]
+            );
+        }
+    }
+
+    for (int frame = 0; frame < frame_count; ++frame) {
+        const int begin = frame_offsets[frame];
+        const int end = frame_offsets[frame + 1];
+        float frame_maximum = -std::numeric_limits<float>::infinity();
+        for (int row = 0; row < row_count; ++row) {
+            for (int column = 0; column < column_count; ++column) {
+                frame_maximum = std::max(
+                    frame_maximum,
+                    inout[clearance_index(
+                        frame,
+                        row,
+                        column,
+                        row_count,
+                        column_count
+                    )]
+                );
+            }
+        }
+        for (int index = begin; index < end; ++index) {
+            const SegmentGeometry& segment = geometry[index];
+            const float improvement_radius = (
+                frame_maximum + occupied_radius[index]
+            );
+            if (improvement_radius <= 0.0F) {
+                continue;
+            }
+            int first_column = 0;
+            int last_column = column_count - 1;
+            int first_row = 0;
+            int last_row = row_count - 1;
+            if (std::isfinite(improvement_radius)) {
+                first_column = std::max(
+                    0,
+                    static_cast<int>(std::floor(
+                        (
+                            segment.min_x
+                            - improvement_radius
+                            - x_start
+                        ) / x_step
+                    ))
+                );
+                last_column = std::min(
+                    column_count - 1,
+                    static_cast<int>(std::ceil(
+                        (
+                            segment.max_x
+                            + improvement_radius
+                            - x_start
+                        ) / x_step
+                    ))
+                );
+                first_row = std::max(
+                    0,
+                    static_cast<int>(std::floor(
+                        (
+                            segment.min_y
+                            - improvement_radius
+                            - y_start
+                        ) / y_step
+                    ))
+                );
+                last_row = std::min(
+                    row_count - 1,
+                    static_cast<int>(std::ceil(
+                        (
+                            segment.max_y
+                            + improvement_radius
+                            - y_start
+                        ) / y_step
+                    ))
+                );
+            }
+            for (int row = first_row; row <= last_row; ++row) {
+                const float sample_y = y_start + row * y_step;
+                for (
+                    int column = first_column;
+                    column <= last_column;
+                    ++column
+                ) {
+                    const float sample_x = x_start + column * x_step;
+                    const std::size_t output_index = clearance_index(
+                    frame,
+                    row,
+                    column,
+                    row_count,
+                    column_count
+                    );
+                    inout[output_index] = std::min(
+                        inout[output_index],
+                        segment_clearance(
+                            sample_x,
+                            sample_y,
+                            segment,
+                            occupied_radius[index]
+                        )
+                    );
+                }
             }
         }
     }

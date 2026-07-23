@@ -581,6 +581,34 @@ spatially relevant instantiated trajectories; dense Stage-6B laser phases
 show that this remaining work must be indexed or tiled before it reaches
 control-rate latency.
 
+## Time-Indexed Segment Rasterization
+
+Finite segment trajectories are flattened frame-major and passed to the
+optional native backend with an offset table. This retains the adapter's
+authoritative per-frame samples, including absent frames, rather than fitting
+an approximate velocity model.
+
+The kernel begins with the existing AABB/static-segment clearance volume. For
+each trajectory sample it computes exact finite-segment geometry and an
+occupied radius. A lattice point can improve the current frame only when its
+distance to the segment is below:
+
+```text
+frame_maximum_clearance + occupied_radius
+```
+
+The segment AABB expanded by that value is therefore a conservative finite
+raster bound. Points outside it cannot reduce any cell in the existing capped
+volume. Points inside use the same clamped projection and Euclidean distance
+as the scalar implementation. The frame maximum is held fixed while processing
+that frame, which may scan extra cells after earlier segments lower the
+volume but cannot omit an improving cell.
+
+This is game-neutral temporal indexing plus exact spatial rasterization. It
+does not depend on TH08 laser IDs, spell names, lifecycle phases, or pool
+counts. Adapters for another game need only supply finite `SegmentHazard`
+samples.
+
 ## Distant-Kernel Recovery
 
 Backward viability is a proof only while the queried state remains in its

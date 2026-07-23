@@ -1,0 +1,404 @@
+{
+  "schema": "th08-practice-comparison-v2",
+  "baseline_run_id": "lunatic_route2_stage1_unattended_20260724_064421",
+  "candidate_run_id": "lunatic_route2_stage1_unattended_20260724_070946",
+  "scope_compatibility": {
+    "same_stage_route_index": true,
+    "candidate_selected_frame_epoch_index": 0,
+    "candidate_frame_epoch_count": 1,
+    "candidate_pre_scope_decisions_excluded": 0,
+    "candidate_raw_summary_scope_valid": true,
+    "candidate_accepted_completion": true
+  },
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 4,
+    "candidate": 4,
+    "delta": 0,
+    "reduction_fraction": 0.0
+  },
+  "robust_viability": {
+    "counts": {
+      "policy_decision_count": {
+        "baseline": 4648,
+        "candidate": 4673,
+        "delta": 25,
+        "reduction_fraction": -0.005378657487091222
+      },
+      "decision_without_query_count": {
+        "baseline": 51,
+        "candidate": 51,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "unique_solution_count": {
+        "baseline": 607,
+        "candidate": 600,
+        "delta": -7,
+        "reduction_fraction": 0.011532125205930808
+      },
+      "query_count": {
+        "baseline": 4597,
+        "candidate": 4622,
+        "delta": 25,
+        "reduction_fraction": -0.005438329345225147
+      },
+      "available_query_count": {
+        "baseline": 4597,
+        "candidate": 4622,
+        "delta": 25,
+        "reduction_fraction": -0.005438329345225147
+      },
+      "support_uncovered_query_count": {
+        "baseline": 98,
+        "candidate": 81,
+        "delta": -17,
+        "reduction_fraction": 0.17346938775510204
+      },
+      "viable_query_count": {
+        "baseline": 3480,
+        "candidate": 3480,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "empty_action_set_count": {
+        "baseline": 1117,
+        "candidate": 1142,
+        "delta": 25,
+        "reduction_fraction": -0.022381378692927483
+      },
+      "constrained_decision_count": {
+        "baseline": 2906,
+        "candidate": 3019,
+        "delta": 113,
+        "reduction_fraction": -0.03888506538196834
+      },
+      "serial_worker_serviceable_count": {
+        "baseline": 4537,
+        "candidate": 4562,
+        "delta": 25,
+        "reduction_fraction": -0.00551024906325766
+      },
+      "queryable_policy_decisions": {
+        "baseline": 4597,
+        "candidate": 4621,
+        "delta": 24,
+        "reduction_fraction": -0.005220796171416141
+      },
+      "expired_policy_decisions": {
+        "baseline": 9,
+        "candidate": 12,
+        "delta": 3,
+        "reduction_fraction": -0.3333333333333333
+      }
+    },
+    "solve_ms": {
+      "median": {
+        "baseline": 220.53250001044944,
+        "candidate": 216.93394999601878,
+        "delta": -3.598550014430657,
+        "reduction_fraction": 0.0163175496321864
+      },
+      "p95": {
+        "baseline": 351.4007999910973,
+        "candidate": 354.57349999342114,
+        "delta": 3.172700002323836,
+        "reduction_fraction": -0.009028721626143755
+      },
+      "max": {
+        "baseline": 438.12169999000616,
+        "candidate": 439.20529997558333,
+        "delta": 1.083599985577166,
+        "reduction_fraction": -0.002473285357931104
+      }
+    },
+    "backend_counts": {
+      "baseline": {
+        "native": 607
+      },
+      "candidate": {
+        "native": 600
+      }
+    },
+    "solver_phase_ms": {
+      "baseline": {
+        "clearance": {
+          "median": 55.347600020468235,
+          "p95": 201.86279999325052,
+          "max": 311.2230999977328
+        },
+        "rollout": {
+          "median": 4.912000003969297,
+          "p95": 16.095600003609434,
+          "max": 22.95450001838617
+        },
+        "viability": {
+          "median": 132.82989998697303,
+          "p95": 317.4707000143826,
+          "max": 414.93009999976493
+        }
+      },
+      "candidate": {
+        "clearance": {
+          "median": 58.344799996120855,
+          "p95": 212.4240999983158,
+          "max": 352.57869999622926
+        },
+        "rollout": {
+          "median": 5.347550002625212,
+          "p95": 16.953600017586723,
+          "max": 28.623500023968518
+        },
+        "viability": {
+          "median": 133.88900000427384,
+          "p95": 312.4041999981273,
+          "max": 419.5551000011619
+        }
+      }
+    },
+    "serial_coverage_margin_frames": {
+      "baseline": {
+        "median": 61.0,
+        "p95": 64.0,
+        "max": 64.0
+      },
+      "candidate": {
+        "median": 62.0,
+        "p95": 64.0,
+        "max": 64.0
+      }
+    }
+  },
+  "prehit_behavior": {
+    "fast_fraction": {
+      "baseline": 0.2916666666666667,
+      "candidate": 0.43243243243243246,
+      "delta": 0.14076576576576577,
+      "reduction_fraction": -0.4826254826254826
+    },
+    "bottom_8px_fraction": {
+      "baseline": 0.013888888888888888,
+      "candidate": 0.28378378378378377,
+      "delta": 0.2698948948948949,
+      "reduction_fraction": -19.43243243243243
+    },
+    "nonpositive_pipeline_fraction": {
+      "baseline": 0.06944444444444445,
+      "candidate": 0.05405405405405406,
+      "delta": -0.01539039039039039,
+      "reduction_fraction": 0.2216216216216216
+    },
+    "negative_corridor_slack_fraction": {
+      "baseline": 0.0,
+      "candidate": 0.7142857142857143,
+      "delta": 0.7142857142857143,
+      "reduction_fraction": null
+    }
+  },
+  "input_visible_next_observation_fraction": {
+    "baseline": 0.8787029623698959,
+    "candidate": 0.878212732305259,
+    "delta": -0.0004902300646368873,
+    "reduction_fraction": 0.0005579019141061251
+  },
+  "per_phase": {
+    "nonspell": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 2,
+        "candidate": 2,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 2872,
+        "candidate": 2824,
+        "delta": -48,
+        "reduction_fraction": 0.016713091922005572
+      },
+      "query_count": {
+        "baseline": 2796,
+        "candidate": 2734,
+        "delta": -62,
+        "reduction_fraction": 0.022174535050071532
+      },
+      "empty_action_set_count": {
+        "baseline": 477,
+        "candidate": 465,
+        "delta": -12,
+        "reduction_fraction": 0.025157232704402517
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 233.96519999369048,
+          "candidate": 226.55105000012554,
+          "delta": -7.4141499935649335,
+          "reduction_fraction": 0.03168911442284954
+        },
+        "p95": {
+          "baseline": 345.70639999583364,
+          "candidate": 354.1193999990355,
+          "delta": 8.413000003201887,
+          "reduction_fraction": -0.02433567907132549
+        },
+        "max": {
+          "baseline": 438.12169999000616,
+          "candidate": 439.20529997558333,
+          "delta": 1.083599985577166,
+          "reduction_fraction": -0.002473285357931104
+        }
+      }
+    },
+    "1": {
+      "spell_name": "蛍符「地上の彗星」",
+      "hit_count": {
+        "baseline": 2,
+        "candidate": 2,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 621,
+        "candidate": 668,
+        "delta": 47,
+        "reduction_fraction": -0.07568438003220612
+      },
+      "query_count": {
+        "baseline": 605,
+        "candidate": 650,
+        "delta": 45,
+        "reduction_fraction": -0.0743801652892562
+      },
+      "empty_action_set_count": {
+        "baseline": 332,
+        "candidate": 288,
+        "delta": -44,
+        "reduction_fraction": 0.13253012048192772
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 137.32665000134148,
+          "candidate": 140.86290000705048,
+          "delta": 3.5362500057090074,
+          "reduction_fraction": -0.025750646401659572
+        },
+        "p95": {
+          "baseline": 304.10249999840744,
+          "candidate": 329.3944999750238,
+          "delta": 25.291999976616353,
+          "reduction_fraction": -0.0831693260553557
+        },
+        "max": {
+          "baseline": 375.9399999980815,
+          "candidate": 412.9945000167936,
+          "delta": 37.05450001871213,
+          "reduction_fraction": -0.09856493062430503
+        }
+      }
+    },
+    "5": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 566,
+        "candidate": 575,
+        "delta": 9,
+        "reduction_fraction": -0.015901060070671377
+      },
+      "query_count": {
+        "baseline": 549,
+        "candidate": 558,
+        "delta": 9,
+        "reduction_fraction": -0.01639344262295082
+      },
+      "empty_action_set_count": {
+        "baseline": 223,
+        "candidate": 201,
+        "delta": -22,
+        "reduction_fraction": 0.09865470852017937
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 201.8343000090681,
+          "candidate": 201.2770000146702,
+          "delta": -0.5572999943979084,
+          "reduction_fraction": 0.0027611758475782847
+        },
+        "p95": {
+          "baseline": 382.2197999979835,
+          "candidate": 373.8780000130646,
+          "delta": -8.341799984918907,
+          "reduction_fraction": 0.021824615011998113
+        },
+        "max": {
+          "baseline": 433.3823999913875,
+          "candidate": 419.6456999925431,
+          "delta": -13.736699998844415,
+          "reduction_fraction": 0.031696487903332946
+        }
+      }
+    },
+    "9": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 653,
+        "candidate": 687,
+        "delta": 34,
+        "reduction_fraction": -0.05206738131699847
+      },
+      "query_count": {
+        "baseline": 647,
+        "candidate": 680,
+        "delta": 33,
+        "reduction_fraction": -0.05100463678516229
+      },
+      "empty_action_set_count": {
+        "baseline": 85,
+        "candidate": 188,
+        "delta": 103,
+        "reduction_fraction": -1.2117647058823529
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 250.66109998442698,
+          "candidate": 246.19789999269415,
+          "delta": -4.463199991732836,
+          "reduction_fraction": 0.017805714536520124
+        },
+        "p95": {
+          "baseline": 359.2639999988023,
+          "candidate": 336.8629000033252,
+          "delta": -22.401099995477125,
+          "reduction_fraction": 0.06235275450797131
+        },
+        "max": {
+          "baseline": 413.648399990052,
+          "candidate": 395.1801999937743,
+          "delta": -18.46819999627769,
+          "reduction_fraction": 0.04464709641502745
+        }
+      }
+    }
+  },
+  "candidate_primary_cause_counts": {
+    "modeled_committed_prefix_collision": 4
+  },
+  "candidate_planner_failure_counts": {
+    "global_viability_kernel_exhausted_before_hit": 3,
+    "robust_action_set_exhausted_before_hit": 1
+  }
+}

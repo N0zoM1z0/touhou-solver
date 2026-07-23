@@ -264,6 +264,119 @@ class CorridorPlannerTests(unittest.TestCase):
         self.assertLessEqual(volume[1, 1, 1], 0.0)
         self.assertGreater(volume[2, 1, 1], 0.0)
 
+    @unittest.skipUnless(
+        native_available(),
+        "native planner backend is not built",
+    )
+    def test_native_time_indexed_segments_match_framewise_geometry(self) -> None:
+        grid_x, grid_y = np.meshgrid(
+            np.arange(0.0, 49.0, 8.0, dtype=np.float32),
+            np.arange(0.0, 41.0, 8.0, dtype=np.float32),
+        )
+        aabbs = (
+            MovingAabbHazard(
+                x=20.0,
+                y=4.0,
+                velocity_x=-0.5,
+                velocity_y=1.25,
+                half_width=2.0,
+                half_height=3.0,
+                base_uncertainty=0.25,
+                uncertainty_per_frame=0.2,
+            ),
+        )
+        static_segments = (
+            SegmentHazard(
+                4.0,
+                32.0,
+                0.0,
+                0.0,
+                38.0,
+                1.5,
+                0.5,
+                0.1,
+            ),
+        )
+        trajectories = (
+            SegmentTrajectoryHazard(
+                (
+                    None,
+                    SegmentHazard(8.0, 8.0, 0.2, -4.0, 22.0, 2.0),
+                    SegmentHazard(
+                        10.0,
+                        10.0,
+                        0.5,
+                        -2.0,
+                        28.0,
+                        2.5,
+                        0.4,
+                        0.3,
+                    ),
+                    None,
+                    SegmentHazard(24.0, 16.0, 1.2, 0.0, 0.0, 4.0),
+                )
+            ),
+            SegmentTrajectoryHazard(
+                tuple(
+                    SegmentHazard(
+                        42.0 - frame,
+                        4.0 + frame * 3.0,
+                        1.8 - frame * 0.13,
+                        -8.0,
+                        30.0,
+                        1.0 + frame * 0.2,
+                        0.2,
+                    )
+                    for frame in range(5)
+                )
+            ),
+        )
+        config = CorridorConfig(
+            grid_step=8.0,
+            frames_per_layer=1,
+            horizon_frames=4,
+            danger_radius=12.0,
+        )
+        reference = _aabb_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs,
+            horizon_frames=4,
+            player_radius=config.player_radius,
+            clearance_cap=config.danger_radius,
+        )
+        for frame in range(5):
+            frame_segments = static_segments + tuple(
+                sample
+                for trajectory in trajectories
+                if (sample := trajectory.sample(frame)) is not None
+            )
+            reference[frame] = np.minimum(
+                reference[frame],
+                _segment_clearance_field(
+                    grid_x,
+                    grid_y,
+                    frame_segments,
+                    frame=frame,
+                    player_radius=config.player_radius,
+                ),
+            )
+        with patch(
+            "corridor_planner._segment_clearance_field",
+            side_effect=AssertionError(
+                "native trajectory path fell back to Python geometry"
+            ),
+        ):
+            actual = _hazard_clearance_volume(
+                grid_x,
+                grid_y,
+                aabbs=aabbs,
+                segments=static_segments,
+                segment_trajectories=trajectories,
+                config=config,
+            )
+        np.testing.assert_allclose(actual, reference, atol=3e-5)
+
     def test_clear_field_reaches_preferred_region_without_touching_boundary(self) -> None:
         plan = plan_corridor(
             start_x=48.0,

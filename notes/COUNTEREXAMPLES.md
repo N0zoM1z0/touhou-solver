@@ -1535,8 +1535,49 @@ Status: observed | inferred | unknown | fixed
   225/285-ms solves for this phase, but many controller/model changes separate
   the runs. The fresh trace establishes current throughput and geometry
   failures; it is not an isolated cache regression.
-- **Correction gate:** Add exact spatial/time indexing or tiled batch
-  reduction to the game-neutral segment-trajectory clearance builder. Any
-  optimization must match the scalar geometry volume and preserve
-  appearing/disappearing lifecycle samples.
-- **Status:** Observed; unresolved.
+- **Correction:** The game-neutral native backend now accepts a frame-major
+  flat sample array plus frame offsets. It updates the existing clearance
+  volume in place. Each frame/segment is rasterized only over the finite
+  lattice rectangle in which its exact Euclidean clearance could improve the
+  current capped volume. `None`, appearing, disappearing, moving, zero-length,
+  width, and uncertainty-growth semantics are unchanged.
+- **Exactness gate:** A mixed AABB/static/trajectory regression compares every
+  cell against the framewise scalar geometry, including finite lifecycle gaps
+  and a degenerate segment. Linux and Windows both pass within `3e-5`.
+- **Performance gate:** The original synthetic profile spent 780 of 832 ms in
+  Python segment-field construction/reduction. Retained 200-trajectory
+  benchmarks now measure clearance/whole-solve warm medians of 43.66/79.76 ms
+  on Linux and 74.13/115.88 ms on Windows. This is a 10x-plus clearance-path
+  improvement without reducing trajectory count or horizon.
+- **Non-laser physical gate:** Random Stage-1 run `20260724_070946` completed
+  with four hits and 3/4-frame cadence. Against `064421`, total hits remained
+  four and global solve median changed 220.53 to 216.93 ms. This rejects a
+  sparse-phase regression but cannot accept dense-laser survival.
+- **Status:** Computational correction accepted; dense-laser physical
+  acceptance remains pending on Stage 3 or 6B.
+
+## CE-0077: Distance to a viable endpoint did not prove a safe recovery bridge
+
+- **Observed symptom:** Stage-1 run `20260724_070946` completed hard no-Bomb
+  with hits at frames `[1444, 5430, 5863, 6938]`. Three followed global-kernel
+  exhaustion and one exhausted the local robust action set. All four had
+  negative modeled pipeline clearance, so these are planning failures rather
+  than late unmodeled contacts.
+- **Canonical witness:** Before frame 1,444, the queried global state was
+  repeatedly outside the kernel. Distant recovery supplied endpoint distances
+  as large as 32--158 pixels, while one-cell repair volumes appeared and
+  disappeared. The issued action alternated across opposing directions near
+  the lower-right boundary. The corridor gate became negative at frame 1,432,
+  pipeline clearance became negative at 1,440, and contact followed at 1,444.
+- **Invalid assumption:** Minimizing Euclidean distance from a one-step
+  endpoint to any viable next-layer cell is enough to guide a collision-free
+  return. It does not prove that a safe path connects the current state to
+  that cell, and recomputing it under changing active actions can encourage
+  chatter.
+- **Correction gate:** Recovery outside the certified kernel needs a
+  path-aware bridge value, such as backward reachability over an augmented
+  recovery band or a robust minimum-cost path whose intermediate states obey
+  the same delay branches. Add hysteresis only after the path objective is
+  defined; action smoothing alone is not a safety proof.
+- **Status:** Observed and retained. No stage-specific motion rule has been
+  added.

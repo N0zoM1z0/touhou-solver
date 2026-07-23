@@ -588,6 +588,17 @@ def _hazard_clearance_volume(
     )
     if native_volume is not None:
         if segment_trajectories:
+            trajectory_volume = (
+                native_backend.apply_segment_trajectory_clearance(
+                    x_axis=grid_x[0],
+                    y_axis=grid_y[:, 0],
+                    player_radius=config.player_radius,
+                    segment_trajectories=segment_trajectories,
+                    clearance_volume=native_volume,
+                )
+            )
+            if trajectory_volume is not None:
+                return trajectory_volume
             for frame in range(config.horizon_frames + 1):
                 frame_segments = tuple(
                     sample

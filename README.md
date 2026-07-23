@@ -85,10 +85,20 @@ and exposes an explicitly armed, foreground-gated `SendInput` path. Screenshots
 are retained only for menu/bootstrap audits and are not a gameplay sensor.
 `scripts/th08_attach_no_life_decrement.py` is the exact-image runtime patcher
 used by `run_th08_no_life_decrement_attach.bat`; the bridge reports the live
-patch byte on every probe. `scripts/th08_live_dodge_agent.py` is an initial
-memory-driven receding-horizon smoke controller over the native bullet/laser
-pools. It physically shoots and moves, defaults to no normal Bombs, and permits
-only an observed phase-2 deathbomb. It is not the final Lunatic/Extra solver.
+patch byte on every probe. `scripts/touhou_control/viability.py` implements
+game-neutral finite-horizon backward reachability with the exact control
+quantifiers `exists action, forall learned delay`. The asynchronous TH08
+corridor worker returns the complete policy kernel, and the live local
+controller queries it by current age, position, and active input before
+optimizing repair volume, clearance, items, or position.
+`scripts/th08_live_dodge_agent.py` physically shoots and moves under this
+policy, defaults to hard no-Bomb, and retains policy exhaustion in its trace.
+This is the first integrated global-survival architecture, not yet a
+physically accepted Lunatic/Extra solver.
+
+Workspace evidence, artifact, counterexample, physical-trial, and checkpoint
+requirements are binding in `AGENTS.md`. The robust planner derivation and its
+current approximation boundary are in `notes/ROBUST_VIABILITY.md`.
 
 ## Reproduce
 

@@ -20,6 +20,28 @@ a pinned initial state and demonstrates all of the following:
 "Accurate planning" therefore means an executable frame-indexed control trace,
 not only a path drawn over one recorded bullet image.
 
+## Robust Survival Kernel
+
+The global survival layer is a finite-horizon backward viability policy, not
+an optimistic forward path. Actuation uncertainty makes current active input
+part of the state:
+
+```text
+V[k, active_action, y, x] =
+    safe now
+    and exists next_action
+        such that for every learned delay:
+          all intermediate physical frames are safe
+          and V[k + 1, next_action, successor] holds
+```
+
+Survival membership is a hard constraint. The policy ranks admissible actions
+by worst-delay successor state-action volume; clearance, corridor target,
+items, power, graze, and score are optimized only after viability. The
+game-neutral implementation, asynchronous query contract, quantization risk,
+and staged physical acceptance are specified in
+`notes/ROBUST_VIABILITY.md`.
+
 ## Evidence Boundary
 
 - **Observed**: fixed 60 Hz scheduling; ECL timeline/VM structure; direct bullet

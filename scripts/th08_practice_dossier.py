@@ -473,6 +473,64 @@ def _adaptive_control_summary(
     }
 
 
+def _robust_viability_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object]:
+    queries = [
+        row["viability"]
+        for row in decisions
+        if isinstance(row.get("viability"), dict)
+        and row["viability"]
+    ]
+    available = [
+        query for query in queries if bool(query.get("available"))
+    ]
+    safe_counts = [
+        int(query.get("safe_action_count", 0)) for query in available
+    ]
+    selected_repairs = [
+        int(query.get("selected_repair_volume", 0))
+        for query in available
+    ]
+    ages = [int(query.get("age", 0)) for query in queries]
+    planning_modes = Counter(
+        str(row["corridor_planning_mode"])
+        for row in decisions
+        if row.get("corridor_planning_mode") is not None
+    )
+    return {
+        "planning_mode_counts": {
+            key: planning_modes[key] for key in sorted(planning_modes)
+        },
+        "query_count": len(queries),
+        "available_query_count": len(available),
+        "support_covered_query_count": sum(
+            bool(query.get("support_covers_current", True))
+            for query in available
+        ),
+        "support_uncovered_query_count": sum(
+            not bool(query.get("support_covers_current", True))
+            for query in available
+        ),
+        "viable_query_count": sum(
+            bool(query.get("state_viable")) for query in available
+        ),
+        "empty_action_set_count": sum(
+            not bool(query.get("state_viable"))
+            or int(query.get("safe_action_count", 0)) == 0
+            for query in available
+        ),
+        "constrained_decision_count": sum(
+            bool(row.get("robust_control", {}).get("viability_constrained"))
+            for row in decisions
+            if isinstance(row.get("robust_control"), dict)
+        ),
+        "safe_action_count": _percentiles(safe_counts),
+        "selected_repair_volume": _percentiles(selected_repairs),
+        "policy_age_frames": _percentiles(ages),
+    }
+
+
 def _input_visibility_summary(
     decisions: list[dict[str, object]],
 ) -> dict[str, object]:
@@ -764,6 +822,7 @@ def build_dossier(
             "action_hold_frames": _action_hold_summary(decisions),
             "control_delay_frames": _control_delay_summary(decisions),
             "adaptive_control_delay": _adaptive_control_summary(decisions),
+            "robust_viability": _robust_viability_summary(decisions),
             "input_visibility": _input_visibility_summary(decisions),
             "runtime_timing_ms": _runtime_timing(decisions),
             "behavior_context": _behavior_context(decisions, deaths),
@@ -960,6 +1019,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
     action_hold = totals["action_hold_frames"]
     control_delay = totals["control_delay_frames"]
     adaptive_delay = totals["adaptive_control_delay"]
+    robust_viability = totals["robust_viability"]
     input_visibility = totals["input_visibility"]
     spell_50_hits = int(totals["spell_hit_counts"].get("50", 0))
     body_overlaps = sum(
@@ -996,6 +1056,20 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"maximum observed overrun/censored counters were "
                 f"{adaptive_delay['overrun_max']}/"
                 f"{adaptive_delay['censored_max']}."
+            ),
+            (
+                "- Robust viability supplied "
+                f"{robust_viability['available_query_count']} available "
+                "policy queries "
+                f"({robust_viability['support_uncovered_query_count']} had "
+                "new delay support outside the cached policy), constrained "
+                f"{robust_viability['constrained_decision_count']} decisions, "
+                "and exposed "
+                f"{robust_viability['empty_action_set_count']} empty queried "
+                "action sets. Safe-action count and selected repair-volume "
+                f"statistics were `{robust_viability['safe_action_count']}` "
+                "and "
+                f"`{robust_viability['selected_repair_volume']}`."
             ),
             "- Of "
             f"{input_visibility['unambiguous_transition_count']} unambiguous "
@@ -1136,6 +1210,8 @@ def write_death_csv(
         "planner_failure_class",
         "usable_pipeline_warning_lead_frames",
         "usable_robust_warning_lead_frames",
+        "usable_viability_warning_lead_frames",
+        "viability_kernel_exhausted_at_frame",
         "contributing_factors",
         "bomb_input_verified_absent",
     ]
@@ -1188,6 +1264,13 @@ def write_death_csv(
                     "usable_robust_warning_lead_frames": death.get(
                         "usable_robust_warning_lead_frames",
                         0,
+                    ),
+                    "usable_viability_warning_lead_frames": death.get(
+                        "usable_viability_warning_lead_frames",
+                        0,
+                    ),
+                    "viability_kernel_exhausted_at_frame": death.get(
+                        "viability_kernel_exhausted_at_frame"
                     ),
                     "contributing_factors": ";".join(
                         death["contributing_factors"]

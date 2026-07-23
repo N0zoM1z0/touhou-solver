@@ -11,9 +11,12 @@ from corridor_planner import (
     CorridorConfig,
     CorridorPlan,
     MovingAabbHazard,
+    RobustControlSpec,
     SegmentHazard,
     plan_corridor,
 )
+from th08_movement_model import ROUTE2_MOVEMENT_PROFILE
+from touhou_control.viability import ControlAction
 
 
 class BulletSnapshot(Protocol):
@@ -58,6 +61,59 @@ TH08_CORRIDOR_CONFIG = CorridorConfig(
     preferred_clearance=10.0,
     danger_radius=48.0,
     boundary_danger_radius=24.0,
+)
+
+_DIRECTION_VECTORS = (
+    ("left", -1.0, 0.0),
+    ("right", 1.0, 0.0),
+    ("up", 0.0, -1.0),
+    ("down", 0.0, 1.0),
+    ("up_left", -1.0, -1.0),
+    ("up_right", 1.0, -1.0),
+    ("down_left", -1.0, 1.0),
+    ("down_right", 1.0, 1.0),
+)
+
+
+def _route2_control_action(
+    name: str,
+    unit_x: float,
+    unit_y: float,
+    *,
+    focused: bool,
+) -> ControlAction:
+    diagonal = unit_x != 0.0 and unit_y != 0.0
+    profile = ROUTE2_MOVEMENT_PROFILE
+    if focused:
+        speed = (
+            profile.focused_diagonal_axis
+            if diagonal
+            else profile.focused_cardinal
+        )
+    else:
+        speed = (
+            profile.unfocused_diagonal_axis
+            if diagonal
+            else profile.unfocused_cardinal
+        )
+    return ControlAction(name, unit_x * speed, unit_y * speed)
+
+
+TH08_VIABILITY_ACTIONS = (
+    ControlAction("stay", 0.0, 0.0),
+    *(
+        _route2_control_action(name, unit_x, unit_y, focused=True)
+        for name, unit_x, unit_y in _DIRECTION_VECTORS
+    ),
+    *(
+        _route2_control_action(
+            f"{name}_fast",
+            unit_x,
+            unit_y,
+            focused=False,
+        )
+        for name, unit_x, unit_y in _DIRECTION_VECTORS
+    ),
 )
 
 
@@ -134,7 +190,22 @@ def plan_th08_corridor(
     preferred_y: float = 368.0,
     required_gate_lane: str | None = None,
     config: CorridorConfig = TH08_CORRIDOR_CONFIG,
+    control_delay_candidates: tuple[int, ...] | None = None,
+    nominal_control_delay: int | None = None,
+    active_action: str = "stay",
 ) -> CorridorPlan:
+    robust_control = None
+    if control_delay_candidates is not None:
+        if nominal_control_delay is None:
+            raise ValueError(
+                "nominal control delay is required for robust viability"
+            )
+        robust_control = RobustControlSpec(
+            actions=TH08_VIABILITY_ACTIONS,
+            delay_frames=control_delay_candidates,
+            nominal_delay=nominal_control_delay,
+            active_action=active_action,
+        )
     return plan_corridor(
         start_x=player_x,
         start_y=player_y,
@@ -151,4 +222,5 @@ def plan_th08_corridor(
         preferred_y=preferred_y,
         required_gate_lane=required_gate_lane,
         config=config,
+        robust_control=robust_control,
     )

@@ -12,10 +12,12 @@ from corridor_planner import (
     CorridorBounds,
     CorridorConfig,
     MovingAabbHazard,
+    RobustControlSpec,
     SegmentHazard,
     _segment_clearance_field,
     plan_corridor,
 )
+from touhou_control.viability import ControlAction
 
 
 BOUNDS = CorridorBounds(0.0, 96.0, 0.0, 96.0)
@@ -260,6 +262,69 @@ class CorridorPlannerTests(unittest.TestCase):
         )
         self.assertEqual(plan.waypoint(9).frame, 12)
         self.assertEqual(plan.waypoint(999), plan.path[-1])
+
+    def test_robust_mode_returns_backward_policy_not_only_waypoint(self) -> None:
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("left", -4.0, 0.0),
+            ControlAction("right", 4.0, 0.0),
+        )
+        plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=BOUNDS,
+            preferred_x=32.0,
+            preferred_y=64.0,
+            config=CONFIG,
+            robust_control=RobustControlSpec(
+                actions=actions,
+                delay_frames=(0, 1, 2),
+                nominal_delay=1,
+                active_action="stay",
+            ),
+        )
+        self.assertTrue(plan.reachable)
+        self.assertEqual(plan.planning_mode, "robust_viability")
+        self.assertIsNotNone(plan.viability_policy)
+        self.assertGreater(plan.initial_safe_action_count, 0)
+        self.assertGreater(plan.initial_repair_volume, 0)
+        assert plan.viability_policy is not None
+        query = plan.viability_policy.query(
+            frame=4,
+            x=plan.path[1].x,
+            y=plan.path[1].y,
+            active_action=plan.path[1].x < 48.0 and "left" or "stay",
+        )
+        self.assertTrue(query.available)
+
+    def test_robust_mode_proves_initial_action_set_empty(self) -> None:
+        wall = (
+            MovingAabbHazard(
+                x=48.0,
+                y=88.0,
+                velocity_x=0.0,
+                velocity_y=0.0,
+                half_width=8.0,
+                half_height=8.0,
+            ),
+        )
+        plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=BOUNDS,
+            aabbs=wall,
+            config=CONFIG,
+            robust_control=RobustControlSpec(
+                actions=(ControlAction("stay", 0.0, 0.0),),
+                delay_frames=(0,),
+                nominal_delay=0,
+                active_action="stay",
+            ),
+        )
+        self.assertFalse(plan.reachable)
+        self.assertEqual(plan.planning_mode, "robust_viability")
+        self.assertIsNotNone(plan.viability_policy)
+        self.assertIn("action set is empty", plan.reason)
 
 
 if __name__ == "__main__":

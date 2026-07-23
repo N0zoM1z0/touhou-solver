@@ -12,6 +12,7 @@ from th08_run_dossier import (
     _nearest_laser,
     _robust_control_unsafe,
     _spell_attribution,
+    _viability_action_set_empty,
 )
 
 
@@ -40,6 +41,45 @@ def _row(
 
 
 class Th08RunDossierTests(unittest.TestCase):
+    def test_global_viability_exhaustion_requires_available_empty_query(
+        self,
+    ) -> None:
+        self.assertFalse(_viability_action_set_empty({}))
+        self.assertFalse(
+            _viability_action_set_empty(
+                {
+                    "viability": {
+                        "available": False,
+                        "state_viable": False,
+                        "safe_action_count": 0,
+                    }
+                }
+            )
+        )
+        self.assertTrue(
+            _viability_action_set_empty(
+                {
+                    "viability": {
+                        "available": True,
+                        "state_viable": False,
+                        "safe_action_count": 0,
+                    }
+                }
+            )
+        )
+        self.assertFalse(
+            _viability_action_set_empty(
+                {
+                    "viability": {
+                        "available": True,
+                        "state_viable": False,
+                        "safe_action_count": 0,
+                        "support_covers_current": False,
+                    }
+                }
+            )
+        )
+
     def test_robust_action_set_exhaustion_uses_collision_or_margin(self) -> None:
         self.assertFalse(_robust_control_unsafe({}))
         self.assertFalse(

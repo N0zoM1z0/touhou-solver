@@ -23,7 +23,7 @@ import numpy as np
 
 from corridor_planner import CorridorPlan
 from runtime_agent import input_transitions
-from th08_corridor_adapter import plan_th08_corridor
+from th08_corridor_adapter import TH08_CORRIDOR_CONFIG, plan_th08_corridor
 from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
     ADDR_ENEMY_MANAGER_FRAME,
@@ -42,6 +42,7 @@ from th08_runtime_agent import (
     verify_target,
 )
 from touhou_control.delay import AdaptiveControlDelay
+from touhou_control.viability import ViabilityQuery
 
 
 BULLET_POOL_BASE = 0x00F6F710
@@ -119,7 +120,10 @@ COLLECTION_HALF_WIDTH = 24.0
 ITEM_SAFETY_CLEARANCE = 8.0
 CORRIDOR_REPLAN_FRAMES = 24
 CORRIDOR_LOOKAHEAD_FRAMES = 16
-CORRIDOR_MAX_AGE_FRAMES = 48
+CORRIDOR_MAX_AGE_FRAMES = (
+    TH08_CORRIDOR_CONFIG.horizon_frames
+    - TH08_CORRIDOR_CONFIG.frames_per_layer
+)
 CORRIDOR_MIN_COMMIT_FRAMES = 32
 STAGE_TRANSITION_TIMEOUT_SECONDS = 90.0
 TERMINAL_INACTIVE_GRACE_SECONDS = 5.0
@@ -200,6 +204,9 @@ class Decision:
     robust_min_clearance: float = 9999.0
     robust_cvar_risk: float = 0.0
     robust_worst_delay: int | None = None
+    viability_constrained: bool = False
+    viability_safe_action_count: int = 0
+    viability_repair_volume: int = 0
 
 
 @dataclass(frozen=True)
@@ -497,6 +504,29 @@ _PLANNER_ACTIONS = (
         for name, direction, unit_x, unit_y in _DIRECTION_ACTIONS
     ),
 )
+
+
+def _action_name_from_mask(input_mask: int) -> str:
+    direction = input_mask & (UP | DOWN | LEFT | RIGHT)
+    if direction & (UP | LEFT) == UP | LEFT:
+        name = "up_left"
+    elif direction & (DOWN | LEFT) == DOWN | LEFT:
+        name = "down_left"
+    elif direction & (UP | RIGHT) == UP | RIGHT:
+        name = "up_right"
+    elif direction & (DOWN | RIGHT) == DOWN | RIGHT:
+        name = "down_right"
+    elif direction & DOWN:
+        name = "down"
+    elif direction & UP:
+        name = "up"
+    elif direction & LEFT:
+        name = "left"
+    elif direction & RIGHT:
+        name = "right"
+    else:
+        return "stay"
+    return name if input_mask & FOCUS else f"{name}_fast"
 
 
 def _finite(values: tuple[float, ...]) -> bool:
@@ -1279,6 +1309,8 @@ def choose_action(
     target_x: float | None = None,
     target_y: float | None = None,
     target_deadline: int | None = None,
+    allowed_first_actions: tuple[str, ...] | None = None,
+    viability_repair_volumes: tuple[tuple[str, int], ...] = (),
 ) -> Decision:
     if horizon <= 0 or beam_width <= 0:
         raise ValueError("planner horizon and beam width must be positive")
@@ -1298,6 +1330,24 @@ def choose_action(
             raise ValueError("nominal control delay must belong to its candidates")
     if action_hold_frames <= 0:
         raise ValueError("action hold must be positive")
+    planner_action_names = {action.name for action in _PLANNER_ACTIONS}
+    if allowed_first_actions is not None:
+        if not allowed_first_actions:
+            raise ValueError("allowed first actions cannot be empty")
+        if len(set(allowed_first_actions)) != len(allowed_first_actions):
+            raise ValueError("allowed first actions must be unique")
+        unknown_actions = set(allowed_first_actions) - planner_action_names
+        if unknown_actions:
+            raise ValueError(
+                f"unknown allowed first actions: {sorted(unknown_actions)}"
+            )
+    repair_by_action = dict(viability_repair_volumes)
+    if len(repair_by_action) != len(viability_repair_volumes):
+        raise ValueError("viability repair action names must be unique")
+    if set(repair_by_action) - planner_action_names:
+        raise ValueError("viability repair contains unknown action")
+    if any(volume < 0 for volume in repair_by_action.values()):
+        raise ValueError("viability repair volume cannot be negative")
     if (target_x is None) != (target_y is None):
         raise ValueError("target_x and target_y must be supplied together")
     if target_x is not None:
@@ -1354,6 +1404,7 @@ def choose_action(
         and not enemy_bodies
         and not selected_items
         and target_x is None
+        and allowed_first_actions is None
     ):
         return Decision(
             SHOT | FOCUS,
@@ -1376,6 +1427,11 @@ def choose_action(
                 if (step - 1) % action_hold_frames == 0
                 else (node.last_action,)
             )
+            if step == 1 and allowed_first_actions is not None:
+                allowed = set(allowed_first_actions)
+                actions = tuple(
+                    action for action in actions if action.name in allowed
+                )
             for action in actions:
                 x = node.x + action.dx
                 y = node.y + action.dy
@@ -1526,16 +1582,24 @@ def choose_action(
                 + ((node.y - target_y) / 8.0) ** 2
             )
         beam[index] = replace(node, risk=node.risk + position_cost)
+    def selection_key(node: SearchNode) -> tuple[object, ...]:
+        return (
+            node.collisions,
+            max(-node.min_clearance, 0.0),
+            -repair_by_action.get(node.first_action.name, 0),
+            _node_key(
+                node,
+                step=horizon,
+                selected_items=selected_items,
+                target_x=target_x,
+                target_y=target_y,
+                target_deadline=target_deadline,
+            ),
+        )
+
     best = min(
         beam,
-        key=lambda node: _node_key(
-            node,
-            step=horizon,
-            selected_items=selected_items,
-            target_x=target_x,
-            target_y=target_y,
-            target_deadline=target_deadline,
-        ),
+        key=selection_key,
     )
     robust_certificates: dict[str, RobustActionCertificate] = {}
     robust_override = False
@@ -1596,14 +1660,7 @@ def choose_action(
                     -robust_certificates[
                         node.first_action.name
                     ].min_clearance,
-                    _node_key(
-                        node,
-                        step=horizon,
-                        selected_items=selected_items,
-                        target_x=target_x,
-                        target_y=target_y,
-                        target_deadline=target_deadline,
-                    ),
+                    selection_key(node),
                 ),
             )
             robust_override = robust_best.first_action != best.first_action
@@ -1664,6 +1721,9 @@ def choose_action(
             if robust_certificate is not None
             else None
         ),
+        allowed_first_actions is not None,
+        len(allowed_first_actions or ()),
+        repair_by_action.get(action.name, 0),
     )
 
 
@@ -1698,6 +1758,9 @@ def _solve_corridor(
     lasers: tuple[Laser, ...],
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
+    control_delay_candidates: tuple[int, ...],
+    nominal_control_delay: int,
+    active_action: str,
     required_gate_lane: str | None = None,
     context_key: tuple[int, int | None] | None = None,
 ) -> CorridorSolution:
@@ -1710,12 +1773,19 @@ def _solve_corridor(
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         required_gate_lane=required_gate_lane,
+        control_delay_candidates=control_delay_candidates,
+        nominal_control_delay=nominal_control_delay,
+        active_action=active_action,
     )
     constraint_honored = (
         required_gate_lane is None
         or (plan.reachable and plan.lane == required_gate_lane)
     )
-    if required_gate_lane is not None and not constraint_honored:
+    if (
+        required_gate_lane is not None
+        and not constraint_honored
+        and plan.planning_mode != "robust_viability"
+    ):
         plan = plan_th08_corridor(
             player_x=player_x,
             player_y=player_y,
@@ -1723,6 +1793,9 @@ def _solve_corridor(
             lasers=lasers,
             enemy_bodies=enemy_bodies,
             snapshot_lag=snapshot_lag,
+            control_delay_candidates=control_delay_candidates,
+            nominal_control_delay=nominal_control_delay,
+            active_action=active_action,
         )
     return CorridorSolution(
         source_frame=source_frame,
@@ -1748,6 +1821,28 @@ def _corridor_target(
         return None
     waypoint = solution.plan.waypoint(age + lookahead_frames)
     return waypoint.x, waypoint.y, max(waypoint.frame - age, 0)
+
+
+def _corridor_viability_query(
+    solution: CorridorSolution | None,
+    *,
+    current_frame: int,
+    player_x: float,
+    player_y: float,
+    active_action: str,
+    max_age_frames: int,
+) -> ViabilityQuery | None:
+    if solution is None or solution.plan.viability_policy is None:
+        return None
+    age = current_frame - solution.source_frame
+    if age < 0 or age > max_age_frames:
+        return None
+    return solution.plan.viability_policy.query(
+        frame=age,
+        x=player_x,
+        y=player_y,
+        active_action=active_action,
+    )
 
 
 def _write_run_summary(
@@ -1877,6 +1972,21 @@ def run(args: argparse.Namespace) -> int:
                     "control_delay_window": LIVE_CONTROL_DELAY_WINDOW,
                     "control_delay_guard_frames": (
                         LIVE_CONTROL_DELAY_GUARD_FRAMES
+                    ),
+                    "global_planner": (
+                        "finite_horizon_robust_backward_viability"
+                        if not args.local_only
+                        else "disabled"
+                    ),
+                    "viability_grid_step": TH08_CORRIDOR_CONFIG.grid_step,
+                    "viability_frames_per_layer": (
+                        TH08_CORRIDOR_CONFIG.frames_per_layer
+                    ),
+                    "viability_horizon_frames": (
+                        TH08_CORRIDOR_CONFIG.horizon_frames
+                    ),
+                    "viability_quantifiers": (
+                        "exists_action_forall_delay"
                     ),
                 }
             )
@@ -2201,6 +2311,9 @@ def run(args: argparse.Namespace) -> int:
                     lasers=lasers,
                     enemy_bodies=enemy_bodies,
                     snapshot_lag=snapshot_lag,
+                    control_delay_candidates=delay_estimate.support,
+                    nominal_control_delay=control_delay_frames,
+                    active_action=_action_name_from_mask(previous_mask),
                     required_gate_lane=(
                         corridor_commitment.active_lane(counter_after_read)
                     ),
@@ -2215,6 +2328,36 @@ def run(args: argparse.Namespace) -> int:
                 ),
                 lookahead_frames=args.corridor_lookahead,
                 max_age_frames=args.corridor_max_age,
+            )
+            viability_query = _corridor_viability_query(
+                corridor_solution,
+                current_frame=counter_after_read,
+                player_x=projected_player_x,
+                player_y=projected_player_y,
+                active_action=_action_name_from_mask(previous_mask),
+                max_age_frames=args.corridor_max_age,
+            )
+            viability_policy = (
+                corridor_solution.plan.viability_policy
+                if corridor_solution is not None
+                else None
+            )
+            viability_support_covers_current = (
+                viability_policy is not None
+                and set(delay_estimate.support).issubset(
+                    viability_policy.delay_frames
+                )
+            )
+            viability_guidance = (
+                viability_query
+                if (
+                    viability_query is not None
+                    and viability_query.available
+                    and viability_query.state_viable
+                    and viability_query.safe_actions
+                    and viability_support_covers_current
+                )
+                else None
             )
             corridor_overhead_ms = (
                 time.perf_counter() - corridor_started
@@ -2249,6 +2392,16 @@ def run(args: argparse.Namespace) -> int:
                 ),
                 target_deadline=(
                     corridor_target[2] if corridor_target is not None else None
+                ),
+                allowed_first_actions=(
+                    viability_guidance.safe_actions
+                    if viability_guidance is not None
+                    else None
+                ),
+                viability_repair_volumes=(
+                    viability_guidance.repair_volumes
+                    if viability_guidance is not None
+                    else ()
                 ),
             )
             plan_ms = (time.perf_counter() - plan_started) * 1000.0
@@ -2408,6 +2561,15 @@ def run(args: argparse.Namespace) -> int:
                         "min_clearance": decision.robust_min_clearance,
                         "cvar_risk": decision.robust_cvar_risk,
                         "worst_delay": decision.robust_worst_delay,
+                        "viability_constrained": (
+                            decision.viability_constrained
+                        ),
+                        "viability_safe_action_count": (
+                            decision.viability_safe_action_count
+                        ),
+                        "viability_repair_volume": (
+                            decision.viability_repair_volume
+                        ),
                     },
                     "score": decision.score,
                     "item_utility": decision.item_utility,
@@ -2429,9 +2591,18 @@ def run(args: argparse.Namespace) -> int:
                         - corridor_solution.source_frame,
                         "solve_ms": corridor_solution.solve_ms,
                         "reachable": corridor_solution.plan.reachable,
+                        "planning_mode": (
+                            corridor_solution.plan.planning_mode
+                        ),
                         "lane": corridor_solution.plan.lane,
                         "bottleneck_clearance": (
                             corridor_solution.plan.bottleneck_clearance
+                        ),
+                        "initial_safe_action_count": (
+                            corridor_solution.plan.initial_safe_action_count
+                        ),
+                        "initial_repair_volume": (
+                            corridor_solution.plan.initial_repair_volume
                         ),
                         "stale": corridor_target is None
                         and corridor_solution.plan.reachable,
@@ -2451,6 +2622,52 @@ def run(args: argparse.Namespace) -> int:
                             "context": corridor_context,
                         },
                     }
+                    if viability_query is not None:
+                        policy = corridor_solution.plan.viability_policy
+                        assert policy is not None
+                        corridor_record["viability"] = {
+                            "query_frame": counter_after_read,
+                            "age": counter_after_read
+                            - corridor_solution.source_frame,
+                            "layer": viability_query.layer,
+                            "available": viability_query.available,
+                            "state_viable": viability_query.state_viable,
+                            "active_action": viability_query.active_action,
+                            "safe_action_count": (
+                                viability_query.safe_action_count
+                            ),
+                            "safe_actions": viability_query.safe_actions,
+                            "repair_volumes": dict(
+                                viability_query.repair_volumes
+                            ),
+                            "selected_action": decision.action,
+                            "selected_repair_volume": (
+                                decision.viability_repair_volume
+                            ),
+                            "position_error": (
+                                viability_query.position_error
+                            ),
+                            "delay_frames": policy.delay_frames,
+                            "current_delay_frames": (
+                                delay_estimate.support
+                            ),
+                            "support_covers_current": (
+                                viability_support_covers_current
+                            ),
+                            "nominal_delay": policy.nominal_delay,
+                            "horizon_frames": policy.horizon_frames,
+                            "viable_state_count": (
+                                policy.viable_state_count(
+                                    viability_query.layer
+                                )
+                                if viability_query.layer is not None
+                                and 0
+                                <= viability_query.layer
+                                <= policy.layer_count
+                                else 0
+                            ),
+                            "reason": viability_query.reason,
+                        }
                     if corridor_solution.plan.gate is not None:
                         corridor_record["gate"] = {
                             "frame": corridor_solution.plan.gate.frame,

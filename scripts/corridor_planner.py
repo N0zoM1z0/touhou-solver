@@ -15,6 +15,13 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from touhou_control.viability import (
+    ControlAction,
+    RobustViabilityPolicy,
+    ViabilityConfig,
+    build_robust_viability_policy,
+)
+
 
 @dataclass(frozen=True)
 class CorridorBounds:
@@ -117,6 +124,10 @@ class CorridorPlan:
     lane: str
     gate: CorridorPoint | None
     reason: str
+    planning_mode: str = "forward_reachability"
+    viability_policy: RobustViabilityPolicy | None = None
+    initial_safe_action_count: int = 0
+    initial_repair_volume: int = 0
 
     def waypoint(self, frame: int) -> CorridorPoint:
         if not self.path:
@@ -125,6 +136,20 @@ class CorridorPlan:
             if point.frame >= frame:
                 return point
         return self.path[-1]
+
+
+@dataclass(frozen=True)
+class RobustControlSpec:
+    actions: tuple[ControlAction, ...]
+    delay_frames: tuple[int, ...]
+    nominal_delay: int
+    active_action: str
+
+    def __post_init__(self) -> None:
+        if not self.actions:
+            raise ValueError("robust control requires at least one action")
+        if self.active_action not in {action.name for action in self.actions}:
+            raise ValueError("active action is absent from robust action set")
 
 
 def _axis(start: float, end: float, step: float) -> np.ndarray:
@@ -334,6 +359,40 @@ def _clearance_field(
     return robust_clearance, boundary_clearance
 
 
+def _hazard_clearance_volume(
+    grid_x: np.ndarray,
+    grid_y: np.ndarray,
+    *,
+    aabbs: tuple[MovingAabbHazard, ...],
+    segments: tuple[SegmentHazard, ...],
+    config: CorridorConfig,
+) -> np.ndarray:
+    """Build physical-frame clearance without treating legal bounds as hazards."""
+
+    volume = np.empty(
+        (config.horizon_frames + 1, *grid_x.shape),
+        dtype=np.float32,
+    )
+    for frame in range(config.horizon_frames + 1):
+        volume[frame] = np.minimum(
+            _aabb_clearance_field(
+                grid_x,
+                grid_y,
+                aabbs,
+                frame=frame,
+                player_radius=config.player_radius,
+            ),
+            _segment_clearance_field(
+                grid_x,
+                grid_y,
+                segments,
+                frame=frame,
+                player_radius=config.player_radius,
+            ),
+        )
+    return volume
+
+
 def _lane(x: float, bounds: CorridorBounds) -> str:
     third = (bounds.right - bounds.left) / 3.0
     if x < bounds.left + third:
@@ -365,6 +424,204 @@ def _trace_coordinates(
     return coordinates
 
 
+def _robust_lane_target(
+    required_gate_lane: str | None,
+    *,
+    bounds: CorridorBounds,
+    preferred_x: float | None,
+) -> float:
+    if required_gate_lane == "left":
+        return bounds.left + (bounds.right - bounds.left) / 6.0
+    if required_gate_lane == "right":
+        return bounds.right - (bounds.right - bounds.left) / 6.0
+    if required_gate_lane == "center":
+        return (bounds.left + bounds.right) * 0.5
+    if preferred_x is not None:
+        return preferred_x
+    return (bounds.left + bounds.right) * 0.5
+
+
+def _plan_robust_corridor(
+    *,
+    start_x: float,
+    start_y: float,
+    bounds: CorridorBounds,
+    aabbs: tuple[MovingAabbHazard, ...],
+    segments: tuple[SegmentHazard, ...],
+    preferred_x: float | None,
+    preferred_y: float | None,
+    required_gate_lane: str | None,
+    config: CorridorConfig,
+    robust_control: RobustControlSpec,
+) -> CorridorPlan:
+    x_axis = _axis(bounds.left, bounds.right, config.grid_step)
+    y_axis = _axis(bounds.top, bounds.bottom, config.grid_step)
+    grid_x, grid_y = np.meshgrid(x_axis, y_axis)
+    clearance_volume = _hazard_clearance_volume(
+        grid_x,
+        grid_y,
+        aabbs=aabbs,
+        segments=segments,
+        config=config,
+    )
+    policy = build_robust_viability_policy(
+        x_axis=x_axis,
+        y_axis=y_axis,
+        clearance_volume=clearance_volume,
+        actions=robust_control.actions,
+        delay_frames=robust_control.delay_frames,
+        nominal_delay=robust_control.nominal_delay,
+        config=ViabilityConfig(
+            frames_per_layer=config.frames_per_layer,
+            required_clearance=config.required_clearance,
+            clamp_to_bounds=True,
+            repair_radius_cells=1,
+        ),
+    )
+    start_query = policy.query(
+        frame=0,
+        x=start_x,
+        y=start_y,
+        active_action=robust_control.active_action,
+    )
+    if not start_query.state_viable:
+        return CorridorPlan(
+            reachable=False,
+            path=(),
+            bottleneck_clearance=-math.inf,
+            terminal_clearance=-math.inf,
+            lane="none",
+            gate=None,
+            reason="initial robust viability action set is empty",
+            planning_mode="robust_viability",
+            viability_policy=policy,
+        )
+
+    target_x = _robust_lane_target(
+        required_gate_lane,
+        bounds=bounds,
+        preferred_x=preferred_x,
+    )
+    target_y = start_y if preferred_y is None else preferred_y
+    current_x = float(x_axis[start_query.column])
+    current_y = float(y_axis[start_query.row])
+    active_action = robust_control.active_action
+    path = [CorridorPoint(0, current_x, current_y, math.inf)]
+    bottleneck = math.inf
+    initial_repair_volume = 0
+    for layer in range(policy.layer_count):
+        frame = layer * config.frames_per_layer
+        query = policy.query(
+            frame=frame,
+            x=current_x,
+            y=current_y,
+            active_action=active_action,
+        )
+        if not query.safe_actions:
+            raise RuntimeError("viability rollout left its own backward kernel")
+        candidates: list[
+            tuple[tuple[float, ...], str, float, float, int, float]
+        ] = []
+        for action_name in query.safe_actions:
+            endpoint_x, endpoint_y = policy.transition_endpoint(
+                x=current_x,
+                y=current_y,
+                active_action=active_action,
+                next_action=action_name,
+            )
+            column = int(np.argmin(np.abs(x_axis - endpoint_x)))
+            row = int(np.argmin(np.abs(y_axis - endpoint_y)))
+            endpoint_x = float(x_axis[column])
+            endpoint_y = float(y_axis[row])
+            next_frame = (layer + 1) * config.frames_per_layer
+            hazard_clearance = float(clearance_volume[next_frame, row, column])
+            boundary_clearance = min(
+                endpoint_x - bounds.left,
+                bounds.right - endpoint_x,
+                endpoint_y - bounds.top,
+                bounds.bottom - endpoint_y,
+            )
+            clearance = min(hazard_clearance, boundary_clearance)
+            repair_volume = query.repair_volume(action_name)
+            position_cost = (
+                (endpoint_x - target_x) ** 2
+                + (endpoint_y - target_y) ** 2
+            )
+            candidates.append(
+                (
+                    (
+                        -float(repair_volume),
+                        -clearance,
+                        position_cost,
+                        0.0 if action_name == active_action else 1.0,
+                    ),
+                    action_name,
+                    endpoint_x,
+                    endpoint_y,
+                    repair_volume,
+                    clearance,
+                )
+            )
+        (
+            _,
+            selected_action,
+            current_x,
+            current_y,
+            repair_volume,
+            clearance,
+        ) = min(candidates, key=lambda candidate: candidate[0])
+        if layer == 0:
+            initial_repair_volume = repair_volume
+        bottleneck = min(bottleneck, clearance)
+        active_action = selected_action
+        path.append(
+            CorridorPoint(
+                frame=(layer + 1) * config.frames_per_layer,
+                x=current_x,
+                y=current_y,
+                clearance=clearance,
+            )
+        )
+
+    terminal = path[-1]
+    gate = min(path[1:], key=lambda point: point.clearance)
+    lane = _lane(gate.x, bounds)
+    if required_gate_lane is not None and lane != required_gate_lane:
+        return CorridorPlan(
+            reachable=False,
+            path=(),
+            bottleneck_clearance=-math.inf,
+            terminal_clearance=-math.inf,
+            lane="none",
+            gate=None,
+            reason=(
+                "robust policy has no representative path through required "
+                f"{required_gate_lane} gate lane"
+            ),
+            planning_mode="robust_viability",
+            viability_policy=policy,
+            initial_safe_action_count=start_query.safe_action_count,
+            initial_repair_volume=initial_repair_volume,
+        )
+    return CorridorPlan(
+        reachable=True,
+        path=tuple(path),
+        bottleneck_clearance=bottleneck,
+        terminal_clearance=terminal.clearance,
+        lane=lane,
+        gate=gate,
+        reason=(
+            "delay-robust viable corridor found"
+            if required_gate_lane is None
+            else f"delay-robust {required_gate_lane} gate policy found"
+        ),
+        planning_mode="robust_viability",
+        viability_policy=policy,
+        initial_safe_action_count=start_query.safe_action_count,
+        initial_repair_volume=initial_repair_volume,
+    )
+
+
 def plan_corridor(
     *,
     start_x: float,
@@ -376,8 +633,9 @@ def plan_corridor(
     preferred_y: float | None = None,
     required_gate_lane: str | None = None,
     config: CorridorConfig = CorridorConfig(),
+    robust_control: RobustControlSpec | None = None,
 ) -> CorridorPlan:
-    """Return a robust reachable path through a coarse time-expanded grid."""
+    """Return a reachable path or a delay-robust backward viability policy."""
 
     if required_gate_lane not in (None, "left", "center", "right"):
         raise ValueError("required gate lane must be left, center, or right")
@@ -386,6 +644,19 @@ def plan_corridor(
         and bounds.top <= start_y <= bounds.bottom
     ):
         raise ValueError("corridor start is outside bounds")
+    if robust_control is not None:
+        return _plan_robust_corridor(
+            start_x=start_x,
+            start_y=start_y,
+            bounds=bounds,
+            aabbs=aabbs,
+            segments=segments,
+            preferred_x=preferred_x,
+            preferred_y=preferred_y,
+            required_gate_lane=required_gate_lane,
+            config=config,
+            robust_control=robust_control,
+        )
     x_axis = _axis(bounds.left, bounds.right, config.grid_step)
     y_axis = _axis(bounds.top, bounds.bottom, config.grid_step)
     grid_x, grid_y = np.meshgrid(x_axis, y_axis)

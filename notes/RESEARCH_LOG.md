@@ -1162,3 +1162,43 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   reaches zero, and true interval-censored pickup estimation instead of
   treating the first matching sampled frame as exact.
 - All 223 tests and the six-case executable regression corpus pass.
+
+## 2026-07-23: Robust Backward Viability Architecture
+
+- Replaced the global planner's survival contract from one optimistic forward
+  corridor to finite-horizon backward reachability:
+  `exists next action, forall learned delays`. Because the prior input remains
+  active during delay, the implemented state is
+  `V[layer, active_action, y, x]`, not only `V[t,x,y]`.
+- Added the game-neutral `scripts/touhou_control/viability.py`. It checks every
+  intermediate physical frame, conservatively subtracts nearest-lattice
+  sampling error from clearance, retains safe-action masks, and scores the
+  minimum successor state-action volume across delay branches.
+- The TH08 adapter supplies all 17 focused/unfocused route-2 controls, live
+  bullet/laser/enemy clearance volumes, the learned delay support, and the
+  currently active input. No TH08 address or input bit enters the neutral
+  kernel.
+- The asynchronous corridor result now retains the complete policy. The live
+  loop queries it by source age, current projected position, and current input;
+  a nonempty query hard-constrains the local MPC. Repair volume outranks the
+  old waypoint and item/position soft objectives inside that viable action
+  set.
+- Trace, death ledger, CSV, dossier JSON, and Markdown now retain policy age,
+  layer, delay support, viability, safe actions/count, selected repair volume,
+  and global-kernel exhaustion warning lead. Global exhaustion is distinct
+  from the prior short-horizon robust-certificate exhaustion.
+- Added `AGENTS.md` as the binding workspace contract for evidence labels, IDA
+  persistence, game-neutral architecture, per-death regressions, complete-run
+  artifacts, physical trial protocol, and checkpoint commits. Added
+  `notes/ROBUST_VIABILITY.md` as the durable algorithm design.
+- A true-size empty-field benchmark fell from about 2.0 seconds before batch
+  vectorization to 0.9 seconds on the first solve and 0.65 seconds after
+  transition-geometry caching. A 400-bullet/200-laser synthetic field took
+  about 1.0 second after warmup. The 80-frame policy remains queryable through
+  frame 72, but physical spell-46 data must determine whether solve age leaves
+  enough useful horizon.
+- Synthetic regressions cover the quantifier-order trap
+  (`forall delay, exists action` is rejected), the active-action state
+  dimension, intermediate collision checking, continuous sampling margin,
+  hard first-action guidance, repair-volume ordering, and asynchronous layer
+  queries. All 240 tests pass. Physical acceptance is still pending.

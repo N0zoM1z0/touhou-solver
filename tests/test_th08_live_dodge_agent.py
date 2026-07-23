@@ -7,7 +7,12 @@ import math
 import struct
 import unittest
 
-from corridor_planner import CorridorBounds, CorridorConfig, plan_corridor
+from corridor_planner import (
+    CorridorBounds,
+    CorridorConfig,
+    RobustControlSpec,
+    plan_corridor,
+)
 from th08_live_dodge_agent import (
     AutoConfirmPulse,
     Bullet,
@@ -27,16 +32,30 @@ from th08_live_dodge_agent import (
     RIGHT,
     UP,
     _auto_confirm_eligible,
+    _action_name_from_mask,
     _corridor_target,
+    _corridor_viability_query,
     _estimate_live_action_hold,
     _frozen_auto_confirm_eligible,
     choose_action,
     decode_enemy_body,
     decode_player_lethal_aabb,
 )
+from touhou_control.viability import ControlAction
 
 
 class LiveDodgeAgentTests(unittest.TestCase):
+    def test_action_name_preserves_focus_speed_and_native_direction_priority(
+        self,
+    ) -> None:
+        self.assertEqual(_action_name_from_mask(0), "stay")
+        self.assertEqual(_action_name_from_mask(LEFT), "left_fast")
+        self.assertEqual(_action_name_from_mask(LEFT | 0x04), "left")
+        self.assertEqual(
+            _action_name_from_mask(UP | LEFT | RIGHT | 0x04),
+            "up_left",
+        )
+
     def test_live_action_hold_tracks_recent_controller_cadence(self) -> None:
         self.assertEqual(_estimate_live_action_hold(()), 3)
         self.assertEqual(
@@ -538,6 +557,104 @@ class LiveDodgeAgentTests(unittest.TestCase):
         )
         self.assertIn("up", decision.action)
         self.assertNotEqual(decision.action, "stay")
+
+    def test_viability_policy_hard_constrains_first_action(self) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            target_x=300.0,
+            target_y=400.0,
+            target_deadline=8,
+            allowed_first_actions=("left",),
+            viability_repair_volumes=(("left", 5),),
+        )
+        self.assertEqual(decision.action, "left")
+        self.assertTrue(decision.viability_constrained)
+        self.assertEqual(decision.viability_safe_action_count, 1)
+        self.assertEqual(decision.viability_repair_volume, 5)
+
+    def test_viability_repair_volume_outranks_soft_waypoint_preference(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            horizon=2,
+            target_x=160.0,
+            target_y=400.0,
+            target_deadline=2,
+            allowed_first_actions=("left", "right"),
+            viability_repair_volumes=(("left", 1), ("right", 9)),
+        )
+        self.assertEqual(decision.action, "right")
+        self.assertEqual(decision.viability_repair_volume, 9)
+
+    def test_exact_local_collision_outranks_coarse_repair_volume(self) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(
+                Bullet(184.0, 400.0, 0.0, 0.0, 2.0, 2.0),
+            ),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            horizon=2,
+            allowed_first_actions=("left", "right"),
+            viability_repair_volumes=(("left", 100), ("right", 1)),
+        )
+        self.assertEqual(decision.action, "right")
+        self.assertEqual(decision.viability_repair_volume, 1)
+
+    def test_async_viability_policy_is_queried_at_current_layer(self) -> None:
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("left", -4.0, 0.0),
+            ControlAction("right", 4.0, 0.0),
+        )
+        plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=CorridorBounds(0.0, 96.0, 0.0, 96.0),
+            config=CorridorConfig(
+                grid_step=8.0,
+                frames_per_layer=4,
+                horizon_frames=16,
+                cardinal_speed=4.0,
+                diagonal_axis_speed=2.8284270763397217,
+            ),
+            robust_control=RobustControlSpec(
+                actions=actions,
+                delay_frames=(1, 2),
+                nominal_delay=1,
+                active_action="stay",
+            ),
+        )
+        solution = CorridorSolution(100, plan, 12.0)
+        query = _corridor_viability_query(
+            solution,
+            current_frame=105,
+            player_x=48.0,
+            player_y=88.0,
+            active_action="stay",
+            max_age_frames=12,
+        )
+        self.assertIsNotNone(query)
+        assert query is not None
+        self.assertEqual(query.layer, 1)
+        self.assertTrue(query.available)
+        self.assertGreater(query.safe_action_count, 0)
 
     def test_ce_frame_1420_commits_away_before_bottom_edge_trap(self) -> None:
         bullet = Bullet(

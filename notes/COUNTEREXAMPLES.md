@@ -722,16 +722,25 @@ Status: observed | inferred | unknown | fixed
   that action becomes unsafe. At that time every first action surviving the
   nominal beam can already fail under some learned delay. Selecting the least
   bad member cannot recover a viable connected component.
-- **Correction required:** Score robust control authority while the current
-  action is still safe: number of safe first actions, safe successor count
-  after another control interval, and reachable repair volume. Persist those
-  counts so loss of viability is observable before it reaches zero.
+- **Correction:** Added the game-neutral
+  `touhou_control.viability` backward-reachability kernel. Its state includes
+  current active action, lattice position, and control layer. It admits a next
+  action only when every learned delay branch remains collision-free through
+  each intermediate physical frame and reaches the next viability kernel.
+  The worst-branch local state-action volume ranks admitted actions before
+  waypoint, item, and positional preferences. The asynchronous worker retains
+  the complete policy so live control can query its current age/position/input
+  rather than following a stale representative path.
 - **Regressions:** The six cases in
   `lunatic_route2_stage3_adaptive_delay_20260723_184741.regressions.json`
   retain robust support, last-alive certificate, exhaustion frame, and warning
   lead. Spell 46's three hits are the primary phase-specific cases.
-- **Status:** open. The report pipeline now classifies these hits as
-  `robust_action_set_exhausted_before_hit`.
+- **Status:** code-complete and unit-tested, physical acceptance pending.
+  Dossiers now separately classify
+  `global_viability_kernel_exhausted_before_hit`, retain its warning lead, and
+  continue to retain the old local
+  `robust_action_set_exhausted_before_hit`. Spell 46 remains the first physical
+  target.
 
 ## CE-0041: First observed input visibility is an interval, not a timestamp
 

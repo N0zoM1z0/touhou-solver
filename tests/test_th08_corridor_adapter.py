@@ -7,6 +7,7 @@ import unittest
 
 from th08_corridor_adapter import (
     TH08_CORRIDOR_CONFIG,
+    TH08_VIABILITY_ACTIONS,
     lower_bullets,
     lower_enemy_bodies,
     lower_lasers,
@@ -19,6 +20,22 @@ class Th08CorridorAdapterTests(unittest.TestCase):
         self.assertEqual(TH08_CORRIDOR_CONFIG.grid_step, 16.0)
         self.assertEqual(TH08_CORRIDOR_CONFIG.frames_per_layer, 8)
         self.assertEqual(TH08_CORRIDOR_CONFIG.horizon_frames, 80)
+
+    def test_viability_actions_match_live_route2_action_names_and_speeds(
+        self,
+    ) -> None:
+        by_name = {action.name: action for action in TH08_VIABILITY_ACTIONS}
+        self.assertEqual(len(by_name), 17)
+        self.assertAlmostEqual(by_name["left"].velocity_x, -2.299999952316284)
+        self.assertAlmostEqual(by_name["left_fast"].velocity_x, -4.0)
+        self.assertAlmostEqual(
+            by_name["up_right"].velocity_x,
+            1.6263456344604492,
+        )
+        self.assertEqual(
+            (by_name["stay"].velocity_x, by_name["stay"].velocity_y),
+            (0.0, 0.0),
+        )
 
     def test_read_lag_projects_bullet_before_corridor_prediction(self) -> None:
         hazards = lower_bullets(

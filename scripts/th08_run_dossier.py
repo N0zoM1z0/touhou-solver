@@ -311,6 +311,12 @@ def _compact_decision(
     player = row["player"]
     corridor = row.get("corridor")
     target = corridor.get("target") if isinstance(corridor, dict) else None
+    viability = (
+        corridor.get("viability")
+        if isinstance(corridor, dict)
+        and isinstance(corridor.get("viability"), dict)
+        else {}
+    )
     compact = {
         "frame": int(row["frame"]),
         "trace_index": trace_index,
@@ -385,6 +391,13 @@ def _compact_decision(
         "corridor_slack": (
             float(target["slack"]) if isinstance(target, dict) else None
         ),
+        "corridor_planning_mode": (
+            str(corridor.get("planning_mode"))
+            if isinstance(corridor, dict)
+            and corridor.get("planning_mode") is not None
+            else None
+        ),
+        "viability": viability,
         "spell": row.get("spell"),
     }
     if compact["hit_started"]:
@@ -573,6 +586,19 @@ def _robust_control_unsafe(row: dict[str, object]) -> bool:
     )
 
 
+def _viability_action_set_empty(row: dict[str, object]) -> bool:
+    viability = row.get("viability")
+    if not isinstance(viability, dict) or not viability:
+        return False
+    return (
+        bool(viability.get("available"))
+        and bool(viability.get("support_covers_current", True))
+    ) and (
+        not bool(viability.get("state_viable"))
+        or int(viability.get("safe_action_count", 0)) == 0
+    )
+
+
 def _death_ledger(
     decisions: list[dict[str, object]],
 ) -> list[dict[str, object]]:
@@ -632,6 +658,21 @@ def _death_ledger(
                 ):
                     break
                 robust_unsafe_suffix_start = sample
+        viability_empty_suffix_start = None
+        if (
+            last_alive is not None
+            and _viability_action_set_empty(last_alive)
+        ):
+            last_alive_index = window.index(last_alive)
+            viability_empty_suffix_start = last_alive
+            for sample in reversed(window[:last_alive_index]):
+                if (
+                    int(sample["player"]["phase"]) != 0
+                    or int(sample["player"]["phase_at_action"]) != 0
+                    or not _viability_action_set_empty(sample)
+                ):
+                    break
+                viability_empty_suffix_start = sample
 
         next_bombs = float(row["resources"]["bombs"])
         next_power = float(row["resources"]["power"])
@@ -673,6 +714,10 @@ def _death_ledger(
         )
         if last_alive is None:
             planner_failure_class = "missing_pre_hit_alive_decision"
+        elif viability_empty_suffix_start is not None:
+            planner_failure_class = (
+                "global_viability_kernel_exhausted_before_hit"
+            )
         elif robust_unsafe_suffix_start is not None:
             planner_failure_class = "robust_action_set_exhausted_before_hit"
         elif float(last_alive["pipeline_clearance"]) <= 0.0:
@@ -754,6 +799,7 @@ def _death_ledger(
                     "robust_control": dict(
                         last_alive["robust_control"]
                     ),
+                    "viability": dict(last_alive["viability"]),
                     "action_lag": int(last_alive["action_lag"]),
                 }
                 if last_alive is not None
@@ -774,6 +820,16 @@ def _death_ledger(
                 if robust_unsafe_suffix_start is not None
                 else None
             ),
+            "usable_viability_warning_lead_frames": (
+                frame - int(viability_empty_suffix_start["frame"])
+                if viability_empty_suffix_start is not None
+                else 0
+            ),
+            "viability_kernel_exhausted_at_frame": (
+                int(viability_empty_suffix_start["frame"])
+                if viability_empty_suffix_start is not None
+                else None
+            ),
             "planner_failure_class": planner_failure_class,
             "active_bullets": row["active_bullets"],
             "active_lasers": row["active_lasers"],
@@ -792,6 +848,7 @@ def _death_ledger(
                 row["control_delay_estimator"]
             ),
             "robust_control": dict(row["robust_control"]),
+            "viability": dict(row["viability"]),
             "read_ms": row["read_ms"],
             "plan_ms": row["plan_ms"],
             "pipeline_clearance_at_hit": row["pipeline_clearance"],
@@ -1546,6 +1603,10 @@ def write_death_csv(
         "nearest_laser_slot",
         "nearest_laser_clearance",
         "primary_cause_class",
+        "planner_failure_class",
+        "usable_robust_warning_lead_frames",
+        "usable_viability_warning_lead_frames",
+        "viability_kernel_exhausted_at_frame",
         "contributing_factors",
         "spell_id",
         "spell_name",
@@ -1602,6 +1663,20 @@ def write_death_csv(
                         nearest_laser["clearance"] if nearest_laser else None
                     ),
                     "primary_cause_class": death["primary_cause_class"],
+                    "planner_failure_class": death[
+                        "planner_failure_class"
+                    ],
+                    "usable_robust_warning_lead_frames": death.get(
+                        "usable_robust_warning_lead_frames",
+                        0,
+                    ),
+                    "usable_viability_warning_lead_frames": death.get(
+                        "usable_viability_warning_lead_frames",
+                        0,
+                    ),
+                    "viability_kernel_exhausted_at_frame": death.get(
+                        "viability_kernel_exhausted_at_frame"
+                    ),
                     "contributing_factors": ";".join(
                         death["contributing_factors"]
                     ),

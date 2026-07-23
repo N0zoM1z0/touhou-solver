@@ -16,6 +16,7 @@ from th08_practice_dossier import (
     _input_visibility_summary,
     _no_bomb_verification,
     _promote_enemy_body_candidates,
+    _robust_viability_summary,
 )
 from th08_fullrun_regression import load_and_validate
 from th08_run_dossier import _input_mask_action
@@ -133,6 +134,38 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(summary["guard_active_decision_count"], 1)
         self.assertEqual(summary["overrun_max"], 1)
         self.assertEqual(summary["censored_max"], 2)
+
+    def test_robust_viability_health_is_retained(self) -> None:
+        rows = [_decision(100), _decision(103), _decision(106)]
+        rows[0]["corridor_planning_mode"] = "robust_viability"
+        rows[0]["viability"] = {
+            "available": True,
+            "state_viable": True,
+            "safe_action_count": 3,
+            "selected_repair_volume": 12,
+            "age": 20,
+            "support_covers_current": True,
+        }
+        rows[0]["robust_control"] = {"viability_constrained": True}
+        rows[1]["corridor_planning_mode"] = "robust_viability"
+        rows[1]["viability"] = {
+            "available": True,
+            "state_viable": False,
+            "safe_action_count": 0,
+            "selected_repair_volume": 0,
+            "age": 23,
+            "support_covers_current": False,
+        }
+        summary = _robust_viability_summary(rows)
+        self.assertEqual(summary["available_query_count"], 2)
+        self.assertEqual(summary["viable_query_count"], 1)
+        self.assertEqual(summary["empty_action_set_count"], 1)
+        self.assertEqual(summary["support_uncovered_query_count"], 1)
+        self.assertEqual(summary["constrained_decision_count"], 1)
+        self.assertEqual(
+            summary["planning_mode_counts"],
+            {"robust_viability": 2},
+        )
 
     def test_cadence_and_prehit_behavior_are_retained(self) -> None:
         rows = [_decision(100), _decision(103), _decision(107)]

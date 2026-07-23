@@ -957,3 +957,9 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   items kept the old auto-confirm predicate false forever despite zero bullets
   and lasers. Auto-confirm now models only actual hazards and Bomb state;
   collectible count is absent by construction. All 196 tests pass.
+- The `153736` trace crossed Stage 2 to 3 but froze at Stage-3 frame 53,623
+  with 189 bullets and 315 items. Manager counter and RNG calls were both
+  static, proving that a frozen projectile snapshot cannot be treated as an
+  evolving hazard for a shot-key edge. Wall-clock confirm now excludes only an
+  active Bomb; the moving-timeline predicate remains hazard-gated. All 197
+  tests pass.

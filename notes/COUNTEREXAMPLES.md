@@ -536,3 +536,20 @@ Status: observed | inferred | unknown | fixed
 - **Regression:**
   `test_auto_confirm_hazard_policy_does_not_gate_on_residual_items`.
 - **Status:** code-fixed; unattended full-route acceptance pending.
+
+## CE-0032: Frozen bullets are not evolving hazards
+
+- **Observed symptom:** The `153736` run stopped at Stage-3 frame 53,623 with
+  189 bullets and 315 items. The game was foreground and responsive, but the
+  manager counter and RNG call count remained fixed and no Z edge was emitted.
+- **Invalid assumption:** A hazard snapshot remains dangerous for the purpose
+  of a shot-key edge even after the game timeline itself has stopped.
+- **Correction:** Keep the hazard-only predicate for frame-driven confirms.
+  For the wall-clock frozen-counter path, ignore bullets, lasers, items, and
+  player phase because none can evolve; only an active Bomb suppresses the
+  complete shot-key release/press edge. Foreground ownership and the idle
+  threshold remain mandatory.
+- **Evidence:** The tracked `153736` summary and
+  `notes/runs/2026-07-23_lunatic_route2_transition_guard_partials.md`.
+- **Regression:** `test_frozen_auto_confirm_only_excludes_an_active_bomb`.
+- **Status:** code-fixed; practice-stage physical verification pending.

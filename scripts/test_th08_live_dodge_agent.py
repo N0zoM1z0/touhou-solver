@@ -20,6 +20,7 @@ from th08_live_dodge_agent import (
     UP,
     _auto_confirm_eligible,
     _corridor_target,
+    _frozen_auto_confirm_eligible,
     choose_action,
 )
 
@@ -110,6 +111,12 @@ class LiveDodgeAgentTests(unittest.TestCase):
                 active_lasers=0,
             )
         )
+
+    def test_frozen_auto_confirm_only_excludes_an_active_bomb(self) -> None:
+        # Projectile and item state are deliberately absent: once the manager
+        # counter is frozen, neither can evolve into a collision.
+        self.assertTrue(_frozen_auto_confirm_eligible(bomb_active=False))
+        self.assertFalse(_frozen_auto_confirm_eligible(bomb_active=True))
 
     def test_scene_guard_waits_for_nonfinal_stage_transition(self) -> None:
         guard = GameplaySceneGuard({0: 1, 1: 2}, 90.0, 5.0)

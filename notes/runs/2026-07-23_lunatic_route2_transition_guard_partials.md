@@ -110,3 +110,28 @@ than accepting an operator key press.
 Items are not hazards and Z is already the held shot key. The corrected policy
 therefore depends only on player phase 0/3, Bomb inactivity, and zero active
 bullets/lasers. Collectible count is deliberately absent from the predicate.
+
+## Frozen-Projectile Auto-Confirm Partial
+
+The next trace,
+`artifacts/runtime_reports/lunatic_route2_hotkey_longrun_20260723_153736.jsonl`,
+physically crossed both Stage 1 to 2 and Stage 2 to 3, including residual-item
+dialogue, then exposed the general form of the deadlock:
+
+- Controlled frames: `1..53623`
+- Decisions: `15,854`
+- Native hit edges: 21
+- Reached: Stage 3
+- Tracked summary SHA-256:
+  `a21727604b6ef0d5593415ff958e2d48eaf03fb9b2790b97bf2e8e43ec11caa7`
+- Termination: deliberate `external_stop`
+
+At frame 53,623, the game remained foreground and responsive but the manager
+counter and RNG call count were frozen. The last snapshot retained 189 bullets
+and 315 items, so the moving-timeline hazard predicate correctly stayed false
+but could never advance.
+
+The final policy separates two clocks. While the manager timeline advances,
+fresh Z edges require phase 0/3, Bomb inactive, and zero bullets/lasers. Once
+the manager counter is frozen beyond the wall-clock idle threshold, projectile
+and item state is inert; the complete Z edge only excludes an active Bomb.

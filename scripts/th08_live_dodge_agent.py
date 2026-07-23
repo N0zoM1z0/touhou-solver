@@ -321,6 +321,12 @@ def _auto_confirm_eligible(
     )
 
 
+def _frozen_auto_confirm_eligible(*, bomb_active: bool) -> bool:
+    """A frozen timeline makes projectile/item state inert; only exclude Bomb."""
+
+    return not bomb_active
+
+
 @dataclass(frozen=True)
 class SceneGuardDecision:
     status: str
@@ -1307,7 +1313,6 @@ def run(args: argparse.Namespace) -> int:
     )
     last_frame_progress = time.perf_counter()
     last_frozen_confirm = float("-inf")
-    frozen_confirm_eligible = False
     if not args.local_only:
         corridor_executor = ThreadPoolExecutor(
             max_workers=1,
@@ -1395,7 +1400,6 @@ def run(args: argparse.Namespace) -> int:
                     send_transitions(api, transitions)
                     previous_mask = 0
                     previous_direction = 0
-                    frozen_confirm_eligible = False
                     corridor_solution = None
                     if corridor_future is not None and corridor_future.cancel():
                         corridor_future = None
@@ -1484,7 +1488,6 @@ def run(args: argparse.Namespace) -> int:
                 previous_action_phase = None
                 auto_confirm.eligible_since = None
                 auto_confirm.released = False
-                frozen_confirm_eligible = False
                 last_frame_progress = now
             if counter == previous_counter:
                 bomb_active = reader.u32(
@@ -1494,7 +1497,9 @@ def run(args: argparse.Namespace) -> int:
                     now=now,
                     last_progress=last_frame_progress,
                     last_pulse=last_frozen_confirm,
-                    eligible=frozen_confirm_eligible and not bomb_active,
+                    eligible=_frozen_auto_confirm_eligible(
+                        bomb_active=bool(bomb_active),
+                    ),
                 ):
                     _require_foreground(api, pid)
                     send_scan_key(api, scan_code=0x2C, pressed=False)
@@ -1691,12 +1696,6 @@ def run(args: argparse.Namespace) -> int:
             )
             if auto_confirm_event is not None:
                 decision = replace(decision, mask=auto_confirm_mask)
-            frozen_confirm_eligible = _auto_confirm_eligible(
-                player_phase=phase_now,
-                bomb_active=bool(player["bomb_active"]),
-                active_bullets=len(bullets),
-                active_lasers=len(lasers),
-            )
             transitions = input_transitions(
                 previous_mask,
                 decision.mask,

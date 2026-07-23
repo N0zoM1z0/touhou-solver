@@ -183,6 +183,19 @@ class PracticeSupervisorTests(unittest.TestCase):
         plan = drive.call_args.args[2]
         self.assertEqual([tap.key for tap in plan], ["right"])
 
+    def test_killed_partial_is_not_accepted_as_completed_practice(self) -> None:
+        self.assertTrue(
+            supervisor.accepted_practice_termination(
+                {"termination_reason": "route_complete"}
+            )
+        )
+        self.assertFalse(
+            supervisor.accepted_practice_termination(
+                {"termination_reason": "process_unreadable"}
+            )
+        )
+        self.assertFalse(supervisor.accepted_practice_termination(None))
+
 
 if __name__ == "__main__":
     unittest.main()

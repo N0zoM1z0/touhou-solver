@@ -62,6 +62,7 @@ from th08_live_dodge_agent import (
     _corridor_target,
     _corridor_viability_query,
     _estimate_live_action_hold,
+    _enemy_sensor_submit_due,
     _frozen_auto_confirm_eligible,
     _stage_corridor_solution,
     build_laser_collision_frames,
@@ -94,6 +95,29 @@ class LiveDodgeAgentTests(unittest.TestCase):
             4,
         )
         self.assertEqual(_estimate_live_action_hold((9, 10, 11)), 6)
+
+    def test_enemy_sensor_throttles_completed_background_scans(self) -> None:
+        self.assertFalse(
+            _enemy_sensor_submit_due(
+                current_frame=115,
+                last_submit_frame=100,
+                pending=False,
+            )
+        )
+        self.assertTrue(
+            _enemy_sensor_submit_due(
+                current_frame=116,
+                last_submit_frame=100,
+                pending=False,
+            )
+        )
+        self.assertFalse(
+            _enemy_sensor_submit_due(
+                current_frame=140,
+                last_submit_frame=100,
+                pending=True,
+            )
+        )
 
     def test_auto_confirm_creates_fresh_z_edge_after_sustained_empty_scene(
         self,

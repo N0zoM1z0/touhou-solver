@@ -143,6 +143,7 @@ LIVE_CONTROL_DELAY_MAX = 6
 LIVE_CONTROL_DELAY_WINDOW = 120
 LIVE_CONTROL_DELAY_GUARD_FRAMES = 600
 ASYNC_POLICY_DELAY_PADDING = 1
+ENEMY_SENSOR_INTERVAL_FRAMES = 16
 COLLECTION_HALF_WIDTH = 24.0
 ITEM_SAFETY_CLEARANCE = 8.0
 CORRIDOR_REPLAN_FRAMES = 24
@@ -2226,6 +2227,21 @@ def _corridor_submit_due(
     return current_frame - last_submit_frame >= interval_frames
 
 
+def _enemy_sensor_submit_due(
+    *,
+    current_frame: int,
+    last_submit_frame: int,
+    pending: bool,
+    interval_frames: int = ENEMY_SENSOR_INTERVAL_FRAMES,
+) -> bool:
+    if interval_frames <= 0:
+        raise ValueError("enemy sensor interval must be positive")
+    return (
+        not pending
+        and current_frame - last_submit_frame >= interval_frames
+    )
+
+
 def _write_run_summary(
     output,
     *,
@@ -2301,6 +2317,7 @@ def run(args: argparse.Namespace) -> int:
     enemy_executor: ThreadPoolExecutor | None = None
     enemy_future: Future[EnemyPoolSnapshot] | None = None
     enemy_snapshot: EnemyPoolSnapshot | None = None
+    enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
     corridor_solution: CorridorSolution | None = None
     corridor_pending_solution: CorridorSolution | None = None
     corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
@@ -2482,6 +2499,7 @@ def run(args: argparse.Namespace) -> int:
             capture_enemy_pool_snapshot,
             reader,
         )
+        enemy_last_submit = int(state["enemy_manager_frame"])
         deadline = time.perf_counter() + args.duration
         while time.perf_counter() < deadline:
             if args.stop_file is not None and args.stop_file.exists():
@@ -2687,10 +2705,19 @@ def run(args: argparse.Namespace) -> int:
             read_started = time.perf_counter()
             if enemy_future is not None and enemy_future.done():
                 enemy_snapshot = enemy_future.result()
+                enemy_future = None
+            if (
+                _enemy_sensor_submit_due(
+                    current_frame=counter,
+                    last_submit_frame=enemy_last_submit,
+                    pending=enemy_future is not None,
+                )
+            ):
                 enemy_future = enemy_executor.submit(
                     capture_enemy_pool_snapshot,
                     reader,
                 )
+                enemy_last_submit = counter
             enemy_bodies = project_enemy_pool_snapshot(
                 enemy_snapshot,
                 frame=counter,

@@ -1499,3 +1499,12 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - The full 284-test Linux suite and 52 focused Windows tests pass. A new
   physical run must accept the restored cadence before this architecture is a
   checkpoint.
+- Partial latency trial `20260724_025622` disproved continuous background
+  scanning: concurrent process-memory bandwidth still kept main read latency
+  at 18.51..32.31 ms with 3..5-frame-old snapshots. It was intentionally
+  killed at frame 3,303 and is retained as discarded evidence. Scans are now
+  submitted at most once per 16 manager frames.
+- The same partial exposed CE-0061: the supervisor equated a joined agent
+  thread with stage completion. Acceptance now requires
+  `termination_reason=route_complete`; killed/partial trials skip no-save and
+  receive `status=discarded`.

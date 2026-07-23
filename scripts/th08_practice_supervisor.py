@@ -368,6 +368,15 @@ def monitor_trial(
     return agent.wait_for_trial()
 
 
+def accepted_practice_termination(
+    summary: dict[str, object] | None,
+) -> bool:
+    return (
+        isinstance(summary, dict)
+        and summary.get("termination_reason") == "route_complete"
+    )
+
+
 def select_no_save_before_termination(
     api: Win32,
     pid: int,
@@ -800,19 +809,31 @@ def run_trial(
             stall_timeout_seconds=args.stall_timeout,
         )
         session["agent_summary"] = agent.last_summary
+        accepted = accepted_practice_termination(agent.last_summary)
+        session["trial_accepted"] = accepted
         if not args.leave_game_running:
-            session["post_stage_no_save"] = select_no_save_before_termination(
-                api,
-                pid,
-                hold_ms=args.tap_hold_ms,
-                tap_gap_ms=args.tap_gap_ms,
-            )
+            if accepted:
+                session["post_stage_no_save"] = (
+                    select_no_save_before_termination(
+                        api,
+                        pid,
+                        hold_ms=args.tap_hold_ms,
+                        tap_gap_ms=args.tap_gap_ms,
+                    )
+                )
+            else:
+                session["post_stage_no_save"] = {
+                    "attempted": False,
+                    "reason": (
+                        "trial did not terminate with route_complete"
+                    ),
+                }
             session["game_terminated_after_trial"] = terminate_exact_target(
                 api,
                 expected_exe,
             )
         session["finished_at"] = datetime.now().astimezone().isoformat()
-        session["status"] = "completed"
+        session["status"] = "completed" if accepted else "discarded"
         session_json.write_text(
             json.dumps(session, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",

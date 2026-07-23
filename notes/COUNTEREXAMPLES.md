@@ -1176,3 +1176,17 @@ Status: observed | inferred | unknown | fixed
   `test_async_enemy_snapshot_projects_age_with_bounded_uncertainty`.
 - **Acceptance gate:** Restore pre-scan read/cadence distributions without
   losing full-pool body witnesses or introducing stale-body false corridors.
+
+## CE-0061: A killed latency experiment was labeled completed
+
+- **Observed symptom:** Intentionally terminated partial Stage-5 run
+  `20260724_025622` ended with `process_unreadable` at frame 3,303, but the
+  supervisor wrote `status=completed`, attempted the post-stage no-save Right,
+  and printed `completed iteration`.
+- **Invalid assumption:** Any normally joined agent thread represents a
+  completed Practice stage.
+- **Correction:** Only `termination_reason=route_complete` is accepted.
+  Process loss, external stop, timeout, and other endings are persisted as
+  `status=discarded`, skip the no-save input, and retain compact artifacts.
+- **Regression:**
+  `test_killed_partial_is_not_accepted_as_completed_practice`.

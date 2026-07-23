@@ -9,37 +9,49 @@ from th08_practice_compare import compare_dossiers
 
 
 def _dossier(run_id: str, *, hits: int, solve_ms: float) -> dict[str, object]:
-    death = {
-        "spell_attribution": {"spell_id": 50},
-    }
     return {
         "schema": "th08-practice-dossier-v1",
         "run_id": run_id,
+        "practice_scope": {
+            "stage_route_index": 7,
+            "raw_summary_is_scope_valid": True,
+        },
         "control_policy": {"verification": {"passed": True}},
-        "deaths": [death] * hits,
+        "deaths": [],
         "totals": {
             "death_count": hits,
-            "latency_ms": {
-                "corridor_solver": {
-                    "active_spell_50": {
+            "robust_viability": {
+                "policy_decision_count": 10,
+                "query_count": 8,
+                "empty_action_set_count": hits,
+                "solve_ms": {
+                    "median": solve_ms,
+                    "p95": solve_ms,
+                    "max": solve_ms,
+                },
+                "policy_status_counts": {"queryable": 8, "expired": 2},
+            },
+            "behavior_context": {},
+            "input_visibility": {},
+            "hit_contact_epoch": {},
+            "primary_cause_counts": {},
+            "per_spell": [
+                {
+                    "phase_key": "166",
+                    "spell_name": "fixture",
+                    "hit_count": hits,
+                    "decision_count": 20,
+                    "robust_viability": {
+                        "query_count": 8,
+                        "empty_action_set_count": hits,
                         "solve_ms": {
                             "median": solve_ms,
                             "p95": solve_ms,
                             "max": solve_ms,
                         },
-                        "age_frames": {
-                            "median": solve_ms,
-                            "p95": solve_ms,
-                            "max": solve_ms,
-                        },
-                        "stale_solution_count": hits,
-                    }
+                    },
                 }
-            },
-            "decision_cadence_frames": {"median": 3.0},
-            "behavior_context": {},
-            "hit_contact_epoch": {},
-            "primary_cause_counts": {},
+            ],
         },
     }
 
@@ -55,10 +67,14 @@ class Th08PracticeCompareTests(unittest.TestCase):
             0.25,
         )
         self.assertEqual(
-            comparison["spell_50_corridor"]["solve_ms"]["p95"][
+            comparison["robust_viability"]["solve_ms"]["p95"][
                 "reduction_fraction"
             ],
             0.75,
+        )
+        self.assertEqual(
+            comparison["per_phase"]["166"]["hit_count"]["delta"],
+            -1,
         )
 
 

@@ -89,13 +89,40 @@ Windows x86-64:
 | Native | 1..3 | 540.2 ms | 619.8 ms | 520.8 ms | 19.2 ms |
 | Native | 1..6 | 511.4 ms | 561.4 ms | 486.4 ms | 24.8 ms |
 
-The full-delay native maximum is about 34 physical frames at 60 FPS. This is
-below the 80-frame horizon and leaves synthetic serial timing headroom. The
-physical Final B trace still must prove that game contention and real hazard
-mixtures preserve this margin.
+The first retained workload was not a worst case for viability. Dense hazards
+make most states unsafe and cause the backward loop to exit early. The
+`222808` physical trace exposed sparse/open phases whose old native viability
+median was 4,027 ms, despite clearance taking only 105 ms.
+
+The kernel now caches the hazard-independent transition lattice:
+
+```text
+(active action, selected action, delay, state, physical step)
+    -> (sample cell, continuous sampling error)
+```
+
+The table includes every delay `0..frames_per_layer`; a changing adaptive
+delay support reuses it. Only hazard clearance and backward membership vary
+between solves. The hotkey daemon builds the cold table before F8.
+
+Post-correction Windows x86-64:
+
+| Workload | Warm median | Clearance | Viability |
+| --- | ---: | ---: | ---: |
+| Open, 0 AABB / 0 segment | 294.1 ms | 0.4 ms | 283.8 ms |
+| Sparse, 600 AABB / 52 segment | 184.1 ms | 179.6 ms | 4.4 ms |
+| Dense, 1,500 AABB / 250 segment | 446.2 ms | 443.8 ms | 2.3 ms |
+
+The open-field cold solve is 1,687.5 ms because it constructs the transition
+table; prewarming keeps it outside gameplay handoff. All warm workloads remain
+below the 80-frame horizon. Synthetic serviceability is restored, but the
+next physical Final-B run must prove it under game contention.
 
 The compact source measurements are retained in
-`artifacts/runtime_reports/native_planner_performance_20260723.json`.
+`artifacts/runtime_reports/native_planner_performance_20260723.json` and the
+`native_planner_windows_{open,sparse,dense_postcache}_20260723.json` artifacts.
+Their checkpoint summary is
+`native_planner_transition_cache_performance_20260723.json`.
 
 ## Build And Deployment
 
@@ -110,8 +137,8 @@ not require a compiler or extra runtime DLL. The current local build hashes
 are:
 
 ```text
-linux  af69b2870a480f71342a9323608f8f3adf266fe1d4bc3c5829d24187ae4a534d
-win64  38821d17f6d6f6e3b1316802c03a86e681d31a7be93de7fca23ccb57c82eb66c
+linux  989c2f2f7f7923ef5248fa15707df18752faf5dac6e4e3753816d0d84fe2a4bd
+win64  e4900c4ebaf17864c2186682cf80e90ef853c19e3076ae31296524e51dfa5982
 ```
 
 If the native library is absent, the planner uses the NumPy reference

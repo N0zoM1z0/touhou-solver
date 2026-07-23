@@ -853,3 +853,52 @@ Status: observed | inferred | unknown | fixed
 - **Status:** offline corrected, physical acceptance pending. The next focused
   Final B trial must demonstrate sustained queryable coverage and positive
   serial margin under actual game contention.
+
+## CE-0045: A Final-B restart inherited the previous attempt's submit clock
+
+- **Observed symptom:** The selected `222808` Final-B epoch restarted at frame
+  zero but emitted no corridor record until frame 70,798. The first policy
+  source was 70,925. Nonspells and spells 150 through 186 therefore ran only
+  the local controller; only spell 190 exposed 575 policy decisions.
+- **Invalid assumption:** Clearing a completed corridor solution at terminal
+  unload resets asynchronous planning. `corridor_last_submit` remained near
+  70k from the earlier attempt, so the new zero-based manager counter could
+  not satisfy the next-submit interval until it caught up to the old value.
+  Stage/spell context alone also cannot distinguish two attempts of the same
+  thprac phase.
+- **Correction:** Scene resume resets the submit timestamp to its initial
+  sentinel, clears active and pending policies and the lane commitment, and
+  increments `gameplay_epoch`. Async solution context now includes gameplay
+  epoch, stage, and spell, so a running future completed after restart is
+  discarded even when stage/spell match.
+- **Regression:**
+  `test_ce_0045_finalb_restart_discards_previous_gameplay_epoch_policy`.
+  The practice dossier's `--frame-epoch last` regression separately ensures
+  a restarted attempt is scoped with its transition event and earlier
+  decisions excluded.
+- **Status:** code-fixed and unit-verified; physical restart verification is
+  pending. The selected 31-hit epoch is retained as a local-planner failure
+  corpus, not native-policy acceptance evidence.
+
+## CE-0046: Dense hazards hid the native DP's open-field worst case
+
+- **Observed symptom:** The first retained benchmark reported about 25 ms in
+  the native viability phase for 1,500 AABBs and 250 segments, yet the five
+  late live Final-B solutions reported 4,027 ms median and 8,488 ms maximum
+  inside the same phase.
+- **Invalid assumption:** More hazards imply a harder backward-reachability
+  workload. Dense synthetic hazards mark most states unsafe and trigger early
+  exits. Sparse or open fields keep more state/action/delay branches alive and
+  force the old kernel to recompute lattice rounding and sampling error inside
+  every layer.
+- **Correction:** Cache hazard-independent transition indices and sampling
+  errors for every active action, selected action, delay, lattice state, and
+  intermediate physical frame. The cache covers all delays in a layer, so a
+  changing adaptive support does not rebuild it. The daemon prewarms this
+  table before F8.
+- **Performance evidence:** Post-correction Windows warm medians are 294 ms
+  open, 184 ms for 600 AABBs/52 segments, and 446 ms for the retained
+  1,500/250 dense load. The cold open solve is about 1.69 seconds and remains
+  outside gameplay handoff.
+- **Status:** semantic parity and synthetic serviceability pass; a fresh live
+  trace must still prove positive serial margin under game contention.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare two retained TH08 practice dossiers."""
+"""Compare two retained TH08 practice dossiers without stage-specific keys."""
 
 from __future__ import annotations
 
@@ -14,6 +14,56 @@ def _reduction(before: float, after: float) -> float | None:
     return (before - after) / before
 
 
+def _change(before: float | int, after: float | int) -> dict[str, object]:
+    return {
+        "baseline": before,
+        "candidate": after,
+        "delta": after - before,
+        "reduction_fraction": _reduction(float(before), float(after)),
+    }
+
+
+def _mapping_count(mapping: object, key: str) -> int:
+    return int(mapping.get(key, 0)) if isinstance(mapping, dict) else 0
+
+
+def _phase_map(dossier: dict[str, object]) -> dict[str, dict[str, object]]:
+    return {
+        str(phase["phase_key"]): phase
+        for phase in dossier["totals"].get("per_spell", [])
+    }
+
+
+def _percentile_change(
+    baseline: object,
+    candidate: object,
+) -> dict[str, object] | None:
+    if not isinstance(baseline, dict) or not isinstance(candidate, dict):
+        return None
+    return {
+        key: _change(float(baseline[key]), float(candidate[key]))
+        for key in ("median", "p95", "max")
+        if baseline.get(key) is not None and candidate.get(key) is not None
+    }
+
+
+def _optional_mapping_change(
+    baseline: dict[str, object],
+    candidate: dict[str, object],
+    key: str,
+) -> dict[str, object]:
+    before = baseline.get(key)
+    after = candidate.get(key)
+    if before is None or after is None:
+        return {
+            "baseline": before,
+            "candidate": after,
+            "delta": None,
+            "reduction_fraction": None,
+        }
+    return _change(float(before), float(after))
+
+
 def compare_dossiers(
     baseline: dict[str, object],
     candidate: dict[str, object],
@@ -22,46 +72,110 @@ def compare_dossiers(
         if dossier.get("schema") != "th08-practice-dossier-v1":
             raise ValueError(f"{name} has an unsupported dossier schema")
 
-    baseline_totals = baseline["totals"]
-    candidate_totals = candidate["totals"]
-    baseline_spell_50 = baseline_totals["latency_ms"]["corridor_solver"][
-        "active_spell_50"
-    ]
-    candidate_spell_50 = candidate_totals["latency_ms"]["corridor_solver"][
-        "active_spell_50"
-    ]
+    before = baseline["totals"]
+    after = candidate["totals"]
+    before_robust = before.get("robust_viability", {})
+    after_robust = after.get("robust_viability", {})
+    before_status = before_robust.get("policy_status_counts", {})
+    after_status = after_robust.get("policy_status_counts", {})
 
-    def active_spell_hits(dossier: dict[str, object], spell_id: int) -> int:
-        return sum(
-            death["spell_attribution"].get("spell_id") == spell_id
-            for death in dossier["deaths"]
+    robust_counts = {}
+    for key in (
+        "policy_decision_count",
+        "decision_without_query_count",
+        "unique_solution_count",
+        "query_count",
+        "available_query_count",
+        "support_uncovered_query_count",
+        "viable_query_count",
+        "empty_action_set_count",
+        "constrained_decision_count",
+        "serial_worker_serviceable_count",
+    ):
+        robust_counts[key] = _change(
+            int(before_robust.get(key, 0)),
+            int(after_robust.get(key, 0)),
         )
+    robust_counts["queryable_policy_decisions"] = _change(
+        _mapping_count(before_status, "queryable"),
+        _mapping_count(after_status, "queryable"),
+    )
+    robust_counts["expired_policy_decisions"] = _change(
+        _mapping_count(before_status, "expired"),
+        _mapping_count(after_status, "expired"),
+    )
 
-    solve_changes = {}
-    for key in ("median", "p95", "max"):
-        before = float(baseline_spell_50["solve_ms"][key])
-        after = float(candidate_spell_50["solve_ms"][key])
-        solve_changes[key] = {
-            "baseline": before,
-            "candidate": after,
-            "reduction_fraction": _reduction(before, after),
-        }
-    age_changes = {}
-    for key in ("median", "p95", "max"):
-        before = float(baseline_spell_50["age_frames"][key])
-        after = float(candidate_spell_50["age_frames"][key])
-        age_changes[key] = {
-            "baseline": before,
-            "candidate": after,
-            "reduction_fraction": _reduction(before, after),
+    baseline_phases = _phase_map(baseline)
+    candidate_phases = _phase_map(candidate)
+    per_phase = {}
+    for key in sorted(
+        set(baseline_phases) | set(candidate_phases),
+        key=lambda value: (value != "nonspell", int(value) if value != "nonspell" else -1),
+    ):
+        baseline_phase = baseline_phases.get(key, {})
+        candidate_phase = candidate_phases.get(key, {})
+        before_phase_robust = baseline_phase.get("robust_viability", {})
+        after_phase_robust = candidate_phase.get("robust_viability", {})
+        per_phase[key] = {
+            "spell_name": (
+                candidate_phase.get("spell_name")
+                or baseline_phase.get("spell_name")
+            ),
+            "hit_count": _change(
+                int(baseline_phase.get("hit_count", 0)),
+                int(candidate_phase.get("hit_count", 0)),
+            ),
+            "decision_count": _change(
+                int(baseline_phase.get("decision_count", 0)),
+                int(candidate_phase.get("decision_count", 0)),
+            ),
+            "query_count": _change(
+                int(before_phase_robust.get("query_count", 0)),
+                int(after_phase_robust.get("query_count", 0)),
+            ),
+            "empty_action_set_count": _change(
+                int(before_phase_robust.get("empty_action_set_count", 0)),
+                int(after_phase_robust.get("empty_action_set_count", 0)),
+            ),
+            "solve_ms": _percentile_change(
+                before_phase_robust.get("solve_ms"),
+                after_phase_robust.get("solve_ms"),
+            ),
         }
 
-    baseline_hits = int(baseline_totals["death_count"])
-    candidate_hits = int(candidate_totals["death_count"])
+    before_prehit = before.get("behavior_context", {}).get(
+        "alive_preceding_hit_60f",
+        {},
+    )
+    after_prehit = after.get("behavior_context", {}).get(
+        "alive_preceding_hit_60f",
+        {},
+    )
+    before_input = before.get("input_visibility", {})
+    after_input = after.get("input_visibility", {})
+    candidate_scope = candidate.get("practice_scope", {})
     return {
-        "schema": "th08-practice-comparison-v1",
+        "schema": "th08-practice-comparison-v2",
         "baseline_run_id": baseline["run_id"],
         "candidate_run_id": candidate["run_id"],
+        "scope_compatibility": {
+            "same_stage_route_index": (
+                baseline.get("practice_scope", {}).get("stage_route_index")
+                == candidate_scope.get("stage_route_index")
+            ),
+            "candidate_selected_frame_epoch_index": (
+                candidate_scope.get("selected_frame_epoch_index", 0)
+            ),
+            "candidate_frame_epoch_count": (
+                candidate_scope.get("frame_epoch_count", 1)
+            ),
+            "candidate_pre_scope_decisions_excluded": (
+                candidate_scope.get("pre_scope_decision_count_excluded", 0)
+            ),
+            "candidate_raw_summary_scope_valid": bool(
+                candidate_scope.get("raw_summary_is_scope_valid")
+            ),
+        },
         "no_bomb_passed": {
             "baseline": bool(
                 baseline["control_policy"]["verification"]["passed"]
@@ -70,46 +184,52 @@ def compare_dossiers(
                 candidate["control_policy"]["verification"]["passed"]
             ),
         },
-        "death_count": {
-            "baseline": baseline_hits,
-            "candidate": candidate_hits,
-            "reduction_fraction": _reduction(
-                float(baseline_hits),
-                float(candidate_hits),
+        "death_count": _change(
+            int(before["death_count"]),
+            int(after["death_count"]),
+        ),
+        "robust_viability": {
+            "counts": robust_counts,
+            "solve_ms": _percentile_change(
+                before_robust.get("solve_ms"),
+                after_robust.get("solve_ms"),
             ),
-        },
-        "active_spell_hit_count": {
-            "35": {
-                "baseline": active_spell_hits(baseline, 35),
-                "candidate": active_spell_hits(candidate, 35),
+            "backend_counts": {
+                "baseline": before_robust.get("backend_counts", {}),
+                "candidate": after_robust.get("backend_counts", {}),
             },
-            "50": {
-                "baseline": active_spell_hits(baseline, 50),
-                "candidate": active_spell_hits(candidate, 50),
+            "solver_phase_ms": {
+                "baseline": before_robust.get("solver_phase_ms", {}),
+                "candidate": after_robust.get("solver_phase_ms", {}),
             },
-        },
-        "spell_50_corridor": {
-            "solve_ms": solve_changes,
-            "age_frames": age_changes,
-            "stale_solution_count": {
-                "baseline": int(
-                    baseline_spell_50["stale_solution_count"]
+            "serial_coverage_margin_frames": {
+                "baseline": before_robust.get(
+                    "serial_coverage_margin_frames"
                 ),
-                "candidate": int(
-                    candidate_spell_50["stale_solution_count"]
+                "candidate": after_robust.get(
+                    "serial_coverage_margin_frames"
                 ),
             },
         },
-        "candidate_decision_cadence_frames": candidate_totals[
-            "decision_cadence_frames"
-        ],
-        "candidate_behavior_context": candidate_totals["behavior_context"],
-        "candidate_hit_contact_epoch": candidate_totals[
-            "hit_contact_epoch"
-        ],
-        "candidate_primary_cause_counts": candidate_totals[
-            "primary_cause_counts"
-        ],
+        "prehit_behavior": {
+            key: _optional_mapping_change(before_prehit, after_prehit, key)
+            for key in (
+                "fast_fraction",
+                "bottom_8px_fraction",
+                "nonpositive_pipeline_fraction",
+                "negative_corridor_slack_fraction",
+            )
+        },
+        "input_visible_next_observation_fraction": _change(
+            float(before_input.get("visible_on_next_observation_fraction", 0.0)),
+            float(after_input.get("visible_on_next_observation_fraction", 0.0)),
+        ),
+        "per_phase": per_phase,
+        "candidate_primary_cause_counts": after["primary_cause_counts"],
+        "candidate_planner_failure_counts": after.get(
+            "planner_failure_counts",
+            {},
+        ),
     }
 
 

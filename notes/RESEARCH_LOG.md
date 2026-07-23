@@ -1271,3 +1271,31 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   submission envelope. The next physical Final B trial must verify the native
   backend, positive serial margin, fewer expired decisions, and retained
   no-Bomb evidence before this correction is accepted.
+
+## 2026-07-23: Final B Multi-Epoch Failure And Transition-Cache Repair
+
+- Scoped the operator-selected later epoch of `222808` to frames `0..72341`,
+  excluding 16,964 earlier decisions. The selected attempt contains 17,722
+  decisions, 31 native hit edges, and zero Bomb input. Its raw summary
+  aggregates two attempts and is explicitly not scope-valid.
+- The selected epoch did not test sustained native policy control. Its first
+  corridor record appeared at frame 70,798 and source 70,925; all earlier
+  phases had zero policy queries. The controller retained the first attempt's
+  `corridor_last_submit` timestamp across the zero-based thprac restart.
+- Scene resume now resets rolling-policy state and increments a gameplay
+  epoch. Async context includes gameplay epoch, stage, and spell so an old
+  running future cannot be accepted by an identical restarted phase.
+- The trace also invalidated the dense-only native benchmark. Live native
+  viability took 4,027 ms median because sparse/open fields preserve many more
+  DP branches, while the dense benchmark pruned them early.
+- The C++ kernel now caches hazard-independent physical transition indices and
+  sampling errors across all delays. Windows warm medians are 294 ms open,
+  184 ms at 600 AABBs/52 segments, and 446 ms at 1,500/250. Cold geometry
+  construction remains in the pre-F8 daemon warmup.
+- Practice artifacts now select a monotone frame epoch explicitly and retain
+  earlier/later exclusion counts. The comparison schema is phase-generic and
+  no longer assumes Stage-3 spell 50.
+- Retained outputs are the scoped dossier, death CSV, executable 31-case
+  regression corpus, generalized comparison, raw aggregate summary, three
+  Windows performance artifacts, and the run note. Physical acceptance of
+  these corrections remains pending a fresh daemon and Final-B attempt.

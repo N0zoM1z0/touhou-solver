@@ -17,6 +17,7 @@ from th08_practice_dossier import (
     _no_bomb_verification,
     _promote_enemy_body_candidates,
     _robust_viability_summary,
+    _select_frame_epoch,
     _spell_phase_summary,
     render_markdown,
 )
@@ -310,6 +311,41 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(
             [(row["kind"], row["frame"]) for row in scenes],
             [("scene_inactive", 102)],
+        )
+
+    def test_last_frame_epoch_selects_restarted_attempt_with_transition(self) -> None:
+        rows = [
+            _decision(100),
+            _decision(102),
+            {"kind": "scene_inactive", "frame": 102},
+            {"kind": "auto_confirm_transition_pulse", "frame": 0},
+            {"kind": "scene_resumed", "frame": 0},
+            _decision(0),
+            _decision(2),
+        ]
+        selected, index, count, before, after = _select_frame_epoch(
+            rows,
+            "last",
+        )
+        self.assertEqual((index, count, before, after), (1, 2, 2, 0))
+        self.assertEqual(
+            [row["kind"] for row in selected[:3]],
+            [
+                "auto_confirm_transition_pulse",
+                "scene_resumed",
+                "decision",
+            ],
+        )
+        decisions, end, scenes, excluded = _extract_scope(
+            selected,
+            trace_path=Path("trace.jsonl"),
+        )
+        self.assertEqual([row["frame"] for row in decisions], [0, 2])
+        self.assertEqual(end["reason"], "raw_trace_end")
+        self.assertEqual(excluded, 0)
+        self.assertEqual(
+            [(row["kind"], row["frame"]) for row in scenes],
+            [("scene_resumed", 0)],
         )
 
     def test_no_bomb_invariant_checks_mask_flag_action_and_config(self) -> None:

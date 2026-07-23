@@ -132,6 +132,7 @@ CORRIDOR_MAX_AGE_FRAMES = (
 CORRIDOR_POLICY_LEAD_INITIAL_FRAMES = 80
 CORRIDOR_POLICY_OVERLAP_FRAMES = 8
 CORRIDOR_MIN_COMMIT_FRAMES = 32
+CORRIDOR_INITIAL_SUBMIT_FRAME = -1_000_000
 STAGE_TRANSITION_TIMEOUT_SECONDS = 90.0
 TERMINAL_INACTIVE_GRACE_SECONDS = 5.0
 
@@ -258,7 +259,7 @@ class CorridorSolution:
     forecast_lead_frames: int = 0
     required_gate_lane: str | None = None
     constraint_honored: bool = False
-    context_key: tuple[int, int | None] | None = None
+    context_key: tuple[int, int, int | None] | None = None
 
 
 @dataclass
@@ -267,9 +268,12 @@ class CorridorCommitment:
 
     lane: str | None = None
     expires_frame: int = -1
-    context_key: tuple[int, int | None] | None = None
+    context_key: tuple[int, int, int | None] | None = None
 
-    def set_context(self, context_key: tuple[int, int | None]) -> bool:
+    def set_context(
+        self,
+        context_key: tuple[int, int, int | None],
+    ) -> bool:
         if self.context_key == context_key:
             return False
         self.context_key = context_key
@@ -1773,7 +1777,7 @@ def _solve_corridor(
     nominal_control_delay: int,
     active_action: str,
     required_gate_lane: str | None = None,
-    context_key: tuple[int, int | None] | None = None,
+    context_key: tuple[int, int, int | None] | None = None,
 ) -> CorridorSolution:
     started = time.perf_counter()
     plan = plan_th08_corridor(
@@ -1883,7 +1887,7 @@ def _stage_corridor_solution(
     candidate: CorridorSolution,
     *,
     current_frame: int,
-    context_key: tuple[int, int | None],
+    context_key: tuple[int, int, int | None],
 ) -> tuple[CorridorSolution | None, CorridorSolution | None]:
     """Keep the active policy until a matching future epoch is reached."""
 
@@ -1892,6 +1896,15 @@ def _stage_corridor_solution(
     if candidate.source_frame <= current_frame:
         return candidate, None
     return active, candidate
+
+
+def _corridor_submit_due(
+    *,
+    current_frame: int,
+    last_submit_frame: int,
+    interval_frames: int,
+) -> bool:
+    return current_frame - last_submit_frame >= interval_frames
 
 
 def _write_run_summary(
@@ -1968,9 +1981,10 @@ def run(args: argparse.Namespace) -> int:
     corridor_future: Future[CorridorSolution] | None = None
     corridor_solution: CorridorSolution | None = None
     corridor_pending_solution: CorridorSolution | None = None
-    corridor_last_submit = -1000000
+    corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
     corridor_commitment = CorridorCommitment()
-    corridor_context: tuple[int, int | None] | None = None
+    corridor_context: tuple[int, int, int | None] | None = None
+    gameplay_epoch = 0
     auto_confirm = AutoConfirmPulse(
         interval_frames=args.auto_confirm_every,
         idle_frames=args.auto_confirm_idle_frames,
@@ -2043,6 +2057,9 @@ def run(args: argparse.Namespace) -> int:
                         args.corridor_max_age
                     ),
                     "async_policy_epoch": "forecasted_solve_completion",
+                    "async_policy_context": (
+                        "gameplay_epoch_stage_spell"
+                    ),
                     "async_policy_initial_lead_frames": (
                         corridor_policy_lead.frames
                     ),
@@ -2140,6 +2157,7 @@ def run(args: argparse.Namespace) -> int:
                     previous_mask = 0
                     previous_direction = 0
                     corridor_solution = None
+                    corridor_pending_solution = None
                     if corridor_future is not None and corridor_future.cancel():
                         corridor_future = None
                     output.write(
@@ -2200,6 +2218,7 @@ def run(args: argparse.Namespace) -> int:
                 time.sleep(args.poll_ms / 1000.0)
                 continue
             if scene_decision.status == "resumed":
+                gameplay_epoch += 1
                 output.write(
                     json.dumps(
                         {
@@ -2217,6 +2236,7 @@ def run(args: argparse.Namespace) -> int:
                                 or scene_decision.expected_stage
                                 == stage_route_index
                             ),
+                            "gameplay_epoch": gameplay_epoch,
                         }
                     )
                     + "\n"
@@ -2229,6 +2249,13 @@ def run(args: argparse.Namespace) -> int:
                 delay_estimator.reset()
                 previous_iteration_ms = None
                 previous_trace_ms = None
+                corridor_solution = None
+                corridor_pending_solution = None
+                corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
+                corridor_context = None
+                corridor_commitment = CorridorCommitment()
+                if corridor_future is not None and corridor_future.cancel():
+                    corridor_future = None
                 auto_confirm.eligible_since = None
                 auto_confirm.released = False
                 last_frame_progress = now
@@ -2287,6 +2314,7 @@ def run(args: argparse.Namespace) -> int:
                 gaps += 1
             spell_state = state["spell"]
             corridor_context = (
+                gameplay_epoch,
                 int(state["stage_route_index"]),
                 (
                     int(spell_state["spell_id"])
@@ -2398,8 +2426,11 @@ def run(args: argparse.Namespace) -> int:
                 corridor_executor is not None
                 and corridor_future is None
                 and corridor_pending_solution is None
-                and counter_after_read - corridor_last_submit
-                >= args.corridor_every
+                and _corridor_submit_due(
+                    current_frame=counter_after_read,
+                    last_submit_frame=corridor_last_submit,
+                    interval_frames=args.corridor_every,
+                )
             ):
                 forecast_lead_frames = corridor_policy_lead.frames
                 policy_delay_support = delay_support_envelope(
@@ -2605,6 +2636,7 @@ def run(args: argparse.Namespace) -> int:
                 record = {
                     "kind": "decision",
                     "frame": counter_at_action,
+                    "gameplay_epoch": gameplay_epoch,
                     "snapshot_frame": state["enemy_manager_frame"],
                     "snapshot_lag": snapshot_lag,
                     "action_lag": counter_at_action - int(state["enemy_manager_frame"]),

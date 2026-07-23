@@ -321,6 +321,7 @@ def _compact_decision(
     )
     compact = {
         "frame": int(row["frame"]),
+        "gameplay_epoch": int(row.get("gameplay_epoch", 0)),
         "trace_index": trace_index,
         "trace_path": str(trace_path),
         "stage_route_index": int(row["stage_route_index"]),

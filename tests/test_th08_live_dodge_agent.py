@@ -17,6 +17,7 @@ from th08_live_dodge_agent import (
     AutoConfirmPulse,
     Bullet,
     CorridorCommitment,
+    CORRIDOR_INITIAL_SUBMIT_FRAME,
     CorridorSolution,
     ENEMY_BODY_READ_OFFSET,
     ENEMY_BODY_READ_SIZE,
@@ -34,6 +35,7 @@ from th08_live_dodge_agent import (
     _auto_confirm_eligible,
     _action_name_from_mask,
     _corridor_policy_status,
+    _corridor_submit_due,
     _corridor_target,
     _corridor_viability_query,
     _estimate_live_action_hold,
@@ -514,9 +516,9 @@ class LiveDodgeAgentTests(unittest.TestCase):
             ),
         )
         commitment = CorridorCommitment()
-        self.assertTrue(commitment.set_context((0, None)))
+        self.assertTrue(commitment.set_context((0, 0, None)))
         commitment.accept(
-            CorridorSolution(100, plan, 12.0, context_key=(0, None)),
+            CorridorSolution(100, plan, 12.0, context_key=(0, 0, None)),
             current_frame=104,
         )
         original_expiry = commitment.expires_frame
@@ -529,7 +531,7 @@ class LiveDodgeAgentTests(unittest.TestCase):
                 12.0,
                 required_gate_lane="left",
                 constraint_honored=True,
-                context_key=(0, None),
+                context_key=(0, 0, None),
             ),
             current_frame=124,
         )
@@ -537,9 +539,9 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertIsNone(commitment.active_lane(original_expiry))
 
     def test_corridor_commitment_resets_at_spell_context_boundary(self) -> None:
-        commitment = CorridorCommitment("right", 200, (0, None))
-        self.assertFalse(commitment.set_context((0, None)))
-        self.assertTrue(commitment.set_context((0, 145)))
+        commitment = CorridorCommitment("right", 200, (0, 0, None))
+        self.assertFalse(commitment.set_context((0, 0, None)))
+        self.assertTrue(commitment.set_context((0, 0, 145)))
         self.assertIsNone(commitment.active_lane(150))
 
     def test_ce_frame_844_leaves_bottom_left_corner_early(self) -> None:
@@ -684,7 +686,7 @@ class LiveDodgeAgentTests(unittest.TestCase):
             800.0,
             snapshot_frame=72,
             forecast_lead_frames=48,
-            context_key=(3, 57),
+            context_key=(0, 3, 57),
         )
         self.assertEqual(
             _corridor_policy_status(
@@ -724,13 +726,13 @@ class LiveDodgeAgentTests(unittest.TestCase):
                 horizon_frames=16,
             ),
         )
-        active = CorridorSolution(100, plan, 10.0, context_key=(3, 57))
-        future = CorridorSolution(120, plan, 8.0, context_key=(3, 57))
+        active = CorridorSolution(100, plan, 10.0, context_key=(0, 3, 57))
+        future = CorridorSolution(120, plan, 8.0, context_key=(0, 3, 57))
         staged_active, pending = _stage_corridor_solution(
             active,
             future,
             current_frame=119,
-            context_key=(3, 57),
+            context_key=(0, 3, 57),
         )
         self.assertIs(staged_active, active)
         self.assertIs(pending, future)
@@ -738,9 +740,51 @@ class LiveDodgeAgentTests(unittest.TestCase):
             staged_active,
             pending,
             current_frame=120,
-            context_key=(3, 57),
+            context_key=(0, 3, 57),
         )
         self.assertIs(staged_active, future)
+        self.assertIsNone(pending)
+
+    def test_ce_0045_finalb_restart_discards_previous_gameplay_epoch_policy(
+        self,
+    ) -> None:
+        self.assertFalse(
+            _corridor_submit_due(
+                current_frame=0,
+                last_submit_frame=70_745,
+                interval_frames=24,
+            )
+        )
+        self.assertTrue(
+            _corridor_submit_due(
+                current_frame=0,
+                last_submit_frame=CORRIDOR_INITIAL_SUBMIT_FRAME,
+                interval_frames=24,
+            )
+        )
+        plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=CorridorBounds(0.0, 96.0, 0.0, 96.0),
+            config=CorridorConfig(
+                grid_step=8.0,
+                frames_per_layer=4,
+                horizon_frames=16,
+            ),
+        )
+        old_future = CorridorSolution(
+            70800,
+            plan,
+            4000.0,
+            context_key=(0, 7, None),
+        )
+        active, pending = _stage_corridor_solution(
+            None,
+            old_future,
+            current_frame=0,
+            context_key=(1, 7, None),
+        )
+        self.assertIsNone(active)
         self.assertIsNone(pending)
 
     def test_ce_frame_1420_commits_away_before_bottom_edge_trap(self) -> None:

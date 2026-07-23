@@ -38,6 +38,9 @@ class PracticeTrace:
     decisions: tuple[dict[str, object], ...]
     end_event: dict[str, object]
     scene_events: tuple[dict[str, object], ...]
+    frame_epoch_index: int
+    frame_epoch_count: int
+    pre_scope_decision_count: int
     post_scope_decision_count: int
 
 
@@ -128,7 +131,83 @@ def _extract_scope(
     return decisions, end_event, scene_events, post_scope_decisions
 
 
-def read_practice_trace(path: Path) -> PracticeTrace:
+def _select_frame_epoch(
+    rows: list[dict[str, object]],
+    selector: str | int,
+) -> tuple[list[dict[str, object]], int, int, int, int]:
+    """Select one monotone gameplay-frame epoch from a multi-attempt trace."""
+    starts = [0]
+    previous_decision_frame: int | None = None
+    previous_stage: int | None = None
+    pending_event_boundary: int | None = None
+    decision_indices: list[int] = []
+
+    for index, row in enumerate(rows):
+        frame = row.get("frame")
+        if not isinstance(frame, int):
+            continue
+        if (
+            previous_decision_frame is not None
+            and frame < previous_decision_frame
+            and pending_event_boundary is None
+        ):
+            pending_event_boundary = index
+        if row.get("kind") != "decision":
+            continue
+        decision_indices.append(index)
+        stage = int(row["stage_route_index"])
+        if previous_decision_frame is not None and (
+            frame < previous_decision_frame or stage != previous_stage
+        ):
+            starts.append(
+                pending_event_boundary
+                if pending_event_boundary is not None
+                else index
+            )
+        previous_decision_frame = frame
+        previous_stage = stage
+        pending_event_boundary = None
+
+    if not decision_indices:
+        raise ValueError("trace contains no decisions")
+    epoch_count = len(starts)
+    if isinstance(selector, str):
+        if selector == "first":
+            epoch_index = 0
+        elif selector == "last":
+            epoch_index = epoch_count - 1
+        else:
+            try:
+                epoch_index = int(selector)
+            except ValueError as exc:
+                raise ValueError(
+                    "frame epoch must be 'first', 'last', or a zero-based index"
+                ) from exc
+    else:
+        epoch_index = selector
+    if not 0 <= epoch_index < epoch_count:
+        raise ValueError(
+            f"frame epoch {epoch_index} is outside 0..{epoch_count - 1}"
+        )
+
+    start = starts[epoch_index]
+    end = starts[epoch_index + 1] if epoch_index + 1 < epoch_count else len(rows)
+    selected = rows[start:end]
+    selected_decisions = sum(row.get("kind") == "decision" for row in selected)
+    pre_decisions = sum(
+        row.get("kind") == "decision" for row in rows[:start]
+    )
+    post_decisions = (
+        len(decision_indices) - pre_decisions - selected_decisions
+    )
+    return selected, epoch_index, epoch_count, pre_decisions, post_decisions
+
+
+def read_practice_trace(
+    path: Path,
+    *,
+    frame_epoch: str | int | None = None,
+) -> PracticeTrace:
     digest = hashlib.sha256()
     rows: list[dict[str, object]] = []
     parse_errors = 0
@@ -155,8 +234,21 @@ def read_practice_trace(path: Path) -> PracticeTrace:
             elif kind == "summary":
                 raw_summary = row
 
+    epoch_index = 0
+    epoch_count = 1
+    pre_scope_decisions = 0
+    epoch_post_decisions = 0
+    scoped_rows = rows
+    if frame_epoch is not None:
+        (
+            scoped_rows,
+            epoch_index,
+            epoch_count,
+            pre_scope_decisions,
+            epoch_post_decisions,
+        ) = _select_frame_epoch(rows, frame_epoch)
     decisions, end_event, scene_events, post_scope_decisions = _extract_scope(
-        rows,
+        scoped_rows,
         trace_path=path,
     )
     return PracticeTrace(
@@ -171,7 +263,12 @@ def read_practice_trace(path: Path) -> PracticeTrace:
         decisions=tuple(decisions),
         end_event=end_event,
         scene_events=tuple(scene_events),
-        post_scope_decision_count=post_scope_decisions,
+        frame_epoch_index=epoch_index,
+        frame_epoch_count=epoch_count,
+        pre_scope_decision_count=pre_scope_decisions,
+        post_scope_decision_count=(
+            post_scope_decisions + epoch_post_decisions
+        ),
     )
 
 
@@ -896,13 +993,19 @@ def build_dossier(
                 int(decisions[-1]["frame"]) - int(decisions[0]["frame"])
             ),
             "decision_count": len(decisions),
+            "selected_frame_epoch_index": trace.frame_epoch_index,
+            "frame_epoch_count": trace.frame_epoch_count,
             "end_event": trace.end_event,
+            "pre_scope_decision_count_excluded": (
+                trace.pre_scope_decision_count
+            ),
             "post_scope_decision_count_excluded": (
                 trace.post_scope_decision_count
             ),
             "scene_events": list(trace.scene_events),
             "raw_summary_is_scope_valid": (
                 trace.raw_summary is not None
+                and trace.frame_epoch_count == 1
                 and int(trace.raw_summary.get("last_frame", -1))
                 == int(decisions[-1]["frame"])
             ),
@@ -1107,6 +1210,10 @@ def render_markdown(dossier: dict[str, object]) -> str:
         "",
         f"- Valid practice scope: `{scope['first_frame']}.."
         f"{scope['last_frame']}` ({scope['decision_count']} decisions).",
+        f"- Selected frame epoch: {scope.get('selected_frame_epoch_index', 0)} "
+        f"of {scope.get('frame_epoch_count', 1)}; "
+        f"{scope.get('pre_scope_decision_count_excluded', 0)} earlier decisions "
+        "were excluded.",
         f"- Scope terminator: `{scope['end_event']['reason']}`; "
         f"{scope['post_scope_decision_count_excluded']} reset-tail decisions "
         "were excluded.",
@@ -1491,13 +1598,21 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--trace", type=Path, required=True)
+    parser.add_argument(
+        "--frame-epoch",
+        default=None,
+        help="'first', 'last', or a zero-based monotone gameplay-frame epoch",
+    )
     parser.add_argument("--json-output", type=Path, required=True)
     parser.add_argument("--markdown-output", type=Path, required=True)
     parser.add_argument("--death-csv", type=Path, required=True)
     parser.add_argument("--regression-output", type=Path, required=True)
     args = parser.parse_args(argv)
 
-    trace = read_practice_trace(args.trace)
+    trace = read_practice_trace(
+        args.trace,
+        frame_epoch=args.frame_epoch,
+    )
     dossier = build_dossier(run_id=args.run_id, trace=trace)
     args.json_output.parent.mkdir(parents=True, exist_ok=True)
     args.json_output.write_text(

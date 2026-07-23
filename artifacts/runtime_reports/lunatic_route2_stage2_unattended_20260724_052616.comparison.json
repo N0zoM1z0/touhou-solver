@@ -1,0 +1,451 @@
+{
+  "schema": "th08-practice-comparison-v2",
+  "baseline_run_id": "lunatic_route2_stage2_unattended_20260724_043310",
+  "candidate_run_id": "lunatic_route2_stage2_unattended_20260724_052616",
+  "scope_compatibility": {
+    "same_stage_route_index": true,
+    "candidate_selected_frame_epoch_index": 0,
+    "candidate_frame_epoch_count": 1,
+    "candidate_pre_scope_decisions_excluded": 0,
+    "candidate_raw_summary_scope_valid": true
+  },
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 5,
+    "candidate": 2,
+    "delta": -3,
+    "reduction_fraction": 0.6
+  },
+  "robust_viability": {
+    "counts": {
+      "policy_decision_count": {
+        "baseline": 6047,
+        "candidate": 6137,
+        "delta": 90,
+        "reduction_fraction": -0.01488341326277493
+      },
+      "decision_without_query_count": {
+        "baseline": 50,
+        "candidate": 51,
+        "delta": 1,
+        "reduction_fraction": -0.02
+      },
+      "unique_solution_count": {
+        "baseline": 766,
+        "candidate": 781,
+        "delta": 15,
+        "reduction_fraction": -0.0195822454308094
+      },
+      "query_count": {
+        "baseline": 5997,
+        "candidate": 6086,
+        "delta": 89,
+        "reduction_fraction": -0.014840753710188427
+      },
+      "available_query_count": {
+        "baseline": 5997,
+        "candidate": 6086,
+        "delta": 89,
+        "reduction_fraction": -0.014840753710188427
+      },
+      "support_uncovered_query_count": {
+        "baseline": 44,
+        "candidate": 87,
+        "delta": 43,
+        "reduction_fraction": -0.9772727272727273
+      },
+      "viable_query_count": {
+        "baseline": 3770,
+        "candidate": 3514,
+        "delta": -256,
+        "reduction_fraction": 0.06790450928381962
+      },
+      "empty_action_set_count": {
+        "baseline": 2227,
+        "candidate": 2572,
+        "delta": 345,
+        "reduction_fraction": -0.15491692860350248
+      },
+      "constrained_decision_count": {
+        "baseline": 3743,
+        "candidate": 3127,
+        "delta": -616,
+        "reduction_fraction": 0.16457387122628908
+      },
+      "serial_worker_serviceable_count": {
+        "baseline": 5938,
+        "candidate": 6024,
+        "delta": 86,
+        "reduction_fraction": -0.014482990906028967
+      },
+      "queryable_policy_decisions": {
+        "baseline": 5996,
+        "candidate": 6087,
+        "delta": 91,
+        "reduction_fraction": -0.015176784523015343
+      },
+      "expired_policy_decisions": {
+        "baseline": 11,
+        "candidate": 10,
+        "delta": -1,
+        "reduction_fraction": 0.09090909090909091
+      }
+    },
+    "solve_ms": {
+      "median": {
+        "baseline": 224.86435000610072,
+        "candidate": 225.45230001560412,
+        "delta": 0.5879500095034018,
+        "reduction_fraction": -0.002614687519330878
+      },
+      "p95": {
+        "baseline": 386.28659999812953,
+        "candidate": 384.3879000050947,
+        "delta": -1.8986999930348247,
+        "reduction_fraction": 0.004915262380429501
+      },
+      "max": {
+        "baseline": 449.7261999931652,
+        "candidate": 465.94130000448786,
+        "delta": 16.215100011322647,
+        "reduction_fraction": -0.03605549334588263
+      }
+    },
+    "backend_counts": {
+      "baseline": {
+        "native": 766
+      },
+      "candidate": {
+        "native": 781
+      }
+    },
+    "solver_phase_ms": {
+      "baseline": {
+        "clearance": {
+          "median": 89.46945000207052,
+          "p95": 182.47800000244752,
+          "max": 321.39629998710006
+        },
+        "rollout": {
+          "median": 3.8377000018954277,
+          "p95": 30.61419998994097,
+          "max": 60.17229999997653
+        },
+        "viability": {
+          "median": 106.93275000085123,
+          "p95": 342.27580000879243,
+          "max": 414.8544000054244
+        }
+      },
+      "candidate": {
+        "clearance": {
+          "median": 93.73799999593757,
+          "p95": 186.12950001261197,
+          "max": 321.5016000031028
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 27.085699985036626,
+          "max": 61.12850000499748
+        },
+        "viability": {
+          "median": 103.06829999899492,
+          "p95": 345.96060001058504,
+          "max": 417.8593000106048
+        }
+      }
+    },
+    "serial_coverage_margin_frames": {
+      "baseline": {
+        "median": 60.0,
+        "p95": 64.0,
+        "max": 64.0
+      },
+      "candidate": {
+        "median": 61.0,
+        "p95": 64.0,
+        "max": 64.0
+      }
+    }
+  },
+  "prehit_behavior": {
+    "fast_fraction": {
+      "baseline": 0.32,
+      "candidate": 0.14285714285714285,
+      "delta": -0.17714285714285716,
+      "reduction_fraction": 0.5535714285714286
+    },
+    "bottom_8px_fraction": {
+      "baseline": 0.27,
+      "candidate": 0.37142857142857144,
+      "delta": 0.10142857142857142,
+      "reduction_fraction": -0.37566137566137564
+    },
+    "nonpositive_pipeline_fraction": {
+      "baseline": 0.09,
+      "candidate": 0.05714285714285714,
+      "delta": -0.032857142857142856,
+      "reduction_fraction": 0.36507936507936506
+    },
+    "negative_corridor_slack_fraction": {
+      "baseline": 0.0,
+      "candidate": 0.0,
+      "delta": 0.0,
+      "reduction_fraction": null
+    }
+  },
+  "input_visible_next_observation_fraction": {
+    "baseline": 0.8596377749029754,
+    "candidate": 0.8821000921093031,
+    "delta": 0.02246231720632763,
+    "reduction_fraction": -0.026129979233244935
+  },
+  "per_phase": {
+    "nonspell": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 4,
+        "candidate": 0,
+        "delta": -4,
+        "reduction_fraction": 1.0
+      },
+      "decision_count": {
+        "baseline": 3563,
+        "candidate": 3537,
+        "delta": -26,
+        "reduction_fraction": 0.007297221442604546
+      },
+      "query_count": {
+        "baseline": 3489,
+        "candidate": 3449,
+        "delta": -40,
+        "reduction_fraction": 0.011464603038119804
+      },
+      "empty_action_set_count": {
+        "baseline": 1197,
+        "candidate": 1360,
+        "delta": 163,
+        "reduction_fraction": -0.1361737677527151
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 276.13564998318907,
+          "candidate": 266.2236999894958,
+          "delta": -9.91194999369327,
+          "reduction_fraction": 0.035895220317610936
+        },
+        "p95": {
+          "baseline": 402.1319000166841,
+          "candidate": 401.4571000006981,
+          "delta": -0.6748000159859657,
+          "reduction_fraction": 0.00167805641869737
+        },
+        "max": {
+          "baseline": 449.7261999931652,
+          "candidate": 465.94130000448786,
+          "delta": 16.215100011322647,
+          "reduction_fraction": -0.03605549334588263
+        }
+      }
+    },
+    "16": {
+      "spell_name": "声符「木菟咆哮」",
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 1,
+        "delta": 1,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 543,
+        "candidate": 563,
+        "delta": 20,
+        "reduction_fraction": -0.03683241252302026
+      },
+      "query_count": {
+        "baseline": 535,
+        "candidate": 553,
+        "delta": 18,
+        "reduction_fraction": -0.03364485981308411
+      },
+      "empty_action_set_count": {
+        "baseline": 128,
+        "candidate": 152,
+        "delta": 24,
+        "reduction_fraction": -0.1875
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 222.19669999321923,
+          "candidate": 226.6894000058528,
+          "delta": 4.492700012633577,
+          "reduction_fraction": -0.020219472263857566
+        },
+        "p95": {
+          "baseline": 329.7614000039175,
+          "candidate": 322.5035000068601,
+          "delta": -7.257899997057393,
+          "reduction_fraction": 0.022009549926010657
+        },
+        "max": {
+          "baseline": 399.54139999463223,
+          "candidate": 371.80410002474673,
+          "delta": -27.7372999698855,
+          "reduction_fraction": 0.06942284321539181
+        }
+      }
+    },
+    "20": {
+      "spell_name": "猛毒「毒蛾の暗闇演舞」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 0,
+        "delta": -1,
+        "reduction_fraction": 1.0
+      },
+      "decision_count": {
+        "baseline": 623,
+        "candidate": 718,
+        "delta": 95,
+        "reduction_fraction": -0.15248796147672553
+      },
+      "query_count": {
+        "baseline": 614,
+        "candidate": 710,
+        "delta": 96,
+        "reduction_fraction": -0.1563517915309446
+      },
+      "empty_action_set_count": {
+        "baseline": 250,
+        "candidate": 442,
+        "delta": 192,
+        "reduction_fraction": -0.768
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 182.2517499967944,
+          "candidate": 177.9470500041498,
+          "delta": -4.304699992644601,
+          "reduction_fraction": 0.023619526247184542
+        },
+        "p95": {
+          "baseline": 284.9114999989979,
+          "candidate": 276.6655000159517,
+          "delta": -8.245999983046204,
+          "reduction_fraction": 0.028942320626142527
+        },
+        "max": {
+          "baseline": 355.3463999996893,
+          "candidate": 326.78929998655804,
+          "delta": -28.557100013131276,
+          "reduction_fraction": 0.08036411797940332
+        }
+      }
+    },
+    "24": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 709,
+        "candidate": 684,
+        "delta": -25,
+        "reduction_fraction": 0.03526093088857546
+      },
+      "query_count": {
+        "baseline": 694,
+        "candidate": 671,
+        "delta": -23,
+        "reduction_fraction": 0.03314121037463977
+      },
+      "empty_action_set_count": {
+        "baseline": 233,
+        "candidate": 265,
+        "delta": 32,
+        "reduction_fraction": -0.13733905579399142
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 194.61360000423156,
+          "candidate": 191.49889999243896,
+          "delta": -3.1147000117925927,
+          "reduction_fraction": 0.01600453417297079
+        },
+        "p95": {
+          "baseline": 266.09540000208654,
+          "candidate": 265.84430001094006,
+          "delta": -0.2510999911464751,
+          "reduction_fraction": 0.0009436464934925824
+        },
+        "max": {
+          "baseline": 319.3371999950614,
+          "candidate": 327.8800999978557,
+          "delta": 8.54290000279434,
+          "reduction_fraction": -0.02675197253225261
+        }
+      }
+    },
+    "28": {
+      "spell_name": "夜盲「夜雀の歌」",
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 1,
+        "delta": 1,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 672,
+        "candidate": 717,
+        "delta": 45,
+        "reduction_fraction": -0.06696428571428571
+      },
+      "query_count": {
+        "baseline": 665,
+        "candidate": 703,
+        "delta": 38,
+        "reduction_fraction": -0.05714285714285714
+      },
+      "empty_action_set_count": {
+        "baseline": 419,
+        "candidate": 353,
+        "delta": -66,
+        "reduction_fraction": 0.1575178997613365
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 181.060199989588,
+          "candidate": 183.34950000280514,
+          "delta": 2.2893000132171437,
+          "reduction_fraction": -0.012643861065815632
+        },
+        "p95": {
+          "baseline": 300.3323000157252,
+          "candidate": 338.04540001438,
+          "delta": 37.7130999986548,
+          "reduction_fraction": -0.12557124224294278
+        },
+        "max": {
+          "baseline": 346.6076999902725,
+          "candidate": 393.41560000320897,
+          "delta": 46.80790001293644,
+          "reduction_fraction": -0.13504575926688905
+        }
+      }
+    }
+  },
+  "candidate_primary_cause_counts": {
+    "observed_bullet_overlap": 1,
+    "modeled_committed_prefix_collision": 1
+  },
+  "candidate_planner_failure_counts": {
+    "robust_action_set_exhausted_before_hit": 1,
+    "global_viability_kernel_exhausted_before_hit": 1
+  }
+}

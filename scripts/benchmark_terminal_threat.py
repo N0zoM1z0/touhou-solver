@@ -52,6 +52,9 @@ def _decision(row: dict[str, object], threat_horizon: int):
         viability_repair_volumes=tuple(
             viability["repair_volumes"].items()
         ),
+        viability_position_error=float(
+            viability.get("position_error", 0.0)
+        ),
     )
 
 
@@ -85,6 +88,7 @@ def main() -> int:
     durations = {10: [], 32: []}
     actions = {10: [""] * len(rows), 32: [""] * len(rows)}
     triggered = {10: 0, 32: 0}
+    relaxed = {10: 0, 32: 0}
     for index, row in enumerate(rows):
         order = (10, 32) if index % 2 == 0 else (32, 10)
         for horizon in order:
@@ -95,6 +99,7 @@ def main() -> int:
             )
             actions[horizon][index] = decision.action
             triggered[horizon] += decision.terminal_threat_horizon > 10
+            relaxed[horizon] += decision.viability_constraint_relaxed
     variants = {}
     for horizon in (10, 32):
         variants[str(horizon)] = {
@@ -102,6 +107,7 @@ def main() -> int:
             "p95_ms": _p95(durations[horizon]),
             "max_ms": max(durations[horizon]),
             "triggered_count": triggered[horizon],
+            "constraint_relaxed_count": relaxed[horizon],
         }
 
     result = {

@@ -778,7 +778,30 @@ def _plan_robust_corridor(
             active_action=active_action,
         )
         if not query.safe_actions:
-            raise RuntimeError("viability rollout left its own backward kernel")
+            return CorridorPlan(
+                reachable=False,
+                path=(),
+                bottleneck_clearance=-math.inf,
+                terminal_clearance=-math.inf,
+                lane="none",
+                gate=None,
+                reason=(
+                    "representative rollout could not remain in the "
+                    "backward kernel"
+                ),
+                planning_mode="robust_viability",
+                viability_policy=policy,
+                initial_safe_action_count=start_query.safe_action_count,
+                initial_repair_volume=initial_repair_volume,
+                viability_backend=policy.backend,
+                solver_timing_ms=(
+                    *base_timing,
+                    (
+                        "rollout",
+                        (time.perf_counter() - viability_finished) * 1000.0,
+                    ),
+                ),
+            )
         candidates: list[
             tuple[tuple[float, ...], str, float, float, int, float]
         ] = []
@@ -789,10 +812,13 @@ def _plan_robust_corridor(
                 active_action=active_action,
                 next_action=action_name,
             )
-            column = int(np.argmin(np.abs(x_axis - endpoint_x)))
-            row = int(np.argmin(np.abs(y_axis - endpoint_y)))
-            endpoint_x = float(x_axis[column])
-            endpoint_y = float(y_axis[row])
+            (
+                endpoint_x,
+                endpoint_y,
+                row,
+                column,
+                _,
+            ) = policy.project_to_lattice(x=endpoint_x, y=endpoint_y)
             next_frame = (layer + 1) * config.frames_per_layer
             hazard_clearance = float(clearance_volume[next_frame, row, column])
             boundary_clearance = min(

@@ -364,8 +364,42 @@ collision.
 
 An always-on 32-frame terminal warning was tested and rejected in Stage 4A:
 it increased cadence p95 from four to five frames and did not reduce total
-hits. The warning is now activated only for the observed fusion failure:
-within four pixels of a boundary, an older global safe mask maps to at most
-three distinct clamped physical successors. This keeps the exact current
-geometry authoritative at control-collapse boundaries without turning a
-single-action rollout into a global policy or paying its cost everywhere.
+hits. The warning is now activated only for the observed fusion failure: at
+least one globally allowed endpoint is clamped and multiple allowed labels
+collapse to the same physical successor.
+
+That collapse also invalidates a stronger assumption. A safe mask computed at
+the nearest coarse lattice center is not a continuous-state certificate for a
+live position several pixels away. At a clamped alias the mask is therefore
+downgraded from a hard constraint to soft repair-volume evidence; exact local
+geometry may select any physical first action and the extended warning ranks
+the result. This downgrade is explicitly logged and remains a heuristic until
+the global policy supports continuous query uncertainty.
+
+An off-grid singleton mask is downgraded for the same reason: it has no action
+redundancy with which to absorb the initial snap error. A complete Stage-6B
+run exercised 1,237 such or clamped-alias downgrades at 3/5-frame
+median/p95 cadence, accepting the runtime cost but not proving a survival
+effect.
+
+## Laser Projection Reuse
+
+Laser lifecycle geometry depends on timers, lengths, widths, speeds, and
+phase thresholds, but not on world origin or absolute angle. The adapter now
+projects an exact normalized template once for each lifecycle tuple, then
+rotates and translates its segments for each pool record. Both the local
+hazard oracle and global clearance builder use the same template function.
+This preserves `step_laser` as the semantic authority while amortizing
+homogeneous barrage records.
+
+Local node evaluation additionally applies a conservative segment-AABB
+broad phase expanded by occupied and risk radii. It can only discard segments
+whose geometry cannot reach any currently queried node.
+
+On retained Stage-6B frame 22,002, 215 pool records shared 19 templates and
+cold projection improved 6.05x. The physical repeat reduced the dense
+spell-154 solve median from 1.34 seconds to 0.94 seconds, which is meaningful
+but still not control-rate performance. A fully materialized vectorized
+clearance volume was slower and was rejected; the next optimization must
+reduce the global builder's spatial work without weakening exact collision
+geometry.

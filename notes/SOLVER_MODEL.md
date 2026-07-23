@@ -521,13 +521,23 @@ currently present.
 
 ## Terminal Threat Warning
 
-The exact local beam remains ten frames to protect control cadence. When an
-older global safe mask collapses to at most three physical successors within
-four pixels of a clamped boundary, at most 24 terminal states are advanced
-cheaply to frame 32 under their final action. Bullet, finite-laser, enemy-body,
-and boundary-clamp geometry use the same hazard primitives as the exact
-planner. Selection orders this extended collision count and an eight-pixel
-clearance deficit before stale asynchronous repair volume.
+The exact local beam remains ten frames to protect control cadence. When at
+least one older global safe-action endpoint is clamped and multiple allowed
+labels collapse to the same physical successor, at most 24 terminal states
+are advanced cheaply to frame 32 under their final action. Bullet,
+finite-laser, enemy-body, and boundary-clamp geometry use the same hazard
+primitives as the exact planner. Selection orders this extended collision
+count and an eight-pixel clearance deficit before stale asynchronous repair
+volume.
+
+The same event downgrades the coarse safe mask from a hard constraint to soft
+repair evidence. The policy was proved at the nearest 16-pixel lattice center;
+its live query does not yet include the continuous position's initial snap
+error. Treating that mask as a certificate at a clamped alias caused the
+Stage-1 frame-19,823 death. The local selector may use every physical first
+action in this case and records `viability_constraint_relaxed`. This does not
+promote the local choice to a robust certificate; it prevents an invalid
+coarse certificate from overruling newer exact geometry.
 
 This extension is intentionally not part of the robust certificate. It tests
 one constant terminal continuation, not the existence of an adaptive future
@@ -540,6 +550,36 @@ The trigger is required for timing, not just semantics. An always-on Stage-4A
 trial raised planning p95 from 38.78 to 45.32 ms and decision-cadence p95 from
 four to five frames without reducing total hits. That design is rejected and
 retained as CE-0069.
+
+An off-grid singleton safe mask is the second downgrade case. It has no
+control redundancy, so a live position different from its lattice center
+cannot be hard-constrained to that one action without a continuous
+certificate. This correction is more expensive than clamped-alias detection
+and remains behind a physical cadence gate.
+
+Lattice projection itself is part of the proof contract. Backward
+reachability, live queries, repair-volume endpoints, and representative path
+rollout must use the same round-to-even rule. The representative path is
+diagnostic guidance, not the policy proof; if it cannot be reconstructed, the
+planner returns no waypoint and retains the backward policy rather than
+terminating control.
+
+## Laser Lifecycle Templates
+
+Laser collision semantics remain defined by `step_laser`. Projection caches
+normalized lifecycle geometry using every state field that can affect those
+semantics while excluding origin and absolute angle. Each live laser
+instantiates the shared template by rotation and translation. The local and
+global planners call the same helper, preventing a faster approximate path
+from silently diverging from the reverse-engineered state machine.
+
+This is an exact reuse optimization, not a reduction of collision fidelity.
+Local beam evaluation may cull a segment only when its AABB, conservatively
+expanded by occupied and risk radii, cannot intersect the complete set of
+current nodes. The global clearance-volume builder still processes all
+spatially relevant instantiated trajectories; dense Stage-6B laser phases
+show that this remaining work must be indexed or tiled before it reaches
+control-rate latency.
 
 ## Verification Gates
 

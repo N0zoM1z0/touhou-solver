@@ -371,6 +371,24 @@ class Th08PracticeDossierTests(unittest.TestCase):
             [("scene_resumed", 0)],
         )
 
+    def test_runtime_error_terminates_scope_explicitly(self) -> None:
+        decisions, end, _, excluded = _extract_scope(
+            [
+                _decision(100),
+                {
+                    "kind": "runtime_error",
+                    "error_type": "RuntimeError",
+                    "error": "representative rollout mismatch",
+                    "last_frame": 100,
+                },
+            ],
+            trace_path=Path("trace.jsonl"),
+        )
+        self.assertEqual([row["frame"] for row in decisions], [100])
+        self.assertEqual(end["reason"], "runtime_error")
+        self.assertEqual(end["error_type"], "RuntimeError")
+        self.assertEqual(excluded, 0)
+
     def test_no_bomb_invariant_checks_mask_flag_action_and_config(self) -> None:
         clean = [_decision(100)]
         result = _no_bomb_verification(

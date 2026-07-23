@@ -1641,3 +1641,46 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   performance gate only. Three hit windows exhausted the global kernel and
   one exhausted the robust local action set; those are the next planning
   target.
+- That Stage-1 trace exposed CE-0070: frame 19,811 queried a 16-pixel policy
+  cell with 9.636 pixels of position error and hard-constrained the player to
+  three bottom-clamped aliases. Visible bullet slot 827 hit the stationary
+  position 12 frames later. Clamped alias collapse now downgrades the coarse
+  mask to soft repair evidence and runs the exact 32-frame cross-check over
+  all physical first actions. The minimized regression changes `stay` to an
+  escape action. A 68-row dense Windows replay activated 16 times, changed 11
+  actions, and measured 8.11/17.32 versus 8.76/16.24 ms median/p95. Physical
+  acceptance remains pending.
+- Random Stage-2 physical differential `20260724_052616` accepted CE-0070's
+  clamped-alias downgrade: total hits fell five to two, nonspell four to zero,
+  and the original spell-20 hit one to zero with 3/4-frame cadence. The
+  remaining spell-16 hit exposed CE-0071, an off-grid singleton mask that
+  forced `stay` for visible bullet slot 866. Singleton downgrade is
+  regression-tested but its 200-row dense benchmark adds about 9.5 ms at p95,
+  so physical cadence acceptance remains pending.
+- Random Stage-6B run `20260724_053742` was intentionally retained as a failed,
+  truncated trial. It aborted at frame 34,506 after 24 hits because
+  representative rollout and the backward kernel used different midpoint tie
+  rules. CE-0072 centralizes round-to-even lattice projection and makes
+  residual waypoint inconsistency nonfatal. Dossiers now label runtime errors
+  and `accepted_completion=false`.
+- The same partial 6B run establishes CE-0073's performance boundary:
+  spell 154 held 205--240 lasers, accumulated ten hits, drove corridor solve
+  p95 to 1.86 seconds, local-plan p95 to 97.31 ms, and cadence p95 to eight
+  frames. Laser broad-phase/vectorization is now a higher-priority
+  cross-stage correction than tuning individual spell paths.
+- Laser projection now shares exact lifecycle templates across records that
+  differ only in origin and angle. Retained frame 22,002 contained 215 lasers
+  but only 19 templates; isolated cold projection improved from 372.13 to
+  61.48 ms. A fully materialized trajectory-clearance volume regressed the
+  same benchmark (about 190 versus 168 ms) and was removed rather than kept as
+  speculative complexity.
+- Random Stage-6B repeat `20260724_060039` completed through frame 77,112 with
+  zero Bomb input and automatic no-save exit. It physically closes CE-0072:
+  the midpoint projection mismatch no longer crashes live control. Relative
+  to the previous complete 6B baseline, hits fell from 42 to 30; spell 162
+  improved from six to one. Relative to the matched pre-cache dense-laser
+  phase, spell-154 hits fell ten to five, solve median/p95 fell
+  1340/1863 to 936/1345 ms, overall plan p95 fell 97.31 to 55.15 ms, and
+  cadence p95 fell eight to five frames. This accepts template reuse only as a
+  partial correction: five laser contacts and near-second global solves
+  remain.

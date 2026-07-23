@@ -99,6 +99,32 @@ class RobustViabilityPolicy:
     def horizon_frames(self) -> int:
         return self.layer_count * self.config.frames_per_layer
 
+    def project_to_lattice(
+        self,
+        *,
+        x: float,
+        y: float,
+    ) -> tuple[float, float, int, int, float]:
+        """Project with the same round-to-even rule used by the kernel."""
+
+        x_start = float(self.x_axis[0])
+        y_start = float(self.y_axis[0])
+        x_step = float(self.x_axis[1] - self.x_axis[0])
+        y_step = float(self.y_axis[1] - self.y_axis[0])
+        column = int(np.rint((x - x_start) / x_step))
+        row = int(np.rint((y - y_start) / y_step))
+        column = min(len(self.x_axis) - 1, max(0, column))
+        row = min(len(self.y_axis) - 1, max(0, row))
+        projected_x = float(self.x_axis[column])
+        projected_y = float(self.y_axis[row])
+        return (
+            projected_x,
+            projected_y,
+            row,
+            column,
+            math.hypot(x - projected_x, y - projected_y),
+        )
+
     def query(
         self,
         *,
@@ -171,11 +197,9 @@ class RobustViabilityPolicy:
                 math.inf,
                 "query position is outside policy bounds",
             )
-        column = int(np.argmin(np.abs(self.x_axis - x)))
-        row = int(np.argmin(np.abs(self.y_axis - y)))
-        position_error = math.hypot(
-            x - float(self.x_axis[column]),
-            y - float(self.y_axis[row]),
+        _, _, row, column, position_error = self.project_to_lattice(
+            x=x,
+            y=y,
         )
         mask = int(self.safe_action_masks[layer, action_index, row, column])
         safe_indices = tuple(

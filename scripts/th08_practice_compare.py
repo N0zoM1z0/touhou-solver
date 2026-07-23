@@ -175,6 +175,9 @@ def compare_dossiers(
             "candidate_raw_summary_scope_valid": bool(
                 candidate_scope.get("raw_summary_is_scope_valid")
             ),
+            "candidate_accepted_completion": bool(
+                candidate_scope.get("accepted_completion")
+            ),
         },
         "no_bomb_passed": {
             "baseline": bool(

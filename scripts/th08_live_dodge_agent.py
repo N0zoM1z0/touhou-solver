@@ -27,7 +27,7 @@ from th08_corridor_adapter import TH08_CORRIDOR_CONFIG, plan_th08_corridor
 from th08_laser_model import (
     LaserPhase,
     LaserState,
-    step_laser,
+    laser_collision_geometry_frames,
 )
 from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
@@ -259,6 +259,7 @@ class Decision:
     viability_constrained: bool = False
     viability_safe_action_count: int = 0
     viability_repair_volume: int = 0
+    viability_constraint_relaxed: bool = False
     terminal_threat_horizon: int = 0
     terminal_threat_collisions: int = 0
     terminal_threat_min_clearance: float = 9999.0
@@ -1131,29 +1132,6 @@ def _build_bullet_frames(
     return tuple(frames)
 
 
-def _collision_segment(
-    state: LaserState,
-    *,
-    box,
-    slot: int,
-    collision_flag: int,
-    uncertainty: float,
-) -> Laser:
-    center_distance = box.center_x - state.origin_x
-    half_length = box.width / 2.0
-    return Laser(
-        origin_x=state.origin_x,
-        origin_y=state.origin_y,
-        angle=state.angle,
-        tail=center_distance - half_length,
-        head=center_distance + half_length,
-        half_width=box.height / 2.0,
-        slot=slot,
-        collision_flag=collision_flag,
-        uncertainty=uncertainty,
-    )
-
-
 def build_laser_collision_frames(
     lasers: tuple[Laser, ...],
     *,
@@ -1164,41 +1142,34 @@ def build_laser_collision_frames(
 
     if horizon < 0 or snapshot_lag < 0:
         raise ValueError("laser projection horizon and lag cannot be negative")
-    states = [laser.state for laser in lasers]
-    frames: list[tuple[Laser, ...]] = []
+    frames: list[list[Laser]] = [[] for _ in range(horizon)]
     total_frames = snapshot_lag + horizon
-    for elapsed in range(1, total_frames + 1):
-        projected: list[Laser] = []
-        for index, laser in enumerate(lasers):
-            state = states[index]
-            if state is None:
-                if elapsed > snapshot_lag:
-                    projected.append(laser)
-                continue
-            result = step_laser(state)
-            states[index] = result.laser
-            if elapsed <= snapshot_lag:
-                continue
-            seen: set[tuple[float, float, float]] = set()
-            for check in result.checks:
-                segment = _collision_segment(
-                    state,
-                    box=check.collision_box,
+    for laser in lasers:
+        state = laser.state
+        if state is None:
+            for projected in frames:
+                projected.append(laser)
+            continue
+        geometry_frames = laser_collision_geometry_frames(
+            state,
+            frame_count=total_frames,
+        )[snapshot_lag:]
+        for projected, geometry in zip(frames, geometry_frames):
+            projected.extend(
+                Laser(
+                    origin_x=state.origin_x,
+                    origin_y=state.origin_y,
+                    angle=state.angle,
+                    tail=tail,
+                    head=head,
+                    half_width=half_width,
                     slot=laser.slot,
                     collision_flag=laser.collision_flag,
                     uncertainty=laser.uncertainty,
                 )
-                geometry = (
-                    segment.tail,
-                    segment.head,
-                    segment.half_width,
-                )
-                if geometry not in seen:
-                    seen.add(geometry)
-                    projected.append(segment)
-        if elapsed > snapshot_lag:
-            frames.append(tuple(projected))
-    return tuple(frames)
+                for tail, head, half_width in geometry
+            )
+    return tuple(tuple(frame) for frame in frames)
 
 
 def _hazards_for_positions(
@@ -1275,34 +1246,6 @@ def _hazards_for_positions(
             (laser.half_width for laser in lasers),
             dtype=np.float64,
         )
-        cosine = np.cos(angle)
-        sine = np.sin(angle)
-        start_x = origin_x + cosine * tail
-        start_y = origin_y + sine * tail
-        segment_x = cosine * (head - tail)
-        segment_y = sine * (head - tail)
-        length_sq = segment_x * segment_x + segment_y * segment_y
-        flat_x = positions_x[:, None]
-        flat_y = positions_y[:, None]
-        numerator = (
-            (flat_x - start_x[None, :]) * segment_x[None, :]
-            + (flat_y - start_y[None, :]) * segment_y[None, :]
-        )
-        projection = np.divide(
-            numerator,
-            length_sq[None, :],
-            out=np.zeros_like(numerator),
-            where=length_sq[None, :] > 1e-9,
-        )
-        projection = np.clip(projection, 0.0, 1.0)
-        distance = np.hypot(
-            flat_x - (start_x + projection * segment_x),
-            flat_y - (start_y + projection * segment_y),
-        )
-        clearance = (
-            distance - half_widths[None, :] - PLAYER_RADIUS
-        )
-        collisions += (clearance <= 0.0).sum(axis=1, dtype=np.int32)
         uncertainty = np.fromiter(
             (
                 laser.uncertainty + min(6.0, 0.08 * step)
@@ -1310,12 +1253,77 @@ def _hazards_for_positions(
             ),
             dtype=np.float64,
         )
-        robust_clearance = clearance - uncertainty[None, :]
-        minimum = np.minimum(minimum, robust_clearance.min(axis=1))
-        danger = np.maximum(56.0 - robust_clearance, 0.0)
-        risk += (
-            2.0 * np.square(danger).sum(axis=1) * time_weight
+        cosine = np.cos(angle)
+        sine = np.sin(angle)
+        start_x = origin_x + cosine * tail
+        start_y = origin_y + sine * tail
+        segment_x = cosine * (head - tail)
+        segment_y = sine * (head - tail)
+        occupied_radius = half_widths + PLAYER_RADIUS + uncertainty
+        margin = 56.0
+        relevant = (
+            (
+                np.maximum(start_x, start_x + segment_x)
+                + occupied_radius
+                >= float(positions_x.min()) - margin
+            )
+            & (
+                np.minimum(start_x, start_x + segment_x)
+                - occupied_radius
+                <= float(positions_x.max()) + margin
+            )
+            & (
+                np.maximum(start_y, start_y + segment_y)
+                + occupied_radius
+                >= float(positions_y.min()) - margin
+            )
+            & (
+                np.minimum(start_y, start_y + segment_y)
+                - occupied_radius
+                <= float(positions_y.max()) + margin
+            )
         )
+        if np.any(relevant):
+            start_x = start_x[relevant]
+            start_y = start_y[relevant]
+            segment_x = segment_x[relevant]
+            segment_y = segment_y[relevant]
+            half_widths = half_widths[relevant]
+            uncertainty = uncertainty[relevant]
+            length_sq = segment_x * segment_x + segment_y * segment_y
+            flat_x = positions_x[:, None]
+            flat_y = positions_y[:, None]
+            numerator = (
+                (flat_x - start_x[None, :]) * segment_x[None, :]
+                + (flat_y - start_y[None, :]) * segment_y[None, :]
+            )
+            projection = np.divide(
+                numerator,
+                length_sq[None, :],
+                out=np.zeros_like(numerator),
+                where=length_sq[None, :] > 1e-9,
+            )
+            projection = np.clip(projection, 0.0, 1.0)
+            distance = np.hypot(
+                flat_x - (start_x + projection * segment_x),
+                flat_y - (start_y + projection * segment_y),
+            )
+            clearance = (
+                distance - half_widths[None, :] - PLAYER_RADIUS
+            )
+            collisions += (clearance <= 0.0).sum(
+                axis=1,
+                dtype=np.int32,
+            )
+            robust_clearance = clearance - uncertainty[None, :]
+            minimum = np.minimum(
+                minimum,
+                robust_clearance.min(axis=1),
+            )
+            danger = np.maximum(56.0 - robust_clearance, 0.0)
+            risk += (
+                2.0 * np.square(danger).sum(axis=1) * time_weight
+            )
     if enemy_bodies:
         body_x = np.fromiter(
             (body.x + body.vx * step for body in enemy_bodies),
@@ -1727,47 +1735,32 @@ def _terminal_threat_required(
     player_y: float,
     action_hold_frames: int,
     allowed_first_actions: tuple[str, ...] | None,
+    viability_position_error: float,
 ) -> bool:
     """Detect stale-policy control collapse near a clamped boundary."""
 
     if allowed_first_actions is None:
         return False
-    boundary_clearance = min(
-        player_x - PLAYFIELD_LEFT,
-        PLAYFIELD_RIGHT - player_x,
-        player_y - PLAYFIELD_TOP,
-        PLAYFIELD_BOTTOM - player_y,
-    )
-    if boundary_clearance > 4.0:
-        return False
     allowed = set(allowed_first_actions)
-    successors = {
-        (
-            round(
-                min(
-                    PLAYFIELD_RIGHT,
-                    max(
-                        PLAYFIELD_LEFT,
-                        player_x + action.dx * action_hold_frames,
-                    ),
-                ),
-                3,
-            ),
-            round(
-                min(
-                    PLAYFIELD_BOTTOM,
-                    max(
-                        PLAYFIELD_TOP,
-                        player_y + action.dy * action_hold_frames,
-                    ),
-                ),
-                3,
-            ),
-        )
-        for action in _PLANNER_ACTIONS
-        if action.name in allowed
-    }
-    return 0 < len(successors) <= 3
+    successors: set[tuple[float, float]] = set()
+    action_count = 0
+    clamped = False
+    for action in _PLANNER_ACTIONS:
+        if action.name not in allowed:
+            continue
+        action_count += 1
+        raw_x = player_x + action.dx * action_hold_frames
+        raw_y = player_y + action.dy * action_hold_frames
+        successor_x = min(PLAYFIELD_RIGHT, max(PLAYFIELD_LEFT, raw_x))
+        successor_y = min(PLAYFIELD_BOTTOM, max(PLAYFIELD_TOP, raw_y))
+        clamped |= successor_x != raw_x or successor_y != raw_y
+        successors.add((round(successor_x, 3), round(successor_y, 3)))
+    off_grid_singleton = (
+        action_count == 1 and viability_position_error > 1e-3
+    )
+    return off_grid_singleton or (
+        clamped and 0 < len(successors) < action_count
+    )
 
 
 def choose_action(
@@ -1795,6 +1788,7 @@ def choose_action(
     target_deadline: int | None = None,
     allowed_first_actions: tuple[str, ...] | None = None,
     viability_repair_volumes: tuple[tuple[str, int], ...] = (),
+    viability_position_error: float = 0.0,
 ) -> Decision:
     if horizon <= 0 or beam_width <= 0:
         raise ValueError("planner horizon and beam width must be positive")
@@ -1802,16 +1796,6 @@ def choose_action(
         threat_horizon = horizon
     if threat_horizon < horizon:
         raise ValueError("threat horizon cannot be shorter than planner horizon")
-    effective_threat_horizon = (
-        threat_horizon
-        if _terminal_threat_required(
-            player_x=player_x,
-            player_y=player_y,
-            action_hold_frames=action_hold_frames,
-            allowed_first_actions=allowed_first_actions,
-        )
-        else horizon
-    )
     if control_delay_frames < 0:
         raise ValueError("control delay cannot be negative")
     if control_delay_candidates is not None:
@@ -1828,6 +1812,11 @@ def choose_action(
             raise ValueError("nominal control delay must belong to its candidates")
     if action_hold_frames <= 0:
         raise ValueError("action hold must be positive")
+    if (
+        not math.isfinite(viability_position_error)
+        or viability_position_error < 0.0
+    ):
+        raise ValueError("viability position error must be finite and nonnegative")
     planner_action_names = {action.name for action in _PLANNER_ACTIONS}
     if allowed_first_actions is not None:
         if not allowed_first_actions:
@@ -1839,6 +1828,22 @@ def choose_action(
             raise ValueError(
                 f"unknown allowed first actions: {sorted(unknown_actions)}"
             )
+    viability_constraint_relaxed = (
+        threat_horizon > horizon
+        and _terminal_threat_required(
+            player_x=player_x,
+            player_y=player_y,
+            action_hold_frames=action_hold_frames,
+            allowed_first_actions=allowed_first_actions,
+            viability_position_error=viability_position_error,
+        )
+    )
+    effective_allowed_first_actions = (
+        None if viability_constraint_relaxed else allowed_first_actions
+    )
+    effective_threat_horizon = (
+        threat_horizon if viability_constraint_relaxed else horizon
+    )
     repair_by_action = dict(viability_repair_volumes)
     if len(repair_by_action) != len(viability_repair_volumes):
         raise ValueError("viability repair action names must be unique")
@@ -1933,8 +1938,8 @@ def choose_action(
                 if (step - 1) % action_hold_frames == 0
                 else (node.last_action,)
             )
-            if step == 1 and allowed_first_actions is not None:
-                allowed = set(allowed_first_actions)
+            if step == 1 and effective_allowed_first_actions is not None:
+                allowed = set(effective_allowed_first_actions)
                 actions = tuple(
                     action for action in actions if action.name in allowed
                 )
@@ -2230,9 +2235,10 @@ def choose_action(
             if robust_certificate is not None
             else None
         ),
-        allowed_first_actions is not None,
+        effective_allowed_first_actions is not None,
         len(allowed_first_actions or ()),
         repair_by_action.get(action.name, 0),
+        viability_constraint_relaxed,
         effective_threat_horizon,
         threat_collisions,
         9999.0 if math.isinf(threat_clearance) else threat_clearance,
@@ -3141,6 +3147,11 @@ def run(args: argparse.Namespace) -> int:
                 viability_repair_volumes=(
                     viability_repair_guidance
                 ),
+                viability_position_error=(
+                    viability_guidance.position_error
+                    if viability_guidance is not None
+                    else 0.0
+                ),
             )
             plan_ms = (time.perf_counter() - plan_started) * 1000.0
             phase_now = reader.u8(0x017D5EF8)
@@ -3314,6 +3325,9 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "viability_repair_volume": (
                             decision.viability_repair_volume
+                        ),
+                        "viability_constraint_relaxed": (
+                            decision.viability_constraint_relaxed
                         ),
                     },
                     "terminal_threat": {

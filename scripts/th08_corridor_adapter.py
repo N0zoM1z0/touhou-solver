@@ -16,7 +16,10 @@ from corridor_planner import (
     SegmentTrajectoryHazard,
     plan_corridor,
 )
-from th08_laser_model import LaserState, step_laser
+from th08_laser_model import (
+    LaserState,
+    laser_collision_geometry_frames,
+)
 from th08_movement_model import ROUTE2_MOVEMENT_PROFILE
 from touhou_control.viability import ControlAction
 
@@ -186,41 +189,30 @@ def lower_lasers(
                 SegmentTrajectoryHazard((sample,) * (horizon_frames + 1))
             )
             continue
-        for _ in range(lag + forecast):
-            state = step_laser(state).laser
-        per_frame: list[tuple[SegmentHazard, ...]] = []
-        for frame in range(horizon_frames + 1):
-            result = step_laser(state)
-            state = result.laser
-            frame_segments: list[SegmentHazard] = []
-            seen: set[tuple[float, float, float]] = set()
-            for check in result.checks:
-                box = check.collision_box
-                center_distance = box.center_x - state.origin_x
-                half_length = box.width / 2.0
-                geometry = (
-                    center_distance - half_length,
-                    center_distance + half_length,
-                    box.height / 2.0,
-                )
-                if geometry in seen:
-                    continue
-                seen.add(geometry)
-                frame_segments.append(
+        geometry_frames = laser_collision_geometry_frames(
+            state,
+            frame_count=lag + forecast + horizon_frames + 1,
+        )[lag + forecast:]
+        per_frame = [
+            tuple(
+                (
                     SegmentHazard(
                         origin_x=state.origin_x,
                         origin_y=state.origin_y,
                         angle=state.angle,
-                        tail=geometry[0],
-                        head=geometry[1],
-                        half_width=geometry[2],
+                        tail=tail,
+                        head=head,
+                        half_width=half_width,
                         base_uncertainty=(
                             laser.uncertainty
                             + min(6.0, 0.08 * (forecast + frame))
                         ),
                     )
                 )
-            per_frame.append(tuple(frame_segments))
+                for tail, head, half_width in geometry
+            )
+            for frame, geometry in enumerate(geometry_frames)
+        ]
         for check_index in range(max(map(len, per_frame), default=0)):
             trajectories.append(
                 SegmentTrajectoryHazard(

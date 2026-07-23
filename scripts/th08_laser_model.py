@@ -15,6 +15,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, replace
 from enum import IntEnum
+from functools import lru_cache
 
 
 LASER_POOL_SIZE = 256
@@ -76,6 +77,52 @@ class LaserStepResult:
     laser: LaserState
     collision_box: LaserCollisionBox
     checks: tuple[LaserCollisionCheck, ...]
+
+
+@lru_cache(maxsize=2048)
+def _cached_collision_geometry_frames(
+    laser: LaserState,
+    frame_count: int,
+) -> tuple[tuple[tuple[float, float, float], ...], ...]:
+    frames: list[tuple[tuple[float, float, float], ...]] = []
+    state = laser
+    for _ in range(frame_count):
+        result = step_laser(state)
+        state = result.laser
+        seen: set[tuple[float, float, float]] = set()
+        geometry: list[tuple[float, float, float]] = []
+        for check in result.checks:
+            box = check.collision_box
+            center_distance = box.center_x - state.origin_x
+            half_length = box.width / 2.0
+            segment = (
+                center_distance - half_length,
+                center_distance + half_length,
+                box.height / 2.0,
+            )
+            if segment not in seen:
+                seen.add(segment)
+                geometry.append(segment)
+        frames.append(tuple(geometry))
+    return tuple(frames)
+
+
+def laser_collision_geometry_frames(
+    laser: LaserState,
+    *,
+    frame_count: int,
+) -> tuple[tuple[tuple[float, float, float], ...], ...]:
+    """Project collision geometry while sharing translated/rotated templates."""
+
+    if frame_count < 0:
+        raise ValueError("laser projection frame count cannot be negative")
+    normalized = replace(
+        laser,
+        origin_x=0.0,
+        origin_y=0.0,
+        angle=0.0,
+    )
+    return _cached_collision_geometry_frames(normalized, frame_count)
 
 
 def spawn_laser_state(

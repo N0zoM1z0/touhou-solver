@@ -7,7 +7,9 @@ from dataclasses import replace
 
 from th08_laser_model import (
     LaserPhase,
+    _cached_collision_geometry_frames,
     laser_collision_box,
+    laser_collision_geometry_frames,
     laser_overlaps_player,
     spawn_laser_state,
     step_laser,
@@ -154,6 +156,20 @@ class LaserModelTests(unittest.TestCase):
         )
         self.assertEqual(len(enabled.checks), 1)
         self.assertEqual(disabled.checks, ())
+
+    def test_projection_template_is_shared_across_origin_and_angle(self) -> None:
+        _cached_collision_geometry_frames.cache_clear()
+        first = laser_collision_geometry_frames(
+            _laser(origin_x=12.0, origin_y=34.0, angle=0.25),
+            frame_count=8,
+        )
+        second = laser_collision_geometry_frames(
+            _laser(origin_x=300.0, origin_y=400.0, angle=1.5),
+            frame_count=8,
+        )
+        self.assertEqual(first, second)
+        info = _cached_collision_geometry_frames.cache_info()
+        self.assertEqual((info.misses, info.hits), (1, 1))
 
 
 if __name__ == "__main__":

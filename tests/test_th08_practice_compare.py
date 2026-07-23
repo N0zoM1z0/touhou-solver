@@ -15,6 +15,7 @@ def _dossier(run_id: str, *, hits: int, solve_ms: float) -> dict[str, object]:
         "practice_scope": {
             "stage_route_index": 7,
             "raw_summary_is_scope_valid": True,
+            "accepted_completion": True,
         },
         "control_policy": {"verification": {"passed": True}},
         "deaths": [],
@@ -75,6 +76,11 @@ class Th08PracticeCompareTests(unittest.TestCase):
         self.assertEqual(
             comparison["per_phase"]["166"]["hit_count"]["delta"],
             -1,
+        )
+        self.assertTrue(
+            comparison["scope_compatibility"][
+                "candidate_accepted_completion"
+            ]
         )
 
 

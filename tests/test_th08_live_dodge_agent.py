@@ -7,6 +7,8 @@ import math
 import struct
 import unittest
 
+import numpy as np
+
 from corridor_planner import (
     CorridorBounds,
     CorridorConfig,
@@ -65,6 +67,7 @@ from th08_live_dodge_agent import (
     _estimate_live_action_hold,
     _enemy_sensor_submit_due,
     _frozen_auto_confirm_eligible,
+    _hazards_for_positions,
     _stage_corridor_solution,
     build_laser_collision_frames,
     choose_action,
@@ -546,6 +549,35 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(frames[0], ())
         self.assertEqual(len(frames[1]), 1)
         self.assertLess(frames[1][0].head - frames[1][0].tail, 10.0)
+
+    def test_laser_broad_phase_discards_only_segments_beyond_risk_radius(
+        self,
+    ) -> None:
+        positions_x = np.asarray([100.0], dtype=np.float32)
+        positions_y = np.asarray([100.0], dtype=np.float32)
+        bullet_frame = tuple(
+            np.asarray([], dtype=np.float32) for _ in range(5)
+        )
+        near = Laser(80.0, 100.0, 0.0, 0.0, 40.0, 2.0)
+        far = Laser(400.0, 400.0, 0.0, 0.0, 40.0, 2.0)
+        expected = _hazards_for_positions(
+            positions_x,
+            positions_y,
+            step=1,
+            bullet_frame=bullet_frame,
+            lasers=(near,),
+            enemy_bodies=(),
+        )
+        actual = _hazards_for_positions(
+            positions_x,
+            positions_y,
+            step=1,
+            bullet_frame=bullet_frame,
+            lasers=(near, far),
+            enemy_bodies=(),
+        )
+        for left, right in zip(expected, actual):
+            np.testing.assert_allclose(left, right)
 
     def test_incoming_bullet_forces_lateral_motion(self) -> None:
         decision = choose_action(
@@ -1137,6 +1169,76 @@ class LiveDodgeAgentTests(unittest.TestCase):
             legacy.min_clearance,
         )
         self.assertFalse(decision.bomb)
+
+        coarse_grid_common = {
+            **common,
+            "player_x": 366.32177734375,
+            "player_y": 424.7275390625,
+            "bullets": (
+                Bullet(
+                    347.1014404296875,
+                    409.2017517089844,
+                    1.6826684474945068,
+                    1.0810304880142212,
+                    2.0,
+                    2.0,
+                    slot=827,
+                ),
+            ),
+            "snapshot_lag": 1,
+            "control_delay_frames": 4,
+            "allowed_first_actions": ("stay", "down", "down_fast"),
+            "viability_repair_volumes": (
+                ("stay", 8),
+                ("down", 3),
+                ("down_fast", 3),
+            ),
+        }
+        coarse_grid_legacy = choose_action(
+            **coarse_grid_common,
+            threat_horizon=10,
+        )
+        coarse_grid_alias = choose_action(
+            **coarse_grid_common,
+            threat_horizon=32,
+        )
+        self.assertEqual(coarse_grid_legacy.action, "stay")
+        self.assertNotEqual(coarse_grid_alias.action, "stay")
+        self.assertTrue(coarse_grid_alias.viability_constraint_relaxed)
+        self.assertEqual(coarse_grid_alias.terminal_threat_horizon, 32)
+
+        singleton_common = {
+            **common,
+            "player_x": 17.515056610107422,
+            "player_y": 414.66705322265625,
+            "bullets": (
+                Bullet(
+                    18.422264099121094,
+                    394.4905700683594,
+                    -0.27819836139678955,
+                    1.2698835134506226,
+                    2.0,
+                    2.0,
+                    slot=866,
+                ),
+            ),
+            "snapshot_lag": 0,
+            "control_delay_frames": 4,
+            "allowed_first_actions": ("stay",),
+            "viability_repair_volumes": (("stay", 1),),
+            "viability_position_error": 6.620516436150773,
+        }
+        singleton_legacy = choose_action(
+            **singleton_common,
+            threat_horizon=10,
+        )
+        singleton_fixed = choose_action(
+            **singleton_common,
+            threat_horizon=32,
+        )
+        self.assertEqual(singleton_legacy.action, "stay")
+        self.assertNotEqual(singleton_fixed.action, "stay")
+        self.assertTrue(singleton_fixed.viability_constraint_relaxed)
 
         interior = choose_action(
             **{**common, "player_y": 400.0},

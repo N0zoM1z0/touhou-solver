@@ -1350,10 +1350,10 @@ Status: observed | inferred | unknown | fixed
 - **Invalid assumption:** A cheap 24-terminal-state rollout is cheap enough to
   execute on every live decision when dense bullets and up to 36 enemy bodies
   share the same hazard kernel.
-- **Correction:** Trigger the extension only when the player is within four
-  pixels of a boundary and the old global safe-action labels collapse to at
-  most three distinct clamped physical successors. Retained Stage-4A telemetry
-  estimates 212/9,439 decisions would meet this gate instead of all 9,439.
+- **Correction:** Trigger the extension only when at least one old global
+  safe-action endpoint is clamped and multiple safe labels collapse to the
+  same physical successor. This makes the gate depend on the transition
+  model, rather than an arbitrary boundary-distance threshold.
 - **Physical gate:** Random Stage-1 run `20260724_050922` activated the
   conditional warning on 97/4,850 decisions. Planning remained 22.04/40.61 ms
   median/p95 and cadence remained 3/4 frames, versus the rejected always-on
@@ -1363,3 +1363,114 @@ Status: observed | inferred | unknown | fixed
   design is accepted as a narrowly scoped warning. Its four new Stage-1
   witnesses remain failures of global-kernel preservation, not evidence that
   the warning solves long-horizon planning.
+
+## CE-0070: Coarse safe mask was treated as a continuous-state certificate
+
+- **Observed symptom:** Stage-1 run `20260724_050922`, spell 9, reported
+  `stay/down/down_fast` as globally safe at frame 19,811. The player was at
+  `(366.322, 424.728)`, 9.636 pixels from the queried 16-pixel lattice point.
+  All three actions stayed at or moved into the bottom clamp. Bullet slot 827
+  was already visible and hit the unchanged position at frame 19,823.
+- **Invalid assumption:** A safe-action mask proved at the nearest coarse
+  lattice center is a hard certificate for the observed continuous position.
+  The builder accounts for transition sampling error from lattice centers,
+  but the live query did not account for its initial 9.636-pixel snap error.
+- **Correction:** When allowed labels collapse under the actual clamped
+  transition, retain their repair volumes as soft evidence but relax the hard
+  mask. The exact local beam considers all physical first actions and applies
+  the 32-frame terminal cross-check. Telemetry records
+  `viability_constraint_relaxed`; this is a certificate downgrade, not a
+  claim that the local result is robustly viable.
+- **Regression:** The retained slot-827 test reproduces the old `stay` choice
+  with the extension disabled. The corrected selector relaxes the mask and
+  leaves `stay`. Replaying frames 19,811 through 19,820 also changes every
+  repeated `stay`.
+- **Performance gate:** On 68 dense Stage-1 samples, the gate activated 16
+  times and changed 11 actions. Alternating Windows measurements were
+  8.11/17.32 ms without and 8.76/16.24 ms with the correction at median/p95.
+- **Physical gate:** Random Stage-2 run `20260724_052616` completed with two
+  hits versus five in the prior adaptive-lead baseline. Nonspell improved
+  four to zero and the original spell-20 failure improved one to zero while
+  cadence remained 3/4 frames and planning remained 22.65/41.10 ms.
+- **Status:** Physically accepted for clamped aliases. The run's two remaining
+  failures expose singleton-mask and empty-kernel cases below.
+
+## CE-0071: Off-grid singleton mask forced the player to wait for impact
+
+- **Observed symptom:** Stage-2 run `20260724_052616`, spell 16, queried a
+  coarse policy with 6.621 pixels of snap error at frame 8,228. Its only safe
+  action was `stay`; visible bullet slot 866 then hit the stationary player at
+  frame 8,243.
+- **Invalid assumption:** A singleton mask has enough control redundancy to
+  remain a hard constraint when the live continuous position differs from the
+  lattice state where it was proved.
+- **Correction:** An off-grid singleton joins clamped alias collapse as a
+  certificate-downgrade trigger. Repair volume remains soft evidence while
+  exact local geometry and the terminal cross-check consider all first
+  actions.
+- **Regression:** The minimized slot-866 case selects `stay` with the
+  correction disabled and an escape action when enabled.
+- **Performance risk:** A 200-row dense Stage-2 Windows replay activated on 71
+  rows and changed 50 actions. Median/p95 planning rose from 10.08/18.01 to
+  12.61/27.52 ms.
+- **Physical performance gate:** Complete random Stage-6B run
+  `20260724_060039` exercised 1,237 constraint downgrades while preserving
+  3/5-frame median/p95 cadence and 21.15/55.15 ms local planning. This accepts
+  the runtime-cost boundary, but the run is not an ablation and cannot assign
+  its survival change to singleton downgrade.
+- **Status:** Fixed and accepted for performance; survival effect remains
+  unisolated.
+
+## CE-0072: Representative viability rollout used a different tie rule
+
+- **Observed symptom:** Random Stage-6B run `20260724_053742` aborted at frame
+  34,506 with `viability rollout left its own backward kernel`.
+- **Root cause:** Backward reachability and the native kernel project lattice
+  endpoints with round-to-even. The representative waypoint rollout used
+  `argmin(abs(axis-x))`, which always selected the lower cell on an exact
+  midpoint. It could therefore query a different successor than the one
+  certified by the action mask.
+- **Correction:** `RobustViabilityPolicy.project_to_lattice` is now the single
+  projection rule for queries and representative rollout. A residual rollout
+  inconsistency degrades the waypoint plan to `reachable=False` while
+  retaining its policy; it can no longer terminate live control.
+- **Regressions:** Tests pin 8/24-pixel midpoint round-to-even behavior and
+  prove an injected representative-rollout mismatch returns an unreachable
+  plan instead of raising.
+- **Artifact integrity:** The Stage-6B dossier explicitly records
+  `runtime_error` and `accepted_completion=false`; its 24-hit truncated result
+  must not be compared as a completed clear.
+- **Physical gate:** Repeat Stage-6B run `20260724_060039` reached
+  `route_complete` at frame 77,112 and exited through the no-save path without
+  another exception. The retained failed run remains the regression witness.
+- **Status:** Fixed and physically accepted.
+
+## CE-0073: Dense laser phases collapse the control cadence
+
+- **Observed symptom:** The truncated Stage-6B run reached 205--240 active
+  lasers in spell 154. That phase accumulated ten hits, corridor solves rose
+  to 1340/1863 ms median/p95, and the partial run's overall local planning and
+  decision cadence reached 21.12/97.31 ms and 3/8 frames.
+- **Invalid assumption:** Per-frame local and global laser geometry can scale
+  linearly over every pool entry without spatial/temporal filtering.
+- **Evidence boundary:** One hit has an exact observed laser overlap; ten are
+  classified `active_laser_without_observed_overlap`. Collision geometry and
+  sensor attribution therefore remain separate from the demonstrated
+  performance failure.
+- **Correction:** Local exact checks now reject laser segments whose
+  conservative segment AABB cannot reach the current node volume. Local and
+  global projection also share exact lifecycle geometry templates keyed
+  independently of origin and angle. On retained frame 22,002, 215 lasers
+  reduced to 19 lifecycle templates; cold projection fell from 372.13 to
+  61.48 ms, a 6.05x isolated speedup.
+- **Rejected attempt:** Fully materializing a vectorized trajectory-clearance
+  volume took about 190 ms on the retained workload versus 168 ms for the
+  existing native volume builder. Array construction and reduction outweighed
+  the hoped-for batch gain, so that implementation was removed.
+- **Physical gate:** Complete repeat `20260724_060039` lowered spell-154
+  corridor solve from 1340/1863 to 936/1345 ms median/p95 and hits from ten to
+  five relative to the matched pre-cache phase. Overall local-plan p95 fell
+  from 97.31 to 55.15 ms and cadence p95 from eight to five frames.
+- **Status:** Partially fixed. Template reuse and broad-phase culling are
+  accepted, but 936-ms median spell-154 solves and five observed laser hits
+  leave both global projection throughput and laser geometry fidelity open.

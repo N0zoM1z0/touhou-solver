@@ -98,6 +98,36 @@ class RobustViabilityTests(unittest.TestCase):
         self.assertEqual(policy.layer_count, 2)
         self.assertEqual(policy.horizon_frames, 4)
 
+    def test_query_and_rollout_projection_share_round_to_even_ties(
+        self,
+    ) -> None:
+        policy = build_robust_viability_policy(
+            x_axis=np.asarray([0.0, 16.0, 32.0], dtype=np.float32),
+            y_axis=np.asarray([0.0, 16.0], dtype=np.float32),
+            clearance_volume=np.full((3, 2, 3), 100.0, dtype=np.float32),
+            actions=(ControlAction("stay", 0.0, 0.0),),
+            delay_frames=(0,),
+            nominal_delay=0,
+            config=ViabilityConfig(frames_per_layer=2),
+        )
+        self.assertEqual(
+            policy.project_to_lattice(x=8.0, y=0.0)[2:4],
+            (0, 0),
+        )
+        self.assertEqual(
+            policy.project_to_lattice(x=24.0, y=0.0)[2:4],
+            (0, 2),
+        )
+        self.assertEqual(
+            policy.query(
+                frame=0,
+                x=24.0,
+                y=0.0,
+                active_action="stay",
+            ).column,
+            2,
+        )
+
     def test_repair_volume_is_computed_exactly_for_the_queried_state(
         self,
     ) -> None:

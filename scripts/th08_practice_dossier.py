@@ -69,6 +69,15 @@ def _extract_scope(
             and end_event is None
         ):
             scene_events.append(row)
+        if kind == "runtime_error" and end_event is None:
+            end_event = {
+                "reason": "runtime_error",
+                "error_type": row.get("error_type"),
+                "error": row.get("error"),
+                "last_frame": row.get("last_frame", previous_frame),
+                "stage_route_index": stage,
+            }
+            continue
         if kind != "decision":
             continue
         frame = int(row["frame"])
@@ -523,6 +532,12 @@ def _terminal_threat_summary(
         },
         "collision_warning_count": sum(
             int(row.get("collisions", 0)) > 0 for row in rows
+        ),
+        "constraint_relaxed_count": sum(
+            bool((decision.get("robust_control") or {}).get(
+                "viability_constraint_relaxed"
+            ))
+            for decision in decisions
         ),
         "clearance_below_item_safety_count": sum(
             float(row.get("min_clearance", 9999.0))
@@ -1096,6 +1111,11 @@ def build_dossier(
     phase_counter_discontinuities = len(decisions) - len(
         operational_lag_rows
     )
+    accepted_completion = (
+        trace.end_event.get("reason") != "runtime_error"
+        and trace.raw_summary is not None
+        and trace.raw_summary.get("termination_reason") == "route_complete"
+    )
 
     return {
         "schema": "th08-practice-dossier-v1",
@@ -1125,6 +1145,7 @@ def build_dossier(
                 and int(trace.raw_summary.get("last_frame", -1))
                 == int(decisions[-1]["frame"])
             ),
+            "accepted_completion": accepted_completion,
         },
         "provenance": {
             "path": trace.path,
@@ -1339,6 +1360,8 @@ def render_markdown(dossier: dict[str, object]) -> str:
         "manager counter before the external stop."
         if not scope["raw_summary_is_scope_valid"]
         else "- The agent's raw summary agrees with the scoped trace.",
+        f"- Accepted complete practice: **"
+        f"{'YES' if scope.get('accepted_completion') else 'NO'}**.",
         f"- Native hit edges: {totals['death_count']}, at "
         f"`{totals['death_frames']}`.",
         f"- Hard no-Bomb verification: **{'PASS' if bomb['passed'] else 'FAIL'}"
@@ -1503,7 +1526,9 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"counts `{terminal_threat['horizon_counts']}`; it reported "
                 f"{terminal_threat['collision_warning_count']} collision and "
                 f"{terminal_threat['clearance_below_item_safety_count']} "
-                "sub-safety-clearance warnings."
+                "sub-safety-clearance warnings, and relaxed "
+                f"{terminal_threat['constraint_relaxed_count']} coarse "
+                "constraints at clamped aliases."
             )
             if isinstance(terminal_threat, dict)
             else "- No extended terminal-threat telemetry was present.",

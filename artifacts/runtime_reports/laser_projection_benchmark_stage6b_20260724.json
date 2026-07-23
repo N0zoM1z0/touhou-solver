@@ -1,0 +1,21 @@
+{
+  "schema": "th08-laser-projection-benchmark-v1",
+  "trace": "artifacts\\runtime_reports\\lunatic_route2_stage6b_unattended_20260724_053742.jsonl",
+  "trace_sha256": "f0704ebadcf9a87bd336b179793e8c07570e4844633179d7313aff7b19b2e01b",
+  "source_frame": 22002,
+  "laser_count": 215,
+  "trajectory_count": 185,
+  "forecast_frames": 27,
+  "horizon_frames": 80,
+  "uncached_sum_ms": 372.12900005397387,
+  "uncached_per_laser_median_ms": 1.7074000206775963,
+  "shared_template_cold_ms": 61.475499998778105,
+  "shared_template_warm_ms": 41.35309997946024,
+  "cold_speedup": 6.053289522840324,
+  "cold_cache": {
+    "hits": 196,
+    "misses": 19,
+    "size": 19
+  },
+  "interpretation": "The retained trace lacks phase thresholds, so reconstructed states use a long active phase. This isolates exact lifecycle template sharing; it is not a collision-fidelity comparison."
+}

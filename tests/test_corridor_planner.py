@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import math
 import unittest
+from unittest.mock import Mock, patch
 
 import numpy as np
 
@@ -22,7 +23,7 @@ from corridor_planner import (
     plan_corridor,
 )
 from touhou_control.native_backend import available as native_available
-from touhou_control.viability import ControlAction
+from touhou_control.viability import ControlAction, ViabilityQuery
 
 
 BOUNDS = CorridorBounds(0.0, 96.0, 0.0, 96.0)
@@ -493,6 +494,57 @@ class CorridorPlannerTests(unittest.TestCase):
         self.assertEqual(plan.planning_mode, "robust_viability")
         self.assertIsNotNone(plan.viability_policy)
         self.assertIn("action set is empty", plan.reason)
+
+    def test_representative_rollout_mismatch_degrades_without_crashing(
+        self,
+    ) -> None:
+        start = ViabilityQuery(
+            True,
+            0,
+            1,
+            1,
+            "stay",
+            True,
+            ("stay",),
+            (("stay", 1),),
+            0.0,
+            "robust viable actions found",
+        )
+        mismatch = ViabilityQuery(
+            True,
+            0,
+            1,
+            1,
+            "stay",
+            False,
+            (),
+            (),
+            0.0,
+            "robust action set is empty",
+        )
+        policy = Mock()
+        policy.query.side_effect = (start, mismatch)
+        policy.backend = "test"
+        policy.layer_count = 1
+        with patch(
+            "corridor_planner.build_robust_viability_policy",
+            return_value=policy,
+        ):
+            plan = plan_corridor(
+                start_x=48.0,
+                start_y=48.0,
+                bounds=BOUNDS,
+                config=CONFIG,
+                robust_control=RobustControlSpec(
+                    actions=(ControlAction("stay", 0.0, 0.0),),
+                    delay_frames=(0,),
+                    nominal_delay=0,
+                    active_action="stay",
+                ),
+            )
+        self.assertFalse(plan.reachable)
+        self.assertIs(plan.viability_policy, policy)
+        self.assertIn("representative rollout", plan.reason)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,26 @@
+{
+  "schema": "th08-terminal-threat-benchmark-v1",
+  "trace": "artifacts\\runtime_reports\\lunatic_route2_stage2_unattended_20260724_052616.jsonl",
+  "trace_sha256": "7618209aa01cdacae0171ddd309ab6714e20ae0e7c3d640182ab43cd08c127d2",
+  "sample_count": 200,
+  "minimum_bullets": 100,
+  "scope": "Bullet-only local planner benchmark using retained player, latency, action-hold, and viability guidance.",
+  "variants": {
+    "10": {
+      "median_ms": 10.07789999130182,
+      "p95_ms": 18.005499994615093,
+      "max_ms": 25.285499985329807,
+      "triggered_count": 0,
+      "constraint_relaxed_count": 0
+    },
+    "32": {
+      "median_ms": 12.610500009031966,
+      "p95_ms": 27.518699993379414,
+      "max_ms": 35.968000011052936,
+      "triggered_count": 71,
+      "constraint_relaxed_count": 71
+    }
+  },
+  "action_change_count": 50,
+  "interpretation": "This measures offline compute and selected-action sensitivity; it is not physical survival acceptance."
+}

@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""Tests for the TH08-to-neutral corridor planning boundary."""
+
+from __future__ import annotations
+
+import unittest
+
+from th08_corridor_adapter import (
+    TH08_CORRIDOR_CONFIG,
+    lower_bullets,
+    lower_lasers,
+)
+from th08_live_dodge_agent import Bullet, Laser
+
+
+class Th08CorridorAdapterTests(unittest.TestCase):
+    def test_live_corridor_keeps_long_horizon_at_coarse_resolution(self) -> None:
+        self.assertEqual(TH08_CORRIDOR_CONFIG.grid_step, 16.0)
+        self.assertEqual(TH08_CORRIDOR_CONFIG.frames_per_layer, 8)
+        self.assertEqual(TH08_CORRIDOR_CONFIG.horizon_frames, 80)
+
+    def test_read_lag_projects_bullet_before_corridor_prediction(self) -> None:
+        hazards = lower_bullets(
+            (Bullet(10.0, 20.0, 2.0, -1.0, 3.0, 4.0),),
+            snapshot_lag=3,
+        )
+        self.assertEqual(len(hazards), 1)
+        self.assertAlmostEqual(hazards[0].x, 16.0)
+        self.assertAlmostEqual(hazards[0].y, 17.0)
+        self.assertGreater(hazards[0].base_uncertainty, 0.0)
+
+    def test_transforming_bullet_gets_growing_robust_margin(self) -> None:
+        straight = lower_bullets(
+            (Bullet(10.0, 20.0, 0.0, 1.0, 2.0, 2.0),),
+            snapshot_lag=0,
+        )[0]
+        transformed = lower_bullets(
+            (Bullet(10.0, 20.0, 0.0, 1.0, 2.0, 2.0, transform_flags=1),),
+            snapshot_lag=0,
+        )[0]
+        self.assertGreater(
+            transformed.base_uncertainty, straight.base_uncertainty
+        )
+        self.assertGreater(
+            transformed.uncertainty_per_frame,
+            straight.uncertainty_per_frame,
+        )
+
+    def test_laser_uncertainty_accounts_for_snapshot_age(self) -> None:
+        hazard = lower_lasers(
+            (Laser(12.0, 34.0, 0.5, 4.0, 80.0, 6.0),),
+            snapshot_lag=5,
+        )[0]
+        self.assertEqual(hazard.origin_x, 12.0)
+        self.assertEqual(hazard.head, 80.0)
+        self.assertEqual(hazard.base_uncertainty, 2.0)
+        self.assertGreater(hazard.uncertainty_per_frame, 0.0)
+
+
+if __name__ == "__main__":
+    unittest.main()

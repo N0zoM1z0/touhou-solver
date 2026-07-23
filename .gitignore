@@ -1,0 +1,15 @@
+# Python/runtime caches
+__pycache__/
+*.py[cod]
+
+# Live trials are large, reproducible sensor captures. Keep compact summaries.
+artifacts/runtime_reports/*.jsonl
+artifacts/runtime_reports/*.png
+artifacts/runtime_reports/*.log
+artifacts/menu_audit/*.png
+
+# Runtime control sentinels and local editor/OS state
+*.stop
+*.tmp
+.DS_Store
+

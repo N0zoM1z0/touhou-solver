@@ -1,0 +1,50 @@
+# ply03a.sht
+sha256: 7060751eb805629da8ec5a4429656adc6c3283438ff21af08dd1a619bc7855ba
+shot_levels: 6
+bomb_gate_reset_value: 12
+movement: unfocused_cardinal=5 unfocused_diagonal_axis=3.5355339 focused_cardinal=1.9 focused_diagonal_axis=1.3435029
+item_homing_speed: 10
+item_fall_scale: 0.89999998
+player_hitbox_width: 2
+player_aux_collision_width: 3
+item_collection_box_width: 24
+point_value_line_y: 128
+
+## level 0 power<8 [0x00000068, 0x000000dc) shots=2
+0x00000068 period=5 phase=0 source=0 type=0 damage=48 spawn=(0,0) hitbox=(18,48) angle=-1.5707964 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-50
+0x000000a0 period=10 phase=0 source=3 type=0 damage=32 spawn=(0,0) hitbox=(18,48) angle=0 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x000000d8 sentinel field_02=-1
+
+## level 1 power<24 [0x000000dc, 0x00000150) shots=2
+0x000000dc period=5 phase=0 source=0 type=0 damage=48 spawn=(0,0) hitbox=(18,48) angle=-1.5707964 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x00000114 period=6 phase=0 source=3 type=0 damage=32 spawn=(0,0) hitbox=(18,48) angle=0 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x0000014c sentinel field_02=-1
+
+## level 2 power<48 [0x00000150, 0x000001c4) shots=2
+0x00000150 period=3 phase=0 source=0 type=0 damage=30 spawn=(0,0) hitbox=(18,48) angle=-1.5707964 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x00000188 period=5 phase=0 source=3 type=0 damage=32 spawn=(0,0) hitbox=(18,48) angle=0 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x000001c0 sentinel field_02=-1
+
+## level 3 power<80 [0x000001c4, 0x00000270) shots=3
+0x000001c4 period=3 phase=0 source=0 type=0 damage=20 spawn=(-8,0) hitbox=(18,48) angle=-1.5358897 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x000001fc period=3 phase=0 source=0 type=0 damage=20 spawn=(8,0) hitbox=(18,48) angle=-1.6057029 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x00000234 period=3 phase=0 source=3 type=0 damage=23 spawn=(0,0) hitbox=(18,48) angle=0 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x0000026c sentinel field_02=-1
+
+## level 4 power<128 [0x00000270, 0x0000038c) shots=5
+0x00000270 period=3 phase=0 source=0 type=0 damage=20 spawn=(-8,0) hitbox=(18,48) angle=-1.5358897 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x000002a8 period=3 phase=0 source=0 type=0 damage=20 spawn=(8,0) hitbox=(18,48) angle=-1.6057029 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x000002e0 period=10 phase=0 source=3 type=0 damage=23 spawn=(0,0) hitbox=(18,48) angle=-0.10471976 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x00000318 period=3 phase=0 source=3 type=0 damage=20 spawn=(0,0) hitbox=(18,48) angle=0 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x00000350 period=10 phase=0 source=3 type=0 damage=23 spawn=(0,0) hitbox=(18,48) angle=0.10471976 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x00000388 sentinel field_02=-1
+
+## level 5 power<999 [0x0000038c, 0x00000518) shots=7
+0x0000038c period=15 phase=0 source=0 type=0 damage=24 spawn=(-8,0) hitbox=(18,48) angle=-1.6231562 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x000003c4 period=3 phase=0 source=0 type=0 damage=21 spawn=(-8,0) hitbox=(18,48) angle=-1.5358897 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x000003fc period=3 phase=0 source=0 type=0 damage=21 spawn=(8,0) hitbox=(18,48) angle=-1.6057029 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x00000434 period=15 phase=0 source=0 type=0 damage=24 spawn=(8,0) hitbox=(18,48) angle=-1.5184364 speed=16 anm=0 sound=0 callbacks=(3,0,0,0) field_1e=-40
+0x0000046c period=5 phase=0 source=3 type=0 damage=23 spawn=(0,0) hitbox=(18,48) angle=-0.10471976 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x000004a4 period=3 phase=0 source=3 type=0 damage=20 spawn=(0,0) hitbox=(18,48) angle=0 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x000004dc period=5 phase=0 source=3 type=0 damage=23 spawn=(0,0) hitbox=(18,48) angle=0.10471976 speed=16 anm=0 sound=0 callbacks=(8,0,0,0) field_1e=-10
+0x00000514 sentinel field_02=-1

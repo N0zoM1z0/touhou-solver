@@ -1326,8 +1326,40 @@ Status: observed | inferred | unknown | fixed
 - **Evidence:** Slot 443 was already visible at frame 13,481 with stable
   velocity and hit 36 frames later. Local robust control did not become unsafe
   until frame 13,509, only eight frames before impact.
-- **Correction gate:** Add a cheap extended terminal-threat rollout after the
+- **Correction:** Add a cheap extended terminal-threat rollout after the
   exact ten-frame beam. It must distinguish physically clamped aliases and
   prefer a beam path whose terminal continuation avoids a visible stable
   hazard before stale repair-volume and positional objectives. It remains a
   heuristic warning, not a viability certificate.
+- **Regression:** `test_ce_stage2_frame_13517_terminal_threat_leaves_clamped_aliases`
+  reduces the retained wave to six bullets. The ten-frame selector stays at
+  the boundary; the 32-frame terminal warning chooses `left_fast`.
+- **Performance gate:** The final boundary-degeneracy trigger activated on
+  6/100 sampled Stage-2 decisions. An alternating-order Windows replay
+  measured 11.01/19.81 ms without the extension and 10.48/21.51 ms with it
+  at median/p95; the p95 cost is about 1.7 ms. Physical acceptance remains
+  pending.
+
+## CE-0069: Running terminal threat on every decision broke cadence
+
+- **Observed symptom:** Always-on terminal threat run
+  `stage4a/20260724_045225` still had 27 hits. Nonspell improved 16 to 12, but
+  spell 73 regressed 1 to 4. Local planning rose from 21.36/38.78 to
+  27.19/45.32 ms median/p95 and control cadence regressed from 3/4 to 3/5
+  frames.
+- **Invalid assumption:** A cheap 24-terminal-state rollout is cheap enough to
+  execute on every live decision when dense bullets and up to 36 enemy bodies
+  share the same hazard kernel.
+- **Correction:** Trigger the extension only when the player is within four
+  pixels of a boundary and the old global safe-action labels collapse to at
+  most three distinct clamped physical successors. Retained Stage-4A telemetry
+  estimates 212/9,439 decisions would meet this gate instead of all 9,439.
+- **Physical gate:** Random Stage-1 run `20260724_050922` activated the
+  conditional warning on 97/4,850 decisions. Planning remained 22.04/40.61 ms
+  median/p95 and cadence remained 3/4 frames, versus the rejected always-on
+  Stage-4A cadence of 3/5. Total hits were unchanged at four; the gate accepts
+  bounded runtime cost, not a hit-count improvement.
+- **Status:** Always-on design rejected and retained. The boundary-conditional
+  design is accepted as a narrowly scoped warning. Its four new Stage-1
+  witnesses remain failures of global-kernel preservation, not evidence that
+  the warning solves long-horizon planning.

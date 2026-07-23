@@ -131,6 +131,7 @@ FOCUSED_DIAGONAL_SPEED = 1.6263456344604492
 UNFOCUSED_CARDINAL_SPEED = 4.0
 UNFOCUSED_DIAGONAL_SPEED = 2.8284270763397217
 PLANNER_HORIZON = 10
+PLANNER_THREAT_HORIZON = 32
 PLANNER_BEAM_WIDTH = 24
 PLANNER_ACTION_HOLD = 2
 LIVE_ACTION_HOLD_DEFAULT = 3
@@ -258,6 +259,9 @@ class Decision:
     viability_constrained: bool = False
     viability_safe_action_count: int = 0
     viability_repair_volume: int = 0
+    terminal_threat_horizon: int = 0
+    terminal_threat_collisions: int = 0
+    terminal_threat_min_clearance: float = 9999.0
 
 
 @dataclass(frozen=True)
@@ -1664,6 +1668,108 @@ def _estimate_live_action_hold(frame_deltas: tuple[int, ...]) -> int:
     )
 
 
+def _terminal_threat_scores(
+    nodes: list[SearchNode],
+    *,
+    start_step: int,
+    end_step: int,
+    control_delay_frames: int,
+    bullet_frames: tuple[tuple[np.ndarray, ...], ...],
+    laser_frames: tuple[tuple[Laser, ...], ...],
+    enemy_bodies: tuple[EnemyBody, ...],
+) -> dict[SearchNode, tuple[int, float]]:
+    """Extend terminal actions cheaply; this is a warning, not a certificate."""
+
+    if not nodes or end_step <= start_step:
+        return {node: (0, math.inf) for node in nodes}
+    positions_x = np.asarray([node.x for node in nodes], dtype=np.float32)
+    positions_y = np.asarray([node.y for node in nodes], dtype=np.float32)
+    velocity_x = np.asarray(
+        [node.last_action.dx for node in nodes],
+        dtype=np.float32,
+    )
+    velocity_y = np.asarray(
+        [node.last_action.dy for node in nodes],
+        dtype=np.float32,
+    )
+    collisions = np.zeros(len(nodes), dtype=np.int32)
+    minimum = np.full(len(nodes), np.inf, dtype=np.float64)
+    for step in range(start_step + 1, end_step + 1):
+        positions_x = np.clip(
+            positions_x + velocity_x,
+            PLAYFIELD_LEFT,
+            PLAYFIELD_RIGHT,
+        )
+        positions_y = np.clip(
+            positions_y + velocity_y,
+            PLAYFIELD_TOP,
+            PLAYFIELD_BOTTOM,
+        )
+        _, step_collisions, step_clearance = _hazards_for_positions(
+            positions_x,
+            positions_y,
+            step=control_delay_frames + step,
+            bullet_frame=bullet_frames[step - 1],
+            lasers=laser_frames[step - 1],
+            enemy_bodies=enemy_bodies,
+        )
+        collisions += step_collisions
+        minimum = np.minimum(minimum, step_clearance)
+    return {
+        node: (int(collisions[index]), float(minimum[index]))
+        for index, node in enumerate(nodes)
+    }
+
+
+def _terminal_threat_required(
+    *,
+    player_x: float,
+    player_y: float,
+    action_hold_frames: int,
+    allowed_first_actions: tuple[str, ...] | None,
+) -> bool:
+    """Detect stale-policy control collapse near a clamped boundary."""
+
+    if allowed_first_actions is None:
+        return False
+    boundary_clearance = min(
+        player_x - PLAYFIELD_LEFT,
+        PLAYFIELD_RIGHT - player_x,
+        player_y - PLAYFIELD_TOP,
+        PLAYFIELD_BOTTOM - player_y,
+    )
+    if boundary_clearance > 4.0:
+        return False
+    allowed = set(allowed_first_actions)
+    successors = {
+        (
+            round(
+                min(
+                    PLAYFIELD_RIGHT,
+                    max(
+                        PLAYFIELD_LEFT,
+                        player_x + action.dx * action_hold_frames,
+                    ),
+                ),
+                3,
+            ),
+            round(
+                min(
+                    PLAYFIELD_BOTTOM,
+                    max(
+                        PLAYFIELD_TOP,
+                        player_y + action.dy * action_hold_frames,
+                    ),
+                ),
+                3,
+            ),
+        )
+        for action in _PLANNER_ACTIONS
+        if action.name in allowed
+    }
+    return 0 < len(successors) <= 3
+
+
 def choose_action(
     *,
     player_x: float,
@@ -1682,6 +1788,7 @@ def choose_action(
     control_delay_candidates: tuple[int, ...] | None = None,
     action_hold_frames: int = PLANNER_ACTION_HOLD,
     horizon: int = PLANNER_HORIZON,
+    threat_horizon: int | None = None,
     beam_width: int = PLANNER_BEAM_WIDTH,
     target_x: float | None = None,
     target_y: float | None = None,
@@ -1691,6 +1798,20 @@ def choose_action(
 ) -> Decision:
     if horizon <= 0 or beam_width <= 0:
         raise ValueError("planner horizon and beam width must be positive")
+    if threat_horizon is None:
+        threat_horizon = horizon
+    if threat_horizon < horizon:
+        raise ValueError("threat horizon cannot be shorter than planner horizon")
+    effective_threat_horizon = (
+        threat_horizon
+        if _terminal_threat_required(
+            player_x=player_x,
+            player_y=player_y,
+            action_hold_frames=action_hold_frames,
+            allowed_first_actions=allowed_first_actions,
+        )
+        else horizon
+    )
     if control_delay_frames < 0:
         raise ValueError("control delay cannot be negative")
     if control_delay_candidates is not None:
@@ -1754,7 +1875,7 @@ def choose_action(
     )
     bullet_frames = _build_bullet_frames(
         bullets,
-        horizon=horizon,
+        horizon=effective_threat_horizon,
         snapshot_lag=max(
             0,
             control_delay_frames - max(0, snapshot_lag),
@@ -1762,7 +1883,7 @@ def choose_action(
     )
     laser_frames = build_laser_collision_frames(
         lasers,
-        horizon=horizon,
+        horizon=effective_threat_horizon,
         snapshot_lag=max(
             0,
             control_delay_frames - max(0, snapshot_lag),
@@ -1967,10 +2088,24 @@ def choose_action(
                 + ((node.y - target_y) / 8.0) ** 2
             )
         beam[index] = replace(node, risk=node.risk + position_cost)
+    terminal_threats = _terminal_threat_scores(
+        beam,
+        start_step=horizon,
+        end_step=effective_threat_horizon,
+        control_delay_frames=control_delay_frames,
+        bullet_frames=bullet_frames,
+        laser_frames=laser_frames,
+        enemy_bodies=enemy_bodies,
+    )
+
     def selection_key(node: SearchNode) -> tuple[object, ...]:
+        threat_collisions, threat_clearance = terminal_threats[node]
         return (
             node.collisions,
             max(-node.min_clearance, 0.0),
+            threat_collisions,
+            max(-threat_clearance, 0.0),
+            max(ITEM_SAFETY_CLEARANCE - threat_clearance, 0.0),
             -repair_by_action.get(node.first_action.name, 0),
             _node_key(
                 node,
@@ -1996,20 +2131,8 @@ def choose_action(
             action_name = node.first_action.name
             actions_by_name[action_name] = node.first_action
             incumbent = nodes_by_action.get(action_name)
-            if incumbent is None or _node_key(
-                node,
-                step=horizon,
-                selected_items=selected_items,
-                target_x=target_x,
-                target_y=target_y,
-                target_deadline=target_deadline,
-            ) < _node_key(
-                incumbent,
-                step=horizon,
-                selected_items=selected_items,
-                target_x=target_x,
-                target_y=target_y,
-                target_deadline=target_deadline,
+            if incumbent is None or selection_key(node) < selection_key(
+                incumbent
             ):
                 nodes_by_action[action_name] = node
         robust_certificates = _robust_action_certificates(
@@ -2065,6 +2188,7 @@ def choose_action(
     )
     direction_mask = action.direction
     focus_mask = FOCUS if action.focused else 0
+    threat_collisions, threat_clearance = terminal_threats[best]
     predicted_collections = tuple(
         selected_items[index][0].slot
         for index in range(len(selected_items))
@@ -2109,6 +2233,9 @@ def choose_action(
         allowed_first_actions is not None,
         len(allowed_first_actions or ()),
         repair_by_action.get(action.name, 0),
+        effective_threat_horizon,
+        threat_collisions,
+        9999.0 if math.isinf(threat_clearance) else threat_clearance,
     )
 
 
@@ -2451,6 +2578,10 @@ def run(args: argparse.Namespace) -> int:
                     ),
                     "viability_horizon_frames": (
                         TH08_CORRIDOR_CONFIG.horizon_frames
+                    ),
+                    "local_planner_horizon_frames": args.horizon,
+                    "local_terminal_threat_horizon_frames": (
+                        args.threat_horizon
                     ),
                     "viability_max_query_age_frames": (
                         args.corridor_max_age
@@ -2991,6 +3122,7 @@ def run(args: argparse.Namespace) -> int:
                 control_delay_candidates=delay_estimate.support,
                 action_hold_frames=action_hold_frames,
                 horizon=args.horizon,
+                threat_horizon=args.threat_horizon,
                 beam_width=args.beam_width,
                 target_x=(
                     corridor_target[0] if corridor_target is not None else None
@@ -3182,6 +3314,22 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "viability_repair_volume": (
                             decision.viability_repair_volume
+                        ),
+                    },
+                    "terminal_threat": {
+                        "mode": (
+                            "constant_terminal_action_heuristic"
+                            if decision.terminal_threat_horizon > args.horizon
+                            else "disabled_no_degenerate_boundary"
+                        ),
+                        "horizon_frames": (
+                            decision.terminal_threat_horizon
+                        ),
+                        "collisions": (
+                            decision.terminal_threat_collisions
+                        ),
+                        "min_clearance": (
+                            decision.terminal_threat_min_clearance
                         ),
                     },
                     "score": decision.score,
@@ -3565,6 +3713,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--poll-ms", type=float, default=0.2)
     parser.add_argument("--log-every", type=int, default=30)
     parser.add_argument("--horizon", type=int, default=PLANNER_HORIZON)
+    parser.add_argument(
+        "--threat-horizon",
+        type=int,
+        default=PLANNER_THREAT_HORIZON,
+        help=(
+            "cheap terminal-action hazard rollout; heuristic only, never a "
+            "viability certificate"
+        ),
+    )
     parser.add_argument("--beam-width", type=int, default=PLANNER_BEAM_WIDTH)
     parser.add_argument(
         "--control-delay-frames",

@@ -519,6 +519,28 @@ replay file does not by itself prove its terminal result or establish
 game-vs-simulator state parity. No local route-2 Lunatic replay baseline is
 currently present.
 
+## Terminal Threat Warning
+
+The exact local beam remains ten frames to protect control cadence. When an
+older global safe mask collapses to at most three physical successors within
+four pixels of a clamped boundary, at most 24 terminal states are advanced
+cheaply to frame 32 under their final action. Bullet, finite-laser, enemy-body,
+and boundary-clamp geometry use the same hazard primitives as the exact
+planner. Selection orders this extended collision count and an eight-pixel
+clearance deficit before stale asynchronous repair volume.
+
+This extension is intentionally not part of the robust certificate. It tests
+one constant terminal continuation, not the existence of an adaptive future
+policy under every delay. Its role is to warn against locally quiet but
+soon-threatening endpoints, especially when several globally allowed action
+labels clamp to one physical boundary state. Trace and dossier telemetry label
+the horizon, collisions, and minimum clearance separately.
+
+The trigger is required for timing, not just semantics. An always-on Stage-4A
+trial raised planning p95 from 38.78 to 45.32 ms and decision-cadence p95 from
+four to five frames without reducing total hits. That design is rejected and
+retained as CE-0069.
+
 ## Verification Gates
 
 1. File parsers reproduce all decoded ECL/SHT corpus boundaries exactly.

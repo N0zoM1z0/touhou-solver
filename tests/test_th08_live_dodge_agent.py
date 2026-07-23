@@ -1039,6 +1039,111 @@ class LiveDodgeAgentTests(unittest.TestCase):
         )
         self.assertEqual(decision.action, "right_fast")
 
+    def test_ce_stage2_frame_13517_terminal_threat_leaves_clamped_aliases(
+        self,
+    ) -> None:
+        bullets = tuple(
+            Bullet(x, y, vx, vy, width, height, slot=slot)
+            for slot, x, y, vx, vy, width, height in (
+                (
+                    246,
+                    268.00494384765625,
+                    423.29119873046875,
+                    0.2894723415374756,
+                    1.9789408445358276,
+                    2.0,
+                    2.0,
+                ),
+                (
+                    255,
+                    310.0292053222656,
+                    399.29315185546875,
+                    0.6699826121330261,
+                    1.8844417333602905,
+                    2.0,
+                    2.0,
+                ),
+                (
+                    344,
+                    285.4129638671875,
+                    398.8815002441406,
+                    0.30125316977500916,
+                    1.9771815538406372,
+                    2.0,
+                    2.0,
+                ),
+                (
+                    391,
+                    207.90084838867188,
+                    325.9405822753906,
+                    1.584021806716919,
+                    1.221012830734253,
+                    2.0,
+                    2.0,
+                ),
+                (
+                    570,
+                    332.90472412109375,
+                    385.6181640625,
+                    0.4250517785549164,
+                    3.3733270168304443,
+                    5.0,
+                    5.0,
+                ),
+                (
+                    577,
+                    334.0790710449219,
+                    394.9444274902344,
+                    0.4500548243522644,
+                    3.5717580318450928,
+                    5.0,
+                    5.0,
+                ),
+            )
+        )
+        common = {
+            "player_x": 304.103759765625,
+            "player_y": 429.64422607421875,
+            "bullets": bullets,
+            "lasers": (),
+            "previous_direction": 0,
+            "previous_focus": True,
+            "snapshot_lag": 1,
+            "control_delay_frames": 3,
+            "control_delay_candidates": (3, 4, 5, 6),
+            "action_hold_frames": 4,
+            "can_bomb": False,
+            "horizon": 10,
+            "allowed_first_actions": (
+                "stay",
+                "down",
+                "left_fast",
+                "down_fast",
+            ),
+            "viability_repair_volumes": (
+                ("stay", 3),
+                ("down", 3),
+                ("left_fast", 1),
+                ("down_fast", 3),
+            ),
+        }
+        legacy = choose_action(**common, threat_horizon=10)
+        decision = choose_action(**common, threat_horizon=32)
+        self.assertEqual(legacy.action, "stay")
+        self.assertEqual(decision.action, "left_fast")
+        self.assertEqual(decision.terminal_threat_horizon, 32)
+        self.assertGreater(
+            decision.terminal_threat_min_clearance,
+            legacy.min_clearance,
+        )
+        self.assertFalse(decision.bomb)
+
+        interior = choose_action(
+            **{**common, "player_y": 400.0},
+            threat_horizon=32,
+        )
+        self.assertEqual(interior.terminal_threat_horizon, 10)
+
     def test_ce_frame_3254_pipeline_detects_slot_1136_before_hit(self) -> None:
         bullet = Bullet(
             337.4276123046875,

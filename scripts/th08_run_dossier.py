@@ -393,6 +393,11 @@ def _compact_decision(
             if isinstance(row.get("robust_control"), dict)
             else {}
         ),
+        "terminal_threat": (
+            row.get("terminal_threat")
+            if isinstance(row.get("terminal_threat"), dict)
+            else {}
+        ),
         "corridor_lane": (
             str(corridor["lane"]) if isinstance(corridor, dict) else None
         ),
@@ -1075,6 +1080,9 @@ def _death_ledger(
                     "robust_control": dict(
                         last_alive["robust_control"]
                     ),
+                    "terminal_threat": dict(
+                        last_alive["terminal_threat"]
+                    ),
                     "viability": dict(last_alive["viability"]),
                     "action_lag": int(last_alive["action_lag"]),
                 }
@@ -1127,6 +1135,7 @@ def _death_ledger(
                 row["control_delay_estimator"]
             ),
             "robust_control": dict(row["robust_control"]),
+            "terminal_threat": dict(row["terminal_threat"]),
             "viability": dict(row["viability"]),
             "read_ms": row["read_ms"],
             "plan_ms": row["plan_ms"],

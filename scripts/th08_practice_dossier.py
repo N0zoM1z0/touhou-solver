@@ -23,6 +23,7 @@ from th08_trial_report import STAGE_ROUTE_LABELS
 
 ROOT = Path(__file__).resolve().parent.parent
 BOMB_INPUT_BIT = 0x02
+TERMINAL_THREAT_SAFETY_CLEARANCE = 8.0
 
 
 @dataclass(frozen=True)
@@ -492,6 +493,43 @@ def _enemy_sensor_summary(
             count > 0 for count in body_counts
         ),
         "max_active_bodies": max(body_counts, default=0),
+    }
+
+
+def _terminal_threat_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object] | None:
+    rows = [
+        row["terminal_threat"]
+        for row in decisions
+        if isinstance(row.get("terminal_threat"), dict)
+        and row["terminal_threat"]
+    ]
+    if not rows:
+        return None
+    clearances = [
+        float(row["min_clearance"])
+        for row in rows
+        if float(row.get("min_clearance", 9999.0)) < 9999.0
+    ]
+    horizons = Counter(int(row.get("horizon_frames", 0)) for row in rows)
+    return {
+        "decision_count": len(rows),
+        "mode_counts": dict(
+            sorted(Counter(str(row.get("mode", "unknown")) for row in rows).items())
+        ),
+        "horizon_counts": {
+            str(key): horizons[key] for key in sorted(horizons)
+        },
+        "collision_warning_count": sum(
+            int(row.get("collisions", 0)) > 0 for row in rows
+        ),
+        "clearance_below_item_safety_count": sum(
+            float(row.get("min_clearance", 9999.0))
+            < TERMINAL_THREAT_SAFETY_CLEARANCE
+            for row in rows
+        ),
+        "minimum_clearance": _percentiles(clearances),
     }
 
 
@@ -1162,6 +1200,7 @@ def build_dossier(
             "input_visibility": _input_visibility_summary(decisions),
             "runtime_timing_ms": _runtime_timing(decisions),
             "enemy_sensor": _enemy_sensor_summary(decisions),
+            "terminal_threat": _terminal_threat_summary(decisions),
             "behavior_context": _behavior_context(decisions, deaths),
             "per_spell": _spell_phase_summary(decisions, deaths),
             "frame_lag": {
@@ -1413,6 +1452,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
     robust_viability = totals["robust_viability"]
     input_visibility = totals["input_visibility"]
     enemy_sensor = totals.get("enemy_sensor")
+    terminal_threat = totals.get("terminal_threat")
     body_overlaps = sum(
         death["observed_enemy_body_contact_candidate"] is not None
         for death in dossier["deaths"]
@@ -1457,6 +1497,16 @@ def render_markdown(dossier: dict[str, object]) -> str:
             )
             if isinstance(enemy_sensor, dict)
             else "- No full enemy-pool sensor telemetry was present.",
+            (
+                "- The terminal-threat heuristic covered "
+                f"{terminal_threat['decision_count']} decisions with horizon "
+                f"counts `{terminal_threat['horizon_counts']}`; it reported "
+                f"{terminal_threat['collision_warning_count']} collision and "
+                f"{terminal_threat['clearance_below_item_safety_count']} "
+                "sub-safety-clearance warnings."
+            )
+            if isinstance(terminal_threat, dict)
+            else "- No extended terminal-threat telemetry was present.",
             "- Modeled action hold counts were "
             f"`{action_hold['all']['counts']}` overall.",
             "- Modeled uncontrollable-prefix counts were "

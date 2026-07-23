@@ -361,3 +361,11 @@ outside the short local horizon approaches. Global certificates, local exact
 geometry, and future ECL events must carry explicit provenance and freshness;
 an older global repair volume cannot outrank a newer locally predicted
 collision.
+
+An always-on 32-frame terminal warning was tested and rejected in Stage 4A:
+it increased cadence p95 from four to five frames and did not reduce total
+hits. The warning is now activated only for the observed fusion failure:
+within four pixels of a boundary, an older global safe mask maps to at most
+three distinct clamped physical successors. This keeps the exact current
+geometry authoritative at control-collapse boundaries without turning a
+single-action rollout into a global policy or paying its cost everywhere.

@@ -1624,3 +1624,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   visible straight bullet approached for more than 30 frames. A cheap extended
   terminal-threat rollout is required; increasing the full beam horizon would
   spend too much control-loop time.
+- CE-0068's minimized six-bullet regression proves that a 32-frame
+  constant-terminal-action warning can change the trapped `stay` to
+  `left_fast`. Always-on Stage-4A run `20260724_045225` rejected the first
+  implementation: total hits remained 27, spell 73 regressed 1 to 4, local
+  planning rose 21.36/38.78 to 27.19/45.32 ms, and cadence p95 rose 4 to 5
+  frames.
+- CE-0069 now gates the heuristic on observed control collapse: player within
+  four pixels of a boundary and the global safe labels mapping to at most
+  three distinct clamped successors. Only 212/9,439 retained Stage-4A
+  decisions meet that condition. A 100-row alternating-order Windows replay
+  triggered 6 times and added about 1.7 ms at p95. Conditional physical
+  acceptance on random Stage-1 run `20260724_050922` triggered 97/4,850
+  decisions while preserving 3/4-frame median/p95 cadence and
+  22.04/40.61-ms planning. The run still had four hits, so this accepts the
+  performance gate only. Three hit windows exhausted the global kernel and
+  one exhausted the robust local action set; those are the next planning
+  target.

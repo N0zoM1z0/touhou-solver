@@ -107,10 +107,11 @@ PLANNER_BEAM_WIDTH = 24
 PLANNER_ACTION_HOLD = 2
 LIVE_ACTION_HOLD_DEFAULT = 3
 LIVE_ACTION_HOLD_MAX = 6
-# From the player snapshot, the live loop spends roughly two game frames
-# reading/planning and TH08 samples injected input on the following frame.
-# Bullet memory is read later, so snapshot_lag is subtracted from its lead.
-CONTROL_DELAY_FRAMES = 3
+# The previous input remains active while the current snapshot is read and
+# planned. Live control estimates this prefix independently from action hold.
+CONTROL_DELAY_FRAMES = 2
+LIVE_CONTROL_DELAY_MIN = 1
+LIVE_CONTROL_DELAY_MAX = 4
 COLLECTION_HALF_WIDTH = 24.0
 ITEM_SAFETY_CLEARANCE = 8.0
 CORRIDOR_REPLAN_FRAMES = 24
@@ -1101,6 +1102,21 @@ def _estimate_live_action_hold(frame_deltas: tuple[int, ...]) -> int:
     )
 
 
+def _estimate_live_control_delay(
+    action_lags: tuple[int, ...],
+    *,
+    default: int = CONTROL_DELAY_FRAMES,
+) -> int:
+    operational = sorted(lag for lag in action_lags if 0 <= lag < 120)
+    if not operational:
+        return default
+    rank = max(0, math.ceil(0.9 * len(operational)) - 1)
+    return max(
+        LIVE_CONTROL_DELAY_MIN,
+        min(LIVE_CONTROL_DELAY_MAX, operational[rank]),
+    )
+
+
 def choose_action(
     *,
     player_x: float,
@@ -1507,6 +1523,14 @@ def run(args: argparse.Namespace) -> int:
         raise ValueError("wait timeout must be positive")
     if args.stop_after_hits < 0 or args.post_hit_frames < 0:
         raise ValueError("hit stopping arguments cannot be negative")
+    if not (
+        LIVE_CONTROL_DELAY_MIN
+        <= args.control_delay_frames
+        <= LIVE_CONTROL_DELAY_MAX
+    ):
+        raise ValueError(
+            "initial control delay must be within the live estimator bounds"
+        )
     if args.auto_confirm_every < 0 or args.auto_confirm_idle_frames < 0:
         raise ValueError("auto-confirm timing arguments cannot be negative")
     if (
@@ -1551,6 +1575,7 @@ def run(args: argparse.Namespace) -> int:
     last_frame_progress = time.perf_counter()
     last_frozen_confirm = float("-inf")
     decision_frame_deltas: deque[int] = deque(maxlen=120)
+    action_lag_history: deque[int] = deque(maxlen=120)
     previous_iteration_ms: float | None = None
     previous_trace_ms: float | None = None
     if not args.local_only:
@@ -1574,6 +1599,10 @@ def run(args: argparse.Namespace) -> int:
                             else "deathbomb_only"
                         )
                     ),
+                    "control_delay_policy": "rolling_action_lag_p90",
+                    "control_delay_default": args.control_delay_frames,
+                    "control_delay_min": LIVE_CONTROL_DELAY_MIN,
+                    "control_delay_max": LIVE_CONTROL_DELAY_MAX,
                 }
             )
             + "\n"
@@ -1744,6 +1773,7 @@ def run(args: argparse.Namespace) -> int:
                 previous_phase = None
                 previous_action_phase = None
                 decision_frame_deltas.clear()
+                action_lag_history.clear()
                 previous_iteration_ms = None
                 previous_trace_ms = None
                 auto_confirm.eligible_since = None
@@ -1854,11 +1884,15 @@ def run(args: argparse.Namespace) -> int:
                 previous_mask,
                 snapshot_lag,
             )
+            control_delay_frames = _estimate_live_control_delay(
+                tuple(action_lag_history),
+                default=args.control_delay_frames,
+            )
             control_origin_x, control_origin_y = _project_player_for_read_lag(
                 float(player["x"]),
                 float(player["y"]),
                 previous_mask,
-                args.control_delay_frames,
+                control_delay_frames,
             )
             corridor_started = time.perf_counter()
             corridor_updated = False
@@ -1897,7 +1931,7 @@ def run(args: argparse.Namespace) -> int:
                 corridor_solution,
                 current_frame=(
                     int(state["enemy_manager_frame"])
-                    + args.control_delay_frames
+                    + control_delay_frames
                 ),
                 lookahead_frames=args.corridor_lookahead,
                 max_age_frames=args.corridor_max_age,
@@ -1922,7 +1956,7 @@ def run(args: argparse.Namespace) -> int:
                 bombs=float(resources["bombs"]),
                 previous_focus=bool(previous_mask & FOCUS),
                 snapshot_lag=snapshot_lag,
-                control_delay_frames=args.control_delay_frames,
+                control_delay_frames=control_delay_frames,
                 action_hold_frames=action_hold_frames,
                 horizon=args.horizon,
                 beam_width=args.beam_width,
@@ -2014,7 +2048,8 @@ def run(args: argparse.Namespace) -> int:
                     "snapshot_frame": state["enemy_manager_frame"],
                     "snapshot_lag": snapshot_lag,
                     "action_lag": counter_at_action - int(state["enemy_manager_frame"]),
-                    "control_delay_frames": args.control_delay_frames,
+                    "control_delay_frames": control_delay_frames,
+                    "control_delay_sample_count": len(action_lag_history),
                     "action_hold_frames": action_hold_frames,
                     "read_ms": read_ms,
                     "plan_ms": plan_ms,
@@ -2175,6 +2210,9 @@ def run(args: argparse.Namespace) -> int:
                 decision_delta = counter_at_action - previous_counter
                 if 0 < decision_delta < 120:
                     decision_frame_deltas.append(decision_delta)
+            action_lag = counter_at_action - int(state["enemy_manager_frame"])
+            if 0 <= action_lag < 120:
+                action_lag_history.append(action_lag)
             previous_trace_ms = trace_ms
             previous_iteration_ms = (
                 time.perf_counter() - iteration_started
@@ -2283,7 +2321,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--control-delay-frames",
         type=int,
         default=CONTROL_DELAY_FRAMES,
-        help="player-snapshot-to-actuation delay under the previous input",
+        help="initial rolling-p90 previous-input prefix estimate",
     )
     parser.add_argument(
         "--difficulty",

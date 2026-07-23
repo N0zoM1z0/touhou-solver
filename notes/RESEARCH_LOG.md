@@ -1071,3 +1071,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Durable outputs are the 10-row death CSV, dossier, executable regression
   corpus, generalized comparison JSON, corrected run report, and
   `notes/runs/2026-07-23_lunatic_route2_stage3_nobomb_comparison.md`.
+
+## 2026-07-23: Dynamic-Hold Physical Run And Actuation Split
+
+- Scoped `173245` to Stage-3 frames `56..26550`: 8,884 decisions, initial
+  8/4/128, eight native hits, and a complete hard no-Bomb pass. The 359-frame
+  `173212` external-stop trace is explicitly discarded.
+- Against `170433`, total hits fell 10 to 8 and active spell-50 hits fell 5 to
+  1. Spell-50 solve median/p95 became slightly slower at 185/396 ms, solution
+  age stayed 28 frames p95, and stale count stayed zero. This supports the
+  dynamic action-hold correction independently of solver-speed improvement.
+- Complete-loop timing is 27.3 ms median and 45.4 ms p95. Local planning is
+  the largest component at 13.7/30.7 ms; pool reads cost 8.5/12.5 ms.
+  Transition-bearing SendInput calls cost 1.72/5.53 ms. CFFI remains
+  unjustified as the next architectural change.
+- Corrected death-ledger causality: the hit-row output is issued only after
+  phase 2 is observed. Five hits have an unsafe last-alive committed prefix
+  with two-to-three-frame warning; three retain positive causal margin and
+  have zero usable warning.
+- Of 5,237 unambiguous output transitions, 86.3% are visible in the next
+  snapshot with a one-frame median/p95 delta. Actuation delay and action hold
+  are now separate plant parameters.
+- The live controller now estimates the previous-input prefix from rolling
+  p90 operational action lag, default two and clamp `1..4`. Its independent
+  action-hold estimate remains rolling p90 decision cadence, clamp `2..6`.
+  Both reset at scene transitions and are retained in trace provenance.
+- Dossier output now includes active input, post-detection action, last alive
+  decision, warning lead, physical contact class, planner failure class,
+  action-hold distribution, control-delay distribution, and input-visibility
+  evidence. All 215 tests pass.

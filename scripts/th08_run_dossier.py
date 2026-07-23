@@ -283,6 +283,24 @@ def _spell_attribution(row: dict[str, object]) -> dict[str, object]:
     }
 
 
+def _input_mask_action(mask: int) -> str:
+    directions = []
+    if mask & 0x10:
+        directions.append("up")
+    if mask & 0x20:
+        directions.append("down")
+    if mask & 0x40:
+        directions.append("left")
+    if mask & 0x80:
+        directions.append("right")
+    action = "_".join(directions) if directions else "stay"
+    if directions and not mask & 0x04:
+        action += "_fast"
+    if mask & 0x02:
+        action += "+bomb"
+    return action
+
+
 def _compact_decision(
     row: dict[str, object],
     *,
@@ -321,11 +339,22 @@ def _compact_decision(
         ),
         "action": str(row.get("action", "")),
         "mask": int(row.get("mask", 0)),
+        "input_snapshot": {
+            key: int(value)
+            for key, value in (
+                row.get("input_snapshot")
+                if isinstance(row.get("input_snapshot"), dict)
+                else {}
+            ).items()
+            if key in {"raw", "current", "previous"}
+        },
         "bomb": bool(row.get("bomb")),
         "hit_started": bool(row.get("hit_started")),
         "auto_confirm": row.get("auto_confirm"),
+        "snapshot_frame": int(row.get("snapshot_frame", row["frame"])),
         "snapshot_lag": int(row.get("snapshot_lag", 0)),
         "action_lag": int(row.get("action_lag", 0)),
+        "control_delay_frames": int(row.get("control_delay_frames", 3)),
         "action_hold_frames": int(row.get("action_hold_frames", 2)),
         "read_ms": float(row.get("read_ms", 0.0)),
         "plan_ms": float(row.get("plan_ms", 0.0)),
@@ -499,11 +528,17 @@ def _classify_death(
     ]
     if slacks and min(slacks) < 0.0:
         contributing.append("corridor_deadline_miss")
-    if int(row["action_lag"]) > 3:
+    if int(row["action_lag"]) > int(row.get("control_delay_frames", 3)):
         contributing.append("action_lag_over_model")
     if int(row["active_bullets"]) >= 1000:
         contributing.append("pool_density_over_1000")
-    if "_fast" in str(row["action"]):
+    input_snapshot = row.get("input_snapshot")
+    active_mask = (
+        int(input_snapshot.get("current", row.get("mask", 0x05)))
+        if isinstance(input_snapshot, dict)
+        else int(row.get("mask", 0x05))
+    )
+    if "_fast" in _input_mask_action(active_mask):
         contributing.append("fast_mode")
     return (
         primary,
@@ -537,6 +572,30 @@ def _death_ledger(
             window.append(sample)
             cursor -= 1
         window.reverse()
+        last_alive = next(
+            (
+                sample
+                for sample in reversed(window[:-1])
+                if int(sample["player"]["phase"]) == 0
+                and int(sample["player"]["phase_at_action"]) == 0
+            ),
+            None,
+        )
+        unsafe_suffix_start = None
+        if (
+            last_alive is not None
+            and float(last_alive["pipeline_clearance"]) <= 0.0
+        ):
+            last_alive_index = window.index(last_alive)
+            unsafe_suffix_start = last_alive
+            for sample in reversed(window[:last_alive_index]):
+                if (
+                    int(sample["player"]["phase"]) != 0
+                    or int(sample["player"]["phase_at_action"]) != 0
+                    or float(sample["pipeline_clearance"]) > 0.0
+                ):
+                    break
+                unsafe_suffix_start = sample
 
         next_bombs = float(row["resources"]["bombs"])
         next_power = float(row["resources"]["power"])
@@ -570,6 +629,32 @@ def _death_ledger(
             if sample["corridor_slack"] is not None
         ]
         bombs_at_hit = float(row["resources"]["bombs"])
+        input_snapshot = row.get("input_snapshot")
+        active_input_mask = (
+            int(input_snapshot.get("current", row["mask"]))
+            if isinstance(input_snapshot, dict)
+            else int(row["mask"])
+        )
+        if last_alive is None:
+            planner_failure_class = "missing_pre_hit_alive_decision"
+        elif float(last_alive["pipeline_clearance"]) <= 0.0:
+            planner_failure_class = "committed_prefix_unsafe_before_hit"
+        elif (
+            float(last_alive["minimum_clearance"]) <= 0.0
+            or primary
+            in {
+                "observed_bullet_overlap",
+                "observed_laser_overlap",
+                "observed_enemy_body_overlap",
+                "observed_multiple_hazard_overlap",
+            }
+            or float(row["pipeline_clearance"]) <= 0.0
+        ):
+            planner_failure_class = (
+                "late_collision_after_positive_causal_margin"
+            )
+        else:
+            planner_failure_class = "unresolved_planner_failure"
         death = {
             "case_id": (
                 f"LUN-S{stage}-F{frame}-"
@@ -590,6 +675,52 @@ def _death_ledger(
             "deathbomb_requested": "+deathbomb" in str(row["action"]),
             "action": row["action"],
             "mask": row["mask"],
+            "issued_action_after_hit_detection": row["action"],
+            "issued_mask_after_hit_detection": row["mask"],
+            "active_input_action": _input_mask_action(active_input_mask),
+            "active_input_mask": active_input_mask,
+            "last_alive_decision": (
+                {
+                    "frame": int(last_alive["frame"]),
+                    "issued_action": str(last_alive["action"]),
+                    "issued_mask": int(last_alive["mask"]),
+                    "active_input_action": _input_mask_action(
+                        int(
+                            last_alive.get("input_snapshot", {}).get(
+                                "current",
+                                last_alive["mask"],
+                            )
+                        )
+                    ),
+                    "active_input_mask": int(
+                        last_alive.get("input_snapshot", {}).get(
+                            "current",
+                            last_alive["mask"],
+                        )
+                    ),
+                    "pipeline_clearance": float(
+                        last_alive["pipeline_clearance"]
+                    ),
+                    "minimum_clearance": float(
+                        last_alive["minimum_clearance"]
+                    ),
+                    "action_hold_frames": int(
+                        last_alive["action_hold_frames"]
+                    ),
+                    "control_delay_frames": int(
+                        last_alive["control_delay_frames"]
+                    ),
+                    "action_lag": int(last_alive["action_lag"]),
+                }
+                if last_alive is not None
+                else None
+            ),
+            "usable_pipeline_warning_lead_frames": (
+                frame - int(unsafe_suffix_start["frame"])
+                if unsafe_suffix_start is not None
+                else 0
+            ),
+            "planner_failure_class": planner_failure_class,
             "active_bullets": row["active_bullets"],
             "active_lasers": row["active_lasers"],
             "active_items": row["active_items"],
@@ -599,6 +730,7 @@ def _death_ledger(
             ),
             "snapshot_lag": row["snapshot_lag"],
             "action_lag": row["action_lag"],
+            "control_delay_frames": row["control_delay_frames"],
             "read_ms": row["read_ms"],
             "plan_ms": row["plan_ms"],
             "pipeline_clearance_at_hit": row["pipeline_clearance"],

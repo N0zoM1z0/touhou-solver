@@ -474,14 +474,15 @@ normal Bomb is disabled by default and native phase-2 deathbomb remains the
 bounded failure fallback.
 
 Runtime timing is part of the plant state. Player position is observed before
-the large pool read; projectile memory belongs to a later sensor epoch; a
-decision then spends another two to four game frames reading/planning before
-injected input affects movement. The local planner evaluates the previous
-input across an explicit three-frame uncontrollable prefix, offsets projectile
-prediction by the measured sensor skew, and advances corridor deadlines to the
-same actuation epoch. Trial reports retain both lags, pipeline clearance, and
-the nearest native hit slot. This timing contract is game-neutral even though
-TH08 supplies the counters and movement adapter.
+the large pool read and projectile memory belongs to a later sensor epoch.
+Decision cadence and input actuation are separate: the former determines how
+long a selected mask remains held, while the latter determines how long the
+previous mask remains uncontrollable. The local controller estimates their
+rolling p90 independently, offsets projectile prediction by measured sensor
+skew, and advances corridor deadlines to the selected actuation epoch. Trial
+reports retain both modeled values, native lags, pipeline clearance, and the
+nearest hit witness. This timing contract is game-neutral even though TH08
+supplies the counters and movement adapter.
 
 This proves the physical control path but is not acceptance. The first two
 prewarmed Lunatic trials reached frames 3259 and 4969 before their first hit,

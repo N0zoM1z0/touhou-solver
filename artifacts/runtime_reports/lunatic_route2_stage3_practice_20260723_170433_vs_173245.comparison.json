@@ -1,0 +1,136 @@
+{
+  "schema": "th08-practice-comparison-v1",
+  "baseline_run_id": "lunatic_route2_stage3_practice_20260723_170433",
+  "candidate_run_id": "lunatic_route2_stage3_practice_20260723_173245",
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 10,
+    "candidate": 8,
+    "reduction_fraction": 0.2
+  },
+  "active_spell_hit_count": {
+    "35": {
+      "baseline": 0,
+      "candidate": 0
+    },
+    "50": {
+      "baseline": 5,
+      "candidate": 1
+    }
+  },
+  "spell_50_corridor": {
+    "solve_ms": {
+      "median": {
+        "baseline": 164.2701999953715,
+        "candidate": 185.27880001056474,
+        "reduction_fraction": -0.12789051219140882
+      },
+      "p95": {
+        "baseline": 362.15460000676103,
+        "candidate": 396.4572999975644,
+        "reduction_fraction": -0.09471838819709312
+      },
+      "max": {
+        "baseline": 429.12250000517815,
+        "candidate": 442.19100000918843,
+        "reduction_fraction": -0.030454007897168244
+      }
+    },
+    "age_frames": {
+      "median": {
+        "baseline": 15.0,
+        "candidate": 14.0,
+        "reduction_fraction": 0.06666666666666667
+      },
+      "p95": {
+        "baseline": 27.0,
+        "candidate": 28.0,
+        "reduction_fraction": -0.037037037037037035
+      },
+      "max": {
+        "baseline": 31.0,
+        "candidate": 30.0,
+        "reduction_fraction": 0.03225806451612903
+      }
+    },
+    "stale_solution_count": {
+      "baseline": 0,
+      "candidate": 0
+    }
+  },
+  "candidate_decision_cadence_frames": {
+    "median": 2.0,
+    "p95": 3.0,
+    "max": 5.0,
+    "mean": 2.3745495495495494,
+    "sample_count": 8880
+  },
+  "candidate_behavior_context": {
+    "alive_all": {
+      "sample_count": 7714,
+      "fast_fraction": 0.5020741508944776,
+      "focused_fraction": 0.4979258491055224,
+      "bottom_8px_fraction": 0.06507648431423387,
+      "nonpositive_pipeline_fraction": 0.005315011667098781,
+      "negative_corridor_slack_fraction": 0.07062600321027288,
+      "action_lag_over_model_fraction": 0.00155561317085818
+    },
+    "alive_preceding_hit_60f": {
+      "sample_count": 213,
+      "fast_fraction": 0.5727699530516432,
+      "focused_fraction": 0.4272300469483568,
+      "bottom_8px_fraction": 0.107981220657277,
+      "nonpositive_pipeline_fraction": 0.056338028169014086,
+      "negative_corridor_slack_fraction": 0.18324607329842932,
+      "action_lag_over_model_fraction": 0.0
+    },
+    "alive_outside_preceding_hit_60f": {
+      "sample_count": 7501,
+      "fast_fraction": 0.5000666577789628,
+      "focused_fraction": 0.4999333422210372,
+      "bottom_8px_fraction": 0.06385815224636715,
+      "nonpositive_pipeline_fraction": 0.0038661511798426876,
+      "negative_corridor_slack_fraction": 0.06767330130404942,
+      "action_lag_over_model_fraction": 0.001599786695107319
+    },
+    "spell_50_alive_all": {
+      "sample_count": 525,
+      "fast_fraction": 0.34476190476190477,
+      "focused_fraction": 0.6552380952380953,
+      "bottom_8px_fraction": 0.3219047619047619,
+      "nonpositive_pipeline_fraction": 0.024761904761904763,
+      "negative_corridor_slack_fraction": 0.11695906432748537,
+      "action_lag_over_model_fraction": 0.017142857142857144
+    },
+    "spell_50_alive_preceding_hit_60f": {
+      "sample_count": 21,
+      "fast_fraction": 0.19047619047619047,
+      "focused_fraction": 0.8095238095238095,
+      "bottom_8px_fraction": 0.5238095238095238,
+      "nonpositive_pipeline_fraction": 0.047619047619047616,
+      "negative_corridor_slack_fraction": null,
+      "action_lag_over_model_fraction": 0.0
+    },
+    "spell_50_alive_other": {
+      "sample_count": 504,
+      "fast_fraction": 0.35119047619047616,
+      "focused_fraction": 0.6488095238095238,
+      "bottom_8px_fraction": 0.3134920634920635,
+      "nonpositive_pipeline_fraction": 0.023809523809523808,
+      "negative_corridor_slack_fraction": 0.11695906432748537,
+      "action_lag_over_model_fraction": 0.017857142857142856
+    }
+  },
+  "candidate_hit_contact_epoch": {
+    "stable_capture_count": 8,
+    "stable_capture_with_enemy_body_count": 5,
+    "exact_enemy_body_overlap_count": 0
+  },
+  "candidate_primary_cause_counts": {
+    "modeled_committed_prefix_collision": 4,
+    "observed_bullet_overlap": 4
+  }
+}

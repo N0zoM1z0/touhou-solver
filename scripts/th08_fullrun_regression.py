@@ -171,7 +171,11 @@ def validate_case(case: dict[str, object]) -> None:
         message="corridor factor disagrees with retained slack",
     )
     _require(
-        ("action_lag_over_model" in factors) == (int(case["action_lag"]) > 3),
+        ("action_lag_over_model" in factors)
+        == (
+            int(case["action_lag"])
+            > int(case.get("control_delay_frames", 3))
+        ),
         case_id=case_id,
         message="action-lag factor disagrees with retained lag",
     )
@@ -182,7 +186,11 @@ def validate_case(case: dict[str, object]) -> None:
         message="density factor disagrees with active bullet count",
     )
     _require(
-        ("fast_mode" in factors) == ("_fast" in str(case["action"])),
+        ("fast_mode" in factors)
+        == (
+            "_fast"
+            in str(case.get("active_input_action", case["action"]))
+        ),
         case_id=case_id,
         message="fast-mode factor disagrees with action",
     )
@@ -200,7 +208,15 @@ def validate_case(case: dict[str, object]) -> None:
     )
     _require(
         bool(case["deathbomb_requested"])
-        == ("+deathbomb" in str(case["action"])),
+        == (
+            "+deathbomb"
+            in str(
+                case.get(
+                    "issued_action_after_hit_detection",
+                    case["action"],
+                )
+            )
+        ),
         case_id=case_id,
         message="deathbomb flag disagrees with action",
     )

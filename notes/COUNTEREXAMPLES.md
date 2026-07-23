@@ -624,7 +624,9 @@ Status: observed | inferred | unknown | fixed
 - **Regression:** `test_live_action_hold_tracks_recent_controller_cadence`.
   On persisted pre-hit hazard subsets, hold 4 changes five of ten first actions
   and reduces search time by reducing branch points.
-- **Status:** code-fixed and unit-tested; physical timing/recurrence pending.
+- **Status:** physically supported. The `173245` run used hold 4 for 473 of
+  645 active spell-50 decisions; spell-50 hits fell from five to one while its
+  corridor solve time became slightly worse. Total hits fell from ten to eight.
 
 ## CE-0036: Immediate clearance selected terminal states with no repair space
 
@@ -640,4 +642,41 @@ Status: observed | inferred | unknown | fixed
   when it preserves materially more future control authority.
 - **Regression:** The five spell-50 cases in the `170433` corpus retain player
   location, bottom occupancy, fast/focus state, hazard density, and plan age.
-- **Status:** isolated from solver latency; implementation open.
+- **Status:** still open. Dynamic hold reduced spell-50 near-hit bottom
+  occupancy from 83.1% to 52.4% and hits from five to one, but the remaining
+  frame-25,665 hit occurred at y=423.2 with positive gate slack and 200 lasers.
+  Scalar bottleneck/gate scoring still does not certify repair space.
+
+## CE-0037: Decision cadence was mistaken for input actuation delay
+
+- **Observed symptom:** The controller held each candidate for the measured
+  three-to-four-frame decision cadence and also kept a fixed three-frame
+  previous-input prefix. In the `173245` trace, however, 4,522 of 5,237
+  unambiguous output transitions were visible in the next decision snapshot;
+  the visible snapshot delta was one frame at median and p95.
+- **Invalid assumption:** The time until the next decision replaces an input
+  equals the time until a newly injected input begins affecting the game.
+- **Correction:** Maintain independent rolling estimates. Action hold follows
+  decision-frame deltas. The uncontrollable prefix follows the p90 of native
+  snapshot-to-action lag, starts at two frames, and is clamped to `1..4`.
+  Scene transitions clear both histories. Trace rows persist the selected
+  delay and estimation sample count.
+- **Regression:** `test_live_control_delay_tracks_recent_action_lag`.
+- **Status:** code-fixed with 215 passing tests; physical recurrence pending.
+
+## CE-0038: The hit-row output was reported as the action that caused the hit
+
+- **Observed symptom:** Death ledgers labelled a hit with the action computed
+  after `phase_at_action` became 2. At frame 7,144 the active input was
+  `up_right_fast`, while the report incorrectly displayed the newly issued
+  focused `up_right`.
+- **Invalid assumption:** Every field on one trace row belongs to one causal
+  epoch. The live loop observes state, plans, detects phase 2, and only then
+  sends the row's output.
+- **Correction:** Practice dossiers retain `active_input_action`, the last
+  alive decision, post-detection issued action, usable warning lead, physical
+  contact class, and planner-failure class separately. Fast-mode regression
+  checks now use active input.
+- **Regressions:** `test_active_input_action_is_independent_of_post_hit_output`
+  and `test_input_visibility_separates_actuation_from_hold`.
+- **Status:** analysis pipeline fixed; the eight-case `173245` corpus passes.

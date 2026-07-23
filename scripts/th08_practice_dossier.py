@@ -350,6 +350,113 @@ def _runtime_timing(
     return result
 
 
+def _action_hold_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object]:
+    values = [int(row["action_hold_frames"]) for row in decisions]
+    counts = Counter(values)
+    spell_50 = [
+        int(row["action_hold_frames"])
+        for row in decisions
+        if isinstance(row.get("spell"), dict)
+        and bool(row["spell"].get("active"))
+        and int(row["spell"].get("spell_id", -1)) == 50
+    ]
+    all_stats = _percentiles(values) or {
+        "median": None,
+        "p95": None,
+        "max": None,
+    }
+    spell_50_stats = _percentiles(spell_50) or {
+        "median": None,
+        "p95": None,
+        "max": None,
+    }
+    return {
+        "all": {
+            **all_stats,
+            "counts": {str(key): counts[key] for key in sorted(counts)},
+        },
+        "active_spell_50": {
+            **spell_50_stats,
+            "counts": {
+                str(key): count
+                for key, count in sorted(Counter(spell_50).items())
+            },
+        },
+    }
+
+
+def _control_delay_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object]:
+    values = [int(row["control_delay_frames"]) for row in decisions]
+    counts = Counter(values)
+    stats = _percentiles(values) or {
+        "median": None,
+        "p95": None,
+        "max": None,
+    }
+    return {
+        **stats,
+        "counts": {str(key): counts[key] for key in sorted(counts)},
+    }
+
+
+def _input_visibility_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object]:
+    transitions = []
+    previous_mask = None
+    for left, right in zip(decisions, decisions[1:]):
+        sent_mask = int(left["mask"])
+        if previous_mask is not None and sent_mask == previous_mask:
+            continue
+        previous_mask = sent_mask
+        current = left.get("input_snapshot")
+        next_input = right.get("input_snapshot")
+        if not isinstance(current, dict) or not isinstance(next_input, dict):
+            continue
+        if int(current.get("current", sent_mask)) == sent_mask:
+            continue
+        snapshot_delta = (
+            int(right["snapshot_frame"]) - int(left["frame"])
+        )
+        observation_delta = int(right["frame"]) - int(left["frame"])
+        if not (
+            0 < snapshot_delta < 120
+            and 0 < observation_delta < 120
+        ):
+            continue
+        transitions.append(
+            {
+                "visible": int(next_input.get("current", -1)) == sent_mask,
+                "snapshot_delta": snapshot_delta,
+                "observation_delta": observation_delta,
+            }
+        )
+    visible = [row for row in transitions if row["visible"]]
+    return {
+        "interpretation": (
+            "Heuristic SendInput-to-observation evidence. Output transitions "
+            "already equal to the current game input are excluded as "
+            "ambiguous; visibility means the next decision snapshot reports "
+            "the newly sent mask."
+        ),
+        "unambiguous_transition_count": len(transitions),
+        "visible_on_next_observation_count": len(visible),
+        "visible_on_next_observation_fraction": (
+            len(visible) / len(transitions) if transitions else None
+        ),
+        "visible_snapshot_delta_frames": _percentiles(
+            int(row["snapshot_delta"]) for row in visible
+        ),
+        "visible_observation_delta_frames": _percentiles(
+            int(row["observation_delta"]) for row in visible
+        ),
+    }
+
+
 def _behavior_slice(
     rows: list[dict[str, object]],
 ) -> dict[str, object]:
@@ -385,7 +492,8 @@ def _behavior_slice(
             else None
         ),
         "action_lag_over_model_fraction": sum(
-            int(row["action_lag"]) > 3 for row in rows
+            int(row["action_lag"]) > int(row["control_delay_frames"])
+            for row in rows
         )
         / count,
     }
@@ -458,6 +566,9 @@ def build_dossier(
     stage = int(decisions[0]["stage_route_index"])
     cause_counts = Counter(
         str(death["primary_cause_class"]) for death in deaths
+    )
+    planner_failure_counts = Counter(
+        str(death["planner_failure_class"]) for death in deaths
     )
     contributor_counts = Counter(
         factor
@@ -542,6 +653,7 @@ def build_dossier(
             "death_count": len(deaths),
             "death_frames": [int(death["frame"]) for death in deaths],
             "primary_cause_counts": dict(cause_counts),
+            "planner_failure_counts": dict(planner_failure_counts),
             "contributing_factor_counts": dict(contributor_counts),
             "spell_hit_counts": dict(spell_counts),
             "max_active_bullets": max(
@@ -579,6 +691,9 @@ def build_dossier(
                 "corridor_solver": _corridor_latency(decisions),
             },
             "decision_cadence_frames": _decision_cadence(decisions),
+            "action_hold_frames": _action_hold_summary(decisions),
+            "control_delay_frames": _control_delay_summary(decisions),
+            "input_visibility": _input_visibility_summary(decisions),
             "runtime_timing_ms": _runtime_timing(decisions),
             "behavior_context": _behavior_context(decisions, deaths),
             "frame_lag": {
@@ -735,9 +850,9 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "",
             "## Death Ledger",
             "",
-            "| Role | Frame | Spell | Player | Action | Bullets/lasers | "
-            "Pipeline/min 240f | Gate min | Primary cause |",
-            "| --- | ---: | --- | --- | --- | ---: | ---: | ---: | --- |",
+            "| Role | Frame | Spell | Player | Active input | Bullets/lasers | "
+            "Pipeline/min 240f | Warning | Contact/cause | Planner failure |",
+            "| --- | ---: | --- | --- | --- | ---: | ---: | ---: | --- | --- |",
         ]
     )
     for death in dossier["deaths"]:
@@ -756,16 +871,22 @@ def render_markdown(dossier: dict[str, object]) -> str:
         lines.append(
             f"| {role} | {death['frame']} | {spell_label} | "
             f"({_format(death['player']['x'])}, "
-            f"{_format(death['player']['y'])}) | `{death['action']}` | "
+            f"{_format(death['player']['y'])}) | "
+            f"`{death.get('active_input_action', death['action'])}` | "
             f"{death['active_bullets']}/{death['active_lasers']} | "
             f"{_format(death['pipeline_clearance_at_hit'])}/"
             f"{_format(death['minimum_pipeline_clearance_240f'])} | "
-            f"{_format(death['minimum_corridor_slack_240f'])} | "
-            f"`{death['primary_cause_class']}` |"
+            f"{death['usable_pipeline_warning_lead_frames']}f | "
+            f"`{death['primary_cause_class']}` | "
+            f"`{death['planner_failure_class']}` |"
         )
     cause_counts = totals["primary_cause_counts"]
+    planner_failure_counts = totals["planner_failure_counts"]
     behavior = totals["behavior_context"]
     cadence = totals["decision_cadence_frames"]
+    action_hold = totals["action_hold_frames"]
+    control_delay = totals["control_delay_frames"]
+    input_visibility = totals["input_visibility"]
     spell_50_hits = int(totals["spell_hit_counts"].get("50", 0))
     body_overlaps = sum(
         death["observed_enemy_body_contact_candidate"] is not None
@@ -786,6 +907,24 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"{_format(cadence['p95'])} frames p95. The local plan took "
             f"{_format(totals['latency_ms']['plan']['median'])} ms median and "
             f"{_format(totals['latency_ms']['plan']['p95'])} ms p95.",
+            "- Modeled action hold counts were "
+            f"`{action_hold['all']['counts']}` overall and "
+            f"`{action_hold['active_spell_50']['counts']}` in active spell 50.",
+            "- Modeled uncontrollable-prefix counts were "
+            f"`{control_delay['counts']}`.",
+            "- Of "
+            f"{input_visibility['unambiguous_transition_count']} unambiguous "
+            "output transitions, "
+            f"{input_visibility['visible_on_next_observation_count']} "
+            f"({_format(input_visibility['visible_on_next_observation_fraction'])}) "
+            "were already visible in the next decision snapshot; their "
+            "snapshot delta had median "
+            f"{_format(input_visibility['visible_snapshot_delta_frames']['median'])} "
+            "frame.",
+            "- Separating physical contact from planner causality gives "
+            f"`{planner_failure_counts}`. Active input is the game-observed "
+            "input at collision; the newly issued action on a hit row occurs "
+            "after hit detection.",
             f"- Spell 50 contains {spell_50_hits} hits. Its "
             f"{spell_50_corridor['unique_solution_count']} unique corridor "
             f"solves took {_format(spell_50_corridor['solve_ms']['median'])} "
@@ -829,6 +968,25 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 "baseline report.",
             ]
         )
+    elif max(
+        (int(value) for value in action_hold["all"]["counts"]),
+        default=2,
+    ) > 2:
+        lines.extend(
+            [
+                "",
+                "## Next Correction Gate",
+                "",
+                "Dynamic action hold is now physically exercised and complete "
+                "loop timing is available. The next controller must model the "
+                "separate actuation-delay distribution: newly injected input "
+                "is usually visible one manager snapshot after SendInput, "
+                "while planning cadence controls how long it remains held. "
+                "The global corridor objective must also score terminal "
+                "reachable volume and repair directions so a locally clear "
+                "boundary cell is not accepted as a dead end.",
+            ]
+        )
     else:
         lines.extend(
             [
@@ -862,6 +1020,7 @@ def write_death_csv(
         "power",
         "action",
         "mask",
+        "issued_action_after_hit_detection",
         "active_bullets",
         "active_lasers",
         "pipeline_clearance",
@@ -870,6 +1029,8 @@ def write_death_csv(
         "nearest_bullet_clearance",
         "nearest_laser_clearance",
         "primary_cause_class",
+        "planner_failure_class",
+        "usable_pipeline_warning_lead_frames",
         "contributing_factors",
         "bomb_input_verified_absent",
     ]
@@ -890,8 +1051,11 @@ def write_death_csv(
                     "player_x": death["player"]["x"],
                     "player_y": death["player"]["y"],
                     "power": death["resources_at_hit"]["power"],
-                    "action": death["action"],
-                    "mask": death["mask"],
+                    "action": death["active_input_action"],
+                    "mask": death["active_input_mask"],
+                    "issued_action_after_hit_detection": death[
+                        "issued_action_after_hit_detection"
+                    ],
                     "active_bullets": death["active_bullets"],
                     "active_lasers": death["active_lasers"],
                     "pipeline_clearance": (
@@ -910,6 +1074,12 @@ def write_death_csv(
                         laser["clearance"] if laser else None
                     ),
                     "primary_cause_class": death["primary_cause_class"],
+                    "planner_failure_class": death[
+                        "planner_failure_class"
+                    ],
+                    "usable_pipeline_warning_lead_frames": death[
+                        "usable_pipeline_warning_lead_frames"
+                    ],
                     "contributing_factors": ";".join(
                         death["contributing_factors"]
                     ),

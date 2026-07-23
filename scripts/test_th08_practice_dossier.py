@@ -7,13 +7,16 @@ import unittest
 from pathlib import Path
 
 from th08_practice_dossier import (
+    _action_hold_summary,
     _behavior_context,
     _decision_cadence,
     _extract_scope,
+    _input_visibility_summary,
     _no_bomb_verification,
     _promote_enemy_body_candidates,
 )
 from th08_fullrun_regression import load_and_validate
+from th08_run_dossier import _input_mask_action
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -46,7 +49,11 @@ def _decision(frame: int, *, mask: int = 5) -> dict[str, object]:
         "bomb": False,
         "hit_started": False,
         "snapshot_lag": 0,
+        "snapshot_frame": frame,
+        "input_snapshot": {"raw": mask, "current": mask, "previous": mask},
         "action_lag": 0,
+        "control_delay_frames": 3,
+        "action_hold_frames": 3,
         "read_ms": 1.0,
         "plan_ms": 2.0,
         "pipeline_clearance": 9999.0,
@@ -57,6 +64,39 @@ def _decision(frame: int, *, mask: int = 5) -> dict[str, object]:
 
 
 class Th08PracticeDossierTests(unittest.TestCase):
+    def test_active_input_action_is_independent_of_post_hit_output(self) -> None:
+        self.assertEqual(_input_mask_action(0x95), "up_right")
+        self.assertEqual(_input_mask_action(0x91), "up_right_fast")
+        self.assertEqual(_input_mask_action(0x05), "stay")
+        self.assertEqual(_input_mask_action(0x07), "stay+bomb")
+
+    def test_action_hold_distribution_is_retained(self) -> None:
+        rows = [_decision(100), _decision(103), _decision(106)]
+        rows[0]["action_hold_frames"] = 2
+        rows[2]["spell"] = {"active": True, "spell_id": 50}
+        summary = _action_hold_summary(rows)
+        self.assertEqual(summary["all"]["counts"], {"2": 1, "3": 2})
+        self.assertEqual(
+            summary["active_spell_50"]["counts"],
+            {"3": 1},
+        )
+
+    def test_input_visibility_separates_actuation_from_hold(self) -> None:
+        rows = [_decision(100), _decision(102), _decision(105)]
+        rows[0]["mask"] = 0x11
+        rows[1]["mask"] = 0x11
+        rows[0]["input_snapshot"]["current"] = 0x05
+        rows[1]["input_snapshot"]["current"] = 0x11
+        rows[1]["snapshot_frame"] = 101
+        rows[2]["mask"] = 0x41
+        summary = _input_visibility_summary(rows)
+        self.assertEqual(summary["unambiguous_transition_count"], 1)
+        self.assertEqual(summary["visible_on_next_observation_count"], 1)
+        self.assertEqual(
+            summary["visible_snapshot_delta_frames"]["median"],
+            1.0,
+        )
+
     def test_cadence_and_prehit_behavior_are_retained(self) -> None:
         rows = [_decision(100), _decision(103), _decision(107)]
         cadence = _decision_cadence(rows)

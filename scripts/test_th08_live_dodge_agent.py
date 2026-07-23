@@ -12,6 +12,7 @@ from th08_live_dodge_agent import (
     Bullet,
     CorridorCommitment,
     CorridorSolution,
+    GameplaySceneGuard,
     Item,
     LEFT,
     Laser,
@@ -80,6 +81,91 @@ class LiveDodgeAgentTests(unittest.TestCase):
         pulse.mark_full_pulse(frame=400)
         self.assertFalse(pulse.released)
         self.assertEqual(pulse.next_release_frame, 415)
+
+    def test_scene_guard_waits_for_nonfinal_stage_transition(self) -> None:
+        guard = GameplaySceneGuard({0: 1, 1: 2}, 90.0, 5.0)
+        active = guard.observe(
+            gameplay_active=True,
+            current_stage=0,
+            now=10.0,
+        )
+        self.assertEqual(active.status, "active")
+        entered = guard.observe(
+            gameplay_active=False,
+            current_stage=0,
+            now=11.0,
+        )
+        self.assertEqual(entered.status, "stage_transition")
+        self.assertTrue(entered.entered)
+        waiting = guard.observe(
+            gameplay_active=False,
+            current_stage=1,
+            now=16.0,
+        )
+        self.assertEqual(waiting.status, "stage_transition")
+        self.assertEqual(waiting.transition_from_stage, 0)
+        self.assertEqual(waiting.expected_stage, 1)
+        resumed = guard.observe(
+            gameplay_active=True,
+            current_stage=1,
+            now=17.0,
+        )
+        self.assertEqual(resumed.status, "resumed")
+        self.assertEqual(resumed.inactive_seconds, 6.0)
+
+    def test_scene_guard_does_not_reclassify_stage5_transition_as_final(self) -> None:
+        guard = GameplaySceneGuard({5: 7}, 90.0, 5.0)
+        guard.observe(gameplay_active=True, current_stage=5, now=1.0)
+        early_index_write = guard.observe(
+            gameplay_active=True,
+            current_stage=7,
+            now=1.5,
+        )
+        self.assertEqual(early_index_write.status, "active")
+        self.assertEqual(guard.last_active_stage, 5)
+        guard.observe(gameplay_active=False, current_stage=5, now=2.0)
+        waiting = guard.observe(
+            gameplay_active=False,
+            current_stage=7,
+            now=10.0,
+        )
+        self.assertEqual(waiting.status, "stage_transition")
+        self.assertEqual(waiting.transition_from_stage, 5)
+        self.assertEqual(waiting.expected_stage, 7)
+
+    def test_scene_guard_requires_stable_final_unload(self) -> None:
+        guard = GameplaySceneGuard({5: 7}, 90.0, 5.0)
+        guard.observe(gameplay_active=True, current_stage=7, now=20.0)
+        entered = guard.observe(
+            gameplay_active=False,
+            current_stage=7,
+            now=21.0,
+        )
+        self.assertEqual(entered.status, "terminal_unload")
+        self.assertTrue(entered.entered)
+        waiting = guard.observe(
+            gameplay_active=False,
+            current_stage=7,
+            now=25.9,
+        )
+        self.assertEqual(waiting.status, "terminal_unload")
+        finished = guard.observe(
+            gameplay_active=False,
+            current_stage=7,
+            now=26.0,
+        )
+        self.assertEqual(finished.status, "route_complete")
+
+    def test_scene_guard_reports_transition_timeout(self) -> None:
+        guard = GameplaySceneGuard({0: 1}, 10.0, 5.0)
+        guard.observe(gameplay_active=True, current_stage=0, now=1.0)
+        guard.observe(gameplay_active=False, current_stage=0, now=2.0)
+        timed_out = guard.observe(
+            gameplay_active=False,
+            current_stage=0,
+            now=12.0,
+        )
+        self.assertEqual(timed_out.status, "stage_transition_timeout")
 
     def test_clear_field_returns_finite_clearance(self) -> None:
         decision = choose_action(

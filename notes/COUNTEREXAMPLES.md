@@ -473,3 +473,47 @@ Status: observed | inferred | unknown | fixed
   median unconstrained and 26.5..27.9 ms for constrained lanes; gate filtering
   does not materially enlarge the DP.
 - **Status:** offline fixed; physical Lunatic recurrence validation pending.
+
+## CE-0029: A lane label aliased disconnected path branches
+
+- **Observed symptom:** In the corrected-commitment Stage-1 run, frame 2358
+  retained a `center` gate near x=264 with slack `+2.1269`. The next completed
+  corridor at frame 2361 was also labelled `center`, but its waypoint jumped
+  to approximately x=88 with slack `-12.2599`; the native hit edge followed at
+  frame 2367.
+- **Invalid assumption:** Left/center/right bottleneck labels uniquely identify
+  the connected safe component selected by the global planner.
+- **Evidence:**
+  `notes/runs/2026-07-23_lunatic_route2_transition_guard_partials.md` and the
+  retained `150027` compact report.
+- **Required correction:** Give each time-expanded connected component a
+  stable identity and retain a component/path certificate across replans.
+  Lane can remain descriptive metadata, but cannot be the commitment key.
+- **Status:** physical counterexample retained; component-identity solver fix
+  open.
+
+## CE-0030: A stage-resource unload was mistaken for route completion
+
+- **Observed symptom:** Stage 1 ended at manager frame 20,587. The gameplay bit
+  cleared transiently, the agent terminated as `gameplay_ended`, and its exit
+  handler pressed Escape after Stage 2 became active. No controller remained
+  to auto-confirm the following dialogue.
+- **Invalid assumption:** Any single inactive `g_engine_flags & 0x04` sample is
+  the final gameplay-scene unload.
+- **Correction:** A pure scene guard records the last active stage and route-2
+  successor. Non-final unloads wait up to 90 wall-clock seconds, release combat
+  input, and issue foreground-gated complete Z pulses. A Final-B unload must be
+  stable for five seconds before `route_complete`. The transition source is
+  fixed at the last committed scene. TH08 was physically observed writing the
+  next index before clearing gameplay (`0` became `1` before the Stage-1
+  unload), so an active sample cannot commit an index change. A new identity is
+  committed only at initial arm or after inactive-to-active resume. Thus an
+  early Stage-5-to-Final-B index update cannot reclassify the transition as
+  terminal.
+- **Regressions:**
+  `test_scene_guard_waits_for_nonfinal_stage_transition`,
+  `test_scene_guard_does_not_reclassify_stage5_transition_as_final`,
+  `test_scene_guard_requires_stable_final_unload`, and
+  `test_scene_guard_reports_transition_timeout`.
+- **Status:** ordering corrected after the `151557` physical boundary test;
+  full-route acceptance pending.

@@ -925,3 +925,29 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   A synthetic 200-bullet benchmark remained about 27 ms median on WSL.
 - The full suite passes 191 tests plus six subtests. These solver changes still
   require the next physical full-run recurrence check.
+
+## 2026-07-23: Stage-Aware Auto-Confirm And Clean Rerun
+
+- The first post-commit physical run controlled Stage 1 frames `1..20587` and
+  recorded four native hit edges, but exited at the normal Stage-1 resource
+  unload. The frozen-frame fix from CE-0025 correctly noticed gameplay
+  inactivity but incorrectly equated every unload with final completion.
+- Added a stage-aware scene guard over route-2 progression `0,1,2,3,5,7`.
+  It fixes the transition source at the last active stage, releases combat
+  keys on unload, drives transition dialogue with complete wall-clock Z pulses,
+  logs inactive/resumed provenance, bounds non-final waits to 90 seconds, and
+  requires a stable five-second Final-B unload.
+- A second old-module segment at Stage 2 frames `21280..41315` was deliberately
+  stopped before replacing the daemon. Both segments and their seven hits are
+  labelled partial and cannot be combined into complete-run results.
+- The Stage-1 trace exposed an independent global-planning flaw: two corridor
+  solutions can share the `center` lane label while choosing opposite path
+  branches. Stable connected-component identity, rather than lane retention,
+  is now an explicit solver requirement.
+- The first corrected trace began at frame 1 as `151557` and survived into
+  Stage 2, but the boundary proved that TH08 writes the successor index before
+  gameplay becomes inactive. It was stopped at frame 23,664. The guard now
+  commits stage identity only at initial arm or inactive-to-active resume; all
+  195 tests pass. The next clean run remains responsible for full provenance,
+  per-hit CSV, executable regressions, and stage/spell/resource review before
+  further planner correction.

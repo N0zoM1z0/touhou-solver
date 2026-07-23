@@ -27,6 +27,7 @@ from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
     ADDR_ENEMY_MANAGER_FRAME,
     ADDR_PLAYER,
+    ADDR_STAGE_ROUTE_INDEX,
     PLAYER_BOMB_ACTIVE_OFFSET,
     SUPPORTED_INPUT_MASK,
     TARGET_EXE,
@@ -100,6 +101,19 @@ CORRIDOR_REPLAN_FRAMES = 24
 CORRIDOR_LOOKAHEAD_FRAMES = 16
 CORRIDOR_MAX_AGE_FRAMES = 48
 CORRIDOR_MIN_COMMIT_FRAMES = 32
+STAGE_TRANSITION_TIMEOUT_SECONDS = 90.0
+TERMINAL_INACTIVE_GRACE_SECONDS = 5.0
+
+# Route-2 stage resource indices. Stage 4B can feed Stage 5 but is not reached
+# by Sakuya/Remilia; retaining it makes the scene guard valid for either branch.
+ROUTE2_STAGE_SUCCESSORS = {
+    0: 1,
+    1: 2,
+    2: 3,
+    3: 5,
+    4: 5,
+    5: 7,
+}
 
 
 @dataclass(frozen=True)
@@ -288,6 +302,90 @@ class AutoConfirmPulse:
     def mark_full_pulse(self, *, frame: int) -> None:
         self.released = False
         self.next_release_frame = frame + self.interval_frames
+
+
+@dataclass(frozen=True)
+class SceneGuardDecision:
+    status: str
+    current_stage: int
+    transition_from_stage: int | None
+    expected_stage: int | None
+    inactive_seconds: float
+    entered: bool = False
+
+
+@dataclass
+class GameplaySceneGuard:
+    """Distinguish a stage-resource transition from the final scene unload."""
+
+    stage_successors: dict[int, int]
+    transition_timeout_seconds: float
+    terminal_grace_seconds: float
+    last_active_stage: int | None = None
+    inactive_since: float | None = None
+    transition_from_stage: int | None = None
+
+    def observe(
+        self,
+        *,
+        gameplay_active: bool,
+        current_stage: int,
+        now: float,
+    ) -> SceneGuardDecision:
+        if gameplay_active:
+            was_inactive = self.inactive_since is not None
+            inactive_seconds = (
+                now - self.inactive_since if self.inactive_since is not None else 0.0
+            )
+            transition_from = self.transition_from_stage
+            expected_stage = self.stage_successors.get(transition_from)
+            # TH08 writes the next stage index before clearing the gameplay
+            # bit. Commit a new identity only at initial arm or after the
+            # inactive interval has completed.
+            if self.last_active_stage is None or was_inactive:
+                self.last_active_stage = current_stage
+            self.inactive_since = None
+            self.transition_from_stage = None
+            return SceneGuardDecision(
+                status="resumed" if was_inactive else "active",
+                current_stage=current_stage,
+                transition_from_stage=transition_from,
+                expected_stage=expected_stage,
+                inactive_seconds=inactive_seconds,
+            )
+
+        entered = self.inactive_since is None
+        if entered:
+            self.inactive_since = now
+            self.transition_from_stage = (
+                self.last_active_stage
+                if self.last_active_stage is not None
+                else current_stage
+            )
+        assert self.inactive_since is not None
+        transition_from = self.transition_from_stage
+        expected_stage = self.stage_successors.get(transition_from)
+        inactive_seconds = now - self.inactive_since
+        if expected_stage is not None:
+            status = (
+                "stage_transition_timeout"
+                if inactive_seconds >= self.transition_timeout_seconds
+                else "stage_transition"
+            )
+        else:
+            status = (
+                "route_complete"
+                if inactive_seconds >= self.terminal_grace_seconds
+                else "terminal_unload"
+            )
+        return SceneGuardDecision(
+            status=status,
+            current_stage=current_stage,
+            transition_from_stage=transition_from,
+            expected_stage=expected_stage,
+            inactive_seconds=inactive_seconds,
+            entered=entered,
+        )
 
 
 def _action(
@@ -1151,6 +1249,11 @@ def run(args: argparse.Namespace) -> int:
         raise ValueError("hit stopping arguments cannot be negative")
     if args.auto_confirm_every < 0 or args.auto_confirm_idle_frames < 0:
         raise ValueError("auto-confirm timing arguments cannot be negative")
+    if (
+        args.stage_transition_timeout <= 0.0
+        or args.terminal_inactive_grace <= 0.0
+    ):
+        raise ValueError("scene transition timing arguments must be positive")
     api = Win32()
     pid = args.pid if args.pid is not None else api.find_pid(TARGET_EXE)
     reader = ProcessReader(api, pid)
@@ -1179,6 +1282,11 @@ def run(args: argparse.Namespace) -> int:
     auto_confirm = AutoConfirmPulse(
         interval_frames=args.auto_confirm_every,
         idle_frames=args.auto_confirm_idle_frames,
+    )
+    scene_guard = GameplaySceneGuard(
+        stage_successors=ROUTE2_STAGE_SUCCESSORS,
+        transition_timeout_seconds=args.stage_transition_timeout,
+        terminal_grace_seconds=args.terminal_inactive_grace,
     )
     last_frame_progress = time.perf_counter()
     last_frozen_confirm = float("-inf")
@@ -1240,18 +1348,128 @@ def run(args: argparse.Namespace) -> int:
             raise RuntimeError("physical gameplay input is already active")
         _require_foreground(api, pid)
         gameplay_armed = True
+        scene_guard.observe(
+            gameplay_active=True,
+            current_stage=int(state["stage_route_index"]),
+            now=time.perf_counter(),
+        )
         deadline = time.perf_counter() + args.duration
         while time.perf_counter() < deadline:
             if args.stop_file is not None and args.stop_file.exists():
                 termination_reason = "external_stop"
                 break
             counter = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
-            if counter == previous_counter:
-                now = time.perf_counter()
-                engine_flags = reader.u32(ADDR_ENGINE_FLAGS)
-                if not engine_flags & 0x04:
-                    termination_reason = "gameplay_ended"
+            now = time.perf_counter()
+            engine_flags = reader.u32(ADDR_ENGINE_FLAGS)
+            stage_route_index = reader.u32(ADDR_STAGE_ROUTE_INDEX)
+            scene_decision = scene_guard.observe(
+                gameplay_active=bool(engine_flags & 0x04),
+                current_stage=stage_route_index,
+                now=now,
+            )
+            if not engine_flags & 0x04:
+                if scene_decision.entered:
+                    _require_foreground(api, pid)
+                    transitions = input_transitions(
+                        previous_mask,
+                        0,
+                        supported_mask=SUPPORTED_INPUT_MASK,
+                    )
+                    send_transitions(api, transitions)
+                    previous_mask = 0
+                    previous_direction = 0
+                    frozen_confirm_eligible = False
+                    corridor_solution = None
+                    if corridor_future is not None and corridor_future.cancel():
+                        corridor_future = None
+                    output.write(
+                        json.dumps(
+                            {
+                                "kind": "scene_inactive",
+                                "frame": counter,
+                                "engine_flags": engine_flags,
+                                "stage_route_index": stage_route_index,
+                                "transition_from_stage": (
+                                    scene_decision.transition_from_stage
+                                ),
+                                "expected_stage": scene_decision.expected_stage,
+                                "status": scene_decision.status,
+                            }
+                        )
+                        + "\n"
+                    )
+                    output.flush()
+                if scene_decision.status in (
+                    "stage_transition_timeout",
+                    "route_complete",
+                ):
+                    termination_reason = scene_decision.status
                     break
+                assert scene_guard.inactive_since is not None
+                if auto_confirm.frozen_pulse_due(
+                    now=now,
+                    last_progress=scene_guard.inactive_since,
+                    last_pulse=last_frozen_confirm,
+                    eligible=True,
+                ):
+                    _require_foreground(api, pid)
+                    send_scan_key(api, scan_code=0x2C, pressed=False)
+                    time.sleep(0.04)
+                    send_scan_key(api, scan_code=0x2C, pressed=True)
+                    previous_mask = SHOT
+                    auto_confirm.mark_full_pulse(frame=counter)
+                    last_frozen_confirm = time.perf_counter()
+                    output.write(
+                        json.dumps(
+                            {
+                                "kind": "auto_confirm_transition_pulse",
+                                "frame": counter,
+                                "stage_route_index": stage_route_index,
+                                "transition_from_stage": (
+                                    scene_decision.transition_from_stage
+                                ),
+                                "expected_stage": scene_decision.expected_stage,
+                                "inactive_seconds": (
+                                    scene_decision.inactive_seconds
+                                ),
+                            }
+                        )
+                        + "\n"
+                    )
+                    output.flush()
+                time.sleep(args.poll_ms / 1000.0)
+                continue
+            if scene_decision.status == "resumed":
+                output.write(
+                    json.dumps(
+                        {
+                            "kind": "scene_resumed",
+                            "frame": counter,
+                            "engine_flags": engine_flags,
+                            "stage_route_index": stage_route_index,
+                            "transition_from_stage": (
+                                scene_decision.transition_from_stage
+                            ),
+                            "expected_stage": scene_decision.expected_stage,
+                            "inactive_seconds": scene_decision.inactive_seconds,
+                            "expected_stage_matched": (
+                                scene_decision.expected_stage is None
+                                or scene_decision.expected_stage
+                                == stage_route_index
+                            ),
+                        }
+                    )
+                    + "\n"
+                )
+                output.flush()
+                previous_counter = None
+                previous_phase = None
+                previous_action_phase = None
+                auto_confirm.eligible_since = None
+                auto_confirm.released = False
+                frozen_confirm_eligible = False
+                last_frame_progress = now
+            if counter == previous_counter:
                 bomb_active = reader.u32(
                     ADDR_PLAYER + PLAYER_BOMB_ACTIVE_OFFSET
                 )
@@ -1286,12 +1504,15 @@ def run(args: argparse.Namespace) -> int:
                 time.sleep(args.poll_ms / 1000.0)
                 continue
             last_frame_progress = time.perf_counter()
-            if previous_counter is not None and counter != previous_counter + 1:
-                gaps += 1
             state = observe_state(reader)
-            if not state["gameplay_active"] or state["route_id"] != 2:
+            if not state["gameplay_active"]:
+                time.sleep(args.poll_ms / 1000.0)
+                continue
+            if state["route_id"] != 2:
                 termination_reason = "gameplay_ended"
                 break
+            if previous_counter is not None and counter != previous_counter + 1:
+                gaps += 1
             spell_state = state["spell"]
             corridor_context = (
                 int(state["stage_route_index"]),
@@ -1816,6 +2037,18 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=20,
         help="empty-scene frames required before automatic Z pulsing",
+    )
+    parser.add_argument(
+        "--stage-transition-timeout",
+        type=float,
+        default=STAGE_TRANSITION_TIMEOUT_SECONDS,
+        help="seconds allowed for a non-final stage resource transition",
+    )
+    parser.add_argument(
+        "--terminal-inactive-grace",
+        type=float,
+        default=TERMINAL_INACTIVE_GRACE_SECONDS,
+        help="stable inactive seconds required after the final stage",
     )
     parser.add_argument("--armed", action="store_true")
     return parser

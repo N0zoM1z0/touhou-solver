@@ -8,6 +8,8 @@ from functools import lru_cache
 
 import numpy as np
 
+from . import native_backend
+
 
 @dataclass(frozen=True)
 class ControlAction:
@@ -87,6 +89,7 @@ class RobustViabilityPolicy:
     config: ViabilityConfig
     viable: np.ndarray
     safe_action_masks: np.ndarray
+    backend: str = "numpy"
 
     @property
     def layer_count(self) -> int:
@@ -467,6 +470,7 @@ def build_robust_viability_policy(
     delay_frames: tuple[int, ...],
     nominal_delay: int,
     config: ViabilityConfig,
+    backend: str = "auto",
 ) -> RobustViabilityPolicy:
     """Compute ``exists action, forall delay`` backward reachability.
 
@@ -495,6 +499,8 @@ def build_robust_viability_policy(
         raise ValueError("delay cannot exceed frames per control layer")
     if nominal_delay not in delay_frames:
         raise ValueError("nominal delay must belong to delay support")
+    if backend not in {"auto", "numpy", "native"}:
+        raise ValueError("viability backend must be auto, numpy, or native")
     clearance_volume = np.asarray(clearance_volume, dtype=np.float32)
     if clearance_volume.ndim != 3:
         raise ValueError("clearance volume must have frame, row, and column axes")
@@ -503,6 +509,40 @@ def build_robust_viability_policy(
     horizon_frames = clearance_volume.shape[0] - 1
     if horizon_frames <= 0 or horizon_frames % config.frames_per_layer:
         raise ValueError("clearance horizon must divide into complete layers")
+
+    if backend in {"auto", "native"}:
+        native_arrays = native_backend.build_viability_arrays(
+            x_axis=x_axis,
+            y_axis=y_axis,
+            clearance_volume=clearance_volume,
+            velocity_x=np.asarray(
+                [action.velocity_x for action in actions],
+                dtype=np.float64,
+            ),
+            velocity_y=np.asarray(
+                [action.velocity_y for action in actions],
+                dtype=np.float64,
+            ),
+            delay_frames=np.asarray(delay_frames, dtype=np.int32),
+            frames_per_layer=config.frames_per_layer,
+            required_clearance=config.required_clearance,
+            clamp_to_bounds=config.clamp_to_bounds,
+        )
+        if native_arrays is not None:
+            viable, safe_action_masks = native_arrays
+            return RobustViabilityPolicy(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                actions=actions,
+                delay_frames=delay_frames,
+                nominal_delay=nominal_delay,
+                config=config,
+                viable=viable,
+                safe_action_masks=safe_action_masks,
+                backend="native",
+            )
+        if backend == "native":
+            raise RuntimeError("native viability backend is unavailable")
 
     complete_transition_batches = _cached_transition_batches(
         x_start=float(x_axis[0]),

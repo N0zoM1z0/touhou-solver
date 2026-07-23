@@ -16,9 +16,11 @@ from corridor_planner import (
     SegmentHazard,
     _aabb_clearance_field,
     _aabb_clearance_volume,
+    _hazard_clearance_volume,
     _segment_clearance_field,
     plan_corridor,
 )
+from touhou_control.native_backend import available as native_available
 from touhou_control.viability import ControlAction
 
 
@@ -34,6 +36,89 @@ CONFIG = CorridorConfig(
 
 
 class CorridorPlannerTests(unittest.TestCase):
+    @unittest.skipUnless(
+        native_available(),
+        "native planner backend is not built",
+    )
+    def test_native_time_volume_matches_numpy_mixed_hazards(self) -> None:
+        grid_x, grid_y = np.meshgrid(
+            np.arange(0.0, 49.0, 8.0, dtype=np.float32),
+            np.arange(0.0, 41.0, 8.0, dtype=np.float32),
+        )
+        aabbs = (
+            MovingAabbHazard(
+                x=-5.0,
+                y=4.0,
+                velocity_x=2.5,
+                velocity_y=1.25,
+                half_width=3.0,
+                half_height=5.0,
+                base_uncertainty=0.5,
+                uncertainty_per_frame=0.25,
+            ),
+            MovingAabbHazard(
+                x=52.0,
+                y=36.0,
+                velocity_x=-1.5,
+                velocity_y=-2.0,
+                half_width=7.0,
+                half_height=2.0,
+            ),
+        )
+        segments = (
+            SegmentHazard(
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                20.0,
+                2.0,
+                1.0,
+                0.5,
+            ),
+            SegmentHazard(
+                10.0,
+                -10.0,
+                math.pi / 2.0,
+                0.0,
+                20.0,
+                1.0,
+            ),
+        )
+        config = CorridorConfig(
+            grid_step=8.0,
+            frames_per_layer=4,
+            horizon_frames=8,
+            danger_radius=12.0,
+        )
+        native = _hazard_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs=aabbs,
+            segments=segments,
+            config=config,
+        )
+        reference = _aabb_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs,
+            horizon_frames=8,
+            player_radius=config.player_radius,
+            clearance_cap=config.danger_radius,
+        )
+        for frame in range(9):
+            reference[frame] = np.minimum(
+                reference[frame],
+                _segment_clearance_field(
+                    grid_x,
+                    grid_y,
+                    segments,
+                    frame=frame,
+                    player_radius=config.player_radius,
+                ),
+            )
+        np.testing.assert_allclose(native, reference, atol=3e-5)
+
     def test_sparse_aabb_volume_matches_dense_geometry_below_cap(
         self,
     ) -> None:

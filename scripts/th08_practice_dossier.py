@@ -476,12 +476,27 @@ def _adaptive_control_summary(
 def _robust_viability_summary(
     decisions: list[dict[str, object]],
 ) -> dict[str, object]:
-    queries = [
-        row["viability"]
-        for row in decisions
-        if isinstance(row.get("viability"), dict)
-        and row["viability"]
-    ]
+    unique_solutions: dict[int, dict[str, object]] = {}
+    policy_rows = []
+    queries = []
+    for row in decisions:
+        if row.get("corridor_planning_mode") == "robust_viability":
+            policy_rows.append(row)
+        source = row.get("corridor_source_frame")
+        if source is not None:
+            unique_solutions.setdefault(int(source), row)
+        viability = row.get("viability")
+        if isinstance(viability, dict) and viability:
+            queries.append(viability)
+
+    unique_rows = list(unique_solutions.values())
+    timing_keys = sorted(
+        {
+            str(key)
+            for row in unique_rows
+            for key in row.get("corridor_solver_timing_ms", {})
+        }
+    )
     available = [
         query for query in queries if bool(query.get("available"))
     ]
@@ -502,8 +517,67 @@ def _robust_viability_summary(
         "planning_mode_counts": {
             key: planning_modes[key] for key in sorted(planning_modes)
         },
+        "policy_decision_count": len(policy_rows),
+        "decision_without_query_count": len(policy_rows) - len(queries),
+        "unique_solution_count": len(unique_rows),
+        "solve_ms": _percentiles(
+            float(row["corridor_solve_ms"])
+            for row in unique_rows
+            if row.get("corridor_solve_ms") is not None
+        ),
+        "first_observed_age_frames": _percentiles(
+            float(row["corridor_age"])
+            for row in unique_rows
+            if row.get("corridor_age") is not None
+        ),
+        "forecast_lead_frames": _percentiles(
+            float(row["corridor_forecast_lead_frames"])
+            for row in unique_rows
+            if row.get("corridor_forecast_lead_frames") is not None
+        ),
+        "backend_counts": dict(
+            Counter(
+                str(row["corridor_viability_backend"])
+                for row in unique_rows
+                if row.get("corridor_viability_backend") is not None
+            )
+        ),
+        "solver_phase_ms": {
+            key: _percentiles(
+                float(row["corridor_solver_timing_ms"][key])
+                for row in unique_rows
+                if key in row.get("corridor_solver_timing_ms", {})
+            )
+            for key in timing_keys
+        },
+        "serial_coverage_margin_frames": _percentiles(
+            float(row["corridor_serial_coverage_margin_frames"])
+            for row in policy_rows
+            if row.get("corridor_serial_coverage_margin_frames") is not None
+        ),
+        "serial_worker_serviceable_count": sum(
+            bool(row.get("corridor_serial_worker_serviceable"))
+            for row in policy_rows
+        ),
+        "policy_status_counts": dict(
+            Counter(
+                str(row["corridor_policy_status"])
+                for row in policy_rows
+                if row.get("corridor_policy_status") is not None
+            )
+        ),
+        "reported_stale_solution_count": sum(
+            bool(row.get("corridor_stale")) for row in unique_rows
+        ),
         "query_count": len(queries),
         "available_query_count": len(available),
+        "unavailable_reason_counts": dict(
+            Counter(
+                str(query.get("reason", "unspecified"))
+                for query in queries
+                if not bool(query.get("available"))
+            )
+        ),
         "support_covered_query_count": sum(
             bool(query.get("support_covers_current", True))
             for query in available
@@ -524,6 +598,20 @@ def _robust_viability_summary(
             bool(row.get("robust_control", {}).get("viability_constrained"))
             for row in decisions
             if isinstance(row.get("robust_control"), dict)
+        ),
+        "constrained_decision_fraction": (
+            sum(
+                bool(
+                    row.get("robust_control", {}).get(
+                        "viability_constrained"
+                    )
+                )
+                for row in decisions
+                if isinstance(row.get("robust_control"), dict)
+            )
+            / len(decisions)
+            if decisions
+            else None
         ),
         "safe_action_count": _percentiles(safe_counts),
         "selected_repair_volume": _percentiles(selected_repairs),
@@ -666,6 +754,73 @@ def _behavior_context(
             [row for row in spell_50_rows if not prehit(row)]
         ),
     }
+
+
+def _spell_phase_summary(
+    decisions: list[dict[str, object]],
+    deaths: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    rows_by_key: dict[str, list[dict[str, object]]] = {}
+    spell_names: dict[str, str | None] = {}
+    for row in decisions:
+        spell = row.get("spell")
+        if (
+            isinstance(spell, dict)
+            and bool(spell.get("active"))
+            and spell.get("spell_id") is not None
+        ):
+            key = str(int(spell["spell_id"]))
+            name = (
+                str(spell["spell_name"])
+                if spell.get("spell_name") is not None
+                else None
+            )
+        else:
+            key = "nonspell"
+            name = None
+        rows_by_key.setdefault(key, []).append(row)
+        if name is not None:
+            spell_names[key] = name
+
+    death_frames: dict[str, list[int]] = {}
+    for death in deaths:
+        spell = death["spell_attribution"]
+        spell_id = spell.get("spell_id")
+        key = str(int(spell_id)) if spell_id is not None else "nonspell"
+        death_frames.setdefault(key, []).append(int(death["frame"]))
+        if spell.get("spell_name") is not None:
+            spell_names[key] = str(spell["spell_name"])
+
+    def sort_key(key: str) -> tuple[int, int]:
+        return (0, -1) if key == "nonspell" else (1, int(key))
+
+    result = []
+    for key in sorted(rows_by_key, key=sort_key):
+        rows = rows_by_key[key]
+        alive = [
+            row for row in rows if int(row["player"]["phase"]) == 0
+        ]
+        viability = _robust_viability_summary(rows)
+        result.append(
+            {
+                "phase_key": key,
+                "spell_id": None if key == "nonspell" else int(key),
+                "spell_name": spell_names.get(key),
+                "decision_count": len(rows),
+                "alive_decision_count": len(alive),
+                "hit_count": len(death_frames.get(key, [])),
+                "hit_frames": death_frames.get(key, []),
+                "max_active_bullets": max(
+                    int(row["active_bullets"]) for row in rows
+                ),
+                "max_active_lasers": max(
+                    int(row["active_lasers"]) for row in rows
+                ),
+                "behavior_alive": _behavior_slice(alive),
+                "robust_viability": viability,
+            }
+        )
+    return result
 
 
 def build_dossier(
@@ -826,6 +981,7 @@ def build_dossier(
             "input_visibility": _input_visibility_summary(decisions),
             "runtime_timing_ms": _runtime_timing(decisions),
             "behavior_context": _behavior_context(decisions, deaths),
+            "per_spell": _spell_phase_summary(decisions, deaths),
             "frame_lag": {
                 "interpretation": (
                     "Values >=120 are phase-counter discontinuities and are "
@@ -889,17 +1045,37 @@ def render_markdown(dossier: dict[str, object]) -> str:
     totals = dossier["totals"]
     bomb = dossier["control_policy"]["verification"]
     canonical = dossier["canonical_first_hit"]["death"]
-    spell_50_corridor = totals["latency_ms"]["corridor_solver"][
-        "active_spell_50"
-    ]
-    canonical_cause = canonical["primary_cause_class"]
-    canonical_spell = canonical["spell_attribution"]
-    canonical_spell_label = (
-        f"spell {canonical_spell['spell_id']} "
-        f"`{canonical_spell['spell_name']}`"
-        if canonical_spell["spell_id"] is not None
-        else "a nonspell phase"
+    canonical_cause = (
+        canonical["primary_cause_class"] if canonical is not None else None
     )
+    if canonical is None:
+        primary_lines = [
+            "No native hit edge occurred in this scoped practice trace.",
+            "",
+            "This is a physical no-Bomb pass for the captured scope. It does "
+            "not by itself establish repeatability; retain repeated clean "
+            "focused passes before promoting the phase.",
+        ]
+    else:
+        canonical_spell = canonical["spell_attribution"]
+        canonical_spell_label = (
+            f"spell {canonical_spell['spell_id']} "
+            f"`{canonical_spell['spell_name']}`"
+            if canonical_spell["spell_id"] is not None
+            else "a nonspell phase"
+        )
+        primary_lines = [
+            f"The authoritative fresh-attempt hit is "
+            f"`{canonical['case_id']}`. It occurred during "
+            f"{canonical_spell_label} at player "
+            f"({_format(canonical['player']['x'])}, "
+            f"{_format(canonical['player']['y'])}), with "
+            f"{canonical['active_bullets']} bullets and "
+            f"{canonical['active_lasers']} lasers. The projectile model "
+            "reported pipeline clearance "
+            f"{_format(canonical['pipeline_clearance_at_hit'])}.",
+            "",
+        ]
     if canonical_cause == "enemy_body_contact_candidate":
         primary_explanation = (
             "This is a strong enemy-body collision candidate, not a "
@@ -909,15 +1085,23 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "the owner pointer but not its position/contact size/flags, so "
             "exact same-frame overlap remains the next telemetry closure."
         )
-    else:
+    elif canonical is not None:
         primary_explanation = (
             f"The primary class is `{canonical_cause}`. This trace contains "
             "the retained hit-window geometry for that classification; later "
             "post-respawn hits remain discovery evidence rather than fresh "
             "independent trials."
         )
+    else:
+        primary_explanation = None
+    if primary_explanation is not None:
+        primary_lines.append(primary_explanation)
+
+    stage_label = scope.get("stage_label") or (
+        f"route {scope['stage_route_index']}"
+    )
     lines = [
-        f"# TH08 Stage 3 No-Bomb Practice Review: {dossier['run_id']}",
+        f"# TH08 {stage_label} No-Bomb Practice Review: {dossier['run_id']}",
         "",
         "## Scope And Integrity",
         "",
@@ -942,16 +1126,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
         "",
         "## Primary Finding",
         "",
-        f"The authoritative fresh-attempt hit is `{canonical['case_id']}`. "
-        f"It occurred during {canonical_spell_label} at player "
-        f"({_format(canonical['player']['x'])}, "
-        f"{_format(canonical['player']['y'])}), with "
-        f"{canonical['active_bullets']} bullets and "
-        f"{canonical['active_lasers']} lasers. The projectile model reported "
-        f"pipeline clearance "
-        f"{_format(canonical['pipeline_clearance_at_hit'])}.",
-        "",
-        primary_explanation,
+        *primary_lines,
         "",
         "## Failure Taxonomy",
         "",
@@ -1012,6 +1187,36 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"`{death['primary_cause_class']}` | "
             f"`{death['planner_failure_class']}` |"
         )
+    lines.extend(
+        [
+            "",
+            "## Per-Phase Planner Health",
+            "",
+            "| Phase | Hits | Decisions | Queries | Empty | Support outside | "
+            "Constrained | Solves | Solve median ms | Bottom alive |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | "
+            "---: | ---: |",
+        ]
+    )
+    for phase in totals["per_spell"]:
+        viability = phase["robust_viability"]
+        solve_ms = viability["solve_ms"]
+        phase_label = (
+            "nonspell"
+            if phase["spell_id"] is None
+            else f"{phase['spell_id']} {phase['spell_name'] or ''}".strip()
+        )
+        bottom = phase["behavior_alive"].get("bottom_8px_fraction")
+        lines.append(
+            f"| {phase_label} | {phase['hit_count']} | "
+            f"{phase['decision_count']} | {viability['query_count']} | "
+            f"{viability['empty_action_set_count']} | "
+            f"{viability['support_uncovered_query_count']} | "
+            f"{viability['constrained_decision_count']} | "
+            f"{viability['unique_solution_count']} | "
+            f"{_format(solve_ms.get('median') if solve_ms else None)} | "
+            f"{_format(bottom)} |"
+        )
     cause_counts = totals["primary_cause_counts"]
     planner_failure_counts = totals["planner_failure_counts"]
     behavior = totals["behavior_context"]
@@ -1021,7 +1226,6 @@ def render_markdown(dossier: dict[str, object]) -> str:
     adaptive_delay = totals["adaptive_control_delay"]
     robust_viability = totals["robust_viability"]
     input_visibility = totals["input_visibility"]
-    spell_50_hits = int(totals["spell_hit_counts"].get("50", 0))
     body_overlaps = sum(
         death["observed_enemy_body_contact_candidate"] is not None
         for death in dossier["deaths"]
@@ -1042,8 +1246,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"{_format(totals['latency_ms']['plan']['median'])} ms median and "
             f"{_format(totals['latency_ms']['plan']['p95'])} ms p95.",
             "- Modeled action hold counts were "
-            f"`{action_hold['all']['counts']}` overall and "
-            f"`{action_hold['active_spell_50']['counts']}` in active spell 50.",
+            f"`{action_hold['all']['counts']}` overall.",
             "- Modeled uncontrollable-prefix counts were "
             f"`{control_delay['counts']}`.",
             (
@@ -1071,6 +1274,17 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 "and "
                 f"`{robust_viability['selected_repair_volume']}`."
             ),
+            (
+                "- The rolling worker produced "
+                f"{robust_viability['unique_solution_count']} unique policies "
+                "with solve-time statistics "
+                f"`{robust_viability['solve_ms']}` and first-observed ages "
+                f"`{robust_viability['first_observed_age_frames']}`. Policy "
+                "status counts were "
+                f"`{robust_viability['policy_status_counts']}`; "
+                f"{robust_viability['decision_without_query_count']} robust-"
+                "mode decisions had no query."
+            ),
             "- Of "
             f"{input_visibility['unambiguous_transition_count']} unambiguous "
             "output transitions, "
@@ -1089,18 +1303,11 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "hit windows with a positive warning lead; those leads were "
             f"`{[death.get('usable_robust_warning_lead_frames', 0) for death in dossier['deaths']]}` "
             "frames.",
-            f"- Spell 50 contains {spell_50_hits} hits. Its "
-            f"{spell_50_corridor['unique_solution_count']} unique corridor "
-            f"solves took {_format(spell_50_corridor['solve_ms']['median'])} "
-            f"ms median, {_format(spell_50_corridor['solve_ms']['p95'])} ms "
-            f"p95, and {_format(spell_50_corridor['solve_ms']['max'])} ms "
-            "maximum.",
-            "- In spell 50, the bottom-eight-pixel occupancy fraction was "
-            f"{_format(behavior['spell_50_alive_preceding_hit_60f'].get('bottom_8px_fraction'))} "
+            "- Across all phases, bottom-eight-pixel occupancy was "
+            f"{_format(behavior['alive_preceding_hit_60f'].get('bottom_8px_fraction'))} "
             "during the 60 frames preceding a hit versus "
-            f"{_format(behavior['spell_50_alive_other'].get('bottom_8px_fraction'))} "
-            "outside those windows. This separates terminal escape-space loss "
-            "from solver latency alone.",
+            f"{_format(behavior['alive_outside_preceding_hit_60f'].get('bottom_8px_fraction'))} "
+            "outside those windows.",
             "- Later hits cannot estimate an initial-stock clear rate because "
             f"Power falls from 128 to "
             f"{_format(totals['resources']['power']['end'])} after respawns. "
@@ -1115,9 +1322,9 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 "## Baseline Correction Gate",
                 "",
                 "Add active-enemy lethal AABBs to the runtime snapshot, "
-                "predictor, and corridor occupancy. The next fresh Stage-3 "
-                "run must eliminate the spell-35 body contact as its canonical "
-                "first hit without regressing the no-Bomb invariant.",
+                "predictor, and corridor occupancy. The next fresh focused "
+                "run must eliminate the canonical body-contact candidate "
+                "without regressing the no-Bomb invariant.",
                 "",
                 "## Offline Correction Prepared",
                 "",
@@ -1132,18 +1339,18 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 "baseline report.",
             ]
         )
-    elif adaptive_delay["robust_certificate_count"] > 0:
+    elif robust_viability["policy_decision_count"] > 0:
         lines.extend(
             [
                 "",
                 "## Next Correction Gate",
                 "",
-                "Compare hit count and first divergence against the accepted "
-                "dynamic-hold run. Reject the controller if robust validation "
-                "raises loop cadence enough to widen its own learned delay "
-                "tail, if end-to-end transitions remain mostly censored, or "
-                "if hits retain a nonnegative last-alive robust certificate. "
-                "Only then promote adaptive delay into the accepted baseline.",
+                "Treat policy delivery, delay-support coverage, and viability "
+                "exhaustion as separate gates. The next focused run must keep "
+                "rolling-policy queries available, reduce unsupported query "
+                "epochs, and preserve a non-empty action kernel before each "
+                "former hit window. Compare per-phase position and warning "
+                "lead, not only aggregate hit count.",
             ]
         )
     elif max(

@@ -17,6 +17,8 @@ from th08_practice_dossier import (
     _no_bomb_verification,
     _promote_enemy_body_candidates,
     _robust_viability_summary,
+    _spell_phase_summary,
+    render_markdown,
 )
 from th08_fullrun_regression import load_and_validate
 from th08_run_dossier import _input_mask_action
@@ -34,6 +36,12 @@ ADAPTIVE_PRACTICE_CORPUS = (
     / "artifacts"
     / "runtime_reports"
     / "lunatic_route2_stage3_adaptive_delay_20260723_184741.regressions.json"
+)
+FINAL_B_PRACTICE_DOSSIER = (
+    ROOT
+    / "artifacts"
+    / "runtime_reports"
+    / "lunatic_route2_finalb_practice_rolling_epoch_20260723_213126.dossier.json"
 )
 
 
@@ -147,6 +155,11 @@ class Th08PracticeDossierTests(unittest.TestCase):
             "support_covers_current": True,
         }
         rows[0]["robust_control"] = {"viability_constrained": True}
+        rows[0]["corridor_source_frame"] = 148
+        rows[0]["corridor_solve_ms"] = 1800.0
+        rows[0]["corridor_age"] = 2
+        rows[0]["corridor_forecast_lead_frames"] = 48
+        rows[0]["corridor_policy_status"] = "rolling_future_epoch"
         rows[1]["corridor_planning_mode"] = "robust_viability"
         rows[1]["viability"] = {
             "available": True,
@@ -162,10 +175,45 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(summary["empty_action_set_count"], 1)
         self.assertEqual(summary["support_uncovered_query_count"], 1)
         self.assertEqual(summary["constrained_decision_count"], 1)
+        self.assertEqual(summary["unique_solution_count"], 1)
+        self.assertEqual(summary["solve_ms"]["median"], 1800.0)
+        self.assertEqual(
+            summary["policy_status_counts"],
+            {"rolling_future_epoch": 1},
+        )
         self.assertEqual(
             summary["planning_mode_counts"],
             {"robust_viability": 2},
         )
+
+    def test_spell_phase_summary_is_not_tied_to_stage3_spell50(
+        self,
+    ) -> None:
+        rows = [_decision(100), _decision(103), _decision(106)]
+        rows[1]["spell"] = {
+            "active": True,
+            "spell_id": 166,
+            "spell_name": "Final B fixture",
+        }
+        rows[2]["spell"] = dict(rows[1]["spell"])
+        summary = _spell_phase_summary(
+            rows,
+            [
+                {
+                    "frame": 106,
+                    "spell_attribution": {
+                        "spell_id": 166,
+                        "spell_name": "Final B fixture",
+                    },
+                }
+            ],
+        )
+        self.assertEqual(
+            [phase["phase_key"] for phase in summary],
+            ["nonspell", "166"],
+        )
+        self.assertEqual(summary[1]["hit_count"], 1)
+        self.assertEqual(summary[1]["hit_frames"], [106])
 
     def test_cadence_and_prehit_behavior_are_retained(self) -> None:
         rows = [_decision(100), _decision(103), _decision(107)]
@@ -230,6 +278,17 @@ class Th08PracticeDossierTests(unittest.TestCase):
                 for case in document["cases"]
             )
         )
+
+    def test_retained_final_b_dossier_renders_without_spell50(
+        self,
+    ) -> None:
+        dossier = json.loads(
+            FINAL_B_PRACTICE_DOSSIER.read_text(encoding="utf-8")
+        )
+        markdown = render_markdown(dossier)
+        self.assertIn("Final B", markdown)
+        self.assertIn("166", markdown)
+        self.assertNotIn("Spell 50 contains", markdown)
 
     def test_frame_regression_excludes_thprac_reset_tail(self) -> None:
         rows = [

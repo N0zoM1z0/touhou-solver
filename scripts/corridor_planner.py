@@ -11,10 +11,12 @@ no TH08 address, opcode, or resource type appears here.
 from __future__ import annotations
 
 import math
+import time
 from dataclasses import dataclass
 
 import numpy as np
 
+from touhou_control import native_backend
 from touhou_control.viability import (
     ControlAction,
     RobustViabilityPolicy,
@@ -128,6 +130,8 @@ class CorridorPlan:
     viability_policy: RobustViabilityPolicy | None = None
     initial_safe_action_count: int = 0
     initial_repair_volume: int = 0
+    viability_backend: str | None = None
+    solver_timing_ms: tuple[tuple[str, float], ...] = ()
 
     def waypoint(self, frame: int) -> CorridorPoint:
         if not self.path:
@@ -550,6 +554,18 @@ def _hazard_clearance_volume(
 ) -> np.ndarray:
     """Build physical-frame clearance without treating legal bounds as hazards."""
 
+    native_volume = native_backend.build_clearance_volume(
+        x_axis=grid_x[0],
+        y_axis=grid_y[:, 0],
+        frame_count=config.horizon_frames + 1,
+        player_radius=config.player_radius,
+        clearance_cap=config.danger_radius,
+        aabbs=aabbs,
+        segments=segments,
+    )
+    if native_volume is not None:
+        return native_volume
+
     volume = _aabb_clearance_volume(
         grid_x,
         grid_y,
@@ -633,6 +649,7 @@ def _plan_robust_corridor(
     config: CorridorConfig,
     robust_control: RobustControlSpec,
 ) -> CorridorPlan:
+    solve_started = time.perf_counter()
     x_axis = _axis(bounds.left, bounds.right, config.grid_step)
     y_axis = _axis(bounds.top, bounds.bottom, config.grid_step)
     grid_x, grid_y = np.meshgrid(x_axis, y_axis)
@@ -643,6 +660,7 @@ def _plan_robust_corridor(
         segments=segments,
         config=config,
     )
+    clearance_finished = time.perf_counter()
     policy = build_robust_viability_policy(
         x_axis=x_axis,
         y_axis=y_axis,
@@ -655,6 +673,17 @@ def _plan_robust_corridor(
             required_clearance=config.required_clearance,
             clamp_to_bounds=True,
             repair_radius_cells=1,
+        ),
+    )
+    viability_finished = time.perf_counter()
+    base_timing = (
+        (
+            "clearance",
+            (clearance_finished - solve_started) * 1000.0,
+        ),
+        (
+            "viability",
+            (viability_finished - clearance_finished) * 1000.0,
         ),
     )
     start_query = policy.query(
@@ -674,6 +703,11 @@ def _plan_robust_corridor(
             reason="initial robust viability action set is empty",
             planning_mode="robust_viability",
             viability_policy=policy,
+            viability_backend=policy.backend,
+            solver_timing_ms=(
+                *base_timing,
+                ("rollout", 0.0),
+            ),
         )
 
     target_x = _robust_lane_target(
@@ -781,6 +815,14 @@ def _plan_robust_corridor(
             viability_policy=policy,
             initial_safe_action_count=start_query.safe_action_count,
             initial_repair_volume=initial_repair_volume,
+            viability_backend=policy.backend,
+            solver_timing_ms=(
+                *base_timing,
+                (
+                    "rollout",
+                    (time.perf_counter() - viability_finished) * 1000.0,
+                ),
+            ),
         )
     return CorridorPlan(
         reachable=True,
@@ -798,6 +840,14 @@ def _plan_robust_corridor(
         viability_policy=policy,
         initial_safe_action_count=start_query.safe_action_count,
         initial_repair_volume=initial_repair_volume,
+        viability_backend=policy.backend,
+        solver_timing_ms=(
+            *base_timing,
+            (
+                "rollout",
+                (time.perf_counter() - viability_finished) * 1000.0,
+            ),
+        ),
     )
 
 

@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import unittest
 
-from touhou_control.async_policy import AsyncPolicyLead
+from touhou_control.async_policy import (
+    AsyncPolicyLead,
+    delay_support_envelope,
+)
 
 
 class AsyncPolicyLeadTests(unittest.TestCase):
@@ -30,6 +33,37 @@ class AsyncPolicyLeadTests(unittest.TestCase):
         lead = AsyncPolicyLead()
         with self.assertRaisesRegex(ValueError, "finite"):
             lead.observe(float("nan"))
+
+    def test_serial_serviceability_requires_solve_inside_horizon(
+        self,
+    ) -> None:
+        lead = AsyncPolicyLead(initial_frames=48, overlap_frames=8)
+        for _ in range(4):
+            lead.observe(500.0)
+        self.assertEqual(lead.p90_solve_frames, 30)
+        self.assertEqual(lead.serial_coverage_margin(80), 32)
+        self.assertTrue(lead.serial_worker_serviceable(80))
+        lead.observe(2000.0)
+        self.assertEqual(lead.p90_solve_frames, 120)
+        self.assertFalse(lead.serial_worker_serviceable(80))
+
+    def test_delay_envelope_covers_one_step_estimator_drift(self) -> None:
+        self.assertEqual(
+            delay_support_envelope(
+                (2, 3, 4),
+                minimum=1,
+                maximum=6,
+            ),
+            (1, 2, 3, 4, 5),
+        )
+        self.assertEqual(
+            delay_support_envelope(
+                (1, 2, 3, 4, 5, 6),
+                minimum=1,
+                maximum=6,
+            ),
+            (1, 2, 3, 4, 5, 6),
+        )
 
 
 if __name__ == "__main__":

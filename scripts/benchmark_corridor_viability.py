@@ -8,6 +8,7 @@ import json
 import statistics
 import time
 from dataclasses import replace
+from pathlib import Path
 
 from corridor_planner import MovingAabbHazard, RobustControlSpec, SegmentHazard
 from corridor_planner import plan_corridor
@@ -71,25 +72,39 @@ def main() -> int:
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--forecast-frames", type=int, default=80)
     parser.add_argument(
+        "--delay-support",
+        type=int,
+        nargs="+",
+        default=(1, 2, 3),
+    )
+    parser.add_argument("--nominal-delay", type=int, default=2)
+    parser.add_argument(
         "--danger-radius",
         type=float,
         default=TH08_CORRIDOR_CONFIG.danger_radius,
     )
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if (
         args.aabbs < 0
         or args.segments < 0
         or args.runs < 1
         or args.forecast_frames < 0
+        or tuple(sorted(set(args.delay_support)))
+        != tuple(args.delay_support)
+        or not args.delay_support
+        or args.delay_support[0] < 0
+        or args.delay_support[-1] > TH08_CORRIDOR_CONFIG.frames_per_layer
+        or args.nominal_delay not in args.delay_support
     ):
-        parser.error("hazard counts must be nonnegative and runs positive")
+        parser.error("invalid hazard, run, or delay arguments")
 
     aabbs = _aabbs(args.aabbs, args.forecast_frames)
     segments = _segments(args.segments, args.forecast_frames)
     robust_control = RobustControlSpec(
         actions=TH08_VIABILITY_ACTIONS,
-        delay_frames=(1, 2, 3),
-        nominal_delay=2,
+        delay_frames=tuple(args.delay_support),
+        nominal_delay=args.nominal_delay,
         active_action="stay",
     )
     config = replace(
@@ -97,9 +112,11 @@ def main() -> int:
         danger_radius=args.danger_radius,
     )
     samples = []
+    phase_samples: dict[str, list[float]] = {}
+    backend = None
     for _ in range(args.runs):
         started = time.perf_counter()
-        plan_corridor(
+        plan = plan_corridor(
             start_x=192.0,
             start_y=400.0,
             bounds=TH08_PLAYFIELD,
@@ -111,22 +128,32 @@ def main() -> int:
             robust_control=robust_control,
         )
         samples.append((time.perf_counter() - started) * 1000.0)
+        backend = plan.viability_backend
+        for key, value in plan.solver_timing_ms:
+            phase_samples.setdefault(key, []).append(value)
 
-    print(
-        json.dumps(
-            {
-                "aabbs": args.aabbs,
-                "segments": args.segments,
-                "runs": args.runs,
-                "forecast_frames": args.forecast_frames,
-                "danger_radius": args.danger_radius,
-                "cold_ms": samples[0],
-                "warm_median_ms": statistics.median(samples[1:] or samples),
-                "samples_ms": samples,
-            },
-            indent=2,
-        )
-    )
+    report = {
+        "aabbs": args.aabbs,
+        "segments": args.segments,
+        "runs": args.runs,
+        "forecast_frames": args.forecast_frames,
+        "danger_radius": args.danger_radius,
+        "delay_support": args.delay_support,
+        "nominal_delay": args.nominal_delay,
+        "viability_backend": backend,
+        "cold_ms": samples[0],
+        "warm_median_ms": statistics.median(samples[1:] or samples),
+        "samples_ms": samples,
+        "phase_warm_median_ms": {
+            key: statistics.median(values[1:] or values)
+            for key, values in phase_samples.items()
+        },
+    }
+    rendered = json.dumps(report, indent=2) + "\n"
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(rendered, encoding="utf-8")
+    print(rendered, end="")
     return 0
 
 

@@ -1238,3 +1238,36 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   focused Stage 4A, focused Final B, complete Lunatic, then Extra. The first
   acceptance signal is nonzero sustained live viability coverage together
   with fewer hits; resource-aware Bomb/item search remains later.
+
+## 2026-07-23: Final B Rolling-Epoch Review And Native Planner
+
+- Scoped focused Final B trace `20260723_213126` to frames `1..70642` with
+  19,289 decisions, 25 native hit edges, and zero Bomb input. The complete
+  dossier, death CSV, executable regression corpus, raw summary, and
+  diagnostic comparison are retained under `artifacts/runtime_reports/` and
+  `notes/runs/`.
+- Future epochs fixed policy delivery: Final B policy queries rose from 80 in
+  the complete-run reference to 8,454, and constrained decisions rose from 32
+  to 3,017. The raw 33-to-25 hit difference is not an acceptance comparison
+  because thprac and complete-route phase-entry resources differ.
+- Delivery alone was insufficient. The candidate still had 8,834 expired
+  decisions, 4,260 empty queried action sets, and 2,409 delay-support
+  mismatches. Solve p95 was 2,915 ms, or about 175 frames, against an 80-frame
+  policy.
+- Per-phase analysis identifies general long-horizon positioning failure:
+  bottom-eight-pixel occupancy rose from 20.4% outside pre-hit windows to
+  41.0% before hits; negative corridor slack rose from 24.7% overall to 71.3%
+  before hits. Spell 166 had five hits, 357/452 empty queries, and 65.3%
+  bottom occupancy. Spell 162 had three hits and 518/552 empty queries.
+- Replaced the two expensive numerical kernels with an optional game-neutral
+  C ABI backend: moving-AABB/finite-segment clearance volume and robust
+  backward viability. Python/NumPy remains the reference implementation.
+  Randomized full-mask and mixed-geometry parity pass on WSL and Windows.
+- Windows retained-stress warm median fell from 1,501.9 ms to 540.2 ms.
+  With the full delay support `1..6`, native median/max was 511.4/561.4 ms,
+  about 31/34 physical frames. The 80-frame worker is synthetically
+  serviceable for the first time.
+- Added generic async serviceability telemetry and a bounded delay-support
+  submission envelope. The next physical Final B trial must verify the native
+  backend, positive serial margin, fewer expired decisions, and retained
+  no-Bomb evidence before this correction is accepted.

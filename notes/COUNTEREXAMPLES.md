@@ -818,3 +818,38 @@ Status: observed | inferred | unknown | fixed
   `test_no_bomb_verification_rejects_bomb_input_bit`.
 - **Status:** reporting fixed. The run is a verified hard-no-Bomb failure
   corpus, not a finite-resource Bomb route.
+
+## CE-0044: A future epoch did not make a slow serial worker continuous
+
+- **Observed symptom:** Focused Final B run `20260723_213126` produced 292
+  future-epoch policies and 8,454 policy queries, a large delivery improvement
+  over the complete-run Final B baseline's 80 queries. It still recorded
+  8,834 expired policy decisions. Solve time was
+  1,957/2,915/3,268 ms median/p95/max against an 80-frame horizon.
+- **Invalid assumption:** Forecasting a policy source near its expected solve
+  completion is sufficient for continuous rolling control. A serial worker
+  whose solve interval exceeds the horizon necessarily leaves a coverage gap,
+  even when each individual result is fresh at first use.
+- **Consequences:** Only 3,017 of 19,289 decisions were constrained. Of 8,454
+  queries, 4,260 had an empty action set and 2,409 no longer covered the
+  current delay support. Spell 162 was empty for 518/552 queries; spell 166
+  was empty for 357/452 and spent 65.3% of alive decisions in the bottom eight
+  pixels. The run retained 25 hard-no-Bomb hit witnesses.
+- **Correction:** Added a game-neutral native C ABI for hazard clearance
+  volume and robust backward DP, with NumPy as the reference fallback.
+  Randomized parity retains the exact `exists action, forall delay` contract.
+  The generic async layer now reports p90 solve frames, serial coverage margin,
+  and serviceability. Policy submissions use a bounded one-frame delay-support
+  envelope to tolerate estimator drift during a solve.
+- **Performance evidence:** On Windows, the retained 1,500-AABB/250-segment
+  workload fell from 1,501.9 ms to 540.2 ms warm median. Full delay support
+  `1..6` measured 511.4 ms median and 561.4 ms maximum, about 31..34 physical
+  frames. Native and reference geometry/viability tests pass on both Windows
+  and WSL.
+- **Regressions:** `test_native_kernel_matches_numpy_for_randomized_delay_game`,
+  `test_native_time_volume_matches_numpy_mixed_hazards`,
+  `test_serial_serviceability_requires_solve_inside_horizon`, and
+  `test_delay_envelope_covers_one_step_estimator_drift`.
+- **Status:** offline corrected, physical acceptance pending. The next focused
+  Final B trial must demonstrate sustained queryable coverage and positive
+  serial margin under actual game contention.

@@ -12,9 +12,63 @@ from touhou_control.viability import (
     ViabilityConfig,
     build_robust_viability_policy,
 )
+from touhou_control.native_backend import available as native_available
 
 
 class RobustViabilityTests(unittest.TestCase):
+    @unittest.skipUnless(
+        native_available(),
+        "native viability backend is not built",
+    )
+    def test_native_kernel_matches_numpy_for_randomized_delay_game(
+        self,
+    ) -> None:
+        rng = np.random.default_rng(0xCE0044)
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("left", -0.8, 0.0),
+            ControlAction("right", 0.8, 0.0),
+            ControlAction("up_right", 0.6, -0.6),
+        )
+        x_axis = np.arange(5, dtype=np.float32) * 2.0
+        y_axis = np.arange(4, dtype=np.float32) * 2.0
+        config = ViabilityConfig(
+            frames_per_layer=3,
+            clamp_to_bounds=False,
+        )
+        for _ in range(12):
+            clearance = rng.uniform(
+                -2.0,
+                8.0,
+                size=(7, len(y_axis), len(x_axis)),
+            ).astype(np.float32)
+            reference = build_robust_viability_policy(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                clearance_volume=clearance,
+                actions=actions,
+                delay_frames=(0, 2, 3),
+                nominal_delay=2,
+                config=config,
+                backend="numpy",
+            )
+            native = build_robust_viability_policy(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                clearance_volume=clearance,
+                actions=actions,
+                delay_frames=(0, 2, 3),
+                nominal_delay=2,
+                config=config,
+                backend="native",
+            )
+            np.testing.assert_array_equal(native.viable, reference.viable)
+            np.testing.assert_array_equal(
+                native.safe_action_masks,
+                reference.safe_action_masks,
+            )
+            self.assertEqual(native.backend, "native")
+
     def test_clear_lattice_exposes_all_robust_actions_and_repair_volume(
         self,
     ) -> None:

@@ -1,0 +1,269 @@
+"""Optional C ABI backend for time-expanded hazards and viability."""
+
+from __future__ import annotations
+
+import ctypes
+import os
+from pathlib import Path
+
+import numpy as np
+
+
+ROOT = Path(__file__).resolve().parents[2]
+_DISABLE_ENV = "TOUHOU_DISABLE_NATIVE_PLANNER"
+_LIBRARY = None
+_VIABILITY_FUNCTION = None
+_CLEARANCE_FUNCTION = None
+_LOAD_ERROR: OSError | None = None
+
+
+def _library_path() -> Path:
+    if os.name == "nt":
+        return (
+            ROOT
+            / "native"
+            / "build"
+            / "windows-x86_64"
+            / "touhou_viability.dll"
+        )
+    return (
+        ROOT
+        / "native"
+        / "build"
+        / "linux-x86_64"
+        / "libtouhou_viability.so"
+    )
+
+
+def _load_library():
+    global _LIBRARY, _LOAD_ERROR
+    if _LIBRARY is not None or _LOAD_ERROR is not None:
+        return _LIBRARY
+    if os.environ.get(_DISABLE_ENV) == "1":
+        return None
+    try:
+        _LIBRARY = ctypes.CDLL(str(_library_path()))
+    except OSError as error:
+        _LOAD_ERROR = error
+        return None
+    return _LIBRARY
+
+
+def _load_viability_function():
+    global _VIABILITY_FUNCTION
+    if _VIABILITY_FUNCTION is not None:
+        return _VIABILITY_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    function = library.touhou_robust_viability_v1
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_uint8),
+        ctypes.POINTER(ctypes.c_uint32),
+    ]
+    function.restype = ctypes.c_int
+    _VIABILITY_FUNCTION = function
+    return function
+
+
+def _load_clearance_function():
+    global _CLEARANCE_FUNCTION
+    if _CLEARANCE_FUNCTION is not None:
+        return _CLEARANCE_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    function = library.touhou_clearance_volume_v1
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    function.argtypes = [
+        ctypes.c_float,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.c_float,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        ctypes.c_int,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        ctypes.c_int,
+        float_pointer,
+    ]
+    function.restype = ctypes.c_int
+    _CLEARANCE_FUNCTION = function
+    return function
+
+
+def available() -> bool:
+    return _load_library() is not None
+
+
+def _attribute_array(items: tuple[object, ...], name: str) -> np.ndarray:
+    return np.fromiter(
+        (float(getattr(item, name)) for item in items),
+        dtype=np.float32,
+        count=len(items),
+    )
+
+
+def build_clearance_volume(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    frame_count: int,
+    player_radius: float,
+    clearance_cap: float,
+    aabbs: tuple[object, ...],
+    segments: tuple[object, ...],
+) -> np.ndarray | None:
+    function = _load_clearance_function()
+    if function is None:
+        return None
+    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
+    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
+    aabb_fields = tuple(
+        _attribute_array(aabbs, name)
+        for name in (
+            "x",
+            "y",
+            "velocity_x",
+            "velocity_y",
+            "half_width",
+            "half_height",
+            "base_uncertainty",
+            "uncertainty_per_frame",
+        )
+    )
+    segment_fields = tuple(
+        _attribute_array(segments, name)
+        for name in (
+            "origin_x",
+            "origin_y",
+            "angle",
+            "tail",
+            "head",
+            "half_width",
+            "base_uncertainty",
+            "uncertainty_per_frame",
+        )
+    )
+    output = np.empty(
+        (frame_count, len(y_axis), len(x_axis)),
+        dtype=np.float32,
+    )
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    result = function(
+        float(x_axis[0]),
+        float(x_axis[1] - x_axis[0]),
+        len(x_axis),
+        float(y_axis[0]),
+        float(y_axis[1] - y_axis[0]),
+        len(y_axis),
+        frame_count,
+        player_radius,
+        clearance_cap,
+        *(
+            values.ctypes.data_as(float_pointer)
+            for values in aabb_fields
+        ),
+        len(aabbs),
+        *(
+            values.ctypes.data_as(float_pointer)
+            for values in segment_fields
+        ),
+        len(segments),
+        output.ctypes.data_as(float_pointer),
+    )
+    if result != 0:
+        raise RuntimeError(f"native clearance kernel returned {result}")
+    return output
+
+
+def build_viability_arrays(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    clearance_volume: np.ndarray,
+    velocity_x: np.ndarray,
+    velocity_y: np.ndarray,
+    delay_frames: np.ndarray,
+    frames_per_layer: int,
+    required_clearance: float,
+    clamp_to_bounds: bool,
+) -> tuple[np.ndarray, np.ndarray] | None:
+    function = _load_viability_function()
+    if function is None:
+        return None
+    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
+    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
+    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
+    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
+    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    layer_count = (clearance.shape[0] - 1) // frames_per_layer
+    action_count = len(velocity_x)
+    rows = len(y_axis)
+    columns = len(x_axis)
+    viable = np.zeros(
+        (layer_count + 1, action_count, rows, columns),
+        dtype=np.bool_,
+    )
+    masks = np.zeros(
+        (layer_count, action_count, rows, columns),
+        dtype=np.uint32,
+    )
+    result = function(
+        clearance.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        clearance.shape[0],
+        rows,
+        columns,
+        float(x_axis[0]),
+        float(x_axis[1] - x_axis[0]),
+        float(y_axis[0]),
+        float(y_axis[1] - y_axis[0]),
+        velocity_x.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        velocity_y.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        action_count,
+        delays.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
+        len(delays),
+        frames_per_layer,
+        required_clearance,
+        int(clamp_to_bounds),
+        viable.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+        masks.ctypes.data_as(ctypes.POINTER(ctypes.c_uint32)),
+    )
+    if result != 0:
+        raise RuntimeError(f"native viability kernel returned {result}")
+    return viable, masks

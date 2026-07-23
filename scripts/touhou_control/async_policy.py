@@ -56,5 +56,48 @@ class AsyncPolicyLead:
     def sample_count(self) -> int:
         return len(self._solve_frames)
 
+    @property
+    def p90_solve_frames(self) -> int | None:
+        if not self._solve_frames:
+            return None
+        ordered = sorted(self._solve_frames)
+        rank = max(0, math.ceil(0.90 * len(ordered)) - 1)
+        return ordered[rank]
 
-__all__ = ["AsyncPolicyLead"]
+    def serial_coverage_margin(self, horizon_frames: int) -> int:
+        """Return policy frames left after the slower submit interval."""
+
+        if horizon_frames <= 0:
+            raise ValueError("policy horizon must be positive")
+        solve_frames = self.p90_solve_frames or self.initial_frames
+        return horizon_frames - max(self.frames, solve_frames)
+
+    def serial_worker_serviceable(self, horizon_frames: int) -> bool:
+        return self.serial_coverage_margin(horizon_frames) > 0
+
+
+def delay_support_envelope(
+    support: tuple[int, ...],
+    *,
+    minimum: int,
+    maximum: int,
+    padding: int = 1,
+) -> tuple[int, ...]:
+    """Pad a contiguous delay estimate for one async solve interval."""
+
+    if (
+        minimum < 0
+        or maximum < minimum
+        or padding < 0
+        or not support
+        or tuple(range(support[0], support[-1] + 1)) != support
+        or support[0] < minimum
+        or support[-1] > maximum
+    ):
+        raise ValueError("invalid delay support envelope")
+    low = max(minimum, support[0] - padding)
+    high = min(maximum, support[-1] + padding)
+    return tuple(range(low, high + 1))
+
+
+__all__ = ["AsyncPolicyLead", "delay_support_envelope"]

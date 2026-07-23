@@ -41,7 +41,11 @@ from th08_runtime_agent import (
     send_transitions,
     verify_target,
 )
-from touhou_control.async_policy import AsyncPolicyLead
+from touhou_control import native_backend
+from touhou_control.async_policy import (
+    AsyncPolicyLead,
+    delay_support_envelope,
+)
 from touhou_control.delay import AdaptiveControlDelay
 from touhou_control.viability import ViabilityQuery
 
@@ -117,6 +121,7 @@ LIVE_CONTROL_DELAY_MIN = 1
 LIVE_CONTROL_DELAY_MAX = 6
 LIVE_CONTROL_DELAY_WINDOW = 120
 LIVE_CONTROL_DELAY_GUARD_FRAMES = 600
+ASYNC_POLICY_DELAY_PADDING = 1
 COLLECTION_HALF_WIDTH = 24.0
 ITEM_SAFETY_CLEARANCE = 8.0
 CORRIDOR_REPLAN_FRAMES = 24
@@ -2044,6 +2049,10 @@ def run(args: argparse.Namespace) -> int:
                     "async_policy_overlap_frames": (
                         corridor_policy_lead.overlap_frames
                     ),
+                    "async_policy_delay_support_padding": (
+                        ASYNC_POLICY_DELAY_PADDING
+                    ),
+                    "native_planner_backend": native_backend.available(),
                     "viability_quantifiers": (
                         "exists_action_forall_delay"
                     ),
@@ -2393,6 +2402,12 @@ def run(args: argparse.Namespace) -> int:
                 >= args.corridor_every
             ):
                 forecast_lead_frames = corridor_policy_lead.frames
+                policy_delay_support = delay_support_envelope(
+                    delay_estimate.support,
+                    minimum=LIVE_CONTROL_DELAY_MIN,
+                    maximum=LIVE_CONTROL_DELAY_MAX,
+                    padding=ASYNC_POLICY_DELAY_PADDING,
+                )
                 forecast_player_x, forecast_player_y = (
                     _project_player_for_read_lag(
                         float(player["x"]),
@@ -2414,7 +2429,7 @@ def run(args: argparse.Namespace) -> int:
                     lasers=lasers,
                     enemy_bodies=enemy_bodies,
                     snapshot_lag=snapshot_lag,
-                    control_delay_candidates=delay_estimate.support,
+                    control_delay_candidates=policy_delay_support,
                     nominal_control_delay=control_delay_frames,
                     active_action=_action_name_from_mask(previous_mask),
                     required_gate_lane=(
@@ -2711,6 +2726,12 @@ def run(args: argparse.Namespace) -> int:
                         "planning_mode": (
                             corridor_report_solution.plan.planning_mode
                         ),
+                        "viability_backend": (
+                            corridor_report_solution.plan.viability_backend
+                        ),
+                        "solver_timing_ms": dict(
+                            corridor_report_solution.plan.solver_timing_ms
+                        ),
                         "lane": corridor_report_solution.plan.lane,
                         "bottleneck_clearance": (
                             corridor_report_solution.plan.bottleneck_clearance
@@ -2730,6 +2751,27 @@ def run(args: argparse.Namespace) -> int:
                         "lead_estimate_frames": corridor_policy_lead.frames,
                         "lead_sample_count": (
                             corridor_policy_lead.sample_count
+                        ),
+                        "lead_p90_solve_frames": (
+                            corridor_policy_lead.p90_solve_frames
+                        ),
+                        "serial_coverage_margin_frames": (
+                            corridor_policy_lead.serial_coverage_margin(
+                                corridor_report_solution.plan
+                                .viability_policy.horizon_frames
+                            )
+                            if corridor_report_solution.plan
+                            .viability_policy is not None
+                            else None
+                        ),
+                        "serial_worker_serviceable": (
+                            corridor_policy_lead.serial_worker_serviceable(
+                                corridor_report_solution.plan
+                                .viability_policy.horizon_frames
+                            )
+                            if corridor_report_solution.plan
+                            .viability_policy is not None
+                            else False
                         ),
                         "commitment": {
                             "active_lane": corridor_commitment.active_lane(

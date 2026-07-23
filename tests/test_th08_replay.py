@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import struct
 import unittest
 from pathlib import Path
@@ -11,8 +12,15 @@ from pathlib import Path
 from th08_replay import compress_input_runs, decode_replay, extract_stage_inputs
 
 
-REPLAY_DIR = Path(
-    "/mnt/d/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)/replay"
+REPLAY_DIR = (
+    Path(
+        r"D:\Entertainment\Game\Touhou\[th08] 东方永夜抄 (日文版)\replay"
+    )
+    if os.name == "nt"
+    else Path(
+        "/mnt/d/Entertainment/Game/Touhou/"
+        "[th08] 东方永夜抄 (日文版)/replay"
+    )
 )
 
 

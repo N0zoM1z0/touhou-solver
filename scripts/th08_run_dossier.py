@@ -438,6 +438,36 @@ def _compact_decision(
             and corridor.get("policy_status") is not None
             else None
         ),
+        "corridor_viability_backend": (
+            str(corridor.get("viability_backend"))
+            if isinstance(corridor, dict)
+            and corridor.get("viability_backend") is not None
+            else None
+        ),
+        "corridor_solver_timing_ms": (
+            {
+                str(key): float(value)
+                for key, value in corridor.get(
+                    "solver_timing_ms",
+                    {},
+                ).items()
+            }
+            if isinstance(corridor, dict)
+            and isinstance(corridor.get("solver_timing_ms"), dict)
+            else {}
+        ),
+        "corridor_serial_coverage_margin_frames": (
+            int(corridor["serial_coverage_margin_frames"])
+            if isinstance(corridor, dict)
+            and corridor.get("serial_coverage_margin_frames") is not None
+            else None
+        ),
+        "corridor_serial_worker_serviceable": (
+            bool(corridor["serial_worker_serviceable"])
+            if isinstance(corridor, dict)
+            and corridor.get("serial_worker_serviceable") is not None
+            else None
+        ),
         "viability": viability,
         "spell": row.get("spell"),
     }
@@ -598,6 +628,13 @@ def _robust_viability_summary(
             queries.append(viability)
 
     unique_rows = list(unique_solutions.values())
+    timing_keys = sorted(
+        {
+            str(key)
+            for row in unique_rows
+            for key in row.get("corridor_solver_timing_ms", {})
+        }
+    )
     available = [
         query for query in queries if bool(query.get("available"))
     ]
@@ -625,6 +662,30 @@ def _robust_viability_summary(
             float(row["corridor_forecast_lead_frames"])
             for row in unique_rows
             if row.get("corridor_forecast_lead_frames") is not None
+        ),
+        "backend_counts": dict(
+            Counter(
+                str(row["corridor_viability_backend"])
+                for row in unique_rows
+                if row.get("corridor_viability_backend") is not None
+            )
+        ),
+        "solver_phase_ms": {
+            key: _percentiles(
+                float(row["corridor_solver_timing_ms"][key])
+                for row in unique_rows
+                if key in row.get("corridor_solver_timing_ms", {})
+            )
+            for key in timing_keys
+        },
+        "serial_coverage_margin_frames": _percentiles(
+            float(row["corridor_serial_coverage_margin_frames"])
+            for row in policy_rows
+            if row.get("corridor_serial_coverage_margin_frames") is not None
+        ),
+        "serial_worker_serviceable_count": sum(
+            bool(row.get("corridor_serial_worker_serviceable"))
+            for row in policy_rows
         ),
         "policy_status_counts": dict(
             Counter(

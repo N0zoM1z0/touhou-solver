@@ -272,3 +272,24 @@ policy-chain algorithms.
 
 The next code checkpoint is steps 1 and 2. It is deliberately phase-generic;
 there will be no spell-specific coordinate or timing exception.
+
+## Recovery Outside The Strict Kernel
+
+Physical traces can start a policy epoch outside the strict robust kernel even
+when a nearby successor state remains recoverable. An empty safe-action mask
+must retain its safety meaning: no action may be relabeled safe. It should not,
+however, erase all global directional information.
+
+For every action at an empty query, the policy now evaluates the minimum over
+delay branches of the viable action-volume in the successor neighborhood. The
+local controller applies this as a soft lexicographic term after exact
+collision and clearance:
+
+1. minimize exact local collisions;
+2. minimize negative local clearance;
+3. maximize worst-branch kernel-repair volume;
+4. apply waypoint, item, and movement smoothness costs.
+
+Thus an unavoidable or already nonviable state is steered toward kernel
+re-entry without weakening `exists action, forall delay` safety. This is
+game-neutral and applies to any discrete action lattice.

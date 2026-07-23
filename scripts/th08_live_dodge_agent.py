@@ -2529,6 +2529,15 @@ def run(args: argparse.Namespace) -> int:
                 )
                 else None
             )
+            viability_repair_guidance = (
+                viability_query.repair_volumes
+                if (
+                    viability_query is not None
+                    and viability_query.available
+                    and viability_support_covers_current
+                )
+                else ()
+            )
             corridor_overhead_ms = (
                 time.perf_counter() - corridor_started
             ) * 1000.0
@@ -2569,9 +2578,7 @@ def run(args: argparse.Namespace) -> int:
                     else None
                 ),
                 viability_repair_volumes=(
-                    viability_guidance.repair_volumes
-                    if viability_guidance is not None
-                    else ()
+                    viability_repair_guidance
                 ),
             )
             plan_ms = (time.perf_counter() - plan_started) * 1000.0

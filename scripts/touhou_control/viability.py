@@ -178,14 +178,16 @@ class RobustViabilityPolicy:
             y - float(self.y_axis[row]),
         )
         mask = int(self.safe_action_masks[layer, action_index, row, column])
-        safe_actions = tuple(
-            action.name
-            for index, action in enumerate(self.actions)
+        safe_indices = tuple(
+            index
+            for index in range(len(self.actions))
             if mask & (1 << index)
         )
-        repair_volumes = tuple(
+        safe_actions = tuple(self.actions[index].name for index in safe_indices)
+        repair_indices = safe_indices or tuple(range(len(self.actions)))
+        repair_candidates = tuple(
             (
-                action.name,
+                self.actions[index].name,
                 self._repair_volume(
                     layer=layer,
                     row=row,
@@ -194,8 +196,16 @@ class RobustViabilityPolicy:
                     selected_action_index=index,
                 ),
             )
-            for index, action in enumerate(self.actions)
-            if mask & (1 << index)
+            for index in repair_indices
+        )
+        repair_volumes = (
+            repair_candidates
+            if safe_indices
+            else tuple(
+                (name, volume)
+                for name, volume in repair_candidates
+                if volume > 0
+            )
         )
         state_viable = bool(self.viable[layer, action_index, row, column])
         return ViabilityQuery(
@@ -211,7 +221,11 @@ class RobustViabilityPolicy:
             (
                 "robust viable actions found"
                 if state_viable
-                else "robust action set is empty"
+                else (
+                    "robust action set is empty; recovery neighborhoods found"
+                    if repair_volumes
+                    else "robust action set and recovery neighborhoods are empty"
+                )
             ),
         )
 

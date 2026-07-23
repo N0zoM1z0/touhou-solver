@@ -603,6 +603,28 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(decision.action, "right")
         self.assertEqual(decision.viability_repair_volume, 9)
 
+    def test_empty_kernel_recovery_is_soft_not_a_hard_action_constraint(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            horizon=2,
+            target_x=160.0,
+            target_y=400.0,
+            target_deadline=2,
+            viability_repair_volumes=(("left", 1), ("right", 9)),
+        )
+        self.assertEqual(decision.action, "right")
+        self.assertFalse(decision.viability_constrained)
+        self.assertEqual(decision.viability_safe_action_count, 0)
+        self.assertEqual(decision.viability_repair_volume, 9)
+
     def test_exact_local_collision_outranks_coarse_repair_volume(self) -> None:
         decision = choose_action(
             player_x=192.0,

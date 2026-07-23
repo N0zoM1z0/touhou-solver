@@ -1074,3 +1074,24 @@ Status: observed | inferred | unknown | fixed
   patch byte becomes zero and store that refreshed identity.
 - **Status:** code-fixed and covered by the existing target verification gate;
   the next physical session must report patch byte zero.
+
+## CE-0056: Empty viability queries discarded all global repair direction
+
+- **Observed symptom:** Unattended Stage-3 run `20260724_013045` completed with
+  11 hits and 4,304 empty queries out of 7,608 available. Seven hit windows
+  were classified as global-kernel exhaustion. Once a query was empty, live
+  control discarded the policy entirely and returned to local beam search.
+- **Invalid assumption:** A policy that cannot certify a strictly safe action
+  contains no useful information. Nearby successors may still lead back into
+  the controlled-invariant region.
+- **Correction:** For an empty action set, compute every action's minimum
+  delay-branch viable neighborhood volume. Feed positive volumes to local MPC
+  as soft recovery guidance after exact collision and clearance, without
+  adding anything to `safe_actions`.
+- **Regression:**
+  `test_empty_kernel_exposes_soft_recovery_without_claiming_safety` and
+  `test_empty_kernel_recovery_is_soft_not_a_hard_action_constraint`.
+- **Acceptance gate:** A fresh randomized stage must report nonzero
+  recovery-guided/selected query counts, preserve hard no-Bomb, and improve
+  former hit-window warning or kernel occupancy without adding local
+  collisions.

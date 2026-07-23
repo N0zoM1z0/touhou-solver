@@ -691,6 +691,19 @@ def _robust_viability_summary(
             or int(query.get("safe_action_count", 0)) == 0
             for query in available
         ),
+        "recovery_guided_query_count": sum(
+            not bool(query.get("state_viable"))
+            and any(
+                int(volume) > 0
+                for volume in dict(query.get("repair_volumes", {})).values()
+            )
+            for query in available
+        ),
+        "recovery_selected_count": sum(
+            not bool(query.get("state_viable"))
+            and int(query.get("selected_repair_volume", 0)) > 0
+            for query in available
+        ),
         "constrained_decision_count": sum(
             bool(row.get("robust_control", {}).get("viability_constrained"))
             for row in decisions
@@ -1376,7 +1389,11 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"{robust_viability['constrained_decision_count']} decisions, "
                 "and exposed "
                 f"{robust_viability['empty_action_set_count']} empty queried "
-                "action sets. Safe-action count and selected repair-volume "
+                "action sets. Recovery guidance was available/selected on "
+                f"{robust_viability.get('recovery_guided_query_count', 0)}/"
+                f"{robust_viability.get('recovery_selected_count', 0)} "
+                "empty-kernel "
+                "queries. Safe-action count and selected repair-volume "
                 f"statistics were `{robust_viability['safe_action_count']}` "
                 "and "
                 f"`{robust_viability['selected_repair_volume']}`."

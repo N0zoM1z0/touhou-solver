@@ -1403,3 +1403,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   identity after the patch wait, instead of retaining the pre-patch `0xFF`
   snapshot. The accepted Stage-1 trace itself proves the patch was active:
   four hit edges left life stock fixed at eight.
+
+## 2026-07-24: Randomized Stage-3 Baseline And Empty-Kernel Recovery
+
+- Randomized unattended run `20260724_013045` physically covered Stage 3
+  frames `1..27610` with 7,887 decisions, 11 hit edges, and zero Bomb input.
+  The post-stage `Right` no-save action, refreshed patch identity byte zero,
+  and verified process kill all passed their first physical gate.
+- The run exposed 4,304 empty queries among 7,608 available. Seven hit windows
+  were global-kernel exhaustions and four were local robust-set exhaustions;
+  all retained contacts were bullets, so laser geometry was not the immediate
+  cause of this run's deaths.
+- CE-0056 adds game-neutral soft kernel recovery. Empty queries keep
+  `safe_actions=()` but now retain worst-delay successor neighborhood volumes
+  for all actions. Exact local collision and clearance remain lexicographically
+  above this recovery signal.
+- Practice dossiers now report recovery-guided and recovery-selected query
+  counts so the next randomized stage can physically accept or reject the
+  correction.

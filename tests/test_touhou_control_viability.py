@@ -159,6 +159,36 @@ class RobustViabilityTests(unittest.TestCase):
         self.assertTrue(query.state_viable)
         self.assertEqual(query.safe_actions, ("stay",))
 
+    def test_empty_kernel_exposes_soft_recovery_without_claiming_safety(
+        self,
+    ) -> None:
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("right", 1.0, 0.0),
+        )
+        clearance = np.full((3, 2, 4), 100.0, dtype=np.float32)
+        clearance[1] = -1.0
+        policy = build_robust_viability_policy(
+            x_axis=np.arange(4, dtype=np.float32),
+            y_axis=np.asarray([0.0, 1.0], dtype=np.float32),
+            clearance_volume=clearance,
+            actions=actions,
+            delay_frames=(0, 1),
+            nominal_delay=1,
+            config=ViabilityConfig(frames_per_layer=2),
+        )
+        query = policy.query(
+            frame=0,
+            x=1.0,
+            y=0.0,
+            active_action="stay",
+        )
+        self.assertFalse(query.state_viable)
+        self.assertEqual(query.safe_actions, ())
+        self.assertTrue(query.repair_volumes)
+        self.assertGreater(query.repair_volume("stay"), 0)
+        self.assertIn("recovery neighborhoods found", query.reason)
+
     def test_exists_action_forall_delay_is_not_swapped(self) -> None:
         actions = (
             ControlAction("stay", 0.0, 0.0),

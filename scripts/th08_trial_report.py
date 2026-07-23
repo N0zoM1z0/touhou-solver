@@ -156,6 +156,16 @@ def summarize_rows(rows: list[dict[str, object]]) -> dict[str, object]:
             ),
             "nearest_bullet": _nearest_bullet(hit_row),
         }
+        nearest_bullet = first_hit_analysis["nearest_bullet"]
+        first_hit_analysis["observed_bullet_contact_candidate"] = (
+            nearest_bullet
+            if nearest_bullet is not None
+            and float(nearest_bullet["aabb_clearance"]) <= 0.0
+            else None
+        )
+        first_hit_analysis["active_lasers_at_observation"] = int(
+            hit_row.get("active_lasers", 0)
+        )
 
     resources_first = first["resources"]
     resources_last = last["resources"]

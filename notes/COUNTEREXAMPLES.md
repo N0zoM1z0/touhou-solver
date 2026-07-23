@@ -290,3 +290,25 @@ Status: observed | inferred | unknown | fixed
   `test_ce_frame_4963_does_not_reverse_into_delayed_slot_471_path`, and
   `test_ce_frame_4969_slot_471_explains_native_hit`.
 - **Status:** fixed offline; next physical F8 trial is the recurrence test.
+
+## CE-0020: A same-frame native hit can be absent from both pool snapshots
+
+- **Observed symptom:** The delay-aware trial ran from frame 1 to a native hit
+  at frame 5016 with Power 46. The planner still reported pipeline clearance
+  8.14; no laser was active, and the nearest bullet in the post-hit read had
+  AABB clearance 14.12. The harness then used a deathbomb and stopped 30 frames
+  later under the old first-hit policy.
+- **Invalid assumption:** Reading the bullet pool before choosing an input
+  captures every hazard that can collide later in that same game frame.
+- **Static mechanism:** Enemy ECL/emission runs at priority 11 after the
+  player update, while hostile bullet collision runs at priority 14. A bullet
+  emitted after the controller's read can enter that same later scan; an exact
+  hit removes its slot before the next controller read. This explains the
+  observation gap but is not yet a runtime-identified hit slot.
+- **Correction:** The report distinguishes the nearest observed bullet from an
+  actual overlapping contact candidate. The F8 harness now retains all hits in
+  a one-hour/F9-bounded long run. The real model fix is to merge executor/ECL
+  predicted same-frame emissions into tactical hazards before input search.
+- **Regression test:** `test_f8_long_run_does_not_stop_at_the_first_hit`; the
+  existing update-order and hostile-pool tests pin the static mechanism.
+- **Status:** open world-model counterexample; collecting recurrence evidence.

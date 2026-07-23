@@ -88,6 +88,11 @@ class Th08TrialReportTests(unittest.TestCase):
         analysis = report["first_hit_analysis"]
         self.assertEqual(analysis["first_nonpositive_pipeline"]["frame"], 103)
         self.assertEqual(analysis["nearest_bullet"]["slot"], 17)
+        self.assertEqual(
+            analysis["observed_bullet_contact_candidate"]["slot"],
+            17,
+        )
+        self.assertEqual(analysis["active_lasers_at_observation"], 0)
         self.assertEqual(report["frame_lag"]["modeled_control_delays"], [3])
         self.assertEqual(report["frame_lag"]["action"]["max"], 3.0)
 

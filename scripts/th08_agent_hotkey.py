@@ -36,6 +36,38 @@ HOTKEY_QUIT = 3
 VK_F8 = 0x77
 VK_F9 = 0x78
 VK_F10 = 0x79
+LONG_RUN_DURATION_SECONDS = 3600
+
+
+def build_long_run_arguments(
+    *,
+    output: Path,
+    stop_file: Path,
+    pid: int,
+    difficulty: int,
+) -> list[str]:
+    return [
+        str(output),
+        "--pid",
+        str(pid),
+        "--duration",
+        str(LONG_RUN_DURATION_SECONDS),
+        "--difficulty",
+        str(difficulty),
+        "--stop-after-hits",
+        "0",
+        "--post-hit-frames",
+        "0",
+        "--log-every",
+        "1",
+        "--trace-radius",
+        "160",
+        "--stop-file",
+        str(stop_file),
+        "--armed",
+    ]
+
+
 class AgentHotkey:
     def __init__(self) -> None:
         if os.name != "nt":
@@ -133,31 +165,17 @@ class AgentHotkey:
             stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             mode = "lunatic" if difficulty == 3 else "extra"
             self.output = self.artifact_dir / (
-                f"{mode}_route2_hotkey_cegar_{stamp}.jsonl"
+                f"{mode}_route2_hotkey_longrun_{stamp}.jsonl"
             )
             self.stop_file = self.output.with_suffix(".stop")
             self.output.unlink(missing_ok=True)
             self.stop_file.unlink(missing_ok=True)
-            arguments = [
-                str(self.output),
-                "--pid",
-                str(pid),
-                "--duration",
-                "300",
-                "--difficulty",
-                str(difficulty),
-                "--stop-after-hits",
-                "1",
-                "--post-hit-frames",
-                "30",
-                "--log-every",
-                "1",
-                "--trace-radius",
-                "160",
-                "--stop-file",
-                str(self.stop_file),
-                "--armed",
-            ]
+            arguments = build_long_run_arguments(
+                output=self.output,
+                stop_file=self.stop_file,
+                pid=pid,
+                difficulty=difficulty,
+            )
             if not gameplay_active:
                 arguments.extend(("--wait-gameplay", "--wait-timeout", "30"))
             self.agent_thread = threading.Thread(
@@ -200,7 +218,7 @@ class AgentHotkey:
     def run(self) -> int:
         print(
             "TH08 agent prewarmed (async-key polling). "
-            "F8 arm/enter, F9 stop+pause, F10 quit.",
+            "F8 arm/enter long run, F9 stop+pause, F10 quit.",
             flush=True,
         )
         try:

@@ -1,0 +1,130 @@
+{
+  "schema": "th08-practice-comparison-v1",
+  "baseline_run_id": "lunatic_route2_stage3_practice_20260723_173245",
+  "candidate_run_id": "lunatic_route2_stage3_adaptive_delay_20260723_184741",
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 8,
+    "candidate": 6,
+    "reduction_fraction": 0.25
+  },
+  "active_spell_hit_count": {
+    "35": {
+      "baseline": 0,
+      "candidate": 0
+    },
+    "50": {
+      "baseline": 1,
+      "candidate": 0
+    }
+  },
+  "spell_50_corridor": {
+    "solve_ms": {
+      "median": {
+        "baseline": 185.27880001056474,
+        "candidate": 240.38090000976808,
+        "reduction_fraction": -0.2974009978263103
+      },
+      "p95": {
+        "baseline": 396.4572999975644,
+        "candidate": 458.4803000034299,
+        "reduction_fraction": -0.1564430772399613
+      },
+      "max": {
+        "baseline": 442.19100000918843,
+        "candidate": 546.0252000048058,
+        "reduction_fraction": -0.23481753358494356
+      }
+    },
+    "age_frames": {
+      "median": {
+        "baseline": 14.0,
+        "candidate": 18.0,
+        "reduction_fraction": -0.2857142857142857
+      },
+      "p95": {
+        "baseline": 28.0,
+        "candidate": 32.0,
+        "reduction_fraction": -0.14285714285714285
+      },
+      "max": {
+        "baseline": 30.0,
+        "candidate": 38.0,
+        "reduction_fraction": -0.26666666666666666
+      }
+    },
+    "stale_solution_count": {
+      "baseline": 0,
+      "candidate": 0
+    }
+  },
+  "candidate_decision_cadence_frames": {
+    "median": 3.0,
+    "p95": 4.0,
+    "max": 6.0,
+    "mean": 2.63904511936008,
+    "sample_count": 8001
+  },
+  "candidate_behavior_context": {
+    "alive_all": {
+      "sample_count": 7153,
+      "fast_fraction": 0.4962952607297637,
+      "focused_fraction": 0.5037047392702363,
+      "bottom_8px_fraction": 0.056899203131553194,
+      "nonpositive_pipeline_fraction": 0.0037746400111841184,
+      "negative_corridor_slack_fraction": 0.09178397012352772,
+      "action_lag_over_model_fraction": 0.001398014818957081
+    },
+    "alive_preceding_hit_60f": {
+      "sample_count": 131,
+      "fast_fraction": 0.6259541984732825,
+      "focused_fraction": 0.37404580152671757,
+      "bottom_8px_fraction": 0.015267175572519083,
+      "nonpositive_pipeline_fraction": 0.03816793893129771,
+      "negative_corridor_slack_fraction": 0.05511811023622047,
+      "action_lag_over_model_fraction": 0.007633587786259542
+    },
+    "alive_outside_preceding_hit_60f": {
+      "sample_count": 7022,
+      "fast_fraction": 0.49387638849330673,
+      "focused_fraction": 0.5061236115066933,
+      "bottom_8px_fraction": 0.05767587581885503,
+      "nonpositive_pipeline_fraction": 0.0031330105383081744,
+      "negative_corridor_slack_fraction": 0.09246525237746892,
+      "action_lag_over_model_fraction": 0.0012816861293078895
+    },
+    "spell_50_alive_all": {
+      "sample_count": 483,
+      "fast_fraction": 0.2939958592132505,
+      "focused_fraction": 0.7060041407867494,
+      "bottom_8px_fraction": 0.2691511387163561,
+      "nonpositive_pipeline_fraction": 0.012422360248447204,
+      "negative_corridor_slack_fraction": 0.09404388714733543,
+      "action_lag_over_model_fraction": 0.008281573498964804
+    },
+    "spell_50_alive_preceding_hit_60f": {
+      "sample_count": 0
+    },
+    "spell_50_alive_other": {
+      "sample_count": 483,
+      "fast_fraction": 0.2939958592132505,
+      "focused_fraction": 0.7060041407867494,
+      "bottom_8px_fraction": 0.2691511387163561,
+      "nonpositive_pipeline_fraction": 0.012422360248447204,
+      "negative_corridor_slack_fraction": 0.09404388714733543,
+      "action_lag_over_model_fraction": 0.008281573498964804
+    }
+  },
+  "candidate_hit_contact_epoch": {
+    "stable_capture_count": 6,
+    "stable_capture_with_enemy_body_count": 4,
+    "exact_enemy_body_overlap_count": 0
+  },
+  "candidate_primary_cause_counts": {
+    "modeled_committed_prefix_collision": 4,
+    "observed_bullet_overlap": 2
+  }
+}

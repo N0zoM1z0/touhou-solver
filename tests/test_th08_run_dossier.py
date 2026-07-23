@@ -10,6 +10,7 @@ from th08_run_dossier import (
     _death_clusters,
     _nearest_bullet,
     _nearest_laser,
+    _robust_control_unsafe,
     _spell_attribution,
 )
 
@@ -39,6 +40,39 @@ def _row(
 
 
 class Th08RunDossierTests(unittest.TestCase):
+    def test_robust_action_set_exhaustion_uses_collision_or_margin(self) -> None:
+        self.assertFalse(_robust_control_unsafe({}))
+        self.assertFalse(
+            _robust_control_unsafe(
+                {
+                    "robust_control": {
+                        "worst_collisions": 0,
+                        "min_clearance": 0.25,
+                    }
+                }
+            )
+        )
+        self.assertTrue(
+            _robust_control_unsafe(
+                {
+                    "robust_control": {
+                        "worst_collisions": 1,
+                        "min_clearance": 3.0,
+                    }
+                }
+            )
+        )
+        self.assertTrue(
+            _robust_control_unsafe(
+                {
+                    "robust_control": {
+                        "worst_collisions": 0,
+                        "min_clearance": -0.01,
+                    }
+                }
+            )
+        )
+
     def test_native_overlap_outranks_positive_pipeline_model(self) -> None:
         row = _row(100)
         primary, contributing, nearest, laser, enemy = _classify_death(

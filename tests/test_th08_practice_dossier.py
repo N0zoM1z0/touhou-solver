@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -26,6 +27,12 @@ PRACTICE_CORPUS = (
     / "artifacts"
     / "runtime_reports"
     / "lunatic_route2_stage3_practice_20260723_160344.regressions.json"
+)
+ADAPTIVE_PRACTICE_CORPUS = (
+    ROOT
+    / "artifacts"
+    / "runtime_reports"
+    / "lunatic_route2_stage3_adaptive_delay_20260723_184741.regressions.json"
 )
 
 
@@ -154,6 +161,41 @@ class Th08PracticeDossierTests(unittest.TestCase):
                 "active_laser_without_observed_overlap": 3,
                 "observed_laser_overlap": 1,
             },
+        )
+
+    def test_adaptive_stage3_deaths_retain_robust_exhaustion_warning(
+        self,
+    ) -> None:
+        document = json.loads(
+            ADAPTIVE_PRACTICE_CORPUS.read_text(encoding="utf-8")
+        )
+        self.assertEqual(document["case_count"], 6)
+        self.assertEqual(
+            [case["frame"] for case in document["cases"]],
+            [2340, 16705, 20469, 22792, 23960, 24489],
+        )
+        self.assertEqual(
+            [
+                case["usable_robust_warning_lead_frames"]
+                for case in document["cases"]
+            ],
+            [6, 4, 5, 7, 6, 3],
+        )
+        self.assertTrue(
+            all(
+                case["planner_failure_class"]
+                == "robust_action_set_exhausted_before_hit"
+                for case in document["cases"]
+            )
+        )
+        self.assertTrue(
+            all(
+                case["last_alive_decision"]["robust_control"][
+                    "worst_collisions"
+                ]
+                > 0
+                for case in document["cases"]
+            )
         )
 
     def test_frame_regression_excludes_thprac_reset_tail(self) -> None:

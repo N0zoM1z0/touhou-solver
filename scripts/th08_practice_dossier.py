@@ -922,7 +922,8 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "## Death Ledger",
             "",
             "| Role | Frame | Spell | Player | Active input | Bullets/lasers | "
-            "Pipeline/min 240f | Warning | Contact/cause | Planner failure |",
+            "Pipeline/min 240f | Pipeline/robust warning | Contact/cause | "
+            "Planner failure |",
             "| --- | ---: | --- | --- | --- | ---: | ---: | ---: | --- | --- |",
         ]
     )
@@ -947,7 +948,8 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"{death['active_bullets']}/{death['active_lasers']} | "
             f"{_format(death['pipeline_clearance_at_hit'])}/"
             f"{_format(death['minimum_pipeline_clearance_240f'])} | "
-            f"{death['usable_pipeline_warning_lead_frames']}f | "
+            f"{death['usable_pipeline_warning_lead_frames']}f/"
+            f"{death.get('usable_robust_warning_lead_frames', 0)}f | "
             f"`{death['primary_cause_class']}` | "
             f"`{death['planner_failure_class']}` |"
         )
@@ -1008,6 +1010,11 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"`{planner_failure_counts}`. Active input is the game-observed "
             "input at collision; the newly issued action on a hit row occurs "
             "after hit detection.",
+            "- Robust action-set exhaustion supplied "
+            f"{sum(death.get('usable_robust_warning_lead_frames', 0) > 0 for death in dossier['deaths'])} "
+            "hit windows with a positive warning lead; those leads were "
+            f"`{[death.get('usable_robust_warning_lead_frames', 0) for death in dossier['deaths']]}` "
+            "frames.",
             f"- Spell 50 contains {spell_50_hits} hits. Its "
             f"{spell_50_corridor['unique_solution_count']} unique corridor "
             f"solves took {_format(spell_50_corridor['solve_ms']['median'])} "
@@ -1128,6 +1135,7 @@ def write_death_csv(
         "primary_cause_class",
         "planner_failure_class",
         "usable_pipeline_warning_lead_frames",
+        "usable_robust_warning_lead_frames",
         "contributing_factors",
         "bomb_input_verified_absent",
     ]
@@ -1177,6 +1185,10 @@ def write_death_csv(
                     "usable_pipeline_warning_lead_frames": death[
                         "usable_pipeline_warning_lead_frames"
                     ],
+                    "usable_robust_warning_lead_frames": death.get(
+                        "usable_robust_warning_lead_frames",
+                        0,
+                    ),
                     "contributing_factors": ";".join(
                         death["contributing_factors"]
                     ),

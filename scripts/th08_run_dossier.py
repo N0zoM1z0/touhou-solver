@@ -563,6 +563,16 @@ def _classify_death(
     )
 
 
+def _robust_control_unsafe(row: dict[str, object]) -> bool:
+    robust = row.get("robust_control")
+    if not isinstance(robust, dict) or not robust:
+        return False
+    return (
+        int(robust.get("worst_collisions", 0)) > 0
+        or float(robust.get("min_clearance", 9999.0)) < 0.0
+    )
+
+
 def _death_ledger(
     decisions: list[dict[str, object]],
 ) -> list[dict[str, object]]:
@@ -610,6 +620,18 @@ def _death_ledger(
                 ):
                     break
                 unsafe_suffix_start = sample
+        robust_unsafe_suffix_start = None
+        if last_alive is not None and _robust_control_unsafe(last_alive):
+            last_alive_index = window.index(last_alive)
+            robust_unsafe_suffix_start = last_alive
+            for sample in reversed(window[:last_alive_index]):
+                if (
+                    int(sample["player"]["phase"]) != 0
+                    or int(sample["player"]["phase_at_action"]) != 0
+                    or not _robust_control_unsafe(sample)
+                ):
+                    break
+                robust_unsafe_suffix_start = sample
 
         next_bombs = float(row["resources"]["bombs"])
         next_power = float(row["resources"]["power"])
@@ -651,6 +673,8 @@ def _death_ledger(
         )
         if last_alive is None:
             planner_failure_class = "missing_pre_hit_alive_decision"
+        elif robust_unsafe_suffix_start is not None:
+            planner_failure_class = "robust_action_set_exhausted_before_hit"
         elif float(last_alive["pipeline_clearance"]) <= 0.0:
             planner_failure_class = "committed_prefix_unsafe_before_hit"
         elif (
@@ -739,6 +763,16 @@ def _death_ledger(
                 frame - int(unsafe_suffix_start["frame"])
                 if unsafe_suffix_start is not None
                 else 0
+            ),
+            "usable_robust_warning_lead_frames": (
+                frame - int(robust_unsafe_suffix_start["frame"])
+                if robust_unsafe_suffix_start is not None
+                else 0
+            ),
+            "robust_action_set_exhausted_at_frame": (
+                int(robust_unsafe_suffix_start["frame"])
+                if robust_unsafe_suffix_start is not None
+                else None
             ),
             "planner_failure_class": planner_failure_class,
             "active_bullets": row["active_bullets"],

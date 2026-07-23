@@ -706,7 +706,47 @@ Status: observed | inferred | unknown | fixed
 - **Regressions:** `test_touhou_control_delay.py`,
   `test_multi_delay_certificate_covers_until_next_command_effect`, and
   `test_adaptive_delay_distribution_and_robust_overrides_are_retained`.
-- **Status:** code-fixed with 221 tests passing. Synthetic 400-bullet/200-laser
-  median local-plan cost rises from 16.7 ms to 21.2 ms. Physical acceptance
-  requires a fresh Stage-3 run and rejects the change if hit count exceeds
-  eight, spell-50 exceeds one, or added cost widens the learned delay tail.
+- **Status:** physically accepted as the new Stage-3 discovery baseline.
+  Run `184741` reduced hits from eight to six and spell-50 hits from one to
+  zero under hard no-Bomb. Median local planning rose from 13.7 to 18.2 ms,
+  but no corridor result became stale.
+
+## CE-0040: Robust validation waited for the action set to become empty
+
+- **Observed symptom:** All six `184741` hits had a last-alive robust
+  certificate with a predicted collision or negative robust clearance.
+  Continuous action-set exhaustion began only 3..7 frames before contact.
+  Five cases still had positive scalar prefix clearance, so the old failure
+  taxonomy called them late collisions.
+- **Invalid assumption:** It is sufficient to override the nominal action once
+  that action becomes unsafe. At that time every first action surviving the
+  nominal beam can already fail under some learned delay. Selecting the least
+  bad member cannot recover a viable connected component.
+- **Correction required:** Score robust control authority while the current
+  action is still safe: number of safe first actions, safe successor count
+  after another control interval, and reachable repair volume. Persist those
+  counts so loss of viability is observable before it reaches zero.
+- **Regressions:** The six cases in
+  `lunatic_route2_stage3_adaptive_delay_20260723_184741.regressions.json`
+  retain robust support, last-alive certificate, exhaustion frame, and warning
+  lead. Spell 46's three hits are the primary phase-specific cases.
+- **Status:** open. The report pipeline now classifies these hits as
+  `robust_action_set_exhausted_before_hit`.
+
+## CE-0041: First observed input visibility is an interval, not a timestamp
+
+- **Observed symptom:** The adaptive estimator spent 6,970 of 8,005 decisions
+  in tail-guard mode and frequently expanded support through delay 6. It
+  recorded 50 overruns and 486 overwritten/censored transitions while the
+  controller cadence itself was 2..4 frames.
+- **Invalid assumption:** The first decision snapshot whose `input_current`
+  equals the issued mask is the exact pickup frame. The true pickup lies after
+  the last mismatching observation and at or before the first match; sparse
+  polling supplies an interval.
+- **Correction required:** Retain lower/upper pickup bounds and fit a bounded
+  discrete distribution under interval censoring. Use its calibrated support
+  or tail probability in robust MPC instead of training on upper bounds as
+  exact samples.
+- **Status:** open. Current upper-bound treatment is conservative and produced
+  a physical improvement, but its computation cost and tail calibration are
+  not yet general enough for other machines or games.

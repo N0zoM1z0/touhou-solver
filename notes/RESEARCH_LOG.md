@@ -1129,3 +1129,36 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   planning at 16.7 ms median without robust certification and 21.2 ms with
   support `(2,3,4)`. The next physical run must measure whether this overhead
   widens the very delay distribution it is intended to tolerate.
+
+## 2026-07-23: Adaptive Robust Stage-3 Physical Acceptance
+
+- Discarded the `184708` 239-frame bootstrap after the TH08 window lost
+  foreground. The formal `184741` scope is frames `57..26582`, 8,005
+  decisions; 477 reset-tail decisions are excluded at counter regression.
+- A later `185544` handoff began mid-stage with a hit already present on its
+  first retained frame and was safely stopped at frame 22,631. Its two hits
+  are kept only as local raw corroboration; it is not a fresh-attempt or
+  complete-stage acceptance sample and is not merged into `184741`.
+- Hard no-Bomb passed. Six hits occurred at frames
+  `2340, 16705, 20469, 22792, 23960, 24489`, down 25% from accepted baseline
+  `173245` and down 45% from rejected scalar run `180832`.
+- Phase attribution is two nonspells, spell 42 once, and spell 46 three times.
+  Spell 35, spell 38, and spell 50 all completed with zero hits. Spell 46 is
+  now the dominant focused practice target.
+- Local-plan median/p95 rose from 13.7/30.7 ms to 18.2/35.3 ms and decision
+  cadence from 2/3 to 3/4 frames. Spell-50 corridor solve p95 rose to 458 ms
+  and age p95 to 32 frames, but stale count stayed zero and spell 50 had no
+  hit.
+- The estimator learned 120 end-to-end transition samples. Support most often
+  covered `2..5` or `2..6`; 135 decisions overrode the nominal action. Maximum
+  cumulative counters were 50 support overruns and 486 censored/overwritten
+  transitions. Native next-observation visibility remained 86.4%.
+- Every hit's last-alive robust certificate was already unsafe. Continuous
+  robust action-set exhaustion supplied warning leads of 6, 4, 5, 7, 6, and
+  3 frames. The dossier now reports and classifies this separately from scalar
+  committed-prefix warning.
+- This run accepts discrete delay support but exposes two next targets:
+  robust viable-successor/reachable-volume scoring before the safe action set
+  reaches zero, and true interval-censored pickup estimation instead of
+  treating the first matching sampled frame as exact.
+- All 223 tests and the six-case executable regression corpus pass.

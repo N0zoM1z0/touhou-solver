@@ -70,6 +70,20 @@ The worker is serviceable only when this margin is positive. This signal is
 written into every future trace instead of inferring health from a completed
 future alone.
 
+The policy epoch also has a configurable minimum lead. TH08 sets it to the
+larger of two viability layers and maximum control-delay-plus-hold, currently
+16 frames. Cold start remains 80 frames. Once four timing samples exist, the
+rolling p90 minus the explicit eight-frame late-arrival overlap may reduce the
+lead to this floor. Replaying Stage-2's 387 ordered solve durations changes
+median/p95 lead from 48/48 to 16/18 frames while the serial coverage equation
+continues to use the larger of lead and actual solve duration.
+
+Physical Stage-2 run `20260724_043310` matched that replay at 16/18 frames.
+Policy age fell from 25/46 to 13/26 frames, completed policy count nearly
+doubled, and expired/no-query decisions both fell while control cadence stayed
+3/4 frames. The scheduler change is accepted; it does not certify the content
+of hazards created after any individual snapshot.
+
 Delay support can change while a policy is solving. The generic
 `delay_support_envelope` pads the current contiguous support by one bounded
 frame on each side before submission. The live local controller still uses

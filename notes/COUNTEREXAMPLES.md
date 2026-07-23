@@ -1295,11 +1295,39 @@ Status: observed | inferred | unknown | fixed
   while it was avoidable. Its robust certificate first became intermittently
   unsafe at frame 1,557, and the retained contiguous warning began only 16
   frames before impact.
-- **Correction gate:** Make the game-neutral future-policy epoch follow
-  measured solve duration and explicit late-arrival overlap, with a small
-  lattice-derived minimum. Retain solver serviceability and expired/pending
-  telemetry. ECL forecasting remains necessary for events inside even that
-  reduced solve interval.
+- **Correction:** TH08 now configures the game-neutral scheduler with a
+  16-frame floor, derived from two viability layers and maximum
+  control-delay-plus-hold. Cold start stays at 80; rolling p90, explicit
+  eight-frame late-arrival overlap, and horizon serviceability remain active.
+  Replaying 387 ordered Stage-2 solves changes median/p95 lead from 48/48 to
+  16/18 frames.
 - **Regression requirement:** A timing test must prove that a fast, warmed
   worker can reduce its lead below 48 frames without changing the conservative
   initial epoch or allowing the policy to exceed its horizon.
+- **Status:** Physically accepted by Stage-2 differential `20260724_043310`.
+  Lead median/p95 became 16/18, policy age became 13/26 instead of 25/46,
+  unique policies rose 387 to 766, decisions without a query fell 139 to 50,
+  expired decisions fell 23 to 11, cadence remained 3/4 frames, and hits fell
+  8 to 5. ECL forecasting remains necessary for events inside even the
+  reduced interval.
+
+## CE-0068: Stale global repair volume preferred three clamped aliases
+
+- **Observed symptom:** Candidate Stage-2 spell-20 hit at frame 13,517
+  occurred at `(304.10, 429.64)`. From frame 13,487 onward, the global policy
+  allowed only `stay`, `down`, and `down_fast`. At the bottom boundary these
+  all clamp to essentially the same physical successor. The controller chose
+  `stay` because its old-policy repair volume was largest, while bullet slot
+  443 approached from above.
+- **Invalid assumption:** Maximizing an asynchronous policy's repair volume is
+  sufficient when the ten-frame local horizon reports no collision. The
+  policy snapshot was older than the live hazard geometry, and three action
+  labels did not provide three independent escape directions.
+- **Evidence:** Slot 443 was already visible at frame 13,481 with stable
+  velocity and hit 36 frames later. Local robust control did not become unsafe
+  until frame 13,509, only eight frames before impact.
+- **Correction gate:** Add a cheap extended terminal-threat rollout after the
+  exact ten-frame beam. It must distinguish physically clamped aliases and
+  prefer a beam path whose terminal continuation avoids a visible stable
+  hazard before stale repair-volume and positional objectives. It remains a
+  heuristic warning, not a viability certificate.

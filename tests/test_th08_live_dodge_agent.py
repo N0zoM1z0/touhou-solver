@@ -18,6 +18,7 @@ from th08_live_dodge_agent import (
     Bullet,
     CorridorCommitment,
     CORRIDOR_INITIAL_SUBMIT_FRAME,
+    CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES,
     CorridorSolution,
     ENEMY_BODY_READ_OFFSET,
     ENEMY_BODY_READ_SIZE,
@@ -78,6 +79,11 @@ from touhou_control.viability import ControlAction
 
 
 class LiveDodgeAgentTests(unittest.TestCase):
+    def test_async_policy_minimum_covers_two_layers_and_control_latency(
+        self,
+    ) -> None:
+        self.assertEqual(CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES, 16)
+
     def test_action_name_preserves_focus_speed_and_native_direction_priority(
         self,
     ) -> None:

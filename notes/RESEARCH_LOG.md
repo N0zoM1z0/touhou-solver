@@ -1596,3 +1596,31 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Performance and automation gates passed: read latency was 12.41/15.35 ms,
   local planning 21.48/39.09 ms, control cadence 3/4 frames, enemy snapshot
   age 5/8 frames, and no manual transition input was required.
+- Offline CE-0067 correction replaces TH08's obsolete 48-frame lead floor
+  with 16 frames, derived from two viability layers and maximum
+  control-delay-plus-hold. Cold start remains 80 and the rolling p90,
+  eight-frame late-arrival budget, horizon serviceability test, and
+  pending/expired states are unchanged. Replaying all 387 ordered Stage-2
+  solve durations moves lead median/p95 from 48/48 to 16/18 frames. This is a
+  scheduler-only result; a physical Stage-2 differential is required.
+
+## 2026-07-24: Adaptive Policy-Lead Physical Acceptance
+
+- Stage-2 differential `20260724_043310` completed frames `2..23279` with
+  6,110 decisions, five hits, hard no-Bomb, working auto-confirm/no-save, and
+  exact-process termination. Against baseline `042005`, total hits fell 8 to
+  5 and nonspell hits fell 8 to 4; spell 20 regressed from zero to one, so this
+  is not a clean-stage claim.
+- The intended mechanism is directly visible. Lead median/p95 changed 48/48
+  to 16/18 frames, policy age 25/46 to 13/26, unique completed policies 387 to
+  766, missing queries 139 to 50, expired policy decisions 23 to 11, and
+  support-uncovered queries 61 to 44. Empty queried kernels fell 2,434 to
+  2,227. Serial coverage margin increased from 32 to 60 frames median.
+- Main-loop safety was preserved: decision cadence remained 3/4 frames,
+  read latency was 11.90/15.64 ms, and local plan latency was 22.52/41.57 ms
+  versus 21.48/39.09. This accepts CE-0067's adaptive scheduling correction.
+- CE-0068 is the next general local/global fusion failure. At the new spell-20
+  hit, stale global guidance allowed only three bottom-clamped aliases while a
+  visible straight bullet approached for more than 30 frames. A cheap extended
+  terminal-threat rollout is required; increasing the full beam horizon would
+  spend too much control-loop time.

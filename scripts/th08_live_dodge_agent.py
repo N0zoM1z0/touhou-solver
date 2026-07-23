@@ -153,6 +153,10 @@ CORRIDOR_MAX_AGE_FRAMES = (
 )
 CORRIDOR_POLICY_LEAD_INITIAL_FRAMES = 80
 CORRIDOR_POLICY_OVERLAP_FRAMES = 8
+CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES = max(
+    2 * TH08_CORRIDOR_CONFIG.frames_per_layer,
+    LIVE_CONTROL_DELAY_MAX + LIVE_ACTION_HOLD_MAX,
+)
 CORRIDOR_MIN_COMMIT_FRAMES = 32
 CORRIDOR_INITIAL_SUBMIT_FRAME = -1_000_000
 STAGE_TRANSITION_TIMEOUT_SECONDS = 90.0
@@ -2397,6 +2401,7 @@ def run(args: argparse.Namespace) -> int:
     corridor_policy_lead = AsyncPolicyLead(
         initial_frames=CORRIDOR_POLICY_LEAD_INITIAL_FRAMES,
         overlap_frames=CORRIDOR_POLICY_OVERLAP_FRAMES,
+        minimum_frames=CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES,
     )
     previous_iteration_ms: float | None = None
     previous_trace_ms: float | None = None
@@ -2459,6 +2464,9 @@ def run(args: argparse.Namespace) -> int:
                     ),
                     "async_policy_overlap_frames": (
                         corridor_policy_lead.overlap_frames
+                    ),
+                    "async_policy_minimum_lead_frames": (
+                        corridor_policy_lead.minimum_frames
                     ),
                     "async_policy_delay_support_padding": (
                         ASYNC_POLICY_DELAY_PADDING

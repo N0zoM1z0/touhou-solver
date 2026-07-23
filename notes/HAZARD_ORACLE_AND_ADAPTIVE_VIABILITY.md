@@ -351,3 +351,13 @@ therefore:
 Reducing the scheduling interval is not evidence that ECL prediction is
 complete. It is a separate latency correction that increases the fraction of
 new native hazards included in the next rolling snapshot.
+
+Stage-2 differential `20260724_043310` physically accepted this scheduling
+change: observed lead was 16/18 frames median/p95, policy age halved, and
+nonspell hits fell from eight to four without cadence regression. The one new
+spell-20 hit also exposed the remaining fusion rule: an older global safe
+action mask may contain only boundary-clamped aliases while a live hazard
+outside the short local horizon approaches. Global certificates, local exact
+geometry, and future ECL events must carry explicit provenance and freshness;
+an older global repair volume cannot outrank a newer locally predicted
+collision.

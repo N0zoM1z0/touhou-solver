@@ -29,6 +29,20 @@ class AsyncPolicyLeadTests(unittest.TestCase):
             lead.observe(solve_ms)
         self.assertEqual(lead.frames, 72)
 
+    def test_warm_fast_worker_can_shrink_below_legacy_48_frame_floor(
+        self,
+    ) -> None:
+        lead = AsyncPolicyLead(
+            initial_frames=80,
+            overlap_frames=8,
+            minimum_frames=16,
+        )
+        for _ in range(4):
+            lead.observe(400.0)
+        self.assertEqual(lead.p90_solve_frames, 24)
+        self.assertEqual(lead.frames, 16)
+        self.assertEqual(lead.serial_coverage_margin(80), 56)
+
     def test_invalid_duration_is_rejected(self) -> None:
         lead = AsyncPolicyLead()
         with self.assertRaisesRegex(ValueError, "finite"):

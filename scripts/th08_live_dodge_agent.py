@@ -205,6 +205,19 @@ class EnemyBody:
     half_width: float
     half_height: float
     flags: int
+    uncertainty: float = 0.0
+
+
+@dataclass(frozen=True)
+class EnemyPoolSnapshot:
+    frame_before: int
+    frame_after: int
+    bodies: tuple[EnemyBody, ...]
+    read_ms: float
+
+    @property
+    def stable(self) -> bool:
+        return self.frame_before == self.frame_after
 
 
 @dataclass(frozen=True)
@@ -817,6 +830,44 @@ def decode_enemy_bodies(blob: bytes) -> tuple[EnemyBody, ...]:
     return tuple(bodies)
 
 
+def capture_enemy_pool_snapshot(
+    reader: ProcessReader,
+) -> EnemyPoolSnapshot:
+    started = time.perf_counter()
+    frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+    blob = reader.read(
+        ENEMY_POOL_BASE,
+        ENEMY_POOL_SIZE * ENEMY_STRIDE,
+    )
+    frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+    return EnemyPoolSnapshot(
+        frame_before,
+        frame_after,
+        decode_enemy_bodies(blob),
+        (time.perf_counter() - started) * 1000.0,
+    )
+
+
+def project_enemy_pool_snapshot(
+    snapshot: EnemyPoolSnapshot | None,
+    *,
+    frame: int,
+) -> tuple[EnemyBody, ...]:
+    if snapshot is None:
+        return ()
+    age = max(0, frame - snapshot.frame_after)
+    uncertainty = min(16.0, 0.75 * age)
+    return tuple(
+        replace(
+            body,
+            x=body.x + body.vx * age,
+            y=body.y + body.vy * age,
+            uncertainty=body.uncertainty + uncertainty,
+        )
+        for body in snapshot.bodies
+    )
+
+
 def read_spell_enemy_bodies(
     reader: ProcessReader,
     spell: dict[str, object],
@@ -860,9 +911,10 @@ def _serialized_enemy_bodies(
             body.y,
             body.vx,
             body.vy,
-            body.half_width,
-            body.half_height,
-            body.flags,
+                            body.half_width,
+                            body.half_height,
+                            body.flags,
+                            body.uncertainty,
         ]
         for body in bodies
     ]
@@ -1217,11 +1269,17 @@ def _hazards_for_positions(
             dtype=np.float32,
         )
         half_width = np.fromiter(
-            (body.half_width for body in enemy_bodies),
+            (
+                body.half_width + body.uncertainty
+                for body in enemy_bodies
+            ),
             dtype=np.float32,
         )
         half_height = np.fromiter(
-            (body.half_height for body in enemy_bodies),
+            (
+                body.half_height + body.uncertainty
+                for body in enemy_bodies
+            ),
             dtype=np.float32,
         )
         dx = np.abs(positions_x[:, None] - body_x[None, :]) - (
@@ -2240,6 +2298,9 @@ def run(args: argparse.Namespace) -> int:
     termination_reason = "duration"
     corridor_executor: ThreadPoolExecutor | None = None
     corridor_future: Future[CorridorSolution] | None = None
+    enemy_executor: ThreadPoolExecutor | None = None
+    enemy_future: Future[EnemyPoolSnapshot] | None = None
+    enemy_snapshot: EnemyPoolSnapshot | None = None
     corridor_solution: CorridorSolution | None = None
     corridor_pending_solution: CorridorSolution | None = None
     corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
@@ -2279,6 +2340,10 @@ def run(args: argparse.Namespace) -> int:
             max_workers=1,
             thread_name_prefix="th08-corridor",
         )
+    enemy_executor = ThreadPoolExecutor(
+        max_workers=1,
+        thread_name_prefix="th08-enemy-sensor",
+    )
     try:
         identity = verify_target(reader)
         output.write(json.dumps({"kind": "identity", **identity}) + "\n")
@@ -2412,6 +2477,10 @@ def run(args: argparse.Namespace) -> int:
             gameplay_active=True,
             current_stage=int(state["stage_route_index"]),
             now=time.perf_counter(),
+        )
+        enemy_future = enemy_executor.submit(
+            capture_enemy_pool_snapshot,
+            reader,
         )
         deadline = time.perf_counter() + args.duration
         while time.perf_counter() < deadline:
@@ -2616,19 +2685,31 @@ def run(args: argparse.Namespace) -> int:
             if iterations % 30 == 0:
                 _require_foreground(api, pid)
             read_started = time.perf_counter()
+            if enemy_future is not None and enemy_future.done():
+                enemy_snapshot = enemy_future.result()
+                enemy_future = enemy_executor.submit(
+                    capture_enemy_pool_snapshot,
+                    reader,
+                )
+            enemy_bodies = project_enemy_pool_snapshot(
+                enemy_snapshot,
+                frame=counter,
+            )
+            enemy_pool_read_ms = (
+                enemy_snapshot.read_ms
+                if enemy_snapshot is not None
+                else None
+            )
+            enemy_body_snapshot_frame = (
+                enemy_snapshot.frame_after
+                if enemy_snapshot is not None
+                else None
+            )
             bullet_blob = reader.read(BULLET_POOL_BASE, BULLET_POOL_SIZE * BULLET_STRIDE)
             laser_blob = reader.read(LASER_POOL_BASE, LASER_POOL_SIZE * LASER_STRIDE)
             item_blob = reader.read(
                 ITEM_MANAGER_BASE, ITEM_POOL_SIZE * ITEM_STRIDE
             )
-            enemy_read_started = time.perf_counter()
-            enemy_blob = reader.read(
-                ENEMY_POOL_BASE,
-                ENEMY_POOL_SIZE * ENEMY_STRIDE,
-            )
-            enemy_pool_read_ms = (
-                time.perf_counter() - enemy_read_started
-            ) * 1000.0
             counter_after_read = reader.u32(0x0164D30C)
             read_ms = (time.perf_counter() - read_started) * 1000.0
             snapshot_lag = max(0, counter_after_read - int(state["enemy_manager_frame"]))
@@ -2636,7 +2717,6 @@ def run(args: argparse.Namespace) -> int:
             bullets = decode_bullets(bullet_blob)
             lasers = decode_lasers(laser_blob)
             items = decode_items(item_blob)
-            enemy_bodies = decode_enemy_bodies(enemy_blob)
             decode_ms = (time.perf_counter() - decode_started) * 1000.0
             player = state["player"]
             resources = state["resources"]
@@ -2992,7 +3072,12 @@ def run(args: argparse.Namespace) -> int:
                     "active_lasers": len(lasers),
                     "active_items": len(items),
                     "active_enemy_bodies": len(enemy_bodies),
-                    "enemy_body_snapshot_frame": counter_after_read,
+                    "enemy_body_snapshot_frame": enemy_body_snapshot_frame,
+                    "enemy_body_snapshot_age": (
+                        counter_after_read - enemy_body_snapshot_frame
+                        if enemy_body_snapshot_frame is not None
+                        else None
+                    ),
                     "action": decision.action,
                     "mask": decision.mask,
                     "focused": decision.planned_focus,
@@ -3380,6 +3465,10 @@ def run(args: argparse.Namespace) -> int:
                     corridor_future.cancel()
                 if corridor_executor is not None:
                     corridor_executor.shutdown(wait=True, cancel_futures=True)
+                if enemy_future is not None:
+                    enemy_future.cancel()
+                if enemy_executor is not None:
+                    enemy_executor.shutdown(wait=True, cancel_futures=True)
             finally:
                 output.close()
                 reader.close()

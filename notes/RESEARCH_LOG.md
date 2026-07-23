@@ -1475,3 +1475,27 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   layers. Per-decision telemetry separates enemy-pool read cost so physical
   delay impact can be accepted or rejected. The full 283-test Linux suite and
   53 focused Windows tests pass.
+
+## 2026-07-24: Stage-5 Full-Pool Acceptance And Async Sensor
+
+- Stage-5 rerun `20260724_023923` completed frames `3..41615` with 8,160
+  decisions, 18 hits, and zero Bomb. Compared with `022420`, aggregate hits
+  fell 20 to 18 and nonspell hits fell 12 to 7. Spell 103 went 1 to 0 and
+  spell 115 went 3 to 2, while spells 107/111 worsened by 3/2 hits.
+- Frame 11,674 is the first exact full-pool enemy-body witness: stable frame
+  11,675 telemetry contains 23 contact-enabled enemies and the native player
+  lethal AABB overlaps the slot at `0x005E5F30`. The action snapshot one frame
+  earlier contains no enabled bodies, proving that present-state sensing alone
+  cannot predict same-frame ECL contact activation.
+- CE-0060 rejects synchronous full-pool sensing as the final architecture.
+  Enemy reads cost 13.97 ms mean; total read median rose from 11.10 to
+  24.91 ms, cadence p95 from four to five frames, and available policy queries
+  fell 20 percent.
+- The sensor is now a dedicated one-worker snapshot pipeline. Control consumes
+  only completed snapshots, projects bodies through their native velocity,
+  and adds a bounded age uncertainty. Full-pool read time, source frame, and
+  age remain trace-visible; the action loop no longer blocks on the 9.8 MiB
+  transfer.
+- The full 284-test Linux suite and 52 focused Windows tests pass. A new
+  physical run must accept the restored cadence before this architecture is a
+  checkpoint.

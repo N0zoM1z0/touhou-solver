@@ -29,6 +29,7 @@ from th08_live_dodge_agent import (
     ENEMY_STRIDE,
     ENEMY_VELOCITY_OFFSET,
     EnemyBody,
+    EnemyPoolSnapshot,
     GameplaySceneGuard,
     Item,
     LASER_ACTIVE_OFFSET,
@@ -69,6 +70,7 @@ from th08_live_dodge_agent import (
     decode_enemy_bodies,
     decode_lasers,
     decode_player_lethal_aabb,
+    project_enemy_pool_snapshot,
 )
 from touhou_control.viability import ControlAction
 
@@ -367,7 +369,34 @@ class LiveDodgeAgentTests(unittest.TestCase):
             bodies[0].pointer,
             ENEMY_POOL_BASE + slot * ENEMY_STRIDE,
         )
-        self.assertEqual((bodies[0].half_width, bodies[0].half_height), (15.0, 9.0))
+        self.assertEqual(
+            (bodies[0].half_width, bodies[0].half_height),
+            (15.0, 9.0),
+        )
+
+    def test_async_enemy_snapshot_projects_age_with_bounded_uncertainty(
+        self,
+    ) -> None:
+        snapshot = EnemyPoolSnapshot(
+            100,
+            101,
+            (
+                EnemyBody(
+                    ENEMY_POOL_BASE,
+                    20.0,
+                    40.0,
+                    2.0,
+                    -1.0,
+                    12.0,
+                    8.0,
+                    0x05,
+                ),
+            ),
+            14.0,
+        )
+        projected = project_enemy_pool_snapshot(snapshot, frame=105)[0]
+        self.assertEqual((projected.x, projected.y), (28.0, 36.0))
+        self.assertEqual(projected.uncertainty, 3.0)
 
     def test_enemy_body_is_a_local_planner_hazard(self) -> None:
         decision = choose_action(

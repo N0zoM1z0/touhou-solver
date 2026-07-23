@@ -1153,3 +1153,26 @@ Status: observed | inferred | unknown | fixed
 - **Acceptance gate:** A fresh physical run must report enemy-pool read cost,
   retain no new sensor-gap hit where an enabled body exists, and avoid a
   control-delay regression large enough to erase the geometry benefit.
+
+## CE-0060: Synchronous full-pool sensing consumed the control budget
+
+- **Observed symptom:** Stage-5 acceptance run `20260724_023923` reduced total
+  hits from 20 to 18 and nonspell hits from 12 to 7, while capturing the first
+  exact full-pool enemy-body overlap at frame 11,674. However, the 9.8 MiB pool
+  read cost 13.97 ms mean by itself.
+- **Measured regression:** Total read median rose from 11.10 to 24.91 ms,
+  decision cadence p95 rose from four to five frames, and available policy
+  queries fell 20 percent. The run still had two sensor gaps and cannot justify
+  paying synchronous latency on every action.
+- **Correction:** Move full-pool capture to a dedicated single-worker sensor.
+  Live control never waits for it; the latest completed snapshot is projected
+  by native velocity and inflated by `0.75 * age_frames`, capped at 16 pixels.
+  Snapshot frame, age, and worker read cost remain visible in every trace.
+- **Limitation:** A current-state scan cannot predict a body whose contact bit
+  activates between snapshots. Frame 11,674 demonstrates such a same-frame
+  activation; its prevention requires the ECL spawn/flag oracle rather than a
+  faster memory scan.
+- **Regression:**
+  `test_async_enemy_snapshot_projects_age_with_bounded_uncertainty`.
+- **Acceptance gate:** Restore pre-scan read/cadence distributions without
+  losing full-pool body witnesses or introducing stale-body false corridors.

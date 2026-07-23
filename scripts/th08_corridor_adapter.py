@@ -49,6 +49,7 @@ class EnemyBodySnapshot(Protocol):
     vy: float
     half_width: float
     half_height: float
+    uncertainty: float
 
 
 TH08_PLAYFIELD = CorridorBounds(8.0, 376.0, 16.0, 432.0)
@@ -252,7 +253,11 @@ def lower_enemy_bodies(
             velocity_y=body.vy,
             half_width=body.half_width,
             half_height=body.half_height,
-            base_uncertainty=0.5 * math.sqrt(lag) + 0.5 * forecast,
+            base_uncertainty=(
+                body.uncertainty
+                + 0.5 * math.sqrt(lag)
+                + 0.5 * forecast
+            ),
             uncertainty_per_frame=0.5,
         )
         for body in bodies

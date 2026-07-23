@@ -1508,3 +1508,24 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   thread with stage completion. Acceptance now requires
   `termination_reason=route_complete`; killed/partial trials skip no-save and
   receive `status=discarded`.
+
+## 2026-07-24: Stage-5 Throttled Async Acceptance
+
+- Complete run `20260724_030420` covered frames `2..43536`, retained 10,428
+  decisions and 24 hit edges, and passed hard no-Bomb, auto-confirm,
+  post-stage no-save, and exact-process termination gates.
+- One full enemy scan per 16 manager frames restored the action loop: read
+  median/p95 was 12.03/24.37 ms and decision cadence median/p95 was 3/4 frames.
+  The synchronous run measured 24.91/33.18 ms and 3/5 frames; the pre-sensor
+  run measured 11.10/15.43 ms and 3/4 frames.
+- Dossiers now retain sensor telemetry. This run produced 1,826 snapshots with
+  operational age 11/19/25 frames and capture cost 16.64/26.88/49.22 ms at
+  median/p95/max. Eight phase-counter discontinuities are counted separately.
+- Aggregate hits regressed from 18 to 24, with per-phase counts
+  nonspell/103/107/111/115 = 11/1/4/4/4. Nineteen contacts were already
+  modeled bullet failures; four remained sensor gaps and one was a body
+  candidate. Since native RNG and phase lengths differ, this rejects only an
+  improvement claim, not the sensor architecture.
+- CE-0062 fixes comparison provenance: only completed, accepted sessions may
+  become automatic baselines. The generated comparison now correctly uses
+  complete run `20260724_023923`, not the killed `025622` latency experiment.

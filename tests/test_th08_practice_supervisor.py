@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -195,6 +196,49 @@ class PracticeSupervisorTests(unittest.TestCase):
             )
         )
         self.assertFalse(supervisor.accepted_practice_termination(None))
+
+    def test_comparison_skips_newer_discarded_partial(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            accepted = root / (
+                "lunatic_route2_stage5_unattended_20260724_010000"
+                ".dossier.json"
+            )
+            discarded = root / (
+                "lunatic_route2_stage5_unattended_20260724_020000"
+                ".dossier.json"
+            )
+            current = root / (
+                "lunatic_route2_stage5_unattended_20260724_030000"
+                ".dossier.json"
+            )
+            for index, dossier in enumerate(
+                (accepted, discarded, current), start=1
+            ):
+                dossier.write_text("{}\n", encoding="utf-8")
+                os.utime(dossier, ns=(index, index))
+            accepted.with_name(
+                accepted.name.replace(".dossier.json", ".session.json")
+            ).write_text(
+                json.dumps(
+                    {"status": "completed", "trial_accepted": True}
+                ),
+                encoding="utf-8",
+            )
+            discarded.with_name(
+                discarded.name.replace(".dossier.json", ".session.json")
+            ).write_text(
+                json.dumps(
+                    {"status": "discarded", "trial_accepted": False}
+                ),
+                encoding="utf-8",
+            )
+            with patch.object(supervisor, "RUNTIME_REPORT_DIR", root):
+                baseline = supervisor._previous_dossier(
+                    parse_practice_stage("5"),
+                    current,
+                )
+            self.assertEqual(baseline, accepted)
 
 
 if __name__ == "__main__":

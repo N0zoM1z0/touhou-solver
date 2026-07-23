@@ -12,6 +12,7 @@ from th08_practice_dossier import (
     _action_hold_summary,
     _behavior_context,
     _decision_cadence,
+    _enemy_sensor_summary,
     _extract_scope,
     _input_visibility_summary,
     _no_bomb_verification,
@@ -229,6 +230,28 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(prehit["sample_count"], 3)
         self.assertEqual(prehit["bottom_8px_fraction"], 1 / 3)
         self.assertEqual(prehit["fast_fraction"], 1 / 3)
+
+    def test_enemy_sensor_summary_deduplicates_async_snapshots(self) -> None:
+        rows = [_decision(100), _decision(103), _decision(107)]
+        for row, source, read_ms, bodies in zip(
+            rows,
+            (96, 96, 103),
+            (15.0, 15.0, 20.0),
+            (0, 4, 2),
+        ):
+            row["enemy_body_snapshot_frame"] = source
+            row["active_enemy_bodies"] = bodies
+            row["timing_ms"] = {"read_enemy_pool": read_ms}
+        summary = _enemy_sensor_summary(rows)
+        self.assertIsNotNone(summary)
+        assert summary is not None
+        self.assertEqual(summary["snapshot_count"], 2)
+        self.assertEqual(summary["decision_count_with_snapshot"], 3)
+        self.assertEqual(summary["capture_read_ms"]["median"], 17.5)
+        self.assertEqual(summary["snapshot_age_frames"]["max"], 7.0)
+        self.assertEqual(summary["snapshot_interval_frames"]["median"], 7.0)
+        self.assertEqual(summary["decision_count_with_active_bodies"], 2)
+        self.assertEqual(summary["max_active_bodies"], 4)
 
     def test_retained_stage3_corpus_is_executable_and_no_bomb(self) -> None:
         summary = load_and_validate(PRACTICE_CORPUS)

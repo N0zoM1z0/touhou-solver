@@ -1176,6 +1176,11 @@ Status: observed | inferred | unknown | fixed
   `test_async_enemy_snapshot_projects_age_with_bounded_uncertainty`.
 - **Acceptance gate:** Restore pre-scan read/cadence distributions without
   losing full-pool body witnesses or introducing stale-body false corridors.
+- **Status:** Accepted for timing by complete Stage-5 run
+  `20260724_030420`: read median returned from 24.91 to 12.03 ms and cadence
+  p95 from five to four frames. Operational sensor age was 11/19/25 frames at
+  median/p95/max. The run's 24 hits do not establish survival improvement and
+  keep the ECL future-hazard gate open.
 
 ## CE-0061: A killed latency experiment was labeled completed
 
@@ -1190,3 +1195,19 @@ Status: observed | inferred | unknown | fixed
   `status=discarded`, skip the no-save input, and retain compact artifacts.
 - **Regression:**
   `test_killed_partial_is_not_accepted_as_completed_practice`.
+
+## CE-0062: A discarded partial became the next comparison baseline
+
+- **Observed symptom:** Complete Stage-5 run `20260724_030420` was initially
+  compared with deliberately killed run `20260724_025622`, producing a
+  meaningless 1-to-24 hit delta over 981 versus 10,428 decisions.
+- **Invalid assumption:** The newest same-stage dossier is necessarily a valid
+  completed baseline.
+- **Correction:** Baseline discovery now requires a sibling session with
+  `status=completed` and an accepted `route_complete` termination. Missing,
+  malformed, failed, and discarded sessions are skipped.
+- **Regression:**
+  `test_comparison_skips_newer_discarded_partial`.
+- **Physical correction:** The retained comparison for `20260724_030420` was
+  regenerated against complete run `20260724_023923`; its valid hit delta is
+  18 to 24, not 1 to 24.

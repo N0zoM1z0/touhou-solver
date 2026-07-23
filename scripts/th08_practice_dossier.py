@@ -447,6 +447,54 @@ def _runtime_timing(
     return result
 
 
+def _enemy_sensor_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object] | None:
+    valid_rows = []
+    for row in decisions:
+        timing = row.get("timing_ms")
+        if not isinstance(timing, dict) or timing.get("read_enemy_pool") is None:
+            continue
+        source_frame = int(row.get("enemy_body_snapshot_frame", 0))
+        age = int(row["frame"]) - source_frame
+        if source_frame <= 0 or age < 0:
+            continue
+        valid_rows.append((row, source_frame, age, timing))
+    if not valid_rows:
+        return None
+
+    snapshots: dict[int, float] = {}
+    for _row, source_frame, _age, timing in valid_rows:
+        snapshots.setdefault(source_frame, float(timing["read_enemy_pool"]))
+    source_frames = sorted(snapshots)
+    intervals = [
+        right - left
+        for left, right in zip(source_frames, source_frames[1:])
+        if 0 < right - left < 120
+    ]
+    body_counts = [
+        int(row.get("active_enemy_bodies", 0))
+        for row, _source, _age, _timing in valid_rows
+    ]
+    operational_ages = [
+        age for _row, _source, age, _timing in valid_rows if age < 120
+    ]
+    return {
+        "decision_count_with_snapshot": len(valid_rows),
+        "snapshot_count": len(snapshots),
+        "snapshot_age_frames": _percentiles(operational_ages),
+        "snapshot_age_discontinuity_count": (
+            len(valid_rows) - len(operational_ages)
+        ),
+        "snapshot_interval_frames": _percentiles(intervals),
+        "capture_read_ms": _percentiles(snapshots.values()),
+        "decision_count_with_active_bodies": sum(
+            count > 0 for count in body_counts
+        ),
+        "max_active_bodies": max(body_counts, default=0),
+    }
+
+
 def _action_hold_summary(
     decisions: list[dict[str, object]],
 ) -> dict[str, object]:
@@ -1113,6 +1161,7 @@ def build_dossier(
             "robust_viability": _robust_viability_summary(decisions),
             "input_visibility": _input_visibility_summary(decisions),
             "runtime_timing_ms": _runtime_timing(decisions),
+            "enemy_sensor": _enemy_sensor_summary(decisions),
             "behavior_context": _behavior_context(decisions, deaths),
             "per_spell": _spell_phase_summary(decisions, deaths),
             "frame_lag": {
@@ -1363,6 +1412,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
     adaptive_delay = totals["adaptive_control_delay"]
     robust_viability = totals["robust_viability"]
     input_visibility = totals["input_visibility"]
+    enemy_sensor = totals.get("enemy_sensor")
     body_overlaps = sum(
         death["observed_enemy_body_contact_candidate"] is not None
         for death in dossier["deaths"]
@@ -1382,6 +1432,19 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"{_format(cadence['p95'])} frames p95. The local plan took "
             f"{_format(totals['latency_ms']['plan']['median'])} ms median and "
             f"{_format(totals['latency_ms']['plan']['p95'])} ms p95.",
+            (
+                "- The full enemy sensor produced "
+                f"{enemy_sensor['snapshot_count']} snapshots; capture read "
+                f"time was `{enemy_sensor['capture_read_ms']}`, snapshot age "
+                f"was `{enemy_sensor['snapshot_age_frames']}` frames, and "
+                f"{enemy_sensor['snapshot_age_discontinuity_count']} "
+                "phase-counter discontinuities were excluded; "
+                f"{enemy_sensor['decision_count_with_active_bodies']} "
+                "decisions retained at least one contact-enabled body "
+                f"(maximum {enemy_sensor['max_active_bodies']})."
+            )
+            if isinstance(enemy_sensor, dict)
+            else "- No full enemy-pool sensor telemetry was present.",
             "- Modeled action hold counts were "
             f"`{action_hold['all']['counts']}` overall.",
             "- Modeled uncontrollable-prefix counts were "

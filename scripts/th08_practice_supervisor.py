@@ -402,6 +402,26 @@ def _previous_dossier(
     stage: PracticeStage,
     current: Path,
 ) -> Path | None:
+    def accepted_session(dossier: Path) -> bool:
+        suffix = ".dossier.json"
+        if not dossier.name.endswith(suffix):
+            return False
+        session_path = dossier.with_name(
+            dossier.name[: -len(suffix)] + ".session.json"
+        )
+        try:
+            session = json.loads(session_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return False
+        if session.get("status") != "completed":
+            return False
+        if session.get("trial_accepted") is not None:
+            return session.get("trial_accepted") is True
+        summary = session.get("agent_summary")
+        return accepted_practice_termination(
+            summary if isinstance(summary, dict) else None
+        )
+
     candidates = sorted(
         RUNTIME_REPORT_DIR.glob(
             f"lunatic_route2_stage{stage.key}_unattended_*.dossier.json"
@@ -409,7 +429,14 @@ def _previous_dossier(
         key=lambda path: path.stat().st_mtime_ns,
         reverse=True,
     )
-    return next((path for path in candidates if path != current), None)
+    return next(
+        (
+            path
+            for path in candidates
+            if path != current and accepted_session(path)
+        ),
+        None,
+    )
 
 
 def materialize_artifacts(

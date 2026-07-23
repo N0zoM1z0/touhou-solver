@@ -96,6 +96,26 @@ class Th08TrialReportTests(unittest.TestCase):
         self.assertEqual(report["frame_lag"]["modeled_control_delays"], [3])
         self.assertEqual(report["frame_lag"]["action"]["max"], 3.0)
 
+    def test_every_hit_gets_a_stage_and_resource_ledger_entry(self) -> None:
+        first = _decision(100, 2.0, hit=True)
+        first["stage_route_index"] = 0
+        second = _decision(500, 1.0, hit=True)
+        second["stage_route_index"] = 1
+        second["resources"] = {"bombs": 1.0, "lives": 2.0, "power": 64.0}
+        report = summarize_rows([first, second])
+        self.assertEqual(report["hit_frames"], [100, 500])
+        self.assertEqual(len(report["hit_analyses"]), 2)
+        self.assertEqual(report["hit_analyses"][0]["stage_label"], "Stage 1")
+        self.assertEqual(report["hit_analyses"][1]["stage_label"], "Stage 2")
+        self.assertEqual(
+            report["hit_analyses"][1]["resources"]["power"],
+            64.0,
+        )
+        self.assertEqual(
+            [entry["stage_route_index"] for entry in report["stage_progress"]["transitions"]],
+            [0, 1],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

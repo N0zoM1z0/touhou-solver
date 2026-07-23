@@ -175,6 +175,45 @@ class CorridorSolution:
     solve_ms: float
 
 
+@dataclass
+class AutoConfirmPulse:
+    """Create fresh Z edges after a sustained projectile-free interval."""
+
+    interval_frames: int
+    idle_frames: int
+    eligible_since: int | None = None
+    next_release_frame: int = 0
+    released: bool = False
+
+    def apply(
+        self,
+        *,
+        frame: int,
+        eligible: bool,
+        mask: int,
+    ) -> tuple[int, str | None]:
+        if self.released:
+            self.released = False
+            self.next_release_frame = frame + self.interval_frames
+            if not eligible:
+                self.eligible_since = None
+            return mask | SHOT, "press"
+        if self.interval_frames <= 0:
+            return mask, None
+        if not eligible:
+            self.eligible_since = None
+            return mask, None
+        if self.eligible_since is None:
+            self.eligible_since = frame
+        if (
+            frame - self.eligible_since < self.idle_frames
+            or frame < self.next_release_frame
+        ):
+            return mask, None
+        self.released = True
+        return mask & ~SHOT, "release"
+
+
 def _action(
     name: str,
     direction: int,
@@ -980,6 +1019,29 @@ def _corridor_target(
     return waypoint.x, waypoint.y, max(waypoint.frame - age, 0)
 
 
+def _write_run_summary(
+    output,
+    *,
+    last_frame: int | None,
+    counter_gaps: int,
+    hit_count: int,
+    termination_reason: str,
+) -> None:
+    output.write(
+        json.dumps(
+            {
+                "kind": "summary",
+                "last_frame": last_frame,
+                "counter_gaps": counter_gaps,
+                "hit_count": hit_count,
+                "termination_reason": termination_reason,
+            }
+        )
+        + "\n"
+    )
+    output.flush()
+
+
 def run(args: argparse.Namespace) -> int:
     if not args.armed:
         raise RuntimeError("live control requires the explicit --armed flag")
@@ -993,6 +1055,8 @@ def run(args: argparse.Namespace) -> int:
         raise ValueError("wait timeout must be positive")
     if args.stop_after_hits < 0 or args.post_hit_frames < 0:
         raise ValueError("hit stopping arguments cannot be negative")
+    if args.auto_confirm_every < 0 or args.auto_confirm_idle_frames < 0:
+        raise ValueError("auto-confirm timing arguments cannot be negative")
     api = Win32()
     pid = args.pid if args.pid is not None else api.find_pid(TARGET_EXE)
     reader = ProcessReader(api, pid)
@@ -1016,6 +1080,10 @@ def run(args: argparse.Namespace) -> int:
     corridor_future: Future[CorridorSolution] | None = None
     corridor_solution: CorridorSolution | None = None
     corridor_last_submit = -1000000
+    auto_confirm = AutoConfirmPulse(
+        interval_frames=args.auto_confirm_every,
+        idle_frames=args.auto_confirm_idle_frames,
+    )
     if not args.local_only:
         corridor_executor = ThreadPoolExecutor(
             max_workers=1,
@@ -1211,6 +1279,18 @@ def run(args: argparse.Namespace) -> int:
                 )
             if decision.bomb:
                 last_bomb_counter = counter_at_action
+            auto_confirm_mask, auto_confirm_event = auto_confirm.apply(
+                frame=counter_at_action,
+                eligible=(
+                    phase_now == 0
+                    and not bullets
+                    and not lasers
+                    and not items
+                ),
+                mask=decision.mask,
+            )
+            if auto_confirm_event is not None:
+                decision = replace(decision, mask=auto_confirm_mask)
             transitions = input_transitions(
                 previous_mask,
                 decision.mask,
@@ -1230,6 +1310,7 @@ def run(args: argparse.Namespace) -> int:
                 or current_power != previous_power
                 or corridor_updated
                 or hit_started
+                or auto_confirm_event is not None
             ):
                 record = {
                     "kind": "decision",
@@ -1257,6 +1338,7 @@ def run(args: argparse.Namespace) -> int:
                         "predeath_at_action": predeath_now,
                     },
                     "resources": resources,
+                    "stage_route_index": state["stage_route_index"],
                     "active_bullets": len(bullets),
                     "active_lasers": len(lasers),
                     "active_items": len(items),
@@ -1272,6 +1354,7 @@ def run(args: argparse.Namespace) -> int:
                     "bomb": decision.bomb,
                     "hit_started": hit_started,
                     "hit_count": hit_count,
+                    "auto_confirm": auto_confirm_event,
                 }
                 if corridor_solution is not None:
                     corridor_record = {
@@ -1365,19 +1448,56 @@ def run(args: argparse.Namespace) -> int:
             ):
                 termination_reason = "hit_limit"
                 break
+        _write_run_summary(
+            output,
+            last_frame=previous_counter,
+            counter_gaps=gaps,
+            hit_count=hit_count,
+            termination_reason=termination_reason,
+        )
+        return 0
+    except OSError as exc:
+        termination_reason = "process_unreadable"
         output.write(
             json.dumps(
                 {
-                    "kind": "summary",
+                    "kind": "runtime_error",
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
                     "last_frame": previous_counter,
-                    "counter_gaps": gaps,
-                    "hit_count": hit_count,
-                    "termination_reason": termination_reason,
                 }
             )
             + "\n"
         )
+        _write_run_summary(
+            output,
+            last_frame=previous_counter,
+            counter_gaps=gaps,
+            hit_count=hit_count,
+            termination_reason=termination_reason,
+        )
         return 0
+    except Exception as exc:
+        termination_reason = "agent_error"
+        output.write(
+            json.dumps(
+                {
+                    "kind": "runtime_error",
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                    "last_frame": previous_counter,
+                }
+            )
+            + "\n"
+        )
+        _write_run_summary(
+            output,
+            last_frame=previous_counter,
+            counter_gaps=gaps,
+            hit_count=hit_count,
+            termination_reason=termination_reason,
+        )
+        raise
     finally:
         try:
             release_injected_keys(api)
@@ -1498,6 +1618,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--normal-bomb",
         action="store_true",
         help="permit a pre-hit Bomb when every next-frame move overlaps",
+    )
+    parser.add_argument(
+        "--auto-confirm-every",
+        type=int,
+        default=0,
+        help="pulse a fresh Z edge this often in sustained empty scenes; zero disables",
+    )
+    parser.add_argument(
+        "--auto-confirm-idle-frames",
+        type=int,
+        default=20,
+        help="empty-scene frames required before automatic Z pulsing",
     )
     parser.add_argument("--armed", action="store_true")
     return parser

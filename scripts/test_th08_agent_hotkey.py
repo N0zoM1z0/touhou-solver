@@ -25,6 +25,8 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.duration, LONG_RUN_DURATION_SECONDS)
         self.assertEqual(parsed.stop_after_hits, 0)
         self.assertEqual(parsed.post_hit_frames, 0)
+        self.assertEqual(parsed.auto_confirm_every, 15)
+        self.assertEqual(parsed.auto_confirm_idle_frames, 20)
         self.assertTrue(parsed.armed)
 
 

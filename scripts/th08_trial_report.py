@@ -11,6 +11,19 @@ from pathlib import Path
 from typing import Iterable
 
 
+STAGE_ROUTE_LABELS = {
+    0: "Stage 1",
+    1: "Stage 2",
+    2: "Stage 3",
+    3: "Stage 4A / Reimu",
+    4: "Stage 4B / Marisa",
+    5: "Stage 5",
+    6: "Final A / Eirin",
+    7: "Final B / Kaguya",
+    8: "Extra / Mokou",
+}
+
+
 def _latency(values: Iterable[float]) -> dict[str, float] | None:
     ordered = sorted(float(value) for value in values)
     if not ordered:
@@ -57,6 +70,72 @@ def _nearest_bullet(row: dict[str, object]) -> dict[str, float | int] | None:
     return min(candidates, key=lambda item: item["center_distance"]) if candidates else None
 
 
+def _analyze_hit(
+    hit_frame: int,
+    *,
+    decisions: list[dict[str, object]],
+    gate_samples: list[dict[str, object]],
+) -> dict[str, object]:
+    hit_row = next(row for row in decisions if int(row["frame"]) == hit_frame)
+    window = [
+        sample
+        for sample in gate_samples
+        if hit_frame - 240 <= int(sample["frame"]) <= hit_frame
+    ]
+    nonnegative = [sample for sample in window if float(sample["slack"]) >= 0.0]
+    negative = [sample for sample in window if float(sample["slack"]) < 0.0]
+    pipeline_samples = [
+        {
+            "frame": int(row["frame"]),
+            "clearance": float(row["pipeline_clearance"]),
+        }
+        for row in decisions
+        if hit_frame - 240 <= int(row["frame"]) <= hit_frame
+        and row.get("pipeline_clearance") is not None
+    ]
+    nonpositive_pipeline = [
+        sample
+        for sample in pipeline_samples
+        if sample["clearance"] <= 0.0
+    ]
+    nearest_bullet = _nearest_bullet(hit_row)
+    stage_index = hit_row.get("stage_route_index")
+    stage_index = int(stage_index) if stage_index is not None else None
+    return {
+        "hit_frame": hit_frame,
+        "window_start": hit_frame - 240,
+        "stage_route_index": stage_index,
+        "stage_label": STAGE_ROUTE_LABELS.get(stage_index),
+        "resources": hit_row.get("resources"),
+        "player": hit_row.get("player"),
+        "last_nonnegative_gate": nonnegative[-1] if nonnegative else None,
+        "first_negative_gate": negative[0] if negative else None,
+        "minimum_gate_slack": (
+            min(float(sample["slack"]) for sample in window)
+            if window
+            else None
+        ),
+        "first_nonpositive_pipeline": (
+            nonpositive_pipeline[0] if nonpositive_pipeline else None
+        ),
+        "minimum_pipeline_clearance": (
+            min(sample["clearance"] for sample in pipeline_samples)
+            if pipeline_samples
+            else None
+        ),
+        "nearest_bullet": nearest_bullet,
+        "observed_bullet_contact_candidate": (
+            nearest_bullet
+            if nearest_bullet is not None
+            and float(nearest_bullet["aabb_clearance"]) <= 0.0
+            else None
+        ),
+        "active_lasers_at_observation": int(
+            hit_row.get("active_lasers", 0)
+        ),
+    }
+
+
 def summarize_rows(rows: list[dict[str, object]]) -> dict[str, object]:
     decisions = [row for row in rows if row.get("kind") == "decision"]
     summaries = [row for row in rows if row.get("kind") == "summary"]
@@ -65,12 +144,14 @@ def summarize_rows(rows: list[dict[str, object]]) -> dict[str, object]:
 
     first = decisions[0]
     last = decisions[-1]
-    hit_frames = [
-        int(row["frame"])
-        for row in decisions
-        if row.get("hit_started")
-        or "+deathbomb" in str(row.get("action", ""))
-    ]
+    hit_frames = list(
+        dict.fromkeys(
+            int(row["frame"])
+            for row in decisions
+            if row.get("hit_started")
+            or "+deathbomb" in str(row.get("action", ""))
+        )
+    )
     unique_solutions: dict[int, dict[str, object]] = {}
     corridor_records = []
     gate_samples = []
@@ -109,63 +190,33 @@ def summarize_rows(rows: list[dict[str, object]]) -> dict[str, object]:
             )
             previous_lane = lane
 
-    first_hit_analysis = None
-    if hit_frames:
-        hit_frame = hit_frames[0]
-        hit_row = next(
-            row for row in decisions if int(row["frame"]) == hit_frame
+    hit_analyses = [
+        _analyze_hit(
+            hit_frame,
+            decisions=decisions,
+            gate_samples=gate_samples,
         )
-        window = [
-            sample
-            for sample in gate_samples
-            if hit_frame - 240 <= sample["frame"] <= hit_frame
-        ]
-        nonnegative = [sample for sample in window if sample["slack"] >= 0.0]
-        negative = [sample for sample in window if sample["slack"] < 0.0]
-        pipeline_samples = [
+        for hit_frame in hit_frames
+    ]
+    first_hit_analysis = hit_analyses[0] if hit_analyses else None
+
+    stage_transitions = []
+    previous_stage = object()
+    for row in decisions:
+        stage_index = row.get("stage_route_index")
+        if stage_index is None:
+            continue
+        stage_index = int(stage_index)
+        if stage_index == previous_stage:
+            continue
+        stage_transitions.append(
             {
                 "frame": int(row["frame"]),
-                "clearance": float(row["pipeline_clearance"]),
+                "stage_route_index": stage_index,
+                "stage_label": STAGE_ROUTE_LABELS.get(stage_index),
             }
-            for row in decisions
-            if hit_frame - 240 <= int(row["frame"]) <= hit_frame
-            and row.get("pipeline_clearance") is not None
-        ]
-        nonpositive_pipeline = [
-            sample
-            for sample in pipeline_samples
-            if sample["clearance"] <= 0.0
-        ]
-        first_hit_analysis = {
-            "hit_frame": hit_frame,
-            "window_start": hit_frame - 240,
-            "last_nonnegative_gate": nonnegative[-1] if nonnegative else None,
-            "first_negative_gate": negative[0] if negative else None,
-            "minimum_gate_slack": (
-                min(sample["slack"] for sample in window)
-                if window
-                else None
-            ),
-            "first_nonpositive_pipeline": (
-                nonpositive_pipeline[0] if nonpositive_pipeline else None
-            ),
-            "minimum_pipeline_clearance": (
-                min(sample["clearance"] for sample in pipeline_samples)
-                if pipeline_samples
-                else None
-            ),
-            "nearest_bullet": _nearest_bullet(hit_row),
-        }
-        nearest_bullet = first_hit_analysis["nearest_bullet"]
-        first_hit_analysis["observed_bullet_contact_candidate"] = (
-            nearest_bullet
-            if nearest_bullet is not None
-            and float(nearest_bullet["aabb_clearance"]) <= 0.0
-            else None
         )
-        first_hit_analysis["active_lasers_at_observation"] = int(
-            hit_row.get("active_lasers", 0)
-        )
+        previous_stage = stage_index
 
     resources_first = first["resources"]
     resources_last = last["resources"]
@@ -181,6 +232,7 @@ def summarize_rows(rows: list[dict[str, object]]) -> dict[str, object]:
         "termination_reason": summary.get("termination_reason", "missing_summary"),
         "counter_gaps": summary.get("counter_gaps"),
         "hit_frames": hit_frames,
+        "hit_analyses": hit_analyses,
         "resources": {
             "bombs": [
                 float(resources_first["bombs"]),
@@ -240,6 +292,19 @@ def summarize_rows(rows: list[dict[str, object]]) -> dict[str, object]:
                 float(row["player"]["x"]) <= 12.0
                 or float(row["player"]["x"]) >= 372.0
                 for row in decisions
+            ),
+        },
+        "stage_progress": {
+            "transitions": stage_transitions,
+            "last_stage_route_index": (
+                stage_transitions[-1]["stage_route_index"]
+                if stage_transitions
+                else None
+            ),
+            "last_stage_label": (
+                stage_transitions[-1]["stage_label"]
+                if stage_transitions
+                else None
             ),
         },
         "first_hit_analysis": first_hit_analysis,

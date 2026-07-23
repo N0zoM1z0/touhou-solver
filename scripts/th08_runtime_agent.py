@@ -37,6 +37,7 @@ ADDR_CURRENT_INPUT = 0x0164D52C
 ADDR_PREVIOUS_INPUT = 0x0164D534
 ADDR_ROUTE_ID = 0x0164D0B1
 ADDR_ENGINE_FLAGS = 0x0164D0B4
+ADDR_STAGE_ROUTE_INDEX = 0x0164D2CC
 ADDR_ENEMY_MANAGER_FRAME = 0x0164D30C
 ADDR_RUN_STATE_INNER_POINTER = 0x0160F510
 ADDR_DIFFICULTY_INDEX = 0x0160F538
@@ -331,6 +332,7 @@ def observe_state(reader: ProcessReader) -> dict[str, object]:
         "engine_flags": engine_flags,
         "gameplay_active": bool(engine_flags & 0x04),
         "route_id": reader.u8(ADDR_ROUTE_ID),
+        "stage_route_index": reader.u32(ADDR_STAGE_ROUTE_INDEX),
         "difficulty_index": reader.u32(ADDR_DIFFICULTY_INDEX),
         "input_raw": reader.u16(ADDR_RAW_INPUT),
         "input_current": reader.u16(ADDR_CURRENT_INPUT),

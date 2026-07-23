@@ -312,3 +312,40 @@ Status: observed | inferred | unknown | fixed
 - **Regression test:** `test_f8_long_run_does_not_stop_at_the_first_hit`; the
   existing update-order and hostile-pool tests pin the static mechanism.
 - **Status:** open world-model counterexample; collecting recurrence evidence.
+
+## CE-0021: Held Z did not advance dialogue and process exit lost the summary
+
+- **Observed symptom:** The first no-life-decrement long run reached manager
+  frame 9,429 but stopped producing normal combat observations after frame
+  7,629. The final frame had no bullets, lasers, or items and still carried a
+  stale corridor. Exiting TH08 then raised `ReadProcessMemory` error 299 before
+  the live agent could append its summary.
+- **Why it failed:** Continuous shooting leaves Z held. TH08 dialogue requires
+  fresh confirm edges, so holding Z is not equivalent to repeatedly pressing
+  it. The live loop also treated target-process disappearance as an uncaught
+  I/O failure.
+- **Correction:** After 20 consecutive empty-scene frames, alternate one-frame
+  Z release/press edges every 15 frames. Any projectile, laser, item, or
+  non-normal player phase resets the idle window, and a pending release is
+  always restored first. Catch process-read failure, append a structured
+  `runtime_error` plus a `process_unreadable` summary, and flush before closing.
+- **Regression:** `test_auto_confirm_creates_fresh_z_edge_after_sustained_empty_scene`
+  and `test_auto_confirm_combat_resets_idle_window_and_restores_z`.
+- **Status:** unit-verified; pending the next full Lunatic physical run.
+
+## CE-0022: One first-hit report is not a long-run death ledger
+
+- **Observed symptom:** The old trial summary could explain only the first hit.
+  A no-life-decrement run is specifically intended to retain every failure
+  through all stages, so later counterexamples would have remained buried in
+  the raw JSONL.
+- **Correction:** Every native phase-2 edge now receives an independent
+  240-frame analysis with resource state, player state, corridor deadline,
+  pipeline clearance, nearest observed bullet, and active-laser count.
+  Runtime traces also read `g_stage_route_index` at `0x0164D2CC`; reports group
+  deaths and progress under the exact ECL stage resource index.
+- **IDA persistence:** Renamed `dword_164D2CC` to `g_stage_route_index` and
+  documented its exact `ecldata1` through `ecldata8` mapping at the
+  `enemy_manager_init_stage` selection site.
+- **Regression:** `test_every_hit_gets_a_stage_and_resource_ledger_entry`.
+- **Status:** unit-verified; stage transitions await physical observation.

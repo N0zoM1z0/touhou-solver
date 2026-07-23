@@ -8,6 +8,7 @@ import unittest
 
 from corridor_planner import CorridorBounds, CorridorConfig, plan_corridor
 from th08_live_dodge_agent import (
+    AutoConfirmPulse,
     Bullet,
     CorridorSolution,
     Item,
@@ -21,6 +22,33 @@ from th08_live_dodge_agent import (
 
 
 class LiveDodgeAgentTests(unittest.TestCase):
+    def test_auto_confirm_creates_fresh_z_edge_after_sustained_empty_scene(
+        self,
+    ) -> None:
+        pulse = AutoConfirmPulse(interval_frames=15, idle_frames=20)
+        mask, event = pulse.apply(frame=100, eligible=True, mask=0x05)
+        self.assertEqual((mask, event), (0x05, None))
+        mask, event = pulse.apply(frame=119, eligible=True, mask=0x05)
+        self.assertEqual((mask, event), (0x05, None))
+        mask, event = pulse.apply(frame=120, eligible=True, mask=0x05)
+        self.assertEqual((mask, event), (0x04, "release"))
+        mask, event = pulse.apply(frame=121, eligible=True, mask=0x05)
+        self.assertEqual((mask, event), (0x05, "press"))
+        mask, event = pulse.apply(frame=135, eligible=True, mask=0x05)
+        self.assertEqual((mask, event), (0x05, None))
+        mask, event = pulse.apply(frame=136, eligible=True, mask=0x05)
+        self.assertEqual((mask, event), (0x04, "release"))
+
+    def test_auto_confirm_combat_resets_idle_window_and_restores_z(self) -> None:
+        pulse = AutoConfirmPulse(interval_frames=15, idle_frames=2)
+        pulse.apply(frame=10, eligible=True, mask=0x05)
+        mask, event = pulse.apply(frame=12, eligible=True, mask=0x05)
+        self.assertEqual((mask, event), (0x04, "release"))
+        mask, event = pulse.apply(frame=13, eligible=False, mask=0x04)
+        self.assertEqual((mask, event), (0x05, "press"))
+        mask, event = pulse.apply(frame=14, eligible=True, mask=0x05)
+        self.assertEqual((mask, event), (0x05, None))
+
     def test_clear_field_returns_finite_clearance(self) -> None:
         decision = choose_action(
             player_x=192.0,

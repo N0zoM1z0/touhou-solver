@@ -101,6 +101,9 @@ ENEMY_VELOCITY_OFFSET = 0x2D4C
 ENEMY_CONTACT_SIZE_OFFSET = 0x2D70
 ENEMY_POSITION_OFFSET = 0x2D88
 ENEMY_FLAGS_OFFSET = 0x3324
+ENEMY_POOL_BASE = 0x005826C0
+ENEMY_POOL_SIZE = 480
+ENEMY_STRIDE = 0x53D0
 ENEMY_BODY_READ_OFFSET = ENEMY_VELOCITY_OFFSET
 ENEMY_BODY_READ_SIZE = ENEMY_FLAGS_OFFSET + 4 - ENEMY_BODY_READ_OFFSET
 ENEMY_ACTIVE_FLAG = 0x00000001
@@ -758,6 +761,62 @@ def decode_enemy_body(blob: bytes, *, pointer: int) -> EnemyBody | None:
     )
 
 
+def decode_enemy_bodies(blob: bytes) -> tuple[EnemyBody, ...]:
+    """Decode every contact-enabled slot from the native 480-enemy pool."""
+
+    expected_size = ENEMY_POOL_SIZE * ENEMY_STRIDE
+    if len(blob) < expected_size:
+        raise ValueError(
+            f"enemy pool requires {expected_size} bytes"
+        )
+    bodies: list[EnemyBody] = []
+    for slot in range(ENEMY_POOL_SIZE):
+        base = slot * ENEMY_STRIDE
+        flags = struct.unpack_from(
+            "<I",
+            blob,
+            base + ENEMY_FLAGS_OFFSET,
+        )[0]
+        if (
+            not flags & ENEMY_ACTIVE_FLAG
+            or not flags & ENEMY_CONTACT_ENABLED_FLAG
+            or flags & ENEMY_CONTACT_BLOCKING_FLAGS
+        ):
+            continue
+        vx, vy = struct.unpack_from(
+            "<ff",
+            blob,
+            base + ENEMY_VELOCITY_OFFSET,
+        )
+        contact_width, contact_height = struct.unpack_from(
+            "<ff",
+            blob,
+            base + ENEMY_CONTACT_SIZE_OFFSET,
+        )
+        x, y = struct.unpack_from(
+            "<ff",
+            blob,
+            base + ENEMY_POSITION_OFFSET,
+        )
+        if not _finite((x, y, vx, vy, contact_width, contact_height)):
+            continue
+        if contact_width < 0.0 or contact_height < 0.0:
+            continue
+        bodies.append(
+            EnemyBody(
+                pointer=ENEMY_POOL_BASE + base,
+                x=x,
+                y=y,
+                vx=vx,
+                vy=vy,
+                half_width=0.75 * contact_width,
+                half_height=0.75 * contact_height,
+                flags=flags,
+            )
+        )
+    return tuple(bodies)
+
+
 def read_spell_enemy_bodies(
     reader: ProcessReader,
     spell: dict[str, object],
@@ -822,7 +881,11 @@ def capture_hit_contact_observation(
             ADDR_PLAYER + PLAYER_LETHAL_AABB_OFFSET,
             PLAYER_LETHAL_AABB_SIZE,
         )
-        enemy_bodies = read_spell_enemy_bodies(reader, spell)
+        enemy_blob = reader.read(
+            ENEMY_POOL_BASE,
+            ENEMY_POOL_SIZE * ENEMY_STRIDE,
+        )
+        enemy_bodies = decode_enemy_bodies(enemy_blob)
         frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
         player_aabb = decode_player_lethal_aabb(player_blob)
         observation = {
@@ -2558,10 +2621,14 @@ def run(args: argparse.Namespace) -> int:
             item_blob = reader.read(
                 ITEM_MANAGER_BASE, ITEM_POOL_SIZE * ITEM_STRIDE
             )
-            enemy_bodies = read_spell_enemy_bodies(
-                reader,
-                state["spell"],
+            enemy_read_started = time.perf_counter()
+            enemy_blob = reader.read(
+                ENEMY_POOL_BASE,
+                ENEMY_POOL_SIZE * ENEMY_STRIDE,
             )
+            enemy_pool_read_ms = (
+                time.perf_counter() - enemy_read_started
+            ) * 1000.0
             counter_after_read = reader.u32(0x0164D30C)
             read_ms = (time.perf_counter() - read_started) * 1000.0
             snapshot_lag = max(0, counter_after_read - int(state["enemy_manager_frame"]))
@@ -2569,6 +2636,7 @@ def run(args: argparse.Namespace) -> int:
             bullets = decode_bullets(bullet_blob)
             lasers = decode_lasers(laser_blob)
             items = decode_items(item_blob)
+            enemy_bodies = decode_enemy_bodies(enemy_blob)
             decode_ms = (time.perf_counter() - decode_started) * 1000.0
             player = state["player"]
             resources = state["resources"]
@@ -2889,6 +2957,7 @@ def run(args: argparse.Namespace) -> int:
                     "timing_ms": {
                         "observe": observe_ms,
                         "read_pools": read_ms,
+                        "read_enemy_pool": enemy_pool_read_ms,
                         "decode_pools": decode_ms,
                         "corridor_bookkeeping": corridor_overhead_ms,
                         "local_plan": plan_ms,

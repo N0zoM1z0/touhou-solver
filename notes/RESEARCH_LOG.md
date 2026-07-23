@@ -1457,3 +1457,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   backend and completed in about 174 ms after warmup; time-indexed clearance
   construction was about 35 ms. The full 282-test suite passes. Physical
   acceptance remains required on laser-heavy Final-B phases.
+
+## 2026-07-24: Randomized Stage-5 Baseline And Full Enemy-Pool Sensor
+
+- Randomized unattended Stage-5 run `20260724_022420` physically covered
+  frames `2..41917` with 10,157 decisions, 20 hit edges, and zero Bomb input.
+  Auto-confirm advanced the long wall-clock transition, post-stage Right
+  selected no-save, and the verified game process was terminated.
+- The run retained 8 observed bullet overlaps, 10 modeled committed-prefix
+  collisions, and two sensor gaps at frames 6,810 and 10,993. Both gaps occur
+  in nonspell stage play with no lasers; nearest-bullet clearance is 43.60 and
+  13.00 pixels. This directly reopens CE-0033's deferred multi-enemy scan.
+- CE-0059 replaces spell-owner-only sensing with one contiguous read of all
+  480 fixed enemy slots from `0x005826C0`, stride `0x53D0`. Every
+  contact-enabled record is decoded through the already verified
+  `0.75 * full_contact_size` lethal half-extents and enters all three planning
+  layers. Per-decision telemetry separates enemy-pool read cost so physical
+  delay impact can be accepted or rejected. The full 283-test Linux suite and
+  53 focused Windows tests pass.

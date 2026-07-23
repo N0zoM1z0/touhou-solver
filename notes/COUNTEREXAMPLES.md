@@ -574,15 +574,15 @@ Status: observed | inferred | unknown | fixed
   `0.75 * contact_size` and feeds it to committed-prefix, local, and global
   planners. Trace rows retain the geometry and snapshot frame; hit edges also
   capture the native player rectangle and body geometry in one stable manager
-  frame. Scanning all 480 enemy slots remains a separate generalization task
-  for nonspell and multi-enemy contact.
+  frame. CE-0059 now generalizes this sensor to all 480 fixed slots for
+  nonspell and simultaneous-enemy contact.
 - **Regression:** `LUN-S2-F4885-T1` in
   `lunatic_route2_stage3_practice_20260723_160344.regressions.json`, plus
   `test_projectile_free_active_spell_promotes_enemy_body_candidate`.
 - **Status:** spell-owner path code-fixed and unit-tested. The `170433`
   physical rerun has zero active spell-35 hits and zero exact body overlaps
-  across eight stable hit epochs containing an owner body. Broader nonspell
-  and multi-enemy scanning remains open.
+  across eight stable hit epochs containing an owner body. Full-pool code is
+  complete under CE-0059; physical timing and contact acceptance are pending.
 
 ## CE-0034: Spell-50 corridor solutions arrived hundreds of frames stale
 
@@ -1129,3 +1129,27 @@ Status: observed | inferred | unknown | fixed
   action. Re-evaluate it only after the phase-exact laser model and adaptive
   lattice reduce false empty sets; compare repeated phase-level trials rather
   than one aggregate RNG-dependent hit count.
+
+## CE-0059: Spell-owner sensing omitted lethal nonspell enemies
+
+- **Observed symptom:** Unattended Stage-5 run `20260724_022420` completed
+  with 20 hits and zero Bomb. Frames 6,810 and 10,993 were classified as
+  `sensor_gap_or_unmodeled_hazard`: the nearest retained bullets had 43.60 and
+  13.00 pixels of clearance, no laser was active, and no spell owner body was
+  available.
+- **Invalid assumption:** The active spell owner is the only enemy body that
+  can contact the player. Native `enemy_manager_update` applies the contact
+  path independently to every active slot, including nonspell stage enemies
+  and simultaneous auxiliary enemies.
+- **Native evidence:** `enemy_spawn_from_timeline` (`0x0042A4E0`) scans 480
+  fixed slots beginning at `0x005826C0`, stride `0x53D0`.
+  `enemy_manager_update` gates each slot with flags `+0x3324` before passing
+  position `+0x2D88` and full contact size `+0x2D70` to the lethal AABB path.
+- **Correction:** Capture the complete enemy pool in one contiguous read,
+  decode every contact-enabled record, and feed all resulting moving AABBs to
+  committed-prefix, local, and global planners. Stable hit-edge telemetry now
+  also captures every contact body rather than only the spell owner.
+- **Regression:** `test_full_enemy_pool_retains_nonspell_contact_slots`.
+- **Acceptance gate:** A fresh physical run must report enemy-pool read cost,
+  retain no new sensor-gap hit where an enabled body exists, and avoid a
+  control-delay regression large enough to erase the geometry benefit.

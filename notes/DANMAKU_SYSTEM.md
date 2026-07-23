@@ -358,10 +358,10 @@ no-Bomb practice run hit at frame 4,885 during spell 35 with zero bullets and
 zero lasers, positive projectile-model clearance, and a live spell owner at
 `0x5826C0`. Static control flow makes enemy-body contact the strong candidate,
 but the baseline trace did not capture the owner's position/size/flags at that
-frame. The corrected sensor now captures the native player lethal rectangle
-and spell-owner AABB in a stable manager-frame epoch on every new hit edge;
-exact runtime overlap remains intentionally unresolved until the next run
-produces that evidence.
+frame. The sensor first captured the spell owner, then Stage-5 CE-0059 proved
+that nonspell and simultaneous enemies cannot be omitted. It now scans all 480
+fixed slots and captures the native player lethal rectangle plus every enabled
+enemy AABB in one stable manager-frame epoch on each new hit edge.
 
 **Observed, presentation-only** for opcode `0x9F`: enemy byte `+0x332F`
 selects one of four linked render lists. `enemy_manager_render` consumes layers

@@ -23,7 +23,10 @@ from th08_live_dodge_agent import (
     ENEMY_BODY_READ_SIZE,
     ENEMY_CONTACT_SIZE_OFFSET,
     ENEMY_FLAGS_OFFSET,
+    ENEMY_POOL_BASE,
+    ENEMY_POOL_SIZE,
     ENEMY_POSITION_OFFSET,
+    ENEMY_STRIDE,
     ENEMY_VELOCITY_OFFSET,
     EnemyBody,
     GameplaySceneGuard,
@@ -63,6 +66,7 @@ from th08_live_dodge_agent import (
     build_laser_collision_frames,
     choose_action,
     decode_enemy_body,
+    decode_enemy_bodies,
     decode_lasers,
     decode_player_lethal_aabb,
 )
@@ -325,6 +329,45 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertIsNone(
             decode_enemy_body(bytes(blob), pointer=0x5826C0)
         )
+
+    def test_full_enemy_pool_retains_nonspell_contact_slots(self) -> None:
+        blob = bytearray(ENEMY_POOL_SIZE * ENEMY_STRIDE)
+        slot = 17
+        base = slot * ENEMY_STRIDE
+        struct.pack_into(
+            "<ff",
+            blob,
+            base + ENEMY_VELOCITY_OFFSET,
+            -1.0,
+            2.0,
+        )
+        struct.pack_into(
+            "<ff",
+            blob,
+            base + ENEMY_CONTACT_SIZE_OFFSET,
+            20.0,
+            12.0,
+        )
+        struct.pack_into(
+            "<ff",
+            blob,
+            base + ENEMY_POSITION_OFFSET,
+            144.0,
+            96.0,
+        )
+        struct.pack_into(
+            "<I",
+            blob,
+            base + ENEMY_FLAGS_OFFSET,
+            0x05,
+        )
+        bodies = decode_enemy_bodies(bytes(blob))
+        self.assertEqual(len(bodies), 1)
+        self.assertEqual(
+            bodies[0].pointer,
+            ENEMY_POOL_BASE + slot * ENEMY_STRIDE,
+        )
+        self.assertEqual((bodies[0].half_width, bodies[0].half_height), (15.0, 9.0))
 
     def test_enemy_body_is_a_local_planner_hazard(self) -> None:
         decision = choose_action(

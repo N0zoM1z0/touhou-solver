@@ -424,7 +424,7 @@ bullet emissions, transforms, lasers, and callbacks. The component traversal
 includes calls, child enemies, interrupt handlers, and auxiliary VMs, but stops
 at enemy-end/health/timeout transitions. The JSON manifests under
 `artifacts/route_manifests/` are machine inputs for the incremental simulator.
-`scripts/test_th08_routes.py` prevents accidental phase loss or cross-phase
+`tests/test_th08_routes.py` prevents accidental phase loss or cross-phase
 component merging as ECL semantics are refined.
 
 ## Replay Baseline

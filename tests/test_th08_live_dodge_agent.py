@@ -29,7 +29,6 @@ from th08_live_dodge_agent import (
     _auto_confirm_eligible,
     _corridor_target,
     _estimate_live_action_hold,
-    _estimate_live_control_delay,
     _frozen_auto_confirm_eligible,
     choose_action,
     decode_enemy_body,
@@ -38,15 +37,6 @@ from th08_live_dodge_agent import (
 
 
 class LiveDodgeAgentTests(unittest.TestCase):
-    def test_live_control_delay_tracks_recent_action_lag(self) -> None:
-        self.assertEqual(_estimate_live_control_delay(()), 2)
-        self.assertEqual(
-            _estimate_live_control_delay((1, 1, 1, 2, 2, 2, 1803)),
-            2,
-        )
-        self.assertEqual(_estimate_live_control_delay((0, 0, 0)), 1)
-        self.assertEqual(_estimate_live_control_delay((7, 8, 9)), 4)
-
     def test_live_action_hold_tracks_recent_controller_cadence(self) -> None:
         self.assertEqual(_estimate_live_action_hold(()), 3)
         self.assertEqual(
@@ -336,6 +326,37 @@ class LiveDodgeAgentTests(unittest.TestCase):
         )
         self.assertNotEqual(decision.action, "stay")
         self.assertFalse(decision.bomb)
+
+    def test_multi_delay_certificate_covers_until_next_command_effect(self) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(Bullet(192.0, 370.0, 0.0, 3.0, 3.0, 3.0),),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            control_delay_frames=3,
+            control_delay_candidates=(2, 3, 4),
+            action_hold_frames=3,
+        )
+        self.assertEqual(decision.robust_delay_frames, (2, 3, 4))
+        self.assertEqual(decision.robust_collisions, 0)
+        self.assertGreater(decision.robust_min_clearance, 0.0)
+        self.assertIn(decision.robust_worst_delay, (2, 3, 4))
+
+    def test_multi_delay_candidates_require_the_nominal_delay(self) -> None:
+        with self.assertRaisesRegex(ValueError, "nominal control delay"):
+            choose_action(
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                previous_direction=0,
+                can_bomb=False,
+                control_delay_frames=2,
+                control_delay_candidates=(3, 4),
+            )
 
     def test_unavoidable_laser_requests_available_bomb(self) -> None:
         decision = choose_action(

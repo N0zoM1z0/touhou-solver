@@ -662,7 +662,10 @@ Status: observed | inferred | unknown | fixed
   Scene transitions clear both histories. Trace rows persist the selected
   delay and estimation sample count.
 - **Regression:** `test_live_control_delay_tracks_recent_action_lag`.
-- **Status:** code-fixed with 215 passing tests; physical recurrence pending.
+- **Status:** rejected by the `180832` physical run. The scalar estimator used
+  delay 2 for 6,505 of 8,878 decisions, but total hits rose from eight to
+  eleven and spell-50 hits from one to three while corridor latency slightly
+  improved. See CE-0039.
 
 ## CE-0038: The hit-row output was reported as the action that caused the hit
 
@@ -680,3 +683,30 @@ Status: observed | inferred | unknown | fixed
 - **Regressions:** `test_active_input_action_is_independent_of_post_hit_output`
   and `test_input_visibility_separates_actuation_from_hold`.
 - **Status:** analysis pipeline fixed; the eight-case `173245` corpus passes.
+
+## CE-0039: A scalar delay quantile is not a conservative plant model
+
+- **Observed symptom:** The `180832` Stage-3 no-Bomb run used a rolling p90
+  snapshot-to-action lag as one uncontrollable-prefix length. Relative to the
+  accepted `173245` run, total hits regressed `8 -> 11` and spell-50 hits
+  regressed `1 -> 3`. Only one hit had action lag above the chosen scalar.
+- **Invalid assumption:** Replacing an uncertain actuation delay with its p90
+  value is conservative. Input timing changes the player trajectory: an action
+  safe when it starts after two frames can be unsafe when it starts after one
+  or three. Delay is a discrete plant uncertainty, not a monotone safety
+  margin. The measured `action_lag` also ends at SendInput issuance; it does
+  not prove when TH08 sampled the new mask.
+- **Correction:** Learn end-to-end `snapshot -> input_current` delay from live
+  mask transitions, retain overwritten/unobserved transitions as censored,
+  and maintain a bounded discrete support. A hit or support overrun temporarily
+  expands its upper tail. The local MPC keeps one nominal long-horizon beam,
+  then certifies its surviving first actions across every learned delay until
+  the next command can physically take effect. Collision-free support is a
+  hard gate; CVaR risk ranks unsafe alternatives.
+- **Regressions:** `test_touhou_control_delay.py`,
+  `test_multi_delay_certificate_covers_until_next_command_effect`, and
+  `test_adaptive_delay_distribution_and_robust_overrides_are_retained`.
+- **Status:** code-fixed with 221 tests passing. Synthetic 400-bullet/200-laser
+  median local-plan cost rises from 16.7 ms to 21.2 ms. Physical acceptance
+  requires a fresh Stage-3 run and rejects the change if hit count exceeds
+  eight, spell-50 exceeds one, or added cost widens the learned delay tail.

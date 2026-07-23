@@ -403,6 +403,76 @@ def _control_delay_summary(
     }
 
 
+def _adaptive_control_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object]:
+    supports = Counter(
+        ",".join(str(value) for value in row["control_delay_candidates"])
+        for row in decisions
+        if row["control_delay_candidates"]
+    )
+    robust_rows = [
+        row["robust_control"]
+        for row in decisions
+        if isinstance(row.get("robust_control"), dict)
+        and row["robust_control"]
+    ]
+    estimator_rows = [
+        row["control_delay_estimator"]
+        for row in decisions
+        if isinstance(row.get("control_delay_estimator"), dict)
+        and row["control_delay_estimator"]
+    ]
+    clearances = [
+        float(robust["min_clearance"])
+        for robust in robust_rows
+        if robust.get("min_clearance") is not None
+    ]
+    return {
+        "support_counts": {
+            key: supports[key] for key in sorted(supports)
+        },
+        "robust_certificate_count": len(robust_rows),
+        "robust_override_count": sum(
+            bool(robust.get("override")) for robust in robust_rows
+        ),
+        "robust_collision_prediction_count": sum(
+            int(robust.get("worst_collisions", 0)) > 0
+            for robust in robust_rows
+        ),
+        "robust_negative_clearance_count": sum(
+            float(robust.get("min_clearance", 9999.0)) < 0.0
+            for robust in robust_rows
+        ),
+        "robust_min_clearance": _percentiles(clearances),
+        "guard_active_decision_count": sum(
+            bool(estimator.get("guard_active"))
+            for estimator in estimator_rows
+        ),
+        "learned_end_to_end_sample_max": max(
+            (
+                int(estimator.get("end_to_end_samples", 0))
+                for estimator in estimator_rows
+            ),
+            default=0,
+        ),
+        "overrun_max": max(
+            (
+                int(estimator.get("overruns", 0))
+                for estimator in estimator_rows
+            ),
+            default=0,
+        ),
+        "censored_max": max(
+            (
+                int(estimator.get("censored", 0))
+                for estimator in estimator_rows
+            ),
+            default=0,
+        ),
+    }
+
+
 def _input_visibility_summary(
     decisions: list[dict[str, object]],
 ) -> dict[str, object]:
@@ -693,6 +763,7 @@ def build_dossier(
             "decision_cadence_frames": _decision_cadence(decisions),
             "action_hold_frames": _action_hold_summary(decisions),
             "control_delay_frames": _control_delay_summary(decisions),
+            "adaptive_control_delay": _adaptive_control_summary(decisions),
             "input_visibility": _input_visibility_summary(decisions),
             "runtime_timing_ms": _runtime_timing(decisions),
             "behavior_context": _behavior_context(decisions, deaths),
@@ -886,6 +957,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
     cadence = totals["decision_cadence_frames"]
     action_hold = totals["action_hold_frames"]
     control_delay = totals["control_delay_frames"]
+    adaptive_delay = totals["adaptive_control_delay"]
     input_visibility = totals["input_visibility"]
     spell_50_hits = int(totals["spell_hit_counts"].get("50", 0))
     body_overlaps = sum(
@@ -912,6 +984,17 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"`{action_hold['active_spell_50']['counts']}` in active spell 50.",
             "- Modeled uncontrollable-prefix counts were "
             f"`{control_delay['counts']}`.",
+            (
+                "- Adaptive delay supports were "
+                f"`{adaptive_delay['support_counts']}`; "
+                f"{adaptive_delay['robust_override_count']} decisions changed "
+                "their nominal first action, "
+                f"{adaptive_delay['learned_end_to_end_sample_max']} "
+                "end-to-end transition samples were retained, and the "
+                f"maximum observed overrun/censored counters were "
+                f"{adaptive_delay['overrun_max']}/"
+                f"{adaptive_delay['censored_max']}."
+            ),
             "- Of "
             f"{input_visibility['unambiguous_transition_count']} unambiguous "
             "output transitions, "
@@ -966,6 +1049,20 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 "- Local and global finite laser-segment clearance fields are "
                 "vectorized; physical acceptance remains pending in this "
                 "baseline report.",
+            ]
+        )
+    elif adaptive_delay["robust_certificate_count"] > 0:
+        lines.extend(
+            [
+                "",
+                "## Next Correction Gate",
+                "",
+                "Compare hit count and first divergence against the accepted "
+                "dynamic-hold run. Reject the controller if robust validation "
+                "raises loop cadence enough to widen its own learned delay "
+                "tail, if end-to-end transitions remain mostly censored, or "
+                "if hits retain a nonnegative last-alive robust certificate. "
+                "Only then promote adaptive delay into the accepted baseline.",
             ]
         )
     elif max(

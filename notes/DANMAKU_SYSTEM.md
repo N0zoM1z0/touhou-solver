@@ -653,7 +653,7 @@ Pinned route-ID 2 manifests under `artifacts/route_manifests/` contain:
 For Lunatic Stage 3, IDs 43/44/45 are present as common-mask payloads inside
 Easy/Normal/Hard-only phase subroutines and are correctly excluded; ID 46 is
 the reachable Lunatic branch. Extra resolves all three Keine cards (191–193)
-and all eleven Mokou cards (194–204). `scripts/test_th08_routes.py` locks these
+and all eleven Mokou cards (194–204). `tests/test_th08_routes.py` locks these
 sets and the phase-boundary rule as corpus regression tests. Extra spell 201
 has component subs `[85, 126, 127, 128, 129, 130]`; its enemy-end and timeout
 edges both exit to sub 82. The recovered two-record derived-pattern sub 127 is
@@ -911,7 +911,7 @@ python th08/scripts/th08_ecl.py corpus \
   th08/artifacts/decoded th08/artifacts/ecl_reports
 python th08/scripts/th08_route_manifest.py \
   th08/artifacts/decoded th08/artifacts/route_manifests
-python -m unittest discover -s th08/scripts -p 'test_*.py' -v
+PYTHONPATH=th08/scripts python -m unittest discover -s th08/tests -p 'test_*.py' -v
 ```
 
 ## IDA Persistence

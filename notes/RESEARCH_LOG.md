@@ -155,7 +155,7 @@ resolves:
 - Lunatic Final B: 37 spell IDs.
 - Extra: 14 spell IDs, including all three Keine and eleven Mokou cards.
 
-`scripts/test_th08_routes.py` pins these sets and verifies that target-route
+`tests/test_th08_routes.py` pins these sets and verifies that target-route
 graphs contain no unresolved dynamic subroutine edges.
 
 ### Bullet Transform And Laser Runtime
@@ -1100,3 +1100,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   decision, warning lead, physical contact class, planner failure class,
   action-hold distribution, control-delay distribution, and input-visibility
   evidence. All 215 tests pass.
+
+## 2026-07-23: Scalar Delay Rejection And Adaptive Robust Control
+
+- Scoped `180832` to Stage-3 frames `68..26736`: 8,878 decisions, eleven
+  native hits, and a hard no-Bomb pass. The following 1,388 decisions belong
+  to a thprac reset tail and are excluded.
+- Relative to accepted run `173245`, total hits regressed from eight to eleven
+  and spell-50 hits from one to three. Corridor solve p95 improved from 396 to
+  384 ms and age p95 from 28 to 27 frames, so global-planner performance does
+  not explain the regression.
+- The rolling scalar selected delay 2 for 6,505 decisions. Eight hits followed
+  a positive last-alive causal margin and three had an unsafe committed
+  prefix. Only one hit exceeded the chosen scalar lag. Delay variation changes
+  trajectories and cannot be reduced to one conservative quantile.
+- Added game-neutral `touhou_control.delay.AdaptiveControlDelay`. It learns
+  end-to-end delay only when an issued mask becomes visible in the game's
+  native input state, separately records computation and pickup samples, marks
+  overwritten commands censored, and expands the tail after hits/overruns.
+- The TH08 MPC now validates surviving first actions over the learned discrete
+  support until the next command can take effect. Trace and dossier fields
+  retain support, samples, guard state, overrun/censored counters, robust
+  clearance, worst delay, CVaR risk, and nominal-action overrides.
+- Moved all 38 test modules from the flat `scripts/` directory to `tests/`.
+  New reusable control code lives under `scripts/touhou_control/`; runtime
+  entry points remain stable for the Windows daemon. All 221 tests pass.
+- A synthetic dense-field benchmark (400 bullets, 200 lasers) measured local
+  planning at 16.7 ms median without robust certification and 21.2 ms with
+  support `(2,3,4)`. The next physical run must measure whether this overhead
+  widens the very delay distribution it is intended to tolerate.

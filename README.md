@@ -15,7 +15,9 @@ any raw capture cited by a conclusion or regression test.
 ## Layout
 
 - `notes/`: curated findings and chronological research logs
-- `scripts/`: reproducible inspection, extraction, and validation tools
+- `scripts/`: runtime entry points plus TH08 inspection and extraction tools
+- `scripts/touhou_control/`: game-neutral online control components
+- `tests/`: unit and retained-counterexample regression tests
 - `artifacts/`: generated reports and small derived metadata (no game binaries)
 
 ## Current Investigation
@@ -118,7 +120,7 @@ python th08/scripts/th08_replay_player_projection.py \
   8 th08/artifacts/replay_reports/th8_06_stage8_player_projection.json
 
 # Run all route, runtime-model, generic-schedule, and TH08 adapter tests.
-python -m unittest discover -s th08/scripts -p 'test_*.py' -v
+PYTHONPATH=th08/scripts python -m unittest discover -s th08/tests -p 'test_*.py' -v
 
 # On the Windows host, inspect the live process without writing game memory.
 python th08/scripts/th08_runtime_agent.py probe

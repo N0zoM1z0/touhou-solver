@@ -355,6 +355,15 @@ def _compact_decision(
         "snapshot_lag": int(row.get("snapshot_lag", 0)),
         "action_lag": int(row.get("action_lag", 0)),
         "control_delay_frames": int(row.get("control_delay_frames", 3)),
+        "control_delay_candidates": [
+            int(value)
+            for value in row.get("control_delay_candidates", [])
+        ],
+        "control_delay_estimator": (
+            row.get("control_delay_estimator")
+            if isinstance(row.get("control_delay_estimator"), dict)
+            else {}
+        ),
         "action_hold_frames": int(row.get("action_hold_frames", 2)),
         "read_ms": float(row.get("read_ms", 0.0)),
         "plan_ms": float(row.get("plan_ms", 0.0)),
@@ -364,6 +373,11 @@ def _compact_decision(
         ),
         "minimum_clearance": float(
             row.get("minimum_clearance", 9999.0)
+        ),
+        "robust_control": (
+            row.get("robust_control")
+            if isinstance(row.get("robust_control"), dict)
+            else {}
         ),
         "corridor_lane": (
             str(corridor["lane"]) if isinstance(corridor, dict) else None
@@ -710,6 +724,12 @@ def _death_ledger(
                     "control_delay_frames": int(
                         last_alive["control_delay_frames"]
                     ),
+                    "control_delay_candidates": list(
+                        last_alive["control_delay_candidates"]
+                    ),
+                    "robust_control": dict(
+                        last_alive["robust_control"]
+                    ),
                     "action_lag": int(last_alive["action_lag"]),
                 }
                 if last_alive is not None
@@ -731,6 +751,13 @@ def _death_ledger(
             "snapshot_lag": row["snapshot_lag"],
             "action_lag": row["action_lag"],
             "control_delay_frames": row["control_delay_frames"],
+            "control_delay_candidates": list(
+                row["control_delay_candidates"]
+            ),
+            "control_delay_estimator": dict(
+                row["control_delay_estimator"]
+            ),
+            "robust_control": dict(row["robust_control"]),
             "read_ms": row["read_ms"],
             "plan_ms": row["plan_ms"],
             "pipeline_clearance_at_hit": row["pipeline_clearance"],

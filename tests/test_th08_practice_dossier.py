@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 from th08_practice_dossier import (
+    _adaptive_control_summary,
     _action_hold_summary,
     _behavior_context,
     _decision_cadence,
@@ -53,11 +54,14 @@ def _decision(frame: int, *, mask: int = 5) -> dict[str, object]:
         "input_snapshot": {"raw": mask, "current": mask, "previous": mask},
         "action_lag": 0,
         "control_delay_frames": 3,
+        "control_delay_candidates": [],
+        "control_delay_estimator": {},
         "action_hold_frames": 3,
         "read_ms": 1.0,
         "plan_ms": 2.0,
         "pipeline_clearance": 9999.0,
         "minimum_clearance": 9999.0,
+        "robust_control": {},
         "corridor_slack": 1.0,
         "spell": {"active": False, "flags": 0},
     }
@@ -96,6 +100,32 @@ class Th08PracticeDossierTests(unittest.TestCase):
             summary["visible_snapshot_delta_frames"]["median"],
             1.0,
         )
+
+    def test_adaptive_delay_distribution_and_robust_overrides_are_retained(
+        self,
+    ) -> None:
+        rows = [_decision(100), _decision(103), _decision(106)]
+        for index, row in enumerate(rows):
+            row["control_delay_candidates"] = [2, 3, 4]
+            row["control_delay_estimator"] = {
+                "end_to_end_samples": index + 4,
+                "guard_active": index == 2,
+                "overruns": 1,
+                "censored": 2,
+            }
+            row["robust_control"] = {
+                "override": index == 1,
+                "worst_collisions": int(index == 2),
+                "min_clearance": 4.0 - 3.0 * index,
+            }
+        summary = _adaptive_control_summary(rows)
+        self.assertEqual(summary["support_counts"], {"2,3,4": 3})
+        self.assertEqual(summary["robust_override_count"], 1)
+        self.assertEqual(summary["robust_collision_prediction_count"], 1)
+        self.assertEqual(summary["learned_end_to_end_sample_max"], 6)
+        self.assertEqual(summary["guard_active_decision_count"], 1)
+        self.assertEqual(summary["overrun_max"], 1)
+        self.assertEqual(summary["censored_max"], 2)
 
     def test_cadence_and_prehit_behavior_are_retained(self) -> None:
         rows = [_decision(100), _decision(103), _decision(107)]

@@ -41,6 +41,7 @@ from th08_runtime_agent import (
     send_transitions,
     verify_target,
 )
+from touhou_control.delay import AdaptiveControlDelay
 
 
 BULLET_POOL_BASE = 0x00F6F710
@@ -111,7 +112,9 @@ LIVE_ACTION_HOLD_MAX = 6
 # planned. Live control estimates this prefix independently from action hold.
 CONTROL_DELAY_FRAMES = 2
 LIVE_CONTROL_DELAY_MIN = 1
-LIVE_CONTROL_DELAY_MAX = 4
+LIVE_CONTROL_DELAY_MAX = 6
+LIVE_CONTROL_DELAY_WINDOW = 120
+LIVE_CONTROL_DELAY_GUARD_FRAMES = 600
 COLLECTION_HALF_WIDTH = 24.0
 ITEM_SAFETY_CLEARANCE = 8.0
 CORRIDOR_REPLAN_FRAMES = 24
@@ -191,6 +194,12 @@ class Decision:
     planned_focus: bool = True
     predicted_collections: tuple[int, ...] = ()
     pipeline_clearance: float = 9999.0
+    robust_delay_frames: tuple[int, ...] = ()
+    robust_override: bool = False
+    robust_collisions: int = 0
+    robust_min_clearance: float = 9999.0
+    robust_cvar_risk: float = 0.0
+    robust_worst_delay: int | None = None
 
 
 @dataclass(frozen=True)
@@ -200,6 +209,16 @@ class PlannerAction:
     dx: float
     dy: float
     focused: bool
+
+
+@dataclass(frozen=True)
+class RobustActionCertificate:
+    action: str
+    delay_frames: tuple[int, ...]
+    worst_collisions: int
+    min_clearance: float
+    cvar_risk: float
+    worst_delay: int
 
 
 @dataclass(frozen=True)
@@ -981,6 +1000,142 @@ def _control_prefix_hazards(
     return risk, collisions, minimum
 
 
+def _robust_action_certificates(
+    *,
+    player_x: float,
+    player_y: float,
+    previous_mask: int,
+    actions: tuple[PlannerAction, ...],
+    delay_frames: tuple[int, ...],
+    action_hold_frames: int,
+    bullets: tuple[Bullet, ...],
+    lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
+    snapshot_lag: int,
+) -> dict[str, RobustActionCertificate]:
+    """Certify the emitted action until the following command can take effect."""
+
+    if not actions or not delay_frames:
+        return {}
+    maximum_step = action_hold_frames + max(delay_frames)
+    bullet_frames = _build_bullet_frames(
+        bullets,
+        horizon=maximum_step,
+        snapshot_lag=-max(0, snapshot_lag),
+    )
+    action_count = len(actions)
+    risk_by_delay: dict[int, np.ndarray] = {}
+    collisions_by_delay: dict[int, np.ndarray] = {}
+    clearance_by_delay: dict[int, np.ndarray] = {}
+    for delay in delay_frames:
+        risks = np.zeros(action_count, dtype=np.float64)
+        collisions = np.zeros(action_count, dtype=np.int32)
+        minimum = np.full(action_count, np.inf, dtype=np.float64)
+        prefix_x = player_x
+        prefix_y = player_y
+        for step in range(1, delay + 1):
+            prefix_x, prefix_y = _project_player_for_read_lag(
+                player_x,
+                player_y,
+                previous_mask,
+                step,
+            )
+            hazard_risk, hazard_collisions, hazard_clearance = (
+                _hazards_for_positions(
+                    np.asarray([prefix_x], dtype=np.float32),
+                    np.asarray([prefix_y], dtype=np.float32),
+                    step=step,
+                    bullet_frame=bullet_frames[step - 1],
+                    lasers=lasers,
+                    enemy_bodies=enemy_bodies,
+                )
+            )
+            risks += _boundary_risk(prefix_x, prefix_y) + float(hazard_risk[0])
+            collisions += int(hazard_collisions[0])
+            minimum = np.minimum(minimum, float(hazard_clearance[0]))
+        for step in range(delay + 1, maximum_step + 1):
+            action_step = step - delay
+            positions_x = np.fromiter(
+                (
+                    min(
+                        PLAYFIELD_RIGHT,
+                        max(PLAYFIELD_LEFT, prefix_x + action.dx * action_step),
+                    )
+                    for action in actions
+                ),
+                dtype=np.float32,
+            )
+            positions_y = np.fromiter(
+                (
+                    min(
+                        PLAYFIELD_BOTTOM,
+                        max(PLAYFIELD_TOP, prefix_y + action.dy * action_step),
+                    )
+                    for action in actions
+                ),
+                dtype=np.float32,
+            )
+            hazard_risk, hazard_collisions, hazard_clearance = (
+                _hazards_for_positions(
+                    positions_x,
+                    positions_y,
+                    step=step,
+                    bullet_frame=bullet_frames[step - 1],
+                    lasers=lasers,
+                    enemy_bodies=enemy_bodies,
+                )
+            )
+            boundary = np.fromiter(
+                (
+                    _boundary_risk(float(x), float(y))
+                    for x, y in zip(positions_x, positions_y)
+                ),
+                dtype=np.float64,
+                count=action_count,
+            )
+            risks += boundary + hazard_risk
+            collisions += hazard_collisions
+            minimum = np.minimum(minimum, hazard_clearance)
+        risk_by_delay[delay] = risks
+        collisions_by_delay[delay] = collisions
+        clearance_by_delay[delay] = minimum
+
+    certificates: dict[str, RobustActionCertificate] = {}
+    tail_count = max(1, math.ceil(0.5 * len(delay_frames)))
+    for action_index, action in enumerate(actions):
+        worst_delay = max(
+            delay_frames,
+            key=lambda delay: (
+                int(collisions_by_delay[delay][action_index]),
+                -float(clearance_by_delay[delay][action_index]),
+                float(risk_by_delay[delay][action_index]),
+            ),
+        )
+        tail_risks = sorted(
+            (
+                float(risk_by_delay[delay][action_index])
+                for delay in delay_frames
+            ),
+            reverse=True,
+        )[:tail_count]
+        minimum = min(
+            float(clearance_by_delay[delay][action_index])
+            for delay in delay_frames
+        )
+        certificates[action.name] = RobustActionCertificate(
+            action=action.name,
+            delay_frames=delay_frames,
+            worst_collisions=max(
+                int(collisions_by_delay[delay][action_index])
+                for delay in delay_frames
+            ),
+            min_clearance=9999.0 if math.isinf(minimum) else minimum,
+            cvar_risk=sum(tail_risks) / len(tail_risks),
+            worst_delay=worst_delay,
+        )
+    return certificates
+
+
 def _item_potential(
     x: float,
     y: float,
@@ -1102,21 +1257,6 @@ def _estimate_live_action_hold(frame_deltas: tuple[int, ...]) -> int:
     )
 
 
-def _estimate_live_control_delay(
-    action_lags: tuple[int, ...],
-    *,
-    default: int = CONTROL_DELAY_FRAMES,
-) -> int:
-    operational = sorted(lag for lag in action_lags if 0 <= lag < 120)
-    if not operational:
-        return default
-    rank = max(0, math.ceil(0.9 * len(operational)) - 1)
-    return max(
-        LIVE_CONTROL_DELAY_MIN,
-        min(LIVE_CONTROL_DELAY_MAX, operational[rank]),
-    )
-
-
 def choose_action(
     *,
     player_x: float,
@@ -1132,6 +1272,7 @@ def choose_action(
     previous_focus: bool = True,
     snapshot_lag: int = 0,
     control_delay_frames: int = CONTROL_DELAY_FRAMES,
+    control_delay_candidates: tuple[int, ...] | None = None,
     action_hold_frames: int = PLANNER_ACTION_HOLD,
     horizon: int = PLANNER_HORIZON,
     beam_width: int = PLANNER_BEAM_WIDTH,
@@ -1143,6 +1284,18 @@ def choose_action(
         raise ValueError("planner horizon and beam width must be positive")
     if control_delay_frames < 0:
         raise ValueError("control delay cannot be negative")
+    if control_delay_candidates is not None:
+        if (
+            not control_delay_candidates
+            or any(delay < 0 for delay in control_delay_candidates)
+            or tuple(sorted(set(control_delay_candidates)))
+            != control_delay_candidates
+        ):
+            raise ValueError(
+                "control delay candidates must be sorted unique nonnegative frames"
+            )
+        if control_delay_frames not in control_delay_candidates:
+            raise ValueError("nominal control delay must belong to its candidates")
     if action_hold_frames <= 0:
         raise ValueError("action hold must be positive")
     if (target_x is None) != (target_y is None):
@@ -1152,6 +1305,8 @@ def choose_action(
             target_deadline = horizon
         if target_deadline < 0:
             raise ValueError("target deadline cannot be negative")
+    observed_player_x = player_x
+    observed_player_y = player_y
     selected_items = _select_items(items, power=power, bombs=bombs)
     delayed_mask = previous_direction | (FOCUS if previous_focus else 0)
     prefix_risk, prefix_collisions, prefix_clearance = _control_prefix_hazards(
@@ -1200,7 +1355,15 @@ def choose_action(
         and not selected_items
         and target_x is None
     ):
-        return Decision(SHOT | FOCUS, "stay", 9999.0, 9999.0, 0.0, False)
+        return Decision(
+            SHOT | FOCUS,
+            "stay",
+            9999.0,
+            9999.0,
+            0.0,
+            False,
+            robust_delay_frames=control_delay_candidates or (),
+        )
     for step in range(1, horizon + 1):
         drafts: list[
             tuple[SearchNode, PlannerAction, float, float, float, int, float]
@@ -1374,12 +1537,90 @@ def choose_action(
             target_deadline=target_deadline,
         ),
     )
+    robust_certificates: dict[str, RobustActionCertificate] = {}
+    robust_override = False
+    robust_certificate: RobustActionCertificate | None = None
+    if control_delay_candidates is not None:
+        nodes_by_action: dict[str, SearchNode] = {}
+        actions_by_name: dict[str, PlannerAction] = {}
+        for node in beam:
+            action_name = node.first_action.name
+            actions_by_name[action_name] = node.first_action
+            incumbent = nodes_by_action.get(action_name)
+            if incumbent is None or _node_key(
+                node,
+                step=horizon,
+                selected_items=selected_items,
+                target_x=target_x,
+                target_y=target_y,
+                target_deadline=target_deadline,
+            ) < _node_key(
+                incumbent,
+                step=horizon,
+                selected_items=selected_items,
+                target_x=target_x,
+                target_y=target_y,
+                target_deadline=target_deadline,
+            ):
+                nodes_by_action[action_name] = node
+        robust_certificates = _robust_action_certificates(
+            player_x=observed_player_x,
+            player_y=observed_player_y,
+            previous_mask=delayed_mask,
+            actions=tuple(actions_by_name.values()),
+            delay_frames=control_delay_candidates,
+            action_hold_frames=action_hold_frames,
+            bullets=bullets,
+            lasers=lasers,
+            enemy_bodies=enemy_bodies,
+            snapshot_lag=snapshot_lag,
+        )
+        nominal_certificate = robust_certificates[best.first_action.name]
+        if (
+            nominal_certificate.worst_collisions > 0
+            or nominal_certificate.min_clearance < 0.0
+        ):
+            robust_best = min(
+                nodes_by_action.values(),
+                key=lambda node: (
+                    robust_certificates[
+                        node.first_action.name
+                    ].worst_collisions,
+                    max(
+                        -robust_certificates[
+                            node.first_action.name
+                        ].min_clearance,
+                        0.0,
+                    ),
+                    robust_certificates[node.first_action.name].cvar_risk,
+                    -robust_certificates[
+                        node.first_action.name
+                    ].min_clearance,
+                    _node_key(
+                        node,
+                        step=horizon,
+                        selected_items=selected_items,
+                        target_x=target_x,
+                        target_y=target_y,
+                        target_deadline=target_deadline,
+                    ),
+                ),
+            )
+            robust_override = robust_best.first_action != best.first_action
+            best = robust_best
+        robust_certificate = robust_certificates[best.first_action.name]
     minimum = 9999.0 if math.isinf(best.min_clearance) else best.min_clearance
     immediate = (
         9999.0 if math.isinf(best.immediate_clearance) else best.immediate_clearance
     )
     action = best.first_action
-    use_bomb = can_bomb and immediate <= 0.0
+    use_bomb = can_bomb and (
+        immediate <= 0.0
+        or (
+            robust_certificate is not None
+            and robust_certificate.worst_collisions > 0
+        )
+    )
     direction_mask = action.direction
     focus_mask = FOCUS if action.focused else 0
     predicted_collections = tuple(
@@ -1401,6 +1642,28 @@ def choose_action(
         action.focused,
         predicted_collections,
         pipeline_clearance,
+        control_delay_candidates or (),
+        robust_override,
+        (
+            robust_certificate.worst_collisions
+            if robust_certificate is not None
+            else 0
+        ),
+        (
+            robust_certificate.min_clearance
+            if robust_certificate is not None
+            else 9999.0
+        ),
+        (
+            robust_certificate.cvar_risk
+            if robust_certificate is not None
+            else 0.0
+        ),
+        (
+            robust_certificate.worst_delay
+            if robust_certificate is not None
+            else None
+        ),
     )
 
 
@@ -1575,7 +1838,13 @@ def run(args: argparse.Namespace) -> int:
     last_frame_progress = time.perf_counter()
     last_frozen_confirm = float("-inf")
     decision_frame_deltas: deque[int] = deque(maxlen=120)
-    action_lag_history: deque[int] = deque(maxlen=120)
+    delay_estimator = AdaptiveControlDelay(
+        supported_mask=SUPPORTED_INPUT_MASK,
+        minimum=LIVE_CONTROL_DELAY_MIN,
+        maximum=LIVE_CONTROL_DELAY_MAX,
+        window=LIVE_CONTROL_DELAY_WINDOW,
+        guard_frames=LIVE_CONTROL_DELAY_GUARD_FRAMES,
+    )
     previous_iteration_ms: float | None = None
     previous_trace_ms: float | None = None
     if not args.local_only:
@@ -1599,10 +1868,16 @@ def run(args: argparse.Namespace) -> int:
                             else "deathbomb_only"
                         )
                     ),
-                    "control_delay_policy": "rolling_action_lag_p90",
+                    "control_delay_policy": (
+                        "adaptive_end_to_end_distribution_robust_mpc"
+                    ),
                     "control_delay_default": args.control_delay_frames,
                     "control_delay_min": LIVE_CONTROL_DELAY_MIN,
                     "control_delay_max": LIVE_CONTROL_DELAY_MAX,
+                    "control_delay_window": LIVE_CONTROL_DELAY_WINDOW,
+                    "control_delay_guard_frames": (
+                        LIVE_CONTROL_DELAY_GUARD_FRAMES
+                    ),
                 }
             )
             + "\n"
@@ -1773,7 +2048,7 @@ def run(args: argparse.Namespace) -> int:
                 previous_phase = None
                 previous_action_phase = None
                 decision_frame_deltas.clear()
-                action_lag_history.clear()
+                delay_estimator.reset()
                 previous_iteration_ms = None
                 previous_trace_ms = None
                 auto_confirm.eligible_since = None
@@ -1826,6 +2101,10 @@ def run(args: argparse.Namespace) -> int:
             if state["route_id"] != 2:
                 termination_reason = "gameplay_ended"
                 break
+            delay_estimator.observe(
+                frame=int(state["enemy_manager_frame"]),
+                input_mask=int(state["input_current"]),
+            )
             if previous_counter is not None and counter != previous_counter + 1:
                 gaps += 1
             spell_state = state["spell"]
@@ -1884,10 +2163,11 @@ def run(args: argparse.Namespace) -> int:
                 previous_mask,
                 snapshot_lag,
             )
-            control_delay_frames = _estimate_live_control_delay(
-                tuple(action_lag_history),
+            delay_estimate = delay_estimator.estimate(
+                frame=counter_after_read,
                 default=args.control_delay_frames,
             )
+            control_delay_frames = delay_estimate.nominal
             control_origin_x, control_origin_y = _project_player_for_read_lag(
                 float(player["x"]),
                 float(player["y"]),
@@ -1957,6 +2237,7 @@ def run(args: argparse.Namespace) -> int:
                 previous_focus=bool(previous_mask & FOCUS),
                 snapshot_lag=snapshot_lag,
                 control_delay_frames=control_delay_frames,
+                control_delay_candidates=delay_estimate.support,
                 action_hold_frames=action_hold_frames,
                 horizon=args.horizon,
                 beam_width=args.beam_width,
@@ -1978,6 +2259,7 @@ def run(args: argparse.Namespace) -> int:
             hit_contact_observation = None
             if hit_started:
                 hit_count += 1
+                delay_estimator.register_hit(counter_at_action)
                 hit_contact_observation = capture_hit_contact_observation(
                     reader,
                     state["spell"],
@@ -2026,6 +2308,13 @@ def run(args: argparse.Namespace) -> int:
             input_started = time.perf_counter()
             send_transitions(api, transitions)
             input_ms = (time.perf_counter() - input_started) * 1000.0
+            if transitions:
+                delay_estimator.issued(
+                    snapshot_frame=int(state["enemy_manager_frame"]),
+                    issue_frame=counter_at_action,
+                    expected_mask=decision.mask,
+                    support_high=delay_estimate.support[-1],
+                )
             previous_mask = decision.mask
             previous_direction = decision.mask & (UP | DOWN | LEFT | RIGHT)
             current_phase = int(player["phase"])
@@ -2049,7 +2338,22 @@ def run(args: argparse.Namespace) -> int:
                     "snapshot_lag": snapshot_lag,
                     "action_lag": counter_at_action - int(state["enemy_manager_frame"]),
                     "control_delay_frames": control_delay_frames,
-                    "control_delay_sample_count": len(action_lag_history),
+                    "control_delay_candidates": delay_estimate.support,
+                    "control_delay_sample_count": (
+                        delay_estimate.end_to_end_samples
+                    ),
+                    "control_delay_estimator": {
+                        "computation_samples": (
+                            delay_estimate.computation_samples
+                        ),
+                        "pickup_samples": delay_estimate.pickup_samples,
+                        "end_to_end_samples": (
+                            delay_estimate.end_to_end_samples
+                        ),
+                        "guard_active": delay_estimate.guard_active,
+                        "overruns": delay_estimate.overruns,
+                        "censored": delay_estimate.censored,
+                    },
                     "action_hold_frames": action_hold_frames,
                     "read_ms": read_ms,
                     "plan_ms": plan_ms,
@@ -2097,6 +2401,14 @@ def run(args: argparse.Namespace) -> int:
                     "minimum_clearance": decision.min_clearance,
                     "immediate_clearance": decision.immediate_clearance,
                     "pipeline_clearance": decision.pipeline_clearance,
+                    "robust_control": {
+                        "delay_frames": decision.robust_delay_frames,
+                        "override": decision.robust_override,
+                        "worst_collisions": decision.robust_collisions,
+                        "min_clearance": decision.robust_min_clearance,
+                        "cvar_risk": decision.robust_cvar_risk,
+                        "worst_delay": decision.robust_worst_delay,
+                    },
                     "score": decision.score,
                     "item_utility": decision.item_utility,
                     "predicted_collections": decision.predicted_collections,
@@ -2211,8 +2523,7 @@ def run(args: argparse.Namespace) -> int:
                 if 0 < decision_delta < 120:
                     decision_frame_deltas.append(decision_delta)
             action_lag = counter_at_action - int(state["enemy_manager_frame"])
-            if 0 <= action_lag < 120:
-                action_lag_history.append(action_lag)
+            delay_estimator.record_computation_lag(action_lag)
             previous_trace_ms = trace_ms
             previous_iteration_ms = (
                 time.perf_counter() - iteration_started

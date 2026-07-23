@@ -37,6 +37,8 @@ VK_F8 = 0x77
 VK_F9 = 0x78
 VK_F10 = 0x79
 LONG_RUN_DURATION_SECONDS = 3600
+ERROR_ALREADY_EXISTS = 183
+INSTANCE_MUTEX_NAME = r"Local\Codex_TH08_Agent_Hotkey"
 
 
 def build_long_run_arguments(
@@ -76,6 +78,27 @@ class AgentHotkey:
     def __init__(self) -> None:
         if os.name != "nt":
             raise RuntimeError("th08_agent_hotkey.py must run under Windows Python")
+        self.kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        self.kernel32.CreateMutexW.argtypes = [
+            ctypes.c_void_p,
+            wintypes.BOOL,
+            wintypes.LPCWSTR,
+        ]
+        self.kernel32.CreateMutexW.restype = wintypes.HANDLE
+        self.kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+        self.kernel32.CloseHandle.restype = wintypes.BOOL
+        ctypes.set_last_error(0)
+        self.instance_mutex = self.kernel32.CreateMutexW(
+            None,
+            False,
+            INSTANCE_MUTEX_NAME,
+        )
+        if not self.instance_mutex:
+            raise ctypes.WinError(ctypes.get_last_error(), "CreateMutexW")
+        if ctypes.get_last_error() == ERROR_ALREADY_EXISTS:
+            self.kernel32.CloseHandle(self.instance_mutex)
+            self.instance_mutex = None
+            raise RuntimeError("another TH08 hotkey daemon is already running")
         self.api = Win32()
         self.user32 = ctypes.WinDLL("user32", use_last_error=True)
         self.user32.GetAsyncKeyState.argtypes = [ctypes.c_int]
@@ -263,9 +286,22 @@ class AgentHotkey:
                 release_injected_keys(self.api)
             except OSError:
                 pass
+            if self.instance_mutex is not None:
+                self.kernel32.CloseHandle(self.instance_mutex)
+                self.instance_mutex = None
 
 
 if __name__ == "__main__":
+    try:
+        agent = AgentHotkey()
+    except Exception as exc:
+        with open(
+            r"\\wsl.localhost\ubuntu\tmp\th08_agent_hotkey.err",
+            "a",
+            encoding="utf-8",
+        ) as error_output:
+            print(f"startup error: {exc}", file=error_output)
+        raise SystemExit(1)
     sys.stdout = open(
         r"\\wsl.localhost\ubuntu\tmp\th08_agent_hotkey.out",
         "w",
@@ -279,7 +315,7 @@ if __name__ == "__main__":
         buffering=1,
     )
     try:
-        raise SystemExit(AgentHotkey().run())
+        raise SystemExit(agent.run())
     except Exception as exc:
         print(f"error: {exc}", file=sys.stderr)
         raise SystemExit(1)

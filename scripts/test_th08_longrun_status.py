@@ -3,9 +3,12 @@
 
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
-from th08_longrun_status import summarize_progress
+from th08_longrun_status import load_rows, summarize_progress
 
 
 class Th08LongrunStatusTests(unittest.TestCase):
@@ -54,6 +57,20 @@ class Th08LongrunStatusTests(unittest.TestCase):
             [entry["stage_route_index"] for entry in status["stage_transitions"]],
             [0, 1],
         )
+
+    def test_stream_loader_counts_corrupt_json_lines(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "trial.jsonl"
+            path.write_text(
+                json.dumps({"kind": "decision", "frame": 1})
+                + "\n"
+                + '{"kind": broken}\n',
+                encoding="utf-8",
+            )
+            diagnostics: dict[str, int] = {}
+            rows = list(load_rows(path, diagnostics))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(diagnostics["json_decode_errors"], 1)
 
 
 if __name__ == "__main__":

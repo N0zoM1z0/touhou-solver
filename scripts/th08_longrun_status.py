@@ -96,13 +96,20 @@ def summarize_progress(
     return result
 
 
-def load_rows(path: Path) -> Iterable[dict[str, object]]:
+def load_rows(
+    path: Path,
+    diagnostics: dict[str, int] | None = None,
+) -> Iterable[dict[str, object]]:
+    if diagnostics is not None:
+        diagnostics.setdefault("json_decode_errors", 0)
     with path.open("r", encoding="utf-8") as source:
         for line in source:
             try:
                 yield json.loads(line)
             except json.JSONDecodeError:
                 # A concurrent writer may not have finished its final line yet.
+                if diagnostics is not None:
+                    diagnostics["json_decode_errors"] += 1
                 continue
 
 
@@ -118,13 +125,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("input", type=Path, nargs="?")
     args = parser.parse_args(argv)
     path = args.input if args.input is not None else latest_trace()
-    status = summarize_progress(load_rows(path))
+    diagnostics: dict[str, int] = {}
+    status = summarize_progress(load_rows(path, diagnostics))
     stat = path.stat()
     status.update(
         {
             "path": str(path),
             "size_bytes": stat.st_size,
             "updated_seconds_ago": max(0.0, time.time() - stat.st_mtime),
+            **diagnostics,
         }
     )
     print(json.dumps(status, indent=2, ensure_ascii=False))

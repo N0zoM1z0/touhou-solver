@@ -349,3 +349,25 @@ Status: observed | inferred | unknown | fixed
   `enemy_manager_init_stage` selection site.
 - **Regression:** `test_every_hit_gets_a_stage_and_resource_ledger_entry`.
 - **Status:** unit-verified; stage transitions await physical observation.
+
+## CE-0023: Two hotkey daemons concurrently controlled one game and trace
+
+- **Observed symptom:** The `13:14:07` trial contained concatenated JSON
+  fragments, repeated frame numbers, conflicting decisions, and duplicate
+  `agent armed` messages. Two controllers were also issuing physical input to
+  the same PID, so neither movement nor timing was valid evidence.
+- **Why it failed:** The old daemon was launched through `python.exe` but its
+  running image name was `python3.12.exe`. Operational cleanup filtered for
+  the alias name and left PID 27824 alive before starting PID 7716. Both saw
+  the same F8 edge and chose the same second-resolution output name.
+- **Containment:** Wrote the shared stop sentinel first so both controllers
+  released keys and requested pause, then terminated both daemons and the
+  contaminated game. The raw JSONL is retained only as invalid forensic
+  evidence and must not enter solver regression results.
+- **Correction:** `AgentHotkey` now owns the named Windows mutex
+  `Local\Codex_TH08_Agent_Hotkey` for its entire lifetime and rejects any
+  second instance before registering hotkeys. The streaming status tool also
+  reports its JSON decode-error count instead of silently hiding corruption.
+- **Regression:** `test_stream_loader_counts_corrupt_json_lines`; the named
+  mutex requires physical Windows startup verification.
+- **Status:** code-fixed; pending duplicate-launch and clean-run verification.

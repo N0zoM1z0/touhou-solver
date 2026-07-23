@@ -328,3 +328,26 @@ pointers absent from the action snapshot, including two hits with positive
 modeled pipeline clearance. The fourth pointer was visible inside an already
 nonviable crowd. Accordingly, sensor freshness and future ECL execution are
 separate gates; neither may be reported as a substitute for the other.
+
+## Observation-To-Policy Blind Interval
+
+An asynchronous policy built from snapshot `s` for future epoch `e` cannot
+contain a hazard created in `(s, e]`. ECL execution is the complete solution,
+but the runtime must also avoid making this blind interval larger than its
+measured compute latency.
+
+Stage-2 frame 1,582 is the retained witness. Bullet slot 637 was absent at
+snapshot 1,498, present at 1,545, and collided before the next policy epoch
+1,594. The worker's rolling p90 solve duration was about 25 frames, while the
+lead estimator was clamped to 48. A general asynchronous scheduler should
+therefore:
+
+1. start conservatively before timing samples exist;
+2. estimate a high solve-time quantile in game frames;
+3. permit only an explicit bounded late-arrival overlap;
+4. retain enough policy horizon after arrival for a useful query;
+5. expose ECL events during the remaining irreducible interval.
+
+Reducing the scheduling interval is not evidence that ECL prediction is
+complete. It is a separate latency correction that increases the fraction of
+new native hazards included in the next rolling snapshot.

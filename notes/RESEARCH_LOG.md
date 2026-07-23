@@ -1575,3 +1575,24 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   infrastructure but rejects polling as the prediction architecture. The
   next general correction is an ECL executor that injects future
   spawn/contact-enable events into the same hazard timeline.
+
+## 2026-07-24: First Original-Game Stage-2 Coverage
+
+- Unattended run `20260724_042005` completed original Practice Stage 2 at
+  frames `2..22886` with 6,087 decisions, eight native hit edges, and hard
+  no-Bomb verification. Auto-confirm crossed the dialogue wall, Right selected
+  no-save, and the exact game PID was terminated. All four observed spells
+  (IDs 16, 20, 24, and 28) were clean; all hits occurred in nonspell waves.
+- Contact evidence was four modeled prefix collisions, two exact bullet
+  overlaps, and two exact enemy-body overlaps. One body pointer was absent
+  from its action snapshot. Planner causality was three local robust
+  exhaustions, four global viability exhaustions, and one late positive-margin
+  contact.
+- Canonical frame 1,582 exposes CE-0067. Bullet slot 637 did not exist in the
+  active global policy's frame-1,498 snapshot, appeared at frame 1,545, and
+  hit before the next policy's frame-1,594 source epoch. The fixed 48-frame
+  lead is no longer justified by the observed 25-frame rolling p90 solve
+  time.
+- Performance and automation gates passed: read latency was 12.41/15.35 ms,
+  local planning 21.48/39.09 ms, control cadence 3/4 frames, enemy snapshot
+  age 5/8 frames, and no manual transition input was required.

@@ -1280,3 +1280,26 @@ Status: observed | inferred | unknown | fixed
   spawn/contact-enable events into the hazard oracle before their native
   flags change. The visible frame-9,505 crowd remains a distinct
   viability-exhaustion failure.
+
+## CE-0067: A fixed 48-frame future-policy lead hid a newly spawned bullet
+
+- **Observed symptom:** Stage-2's canonical hit at frame 1,582 was bullet slot
+  637. It was absent at the active policy's snapshot frame 1,498, appeared by
+  frame 1,545, and hit 37 frames later. That policy targeted source frame
+  1,546; the next one targeted 1,594, after the collision.
+- **Invalid assumption:** A 48-frame minimum forecast lead remains necessary
+  after the native viability kernel reduces solve latency. The run's rolling
+  solve p90 was about 25 frames, so the fixed floor created a larger
+  observation-to-policy blind interval than computation required.
+- **Observed local fallback:** Ten-frame local MPC did not see the collision
+  while it was avoidable. Its robust certificate first became intermittently
+  unsafe at frame 1,557, and the retained contiguous warning began only 16
+  frames before impact.
+- **Correction gate:** Make the game-neutral future-policy epoch follow
+  measured solve duration and explicit late-arrival overlap, with a small
+  lattice-derived minimum. Retain solver serviceability and expired/pending
+  telemetry. ECL forecasting remains necessary for events inside even that
+  reduced solve interval.
+- **Regression requirement:** A timing test must prove that a fast, warmed
+  worker can reduce its lead below 48 frames without changing the conservative
+  initial epoch or allowing the policy to exceed its horizon.

@@ -68,6 +68,7 @@ def build_long_run_arguments(
         "15",
         "--auto-confirm-idle-frames",
         "20",
+        "--no-bomb",
         "--stop-file",
         str(stop_file),
         "--armed",

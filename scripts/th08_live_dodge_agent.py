@@ -1321,6 +1321,23 @@ def run(args: argparse.Namespace) -> int:
     try:
         identity = verify_target(reader)
         output.write(json.dumps({"kind": "identity", **identity}) + "\n")
+        output.write(
+            json.dumps(
+                {
+                    "kind": "controller_config",
+                    "bomb_policy": (
+                        "disabled"
+                        if args.no_bomb
+                        else (
+                            "normal_and_deathbomb"
+                            if args.normal_bomb
+                            else "deathbomb_only"
+                        )
+                    ),
+                }
+            )
+            + "\n"
+        )
         output.flush()
         state = observe_state(reader)
         if args.wait_gameplay:
@@ -1572,7 +1589,8 @@ def run(args: argparse.Namespace) -> int:
                 termination_reason = "resources_unavailable"
                 break
             can_bomb = (
-                args.normal_bomb
+                not args.no_bomb
+                and args.normal_bomb
                 and player["phase"] == 0
                 and not player["bomb_active"]
                 and resources["bombs"] > 0
@@ -1670,7 +1688,8 @@ def run(args: argparse.Namespace) -> int:
                 ):
                     stop_after_frame = counter_at_action + args.post_hit_frames
             can_deathbomb = (
-                phase_now == 2
+                not args.no_bomb
+                and phase_now == 2
                 and predeath_now > 0
                 and resources["bombs"] > 0
                 and counter_at_action - last_bomb_counter > 30
@@ -1696,6 +1715,8 @@ def run(args: argparse.Namespace) -> int:
             )
             if auto_confirm_event is not None:
                 decision = replace(decision, mask=auto_confirm_mask)
+            if args.no_bomb and decision.mask & BOMB:
+                raise RuntimeError("no-bomb policy produced a Bomb input")
             transitions = input_transitions(
                 previous_mask,
                 decision.mask,
@@ -2035,10 +2056,16 @@ def build_parser() -> argparse.ArgumentParser:
         default=0.0,
         help="include native projectile/item geometry within this player radius",
     )
-    parser.add_argument(
+    bomb_group = parser.add_mutually_exclusive_group()
+    bomb_group.add_argument(
         "--normal-bomb",
         action="store_true",
         help="permit a pre-hit Bomb when every next-frame move overlaps",
+    )
+    bomb_group.add_argument(
+        "--no-bomb",
+        action="store_true",
+        help="forbid normal Bomb and deathbomb input",
     )
     parser.add_argument(
         "--auto-confirm-every",

@@ -963,3 +963,19 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   evolving hazard for a shot-key edge. Wall-clock confirm now excludes only an
   active Bomb; the moving-timeline predicate remains hazard-gated. All 197
   tests pass.
+
+## 2026-07-23: THPRAC Stage Isolation And Hard No-Bomb Policy
+
+- Adopted local `thprac.v2.1.3.0.exe` as the fast stage/checkpoint harness.
+  The operator owns its menu; the existing F8 daemon takes over only after
+  gameplay begins. Original-game full runs remain the integration acceptance.
+- The first Stage-3 practice trace began at frame 233 with 8 lives, 8 Bombs,
+  and full Power. Its early Bomb consumption demonstrated that deathbomb
+  confounded planner diagnosis by changing invulnerability, bullet state, and
+  later resources.
+- F8 now always passes `--no-bomb`. Both proactive and deathbomb eligibility
+  are disabled, the final input mask has a fail-closed Bomb-bit invariant, and
+  trace provenance records `bomb_policy=disabled`.
+- For causal regression, the first hit of each fresh practice attempt is
+  authoritative. Later post-respawn hits are discovery evidence because death
+  still changes state even under the no-life-decrement patch.

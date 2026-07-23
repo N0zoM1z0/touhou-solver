@@ -27,6 +27,8 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.post_hit_frames, 0)
         self.assertEqual(parsed.auto_confirm_every, 15)
         self.assertEqual(parsed.auto_confirm_idle_frames, 20)
+        self.assertTrue(parsed.no_bomb)
+        self.assertFalse(parsed.normal_bomb)
         self.assertTrue(parsed.armed)
 
 

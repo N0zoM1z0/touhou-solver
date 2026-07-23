@@ -1551,3 +1551,27 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   the bit filter at `0x0046AFCA`.
 - CE-0065 corrects live status spell attribution: the renderer now reads the
   nested native spell record used by decision traces.
+
+## 2026-07-24: Stage-4A Sparse-Sensor Physical Differential
+
+- Complete run `20260724_040019` covered frames `2..45775`, retained 10,525
+  decisions, 27 native hit edges, and zero Bomb input. The aggregate equals
+  baseline `033341`, but phase counts moved from
+  `10/5/4/3/2/3` to `16/6/1/2/1/1` for
+  nonspell/spells 57/61/65/69/73, so one RNG sample does not support a
+  survival-improvement claim.
+- The sparse four-frame sensor passed its systems gate. Operational snapshot
+  age improved from 11/20 to 5/8 frames median/p95, main-loop read latency
+  improved from 12.72/26.03 to 11.71/15.32 ms, and decision cadence remained
+  3/4 frames. Capture wall time rose under concurrent scheduling, but it did
+  not re-enter the synchronous control path.
+- Failure evidence contains 12 bullet overlaps, 11 committed-prefix
+  collisions, and four exact enemy-body overlaps; the previous two generic
+  sensor gaps fell to zero. Three exact body pointers were absent from their
+  action snapshots. Frame 9,505 was the counterexample: 26 helpers were
+  already visible, pipeline clearance was negative, and the global viability
+  kernel had been exhausted before impact.
+- CE-0066 therefore accepts sparse sensing as general observation
+  infrastructure but rejects polling as the prediction architecture. The
+  next general correction is an ECL executor that injects future
+  spawn/contact-enable events into the same hazard timeline.

@@ -319,3 +319,12 @@ This is still observation, not prediction. A helper whose contact bit becomes
 enabled after the last scan remains absent from the oracle until the next
 snapshot. ECL event execution is required to turn that boundary into a
 future hazard before activation.
+
+The Stage-4A physical differential `20260724_040019` accepted the observation
+half of this design: snapshot age improved from 11/20 to 5/8 frames
+median/p95 without worsening 3/4-frame control cadence. It also supplied the
+prediction counterexample. Three of four stable enemy-body overlaps involved
+pointers absent from the action snapshot, including two hits with positive
+modeled pipeline clearance. The fourth pointer was visible inside an already
+nonviable crowd. Accordingly, sensor freshness and future ECL execution are
+separate gates; neither may be reported as a substitute for the other.

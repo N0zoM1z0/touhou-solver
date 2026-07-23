@@ -300,13 +300,29 @@ class Th08RunDossierTests(unittest.TestCase):
                 ]
             ],
         }
-        primary, _, _, _, enemy = _classify_death(
+        primary, contributing, _, _, enemy = _classify_death(
             row,
             window=[row],
         )
         self.assertEqual(primary, "observed_enemy_body_overlap")
         self.assertTrue(enemy["exact_same_epoch"])
         self.assertLessEqual(enemy["aabb_clearance"], 0.0)
+        self.assertFalse(enemy["present_in_action_snapshot"])
+        self.assertIn(
+            "enemy_body_absent_from_action_snapshot",
+            contributing,
+        )
+
+        row["enemy_body_pointers"] = [0x5826C0]
+        _, contributing, _, _, enemy = _classify_death(
+            row,
+            window=[row],
+        )
+        self.assertTrue(enemy["present_in_action_snapshot"])
+        self.assertNotIn(
+            "enemy_body_absent_from_action_snapshot",
+            contributing,
+        )
 
     def test_live_spell_attribution_is_gated_by_active_flag(self) -> None:
         row = {

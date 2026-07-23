@@ -1258,3 +1258,25 @@ Status: observed | inferred | unknown | fixed
 - **Correction:** Progress rendering accepts both report shapes and only shows
   the nested ID while its `active` flag is set.
 - **Regression:** `test_progress_text_reads_nested_live_spell_state`.
+
+## CE-0066: Faster sensing cannot predict a just-enabled enemy body
+
+- **Observed symptom:** The four-frame sparse-sensor Stage-4A acceptance run
+  still had 27 hits. Stable hit-edge reads found four exact enemy-body
+  overlaps. At frames 8,806, 10,483, and 10,794, the colliding pointers were
+  absent from the action snapshots even though snapshot age was only 4--6
+  frames; frame 9,505's pointer was already visible.
+- **Invalid assumption:** Reducing observation age is sufficient to make every
+  native contact hazard available to the planner.
+- **Correction:** Death evidence now retains whether the exact stable
+  contact pointer existed in the action snapshot and reports
+  `enemy_body_absent_from_action_snapshot` separately. Sparse sensing remains
+  accepted as an observation optimization: operational age fell from
+  11/20 to 5/8 frames median/p95, main-loop read p95 fell from 26.03 to
+  15.32 ms, and decision cadence stayed 3/4 frames.
+- **Regression:** `test_stable_hit_epoch_enemy_body_overlap_is_exact` covers
+  both absent and present action-snapshot pointers.
+- **Remaining correction:** Execute ECL far enough ahead to publish enemy
+  spawn/contact-enable events into the hazard oracle before their native
+  flags change. The visible frame-9,505 crowd remains a distinct
+  viability-exhaustion failure.

@@ -1417,6 +1417,16 @@ def render_markdown(dossier: dict[str, object]) -> str:
         death["observed_enemy_body_contact_candidate"] is not None
         for death in dossier["deaths"]
     )
+    body_overlaps_absent_at_action = sum(
+        death["observed_enemy_body_contact_candidate"] is not None
+        and not bool(
+            death["observed_enemy_body_contact_candidate"].get(
+                "present_in_action_snapshot",
+                False,
+            )
+        )
+        for death in dossier["deaths"]
+    )
     lines.extend(
         [
             "",
@@ -1426,7 +1436,9 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"{cause_counts.get('observed_bullet_overlap', 0)} bullet "
             f"overlaps, {cause_counts.get('observed_laser_overlap', 0)} "
             f"laser overlaps, and {body_overlaps} exact same-epoch enemy-body "
-            "overlaps.",
+            "overlaps; "
+            f"{body_overlaps_absent_at_action} of those enemy slots were "
+            "absent from the action snapshot.",
             f"- The controller decision cadence was "
             f"{_format(cadence['median'])} frames median and "
             f"{_format(cadence['p95'])} frames p95. The local plan took "

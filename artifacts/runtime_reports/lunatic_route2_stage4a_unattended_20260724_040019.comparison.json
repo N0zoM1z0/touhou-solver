@@ -1,0 +1,500 @@
+{
+  "schema": "th08-practice-comparison-v2",
+  "baseline_run_id": "lunatic_route2_stage4a_unattended_20260724_033341",
+  "candidate_run_id": "lunatic_route2_stage4a_unattended_20260724_040019",
+  "scope_compatibility": {
+    "same_stage_route_index": true,
+    "candidate_selected_frame_epoch_index": 0,
+    "candidate_frame_epoch_count": 1,
+    "candidate_pre_scope_decisions_excluded": 0,
+    "candidate_raw_summary_scope_valid": true
+  },
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 27,
+    "candidate": 27,
+    "delta": 0,
+    "reduction_fraction": 0.0
+  },
+  "robust_viability": {
+    "counts": {
+      "policy_decision_count": {
+        "baseline": 10353,
+        "candidate": 10435,
+        "delta": 82,
+        "reduction_fraction": -0.007920409543127596
+      },
+      "decision_without_query_count": {
+        "baseline": 183,
+        "candidate": 186,
+        "delta": 3,
+        "reduction_fraction": -0.01639344262295082
+      },
+      "unique_solution_count": {
+        "baseline": 672,
+        "candidate": 669,
+        "delta": -3,
+        "reduction_fraction": 0.004464285714285714
+      },
+      "query_count": {
+        "baseline": 10170,
+        "candidate": 10249,
+        "delta": 79,
+        "reduction_fraction": -0.007767944936086529
+      },
+      "available_query_count": {
+        "baseline": 10170,
+        "candidate": 10249,
+        "delta": 79,
+        "reduction_fraction": -0.007767944936086529
+      },
+      "support_uncovered_query_count": {
+        "baseline": 150,
+        "candidate": 130,
+        "delta": -20,
+        "reduction_fraction": 0.13333333333333333
+      },
+      "viable_query_count": {
+        "baseline": 6603,
+        "candidate": 6613,
+        "delta": 10,
+        "reduction_fraction": -0.0015144631228229592
+      },
+      "empty_action_set_count": {
+        "baseline": 3567,
+        "candidate": 3636,
+        "delta": 69,
+        "reduction_fraction": -0.01934398654331371
+      },
+      "constrained_decision_count": {
+        "baseline": 6487,
+        "candidate": 6508,
+        "delta": 21,
+        "reduction_fraction": -0.003237243718205642
+      },
+      "serial_worker_serviceable_count": {
+        "baseline": 10248,
+        "candidate": 10323,
+        "delta": 75,
+        "reduction_fraction": -0.007318501170960188
+      },
+      "queryable_policy_decisions": {
+        "baseline": 10171,
+        "candidate": 10248,
+        "delta": 77,
+        "reduction_fraction": -0.007570543702684102
+      },
+      "expired_policy_decisions": {
+        "baseline": 60,
+        "candidate": 53,
+        "delta": -7,
+        "reduction_fraction": 0.11666666666666667
+      }
+    },
+    "solve_ms": {
+      "median": {
+        "baseline": 266.30599999043625,
+        "candidate": 266.71510000596754,
+        "delta": 0.40910001553129405,
+        "reduction_fraction": -0.0015362027725473173
+      },
+      "p95": {
+        "baseline": 397.12839998537675,
+        "candidate": 408.3247999951709,
+        "delta": 11.19640000979416,
+        "reduction_fraction": -0.028193400447327464
+      },
+      "max": {
+        "baseline": 476.94560000672936,
+        "candidate": 473.1752000225242,
+        "delta": -3.7703999842051417,
+        "reduction_fraction": 0.007905304051765955
+      }
+    },
+    "backend_counts": {
+      "baseline": {
+        "native": 672
+      },
+      "candidate": {
+        "native": 669
+      }
+    },
+    "solver_phase_ms": {
+      "baseline": {
+        "clearance": {
+          "median": 67.75869999546558,
+          "p95": 320.7594999985304,
+          "max": 391.2660999922082
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 24.493300006724894,
+          "max": 57.26380000123754
+        },
+        "viability": {
+          "median": 153.10699999099597,
+          "p95": 327.6102000090759,
+          "max": 424.3564000062179
+        }
+      },
+      "candidate": {
+        "clearance": {
+          "median": 74.05620001372881,
+          "p95": 331.6707999911159,
+          "max": 402.1723000041675
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 26.385400007711723,
+          "max": 64.6122999896761
+        },
+        "viability": {
+          "median": 154.94959999341518,
+          "p95": 318.98629997158423,
+          "max": 424.16949998005293
+        }
+      }
+    },
+    "serial_coverage_margin_frames": {
+      "baseline": {
+        "median": 32.0,
+        "p95": 32.0,
+        "max": 32.0
+      },
+      "candidate": {
+        "median": 32.0,
+        "p95": 32.0,
+        "max": 32.0
+      }
+    }
+  },
+  "prehit_behavior": {
+    "fast_fraction": {
+      "baseline": 0.35671342685370744,
+      "candidate": 0.2766798418972332,
+      "delta": -0.08003358495647422,
+      "reduction_fraction": 0.22436381400719457
+    },
+    "bottom_8px_fraction": {
+      "baseline": 0.19238476953907815,
+      "candidate": 0.37549407114624506,
+      "delta": 0.1831093016071669,
+      "reduction_fraction": -0.9517868906455863
+    },
+    "nonpositive_pipeline_fraction": {
+      "baseline": 0.09218436873747494,
+      "candidate": 0.08300395256916997,
+      "delta": -0.009180416168304978,
+      "reduction_fraction": 0.09958755799965618
+    },
+    "negative_corridor_slack_fraction": {
+      "baseline": 0.22994652406417113,
+      "candidate": 0.10416666666666667,
+      "delta": -0.12577985739750447,
+      "reduction_fraction": 0.5469961240310078
+    }
+  },
+  "input_visible_next_observation_fraction": {
+    "baseline": 0.8549605217988329,
+    "candidate": 0.8688081149619611,
+    "delta": 0.013847593163128225,
+    "reduction_fraction": -0.016196763254042366
+  },
+  "per_phase": {
+    "nonspell": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 10,
+        "candidate": 16,
+        "delta": 6,
+        "reduction_fraction": -0.6
+      },
+      "decision_count": {
+        "baseline": 5945,
+        "candidate": 6063,
+        "delta": 118,
+        "reduction_fraction": -0.01984861227922624
+      },
+      "query_count": {
+        "baseline": 5779,
+        "candidate": 5885,
+        "delta": 106,
+        "reduction_fraction": -0.0183422737497837
+      },
+      "empty_action_set_count": {
+        "baseline": 1755,
+        "candidate": 1938,
+        "delta": 183,
+        "reduction_fraction": -0.10427350427350428
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 254.49670001398772,
+          "candidate": 252.47289999970235,
+          "delta": -2.0238000142853707,
+          "reduction_fraction": 0.007952166036628915
+        },
+        "p95": {
+          "baseline": 373.1086000043433,
+          "candidate": 372.10499998764135,
+          "delta": -1.0036000167019665,
+          "reduction_fraction": 0.0026898335141304266
+        },
+        "max": {
+          "baseline": 450.8297000138555,
+          "candidate": 473.1752000225242,
+          "delta": 22.34550000866875,
+          "reduction_fraction": -0.04956527932383781
+        }
+      }
+    },
+    "57": {
+      "spell_name": "夢境「二重大結界」",
+      "hit_count": {
+        "baseline": 5,
+        "candidate": 6,
+        "delta": 1,
+        "reduction_fraction": -0.2
+      },
+      "decision_count": {
+        "baseline": 951,
+        "candidate": 991,
+        "delta": 40,
+        "reduction_fraction": -0.04206098843322818
+      },
+      "query_count": {
+        "baseline": 932,
+        "candidate": 979,
+        "delta": 47,
+        "reduction_fraction": -0.05042918454935622
+      },
+      "empty_action_set_count": {
+        "baseline": 74,
+        "candidate": 79,
+        "delta": 5,
+        "reduction_fraction": -0.06756756756756757
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 275.65619998495094,
+          "candidate": 284.50555000745226,
+          "delta": 8.849350022501312,
+          "reduction_fraction": -0.03210285138873869
+        },
+        "p95": {
+          "baseline": 359.96439997688867,
+          "candidate": 334.4396000029519,
+          "delta": -25.52479997393675,
+          "reduction_fraction": 0.07090923428976743
+        },
+        "max": {
+          "baseline": 386.13870000699535,
+          "candidate": 356.86950001399964,
+          "delta": -29.26919999299571,
+          "reduction_fraction": 0.07579970614824534
+        }
+      }
+    },
+    "61": {
+      "spell_name": "散霊「夢想封印　寂」",
+      "hit_count": {
+        "baseline": 4,
+        "candidate": 1,
+        "delta": -3,
+        "reduction_fraction": 0.75
+      },
+      "decision_count": {
+        "baseline": 918,
+        "candidate": 880,
+        "delta": -38,
+        "reduction_fraction": 0.04139433551198257
+      },
+      "query_count": {
+        "baseline": 894,
+        "candidate": 856,
+        "delta": -38,
+        "reduction_fraction": 0.042505592841163314
+      },
+      "empty_action_set_count": {
+        "baseline": 223,
+        "candidate": 160,
+        "delta": -63,
+        "reduction_fraction": 0.2825112107623318
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 262.72970001446083,
+          "candidate": 260.18790001398884,
+          "delta": -2.5418000004719943,
+          "reduction_fraction": 0.009674581900455457
+        },
+        "p95": {
+          "baseline": 347.7435999957379,
+          "candidate": 313.93850001040846,
+          "delta": -33.805099985329434,
+          "reduction_fraction": 0.09721271645472056
+        },
+        "max": {
+          "baseline": 429.76110000745393,
+          "candidate": 363.1102000072133,
+          "delta": -66.65090000024065,
+          "reduction_fraction": 0.15508825717144858
+        }
+      }
+    },
+    "65": {
+      "spell_name": "神技「八方龍殺陣」",
+      "hit_count": {
+        "baseline": 3,
+        "candidate": 2,
+        "delta": -1,
+        "reduction_fraction": 0.3333333333333333
+      },
+      "decision_count": {
+        "baseline": 805,
+        "candidate": 782,
+        "delta": -23,
+        "reduction_fraction": 0.02857142857142857
+      },
+      "query_count": {
+        "baseline": 784,
+        "candidate": 757,
+        "delta": -27,
+        "reduction_fraction": 0.03443877551020408
+      },
+      "empty_action_set_count": {
+        "baseline": 547,
+        "candidate": 450,
+        "delta": -97,
+        "reduction_fraction": 0.1773308957952468
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 333.20584999455605,
+          "candidate": 341.7863000067882,
+          "delta": 8.580450012232177,
+          "reduction_fraction": -0.02575119858301517
+        },
+        "p95": {
+          "baseline": 412.4327000172343,
+          "candidate": 422.96820000046864,
+          "delta": 10.535499983234331,
+          "reduction_fraction": -0.025544773687426057
+        },
+        "max": {
+          "baseline": 444.7300999891013,
+          "candidate": 441.8432999809738,
+          "delta": -2.886800008127466,
+          "reduction_fraction": 0.0064911280081969055
+        }
+      }
+    },
+    "69": {
+      "spell_name": "回霊「夢想封印　侘」",
+      "hit_count": {
+        "baseline": 2,
+        "candidate": 1,
+        "delta": -1,
+        "reduction_fraction": 0.5
+      },
+      "decision_count": {
+        "baseline": 916,
+        "candidate": 925,
+        "delta": 9,
+        "reduction_fraction": -0.009825327510917031
+      },
+      "query_count": {
+        "baseline": 899,
+        "candidate": 905,
+        "delta": 6,
+        "reduction_fraction": -0.006674082313681869
+      },
+      "empty_action_set_count": {
+        "baseline": 527,
+        "candidate": 579,
+        "delta": 52,
+        "reduction_fraction": -0.09867172675521822
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 214.13619999657385,
+          "candidate": 213.20070000365376,
+          "delta": -0.9354999929200858,
+          "reduction_fraction": 0.004368714831658793
+        },
+        "p95": {
+          "baseline": 320.60940001974814,
+          "candidate": 305.8166999835521,
+          "delta": -14.792700036196038,
+          "reduction_fraction": 0.046139321040758234
+        },
+        "max": {
+          "baseline": 465.0182999903336,
+          "candidate": 395.3435000148602,
+          "delta": -69.67479997547343,
+          "reduction_fraction": 0.1498323828909997
+        }
+      }
+    },
+    "73": {
+      "spell_name": "大結界「博麗弾幕結界」",
+      "hit_count": {
+        "baseline": 3,
+        "candidate": 1,
+        "delta": -2,
+        "reduction_fraction": 0.6666666666666666
+      },
+      "decision_count": {
+        "baseline": 896,
+        "candidate": 884,
+        "delta": -12,
+        "reduction_fraction": 0.013392857142857142
+      },
+      "query_count": {
+        "baseline": 882,
+        "candidate": 867,
+        "delta": -15,
+        "reduction_fraction": 0.017006802721088437
+      },
+      "empty_action_set_count": {
+        "baseline": 441,
+        "candidate": 430,
+        "delta": -11,
+        "reduction_fraction": 0.024943310657596373
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 335.7102999871131,
+          "candidate": 382.7739499974996,
+          "delta": 47.06365001038648,
+          "reduction_fraction": -0.14019126017936628
+        },
+        "p95": {
+          "baseline": 433.06459998711944,
+          "candidate": 443.6340999964159,
+          "delta": 10.569500009296462,
+          "reduction_fraction": -0.024406289522650497
+        },
+        "max": {
+          "baseline": 476.94560000672936,
+          "candidate": 453.0949000036344,
+          "delta": -23.85070000309497,
+          "reduction_fraction": 0.05000717063488678
+        }
+      }
+    }
+  },
+  "candidate_primary_cause_counts": {
+    "modeled_committed_prefix_collision": 11,
+    "observed_bullet_overlap": 12,
+    "observed_enemy_body_overlap": 4
+  },
+  "candidate_planner_failure_counts": {
+    "robust_action_set_exhausted_before_hit": 12,
+    "global_viability_kernel_exhausted_before_hit": 14,
+    "late_collision_after_positive_causal_margin": 1
+  }
+}

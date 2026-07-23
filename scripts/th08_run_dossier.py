@@ -346,6 +346,11 @@ def _compact_decision(
         "enemy_body_snapshot_frame": int(
             row.get("enemy_body_snapshot_frame", row["frame"])
         ),
+        "enemy_body_pointers": [
+            int(body[0])
+            for body in row.get("enemy_bodies", ())
+            if isinstance(body, list) and len(body) >= 8
+        ],
         "action": str(row.get("action", "")),
         "mask": int(row.get("mask", 0)),
         "input_snapshot": {
@@ -762,6 +767,14 @@ def _classify_death(
         and bool(nearest_enemy_body.get("exact_same_epoch"))
         and float(nearest_enemy_body["aabb_clearance"]) <= 0.0
     )
+    if exact_enemy_overlap:
+        action_body_pointers = {
+            int(pointer)
+            for pointer in row.get("enemy_body_pointers", ())
+        }
+        nearest_enemy_body["present_in_action_snapshot"] = (
+            int(nearest_enemy_body["pointer"]) in action_body_pointers
+        )
     exact_overlaps = sum(
         (
             exact_enemy_overlap,
@@ -819,6 +832,11 @@ def _classify_death(
     )
     if "_fast" in _input_mask_action(active_mask):
         contributing.append("fast_mode")
+    if (
+        exact_enemy_overlap
+        and not bool(nearest_enemy_body["present_in_action_snapshot"])
+    ):
+        contributing.append("enemy_body_absent_from_action_snapshot")
     return (
         primary,
         contributing,
@@ -1093,6 +1111,9 @@ def _death_ledger(
             "active_lasers": row["active_lasers"],
             "active_items": row["active_items"],
             "active_enemy_bodies": row["active_enemy_bodies"],
+            "enemy_body_snapshot_frame": row[
+                "enemy_body_snapshot_frame"
+            ],
             "hit_contact_observation": row.get(
                 "hit_contact_observation"
             ),

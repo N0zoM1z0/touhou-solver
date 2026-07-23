@@ -42,6 +42,11 @@ ERROR_ALREADY_EXISTS = 183
 INSTANCE_MUTEX_NAME = r"Local\Codex_TH08_Agent_Hotkey"
 
 
+def one_shot_trial_finished(*, agent_started: bool, agent_alive: bool) -> bool:
+    """Return whether a one-shot daemon must exit before accepting another arm."""
+    return agent_started and not agent_alive
+
+
 def build_long_run_arguments(
     *,
     output: Path,
@@ -259,6 +264,18 @@ class AgentHotkey:
             previous = {virtual_key: False for virtual_key in keys}
             previous[VK_F10] = False
             while True:
+                if one_shot_trial_finished(
+                    agent_started=self.agent_thread is not None,
+                    agent_alive=(
+                        self.agent_thread is not None
+                        and self.agent_thread.is_alive()
+                    ),
+                ):
+                    print(
+                        "trial worker finished; one-shot daemon exiting",
+                        flush=True,
+                    )
+                    break
                 quit_pressed = bool(
                     self.user32.GetAsyncKeyState(VK_F10) & 0x8000
                 )

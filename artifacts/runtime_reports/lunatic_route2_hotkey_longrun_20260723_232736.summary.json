@@ -1,0 +1,3364 @@
+{
+  "decision_count": 19399,
+  "first_frame": 2,
+  "last_frame": 73796,
+  "frame_span": 73794,
+  "termination_reason": "route_complete",
+  "counter_gaps": 27,
+  "hit_frames": [
+    2191,
+    7662,
+    9386,
+    11743,
+    12609,
+    13624,
+    18675,
+    19795,
+    20521,
+    21909,
+    29577,
+    31092,
+    35623,
+    37977,
+    39413,
+    39868,
+    40379,
+    40767,
+    41262,
+    41815,
+    42190,
+    47035,
+    48212,
+    48588,
+    49135,
+    49631,
+    49954,
+    50519,
+    54447,
+    55624,
+    56344,
+    56744,
+    57305,
+    57769,
+    58201,
+    61023,
+    63996,
+    69720
+  ],
+  "hit_analyses": [
+    {
+      "hit_frame": 2191,
+      "window_start": 1951,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 128.0
+      },
+      "player": {
+        "x": 361.3569030761719,
+        "y": 333.3641052246094,
+        "projected_x": 361.3569030761719,
+        "projected_y": 333.3641052246094,
+        "control_origin_x": 350.043194770813,
+        "control_origin_y": 344.67781352996826,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": {
+        "frame": 2191,
+        "source_frame": 2143,
+        "lane": "right",
+        "slack": 3.0081260709518,
+        "deadline": 21,
+        "travel_frames": 17.9918739290482
+      },
+      "first_negative_gate": {
+        "frame": 2071,
+        "source_frame": 2043,
+        "lane": "right",
+        "slack": -0.7780248694579903,
+        "deadline": 19,
+        "travel_frames": 19.77802486945799
+      },
+      "minimum_gate_slack": -17.09925079345703,
+      "first_nonpositive_pipeline": {
+        "frame": 2189,
+        "clearance": -3.3888611793518066
+      },
+      "minimum_pipeline_clearance": -3.3888611793518066,
+      "nearest_bullet": {
+        "slot": 982,
+        "x": 358.0629577636719,
+        "y": 335.6056823730469,
+        "center_distance": 3.984312215946175,
+        "aabb_clearance": -0.7060546875
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 982,
+        "x": 358.0629577636719,
+        "y": 335.6056823730469,
+        "center_distance": 3.984312215946175,
+        "aabb_clearance": -0.7060546875
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 7662,
+      "window_start": 7422,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 128.0
+      },
+      "player": {
+        "x": 16.89175796508789,
+        "y": 398.6634521484375,
+        "projected_x": 14.063330888748169,
+        "projected_y": 395.8350250720978,
+        "control_origin_x": 8.406476736068726,
+        "control_origin_y": 390.17817091941833,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": {
+        "frame": 7452,
+        "source_frame": 7403,
+        "lane": "left",
+        "slack": 15.708088022757456,
+        "deadline": 22,
+        "travel_frames": 6.291911977242544
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 12.782663098359325,
+      "first_nonpositive_pipeline": {
+        "frame": 7662,
+        "clearance": -2.656439781188965
+      },
+      "minimum_pipeline_clearance": -2.656439781188965,
+      "nearest_bullet": {
+        "slot": 242,
+        "x": 9.19406509399414,
+        "y": 392.7600402832031,
+        "center_distance": 9.700760134560463,
+        "aabb_clearance": 2.844942850919205
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 9386,
+      "window_start": 9146,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 115.0
+      },
+      "player": {
+        "x": 22.207870483398438,
+        "y": 335.231689453125,
+        "projected_x": 22.207870483398438,
+        "projected_y": 335.231689453125,
+        "control_origin_x": 17.32883358001709,
+        "control_origin_y": 340.11072635650635,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 14
+      },
+      "last_nonnegative_gate": {
+        "frame": 9363,
+        "source_frame": 9314,
+        "lane": "left",
+        "slack": 19.05810546875,
+        "deadline": 22,
+        "travel_frames": 2.94189453125
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 12.066909790039062,
+      "first_nonpositive_pipeline": null,
+      "minimum_pipeline_clearance": 2.1045639514923096,
+      "nearest_bullet": {
+        "slot": 1490,
+        "x": 24.31764030456543,
+        "y": 292.1600646972656,
+        "center_distance": 43.12326504113371,
+        "aabb_clearance": 39.071624755859375
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 11743,
+      "window_start": 11503,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 112.0
+      },
+      "player": {
+        "x": 191.72378540039062,
+        "y": 421.69677734375,
+        "projected_x": 191.72378540039062,
+        "projected_y": 421.69677734375,
+        "control_origin_x": 191.72378540039062,
+        "control_origin_y": 421.69677734375,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": {
+        "frame": 11598,
+        "source_frame": 11549,
+        "lane": "right",
+        "slack": 15.595558427037687,
+        "deadline": 21,
+        "travel_frames": 5.4044415729623125
+      },
+      "first_negative_gate": {
+        "frame": 11504,
+        "source_frame": 11501,
+        "lane": "left",
+        "slack": -1.484821059046297,
+        "deadline": 19,
+        "travel_frames": 20.484821059046297
+      },
+      "minimum_gate_slack": -27.55444309884122,
+      "first_nonpositive_pipeline": {
+        "frame": 11743,
+        "clearance": -2.9455924034118652
+      },
+      "minimum_pipeline_clearance": -2.9455924034118652,
+      "nearest_bullet": {
+        "slot": 1434,
+        "x": 193.9855499267578,
+        "y": 416.6971740722656,
+        "center_distance": 5.487404818761803,
+        "aabb_clearance": 0.999603271484375
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 12609,
+      "window_start": 12369,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 97.0
+      },
+      "player": {
+        "x": 10.020963668823242,
+        "y": 29.79999542236328,
+        "projected_x": 10.020963668823242,
+        "projected_y": 29.79999542236328,
+        "control_origin_x": 10.020963668823242,
+        "control_origin_y": 17.79999542236328,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": {
+        "frame": 12609,
+        "source_frame": 12572,
+        "lane": "left",
+        "slack": 3.1237425415509286,
+        "deadline": 18,
+        "travel_frames": 14.876257458449071
+      },
+      "first_negative_gate": {
+        "frame": 12575,
+        "source_frame": 12572,
+        "lane": "left",
+        "slack": -1.4853319798685227,
+        "deadline": 21,
+        "travel_frames": 22.485331979868523
+      },
+      "minimum_gate_slack": -4.770813597720149,
+      "first_nonpositive_pipeline": {
+        "frame": 12582,
+        "clearance": -0.5493699312210083
+      },
+      "minimum_pipeline_clearance": -2.9654955863952637,
+      "nearest_bullet": {
+        "slot": 166,
+        "x": 15.24895191192627,
+        "y": 24.228713989257812,
+        "center_distance": 7.640094101311135,
+        "aabb_clearance": 1.9942117408192228
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 13624,
+      "window_start": 13384,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 91.0
+      },
+      "player": {
+        "x": 97.3032455444336,
+        "y": 426.913330078125,
+        "projected_x": 100.13167262077332,
+        "projected_y": 424.0849030017853,
+        "control_origin_x": 105.78852677345276,
+        "control_origin_y": 418.42804884910583,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": {
+        "frame": 13613,
+        "source_frame": 13598,
+        "lane": "left",
+        "slack": 1.0851655417303263,
+        "deadline": 16,
+        "travel_frames": 14.914834458269674
+      },
+      "first_negative_gate": {
+        "frame": 13403,
+        "source_frame": 13401,
+        "lane": "left",
+        "slack": -27.515674418780982,
+        "deadline": 22,
+        "travel_frames": 49.51567441878098
+      },
+      "minimum_gate_slack": -27.940676097877386,
+      "first_nonpositive_pipeline": {
+        "frame": 13620,
+        "clearance": -1.177465558052063
+      },
+      "minimum_pipeline_clearance": -1.6782944202423096,
+      "nearest_bullet": {
+        "slot": 902,
+        "x": 103.6514892578125,
+        "y": 425.06396484375,
+        "center_distance": 6.612136569564312,
+        "aabb_clearance": 2.3482437133789062
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 18675,
+      "window_start": 18435,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 84.0
+      },
+      "player": {
+        "x": 12.904325485229492,
+        "y": 430.22882080078125,
+        "projected_x": 15.732752561569214,
+        "projected_y": 427.4003937244415,
+        "control_origin_x": 21.389606714248657,
+        "control_origin_y": 421.7435395717621,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 12
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 18671,
+        "clearance": -2.1457109451293945
+      },
+      "minimum_pipeline_clearance": -2.1457109451293945,
+      "nearest_bullet": {
+        "slot": 101,
+        "x": 15.041458129882812,
+        "y": 431.93597412109375,
+        "center_distance": 2.7352711748374947,
+        "aabb_clearance": -1.8628673553466797
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 101,
+        "x": 15.041458129882812,
+        "y": 431.93597412109375,
+        "center_distance": 2.7352711748374947,
+        "aabb_clearance": -1.8628673553466797
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 19795,
+      "window_start": 19555,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 71.0
+      },
+      "player": {
+        "x": 14.53883171081543,
+        "y": 421.96502685546875,
+        "projected_x": 14.53883171081543,
+        "projected_y": 421.96502685546875,
+        "control_origin_x": 14.53883171081543,
+        "control_origin_y": 409.96502685546875,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 14
+      },
+      "last_nonnegative_gate": {
+        "frame": 19605,
+        "source_frame": 19556,
+        "lane": "left",
+        "slack": 0.8184650335814432,
+        "deadline": 21,
+        "travel_frames": 20.181534966418557
+      },
+      "first_negative_gate": {
+        "frame": 19559,
+        "source_frame": 19556,
+        "lane": "left",
+        "slack": -39.659885121290344,
+        "deadline": 20,
+        "travel_frames": 59.659885121290344
+      },
+      "minimum_gate_slack": -39.95645635271647,
+      "first_nonpositive_pipeline": {
+        "frame": 19793,
+        "clearance": -0.5083400011062622
+      },
+      "minimum_pipeline_clearance": -0.5083400011062622,
+      "nearest_bullet": {
+        "slot": 1333,
+        "x": 13.592756271362305,
+        "y": 423.20233154296875,
+        "center_distance": 1.5575562997355492,
+        "aabb_clearance": -2.7626953125
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1333,
+        "x": 13.592756271362305,
+        "y": 423.20233154296875,
+        "center_distance": 1.5575562997355492,
+        "aabb_clearance": -2.7626953125
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 20521,
+      "window_start": 20281,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 65.0
+      },
+      "player": {
+        "x": 21.126344680786133,
+        "y": 430.925537109375,
+        "projected_x": 21.126344680786133,
+        "projected_y": 430.925537109375,
+        "control_origin_x": 28.026344537734985,
+        "control_origin_y": 430.925537109375,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 20519,
+        "clearance": -2.1741080284118652
+      },
+      "minimum_pipeline_clearance": -2.1741080284118652,
+      "nearest_bullet": {
+        "slot": 1371,
+        "x": 23.163496017456055,
+        "y": 426.9425964355469,
+        "center_distance": 4.473678797112114,
+        "aabb_clearance": -0.017059326171875
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1371,
+        "x": 23.163496017456055,
+        "y": 426.9425964355469,
+        "center_distance": 4.473678797112114,
+        "aabb_clearance": -0.017059326171875
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 21909,
+      "window_start": 21669,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 59.0
+      },
+      "player": {
+        "x": 76.12759399414062,
+        "y": 345.786865234375,
+        "projected_x": 76.12759399414062,
+        "projected_y": 345.786865234375,
+        "control_origin_x": 87.44130229949951,
+        "control_origin_y": 357.1005735397339,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 27
+      },
+      "last_nonnegative_gate": {
+        "frame": 21853,
+        "source_frame": 21802,
+        "lane": "center",
+        "slack": 10.046259880065918,
+        "deadline": 20,
+        "travel_frames": 9.953740119934082
+      },
+      "first_negative_gate": {
+        "frame": 21806,
+        "source_frame": 21802,
+        "lane": "center",
+        "slack": -1.8879135036222863,
+        "deadline": 18,
+        "travel_frames": 19.887913503622286
+      },
+      "minimum_gate_slack": -2.047988176345825,
+      "first_nonpositive_pipeline": {
+        "frame": 21669,
+        "clearance": -2.07319732480051
+      },
+      "minimum_pipeline_clearance": -8.054507766100842,
+      "nearest_bullet": {
+        "slot": 1237,
+        "x": 75.71882629394531,
+        "y": 345.5976867675781,
+        "center_distance": 0.4504214970697793,
+        "aabb_clearance": -4.5912322998046875
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1237,
+        "x": 75.71882629394531,
+        "y": 345.5976867675781,
+        "center_distance": 0.4504214970697793,
+        "aabb_clearance": -4.5912322998046875
+      },
+      "active_lasers_at_observation": 210
+    },
+    {
+      "hit_frame": 29577,
+      "window_start": 29337,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 47.0
+      },
+      "player": {
+        "x": 242.74734497070312,
+        "y": 429.40960693359375,
+        "projected_x": 242.74734497070312,
+        "projected_y": 429.40960693359375,
+        "control_origin_x": 247.62638187408447,
+        "control_origin_y": 424.5305700302124,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 29370,
+        "clearance": -0.1857052743434906
+      },
+      "minimum_pipeline_clearance": -7.1680720934038336,
+      "nearest_bullet": {
+        "slot": 205,
+        "x": 242.064697265625,
+        "y": 426.3783264160156,
+        "center_distance": 3.107196399569415,
+        "aabb_clearance": -0.968719482421875
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 205,
+        "x": 242.064697265625,
+        "y": 426.3783264160156,
+        "center_distance": 3.107196399569415,
+        "aabb_clearance": -0.968719482421875
+      },
+      "active_lasers_at_observation": 33
+    },
+    {
+      "hit_frame": 31092,
+      "window_start": 30852,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 32.0
+      },
+      "player": {
+        "x": 252.77978515625,
+        "y": 425.70550537109375,
+        "projected_x": 255.07978510856628,
+        "projected_y": 425.70550537109375,
+        "control_origin_x": 261.97978496551514,
+        "control_origin_y": 425.70550537109375,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 31084,
+        "clearance": -0.812261700630188
+      },
+      "minimum_pipeline_clearance": -3.6942195892333984,
+      "nearest_bullet": {
+        "slot": 424,
+        "x": 257.4277038574219,
+        "y": 423.3399963378906,
+        "center_distance": 5.215245079463556,
+        "aabb_clearance": 0.647918701171875
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 33
+    },
+    {
+      "hit_frame": 35623,
+      "window_start": 35383,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 17.0
+      },
+      "player": {
+        "x": 9.648040771484375,
+        "y": 422.29998779296875,
+        "projected_x": 9.648040771484375,
+        "projected_y": 422.29998779296875,
+        "control_origin_x": 21.648040771484375,
+        "control_origin_y": 422.29998779296875,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": {
+        "frame": 35583,
+        "source_frame": 35534,
+        "lane": "left",
+        "slack": 21.0,
+        "deadline": 21,
+        "travel_frames": 0.0
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 10.955422401428223,
+      "first_nonpositive_pipeline": {
+        "frame": 35623,
+        "clearance": -2.0161831378936768
+      },
+      "minimum_pipeline_clearance": -2.0161831378936768,
+      "nearest_bullet": {
+        "slot": 1102,
+        "x": 17.00930404663086,
+        "y": 406.95343017578125,
+        "center_distance": 17.02072347768085,
+        "aabb_clearance": 8.354372221238425
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 37977,
+      "window_start": 37737,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 13.0
+      },
+      "player": {
+        "x": 20.66678810119629,
+        "y": 428.8525390625,
+        "projected_x": 20.66678810119629,
+        "projected_y": 428.8525390625,
+        "control_origin_x": 28.66678810119629,
+        "control_origin_y": 428.8525390625,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 14
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 37975,
+        "clearance": -0.718725323677063
+      },
+      "minimum_pipeline_clearance": -4.475194931030273,
+      "nearest_bullet": {
+        "slot": 651,
+        "x": 9.935644149780273,
+        "y": 423.0375061035156,
+        "center_distance": 12.205411046748369,
+        "aabb_clearance": 5.788807279231466
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 39413,
+      "window_start": 39173,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 12.0
+      },
+      "player": {
+        "x": 372.677734375,
+        "y": 373.54486083984375,
+        "projected_x": 372.677734375,
+        "projected_y": 373.54486083984375,
+        "control_origin_x": 372.677734375,
+        "control_origin_y": 380.4448606967926,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": {
+        "frame": 39324,
+        "source_frame": 39276,
+        "lane": "right",
+        "slack": 18.929807588384183,
+        "deadline": 22,
+        "travel_frames": 3.0701924116158175
+      },
+      "first_negative_gate": {
+        "frame": 39278,
+        "source_frame": 39276,
+        "lane": "right",
+        "slack": -3.296504990441374,
+        "deadline": 21,
+        "travel_frames": 24.296504990441374
+      },
+      "minimum_gate_slack": -3.296504990441374,
+      "first_nonpositive_pipeline": {
+        "frame": 39234,
+        "clearance": -4.3264603099989065
+      },
+      "minimum_pipeline_clearance": -8.199997785868856,
+      "nearest_bullet": {
+        "slot": 713,
+        "x": 355.0306091308594,
+        "y": 333.40606689453125,
+        "center_distance": 43.846822105674214,
+        "aabb_clearance": 37.98645200675581
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 28
+    },
+    {
+      "hit_frame": 39868,
+      "window_start": 39628,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 1.0
+      },
+      "player": {
+        "x": 18.2270450592041,
+        "y": 394.9364013671875,
+        "projected_x": 18.2270450592041,
+        "projected_y": 394.9364013671875,
+        "control_origin_x": 18.2270450592041,
+        "control_origin_y": 406.9364013671875,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": {
+        "frame": 39715,
+        "source_frame": 39668,
+        "lane": "left",
+        "slack": 21.143478393554688,
+        "deadline": 23,
+        "travel_frames": 1.8565216064453125
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 9.5658387931481,
+      "first_nonpositive_pipeline": {
+        "frame": 39629,
+        "clearance": -4.6169246409523845
+      },
+      "minimum_pipeline_clearance": -8.107952529732442,
+      "nearest_bullet": {
+        "slot": 679,
+        "x": 28.43954849243164,
+        "y": 357.6903381347656,
+        "center_distance": 38.620777473883834,
+        "aabb_clearance": 33.240597959369026
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 28
+    },
+    {
+      "hit_frame": 40379,
+      "window_start": 40139,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 0.0
+      },
+      "player": {
+        "x": 315.08587646484375,
+        "y": 323.33013916015625,
+        "projected_x": 315.08587646484375,
+        "projected_y": 323.33013916015625,
+        "control_origin_x": 315.08587646484375,
+        "control_origin_y": 311.33013916015625,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 40253,
+        "clearance": -4.833693460370362
+      },
+      "minimum_pipeline_clearance": -8.03830505409532,
+      "nearest_bullet": {
+        "slot": 469,
+        "x": 311.45953369140625,
+        "y": 316.65875244140625,
+        "center_distance": 7.593270880297651,
+        "aabb_clearance": 2.17138671875
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 28
+    },
+    {
+      "hit_frame": 40767,
+      "window_start": 40527,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 0.0
+      },
+      "player": {
+        "x": 359.02301025390625,
+        "y": 422.03155517578125,
+        "projected_x": 359.02301025390625,
+        "projected_y": 422.03155517578125,
+        "control_origin_x": 359.02301025390625,
+        "control_origin_y": 410.03155517578125,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": {
+        "frame": 40647,
+        "source_frame": 40597,
+        "lane": "right",
+        "slack": 14.065200987543255,
+        "deadline": 21,
+        "travel_frames": 6.934799012456745
+      },
+      "first_negative_gate": {
+        "frame": 40601,
+        "source_frame": 40597,
+        "lane": "right",
+        "slack": -29.08480474376813,
+        "deadline": 19,
+        "travel_frames": 48.08480474376813
+      },
+      "minimum_gate_slack": -29.084808521193338,
+      "first_nonpositive_pipeline": {
+        "frame": 40641,
+        "clearance": -2.7147881320139375
+      },
+      "minimum_pipeline_clearance": -8.199994751675284,
+      "nearest_bullet": {
+        "slot": 1174,
+        "x": 353.3365478515625,
+        "y": 406.9794616699219,
+        "center_distance": 16.09041247334583,
+        "aabb_clearance": 10.618586082364022
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 28
+    },
+    {
+      "hit_frame": 41262,
+      "window_start": 41022,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 0.0
+      },
+      "player": {
+        "x": 45.25032424926758,
+        "y": 428.747314453125,
+        "projected_x": 45.25032424926758,
+        "projected_y": 428.747314453125,
+        "control_origin_x": 36.76504302024841,
+        "control_origin_y": 420.26203322410583,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": {
+        "frame": 41088,
+        "source_frame": 41039,
+        "lane": "left",
+        "slack": 12.789812491116141,
+        "deadline": 22,
+        "travel_frames": 9.210187508883859
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 6.075292504906097,
+      "first_nonpositive_pipeline": {
+        "frame": 41029,
+        "clearance": -7.951285641647873
+      },
+      "minimum_pipeline_clearance": -8.199994237174526,
+      "nearest_bullet": {
+        "slot": 908,
+        "x": 76.23463439941406,
+        "y": 364.3190002441406,
+        "center_distance": 71.49150402175134,
+        "aabb_clearance": 65.51962704457276
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 28
+    },
+    {
+      "hit_frame": 41815,
+      "window_start": 41575,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 1.0
+      },
+      "player": {
+        "x": 334.4036865234375,
+        "y": 407.01177978515625,
+        "projected_x": 334.4036865234375,
+        "projected_y": 407.01177978515625,
+        "control_origin_x": 325.91840529441833,
+        "control_origin_y": 415.4970610141754,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": {
+        "frame": 41720,
+        "source_frame": 41672,
+        "lane": "right",
+        "slack": 21.271499633789062,
+        "deadline": 22,
+        "travel_frames": 0.7285003662109375
+      },
+      "first_negative_gate": {
+        "frame": 41674,
+        "source_frame": 41672,
+        "lane": "right",
+        "slack": -2.6088891664644756,
+        "deadline": 21,
+        "travel_frames": 23.608889166464476
+      },
+      "minimum_gate_slack": -2.6088891664644756,
+      "first_nonpositive_pipeline": {
+        "frame": 41659,
+        "clearance": -0.9935846897302293
+      },
+      "minimum_pipeline_clearance": -5.975496145761702,
+      "nearest_bullet": {
+        "slot": 688,
+        "x": 306.29083251953125,
+        "y": 359.62884521484375,
+        "center_distance": 55.09514541898826,
+        "aabb_clearance": 48.95419237993304
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 28
+    },
+    {
+      "hit_frame": 42190,
+      "window_start": 41950,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 0.0
+      },
+      "player": {
+        "x": 56.15240478515625,
+        "y": 411.795166015625,
+        "projected_x": 56.15240478515625,
+        "projected_y": 411.795166015625,
+        "control_origin_x": 56.15240478515625,
+        "control_origin_y": 418.69516587257385,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": {
+        "frame": 42108,
+        "source_frame": 42060,
+        "lane": "left",
+        "slack": 17.904741287231445,
+        "deadline": 22,
+        "travel_frames": 4.095258712768555
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 11.904741287231445,
+      "first_nonpositive_pipeline": {
+        "frame": 42048,
+        "clearance": -7.680682283506287
+      },
+      "minimum_pipeline_clearance": -7.680682283506287,
+      "nearest_bullet": {
+        "slot": 1417,
+        "x": 26.700536727905273,
+        "y": 417.5255126953125,
+        "center_distance": 30.004156464248847,
+        "aabb_clearance": 24.98218310113589
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 32
+    },
+    {
+      "hit_frame": 47035,
+      "window_start": 46795,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 9.0
+      },
+      "player": {
+        "x": 28.856613159179688,
+        "y": 16.952693939208984,
+        "projected_x": 28.856613159179688,
+        "projected_y": 16.952693939208984,
+        "control_origin_x": 34.51346731185913,
+        "control_origin_y": 22.609548091888428,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 47033,
+        "clearance": -0.9957783222198486
+      },
+      "minimum_pipeline_clearance": -5.274624824523926,
+      "nearest_bullet": {
+        "slot": 957,
+        "x": 36.3928108215332,
+        "y": 18.905364990234375,
+        "center_distance": 7.785062584178447,
+        "aabb_clearance": 3.0361976623535156
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 48212,
+      "window_start": 47972,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 8.0
+      },
+      "player": {
+        "x": 173.47039794921875,
+        "y": 428.747314453125,
+        "projected_x": 173.47039794921875,
+        "projected_y": 428.747314453125,
+        "control_origin_x": 173.47039794921875,
+        "control_origin_y": 428.747314453125,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": {
+        "frame": 48075,
+        "source_frame": 48028,
+        "lane": "center",
+        "slack": 1.5,
+        "deadline": 16,
+        "travel_frames": 14.5
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 1.5,
+      "first_nonpositive_pipeline": {
+        "frame": 48018,
+        "clearance": -6.4855111455163135
+      },
+      "minimum_pipeline_clearance": -6.4855111455163135,
+      "nearest_bullet": {
+        "slot": 666,
+        "x": 174.27200317382812,
+        "y": 423.73822021484375,
+        "center_distance": 5.072829193271095,
+        "aabb_clearance": 1.00909423828125
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 52
+    },
+    {
+      "hit_frame": 48588,
+      "window_start": 48348,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 8.0
+      },
+      "player": {
+        "x": 213.35467529296875,
+        "y": 420.66839599609375,
+        "projected_x": 213.35467529296875,
+        "projected_y": 420.66839599609375,
+        "control_origin_x": 213.35467529296875,
+        "control_origin_y": 420.66839599609375,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 48469,
+        "clearance": -4.329476947934909
+      },
+      "minimum_pipeline_clearance": -4.329476947934909,
+      "nearest_bullet": {
+        "slot": 1237,
+        "x": 211.8385467529297,
+        "y": 420.49365234375,
+        "center_distance": 1.5261654870804189,
+        "aabb_clearance": -2.4838714599609375
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1237,
+        "x": 211.8385467529297,
+        "y": 420.49365234375,
+        "center_distance": 1.5261654870804189,
+        "aabb_clearance": -2.4838714599609375
+      },
+      "active_lasers_at_observation": 52
+    },
+    {
+      "hit_frame": 49135,
+      "window_start": 48895,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 1.0
+      },
+      "player": {
+        "x": 160.21360778808594,
+        "y": 431.28631591796875,
+        "projected_x": 160.21360778808594,
+        "projected_y": 431.28631591796875,
+        "control_origin_x": 160.21360778808594,
+        "control_origin_y": 424.3863160610199,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 28
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 48918,
+        "clearance": -6.7992081454238305
+      },
+      "minimum_pipeline_clearance": -6.7992081454238305,
+      "nearest_bullet": {
+        "slot": 855,
+        "x": 158.53225708007812,
+        "y": 426.5986633300781,
+        "center_distance": 4.98006295021218,
+        "aabb_clearance": 0.687652587890625
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 52
+    },
+    {
+      "hit_frame": 49631,
+      "window_start": 49391,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 0.0
+      },
+      "player": {
+        "x": 243.32656860351562,
+        "y": 418.826416015625,
+        "projected_x": 243.32656860351562,
+        "projected_y": 414.826416015625,
+        "control_origin_x": 243.32656860351562,
+        "control_origin_y": 406.826416015625,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 49612,
+        "clearance": -0.03029770777484142
+      },
+      "minimum_pipeline_clearance": -1.754156231880188,
+      "nearest_bullet": {
+        "slot": 112,
+        "x": 239.07960510253906,
+        "y": 413.8254699707031,
+        "center_distance": 6.560957271835174,
+        "aabb_clearance": 1.0309626354331882
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 52
+    },
+    {
+      "hit_frame": 49954,
+      "window_start": 49714,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 2.0
+      },
+      "player": {
+        "x": 185.91888427734375,
+        "y": 402.68109130859375,
+        "projected_x": 185.91888427734375,
+        "projected_y": 402.68109130859375,
+        "control_origin_x": 185.91888427734375,
+        "control_origin_y": 402.68109130859375,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 49817,
+        "clearance": -3.97198981793166
+      },
+      "minimum_pipeline_clearance": -3.97198981793166,
+      "nearest_bullet": {
+        "slot": 785,
+        "x": 185.4984893798828,
+        "y": 396.8421936035156,
+        "center_distance": 5.854012152377016,
+        "aabb_clearance": 1.838897705078125
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 52
+    },
+    {
+      "hit_frame": 50519,
+      "window_start": 50279,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 2.0
+      },
+      "player": {
+        "x": 214.44871520996094,
+        "y": 431.837890625,
+        "projected_x": 214.44871520996094,
+        "projected_y": 431.837890625,
+        "control_origin_x": 205.96343398094177,
+        "control_origin_y": 423.35260939598083,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 50385,
+        "clearance": -1.0415307579204285
+      },
+      "minimum_pipeline_clearance": -5.2661382398153025,
+      "nearest_bullet": {
+        "slot": 396,
+        "x": 213.310791015625,
+        "y": 427.8008728027344,
+        "center_distance": 4.1943276421073,
+        "aabb_clearance": 0.037017822265625
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 52
+    },
+    {
+      "hit_frame": 54447,
+      "window_start": 54207,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 18.0
+      },
+      "player": {
+        "x": 18.32669448852539,
+        "y": 428.927978515625,
+        "projected_x": 21.155121564865112,
+        "projected_y": 426.0995514392853,
+        "control_origin_x": 26.811975717544556,
+        "control_origin_y": 420.44269728660583,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 54378,
+        "clearance": -0.9658862352371216
+      },
+      "minimum_pipeline_clearance": -1.2266579866409302,
+      "nearest_bullet": {
+        "slot": 1300,
+        "x": 15.001717567443848,
+        "y": 424.4077453613281,
+        "center_distance": 5.611415088454033,
+        "aabb_clearance": 0.520233154296875
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 55624,
+      "window_start": 55384,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 11.0
+      },
+      "player": {
+        "x": 367.8502197265625,
+        "y": 355.13201904296875,
+        "projected_x": 367.8502197265625,
+        "projected_y": 355.13201904296875,
+        "control_origin_x": 367.8502197265625,
+        "control_origin_y": 355.13201904296875,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 55465,
+        "clearance": -0.47316282987594604
+      },
+      "minimum_pipeline_clearance": -3.610156297683716,
+      "nearest_bullet": {
+        "slot": 317,
+        "x": 368.7886657714844,
+        "y": 351.5971984863281,
+        "center_distance": 3.6572718448152917,
+        "aabb_clearance": -0.465179443359375
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 317,
+        "x": 368.7886657714844,
+        "y": 351.5971984863281,
+        "center_distance": 3.6572718448152917,
+        "aabb_clearance": -0.465179443359375
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 56344,
+      "window_start": 56104,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 2.0
+      },
+      "player": {
+        "x": 220.14523315429688,
+        "y": 207.65524291992188,
+        "projected_x": 220.14523315429688,
+        "projected_y": 207.65524291992188,
+        "control_origin_x": 220.14523315429688,
+        "control_origin_y": 207.65524291992188,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 56155,
+        "clearance": -0.20238037407398224
+      },
+      "minimum_pipeline_clearance": -3.7739434242248535,
+      "nearest_bullet": {
+        "slot": 695,
+        "x": 220.544189453125,
+        "y": 210.9600830078125,
+        "center_distance": 3.3288337499646254,
+        "aabb_clearance": -0.695159912109375
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 695,
+        "x": 220.544189453125,
+        "y": 210.9600830078125,
+        "center_distance": 3.3288337499646254,
+        "aabb_clearance": -0.695159912109375
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 56744,
+      "window_start": 56504,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 9.0
+      },
+      "player": {
+        "x": 70.41375732421875,
+        "y": 420.2783203125,
+        "projected_x": 70.41375732421875,
+        "projected_y": 420.2783203125,
+        "control_origin_x": 70.41375732421875,
+        "control_origin_y": 432.0,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": {
+        "frame": 56742,
+        "source_frame": 56693,
+        "lane": "left",
+        "slack": 2.1042834096031022,
+        "deadline": 21,
+        "travel_frames": 18.895716590396898
+      },
+      "first_negative_gate": {
+        "frame": 56696,
+        "source_frame": 56693,
+        "lane": "left",
+        "slack": -1.820177948267478,
+        "deadline": 20,
+        "travel_frames": 21.820177948267478
+      },
+      "minimum_gate_slack": -2.8957165903968978,
+      "first_nonpositive_pipeline": {
+        "frame": 56740,
+        "clearance": -1.1146596670150757
+      },
+      "minimum_pipeline_clearance": -2.815183639526367,
+      "nearest_bullet": {
+        "slot": 344,
+        "x": 71.88141632080078,
+        "y": 419.749755859375,
+        "center_distance": 1.5599369574939577,
+        "aabb_clearance": -2.5323410034179688
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 344,
+        "x": 71.88141632080078,
+        "y": 419.749755859375,
+        "center_distance": 1.5599369574939577,
+        "aabb_clearance": -2.5323410034179688
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 57305,
+      "window_start": 57065,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 2.0
+      },
+      "player": {
+        "x": 359.7192077636719,
+        "y": 395.53228759765625,
+        "projected_x": 363.7192077636719,
+        "projected_y": 395.53228759765625,
+        "control_origin_x": 371.7192077636719,
+        "control_origin_y": 395.53228759765625,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": {
+        "frame": 57184,
+        "source_frame": 57136,
+        "lane": "right",
+        "slack": 21.272597896555492,
+        "deadline": 22,
+        "travel_frames": 0.7274021034445067
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 13.422920227050781,
+      "first_nonpositive_pipeline": {
+        "frame": 57290,
+        "clearance": -0.06570947170257568
+      },
+      "minimum_pipeline_clearance": -3.296496629714966,
+      "nearest_bullet": {
+        "slot": 418,
+        "x": 364.0690002441406,
+        "y": 394.6287841796875,
+        "center_distance": 4.442635822282049,
+        "aabb_clearance": 0.34979248046875
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 57769,
+      "window_start": 57529,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 10.0
+      },
+      "player": {
+        "x": 363.806640625,
+        "y": 430.30126953125,
+        "projected_x": 363.806640625,
+        "projected_y": 430.30126953125,
+        "control_origin_x": 368.68567752838135,
+        "control_origin_y": 425.42223262786865,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": {
+        "frame": 57574,
+        "source_frame": 57524,
+        "lane": "center",
+        "slack": 9.159300326063722,
+        "deadline": 21,
+        "travel_frames": 11.840699673936278
+      },
+      "first_negative_gate": {
+        "frame": 57538,
+        "source_frame": 57524,
+        "lane": "center",
+        "slack": -0.47312026350277847,
+        "deadline": 18,
+        "travel_frames": 18.47312026350278
+      },
+      "minimum_gate_slack": -0.47312026350277847,
+      "first_nonpositive_pipeline": {
+        "frame": 57767,
+        "clearance": -0.4034780263900757
+      },
+      "minimum_pipeline_clearance": -1.1371948719024658,
+      "nearest_bullet": {
+        "slot": 99,
+        "x": 364.9991149902344,
+        "y": 429.1459045410156,
+        "center_distance": 1.6603804902492691,
+        "aabb_clearance": -2.807525634765625
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 99,
+        "x": 364.9991149902344,
+        "y": 429.1459045410156,
+        "center_distance": 1.6603804902492691,
+        "aabb_clearance": -2.807525634765625
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 58201,
+      "window_start": 57961,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 9.0
+      },
+      "player": {
+        "x": 253.75668334960938,
+        "y": 427.30194091796875,
+        "projected_x": 256.5851104259491,
+        "projected_y": 424.473513841629,
+        "control_origin_x": 262.24196457862854,
+        "control_origin_y": 418.8166596889496,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 28
+      },
+      "last_nonnegative_gate": {
+        "frame": 58111,
+        "source_frame": 58064,
+        "lane": "right",
+        "slack": 20.56528720611976,
+        "deadline": 23,
+        "travel_frames": 2.4347127938802418
+      },
+      "first_negative_gate": {
+        "frame": 58066,
+        "source_frame": 58064,
+        "lane": "right",
+        "slack": -4.417619622027225,
+        "deadline": 21,
+        "travel_frames": 25.417619622027225
+      },
+      "minimum_gate_slack": -4.417620983735279,
+      "first_nonpositive_pipeline": {
+        "frame": 58181,
+        "clearance": -1.1800442934036255
+      },
+      "minimum_pipeline_clearance": -1.5273336172103882,
+      "nearest_bullet": {
+        "slot": 1270,
+        "x": 256.5757751464844,
+        "y": 429.1578063964844,
+        "center_distance": 3.375131883875643,
+        "aabb_clearance": -1.180908203125
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1270,
+        "x": 256.5757751464844,
+        "y": 429.1578063964844,
+        "center_distance": 3.375131883875643,
+        "aabb_clearance": -1.180908203125
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 61023,
+      "window_start": 60783,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 18.0
+      },
+      "player": {
+        "x": 364.10198974609375,
+        "y": 428.0594482421875,
+        "projected_x": 364.10198974609375,
+        "projected_y": 428.0594482421875,
+        "control_origin_x": 364.10198974609375,
+        "control_origin_y": 416.0594482421875,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 1
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 60950,
+        "clearance": -2.7558345794677734
+      },
+      "minimum_pipeline_clearance": -2.7605643272399902,
+      "nearest_bullet": {
+        "slot": 216,
+        "x": 359.1468505859375,
+        "y": 429.6327209472656,
+        "center_distance": 5.198902874747501,
+        "aabb_clearance": 0.95513916015625
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 63996,
+      "window_start": 63756,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 18.0
+      },
+      "player": {
+        "x": 364.400390625,
+        "y": 427.77764892578125,
+        "projected_x": 364.400390625,
+        "projected_y": 427.77764892578125,
+        "control_origin_x": 352.400390625,
+        "control_origin_y": 427.77764892578125,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 1
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 63793,
+        "clearance": -1.0704522132873535
+      },
+      "minimum_pipeline_clearance": -3.969874382019043,
+      "nearest_bullet": {
+        "slot": 482,
+        "x": 360.3337707519531,
+        "y": 432.74713134765625,
+        "center_distance": 6.421304597446254,
+        "aabb_clearance": 0.9717686832829082
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 69720,
+      "window_start": 69480,
+      "stage_route_index": 7,
+      "stage_label": "Final B / Kaguya",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 18.0
+      },
+      "player": {
+        "x": 17.49626922607422,
+        "y": 391.912353515625,
+        "projected_x": 17.49626922607422,
+        "projected_y": 391.912353515625,
+        "control_origin_x": 25.981550455093384,
+        "control_origin_y": 400.39763474464417,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 1
+      },
+      "last_nonnegative_gate": {
+        "frame": 69578,
+        "source_frame": 69546,
+        "lane": "left",
+        "slack": 0.8084874587917454,
+        "deadline": 22,
+        "travel_frames": 21.191512541208255
+      },
+      "first_negative_gate": {
+        "frame": 69481,
+        "source_frame": 69450,
+        "lane": "center",
+        "slack": -30.9969312782409,
+        "deadline": 16,
+        "travel_frames": 46.9969312782409
+      },
+      "minimum_gate_slack": -30.9969312782409,
+      "first_nonpositive_pipeline": {
+        "frame": 69720,
+        "clearance": -2.2542030811309814
+      },
+      "minimum_pipeline_clearance": -2.2542030811309814,
+      "nearest_bullet": {
+        "slot": 266,
+        "x": 19.505615234375,
+        "y": 397.7467346191406,
+        "center_distance": 6.170694794116339,
+        "aabb_clearance": 1.834381103515625
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    }
+  ],
+  "resources": {
+    "bombs": [
+      3.0,
+      4.0
+    ],
+    "lives": [
+      8.0,
+      8.0
+    ],
+    "power": [
+      128.0,
+      18.0
+    ]
+  },
+  "local_latency_ms": {
+    "read": {
+      "median": 8.672500000102445,
+      "p95": 13.484800001606345,
+      "max": 29.883800001698546
+    },
+    "plan": {
+      "median": 15.909800000372343,
+      "p95": 33.27030000218656,
+      "max": 67.79070000629872
+    }
+  },
+  "frame_lag": {
+    "snapshot": {
+      "median": 0.0,
+      "p95": 1.0,
+      "max": 2.0
+    },
+    "action": {
+      "median": 1.0,
+      "p95": 3.0,
+      "max": 1802.0
+    },
+    "modeled_control_delays": [
+      2,
+      3,
+      4
+    ]
+  },
+  "corridor": {
+    "record_count": 19149,
+    "unique_solution_count": 985,
+    "stale_record_count": 271,
+    "stale_fraction": 0.014152175048305394,
+    "solve_latency_ms": {
+      "median": 194.75589999638032,
+      "p95": 363.66800000541843,
+      "max": 568.4698999975808
+    },
+    "lane_transitions": [
+      {
+        "source_frame": 82,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 372,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 420,
+        "lane": "center",
+        "bottleneck_clearance": 12.180990219116211
+      },
+      {
+        "source_frame": 468,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 715,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 763,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 861,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 909,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 1007,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 1104,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 1153,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 1202,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 1251,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 1299,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 1348,
+        "lane": "right",
+        "bottleneck_clearance": 6.732958793640137
+      },
+      {
+        "source_frame": 1398,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 1599,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 1746,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 1845,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 1895,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 1945,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 2241,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 2290,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 2339,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 2487,
+        "lane": "center",
+        "bottleneck_clearance": 13.450536727905273
+      },
+      {
+        "source_frame": 2538,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 2587,
+        "lane": "right",
+        "bottleneck_clearance": 29.524765014648438
+      },
+      {
+        "source_frame": 2636,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 2686,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 2738,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 2787,
+        "lane": "right",
+        "bottleneck_clearance": 5.032740592956543
+      },
+      {
+        "source_frame": 2884,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 2982,
+        "lane": "right",
+        "bottleneck_clearance": 2.0704097747802734
+      },
+      {
+        "source_frame": 3031,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 3081,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 3130,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 3424,
+        "lane": "center",
+        "bottleneck_clearance": 8.460598945617676
+      },
+      {
+        "source_frame": 3473,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 3523,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 5350,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 7208,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7256,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 7403,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7453,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 7750,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 7799,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 7847,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7946,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 8188,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 8236,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 8285,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 8333,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 8969,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 9018,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 9068,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 9117,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 9314,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 9363,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 9460,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 9509,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 9584,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 11549,
+        "lane": "right",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 11598,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 11843,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 11891,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 11940,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 12036,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 12279,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 12524,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 12620,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 12819,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 12867,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 12916,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 12965,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 13013,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 13062,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 13110,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13255,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 13401,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13449,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 13500,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13648,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 13746,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13844,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 13939,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 13989,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 14087,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 14135,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 14184,
+        "lane": "left",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 14232,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 14280,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 14328,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 14376,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 18431,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 18724,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 18773,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 18821,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 18869,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 19556,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19605,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 19947,
+        "lane": "left",
+        "bottleneck_clearance": 26.991594314575195
+      },
+      {
+        "source_frame": 19998,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 20047,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 20097,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 20195,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 20243,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 20631,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 20681,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 20914,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 21155,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 21503,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 21553,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 21802,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 21852,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 22005,
+        "lane": "left",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 22104,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 22593,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 22642,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 22788,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 22839,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 24824,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 25018,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 25066,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 25114,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 25406,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 25792,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 25888,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 26036,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 26085,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 26329,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 26378,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 26525,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 26574,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 27110,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 27160,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 27355,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 27405,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 27795,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 27843,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 27941,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 28086,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 28134,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 28182,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 28230,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 28280,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 28472,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 28568,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 28616,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 28665,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 28713,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 34950,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 35049,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 35097,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 35145,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 35243,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 35341,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 35389,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 35583,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 35729,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 35875,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 35924,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 36264,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 36653,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 36701,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 36798,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 36846,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 36943,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 36992,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 37381,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 37429,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 38111,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 38160,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 38208,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 38257,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 38305,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 38403,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 38501,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 38550,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 38646,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 38791,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 39276,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 39324,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 39522,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 39570,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 39620,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 39716,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 40006,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 40058,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 40500,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 40548,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 40597,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 40647,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 40891,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 40991,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 41039,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 41088,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 41672,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 41720,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 41916,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 42109,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 42303,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 44419,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 44467,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 44757,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 44805,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 44951,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 44999,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 46452,
+        "lane": "center",
+        "bottleneck_clearance": 35.89036178588867
+      },
+      {
+        "source_frame": 46500,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 46549,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 46597,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 47082,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 47130,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 47567,
+        "lane": "center",
+        "bottleneck_clearance": 47.07802963256836
+      },
+      {
+        "source_frame": 47615,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 47883,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 48076,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 52775,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 52922,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 52970,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 53018,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 53066,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 53114,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 53650,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 53796,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 54091,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 54139,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 54578,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 54726,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 54973,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 55025,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 55270,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 55320,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 55760,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 55859,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 55909,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 56449,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 56596,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 56693,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 56742,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 56840,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 56937,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 56986,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 57136,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 57185,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 57426,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 57573,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 57916,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 58014,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 58064,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 58112,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 58307,
+        "lane": "center",
+        "bottleneck_clearance": 31.525165557861328
+      },
+      {
+        "source_frame": 60721,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 60769,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 61111,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 61195,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 61243,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 63215,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 63264,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 64166,
+        "lane": "right",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 66187,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 66236,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 69084,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 69253,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 69302,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 69450,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 69498,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 69546,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 69595,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 69840,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 69913,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 71914,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 71962,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 72010,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 72107,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 72157,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 73519,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 73568,
+        "lane": "none",
+        "bottleneck_clearance": -Infinity
+      },
+      {
+        "source_frame": 73764,
+        "lane": "left",
+        "bottleneck_clearance": 2.5822086334228516
+      }
+    ]
+  },
+  "boundary_occupancy": {
+    "bottom_frames": 2181,
+    "side_frames": 1405
+  },
+  "stage_progress": {
+    "transitions": [
+      {
+        "frame": 2,
+        "stage_route_index": 7,
+        "stage_label": "Final B / Kaguya"
+      }
+    ],
+    "last_stage_route_index": 7,
+    "last_stage_label": "Final B / Kaguya"
+  },
+  "first_hit_analysis": {
+    "hit_frame": 2191,
+    "window_start": 1951,
+    "stage_route_index": 7,
+    "stage_label": "Final B / Kaguya",
+    "resources": {
+      "lives": 8.0,
+      "bombs": 3.0,
+      "power": 128.0
+    },
+    "player": {
+      "x": 361.3569030761719,
+      "y": 333.3641052246094,
+      "projected_x": 361.3569030761719,
+      "projected_y": 333.3641052246094,
+      "control_origin_x": 350.043194770813,
+      "control_origin_y": 344.67781352996826,
+      "phase": 0,
+      "phase_at_action": 2,
+      "predeath_at_action": 15
+    },
+    "last_nonnegative_gate": {
+      "frame": 2191,
+      "source_frame": 2143,
+      "lane": "right",
+      "slack": 3.0081260709518,
+      "deadline": 21,
+      "travel_frames": 17.9918739290482
+    },
+    "first_negative_gate": {
+      "frame": 2071,
+      "source_frame": 2043,
+      "lane": "right",
+      "slack": -0.7780248694579903,
+      "deadline": 19,
+      "travel_frames": 19.77802486945799
+    },
+    "minimum_gate_slack": -17.09925079345703,
+    "first_nonpositive_pipeline": {
+      "frame": 2189,
+      "clearance": -3.3888611793518066
+    },
+    "minimum_pipeline_clearance": -3.3888611793518066,
+    "nearest_bullet": {
+      "slot": 982,
+      "x": 358.0629577636719,
+      "y": 335.6056823730469,
+      "center_distance": 3.984312215946175,
+      "aabb_clearance": -0.7060546875
+    },
+    "observed_bullet_contact_candidate": {
+      "slot": 982,
+      "x": 358.0629577636719,
+      "y": 335.6056823730469,
+      "center_distance": 3.984312215946175,
+      "aabb_clearance": -0.7060546875
+    },
+    "active_lasers_at_observation": 0
+  }
+}

@@ -19,6 +19,9 @@ and route feasibility.
    a timestamped trace under `artifacts/runtime_reports/`.
 5. Stop with F9 when the selected scope ends. Do not merge separate practice
    attempts into one route score.
+6. The hotkey daemon is one-shot. After the trial worker finishes for any
+   reason, it releases injected keys and exits before accepting another F8.
+   Start a fresh prewarmed daemon for the next operator-selected attempt.
 
 ## No-Bomb Diagnostic Policy
 

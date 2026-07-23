@@ -9,6 +9,7 @@ from pathlib import Path
 from th08_agent_hotkey import (
     LONG_RUN_DURATION_SECONDS,
     build_long_run_arguments,
+    one_shot_trial_finished,
 )
 from th08_live_dodge_agent import build_parser
 
@@ -30,6 +31,17 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertTrue(parsed.no_bomb)
         self.assertFalse(parsed.normal_bomb)
         self.assertTrue(parsed.armed)
+
+    def test_completed_trial_exits_before_a_second_f8_can_rearm(self) -> None:
+        self.assertFalse(
+            one_shot_trial_finished(agent_started=False, agent_alive=False)
+        )
+        self.assertFalse(
+            one_shot_trial_finished(agent_started=True, agent_alive=True)
+        )
+        self.assertTrue(
+            one_shot_trial_finished(agent_started=True, agent_alive=False)
+        )
 
 
 if __name__ == "__main__":

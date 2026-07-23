@@ -1299,3 +1299,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   regression corpus, generalized comparison, raw aggregate summary, three
   Windows performance artifacts, and the run note. Physical acceptance of
   these corrections remains pending a fresh daemon and Final-B attempt.
+
+## 2026-07-23: Final B Policy-Delivery Acceptance And Empty-Kernel Failure
+
+- Clean focused trace `20260723_234414` completed Final B frames `1..70295`
+  with 17,723 decisions, 37 native hit edges, zero Bomb input, one frame
+  epoch, valid raw summary scope, and no runtime or JSON error.
+- The cross-attempt reset and native transition cache passed their physical
+  gate. The worker produced 911 native policies at 208/369/609 ms
+  median/p95/max, 16,817 decisions had queryable status, and serial coverage
+  margin was +32 frames. The prior selected epoch had only five policies, 65
+  queries, and a -544-frame median margin.
+- Delivery did not improve survival. Of 16,813 available queries, 8,292 were
+  empty and only 8,164 constrained the local action. Planner attribution is
+  26 global-kernel exhaustions, nine local robust-set exhaustions, and two
+  missing preceding alive samples. The raw hit count is six above the prior
+  selected attempt.
+- The remaining issue is therefore not Python/C++ throughput or SendInput
+  pickup. The controller repeatedly enters states outside the finite-horizon
+  viability funnel. Pre-hit bottom occupancy is 47.3% versus 20.2% outside
+  those windows; spells 162 and 170 each have seven hits, and spell 166 is
+  empty for 1,043 of 1,131 policy queries.
+- Retained artifacts include a scoped dossier, 37-row death ledger,
+  executable regression corpus, prior-attempt comparison, raw summary, and
+  the human run note. The next modeling gate is a longer-lived invariant
+  funnel with future ECL emission and laser-transition prediction rather than
+  further worker micro-optimization.
+- A separate `235835` trace recorded an unapproved second arm after the
+  completed run. It was safely stopped at frames `5311..8725` with no hit.
+  The daemon is now one-shot and exits when its first trial worker finishes.

@@ -902,3 +902,58 @@ Status: observed | inferred | unknown | fixed
   outside gameplay handoff.
 - **Status:** semantic parity and synthetic serviceability pass; a fresh live
   trace must still prove positive serial margin under game contention.
+
+## CE-0047: A continuously delivered policy can continuously report no escape
+
+- **Observed symptom:** The clean focused Final-B trial `20260723_234414`
+  completed frames `1..70295` with 37 hard-no-Bomb hit edges. The native
+  worker produced 911 policies at 208/369/609 ms median/p95/max, exposed
+  16,813 live queries, and held a positive 32-frame median serial coverage
+  margin. Nevertheless, 8,292 queries had an empty action set and only 8,164
+  decisions were actually constrained.
+- **Retained failures:** All 37 frames
+  `[1441, 2891, 12000, 12832, 13204, 18413, 18996, 19577, 20253, 20813,
+  21199, 28834, 32563, 36322, 37079, 37380, 37909, 38281, 38854, 39158,
+  44874, 45268, 45644, 46304, 46930, 47228, 50867, 51281, 52989, 53594,
+  54020, 54495, 54962, 58300, 60870, 66806, 69692]` are executable in the
+  matching regression artifact. Twenty-six follow global-kernel exhaustion,
+  nine follow local robust-set exhaustion, and two lack a preceding alive
+  sample.
+- **Invalid assumption:** Making an 80-frame finite-horizon policy queryable
+  is enough to make its guidance useful. Delivery and viability are separate
+  gates. The live state can already be outside the returned kernel because
+  the preceding finite-horizon choices preserve too little terminal repair
+  space, future emissions and laser transitions are incomplete, or the
+  projected state crosses the lattice/kernel boundary between policy epochs.
+- **General evidence:** Pre-hit bottom-eight-pixel occupancy was 47.3% versus
+  20.2% outside the 60-frame windows. Eighteen hits involved a playfield
+  boundary. Spell 166 was empty on 1,043 of 1,131 queries; spells 162 and 170
+  retained seven hits each.
+- **Regression:**
+  `lunatic_route2_finalb_policy_epoch_reset_20260723_234414.regressions.json`
+  retains every hit window, warning lead, query state, delay support, contact
+  geometry, and no-Bomb proof.
+- **Status:** policy epoch reset and native throughput are physically
+  accepted. Survival is not accepted. The next planner gate is preserving a
+  nonempty controlled-invariant funnel, with explicit future-spawn/laser
+  prediction and a conservative terminal safe set, before tuning item or
+  graze objectives.
+
+## CE-0048: A completed trial returned to an armed hotkey loop
+
+- **Observed symptom:** After `234414` wrote `route_complete`, the same daemon
+  later observed another F8 edge and started trace `235835` during active
+  Final-B gameplay. It controlled frames `5311..8725` until F9 produced a safe
+  external stop. No hit or Bomb occurred in that partial trace.
+- **Invalid assumption:** Returning to the daemon's F8 polling loop after a
+  trial is harmless. Any physical F8 event, thprac hotkey collision, or other
+  process-level key edge can authorize a second trial without a fresh daemon
+  boundary.
+- **Correction:** The hotkey daemon is one-shot. Once an agent worker has
+  started and is no longer alive, the polling loop exits and the existing
+  `finally` path releases all injected keys. A new trial requires a new
+  prewarmed daemon.
+- **Regression:**
+  `test_completed_trial_exits_before_a_second_f8_can_rearm`.
+- **Status:** code-fixed and unit-tested. The next physical launch must show
+  the daemon process exiting immediately after route completion or F9.

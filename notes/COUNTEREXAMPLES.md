@@ -1474,3 +1474,69 @@ Status: observed | inferred | unknown | fixed
 - **Status:** Partially fixed. Template reuse and broad-phase culling are
   accepted, but 936-ms median spell-154 solves and five observed laser hits
   leave both global projection throughput and laser geometry fidelity open.
+
+## CE-0074: Empty viability kernels had no global recovery direction
+
+- **Observed symptom:** Stage-1 baseline `20260724_062416` lost its global
+  viability kernel 109--239 frames before all four hits. Once the one-cell
+  repair neighborhood was also empty, the 10-frame local beam oscillated near
+  boundaries without any signal describing where the next viable region lay.
+- **Invalid assumption:** A one-cell repair volume is sufficient soft guidance
+  for every state outside the robust kernel.
+- **Correction:** For each candidate action, query the next-layer viable set
+  for that resulting active action and compute the maximum, over every delay
+  branch, of the distance to its nearest viable lattice state. This distant
+  recovery distance is soft: exact local collisions and clearance remain
+  lexicographically prior, and the distance never claims robust safety.
+- **Performance:** A synthetic 24-by-27, 17-action empty-kernel query costs
+  about 1.30 ms on Linux. Physical Stage-1 bookkeeping p95 rose from 1.51 to
+  4.20 ms after the corrected variant, while end-to-end cadence remained
+  3/5 frames.
+- **Cross-stage gate:** Stage-3 run `20260724_065029` selected distant
+  recovery on 1,761 queries. Against the prior complete Stage-3 baseline,
+  pre-laser hits changed from 11 to four, including zero hits in spells 38,
+  42, and 46. Total hits fell from 11 to seven despite three new spell-50
+  laser failures.
+- **Status:** Physically accepted as general soft recovery. It does not solve
+  states in which every action is already locally unsafe.
+
+## CE-0075: Beam pruning discarded the best recovery action
+
+- **Observed symptom:** Initial Stage-1 recovery trial `20260724_063701`
+  reported at frame 2,512 that `down_left_fast` had a 32-pixel worst-branch
+  recovery distance, but issued `up` at 81.58 pixels. The player was then
+  driven into the upper-left pressure region and hit at frame 2,571.
+- **Root cause:** Recovery distance participated only in final node selection.
+  Intermediate beam deduplication and width pruning still used the old local
+  key, so the better first action could disappear before final ranking.
+- **Correction:** The same collision, gate, and safety priorities remain
+  first, but recovery distance now precedes local risk/utility throughout
+  deduplication and beam pruning as well as final selection.
+- **Regression:** A minimized Stage-1 frame-2,512 contract with
+  `beam_width=1` retains the lower-distance action. Exact local collision still
+  overrides distant recovery in a separate test.
+- **Physical gate:** Corrected Stage-1 run `20260724_064421` remained at four
+  hits but changed spell 5 from three hits to zero and reduced 60-frame
+  pre-hit bottom occupancy to 1.4 percent. The independent Stage-3 gate in
+  CE-0074 supplies the cross-stage survival acceptance.
+- **Status:** Fixed and physically accepted.
+
+## CE-0076: Lifecycle caching did not remove global laser-volume scaling
+
+- **Observed symptom:** Stage-3 spell 50 held 200 lasers. Corridor solve
+  median/p95 reached 1255/1565 ms, action lag exceeded the model on 29 percent
+  of alive decisions, and the phase produced three hits including two exact
+  observed laser overlaps.
+- **Invalid assumption:** Amortizing `step_laser` lifecycle projection would
+  make dense laser policies control-rate. It removes repeated state-machine
+  work, but the global clearance builder still applies every instantiated
+  segment trajectory to every relevant time/grid slice.
+- **Evidence boundary:** The older Stage-3 baseline reported zero hits and
+  225/285-ms solves for this phase, but many controller/model changes separate
+  the runs. The fresh trace establishes current throughput and geometry
+  failures; it is not an isolated cache regression.
+- **Correction gate:** Add exact spatial/time indexing or tiled batch
+  reduction to the game-neutral segment-trajectory clearance builder. Any
+  optimization must match the scalar geometry volume and preserve
+  appearing/disappearing lifecycle samples.
+- **Status:** Observed; unresolved.

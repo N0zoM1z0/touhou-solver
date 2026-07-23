@@ -866,6 +866,50 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(decision.viability_safe_action_count, 0)
         self.assertEqual(decision.viability_repair_volume, 9)
 
+    def test_ce_stage1_frame_2512_distant_recovery_survives_beam_pruning(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            horizon=2,
+            beam_width=1,
+            viability_recovery_distances=(
+                ("left", 48.0),
+                ("right", 16.0),
+            ),
+        )
+        self.assertEqual(decision.action, "right")
+        self.assertFalse(decision.viability_constrained)
+        self.assertEqual(decision.viability_recovery_distance, 16.0)
+
+    def test_exact_local_collision_outranks_distant_kernel_recovery(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(
+                Bullet(200.0, 400.0, 0.0, 0.0, 2.0, 2.0),
+            ),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            horizon=2,
+            viability_recovery_distances=(
+                ("left", 48.0),
+                ("right", 0.0),
+            ),
+        )
+        self.assertEqual(decision.action, "left")
+        self.assertEqual(decision.viability_recovery_distance, 48.0)
+
     def test_exact_local_collision_outranks_coarse_repair_volume(self) -> None:
         decision = choose_action(
             player_x=192.0,

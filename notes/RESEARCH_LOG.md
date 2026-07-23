@@ -1684,3 +1684,27 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   cadence p95 fell eight to five frames. This accepts template reuse only as a
   partial correction: five laser contacts and near-second global solves
   remain.
+- Stage-1 baseline `20260724_062416` showed that all four hits followed global
+  kernel exhaustion by 109--239 frames, while the existing one-cell repair
+  neighborhood often supplied no direction. CE-0074 adds a game-neutral
+  worst-delay distance from each action endpoint to the nearest viable
+  next-layer state. It remains soft and ranks after exact local safety.
+- Initial recovery run `20260724_063701` was rejected as an algorithm
+  acceptance: frame 2,512 reported a 32-pixel recovery action but selected an
+  81.58-pixel action because intermediate beam pruning ignored the new
+  priority. CE-0075 makes deduplication, beam truncation, and final selection
+  share the recovery contract.
+- Corrected Stage-1 run `20260724_064421` completed at four hits and 3/5-frame
+  cadence. Aggregate survival was neutral, but spell 5 changed from three hits
+  to zero and 60-frame pre-hit bottom occupancy fell to 1.4 percent. This was
+  retained as a behavioral gate, not a survival-improvement claim.
+- Random cross-stage run `20260724_065029` physically accepted distant
+  recovery: Stage 3 fell from 11 to seven hits versus its prior complete
+  baseline, while pre-laser phases fell from 11 to four and spells 38/42/46
+  were hitless. Distant recovery was selected 1,761 times at 3/5-frame
+  cadence. A native auto-confirm wall pulse at frame 4,700 also advanced the
+  dialogue without manual input.
+- That Stage-3 run also opens CE-0076. Spell 50's 200 lasers drove corridor
+  solve median/p95 to 1255/1565 ms and produced three hits, two with exact
+  laser overlap. Lifecycle caching is accepted but insufficient; global
+  segment-trajectory clearance needs exact spatial/time indexing.

@@ -54,6 +54,7 @@ class ViabilityQuery:
     repair_volumes: tuple[tuple[str, int], ...]
     position_error: float
     reason: str
+    recovery_distances: tuple[tuple[str, float], ...] = ()
 
     @property
     def safe_action_count(self) -> int:
@@ -64,6 +65,12 @@ class ViabilityQuery:
             if name == action:
                 return volume
         return 0
+
+    def recovery_distance(self, action: str) -> float:
+        for name, distance in self.recovery_distances:
+            if name == action:
+                return distance
+        return math.inf
 
 
 @dataclass(frozen=True)
@@ -231,6 +238,21 @@ class RobustViabilityPolicy:
                 if volume > 0
             )
         )
+        recovery_distances = ()
+        if not safe_indices and not repair_volumes:
+            recovery_distances = tuple(
+                (self.actions[index].name, distance)
+                for index in range(len(self.actions))
+                if math.isfinite(
+                    distance := self._recovery_distance(
+                        layer=layer,
+                        row=row,
+                        column=column,
+                        active_action_index=action_index,
+                        selected_action_index=index,
+                    )
+                )
+            )
         state_viable = bool(self.viable[layer, action_index, row, column])
         return ViabilityQuery(
             True,
@@ -248,9 +270,17 @@ class RobustViabilityPolicy:
                 else (
                     "robust action set is empty; recovery neighborhoods found"
                     if repair_volumes
-                    else "robust action set and recovery neighborhoods are empty"
+                    else (
+                        "robust action set is empty; distant recovery found"
+                        if recovery_distances
+                        else (
+                            "robust action set and recovery neighborhoods "
+                            "are empty"
+                        )
+                    )
                 )
             ),
+            recovery_distances,
         )
 
     def _repair_volume(
@@ -330,6 +360,71 @@ class RobustViabilityPolicy:
                 sum(int(value).bit_count() for value in masks.flat)
             )
         return min(branch_volumes, default=0)
+
+    def _recovery_distance(
+        self,
+        *,
+        layer: int,
+        row: int,
+        column: int,
+        active_action_index: int,
+        selected_action_index: int,
+    ) -> float:
+        """Return worst-delay distance to the next-layer viable kernel.
+
+        This is soft guidance for a state already outside the proof. It does
+        not test the selected transition's collision safety; the exact local
+        controller remains authoritative for that.
+        """
+
+        viable_rows, viable_columns = np.nonzero(
+            self.viable[layer + 1, selected_action_index]
+        )
+        if not viable_rows.size:
+            return math.inf
+        active = self.actions[active_action_index]
+        selected = self.actions[selected_action_index]
+        x = float(self.x_axis[column])
+        y = float(self.y_axis[row])
+        x_start = float(self.x_axis[0])
+        y_start = float(self.y_axis[0])
+        x_end = float(self.x_axis[-1])
+        y_end = float(self.y_axis[-1])
+        x_step = float(self.x_axis[1] - self.x_axis[0])
+        y_step = float(self.y_axis[1] - self.y_axis[0])
+        viable_x = self.x_axis[viable_columns].astype(np.float64)
+        viable_y = self.y_axis[viable_rows].astype(np.float64)
+        branch_distances: list[float] = []
+        for delay in self.delay_frames:
+            selected_frames = self.config.frames_per_layer - delay
+            target_x = (
+                x
+                + active.velocity_x * delay
+                + selected.velocity_x * selected_frames
+            )
+            target_y = (
+                y
+                + active.velocity_y * delay
+                + selected.velocity_y * selected_frames
+            )
+            inside = (
+                x_start <= target_x <= x_end
+                and y_start <= target_y <= y_end
+            )
+            if not inside and not self.config.clamp_to_bounds:
+                return math.inf
+            target_x = min(x_end, max(x_start, target_x))
+            target_y = min(y_end, max(y_start, target_y))
+            target_column = int(np.rint((target_x - x_start) / x_step))
+            target_row = int(np.rint((target_y - y_start) / y_step))
+            projected_x = float(self.x_axis[target_column])
+            projected_y = float(self.y_axis[target_row])
+            squared = (
+                np.square(viable_x - projected_x)
+                + np.square(viable_y - projected_y)
+            )
+            branch_distances.append(float(math.sqrt(float(np.min(squared)))))
+        return max(branch_distances, default=math.inf)
 
     def viable_state_count(self, layer: int) -> int:
         if not 0 <= layer <= self.layer_count:

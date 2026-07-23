@@ -1,0 +1,1650 @@
+{
+  "schema": "th08-practice-death-regressions-v1",
+  "run_id": "lunatic_route2_stage1_unattended_20260724_064421",
+  "scope": {
+    "stage_route_index": 0,
+    "stage_label": "Stage 1",
+    "first_frame": 3,
+    "last_frame": 21008,
+    "observed_frame_span": 21005,
+    "decision_count": 4712,
+    "selected_frame_epoch_index": 0,
+    "frame_epoch_count": 1,
+    "end_event": {
+      "reason": "raw_trace_end",
+      "last_frame": 21008,
+      "stage_route_index": 0
+    },
+    "pre_scope_decision_count_excluded": 0,
+    "post_scope_decision_count_excluded": 0,
+    "scene_events": [
+      {
+        "kind": "scene_inactive",
+        "frame": 21008,
+        "engine_flags": 98817,
+        "stage_route_index": 0,
+        "transition_from_stage": 0,
+        "expected_stage": null,
+        "status": "terminal_unload"
+      }
+    ],
+    "raw_summary_is_scope_valid": true,
+    "accepted_completion": true
+  },
+  "no_bomb_verification": {
+    "passed": true,
+    "bomb_input_bit": 2,
+    "controller_policy_disabled": true,
+    "decision_count_checked": 4712,
+    "mask_violation_frames": [],
+    "bomb_flag_violation_frames": [],
+    "bomb_action_violation_frames": [],
+    "resource_note": "Bomb stock changes after a hit are thprac respawn-state changes, not Bomb input; the mask, decision flag, and action are the controller evidence."
+  },
+  "case_count": 4,
+  "cases": [
+    {
+      "case_id": "LUN-S0-F1072-T1",
+      "frame": 1072,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\lunatic_route2_stage1_unattended_20260724_064421.jsonl",
+      "stage_route_index": 0,
+      "stage_label": "Stage 1",
+      "player": {
+        "x": 28.878700256347656,
+        "y": 29.266613006591797,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 13
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 4.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 4.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "stay",
+      "mask": 5,
+      "issued_action_after_hit_detection": "stay",
+      "issued_mask_after_hit_detection": 5,
+      "active_input_action": "up",
+      "active_input_mask": 21,
+      "last_alive_decision": {
+        "frame": 1069,
+        "issued_action": "up",
+        "issued_mask": 21,
+        "active_input_action": "right_fast",
+        "active_input_mask": 129,
+        "pipeline_clearance": -0.19654664397239685,
+        "minimum_clearance": -0.19654664397239685,
+        "action_hold_frames": 4,
+        "control_delay_frames": 4,
+        "control_delay_candidates": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "robust_control": {
+          "delay_frames": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "override": false,
+          "worst_collisions": 0,
+          "min_clearance": -0.19654664397239685,
+          "cvar_risk": 96896.52970432742,
+          "worst_delay": 2,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 1067,
+          "age": 15,
+          "layer": 1,
+          "available": true,
+          "state_viable": false,
+          "active_action": "right_fast",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {
+            "down": 1,
+            "down_fast": 4
+          },
+          "recovery_distances": {},
+          "selected_action": "up",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": null,
+          "position_error": 7.627864346897897,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 4,
+          "horizon_frames": 80,
+          "viable_state_count": 5254,
+          "reason": "robust action set is empty; recovery neighborhoods found"
+        },
+        "action_lag": 3
+      },
+      "usable_pipeline_warning_lead_frames": 3,
+      "usable_robust_warning_lead_frames": 7,
+      "robust_action_set_exhausted_at_frame": 1065,
+      "usable_viability_warning_lead_frames": 46,
+      "viability_kernel_exhausted_at_frame": 1026,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 172,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 14,
+      "enemy_body_snapshot_frame": 1067,
+      "hit_contact_observation": {
+        "frame_before": 1074,
+        "frame_after": 1075,
+        "stable": false,
+        "player_lethal_aabb": [
+          27.878700256347656,
+          28.266613006591797,
+          29.878700256347656,
+          30.266613006591797
+        ],
+        "enemy_bodies": [
+          [
+            5777088,
+            370.6482238769531,
+            195.5541534423828,
+            1.9145007133483887,
+            -0.3703800439834595,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5798544,
+            328.87384033203125,
+            240.9298553466797,
+            1.846163034439087,
+            0.11906629800796509,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5820000,
+            288.04315185546875,
+            284.1064453125,
+            1.627040982246399,
+            0.6443856954574585,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5841456,
+            281.8886413574219,
+            296.0180969238281,
+            1.4078845977783203,
+            0.8604398965835571,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5862912,
+            242.62484741210938,
+            292.2633972167969,
+            1.1884632110595703,
+            0.995013415813446,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5884368,
+            200.69696044921875,
+            273.29815673828125,
+            0.977979302406311,
+            1.070538878440857,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5905824,
+            221.1020965576172,
+            112.05440521240234,
+            0.6467156410217285,
+            0.2678784132003784,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5927280,
+            226.849853515625,
+            230.56179809570312,
+            1.0582975149154663,
+            0.8381549715995789,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5948736,
+            204.7430419921875,
+            212.01437377929688,
+            0.8957929015159607,
+            0.8718101382255554,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5970192,
+            179.3979034423828,
+            204.7353515625,
+            0.7476268410682678,
+            0.8738148808479309,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5991648,
+            198.07334899902344,
+            168.26512145996094,
+            0.7874084711074829,
+            0.6946125030517578,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6013104,
+            184.70420837402344,
+            130.41934204101562,
+            0.8448152542114258,
+            0.43449512124061584,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6077472,
+            164.90293884277344,
+            103.68883514404297,
+            0.7690698504447937,
+            0.3619816303253174,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6098928,
+            119.99999237060547,
+            100.0,
+            0.0,
+            0.0,
+            18.0,
+            18.0,
+            16842829,
+            0.0
+          ]
+        ]
+      },
+      "snapshot_lag": 1,
+      "action_lag": 2,
+      "control_delay_frames": 4,
+      "control_delay_candidates": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 4,
+        "censored": 6
+      },
+      "robust_control": {
+        "delay_frames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "override": false,
+        "worst_collisions": 1,
+        "min_clearance": -2.6899240016937256,
+        "cvar_risk": 94346.28434305928,
+        "worst_delay": 3,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": 48.0
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 1071,
+        "age": 19,
+        "layer": 2,
+        "available": true,
+        "state_viable": false,
+        "active_action": "up",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 48.0,
+          "left": 48.0,
+          "right": 57.688820407423826,
+          "up": 65.96969000988257,
+          "down": 48.0,
+          "up_left": 65.96969000988257,
+          "up_right": 65.96969000988257,
+          "down_left": 50.59644256269407,
+          "down_right": 65.96969000988257,
+          "left_fast": 48.0,
+          "right_fast": 65.96969000988257,
+          "up_fast": 80.0,
+          "down_fast": 32.0,
+          "up_left_fast": 65.96969000988257,
+          "up_right_fast": 80.0,
+          "down_left_fast": 35.77708763999664,
+          "down_right_fast": 50.59644256269407
+        },
+        "selected_action": "stay",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": 48.0,
+        "position_error": 7.009757509120866,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 4,
+        "horizon_frames": 80,
+        "viable_state_count": 4702,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 13.70179999503307,
+      "plan_ms": 24.709399993298575,
+      "pipeline_clearance_at_hit": 0.5969207882881165,
+      "minimum_pipeline_clearance_240f": -0.19654664397239685,
+      "minimum_corridor_slack_240f": -10.90118408203125,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 231,
+        "x": 25.476524353027344,
+        "y": 32.76353454589844,
+        "velocity_x": -1.5865856409072876,
+        "velocity_y": -1.9883182048797607,
+        "half_width": 3.0,
+        "half_height": 3.0,
+        "transform_flags": 0,
+        "center_distance": 4.8788585887684945,
+        "aabb_clearance": -1.5030784606933594
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 231,
+        "x": 25.476524353027344,
+        "y": 32.76353454589844,
+        "velocity_x": -1.5865856409072876,
+        "velocity_y": -1.9883182048797607,
+        "half_width": 3.0,
+        "half_height": 3.0,
+        "transform_flags": 0,
+        "center_distance": 4.8788585887684945,
+        "aabb_clearance": -1.5030784606933594
+      },
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 6098928,
+        "x_at_snapshot": 119.99999237060547,
+        "y_at_snapshot": 100.44000244140625,
+        "velocity_x": 0.0,
+        "velocity_y": 0.2566680908203125,
+        "projected_x_at_action": 119.99999237060547,
+        "projected_y_at_action": 101.72334289550781,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 16851021,
+        "snapshot_frame": 1067,
+        "elapsed_frames": 5,
+        "exact_same_epoch": false,
+        "aabb_clearance": 88.37390283698171
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "observed_bullet_overlap",
+      "contributing_factors": [
+        "corridor_deadline_miss"
+      ],
+      "spell_attribution": {
+        "status": "no_active_spell_at_hit",
+        "spell_id": null,
+        "spell_name": null,
+        "flags": 0
+      },
+      "sample_role": "canonical_fresh_attempt_causal_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S0-F5859-T1",
+      "frame": 5859,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\lunatic_route2_stage1_unattended_20260724_064421.jsonl",
+      "stage_route_index": 0,
+      "stage_label": "Stage 1",
+      "player": {
+        "x": 361.15692138671875,
+        "y": 422.44439697265625,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 28
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 18.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 18.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_fast",
+      "mask": 17,
+      "issued_action_after_hit_detection": "up_fast",
+      "issued_mask_after_hit_detection": 17,
+      "active_input_action": "up_fast",
+      "active_input_mask": 17,
+      "last_alive_decision": {
+        "frame": 5855,
+        "issued_action": "up_fast",
+        "issued_mask": 17,
+        "active_input_action": "up_left",
+        "active_input_mask": 85,
+        "pipeline_clearance": -0.7203124761581421,
+        "minimum_clearance": -0.7203124761581421,
+        "action_hold_frames": 5,
+        "control_delay_frames": 4,
+        "control_delay_candidates": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "robust_control": {
+          "delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "override": false,
+          "worst_collisions": 2,
+          "min_clearance": -2.5998597145080566,
+          "cvar_risk": 24634.79385463307,
+          "worst_delay": 3,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": 35.77708763999664
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 5854,
+          "age": 21,
+          "layer": 2,
+          "available": true,
+          "state_viable": false,
+          "active_action": "up_left",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 50.59644256269407,
+            "left": 101.19288512538814,
+            "right": 131.93938001976514,
+            "up": 35.77708763999664,
+            "down": 65.96969000988257,
+            "up_left": 97.32420048477151,
+            "up_right": 144.88616221019868,
+            "down_left": 107.33126291998991,
+            "down_right": 136.7040599250805,
+            "left_fast": 101.19288512538814,
+            "right_fast": 147.5127113166862,
+            "up_fast": 35.77708763999664,
+            "down_fast": 81.58431221748455,
+            "up_left_fast": 176.72577627499618,
+            "up_right_fast": 160.79800993793424,
+            "down_left_fast": 107.33126291998991,
+            "down_right_fast": 182.42806801586207
+          },
+          "selected_action": "up_fast",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": 35.77708763999664,
+          "position_error": 7.692295685165959,
+          "delay_frames": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 4,
+          "horizon_frames": 80,
+          "viable_state_count": 134,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 2
+      },
+      "usable_pipeline_warning_lead_frames": 4,
+      "usable_robust_warning_lead_frames": 7,
+      "robust_action_set_exhausted_at_frame": 5852,
+      "usable_viability_warning_lead_frames": 71,
+      "viability_kernel_exhausted_at_frame": 5788,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 287,
+      "active_lasers": 0,
+      "active_items": 8,
+      "active_enemy_bodies": 1,
+      "enemy_body_snapshot_frame": 5855,
+      "hit_contact_observation": {
+        "frame_before": 5859,
+        "frame_after": 5859,
+        "stable": true,
+        "player_lethal_aabb": [
+          360.15692138671875,
+          417.44439697265625,
+          362.15692138671875,
+          419.44439697265625
+        ],
+        "enemy_bodies": [
+          [
+            5777088,
+            283.5397033691406,
+            104.19114685058594,
+            0.0,
+            0.0,
+            36.0,
+            36.0,
+            287899727,
+            0.0
+          ]
+        ]
+      },
+      "snapshot_lag": 1,
+      "action_lag": 3,
+      "control_delay_frames": 4,
+      "control_delay_candidates": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 22,
+        "censored": 72
+      },
+      "robust_control": {
+        "delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "override": false,
+        "worst_collisions": 2,
+        "min_clearance": -2.399829149246216,
+        "cvar_risk": 18158.942083083093,
+        "worst_delay": 3,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 1,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 5857,
+        "age": 24,
+        "layer": 3,
+        "available": true,
+        "state_viable": false,
+        "active_action": "up_fast",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {
+          "stay": 1,
+          "up": 1,
+          "up_fast": 1
+        },
+        "recovery_distances": {},
+        "selected_action": "up_fast",
+        "selected_repair_volume": 1,
+        "selected_recovery_distance": null,
+        "position_error": 2.704356421586895,
+        "delay_frames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 4,
+        "horizon_frames": 80,
+        "viable_state_count": 106,
+        "reason": "robust action set is empty; recovery neighborhoods found"
+      },
+      "read_ms": 14.088299998547882,
+      "plan_ms": 27.209199994103983,
+      "pipeline_clearance_at_hit": -2.399829149246216,
+      "minimum_pipeline_clearance_240f": -2.399829149246216,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 129,
+        "x": 365.95709228515625,
+        "y": 414.13836669921875,
+        "velocity_x": 0.7573409676551819,
+        "velocity_y": 2.0299949645996094,
+        "half_width": 5.0,
+        "half_height": 5.0,
+        "transform_flags": 0,
+        "center_distance": 9.59331952753928,
+        "aabb_clearance": 1.3060302734375
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 5777088,
+        "x_at_observation": 283.5397033691406,
+        "y_at_observation": 104.19114685058594,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0,
+        "half_width": 36.0,
+        "half_height": 36.0,
+        "flags": 287899727,
+        "observation_frame": 5859,
+        "player_lethal_aabb": [
+          360.15692138671875,
+          417.44439697265625,
+          362.15692138671875,
+          419.44439697265625
+        ],
+        "exact_same_epoch": true,
+        "aabb_clearance": 280.2126390845687
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 1,
+        "spell_name": "蛍符「地上の彗星」",
+        "flags": 5,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S0-F6269-T1",
+      "frame": 6269,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\lunatic_route2_stage1_unattended_20260724_064421.jsonl",
+      "stage_route_index": 0,
+      "stage_label": "Stage 1",
+      "player": {
+        "x": 130.28811645507812,
+        "y": 420.68927001953125,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 28
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 3.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 0.0
+      },
+      "post_hit_bomb_stock_decrease": 1.0,
+      "observed_bomb_cost": 1.0,
+      "deathbomb_requested": false,
+      "action": "down_right",
+      "mask": 165,
+      "issued_action_after_hit_detection": "down_right",
+      "issued_mask_after_hit_detection": 165,
+      "active_input_action": "left_fast",
+      "active_input_mask": 65,
+      "last_alive_decision": {
+        "frame": 6266,
+        "issued_action": "left_fast",
+        "issued_mask": 65,
+        "active_input_action": "left_fast",
+        "active_input_mask": 65,
+        "pipeline_clearance": 0.2890808582305908,
+        "minimum_clearance": 0.2890808582305908,
+        "action_hold_frames": 4,
+        "control_delay_frames": 4,
+        "control_delay_candidates": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "robust_control": {
+          "delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "override": false,
+          "worst_collisions": 0,
+          "min_clearance": 0.2890808582305908,
+          "cvar_risk": 30931.4077020213,
+          "worst_delay": 3,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": 35.77708763999664
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 6264,
+          "age": 5,
+          "layer": 0,
+          "available": true,
+          "state_viable": false,
+          "active_action": "left_fast",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 45.254833995939045,
+            "left": 163.1686244349691,
+            "right": 131.93938001976514,
+            "up": 128.9961239727768,
+            "down": 151.7893276880822,
+            "up_left": 163.1686244349691,
+            "up_right": 121.85236969382254,
+            "down_left": 157.58172482873766,
+            "down_right": 136.7040599250805,
+            "left_fast": 35.77708763999664,
+            "right_fast": 71.55417527999327,
+            "up_fast": 160.79800993793424,
+            "down_fast": 178.88543819998318,
+            "up_left_fast": 178.88543819998318,
+            "up_right_fast": 97.32420048477151,
+            "down_left_fast": 164.730082255792,
+            "down_right_fast": 150.94369811290565
+          },
+          "selected_action": "left_fast",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": 35.77708763999664,
+          "position_error": 7.844084514377627,
+          "delay_frames": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 4,
+          "horizon_frames": 80,
+          "viable_state_count": 278,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 2
+      },
+      "usable_pipeline_warning_lead_frames": 0,
+      "usable_robust_warning_lead_frames": 0,
+      "robust_action_set_exhausted_at_frame": null,
+      "usable_viability_warning_lead_frames": 58,
+      "viability_kernel_exhausted_at_frame": 6211,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 335,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 1,
+      "enemy_body_snapshot_frame": 6266,
+      "hit_contact_observation": {
+        "frame_before": 6271,
+        "frame_after": 6271,
+        "stable": true,
+        "player_lethal_aabb": [
+          129.28811645507812,
+          419.68927001953125,
+          131.28811645507812,
+          421.68927001953125
+        ],
+        "enemy_bodies": [
+          [
+            5777088,
+            167.97486877441406,
+            75.1782455444336,
+            -0.2409820556640625,
+            -0.06653594970703125,
+            36.0,
+            36.0,
+            287907919,
+            0.0
+          ],
+          [
+            5820000,
+            325.0389404296875,
+            414.8586730957031,
+            -0.8962316513061523,
+            2.2263803482055664,
+            18.0,
+            18.0,
+            16781645,
+            0.0
+          ],
+          [
+            5841456,
+            134.0326385498047,
+            417.5084533691406,
+            -1.9576300382614136,
+            1.388411045074463,
+            18.0,
+            18.0,
+            16781645,
+            0.0
+          ]
+        ]
+      },
+      "snapshot_lag": 0,
+      "action_lag": 2,
+      "control_delay_frames": 4,
+      "control_delay_candidates": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 22,
+        "censored": 77
+      },
+      "robust_control": {
+        "delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "override": false,
+        "worst_collisions": 0,
+        "min_clearance": 7.6290388107299805,
+        "cvar_risk": 28122.216993019916,
+        "worst_delay": 3,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": 121.85236969382254
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 6267,
+        "age": 8,
+        "layer": 1,
+        "available": true,
+        "state_viable": false,
+        "active_action": "left_fast",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 45.254833995939045,
+          "left": 160.79800993793424,
+          "right": 128.9961239727768,
+          "up": 147.5127113166862,
+          "down": 178.88543819998318,
+          "up_left": 163.1686244349691,
+          "up_right": 116.48175822848829,
+          "down_left": 151.7893276880822,
+          "down_right": 121.85236969382254,
+          "left_fast": 35.77708763999664,
+          "right_fast": 71.55417527999327,
+          "up_fast": 176.72577627499618,
+          "down_fast": 178.88543819998318,
+          "up_left_fast": 163.1686244349691,
+          "up_right_fast": 116.48175822848829,
+          "down_left_fast": 186.59046063504962,
+          "down_right_fast": 128.9961239727768
+        },
+        "selected_action": "down_right",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": 121.85236969382254,
+        "position_error": 7.390187206480219,
+        "delay_frames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 4,
+        "horizon_frames": 80,
+        "viable_state_count": 215,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 10.98620000993833,
+      "plan_ms": 15.696299989940599,
+      "pipeline_clearance_at_hit": 7.6290388107299805,
+      "minimum_pipeline_clearance_240f": 0.2890808582305908,
+      "minimum_corridor_slack_240f": 2.3561138406230597,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 1430,
+        "x": 141.7872772216797,
+        "y": 411.8501892089844,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0,
+        "half_width": 3.0,
+        "half_height": 3.0,
+        "transform_flags": 131072,
+        "center_distance": 14.503794259142214,
+        "aabb_clearance": 7.5483529422015145
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 5841456,
+        "x_at_observation": 134.0326385498047,
+        "y_at_observation": 417.5084533691406,
+        "velocity_x": -1.9576300382614136,
+        "velocity_y": 1.388411045074463,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 16781645,
+        "observation_frame": 6271,
+        "player_lethal_aabb": [
+          129.28811645507812,
+          419.68927001953125,
+          131.28811645507812,
+          421.68927001953125
+        ],
+        "exact_same_epoch": true,
+        "aabb_clearance": -15.255477905273438,
+        "present_in_action_snapshot": false
+      },
+      "observed_enemy_body_contact_candidate": {
+        "pointer": 5841456,
+        "x_at_observation": 134.0326385498047,
+        "y_at_observation": 417.5084533691406,
+        "velocity_x": -1.9576300382614136,
+        "velocity_y": 1.388411045074463,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 16781645,
+        "observation_frame": 6271,
+        "player_lethal_aabb": [
+          129.28811645507812,
+          419.68927001953125,
+          131.28811645507812,
+          421.68927001953125
+        ],
+        "exact_same_epoch": true,
+        "aabb_clearance": -15.255477905273438,
+        "present_in_action_snapshot": false
+      },
+      "primary_cause_class": "observed_enemy_body_overlap",
+      "contributing_factors": [
+        "fast_mode",
+        "enemy_body_absent_from_action_snapshot"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 1,
+        "spell_name": "蛍符「地上の彗星」",
+        "flags": 1,
+        "enemy_pointer": 5777088
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "LUN-S0-F7019-T1",
+      "frame": 7019,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\lunatic_route2_stage1_unattended_20260724_064421.jsonl",
+      "stage_route_index": 0,
+      "stage_label": "Stage 1",
+      "player": {
+        "x": 361.27996826171875,
+        "y": 23.016860961914062,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 14
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 19.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 3.0
+      },
+      "post_hit_bomb_stock_decrease": 1.0,
+      "observed_bomb_cost": 1.0,
+      "deathbomb_requested": false,
+      "action": "left",
+      "mask": 69,
+      "issued_action_after_hit_detection": "left",
+      "issued_mask_after_hit_detection": 69,
+      "active_input_action": "left_fast",
+      "active_input_mask": 65,
+      "last_alive_decision": {
+        "frame": 7016,
+        "issued_action": "left_fast",
+        "issued_mask": 65,
+        "active_input_action": "left",
+        "active_input_mask": 69,
+        "pipeline_clearance": -1.6673396825790405,
+        "minimum_clearance": -1.6673396825790405,
+        "action_hold_frames": 5,
+        "control_delay_frames": 4,
+        "control_delay_candidates": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "robust_control": {
+          "delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "override": false,
+          "worst_collisions": 2,
+          "min_clearance": -1.6673396825790405,
+          "cvar_risk": 110460.29641949147,
+          "worst_delay": 6,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": 160.0
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 7014,
+          "age": 19,
+          "layer": 2,
+          "available": true,
+          "state_viable": false,
+          "active_action": "left",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 176.0,
+            "left": 160.0,
+            "right": 176.0,
+            "up": 176.0,
+            "down": 160.79800993793424,
+            "up_left": 160.0,
+            "up_right": 192.0,
+            "down_left": 160.79800993793424,
+            "down_right": 176.72577627499618,
+            "left_fast": 160.0,
+            "right_fast": 176.0,
+            "up_fast": 176.0,
+            "down_fast": 160.79800993793424,
+            "up_left_fast": 160.0,
+            "up_right_fast": 192.0,
+            "down_left_fast": 160.79800993793424,
+            "down_right_fast": 160.79800993793424
+          },
+          "selected_action": "left_fast",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": 160.0,
+          "position_error": 10.506655362394426,
+          "delay_frames": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 4,
+          "horizon_frames": 80,
+          "viable_state_count": 2675,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 2
+      },
+      "usable_pipeline_warning_lead_frames": 3,
+      "usable_robust_warning_lead_frames": 9,
+      "robust_action_set_exhausted_at_frame": 7010,
+      "usable_viability_warning_lead_frames": 48,
+      "viability_kernel_exhausted_at_frame": 6971,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 218,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 18,
+      "enemy_body_snapshot_frame": 7016,
+      "hit_contact_observation": {
+        "frame_before": 7021,
+        "frame_after": 7022,
+        "stable": false,
+        "player_lethal_aabb": [
+          356.27996826171875,
+          22.016860961914062,
+          358.27996826171875,
+          24.016860961914062
+        ],
+        "enemy_bodies": [
+          [
+            5777088,
+            275.299560546875,
+            104.0,
+            0.699999988079071,
+            0.0,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5884368,
+            53.9873046875,
+            114.2204360961914,
+            -1.7386001348495483,
+            -0.9681752324104309,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5905824,
+            62.27653884887695,
+            181.14743041992188,
+            -1.8414279222488403,
+            -0.42572012543678284,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5927280,
+            91.95667266845703,
+            252.14366149902344,
+            -1.7678499221801758,
+            0.28071630001068115,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5948736,
+            102.05818939208984,
+            273.9271240234375,
+            -1.5891563892364502,
+            0.5750458240509033,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5970192,
+            147.11648559570312,
+            309.0291442871094,
+            -1.2620922327041626,
+            0.967067539691925,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            5991648,
+            168.01673889160156,
+            274.5082702636719,
+            -1.2259176969528198,
+            0.8468899130821228,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6013104,
+            138.04635620117188,
+            228.09048461914062,
+            -1.3340606689453125,
+            0.39035823941230774,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6034560,
+            163.50604248046875,
+            231.7698974609375,
+            -1.1457468271255493,
+            0.5927578806877136,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6056016,
+            192.2828826904297,
+            212.49468994140625,
+            -0.9657126069068909,
+            0.6953397393226624,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6077472,
+            182.49685668945312,
+            184.9593048095703,
+            -0.8632220029830933,
+            0.6655421257019043,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6098928,
+            79.99999237060547,
+            116.0,
+            0.0,
+            0.0,
+            18.0,
+            18.0,
+            16842829,
+            0.0
+          ],
+          [
+            6120384,
+            197.78744506835938,
+            159.22000122070312,
+            -0.7739860415458679,
+            0.6172878742218018,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6141840,
+            216.72972106933594,
+            130.25350952148438,
+            -0.7426599860191345,
+            0.4904642105102539,
+            18.0,
+            18.0,
+            16846925,
+            0.0
+          ],
+          [
+            6206208,
+            304.0,
+            104.0,
+            0.0,
+            0.0,
+            18.0,
+            18.0,
+            17104973,
+            0.0
+          ],
+          [
+            6227664,
+            215.8164825439453,
+            6.426715850830078,
+            1.53985595703125,
+            0.2178974151611328,
+            18.0,
+            18.0,
+            16851021,
+            0.0
+          ],
+          [
+            6249120,
+            155.3082275390625,
+            -5.183224678039551,
+            2.61724853515625,
+            0.5074081420898438,
+            18.0,
+            18.0,
+            16851021,
+            0.0
+          ],
+          [
+            6270576,
+            158.46676635742188,
+            -2.3018856048583984,
+            2.32275390625,
+            0.27030086517333984,
+            18.0,
+            18.0,
+            16851021,
+            0.0
+          ]
+        ]
+      },
+      "snapshot_lag": 1,
+      "action_lag": 2,
+      "control_delay_frames": 4,
+      "control_delay_candidates": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 27,
+        "censored": 92
+      },
+      "robust_control": {
+        "delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "override": false,
+        "worst_collisions": 3,
+        "min_clearance": -2.919116258621216,
+        "cvar_risk": 102897.06668474269,
+        "worst_delay": 4,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": 144.0
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 7018,
+        "age": 23,
+        "layer": 2,
+        "available": true,
+        "state_viable": false,
+        "active_action": "left_fast",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 160.0,
+          "left": 144.0,
+          "right": 176.0,
+          "up": 160.0,
+          "down": 160.79800993793424,
+          "up_left": 144.0,
+          "up_right": 176.0,
+          "down_left": 144.88616221019868,
+          "down_right": 176.0,
+          "left_fast": 128.0,
+          "right_fast": 176.0,
+          "up_fast": 160.0,
+          "down_fast": 160.0,
+          "up_left_fast": 128.0,
+          "up_right_fast": 192.0,
+          "down_left_fast": 128.9961239727768,
+          "down_right_fast": 160.0
+        },
+        "selected_action": "left",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": 144.0,
+        "position_error": 7.5256169458783155,
+        "delay_frames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 4,
+        "horizon_frames": 80,
+        "viable_state_count": 2675,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 13.035799987846985,
+      "plan_ms": 22.648799989838153,
+      "pipeline_clearance_at_hit": -2.919116258621216,
+      "minimum_pipeline_clearance_240f": -2.919116258621216,
+      "minimum_corridor_slack_240f": -3.2010516335035746,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 565,
+        "x": 363.989013671875,
+        "y": 26.666763305664062,
+        "velocity_x": 1.6833229064941406,
+        "velocity_y": -1.3425242900848389,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 4.545405829318256,
+        "aabb_clearance": -0.35009765625
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 565,
+        "x": 363.989013671875,
+        "y": 26.666763305664062,
+        "velocity_x": 1.6833229064941406,
+        "velocity_y": -1.3425242900848389,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 4.545405829318256,
+        "aabb_clearance": -0.35009765625
+      },
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 6206208,
+        "x_at_snapshot": 304.0,
+        "y_at_snapshot": 104.0,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0,
+        "projected_x_at_action": 304.0,
+        "projected_y_at_action": 104.0,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 17104973,
+        "snapshot_frame": 7016,
+        "elapsed_frames": 3,
+        "exact_same_epoch": false,
+        "aabb_clearance": 71.47544529790129
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "observed_bullet_overlap",
+      "contributing_factors": [
+        "corridor_deadline_miss",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "no_active_spell_at_hit",
+        "spell_id": null,
+        "spell_name": null,
+        "flags": 8
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    }
+  ]
+}

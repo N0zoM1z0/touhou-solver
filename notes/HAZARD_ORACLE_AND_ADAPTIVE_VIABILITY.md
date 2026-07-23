@@ -403,3 +403,11 @@ but still not control-rate performance. A fully materialized vectorized
 clearance volume was slower and was rejected; the next optimization must
 reduce the global builder's spatial work without weakening exact collision
 geometry.
+
+Stage-3 spell 50 confirms the remaining scale problem outside Final B. With
+200 active lasers, global solve median/p95 reached 1.26/1.56 seconds and three
+hits occurred. Lifecycle templates avoid rerunning the laser state machine,
+but each translated/rotated trajectory is still reduced against the full
+time-grid volume. The next acceptable optimization is an exact spatial/time
+index or tiled reduction in the game-neutral segment-trajectory builder, with
+scalar-volume equality tests for finite lifecycle samples.

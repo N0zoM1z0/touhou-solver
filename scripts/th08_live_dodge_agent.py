@@ -263,6 +263,7 @@ class Decision:
     terminal_threat_horizon: int = 0
     terminal_threat_collisions: int = 0
     terminal_threat_min_clearance: float = 9999.0
+    viability_recovery_distance: float | None = None
 
 
 @dataclass(frozen=True)
@@ -1788,6 +1789,7 @@ def choose_action(
     target_deadline: int | None = None,
     allowed_first_actions: tuple[str, ...] | None = None,
     viability_repair_volumes: tuple[tuple[str, int], ...] = (),
+    viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_position_error: float = 0.0,
 ) -> Decision:
     if horizon <= 0 or beam_width <= 0:
@@ -1851,6 +1853,18 @@ def choose_action(
         raise ValueError("viability repair contains unknown action")
     if any(volume < 0 for volume in repair_by_action.values()):
         raise ValueError("viability repair volume cannot be negative")
+    recovery_by_action = dict(viability_recovery_distances)
+    if len(recovery_by_action) != len(viability_recovery_distances):
+        raise ValueError("viability recovery action names must be unique")
+    if set(recovery_by_action) - planner_action_names:
+        raise ValueError("viability recovery contains unknown action")
+    if any(
+        not math.isfinite(distance) or distance < 0.0
+        for distance in recovery_by_action.values()
+    ):
+        raise ValueError(
+            "viability recovery distance must be finite and nonnegative"
+        )
     if (target_x is None) != (target_y is None):
         raise ValueError("target_x and target_y must be supplied together")
     if target_x is not None:
@@ -1909,6 +1923,28 @@ def choose_action(
             0.0,
         )
     ]
+
+    def pruning_key(
+        node: SearchNode,
+        *,
+        step: int,
+    ) -> tuple[object, ...]:
+        base = _node_key(
+            node,
+            step=step,
+            selected_items=selected_items,
+            target_x=target_x,
+            target_y=target_y,
+            target_deadline=target_deadline,
+        )
+        return (
+            base[0],
+            base[1],
+            base[2],
+            recovery_by_action.get(node.first_action.name, math.inf),
+            *base[3:],
+        )
+
     if (
         not bullets
         and not lasers
@@ -1916,6 +1952,8 @@ def choose_action(
         and not selected_items
         and target_x is None
         and allowed_first_actions is None
+        and not repair_by_action
+        and not recovery_by_action
     ):
         return Decision(
             SHOT | FOCUS,
@@ -2036,34 +2074,16 @@ def choose_action(
                 collected_mask,
             )
             incumbent = candidates.get(quantized)
-            if incumbent is None or _node_key(
+            if incumbent is None or pruning_key(
                 candidate,
                 step=step,
-                selected_items=selected_items,
-                target_x=target_x,
-                target_y=target_y,
-                target_deadline=target_deadline,
-            ) < _node_key(
-                incumbent,
-                step=step,
-                selected_items=selected_items,
-                target_x=target_x,
-                target_y=target_y,
-                target_deadline=target_deadline,
-            ):
+            ) < pruning_key(incumbent, step=step):
                 candidates[quantized] = candidate
         if not candidates:
             break
         beam = sorted(
             candidates.values(),
-            key=lambda node: _node_key(
-                node,
-                step=step,
-                selected_items=selected_items,
-                target_x=target_x,
-                target_y=target_y,
-                target_deadline=target_deadline,
-            ),
+            key=lambda node: pruning_key(node, step=step),
         )[:beam_width]
 
     if not beam:
@@ -2111,6 +2131,7 @@ def choose_action(
             threat_collisions,
             max(-threat_clearance, 0.0),
             max(ITEM_SAFETY_CLEARANCE - threat_clearance, 0.0),
+            recovery_by_action.get(node.first_action.name, math.inf),
             -repair_by_action.get(node.first_action.name, 0),
             _node_key(
                 node,
@@ -2242,6 +2263,7 @@ def choose_action(
         effective_threat_horizon,
         threat_collisions,
         9999.0 if math.isinf(threat_clearance) else threat_clearance,
+        recovery_by_action.get(action.name),
     )
 
 
@@ -3104,6 +3126,15 @@ def run(args: argparse.Namespace) -> int:
                 )
                 else ()
             )
+            viability_recovery_guidance = (
+                viability_query.recovery_distances
+                if (
+                    viability_query is not None
+                    and viability_query.available
+                    and viability_support_covers_current
+                )
+                else ()
+            )
             corridor_overhead_ms = (
                 time.perf_counter() - corridor_started
             ) * 1000.0
@@ -3146,6 +3177,9 @@ def run(args: argparse.Namespace) -> int:
                 ),
                 viability_repair_volumes=(
                     viability_repair_guidance
+                ),
+                viability_recovery_distances=(
+                    viability_recovery_guidance
                 ),
                 viability_position_error=(
                     viability_guidance.position_error
@@ -3329,6 +3363,9 @@ def run(args: argparse.Namespace) -> int:
                         "viability_constraint_relaxed": (
                             decision.viability_constraint_relaxed
                         ),
+                        "viability_recovery_distance": (
+                            decision.viability_recovery_distance
+                        ),
                     },
                     "terminal_threat": {
                         "mode": (
@@ -3480,9 +3517,15 @@ def run(args: argparse.Namespace) -> int:
                             "repair_volumes": dict(
                                 viability_query.repair_volumes
                             ),
+                            "recovery_distances": dict(
+                                viability_query.recovery_distances
+                            ),
                             "selected_action": decision.action,
                             "selected_repair_volume": (
                                 decision.viability_repair_volume
+                            ),
+                            "selected_recovery_distance": (
+                                decision.viability_recovery_distance
                             ),
                             "position_error": (
                                 viability_query.position_error

@@ -168,6 +168,8 @@ class Th08PracticeDossierTests(unittest.TestCase):
             "state_viable": False,
             "safe_action_count": 0,
             "selected_repair_volume": 0,
+            "recovery_distances": {"left": 48.0, "right": 16.0},
+            "selected_recovery_distance": 16.0,
             "age": 23,
             "support_covers_current": False,
         }
@@ -176,6 +178,12 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(summary["viable_query_count"], 1)
         self.assertEqual(summary["empty_action_set_count"], 1)
         self.assertEqual(summary["support_uncovered_query_count"], 1)
+        self.assertEqual(summary["distant_recovery_guided_query_count"], 1)
+        self.assertEqual(summary["distant_recovery_selected_count"], 1)
+        self.assertEqual(
+            summary["selected_recovery_distance"]["median"],
+            16.0,
+        )
         self.assertEqual(summary["constrained_decision_count"], 1)
         self.assertEqual(summary["unique_solution_count"], 1)
         self.assertEqual(summary["solve_ms"]["median"], 1800.0)

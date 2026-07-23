@@ -705,6 +705,11 @@ def _robust_viability_summary(
         int(query.get("selected_repair_volume", 0))
         for query in available
     ]
+    selected_recovery_distances = [
+        float(query["selected_recovery_distance"])
+        for query in available
+        if query.get("selected_recovery_distance") is not None
+    ]
     ages = [int(query.get("age", 0)) for query in queries]
     planning_modes = Counter(
         str(row["corridor_planning_mode"])
@@ -805,6 +810,16 @@ def _robust_viability_summary(
             and int(query.get("selected_repair_volume", 0)) > 0
             for query in available
         ),
+        "distant_recovery_guided_query_count": sum(
+            not bool(query.get("state_viable"))
+            and bool(dict(query.get("recovery_distances", {})))
+            for query in available
+        ),
+        "distant_recovery_selected_count": sum(
+            not bool(query.get("state_viable"))
+            and query.get("selected_recovery_distance") is not None
+            for query in available
+        ),
         "constrained_decision_count": sum(
             bool(row.get("robust_control", {}).get("viability_constrained"))
             for row in decisions
@@ -826,6 +841,9 @@ def _robust_viability_summary(
         ),
         "safe_action_count": _percentiles(safe_counts),
         "selected_repair_volume": _percentiles(selected_repairs),
+        "selected_recovery_distance": _percentiles(
+            selected_recovery_distances
+        ),
         "policy_age_frames": _percentiles(ages),
     }
 
@@ -897,6 +915,8 @@ def _behavior_slice(
     count = len(rows)
     recovery_guided = 0
     recovery_selected = 0
+    distant_recovery_guided = 0
+    distant_recovery_selected = 0
     for row in rows:
         viability = row.get("viability")
         if not isinstance(viability, dict) or bool(
@@ -910,6 +930,11 @@ def _behavior_slice(
             recovery_guided += 1
         if int(viability.get("selected_repair_volume", 0)) > 0:
             recovery_selected += 1
+        recovery_distances = viability.get("recovery_distances", {})
+        if isinstance(recovery_distances, dict) and recovery_distances:
+            distant_recovery_guided += 1
+        if viability.get("selected_recovery_distance") is not None:
+            distant_recovery_selected += 1
     return {
         "sample_count": count,
         "fast_fraction": sum(
@@ -940,6 +965,12 @@ def _behavior_slice(
         / count,
         "recovery_guided_fraction": recovery_guided / count,
         "recovery_selected_fraction": recovery_selected / count,
+        "distant_recovery_guided_fraction": (
+            distant_recovery_guided / count
+        ),
+        "distant_recovery_selected_fraction": (
+            distant_recovery_selected / count
+        ),
     }
 
 
@@ -1560,10 +1591,14 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"{robust_viability.get('recovery_guided_query_count', 0)}/"
                 f"{robust_viability.get('recovery_selected_count', 0)} "
                 "empty-kernel "
-                "queries. Safe-action count and selected repair-volume "
+                "queries; distant-kernel guidance was available/selected on "
+                f"{robust_viability.get('distant_recovery_guided_query_count', 0)}/"
+                f"{robust_viability.get('distant_recovery_selected_count', 0)}. "
+                "Safe-action count, selected repair-volume, and selected "
+                "recovery-distance "
                 f"statistics were `{robust_viability['safe_action_count']}` "
-                "and "
-                f"`{robust_viability['selected_repair_volume']}`."
+                f"`{robust_viability['selected_repair_volume']}`, and "
+                f"`{robust_viability.get('selected_recovery_distance')}`."
             ),
             (
                 "- The rolling worker produced "

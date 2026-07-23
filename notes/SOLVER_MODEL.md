@@ -581,6 +581,40 @@ spatially relevant instantiated trajectories; dense Stage-6B laser phases
 show that this remaining work must be indexed or tiled before it reaches
 control-rate latency.
 
+## Distant-Kernel Recovery
+
+Backward viability is a proof only while the queried state remains in its
+kernel. When the safe-action mask is empty, a one-cell repair volume first
+measures whether every delay branch can land near a viable next-layer state.
+If that neighborhood is also empty, the policy now exposes a second,
+explicitly soft quantity:
+
+```text
+recovery_distance(action) =
+    max over possible delay branches (
+        distance from that branch endpoint
+        to the nearest viable next-layer state
+        whose active action is action
+    )
+```
+
+Actions with no viable next-layer state are omitted. The result is not a
+certificate because it does not prove a collision-free path back into the
+kernel. The exact local planner therefore orders current collisions and
+clearance before recovery distance.
+
+Recovery priority must participate in every beam truncation, not only final
+selection. Otherwise a locally attractive node can erase the best recovery
+first action before the terminal ranking sees it. Stage-1 frame 2,512 exposed
+that contract violation; beam deduplication, width pruning, and final
+selection now share the priority.
+
+The method is game-neutral and uses the policy's own axes, action dynamics,
+delay support, clamping rule, and next-layer viable tensor. A Stage-3 physical
+gate reduced pre-laser hits from 11 to four relative to the prior complete
+baseline while maintaining 3/5-frame cadence. This accepts the fallback as
+soft recovery, not as proof that an empty kernel has become viable.
+
 ## Verification Gates
 
 1. File parsers reproduce all decoded ECL/SHT corpus boundaries exactly.

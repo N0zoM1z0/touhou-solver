@@ -38,9 +38,10 @@ The segment gap is a foreground-loss/manual-rearm interval. It is not scored as 
 | Primary class | Deaths | Interpretation |
 | --- | ---: | --- |
 | `observed_bullet_overlap` | 35 | A bullet overlaps the native player AABB in the hit observation. |
+| `modeled_committed_prefix_collision` | 20 | The measured three-frame input pipeline was already unsafe. |
 | `sensor_gap_or_unmodeled_hazard` | 20 | No observed overlap and positive pipeline clearance; same-frame ECL emission, transform error, or another unmodeled hazard is the leading explanation. |
-| `active_laser_unresolved` | 18 | At least one laser is active; exact responsible geometry is not yet persisted in the summary classifier. |
-| `modeled_committed_prefix_collision` | 18 | The measured three-frame input pipeline was already unsafe. |
+| `observed_laser_overlap` | 11 | The player overlaps an active laser's exact finite segment; TH08 checks this before the broad bullet pass. |
+| `active_laser_without_observed_overlap` | 5 | At least one laser is active, but none of the persisted finite segments overlaps the player in the hit observation. |
 
 Contributing factors:
 
@@ -95,7 +96,7 @@ Contributing factors:
 ### Stage 3
 
 - Death frames: 47372, 48301, 49172, 50035, 54974, 58164, 62153, 64242, 66537, 66833, 67217, 67562, 67877
-- Cause counts: `{"modeled_committed_prefix_collision": 2, "observed_bullet_overlap": 5, "sensor_gap_or_unmodeled_hazard": 1, "active_laser_unresolved": 5}`
+- Cause counts: `{"modeled_committed_prefix_collision": 4, "observed_bullet_overlap": 5, "sensor_gap_or_unmodeled_hazard": 1, "observed_laser_overlap": 1, "active_laser_without_observed_overlap": 2}`
 - Phase markers: observed 3, reachable static opcode `0x94` 4.
 - Bottom/side occupancy decisions: 403/184.
 
@@ -109,11 +110,11 @@ Contributing factors:
 | 58164 | 0.00 | 128.00 | 0.00 | 473 | 0.38 | -6.26 | `observed_bullet_overlap` | corridor_deadline_miss,fast_mode |
 | 62153 | 3.00 | 121.00 | 2.00 | 162 | 0.61 | -7.86 | `observed_bullet_overlap` | corridor_deadline_miss,fast_mode |
 | 64242 | 1.00 | 121.00 | 1.00 | 430 | 4.80 | -16.45 | `sensor_gap_or_unmodeled_hazard` | corridor_deadline_miss |
-| 66537 | 0.00 | 128.00 | 0.00 | 325 | -5.97 | -3.47 | `active_laser_unresolved` | playfield_boundary,corridor_deadline_miss,action_lag_over_model,fast_mode |
-| 66833 | 3.00 | 113.00 | 2.00 | 280 | 5.19 | - | `active_laser_unresolved` | action_lag_over_model,fast_mode |
-| 67217 | 1.00 | 125.00 | 1.00 | 332 | -5.55 | - | `active_laser_unresolved` | playfield_boundary,action_lag_over_model,fast_mode |
-| 67562 | 0.00 | 125.00 | 0.00 | 296 | 3.23 | - | `active_laser_unresolved` | playfield_boundary,action_lag_over_model,fast_mode |
-| 67877 | 3.00 | 109.00 | 2.00 | 306 | -2.44 | - | `active_laser_unresolved` | playfield_boundary,action_lag_over_model,fast_mode |
+| 66537 | 0.00 | 128.00 | 0.00 | 325 | -5.97 | -3.47 | `observed_laser_overlap` | playfield_boundary,corridor_deadline_miss,action_lag_over_model,fast_mode |
+| 66833 | 3.00 | 113.00 | 2.00 | 280 | 5.19 | - | `active_laser_without_observed_overlap` | action_lag_over_model,fast_mode |
+| 67217 | 1.00 | 125.00 | 1.00 | 332 | -5.55 | - | `modeled_committed_prefix_collision` | playfield_boundary,action_lag_over_model,fast_mode |
+| 67562 | 0.00 | 125.00 | 0.00 | 296 | 3.23 | - | `active_laser_without_observed_overlap` | playfield_boundary,action_lag_over_model,fast_mode |
+| 67877 | 3.00 | 109.00 | 2.00 | 306 | -2.44 | - | `modeled_committed_prefix_collision` | playfield_boundary,action_lag_over_model,fast_mode |
 
 ### Stage 4A / Reimu
 
@@ -181,7 +182,7 @@ Contributing factors:
 ### Final B / Kaguya
 
 - Death frames: 161147, 163663, 164288, 164994, 170663, 171585, 172681, 173355, 173733, 174091, 174419, 177723, 180491, 181287, 187413, 187845, 188331, 188689, 189223, 195434, 195845, 196247, 199039, 199814, 200492, 201242, 201875, 202617, 203556
-- Cause counts: `{"sensor_gap_or_unmodeled_hazard": 4, "modeled_committed_prefix_collision": 4, "observed_bullet_overlap": 8, "active_laser_unresolved": 13}`
+- Cause counts: `{"sensor_gap_or_unmodeled_hazard": 4, "modeled_committed_prefix_collision": 4, "observed_bullet_overlap": 8, "observed_laser_overlap": 10, "active_laser_without_observed_overlap": 3}`
 - Phase markers: observed 11, reachable static opcode `0x94` 14.
 - Bottom/side occupancy decisions: 984/418.
 
@@ -194,20 +195,20 @@ Contributing factors:
 | 170663 | 2.00 | 66.00 | 2.00 | 1125 | 1.85 | -38.07 | `observed_bullet_overlap` | playfield_boundary,corridor_deadline_miss,pool_density_over_1000 |
 | 171585 | 0.00 | 66.00 | 0.00 | 1126 | 1.80 | -33.04 | `sensor_gap_or_unmodeled_hazard` | corridor_deadline_miss,pool_density_over_1000 |
 | 172681 | 3.00 | 61.00 | 2.00 | 1161 | -3.06 | -21.26 | `modeled_committed_prefix_collision` | playfield_boundary,corridor_deadline_miss,pool_density_over_1000,fast_mode |
-| 173355 | 1.00 | 61.00 | 1.00 | 68 | -7.60 | -4.30 | `active_laser_unresolved` | playfield_boundary,corridor_deadline_miss,action_lag_over_model,fast_mode |
-| 173733 | 0.00 | 61.00 | 0.00 | 78 | 11.71 | - | `active_laser_unresolved` | playfield_boundary,action_lag_over_model,fast_mode |
-| 174091 | 3.00 | 47.00 | 2.00 | 92 | -1.78 | - | `active_laser_unresolved` | playfield_boundary,action_lag_over_model |
-| 174419 | 1.00 | 47.00 | 1.00 | 30 | -5.08 | - | `active_laser_unresolved` | action_lag_over_model,fast_mode |
+| 173355 | 1.00 | 61.00 | 1.00 | 68 | -7.60 | -4.30 | `observed_laser_overlap` | playfield_boundary,corridor_deadline_miss,action_lag_over_model,fast_mode |
+| 173733 | 0.00 | 61.00 | 0.00 | 78 | 11.71 | - | `active_laser_without_observed_overlap` | playfield_boundary,action_lag_over_model,fast_mode |
+| 174091 | 3.00 | 47.00 | 2.00 | 92 | -1.78 | - | `observed_laser_overlap` | playfield_boundary,action_lag_over_model |
+| 174419 | 1.00 | 47.00 | 1.00 | 30 | -5.08 | - | `observed_laser_overlap` | action_lag_over_model,fast_mode |
 | 177723 | 0.00 | 52.00 | 0.00 | 440 | -3.55 | -16.06 | `modeled_committed_prefix_collision` | playfield_boundary,corridor_deadline_miss,fast_mode |
-| 180491 | 3.00 | 46.00 | 2.00 | 144 | -3.39 | - | `active_laser_unresolved` | - |
-| 181287 | 1.00 | 46.00 | 1.00 | 243 | 0.62 | - | `active_laser_unresolved` | playfield_boundary,action_lag_over_model,fast_mode |
-| 187413 | 0.00 | 51.00 | 0.00 | 562 | -3.84 | -34.27 | `active_laser_unresolved` | corridor_deadline_miss |
-| 187845 | 3.00 | 35.00 | 2.00 | 542 | -7.68 | 9.98 | `active_laser_unresolved` | playfield_boundary,fast_mode |
-| 188331 | 1.00 | 35.00 | 1.00 | 540 | -7.29 | -5.84 | `active_laser_unresolved` | playfield_boundary,corridor_deadline_miss,fast_mode |
-| 188689 | 0.00 | 35.00 | 0.00 | 302 | -3.91 | -20.58 | `active_laser_unresolved` | corridor_deadline_miss,fast_mode |
-| 189223 | 3.00 | 20.00 | 2.00 | 522 | -6.42 | -9.74 | `active_laser_unresolved` | playfield_boundary,corridor_deadline_miss |
-| 195434 | 1.00 | 25.00 | 1.00 | 330 | -4.33 | - | `active_laser_unresolved` | fast_mode |
-| 195845 | 0.00 | 25.00 | 0.00 | 345 | 1.42 | - | `active_laser_unresolved` | action_lag_over_model |
+| 180491 | 3.00 | 46.00 | 2.00 | 144 | -3.39 | - | `observed_laser_overlap` | - |
+| 181287 | 1.00 | 46.00 | 1.00 | 243 | 0.62 | - | `active_laser_without_observed_overlap` | playfield_boundary,action_lag_over_model,fast_mode |
+| 187413 | 0.00 | 51.00 | 0.00 | 562 | -3.84 | -34.27 | `observed_laser_overlap` | corridor_deadline_miss |
+| 187845 | 3.00 | 35.00 | 2.00 | 542 | -7.68 | 9.98 | `observed_laser_overlap` | playfield_boundary,fast_mode |
+| 188331 | 1.00 | 35.00 | 1.00 | 540 | -7.29 | -5.84 | `observed_laser_overlap` | playfield_boundary,corridor_deadline_miss,fast_mode |
+| 188689 | 0.00 | 35.00 | 0.00 | 302 | -3.91 | -20.58 | `observed_laser_overlap` | corridor_deadline_miss,fast_mode |
+| 189223 | 3.00 | 20.00 | 2.00 | 522 | -6.42 | -9.74 | `observed_laser_overlap` | playfield_boundary,corridor_deadline_miss |
+| 195434 | 1.00 | 25.00 | 1.00 | 330 | -4.33 | - | `observed_laser_overlap` | fast_mode |
+| 195845 | 0.00 | 25.00 | 0.00 | 345 | 1.42 | - | `active_laser_without_observed_overlap` | action_lag_over_model |
 | 196247 | 3.00 | 10.00 | 2.00 | 416 | 0.41 | - | `observed_bullet_overlap` | action_lag_over_model |
 | 199039 | 1.00 | 25.00 | 1.00 | 284 | -3.46 | -16.33 | `modeled_committed_prefix_collision` | corridor_deadline_miss,fast_mode |
 | 199814 | 0.00 | 25.00 | 0.00 | 594 | 0.08 | -11.91 | `observed_bullet_overlap` | corridor_deadline_miss,fast_mode |
@@ -317,7 +318,7 @@ Every spell below is statically reachable for route 2 Lunatic Final B. `unresolv
 
 ## Next Regression Work
 
-1. Turn each row in the companion regression-case JSON into an offline executor witness; deduplicate only after two cases prove the same root cause.
-2. Integrate exact laser collision and same-frame ECL emissions before tuning corridor weights.
-3. Replace late gate waypoints with connected-safe-component commitments across whole spell/phase boundaries.
-4. Re-run the same Lunatic Final B route and compare native hits, Bomb spend, Power curve, per-spell exposure, and cluster recurrence.
+1. Explain the five active-laser/no-overlap and twenty sensor-gap cases with exact same-frame ECL/transform executor traces.
+2. Replay all 91 retained witnesses through the integrated executor before deduplicating equivalent root causes.
+3. Physically validate gate-first local ordering and fixed-expiry lane commitment on the same Lunatic Final B route.
+4. Add Bomb/Power/item state to phase-level component search, then compare native hits, Bomb spend, Power curve, per-spell exposure, and cluster recurrence.

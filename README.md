@@ -133,6 +133,10 @@ python th08/scripts/th08_live_dodge_agent.py \
 
 # Stitch a completed multi-segment run into review and regression artifacts.
 python th08/scripts/th08_run_dossier.py --help
+
+# Execute structural/geometric invariants for every retained native hit.
+python th08/scripts/th08_fullrun_regression.py \
+  th08/artifacts/runtime_reports/lunatic_route2_fullrun_20260723.regressions.json
 ```
 
 The curated model, address map, evidence distinctions, and remaining unknowns

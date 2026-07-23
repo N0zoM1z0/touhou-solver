@@ -882,9 +882,10 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 
 ### Failure Structure
 
-- Primary classifications are 35 observed bullet overlaps, 18 collisions
-  already visible in the committed-input prefix, 18 active-laser unresolved
-  cases, and 20 sensor-gap/unmodeled-hazard cases.
+- Primary classifications are 35 observed bullet overlaps, 20 collisions
+  already visible in the committed-input prefix, 11 exact finite-segment laser
+  overlaps, five active-laser/no-overlap cases, and 20
+  sensor-gap/unmodeled-hazard cases.
 - Cross-cutting contributors are stronger: 74/91 missed a corridor deadline,
   68/91 were in fast mode, 32/91 were at a side/bottom boundary, 16/91 had
   more than 1,000 bullets, and 14/91 exceeded the modeled action lag. This
@@ -905,6 +906,22 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `spell_card_start` and the active-bit lifetime at `spell_card_finish`.
 - Auto-confirm now has a foreground-gated wall-clock path when dialogue freezes
   the manager frame. The same frozen-counter branch detects gameplay scene
-  unload instead of waiting forever. The full suite passes 183 tests plus six
-  subtests; the fixes still require the next physical full-run recurrence
-  check.
+  unload instead of waiting forever.
+
+### Executable Corpus And Gate Commitment
+
+- `scripts/th08_fullrun_regression.py` validates all 91 retained case IDs and
+  their geometry, classification priority, resource fields, corridor/latency/
+  density factors, stage totals, and spell-attribution status. The corpus now
+  contains full exact geometry for 35 bullet and 11 laser contact witnesses.
+- Corrected the local lexicographic order from
+  `collision -> safety -> gate` to `collision -> gate -> safety`. The minimal
+  regression preserves a tight left gate by choosing `down_left_fast` instead
+  of entering a wider local dead end with `down_fast`.
+- The game-neutral corridor planner can constrain a bottleneck gate to a
+  left/center/right component. The live async adapter retains that component
+  until a fixed non-rolling expiry, falls back only when the constrained
+  component is proven unreachable, and resets at stage/live-spell boundaries.
+  A synthetic 200-bullet benchmark remained about 27 ms median on WSL.
+- The full suite passes 191 tests plus six subtests. These solver changes still
+  require the next physical full-run recurrence check.

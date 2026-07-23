@@ -9,6 +9,7 @@ from th08_run_dossier import (
     _classify_death,
     _death_clusters,
     _nearest_bullet,
+    _nearest_laser,
     _spell_attribution,
 )
 
@@ -40,22 +41,24 @@ def _row(
 class Th08RunDossierTests(unittest.TestCase):
     def test_native_overlap_outranks_positive_pipeline_model(self) -> None:
         row = _row(100)
-        primary, contributing, nearest = _classify_death(
+        primary, contributing, nearest, laser = _classify_death(
             row,
             window=[row],
         )
         self.assertEqual(primary, "observed_bullet_overlap")
         self.assertEqual(nearest["slot"], 17)
+        self.assertIsNone(laser)
         self.assertEqual(contributing, [])
 
     def test_missing_witness_stays_explicitly_unmodeled(self) -> None:
         row = _row(100, bullets=0, pipeline=8.0, slack=-2.0)
-        primary, contributing, nearest = _classify_death(
+        primary, contributing, nearest, laser = _classify_death(
             row,
             window=[row],
         )
         self.assertEqual(primary, "sensor_gap_or_unmodeled_hazard")
         self.assertIsNone(nearest)
+        self.assertIsNone(laser)
         self.assertIn("corridor_deadline_miss", contributing)
 
     def test_overlap_witness_outranks_closer_nonoverlapping_center(self) -> None:
@@ -67,6 +70,15 @@ class Th08RunDossierTests(unittest.TestCase):
         nearest = _nearest_bullet(row)
         self.assertEqual(nearest["slot"], 2)
         self.assertLessEqual(nearest["aabb_clearance"], 0.0)
+
+    def test_native_laser_overlap_uses_exact_segment_geometry(self) -> None:
+        row = _row(100, bullets=0)
+        row["active_lasers"] = 1
+        row["lasers"] = [[100.0, 400.0, 0.0, 0.0, 200.0, 5.0]]
+        nearest = _nearest_laser(row)
+        self.assertLessEqual(nearest["clearance"], 0.0)
+        primary, _, _, _ = _classify_death(row, window=[row])
+        self.assertEqual(primary, "observed_laser_overlap")
 
     def test_live_spell_attribution_is_gated_by_active_flag(self) -> None:
         row = {

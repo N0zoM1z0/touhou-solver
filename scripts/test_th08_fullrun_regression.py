@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Executable gates for the first complete TH08 Lunatic failure corpus."""
+
+from __future__ import annotations
+
+import unittest
+from pathlib import Path
+
+from th08_fullrun_regression import load_and_validate
+
+
+ROOT = Path(__file__).resolve().parent.parent
+CORPUS = (
+    ROOT
+    / "artifacts"
+    / "runtime_reports"
+    / "lunatic_route2_fullrun_20260723.regressions.json"
+)
+
+
+class Th08FullrunRegressionTests(unittest.TestCase):
+    def test_every_retained_native_hit_is_a_valid_unique_witness(self) -> None:
+        summary = load_and_validate(CORPUS)
+        self.assertEqual(summary.case_count, 91)
+        self.assertEqual(
+            summary.stage_counts,
+            {
+                "Stage 1": 2,
+                "Stage 2": 4,
+                "Stage 3": 13,
+                "Stage 4A / Reimu": 21,
+                "Stage 5": 22,
+                "Final B / Kaguya": 29,
+            },
+        )
+        self.assertEqual(summary.deathbomb_count, 62)
+        self.assertEqual(
+            summary.factor_counts,
+            {
+                "playfield_boundary": 32,
+                "corridor_deadline_miss": 74,
+                "fast_mode": 68,
+                "action_lag_over_model": 14,
+                "pool_density_over_1000": 16,
+            },
+        )
+
+    def test_failure_taxonomy_retains_exact_geometry_and_model_gaps(self) -> None:
+        summary = load_and_validate(CORPUS)
+        self.assertEqual(
+            summary.cause_counts,
+            {
+                "sensor_gap_or_unmodeled_hazard": 20,
+                "observed_bullet_overlap": 35,
+                "modeled_committed_prefix_collision": 20,
+                "observed_laser_overlap": 11,
+                "active_laser_without_observed_overlap": 5,
+            },
+        )
+        self.assertEqual(summary.exact_bullet_witnesses, 35)
+        self.assertEqual(summary.exact_laser_witnesses, 11)
+
+
+if __name__ == "__main__":
+    unittest.main()

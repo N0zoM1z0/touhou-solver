@@ -132,6 +132,55 @@ class CorridorPlannerTests(unittest.TestCase):
         self.assertEqual(plan.path, ())
         self.assertIsNone(plan.gate)
 
+    def test_required_gate_lane_selects_a_stable_component(self) -> None:
+        constrained_config = CorridorConfig(
+            grid_step=8.0,
+            frames_per_layer=4,
+            horizon_frames=32,
+            cardinal_speed=4.0,
+            diagonal_axis_speed=2.8284270763397217,
+            preferred_clearance=20.0,
+        )
+        plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=BOUNDS,
+            preferred_x=48.0,
+            preferred_y=64.0,
+            required_gate_lane="right",
+            config=constrained_config,
+        )
+        self.assertTrue(plan.reachable)
+        self.assertEqual(plan.lane, "right")
+        self.assertLess(
+            plan.bottleneck_clearance,
+            constrained_config.preferred_clearance,
+        )
+        self.assertIn("commitment", plan.reason)
+
+    def test_required_closed_gate_lane_fails_instead_of_switching(self) -> None:
+        hazards = tuple(
+            MovingAabbHazard(
+                x=float(x),
+                y=48.0,
+                velocity_x=0.0,
+                velocity_y=0.0,
+                half_width=4.0,
+                half_height=50.0,
+            )
+            for x in range(32, 65, 8)
+        )
+        plan = plan_corridor(
+            start_x=16.0,
+            start_y=88.0,
+            bounds=BOUNDS,
+            aabbs=hazards,
+            required_gate_lane="center",
+            config=CONFIG,
+        )
+        self.assertFalse(plan.reachable)
+        self.assertIn("required center", plan.reason)
+
     def test_waypoint_uses_first_point_at_or_after_requested_frame(self) -> None:
         plan = plan_corridor(
             start_x=48.0,

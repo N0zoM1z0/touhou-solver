@@ -101,6 +101,7 @@ def plan_th08_corridor(
     snapshot_lag: int = 0,
     preferred_x: float = 192.0,
     preferred_y: float = 368.0,
+    required_gate_lane: str | None = None,
     config: CorridorConfig = TH08_CORRIDOR_CONFIG,
 ) -> CorridorPlan:
     return plan_corridor(
@@ -111,5 +112,6 @@ def plan_th08_corridor(
         segments=lower_lasers(lasers, snapshot_lag=snapshot_lag),
         preferred_x=preferred_x,
         preferred_y=preferred_y,
+        required_gate_lane=required_gate_lane,
         config=config,
     )

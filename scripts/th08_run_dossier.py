@@ -62,6 +62,11 @@ def _nearest_bullet(row: dict[str, object]) -> dict[str, object] | None:
                 "slot": int(bullet[0]),
                 "x": float(bullet[1]),
                 "y": float(bullet[2]),
+                "velocity_x": float(bullet[3]),
+                "velocity_y": float(bullet[4]),
+                "half_width": float(bullet[5]),
+                "half_height": float(bullet[6]),
+                "transform_flags": int(bullet[7]) if len(bullet) >= 8 else 0,
                 "center_distance": math.hypot(dx, dy),
                 "aabb_clearance": clearance,
             }
@@ -82,6 +87,69 @@ def _nearest_bullet(row: dict[str, object]) -> dict[str, object] | None:
             key=lambda candidate: candidate["center_distance"],
         )
     return None
+
+
+def _nearest_laser(row: dict[str, object]) -> dict[str, object] | None:
+    player = row["player"]
+    player_x = float(player["x"])
+    player_y = float(player["y"])
+    candidates = []
+    for slot, laser in enumerate(row.get("lasers", ())):
+        if not isinstance(laser, list) or len(laser) < 6:
+            continue
+        origin_x = float(laser[0])
+        origin_y = float(laser[1])
+        angle = float(laser[2])
+        tail = float(laser[3])
+        head = float(laser[4])
+        half_width = float(laser[5])
+        cosine = math.cos(angle)
+        sine = math.sin(angle)
+        start_x = origin_x + cosine * tail
+        start_y = origin_y + sine * tail
+        end_x = origin_x + cosine * head
+        end_y = origin_y + sine * head
+        segment_x = end_x - start_x
+        segment_y = end_y - start_y
+        length_sq = segment_x * segment_x + segment_y * segment_y
+        if length_sq <= 1e-9:
+            projection = 0.0
+        else:
+            projection = min(
+                1.0,
+                max(
+                    0.0,
+                    (
+                        (player_x - start_x) * segment_x
+                        + (player_y - start_y) * segment_y
+                    )
+                    / length_sq,
+                ),
+            )
+        closest_x = start_x + projection * segment_x
+        closest_y = start_y + projection * segment_y
+        center_distance = math.hypot(
+            player_x - closest_x,
+            player_y - closest_y,
+        )
+        candidates.append(
+            {
+                "slot": slot,
+                "origin_x": origin_x,
+                "origin_y": origin_y,
+                "angle": angle,
+                "tail": tail,
+                "head": head,
+                "half_width": half_width,
+                "closest_x": closest_x,
+                "closest_y": closest_y,
+                "center_distance": center_distance,
+                "clearance": center_distance - half_width - 2.0,
+            }
+        )
+    if not candidates:
+        return None
+    return min(candidates, key=lambda candidate: candidate["clearance"])
 
 
 def _spell_attribution(row: dict[str, object]) -> dict[str, object]:
@@ -251,16 +319,30 @@ def _classify_death(
     row: dict[str, object],
     *,
     window: list[dict[str, object]],
-) -> tuple[str, list[str], dict[str, object] | None]:
-    nearest = _nearest_bullet(row)
+) -> tuple[
+    str,
+    list[str],
+    dict[str, object] | None,
+    dict[str, object] | None,
+]:
+    nearest_bullet = _nearest_bullet(row)
+    nearest_laser = _nearest_laser(row)
     pipeline = float(row["pipeline_clearance"])
     lasers = int(row["active_lasers"])
-    if nearest is not None and float(nearest["aabb_clearance"]) <= 0.0:
+    if (
+        nearest_laser is not None
+        and float(nearest_laser["clearance"]) <= 0.0
+    ):
+        primary = "observed_laser_overlap"
+    elif (
+        nearest_bullet is not None
+        and float(nearest_bullet["aabb_clearance"]) <= 0.0
+    ):
         primary = "observed_bullet_overlap"
-    elif lasers:
-        primary = "active_laser_unresolved"
     elif pipeline <= 0.0:
         primary = "modeled_committed_prefix_collision"
+    elif lasers:
+        primary = "active_laser_without_observed_overlap"
     else:
         primary = "sensor_gap_or_unmodeled_hazard"
 
@@ -285,7 +367,7 @@ def _classify_death(
         contributing.append("pool_density_over_1000")
     if "_fast" in str(row["action"]):
         contributing.append("fast_mode")
-    return primary, contributing, nearest
+    return primary, contributing, nearest_bullet, nearest_laser
 
 
 def _death_ledger(
@@ -328,7 +410,7 @@ def _death_ledger(
                 next_power = power
                 break
 
-        primary, contributing, nearest = _classify_death(
+        primary, contributing, nearest_bullet, nearest_laser = _classify_death(
             row,
             window=window,
         )
@@ -374,11 +456,18 @@ def _death_ledger(
                 min(slack_samples) if slack_samples else None
             ),
             "corridor_lane": row["corridor_lane"],
-            "nearest_observed_bullet": nearest,
+            "nearest_observed_bullet": nearest_bullet,
             "observed_bullet_contact_candidate": (
-                nearest
-                if nearest is not None
-                and float(nearest["aabb_clearance"]) <= 0.0
+                nearest_bullet
+                if nearest_bullet is not None
+                and float(nearest_bullet["aabb_clearance"]) <= 0.0
+                else None
+            ),
+            "nearest_observed_laser": nearest_laser,
+            "observed_laser_contact_candidate": (
+                nearest_laser
+                if nearest_laser is not None
+                and float(nearest_laser["clearance"]) <= 0.0
                 else None
             ),
             "primary_cause_class": primary,
@@ -877,9 +966,13 @@ def render_markdown(dossier: dict[str, object]) -> str:
         "observed_bullet_overlap": (
             "A bullet overlaps the native player AABB in the hit observation."
         ),
-        "active_laser_unresolved": (
-            "At least one laser is active; exact responsible geometry is not "
-            "yet persisted in the summary classifier."
+        "observed_laser_overlap": (
+            "The player overlaps an active laser's exact finite segment; TH08 "
+            "checks this before the broad bullet pass."
+        ),
+        "active_laser_without_observed_overlap": (
+            "At least one laser is active, but none of the persisted finite "
+            "segments overlaps the player in the hit observation."
         ),
         "modeled_committed_prefix_collision": (
             "The measured three-frame input pipeline was already unsafe."
@@ -1049,14 +1142,14 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "",
             "## Next Regression Work",
             "",
-            "1. Turn each row in the companion regression-case JSON into an "
-            "offline executor witness; deduplicate only after two cases prove "
-            "the same root cause.",
-            "2. Integrate exact laser collision and same-frame ECL emissions "
-            "before tuning corridor weights.",
-            "3. Replace late gate waypoints with connected-safe-component "
-            "commitments across whole spell/phase boundaries.",
-            "4. Re-run the same Lunatic Final B route and compare native hits, "
+            "1. Explain the five active-laser/no-overlap and twenty sensor-gap "
+            "cases with exact same-frame ECL/transform executor traces.",
+            "2. Replay all 91 retained witnesses through the integrated "
+            "executor before deduplicating equivalent root causes.",
+            "3. Physically validate gate-first local ordering and fixed-expiry "
+            "lane commitment on the same Lunatic Final B route.",
+            "4. Add Bomb/Power/item state to phase-level component search, then "
+            "compare native hits, "
             "Bomb "
             "spend, Power curve, per-spell exposure, and cluster recurrence.",
         ]
@@ -1090,6 +1183,8 @@ def write_death_csv(
         "action",
         "nearest_bullet_slot",
         "nearest_bullet_clearance",
+        "nearest_laser_slot",
+        "nearest_laser_clearance",
         "primary_cause_class",
         "contributing_factors",
         "spell_id",
@@ -1106,6 +1201,7 @@ def write_death_csv(
         writer.writeheader()
         for death in deaths:
             nearest = death["nearest_observed_bullet"]
+            nearest_laser = death["nearest_observed_laser"]
             writer.writerow(
                 {
                     "case_id": death["case_id"],
@@ -1138,6 +1234,12 @@ def write_death_csv(
                     ),
                     "nearest_bullet_clearance": (
                         nearest["aabb_clearance"] if nearest else None
+                    ),
+                    "nearest_laser_slot": (
+                        nearest_laser["slot"] if nearest_laser else None
+                    ),
+                    "nearest_laser_clearance": (
+                        nearest_laser["clearance"] if nearest_laser else None
                     ),
                     "primary_cause_class": death["primary_cause_class"],
                     "contributing_factors": ";".join(

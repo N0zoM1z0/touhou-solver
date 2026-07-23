@@ -10,6 +10,7 @@ from corridor_planner import CorridorBounds, CorridorConfig, plan_corridor
 from th08_live_dodge_agent import (
     AutoConfirmPulse,
     Bullet,
+    CorridorCommitment,
     CorridorSolution,
     Item,
     LEFT,
@@ -176,6 +177,24 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertIn("left", decision.action)
         self.assertNotEqual(decision.action, "stay")
 
+    def test_gate_reachability_outranks_a_wider_local_dead_end(self) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(
+                Bullet(176.0, 394.0, 0.0, 0.0, 4.0, 4.0),
+            ),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            target_x=160.0,
+            target_y=400.0,
+            target_deadline=5,
+        )
+        self.assertEqual(decision.action, "down_left_fast")
+        self.assertGreater(decision.min_clearance, 0.0)
+
     def test_async_corridor_age_advances_waypoint_and_deadline(self) -> None:
         plan = plan_corridor(
             start_x=48.0,
@@ -207,6 +226,49 @@ class LiveDodgeAgentTests(unittest.TestCase):
                 max_age_frames=20,
             )
         )
+
+    def test_corridor_commitment_survives_replans_without_rolling_expiry(
+        self,
+    ) -> None:
+        plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=CorridorBounds(0.0, 96.0, 0.0, 96.0),
+            required_gate_lane="left",
+            config=CorridorConfig(
+                grid_step=8.0,
+                frames_per_layer=4,
+                horizon_frames=32,
+            ),
+        )
+        commitment = CorridorCommitment()
+        self.assertTrue(commitment.set_context((0, None)))
+        commitment.accept(
+            CorridorSolution(100, plan, 12.0, context_key=(0, None)),
+            current_frame=104,
+        )
+        original_expiry = commitment.expires_frame
+        self.assertEqual(commitment.active_lane(104), "left")
+
+        commitment.accept(
+            CorridorSolution(
+                120,
+                plan,
+                12.0,
+                required_gate_lane="left",
+                constraint_honored=True,
+                context_key=(0, None),
+            ),
+            current_frame=124,
+        )
+        self.assertEqual(commitment.expires_frame, original_expiry)
+        self.assertIsNone(commitment.active_lane(original_expiry))
+
+    def test_corridor_commitment_resets_at_spell_context_boundary(self) -> None:
+        commitment = CorridorCommitment("right", 200, (0, None))
+        self.assertFalse(commitment.set_context((0, None)))
+        self.assertTrue(commitment.set_context((0, 145)))
+        self.assertIsNone(commitment.active_lane(150))
 
     def test_ce_frame_844_leaves_bottom_left_corner_early(self) -> None:
         bullets = (

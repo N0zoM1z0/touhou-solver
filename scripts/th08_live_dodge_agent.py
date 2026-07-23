@@ -99,6 +99,7 @@ ITEM_SAFETY_CLEARANCE = 8.0
 CORRIDOR_REPLAN_FRAMES = 24
 CORRIDOR_LOOKAHEAD_FRAMES = 16
 CORRIDOR_MAX_AGE_FRAMES = 48
+CORRIDOR_MIN_COMMIT_FRAMES = 32
 
 
 @dataclass(frozen=True)
@@ -177,6 +178,56 @@ class CorridorSolution:
     source_frame: int
     plan: CorridorPlan
     solve_ms: float
+    required_gate_lane: str | None = None
+    constraint_honored: bool = False
+    context_key: tuple[int, int | None] | None = None
+
+
+@dataclass
+class CorridorCommitment:
+    """Retain a viable gate component across asynchronous replans."""
+
+    lane: str | None = None
+    expires_frame: int = -1
+    context_key: tuple[int, int | None] | None = None
+
+    def set_context(self, context_key: tuple[int, int | None]) -> bool:
+        if self.context_key == context_key:
+            return False
+        self.context_key = context_key
+        self.lane = None
+        self.expires_frame = -1
+        return True
+
+    def active_lane(self, frame: int) -> str | None:
+        if self.lane is None or frame >= self.expires_frame:
+            return None
+        return self.lane
+
+    def accept(self, solution: CorridorSolution, *, current_frame: int) -> None:
+        if not solution.plan.reachable or solution.plan.gate is None:
+            return
+        active_lane = self.active_lane(current_frame)
+        if (
+            active_lane is not None
+            and (
+                (
+                    solution.required_gate_lane == active_lane
+                    and solution.constraint_honored
+                )
+                or solution.plan.lane == active_lane
+            )
+        ):
+            return
+        if active_lane is None and solution.required_gate_lane is not None:
+            self.lane = None
+            self.expires_frame = -1
+            return
+        self.lane = solution.plan.lane
+        self.expires_frame = max(
+            current_frame + CORRIDOR_MIN_COMMIT_FRAMES,
+            solution.source_frame + solution.plan.gate.frame,
+        )
 
 
 @dataclass
@@ -654,8 +705,8 @@ def _node_key(
         )
     return (
         node.collisions,
-        safety_deficit,
         gate_deficit,
+        safety_deficit,
         node.risk - 6.0 * utility,
         -node.min_clearance,
     )
@@ -1012,6 +1063,8 @@ def _solve_corridor(
     bullets: tuple[Bullet, ...],
     lasers: tuple[Laser, ...],
     snapshot_lag: int,
+    required_gate_lane: str | None = None,
+    context_key: tuple[int, int | None] | None = None,
 ) -> CorridorSolution:
     started = time.perf_counter()
     plan = plan_th08_corridor(
@@ -1020,11 +1073,27 @@ def _solve_corridor(
         bullets=bullets,
         lasers=lasers,
         snapshot_lag=snapshot_lag,
+        required_gate_lane=required_gate_lane,
     )
+    constraint_honored = (
+        required_gate_lane is None
+        or (plan.reachable and plan.lane == required_gate_lane)
+    )
+    if required_gate_lane is not None and not constraint_honored:
+        plan = plan_th08_corridor(
+            player_x=player_x,
+            player_y=player_y,
+            bullets=bullets,
+            lasers=lasers,
+            snapshot_lag=snapshot_lag,
+        )
     return CorridorSolution(
         source_frame=source_frame,
         plan=plan,
         solve_ms=(time.perf_counter() - started) * 1000.0,
+        required_gate_lane=required_gate_lane,
+        constraint_honored=constraint_honored,
+        context_key=context_key,
     )
 
 
@@ -1105,6 +1174,8 @@ def run(args: argparse.Namespace) -> int:
     corridor_future: Future[CorridorSolution] | None = None
     corridor_solution: CorridorSolution | None = None
     corridor_last_submit = -1000000
+    corridor_commitment = CorridorCommitment()
+    corridor_context: tuple[int, int | None] | None = None
     auto_confirm = AutoConfirmPulse(
         interval_frames=args.auto_confirm_every,
         idle_frames=args.auto_confirm_idle_frames,
@@ -1221,6 +1292,22 @@ def run(args: argparse.Namespace) -> int:
             if not state["gameplay_active"] or state["route_id"] != 2:
                 termination_reason = "gameplay_ended"
                 break
+            spell_state = state["spell"]
+            corridor_context = (
+                int(state["stage_route_index"]),
+                (
+                    int(spell_state["spell_id"])
+                    if spell_state["active"]
+                    else None
+                ),
+            )
+            if corridor_commitment.set_context(corridor_context):
+                corridor_solution = None
+                if (
+                    corridor_future is not None
+                    and corridor_future.cancel()
+                ):
+                    corridor_future = None
             iterations += 1
             if iterations % 30 == 0:
                 _require_foreground(api, pid)
@@ -1262,9 +1349,15 @@ def run(args: argparse.Namespace) -> int:
             )
             corridor_updated = False
             if corridor_future is not None and corridor_future.done():
-                corridor_solution = corridor_future.result()
+                completed_solution = corridor_future.result()
                 corridor_future = None
-                corridor_updated = True
+                if completed_solution.context_key == corridor_context:
+                    corridor_solution = completed_solution
+                    corridor_commitment.accept(
+                        completed_solution,
+                        current_frame=counter_after_read,
+                    )
+                    corridor_updated = True
             if (
                 corridor_executor is not None
                 and corridor_future is None
@@ -1279,6 +1372,10 @@ def run(args: argparse.Namespace) -> int:
                     bullets=bullets,
                     lasers=lasers,
                     snapshot_lag=snapshot_lag,
+                    required_gate_lane=(
+                        corridor_commitment.active_lane(counter_after_read)
+                    ),
+                    context_key=corridor_context,
                 )
                 corridor_last_submit = counter_after_read
             corridor_target = _corridor_target(
@@ -1443,6 +1540,21 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "stale": corridor_target is None
                         and corridor_solution.plan.reachable,
+                        "commitment": {
+                            "active_lane": corridor_commitment.active_lane(
+                                counter_at_action
+                            ),
+                            "expires_frame": (
+                                corridor_commitment.expires_frame
+                            ),
+                            "required_gate_lane": (
+                                corridor_solution.required_gate_lane
+                            ),
+                            "constraint_honored": (
+                                corridor_solution.constraint_honored
+                            ),
+                            "context": corridor_context,
+                        },
                     }
                     if corridor_solution.plan.gate is not None:
                         corridor_record["gate"] = {

@@ -320,6 +320,28 @@ def _lane(x: float, bounds: CorridorBounds) -> str:
     return "center"
 
 
+def _trace_coordinates(
+    terminal_row: int,
+    terminal_column: int,
+    *,
+    predecessors: list[np.ndarray],
+    offsets: tuple[tuple[int, int], ...],
+) -> list[tuple[int, int]]:
+    coordinates = [(terminal_row, terminal_column)]
+    row = terminal_row
+    column = terminal_column
+    for layer in range(len(predecessors) - 1, -1, -1):
+        move_index = int(predecessors[layer][row, column])
+        if move_index < 0:
+            raise RuntimeError("corridor predecessor chain is incomplete")
+        dy, dx = offsets[move_index]
+        row -= dy
+        column -= dx
+        coordinates.append((row, column))
+    coordinates.reverse()
+    return coordinates
+
+
 def plan_corridor(
     *,
     start_x: float,
@@ -329,10 +351,13 @@ def plan_corridor(
     segments: tuple[SegmentHazard, ...] = (),
     preferred_x: float | None = None,
     preferred_y: float | None = None,
+    required_gate_lane: str | None = None,
     config: CorridorConfig = CorridorConfig(),
 ) -> CorridorPlan:
     """Return a robust reachable path through a coarse time-expanded grid."""
 
+    if required_gate_lane not in (None, "left", "center", "right"):
+        raise ValueError("required gate lane must be left, center, or right")
     if not (
         bounds.left <= start_x <= bounds.right
         and bounds.top <= start_y <= bounds.bottom
@@ -413,31 +438,61 @@ def plan_corridor(
         )
 
     maximum_bottleneck = float(np.max(bottleneck[reachable]))
-    acceptable_floor = min(config.preferred_clearance, maximum_bottleneck)
-    acceptable = reachable & (bottleneck >= acceptable_floor - 1e-5)
+    if required_gate_lane is None:
+        acceptable_floor = min(config.preferred_clearance, maximum_bottleneck)
+        acceptable = reachable & (bottleneck >= acceptable_floor - 1e-5)
+    else:
+        acceptable = reachable
     target_x = start_x if preferred_x is None else preferred_x
     target_y = start_y if preferred_y is None else preferred_y
     terminal_cost = exposure + config.preferred_position_weight * (
         np.square(grid_x - target_x) + np.square(grid_y - target_y)
     )
     terminal_cost[~acceptable] = np.inf
+    if required_gate_lane is not None:
+        for terminal_flat in np.flatnonzero(np.isfinite(terminal_cost)):
+            candidate_row, candidate_column = np.unravel_index(
+                int(terminal_flat),
+                terminal_cost.shape,
+            )
+            coordinates = _trace_coordinates(
+                candidate_row,
+                candidate_column,
+                predecessors=predecessors,
+                offsets=offsets,
+            )
+            _, (gate_row, gate_column) = min(
+                enumerate(coordinates[1:], start=1),
+                key=lambda item: float(
+                    clearance_fields[item[0] - 1][item[1][0], item[1][1]]
+                ),
+            )
+            if _lane(float(x_axis[gate_column]), bounds) != required_gate_lane:
+                terminal_cost[candidate_row, candidate_column] = np.inf
+        if not np.isfinite(terminal_cost).any():
+            return CorridorPlan(
+                reachable=False,
+                path=(),
+                bottleneck_clearance=-math.inf,
+                terminal_clearance=-math.inf,
+                lane="none",
+                gate=None,
+                reason=(
+                    "no collision-free path through required "
+                    f"{required_gate_lane} gate lane"
+                ),
+            )
     terminal_flat = int(np.argmin(terminal_cost))
     terminal_row, terminal_column = np.unravel_index(
         terminal_flat, terminal_cost.shape
     )
 
-    coordinates: list[tuple[int, int]] = [(terminal_row, terminal_column)]
-    row = terminal_row
-    column = terminal_column
-    for layer in range(layer_count - 1, -1, -1):
-        move_index = int(predecessors[layer][row, column])
-        if move_index < 0:
-            raise RuntimeError("corridor predecessor chain is incomplete")
-        dy, dx = offsets[move_index]
-        row -= dy
-        column -= dx
-        coordinates.append((row, column))
-    coordinates.reverse()
+    coordinates = _trace_coordinates(
+        terminal_row,
+        terminal_column,
+        predecessors=predecessors,
+        offsets=offsets,
+    )
 
     path: list[CorridorPoint] = [
         CorridorPoint(0, float(x_axis[start_column]), float(y_axis[start_row]), math.inf)
@@ -460,5 +515,9 @@ def plan_corridor(
         terminal_clearance=terminal.clearance,
         lane=_lane(gate.x, bounds),
         gate=gate,
-        reason="collision-free corridor found",
+        reason=(
+            "collision-free corridor found"
+            if required_gate_lane is None
+            else f"collision-free {required_gate_lane} gate commitment found"
+        ),
     )

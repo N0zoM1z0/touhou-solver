@@ -342,8 +342,8 @@ measurements are stable.
 3. Corridor planner: propagate a coarse reachable set over 80 frames, retain
    connected safe-region choices, and emit a gate waypoint plus deadline.
 4. Local planner: use short-horizon safe-set search or model-predictive control
-   over direction/focus actions while preserving gate reachability as a
-   lexicographic constraint.
+   over direction/focus actions. After collision count, expiring gate
+   reachability is lexicographically prior to local safety margin and utility.
 5. Resource planner: dynamic programming or graph search across phase boundaries
    for bomb/life allocation and collection detours.
 6. Route compressor: convert the frame trace to held-input intervals, retaining
@@ -352,6 +352,14 @@ measurements are stable.
 The two-level search avoids branching on every bomb/resource decision at every
 movement frame. Candidate paths still require exact full-stage replay before
 acceptance.
+
+The current online approximation identifies a safe component by the lane of
+the time-expanded path's minimum-clearance gate. The neutral planner can
+require that gate lane on later snapshots. A live commitment has a fixed
+non-rolling expiry and is cleared by stage/spell boundaries; an infeasible
+constrained solve falls back to the best currently reachable component. This
+is a stabilizer for the next physical run, not a substitute for the planned
+full-phase component graph driven by deterministic ECL execution.
 
 ## Counterexample-Guided Agent Refinement
 

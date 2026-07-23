@@ -433,15 +433,43 @@ Status: observed | inferred | unknown | fixed
   `artifacts/runtime_reports/lunatic_route2_fullrun_20260723.dossier.json`,
   `.deaths.csv`, and `.regressions.json`. Of 91 edges, 74 had a missed
   corridor deadline, 68 used fast movement, 32 were at a playfield boundary,
-  and 18 occurred with active lasers. The densest recurrent clusters are five
-  hits at Stage-3 frames 66,537..67,877 and five at Final-B frames
-  187,413..189,223.
+  and 19 occurred with active lasers. Exact finite-segment geometry proves 11
+  laser contacts; five active-laser cases have no observed contact, while two
+  more are already explained by the committed-input prefix and one by a bullet
+  overlap. The densest recurrent clusters are five hits at Stage-3 frames
+  66,537..67,877 and five at Final-B frames 187,413..189,223.
 - **Correction:** First close exact laser, transform, and same-frame ECL
   emission gaps. Then make the global state a connected safe component across
   full spell/phase boundaries, with Bomb/Power/item state in the resource
   search; the local MPC must preserve that selected component instead of
   choosing a late waypoint.
 - **Regression:** The companion JSON contains one retained witness for each
-  native hit. Cases remain separate until executor replay proves equivalent
-  root causes.
-- **Status:** full-run dataset captured; solver correction open.
+  native hit. `th08_fullrun_regression.py` now validates every case ID,
+  classification witness, factor, resource field, and stage count. Cases remain
+  separate until executor replay proves equivalent root causes.
+- **Status:** corpus executable; full phase/resource solver correction open.
+
+## CE-0028: Local clearance outranked an expiring global gate
+
+- **Observed symptom:** The local node key sorted
+  `(collision, safety_deficit, gate_deficit, ...)`. A minimal retained-gate
+  fixture at `(192,400)` with a left gate at `(160,400)` chose `down_fast`: it
+  gained local clearance but could no longer reach the gate by its deadline.
+- **Invalid assumption:** Gate reachability could remain a lower-priority
+  preference after the global layer had already selected a viable component.
+- **Correction:** Sort collision first, then gate deficit, then local safety.
+  The neutral corridor DP can now require the bottleneck gate to remain in a
+  specified left/center/right component. The live async controller keeps that
+  component through a fixed, non-rolling expiry; if a constrained solve proves
+  it unreachable, the same worker computes an unconstrained fallback. Stage or
+  live spell-ID changes clear the commitment and discard old-context results.
+- **Regressions:**
+  `test_gate_reachability_outranks_a_wider_local_dead_end`,
+  `test_required_gate_lane_selects_a_stable_component`,
+  `test_required_closed_gate_lane_fails_instead_of_switching`,
+  `test_corridor_commitment_survives_replans_without_rolling_expiry`, and
+  `test_corridor_commitment_resets_at_spell_context_boundary`.
+- **Performance:** A synthetic 200-bullet WSL benchmark measured 26.6 ms
+  median unconstrained and 26.5..27.9 ms for constrained lanes; gate filtering
+  does not materially enlarge the DP.
+- **Status:** offline fixed; physical Lunatic recurrence validation pending.

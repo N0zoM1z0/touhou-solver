@@ -1328,3 +1328,78 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - A separate `235835` trace recorded an unapproved second arm after the
   completed run. It was safely stopped at frames `5311..8725` with no hit.
   The daemon is now one-shot and exits when its first trial worker finishes.
+
+## 2026-07-24: No-Bomb Feasibility And Phase-Exact Hazard Design
+
+- External existence evidence confirms Scarlet Team no-Bomb completion is not
+  merely theoretical: the current LNN database lists 17 Final-B Scarlet-Team
+  LNNFS players, and a separate Extra report records Scarlet-Team No Miss,
+  No Bomb, Full Spell. External material is used only as an acceptance
+  witness; the controller remains based on shipped-game and runtime evidence.
+- The `234414` dossier's empty-set rate is 68.95/84.17/57.96/92.22 percent
+  for laser-heavy spells 154/158/162/166. Zero-laser phases 170/174/178/182/
+  186/190 still range from 41.10 to 79.45 percent, proving that laser geometry
+  is a major but not exclusive failure.
+- IDA reinspection of `bullet_manager_update` (`0x00431240`) and
+  `player_test_collision_and_graze` (`0x0044A6A0`) found that active laser
+  transverse half-extent is descriptor width divided by four, because the
+  manager passes width/2 and the player helper halves the size vector again.
+  The live capsule currently uses descriptor width/2.
+- Non-alpha warmup/fade overwrite the longitudinal rectangle size with half
+  the ramped/fading width. The live planner instead treats every allocated
+  laser as the same full static `tail..head` segment throughout its forecast.
+  IDA comments were added at `0x00431C56`, `0x00431E5F`, `0x00432048`, and
+  `0x0044A793`.
+- REA independently corroborates the native field and control-flow evidence:
+  `ev_d0f27bd5ad4f901c2cc242681ed1658f5f790af3994d42dcd56c6eea69eee9e5`,
+  `ev_3703fc10b6c9874992d83e523870471a871517461e81f21cd4c1bc9d8480f48a`,
+  and
+  `ev_1d2d488e8cb1f98bcddeaf0d124c1445884ef4bcb3d163bf19546cc069493a63`.
+- `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md` specifies the general fix:
+  an offline/instantiated/online-corrected ECL hazard oracle, event-aligned
+  exact geometry, adaptive 16/4/2-pixel viability, multiple macro route
+  classes, and terminal-kernel overlap certificates. Increasing the present
+  uniform 80-frame horizon is explicitly rejected until those model defects
+  are corrected.
+
+## 2026-07-24: Unattended Original-Game Practice Bootstrap
+
+- Added a pure original-game Practice Start menu plan for the operator-supplied
+  eight-row stage screen: stage keys `1/2/3/4a/4b/5/6a/6b` lower to native
+  stage-route indices `0..7`.
+- Added `th08_practice_supervisor.py` to enable Caps Lock, recycle only an
+  identity-verified TH08 process, launch the existing no-life-decrement BAT,
+  verify the patch, acquire foreground, navigate the fresh-process menu, and
+  hand the final confirm to an already waiting no-Bomb agent.
+- The live agent now accepts expected/terminal stage arguments. It aborts if
+  the confirmed native stage differs and treats the focused stage's stable
+  unload as completion. Terminal unloads no longer receive transition Z
+  pulses; normal cross-stage unloads retain auto-confirm.
+- The supervisor prints bounded 30-second progress, writes a session manifest,
+  builds practice dossier/death/regression/run-note artifacts, compares against
+  the previous unattended attempt for the same stage, releases input, and can
+  repeat after terminating the verified game.
+- Windows validation exposed CE-0050: IDA's patcher Python has no `numpy`.
+  The clickable wrapper now preflights and uses the installed Windows Store
+  Python. Linux and Windows focused unit tests pass; armed physical menu
+  acceptance remains pending.
+- Physical bootstrap `20260724_010112` exposed CE-0052: the fresh team cursor
+  starts on the first route. The bounded plan now sends `Right`, `Right`, `Z`
+  for the third Sakuya/Remilia entry and still requires native `route=2`
+  before the waiting agent can confirm the stage.
+- Reverse inspection established the title state machine and removed
+  delay-only menu navigation: modes `0/8/9/11` are main/difficulty/team/
+  Practice-stage, their live cursor is title-manager offset zero, and only the
+  final Practice-stage `Z` commits difficulty and stage gameplay globals.
+- Complete unattended Stage-1 run `20260724_011933` physically accepted launch,
+  Sakuya/Remilia selection, final handoff, auto-dialogue, terminal unload,
+  no-Bomb capture, and artifact generation. It covered frames `2..21008`,
+  retained hits `[1893, 6874, 14118, 20028]`, and passed the hard no-Bomb
+  audit across 6,306 decisions.
+- Post-stage lifecycle now sends one `Right` to select "do not save" and
+  immediately kills the identity-verified game. A separate trace-stall timeout
+  handles unresponsive terminal/save states.
+- CE-0055 corrected session provenance: the launcher now refreshes exact target
+  identity after the patch wait, instead of retaining the pre-patch `0xFF`
+  snapshot. The accepted Stage-1 trace itself proves the patch was active:
+  four hit edges left life stock fixed at eight.

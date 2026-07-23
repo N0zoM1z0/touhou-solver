@@ -1,0 +1,73 @@
+{
+  "schema": "th08-unattended-practice-session-v1",
+  "run_id": "lunatic_route2_stage1_unattended_20260724_010506",
+  "iteration": 1,
+  "stage": {
+    "key": "1",
+    "label": "Stage 1",
+    "menu_index": 0,
+    "route_index": 0
+  },
+  "game_dir": "D:\\Entertainment\\Game\\Touhou\\[th08] 东方永夜抄 (日文版)",
+  "launch_bat": "D:\\Entertainment\\Game\\Touhou\\[th08] 东方永夜抄 (日文版)\\run_th08_no_life_decrement_attach.bat",
+  "menu_plan": [
+    {
+      "key": "down",
+      "purpose": "main-menu Practice Start (2/4)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "main-menu Practice Start (3/4)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "main-menu Practice Start (4/4)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "confirm",
+      "purpose": "enter Practice Start",
+      "wait_after_ms": 700
+    },
+    {
+      "key": "confirm",
+      "purpose": "accept default Lunatic",
+      "wait_after_ms": 700
+    },
+    {
+      "key": "down",
+      "purpose": "team Sakuya/Remilia (2/3)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "team Sakuya/Remilia (3/3)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "confirm",
+      "purpose": "accept Sakuya/Remilia",
+      "wait_after_ms": 700
+    }
+  ],
+  "hard_no_bomb": true,
+  "started_at": "2026-07-24T01:05:06.274067+08:00",
+  "caps_lock_changed": true,
+  "target": {
+    "pid": 20472,
+    "image_path": "D:\\Entertainment\\Game\\Touhou\\[th08] 东方永夜抄 (日文版)\\th08.exe",
+    "sha256": "330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924",
+    "runtime_patch": {
+      "address": 4509946,
+      "byte": 255,
+      "no_life_decrement": false
+    }
+  },
+  "pid": 20472,
+  "finished_at": "2026-07-24T01:05:16.121500+08:00",
+  "status": "failed",
+  "error_type": "RuntimeError",
+  "error": "native menu selection mismatch before final confirm: difficulty=0 route=2"
+}

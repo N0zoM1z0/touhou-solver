@@ -23,6 +23,13 @@ and route feasibility.
    reason, it releases injected keys and exits before accepting another F8.
    Start a fresh prewarmed daemon for the next operator-selected attempt.
 
+The original-game alternative is
+`scripts/th08_practice_supervisor.py`. It launches the patched BAT, drives the
+fresh-process Practice Start menu, prewarms before the final confirm, verifies
+difficulty/team/stage from native state, and produces the same compact
+practice artifacts without thprac. See
+`notes/UNATTENDED_PRACTICE_AUTOMATION.md`.
+
 ## No-Bomb Diagnostic Policy
 
 F8 practice and long-run traces use `--no-bomb`. This forbids both proactive

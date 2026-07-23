@@ -21,6 +21,8 @@ class AgentHotkeyTests(unittest.TestCase):
             stop_file=Path("trial.stop"),
             pid=1234,
             difficulty=3,
+            expected_stage=2,
+            terminal_stage=2,
         )
         parsed = build_parser().parse_args(arguments)
         self.assertEqual(parsed.duration, LONG_RUN_DURATION_SECONDS)
@@ -31,6 +33,8 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertTrue(parsed.no_bomb)
         self.assertFalse(parsed.normal_bomb)
         self.assertTrue(parsed.armed)
+        self.assertEqual(parsed.expected_stage, 2)
+        self.assertEqual(parsed.terminal_stage, 2)
 
     def test_completed_trial_exits_before_a_second_f8_can_rearm(self) -> None:
         self.assertFalse(

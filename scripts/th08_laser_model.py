@@ -5,6 +5,10 @@ The 0x59C-byte runtime record is allocated by laser_pool_spawn (0x00430F20)
 and advanced in the laser loop inside bullet_manager_update (0x00431B7A).
 The rotated-rectangle player test is player_test_collision_and_graze
 (0x0044A6A0).
+
+The active-phase rectangle is modeled. Non-alpha warmup/fade branches
+temporarily overwrite the longitudinal size with a width ramp; LaserState does
+not yet retain enough native fields to reproduce that phase geometry.
 """
 
 from __future__ import annotations
@@ -120,7 +124,7 @@ def spawn_laser_state(
 
 
 def laser_collision_box(laser: LaserState) -> LaserCollisionBox:
-    """Build the exact local horizontal rectangle passed to 0x0044A6A0."""
+    """Build the active-phase local rectangle passed to 0x0044A6A0."""
 
     visible_length = laser.head_distance - laser.tail_distance
     collision_length = visible_length * (0.7 if laser.tail_distance > 0.0 else 1.0)

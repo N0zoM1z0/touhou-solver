@@ -561,8 +561,14 @@ reflection, countdown, and wrap boundary rules are executable in
 - Collision constructs a horizontal rectangle in laser-local coordinates. Its
   center is `origin + (tail + (head-tail)/2, 0)`. Full collision length is
   `head-tail` while `tail==0`, and `0.7*(head-tail)` after the tail becomes
-  positive. The collision height passed to the player test is half the
-  descriptor width.
+  positive. The transverse size passed to the player test is half the
+  descriptor width. The player test then divides the incoming size vector by
+  two, so active lethal transverse half-extent is one quarter of descriptor
+  width before combining it with the player's SHT half extents.
+- For non-alpha warmup and fade, the manager overwrites the longitudinal
+  rectangle size with half the ramped/fading width before the phase collision
+  gate. An allocated warning/fading record is therefore not always a lethal
+  full `tail..head` segment.
 - The player center is inverse-rotated by `-angle` around the laser origin, then
   the game performs an inclusive AABB overlap using the player's SHT hitbox
   half extents. A graze check expands each laser-local rectangle boundary by
@@ -594,7 +600,9 @@ Recovered runtime offsets:
 
 IDA Local Types contains the verified 1436-byte `Th08Laser` layout.
 `scripts/th08_laser_model.py` implements the observed kinematics, phase
-fallthrough, collision schedule, rotated hit geometry, and graze expansion.
+fallthrough, collision schedule, active rotated hit geometry, and graze
+expansion. Its warmup/fade size-vector behavior is incomplete as of
+2026-07-24 and must not be treated as phase-exact future occupancy.
 
 ## Built-In ECL Callbacks
 

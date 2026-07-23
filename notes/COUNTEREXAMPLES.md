@@ -957,3 +957,120 @@ Status: observed | inferred | unknown | fixed
   `test_completed_trial_exits_before_a_second_f8_can_rearm`.
 - **Status:** code-fixed and unit-tested. The next physical launch must show
   the daemon process exiting immediately after route completion or F9.
+
+## CE-0049: An allocated warning laser became a full static lethal wall
+
+- **Observed symptom:** Final-B trace `20260723_234414` returned empty robust
+  action sets on 68.95, 84.17, 57.96, and 92.22 percent of queries in
+  laser-heavy spells 154, 158, 162, and 166. The forecast used a median
+  48-frame lead plus an 80-frame horizon.
+- **Invalid assumption:** A nonzero laser allocation flag implies the current
+  `tail..head` segment remains lethal throughout the forecast. The live
+  decoder discarded phase, timer, gates, flags, speed, maximum length, and
+  current width; lowering retained a static capsule and added `0.4` pixels of
+  uncertainty per forecast/future frame.
+- **Native evidence:** `bullet_manager_update` gates collision by phase and
+  timer. Its active transverse half-extent is descriptor width/4 after the
+  player helper's second division, while the live capsule uses width/2.
+  Non-alpha warmup and fade also replace the longitudinal size with the
+  width-ramp geometry. See IDA `0x00431C56`, `0x00431E5F`, `0x00432048`, and
+  `0x0044A793`.
+- **General correction:** Retain the complete runtime record and lower a
+  time-indexed rotated rectangle through the native lifecycle. Future angle,
+  origin, spawn, and fade mutations come from an executable ECL oracle.
+  Spatial uncertainty is learned per predicted field/event rather than grown
+  universally.
+- **Regression required:** A retained native differential fixture must cover
+  warning-before-enable, active, fade-before-disable, fade-after-disable, and
+  both phase-fallthrough boundary calls. The coarse planner may not report a
+  true empty set until 4/2-pixel refinement also finds none.
+- **Status:** native cause confirmed and IDA/documentation corrected; runtime
+  model and physical acceptance remain open.
+
+## CE-0050: The patcher's Python could not import the planner
+
+- **Observed symptom:** The first Windows `--help` validation of the unattended
+  supervisor failed while importing `corridor_planner`: the IDA 9.3
+  `python311` used by the patch BAT has no `numpy`.
+- **Invalid assumption:** Because the BAT successfully runs the small memory
+  patcher, the same interpreter is suitable for the native planner and live
+  agent.
+- **Correction:** The clickable wrapper uses the installed Windows Store
+  Python alias under `%LOCALAPPDATA%` and performs `import numpy` before
+  starting the supervisor. The original BAT continues to use IDA Python only
+  for the dependency-free patcher.
+- **Regression:**
+  `test_ce_0050_wrapper_does_not_use_dependency_free_ida_python`.
+- **Status:** wrapper and Windows `--help` validation pass; full physical menu
+  and stage acceptance remain pending.
+
+## CE-0051: Nested cmd quoting prevented the game from launching
+
+- **Observed symptom:** Armed unattended Stage-1 session `20260724_005845`
+  timed out after 25 seconds with no `th08.exe`. Its launch log reports the
+  quoted BAT path as an unrecognized command; no gameplay input occurred.
+- **Invalid assumption:** Passing `call "path with spaces"` as one argument to
+  `cmd.exe /S /C` preserves the intended inner quoting. Python's Windows
+  command-line quoting added another layer and `cmd` retained literal quotes
+  around the command name.
+- **Correction:** Launch argv is now `cmd.exe /d /c call <bat-path>`, with
+  `call` and the path as separate arguments and no `/S`. The exact failed
+  session manifest is retained.
+- **Regression:**
+  `test_ce_0051_patch_batch_path_is_not_nested_in_one_cmd_argument`.
+- **Status:** code-fixed and unit-tested; fresh physical launch pending.
+
+## CE-0052: Fresh practice launch does not default to Sakuya/Remilia
+
+- **Observed symptom:** Armed unattended Stage-1 session `20260724_010112`
+  reached menu validation with `difficulty=3 route=0`, then failed closed
+  before the agent sent the final stage confirm.
+- **Invalid assumption:** Sakuya/Remilia was already selected on a fresh team
+  screen. It is the third entry; confirming the untouched cursor selected the
+  first route.
+- **Correction:** After accepting Lunatic, send `Right`, `Right`, `Z` to select
+  the third Sakuya/Remilia team, then navigate the stage list.
+- **Regression:**
+  `test_ce_0052_fresh_team_menu_moves_to_third_sakuya_remilia`.
+- **Status:** physically accepted by complete Stage-1 run `20260724_011933`.
+
+## CE-0053: Team selection consumes the horizontal axis
+
+- **Observed symptom:** Session `20260724_011433` reached interactive title
+  mode 9, but two `Down` taps left the title cursor at zero.
+- **Invalid assumption:** The third team entry used the vertical axis like the
+  main, difficulty, and stage menus.
+- **Native evidence:** `title_team_menu_update` calls helper `0x00470424`,
+  which consumes Left/Right bits `0x40/0x80`. The vertical helper
+  `0x0047030B` consumes Up/Down bits `0x10/0x20`.
+- **Correction:** Menu navigation declares an axis per native mode. Team mode
+  9 uses `Right`; modes 0, 8, and 11 use `Down`.
+- **Regression:** The CE-0052 plan test requires `Right`, `Right`, `Z`.
+- **Status:** physically accepted by complete Stage-1 run `20260724_011933`.
+
+## CE-0054: Gameplay globals are stale before the final Practice confirm
+
+- **Observed symptom:** Sessions `20260724_010506` and `20260724_010732` were
+  rejected because pre-final validation read `g_difficulty_index=0`, even
+  though the visible difficulty cursor was Lunatic.
+- **Invalid assumption:** Gameplay globals mirror current title-menu cursors.
+- **Native evidence:** Difficulty mode 8 stores its cursor at
+  `g_title_difficulty_cursor`; team mode 9 commits only `g_player_route_id`.
+  `title_practice_stage_menu_update` commits `g_difficulty_index` and
+  `g_stage_route_index` only when the final stage `Z` is consumed at
+  `0x0046B0A5`.
+- **Correction:** Synchronize modes and cursors through
+  `g_title_menu_manager`; validate gameplay globals only after final confirm.
+- **Status:** physically accepted by complete Stage-1 run `20260724_011933`.
+
+## CE-0055: Session target identity retained the pre-patch byte
+
+- **Observed symptom:** Successful session `20260724_011933` reported runtime
+  patch byte `0xFF` and `no_life_decrement=false`, while all four native hit
+  edges left the life stock at eight.
+- **Invalid assumption:** The identity captured when the process first
+  appeared also represented its state after the patch wait completed.
+- **Correction:** Re-run exact executable/hash/patch verification after the
+  patch byte becomes zero and store that refreshed identity.
+- **Status:** code-fixed and covered by the existing target verification gate;
+  the next physical session must report patch byte zero.

@@ -1989,8 +1989,11 @@ def run(args: argparse.Namespace) -> int:
         interval_frames=args.auto_confirm_every,
         idle_frames=args.auto_confirm_idle_frames,
     )
+    stage_successors = dict(ROUTE2_STAGE_SUCCESSORS)
+    if args.terminal_stage is not None:
+        stage_successors.pop(args.terminal_stage, None)
     scene_guard = GameplaySceneGuard(
-        stage_successors=ROUTE2_STAGE_SUCCESSORS,
+        stage_successors=stage_successors,
         transition_timeout_seconds=args.stage_transition_timeout,
         terminal_grace_seconds=args.terminal_inactive_grace,
     )
@@ -2103,6 +2106,15 @@ def run(args: argparse.Namespace) -> int:
                             f"difficulty={state['difficulty_index']} "
                             f"route={state['route_id']}"
                         )
+                    if (
+                        args.expected_stage is not None
+                        and state["stage_route_index"] != args.expected_stage
+                    ):
+                        raise RuntimeError(
+                            "practice stage mismatch after confirm: "
+                            f"expected={args.expected_stage} "
+                            f"got={state['stage_route_index']}"
+                        )
                     if not state["input_raw"]:
                         break
                 if args.stop_file is not None and args.stop_file.exists():
@@ -2121,6 +2133,15 @@ def run(args: argparse.Namespace) -> int:
             raise RuntimeError(
                 "difficulty mismatch: "
                 f"expected {args.difficulty}, got {state['difficulty_index']}"
+            )
+        if (
+            args.expected_stage is not None
+            and state["stage_route_index"] != args.expected_stage
+        ):
+            raise RuntimeError(
+                "stage mismatch: "
+                f"expected {args.expected_stage}, "
+                f"got {state['stage_route_index']}"
             )
         if state["input_raw"]:
             raise RuntimeError("physical gameplay input is already active")
@@ -2188,7 +2209,7 @@ def run(args: argparse.Namespace) -> int:
                     now=now,
                     last_progress=scene_guard.inactive_since,
                     last_pulse=last_frozen_confirm,
-                    eligible=True,
+                    eligible=scene_decision.expected_stage is not None,
                 ):
                     _require_foreground(api, pid)
                     send_scan_key(api, scan_code=0x2C, pressed=False)
@@ -3108,6 +3129,18 @@ def build_parser() -> argparse.ArgumentParser:
         type=float,
         default=60.0,
         help="seconds allowed for --wait-gameplay",
+    )
+    parser.add_argument(
+        "--expected-stage",
+        type=int,
+        choices=range(9),
+        help="required stage-route index after menu confirmation",
+    )
+    parser.add_argument(
+        "--terminal-stage",
+        type=int,
+        choices=range(9),
+        help="treat this stage's first stable scene unload as trial completion",
     )
     parser.add_argument(
         "--stop-after-hits",

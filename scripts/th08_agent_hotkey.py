@@ -53,8 +53,10 @@ def build_long_run_arguments(
     stop_file: Path,
     pid: int,
     difficulty: int,
+    expected_stage: int | None = None,
+    terminal_stage: int | None = None,
 ) -> list[str]:
-    return [
+    arguments = [
         str(output),
         "--pid",
         str(pid),
@@ -79,10 +81,20 @@ def build_long_run_arguments(
         str(stop_file),
         "--armed",
     ]
+    if expected_stage is not None:
+        arguments.extend(("--expected-stage", str(expected_stage)))
+    if terminal_stage is not None:
+        arguments.extend(("--terminal-stage", str(terminal_stage)))
+    return arguments
 
 
 class AgentHotkey:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        expected_stage: int | None = None,
+        terminal_stage: int | None = None,
+    ) -> None:
         if os.name != "nt":
             raise RuntimeError("th08_agent_hotkey.py must run under Windows Python")
         self.kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
@@ -111,8 +123,12 @@ class AgentHotkey:
         self.user32.GetAsyncKeyState.argtypes = [ctypes.c_int]
         self.user32.GetAsyncKeyState.restype = ctypes.c_short
         self.agent_thread: threading.Thread | None = None
+        self.agent_error: Exception | None = None
+        self.last_summary: dict[str, object] | None = None
         self.stop_file: Path | None = None
         self.output: Path | None = None
+        self.expected_stage = expected_stage
+        self.terminal_stage = terminal_stage
         self.artifact_dir = (
             Path(__file__).resolve().parent.parent
             / "artifacts"
@@ -157,6 +173,7 @@ class AgentHotkey:
                 if line.strip()
             ]
             report = summarize_rows(rows)
+            self.last_summary = report
             summary = self.output.with_suffix(".summary.json")
             summary.write_text(
                 json.dumps(report, indent=2, ensure_ascii=False) + "\n",
@@ -171,12 +188,15 @@ class AgentHotkey:
                 flush=True,
             )
         except Exception as exc:
+            self.agent_error = exc
             print(f"agent error: {exc}", file=sys.stderr, flush=True)
 
-    def arm(self) -> None:
+    def arm(self, *, output_path: Path | None = None) -> None:
         if self.agent_thread is not None and self.agent_thread.is_alive():
             print("agent is already active", flush=True)
             return
+        self.agent_error = None
+        self.last_summary = None
         pid, reader, _identity = self._open_target()
         try:
             _require_foreground(self.api, pid)
@@ -199,9 +219,10 @@ class AgentHotkey:
             self.artifact_dir.mkdir(parents=True, exist_ok=True)
             stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             mode = "lunatic" if difficulty == 3 else "extra"
-            self.output = self.artifact_dir / (
+            self.output = output_path or self.artifact_dir / (
                 f"{mode}_route2_hotkey_longrun_{stamp}.jsonl"
             )
+            self.output.parent.mkdir(parents=True, exist_ok=True)
             self.stop_file = self.output.with_suffix(".stop")
             self.output.unlink(missing_ok=True)
             self.stop_file.unlink(missing_ok=True)
@@ -210,6 +231,8 @@ class AgentHotkey:
                 stop_file=self.stop_file,
                 pid=pid,
                 difficulty=difficulty,
+                expected_stage=self.expected_stage,
+                terminal_stage=self.terminal_stage,
             )
             if not gameplay_active:
                 arguments.extend(("--wait-gameplay", "--wait-timeout", "30"))
@@ -242,6 +265,18 @@ class AgentHotkey:
         finally:
             reader.close()
 
+    def wait_for_trial(self, timeout: float | None = None) -> Path:
+        if self.agent_thread is None:
+            raise RuntimeError("agent has not been armed")
+        self.agent_thread.join(timeout=timeout)
+        if self.agent_thread.is_alive():
+            raise TimeoutError("agent trial did not finish before timeout")
+        if self.agent_error is not None:
+            raise RuntimeError(f"agent trial failed: {self.agent_error}")
+        if self.output is None:
+            raise RuntimeError("agent trial completed without an output path")
+        return self.output
+
     def stop(self) -> None:
         if self.agent_thread is None or not self.agent_thread.is_alive():
             print("agent is not active", flush=True)
@@ -249,6 +284,15 @@ class AgentHotkey:
         assert self.stop_file is not None
         self.stop_file.write_text("stop\n", encoding="ascii")
         print("safe stop requested", flush=True)
+
+    def close(self) -> None:
+        try:
+            release_injected_keys(self.api)
+        except OSError:
+            pass
+        if self.instance_mutex is not None:
+            self.kernel32.CloseHandle(self.instance_mutex)
+            self.instance_mutex = None
 
     def run(self) -> int:
         print(
@@ -302,13 +346,7 @@ class AgentHotkey:
                 self.agent_thread.join(timeout=10.0)
             return 0
         finally:
-            try:
-                release_injected_keys(self.api)
-            except OSError:
-                pass
-            if self.instance_mutex is not None:
-                self.kernel32.CloseHandle(self.instance_mutex)
-                self.instance_mutex = None
+            self.close()
 
 
 if __name__ == "__main__":

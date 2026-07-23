@@ -72,6 +72,7 @@ from th08_live_dodge_agent import (
     decode_lasers,
     decode_player_lethal_aabb,
     project_enemy_pool_snapshot,
+    read_enemy_bodies_sparse,
 )
 from touhou_control.viability import ControlAction
 
@@ -99,14 +100,14 @@ class LiveDodgeAgentTests(unittest.TestCase):
     def test_enemy_sensor_throttles_completed_background_scans(self) -> None:
         self.assertFalse(
             _enemy_sensor_submit_due(
-                current_frame=115,
+                current_frame=103,
                 last_submit_frame=100,
                 pending=False,
             )
         )
         self.assertTrue(
             _enemy_sensor_submit_due(
-                current_frame=116,
+                current_frame=104,
                 last_submit_frame=100,
                 pending=False,
             )
@@ -396,6 +397,62 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(
             (bodies[0].half_width, bodies[0].half_height),
             (15.0, 9.0),
+        )
+
+    def test_sparse_enemy_reader_fetches_only_contact_enabled_windows(
+        self,
+    ) -> None:
+        active_slot = 17
+        active_pointer = ENEMY_POOL_BASE + active_slot * ENEMY_STRIDE
+        body_blob = bytearray(ENEMY_BODY_READ_SIZE)
+        struct.pack_into(
+            "<ff",
+            body_blob,
+            ENEMY_VELOCITY_OFFSET - ENEMY_BODY_READ_OFFSET,
+            -1.0,
+            2.0,
+        )
+        struct.pack_into(
+            "<ff",
+            body_blob,
+            ENEMY_CONTACT_SIZE_OFFSET - ENEMY_BODY_READ_OFFSET,
+            20.0,
+            12.0,
+        )
+        struct.pack_into(
+            "<ff",
+            body_blob,
+            ENEMY_POSITION_OFFSET - ENEMY_BODY_READ_OFFSET,
+            144.0,
+            96.0,
+        )
+        struct.pack_into(
+            "<I",
+            body_blob,
+            ENEMY_FLAGS_OFFSET - ENEMY_BODY_READ_OFFSET,
+            0x05,
+        )
+
+        class Reader:
+            def __init__(self) -> None:
+                self.body_reads = []
+
+            def u32(self, address: int) -> int:
+                slot = (address - ENEMY_POOL_BASE - ENEMY_FLAGS_OFFSET) // (
+                    ENEMY_STRIDE
+                )
+                return 0x05 if slot == active_slot else 0x01
+
+            def read(self, address: int, size: int) -> bytes:
+                self.body_reads.append((address, size))
+                return bytes(body_blob)
+
+        reader = Reader()
+        bodies = read_enemy_bodies_sparse(reader)
+        self.assertEqual([body.pointer for body in bodies], [active_pointer])
+        self.assertEqual(
+            reader.body_reads,
+            [(active_pointer + ENEMY_BODY_READ_OFFSET, ENEMY_BODY_READ_SIZE)],
         )
 
     def test_async_enemy_snapshot_projects_age_with_bounded_uncertainty(

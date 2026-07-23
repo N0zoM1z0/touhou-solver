@@ -143,7 +143,7 @@ LIVE_CONTROL_DELAY_MAX = 6
 LIVE_CONTROL_DELAY_WINDOW = 120
 LIVE_CONTROL_DELAY_GUARD_FRAMES = 600
 ASYNC_POLICY_DELAY_PADDING = 1
-ENEMY_SENSOR_INTERVAL_FRAMES = 16
+ENEMY_SENSOR_INTERVAL_FRAMES = 4
 COLLECTION_HALF_WIDTH = 24.0
 ITEM_SAFETY_CLEARANCE = 8.0
 CORRIDOR_REPLAN_FRAMES = 24
@@ -831,7 +831,7 @@ def decode_enemy_bodies(blob: bytes) -> tuple[EnemyBody, ...]:
     return tuple(bodies)
 
 
-def capture_enemy_pool_snapshot(
+def capture_enemy_pool_snapshot_contiguous(
     reader: ProcessReader,
 ) -> EnemyPoolSnapshot:
     started = time.perf_counter()
@@ -847,6 +847,54 @@ def capture_enemy_pool_snapshot(
         decode_enemy_bodies(blob),
         (time.perf_counter() - started) * 1000.0,
     )
+
+
+def read_enemy_bodies_sparse(
+    reader: ProcessReader,
+) -> tuple[EnemyBody, ...]:
+    """Read flags for every slot, then fetch only enabled body windows."""
+
+    bodies = []
+    for slot in range(ENEMY_POOL_SIZE):
+        pointer = ENEMY_POOL_BASE + slot * ENEMY_STRIDE
+        flags = reader.u32(pointer + ENEMY_FLAGS_OFFSET)
+        if (
+            not flags & ENEMY_ACTIVE_FLAG
+            or not flags & ENEMY_CONTACT_ENABLED_FLAG
+            or flags & ENEMY_CONTACT_BLOCKING_FLAGS
+        ):
+            continue
+        body = decode_enemy_body(
+            reader.read(
+                pointer + ENEMY_BODY_READ_OFFSET,
+                ENEMY_BODY_READ_SIZE,
+            ),
+            pointer=pointer,
+        )
+        if body is not None:
+            bodies.append(body)
+    return tuple(bodies)
+
+
+def capture_enemy_pool_snapshot_sparse(
+    reader: ProcessReader,
+) -> EnemyPoolSnapshot:
+    started = time.perf_counter()
+    frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+    bodies = read_enemy_bodies_sparse(reader)
+    frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+    return EnemyPoolSnapshot(
+        frame_before,
+        frame_after,
+        bodies,
+        (time.perf_counter() - started) * 1000.0,
+    )
+
+
+# Sparse reads retained the same bodies in paused multi-enemy runtime
+# differentials while reducing capture latency enough to scan four times as
+# often at approximately the old bandwidth duty cycle.
+capture_enemy_pool_snapshot = capture_enemy_pool_snapshot_sparse
 
 
 def project_enemy_pool_snapshot(

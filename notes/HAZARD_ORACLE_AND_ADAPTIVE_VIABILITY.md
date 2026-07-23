@@ -296,3 +296,26 @@ collision and clearance:
 Thus an unavoidable or already nonviable state is steered toward kernel
 re-entry without weakening `exists action, forall delay` safety. This is
 game-neutral and applies to any discrete action lattice.
+
+## Sparse Native Body Synchronization
+
+TH08's enemy pool is fixed-stride but its collision fields occupy only a
+1,500-byte window near the end of each 21,456-byte slot. Reading all 480 slots
+contiguously transfers 9.8 MiB even when only a boss and a few helpers are
+contact-enabled.
+
+The synchronizer now performs a two-level observation:
+
+1. probe the native active/contact/blocking flags for every slot;
+2. fetch and decode the collision window only for slots that pass the exact
+   native gate.
+
+A fixed-frame, eight-body differential retained equal pointer sets for 30
+pairs while reducing median capture from 14.06 to 3.34 ms. This permits a
+four-frame observation interval at approximately the prior 16-frame
+contiguous reader's bandwidth duty cycle.
+
+This is still observation, not prediction. A helper whose contact bit becomes
+enabled after the last scan remains absent from the oracle until the next
+snapshot. ECL event execution is required to turn that boundary into a
+future hazard before activation.

@@ -1529,3 +1529,25 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - CE-0062 fixes comparison provenance: only completed, accepted sessions may
   become automatic baselines. The generated comparison now correctly uses
   complete run `20260724_023923`, not the killed `025622` latency experiment.
+
+## 2026-07-24: Stage-4A Baseline, Native Locks, And Sparse Enemy Sensor
+
+- Original-game Stage-4A run `20260724_033341` completed frames `2..46032`
+  with 10,431 decisions, 27 hits, and zero Bomb. Per-phase hits were
+  nonspell/57/61/65/69/73 = 10/5/4/3/2/3.
+- Twenty-four hits were modeled bullet failures, two were sensor gaps, and
+  frame 32,976 retained an exact overlap with helper slot 34. The action
+  snapshot was seven frames old and contained one body; stable hit telemetry
+  contained 35. This is cross-stage evidence for ECL activation forecasting.
+- Stage-4A kept contact bodies in 79 percent of decisions. The contiguous
+  9.8 MiB sensor cost 17.71/28.04 ms median/p95 and snapshot age was 11/20
+  frames. A fixed-frame eight-body differential showed sparse flag/window
+  capture was equivalent in 30/30 pairs and reduced median from 14.06 to
+  3.34 ms. The production sensor now uses sparse capture every four frames.
+- Original-game Stage 6A bootstrap failures `20260724_032745` and
+  `20260724_033256` exposed a native availability mask, not input loss.
+  Route-2 Lunatic read `0x40AF`, locking cursor bits 4 and 6. IDA now names
+  `g_practice_stage_availability_masks`, names its update locals, and comments
+  the bit filter at `0x0046AFCA`.
+- CE-0065 corrects live status spell attribution: the renderer now reads the
+  nested native spell record used by decision traces.

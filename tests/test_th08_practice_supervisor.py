@@ -21,6 +21,7 @@ from th08_practice_supervisor import (
     _progress_text,
     build_patch_batch_command,
     build_parser,
+    practice_stage_available,
     read_last_json_record,
 )
 
@@ -105,6 +106,12 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertEqual(forward_menu_steps(3, 2, 4), 3)
         self.assertEqual(forward_menu_steps(0, 2, 4), 2)
 
+    def test_final_a_is_bit_six_of_native_practice_availability(self) -> None:
+        final_a = parse_practice_stage("6a")
+        self.assertEqual(final_a.menu_index, 6)
+        self.assertFalse(practice_stage_available(0xBF, final_a.menu_index))
+        self.assertTrue(practice_stage_available(0xFF, final_a.menu_index))
+
     def test_parser_accepts_repeatable_stage_selection(self) -> None:
         args = build_parser().parse_args(
             ["--stage", "6a", "--repeat", "3", "--armed"]
@@ -151,6 +158,20 @@ class PracticeSupervisorTests(unittest.TestCase):
             "kind=decision frame=500 stage=3 spell=99 hits=2 "
             "bullets=800 lasers=12",
         )
+
+    def test_progress_text_reads_nested_live_spell_state(self) -> None:
+        text = _progress_text(
+            {
+                "kind": "decision",
+                "frame": 500,
+                "stage_route_index": 3,
+                "spell": {"active": True, "spell_id": 57},
+                "hit_count": 2,
+                "active_bullets": 800,
+                "active_lasers": 0,
+            }
+        )
+        self.assertIn("spell=57", text)
 
     def test_ce_0050_wrapper_does_not_use_dependency_free_ida_python(self) -> None:
         wrapper = (ROOT / "run_th08_practice_agent.bat").read_text(

@@ -54,6 +54,7 @@ DEFAULT_LAUNCH_BAT = "run_th08_no_life_decrement_attach.bat"
 
 ADDR_TITLE_MENU_MANAGER = 0x018BDE08
 ADDR_TITLE_DIFFICULTY_CURSOR = 0x017CE891
+ADDR_PRACTICE_STAGE_AVAILABILITY = 0x0164B9AE
 TITLE_CURSOR_OFFSET = 0
 TITLE_SUBSTATE_OFFSET = 12
 TITLE_MODE_OFFSET = 82_984
@@ -323,10 +324,18 @@ def read_last_json_record(path: Path) -> dict[str, object] | None:
 def _progress_text(record: dict[str, object] | None) -> str:
     if not record:
         return "waiting for trace output"
+    spell_id = record.get("spell_id")
+    spell = record.get("spell")
+    if (
+        spell_id is None
+        and isinstance(spell, dict)
+        and spell.get("active")
+    ):
+        spell_id = spell.get("spell_id")
     return (
         f"kind={record.get('kind')} frame={record.get('frame')} "
         f"stage={record.get('stage_route_index')} "
-        f"spell={record.get('spell_id')} hits={record.get('hit_count')} "
+        f"spell={spell_id} hits={record.get('hit_count')} "
         f"bullets={record.get('active_bullets')} "
         f"lasers={record.get('active_lasers')}"
     )
@@ -515,16 +524,22 @@ def _read_title_menu_state(api: Win32, pid: int) -> dict[str, int]:
         manager = reader.u32(ADDR_TITLE_MENU_MANAGER)
         if not manager:
             raise RuntimeError("title menu manager is not allocated")
+        difficulty_cursor = reader.u8(ADDR_TITLE_DIFFICULTY_CURSOR)
+        route_id = reader.u8(ADDR_ROUTE_ID)
         return {
             "manager": manager,
             "mode": reader.u32(manager + TITLE_MODE_OFFSET),
             "substate": reader.u32(manager + TITLE_SUBSTATE_OFFSET),
             "screen_age": reader.u32(manager + TITLE_SCREEN_AGE_OFFSET),
             "cursor": reader.u32(manager + TITLE_CURSOR_OFFSET),
-            "difficulty_cursor": reader.u8(ADDR_TITLE_DIFFICULTY_CURSOR),
+            "difficulty_cursor": difficulty_cursor,
             "difficulty_index": reader.u32(ADDR_DIFFICULTY_INDEX),
-            "route_id": reader.u8(ADDR_ROUTE_ID),
+            "route_id": route_id,
             "stage_route_index": reader.u32(ADDR_STAGE_ROUTE_INDEX),
+            "practice_stage_availability_mask": reader.u16(
+                ADDR_PRACTICE_STAGE_AVAILABILITY
+                + 2 * (18 * route_id + difficulty_cursor)
+            ),
         }
     finally:
         reader.close()
@@ -549,6 +564,10 @@ def wait_for_title_menu(
     )
 
 
+def practice_stage_available(mask: int, stage_index: int) -> bool:
+    return bool(mask & (1 << stage_index))
+
+
 def _navigate_title_cursor(
     api: Win32,
     pid: int,
@@ -570,6 +589,19 @@ def _navigate_title_cursor(
     )
     if not 0 <= target < option_count:
         raise ValueError(f"target cursor {target} outside menu option count")
+    if (
+        mode == TITLE_MODE_PRACTICE_STAGE
+        and not practice_stage_available(
+            state["practice_stage_availability_mask"],
+            target,
+        )
+    ):
+        raise RuntimeError(
+            f"title cursor {target} is disabled in mode {mode}; "
+            "practice_stage_availability_mask="
+            f"0x{state['practice_stage_availability_mask']:04X} "
+            f"state={state}"
+        )
     taps: list[MenuTap] = []
     visited = [state["cursor"]]
     deadline = time.perf_counter() + timeout_seconds

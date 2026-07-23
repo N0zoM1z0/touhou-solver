@@ -1211,3 +1211,50 @@ Status: observed | inferred | unknown | fixed
 - **Physical correction:** The retained comparison for `20260724_030420` was
   regenerated against complete run `20260724_023923`; its valid hit delta is
   18 to 24, not 1 to 24.
+
+## CE-0063: Native Practice navigation silently skipped locked stages
+
+- **Observed symptom:** Original-game Final-A selection visited
+  `[0,1,2,3,4,5,7,...]` and could never reach cursor 6.
+- **Native evidence:** `title_practice_stage_menu_update` (`0x0046ADB0`)
+  loads `g_practice_stage_availability_masks[18*route+difficulty]` at
+  `0x0046AFCA` and skips every cursor whose bit is clear at `0x0046B006`.
+  Runtime route-2 Lunatic state was `0x40AF`; low bits 4 and 6 are clear, so
+  Stage 4B and Final A are locked while Final B remains selectable.
+- **Correction:** Supervisor title telemetry now reads the native mask and
+  fails immediately with `disabled`, rather than cycling three times and
+  blaming input reachability. The global and locals are renamed/commented in
+  IDA.
+- **Regression:** `test_final_a_is_bit_six_of_native_practice_availability`.
+- **Remaining route:** Cover locked rows through a legally unlocked save or
+  the previously approved thprac focused path; do not write the cursor or mask
+  to counterfeit original-menu acceptance.
+
+## CE-0064: Contiguous enemy sensing paid for 9.1 MiB of unused slot data
+
+- **Observed symptom:** Stage-4A retained bodies in 8,231 of 10,431 decisions,
+  while its 9.8 MiB contiguous capture cost 17.71/28.04 ms median/p95 and left
+  snapshots 11/20 frames old. Frame 32,976 collided with a helper missing from
+  the seven-frame-old action snapshot.
+- **Invalid assumption:** One large `ReadProcessMemory` call is necessarily
+  cheaper than sparse reads across a fixed, mostly inactive pool.
+- **Correction:** Read the four-byte flags of all 480 slots, then fetch the
+  1,500-byte collision window only for enabled slots. A paused eight-body
+  differential retained identical pointer sets in all 30 pairs and reduced
+  median capture from 14.06 to 3.34 ms. The faster reader runs every four
+  manager frames at approximately the old bandwidth duty cycle.
+- **Regression:** `test_sparse_enemy_reader_fetches_only_contact_enabled_windows`.
+- **Acceptance gate:** A complete Stage-4A rerun must retain p95 decision
+  cadence, reduce operational snapshot age, and not introduce body-set decode
+  discrepancies.
+
+## CE-0065: Live progress hid every active spell
+
+- **Observed symptom:** Supervisor status lines printed `spell=None`
+  throughout Stage 4A even while native spell IDs 57, 61, 65, 69, and 73 were
+  active.
+- **Invalid assumption:** Decision traces store `spell_id` at the top level.
+  Live decisions store the native state under `spell.spell_id`.
+- **Correction:** Progress rendering accepts both report shapes and only shows
+  the nested ID while its `active` flag is set.
+- **Regression:** `test_progress_text_reads_nested_live_spell_state`.

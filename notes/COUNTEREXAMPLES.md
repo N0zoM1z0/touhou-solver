@@ -579,8 +579,10 @@ Status: observed | inferred | unknown | fixed
 - **Regression:** `LUN-S2-F4885-T1` in
   `lunatic_route2_stage3_practice_20260723_160344.regressions.json`, plus
   `test_projectile_free_active_spell_promotes_enemy_body_candidate`.
-- **Status:** spell-owner path code-fixed and unit-tested; exact runtime
-  overlap in the new telemetry and physical no-hit recurrence remain open.
+- **Status:** spell-owner path code-fixed and unit-tested. The `170433`
+  physical rerun has zero active spell-35 hits and zero exact body overlaps
+  across eight stable hit epochs containing an owner body. Broader nonspell
+  and multi-enemy scanning remains open.
 
 ## CE-0034: Spell-50 corridor solutions arrived hundreds of frames stale
 
@@ -601,5 +603,41 @@ Status: observed | inferred | unknown | fixed
   retain solve latency/age, action lag, laser geometry, and boundary factors.
   A future successful fresh run must compare first divergence rather than
   merging post-respawn hits.
-- **Status:** geometry hot path optimized and regression-tested; live
-  freshness acceptance and the complete bounded-latency policy remain open.
+- **Status:** physical freshness target met for this Stage-3 run: spell-50
+  solve p95 fell from 2.99 s to 362 ms, age p95 from 193 to 27 frames, and
+  stale solutions from eight to zero. Five spell-50 hits remain, so connected
+  component viability and local control are still open.
+
+## CE-0035: The MPC modeled a two-frame action but the live loop held it longer
+
+- **Observed symptom:** The corrected Stage-3 run updates control every three
+  frames median and four frames p95. In spell-50 hit windows the last input was
+  commonly retained for four or five frames. The search expands a new action
+  every `PLANNER_ACTION_HOLD=2` predicted frames.
+- **Invalid assumption:** Snapshot-to-`SendInput` lag is the complete control
+  delay. It omits how long the emitted mask remains active before the next
+  planning iteration replaces it.
+- **Correction:** Retain a rolling 120-sample operational decision-frame
+  cadence. The live MPC uses its p90, clamped to 2..6 frames, as the candidate
+  action hold. The initial live estimate is three. Trace rows record the
+  chosen hold and complete timing components.
+- **Regression:** `test_live_action_hold_tracks_recent_controller_cadence`.
+  On persisted pre-hit hazard subsets, hold 4 changes five of ten first actions
+  and reduces search time by reducing branch points.
+- **Status:** code-fixed and unit-tested; physical timing/recurrence pending.
+
+## CE-0036: Immediate clearance selected terminal states with no repair space
+
+- **Observed symptom:** During spell 50, bottom-eight-pixel occupancy is 83.1%
+  in alive samples within 60 frames of a hit but 8.9% in other alive samples.
+  Fast mode rises from 45.9% outside hit windows to 60.6% inside them.
+- **Invalid assumption:** A coarse path with acceptable bottleneck clearance
+  and boundary exposure remains robust even when its terminal cell has few
+  safe successor directions.
+- **Required correction:** Add a game-neutral terminal viability certificate:
+  future reachable volume, safe-control count, or connected-component repair
+  radius. The local controller must prefer a slightly narrower current path
+  when it preserves materially more future control authority.
+- **Regression:** The five spell-50 cases in the `170433` corpus retain player
+  location, bottom occupancy, fast/focus state, hazard density, and plan age.
+- **Status:** isolated from solver latency; implementation open.

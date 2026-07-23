@@ -14,6 +14,7 @@ import json
 import math
 import struct
 import time
+from collections import deque
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -104,6 +105,8 @@ UNFOCUSED_DIAGONAL_SPEED = 2.8284270763397217
 PLANNER_HORIZON = 10
 PLANNER_BEAM_WIDTH = 24
 PLANNER_ACTION_HOLD = 2
+LIVE_ACTION_HOLD_DEFAULT = 3
+LIVE_ACTION_HOLD_MAX = 6
 # From the player snapshot, the live loop spends roughly two game frames
 # reading/planning and TH08 samples injected input on the following frame.
 # Bullet memory is read later, so snapshot_lag is subtracted from its lead.
@@ -1087,6 +1090,17 @@ def _directions_opposed(left: int, right: int) -> bool:
     return horizontal or vertical
 
 
+def _estimate_live_action_hold(frame_deltas: tuple[int, ...]) -> int:
+    operational = sorted(delta for delta in frame_deltas if 0 < delta < 120)
+    if not operational:
+        return LIVE_ACTION_HOLD_DEFAULT
+    rank = max(0, math.ceil(0.9 * len(operational)) - 1)
+    return max(
+        PLANNER_ACTION_HOLD,
+        min(LIVE_ACTION_HOLD_MAX, operational[rank]),
+    )
+
+
 def choose_action(
     *,
     player_x: float,
@@ -1102,6 +1116,7 @@ def choose_action(
     previous_focus: bool = True,
     snapshot_lag: int = 0,
     control_delay_frames: int = CONTROL_DELAY_FRAMES,
+    action_hold_frames: int = PLANNER_ACTION_HOLD,
     horizon: int = PLANNER_HORIZON,
     beam_width: int = PLANNER_BEAM_WIDTH,
     target_x: float | None = None,
@@ -1112,6 +1127,8 @@ def choose_action(
         raise ValueError("planner horizon and beam width must be positive")
     if control_delay_frames < 0:
         raise ValueError("control delay cannot be negative")
+    if action_hold_frames <= 0:
+        raise ValueError("action hold must be positive")
     if (target_x is None) != (target_y is None):
         raise ValueError("target_x and target_y must be supplied together")
     if target_x is not None:
@@ -1177,7 +1194,7 @@ def choose_action(
         for node in beam:
             actions = (
                 _PLANNER_ACTIONS
-                if (step - 1) % PLANNER_ACTION_HOLD == 0
+                if (step - 1) % action_hold_frames == 0
                 else (node.last_action,)
             )
             for action in actions:
@@ -1533,6 +1550,9 @@ def run(args: argparse.Namespace) -> int:
     )
     last_frame_progress = time.perf_counter()
     last_frozen_confirm = float("-inf")
+    decision_frame_deltas: deque[int] = deque(maxlen=120)
+    previous_iteration_ms: float | None = None
+    previous_trace_ms: float | None = None
     if not args.local_only:
         corridor_executor = ThreadPoolExecutor(
             max_workers=1,
@@ -1723,6 +1743,9 @@ def run(args: argparse.Namespace) -> int:
                 previous_counter = None
                 previous_phase = None
                 previous_action_phase = None
+                decision_frame_deltas.clear()
+                previous_iteration_ms = None
+                previous_trace_ms = None
                 auto_confirm.eligible_since = None
                 auto_confirm.released = False
                 last_frame_progress = now
@@ -1763,7 +1786,10 @@ def run(args: argparse.Namespace) -> int:
                 time.sleep(args.poll_ms / 1000.0)
                 continue
             last_frame_progress = time.perf_counter()
+            iteration_started = time.perf_counter()
+            observe_started = iteration_started
             state = observe_state(reader)
+            observe_ms = (time.perf_counter() - observe_started) * 1000.0
             if not state["gameplay_active"]:
                 time.sleep(args.poll_ms / 1000.0)
                 continue
@@ -1804,9 +1830,11 @@ def run(args: argparse.Namespace) -> int:
             counter_after_read = reader.u32(0x0164D30C)
             read_ms = (time.perf_counter() - read_started) * 1000.0
             snapshot_lag = max(0, counter_after_read - int(state["enemy_manager_frame"]))
+            decode_started = time.perf_counter()
             bullets = decode_bullets(bullet_blob)
             lasers = decode_lasers(laser_blob)
             items = decode_items(item_blob)
+            decode_ms = (time.perf_counter() - decode_started) * 1000.0
             player = state["player"]
             resources = state["resources"]
             if resources is None:
@@ -1832,6 +1860,7 @@ def run(args: argparse.Namespace) -> int:
                 previous_mask,
                 args.control_delay_frames,
             )
+            corridor_started = time.perf_counter()
             corridor_updated = False
             if corridor_future is not None and corridor_future.done():
                 completed_solution = corridor_future.result()
@@ -1873,6 +1902,12 @@ def run(args: argparse.Namespace) -> int:
                 lookahead_frames=args.corridor_lookahead,
                 max_age_frames=args.corridor_max_age,
             )
+            corridor_overhead_ms = (
+                time.perf_counter() - corridor_started
+            ) * 1000.0
+            action_hold_frames = _estimate_live_action_hold(
+                tuple(decision_frame_deltas)
+            )
             plan_started = time.perf_counter()
             decision = choose_action(
                 player_x=float(player["x"]),
@@ -1888,6 +1923,7 @@ def run(args: argparse.Namespace) -> int:
                 previous_focus=bool(previous_mask & FOCUS),
                 snapshot_lag=snapshot_lag,
                 control_delay_frames=args.control_delay_frames,
+                action_hold_frames=action_hold_frames,
                 horizon=args.horizon,
                 beam_width=args.beam_width,
                 target_x=(
@@ -1953,12 +1989,15 @@ def run(args: argparse.Namespace) -> int:
                 decision.mask,
                 supported_mask=SUPPORTED_INPUT_MASK,
             )
+            input_started = time.perf_counter()
             send_transitions(api, transitions)
+            input_ms = (time.perf_counter() - input_started) * 1000.0
             previous_mask = decision.mask
             previous_direction = decision.mask & (UP | DOWN | LEFT | RIGHT)
             current_phase = int(player["phase"])
             current_bombs = resources["bombs"]
             current_power = resources["power"]
+            trace_ms = 0.0
             if (
                 iterations % args.log_every == 0
                 or decision.bomb
@@ -1976,8 +2015,23 @@ def run(args: argparse.Namespace) -> int:
                     "snapshot_lag": snapshot_lag,
                     "action_lag": counter_at_action - int(state["enemy_manager_frame"]),
                     "control_delay_frames": args.control_delay_frames,
+                    "action_hold_frames": action_hold_frames,
                     "read_ms": read_ms,
                     "plan_ms": plan_ms,
+                    "timing_ms": {
+                        "observe": observe_ms,
+                        "read_pools": read_ms,
+                        "decode_pools": decode_ms,
+                        "corridor_bookkeeping": corridor_overhead_ms,
+                        "local_plan": plan_ms,
+                        "input": input_ms,
+                        "before_trace": (
+                            time.perf_counter() - iteration_started
+                        )
+                        * 1000.0,
+                        "previous_trace": previous_trace_ms,
+                        "previous_iteration": previous_iteration_ms,
+                    },
                     "input_snapshot": {
                         "raw": state["input_raw"],
                         "current": state["input_current"],
@@ -2113,10 +2167,18 @@ def run(args: argparse.Namespace) -> int:
                         ]
                         for item in items
                     ]
-                output.write(
-                    json.dumps(record) + "\n"
-                )
+                trace_started = time.perf_counter()
+                output.write(json.dumps(record) + "\n")
                 output.flush()
+                trace_ms = (time.perf_counter() - trace_started) * 1000.0
+            if previous_counter is not None:
+                decision_delta = counter_at_action - previous_counter
+                if 0 < decision_delta < 120:
+                    decision_frame_deltas.append(decision_delta)
+            previous_trace_ms = trace_ms
+            previous_iteration_ms = (
+                time.perf_counter() - iteration_started
+            ) * 1000.0
             previous_phase = current_phase
             previous_bombs = current_bombs
             previous_power = current_power

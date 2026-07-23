@@ -7,6 +7,8 @@ import unittest
 from pathlib import Path
 
 from th08_practice_dossier import (
+    _behavior_context,
+    _decision_cadence,
     _extract_scope,
     _no_bomb_verification,
     _promote_enemy_body_candidates,
@@ -49,11 +51,26 @@ def _decision(frame: int, *, mask: int = 5) -> dict[str, object]:
         "plan_ms": 2.0,
         "pipeline_clearance": 9999.0,
         "minimum_clearance": 9999.0,
+        "corridor_slack": 1.0,
         "spell": {"active": False, "flags": 0},
     }
 
 
 class Th08PracticeDossierTests(unittest.TestCase):
+    def test_cadence_and_prehit_behavior_are_retained(self) -> None:
+        rows = [_decision(100), _decision(103), _decision(107)]
+        cadence = _decision_cadence(rows)
+        self.assertEqual(cadence["sample_count"], 2)
+        self.assertEqual(cadence["mean"], 3.5)
+        rows[-1]["action"] = "left_fast"
+        rows[-1]["mask"] = 0x41
+        rows[-1]["player"]["y"] = 430.0
+        behavior = _behavior_context(rows, [{"frame": 110}])
+        prehit = behavior["alive_preceding_hit_60f"]
+        self.assertEqual(prehit["sample_count"], 3)
+        self.assertEqual(prehit["bottom_8px_fraction"], 1 / 3)
+        self.assertEqual(prehit["fast_fraction"], 1 / 3)
+
     def test_retained_stage3_corpus_is_executable_and_no_bomb(self) -> None:
         summary = load_and_validate(PRACTICE_CORPUS)
         self.assertEqual(summary.case_count, 16)

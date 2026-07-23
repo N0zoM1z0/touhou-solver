@@ -1036,7 +1036,38 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   median afterward (ten runs, 65.7 ms maximum). A local field containing 44
   nearby bullets and all 200 lasers took 21.0 ms median. These are offline
   component measurements, not a claim that the live hard deadline is solved.
-- All 208 unit tests pass. Both the historical full-run corpus and this
+- All 211 unit tests pass. Both the historical full-run corpus and this
   16-case practice corpus pass the generalized regression validator. Physical
   acceptance still requires a fresh no-Bomb Stage-3 run in which frame 4,885's
   spell-35 contact does not recur and spell-50 plan age is measured again.
+
+## 2026-07-23: Stage-3 Corrected No-Bomb Rerun
+
+- The `170433` run is a clean Stage-3 practice scope at frames `93..26383`,
+  7,576 decisions, initial resources 8/4/128, and ten hits. All mask, action,
+  decision-flag, and controller-config checks pass hard no-Bomb.
+- Total hits fell from 16 to 10. Active spell-35 hits fell from two to zero.
+  All ten new hit edges have a stable same-manager-frame player lethal AABB
+  capture; eight include the active spell-owner AABB, and none overlap. The
+  prior spell-35 body-contact failure did not recur.
+- Spell-50 finite-segment vectorization physically reduced solve median from
+  895.4 to 164.3 ms, p95 from 2.99 s to 362.2 ms, solution-age p95 from 193 to
+  27 frames, and stale solutions from eight to zero. Spell-50 hits only fell
+  from six to five, proving that stale global computation was real but not the
+  sole survival blocker.
+- The controller cadence is three frames median and four p95. Spell-50
+  pre-hit windows commonly hold one input for four or five frames, while the
+  MPC assumed two. The next runtime records complete timing components and
+  models action hold from the rolling p90 of observed frame deltas, clamped to
+  2..6. Persisted pre-hit subsets show that hold 4 changes five of ten first
+  actions and roughly halves beam-search cost.
+- Spell-50 bottom-eight-pixel occupancy is 83.1% in the 60 frames before hits
+  versus 8.9% outside them. This is stronger than negative corridor slack near
+  hits and isolates terminal escape-space collapse as the next global-planner
+  target.
+- `cffi` alone is rejected as a performance fix. A future native core is
+  justified only after full-loop profiling, and must accept contiguous arrays
+  in one coarse call rather than crossing the FFI boundary per hazard.
+- Durable outputs are the 10-row death CSV, dossier, executable regression
+  corpus, generalized comparison JSON, corrected run report, and
+  `notes/runs/2026-07-23_lunatic_route2_stage3_nobomb_comparison.md`.

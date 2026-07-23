@@ -326,8 +326,10 @@ def _compact_decision(
         "auto_confirm": row.get("auto_confirm"),
         "snapshot_lag": int(row.get("snapshot_lag", 0)),
         "action_lag": int(row.get("action_lag", 0)),
+        "action_hold_frames": int(row.get("action_hold_frames", 2)),
         "read_ms": float(row.get("read_ms", 0.0)),
         "plan_ms": float(row.get("plan_ms", 0.0)),
+        "timing_ms": row.get("timing_ms"),
         "pipeline_clearance": float(
             row.get("pipeline_clearance", 9999.0)
         ),
@@ -592,6 +594,9 @@ def _death_ledger(
             "active_lasers": row["active_lasers"],
             "active_items": row["active_items"],
             "active_enemy_bodies": row["active_enemy_bodies"],
+            "hit_contact_observation": row.get(
+                "hit_contact_observation"
+            ),
             "snapshot_lag": row["snapshot_lag"],
             "action_lag": row["action_lag"],
             "read_ms": row["read_ms"],

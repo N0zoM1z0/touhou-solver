@@ -56,19 +56,18 @@ Contributing factors:
 
 ## Interpretation
 
-- The first hit isolates a missing hazard class: enemy bodies are absent from both local clearance and global corridor occupancy.
-- Six hits were already unsafe in the committed input prefix. Five have direct bullet-overlap witnesses and one has a direct finite-segment laser witness.
-- The last six hits cluster in spell 50 with 180-200 active lasers. Its 32 unique corridor solves took 895.433 ms median, 2993.639 ms p95, and 3196.693 ms maximum; bottom-boundary occupation then removes escape options.
-- Fourteen of 16 hits use fast mode and 11 follow a missed corridor deadline. The global plan is not reserving a safe component early enough, even after Bomb decisions are removed.
-- Later hits cannot estimate an initial-stock clear rate because Power falls from 128 to 0/1 after repeated respawns. They remain valid counterexamples for geometry, latency, boundary use, and spell-specific pressure.
+- Retained witnesses classify 5 bullet overlaps, 1 laser overlaps, and 0 exact same-epoch enemy-body overlaps.
+- The controller decision cadence was 3.000 frames median and 4.000 frames p95. The local plan took 16.748 ms median and 44.230 ms p95.
+- Spell 50 contains 6 hits. Its 32 unique corridor solves took 895.433 ms median, 2993.639 ms p95, and 3196.693 ms maximum.
+- In spell 50, the bottom-eight-pixel occupancy fraction was 0.643 during the 60 frames preceding a hit versus 0.000 outside those windows. This separates terminal escape-space loss from solver latency alone.
+- Later hits cannot estimate an initial-stock clear rate because Power falls from 128 to 0.000 after respawns. They remain valid counterexamples for geometry, latency, boundary use, and spell-specific pressure.
 
 ## Baseline Correction Gate
 
-Add active-enemy lethal AABBs to the runtime snapshot, predictor, and corridor occupancy. The next fresh Stage-3 run must eliminate the spell-35 body contact as its canonical first hit without regressing the no-Bomb invariant. After that, optimize spell 50 with bounded solver latency and an earlier connected-component reservation instead of treating six post-respawn hits as one local dodge problem.
+Add active-enemy lethal AABBs to the runtime snapshot, predictor, and corridor occupancy. The next fresh Stage-3 run must eliminate the spell-35 body contact as its canonical first hit without regressing the no-Bomb invariant.
 
 ## Offline Correction Prepared
 
-- The live adapter now reads the active spell owner's native contact window, applies the proven contact/disable flags, and lowers `0.75 * contact_size` enemy-body half-extents into both the committed-prefix check and local/global planners.
-- Runtime traces now persist enemy-body geometry and its snapshot frame. Every new hit also captures the native player lethal rectangle and spell-owner AABB in a stable manager-frame epoch, so only a same-epoch overlap becomes an exact witness.
-- Local and global finite laser-segment clearance fields are now vectorized. On the preserved spell-50 frame-25,433 snapshot, global planning fell from 64.8 ms median before the change to 32.7 ms median after it in the offline benchmark.
-- These changes pass the full test and dossier-regression suites. They are not yet a physical Stage-3 acceptance result; the next fresh no-Bomb run must supply that evidence.
+- The live adapter now reads the active spell owner's native contact window and lowers its proven lethal AABB into local and global planners.
+- Runtime hit telemetry now captures the native player lethal rectangle and spell-owner AABB in a stable manager-frame epoch.
+- Local and global finite laser-segment clearance fields are vectorized; physical acceptance remains pending in this baseline report.

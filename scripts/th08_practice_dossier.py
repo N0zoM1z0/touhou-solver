@@ -308,6 +308,130 @@ def _corridor_latency(
     }
 
 
+def _decision_cadence(
+    decisions: list[dict[str, object]],
+) -> dict[str, object]:
+    deltas = [
+        int(right["frame"]) - int(left["frame"])
+        for left, right in zip(decisions, decisions[1:])
+        if 0 < int(right["frame"]) - int(left["frame"]) < 120
+    ]
+    return {
+        **_percentiles(deltas),
+        "mean": sum(deltas) / len(deltas) if deltas else None,
+        "sample_count": len(deltas),
+    }
+
+
+def _runtime_timing(
+    decisions: list[dict[str, object]],
+) -> dict[str, object]:
+    keys = (
+        "observe",
+        "read_pools",
+        "decode_pools",
+        "corridor_bookkeeping",
+        "local_plan",
+        "input",
+        "before_trace",
+        "previous_trace",
+        "previous_iteration",
+    )
+    result = {}
+    for key in keys:
+        values = [
+            float(timing[key])
+            for row in decisions
+            if isinstance((timing := row.get("timing_ms")), dict)
+            and timing.get(key) is not None
+        ]
+        if values:
+            result[key] = _percentiles(values)
+    return result
+
+
+def _behavior_slice(
+    rows: list[dict[str, object]],
+) -> dict[str, object]:
+    if not rows:
+        return {"sample_count": 0}
+    slacks = [
+        float(row["corridor_slack"])
+        for row in rows
+        if row["corridor_slack"] is not None
+    ]
+    count = len(rows)
+    return {
+        "sample_count": count,
+        "fast_fraction": sum(
+            "_fast" in str(row["action"]) for row in rows
+        )
+        / count,
+        "focused_fraction": sum(
+            bool(int(row["mask"]) & 0x04) for row in rows
+        )
+        / count,
+        "bottom_8px_fraction": sum(
+            float(row["player"]["y"]) >= 424.0 for row in rows
+        )
+        / count,
+        "nonpositive_pipeline_fraction": sum(
+            float(row["pipeline_clearance"]) <= 0.0 for row in rows
+        )
+        / count,
+        "negative_corridor_slack_fraction": (
+            sum(slack < 0.0 for slack in slacks) / len(slacks)
+            if slacks
+            else None
+        ),
+        "action_lag_over_model_fraction": sum(
+            int(row["action_lag"]) > 3 for row in rows
+        )
+        / count,
+    }
+
+
+def _behavior_context(
+    decisions: list[dict[str, object]],
+    deaths: list[dict[str, object]],
+) -> dict[str, object]:
+    death_frames = [int(death["frame"]) for death in deaths]
+    alive = [
+        row for row in decisions if int(row["player"]["phase"]) == 0
+    ]
+
+    def prehit(row: dict[str, object]) -> bool:
+        frame = int(row["frame"])
+        return any(
+            0 <= death_frame - frame <= 60
+            for death_frame in death_frames
+        )
+
+    def spell_50(row: dict[str, object]) -> bool:
+        spell = row.get("spell")
+        return (
+            isinstance(spell, dict)
+            and bool(spell.get("active"))
+            and int(spell.get("spell_id", -1)) == 50
+        )
+
+    prehit_rows = [row for row in alive if prehit(row)]
+    other_rows = [row for row in alive if not prehit(row)]
+    spell_50_rows = [row for row in alive if spell_50(row)]
+    return {
+        "alive_all": _behavior_slice(alive),
+        "alive_preceding_hit_60f": _behavior_slice(prehit_rows),
+        "alive_outside_preceding_hit_60f": _behavior_slice(other_rows),
+        "spell_50_alive_all": _behavior_slice(spell_50_rows),
+        "spell_50_alive_preceding_hit_60f": _behavior_slice(
+            [row for row in spell_50_rows if prehit(row)]
+        ),
+        "spell_50_alive_other": _behavior_slice(
+            [row for row in spell_50_rows if not prehit(row)]
+        ),
+    }
+
+
 def build_dossier(
     *,
     run_id: str,
@@ -426,6 +550,25 @@ def build_dossier(
             "max_active_lasers": max(
                 int(row["active_lasers"]) for row in decisions
             ),
+            "hit_contact_epoch": {
+                "stable_capture_count": sum(
+                    isinstance(death.get("hit_contact_observation"), dict)
+                    and bool(death["hit_contact_observation"].get("stable"))
+                    for death in deaths
+                ),
+                "stable_capture_with_enemy_body_count": sum(
+                    isinstance(death.get("hit_contact_observation"), dict)
+                    and bool(death["hit_contact_observation"].get("stable"))
+                    and bool(
+                        death["hit_contact_observation"].get("enemy_bodies")
+                    )
+                    for death in deaths
+                ),
+                "exact_enemy_body_overlap_count": sum(
+                    death["observed_enemy_body_contact_candidate"] is not None
+                    for death in deaths
+                ),
+            },
             "resources": {
                 key: _resource_range(decisions, key)
                 for key in ("lives", "bombs", "power")
@@ -435,6 +578,9 @@ def build_dossier(
                 "plan": _percentiles(row["plan_ms"] for row in decisions),
                 "corridor_solver": _corridor_latency(decisions),
             },
+            "decision_cadence_frames": _decision_cadence(decisions),
+            "runtime_timing_ms": _runtime_timing(decisions),
+            "behavior_context": _behavior_context(decisions, deaths),
             "frame_lag": {
                 "interpretation": (
                     "Values >=120 are phase-counter discontinuities and are "
@@ -501,6 +647,30 @@ def render_markdown(dossier: dict[str, object]) -> str:
     spell_50_corridor = totals["latency_ms"]["corridor_solver"][
         "active_spell_50"
     ]
+    canonical_cause = canonical["primary_cause_class"]
+    canonical_spell = canonical["spell_attribution"]
+    canonical_spell_label = (
+        f"spell {canonical_spell['spell_id']} "
+        f"`{canonical_spell['spell_name']}`"
+        if canonical_spell["spell_id"] is not None
+        else "a nonspell phase"
+    )
+    if canonical_cause == "enemy_body_contact_candidate":
+        primary_explanation = (
+            "This is a strong enemy-body collision candidate, not a "
+            "bullet-planner miss. Static analysis proves that the active "
+            "spell owner can invoke a lethal player/enemy AABB check at "
+            "`0x42cf7a -> 0x42c290 -> 0x44a360`. The baseline trace records "
+            "the owner pointer but not its position/contact size/flags, so "
+            "exact same-frame overlap remains the next telemetry closure."
+        )
+    else:
+        primary_explanation = (
+            f"The primary class is `{canonical_cause}`. This trace contains "
+            "the retained hit-window geometry for that classification; later "
+            "post-respawn hits remain discovery evidence rather than fresh "
+            "independent trials."
+        )
     lines = [
         f"# TH08 Stage 3 No-Bomb Practice Review: {dossier['run_id']}",
         "",
@@ -528,8 +698,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
         "## Primary Finding",
         "",
         f"The authoritative fresh-attempt hit is `{canonical['case_id']}`. "
-        f"It occurred during spell {canonical['spell_attribution']['spell_id']} "
-        f"`{canonical['spell_attribution']['spell_name']}` at player "
+        f"It occurred during {canonical_spell_label} at player "
         f"({_format(canonical['player']['x'])}, "
         f"{_format(canonical['player']['y'])}), with "
         f"{canonical['active_bullets']} bullets and "
@@ -537,12 +706,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
         f"pipeline clearance "
         f"{_format(canonical['pipeline_clearance_at_hit'])}.",
         "",
-        "This is a strong enemy-body collision candidate, not a bullet-planner "
-        "miss. Static analysis proves that the active spell owner can invoke "
-        "a lethal player/enemy AABB check at `0x42cf7a -> 0x42c290 -> "
-        "0x44a360`. The baseline trace records the owner pointer but not its "
-        "position/contact size/flags, so exact same-frame overlap remains the "
-        "next telemetry closure.",
+        primary_explanation,
         "",
         "## Failure Taxonomy",
         "",
@@ -599,60 +763,86 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"{_format(death['minimum_corridor_slack_240f'])} | "
             f"`{death['primary_cause_class']}` |"
         )
+    cause_counts = totals["primary_cause_counts"]
+    behavior = totals["behavior_context"]
+    cadence = totals["decision_cadence_frames"]
+    spell_50_hits = int(totals["spell_hit_counts"].get("50", 0))
+    body_overlaps = sum(
+        death["observed_enemy_body_contact_candidate"] is not None
+        for death in dossier["deaths"]
+    )
     lines.extend(
         [
             "",
             "## Interpretation",
             "",
-            "- The first hit isolates a missing hazard class: enemy bodies are "
-            "absent from both local clearance and global corridor occupancy.",
-            "- Six hits were already unsafe in the committed input prefix. "
-            "Five have direct bullet-overlap witnesses and one has a direct "
-            "finite-segment laser witness.",
-            "- The last six hits cluster in spell 50 with 180-200 active "
-            f"lasers. Its {spell_50_corridor['unique_solution_count']} unique "
-            "corridor solves took "
-            f"{_format(spell_50_corridor['solve_ms']['median'])} ms median, "
-            f"{_format(spell_50_corridor['solve_ms']['p95'])} ms p95, and "
-            f"{_format(spell_50_corridor['solve_ms']['max'])} ms maximum; "
-            "bottom-boundary occupation then removes escape options.",
-            "- Fourteen of 16 hits use fast mode and 11 follow a missed corridor "
-            "deadline. The global plan is not reserving a safe component early "
-            "enough, even after Bomb decisions are removed.",
+            f"- Retained witnesses classify "
+            f"{cause_counts.get('observed_bullet_overlap', 0)} bullet "
+            f"overlaps, {cause_counts.get('observed_laser_overlap', 0)} "
+            f"laser overlaps, and {body_overlaps} exact same-epoch enemy-body "
+            "overlaps.",
+            f"- The controller decision cadence was "
+            f"{_format(cadence['median'])} frames median and "
+            f"{_format(cadence['p95'])} frames p95. The local plan took "
+            f"{_format(totals['latency_ms']['plan']['median'])} ms median and "
+            f"{_format(totals['latency_ms']['plan']['p95'])} ms p95.",
+            f"- Spell 50 contains {spell_50_hits} hits. Its "
+            f"{spell_50_corridor['unique_solution_count']} unique corridor "
+            f"solves took {_format(spell_50_corridor['solve_ms']['median'])} "
+            f"ms median, {_format(spell_50_corridor['solve_ms']['p95'])} ms "
+            f"p95, and {_format(spell_50_corridor['solve_ms']['max'])} ms "
+            "maximum.",
+            "- In spell 50, the bottom-eight-pixel occupancy fraction was "
+            f"{_format(behavior['spell_50_alive_preceding_hit_60f'].get('bottom_8px_fraction'))} "
+            "during the 60 frames preceding a hit versus "
+            f"{_format(behavior['spell_50_alive_other'].get('bottom_8px_fraction'))} "
+            "outside those windows. This separates terminal escape-space loss "
+            "from solver latency alone.",
             "- Later hits cannot estimate an initial-stock clear rate because "
-            "Power falls from 128 to 0/1 after repeated respawns. They remain "
-            "valid counterexamples for geometry, latency, boundary use, and "
-            "spell-specific pressure.",
-            "",
-            "## Baseline Correction Gate",
-            "",
-            "Add active-enemy lethal AABBs to the runtime snapshot, predictor, "
-            "and corridor occupancy. The next fresh Stage-3 run must eliminate "
-            "the spell-35 body contact as its canonical first hit without "
-            "regressing the no-Bomb invariant. After that, optimize spell 50 "
-            "with bounded solver latency and an earlier connected-component "
-            "reservation instead of treating six post-respawn hits as one "
-            "local dodge problem.",
-            "",
-            "## Offline Correction Prepared",
-            "",
-            "- The live adapter now reads the active spell owner's native "
-            "contact window, applies the proven contact/disable flags, and "
-            "lowers `0.75 * contact_size` enemy-body half-extents into both "
-            "the committed-prefix check and local/global planners.",
-            "- Runtime traces now persist enemy-body geometry and its snapshot "
-            "frame. Every new hit also captures the native player lethal "
-            "rectangle and spell-owner AABB in a stable manager-frame epoch, "
-            "so only a same-epoch overlap becomes an exact witness.",
-            "- Local and global finite laser-segment clearance fields are now "
-            "vectorized. On the preserved spell-50 frame-25,433 snapshot, "
-            "global planning fell from 64.8 ms median before the change to "
-            "32.7 ms median after it in the offline benchmark.",
-            "- These changes pass the full test and dossier-regression suites. "
-            "They are not yet a physical Stage-3 acceptance result; the next "
-            "fresh no-Bomb run must supply that evidence.",
+            f"Power falls from 128 to "
+            f"{_format(totals['resources']['power']['end'])} after respawns. "
+            "They remain valid counterexamples for geometry, latency, "
+            "boundary use, and spell-specific pressure.",
         ]
     )
+    if canonical_cause == "enemy_body_contact_candidate":
+        lines.extend(
+            [
+                "",
+                "## Baseline Correction Gate",
+                "",
+                "Add active-enemy lethal AABBs to the runtime snapshot, "
+                "predictor, and corridor occupancy. The next fresh Stage-3 "
+                "run must eliminate the spell-35 body contact as its canonical "
+                "first hit without regressing the no-Bomb invariant.",
+                "",
+                "## Offline Correction Prepared",
+                "",
+                "- The live adapter now reads the active spell owner's native "
+                "contact window and lowers its proven lethal AABB into local "
+                "and global planners.",
+                "- Runtime hit telemetry now captures the native player lethal "
+                "rectangle and spell-owner AABB in a stable manager-frame "
+                "epoch.",
+                "- Local and global finite laser-segment clearance fields are "
+                "vectorized; physical acceptance remains pending in this "
+                "baseline report.",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "",
+                "## Next Correction Gate",
+                "",
+                "Measure complete loop, decode, trace-write, and input costs; "
+                "make the MPC action-hold model follow observed controller "
+                "cadence instead of assuming a fixed two frames. Separately, "
+                "the global objective must value terminal escape viability so "
+                "that a currently clear bottom cell is not treated as a good "
+                "long-horizon component when it has no repair space.",
+            ]
+        )
     return "\n".join(lines)
 
 

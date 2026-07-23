@@ -59,3 +59,10 @@ time and solution age with the baseline (895 ms median solve, 2.99 s p95,
 193-frame p95 age), and treat a later post-respawn hit only as discovery
 evidence. A complete checkpoint result requires a fresh attempt from full
 practice resources.
+
+The `170433` corrected rerun passed the no-Bomb gate and physically removed
+active spell-35 hits. Spell-50 solve p95 is now 362 ms with 27-frame p95 age
+and zero stale results, but five hits remain. The next run must additionally
+record complete loop timing, demonstrate that modeled action hold tracks live
+cadence, and reduce bottom-eight-pixel pre-hit occupancy from the 83.1%
+candidate baseline.

@@ -28,6 +28,7 @@ from th08_live_dodge_agent import (
     UP,
     _auto_confirm_eligible,
     _corridor_target,
+    _estimate_live_action_hold,
     _frozen_auto_confirm_eligible,
     choose_action,
     decode_enemy_body,
@@ -36,6 +37,14 @@ from th08_live_dodge_agent import (
 
 
 class LiveDodgeAgentTests(unittest.TestCase):
+    def test_live_action_hold_tracks_recent_controller_cadence(self) -> None:
+        self.assertEqual(_estimate_live_action_hold(()), 3)
+        self.assertEqual(
+            _estimate_live_action_hold((2, 2, 3, 3, 4, 4, 1803)),
+            4,
+        )
+        self.assertEqual(_estimate_live_action_hold((9, 10, 11)), 6)
+
     def test_auto_confirm_creates_fresh_z_edge_after_sustained_empty_scene(
         self,
     ) -> None:

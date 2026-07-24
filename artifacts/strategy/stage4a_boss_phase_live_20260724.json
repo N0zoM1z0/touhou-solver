@@ -1,0 +1,145 @@
+{
+  "alignment_thresholds": [
+    16.0,
+    32.0,
+    48.0,
+    64.0
+  ],
+  "proxy": "absolute player-x minus spell-owner-x during native player phase 3",
+  "role": "shadow_with_retained_rejected_live_experiment",
+  "schema": "th08-attack-alignment-audit-v2",
+  "traces": [
+    {
+      "active_shot_fraction": 0.9774058577405857,
+      "decision_count": 3585,
+      "output_shot_fraction": 0.9779637377963738,
+      "phases": [
+        {
+          "active_shot_fraction": 0.9911699779249448,
+          "decision_count": 906,
+          "first_frame": 10249,
+          "hit_count": 3,
+          "last_frame": 13329,
+          "native_boss_telemetry": {
+            "comparable_damage_sample_count": 905,
+            "current_health": {
+              "first": 2000,
+              "last": 835,
+              "minimum": 835
+            },
+            "damageable_fraction": 1.0,
+            "observed_damage_frames": 3079,
+            "observed_damage_per_frame": 0.37836960051964924,
+            "observed_health_delta": 1165,
+            "phase_end_health": 0,
+            "sample_count": 906,
+            "sampled_native_frame_damage_sum": 301,
+            "stable_fraction": 1.0,
+            "timer": {
+              "first": 4.0,
+              "last": 2996.0,
+              "timeout": 3000
+            }
+          },
+          "normal_alignment_fraction": {
+            "16": 0.2571428571428571,
+            "32": 0.6,
+            "48": 0.7755102040816326,
+            "64": 0.8448979591836735
+          },
+          "normal_horizontal_alignment_error": {
+            "maximum": 105.7001953125,
+            "median": 25.188568115234375,
+            "p95": 80.98799438476557
+          },
+          "normal_player_phase_count": 245,
+          "normal_spell_owner_guard_count": 245,
+          "observed_frame_span": 3080,
+          "output_shot_fraction": 0.9889624724061811,
+          "power": {
+            "first": 100.0,
+            "last": 63.0,
+            "median": 84.0
+          },
+          "safe_damage_objective": {
+            "alignment_cost_improvement": {
+              "maximum": 35.31370830535889,
+              "median": 0.0,
+              "p95": 7.923918795585624
+            },
+            "available_count": 660,
+            "live_action_change_count": 123,
+            "shadow_action_change_count": 123
+          },
+          "spell_id": 57,
+          "spell_name": "夢境「二重大結界」",
+          "spell_owner_guard_count": 906
+        },
+        {
+          "active_shot_fraction": 0.8431372549019608,
+          "decision_count": 51,
+          "first_frame": 16852,
+          "hit_count": 0,
+          "last_frame": 17014,
+          "native_boss_telemetry": {
+            "comparable_damage_sample_count": 49,
+            "current_health": {
+              "first": 2000,
+              "last": 1995,
+              "minimum": 1995
+            },
+            "damageable_fraction": 1.0,
+            "observed_damage_frames": 159,
+            "observed_damage_per_frame": 0.031446540880503145,
+            "observed_health_delta": 5,
+            "phase_end_health": 0,
+            "sample_count": 51,
+            "sampled_native_frame_damage_sum": 1,
+            "stable_fraction": 1.0,
+            "timer": {
+              "first": 1.0,
+              "last": 73.0,
+              "timeout": 2700
+            }
+          },
+          "normal_alignment_fraction": {
+            "16": 0.5217391304347826,
+            "32": 0.9130434782608695,
+            "48": 1.0,
+            "64": 1.0
+          },
+          "normal_horizontal_alignment_error": {
+            "maximum": 36.404380798339844,
+            "median": 15.072792053222656,
+            "p95": 33.625734965006515
+          },
+          "normal_player_phase_count": 23,
+          "normal_spell_owner_guard_count": 23,
+          "observed_frame_span": 162,
+          "output_shot_fraction": 0.8431372549019608,
+          "power": {
+            "first": 50.0,
+            "last": 50.0,
+            "median": 50.0
+          },
+          "safe_damage_objective": {
+            "alignment_cost_improvement": {
+              "maximum": 8.976998329162598,
+              "median": 0.0,
+              "p95": 4.1185705343881995
+            },
+            "available_count": 40,
+            "live_action_change_count": 5,
+            "shadow_action_change_count": 5
+          },
+          "spell_id": 61,
+          "spell_name": "散霊「夢想封印　寂」",
+          "spell_owner_guard_count": 51
+        }
+      ],
+      "sha256": "148ba57f03e32b8f477d3a3f37d8f744aa183ffd0083511ffa3a1d655d350bc8",
+      "trace": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260724_231637.jsonl"
+    }
+  ],
+  "warning": "native HP delta is observed damage, but horizontal alignment is still only a coverage proxy; shot/option geometry is not modeled"
+}

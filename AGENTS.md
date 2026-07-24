@@ -43,6 +43,18 @@ These instructions apply to every file and task below this directory.
   control, and planning contracts. Record why any stage- or spell-specific
   exception is unavoidable and test that it does not silently become the
   default planner policy.
+- Separate universal mechanics from route-conditioned strategy. Collision,
+  movement, delay, sensing, event timing, and viability semantics must not be
+  tuned until one stage happens to pass. A game/team/stage/phase profile may
+  legitimately supply a practiced reference tube, event-relative lead times,
+  planning resolution/horizon, resource floors, damage model, and objective
+  priorities. Treat such profiles as explicit strategy data with provenance,
+  not hidden branches in the safety kernel.
+- Do not assume one scalar weight vector is universal. Power, boss HP,
+  remaining phase time, lives, and Bombs are state and resource constraints,
+  not merely preferences. Tune remaining strategy parameters on more than one
+  RNG/entry-state sample, retain adverse trials, and keep a profile shadow-only
+  until its hard-safety boundary and cross-sample effect are understood.
 - Persist every important algorithmic or architectural decision, breakthrough,
   rejected approach, assumption, and limitation. Use a dedicated design note
   for the algorithm and summarize the checkpoint in
@@ -75,12 +87,20 @@ These instructions apply to every file and task below this directory.
 - Add the smallest useful regression test or retained regression artifact for
   each understood failure. A strangely specific test name should explain the
   exact way the agent once failed.
-- Run focused tests while developing and the complete suite before a checkpoint:
+- Use the smallest focused test while iterating on a hypothesis. Keep unit
+  tests deterministic and fast; full native solves, multi-resolution audits,
+  replay corpora, memory benchmarks, and physical trials are retained research
+  experiments rather than unit-test setup.
+- Run the quick complete unit suite before a code checkpoint:
 
   ```bash
   PYTHONPATH=scripts python -m unittest discover -s tests -p 'test_*.py'
   ```
 
+- Run expensive capsule replays only when their model or algorithm changed.
+  Run Windows tests only for Windows/process/input/parser/native changes or
+  immediately before physical promotion. A documentation or offline-analysis
+  checkpoint does not require duplicating the complete suite on Windows.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 

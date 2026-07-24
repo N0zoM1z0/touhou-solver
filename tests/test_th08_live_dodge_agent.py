@@ -424,6 +424,33 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(decision.immediate_clearance, 9999.0)
         self.assertTrue(math.isfinite(decision.score))
 
+    def test_damage_shadow_only_ranks_the_fresh_viable_action_set(self) -> None:
+        common = {
+            "player_x": 100.0,
+            "player_y": 400.0,
+            "bullets": (),
+            "lasers": (),
+            "previous_direction": 0,
+            "can_bomb": False,
+            "control_delay_frames": 1,
+            "control_delay_candidates": (1,),
+            "horizon": 2,
+            "threat_horizon": 2,
+            "action_hold_frames": 1,
+            "beam_width": 64,
+            "allowed_first_actions": ("stay", "left", "right"),
+            "damage_target_x": 300.0,
+            "damage_target_half_width": 10.0,
+            "damageable": True,
+        }
+        shadow = choose_action(**common)
+        self.assertEqual(shadow.action, "stay")
+        self.assertEqual(shadow.damage_shadow_action, "right")
+        restricted = choose_action(
+            **{**common, "allowed_first_actions": ("stay",)}
+        )
+        self.assertEqual(restricted.damage_shadow_action, "stay")
+
     def test_native_enemy_body_window_decodes_scaled_lethal_extents(
         self,
     ) -> None:

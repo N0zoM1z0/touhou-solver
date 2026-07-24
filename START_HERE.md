@@ -13,12 +13,16 @@ runtime evidence remain in `notes/`.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - Handoff base before the current checkpoint:
-  `60be630 Audit Stage 5 viability failures`.
-- The current verified checkpoint adds adaptive-refinement replay, fused
-  survival-label query infrastructure, and a corridor-runtime/policy-guidance
-  module split, but explicitly keeps refinement and survival labels out of
-  live control after physical rejection. Linux and Windows complete suites
-  pass 416 tests. Read
+  `4510a2a Reject stale live refinement and record strategy ledger`.
+- The current checkpoint adds stable native Boss HP/phase telemetry and
+  safe-set damage shadowing. A physical Stage-4A experiment rejected
+  horizontal Boss alignment as live damage authority: it improved its
+  geometric proxy but did not improve native HP response. The architecture is
+  now a reusable mechanics/safety core plus explicit game/team/stage/phase
+  practiced profiles. Linux and Windows complete suites pass 420 quick unit
+  tests; Linux runtime is about 1.4 seconds after moving full differential
+  solves out of unit-test setup. Read
+  `notes/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`,
   `notes/DELIVERY_AWARE_STRATEGY_REASSESSMENT_20260724.md`,
   `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`, and `STRATEGY.md`
   before changing the recovery, refinement, or objective layers.
@@ -340,12 +344,14 @@ The unattended supervisor generates these automatically. Then:
 2. Add a durable failure entry to `notes/COUNTEREXAMPLES.md`.
 3. Add the checkpoint and interpretation to `notes/RESEARCH_LOG.md`.
 4. Add the smallest useful synthetic or retained regression.
-5. Run focused tests, then the full suite.
+5. Run the smallest focused tests. Before a code checkpoint, run the quick
+   complete unit suite. Run heavy capsule/audit replays only when their model
+   changed; run Windows validation for Windows/native/live promotion work.
 6. Stage files explicitly. Never stage `image.png`, JSONL, launch logs, daemon
    logs, game files, binaries, credentials, or native build output.
 7. Commit a focused, verified checkpoint.
 
-Full test command:
+Quick complete unit command:
 
 ```bash
 PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_*.py'
@@ -803,14 +809,13 @@ should:
 4. Keep CE-0100 refinement query-local or inside a reachable tube. Reproduce
    all three witnesses in shadow without increasing live expiry, missing
    queries, or local latency.
-5. Add read-only boss HP, health-threshold, damageability, phase timer/exit,
-   shot-cadence, and option telemetry. Validate observed HP delta before the
-   damage-aware phase-progress hypothesis can rank survival-equivalent
-   actions.
+5. Use the now-validated Boss HP/phase sensor with the existing executable
+   SHT/option/cadence model. Validate predicted versus native HP delta in
+   shadow; do not restore the rejected Boss-x live proxy.
 6. Audit instant-winning terminal states and add pending-command/remaining-
    delay state before claiming exact event-time layers.
-7. Require randomized delayed-birth/stop/reverse/redirect parity, Linux and
-   Windows builds/tests, and whole-pipeline timing before physical use.
+7. Require randomized delayed-birth/stop/reverse/redirect parity, relevant
+   platform/native tests, and whole-pipeline timing before physical use.
 8. Use a focused boss phase and then a different stage for physical A/B.
    Retain every required artifact and counterexample while leaving raw traces,
    logs, native binaries, and `image.png` untracked.
@@ -821,15 +826,17 @@ should:
 Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
 START_HERE.md and STRATEGY.md completely, then inspect git status and the
 latest commit. Keep hard no-Bomb; keep safety value, fused survival labels,
-and fine refinement shadow-only. Read the 20260724 Stage-5 differential and
-delivery-aware reassessment notes plus CE-0099..0103. Exact capsule replay
+and fine refinement shadow-only. Read the route-conditioned strategy,
+20260724 Stage-5 differential, and delivery-aware reassessment notes plus
+CE-0099..0104. Exact capsule replay
 found 3/54 spatial coarse false-empties, but the live full-horizon 8px
 promotion raised solve p95 to 1.174 seconds and expired far more policies.
 Build delivery-aware control: a packed issue-time bullet/laser/enemy
 certificate, versioned/cancellable background policies, and ECL/timeline
-`BirthWindow` events. Separately add read-only boss HP/damage/phase telemetry
-and validate a damage-aware tie-breaker only inside fresh
-survival-equivalent actions. Keep generic planners game-neutral, retain
-artifacts/counterexamples, run both complete suites, commit verified
+`BirthWindow` events. Preserve the validated native Boss HP/phase sensor;
+replace the rejected horizontal-alignment proxy with the executable SHT and
+option damage model in shadow. Keep mechanics/safety game-neutral while
+allowing explicit route/stage/phase practiced profiles. Retain
+artifacts/counterexamples, use tiered relevant tests, commit verified
 checkpoints, and stop every runtime session.
 ```

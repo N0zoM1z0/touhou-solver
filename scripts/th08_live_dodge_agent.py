@@ -27,6 +27,11 @@ from th08_bullet_transform_model import (
     TransformRecord,
     parse_next_transform_record,
 )
+from th08_boss_phase import (
+    BossPhaseSnapshot,
+    capture_boss_phase_snapshot,
+    serialize_boss_phase_snapshot,
+)
 from th08_corridor_runtime import (
     CorridorCommitment,
     CorridorSolution,
@@ -86,6 +91,12 @@ from touhou_control.epochs import (
     HazardEpochAlignment,
 )
 from touhou_control.policy_guidance import assemble_local_policy_guidance
+from touhou_control.phase_progress import (
+    PhaseProgressObservation,
+    PhaseProgressTracker,
+    ProgressCandidate,
+    select_progress_action,
+)
 from touhou_control.trajectory import VelocityChange
 
 
@@ -671,6 +682,13 @@ class Decision:
     viability_survival_preferred: bool = False
     viability_survival_frames: int | None = None
     viability_survival_bottleneck_margin: float | None = None
+    damage_objective_available: bool = False
+    damage_baseline_action: str | None = None
+    damage_shadow_action: str | None = None
+    damage_current_alignment_cost: float | None = None
+    damage_shadow_alignment_cost: float | None = None
+    damage_eligible_action_count: int = 0
+    damage_reason: str = "disabled"
 
 
 @dataclass(frozen=True)
@@ -1945,6 +1963,16 @@ def read_spell_enemy_body_guard(
     pointer = int(spell.get("enemy_pointer", 0))
     if pointer == 0:
         return None
+    return read_enemy_body_guard(reader, pointer=pointer)
+
+
+def read_enemy_body_guard(
+    reader: ProcessReader,
+    *,
+    pointer: int,
+) -> SpellEnemyBodyGuard | None:
+    """Read one active enemy body, including latent contact mode geometry."""
+
     return decode_spell_enemy_body_guard(
         reader.read(
             pointer + ENEMY_BODY_READ_OFFSET,
@@ -3012,6 +3040,9 @@ def choose_action(
     viability_survival_frames: int | None = None,
     viability_survival_bottleneck_margin: float | None = None,
     viability_position_error: float = 0.0,
+    damage_target_x: float | None = None,
+    damage_target_half_width: float = 0.0,
+    damageable: bool = False,
     recovery_control_reserve: bool = True,
     preserve_previous_direction_inertia: bool = True,
     relax_stale_viability_contradiction: bool = False,
@@ -3046,6 +3077,13 @@ def choose_action(
         or viability_position_error < 0.0
     ):
         raise ValueError("viability position error must be finite and nonnegative")
+    if damage_target_x is not None and not math.isfinite(damage_target_x):
+        raise ValueError("damage target x must be finite")
+    if (
+        not math.isfinite(damage_target_half_width)
+        or damage_target_half_width < 0.0
+    ):
+        raise ValueError("damage target half-width must be finite and nonnegative")
     planner_action_names = {action.name for action in _PLANNER_ACTIONS}
     if allowed_first_actions is not None:
         if not allowed_first_actions:
@@ -3620,10 +3658,10 @@ def choose_action(
         key=selection_key,
     )
     robust_certificates: dict[str, RobustActionCertificate] = {}
+    nodes_by_action: dict[str, SearchNode] = {}
     robust_override = False
     robust_certificate: RobustActionCertificate | None = None
     if control_delay_candidates is not None:
-        nodes_by_action: dict[str, SearchNode] = {}
         actions_by_name: dict[str, PlannerAction] = {}
         for node in beam:
             action_name = node.first_action.name
@@ -3679,6 +3717,73 @@ def choose_action(
             robust_override = robust_best.first_action != best.first_action
             best = robust_best
         robust_certificate = robust_certificates[best.first_action.name]
+    damage_reason = "boss_not_damageable"
+    if damageable:
+        damage_reason = "boss_geometry_unavailable"
+    if damageable and damage_target_x is not None:
+        damage_reason = "fresh_viability_unavailable"
+    if (
+        damageable
+        and damage_target_x is not None
+        and effective_allowed_first_actions is not None
+    ):
+        damage_reason = (
+            "viability_constraint_relaxed"
+            if viability_fresh_prefix_relaxed
+            else "issue_certificate_unavailable"
+        )
+    damage_shadow_action: str | None = None
+    damage_baseline_action = best.first_action.name
+    damage_current_alignment_cost: float | None = None
+    damage_shadow_alignment_cost: float | None = None
+    damage_eligible_action_count = 0
+    damage_objective_available = bool(
+        damageable
+        and damage_target_x is not None
+        and effective_allowed_first_actions is not None
+        and not viability_fresh_prefix_relaxed
+        and robust_certificates
+        and nodes_by_action
+    )
+    if damage_objective_available:
+        viable_actions = set(effective_allowed_first_actions or ())
+        progress_candidates = tuple(
+            ProgressCandidate(
+                action=action_name,
+                progress_cost=max(
+                    abs(node.x - damage_target_x)
+                    - damage_target_half_width,
+                    0.0,
+                ),
+                viable=action_name in viable_actions,
+                issue_collisions=robust_certificates[
+                    action_name
+                ].worst_collisions,
+                issue_min_clearance=robust_certificates[
+                    action_name
+                ].min_clearance,
+                baseline_rank=selection_key(node),
+            )
+            for action_name, node in nodes_by_action.items()
+        )
+        damage_eligible_action_count = sum(
+            candidate.viable
+            and candidate.issue_collisions == 0
+            and candidate.issue_min_clearance >= 0.0
+            for candidate in progress_candidates
+        )
+        damage_candidate = select_progress_action(progress_candidates)
+        if damage_candidate is None:
+            damage_objective_available = False
+            damage_reason = "no_issue_safe_viable_action"
+        else:
+            damage_reason = "shadow_lexicographic_tiebreak"
+            damage_shadow_action = damage_candidate.action
+            damage_current_alignment_cost = max(
+                abs(best.x - damage_target_x) - damage_target_half_width,
+                0.0,
+            )
+            damage_shadow_alignment_cost = damage_candidate.progress_cost
     minimum = 9999.0 if math.isinf(best.min_clearance) else best.min_clearance
     immediate = (
         9999.0 if math.isinf(best.immediate_clearance) else best.immediate_clearance
@@ -3761,6 +3866,13 @@ def choose_action(
         bool(survival_actions and action.name in survival_actions),
         viability_survival_frames,
         viability_survival_bottleneck_margin,
+        damage_objective_available=damage_objective_available,
+        damage_baseline_action=damage_baseline_action,
+        damage_shadow_action=damage_shadow_action,
+        damage_current_alignment_cost=damage_current_alignment_cost,
+        damage_shadow_alignment_cost=damage_shadow_alignment_cost,
+        damage_eligible_action_count=damage_eligible_action_count,
+        damage_reason=damage_reason,
     )
     if (
         effective_allowed_first_actions is not None
@@ -3990,6 +4102,7 @@ def run(args: argparse.Namespace) -> int:
         enemy_background_memory,
         spell_enemy_body_memory,
     )
+    boss_phase_tracker = PhaseProgressTracker()
     gameplay_epoch = 0
     auto_confirm = AutoConfirmPulse(
         interval_frames=args.auto_confirm_every,
@@ -4055,6 +4168,12 @@ def run(args: argparse.Namespace) -> int:
                         "survival_only_passive_collection"
                         if not ITEM_OBJECTIVES_ENABLED
                         else "certified_viable_tiebreaker"
+                    ),
+                    "boss_phase_sensor": (
+                        "native_registry_health_timer_and_damage_gate"
+                    ),
+                    "damage_objective": (
+                        "shadow_lexicographic_inside_fresh_safe_set"
                     ),
                     "enemy_body_sensor": (
                         "synchronous_latent_contact_prefix_plus_"
@@ -4329,6 +4448,7 @@ def run(args: argparse.Namespace) -> int:
                 continue
             if scene_decision.status == "resumed":
                 gameplay_epoch += 1
+                boss_phase_tracker.reset()
                 output.write(
                     json.dumps(
                         {
@@ -4441,6 +4561,7 @@ def run(args: argparse.Namespace) -> int:
             for memory in enemy_body_memories:
                 memory.set_context(corridor_context)
             if corridor_context_changed:
+                boss_phase_tracker.reset()
                 corridor_solution = None
                 corridor_pending_solution = None
                 if (
@@ -4531,18 +4652,50 @@ def run(args: argparse.Namespace) -> int:
             ecl_frame_after: int | None = None
             spell_enemy_body_guard: SpellEnemyBodyGuard | None = None
             spell_enemy_body_guard_error: str | None = None
+            boss_guard_frame_before: int | None = None
+            boss_guard_frame_after: int | None = None
+            boss_phase_snapshot: BossPhaseSnapshot | None = None
+            boss_phase_error: str | None = None
+            boss_phase_progress: PhaseProgressObservation | None = None
             spell_enemy_pointer = int(spell_state.get("enemy_pointer", 0))
-            if spell_state.get("active") and spell_enemy_pointer:
-                ecl_frame_before = reader.u32(0x0164D30C)
+            try:
+                boss_phase_snapshot = capture_boss_phase_snapshot(
+                    reader,
+                    preferred_pointer=(
+                        spell_enemy_pointer
+                        if spell_state.get("active")
+                        else 0
+                    ),
+                )
+            except (OSError, RuntimeError, ValueError, struct.error) as error:
+                boss_phase_error = f"{type(error).__name__}: {error}"
+            boss_enemy_pointer = (
+                boss_phase_snapshot.pointer
+                if boss_phase_snapshot is not None
+                else (
+                    spell_enemy_pointer
+                    if spell_state.get("active")
+                    else 0
+                )
+            )
+            if boss_enemy_pointer:
+                boss_guard_frame_before = reader.u32(
+                    ADDR_ENEMY_MANAGER_FRAME
+                )
                 try:
-                    spell_enemy_body_guard = read_spell_enemy_body_guard(
+                    spell_enemy_body_guard = read_enemy_body_guard(
                         reader,
-                        spell_state,
+                        pointer=boss_enemy_pointer,
                     )
                 except (OSError, RuntimeError, ValueError, struct.error) as error:
                     spell_enemy_body_guard_error = (
                         f"{type(error).__name__}: {error}"
                     )
+                boss_guard_frame_after = reader.u32(
+                    ADDR_ENEMY_MANAGER_FRAME
+                )
+            if spell_state.get("active") and spell_enemy_pointer:
+                ecl_frame_before = reader.u32(0x0164D30C)
                 try:
                     ecl_vm_snapshot = read_main_ecl_vm_snapshot(
                         reader,
@@ -4570,23 +4723,37 @@ def run(args: argparse.Namespace) -> int:
                         f"{type(error).__name__}: {error}"
                     )
                 ecl_frame_after = reader.u32(0x0164D30C)
-                if spell_enemy_body_guard is not None:
-                    tracked_spell_bodies, _dormant = (
-                        spell_enemy_body_memory.merge_snapshot(
-                            EnemyPoolSnapshot(
-                                ecl_frame_before,
-                                ecl_frame_after,
-                                (spell_enemy_body_guard.body,),
-                                0.0,
-                            ),
-                            frame=int(state["enemy_manager_frame"]),
-                        )
+            if (
+                spell_enemy_body_guard is not None
+                and boss_guard_frame_before is not None
+                and boss_guard_frame_after is not None
+            ):
+                tracked_spell_bodies, _dormant = (
+                    spell_enemy_body_memory.merge_snapshot(
+                        EnemyPoolSnapshot(
+                            boss_guard_frame_before,
+                            boss_guard_frame_after,
+                            (spell_enemy_body_guard.body,),
+                            0.0,
+                        ),
+                        frame=int(state["enemy_manager_frame"]),
                     )
-                    if tracked_spell_bodies:
-                        spell_enemy_body_guard = replace(
-                            spell_enemy_body_guard,
-                            body=tracked_spell_bodies[0],
-                        )
+                )
+                if tracked_spell_bodies:
+                    spell_enemy_body_guard = replace(
+                        spell_enemy_body_guard,
+                        body=tracked_spell_bodies[0],
+                    )
+            boss_phase_progress = boss_phase_tracker.observe(
+                (
+                    boss_phase_snapshot.as_progress_state(
+                        context=corridor_context,
+                        bomb_active=bool(player["bomb_active"]),
+                    )
+                    if boss_phase_snapshot is not None
+                    else None
+                )
+            )
             enemy_bodies = merge_spell_enemy_body_guard(
                 enemy_bodies,
                 spell_enemy_body_guard,
@@ -4604,21 +4771,38 @@ def run(args: argparse.Namespace) -> int:
                     and ecl_frame_after is not None
                     and ecl_frame_after < ecl_frame_before
                 )
+                or (
+                    boss_guard_frame_before is not None
+                    and boss_guard_frame_after is not None
+                    and boss_guard_frame_after < boss_guard_frame_before
+                )
             ):
                 gaps += 1
                 continue
             snapshot_lag = max(0, counter_after_read - int(state["enemy_manager_frame"]))
+            hazard_frame_before = min(
+                enemy_prefix_snapshot.frame_before,
+                bullet_frame_before,
+                (
+                    boss_guard_frame_before
+                    if boss_guard_frame_before is not None
+                    else bullet_frame_before
+                ),
+            )
+            hazard_frame_after = max(
+                enemy_prefix_snapshot.frame_after,
+                bullet_frame_after,
+                (
+                    boss_guard_frame_after
+                    if boss_guard_frame_after is not None
+                    else bullet_frame_after
+                ),
+            )
             hazard_alignment = HazardEpochAlignment(
                 source_frame=int(state["enemy_manager_frame"]),
                 hazard_window=FrameWindow(
-                    min(
-                        enemy_prefix_snapshot.frame_before,
-                        bullet_frame_before,
-                    ),
-                    max(
-                        enemy_prefix_snapshot.frame_after,
-                        bullet_frame_after,
-                    ),
+                    hazard_frame_before,
+                    hazard_frame_after,
                 ),
                 current_frame=counter_after_read,
                 event_window=(
@@ -4655,6 +4839,7 @@ def run(args: argparse.Namespace) -> int:
                 corridor_commitment = CorridorCommitment()
                 for memory in enemy_body_memories:
                     memory.clear()
+                boss_phase_tracker.reset()
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
@@ -4896,6 +5081,28 @@ def run(args: argparse.Namespace) -> int:
             action_hold_frames = _estimate_live_action_hold(
                 tuple(decision_frame_deltas)
             )
+            damage_target_x: float | None = None
+            damage_target_half_width = 0.0
+            damageable = False
+            if (
+                boss_phase_snapshot is not None
+                and boss_phase_progress is not None
+                and spell_enemy_body_guard is not None
+                and spell_enemy_body_guard.body.pointer
+                == boss_phase_snapshot.pointer
+            ):
+                boss_body = spell_enemy_body_guard.body
+                damage_target_x = (
+                    boss_body.x
+                    + boss_body.vx
+                    * (player_to_hazard_lag + args.horizon)
+                )
+                # Enemy-body contact expands the native full size by 1.5.
+                # Player-shot damage uses the unexpanded AABB.
+                damage_target_half_width = (
+                    spell_enemy_body_guard.body.half_width * (2.0 / 3.0)
+                )
+                damageable = boss_phase_progress.state.damageable
             plan_started = time.perf_counter()
             decision = choose_action(
                 player_x=float(player["x"]),
@@ -4942,6 +5149,9 @@ def run(args: argparse.Namespace) -> int:
                     policy_guidance.survival_bottleneck_margin
                 ),
                 viability_position_error=policy_guidance.position_error,
+                damage_target_x=damage_target_x,
+                damage_target_half_width=damage_target_half_width,
+                damageable=damageable,
                 preserve_previous_direction_inertia=(
                     not corridor_context_changed
                 ),
@@ -5043,6 +5253,7 @@ def run(args: argparse.Namespace) -> int:
                 corridor_commitment = CorridorCommitment()
                 for memory in enemy_body_memories:
                     memory.clear()
+                boss_phase_tracker.reset()
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
@@ -5274,6 +5485,67 @@ def run(args: argparse.Namespace) -> int:
                     "resources": resources,
                     "stage_route_index": state["stage_route_index"],
                     "spell": state["spell"],
+                    "boss_phase": (
+                        {
+                            **(
+                                serialize_boss_phase_snapshot(
+                                    boss_phase_snapshot
+                                )
+                                or {}
+                            ),
+                            "error": boss_phase_error,
+                        }
+                        if (
+                            boss_phase_snapshot is not None
+                            or boss_phase_error is not None
+                        )
+                        else None
+                    ),
+                    "boss_phase_progress": (
+                        {
+                            "status": boss_phase_progress.status,
+                            "frame_delta": boss_phase_progress.frame_delta,
+                            "health_delta": boss_phase_progress.health_delta,
+                            "damage_per_frame": (
+                                boss_phase_progress.damage_per_frame
+                            ),
+                            "damage_per_second_60hz": (
+                                boss_phase_progress.damage_per_frame * 60.0
+                                if (
+                                    boss_phase_progress.damage_per_frame
+                                    is not None
+                                )
+                                else None
+                            ),
+                            "damageable": (
+                                boss_phase_progress.state.damageable
+                            ),
+                        }
+                        if boss_phase_progress is not None
+                        else None
+                    ),
+                    "damage_objective": {
+                        "role": (
+                            "shadow"
+                        ),
+                        "available": decision.damage_objective_available,
+                        "reason": decision.damage_reason,
+                        "target_x": damage_target_x,
+                        "target_half_width": damage_target_half_width,
+                        "baseline_action": decision.damage_baseline_action,
+                        "shadow_action": decision.damage_shadow_action,
+                        "issued_action": decision.action,
+                        "live_selected": False,
+                        "current_alignment_cost": (
+                            decision.damage_current_alignment_cost
+                        ),
+                        "shadow_alignment_cost": (
+                            decision.damage_shadow_alignment_cost
+                        ),
+                        "eligible_action_count": (
+                            decision.damage_eligible_action_count
+                        ),
+                    },
                     "bullet_velocity_lookahead": (
                         {
                             "instruction_pointer": (
@@ -5387,6 +5659,12 @@ def run(args: argparse.Namespace) -> int:
                         "player_to_hazard_lag": player_to_hazard_lag,
                         "ecl_frame_before": ecl_frame_before,
                         "ecl_frame_after": ecl_frame_after,
+                        "boss_guard_frame_before": (
+                            boss_guard_frame_before
+                        ),
+                        "boss_guard_frame_after": (
+                            boss_guard_frame_after
+                        ),
                     },
                     "enemy_body_snapshot_frame": enemy_body_snapshot_frame,
                     "enemy_body_snapshot_age": (
@@ -5437,6 +5715,9 @@ def run(args: argparse.Namespace) -> int:
                     },
                     "spell_enemy_body_guard": (
                         {
+                            "source": (
+                                "boss_registry_or_spell_owner"
+                            ),
                             "body": _serialized_enemy_bodies(
                                 (spell_enemy_body_guard.body,)
                             )[0],

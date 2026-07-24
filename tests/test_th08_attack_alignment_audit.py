@@ -27,6 +27,23 @@ class Th08AttackAlignmentAuditTests(unittest.TestCase):
                 "spell_enemy_body_guard": {
                     "body": [0x1234, 120.0, 80.0]
                 },
+                "boss_phase": {
+                    "pointer": 0x1234,
+                    "stable": True,
+                    "frame_damage": 0,
+                },
+                "boss_phase_progress": {
+                    "status": "initial",
+                    "damageable": True,
+                },
+                "damage_objective": {
+                    "available": True,
+                    "baseline_action": "stay",
+                    "shadow_action": "right",
+                    "live_selected": False,
+                    "current_alignment_cost": 20.0,
+                    "shadow_alignment_cost": 12.0,
+                },
             },
             {
                 "kind": "decision",
@@ -39,6 +56,25 @@ class Th08AttackAlignmentAuditTests(unittest.TestCase):
                 "spell": {"active": True, "spell_id": 57, "name": "test"},
                 "spell_enemy_body_guard": {
                     "body": [0x1234, 120.0, 80.0]
+                },
+                "boss_phase": {
+                    "pointer": 0x1234,
+                    "stable": True,
+                    "frame_damage": 60,
+                },
+                "boss_phase_progress": {
+                    "status": "comparable",
+                    "damageable": True,
+                    "health_delta": 60,
+                    "frame_delta": 4,
+                },
+                "damage_objective": {
+                    "available": True,
+                    "baseline_action": "right",
+                    "shadow_action": "right",
+                    "live_selected": False,
+                    "current_alignment_cost": 0.0,
+                    "shadow_alignment_cost": 0.0,
                 },
             },
         )
@@ -62,6 +98,14 @@ class Th08AttackAlignmentAuditTests(unittest.TestCase):
         self.assertEqual(phase["normal_alignment_fraction"]["32"], 0.5)
         self.assertEqual(phase["power"]["first"], 128.0)
         self.assertEqual(phase["power"]["last"], 96.0)
+        self.assertEqual(
+            phase["native_boss_telemetry"]["observed_damage_per_frame"],
+            15.0,
+        )
+        self.assertEqual(
+            phase["safe_damage_objective"]["shadow_action_change_count"],
+            1,
+        )
 
 
 if __name__ == "__main__":

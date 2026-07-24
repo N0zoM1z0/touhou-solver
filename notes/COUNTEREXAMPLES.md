@@ -2545,3 +2545,36 @@ Status: observed | inferred | unknown | fixed
 - **Correction:** Coarse survival is also returned to shadow until an
   independently complete, delivery-safe experiment is justified. No further
   physical run is launched merely to rescue this strategy.
+
+## CE-0104: Better Boss-x alignment did not produce better native HP response
+
+- **Observed physical samples:** Stage-4A shadow capture
+  `lunatic_route2_stage4a_unattended_20260724_231247` and the explicit
+  horizontal-alignment experiment
+  `lunatic_route2_stage4a_unattended_20260724_231637` both observed spell 57
+  through the native Boss registry.
+- **Sensor parity:** The shadow/live samples contain 873/906 Boss observations;
+  every observation had a stable manager-frame bracket and an open native
+  damage gate. Consecutive same-phase HP samples were monotone.
+- **Proxy success:** The live experiment changed 123 safe-set actions and
+  improved normal player/Boss horizontal-error median
+  `51.50 -> 25.19 px`.
+- **Native disagreement:** Observed HP response was
+  `0.47597 -> 0.37837 HP/frame`. The alignment run's Power first/median was
+  higher (`100/84` versus `75/43`), so depleted Power does not explain why the
+  improved proxy failed to demonstrate improved damage in this pair.
+- **Comparison limit:** The shadow trace was manually stopped at phase timer
+  2729/3000, while the live trace reached 2996/3000. RNG, hit history, entry
+  state, and Power trajectory differ. This is adverse evidence, not a causal
+  estimate or a valid phase-duration comparison.
+- **Cause:** Horizontal player/Boss distance omits decoded SHT shot records,
+  focus-dependent option positions, cadence, shot travel, hitboxes, piercing,
+  and the shared damage cap. It is not a faithful damage model.
+- **Correction:** The live alignment CLI/authority was removed. Native
+  HP/phase telemetry and safe-set shadow diagnostics remain. Any later damage
+  objective must use the executable shot/option model and first demonstrate
+  predicted-versus-native HP-delta parity.
+- **Artifacts:**
+  `artifacts/strategy/stage4a_boss_phase_shadow_20260724.json`,
+  `artifacts/strategy/stage4a_boss_phase_live_20260724.json`, and
+  `notes/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`.

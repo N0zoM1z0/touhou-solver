@@ -2457,3 +2457,65 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Detailed evidence and the new architecture order are in
   `notes/DELIVERY_AWARE_STRATEGY_REASSESSMENT_20260724.md`; CE-0102/0103 retain
   the complete delivery regression and discarded isolation run.
+
+## 2026-07-24: Native Boss Progress, Alignment Rejection, And Practiced Profiles
+
+- **Observed static/native fields:** ECL `0x83` writes current/max/phase HP at
+  enemy `+0x2DFC/+0x2E00/+0x2E04`; thresholds are four signed integers at
+  `+0x3358`; phase timer elapsed is `+0x2E1C`; timeout is `+0x3378`; resolved
+  player-shot damage commits to current HP at `0x0042D349`. The indexed Boss
+  registry is four pointers at `0x00F54CC0`.
+- **Observed runtime correction:** A read-only live probe showed Stage-4A slot
+  0 pointing at `0x5826C0`, with primary flags `0x1128004F`, flags2 `0x4`,
+  current HP 4268, phase HP 15000, next threshold 2000, timer 2590/2700, and
+  an open damage gate in one stable manager frame. Earlier prose saying
+  “flags2 bit 0x2” meant bit **index** 2; the concrete mask is `1 << 2 = 0x4`.
+  Two preliminary sessions loaded the wrong mask and were safely stopped and
+  marked discarded before strategy interpretation.
+- Added `th08_boss_phase.py`, the read-only `th08_boss_probe.py`, and the
+  game-neutral `touhou_control.phase_progress` tracker/lexicographic
+  safe-objective primitive. The live trace now observes registered nonspell
+  Bosses as well as spell owners and records stable HP, phase boundary, timer,
+  timeout, damage gate, HP delta, and a damage shadow action.
+- **Observed shadow capture:** Discarded focused partial Stage-4A run
+  `20260724_231247` retained 873 spell-57 Boss samples; all were stable and
+  damageable. It observed HP `2000 -> 633` over 2872 comparable game frames
+  (`0.47597 HP/frame`). Of 725 decisions with both fresh viability guidance
+  and an issue-time certificate, the horizontal shadow disagreed 198 times.
+  This capture was manually stopped at timer 2729/3000 and is not a completed
+  phase or stage baseline.
+- **Observed rejected live experiment:** Discarded focused partial run
+  `20260724_231637` temporarily allowed horizontal alignment to rank only the
+  same fresh viable, issue-safe action set. It changed 123 spell-57 actions
+  and improved normal horizontal-error median `51.50 -> 25.19 px`, but
+  observed HP response was `0.37837 HP/frame` (`2000 -> 835` over 3079
+  comparable frames) despite higher measured Power (first/median `100/84`
+  versus `75/43`). It reached timer 2996/3000. RNG, hit history, Power
+  trajectory, entry state, and trace extent differ, so this is adverse
+  evidence rather than a causal HP-rate or phase-duration A/B.
+- CE-0104 records the proxy/native disagreement. Runtime live alignment
+  authority and its CLI switch were removed after the experiment. Stable Boss
+  telemetry and safe-set shadow output remain. The next damage hypothesis
+  must use the already executable SHT cadence/source/shot collision/damage
+  model plus route-2 option state and demonstrate predicted/native HP-delta
+  parity before another physical promotion.
+- **Architectural decision:** Keep movement, collision, laser/transform,
+  event-time, sensing, delay, viability, and issue certification semantically
+  reusable. Permit explicit game/team/stage/phase practiced profiles for
+  reference tubes, lead times, resolution/horizon, Power floors, pickup
+  windows, and exact phase-progress objectives. Power, Boss HP, and remaining
+  time are route state/resource constraints, not merely three scalar weights.
+  Profiles must validate across RNG/entry-state samples and must not become
+  hidden branches in the safety kernel. The full rationale is
+  `notes/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`; `STRATEGY.md`
+  records S12.
+- Test policy is now research-tiered. Profiling found that one differential
+  wiring test spent about 8.6 of 9.9 seconds recomputing complete 16/8/4-pixel
+  policies. It now stubs the solver and tests classification in 0.004 seconds;
+  real multi-resolution solves remain retained capsule experiments. The
+  complete 420-test Linux suite passes in 1.351 seconds and the complete
+  Windows suite passes in 2.561 seconds.
+- Added IDA comments at `0x0041C97A`, `0x0041C989`, `0x0041C998`,
+  `0x0042D349`, and `0x0042DCB3` for max/current/phase HP writes, native
+  damage commit, and the current/max UI consumer. No REA session was used for
+  this checkpoint.

@@ -7,6 +7,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from touhou_control.viability_audit_capsule import (
     write_viability_audit_capsule,
@@ -101,13 +102,36 @@ class ViabilityDifferentialAuditTests(unittest.TestCase):
                 "\n".join(json.dumps(row) for row in rows) + "\n",
                 encoding="utf-8",
             )
-            report = audit(
-                trace_path=trace,
-                capsule_dir=capsule_dir,
-                regressions_path=None,
-                pre_hit_frames=16,
-                max_queries_per_hit=8,
-            )
+            # This is a classification/wiring regression, not a performance
+            # benchmark.  The old test recomputed every 16/8/4-pixel audit
+            # variant and spent ~8.6 seconds proving a one-bit disagreement.
+            # Full native solves belong in retained capsule experiments.
+            recomputed = {
+                "available": True,
+                "state_viable": True,
+                "safe_action_count": 1,
+                "layer": 1,
+                "row": 0,
+                "column": 0,
+                "position_error": 0.0,
+            }
+            with (
+                patch(
+                    "viability_differential_audit.AuditSolver.solve",
+                    return_value=object(),
+                ),
+                patch(
+                    "viability_differential_audit._query_payload",
+                    return_value=recomputed,
+                ),
+            ):
+                report = audit(
+                    trace_path=trace,
+                    capsule_dir=capsule_dir,
+                    regressions_path=None,
+                    pre_hit_frames=16,
+                    max_queries_per_hit=8,
+                )
         self.assertEqual(report["scope"]["audited_empty_queries"], 1)
         labels = report["observations"][0]["labels"]
         self.assertIn(

@@ -917,6 +917,44 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertFalse(decision.viability_constrained)
         self.assertEqual(decision.viability_recovery_distance, 16.0)
 
+    def test_distant_recovery_preserves_delay_scaled_boundary_control(
+        self,
+    ) -> None:
+        common = {
+            "player_x": 8.0,
+            "player_y": 424.0,
+            "bullets": (),
+            "lasers": (),
+            "previous_direction": DOWN,
+            "previous_focus": True,
+            "can_bomb": False,
+            "control_delay_frames": 3,
+            "control_delay_candidates": (3, 4, 5, 6),
+            "action_hold_frames": 6,
+            "horizon": 10,
+            "viability_recovery_distances": (
+                ("stay", 226.0),
+                ("down", 164.0),
+                ("up_right_fast", 315.0),
+            ),
+        }
+        baseline = choose_action(
+            **common,
+            recovery_control_reserve=False,
+        )
+        decision = choose_action(
+            **common,
+            recovery_control_reserve=True,
+        )
+        self.assertEqual(baseline.action, "down")
+        self.assertGreater(
+            baseline.viability_control_reserve_deficit,
+            0.0,
+        )
+        self.assertEqual(decision.action, "up_right_fast")
+        self.assertEqual(decision.viability_recovery_distance, 315.0)
+        self.assertEqual(decision.viability_control_reserve_deficit, 0.0)
+
     def test_exact_local_collision_outranks_distant_kernel_recovery(
         self,
     ) -> None:

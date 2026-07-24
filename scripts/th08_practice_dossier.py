@@ -7,6 +7,7 @@ import argparse
 import csv
 import hashlib
 import json
+import statistics
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -710,6 +711,17 @@ def _robust_viability_summary(
         for query in available
         if query.get("selected_recovery_distance") is not None
     ]
+    selected_control_reserve_deficits = [
+        float(row["robust_control"]["viability_control_reserve_deficit"])
+        for row in decisions
+        if isinstance(row.get("robust_control"), dict)
+        and row["robust_control"].get(
+            "viability_recovery_distance"
+        ) is not None
+        and row["robust_control"].get(
+            "viability_control_reserve_deficit"
+        ) is not None
+    ]
     ages = [int(query.get("age", 0)) for query in queries]
     planning_modes = Counter(
         str(row["corridor_planning_mode"])
@@ -844,6 +856,9 @@ def _robust_viability_summary(
         "selected_recovery_distance": _percentiles(
             selected_recovery_distances
         ),
+        "selected_control_reserve_deficit": _percentiles(
+            selected_control_reserve_deficits
+        ),
         "policy_age_frames": _percentiles(ages),
     }
 
@@ -917,7 +932,22 @@ def _behavior_slice(
     recovery_selected = 0
     distant_recovery_guided = 0
     distant_recovery_selected = 0
+    control_reserve_deficits = []
     for row in rows:
+        robust_control = row.get("robust_control")
+        if (
+            isinstance(robust_control, dict)
+            and robust_control.get(
+                "viability_control_reserve_deficit"
+            ) is not None
+        ):
+            control_reserve_deficits.append(
+                float(
+                    robust_control[
+                        "viability_control_reserve_deficit"
+                    ]
+                )
+            )
         viability = row.get("viability")
         if not isinstance(viability, dict) or bool(
             viability.get("state_viable")
@@ -970,6 +1000,17 @@ def _behavior_slice(
         ),
         "distant_recovery_selected_fraction": (
             distant_recovery_selected / count
+        ),
+        "control_reserve_deficit_mean": (
+            statistics.mean(control_reserve_deficits)
+            if control_reserve_deficits
+            else None
+        ),
+        "positive_control_reserve_deficit_fraction": (
+            sum(value > 1e-6 for value in control_reserve_deficits)
+            / len(control_reserve_deficits)
+            if control_reserve_deficits
+            else None
         ),
     }
 
@@ -1594,11 +1635,13 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 "queries; distant-kernel guidance was available/selected on "
                 f"{robust_viability.get('distant_recovery_guided_query_count', 0)}/"
                 f"{robust_viability.get('distant_recovery_selected_count', 0)}. "
-                "Safe-action count, selected repair-volume, and selected "
-                "recovery-distance "
-                f"statistics were `{robust_viability['safe_action_count']}` "
-                f"`{robust_viability['selected_repair_volume']}`, and "
-                f"`{robust_viability.get('selected_recovery_distance')}`."
+                "Safe-action count, selected repair-volume, selected "
+                "recovery-distance, and selected control-reserve deficit "
+                f"statistics were `{robust_viability['safe_action_count']}`, "
+                f"`{robust_viability['selected_repair_volume']}`, "
+                f"`{robust_viability.get('selected_recovery_distance')}`, "
+                "and "
+                f"`{robust_viability.get('selected_control_reserve_deficit')}`."
             ),
             (
                 "- The rolling worker produced "
@@ -1633,6 +1676,11 @@ def render_markdown(dossier: dict[str, object]) -> str:
             f"{_format(behavior['alive_preceding_hit_60f'].get('bottom_8px_fraction'))} "
             "during the 60 frames preceding a hit versus "
             f"{_format(behavior['alive_outside_preceding_hit_60f'].get('bottom_8px_fraction'))} "
+            "outside those windows.",
+            "- Mean selected control-reserve deficit was "
+            f"{_format(behavior['alive_preceding_hit_60f'].get('control_reserve_deficit_mean'))} "
+            "during the 60 frames preceding a hit versus "
+            f"{_format(behavior['alive_outside_preceding_hit_60f'].get('control_reserve_deficit_mean'))} "
             "outside those windows.",
             "- Soft recovery was selected on "
             f"{_format(behavior['alive_preceding_hit_60f'].get('recovery_selected_fraction'))} "

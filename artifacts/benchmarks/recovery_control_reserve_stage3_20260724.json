@@ -1,0 +1,831 @@
+{
+  "schema": "th08-recovery-control-reserve-benchmark-v1",
+  "trace": "artifacts/runtime_reports/lunatic_route2_stage3_unattended_20260724_075004.jsonl",
+  "trace_sha256": "349c4e61865bcd0df9d805a68aed0e9f14d06f8d97a11e93c98d4a19084672cd",
+  "sample_count": 200,
+  "prehit_window": 0,
+  "scope": "Offline ablation over retained trace-radius hazards and exact laser lifecycle state; this is not physical survival evidence.",
+  "reserve_distance": "unfocused_cardinal_speed * maximum current delay support",
+  "variants": {
+    "disabled": {
+      "median_ms": 13.874242009478621,
+      "p95_ms": 24.026594997849315,
+      "selected_reserve_deficit": {
+        "median": 15.262720584869385,
+        "p95": 36.68629169464111,
+        "zero_count": 30
+      },
+      "selected_recovery_distance": {
+        "median": 80.0,
+        "p95": 242.1239352067449
+      }
+    },
+    "enabled": {
+      "median_ms": 13.791352990665473,
+      "p95_ms": 23.724686005152762,
+      "selected_reserve_deficit": {
+        "median": 0.0,
+        "p95": 18.331871032714844,
+        "zero_count": 137
+      },
+      "selected_recovery_distance": {
+        "median": 112.0,
+        "p95": 268.2088738278434
+      }
+    }
+  },
+  "action_change_count": 113,
+  "action_changes": [
+    {
+      "frame": 823,
+      "disabled": "left_fast",
+      "enabled": "down_right",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 857,
+      "disabled": "left",
+      "enabled": "up",
+      "disabled_reserve_deficit": 18.343145847320557,
+      "enabled_reserve_deficit": 16.34874963760376
+    },
+    {
+      "frame": 1005,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 0.23359394073486328,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 1816,
+      "disabled": "left",
+      "enabled": "down_fast",
+      "disabled_reserve_deficit": 20.0,
+      "enabled_reserve_deficit": 4.571224927902222
+    },
+    {
+      "frame": 1877,
+      "disabled": "stay",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 20.0,
+      "enabled_reserve_deficit": 10.301728248596191
+    },
+    {
+      "frame": 1940,
+      "disabled": "up",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 5.423912525177002,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 2252,
+      "disabled": "up",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 10.900250434875488,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 2291,
+      "disabled": "down",
+      "enabled": "left_fast",
+      "disabled_reserve_deficit": 20.818007469177246,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 2322,
+      "disabled": "stay",
+      "enabled": "left",
+      "disabled_reserve_deficit": 20.818004608154297,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 2901,
+      "disabled": "left_fast",
+      "enabled": "left",
+      "disabled_reserve_deficit": 31.979241847991943,
+      "enabled_reserve_deficit": 17.122387886047363
+    },
+    {
+      "frame": 2933,
+      "disabled": "up_right",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 5483,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 9.834374904632568,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 5585,
+      "disabled": "stay",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 8.981072425842285,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 5648,
+      "disabled": "stay",
+      "enabled": "down_right_fast",
+      "disabled_reserve_deficit": 2.2694578170776367,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 5770,
+      "disabled": "stay",
+      "enabled": "right",
+      "disabled_reserve_deficit": 10.815600395202637,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 6219,
+      "disabled": "down",
+      "enabled": "down_right_fast",
+      "disabled_reserve_deficit": 18.343145847320557,
+      "enabled_reserve_deficit": 4.686291694641113
+    },
+    {
+      "frame": 6247,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 13.883419513702393,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 6325,
+      "disabled": "down",
+      "enabled": "down_right_fast",
+      "disabled_reserve_deficit": 15.663461923599243,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 6356,
+      "disabled": "stay",
+      "enabled": "right",
+      "disabled_reserve_deficit": 18.463462829589844,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 6491,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 0.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 6564,
+      "disabled": "stay",
+      "enabled": "up",
+      "disabled_reserve_deficit": 11.720232963562012,
+      "enabled_reserve_deficit": 2.5812501907348633
+    },
+    {
+      "frame": 6648,
+      "disabled": "down_left_fast",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 11.938982963562012,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 6732,
+      "disabled": "left",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 14.018796920776367,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 6895,
+      "disabled": "down_right_fast",
+      "enabled": "up",
+      "disabled_reserve_deficit": 21.0335054397583,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 7135,
+      "disabled": "down",
+      "enabled": "right_fast",
+      "disabled_reserve_deficit": 15.489306449890137,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 7300,
+      "disabled": "right_fast",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 0.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 7447,
+      "disabled": "down",
+      "enabled": "right",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 7777,
+      "disabled": "stay",
+      "enabled": "left",
+      "disabled_reserve_deficit": 8.384594917297363,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 7811,
+      "disabled": "down_fast",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 3.1533937454223633
+    },
+    {
+      "frame": 7935,
+      "disabled": "down_left_fast",
+      "enabled": "up",
+      "disabled_reserve_deficit": 16.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 7978,
+      "disabled": "stay",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 19.25677490234375,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 8006,
+      "disabled": "left",
+      "enabled": "up",
+      "disabled_reserve_deficit": 2.877746820449829,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 8069,
+      "disabled": "stay",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 21.46392822265625,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 8104,
+      "disabled": "down_left",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 22.602858543395996,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 8445,
+      "disabled": "down",
+      "enabled": "left_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 12983,
+      "disabled": "down_right_fast",
+      "enabled": "down_fast",
+      "disabled_reserve_deficit": 14.343145847320557,
+      "enabled_reserve_deficit": 0.6862916946411133
+    },
+    {
+      "frame": 13147,
+      "disabled": "stay",
+      "enabled": "right_fast",
+      "disabled_reserve_deficit": 7.837759971618652,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 13250,
+      "disabled": "up_right",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 7.02943754196167
+    },
+    {
+      "frame": 13747,
+      "disabled": "down",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 4.686291694641113,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 13779,
+      "disabled": "right_fast",
+      "enabled": "down_left_fast",
+      "disabled_reserve_deficit": 33.31281757354736,
+      "enabled_reserve_deficit": 9.494617462158203
+    },
+    {
+      "frame": 13865,
+      "disabled": "stay",
+      "enabled": "right_fast",
+      "disabled_reserve_deficit": 18.343145847320557,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 13909,
+      "disabled": "down_left",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 18.343145847320557,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 14004,
+      "disabled": "down_left",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 15.228686332702637,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 14134,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 11.760504245758057,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 14460,
+      "disabled": "stay",
+      "enabled": "up",
+      "disabled_reserve_deficit": 22.67144775390625,
+      "enabled_reserve_deficit": 5.471447944641113
+    },
+    {
+      "frame": 14500,
+      "disabled": "right_fast",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 14.67144775390625,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 14537,
+      "disabled": "right",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 15.563147068023682,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 14571,
+      "disabled": "stay",
+      "enabled": "down_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 15354,
+      "disabled": "right_fast",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 19.69431734085083,
+      "enabled_reserve_deficit": 1.8752264976501465
+    },
+    {
+      "frame": 15390,
+      "disabled": "left",
+      "enabled": "left_fast",
+      "disabled_reserve_deficit": 12.772222995758057,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 15827,
+      "disabled": "up_right_fast",
+      "enabled": "left_fast",
+      "disabled_reserve_deficit": 29.336926460266113,
+      "enabled_reserve_deficit": 0.650634765625
+    },
+    {
+      "frame": 15896,
+      "disabled": "stay",
+      "enabled": "right",
+      "disabled_reserve_deficit": 35.0139274597168,
+      "enabled_reserve_deficit": 26.39483642578125
+    },
+    {
+      "frame": 15922,
+      "disabled": "stay",
+      "enabled": "up",
+      "disabled_reserve_deficit": 8.411352634429932,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 16427,
+      "disabled": "right_fast",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 22.845301151275635,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 17554,
+      "disabled": "stay",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 12.033416748046875,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 17615,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 7.619671821594238,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 17646,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 11.548126220703125,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 17781,
+      "disabled": "down",
+      "enabled": "down_left_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 4.686291694641113
+    },
+    {
+      "frame": 17876,
+      "disabled": "stay",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 10.63640832901001
+    },
+    {
+      "frame": 18031,
+      "disabled": "right_fast",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 16.14692974090576,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 18130,
+      "disabled": "right",
+      "enabled": "down_left_fast",
+      "disabled_reserve_deficit": 15.661651611328125,
+      "enabled_reserve_deficit": 0.6862916946411133
+    },
+    {
+      "frame": 18197,
+      "disabled": "down",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 14.343145847320557,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 18253,
+      "disabled": "left",
+      "enabled": "stay",
+      "disabled_reserve_deficit": 17.195136070251465,
+      "enabled_reserve_deficit": 6.729956150054932
+    },
+    {
+      "frame": 18549,
+      "disabled": "stay",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 19.7362003326416,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 18576,
+      "disabled": "down",
+      "enabled": "down_fast",
+      "disabled_reserve_deficit": 48.0,
+      "enabled_reserve_deficit": 19.675183296203613
+    },
+    {
+      "frame": 18731,
+      "disabled": "left",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 0.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 18790,
+      "disabled": "right",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 10.581585884094238,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 18825,
+      "disabled": "down",
+      "enabled": "right_fast",
+      "disabled_reserve_deficit": 14.976305961608887,
+      "enabled_reserve_deficit": 10.787071228027344
+    },
+    {
+      "frame": 18906,
+      "disabled": "down",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 27.975939750671387,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 18974,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 0.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 19008,
+      "disabled": "down_right",
+      "enabled": "down_right_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 4.0
+    },
+    {
+      "frame": 19049,
+      "disabled": "stay",
+      "enabled": "left",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 21387,
+      "disabled": "stay",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 0.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 21451,
+      "disabled": "down",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 20.1302547454834,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 21539,
+      "disabled": "up_fast",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 24.295825004577637,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 22046,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 14.34564208984375,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 22077,
+      "disabled": "stay",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 14.34564208984375,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 22142,
+      "disabled": "down_left",
+      "enabled": "left_fast",
+      "disabled_reserve_deficit": 16.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 22216,
+      "disabled": "stay",
+      "enabled": "down_right",
+      "disabled_reserve_deficit": 0.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 22320,
+      "disabled": "stay",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 29.809091091156006,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 22827,
+      "disabled": "down_right_fast",
+      "enabled": "left_fast",
+      "disabled_reserve_deficit": 36.68629169464111,
+      "enabled_reserve_deficit": 16.499699592590332
+    },
+    {
+      "frame": 22986,
+      "disabled": "right_fast",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 15.608447074890137,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 23084,
+      "disabled": "stay",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 9.174957275390625,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 23111,
+      "disabled": "down_fast",
+      "enabled": "left_fast",
+      "disabled_reserve_deficit": 33.4946174621582,
+      "enabled_reserve_deficit": 17.059679985046387
+    },
+    {
+      "frame": 23513,
+      "disabled": "stay",
+      "enabled": "right_fast",
+      "disabled_reserve_deficit": 39.36954307556152,
+      "enabled_reserve_deficit": 4.055834770202637
+    },
+    {
+      "frame": 23544,
+      "disabled": "left",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 22.0893497467041,
+      "enabled_reserve_deficit": 3.644984245300293
+    },
+    {
+      "frame": 23789,
+      "disabled": "stay",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 25.638946533203125,
+      "enabled_reserve_deficit": 11.863317012786865
+    },
+    {
+      "frame": 23820,
+      "disabled": "stay",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 35.098931312561035,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 23848,
+      "disabled": "down_fast",
+      "enabled": "right",
+      "disabled_reserve_deficit": 40.0,
+      "enabled_reserve_deficit": 27.33905601501465
+    },
+    {
+      "frame": 23907,
+      "disabled": "stay",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 15.903484344482422,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 23939,
+      "disabled": "stay",
+      "enabled": "up",
+      "disabled_reserve_deficit": 11.156158447265625,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 23987,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 16.352148056030273,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 24038,
+      "disabled": "stay",
+      "enabled": "left_fast",
+      "disabled_reserve_deficit": 28.65863609313965,
+      "enabled_reserve_deficit": 4.85410737991333
+    },
+    {
+      "frame": 24089,
+      "disabled": "down",
+      "enabled": "down_left_fast",
+      "disabled_reserve_deficit": 25.00409507751465,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 24177,
+      "disabled": "up_right",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 5.169783115386963,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 24208,
+      "disabled": "stay",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 18.9583740234375,
+      "enabled_reserve_deficit": 7.852991580963135
+    },
+    {
+      "frame": 24418,
+      "disabled": "stay",
+      "enabled": "right_fast",
+      "disabled_reserve_deficit": 28.076947689056396,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 24466,
+      "disabled": "stay",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 7.953885555267334,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 24575,
+      "disabled": "stay",
+      "enabled": "up",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 5.131911516189575
+    },
+    {
+      "frame": 24649,
+      "disabled": "left",
+      "enabled": "down_right_fast",
+      "disabled_reserve_deficit": 42.58599829673767,
+      "enabled_reserve_deficit": 3.1409387588500977
+    },
+    {
+      "frame": 24750,
+      "disabled": "stay",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 29.973936080932617,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 24968,
+      "disabled": "stay",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 19.41229248046875,
+      "enabled_reserve_deficit": 2.44173002243042
+    },
+    {
+      "frame": 24998,
+      "disabled": "stay",
+      "enabled": "right_fast",
+      "disabled_reserve_deficit": 18.343145847320557,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 25432,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 8.739487648010254,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 25475,
+      "disabled": "stay",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 25526,
+      "disabled": "stay",
+      "enabled": "up_left_fast",
+      "disabled_reserve_deficit": 10.43524169921875,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 25580,
+      "disabled": "down",
+      "enabled": "down_left_fast",
+      "disabled_reserve_deficit": 20.57617163658142,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 26063,
+      "disabled": "left_fast",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 26792,
+      "disabled": "down",
+      "enabled": "down_right_fast",
+      "disabled_reserve_deficit": 44.4169602394104,
+      "enabled_reserve_deficit": 1.6061954498291016
+    },
+    {
+      "frame": 26920,
+      "disabled": "stay",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 21.621244430541992,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 27296,
+      "disabled": "stay",
+      "enabled": "down_right",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 27349,
+      "disabled": "stay",
+      "enabled": "down",
+      "disabled_reserve_deficit": 20.31781005859375,
+      "enabled_reserve_deficit": 12.686291694641113
+    },
+    {
+      "frame": 27572,
+      "disabled": "down_right",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 8.0,
+      "enabled_reserve_deficit": 0.0
+    }
+  ]
+}

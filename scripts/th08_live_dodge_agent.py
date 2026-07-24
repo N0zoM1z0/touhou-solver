@@ -304,6 +304,7 @@ class Decision:
     terminal_threat_collisions: int = 0
     terminal_threat_min_clearance: float = 9999.0
     viability_recovery_distance: float | None = None
+    viability_control_reserve_deficit: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -1738,6 +1739,26 @@ def _boundary_risk(x: float, y: float) -> float:
     return risk
 
 
+def _boundary_control_reserve_deficit(
+    x: float,
+    y: float,
+    *,
+    reserve_distance: float,
+) -> float:
+    """Measure lost axis-wise control range near clamped boundaries."""
+
+    if reserve_distance <= 0.0:
+        return 0.0
+    return sum(
+        (
+            max(reserve_distance - (x - PLAYFIELD_LEFT), 0.0),
+            max(reserve_distance - (PLAYFIELD_RIGHT - x), 0.0),
+            max(reserve_distance - (y - PLAYFIELD_TOP), 0.0),
+            max(reserve_distance - (PLAYFIELD_BOTTOM - y), 0.0),
+        )
+    )
+
+
 def _directions_opposed(left: int, right: int) -> bool:
     horizontal = bool(left & LEFT and right & RIGHT) or bool(
         left & RIGHT and right & LEFT
@@ -1885,6 +1906,7 @@ def choose_action(
     viability_repair_volumes: tuple[tuple[str, int], ...] = (),
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_position_error: float = 0.0,
+    recovery_control_reserve: bool = True,
 ) -> Decision:
     if horizon <= 0 or beam_width <= 0:
         raise ValueError("planner horizon and beam width must be positive")
@@ -1974,6 +1996,16 @@ def choose_action(
         control_delay_candidates
         if control_delay_candidates is not None
         else (control_delay_frames,)
+    )
+    diagnostic_recovery_reserve_distance = (
+        UNFOCUSED_CARDINAL_SPEED * max(certificate_delay_frames)
+        if recovery_by_action
+        else 0.0
+    )
+    recovery_reserve_distance = (
+        diagnostic_recovery_reserve_distance
+        if recovery_control_reserve
+        else 0.0
     )
     certificate_horizon = (
         action_hold_frames + max(certificate_delay_frames)
@@ -2102,6 +2134,11 @@ def choose_action(
             base[0],
             base[1],
             base[2],
+            _boundary_control_reserve_deficit(
+                node.x,
+                node.y,
+                reserve_distance=recovery_reserve_distance,
+            ),
             recovery_by_action.get(node.first_action.name, math.inf),
             *base[3:],
         )
@@ -2293,6 +2330,11 @@ def choose_action(
             threat_collisions,
             max(-threat_clearance, 0.0),
             max(ITEM_SAFETY_CLEARANCE - threat_clearance, 0.0),
+            _boundary_control_reserve_deficit(
+                node.x,
+                node.y,
+                reserve_distance=recovery_reserve_distance,
+            ),
             recovery_by_action.get(node.first_action.name, math.inf),
             -repair_by_action.get(node.first_action.name, 0),
             _node_key(
@@ -2438,6 +2480,11 @@ def choose_action(
         threat_collisions,
         9999.0 if math.isinf(threat_clearance) else threat_clearance,
         recovery_by_action.get(action.name),
+        _boundary_control_reserve_deficit(
+            best.x,
+            best.y,
+            reserve_distance=diagnostic_recovery_reserve_distance,
+        ),
     )
 
 
@@ -3539,6 +3586,9 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "viability_recovery_distance": (
                             decision.viability_recovery_distance
+                        ),
+                        "viability_control_reserve_deficit": (
+                            decision.viability_control_reserve_deficit
                         ),
                     },
                     "terminal_threat": {

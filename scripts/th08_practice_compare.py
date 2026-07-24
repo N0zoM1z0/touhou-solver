@@ -221,6 +221,8 @@ def compare_dossiers(
                 "bottom_8px_fraction",
                 "nonpositive_pipeline_fraction",
                 "negative_corridor_slack_fraction",
+                "control_reserve_deficit_mean",
+                "positive_control_reserve_deficit_fraction",
             )
         },
         "input_visible_next_observation_fraction": _change(

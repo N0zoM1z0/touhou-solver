@@ -451,3 +451,24 @@ now supplies all three exact views. Physical median/p95 planning improved by
 27/17 percent in spell 50, but p95 snapshot-to-action lag remains ten frames
 against a six-frame support ceiling. This residual is an architecture
 boundary, not evidence that segment geometry should be simplified.
+
+## Empty-Kernel Control Reserve
+
+When no robust action remains, scalar distance to a later viable slice can
+prefer a boundary-clamped endpoint. The local controller now measures the
+distance needed to preserve one maximum-delay, unfocused-speed command in
+each axis. The summed shortfall across all four boundaries ranks empty-kernel
+candidates after exact collision, terminal threat, and local safety, but
+before recovery distance.
+
+This ordering is deliberately game-neutral and soft. It derives its margin
+from action dynamics and the learned delay support; it has no stage, spell,
+screen-half, or hazard-type rule. It cannot override a locally safe action
+requirement, and edge occupancy remains legal when geometry demands it.
+
+`benchmark_recovery_control_reserve.py` replays retained trace-radius hazards
+with reserve enabled and disabled in alternating order. It is an action and
+cost ablation, not a survival simulator. Stage-1, Stage-3, Stage-4A, and
+Stage-6B artifacts show broad action changes with no material cost increase.
+Fresh Stage-4A physical evidence reduced hits and boundary occupancy, while
+the remaining hit windows keep the stronger path-aware recovery problem open.

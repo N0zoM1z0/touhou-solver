@@ -173,6 +173,10 @@ class Th08PracticeDossierTests(unittest.TestCase):
             "age": 23,
             "support_covers_current": False,
         }
+        rows[1]["robust_control"] = {
+            "viability_recovery_distance": 16.0,
+            "viability_control_reserve_deficit": 3.5,
+        }
         summary = _robust_viability_summary(rows)
         self.assertEqual(summary["available_query_count"], 2)
         self.assertEqual(summary["viable_query_count"], 1)
@@ -183,6 +187,10 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(
             summary["selected_recovery_distance"]["median"],
             16.0,
+        )
+        self.assertEqual(
+            summary["selected_control_reserve_deficit"]["median"],
+            3.5,
         )
         self.assertEqual(summary["constrained_decision_count"], 1)
         self.assertEqual(summary["unique_solution_count"], 1)
@@ -233,11 +241,22 @@ class Th08PracticeDossierTests(unittest.TestCase):
         rows[-1]["action"] = "left_fast"
         rows[-1]["mask"] = 0x41
         rows[-1]["player"]["y"] = 430.0
+        rows[0]["robust_control"] = {
+            "viability_control_reserve_deficit": 0.0,
+        }
+        rows[1]["robust_control"] = {
+            "viability_control_reserve_deficit": 3.0,
+        }
         behavior = _behavior_context(rows, [{"frame": 110}])
         prehit = behavior["alive_preceding_hit_60f"]
         self.assertEqual(prehit["sample_count"], 3)
         self.assertEqual(prehit["bottom_8px_fraction"], 1 / 3)
         self.assertEqual(prehit["fast_fraction"], 1 / 3)
+        self.assertEqual(prehit["control_reserve_deficit_mean"], 1.5)
+        self.assertEqual(
+            prehit["positive_control_reserve_deficit_fraction"],
+            0.5,
+        )
 
     def test_enemy_sensor_summary_deduplicates_async_snapshots(self) -> None:
         rows = [_decision(100), _decision(103), _decision(107)]

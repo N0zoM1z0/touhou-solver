@@ -1793,3 +1793,25 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   percent. Spell 170 alone produced six bullet-only hits at the bottom edge.
   Scalar distant recovery needs a robust path/control-reserve extension; the
   next change must preserve the earlier cross-stage recovery acceptance.
+
+## 2026-07-24: Delay-Scaled Recovery Control Reserve
+
+- Empty-kernel ranking now prices the loss of one maximum-supported-delay
+  unfocused command near each playfield boundary. Exact collision, terminal
+  threat, and local safety remain higher priorities; reserve only breaks
+  heuristic recovery choices before scalar distance.
+- A reusable retained-trace ablation covers Stage 1, Stage 3, Stage 4A, and
+  Stage 6B. Broad 200-sample median reserve deficits fell to zero on all four
+  stages. Stage-4A zero-deficit selections rose from 79 to 151, while p95
+  planning changed from 21.00 to 22.74 ms.
+- Random original-game Stage-4A run `20260724_084835` completed frames
+  `2..43356`, with 19 hits, zero Bomb input, automatic dialogue, and automatic
+  no-save termination. Complete baseline `045225` had 27 hits.
+- Pre-hit bottom occupancy fell from 40.5 to 23.2 percent. Nonspell hits fell
+  12 to eight and spell 61 fell one to zero. This is directional physical
+  acceptance despite intervening solver changes; it is not an isolated
+  survival attribution.
+- The new dossier retains selected reserve percentiles and pre-hit/outside
+  means. Stage 4A still had 16 global-kernel-exhausted hit windows and 11
+  boundary hits; pre-hit mean deficit was 3.654 versus 0.581 outside. CE-0082
+  therefore remains open for a collision-checked bridge back to viability.

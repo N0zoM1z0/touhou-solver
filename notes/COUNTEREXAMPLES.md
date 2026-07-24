@@ -1703,4 +1703,23 @@ Status: observed | inferred | unknown | fixed
   control reserve under every delay branch. It must retain the previously
   accepted Stage-1/Stage-3 distant-recovery gains and cannot encode Stage-6B
   or spell-170 directions.
-- **Status:** Open. The complete run and all 18 death windows are retained.
+- **Implemented partial correction:** Empty-kernel candidates now carry a
+  delay-scaled, axis-symmetric boundary control-reserve deficit. Ranking
+  remains collision, terminal gate, and local-safety first; reserve is used
+  only before scalar recovery distance. The diagnostic remains active when
+  the behavior is ablated so paired retained-trace comparisons are exact.
+- **Offline cross-stage gate:** On 200 retained recovery samples, median
+  selected deficit changed from `11.62` to `0` on Stage 1, `15.26` to `0` on
+  Stage 3, `18.38` to `0` on Stage 6B, and `10.39` to `0` on Stage 4A.
+  Planning p95 was effectively unchanged. The Stage-4A pre-hit subset changed
+  34 of 104 actions and reduced median deficit from `24` to `3.08`.
+- **Physical gate:** Random Stage-4A run `20260724_084835` completed frames
+  `2..43356`, hard no-Bomb, with 19 hits versus 27 in complete baseline
+  `045225`. Pre-hit bottom occupancy fell from 40.5 to 23.2 percent. Spell 61
+  became hitless; nonspell hits fell 12 to eight.
+- **Residual:** Sixteen of 19 hit windows still had an exhausted global
+  kernel, 11 involved a boundary, and pre-hit mean reserve deficit remained
+  `3.654` versus `0.581` outside hit windows. Endpoint reserve does not prove
+  an intermediate collision-free bridge.
+- **Status:** Partial correction physically accepted. CE-0082 remains open
+  for backward-reachable recovery bands and long-horizon path connectivity.

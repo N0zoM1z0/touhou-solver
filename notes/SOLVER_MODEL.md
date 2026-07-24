@@ -673,7 +673,34 @@ fragile/unsafe singletons remain explicit certificate downgrades.
 Stage-6B shows the limit of scalar distant recovery. When the player is
 outside the viability kernel, endpoint distance can repeatedly prefer an
 action-indexed target near a clamped edge and consume future control reserve.
-The next game-neutral recovery value must account for the entire bridge:
+The first correction adds a delay-scaled boundary reserve to every candidate
+endpoint:
+
+```text
+reserve_distance = maximum unfocused speed * maximum supported delay
+reserve_deficit =
+    sum over x/y lower/upper boundaries (
+        max(0, reserve_distance - endpoint distance to boundary)
+    )
+```
+
+It ranks after exact collision count, terminal gate, and local safety
+deficit, but before scalar distant recovery distance. Thus it cannot reject a
+locally necessary edge action or trade a known collision for centrality. It
+only preserves the ability to issue a later command while the global kernel
+is already empty.
+
+The retained Stage-1, Stage-3, Stage-4A, and Stage-6B ablations change
+93--127 of 200 broad recovery samples on three earlier traces and 54 of 200
+Stage-4A samples without meaningful planning cost. On the fresh Stage-4A
+trace, zero-deficit selections rose from 79 to 151 of 200. The physical run
+reduced hits from 27 to 19 and pre-hit bottom occupancy from 40.5 to 23.2
+percent, but 16 of 19 hit windows still followed global-kernel exhaustion.
+This accepts reserve ranking as a general fallback improvement, not as a
+complete robust bridge.
+
+The stronger game-neutral recovery value still needs to account for the
+entire bridge:
 
 ```text
 recovery_cost(action) =

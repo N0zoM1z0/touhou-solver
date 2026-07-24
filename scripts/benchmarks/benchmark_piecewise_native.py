@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline comparison of dense Python and sparse native hazards."""
+"""Benchmark stop/resume/redirect/reversal piecewise-transform hazards."""
 
 from __future__ import annotations
 
@@ -116,7 +116,7 @@ def _measure(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seed", type=int, default=82408)
     parser.add_argument("--hazards", type=int, default=1024)
     parser.add_argument("--horizon", type=int, default=80)
@@ -175,7 +175,10 @@ def main() -> int:
     dense_median = float(dense["total_ms"]["median"])
     sparse_median = float(sparse["total_ms"]["median"])
     result = {
-        "schema": "touhou_piecewise_native_benchmark_v1",
+        "schema": "touhou_piecewise_native_benchmark_v2",
+        "workload_identity": (
+            "game_neutral_piecewise_transform_adversarial"
+        ),
         "configuration": {
             "seed": args.seed,
             "hazards": args.hazards,

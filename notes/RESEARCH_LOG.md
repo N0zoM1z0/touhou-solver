@@ -2590,3 +2590,23 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   measured 16.67 ms versus 40.47 ms for object lowering plus repacking.
   Capsule schema v2 preserves packed arrays while the reader remains
   compatible with v1. The complete Linux quick suite passes 432 tests.
+- Split clearance timing into live-like packed lasers, static finite-segment
+  stress, and piecewise-transform adversarial benchmark identities. Added a
+  cap-aware finite-geometry broad phase for static segments. Five hundred
+  old/new randomized native workloads were bit-identical; the
+  1,500-AABB/250-static clearance median improved 122.28 to 81.86 ms.
+- Re-ran 24 seeds of 2,048 piecewise hazards against the scalar oracle; all
+  passed with maximum error `9.537e-7`. Compact reports are retained under
+  `artifacts/benchmarks/`.
+- **Rejected shadow:** one Boolean occupancy bit per cell does not preserve
+  the current robust recurrence because it subtracts transition-specific
+  nearest-lattice error. Sign-only occupancy added 338,218 false-positive
+  action bits on the retained synthetic shadow; uniform maximum dilation
+  removed 115,584 valid bits. Query-local exact endpoint ranking touched only
+  72 cells but cannot repair intermediate/delay admissibility. Keep this
+  direction shadow-only until a multi-margin, continuous-query, or
+  signed-distance-narrow-band design achieves full-policy parity.
+- Final offline gate: packed/object full policies and representative rollouts
+  are identical; Linux and Windows complete suites pass 434/434 in
+  1.074/2.367 seconds. Both native libraries were rebuilt. No physical trial
+  or live strategy promotion was performed.

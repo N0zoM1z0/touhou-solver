@@ -144,3 +144,89 @@ packed batch through to the planner.
 - the complete Linux quick suite passes 432 tests in 1.227 seconds.
 
 The timing is a generated lifecycle workload, not a retained physical trace.
+
+## Checkpoint 3: Workload Split And Static-Segment Broad Phase
+
+The former mixed benchmark was removed. It is replaced by three explicit
+workload identities under `scripts/benchmarks/`:
+
+- `benchmark_clearance_live_like.py`: pre-lowered moving AABBs plus packed
+  frame-major laser trajectories;
+- `benchmark_clearance_static_segments.py`: game-neutral static finite
+  segments, optionally combined with moving AABBs;
+- `benchmark_piecewise_native.py`: stop/resume/redirect/reversal
+  piecewise-transform adversarial motion.
+
+Reports state that solve timing excludes workload generation and TH08 sensor
+decoding. Laser projection/lowering remains independently measurable with
+`benchmark_laser_projection.py`.
+
+**Implemented:** static finite segments are now traversed segment-major within
+their exact finite geometry AABB expanded by occupied radius and the configured
+clearance cap. A one-cell numeric guard preserves boundary candidates. The
+authoritative clearance remains `std::hypot`; this change only rejects cells
+that cannot improve the cap.
+
+**Observed:**
+
+- 500 randomized old/new native workloads, including far, reversed, growing,
+  and zero-length segments at caps 1/12/48/96, changed zero float cells;
+- pre-lowered native clearance for 1,500 moving AABBs, 250 static segments,
+  81 frames, a 24-by-27 lattice, and cap 48 improved from 122.28 to 81.86 ms
+  warm median (1.49 times);
+- the separated static complete-solve workload measured 85.51 ms warm median,
+  of which 80.12 ms was clearance and 4.88 ms viability;
+- the separated live-like 800-AABB/200-laser workload measured 49.42 ms warm
+  median, of which 37.40 ms was clearance and 10.63 ms viability;
+- the 1,024-hazard piecewise dense/sparse benchmark retained a maximum
+  difference of `2.003e-5`; sparse total median was 40.61 ms versus 158.58 ms;
+- 24 seeds of 2,048 piecewise hazards, 48 frames, and up to six transform
+  events all passed the independent scalar oracle with maximum error
+  `9.537e-7`.
+
+Compact reports are under `artifacts/benchmarks/` with the `20260725` suffix.
+
+## Checkpoint 4: Boolean Occupancy Shadow
+
+The simple premise that viability consumes only clearance sign is false for
+the current certified recurrence. Every transition samples the nearest
+lattice cell and subtracts its transition-specific Euclidean sampling error
+before applying the zero-clearance test. On the 16-pixel lattice this error
+can reach 11.314 pixels. Therefore two positive clearances with the same sign
+can produce different action admissibility.
+
+The reproducible semantic shadow in
+`scripts/analysis/boolean_occupancy_shadow.py` compared the exact policy with:
+
+1. an optimistic sign-only volume, where every positive cell is treated as
+   clearing every sampling error;
+2. a conservative volume, where every cell below the maximum possible
+   sampling error is occupied.
+
+For a 50-AABB/10-laser, 81-frame workload, the optimistic policy added 338,218
+unsafe action bits and 18,601 false-positive viable states. The conservative
+policy had no false positives but removed 115,584 valid action bits and 13,483
+valid states. Exact clearance was needed at only 72 representative endpoint
+rankings (46 unique cells), but endpoint reranking cannot reconstruct safety
+over all intermediate frames and delay branches.
+
+**Decision:** do not add a live Boolean kernel behind the current API. The
+shadow is rejected for live parity, while the broader direction remains open.
+A viable successor must either encode transition-specific dilation levels,
+perform continuous exact occupancy queries inside the recurrence, or retain a
+signed-distance narrow band. It must reproduce complete viable and safe-action
+arrays before query-local endpoint clearance can replace the dense volume.
+The semantic artifact deliberately derives Boolean arrays from the exact
+volume and makes no construction-speed claim.
+
+## Final Offline Validation
+
+- Linux complete quick suite: 434/434 in 1.074 seconds.
+- Windows complete UNC-safe suite: 434/434 in 2.367 seconds.
+- Linux and Windows native libraries rebuilt from the same source; the C++
+  source also passes `-Wall -Wextra -Wpedantic -fsyntax-only`.
+- Packed object/reference plans have identical clearance, viable arrays,
+  safe-action masks, representative paths, gates, and bottlenecks.
+
+No physical trial was run, so this checkpoint changes no strategy promotion
+or physical acceptance claim.

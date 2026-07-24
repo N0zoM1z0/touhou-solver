@@ -134,6 +134,17 @@ These instructions apply to every file and task below this directory.
 - The quick suite is the default checkpoint gate only while it remains on the
   order of seconds. Never put complete 16/8/4-pixel solves, large trace scans,
   native memory/RSS benchmarks, or physical integration in that suite.
+- Keep clearance benchmarks separated by workload identity: TH08 live-like
+  moving AABBs plus packed laser trajectories, game-neutral static finite
+  segments, and piecewise transform adversarial motion. Every performance
+  report must state whether decoding, lowering, packing, and policy induction
+  are inside or outside its timing boundary.
+- Do not replace signed clearance with one Boolean occupancy bit per lattice
+  cell under the current robust recurrence: it subtracts
+  transition-specific nearest-lattice sampling error. Any occupancy or
+  query-local successor stays shadow-only until complete viable-state and
+  safe-action-mask parity is demonstrated, not only representative endpoint
+  parity.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 

@@ -177,6 +177,52 @@ class CorridorPlannerTests(unittest.TestCase):
         )
         np.testing.assert_allclose(actual, expected, atol=5e-6)
 
+    @unittest.skipUnless(
+        native_available(),
+        "native planner backend is not built",
+    )
+    def test_native_static_segment_cap_bounds_keep_finite_capsules(self) -> None:
+        grid_x, grid_y = np.meshgrid(
+            np.arange(-24.0, 73.0, 8.0, dtype=np.float32),
+            np.arange(-16.0, 65.0, 8.0, dtype=np.float32),
+        )
+        segments = (
+            SegmentHazard(-200.0, -200.0, 0.0, 0.0, 20.0, 2.0),
+            SegmentHazard(8.0, 12.0, 0.7, 45.0, -30.0, 3.0, 0.5, 0.2),
+            SegmentHazard(40.0, 24.0, 1.2, 0.0, 0.0, 6.0, 1.0, 0.4),
+            SegmentHazard(300.0, 300.0, 2.0, -120.0, 150.0, 4.0),
+        )
+        config = CorridorConfig(
+            grid_step=8.0,
+            frames_per_layer=1,
+            horizon_frames=6,
+            danger_radius=12.0,
+        )
+        actual = _hazard_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs=(),
+            segments=segments,
+            segment_trajectories=(),
+            config=config,
+        )
+        expected = np.stack(
+            [
+                np.minimum(
+                    _segment_clearance_field(
+                        grid_x,
+                        grid_y,
+                        segments,
+                        frame=frame,
+                        player_radius=config.player_radius,
+                    ),
+                    config.danger_radius,
+                )
+                for frame in range(config.horizon_frames + 1)
+            ]
+        )
+        np.testing.assert_allclose(actual, expected, atol=3e-5)
+
     def test_sparse_aabb_volume_matches_dense_geometry_below_cap(
         self,
     ) -> None:
@@ -679,6 +725,97 @@ class CorridorPlannerTests(unittest.TestCase):
             config=config,
         )
         np.testing.assert_array_equal(packed_volume, object_volume)
+
+    def test_packed_and_object_segments_produce_same_policy_and_rollout(
+        self,
+    ) -> None:
+        trajectories = (
+            SegmentTrajectoryHazard(
+                tuple(
+                    SegmentHazard(
+                        8.0 + frame,
+                        16.0,
+                        0.15,
+                        0.0,
+                        30.0,
+                        1.0,
+                    )
+                    for frame in range(9)
+                )
+            ),
+        )
+        config = CorridorConfig(
+            grid_step=8.0,
+            frames_per_layer=2,
+            horizon_frames=8,
+            cardinal_speed=4.0,
+            diagonal_axis_speed=2.8284270763397217,
+            danger_radius=16.0,
+        )
+        robust = RobustControlSpec(
+            actions=(
+                ControlAction("stay", 0.0, 0.0),
+                ControlAction("left", -4.0, 0.0),
+                ControlAction("right", 4.0, 0.0),
+            ),
+            delay_frames=(0, 1),
+            nominal_delay=1,
+            active_action="stay",
+        )
+        object_plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=BOUNDS,
+            segment_trajectories=trajectories,
+            preferred_x=32.0,
+            preferred_y=64.0,
+            config=config,
+            robust_control=robust,
+        )
+        packed_plan = plan_corridor(
+            start_x=48.0,
+            start_y=88.0,
+            bounds=BOUNDS,
+            packed_segments=PackedSegmentFrames.from_trajectories(
+                trajectories,
+                frame_count=9,
+            ),
+            preferred_x=32.0,
+            preferred_y=64.0,
+            config=config,
+            robust_control=robust,
+        )
+        self.assertEqual(packed_plan.path, object_plan.path)
+        self.assertEqual(
+            (
+                packed_plan.reachable,
+                packed_plan.bottleneck_clearance,
+                packed_plan.terminal_clearance,
+                packed_plan.lane,
+                packed_plan.gate,
+                packed_plan.initial_safe_action_count,
+                packed_plan.initial_repair_volume,
+            ),
+            (
+                object_plan.reachable,
+                object_plan.bottleneck_clearance,
+                object_plan.terminal_clearance,
+                object_plan.lane,
+                object_plan.gate,
+                object_plan.initial_safe_action_count,
+                object_plan.initial_repair_volume,
+            ),
+        )
+        assert packed_plan.viability_policy is not None
+        assert object_plan.viability_policy is not None
+        np.testing.assert_array_equal(
+            packed_plan.viability_policy.viable,
+            object_plan.viability_policy.viable,
+        )
+        np.testing.assert_array_equal(
+            packed_plan.viability_policy.safe_action_masks,
+            object_plan.viability_policy.safe_action_masks,
+        )
 
     def test_packed_segment_horizon_mismatch_is_rejected(self) -> None:
         grid_x, grid_y = np.meshgrid(

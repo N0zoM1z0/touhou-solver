@@ -369,33 +369,100 @@ TOUHOU_EXPORT int touhou_clearance_volume_v1(
         for (int row = 0; row < row_count; ++row) {
             for (int column = 0; column < column_count; ++column) {
                 const int state = row * column_count + column;
-                float best = (
-                    best_negative[state] <= 0.0F
-                    ? best_negative[state]
-                    : std::sqrt(best_positive_squared[state])
-                );
-                const float sample_x = x_start + column * x_step;
-                const float sample_y = y_start + row * y_step;
-                for (int index = 0; index < segment_count; ++index) {
-                    const SegmentGeometry& segment = segment_geometry[index];
-                    const float clearance = segment_clearance(
-                        sample_x,
-                        sample_y,
-                        segment,
-                        player_radius
-                        + segment_half_width[index]
-                        + segment_base_uncertainty[index]
-                        + frame * segment_uncertainty_per_frame[index]
-                    );
-                    best = std::min(best, clearance);
-                }
                 output[clearance_index(
                     frame,
                     row,
                     column,
                     row_count,
                     column_count
-                )] = best;
+                )] = (
+                    best_negative[state] <= 0.0F
+                    ? best_negative[state]
+                    : std::sqrt(best_positive_squared[state])
+                );
+            }
+        }
+        for (int index = 0; index < segment_count; ++index) {
+            const SegmentGeometry& segment = segment_geometry[index];
+            const float occupied_radius = (
+                player_radius
+                + segment_half_width[index]
+                + segment_base_uncertainty[index]
+                + frame * segment_uncertainty_per_frame[index]
+            );
+            // A segment cannot improve the cap outside its finite geometry
+            // bounds expanded by the occupied radius and cap. Retain a
+            // one-cell numeric guard at floating-point boundaries.
+            const int first_column = std::max(
+                0,
+                static_cast<int>(std::floor(
+                    (
+                        segment.min_x
+                        - occupied_radius
+                        - clearance_cap
+                        - x_start
+                    ) / x_step
+                )) - 1
+            );
+            const int last_column = std::min(
+                column_count - 1,
+                static_cast<int>(std::ceil(
+                    (
+                        segment.max_x
+                        + occupied_radius
+                        + clearance_cap
+                        - x_start
+                    ) / x_step
+                )) + 1
+            );
+            const int first_row = std::max(
+                0,
+                static_cast<int>(std::floor(
+                    (
+                        segment.min_y
+                        - occupied_radius
+                        - clearance_cap
+                        - y_start
+                    ) / y_step
+                )) - 1
+            );
+            const int last_row = std::min(
+                row_count - 1,
+                static_cast<int>(std::ceil(
+                    (
+                        segment.max_y
+                        + occupied_radius
+                        + clearance_cap
+                        - y_start
+                    ) / y_step
+                )) + 1
+            );
+            for (int row = first_row; row <= last_row; ++row) {
+                const float sample_y = y_start + row * y_step;
+                for (
+                    int column = first_column;
+                    column <= last_column;
+                    ++column
+                ) {
+                    const float sample_x = x_start + column * x_step;
+                    const float clearance = segment_clearance(
+                        sample_x,
+                        sample_y,
+                        segment,
+                        occupied_radius
+                    );
+                    const std::size_t output_index = clearance_index(
+                        frame,
+                        row,
+                        column,
+                        row_count,
+                        column_count
+                    );
+                    output[output_index] = std::min(
+                        output[output_index],
+                        clearance
+                    );
+                }
             }
         }
     }

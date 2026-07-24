@@ -8,14 +8,17 @@ test, physical-trial, and commit requirements are binding.
 
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
-- Handoff base commit: `8afc0d5 Keep asynchronous viability policies fresh`
-- Complete Linux test gate at that commit: `312 tests`, all passing.
+- Handoff base commit:
+  `b2faee4 Preserve robust actions before recovery pruning`
+- Complete Linux and Windows test gates at that commit: `362 tests` each, all
+  passing.
 - The only expected untracked pre-existing file is `image.png`. It is a user
   screenshot. Do not add, delete, overwrite, or otherwise clean it.
-- No transform-runtime implementation was left half-edited. The next change
-  starts from a clean code checkpoint.
+- The 301 MB Stage-6B raw JSONL and its launch log remain local and ignored.
+  Compact review/regression artifacts are committed.
+- No runtime session or half-edited experiment is part of the checkpoint.
 - The IDA database has newer metadata than Git: the transform functions listed
-  in section 10 were renamed/commented after `8afc0d5`.
+  in section 10 were renamed/commented during the callback investigation.
 - The REA binary session used for the latest transform analysis was closed
   before this handoff.
 
@@ -199,9 +202,10 @@ stage=$(printf '%s\n' 1 2 3 4a 5 6b | shuf -n1)
 printf 'selected stage: %s\n' "$stage"
 ```
 
-Randomization guards against tuning only one spell. Focused Stage 5 is still
-the next intentional gate because CE-0084 is a concrete transform-oracle
-failure; random cross-stage regression follows that gate.
+Randomization guards against tuning only one spell. The immediate CE-0089 gate
+should choose from `1 2 3 4a 5`, excluding Stage 6B because it generated the
+counterexample. A later Stage-5 repeat remains useful for the sparse callback
+projector, but is no longer an unknown-layout prerequisite.
 
 ## 6. Monitoring, Stops, And Stalls
 
@@ -361,52 +365,69 @@ git diff --stat
 These are independent complete Practice runs, not one continuous route and not
 same-seed A/B trials:
 
-| Stage | Earlier complete baseline | Latest complete | Change |
-| --- | ---: | ---: | ---: |
-| 1 | 4 | 4 | unchanged |
-| 2 | 2 | 3 | +1 regression |
-| 3 | 7 | 11 | +4 regression |
-| 4A | 27 | 19 | -8, 29.6% better |
-| 5 | 24 | 15 | -9, 37.5% better |
-| 6B | 30 | 18 | -12, 40.0% better |
+| Stage | Latest run | Hits | Interpretation |
+| --- | --- | ---: | --- |
+| 1 | `070946` | 4 | default-policy control |
+| 2 | `091120` | 3 | CE-0083 phase witness |
+| 3 | `123136` | 8 | default safety-value-off cross-control |
+| 3 | `132007` | 15 | rejected safety-value-on experiment |
+| 4A | `084835` | 19 | boundary-reserve physical evidence |
+| 5 | `120128` | 31 | callback activation/performance regression |
+| 6B | `135201` | 27 | latest fused-laser cross-control |
 
-The latest sum is 70 hits versus the selected earlier sum of 94, about 25.5%
-better. This is useful directionally, but random pattern realization and
-intervening changes prevent causal attribution from the aggregate alone.
+Do not sum these rows into a route score. Native RNG, controller versions,
+death/respawn Power, and experimental switches differ. The Stage-6B complete
+history is `42,30,18,27`; the latest 27 is within that range and is neither an
+accepted improvement nor proof of regression.
 
 Key accepted improvements:
 
 - Phase-exact laser lifecycle and time-indexed segment geometry.
 - Shared packed laser timeline across prefix/local/terminal/robust checks.
+- Fused local lifecycle-to-packed laser projection; Stage-6B spell 154 local
+  timing improved across runs, while survival remains open.
 - Native game-neutral clearance and backward-viability kernels.
+- Sparse native piecewise AABB projection for callback-driven stop/resume
+  trajectories.
 - `exists action, forall learned delay` robust control semantics.
 - Adaptive delay/hold telemetry.
 - Work-conserving async worker with the full configured delay support `{1..6}`.
 - Certificate preservation at continuous off-grid/clamped states.
 - Native-consistent local motion clamping.
-- Delay-scaled boundary control reserve during empty-kernel recovery.
+- Delay-scaled boundary control reserve during empty-kernel recovery, now
+  ordered after preflight robust first-action certificates.
+- Capture-time and issue-time epoch/deadline guards that prevent stale new
+  direction injection.
 - Original-game unattended menu, monitor, dialogue, no-save, kill, and
   artifact loop.
 
-Latest Stage 5 run:
+Latest Stage-6B evidence:
 
-- Run ID: `lunatic_route2_stage5_unattended_20260724_093713`
-- Frames: `2..40607`
-- Hits: 15
-- Bomb input: zero
-- Unique policies: 1,283 versus 626 in baseline
-- Unsupported delay queries: 0 versus 148
-- Decisions without policy query: 71 versus 201
-- Solve median/p95: about 299/445 ms versus 291/422 ms
-- Hits by phase, nonspell/103/107/111/115: `3/2/1/6/3`
+- Run ID: `lunatic_route2_stage6b_unattended_20260724_135201`
+- Frames: `3..75073`
+- Hits: 27; Bomb input: zero; accepted completion: yes
+- Local plan median/p95: `24.48/46.69 ms`
+- Global solve median/p95: `266.80/431.74 ms`
+- Available policy queries: 12,374; empty action sets: 5,518 (44.6 percent)
+- Hit attribution: 24 global-kernel exhausted, two local robust-set exhausted,
+  one missing pre-hit alive decision
+- Boundary factor: 17/27 hits
 
-Latest Stage 2 run:
+CE-0089 paired replay:
 
-- Run ID: `lunatic_route2_stage2_unattended_20260724_091120`
-- Frames: `1..23129`
-- Hits: 3, all nonspell
-- Spells 16/20/24/28: zero hits
-- The final hit is the canonical CE-0083 policy-phase witness.
+- Old post-beam certificate ordering, reserve disabled/enabled:
+  robust collisions `24/26`, negative certificates `39/42`.
+- Corrected preflight ordering: `22/22` and `36/36`.
+- Pre-hit subset after correction: `56/56` and `72/72`.
+- This is an offline correctness gate. Physical acceptance is pending.
+
+Planning bullet decode:
+
+- Default live planning omits diagnostic queue/stop objects but preserves
+  original tags, callback state, attached velocity events, and uncertainty.
+- `--trace-transform-runtime` explicitly restores full diagnostic capture.
+- Synthetic 200--1,200-record decode speedup is 1.25x--2.24x median with exact
+  gameplay-field parity. A physical timing check is still required.
 
 ## 10. IDA Pro MCP And REA
 
@@ -477,88 +498,54 @@ Tool feedback for later REA MCP improvement belongs in
 
 ## 11. Current Blockers
 
-### CE-0084: Live Bullet Transform Lifecycle
+### CE-0089: Hard-Before-Soft Physical Acceptance
 
 Priority 1.
 
-Stage-5 spell 111, `懶惰「生神停止(マインドストッパー)」`, had
-sensor-gap hits at frames 35,751, 36,607, and 36,980. Each observation had
-exactly 96 bullets, no laser, and an oracle robust clearance of 24.6-30.8
-pixels. The game still registered contact.
+Stage-6B run `20260724_135201` exposed a general search-order bug. Boundary
+control reserve was a soft term inside beam pruning, while uncertain-delay
+first-action certificates were computed only after the beam. A safer first
+action could therefore disappear before its hard evidence was available.
 
-Root cause:
+The correction at `b2faee4` precomputes the existing certificate, places its
+collision and negative-clearance components before all soft terms, and reuses
+it during final selection. Paired replays preserve hard counts while still
+reducing boundary reserve deficit.
 
-- `Bullet.transform_flags` currently reads only active flags at `+0xDAC`.
-- The live oracle assumes `x + vx*t, y + vy*t`.
-- Stopped bullets can have zero current velocity and zero current active flags
-  while original transform state or queued work remains relevant.
+Next physical gate:
 
-Recovered runtime layout:
+1. Choose a randomized stage from `1 2 3 4a 5`; do not use Stage 6B again as
+   the first validation workload.
+2. Keep safety value disabled and hard no-Bomb.
+3. Verify the planning decoder's compact callback/tag telemetry is nonzero
+   where expected and default trace rows retain attached velocity events.
+4. Compare local plan/decode p50/p95, action deadline misses, robust
+   collision/negative-clearance counts, global empty-kernel fraction,
+   boundary occupancy, and every hit window.
+5. Do not accept the change only because the randomized run has fewer hits.
+   The hard-ordering telemetry and compact artifacts must agree.
 
-| Field | Offset |
-| --- | ---: |
-| speed | `+0xD68` |
-| angle | `+0xD74` |
-| active transform flags | `+0xDAC` |
-| original transform flags | `+0xDB0` |
-| bullet allocation state | `+0xDB8` |
-| transform sound ID | `+0xDC8` |
-| current queue index | `+0xDCC` |
-| 18 x 24-byte transform records | `+0xDD0` |
-| stop `Th08Timer` root | `+0x1004` |
-| timer fractional elapsed | `+0x1008` |
-| timer integer elapsed | `+0x100C` |
-| stop resume speed | `+0x1010` |
-| angle delta/offset/absolute angle | `+0x1014` |
-| stop duration | `+0x1024` |
-| repeat limit | `+0x1028` |
-| repeat count | `+0x102C` |
+The corrected ordering has passed Linux/Windows unit tests and retained
+offline differential gates. It has not yet passed a physical run.
 
-Transform record:
+### CE-0084..0086: Callback Motion Is Modeled, Survival Remains Open
 
-```c
-struct TransformRecord {
-    float float_0;
-    float float_1;
-    int32_t int_0;
-    int32_t int_1;
-    uint32_t kind;
-    uint32_t allow_while_active;
-};
-```
+The transform/runtime investigation is no longer the next implementation
+slice. Native queue state was decoded, callback-driven stop/resume behavior
+was separated from queued transforms, ECL callback lookahead was activated,
+and sparse native piecewise hazards removed the thousand-bullet Python object
+explosion.
 
-Next implementation slice:
-
-1. Add runtime dataclasses and record parsing to
-   `scripts/th08_bullet_transform_model.py`.
-2. Extend `Bullet` and `decode_bullets` in
-   `scripts/th08_live_dodge_agent.py` with original flags, queue cursor, next
-   record, speed/angle, timer, duration, resume speed, angle operand, and
-   repeat state.
-3. Append these fields to nearby-bullet trace serialization without breaking
-   the first eight legacy list fields used by dossiers.
-4. First run a behavior-neutral Stage-5 capture and verify same-slot native
-   transitions through stop, resume, and re-aim.
-5. Implement exact per-frame projection for active 0x40 turn, 0x100 snap, and
-   0x80 re-aim. Re-aim depends on the player's future state; represent the
-   reachable target as an angle/trajectory envelope or candidate-dependent
-   branch. Do not aim one guessed line at the current player and call it exact.
-6. Keep unsupported concurrent transforms on a conservative fallback.
-7. Feed the same lifecycle into local hazard frames and global corridor
-   geometry. Avoid fixing only local MPC while the global certificate still
-   sees a stationary bullet.
-8. Add parser, stop/resume, repeat, pending-record, and re-aim uncertainty
-   tests.
-9. Re-run Stage 5. The focused acceptance question is whether the three
-   spell-111 false-safe hits disappear without exploding empty kernels.
-
-Do not simply replace active flags with original flags in the old uncertainty
-formula. That would label completed transforms forever and may make the
-global kernel useless.
+Physical Stage-5 run `20260724_120128` proved callback events and attachments
+were active, but recorded 31 hits and severe callback-heavy tail latency before
+the sparse native correction. Do not reopen the old “read original flags”
+task. A future Stage-5 run should validate the sparse projector and current
+epoch guards physically; it remains a survival gate, not an unknown-layout
+gate.
 
 ### CE-0083: Coarse Policy Phase Mismatch
 
-Priority 2 after the transform decoder/projection gate.
+Priority 2 after CE-0089's physical gate.
 
 At Stage-2 frame 17,480, policy age 30 selected layer 3. The layer represents
 age 24, so its certificate was six physical frames behind. A newer policy
@@ -591,20 +578,45 @@ Do not choose a Stage-2-specific escape direction.
 
 Priority 3.
 
-Boundary control reserve reduced Stage-4A and Stage-6B hits, but it is still an
-endpoint heuristic. It does not prove a collision-free bridge back to the
-viable set. The next recovery design should use backward-reachable recovery
-bands or a robust bridge value with intermediate collision checks and control
-reserve under every delay branch.
+Boundary control reserve is still an endpoint heuristic. It does not prove a
+collision-free bridge back to the viable set. Stage 6B had 5,518 empty kernels
+and 24 kernel-exhausted hit windows despite policy availability and complete
+delay-support coverage.
+
+Read `notes/ALGORITHM_REVIEW_20260724.md` before changing this layer. The next
+candidate is a time-expanded min-max recovery band whose lexicographic cost
+includes every intermediate collision/clearance violation, boundary control
+loss, and terminal distance to the Boolean viability kernel. Build it first
+against a small independent scalar oracle and multi-stage/adversarial replay.
+Do not promote endpoint distance or centrality into a survival certificate.
+
+### CE-0087/0088: Compute Deadline And Optional Safety Value
+
+The issue-time guard now suppresses expired new directions and invalidates
+implausible `+1800` action epochs. Stage-3 physically exercised both paths,
+but holding the older actuator command after a deadline miss is not a safe
+fallback.
+
+The exact max-min safety value is retained as an offline/opt-in oracle.
+Stage-3 safety-value-on run `132007` added about 50 ms to global solves and
+regressed live tail latency; default remains
+`--safety-value-horizon 0`. Do not re-enable it without a measured compute
+budget and paired physical A/B.
 
 ### Remaining Oracle Gaps
 
 - Future ECL emissions are not yet injected into the committed-input horizon.
 - Same-frame transform/emission ordering can still explain sensor-gap cases.
+- It is not yet known how much of the 44.6-percent Stage-6B empty-kernel rate
+  is true controllability loss versus quantization or conservative uncertainty.
+  Calibrate stable same-slot residuals after excluding callbacks, phase
+  boundaries, epoch jumps, and unmatched slots.
 - Item/power objectives are present but cannot repair a missing survival
   certificate.
-- Stage-3 dense-laser local p95 can still exceed the six-frame delay model,
-  although laser lifecycle geometry itself is now phase-exact and shared.
+- Global solve p95 remains hundreds of milliseconds. Continue using C++ for
+  compact numerical batches, but require whole-pipeline gain and oracle/action
+  parity. A C++ decoder that reconstructs the same per-bullet Python objects
+  is not a useful boundary.
 - Extra still has five unresolved native Bomb/Last-Spell replay boundaries;
   hard no-Bomb Lunatic practice remains the immediate diagnostic scope.
 
@@ -612,19 +624,22 @@ reserve under every delay branch.
 
 1. `AGENTS.md`
 2. `START_HERE.md`
-3. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0084
-4. `notes/RESEARCH_LOG.md`, latest three dated sections
-5. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
+3. `notes/ALGORITHM_REVIEW_20260724.md`
+4. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0089
+5. `notes/RESEARCH_LOG.md`, latest four dated sections
 6. `notes/ROBUST_VIABILITY.md`
-7. `notes/NATIVE_PLANNER_BACKEND.md`
-8. `notes/DANMAKU_SYSTEM.md`, Transform Record and Per-Frame Bullet Runtime
-9. `scripts/th08_live_dodge_agent.py`
-10. `scripts/th08_bullet_transform_model.py`
-11. `scripts/th08_corridor_adapter.py`
-12. `scripts/touhou_control/viability.py`
-13. Latest Stage-2 and Stage-5 notes:
-    `notes/runs/lunatic_route2_stage2_unattended_20260724_091120.md` and
-    `notes/runs/lunatic_route2_stage5_unattended_20260724_093713.md`
+7. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
+8. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
+9. `notes/NATIVE_PLANNER_BACKEND.md`
+10. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
+11. `scripts/th08_live_dodge_agent.py`
+12. `scripts/th08_bullet_transform_model.py`
+13. `scripts/th08_corridor_adapter.py`
+14. `scripts/touhou_control/viability.py`
+15. Latest Stage-3, Stage-5, and Stage-6B notes:
+    `notes/runs/lunatic_route2_stage3_unattended_20260724_132007.md`,
+    `notes/runs/lunatic_route2_stage5_unattended_20260724_120128.md`, and
+    `notes/runs/lunatic_route2_stage6b_unattended_20260724_135201.md`
 
 ## 13. Common Traps Already Paid For
 
@@ -650,43 +665,62 @@ reserve under every delay branch.
   certificate.
 - Policy availability, delay-support coverage, kernel non-emptiness, and
   hazard correctness are separate gates.
+- Hard survival ordering must hold during deduplication and beam truncation,
+  not only final action selection. A soft recovery term can otherwise erase a
+  safer first action.
+- `--trace-transform-runtime` is a diagnostic cost switch. Default planning
+  still retains a lightweight callback/tag/velocity-event payload; do not
+  remove that evidence merely to improve decode timing.
 - Faster Python/CFFI alone cannot fix a wrong hazard model. Native acceleration
-  solved most viability throughput; transformed bullets and policy phase are
-  semantic blockers.
+  solved major viability/projection costs; policy phase, future emissions,
+  uncertainty calibration, and path-reachable recovery remain semantic
+  blockers.
+- Move work to C++ at a packed numeric boundary. Reject micro-kernels that do
+  not materially improve whole-decision/background p95 or that change actions
+  without an accepted numeric contract.
 - Do not weaken a strangely specific test. It is probably a retained death.
 
 ## 14. Definition Of The Next Good Checkpoint
 
-A good next commit is not "spell 111 has fewer hits" by itself. It should:
+A good next commit is not "the randomized stage had fewer hits" by itself. It
+should:
 
-1. Decode and retain the native transform runtime without stage-specific data.
-2. Have synthetic tests for stop/turn/snap/re-aim timing and queue behavior.
-3. Show a same-slot physical differential trace matching native stop/resume.
-4. Feed the lifecycle consistently to local and global hazard layers.
-5. Pass the complete Linux suite and focused Windows tests.
-6. Complete a hard-no-Bomb Stage-5 physical trial with compact artifacts.
-7. Explain every changed spell-111 hit and any new empty-kernel behavior.
-8. Add/update the counterexample and research notes.
-9. Commit the verified checkpoint while leaving raw traces and `image.png`
-   untracked.
+1. Run one randomized physical stage from `1 2 3 4a 5` with hard no-Bomb,
+   safety value disabled, and the CE-0089 ordering active.
+2. Retain the complete dossier, death ledger, regression cases, comparison,
+   session/summary, and human-readable run note.
+3. Verify compact planning traces preserve callback tags and attached velocity
+   events where the stage emits them.
+4. Compare decode/local/global p50/p95, decision cadence, deadline suppression,
+   robust hard-vector counts, kernel exhaustion, boundary occupancy, and every
+   hit window.
+5. Add a counterexample and smallest useful regression for every new concrete
+   failure. Do not tune a stage/spell direction.
+6. Pass the complete 362-plus Linux and Windows suites.
+7. Commit the verified checkpoint while leaving raw traces, logs, native
+   binaries, and `image.png` untracked.
 
-After that, choose a random stage from `1 2 3 4a 5 6b`, run it physically, and
-verify that the transform correction generalized instead of overfitting Stage
-5.
+After the physical gate, prototype recovery-band semantics offline across
+multiple stages and adversarial generated workloads. Do not introduce another
+C++ boundary until profiling shows an end-to-end limiter and the independent
+oracle/action-parity gate is defined.
 
 ## 15. Suggested First Prompt For A New Codex
 
 ```text
 Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
 START_HERE.md completely, then inspect git status and the latest commit. Keep
-hard no-Bomb. Continue CE-0084 from the clean checkpoint: first add a
-behavior-neutral live decoder/trace for bullet original flags, queue cursor,
-next transform record, and stop timer/repeat state; test it; obtain a focused
-Stage-5 physical differential trace; then implement a general stop/resume and
-re-aim trajectory model in both local and global hazard layers. Do not
-hardcode Stage 5 or spell 111. Use IDA MCP at localhost:13337 and cite REA
-Evidence IDs already listed in START_HERE.md. Run full tests, retain every
-physical artifact/counterexample, update notes, and commit verified
-checkpoints. The user authorizes unattended launch/input/monitor/kill; use the
-one-command supervisor and decisively clean up stalls.
+hard no-Bomb and leave safety value disabled. Continue from b2faee4: physically
+validate CE-0089 on one randomized stage from 1,2,3,4a,5 (not Stage 6B first).
+Analyze hard robust-certificate counts, global kernel exhaustion, boundary
+behavior, decode/local/global timing, deadline suppression, and every hit—not
+only aggregate hit count. Verify the lightweight default bullet trace retains
+callback tags and attached velocity events. Keep all planner changes
+game-neutral unless recovered TH08 mechanics require an adapter. After the
+physical gate, investigate a robust time-expanded recovery band with an
+independent scalar oracle and adversarial generated cases. Use C++ only at a
+packed numerical boundary with whole-pipeline performance and parity evidence.
+Run complete Linux and Windows tests, retain compact artifacts/counterexamples,
+update notes, commit verified checkpoints, and cleanly stop every runtime
+session.
 ```

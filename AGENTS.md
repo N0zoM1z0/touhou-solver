@@ -33,6 +33,16 @@ These instructions apply to every file and task below this directory.
 - Put reusable, game-neutral control and planning code in
   `scripts/touhou_control/`. Keep TH08 memory addresses, input masks, movement
   constants, ECL details, and pool layouts in TH08 adapters.
+- Treat TH08 stages, spells, and retained deaths as validation workloads and
+  counterexamples, not planner identities. Whenever practical, improve the
+  accuracy, performance, uncertainty handling, or reachability semantics of
+  the reusable solver instead of encoding a route for one observed pattern.
+- Generality is a strong preference, not an absolute ban on game-specific
+  behavior. TH08-native mechanics and recovered runtime semantics belong in a
+  TH08 model or adapter, exposed through game-neutral trajectory, occupancy,
+  control, and planning contracts. Record why any stage- or spell-specific
+  exception is unavoidable and test that it does not silently become the
+  default planner policy.
 - Persist every important algorithmic or architectural decision, breakthrough,
   rejected approach, assumption, and limitation. Use a dedicated design note
   for the algorithm and summarize the checkpoint in

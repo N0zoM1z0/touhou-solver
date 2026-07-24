@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 _DISABLE_ENV = "TOUHOU_DISABLE_NATIVE_PLANNER"
 _LIBRARY = None
 _VIABILITY_FUNCTION = None
+_SAFETY_VALUE_FUNCTION = None
+_SAFETY_POLICY_FUNCTION = None
 _CLEARANCE_FUNCTION = None
 _AABB_TRAJECTORY_CLEARANCE_FUNCTION = None
 _PIECEWISE_AABB_CLEARANCE_FUNCTION = None
@@ -82,6 +84,76 @@ def _load_viability_function():
     ]
     function.restype = ctypes.c_int
     _VIABILITY_FUNCTION = function
+    return function
+
+
+def _load_safety_value_function():
+    global _SAFETY_VALUE_FUNCTION
+    if _SAFETY_VALUE_FUNCTION is not None:
+        return _SAFETY_VALUE_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_robust_safety_value_v1
+    except AttributeError:
+        return None
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+    ]
+    function.restype = ctypes.c_int
+    _SAFETY_VALUE_FUNCTION = function
+    return function
+
+
+def _load_safety_policy_function():
+    global _SAFETY_POLICY_FUNCTION
+    if _SAFETY_POLICY_FUNCTION is not None:
+        return _SAFETY_POLICY_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_robust_safety_policy_v1
+    except AttributeError:
+        return None
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_uint32),
+    ]
+    function.restype = ctypes.c_int
+    _SAFETY_POLICY_FUNCTION = function
     return function
 
 
@@ -617,3 +689,127 @@ def build_viability_arrays(
     if result != 0:
         raise RuntimeError(f"native viability kernel returned {result}")
     return viable, masks
+
+
+def build_safety_value_arrays(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    clearance_volume: np.ndarray,
+    velocity_x: np.ndarray,
+    velocity_y: np.ndarray,
+    delay_frames: np.ndarray,
+    frames_per_layer: int,
+    clamp_to_bounds: bool,
+) -> tuple[np.ndarray, np.ndarray] | None:
+    """Build threshold-free robust state and action clearance values."""
+
+    function = _load_safety_value_function()
+    if function is None:
+        return None
+    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
+    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
+    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
+    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
+    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    layer_count = (clearance.shape[0] - 1) // frames_per_layer
+    action_count = len(velocity_x)
+    rows = len(y_axis)
+    columns = len(x_axis)
+    state_values = np.empty(
+        (layer_count + 1, action_count, rows, columns),
+        dtype=np.float32,
+    )
+    action_values = np.empty(
+        (
+            layer_count,
+            action_count,
+            action_count,
+            rows,
+            columns,
+        ),
+        dtype=np.float32,
+    )
+    result = function(
+        clearance.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        clearance.shape[0],
+        rows,
+        columns,
+        float(x_axis[0]),
+        float(x_axis[1] - x_axis[0]),
+        float(y_axis[0]),
+        float(y_axis[1] - y_axis[0]),
+        velocity_x.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        velocity_y.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        action_count,
+        delays.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
+        len(delays),
+        frames_per_layer,
+        int(clamp_to_bounds),
+        state_values.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        action_values.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+    )
+    if result != 0:
+        raise RuntimeError(f"native safety-value kernel returned {result}")
+    return state_values, action_values
+
+
+def build_safety_policy_arrays(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    clearance_volume: np.ndarray,
+    velocity_x: np.ndarray,
+    velocity_y: np.ndarray,
+    delay_frames: np.ndarray,
+    frames_per_layer: int,
+    clamp_to_bounds: bool,
+) -> tuple[np.ndarray, np.ndarray] | None:
+    """Build exact state values and max-min optimal action masks."""
+
+    function = _load_safety_policy_function()
+    if function is None:
+        return None
+    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
+    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
+    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
+    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
+    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    layer_count = (clearance.shape[0] - 1) // frames_per_layer
+    action_count = len(velocity_x)
+    rows = len(y_axis)
+    columns = len(x_axis)
+    state_values = np.empty(
+        (layer_count + 1, action_count, rows, columns),
+        dtype=np.float32,
+    )
+    best_action_masks = np.empty(
+        (layer_count, action_count, rows, columns),
+        dtype=np.uint32,
+    )
+    result = function(
+        clearance.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        clearance.shape[0],
+        rows,
+        columns,
+        float(x_axis[0]),
+        float(x_axis[1] - x_axis[0]),
+        float(y_axis[0]),
+        float(y_axis[1] - y_axis[0]),
+        velocity_x.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        velocity_y.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        action_count,
+        delays.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
+        len(delays),
+        frames_per_layer,
+        int(clamp_to_bounds),
+        state_values.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        best_action_masks.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint32)
+        ),
+    )
+    if result != 0:
+        raise RuntimeError(f"native safety policy kernel returned {result}")
+    return state_values, best_action_masks

@@ -348,6 +348,7 @@ def plan_th08_corridor(
     control_delay_candidates: tuple[int, ...] | None = None,
     nominal_control_delay: int | None = None,
     active_action: str = "stay",
+    safety_value_horizon_frames: int = 0,
 ) -> CorridorPlan:
     robust_control = None
     if control_delay_candidates is not None:
@@ -360,6 +361,7 @@ def plan_th08_corridor(
             delay_frames=control_delay_candidates,
             nominal_delay=nominal_control_delay,
             active_action=active_action,
+            safety_value_horizon_frames=safety_value_horizon_frames,
         )
     return plan_corridor(
         start_x=player_x,

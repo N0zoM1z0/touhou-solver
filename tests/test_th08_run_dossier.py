@@ -235,6 +235,34 @@ class Th08RunDossierTests(unittest.TestCase):
         self.assertIsNone(enemy)
         self.assertIn("corridor_deadline_miss", contributing)
 
+    def test_ce_0087_last_alive_deadline_miss_is_attributed(self) -> None:
+        alive = _row(26753, bullets=0)
+        alive["action_lag"] = 10
+        alive["control_delay_frames"] = 5
+        alive["control_delay_candidates"] = [3, 4, 5, 6]
+        alive["player"]["phase"] = 0
+        alive["player"]["phase_at_action"] = 0
+        hit = _row(26759, bullets=0, pipeline=-1.0)
+        hit["action_lag"] = 5
+        hit["control_delay_frames"] = 5
+        hit["control_delay_candidates"] = [3, 4, 5, 6]
+        _, contributing, _, _, _ = _classify_death(
+            hit,
+            window=[alive, hit],
+        )
+        self.assertIn("action_lag_over_model", contributing)
+
+    def test_action_lag_uses_support_high_not_nominal_delay(self) -> None:
+        hit = _row(100, bullets=0, pipeline=-1.0)
+        hit["action_lag"] = 6
+        hit["control_delay_frames"] = 4
+        hit["control_delay_candidates"] = [3, 4, 5, 6]
+        _, contributing, _, _, _ = _classify_death(
+            hit,
+            window=[hit],
+        )
+        self.assertNotIn("action_lag_over_model", contributing)
+
     def test_overlap_witness_outranks_closer_nonoverlapping_center(self) -> None:
         row = _row(100)
         row["nearby_bullets"] = [

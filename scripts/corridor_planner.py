@@ -20,8 +20,10 @@ from touhou_control import native_backend
 from touhou_control.trajectory import PiecewiseLinearTrajectory
 from touhou_control.viability import (
     ControlAction,
+    RobustSafetyValuePolicy,
     RobustViabilityPolicy,
     ViabilityConfig,
+    build_robust_safety_value_policy,
     build_robust_viability_policy,
 )
 
@@ -219,6 +221,7 @@ class CorridorPlan:
     reason: str
     planning_mode: str = "forward_reachability"
     viability_policy: RobustViabilityPolicy | None = None
+    safety_value_policy: RobustSafetyValuePolicy | None = None
     initial_safe_action_count: int = 0
     initial_repair_volume: int = 0
     viability_backend: str | None = None
@@ -239,12 +242,15 @@ class RobustControlSpec:
     delay_frames: tuple[int, ...]
     nominal_delay: int
     active_action: str
+    safety_value_horizon_frames: int = 0
 
     def __post_init__(self) -> None:
         if not self.actions:
             raise ValueError("robust control requires at least one action")
         if self.active_action not in {action.name for action in self.actions}:
             raise ValueError("active action is absent from robust action set")
+        if self.safety_value_horizon_frames < 0:
+            raise ValueError("safety-value horizon cannot be negative")
 
 
 def _axis(start: float, end: float, step: float) -> np.ndarray:
@@ -952,6 +958,35 @@ def _plan_robust_corridor(
         ),
     )
     viability_finished = time.perf_counter()
+    safety_value_policy = None
+    safety_value_finished = viability_finished
+    safety_value_horizon = robust_control.safety_value_horizon_frames
+    if safety_value_horizon:
+        if (
+            safety_value_horizon > config.horizon_frames
+            or safety_value_horizon % config.frames_per_layer
+        ):
+            raise ValueError(
+                "safety-value horizon must fit the corridor horizon and "
+                "contain complete control layers"
+            )
+        safety_value_policy = build_robust_safety_value_policy(
+            x_axis=x_axis,
+            y_axis=y_axis,
+            clearance_volume=clearance_volume[
+                : safety_value_horizon + 1
+            ],
+            actions=robust_control.actions,
+            delay_frames=robust_control.delay_frames,
+            nominal_delay=robust_control.nominal_delay,
+            config=ViabilityConfig(
+                frames_per_layer=config.frames_per_layer,
+                required_clearance=config.required_clearance,
+                clamp_to_bounds=True,
+            ),
+            compact=True,
+        )
+        safety_value_finished = time.perf_counter()
     base_timing = (
         (
             "clearance",
@@ -960,6 +995,10 @@ def _plan_robust_corridor(
         (
             "viability",
             (viability_finished - clearance_finished) * 1000.0,
+        ),
+        (
+            "safety_value",
+            (safety_value_finished - viability_finished) * 1000.0,
         ),
     )
     start_query = policy.query(
@@ -979,6 +1018,7 @@ def _plan_robust_corridor(
             reason="initial robust viability action set is empty",
             planning_mode="robust_viability",
             viability_policy=policy,
+            safety_value_policy=safety_value_policy,
             viability_backend=policy.backend,
             solver_timing_ms=(
                 *base_timing,
@@ -1020,6 +1060,7 @@ def _plan_robust_corridor(
                 ),
                 planning_mode="robust_viability",
                 viability_policy=policy,
+                safety_value_policy=safety_value_policy,
                 initial_safe_action_count=start_query.safe_action_count,
                 initial_repair_volume=initial_repair_volume,
                 viability_backend=policy.backend,
@@ -1027,7 +1068,8 @@ def _plan_robust_corridor(
                     *base_timing,
                     (
                         "rollout",
-                        (time.perf_counter() - viability_finished) * 1000.0,
+                        (time.perf_counter() - safety_value_finished)
+                        * 1000.0,
                     ),
                 ),
             )
@@ -1115,6 +1157,7 @@ def _plan_robust_corridor(
             ),
             planning_mode="robust_viability",
             viability_policy=policy,
+            safety_value_policy=safety_value_policy,
             initial_safe_action_count=start_query.safe_action_count,
             initial_repair_volume=initial_repair_volume,
             viability_backend=policy.backend,
@@ -1122,7 +1165,8 @@ def _plan_robust_corridor(
                 *base_timing,
                 (
                     "rollout",
-                    (time.perf_counter() - viability_finished) * 1000.0,
+                    (time.perf_counter() - safety_value_finished)
+                    * 1000.0,
                 ),
             ),
         )
@@ -1140,6 +1184,7 @@ def _plan_robust_corridor(
         ),
         planning_mode="robust_viability",
         viability_policy=policy,
+        safety_value_policy=safety_value_policy,
         initial_safe_action_count=start_query.safe_action_count,
         initial_repair_volume=initial_repair_volume,
         viability_backend=policy.backend,
@@ -1147,7 +1192,7 @@ def _plan_robust_corridor(
             *base_timing,
             (
                 "rollout",
-                (time.perf_counter() - viability_finished) * 1000.0,
+                (time.perf_counter() - safety_value_finished) * 1000.0,
             ),
         ),
     )

@@ -368,6 +368,11 @@ def _compact_decision(
         "snapshot_frame": int(row.get("snapshot_frame", row["frame"])),
         "snapshot_lag": int(row.get("snapshot_lag", 0)),
         "action_lag": int(row.get("action_lag", 0)),
+        "deadline_guard": (
+            row.get("deadline_guard")
+            if isinstance(row.get("deadline_guard"), dict)
+            else {}
+        ),
         "control_delay_frames": int(row.get("control_delay_frames", 3)),
         "control_delay_candidates": [
             int(value)
@@ -825,7 +830,21 @@ def _classify_death(
     ]
     if slacks and min(slacks) < 0.0:
         contributing.append("corridor_deadline_miss")
-    if int(row["action_lag"]) > int(row.get("control_delay_frames", 3)):
+    last_alive = next(
+        (
+            sample
+            for sample in reversed(window[:-1])
+            if int(sample.get("player", {}).get("phase", 0)) == 0
+            and int(
+                sample.get("player", {}).get("phase_at_action", 0)
+            )
+            == 0
+        ),
+        None,
+    )
+    if _action_lag_over_model(row) or (
+        last_alive is not None and _action_lag_over_model(last_alive)
+    ):
         contributing.append("action_lag_over_model")
     if int(row["active_bullets"]) >= 1000:
         contributing.append("pool_density_over_1000")
@@ -849,6 +868,20 @@ def _classify_death(
         nearest_laser,
         nearest_enemy_body,
     )
+
+
+def _action_lag_over_model(row: dict[str, object]) -> bool:
+    """Whether issue lag exceeds the decision's complete delay support."""
+
+    support = tuple(
+        int(value) for value in row.get("control_delay_candidates", ())
+    )
+    support_high = (
+        max(support)
+        if support
+        else int(row.get("control_delay_frames", 3))
+    )
+    return int(row.get("action_lag", 0)) > support_high
 
 
 def _robust_control_unsafe(row: dict[str, object]) -> bool:
@@ -1089,6 +1122,32 @@ def _death_ledger(
                 if last_alive is not None
                 else None
             ),
+            "action_deadline_miss": {
+                "at_hit": _action_lag_over_model(row),
+                "last_alive": (
+                    _action_lag_over_model(last_alive)
+                    if last_alive is not None
+                    else False
+                ),
+                "hit_action_lag": int(row["action_lag"]),
+                "hit_support_high": max(
+                    tuple(row["control_delay_candidates"])
+                    or (int(row["control_delay_frames"]),)
+                ),
+                "last_alive_action_lag": (
+                    int(last_alive["action_lag"])
+                    if last_alive is not None
+                    else None
+                ),
+                "last_alive_support_high": (
+                    max(
+                        tuple(last_alive["control_delay_candidates"])
+                        or (int(last_alive["control_delay_frames"]),)
+                    )
+                    if last_alive is not None
+                    else None
+                ),
+            },
             "usable_pipeline_warning_lead_frames": (
                 frame - int(unsafe_suffix_start["frame"])
                 if unsafe_suffix_start is not None

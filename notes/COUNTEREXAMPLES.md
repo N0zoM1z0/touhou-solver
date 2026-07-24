@@ -1908,3 +1908,55 @@ Status: observed | inferred | unknown | fixed
   `piecewise_native_speed_seed82408.json`.
 - **Status:** Code and synthetic gates passed. A randomized non-Stage-5
   physical run is required before accepting the architecture change.
+
+## CE-0087: A read-valid plan expired before input issue
+
+- **Observed cross-stage control:** Complete hard-no-Bomb Stage-3 run
+  `20260724_123136` recorded eight hits. Stage 3 emitted zero callback-motion
+  events and attached zero piecewise bullets across spells 35, 38, 42, 46,
+  and 50. The eight-hit result is within the prior complete-Stage-3 range
+  `7..12` and is second-best among the six retained runs. This is evidence
+  against a Stage-5 callback-specific overfit claim, but one randomized run is
+  not acceptance.
+- **Observed timing failure:** The read-time `fits_epoch` guard emitted zero
+  discontinuities, yet frame 11,056 used source frame 9,254: the bullet read
+  itself covered only 9,254..9,255 and the native `+1800` counter transition
+  occurred while local planning was running. A stale action was therefore
+  issued with `action_lag=1802`, and an old asynchronous corridor policy later
+  appeared at ages above 3,590.
+- **Observed ordinary deadline failure:** Spell 50 had 98/308 decisions
+  (31.8 percent) whose snapshot-to-issue lag exceeded the modeled maximum of
+  six frames. Three of its four hits were at or immediately preceded by such
+  an invalid decision: frame 26,246 issued at lag 13; the last alive decisions
+  before frames 26,759 and 27,421 issued at lags 10 and 11. The old dossier
+  inspected only the hit row and therefore attributed only the first case.
+- **Independent performance cause:** Stage 3 never invoked the sparse
+  callback-AABB path. Relative to retained run `20260724_075004`, decode
+  median rose `1.85 -> 5.34 ms`, local-plan median `22.90 -> 28.06 ms`, and
+  global-solve median `217.71 -> 245.11 ms`. Spell 50's 200 lifecycle lasers
+  made local laser construction the dominant sampled hot path; its local
+  p95 was already approximately 135 ms in both runs, while the added
+  bookkeeping increased the fraction of missed issue deadlines.
+- **Invalid assumption:** A sensor epoch that is consistent at the end of
+  capture remains valid until `SendInput`. The delay support describes
+  snapshot-to-visible-input time; snapshot-to-issue lag is already a lower
+  bound and must be checked again immediately before input.
+- **General correction:** `ActionIssueAlignment` separates ordinary deadline
+  miss from implausible post-capture counter advance. A decision beyond its
+  complete delay support no longer injects a newly planned direction; it holds
+  the previous actuator command and forces a trace row with planned/issued
+  masks. A post-capture advance above the configured contiguous limit releases
+  movement, advances the gameplay epoch, invalidates cached policy state, and
+  records `action_epoch_discontinuity`.
+- **Reporting correction:** `action_lag_over_model` now compares against the
+  complete support high value and inspects both the hit row and last alive
+  decision. The regenerated Stage-3 dossier attributes frames 26,246, 26,759,
+  and 27,421, and retains both lags/support bounds in each death record.
+- **Regression:** `test_ce_0087_slow_plan_misses_support_without_claiming_epoch`,
+  `test_ce_0087_jump_after_valid_capture_crosses_action_epoch`,
+  `test_ce_0087_last_alive_deadline_miss_is_attributed`, and
+  `test_action_lag_uses_support_high_not_nominal_delay`.
+- **Status:** Code and retained-report gates passed. Focused Stage-3 spell 50
+  must show zero stale newly injected directions near its former hit windows;
+  holding an old actuator command is fail-closed observability, not itself a
+  survival proof.

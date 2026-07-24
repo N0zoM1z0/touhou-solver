@@ -7,15 +7,226 @@ import unittest
 
 import numpy as np
 
+from touhou_control import native_backend
 from touhou_control.viability import (
     ControlAction,
     ViabilityConfig,
+    build_robust_safety_value_policy,
     build_robust_viability_policy,
 )
 from touhou_control.native_backend import available as native_available
 
 
 class RobustViabilityTests(unittest.TestCase):
+    def test_safety_value_threshold_exactly_recovers_boolean_policy(
+        self,
+    ) -> None:
+        rng = np.random.default_rng(0xCE0087)
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("left", -0.75, 0.0),
+            ControlAction("right", 0.75, 0.0),
+        )
+        x_axis = np.arange(5, dtype=np.float32) * 2.0
+        y_axis = np.arange(3, dtype=np.float32) * 2.0
+        clearance = rng.uniform(
+            -3.0,
+            7.0,
+            size=(7, len(y_axis), len(x_axis)),
+        ).astype(np.float32)
+        value_policy = build_robust_safety_value_policy(
+            x_axis=x_axis,
+            y_axis=y_axis,
+            clearance_volume=clearance,
+            actions=actions,
+            delay_frames=(0, 2, 3),
+            nominal_delay=2,
+            config=ViabilityConfig(
+                frames_per_layer=3,
+                clamp_to_bounds=False,
+            ),
+            backend="numpy",
+        )
+        for threshold in (-1.25, 0.0, 2.5):
+            boolean = build_robust_viability_policy(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                clearance_volume=clearance,
+                actions=actions,
+                delay_frames=(0, 2, 3),
+                nominal_delay=2,
+                config=ViabilityConfig(
+                    frames_per_layer=3,
+                    required_clearance=threshold,
+                    clamp_to_bounds=False,
+                ),
+                backend="numpy",
+            )
+            viable, masks = value_policy.threshold_arrays(threshold)
+            np.testing.assert_array_equal(viable, boolean.viable)
+            np.testing.assert_array_equal(masks, boolean.safe_action_masks)
+
+    def test_empty_boolean_kernel_retains_continuous_least_bad_action(
+        self,
+    ) -> None:
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("right", 1.0, 0.0),
+        )
+        clearance = np.full((3, 2, 5), 10.0, dtype=np.float32)
+        clearance[2, :, 1] = -5.0
+        clearance[2, :, 3] = -1.0
+        value_policy = build_robust_safety_value_policy(
+            x_axis=np.arange(5, dtype=np.float32),
+            y_axis=np.asarray([0.0, 1.0], dtype=np.float32),
+            clearance_volume=clearance,
+            actions=actions,
+            delay_frames=(0,),
+            nominal_delay=0,
+            config=ViabilityConfig(
+                frames_per_layer=2,
+                clamp_to_bounds=False,
+            ),
+            backend="numpy",
+        )
+        query = value_policy.query(
+            frame=0,
+            x=1.0,
+            y=0.0,
+            active_action="stay",
+        )
+        self.assertTrue(query.available)
+        self.assertEqual(query.best_actions, ("right",))
+        self.assertEqual(query.action_value("stay"), -5.0)
+        self.assertEqual(query.action_value("right"), -1.0)
+        viable, masks = value_policy.threshold_arrays(0.0)
+        self.assertFalse(viable[0, 0, 0, 1])
+        self.assertEqual(int(masks[0, 0, 0, 1]), 0)
+        compact = build_robust_safety_value_policy(
+            x_axis=np.arange(5, dtype=np.float32),
+            y_axis=np.asarray([0.0, 1.0], dtype=np.float32),
+            clearance_volume=clearance,
+            actions=actions,
+            delay_frames=(0,),
+            nominal_delay=0,
+            config=ViabilityConfig(
+                frames_per_layer=2,
+                clamp_to_bounds=False,
+            ),
+            backend="numpy",
+            compact=True,
+        )
+        compact_query = compact.query(
+            frame=0,
+            x=1.0,
+            y=0.0,
+            active_action="stay",
+        )
+        self.assertEqual(compact_query.best_actions, ("right",))
+        self.assertEqual(compact_query.action_values, ())
+        self.assertEqual(compact_query.state_value, -1.0)
+        with self.assertRaisesRegex(ValueError, "does not retain"):
+            compact.threshold_arrays(0.0)
+
+    @unittest.skipUnless(
+        native_available(),
+        "native viability backend is not built",
+    )
+    def test_native_safety_value_matches_numpy_oracle(self) -> None:
+        rng = np.random.default_rng(0x5AFE0087)
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("left", -0.8, 0.0),
+            ControlAction("right", 0.8, 0.0),
+            ControlAction("up_right", 0.6, -0.6),
+        )
+        x_axis = np.arange(5, dtype=np.float32) * 2.0
+        y_axis = np.arange(4, dtype=np.float32) * 2.0
+        config = ViabilityConfig(
+            frames_per_layer=3,
+            clamp_to_bounds=False,
+        )
+        for _ in range(12):
+            clearance = rng.uniform(
+                -2.0,
+                8.0,
+                size=(7, len(y_axis), len(x_axis)),
+            ).astype(np.float32)
+            reference = build_robust_safety_value_policy(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                clearance_volume=clearance,
+                actions=actions,
+                delay_frames=(0, 2, 3),
+                nominal_delay=2,
+                config=config,
+                backend="numpy",
+            )
+            native = build_robust_safety_value_policy(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                clearance_volume=clearance,
+                actions=actions,
+                delay_frames=(0, 2, 3),
+                nominal_delay=2,
+                config=config,
+                backend="native",
+            )
+            np.testing.assert_allclose(
+                native.state_values,
+                reference.state_values,
+                rtol=0.0,
+                atol=2e-6,
+            )
+            np.testing.assert_allclose(
+                native.action_values,
+                reference.action_values,
+                rtol=0.0,
+                atol=2e-6,
+            )
+            optimized = native_backend.build_safety_policy_arrays(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                clearance_volume=clearance,
+                velocity_x=np.asarray(
+                    [action.velocity_x for action in actions],
+                    dtype=np.float64,
+                ),
+                velocity_y=np.asarray(
+                    [action.velocity_y for action in actions],
+                    dtype=np.float64,
+                ),
+                delay_frames=np.asarray((0, 2, 3), dtype=np.int32),
+                frames_per_layer=config.frames_per_layer,
+                clamp_to_bounds=config.clamp_to_bounds,
+            )
+            self.assertIsNotNone(optimized)
+            optimized_values, optimized_masks = optimized
+            np.testing.assert_allclose(
+                optimized_values,
+                reference.state_values,
+                rtol=0.0,
+                atol=2e-6,
+            )
+            best_values = np.max(reference.action_values, axis=2)
+            best_bits = np.left_shift(
+                np.uint32(1),
+                np.arange(len(actions), dtype=np.uint32),
+            )[None, None, :, None, None]
+            expected_masks = np.bitwise_or.reduce(
+                np.where(
+                    reference.action_values == best_values[:, :, None],
+                    best_bits,
+                    np.uint32(0),
+                ),
+                axis=2,
+            )
+            np.testing.assert_array_equal(
+                optimized_masks,
+                expected_masks,
+            )
+            self.assertEqual(native.backend, "native")
+
     @unittest.skipUnless(
         native_available(),
         "native viability backend is not built",

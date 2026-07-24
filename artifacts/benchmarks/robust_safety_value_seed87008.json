@@ -1,0 +1,72 @@
+{
+  "boolean_ms": {
+    "median": 43.995913001708686,
+    "minimum": 39.554725983180106,
+    "p95": 49.02453001704998,
+    "samples": [
+      39.554725983180106,
+      41.8526429857593,
+      42.99553800956346,
+      43.995913001708686,
+      45.00815202482045,
+      47.904923994792625,
+      49.02453001704998
+    ]
+  },
+  "boolean_output_bytes": 561816,
+  "configuration": {
+    "action_count": 17,
+    "delay_support": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "frames_per_layer": 8,
+    "grid_shape": [
+      27,
+      24
+    ],
+    "horizon_frames": 80,
+    "repeats": 7,
+    "seed": 87008
+  },
+  "median_time_ratio": 7.692079966550771,
+  "pruned_best_action_parity": true,
+  "pruned_median_time_ratio": 2.232376198036518,
+  "pruned_safety_policy_ms": {
+    "median": 98.21542899589986,
+    "minimum": 94.56690898514353,
+    "p95": 110.06678800913505,
+    "samples": [
+      94.56690898514353,
+      95.11790599208325,
+      98.06234500138089,
+      98.21542899589986,
+      98.77220398630016,
+      102.56152399233542,
+      110.06678800913505
+    ]
+  },
+  "pruned_safety_policy_output_bytes": 925344,
+  "pruned_value_parity": true,
+  "safety_value_ms": {
+    "median": 338.420081010554,
+    "minimum": 320.9923139947932,
+    "p95": 355.66699400078505,
+    "samples": [
+      320.9923139947932,
+      330.8779179933481,
+      335.6297419813927,
+      338.420081010554,
+      339.3414030142594,
+      340.1645689737052,
+      355.66699400078505
+    ]
+  },
+  "safety_value_output_bytes": 7975584,
+  "schema": "touhou_robust_safety_value_benchmark_v1",
+  "threshold_parity": true
+}

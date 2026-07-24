@@ -66,9 +66,13 @@ from touhou_control.async_policy import (
     delay_support_envelope,
 )
 from touhou_control.delay import AdaptiveControlDelay
-from touhou_control.epochs import FrameWindow, HazardEpochAlignment
+from touhou_control.epochs import (
+    ActionIssueAlignment,
+    FrameWindow,
+    HazardEpochAlignment,
+)
 from touhou_control.trajectory import VelocityChange
-from touhou_control.viability import ViabilityQuery
+from touhou_control.viability import SafetyValueQuery, ViabilityQuery
 
 
 BULLET_POOL_BASE = 0x00F6F710
@@ -178,6 +182,11 @@ LIVE_CONTROL_DELAY_GUARD_FRAMES = 600
 # tolerates scheduler stalls but rejects known +1800 logical timer jumps that
 # splice source state and hazard pools from different gameplay epochs.
 MAX_SENSOR_EPOCH_EXTENT_FRAMES = 8
+# A normal 60 Hz counter cannot advance this far during one local planning
+# call. This catches logical +1800 jumps that occur after sensor capture but
+# before input issue without mislabeling an ordinary 7..20-frame overrun as a
+# new gameplay epoch.
+MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES = 120
 # A rolling async policy can outlive several estimator updates. Cover the
 # complete configured support instead of assuming only one-step drift.
 ASYNC_POLICY_DELAY_PADDING = (
@@ -429,6 +438,8 @@ class Decision:
     terminal_threat_min_clearance: float = 9999.0
     viability_recovery_distance: float | None = None
     viability_control_reserve_deficit: float = 0.0
+    viability_safety_value_preferred: bool = False
+    viability_safety_state_value: float | None = None
 
 
 @dataclass(frozen=True)
@@ -2218,6 +2229,8 @@ def choose_action(
     allowed_first_actions: tuple[str, ...] | None = None,
     viability_repair_volumes: tuple[tuple[str, int], ...] = (),
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
+    viability_safety_actions: tuple[str, ...] = (),
+    viability_safety_state_value: float | None = None,
     viability_position_error: float = 0.0,
     recovery_control_reserve: bool = True,
     relax_stale_viability_contradiction: bool = False,
@@ -2293,6 +2306,13 @@ def choose_action(
         raise ValueError(
             "viability recovery distance must be finite and nonnegative"
         )
+    if len(set(viability_safety_actions)) != len(
+        viability_safety_actions
+    ):
+        raise ValueError("safety-value actions must be unique")
+    if set(viability_safety_actions) - planner_action_names:
+        raise ValueError("safety value contains unknown action")
+    safety_value_actions = set(viability_safety_actions)
     if (target_x is None) != (target_y is None):
         raise ValueError("target_x and target_y must be supplied together")
     if target_x is not None:
@@ -2452,6 +2472,14 @@ def choose_action(
             base[0],
             base[1],
             base[2],
+            (
+                0
+                if (
+                    not safety_value_actions
+                    or node.first_action.name in safety_value_actions
+                )
+                else 1
+            ),
             _boundary_control_reserve_deficit(
                 node.x,
                 node.y,
@@ -2470,6 +2498,7 @@ def choose_action(
         and allowed_first_actions is None
         and not repair_by_action
         and not recovery_by_action
+        and not safety_value_actions
     ):
         return Decision(
             SHOT | FOCUS,
@@ -2648,6 +2677,14 @@ def choose_action(
             threat_collisions,
             max(-threat_clearance, 0.0),
             max(ITEM_SAFETY_CLEARANCE - threat_clearance, 0.0),
+            (
+                0
+                if (
+                    not safety_value_actions
+                    or node.first_action.name in safety_value_actions
+                )
+                else 1
+            ),
             _boundary_control_reserve_deficit(
                 node.x,
                 node.y,
@@ -2803,6 +2840,11 @@ def choose_action(
             best.y,
             reserve_distance=diagnostic_recovery_reserve_distance,
         ),
+        bool(
+            safety_value_actions
+            and action.name in safety_value_actions
+        ),
+        viability_safety_state_value,
     )
     if (
         effective_allowed_first_actions is not None
@@ -2840,6 +2882,8 @@ def choose_action(
             allowed_first_actions=None,
             viability_repair_volumes=viability_repair_volumes,
             viability_recovery_distances=viability_recovery_distances,
+            viability_safety_actions=viability_safety_actions,
+            viability_safety_state_value=viability_safety_state_value,
             viability_position_error=viability_position_error,
             recovery_control_reserve=recovery_control_reserve,
             relax_stale_viability_contradiction=(
@@ -2910,6 +2954,7 @@ def _solve_corridor(
     control_delay_candidates: tuple[int, ...],
     nominal_control_delay: int,
     active_action: str,
+    safety_value_horizon_frames: int = 0,
     required_gate_lane: str | None = None,
     context_key: tuple[int, int, int | None] | None = None,
 ) -> CorridorSolution:
@@ -2926,6 +2971,7 @@ def _solve_corridor(
         control_delay_candidates=control_delay_candidates,
         nominal_control_delay=nominal_control_delay,
         active_action=active_action,
+        safety_value_horizon_frames=safety_value_horizon_frames,
     )
     constraint_honored = (
         required_gate_lane is None
@@ -2947,6 +2993,7 @@ def _solve_corridor(
             control_delay_candidates=control_delay_candidates,
             nominal_control_delay=nominal_control_delay,
             active_action=active_action,
+            safety_value_horizon_frames=safety_value_horizon_frames,
         )
     return CorridorSolution(
         source_frame=source_frame,
@@ -2991,6 +3038,28 @@ def _corridor_viability_query(
     if age < 0 or age > max_age_frames:
         return None
     return solution.plan.viability_policy.query(
+        frame=age,
+        x=player_x,
+        y=player_y,
+        active_action=active_action,
+    )
+
+
+def _corridor_safety_value_query(
+    solution: CorridorSolution | None,
+    *,
+    current_frame: int,
+    player_x: float,
+    player_y: float,
+    active_action: str,
+    max_age_frames: int,
+) -> SafetyValueQuery | None:
+    if solution is None or solution.plan.safety_value_policy is None:
+        return None
+    age = current_frame - solution.source_frame
+    if age < 0 or age > max_age_frames:
+        return None
+    return solution.plan.safety_value_policy.query(
         frame=age,
         x=player_x,
         y=player_y,
@@ -3092,6 +3161,18 @@ def run(args: argparse.Namespace) -> int:
         raise ValueError("wait timeout must be positive")
     if args.stop_after_hits < 0 or args.post_hit_frames < 0:
         raise ValueError("hit stopping arguments cannot be negative")
+    if (
+        args.safety_value_horizon < 0
+        or args.safety_value_horizon > TH08_CORRIDOR_CONFIG.horizon_frames
+        or (
+            args.safety_value_horizon
+            % TH08_CORRIDOR_CONFIG.frames_per_layer
+        )
+    ):
+        raise ValueError(
+            "safety-value horizon must be zero or complete corridor layers "
+            "within the global horizon"
+        )
     if not (
         LIVE_CONTROL_DELAY_MIN
         <= args.control_delay_frames
@@ -3206,6 +3287,9 @@ def run(args: argparse.Namespace) -> int:
                     "maximum_sensor_epoch_extent_frames": (
                         MAX_SENSOR_EPOCH_EXTENT_FRAMES
                     ),
+                    "maximum_action_contiguous_advance_frames": (
+                        MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES
+                    ),
                     "global_planner": (
                         "finite_horizon_robust_backward_viability"
                         if not args.local_only
@@ -3243,6 +3327,14 @@ def run(args: argparse.Namespace) -> int:
                     ),
                     "async_policy_submit_interval_frames": (
                         args.corridor_every
+                    ),
+                    "safety_value_horizon_frames": (
+                        args.safety_value_horizon
+                    ),
+                    "safety_value_role": (
+                        "empty_kernel_soft_preference"
+                        if args.safety_value_horizon
+                        else "disabled"
                     ),
                     "native_planner_backend": native_backend.available(),
                     "viability_quantifiers": (
@@ -3838,6 +3930,9 @@ def run(args: argparse.Namespace) -> int:
                     control_delay_candidates=policy_delay_support,
                     nominal_control_delay=control_delay_frames,
                     active_action=_action_name_from_mask(previous_mask),
+                    safety_value_horizon_frames=(
+                        args.safety_value_horizon
+                    ),
                     required_gate_lane=(
                         corridor_commitment.active_lane(counter_after_read)
                     ),
@@ -3854,6 +3949,14 @@ def run(args: argparse.Namespace) -> int:
                 max_age_frames=args.corridor_max_age,
             )
             viability_query = _corridor_viability_query(
+                corridor_solution,
+                current_frame=counter_after_read,
+                player_x=projected_player_x,
+                player_y=projected_player_y,
+                active_action=_action_name_from_mask(previous_mask),
+                max_age_frames=args.corridor_max_age,
+            )
+            safety_value_query = _corridor_safety_value_query(
                 corridor_solution,
                 current_frame=counter_after_read,
                 player_x=projected_player_x,
@@ -3901,6 +4004,19 @@ def run(args: argparse.Namespace) -> int:
                 )
                 else ()
             )
+            safety_value_guidance = (
+                safety_value_query
+                if (
+                    safety_value_query is not None
+                    and safety_value_query.available
+                    and safety_value_query.best_actions
+                    and viability_query is not None
+                    and viability_query.available
+                    and not viability_query.state_viable
+                    and viability_support_covers_current
+                )
+                else None
+            )
             corridor_overhead_ms = (
                 time.perf_counter() - corridor_started
             ) * 1000.0
@@ -3947,6 +4063,16 @@ def run(args: argparse.Namespace) -> int:
                 viability_recovery_distances=(
                     viability_recovery_guidance
                 ),
+                viability_safety_actions=(
+                    safety_value_guidance.best_actions
+                    if safety_value_guidance is not None
+                    else ()
+                ),
+                viability_safety_state_value=(
+                    safety_value_guidance.state_value
+                    if safety_value_guidance is not None
+                    else None
+                ),
                 viability_position_error=(
                     viability_guidance.position_error
                     if viability_guidance is not None
@@ -3957,6 +4083,86 @@ def run(args: argparse.Namespace) -> int:
             phase_now = reader.u8(0x017D5EF8)
             predeath_now = reader.i32(0x017D5EF8 + 0xE2A68)
             counter_at_action = reader.u32(0x0164D30C)
+            action_alignment = ActionIssueAlignment(
+                source_frame=int(state["enemy_manager_frame"]),
+                capture_frame=counter_after_read,
+                issue_frame=counter_at_action,
+                delay_support=delay_estimate.support,
+            )
+            if action_alignment.crosses_contiguous_epoch(
+                maximum_post_capture_advance=(
+                    MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES
+                )
+            ):
+                gaps += 1
+                gameplay_epoch += 1
+                safe_mask = previous_mask & SHOT
+                _require_foreground(api, pid)
+                send_transitions(
+                    api,
+                    input_transitions(
+                        previous_mask,
+                        safe_mask,
+                        supported_mask=SUPPORTED_INPUT_MASK,
+                    ),
+                )
+                previous_mask = safe_mask
+                previous_direction = 0
+                decision_frame_deltas.clear()
+                delay_estimator.reset()
+                corridor_solution = None
+                corridor_pending_solution = None
+                corridor_context = None
+                corridor_commitment = CorridorCommitment()
+                ecl_instruction_cache.clear()
+                if corridor_future is not None:
+                    corridor_future.cancel()
+                output.write(
+                    json.dumps(
+                        {
+                            "kind": "action_epoch_discontinuity",
+                            "frame": counter_at_action,
+                            "source_frame": state["enemy_manager_frame"],
+                            "capture_frame": counter_after_read,
+                            "gameplay_epoch": gameplay_epoch,
+                            "action_lag": action_alignment.action_lag,
+                            "post_capture_advance": (
+                                action_alignment.post_capture_advance
+                            ),
+                            "maximum_contiguous_advance": (
+                                MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES
+                            ),
+                            "control_delay_candidates": (
+                                delay_estimate.support
+                            ),
+                            "planned_action": decision.action,
+                            "planned_mask": decision.mask,
+                            "spell": state["spell"],
+                            "released_to_mask": safe_mask,
+                        }
+                    )
+                    + "\n"
+                )
+                output.flush()
+                continue
+            planned_action = decision.action
+            planned_mask = decision.mask
+            action_deadline_missed = action_alignment.deadline_missed
+            if action_deadline_missed:
+                # Do not inject a newly selected direction after its robust
+                # delay certificate has expired. Holding the last actuator
+                # command avoids adding a second unmodeled transition; the
+                # next iteration replans from a fresh native snapshot.
+                decision = replace(
+                    decision,
+                    mask=previous_mask,
+                    action=(
+                        f"{_action_name_from_mask(previous_mask)}"
+                        "+deadline_hold"
+                    ),
+                    bomb=False,
+                    planned_focus=bool(previous_mask & FOCUS),
+                )
             hit_started = phase_now == 2 and previous_action_phase != 2
             hit_contact_observation = None
             if hit_started:
@@ -4032,6 +4238,7 @@ def run(args: argparse.Namespace) -> int:
                 or corridor_updated
                 or hit_started
                 or auto_confirm_event is not None
+                or action_deadline_missed
             ):
                 ecl_tagged_bullets = (
                     tuple(
@@ -4056,6 +4263,18 @@ def run(args: argparse.Namespace) -> int:
                     "snapshot_frame": state["enemy_manager_frame"],
                     "snapshot_lag": snapshot_lag,
                     "action_lag": counter_at_action - int(state["enemy_manager_frame"]),
+                    "deadline_guard": {
+                        "missed": action_deadline_missed,
+                        "support_high": action_alignment.support_high,
+                        "post_capture_advance": (
+                            action_alignment.post_capture_advance
+                        ),
+                        "input_suppressed": action_deadline_missed,
+                        "planned_action": planned_action,
+                        "planned_mask": planned_mask,
+                        "issued_action": decision.action,
+                        "issued_mask": decision.mask,
+                    },
                     "control_delay_frames": control_delay_frames,
                     "control_delay_candidates": delay_estimate.support,
                     "control_delay_sample_count": (
@@ -4218,6 +4437,12 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "viability_control_reserve_deficit": (
                             decision.viability_control_reserve_deficit
+                        ),
+                        "viability_safety_value_preferred": (
+                            decision.viability_safety_value_preferred
+                        ),
+                        "viability_safety_state_value": (
+                            decision.viability_safety_state_value
                         ),
                     },
                     "terminal_threat": {
@@ -4410,6 +4635,42 @@ def run(args: argparse.Namespace) -> int:
                                 else 0
                             ),
                             "reason": viability_query.reason,
+                        }
+                    if safety_value_query is not None:
+                        assert corridor_solution is not None
+                        safety_policy = (
+                            corridor_solution.plan.safety_value_policy
+                        )
+                        assert safety_policy is not None
+                        corridor_record["safety_value"] = {
+                            "query_frame": counter_after_read,
+                            "age": (
+                                counter_after_read
+                                - corridor_solution.source_frame
+                            ),
+                            "layer": safety_value_query.layer,
+                            "available": safety_value_query.available,
+                            "active_action": (
+                                safety_value_query.active_action
+                            ),
+                            "state_value": safety_value_query.state_value,
+                            "best_actions": (
+                                safety_value_query.best_actions
+                            ),
+                            "selected_action": decision.action,
+                            "selected_preferred": (
+                                decision.viability_safety_value_preferred
+                            ),
+                            "position_error": (
+                                safety_value_query.position_error
+                            ),
+                            "horizon_frames": (
+                                safety_policy.horizon_frames
+                            ),
+                            "guidance_active": (
+                                safety_value_guidance is not None
+                            ),
+                            "reason": safety_value_query.reason,
                         }
                     if corridor_report_solution.plan.gate is not None:
                         corridor_record["gate"] = {
@@ -4623,6 +4884,15 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=CORRIDOR_MAX_AGE_FRAMES,
         help="discard a corridor result after this many game frames",
+    )
+    parser.add_argument(
+        "--safety-value-horizon",
+        type=int,
+        default=0,
+        help=(
+            "optional compact max-min fallback horizon in game frames; "
+            "zero disables the research policy"
+        ),
     )
     parser.add_argument(
         "--local-only",

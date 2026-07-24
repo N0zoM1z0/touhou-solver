@@ -899,6 +899,48 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(decision.viability_safe_action_count, 0)
         self.assertEqual(decision.viability_repair_volume, 9)
 
+    def test_empty_kernel_safety_value_is_soft_but_precedes_position(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            horizon=2,
+            viability_safety_actions=("right",),
+            viability_safety_state_value=-1.25,
+        )
+        self.assertEqual(decision.action, "right")
+        self.assertTrue(decision.viability_safety_value_preferred)
+        self.assertEqual(
+            decision.viability_safety_state_value,
+            -1.25,
+        )
+
+    def test_safety_value_never_overrides_local_collision_priority(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(
+                Bullet(196.0, 400.0, 0.0, 0.0, 4.0, 4.0),
+            ),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            horizon=2,
+            viability_safety_actions=("right",),
+            viability_safety_state_value=-2.0,
+        )
+        self.assertNotEqual(decision.action, "right")
+        self.assertFalse(decision.viability_safety_value_preferred)
+
     def test_ce_stage1_frame_2512_distant_recovery_survives_beam_pruning(
         self,
     ) -> None:

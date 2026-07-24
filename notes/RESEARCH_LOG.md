@@ -2024,3 +2024,30 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   and two adversarial focused tests with the rebuilt x86-64 DLL.
 - Physical acceptance is deliberately deferred to a randomized non-Stage-5
   run so the performance/epoch correction is not judged only on Reisen.
+
+## 2026-07-24: Stage-3 Cross-Control And Action-Time Deadline Guard
+
+- Complete randomized Stage-3 run `20260724_123136` reached
+  `route_complete`, emitted zero Bomb input, and recorded eight hits. All
+  Stage-3 spell lookahead rows had zero callback events/attachments, so this
+  is a valid non-Reisen architectural control. Eight lies within the retained
+  Stage-3 range `7..12`; no improvement claim is made.
+- All eight hits followed robust viability exhaustion. Spell 50 contributed
+  four hits and 98/308 decisions beyond the six-frame action-delay support.
+  Three contacts were at or immediately preceded by invalid action timing.
+- Frame 11,056 proved the existing epoch guard was incomplete: capture
+  9,254..9,255 passed, then the counter jumped by 1,800 during local planning.
+  The stale action issued at lag 1,802 and old corridor state survived into
+  later queries.
+- Added game-neutral `ActionIssueAlignment`. TH08 now revalidates immediately
+  before input: ordinary delay-support misses suppress the new direction and
+  retain planned/issued telemetry; implausible post-capture advance releases
+  movement and invalidates the gameplay epoch.
+- Corrected dossier attribution to use the support high value and the last
+  alive causal decision. The Stage-3 compact dossier now marks hit frames
+  26,246, 26,759, and 27,421 instead of only the hit-row overrun.
+- Profiling identifies batched laser lifecycle construction as the next
+  measured local C++ candidate, but the algorithmic empty-kernel recovery
+  problem remains separate. The next solver experiment is a max-min robust
+  clearance value whose positive threshold must exactly reproduce Boolean
+  viability before negative-margin ranking is considered.

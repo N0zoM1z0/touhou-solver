@@ -6,6 +6,7 @@ from __future__ import annotations
 import math
 import struct
 import unittest
+from dataclasses import replace
 from unittest.mock import patch
 
 import numpy as np
@@ -26,10 +27,12 @@ from th08_live_dodge_agent import (
     CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES,
     CorridorSolution,
     DOWN,
+    Decision,
     ENEMY_BODY_READ_OFFSET,
     ENEMY_BODY_READ_SIZE,
     ENEMY_CONTACT_SIZE_OFFSET,
     ENEMY_FLAGS_OFFSET,
+    ENEMY_LOCAL_PREFIX_SIZE,
     ENEMY_POOL_BASE,
     ENEMY_POOL_SIZE,
     ENEMY_POSITION_OFFSET,
@@ -62,6 +65,7 @@ from th08_live_dodge_agent import (
     Laser,
     RIGHT,
     RobustActionCertificate,
+    SHOT,
     UP,
     _auto_confirm_eligible,
     _action_name_from_mask,
@@ -77,15 +81,19 @@ from th08_live_dodge_agent import (
     _pack_laser_frame,
     _stage_corridor_solution,
     build_laser_collision_frames,
+    capture_enemy_pool_prefix_contiguous,
     choose_action,
     decode_enemy_body,
     decode_enemy_bodies,
     decode_spell_enemy_body_guard,
     enemy_pointer_in_scanned_pool,
+    enemy_pool_snapshot_changes,
     decode_lasers,
     decode_player_lethal_aabb,
     merge_spell_enemy_body_guard,
+    merge_enemy_pool_prefix,
     project_enemy_pool_snapshot,
+    recertify_action_for_fresh_hazards,
     read_enemy_bodies_sparse,
     serialize_laser_trace,
 )
@@ -571,6 +579,34 @@ class LiveDodgeAgentTests(unittest.TestCase):
             [(active_pointer + ENEMY_BODY_READ_OFFSET, ENEMY_BODY_READ_SIZE)],
         )
 
+    def test_local_enemy_prefix_is_one_contiguous_native_read(self) -> None:
+        blob = bytes(ENEMY_LOCAL_PREFIX_SIZE * ENEMY_STRIDE)
+
+        class Reader:
+            def __init__(self) -> None:
+                self.reads = []
+
+            def u32(self, _address: int) -> int:
+                return 100
+
+            def read(self, address: int, size: int) -> bytes:
+                self.reads.append((address, size))
+                return blob
+
+        reader = Reader()
+        snapshot = capture_enemy_pool_prefix_contiguous(reader)
+        self.assertTrue(snapshot.stable)
+        self.assertEqual(snapshot.bodies, ())
+        self.assertEqual(
+            reader.reads,
+            [
+                (
+                    ENEMY_POOL_BASE,
+                    ENEMY_LOCAL_PREFIX_SIZE * ENEMY_STRIDE,
+                )
+            ],
+        )
+
     def test_async_enemy_snapshot_projects_age_with_bounded_uncertainty(
         self,
     ) -> None:
@@ -594,6 +630,175 @@ class LiveDodgeAgentTests(unittest.TestCase):
         projected = project_enemy_pool_snapshot(snapshot, frame=105)[0]
         self.assertEqual((projected.x, projected.y), (28.0, 36.0))
         self.assertEqual(projected.uncertainty, 3.0)
+
+    def test_fresh_enemy_prefix_backprojects_and_replaces_stale_slots(
+        self,
+    ) -> None:
+        stale = EnemyBody(
+            ENEMY_POOL_BASE,
+            20.0,
+            40.0,
+            0.0,
+            0.0,
+            12.0,
+            8.0,
+            0x05,
+        )
+        outside_prefix = EnemyBody(
+            ENEMY_POOL_BASE + ENEMY_LOCAL_PREFIX_SIZE * ENEMY_STRIDE,
+            300.0,
+            80.0,
+            0.0,
+            0.0,
+            8.0,
+            8.0,
+            0x05,
+        )
+        fresh_snapshot = EnemyPoolSnapshot(
+            104,
+            104,
+            (
+                EnemyBody(
+                    ENEMY_POOL_BASE,
+                    36.0,
+                    32.0,
+                    2.0,
+                    -1.0,
+                    12.0,
+                    8.0,
+                    0x05,
+                ),
+            ),
+            2.0,
+        )
+        fresh = project_enemy_pool_snapshot(fresh_snapshot, frame=100)
+        merged = merge_enemy_pool_prefix(
+            (stale, outside_prefix),
+            fresh,
+        )
+        self.assertEqual(
+            [body.pointer for body in merged],
+            [ENEMY_POOL_BASE, outside_prefix.pointer],
+        )
+        self.assertEqual((merged[0].x, merged[0].y), (28.0, 36.0))
+        self.assertEqual(merged[0].uncertainty, 3.0)
+
+    def test_ce_0092_synchronous_prefix_exposes_new_contact_ring(
+        self,
+    ) -> None:
+        stale_boss_only = (
+            EnemyBody(
+                ENEMY_POOL_BASE,
+                192.0,
+                96.0,
+                0.0,
+                0.0,
+                18.0,
+                18.0,
+                0x05,
+            ),
+        )
+        fresh_ring = tuple(
+            EnemyBody(
+                ENEMY_POOL_BASE + slot * ENEMY_STRIDE,
+                192.0 + slot,
+                128.0,
+                0.0,
+                2.0,
+                18.0,
+                18.0,
+                0x05,
+            )
+            for slot in range(1, 19)
+        )
+        merged = merge_enemy_pool_prefix(stale_boss_only, fresh_ring)
+        self.assertEqual(len(merged), 18)
+        self.assertEqual(
+            {body.pointer for body in merged},
+            {body.pointer for body in fresh_ring},
+        )
+        before = EnemyPoolSnapshot(
+            35412,
+            35412,
+            stale_boss_only,
+            1.0,
+        )
+        after = EnemyPoolSnapshot(
+            35415,
+            35415,
+            stale_boss_only + fresh_ring,
+            1.0,
+        )
+        changes = enemy_pool_snapshot_changes(before, after)
+        self.assertEqual(
+            sum(change.startswith("added:") for change in changes),
+            18,
+        )
+
+    def test_issue_enemy_guard_accepts_expected_linear_motion(self) -> None:
+        before_body = EnemyBody(
+            ENEMY_POOL_BASE + 3 * ENEMY_STRIDE,
+            80.0,
+            120.0,
+            1.5,
+            -0.5,
+            18.0,
+            12.0,
+            0x05,
+        )
+        after_body = replace(
+            before_body,
+            x=84.5,
+            y=118.5,
+        )
+        self.assertEqual(
+            enemy_pool_snapshot_changes(
+                EnemyPoolSnapshot(100, 100, (before_body,), 1.0),
+                EnemyPoolSnapshot(103, 103, (after_body,), 1.0),
+            ),
+            (),
+        )
+
+    def test_ce_0092_issue_time_ring_recertifies_stale_up_right(self) -> None:
+        stale_decision = Decision(
+            SHOT | UP | RIGHT,
+            "up_right_fast",
+            27.55,
+            27.55,
+            0.0,
+            False,
+            planned_focus=False,
+            robust_delay_frames=(3, 4, 5, 6),
+            robust_min_clearance=27.55,
+        )
+        # Exact Stage-4A contact body back-projected from stable frame 35420
+        # to the causal player snapshot at frame 35412.
+        body = EnemyBody(
+            6163296,
+            344.0525817871094,
+            110.52362060546875,
+            -2.274150848388672,
+            2.251274824142456,
+            18.0,
+            18.0,
+            285217101,
+            6.0,
+        )
+        corrected = recertify_action_for_fresh_hazards(
+            stale_decision,
+            player_x=306.51348876953125,
+            player_y=147.7181396484375,
+            previous_mask=SHOT | UP | RIGHT,
+            delay_frames=(3, 4, 5, 6),
+            action_hold_frames=4,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(body,),
+            snapshot_lag=1,
+        )
+        self.assertNotEqual(corrected.action, "up_right_fast")
+        self.assertTrue(corrected.robust_override)
+        self.assertLess(corrected.robust_min_clearance, 0.0)
 
     def test_enemy_body_is_a_local_planner_hazard(self) -> None:
         decision = choose_action(
@@ -825,23 +1030,28 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertTrue(decision.bomb)
         self.assertTrue(decision.mask & 0x02)
 
-    def test_safe_large_power_item_remains_an_eventual_objective(self) -> None:
-        decision = choose_action(
+    def test_survival_only_policy_ignores_even_safe_large_power_item(
+        self,
+    ) -> None:
+        common = dict(
             player_x=192.0,
             player_y=400.0,
             bullets=(),
             lasers=(),
-            items=(Item(17, 210.0, 400.0, 0.0, 0.0, 2, 0, False),),
             power=0.0,
             bombs=2.0,
             previous_direction=0,
             can_bomb=False,
         )
-        # Lower item priority no longer requires an immediate lateral command,
-        # but a safe large item remains in the selected rollout.
-        self.assertNotIn("left", decision.action)
-        self.assertEqual(decision.predicted_collections, (17,))
-        self.assertGreater(decision.item_utility, 0.0)
+        without_item = choose_action(**common)
+        with_item = choose_action(
+            **common,
+            items=(Item(17, 210.0, 400.0, 0.0, 0.0, 2, 0, False),),
+        )
+        self.assertEqual(with_item.action, without_item.action)
+        self.assertEqual(with_item.score, without_item.score)
+        self.assertEqual(with_item.predicted_collections, ())
+        self.assertEqual(with_item.item_utility, 0.0)
 
     def test_small_top_item_does_not_override_conservative_position(self) -> None:
         decision = choose_action(

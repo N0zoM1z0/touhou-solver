@@ -127,6 +127,55 @@ class CorridorPlannerTests(unittest.TestCase):
             )
         np.testing.assert_allclose(native, reference, atol=3e-5)
 
+    @unittest.skipUnless(
+        native_available(),
+        "native planner backend is not built",
+    )
+    def test_native_bounded_aabb_traversal_matches_adversarial_dense_oracle(
+        self,
+    ) -> None:
+        rng = np.random.default_rng(9292)
+        grid_x, grid_y = np.meshgrid(
+            np.arange(8.0, 377.0, 16.0, dtype=np.float32),
+            np.arange(16.0, 433.0, 16.0, dtype=np.float32),
+        )
+        aabbs = tuple(
+            MovingAabbHazard(
+                x=float(rng.uniform(-100.0, 476.0)),
+                y=float(rng.uniform(-100.0, 532.0)),
+                velocity_x=float(rng.uniform(-5.0, 5.0)),
+                velocity_y=float(rng.uniform(-5.0, 5.0)),
+                half_width=float(rng.uniform(0.0, 18.0)),
+                half_height=float(rng.uniform(0.0, 18.0)),
+                base_uncertainty=float(rng.uniform(0.0, 2.0)),
+                uncertainty_per_frame=float(rng.uniform(0.0, 0.2)),
+            )
+            for _ in range(200)
+        )
+        config = CorridorConfig(
+            grid_step=16.0,
+            frames_per_layer=8,
+            horizon_frames=16,
+            danger_radius=48.0,
+        )
+        actual = _hazard_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs=aabbs,
+            segments=(),
+            segment_trajectories=(),
+            config=config,
+        )
+        expected = _aabb_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs,
+            horizon_frames=config.horizon_frames,
+            player_radius=config.player_radius,
+            clearance_cap=config.danger_radius,
+        )
+        np.testing.assert_allclose(actual, expected, atol=5e-6)
+
     def test_sparse_aabb_volume_matches_dense_geometry_below_cap(
         self,
     ) -> None:

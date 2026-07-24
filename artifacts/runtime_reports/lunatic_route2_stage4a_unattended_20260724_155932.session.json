@@ -1,0 +1,3816 @@
+{
+  "schema": "th08-unattended-practice-session-v1",
+  "run_id": "lunatic_route2_stage4a_unattended_20260724_155932",
+  "iteration": 1,
+  "stage": {
+    "key": "4a",
+    "label": "Stage 4A",
+    "menu_index": 3,
+    "route_index": 3
+  },
+  "game_dir": "D:\\Entertainment\\Game\\Touhou\\[th08] 东方永夜抄 (日文版)",
+  "launch_bat": "D:\\Entertainment\\Game\\Touhou\\[th08] 东方永夜抄 (日文版)\\run_th08_no_life_decrement_attach.bat",
+  "menu_plan": [
+    {
+      "key": "down",
+      "purpose": "main-menu Practice Start (2/4)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "main-menu Practice Start (3/4)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "main-menu Practice Start (4/4)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "confirm",
+      "purpose": "enter Practice Start",
+      "wait_after_ms": 700
+    },
+    {
+      "key": "confirm",
+      "purpose": "accept native-verified Lunatic",
+      "wait_after_ms": 700
+    },
+    {
+      "key": "right",
+      "purpose": "team Sakuya/Remilia (2/3)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "right",
+      "purpose": "team Sakuya/Remilia (3/3)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "confirm",
+      "purpose": "accept native-verified Sakuya/Remilia",
+      "wait_after_ms": 700
+    },
+    {
+      "key": "down",
+      "purpose": "select Stage 4A (1/3)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "select Stage 4A (2/3)",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "select Stage 4A (3/3)",
+      "wait_after_ms": 700
+    }
+  ],
+  "hard_no_bomb": true,
+  "trace_transform_runtime": false,
+  "started_at": "2026-07-24T15:59:32.992560+08:00",
+  "caps_lock_changed": false,
+  "target": {
+    "pid": 36488,
+    "image_path": "D:\\Entertainment\\Game\\Touhou\\[th08] 东方永夜抄 (日文版)\\th08.exe",
+    "sha256": "330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924",
+    "runtime_patch": {
+      "address": 4509946,
+      "byte": 0,
+      "no_life_decrement": true
+    }
+  },
+  "pid": 36488,
+  "executed_menu_taps": [
+    {
+      "key": "down",
+      "purpose": "select Practice Start feedback step 1",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "select Practice Start feedback step 2",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "select Practice Start feedback step 3",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "confirm",
+      "purpose": "enter Practice Start",
+      "wait_after_ms": 700
+    },
+    {
+      "key": "confirm",
+      "purpose": "accept native-verified Lunatic",
+      "wait_after_ms": 700
+    },
+    {
+      "key": "right",
+      "purpose": "select Sakuya/Remilia feedback step 1",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "right",
+      "purpose": "select Sakuya/Remilia feedback step 2",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "confirm",
+      "purpose": "accept native-verified Sakuya/Remilia",
+      "wait_after_ms": 700
+    },
+    {
+      "key": "down",
+      "purpose": "select Stage 4A feedback step 1",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "select Stage 4A feedback step 2",
+      "wait_after_ms": 180
+    },
+    {
+      "key": "down",
+      "purpose": "select Stage 4A feedback step 3",
+      "wait_after_ms": 180
+    }
+  ],
+  "menu_native_trace": [
+    {
+      "label": "practice_start_selected",
+      "manager": 186887144,
+      "mode": 0,
+      "substate": 1,
+      "screen_age": 48,
+      "cursor": 3,
+      "difficulty_cursor": 3,
+      "difficulty_index": 0,
+      "route_id": 0,
+      "stage_route_index": 0,
+      "practice_stage_availability_mask": 1
+    },
+    {
+      "label": "difficulty_screen_entered",
+      "manager": 186887144,
+      "mode": 8,
+      "substate": 1,
+      "screen_age": 42,
+      "cursor": 3,
+      "difficulty_cursor": 3,
+      "difficulty_index": 0,
+      "route_id": 0,
+      "stage_route_index": 0,
+      "practice_stage_availability_mask": 1
+    },
+    {
+      "label": "difficulty_selected",
+      "manager": 186887144,
+      "mode": 8,
+      "substate": 1,
+      "screen_age": 42,
+      "cursor": 3,
+      "difficulty_cursor": 3,
+      "difficulty_index": 0,
+      "route_id": 0,
+      "stage_route_index": 0,
+      "practice_stage_availability_mask": 1
+    },
+    {
+      "label": "team_screen_entered",
+      "manager": 186887144,
+      "mode": 9,
+      "substate": 1,
+      "screen_age": 45,
+      "cursor": 0,
+      "difficulty_cursor": 3,
+      "difficulty_index": 0,
+      "route_id": 0,
+      "stage_route_index": 0,
+      "practice_stage_availability_mask": 1
+    },
+    {
+      "label": "team_selected",
+      "manager": 186887144,
+      "mode": 9,
+      "substate": 1,
+      "screen_age": 77,
+      "cursor": 2,
+      "difficulty_cursor": 3,
+      "difficulty_index": 0,
+      "route_id": 0,
+      "stage_route_index": 0,
+      "practice_stage_availability_mask": 1
+    },
+    {
+      "label": "stage_screen_entered",
+      "manager": 186887144,
+      "mode": 11,
+      "substate": 1,
+      "screen_age": 46,
+      "cursor": 0,
+      "difficulty_cursor": 3,
+      "difficulty_index": 0,
+      "route_id": 2,
+      "stage_route_index": 0,
+      "practice_stage_availability_mask": 16559
+    },
+    {
+      "label": "stage_selected",
+      "manager": 186887144,
+      "mode": 11,
+      "substate": 1,
+      "screen_age": 93,
+      "cursor": 3,
+      "difficulty_cursor": 3,
+      "difficulty_index": 0,
+      "route_id": 2,
+      "stage_route_index": 0,
+      "practice_stage_availability_mask": 16559
+    }
+  ],
+  "menu_native_state": {
+    "manager": 186887144,
+    "mode": 11,
+    "substate": 1,
+    "screen_age": 93,
+    "cursor": 3,
+    "difficulty_cursor": 3,
+    "difficulty_index": 0,
+    "route_id": 2,
+    "stage_route_index": 0,
+    "practice_stage_availability_mask": 16559
+  },
+  "agent_armed_at": "2026-07-24T15:59:45.710766+08:00",
+  "agent_summary": {
+    "decision_count": 8293,
+    "first_frame": 2,
+    "last_frame": 45110,
+    "frame_span": 45108,
+    "termination_reason": "route_complete",
+    "counter_gaps": 168,
+    "hit_frames": [
+      1632,
+      2609,
+      4023,
+      4330,
+      9430,
+      9859,
+      11460,
+      12203,
+      12512,
+      12881,
+      13262,
+      20910,
+      22041,
+      22862,
+      31415,
+      35419,
+      36008,
+      37260,
+      45012
+    ],
+    "hit_analyses": [
+      {
+        "hit_frame": 1632,
+        "window_start": 1392,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 128.0
+        },
+        "player": {
+          "x": 22.345439910888672,
+          "y": 432.0,
+          "projected_x": 18.345439910888672,
+          "projected_y": 432.0,
+          "control_origin_x": 8.0,
+          "control_origin_y": 432.0,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 14
+        },
+        "last_nonnegative_gate": {
+          "frame": 1459,
+          "source_frame": 1441,
+          "lane": "left",
+          "slack": 0.5932068056968269,
+          "deadline": 19,
+          "travel_frames": 18.406793194303173
+        },
+        "first_negative_gate": {
+          "frame": 1446,
+          "source_frame": 1441,
+          "lane": "left",
+          "slack": -6.431787031182903,
+          "deadline": 17,
+          "travel_frames": 23.431787031182903
+        },
+        "minimum_gate_slack": -6.431787031182903,
+        "first_nonpositive_pipeline": {
+          "frame": 1516,
+          "clearance": -1.6216462850570679
+        },
+        "minimum_pipeline_clearance": -1.6216462850570679,
+        "nearest_bullet": {
+          "slot": 462,
+          "x": 19.957908630371094,
+          "y": 425.3955383300781,
+          "center_distance": 7.022764381987847,
+          "aabb_clearance": 2.604461669921875
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 2609,
+        "window_start": 2369,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 112.0
+        },
+        "player": {
+          "x": 299.42864990234375,
+          "y": 432.0,
+          "projected_x": 299.42864990234375,
+          "projected_y": 432.0,
+          "control_origin_x": 299.42864990234375,
+          "control_origin_y": 422.80000019073486,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 14
+        },
+        "last_nonnegative_gate": {
+          "frame": 2509,
+          "source_frame": 2490,
+          "lane": "center",
+          "slack": 19.0,
+          "deadline": 19,
+          "travel_frames": 0.0
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 12.464842682681013,
+        "first_nonpositive_pipeline": {
+          "frame": 2609,
+          "clearance": -3.214801073074341
+        },
+        "minimum_pipeline_clearance": -3.214801073074341,
+        "nearest_bullet": {
+          "slot": 1257,
+          "x": 298.0790100097656,
+          "y": 425.2515869140625,
+          "center_distance": 6.882049623338296,
+          "aabb_clearance": 1.7484130859375
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 4023,
+        "window_start": 3783,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 101.0
+        },
+        "player": {
+          "x": 8.0,
+          "y": 432.0,
+          "projected_x": 8.0,
+          "projected_y": 428.0,
+          "control_origin_x": 8.0,
+          "control_origin_y": 416.0,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 14
+        },
+        "last_nonnegative_gate": {
+          "frame": 3910,
+          "source_frame": 3896,
+          "lane": "left",
+          "slack": 15.563438415527344,
+          "deadline": 16,
+          "travel_frames": 0.43656158447265625
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 8.39849853515625,
+        "first_nonpositive_pipeline": {
+          "frame": 4007,
+          "clearance": -0.9364665746688843
+        },
+        "minimum_pipeline_clearance": -2.2013001441955566,
+        "nearest_bullet": {
+          "slot": 18,
+          "x": 12.850933074951172,
+          "y": 425.0560607910156,
+          "center_distance": 8.47052793134677,
+          "aabb_clearance": 3.0644518537972503
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 4330,
+        "window_start": 4090,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 93.0
+        },
+        "player": {
+          "x": 111.73185729980469,
+          "y": 410.583984375,
+          "projected_x": 111.73185729980469,
+          "projected_y": 410.583984375,
+          "control_origin_x": 97.58972191810608,
+          "control_origin_y": 424.7261197566986,
+          "phase": 2,
+          "phase_at_action": 2,
+          "predeath_at_action": 12
+        },
+        "last_nonnegative_gate": {
+          "frame": 4221,
+          "source_frame": 4202,
+          "lane": "center",
+          "slack": 16.203212853590912,
+          "deadline": 20,
+          "travel_frames": 3.7967871464090877
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 6.5,
+        "first_nonpositive_pipeline": {
+          "frame": 4330,
+          "clearance": -1.8568146228790283
+        },
+        "minimum_pipeline_clearance": -1.8568146228790283,
+        "nearest_bullet": {
+          "slot": 734,
+          "x": 113.87166595458984,
+          "y": 411.41729736328125,
+          "center_distance": 2.2963430962144327,
+          "aabb_clearance": -2.8601913452148438
+        },
+        "observed_bullet_contact_candidate": {
+          "slot": 734,
+          "x": 113.87166595458984,
+          "y": 411.41729736328125,
+          "center_distance": 2.2963430962144327,
+          "aabb_clearance": -2.8601913452148438
+        },
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 9430,
+        "window_start": 9190,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 4.0,
+          "power": 91.0
+        },
+        "player": {
+          "x": 20.675941467285156,
+          "y": 432.0,
+          "projected_x": 20.675941467285156,
+          "projected_y": 432.0,
+          "control_origin_x": 40.675941467285156,
+          "control_origin_y": 432.0,
+          "phase": 2,
+          "phase_at_action": 2,
+          "predeath_at_action": 12
+        },
+        "last_nonnegative_gate": {
+          "frame": 9318,
+          "source_frame": 9294,
+          "lane": "left",
+          "slack": 11.402142063956651,
+          "deadline": 23,
+          "travel_frames": 11.597857936043349
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 9.651772585693784,
+        "first_nonpositive_pipeline": {
+          "frame": 9423,
+          "clearance": -8.1092529296875
+        },
+        "minimum_pipeline_clearance": -14.78077220916748,
+        "nearest_bullet": {
+          "slot": 664,
+          "x": 38.9432373046875,
+          "y": 439.2533264160156,
+          "center_distance": 19.65463918031687,
+          "aabb_clearance": 14.633518486034154
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 9859,
+        "window_start": 9619,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 75.0
+        },
+        "player": {
+          "x": 92.9317855834961,
+          "y": 384.9647216796875,
+          "projected_x": 95.76021265983582,
+          "projected_y": 387.7931487560272,
+          "control_origin_x": 107.0739209651947,
+          "control_origin_y": 399.1068570613861,
+          "phase": 2,
+          "phase_at_action": 2,
+          "predeath_at_action": 11
+        },
+        "last_nonnegative_gate": {
+          "frame": 9821,
+          "source_frame": 9795,
+          "lane": "left",
+          "slack": 0.6241332933328749,
+          "deadline": 20,
+          "travel_frames": 19.375866706667125
+        },
+        "first_negative_gate": {
+          "frame": 9625,
+          "source_frame": 9616,
+          "lane": "left",
+          "slack": -1.0733619632240305,
+          "deadline": 21,
+          "travel_frames": 22.07336196322403
+        },
+        "minimum_gate_slack": -5.896215164765902,
+        "first_nonpositive_pipeline": {
+          "frame": 9821,
+          "clearance": -15.405414581298828
+        },
+        "minimum_pipeline_clearance": -15.405414581298828,
+        "nearest_bullet": {
+          "slot": 619,
+          "x": 109.79472351074219,
+          "y": 358.9501953125,
+          "center_distance": 31.001842810504805,
+          "aabb_clearance": 25.496951647045567
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 11460,
+        "window_start": 11220,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 60.0
+        },
+        "player": {
+          "x": 8.0,
+          "y": 378.38287353515625,
+          "projected_x": 10.828427076339722,
+          "projected_y": 375.5544464588165,
+          "control_origin_x": 22.14213538169861,
+          "control_origin_y": 364.24073815345764,
+          "phase": 2,
+          "phase_at_action": 2,
+          "predeath_at_action": 26
+        },
+        "last_nonnegative_gate": {
+          "frame": 11460,
+          "source_frame": 11426,
+          "lane": "left",
+          "slack": 18.964466154575348,
+          "deadline": 21,
+          "travel_frames": 2.035533845424652
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 8.302886962890625,
+        "first_nonpositive_pipeline": {
+          "frame": 11306,
+          "clearance": -0.018983930349349976
+        },
+        "minimum_pipeline_clearance": -0.7441801428794861,
+        "nearest_bullet": {
+          "slot": 1469,
+          "x": 6.09473991394043,
+          "y": 375.3890380859375,
+          "center_distance": 3.548671116422393,
+          "aabb_clearance": -1.00616455078125
+        },
+        "observed_bullet_contact_candidate": {
+          "slot": 1469,
+          "x": 6.09473991394043,
+          "y": 375.3890380859375,
+          "center_distance": 3.548671116422393,
+          "aabb_clearance": -1.00616455078125
+        },
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 12203,
+        "window_start": 11963,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 44.0
+        },
+        "player": {
+          "x": 8.0,
+          "y": 432.0,
+          "projected_x": 8.0,
+          "projected_y": 428.0,
+          "control_origin_x": 8.0,
+          "control_origin_y": 412.0,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 29
+        },
+        "last_nonnegative_gate": {
+          "frame": 12152,
+          "source_frame": 12123,
+          "lane": "left",
+          "slack": 9.12634563446045,
+          "deadline": 17,
+          "travel_frames": 7.873654365539551
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 4.807611687253857,
+        "first_nonpositive_pipeline": {
+          "frame": 12019,
+          "clearance": -0.8453038930892944
+        },
+        "minimum_pipeline_clearance": -2.3235225677490234,
+        "nearest_bullet": {
+          "slot": 931,
+          "x": 13.662456512451172,
+          "y": 426.4493103027344,
+          "center_distance": 7.929285583880268,
+          "aabb_clearance": 2.2734115758034377
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 12512,
+        "window_start": 12272,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 28.0
+        },
+        "player": {
+          "x": 193.987548828125,
+          "y": 432.0,
+          "projected_x": 191.15912175178528,
+          "projected_y": 429.1715729236603,
+          "control_origin_x": 179.8454134464264,
+          "control_origin_y": 417.8578646183014,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 30
+        },
+        "last_nonnegative_gate": {
+          "frame": 12512,
+          "source_frame": 12488,
+          "lane": "center",
+          "slack": 4.538646638393402,
+          "deadline": 22,
+          "travel_frames": 17.461353361606598
+        },
+        "first_negative_gate": {
+          "frame": 12287,
+          "source_frame": 12280,
+          "lane": "left",
+          "slack": -5.4409126477642396,
+          "deadline": 22,
+          "travel_frames": 27.44091264776424
+        },
+        "minimum_gate_slack": -9.817704873014545,
+        "first_nonpositive_pipeline": {
+          "frame": 12512,
+          "clearance": -2.7716727256774902
+        },
+        "minimum_pipeline_clearance": -2.7716727256774902,
+        "nearest_bullet": {
+          "slot": 397,
+          "x": 181.25860595703125,
+          "y": 423.7330322265625,
+          "center_distance": 15.177903108882418,
+          "aabb_clearance": 9.71604125281344
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 12881,
+        "window_start": 12641,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 12.0
+        },
+        "player": {
+          "x": 8.0,
+          "y": 407.3687744140625,
+          "projected_x": 9.62634563446045,
+          "projected_y": 405.74242877960205,
+          "control_origin_x": 16.131728172302246,
+          "control_origin_y": 399.23704624176025,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 28
+        },
+        "last_nonnegative_gate": {
+          "frame": 12873,
+          "source_frame": 12841,
+          "lane": "left",
+          "slack": 8.438052892684937,
+          "deadline": 22,
+          "travel_frames": 13.561947107315063
+        },
+        "first_negative_gate": {
+          "frame": 12702,
+          "source_frame": 12697,
+          "lane": "left",
+          "slack": -11.414394319057465,
+          "deadline": 18,
+          "travel_frames": 29.414394319057465
+        },
+        "minimum_gate_slack": -11.414394319057465,
+        "first_nonpositive_pipeline": {
+          "frame": 12877,
+          "clearance": -1.1211657524108887
+        },
+        "minimum_pipeline_clearance": -1.3006775379180908,
+        "nearest_bullet": {
+          "slot": 1096,
+          "x": 11.326045989990234,
+          "y": 408.6417541503906,
+          "center_distance": 3.5613283107054508,
+          "aabb_clearance": -0.6739540100097656
+        },
+        "observed_bullet_contact_candidate": {
+          "slot": 1096,
+          "x": 11.326045989990234,
+          "y": 408.6417541503906,
+          "center_distance": 3.5613283107054508,
+          "aabb_clearance": -0.6739540100097656
+        },
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 13262,
+        "window_start": 13022,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 0.0
+        },
+        "player": {
+          "x": 8.0,
+          "y": 387.58154296875,
+          "projected_x": 8.0,
+          "projected_y": 384.7531158924103,
+          "control_origin_x": 8.0,
+          "control_origin_y": 373.4394075870514,
+          "phase": 2,
+          "phase_at_action": 2,
+          "predeath_at_action": 28
+        },
+        "last_nonnegative_gate": {
+          "frame": 13247,
+          "source_frame": 13214,
+          "lane": "left",
+          "slack": 18.888411427873375,
+          "deadline": 22,
+          "travel_frames": 3.111588572126624
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 1.874161627828915,
+        "first_nonpositive_pipeline": {
+          "frame": 13259,
+          "clearance": -3.1963562965393066
+        },
+        "minimum_pipeline_clearance": -3.1963562965393066,
+        "nearest_bullet": {
+          "slot": 704,
+          "x": 6.401092529296875,
+          "y": 387.21148681640625,
+          "center_distance": 1.6411723418817796,
+          "aabb_clearance": -2.401092529296875
+        },
+        "observed_bullet_contact_candidate": {
+          "slot": 704,
+          "x": 6.401092529296875,
+          "y": 387.21148681640625,
+          "center_distance": 1.6411723418817796,
+          "aabb_clearance": -2.401092529296875
+        },
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 20910,
+        "window_start": 20670,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 1.0
+        },
+        "player": {
+          "x": 29.238327026367188,
+          "y": 432.0,
+          "projected_x": 29.238327026367188,
+          "projected_y": 432.0,
+          "control_origin_x": 29.238327026367188,
+          "control_origin_y": 420.5000002384186,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 27
+        },
+        "last_nonnegative_gate": {
+          "frame": 20910,
+          "source_frame": 20885,
+          "lane": "left",
+          "slack": 17.620874586554805,
+          "deadline": 22,
+          "travel_frames": 4.3791254134451965
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 3.7572322902674866,
+        "first_nonpositive_pipeline": {
+          "frame": 20905,
+          "clearance": -12.250492095947266
+        },
+        "minimum_pipeline_clearance": -15.482704162597656,
+        "nearest_bullet": {
+          "slot": 1241,
+          "x": 37.542816162109375,
+          "y": 442.45977783203125,
+          "center_distance": 13.3555790627405,
+          "aabb_clearance": 7.762561198401265
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 22041,
+        "window_start": 21801,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 4.0,
+          "power": 15.0
+        },
+        "player": {
+          "x": 8.0,
+          "y": 417.8846435546875,
+          "projected_x": 8.0,
+          "projected_y": 413.8846435546875,
+          "control_origin_x": 8.0,
+          "control_origin_y": 397.8846435546875,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 15
+        },
+        "last_nonnegative_gate": {
+          "frame": 21965,
+          "source_frame": 21947,
+          "lane": "left",
+          "slack": 13.147587280372992,
+          "deadline": 21,
+          "travel_frames": 7.852412719627008
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 2.1473875045776367,
+        "first_nonpositive_pipeline": {
+          "frame": 22041,
+          "clearance": -1.9208413362503052
+        },
+        "minimum_pipeline_clearance": -1.9208413362503052,
+        "nearest_bullet": {
+          "slot": 1349,
+          "x": 15.340951919555664,
+          "y": 424.4796142578125,
+          "center_distance": 9.868293350944988,
+          "aabb_clearance": 2.8326643700760608
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 22862,
+        "window_start": 22622,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 5.0
+        },
+        "player": {
+          "x": 24.600788116455078,
+          "y": 432.0,
+          "projected_x": 24.600788116455078,
+          "projected_y": 428.0,
+          "control_origin_x": 24.600788116455078,
+          "control_origin_y": 412.0,
+          "phase": 2,
+          "phase_at_action": 2,
+          "predeath_at_action": 12
+        },
+        "last_nonnegative_gate": null,
+        "first_negative_gate": null,
+        "minimum_gate_slack": null,
+        "first_nonpositive_pipeline": {
+          "frame": 22811,
+          "clearance": -0.7065795660018921
+        },
+        "minimum_pipeline_clearance": -2.5375092029571533,
+        "nearest_bullet": {
+          "slot": 1460,
+          "x": 21.613868713378906,
+          "y": 434.3385009765625,
+          "center_distance": 3.7934515072499186,
+          "aabb_clearance": -1.0130805969238281
+        },
+        "observed_bullet_contact_candidate": {
+          "slot": 1460,
+          "x": 21.613868713378906,
+          "y": 434.3385009765625,
+          "center_distance": 3.7934515072499186,
+          "aabb_clearance": -1.0130805969238281
+        },
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 31415,
+        "window_start": 31175,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 4.0,
+          "power": 3.0
+        },
+        "player": {
+          "x": 56.08113479614258,
+          "y": 413.78631591796875,
+          "projected_x": 56.08113479614258,
+          "projected_y": 413.78631591796875,
+          "control_origin_x": 32.08113479614258,
+          "control_origin_y": 413.78631591796875,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 29
+        },
+        "last_nonnegative_gate": null,
+        "first_negative_gate": null,
+        "minimum_gate_slack": null,
+        "first_nonpositive_pipeline": {
+          "frame": 31407,
+          "clearance": -1.215806484222412
+        },
+        "minimum_pipeline_clearance": -1.215806484222412,
+        "nearest_bullet": {
+          "slot": 648,
+          "x": 39.39197540283203,
+          "y": 405.52777099609375,
+          "center_distance": 18.62073053029749,
+          "aabb_clearance": 13.384691664751513
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 35419,
+        "window_start": 35179,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 4.0,
+          "power": 3.0
+        },
+        "player": {
+          "x": 317.82720947265625,
+          "y": 136.4044189453125,
+          "projected_x": 317.82720947265625,
+          "projected_y": 136.4044189453125,
+          "control_origin_x": 329.14091777801514,
+          "control_origin_y": 125.09071063995361,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 14
+        },
+        "last_nonnegative_gate": {
+          "frame": 35419,
+          "source_frame": 35402,
+          "lane": "right",
+          "slack": 14.448428683009668,
+          "deadline": 22,
+          "travel_frames": 7.551571316990332
+        },
+        "first_negative_gate": {
+          "frame": 35265,
+          "source_frame": 35264,
+          "lane": "right",
+          "slack": -1.6304403077757925,
+          "deadline": 21,
+          "travel_frames": 22.630440307775793
+        },
+        "minimum_gate_slack": -16.791964769363403,
+        "first_nonpositive_pipeline": {
+          "frame": 35340,
+          "clearance": -14.059814453125
+        },
+        "minimum_pipeline_clearance": -22.77972412109375,
+        "nearest_bullet": {
+          "slot": 410,
+          "x": 296.8558044433594,
+          "y": 176.351318359375,
+          "center_distance": 45.117120937622396,
+          "aabb_clearance": 39.751832236428676
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 36008,
+        "window_start": 35768,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 3.0,
+          "power": 1.0
+        },
+        "player": {
+          "x": 360.0,
+          "y": 423.1712646484375,
+          "projected_x": 360.0,
+          "projected_y": 419.1712646484375,
+          "control_origin_x": 360.0,
+          "control_origin_y": 407.1712646484375,
+          "phase": 2,
+          "phase_at_action": 2,
+          "predeath_at_action": 13
+        },
+        "last_nonnegative_gate": {
+          "frame": 35997,
+          "source_frame": 35976,
+          "lane": "right",
+          "slack": 8.707183837890625,
+          "deadline": 18,
+          "travel_frames": 9.292816162109375
+        },
+        "first_negative_gate": null,
+        "minimum_gate_slack": 4.763985165308474,
+        "first_nonpositive_pipeline": null,
+        "minimum_pipeline_clearance": 6.865289211273193,
+        "nearest_bullet": {
+          "slot": 870,
+          "x": 378.5810852050781,
+          "y": 416.18365478515625,
+          "center_distance": 19.851534424315883,
+          "aabb_clearance": 14.884013519643268
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 37260,
+        "window_start": 37020,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 4.0,
+          "power": 1.0
+        },
+        "player": {
+          "x": 102.09947204589844,
+          "y": 415.91925048828125,
+          "projected_x": 99.27104496955872,
+          "projected_y": 418.747677564621,
+          "control_origin_x": 90.78576374053955,
+          "control_origin_y": 427.23295879364014,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 15
+        },
+        "last_nonnegative_gate": {
+          "frame": 37066,
+          "source_frame": 37047,
+          "lane": "right",
+          "slack": 2.082733154296875,
+          "deadline": 19,
+          "travel_frames": 16.917266845703125
+        },
+        "first_negative_gate": {
+          "frame": 37050,
+          "source_frame": 37047,
+          "lane": "right",
+          "slack": -1.917266845703125,
+          "deadline": 19,
+          "travel_frames": 20.917266845703125
+        },
+        "minimum_gate_slack": -15.936026981472722,
+        "first_nonpositive_pipeline": {
+          "frame": 37260,
+          "clearance": -10.916473388671875
+        },
+        "minimum_pipeline_clearance": -10.916473388671875,
+        "nearest_bullet": {
+          "slot": 495,
+          "x": 107.55827331542969,
+          "y": 391.34051513671875,
+          "center_distance": 25.17762385099881,
+          "aabb_clearance": 20.63037687037331
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      },
+      {
+        "hit_frame": 45012,
+        "window_start": 44772,
+        "stage_route_index": 3,
+        "stage_label": "Stage 4A / Reimu",
+        "resources": {
+          "lives": 8.0,
+          "bombs": 4.0,
+          "power": 24.0
+        },
+        "player": {
+          "x": 170.3413543701172,
+          "y": 384.2984619140625,
+          "projected_x": 167.51292729377747,
+          "projected_y": 387.1268889904022,
+          "control_origin_x": 153.37079191207886,
+          "control_origin_y": 401.26902437210083,
+          "phase": 0,
+          "phase_at_action": 2,
+          "predeath_at_action": 26
+        },
+        "last_nonnegative_gate": null,
+        "first_negative_gate": null,
+        "minimum_gate_slack": null,
+        "first_nonpositive_pipeline": {
+          "frame": 45006,
+          "clearance": -0.1742088496685028
+        },
+        "minimum_pipeline_clearance": -1.9885132312774658,
+        "nearest_bullet": {
+          "slot": 596,
+          "x": 168.8968963623047,
+          "y": 389.33837890625,
+          "center_distance": 5.24282578620289,
+          "aabb_clearance": 1.0399169921875
+        },
+        "observed_bullet_contact_candidate": null,
+        "active_lasers_at_observation": 0
+      }
+    ],
+    "resources": {
+      "bombs": [
+        3.0,
+        3.0
+      ],
+      "lives": [
+        8.0,
+        8.0
+      ],
+      "power": [
+        128.0,
+        8.0
+      ]
+    },
+    "local_latency_ms": {
+      "read": {
+        "median": 13.14490000368096,
+        "p95": 17.21019999240525,
+        "max": 35.56269998080097
+      },
+      "plan": {
+        "median": 29.09419999923557,
+        "p95": 48.376599996117875,
+        "max": 84.09550000214949
+      }
+    },
+    "frame_lag": {
+      "snapshot": {
+        "median": 1.0,
+        "p95": 1.0,
+        "max": 2.0
+      },
+      "action": {
+        "median": 3.0,
+        "p95": 5.0,
+        "max": 7.0
+      },
+      "modeled_control_delays": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "corridor": {
+      "record_count": 8173,
+      "unique_solution_count": 1533,
+      "stale_record_count": 11,
+      "stale_fraction": 0.0013458950201884253,
+      "solve_latency_ms": {
+        "median": 290.2024000068195,
+        "p95": 437.1617999859154,
+        "max": 519.6632999868598
+      },
+      "lane_transitions": [
+        {
+          "source_frame": 82,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 456,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 485,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 513,
+          "lane": "left",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 605,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 648,
+          "lane": "left",
+          "bottleneck_clearance": 10.012853622436523
+        },
+        {
+          "source_frame": 668,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 688,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 709,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 775,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 796,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 815,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 833,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 911,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 929,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 1055,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 1135,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 1386,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 1461,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 1693,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 1837,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 1855,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 1906,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 1941,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 1960,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2035,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 2051,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2068,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 2086,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2340,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 2356,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2390,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 2422,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2490,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 2508,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2620,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 2657,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2674,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 2774,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2798,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 2911,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 2932,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2953,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 2975,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 2999,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 3170,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 3193,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 3274,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 3296,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 3528,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 3544,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 3586,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 3607,
+          "lane": "left",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 3789,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 3879,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 3912,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 4099,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 4115,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 4133,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 4220,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 4396,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 4413,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 4429,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 4464,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 4520,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 4537,
+          "lane": "left",
+          "bottleneck_clearance": 7.914921760559082
+        },
+        {
+          "source_frame": 4555,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 4592,
+          "lane": "left",
+          "bottleneck_clearance": 32.0
+        },
+        {
+          "source_frame": 4616,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 4647,
+          "lane": "left",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 4675,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 4735,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 8678,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 8700,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 8722,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 8768,
+          "lane": "left",
+          "bottleneck_clearance": 6.527652263641357
+        },
+        {
+          "source_frame": 8834,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 9058,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 9079,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 9294,
+          "lane": "left",
+          "bottleneck_clearance": 11.917987823486328
+        },
+        {
+          "source_frame": 9313,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 9550,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 9572,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 9616,
+          "lane": "left",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 9638,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 9657,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 9713,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 9732,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 9817,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 9858,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 9879,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 9951,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 9975,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10018,
+          "lane": "center",
+          "bottleneck_clearance": 10.009684562683105
+        },
+        {
+          "source_frame": 10037,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10060,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 10111,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10151,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 10253,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10290,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 10310,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10367,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 10383,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10525,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 10546,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10563,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 10580,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10615,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 10643,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10667,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 10920,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10941,
+          "lane": "left",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 10967,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 10991,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11017,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11041,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11066,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11144,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11167,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11191,
+          "lane": "left",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 11216,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11241,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11265,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11426,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11454,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11481,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11504,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11530,
+          "lane": "left",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 11552,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11574,
+          "lane": "left",
+          "bottleneck_clearance": 32.0
+        },
+        {
+          "source_frame": 11599,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11625,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11662,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11683,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11726,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11771,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 11800,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 11825,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12051,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12072,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12123,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12145,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12235,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12257,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12280,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12302,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12327,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12353,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12395,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12509,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12533,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12556,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12630,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 12651,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12697,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12715,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12738,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12863,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 12960,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 12982,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 13003,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 13021,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 13042,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 13064,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 13083,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 13146,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 13169,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 13242,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 13317,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 13341,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 13387,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 13409,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 13433,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 13477,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 13496,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 13537,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 13580,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 15580,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 15607,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 15636,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 15735,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 15796,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 15841,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 15902,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 15963,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 15982,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16017,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16076,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16096,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16116,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16252,
+          "lane": "center",
+          "bottleneck_clearance": 45.697452545166016
+        },
+        {
+          "source_frame": 16271,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16304,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16391,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16601,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16654,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16688,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16704,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16723,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16740,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16756,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16775,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16792,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16813,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16832,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16855,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16873,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 16932,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 16990,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 17129,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 17200,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 17243,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 17358,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 17392,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 17427,
+          "lane": "right",
+          "bottleneck_clearance": 14.78758430480957
+        },
+        {
+          "source_frame": 17448,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 17500,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 17516,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 17615,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 17632,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 17648,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 17687,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 17703,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 17721,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 17799,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 17884,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 17919,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 17997,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18029,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 18135,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18154,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 18175,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18193,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 18211,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18263,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 18290,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18349,
+          "lane": "right",
+          "bottleneck_clearance": 32.0
+        },
+        {
+          "source_frame": 18399,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18424,
+          "lane": "right",
+          "bottleneck_clearance": 32.0
+        },
+        {
+          "source_frame": 18468,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18489,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 18509,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18548,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 18569,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18730,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 18748,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18765,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 18824,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18896,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 18914,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18930,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 18969,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 18990,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 19192,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 19212,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 19229,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 19341,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 19366,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 19389,
+          "lane": "right",
+          "bottleneck_clearance": 7.369297504425049
+        },
+        {
+          "source_frame": 19518,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 19538,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 19576,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 19667,
+          "lane": "right",
+          "bottleneck_clearance": 5.349972724914551
+        },
+        {
+          "source_frame": 19688,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 19729,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 19768,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 19805,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 19838,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 19855,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 19892,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 19914,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 19932,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20015,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20032,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20075,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20097,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20226,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20278,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20294,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20311,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20333,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20352,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20373,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20410,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20460,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20478,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20494,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20576,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20594,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20615,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20655,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20724,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20761,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20826,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20863,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20885,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 20930,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 20969,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 21210,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 21232,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 21336,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 21417,
+          "lane": "right",
+          "bottleneck_clearance": 10.978854179382324
+        },
+        {
+          "source_frame": 21457,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 21628,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 21668,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 21686,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 21757,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 21774,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 21964,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 22106,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 22146,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 22166,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 22326,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 22485,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 22508,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 22921,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 22942,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 22975,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 23050,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 24906,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 26759,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 26849,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 26877,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 27066,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27112,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 27205,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27224,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 27369,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27448,
+          "lane": "left",
+          "bottleneck_clearance": 40.03717803955078
+        },
+        {
+          "source_frame": 27557,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27573,
+          "lane": "left",
+          "bottleneck_clearance": 5.648889064788818
+        },
+        {
+          "source_frame": 27592,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27630,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 27676,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27700,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 27724,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27768,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 27789,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27811,
+          "lane": "right",
+          "bottleneck_clearance": 7.566543102264404
+        },
+        {
+          "source_frame": 27854,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27875,
+          "lane": "right",
+          "bottleneck_clearance": 12.063250541687012
+        },
+        {
+          "source_frame": 27894,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27913,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 27931,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 27998,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 28139,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 28160,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 28178,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 28250,
+          "lane": "right",
+          "bottleneck_clearance": 27.332332611083984
+        },
+        {
+          "source_frame": 28268,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 28291,
+          "lane": "right",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 28428,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 28448,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 28493,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 28572,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 28663,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 28750,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 28827,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 28916,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 28956,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 28980,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 28997,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 29030,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 29088,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 29109,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 29128,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 29214,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 29364,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 29382,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 29614,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 29669,
+          "lane": "left",
+          "bottleneck_clearance": 14.167746543884277
+        },
+        {
+          "source_frame": 29687,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 29756,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 29921,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 29943,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 29982,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 30030,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 30126,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 30256,
+          "lane": "left",
+          "bottleneck_clearance": 12.550857543945312
+        },
+        {
+          "source_frame": 30277,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 31517,
+          "lane": "center",
+          "bottleneck_clearance": 32.0
+        },
+        {
+          "source_frame": 31561,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 34359,
+          "lane": "center",
+          "bottleneck_clearance": 32.0
+        },
+        {
+          "source_frame": 34629,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 34671,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 34713,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 34754,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 34779,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 34903,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 34938,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 35051,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 35118,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 35135,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 35152,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 35170,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 35232,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 35299,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 35358,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 35447,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 35730,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 35757,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 35863,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 35941,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 35976,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 35996,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 36014,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 36033,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 36154,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 36284,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 36446,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 36482,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 36502,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 36522,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 36623,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 36662,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 36701,
+          "lane": "left",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 36739,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 36755,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 36858,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37006,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 37025,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37047,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 37065,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37152,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 37168,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37312,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 37330,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37451,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 37477,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37502,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 37532,
+          "lane": "right",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 37557,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37607,
+          "lane": "center",
+          "bottleneck_clearance": 48.0
+        },
+        {
+          "source_frame": 37714,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37733,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 37753,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 37773,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37811,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 37845,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37915,
+          "lane": "center",
+          "bottleneck_clearance": 4.720129013061523
+        },
+        {
+          "source_frame": 37935,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37952,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 37971,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 37990,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 38006,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 38024,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 38096,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 38188,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 38206,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 38259,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 38278,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 38355,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 38376,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 38630,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 38648,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 38794,
+          "lane": "right",
+          "bottleneck_clearance": 0.027862548828125
+        },
+        {
+          "source_frame": 38813,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 38990,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 39008,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 39043,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 39093,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 39144,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 39162,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 39410,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 39429,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 39489,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 39545,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 39658,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 39675,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 39795,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 39821,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 39917,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 39936,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 40046,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 40069,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 40089,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 40112,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 40135,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 40178,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 40198,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 40236,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 40387,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 40408,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 42273,
+          "lane": "center",
+          "bottleneck_clearance": 32.0
+        },
+        {
+          "source_frame": 42370,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 42392,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 42806,
+          "lane": "right",
+          "bottleneck_clearance": 16.0
+        },
+        {
+          "source_frame": 43052,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 43208,
+          "lane": "right",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 43242,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 44099,
+          "lane": "center",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 44130,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 44528,
+          "lane": "left",
+          "bottleneck_clearance": 0.0
+        },
+        {
+          "source_frame": 44590,
+          "lane": "center",
+          "bottleneck_clearance": 4.525002956390381
+        },
+        {
+          "source_frame": 44620,
+          "lane": "none",
+          "bottleneck_clearance": -Infinity
+        },
+        {
+          "source_frame": 45077,
+          "lane": "center",
+          "bottleneck_clearance": 16.0
+        }
+      ]
+    },
+    "boundary_occupancy": {
+      "bottom_frames": 586,
+      "side_frames": 644
+    },
+    "stage_progress": {
+      "transitions": [
+        {
+          "frame": 2,
+          "stage_route_index": 3,
+          "stage_label": "Stage 4A / Reimu"
+        }
+      ],
+      "last_stage_route_index": 3,
+      "last_stage_label": "Stage 4A / Reimu"
+    },
+    "first_hit_analysis": {
+      "hit_frame": 1632,
+      "window_start": 1392,
+      "stage_route_index": 3,
+      "stage_label": "Stage 4A / Reimu",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 128.0
+      },
+      "player": {
+        "x": 22.345439910888672,
+        "y": 432.0,
+        "projected_x": 18.345439910888672,
+        "projected_y": 432.0,
+        "control_origin_x": 8.0,
+        "control_origin_y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 14
+      },
+      "last_nonnegative_gate": {
+        "frame": 1459,
+        "source_frame": 1441,
+        "lane": "left",
+        "slack": 0.5932068056968269,
+        "deadline": 19,
+        "travel_frames": 18.406793194303173
+      },
+      "first_negative_gate": {
+        "frame": 1446,
+        "source_frame": 1441,
+        "lane": "left",
+        "slack": -6.431787031182903,
+        "deadline": 17,
+        "travel_frames": 23.431787031182903
+      },
+      "minimum_gate_slack": -6.431787031182903,
+      "first_nonpositive_pipeline": {
+        "frame": 1516,
+        "clearance": -1.6216462850570679
+      },
+      "minimum_pipeline_clearance": -1.6216462850570679,
+      "nearest_bullet": {
+        "slot": 462,
+        "x": 19.957908630371094,
+        "y": 425.3955383300781,
+        "center_distance": 7.022764381987847,
+        "aabb_clearance": 2.604461669921875
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    }
+  },
+  "trial_accepted": true,
+  "post_stage_no_save": {
+    "attempted": true,
+    "key": "right",
+    "sent": true
+  },
+  "game_terminated_after_trial": true,
+  "finished_at": "2026-07-24T16:09:25.690782+08:00",
+  "status": "completed"
+}

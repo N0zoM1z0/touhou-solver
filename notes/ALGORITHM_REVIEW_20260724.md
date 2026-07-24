@@ -230,3 +230,114 @@ different RNG/respawn history. This accepts observation completeness for the
 targeted failure only. Remaining failures still concentrate on global-kernel
 exhaustion and motivate the generated recovery-band/oracle work rather than
 more spell-specific weights.
+
+## Stage-4A Cross-Control: Local Stability And Observation Timing
+
+The complete randomized Stage-4A run
+`lunatic_route2_stage4a_unattended_20260724_155932` retained 8,293 decisions,
+19 hits, and zero Bomb input. The preceding complete Stage-4A run also had 19
+hits, but per-phase counts moved in both directions. This is a cross-stage
+workload, not an aggregate causal comparison.
+
+The input path itself is not the dominant local defect. Of 4,843 unambiguous
+issued-mask transitions, 4,052 were visible on the next decision; for visible
+transitions the native snapshot delta was median/p95 `1/1` frame and maximum
+4. The controller observation cadence was instead median/p95 `4/6` frames,
+with local planning `29.09/48.38 ms`. Replacing `SendInput` with C++ would not
+remove that closed-loop sampling interval.
+
+CE-0092 distinguishes sensor age from computation-window freshness. The
+causal frame-35,415 decision read projectile time 35,412 and only a frame-
+35,410 boss body, but its action was not issued until frame 35,415. The next
+async result was stamped 35,413 and contained an 18-body ring whose slot 18
+made exact contact at frame 35,420. A synchronous read only at the beginning
+of the old decision would still precede the spawn. The correction therefore
+uses two adapter-level observations:
+
+```text
+source state -> synchronous 64-slot prefix -> local plan
+             -> synchronous prefix version check -> robust recertificate
+             -> issue-time deadline check -> input
+```
+
+The first read merges fresh allocation-head bodies with the complete async
+tail. The second compares pointer set, contact mode, size, velocity, and
+linear-motion residual. Only a change pays the all-action recertificate cost.
+This closes one observed class of during-plan spawn/teleport/contact changes;
+it does not predict a hazard that spawns after the second check.
+
+Item objectives are disabled during the survival acceptance phase. Items can
+still be collected passively, but they do not enter pruning, final ranking, or
+predicted collections. On a deterministic 180-bullet/24-item local workload,
+median/p95 changed from `11.68/19.44 ms` to `8.10/12.54 ms`. This deliberately
+invalidates the old expectation that a safe power item must remain an eventual
+rollout objective. Resource-aware pickup may return only inside a separately
+certified survival-equivalent action class.
+
+## Stage-4A Global/Local Consistency Audit
+
+The dossier now compares only alive, action-eligible rows with an available
+global query and a local uncertain-delay certificate. Of 6,613 comparable
+decisions:
+
+- 4,186 global/local Boolean claims agreed;
+- 32 (`0.484%`) were global-safe but local-unsafe;
+- 2,395 (`36.217%`) were global-empty but local-safe;
+- 99 selected actions lay outside the reported global safe set, and every one
+  was an explicitly recorded local degeneracy relaxation.
+
+The last count is explained behavior rather than a hidden constraint leak.
+The other two mismatches prove that the global lattice is neither uniformly
+optimistic nor uniformly conservative. The small optimistic set is consistent
+with nearest-cell query error, policy age, and hazards missing from the older
+forecast. The much larger false-empty set is consistent with 16-pixel spatial
+quantization, 8-frame layers, growing forecast uncertainty, and finite-horizon
+kernel erosion. These are inferences; phase-stratified exact counterfactuals
+are still needed to allocate causality.
+
+The Boolean recurrence itself remains correct for its discrete model:
+`exists issued action / forall delay`, every physical frame is checked, and
+transition sampling error is subtracted. Two theory/practice gaps remain:
+
+1. A live continuous position is mapped to its nearest lattice cell, but the
+   query does not have a clearance value with which to subtract the initial
+   off-grid error. The local certificate must remain authoritative.
+2. Outside the Boolean kernel, `recovery_distance` measures only the
+   next-layer endpoint's distance to a viable cell. It does not certify the
+   bridge. The next algorithm experiment remains the time-expanded min-max
+   recovery-band recurrence, first against a scalar oracle and generated
+   adversarial seeds.
+
+No scalar risk-weight adjustment can correct both mismatch directions.
+
+## Native Clearance Traversal Checkpoint
+
+The ordinary moving-AABB clearance phase was already C++, but its loop order
+still evaluated every hazard at every lattice cell:
+
+```text
+frame x row x column x hazard
+```
+
+With 81 frames, 648 cells, and 1,360 hazards this is roughly 71 million AABB
+tests even though the clearance cap is 48 pixels. The retained native kernel
+now traverses hazard-first and updates only the analytically bounded cells
+where that hazard can lower the cap. It keeps separate negative overlap and
+positive squared-distance buffers, so the final reduction has the same
+semantics as the dense oracle. A one-cell numeric guard protects the bound.
+
+On fixed seed `20260724`, 1,360 moving AABBs, the TH08 24x27 grid, 81 frames,
+and 48-pixel cap:
+
+- dense native median/p95: `342.67/372.69 ms`;
+- bounded native median/p95: `59.68/97.40 ms`;
+- speedup by median: `5.74x`;
+- the float64 checksum of the float32 output remained exactly
+  `-133779.12470752`, with identical min/max
+  `-15.9373226/19.7757092`.
+
+The existing mixed-hazard differential plus a new randomized 200-AABB
+off-playfield/boundary oracle pass. Both Linux and Windows x86-64 libraries
+build. This is a meaningful C++ optimization of an existing compact numerical
+boundary; it does not justify translating orchestration, tracing, or TH08
+memory adapters into C++.

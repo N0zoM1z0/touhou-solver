@@ -2167,3 +2167,50 @@ Status: observed | inferred | unknown | fixed
 - **Regression:** `test_action_lag_factor_includes_last_alive_support_miss`.
   The 21-case `20260724_152719` corpus and both older full-run corpora pass the
   executable gate.
+
+## CE-0092: A contact ring spawned while the local decision was computing
+
+- **Observed cross-stage control:** Complete hard-no-Bomb Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260724_155932` reached
+  `route_complete` with 19 native hits, equal to the previous complete
+  Stage-4A run. Per-phase hit counts changed in both directions, so native RNG,
+  respawn, Power, and phase-length differences do not support an aggregate
+  improvement or regression claim.
+- **Observed exact contact:** Hit frame 35,419 has a stable crossed-frame
+  contact observation at frame 35,420. Ordinary pool slot 18
+  (`0x005E0B60`) was at `(325.859,128.534)`, velocity
+  `(-2.274,2.251)`, half-size `(18,18)`, and overlapped the native player
+  lethal AABB with clearance `-16.625`.
+- **Observed causal gap:** The last alive decision used source frame 35,412,
+  captured bullets at frame 35,412, and issued at frame 35,415. Its async
+  enemy snapshot was frame 35,410 and contained only the boss. The next
+  decision exposed 19 bodies from an async snapshot stamped frame 35,413.
+  Therefore the 18-body ring appeared after the causal hazard capture but
+  before the old action was issued. The old local certificate reported zero
+  collisions and `+27.550` clearance; the hit row, already too late, reported
+  11 collisions and `-22.780`.
+- **Reporting correction:** The old dossier called a pointer present if it
+  appeared on the hit-detection row. It now records
+  `present_in_hit_decision_snapshot=true` separately from
+  `present_in_causal_snapshot=false`; the compatibility
+  `present_in_action_snapshot` field has causal semantics. The run now
+  attributes `enemy_body_absent_from_action_snapshot`.
+- **General correction:** The TH08 adapter reads the first 64 ordinary enemy
+  slots in one contiguous native read at local capture time while retaining
+  the complete low-rate scan for tail slots and the special spell-owner
+  guard. It reads the same prefix again immediately before input. New/removed
+  pointers, contact-mode changes, size/velocity changes, or motion residuals
+  trigger a fast all-action robust recertificate against the refreshed
+  hazards. This is an allocation-prefix and issue-time version guard, not a
+  Stage-4, Reimu, coordinate, or spell exception.
+- **Measured emergency cost:** A retained 19-body synthetic recertificate
+  costs `4.92/7.17 ms` median/p95 and runs only after a during-plan geometry
+  change. The second contiguous read runs every decision and requires physical
+  timing validation.
+- **Regressions:**
+  `test_ce_0092_synchronous_prefix_exposes_new_contact_ring`,
+  `test_ce_0092_issue_time_ring_recertifies_stale_up_right`, and
+  `test_ce_0092_hit_row_visibility_is_not_causal_visibility`.
+- **Status:** Causal replay and focused tests pass. No physical run has yet
+  validated the issue-time guard or its read tail, so the original hit remains
+  an open physical counterexample.

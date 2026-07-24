@@ -491,6 +491,11 @@ def _compact_decision(
             if isinstance(row.get("spell_enemy_body_guard"), dict)
             else None
         ),
+        "issue_time_enemy_guard": (
+            row.get("issue_time_enemy_guard")
+            if isinstance(row.get("issue_time_enemy_guard"), dict)
+            else None
+        ),
     }
     if compact["hit_started"]:
         compact["nearby_bullets"] = row.get("nearby_bullets", [])
@@ -761,6 +766,79 @@ def _robust_viability_summary(
     }
 
 
+def _planner_consistency_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object]:
+    """Compare the global lattice claim with the local continuous certificate."""
+
+    comparable = []
+    for row in decisions:
+        player = row.get("player")
+        if isinstance(player, dict) and (
+            int(player.get("phase", 0)) != 0
+            or int(player.get("phase_at_action", 0)) != 0
+        ):
+            continue
+        viability = row.get("viability")
+        robust = row.get("robust_control")
+        if (
+            not isinstance(viability, dict)
+            or not bool(viability.get("available"))
+            or not bool(viability.get("support_covers_current", True))
+            or not isinstance(robust, dict)
+        ):
+            continue
+        global_safe = (
+            bool(viability.get("state_viable"))
+            and int(viability.get("safe_action_count", 0)) > 0
+        )
+        local_safe = (
+            int(robust.get("worst_collisions", 0)) == 0
+            and float(robust.get("min_clearance", 0.0)) >= 0.0
+        )
+        safe_actions = {
+            str(action) for action in viability.get("safe_actions", ())
+        }
+        comparable.append(
+            {
+                "global_safe": global_safe,
+                "local_safe": local_safe,
+                "selected_outside": (
+                    global_safe
+                    and bool(safe_actions)
+                    and str(row.get("action", "")) not in safe_actions
+                ),
+            }
+        )
+    count = len(comparable)
+    global_safe_local_unsafe = sum(
+        item["global_safe"] and not item["local_safe"]
+        for item in comparable
+    )
+    global_empty_local_safe = sum(
+        not item["global_safe"] and item["local_safe"]
+        for item in comparable
+    )
+    return {
+        "comparable_decision_count": count,
+        "agreement_count": sum(
+            item["global_safe"] == item["local_safe"]
+            for item in comparable
+        ),
+        "global_safe_local_unsafe_count": global_safe_local_unsafe,
+        "global_safe_local_unsafe_fraction": (
+            global_safe_local_unsafe / count if count else None
+        ),
+        "global_empty_local_safe_count": global_empty_local_safe,
+        "global_empty_local_safe_fraction": (
+            global_empty_local_safe / count if count else None
+        ),
+        "selected_action_outside_global_safe_set_count": sum(
+            item["selected_outside"] for item in comparable
+        ),
+    }
+
+
 def _classify_death(
     row: dict[str, object],
     *,
@@ -775,6 +853,18 @@ def _classify_death(
     nearest_bullet = _nearest_bullet(row)
     nearest_laser = _nearest_laser(row)
     nearest_enemy_body = _nearest_enemy_body(row)
+    last_alive = next(
+        (
+            sample
+            for sample in reversed(window[:-1])
+            if int(sample.get("player", {}).get("phase", 0)) == 0
+            and int(
+                sample.get("player", {}).get("phase_at_action", 0)
+            )
+            == 0
+        ),
+        None,
+    )
     pipeline = float(row["pipeline_clearance"])
     lasers = int(row["active_lasers"])
     exact_enemy_overlap = (
@@ -783,12 +873,27 @@ def _classify_death(
         and float(nearest_enemy_body["aabb_clearance"]) <= 0.0
     )
     if exact_enemy_overlap:
-        action_body_pointers = {
+        hit_body_pointers = {
             int(pointer)
             for pointer in row.get("enemy_body_pointers", ())
         }
+        causal_row = last_alive if last_alive is not None else row
+        causal_body_pointers = {
+            int(pointer)
+            for pointer in causal_row.get("enemy_body_pointers", ())
+        }
+        pointer = int(nearest_enemy_body["pointer"])
+        nearest_enemy_body["present_in_hit_decision_snapshot"] = (
+            pointer in hit_body_pointers
+        )
+        nearest_enemy_body["present_in_causal_snapshot"] = (
+            pointer in causal_body_pointers
+        )
+        # Compatibility field retained for downstream regression readers.  Its
+        # intended semantics are the last action that could have prevented the
+        # hit, not the already-too-late hit-detection decision.
         nearest_enemy_body["present_in_action_snapshot"] = (
-            int(nearest_enemy_body["pointer"]) in action_body_pointers
+            pointer in causal_body_pointers
         )
     exact_overlaps = sum(
         (
@@ -835,18 +940,6 @@ def _classify_death(
     ]
     if slacks and min(slacks) < 0.0:
         contributing.append("corridor_deadline_miss")
-    last_alive = next(
-        (
-            sample
-            for sample in reversed(window[:-1])
-            if int(sample.get("player", {}).get("phase", 0)) == 0
-            and int(
-                sample.get("player", {}).get("phase_at_action", 0)
-            )
-            == 0
-        ),
-        None,
-    )
     if _action_lag_over_model(row) or (
         last_alive is not None and _action_lag_over_model(last_alive)
     ):
@@ -1511,6 +1604,9 @@ def build_dossier(
                 "robust_viability": _robust_viability_summary(
                     stage_decisions
                 ),
+                "planner_consistency": _planner_consistency_summary(
+                    stage_decisions
+                ),
             }
         )
     stage_reports.sort(key=lambda stage: int(stage["first_frame"]))
@@ -1608,6 +1704,7 @@ def build_dossier(
                 provenance,
             ),
             "robust_viability": _robust_viability_summary(decisions),
+            "planner_consistency": _planner_consistency_summary(decisions),
         },
         "stages": stage_reports,
         "death_clusters": _death_clusters(deaths),
@@ -1640,6 +1737,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
     control_policy = dossier["control_policy"]
     no_bomb = control_policy["no_bomb_verification"]
     viability = control_policy["robust_viability"]
+    consistency = control_policy["planner_consistency"]
     spell_attribution_resolved = (
         integrity["spell_attribution"] == "resolved_live_spell_state"
     )
@@ -1962,6 +2060,13 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "- Robust-policy decisions without any usable query: "
             f"{viability['decision_without_query_count']}/"
             f"{viability['policy_decision_count']}.",
+            "- Global/local comparable decisions: "
+            f"{consistency['comparable_decision_count']}; global-safe/local-"
+            f"unsafe: {consistency['global_safe_local_unsafe_count']}; "
+            "global-empty/local-safe: "
+            f"{consistency['global_empty_local_safe_count']}; selected action "
+            "outside the reported global safe set: "
+            f"{consistency['selected_action_outside_global_safe_set_count']}.",
             "- Live spell attribution was recorded at every hit edge; exact "
             "per-spell counts are preserved below.",
             f"- `{sensor_gap_count}` hit edges remain in the "

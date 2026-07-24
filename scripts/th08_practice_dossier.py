@@ -16,6 +16,7 @@ from th08_run_dossier import (
     _compact_decision,
     _death_clusters,
     _death_ledger,
+    _planner_consistency_summary,
     _percentiles,
     _resource_range,
 )
@@ -445,9 +446,13 @@ def _runtime_timing(
     keys = (
         "observe",
         "read_pools",
+        "read_enemy_prefix",
+        "read_enemy_issue_prefix",
         "decode_pools",
         "corridor_bookkeeping",
         "local_plan",
+        "local_plan_initial",
+        "issue_enemy_recertificate",
         "input",
         "before_trace",
         "previous_trace",
@@ -511,6 +516,48 @@ def _enemy_sensor_summary(
             count > 0 for count in body_counts
         ),
         "max_active_bodies": max(body_counts, default=0),
+    }
+
+
+def _issue_enemy_guard_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object] | None:
+    guards = [
+        row["issue_time_enemy_guard"]
+        for row in decisions
+        if isinstance(row.get("issue_time_enemy_guard"), dict)
+    ]
+    if not guards:
+        return None
+    changes = [
+        str(change)
+        for guard in guards
+        for change in guard.get("changes", ())
+    ]
+    return {
+        "observation_count": len(guards),
+        "changed_observation_count": sum(
+            bool(guard.get("changes")) for guard in guards
+        ),
+        "recertified_count": sum(
+            bool(guard.get("recertified")) for guard in guards
+        ),
+        "action_override_count": sum(
+            str(guard.get("planned_action_before_guard"))
+            != str(guard.get("action_after_guard"))
+            for guard in guards
+        ),
+        "change_kind_counts": dict(
+            Counter(change.split(":", 1)[0] for change in changes)
+        ),
+        "read_ms": _percentiles(
+            float(guard.get("read_ms", 0.0)) for guard in guards
+        ),
+        "recertificate_ms": _percentiles(
+            float(guard.get("recertificate_ms", 0.0))
+            for guard in guards
+            if bool(guard.get("recertified"))
+        ),
     }
 
 
@@ -1202,6 +1249,7 @@ def _spell_phase_summary(
                 "decision_cadence_frames": _decision_cadence(rows),
                 "runtime_timing_ms": _runtime_timing(rows),
                 "robust_viability": viability,
+                "planner_consistency": _planner_consistency_summary(rows),
             }
         )
     return result
@@ -1374,9 +1422,11 @@ def build_dossier(
             "control_delay_frames": _control_delay_summary(decisions),
             "adaptive_control_delay": _adaptive_control_summary(decisions),
             "robust_viability": _robust_viability_summary(decisions),
+            "planner_consistency": _planner_consistency_summary(decisions),
             "input_visibility": _input_visibility_summary(decisions),
             "runtime_timing_ms": _runtime_timing(decisions),
             "enemy_sensor": _enemy_sensor_summary(decisions),
+            "issue_enemy_guard": _issue_enemy_guard_summary(decisions),
             "spell_owner_guard": _spell_owner_guard_summary(decisions),
             "terminal_threat": _terminal_threat_summary(decisions),
             "behavior_context": _behavior_context(decisions, deaths),
@@ -1630,8 +1680,18 @@ def render_markdown(dossier: dict[str, object]) -> str:
     control_delay = totals["control_delay_frames"]
     adaptive_delay = totals["adaptive_control_delay"]
     robust_viability = totals["robust_viability"]
+    planner_consistency = totals.get(
+        "planner_consistency",
+        {
+            "comparable_decision_count": 0,
+            "global_safe_local_unsafe_count": 0,
+            "global_empty_local_safe_count": 0,
+            "selected_action_outside_global_safe_set_count": 0,
+        },
+    )
     input_visibility = totals["input_visibility"]
     enemy_sensor = totals.get("enemy_sensor")
+    issue_enemy_guard = totals.get("issue_enemy_guard")
     spell_owner_guard = totals.get("spell_owner_guard")
     terminal_threat = totals.get("terminal_threat")
     body_overlaps = sum(
@@ -1678,6 +1738,19 @@ def render_markdown(dossier: dict[str, object]) -> str:
             )
             if isinstance(enemy_sensor, dict)
             else "- No full enemy-pool sensor telemetry was present.",
+            (
+                "- The issue-time enemy guard retained "
+                f"{issue_enemy_guard['observation_count']} observations, "
+                f"detected {issue_enemy_guard['changed_observation_count']} "
+                "during-plan geometry changes, recertified "
+                f"{issue_enemy_guard['recertified_count']} decisions, and "
+                f"overrode {issue_enemy_guard['action_override_count']} "
+                "actions. Read/recertificate timing was "
+                f"`{issue_enemy_guard['read_ms']}` / "
+                f"`{issue_enemy_guard['recertificate_ms']}` ms."
+            )
+            if isinstance(issue_enemy_guard, dict)
+            else "- No issue-time enemy-geometry guard telemetry was present.",
             (
                 "- The synchronous spell-owner guard retained "
                 f"{spell_owner_guard['observation_count']} observations "
@@ -1747,6 +1820,17 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 "- Queried policy phase offsets within the coarse control "
                 "layer were "
                 f"`{robust_viability.get('policy_phase_frame_counts', {})}`."
+            ),
+            (
+                "- Global/local certificate comparison covered "
+                f"{planner_consistency['comparable_decision_count']} "
+                "decisions: "
+                f"{planner_consistency['global_safe_local_unsafe_count']} "
+                "were global-safe/local-unsafe, "
+                f"{planner_consistency['global_empty_local_safe_count']} "
+                "were global-empty/local-safe, and "
+                f"{planner_consistency['selected_action_outside_global_safe_set_count']} "
+                "selected actions were outside the reported global safe set."
             ),
             (
                 "- The rolling worker produced "

@@ -12,6 +12,7 @@ from th08_run_dossier import (
     _nearest_bullet,
     _nearest_laser,
     _no_bomb_verification,
+    _planner_consistency_summary,
     _robust_control_unsafe,
     _robust_viability_summary,
     _spell_attribution,
@@ -138,6 +139,49 @@ class Th08RunDossierTests(unittest.TestCase):
         self.assertEqual(summary["available_query_count"], 1)
         self.assertEqual(summary["constrained_decision_count"], 1)
         self.assertEqual(summary["solve_ms"]["median"], 700.0)
+
+    def test_planner_consistency_separates_false_safe_and_false_empty(
+        self,
+    ) -> None:
+        rows = [
+            {
+                "action": "right",
+                "viability": {
+                    "available": True,
+                    "support_covers_current": True,
+                    "state_viable": True,
+                    "safe_action_count": 1,
+                    "safe_actions": ["left"],
+                },
+                "robust_control": {
+                    "worst_collisions": 1,
+                    "min_clearance": -2.0,
+                },
+            },
+            {
+                "action": "stay",
+                "viability": {
+                    "available": True,
+                    "support_covers_current": True,
+                    "state_viable": False,
+                    "safe_action_count": 0,
+                    "safe_actions": [],
+                },
+                "robust_control": {
+                    "worst_collisions": 0,
+                    "min_clearance": 4.0,
+                },
+            },
+        ]
+        summary = _planner_consistency_summary(rows)
+        self.assertEqual(summary["comparable_decision_count"], 2)
+        self.assertEqual(summary["agreement_count"], 0)
+        self.assertEqual(summary["global_safe_local_unsafe_count"], 1)
+        self.assertEqual(summary["global_empty_local_safe_count"], 1)
+        self.assertEqual(
+            summary["selected_action_outside_global_safe_set_count"],
+            1,
+        )
 
     def test_global_viability_exhaustion_requires_available_empty_query(
         self,
@@ -348,6 +392,45 @@ class Th08RunDossierTests(unittest.TestCase):
         )
         self.assertTrue(enemy["present_in_action_snapshot"])
         self.assertNotIn(
+            "enemy_body_absent_from_action_snapshot",
+            contributing,
+        )
+
+    def test_ce_0092_hit_row_visibility_is_not_causal_visibility(self) -> None:
+        pointer = 0x5826C0 + 18 * 0x53D0
+        alive = _row(35415, bullets=0)
+        alive["player"].update({"phase": 0, "phase_at_action": 0})
+        alive["enemy_body_pointers"] = [0x5826C0]
+        hit = _row(35419, bullets=0)
+        hit["enemy_body_pointers"] = [
+            0x5826C0 + slot * 0x53D0 for slot in range(19)
+        ]
+        hit["hit_contact_observation"] = {
+            "frame_before": 35420,
+            "frame_after": 35420,
+            "stable": True,
+            "player_lethal_aabb": [316.3, 134.9, 319.3, 137.9],
+            "enemy_bodies": [
+                [
+                    pointer,
+                    325.859,
+                    128.534,
+                    -2.274,
+                    2.251,
+                    18.0,
+                    18.0,
+                    5,
+                ]
+            ],
+        }
+        _, contributing, _, _, enemy = _classify_death(
+            hit,
+            window=[alive, hit],
+        )
+        self.assertTrue(enemy["present_in_hit_decision_snapshot"])
+        self.assertFalse(enemy["present_in_causal_snapshot"])
+        self.assertFalse(enemy["present_in_action_snapshot"])
+        self.assertIn(
             "enemy_body_absent_from_action_snapshot",
             contributing,
         )

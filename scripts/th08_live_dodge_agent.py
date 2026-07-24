@@ -142,6 +142,12 @@ ENEMY_FLAGS_OFFSET = 0x3324
 ENEMY_POOL_BASE = 0x005826C0
 ENEMY_POOL_SIZE = 480
 ENEMY_STRIDE = 0x53D0
+# Timeline allocation is contiguous from the front of the ordinary pool in
+# every retained Stage 4A observation (highest active slot: 37).  Reading a
+# guarded prefix in one ReadProcessMemory call on every local decision catches
+# newly spawned contact bodies without paying 480 cross-process flag reads.
+# The complete sparse scan remains the authoritative low-rate fallback.
+ENEMY_LOCAL_PREFIX_SIZE = 64
 ENEMY_BODY_READ_OFFSET = ENEMY_VELOCITY_OFFSET
 ENEMY_BODY_READ_SIZE = ENEMY_FLAGS_OFFSET + 4 - ENEMY_BODY_READ_OFFSET
 ENEMY_ACTIVE_FLAG = 0x00000001
@@ -209,6 +215,11 @@ ITEM_SAFETY_CLEARANCE = 8.0
 ITEM_UTILITY_WEIGHT = 0.25
 ITEM_UTILITY_SATURATION = 32.0
 ITEM_APPROACH_POTENTIAL_WEIGHT = 0.02
+# Current acceptance work is survival-only.  Items may still be collected
+# passively, but they cannot affect beam pruning, action choice, or reported
+# predicted collections.  Resource-aware pickup can later be re-enabled only
+# as a tie-breaker between independently certified survival-equivalent paths.
+ITEM_OBJECTIVES_ENABLED = False
 # Keep the single worker work-conserving. There is never more than one queued
 # solve, so native solve throughput remains the hard rate limit.
 CORRIDOR_REPLAN_FRAMES = TH08_CORRIDOR_CONFIG.frames_per_layer
@@ -1392,16 +1403,22 @@ def decode_spell_enemy_body_guard(
     )
 
 
-def decode_enemy_bodies(blob: bytes) -> tuple[EnemyBody, ...]:
-    """Decode every contact-enabled slot from the native 480-enemy pool."""
+def decode_enemy_bodies(
+    blob: bytes,
+    *,
+    pool_size: int = ENEMY_POOL_SIZE,
+) -> tuple[EnemyBody, ...]:
+    """Decode contact-enabled slots from a contiguous native pool prefix."""
 
-    expected_size = ENEMY_POOL_SIZE * ENEMY_STRIDE
+    if not 0 <= pool_size <= ENEMY_POOL_SIZE:
+        raise ValueError("enemy pool size must belong to the native pool")
+    expected_size = pool_size * ENEMY_STRIDE
     if len(blob) < expected_size:
         raise ValueError(
             f"enemy pool requires {expected_size} bytes"
         )
     bodies: list[EnemyBody] = []
-    for slot in range(ENEMY_POOL_SIZE):
+    for slot in range(pool_size):
         base = slot * ENEMY_STRIDE
         flags = struct.unpack_from(
             "<I",
@@ -1466,6 +1483,31 @@ def capture_enemy_pool_snapshot_contiguous(
     )
 
 
+def capture_enemy_pool_prefix_contiguous(
+    reader: ProcessReader,
+    *,
+    pool_size: int = ENEMY_LOCAL_PREFIX_SIZE,
+) -> EnemyPoolSnapshot:
+    """Capture the allocation head once per local decision.
+
+    This is a freshness fast path, not a complete-pool assumption.  The
+    background sparse scanner still supplies slots outside the prefix.
+    """
+
+    if not 0 < pool_size <= ENEMY_POOL_SIZE:
+        raise ValueError("enemy prefix size must belong to the native pool")
+    started = time.perf_counter()
+    frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+    blob = reader.read(ENEMY_POOL_BASE, pool_size * ENEMY_STRIDE)
+    frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+    return EnemyPoolSnapshot(
+        frame_before,
+        frame_after,
+        decode_enemy_bodies(blob, pool_size=pool_size),
+        (time.perf_counter() - started) * 1000.0,
+    )
+
+
 def read_enemy_bodies_sparse(
     reader: ProcessReader,
 ) -> tuple[EnemyBody, ...]:
@@ -1521,8 +1563,8 @@ def project_enemy_pool_snapshot(
 ) -> tuple[EnemyBody, ...]:
     if snapshot is None:
         return ()
-    age = max(0, frame - snapshot.frame_after)
-    uncertainty = min(16.0, 0.75 * age)
+    age = frame - snapshot.frame_after
+    uncertainty = min(16.0, 0.75 * abs(age))
     return tuple(
         replace(
             body,
@@ -1531,6 +1573,147 @@ def project_enemy_pool_snapshot(
             uncertainty=body.uncertainty + uncertainty,
         )
         for body in snapshot.bodies
+    )
+
+
+def merge_enemy_pool_prefix(
+    background_bodies: tuple[EnemyBody, ...],
+    prefix_bodies: tuple[EnemyBody, ...],
+    *,
+    pool_size: int = ENEMY_LOCAL_PREFIX_SIZE,
+) -> tuple[EnemyBody, ...]:
+    """Replace stale background copies in the synchronously read prefix."""
+
+    if not 0 < pool_size <= ENEMY_POOL_SIZE:
+        raise ValueError("enemy prefix size must belong to the native pool")
+    prefix_end = ENEMY_POOL_BASE + pool_size * ENEMY_STRIDE
+    tail = tuple(
+        body
+        for body in background_bodies
+        if not ENEMY_POOL_BASE <= body.pointer < prefix_end
+    )
+    return prefix_bodies + tail
+
+
+def enemy_pool_snapshot_changes(
+    planned: EnemyPoolSnapshot,
+    current: EnemyPoolSnapshot,
+    *,
+    position_tolerance: float = 2.0,
+    velocity_tolerance: float = 0.25,
+    size_tolerance: float = 0.25,
+) -> tuple[str, ...]:
+    """Detect contact-topology or non-linear geometry changes during planning."""
+
+    if current.frame_after < planned.frame_after:
+        return ("frame_reversed",)
+    planned_by_pointer = {body.pointer: body for body in planned.bodies}
+    current_by_pointer = {body.pointer: body for body in current.bodies}
+    changes = []
+    for pointer in sorted(current_by_pointer.keys() - planned_by_pointer.keys()):
+        changes.append(f"added:{pointer:#x}")
+    for pointer in sorted(planned_by_pointer.keys() - current_by_pointer.keys()):
+        changes.append(f"removed:{pointer:#x}")
+    frame_delta = current.frame_after - planned.frame_after
+    relevant_flags = (
+        ENEMY_ACTIVE_FLAG
+        | ENEMY_CONTACT_ENABLED_FLAG
+        | ENEMY_CONTACT_BLOCKING_FLAGS
+    )
+    for pointer in sorted(planned_by_pointer.keys() & current_by_pointer.keys()):
+        before = planned_by_pointer[pointer]
+        after = current_by_pointer[pointer]
+        expected_x = before.x + before.vx * frame_delta
+        expected_y = before.y + before.vy * frame_delta
+        if (
+            abs(after.x - expected_x) > position_tolerance
+            or abs(after.y - expected_y) > position_tolerance
+        ):
+            changes.append(f"trajectory:{pointer:#x}")
+        if (
+            abs(after.vx - before.vx) > velocity_tolerance
+            or abs(after.vy - before.vy) > velocity_tolerance
+        ):
+            changes.append(f"velocity:{pointer:#x}")
+        if (
+            abs(after.half_width - before.half_width) > size_tolerance
+            or abs(after.half_height - before.half_height) > size_tolerance
+        ):
+            changes.append(f"size:{pointer:#x}")
+        if (after.flags ^ before.flags) & relevant_flags:
+            changes.append(f"contact_mode:{pointer:#x}")
+    return tuple(changes)
+
+
+def recertify_action_for_fresh_hazards(
+    decision: Decision,
+    *,
+    player_x: float,
+    player_y: float,
+    previous_mask: int,
+    delay_frames: tuple[int, ...],
+    action_hold_frames: int,
+    bullets: tuple[Bullet, ...],
+    lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
+    snapshot_lag: int,
+) -> Decision:
+    """Fast issue-time safety override after the observed hazard set changes."""
+
+    certificates = _robust_action_certificates(
+        player_x=player_x,
+        player_y=player_y,
+        previous_mask=previous_mask,
+        actions=_PLANNER_ACTIONS,
+        delay_frames=delay_frames,
+        action_hold_frames=action_hold_frames,
+        bullets=bullets,
+        lasers=lasers,
+        enemy_bodies=enemy_bodies,
+        snapshot_lag=snapshot_lag,
+    )
+    planned = certificates.get(decision.action)
+    ranked_actions = sorted(
+        _PLANNER_ACTIONS,
+        key=lambda action: (
+            certificates[action.name].worst_collisions,
+            max(-certificates[action.name].min_clearance, 0.0),
+            certificates[action.name].cvar_risk,
+            0 if action.name == decision.action else 1,
+            action.name,
+        ),
+    )
+    selected = ranked_actions[0]
+    certificate = certificates[selected.name]
+    if planned is not None and (
+        planned.worst_collisions,
+        max(-planned.min_clearance, 0.0),
+        planned.cvar_risk,
+    ) == (
+        certificate.worst_collisions,
+        max(-certificate.min_clearance, 0.0),
+        certificate.cvar_risk,
+    ):
+        selected = next(
+            action for action in _PLANNER_ACTIONS
+            if action.name == decision.action
+        )
+        certificate = planned
+    return replace(
+        decision,
+        mask=SHOT
+        | (FOCUS if selected.focused else 0)
+        | selected.direction,
+        action=selected.name,
+        bomb=False,
+        planned_focus=selected.focused,
+        robust_override=(
+            decision.robust_override or selected.name != decision.action
+        ),
+        robust_collisions=certificate.worst_collisions,
+        robust_min_clearance=certificate.min_clearance,
+        robust_cvar_risk=certificate.cvar_risk,
+        robust_worst_delay=certificate.worst_delay,
     )
 
 
@@ -2713,7 +2896,11 @@ def choose_action(
             raise ValueError("target deadline cannot be negative")
     observed_player_x = player_x
     observed_player_y = player_y
-    selected_items = _select_items(items, power=power, bombs=bombs)
+    selected_items = (
+        _select_items(items, power=power, bombs=bombs)
+        if ITEM_OBJECTIVES_ENABLED
+        else ()
+    )
     delayed_mask = previous_direction | (FOCUS if previous_focus else 0)
     main_laser_offset = max(
         0,
@@ -3694,6 +3881,17 @@ def run(args: argparse.Namespace) -> int:
                             else "deathbomb_only"
                         )
                     ),
+                    "item_policy": (
+                        "survival_only_passive_collection"
+                        if not ITEM_OBJECTIVES_ENABLED
+                        else "certified_viable_tiebreaker"
+                    ),
+                    "enemy_body_sensor": (
+                        "synchronous_prefix_plus_async_complete_pool"
+                    ),
+                    "enemy_body_synchronous_prefix_slots": (
+                        ENEMY_LOCAL_PREFIX_SIZE
+                    ),
                     "control_delay_policy": (
                         "adaptive_end_to_end_distribution_robust_mpc"
                     ),
@@ -4065,7 +4263,7 @@ def run(args: argparse.Namespace) -> int:
                 enemy_last_submit = counter
             enemy_bodies = project_enemy_pool_snapshot(
                 enemy_snapshot,
-                frame=counter,
+                frame=int(state["enemy_manager_frame"]),
             )
             enemy_pool_read_ms = (
                 enemy_snapshot.read_ms
@@ -4076,6 +4274,17 @@ def run(args: argparse.Namespace) -> int:
                 enemy_snapshot.frame_after
                 if enemy_snapshot is not None
                 else None
+            )
+            enemy_prefix_snapshot = capture_enemy_pool_prefix_contiguous(
+                reader
+            )
+            enemy_prefix_bodies = project_enemy_pool_snapshot(
+                enemy_prefix_snapshot,
+                frame=int(state["enemy_manager_frame"]),
+            )
+            enemy_bodies = merge_enemy_pool_prefix(
+                enemy_bodies,
+                enemy_prefix_bodies,
             )
             bullet_frame_before = reader.u32(0x0164D30C)
             bullet_blob = reader.read(
@@ -4141,7 +4350,10 @@ def run(args: argparse.Namespace) -> int:
             counter_after_read = reader.u32(0x0164D30C)
             read_ms = (time.perf_counter() - read_started) * 1000.0
             if (
-                bullet_frame_after < bullet_frame_before
+                enemy_prefix_snapshot.frame_after
+                < enemy_prefix_snapshot.frame_before
+                or counter_after_read < enemy_prefix_snapshot.frame_after
+                or bullet_frame_after < bullet_frame_before
                 or counter_after_read < bullet_frame_after
                 or (
                     ecl_frame_before is not None
@@ -4155,8 +4367,14 @@ def run(args: argparse.Namespace) -> int:
             hazard_alignment = HazardEpochAlignment(
                 source_frame=int(state["enemy_manager_frame"]),
                 hazard_window=FrameWindow(
-                    bullet_frame_before,
-                    bullet_frame_after,
+                    min(
+                        enemy_prefix_snapshot.frame_before,
+                        bullet_frame_before,
+                    ),
+                    max(
+                        enemy_prefix_snapshot.frame_after,
+                        bullet_frame_after,
+                    ),
                 ),
                 current_frame=counter_after_read,
                 event_window=(
@@ -4524,6 +4742,47 @@ def run(args: argparse.Namespace) -> int:
                 ),
             )
             plan_ms = (time.perf_counter() - plan_started) * 1000.0
+            pre_issue_action = decision.action
+            pre_issue_mask = decision.mask
+            issue_enemy_read_started = time.perf_counter()
+            issue_enemy_prefix_snapshot = (
+                capture_enemy_pool_prefix_contiguous(reader)
+            )
+            issue_enemy_read_ms = (
+                time.perf_counter() - issue_enemy_read_started
+            ) * 1000.0
+            issue_enemy_changes = enemy_pool_snapshot_changes(
+                enemy_prefix_snapshot,
+                issue_enemy_prefix_snapshot,
+            )
+            issue_enemy_recertificate_ms = 0.0
+            if issue_enemy_changes:
+                issue_enemy_bodies = merge_enemy_pool_prefix(
+                    enemy_bodies,
+                    project_enemy_pool_snapshot(
+                        issue_enemy_prefix_snapshot,
+                        frame=int(state["enemy_manager_frame"]),
+                    ),
+                )
+                issue_recertificate_started = time.perf_counter()
+                decision = recertify_action_for_fresh_hazards(
+                    decision,
+                    player_x=float(player["x"]),
+                    player_y=float(player["y"]),
+                    previous_mask=previous_mask,
+                    delay_frames=delay_estimate.support,
+                    action_hold_frames=action_hold_frames,
+                    bullets=bullets,
+                    lasers=lasers,
+                    enemy_bodies=issue_enemy_bodies,
+                    snapshot_lag=player_to_hazard_lag,
+                )
+                issue_enemy_recertificate_ms = (
+                    time.perf_counter() - issue_recertificate_started
+                ) * 1000.0
+                plan_ms += issue_enemy_recertificate_ms
+            post_issue_guard_action = decision.action
+            post_issue_guard_mask = decision.mask
             phase_now = reader.u8(0x017D5EF8)
             predeath_now = reader.i32(0x017D5EF8 + 0xE2A68)
             counter_at_action = reader.u32(0x0164D30C)
@@ -4749,9 +5008,19 @@ def run(args: argparse.Namespace) -> int:
                         "observe": observe_ms,
                         "read_pools": read_ms,
                         "read_enemy_pool": enemy_pool_read_ms,
+                        "read_enemy_prefix": (
+                            enemy_prefix_snapshot.read_ms
+                        ),
+                        "read_enemy_issue_prefix": issue_enemy_read_ms,
                         "decode_pools": decode_ms,
                         "corridor_bookkeeping": corridor_overhead_ms,
                         "local_plan": plan_ms,
+                        "local_plan_initial": (
+                            plan_ms - issue_enemy_recertificate_ms
+                        ),
+                        "issue_enemy_recertificate": (
+                            issue_enemy_recertificate_ms
+                        ),
                         "input": input_ms,
                         "before_trace": (
                             time.perf_counter() - iteration_started
@@ -4845,6 +5114,15 @@ def run(args: argparse.Namespace) -> int:
                     "hazard_alignment": {
                         "bullet_frame_before": bullet_frame_before,
                         "bullet_frame_after": bullet_frame_after,
+                        "enemy_prefix_frame_before": (
+                            enemy_prefix_snapshot.frame_before
+                        ),
+                        "enemy_prefix_frame_after": (
+                            enemy_prefix_snapshot.frame_after
+                        ),
+                        "enemy_prefix_body_count": len(
+                            enemy_prefix_bodies
+                        ),
                         "bullet_capture_span": bullet_capture_span,
                         "hazard_snapshot_age": hazard_snapshot_age,
                         "player_to_hazard_lag": player_to_hazard_lag,
@@ -4857,6 +5135,27 @@ def run(args: argparse.Namespace) -> int:
                         if enemy_body_snapshot_frame is not None
                         else None
                     ),
+                    "issue_time_enemy_guard": {
+                        "frame_before": (
+                            issue_enemy_prefix_snapshot.frame_before
+                        ),
+                        "frame_after": (
+                            issue_enemy_prefix_snapshot.frame_after
+                        ),
+                        "body_count": len(
+                            issue_enemy_prefix_snapshot.bodies
+                        ),
+                        "changes": list(issue_enemy_changes),
+                        "recertified": bool(issue_enemy_changes),
+                        "planned_action_before_guard": pre_issue_action,
+                        "planned_mask_before_guard": pre_issue_mask,
+                        "action_after_guard": post_issue_guard_action,
+                        "mask_after_guard": post_issue_guard_mask,
+                        "read_ms": issue_enemy_read_ms,
+                        "recertificate_ms": (
+                            issue_enemy_recertificate_ms
+                        ),
+                    },
                     "spell_enemy_body_guard": (
                         {
                             "body": _serialized_enemy_bodies(

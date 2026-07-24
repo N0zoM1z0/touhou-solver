@@ -151,9 +151,25 @@ not require a compiler or extra runtime DLL. The current local build hashes
 are:
 
 ```text
-linux  989c2f2f7f7923ef5248fa15707df18752faf5dac6e4e3753816d0d84fe2a4bd
-win64  e4900c4ebaf17864c2186682cf80e90ef853c19e3076ae31296524e51dfa5982
+linux  a99b24193d8d3259f84a61fbccbb5fb0a6f55cb4684c46f43b4f58cf5abbc90a
+win64  260309b58d606bed77990677a2ad80c3066ff4457f34858ef7f19212cefb329e
 ```
+
+### 2026-07-24 bounded moving-AABB traversal
+
+The original native moving-AABB phase still evaluated every hazard at every
+grid cell. The current kernel traverses hazards first and restricts updates to
+the cells where the hazard can lower the configured clearance cap. Separate
+negative-overlap and positive-squared-distance buffers preserve the dense
+reduction semantics, with a one-cell guard at analytic range boundaries.
+
+For fixed seed `20260724`, 1,360 AABBs, 81 frames, the TH08 24x27 lattice,
+and a 48-pixel cap, Linux median/p95 fell from `342.67/372.69 ms` to
+`59.68/97.40 ms` while the float32 volume checksum and extrema remained
+identical. The complete warm synthetic solve is `76.15 ms` median on Linux
+and `82.83 ms` on Windows; warm clearance is `63.44/67.00 ms` respectively.
+`test_native_bounded_aabb_traversal_matches_adversarial_dense_oracle` covers
+moving, growing, off-playfield, and boundary workloads.
 
 If the native library is absent, the planner uses the NumPy reference
 implementation. `TOUHOU_DISABLE_NATIVE_PLANNER=1` forces that path for

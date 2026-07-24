@@ -2213,3 +2213,45 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Linux and Windows Python each pass all 370 tests. The 21-case Stage-5
   corpus passes its independent executable validator. Native source did not
   change.
+
+## 2026-07-24: Stage-4A Causal Audit, Survival-Only Items, And Bounded Native Clearance
+
+- Complete randomized Stage-4A practice
+  `lunatic_route2_stage4a_unattended_20260724_155932` reached
+  `route_complete` with 19 hits and zero Bomb input. The previous complete
+  Stage-4A run also had 19 hits; per-phase differences move in both directions
+  and are not a causal aggregate result.
+- Native input visibility is usually one frame once observed, while the
+  closed-loop decision cadence is `4/6` frames median/p95 and local planning is
+  `29.09/48.38 ms`. The current evidence does not justify rewriting the input
+  interface in C++.
+- CE-0092 proves a during-computation observation gap. The causal frame-35,415
+  decision read hazards at frame 35,412 and an enemy snapshot at 35,410. An
+  18-body ring appeared in a frame-35,413 async snapshot before the action was
+  issued, and ordinary slot 18 made stable exact contact at frame 35,420.
+  Dossier semantics now distinguish hit-row visibility from last-alive causal
+  visibility.
+- The TH08 adapter now merges a synchronous 64-slot allocation prefix with the
+  complete async tail and repeats the prefix read before input. A geometry-set
+  change triggers a compact all-action robust recertificate; the retained
+  19-body synthetic costs `4.92/7.17 ms` median/p95 when triggered.
+- Item objectives are disabled for the survival acceptance phase. They cannot
+  affect beam pruning, action ranking, utility, or predicted collections.
+  Passive pickup remains. A fixed local workload improves from
+  `11.68/19.44` to `8.10/12.54 ms` median/p95.
+- Alive global/local telemetry covers 6,613 decisions: 32 global-safe/local-
+  unsafe, 2,395 global-empty/local-safe, and 99 selected actions outside the
+  reported global set. All 99 are explicit local degeneracy relaxations. The
+  bidirectional mismatch rejects a scalar-weight fix and keeps the robust
+  recovery-band recurrence as the next correctness experiment.
+- The existing native moving-AABB clearance loop was still dense over every
+  hazard and cell. A cap-bounded hazard-major traversal preserves the fixed-
+  seed float32 volume checksum while reducing the 1,360-AABB, 81-frame
+  microbenchmark from `342.67/372.69` to `59.68/97.40 ms` median/p95
+  (`5.74x` median). The full warm synthetic solve is `76.15 ms` median with
+  clearance/viability `63.44/12.66 ms`.
+- The new randomized dense-oracle regression passes; Linux and Windows native
+  libraries rebuild, and both Python environments pass all 378 tests. The
+  Windows warm synthetic solve is `82.83 ms` median with `67.00/13.70 ms`
+  clearance/viability. Physical Stage-4A validation remains required for the
+  two synchronous reads, issue-time override rate, timing tail, and survival.

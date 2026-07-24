@@ -1985,3 +1985,42 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `HazardEpochAlignment` distinguishes old source-state lag, fresh hazard age,
   ECL-to-hazard event offset, and capture-window uncertainty. The corridor no
   longer advances newly read bullets by the older player-state lag.
+
+## 2026-07-24: Callback Activation Regression And Sparse Native Projection
+
+- Complete Stage-5 run `20260724_120128` reached `route_complete`, emitted no
+  Bomb input, and recorded 31 native hits. It is a regression from the prior
+  21-hit run and cannot be an acceptance baseline.
+- **Observed activation:** Spell 111's ECL timer covered 1 through 709 with
+  eight loop resets. Future callbacks appeared on 672/721 rows and attached
+  bullets on 544 rows, including both stopped and moving callback states.
+  This closes CE-0085's silent-zero-attachment failure.
+- **Observed performance cause:** Spell 107 attached a median 988 event-driven
+  bullets and reached `463.87 ms` local-planning p95 with `7/37`-frame
+  median/p95 cadence. Spell 115 had no callback events and retained
+  `39.90 ms` local p95 with `4/6`-frame cadence. The adapter had expanded each
+  attached bullet into 81 Python `AabbHazard` objects before entering C++.
+- Replaced that dense boundary with game-neutral `PiecewiseAabbHazard` and
+  `touhou_piecewise_aabb_clearance_v1`. The new native ABI accepts double-
+  precision initial kinematics, float geometry/uncertainty, and compact
+  per-hazard velocity-event offsets. The sampled trajectory path remains a
+  fallback and an ablation.
+- Initial float-native projection failed the unchanged adversarial tolerance
+  at approximately `8.3e-5`; the gate was not weakened. Double kinematics
+  reduce maximum error to `9.54e-7` over four seeds, 2,048 hazards, 32 frames,
+  and up to six events.
+- Retained benchmark `piecewise_native_speed_seed82408.json` measures a
+  `4.89×` median end-to-end speedup for 1,024 hazards over 80 frames:
+  `325.88 ms` dense versus `66.70 ms` sparse. Python lowering falls from
+  `218.80 ms` to `1.01 ms`; maximum dense/sparse volume difference is
+  `2.01e-5`.
+- **Observed epoch bug:** Spell-boundary decisions 27,169 and 36,140 joined
+  source state to bullet pools across native `+1800/+1801` counter jumps.
+  `HazardEpochAlignment.total_frame_extent` and `fits_epoch` now expose this
+  generally. Live TH08 control rejects extents above eight frames, releases
+  movement, advances the gameplay epoch, clears cached planning state, and
+  logs `sensor_epoch_discontinuity`.
+- Linux passes 345 tests. Windows Python passes 54 live-agent, 18 corridor,
+  and two adversarial focused tests with the rebuilt x86-64 DLL.
+- Physical acceptance is deliberately deferred to a randomized non-Stage-5
+  run so the performance/epoch correction is not judged only on Reisen.

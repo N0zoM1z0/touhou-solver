@@ -15,6 +15,7 @@ from corridor_planner import (
     CorridorBounds,
     CorridorConfig,
     MovingAabbHazard,
+    PiecewiseAabbHazard,
     RobustControlSpec,
     SegmentHazard,
     SegmentTrajectoryHazard,
@@ -26,6 +27,7 @@ from corridor_planner import (
     plan_corridor,
 )
 from touhou_control.native_backend import available as native_available
+from touhou_control.trajectory import PiecewiseLinearTrajectory, VelocityChange
 from touhou_control.viability import ControlAction, ViabilityQuery
 
 
@@ -371,6 +373,83 @@ class CorridorPlannerTests(unittest.TestCase):
                 grid_y,
                 aabbs=(),
                 aabb_trajectories=trajectories,
+                segments=(),
+                segment_trajectories=(),
+                config=config,
+            )
+        np.testing.assert_allclose(actual, reference, atol=3e-5)
+
+    @unittest.skipUnless(
+        native_available(),
+        "native planner backend is not built",
+    )
+    def test_native_sparse_piecewise_aabbs_match_scalar_samples(self) -> None:
+        grid_x, grid_y = np.meshgrid(
+            np.arange(0.0, 49.0, 8.0, dtype=np.float32),
+            np.arange(0.0, 41.0, 8.0, dtype=np.float32),
+        )
+        trajectories = (
+            PiecewiseAabbHazard(
+                motion=PiecewiseLinearTrajectory(
+                    8.0,
+                    8.0,
+                    3.0,
+                    1.0,
+                    (
+                        VelocityChange(2, 0.0, 0.0),
+                        VelocityChange(4, -2.0, 3.0),
+                    ),
+                ),
+                half_width=2.0,
+                half_height=3.0,
+                base_uncertainty=0.25,
+                uncertainty_per_frame=0.1,
+            ),
+            PiecewiseAabbHazard(
+                motion=PiecewiseLinearTrajectory(
+                    44.0,
+                    36.0,
+                    -1.5,
+                    -2.0,
+                    (VelocityChange(3, 2.0, -1.0),),
+                ),
+                half_width=4.0,
+                half_height=1.0,
+            ),
+        )
+        config = CorridorConfig(
+            grid_step=8.0,
+            frames_per_layer=1,
+            horizon_frames=5,
+            danger_radius=12.0,
+        )
+        reference = np.full(
+            (6, *grid_x.shape),
+            config.danger_radius,
+            dtype=np.float32,
+        )
+        for frame in range(6):
+            reference[frame] = np.minimum(
+                reference[frame],
+                _aabb_sample_clearance_field(
+                    grid_x,
+                    grid_y,
+                    tuple(trajectory.sample(frame) for trajectory in trajectories),
+                    frame=frame,
+                    player_radius=config.player_radius,
+                ),
+            )
+        with patch(
+            "corridor_planner._aabb_sample_clearance_field",
+            side_effect=AssertionError(
+                "native piecewise path fell back to Python geometry"
+            ),
+        ):
+            actual = _hazard_clearance_volume(
+                grid_x,
+                grid_y,
+                aabbs=(),
+                piecewise_aabbs=trajectories,
                 segments=(),
                 segment_trajectories=(),
                 config=config,

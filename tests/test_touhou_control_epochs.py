@@ -20,6 +20,8 @@ class HazardEpochAlignmentTests(unittest.TestCase):
         self.assertEqual(alignment.hazard_age, 1)
         self.assertEqual(alignment.event_frame_offset, 1)
         self.assertEqual(alignment.event_frame_uncertainty, 2)
+        self.assertEqual(alignment.total_frame_extent, 6)
+        self.assertTrue(alignment.fits_epoch(maximum_extent=6))
 
     def test_same_epoch_capture_has_no_synthetic_projection(self) -> None:
         alignment = HazardEpochAlignment(
@@ -35,6 +37,25 @@ class HazardEpochAlignmentTests(unittest.TestCase):
     def test_invalid_capture_window_is_rejected(self) -> None:
         with self.assertRaises(ValueError):
             FrameWindow(9, 8)
+
+    def test_ce_0086_large_positive_jump_crosses_sensor_epoch(self) -> None:
+        alignment = HazardEpochAlignment(
+            source_frame=25364,
+            hazard_window=FrameWindow(25364, 27165),
+            current_frame=27169,
+            event_window=FrameWindow(27165, 27165),
+        )
+        self.assertEqual(alignment.total_frame_extent, 1805)
+        self.assertFalse(alignment.fits_epoch(maximum_extent=8))
+
+    def test_negative_epoch_extent_limit_is_rejected(self) -> None:
+        alignment = HazardEpochAlignment(
+            source_frame=10,
+            hazard_window=FrameWindow(10, 10),
+            current_frame=10,
+        )
+        with self.assertRaises(ValueError):
+            alignment.fits_epoch(maximum_extent=-1)
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from touhou_control import native_backend
+from touhou_control.trajectory import PiecewiseLinearTrajectory
 from touhou_control.viability import (
     ControlAction,
     RobustViabilityPolicy,
@@ -93,6 +94,43 @@ class AabbTrajectoryHazard:
         if frame < 0 or frame >= len(self.samples):
             return None
         return self.samples[frame]
+
+
+@dataclass(frozen=True)
+class PiecewiseAabbHazard:
+    """A sparse piecewise-linear AABB trajectory.
+
+    Keeping velocity replacements sparse lets native backends project hazards
+    without adapters materializing one Python object per hazard per frame.
+    """
+
+    motion: PiecewiseLinearTrajectory
+    half_width: float
+    half_height: float
+    base_uncertainty: float = 0.0
+    uncertainty_per_frame: float = 0.0
+
+    def __post_init__(self) -> None:
+        if min(
+            self.half_width,
+            self.half_height,
+            self.base_uncertainty,
+            self.uncertainty_per_frame,
+        ) < 0.0:
+            raise ValueError("hazard dimensions and uncertainty cannot be negative")
+
+    def sample(self, frame: int) -> AabbHazard | None:
+        if frame < 0:
+            return None
+        x, y = self.motion.position(frame)
+        return AabbHazard(
+            x=x,
+            y=y,
+            half_width=self.half_width,
+            half_height=self.half_height,
+            base_uncertainty=self.base_uncertainty,
+            uncertainty_per_frame=self.uncertainty_per_frame,
+        )
 
 
 @dataclass(frozen=True)
@@ -608,6 +646,7 @@ def _clearance_field(
     bounds: CorridorBounds,
     aabbs: tuple[MovingAabbHazard, ...],
     aabb_trajectories: tuple[AabbTrajectoryHazard, ...],
+    piecewise_aabbs: tuple[PiecewiseAabbHazard, ...],
     segments: tuple[SegmentHazard, ...],
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
     frame: int,
@@ -616,6 +655,10 @@ def _clearance_field(
     frame_aabbs = tuple(
         sample
         for trajectory in aabb_trajectories
+        if (sample := trajectory.sample(frame)) is not None
+    ) + tuple(
+        sample
+        for trajectory in piecewise_aabbs
         if (sample := trajectory.sample(frame)) is not None
     )
     frame_segments = segments + tuple(
@@ -669,6 +712,7 @@ def _hazard_clearance_volume(
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
     config: CorridorConfig,
     aabb_trajectories: tuple[AabbTrajectoryHazard, ...] = (),
+    piecewise_aabbs: tuple[PiecewiseAabbHazard, ...] = (),
 ) -> np.ndarray:
     """Build physical-frame clearance without treating legal bounds as hazards."""
 
@@ -697,6 +741,35 @@ def _hazard_clearance_volume(
                     frame_aabbs = tuple(
                         sample
                         for trajectory in aabb_trajectories
+                        if (sample := trajectory.sample(frame)) is not None
+                    )
+                    native_volume[frame] = np.minimum(
+                        native_volume[frame],
+                        _aabb_sample_clearance_field(
+                            grid_x,
+                            grid_y,
+                            frame_aabbs,
+                            frame=frame,
+                            player_radius=config.player_radius,
+                        ),
+                    )
+        if piecewise_aabbs:
+            piecewise_volume = (
+                native_backend.apply_piecewise_aabb_clearance(
+                    x_axis=grid_x[0],
+                    y_axis=grid_y[:, 0],
+                    player_radius=config.player_radius,
+                    piecewise_aabbs=piecewise_aabbs,
+                    clearance_volume=native_volume,
+                )
+            )
+            if piecewise_volume is not None:
+                native_volume = piecewise_volume
+            else:
+                for frame in range(config.horizon_frames + 1):
+                    frame_aabbs = tuple(
+                        sample
+                        for trajectory in piecewise_aabbs
                         if (sample := trajectory.sample(frame)) is not None
                     )
                     native_volume[frame] = np.minimum(
@@ -751,6 +824,10 @@ def _hazard_clearance_volume(
         frame_aabbs = tuple(
             sample
             for trajectory in aabb_trajectories
+            if (sample := trajectory.sample(frame)) is not None
+        ) + tuple(
+            sample
+            for trajectory in piecewise_aabbs
             if (sample := trajectory.sample(frame)) is not None
         )
         volume[frame] = np.minimum(
@@ -836,6 +913,7 @@ def _plan_robust_corridor(
     bounds: CorridorBounds,
     aabbs: tuple[MovingAabbHazard, ...],
     aabb_trajectories: tuple[AabbTrajectoryHazard, ...],
+    piecewise_aabbs: tuple[PiecewiseAabbHazard, ...],
     segments: tuple[SegmentHazard, ...],
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
     preferred_x: float | None,
@@ -853,6 +931,7 @@ def _plan_robust_corridor(
         grid_y,
         aabbs=aabbs,
         aabb_trajectories=aabb_trajectories,
+        piecewise_aabbs=piecewise_aabbs,
         segments=segments,
         segment_trajectories=segment_trajectories,
         config=config,
@@ -1081,6 +1160,7 @@ def plan_corridor(
     bounds: CorridorBounds,
     aabbs: tuple[MovingAabbHazard, ...] = (),
     aabb_trajectories: tuple[AabbTrajectoryHazard, ...] = (),
+    piecewise_aabbs: tuple[PiecewiseAabbHazard, ...] = (),
     segments: tuple[SegmentHazard, ...] = (),
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...] = (),
     preferred_x: float | None = None,
@@ -1105,6 +1185,7 @@ def plan_corridor(
             bounds=bounds,
             aabbs=aabbs,
             aabb_trajectories=aabb_trajectories,
+            piecewise_aabbs=piecewise_aabbs,
             segments=segments,
             segment_trajectories=segment_trajectories,
             preferred_x=preferred_x,
@@ -1136,6 +1217,7 @@ def plan_corridor(
             bounds=bounds,
             aabbs=aabbs,
             aabb_trajectories=aabb_trajectories,
+            piecewise_aabbs=piecewise_aabbs,
             segments=segments,
             segment_trajectories=segment_trajectories,
             frame=frame,

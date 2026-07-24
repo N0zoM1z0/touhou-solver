@@ -105,6 +105,29 @@ class Th08CorridorAdapterTests(unittest.TestCase):
         self.assertEqual(trajectory.sample(6).x, 13.0)
         self.assertEqual(trajectory.sample(7).x, 12.0)
 
+    def test_piecewise_projection_consumes_and_rebases_past_events(self) -> None:
+        bullet = Bullet(
+            10.0,
+            20.0,
+            2.0,
+            0.0,
+            3.0,
+            4.0,
+            velocity_changes=(
+                VelocityChange(3, 0.0, 0.0),
+                VelocityChange(6, -1.0, 0.0),
+            ),
+        )
+        trajectory = lower_bullet_trajectories(
+            (bullet,),
+            snapshot_lag=4,
+            horizon_frames=4,
+        )[0]
+        self.assertEqual(trajectory.sample(0).x, 14.0)
+        self.assertEqual(trajectory.sample(1).x, 14.0)
+        self.assertEqual(trajectory.sample(2).x, 13.0)
+        self.assertEqual(trajectory.motion.changes[0].frame, 2)
+
     def test_laser_uncertainty_accounts_for_snapshot_age(self) -> None:
         trajectory = lower_lasers(
             (Laser(12.0, 34.0, 0.5, 4.0, 80.0, 6.0),),

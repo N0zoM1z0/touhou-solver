@@ -457,10 +457,13 @@ boundary, not evidence that segment geometry should be simplified.
 Constant velocity is no longer the neutral projectile contract.
 `PiecewiseLinearTrajectory` stores finite velocity replacements whose event
 applies before movement on that update. The local vectorized oracle applies
-the same delta-velocity correction, while the global planner receives exact
-per-frame `AabbTrajectoryHazard` samples. The optional native backend consumes
-frame offsets plus flattened AABBs and is differential-tested against the
-scalar clearance oracle.
+the same delta-velocity correction. The global planner accepts both finite
+per-frame `AabbTrajectoryHazard` samples and sparse `PiecewiseAabbHazard`
+motion. The optimized path passes one structure-of-arrays snapshot plus
+per-hazard event offsets to C++; the native kernel projects positions and
+updates clearance directly. It does not materialize one Python object per
+hazard per frame. The sampled interface remains available for arbitrary
+trajectories and as a scalar fallback.
 
 This interface contains no spell or TH08 opcode. A game adapter may obtain
 events from an ECL VM, a projectile state machine, a replay, or another
@@ -483,8 +486,13 @@ future policy lead. Callback events are rebased by the event offset, and the
 velocity-delta displacement produced by the timing window inflates the AABB.
 
 This fixes a prior double projection: TH08's fresh bullet pool was advanced by
-the older player sensor lag in the corridor. Trace records now retain both
-capture bounds and all derived values, so alignment can be replayed.
+the older player sensor lag in the corridor. `total_frame_extent` also spans
+the source, hazard, event, and current timestamps. A consumer supplies its
+maximum plausible atomic extent and must reject a snapshot that does not fit
+one epoch. TH08 uses eight frames: ordinary pool captures span zero or one,
+while observed opcode-`0x94` phase boundaries jump by approximately 1,800.
+Trace records retain both capture bounds and all derived values, so alignment
+can be replayed.
 
 ## Synthetic Adversarial Differential Gate
 
@@ -494,12 +502,21 @@ limited to a game's pool capacity. `adversarial_planner_diff.py` compares the
 optimized/native volume against an independent scalar oracle and shrinks a
 failing hazard set while preserving its seed.
 
-The retained seed-8008 benchmark covers four seeds, 2,048 hazards per seed,
-and 32 frames. Maximum absolute native/reference error is `1.72e-5`, below the
-`5e-5` gate. These workloads are deliberately harder and denser than the
-1,536-slot TH08 pool. Passing them establishes implementation parity for the
-tested geometry; it does not establish game-state fidelity or physical
-survival.
+The original retained seed-8008 benchmark covers four seeds, 2,048 hazards
+per seed, and 32 frames. The sparse-native extension raises the event count
+from three to six and uses a 16-pixel rather than 32-pixel grid. Its maximum
+absolute native/reference error is `9.54e-7`, below the unchanged `5e-5`
+gate. These workloads are deliberately harder and denser than the 1,536-slot
+TH08 pool. Passing them establishes implementation parity for the tested
+geometry; it does not establish game-state fidelity or physical survival.
+
+The separate 1,024-hazard, 80-frame performance benchmark keeps the old dense
+sample path as an ablation. Median lowering/total time changes from
+`218.80/325.88 ms` to `1.01/66.70 ms`, a `4.89×` end-to-end speedup, while
+dense and sparse volumes differ by at most `2.01e-5`. This accepts the sparse
+C++ boundary as a performance architecture. It does not imply that every
+planner component should be rewritten in C++; Python remains the orchestration
+and reference layer until a measured kernel justifies another move.
 
 ## Empty-Kernel Control Reserve
 

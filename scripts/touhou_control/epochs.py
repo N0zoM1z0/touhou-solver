@@ -61,3 +61,24 @@ class HazardEpochAlignment:
         if self.event_window is None:
             return self.hazard_window.span
         return self.hazard_window.span + self.event_window.span
+
+    @property
+    def total_frame_extent(self) -> int:
+        """Width of all source, capture, event, and planning timestamps."""
+
+        frames = [
+            self.source_frame,
+            self.hazard_window.before,
+            self.hazard_window.after,
+            self.current_frame,
+        ]
+        if self.event_window is not None:
+            frames.extend((self.event_window.before, self.event_window.after))
+        return max(frames) - min(frames)
+
+    def fits_epoch(self, *, maximum_extent: int) -> bool:
+        """Whether one capture is plausibly contained in a single epoch."""
+
+        if maximum_extent < 0:
+            raise ValueError("maximum epoch extent cannot be negative")
+        return self.total_frame_extent <= maximum_extent

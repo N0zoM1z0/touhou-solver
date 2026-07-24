@@ -1849,4 +1849,62 @@ Status: observed | inferred | unknown | fixed
   run must show nonzero callback events and attached tagged bullets on both
   moving and stopped portions, timer progression through the 350/450/710
   loop, and event/phase parity within the recorded capture uncertainty.
-- **Status:** Offline correction implemented; physical gate pending.
+- **Physical activation evidence:** Complete Stage-5 run
+  `20260724_120128` covered timer values 1 through 709 and eight loop resets.
+  Of 721 spell-111 lookahead rows, 672 contained future callback events and
+  544 attached at least one bullet. Attached bullets occurred in both moving
+  and stopped callback states. This closes the silent-zero-attachment gate,
+  but the run regressed to 31 hits and is not a survival acceptance.
+- **Status:** Activation gate passed; performance and epoch failures moved to
+  CE-0086.
+
+## CE-0086: Exact callback projection starved control and crossed an epoch
+
+- **Observed symptom:** Complete hard-no-Bomb Stage-5 run
+  `20260724_120128` recorded 31 hits versus 21 in the preceding failed-
+  activation run. Spell 107 regressed from four hits to 11, spell 111 from
+  two to five, and overall decision cadence degraded most strongly in the
+  callback-heavy phases.
+- **Observed timing:** Spell 107 attached callback trajectories on 315 of 346
+  decisions, with median 988 and maximum 1,022 attached bullets. Its local
+  planning median/p95 was `40.20/463.87 ms`, decision cadence `7/37` frames,
+  and global solve median/p95 `556.50/708.46 ms`. Spell 115 had no callback
+  events and retained `26.33/39.90 ms` local planning and `4/6`-frame cadence.
+  Spell 103 similarly emitted four or six lookahead events on every decision
+  and reached `333.19 ms` local p95.
+- **Implementation cause:** The general event model was semantically active,
+  but the TH08 corridor adapter expanded every event-driven bullet into 81
+  `AabbHazard` Python objects. The native wrapper then traversed and repacked
+  those objects frame by frame. A 1,024-bullet, 80-frame retained benchmark
+  measured `325.88 ms` median end-to-end, including `218.80 ms` in Python
+  materialization. A background corridor solve therefore competed with the
+  real-time local loop precisely when callback density was highest.
+- **Independent epoch failure:** At spell-103 frame 27,169 and spell-107
+  frame 36,140, one bullet-pool read crossed native opcode-`0x94`'s `+1800`
+  stage-counter jump. The controller joined the pre-jump player/spell state
+  to the post-jump pool and treated the 1,800/1,801-frame span as ordinary
+  timing uncertainty. These are torn cross-epoch snapshots, not slow physical
+  reads.
+- **General correction:** `PiecewiseAabbHazard` retains one trajectory plus
+  sparse velocity replacements. A new C++ kernel accepts structure-of-arrays
+  state and event offsets, performs double-precision projection, and updates
+  the clearance volume without `N × T` Python objects. Python scalar sampling
+  remains the fallback/oracle. `HazardEpochAlignment.fits_epoch` now rejects
+  any source/capture/event/current timestamp extent above the configured
+  eight-frame atomicity bound. Live control releases movement, increments the
+  gameplay epoch, invalidates cached policy state, and records
+  `sensor_epoch_discontinuity` instead of planning from a torn snapshot.
+- **Differential/performance gate:** Four deterministic cases with 2,048
+  hazards, 32 frames, and up to six velocity events match the independent
+  scalar oracle within `9.54e-7` against the unchanged `5e-5` gate. The
+  1,024-by-81 dense/sparse benchmark reports `325.88 ms` versus `66.70 ms`
+  median, a `4.89×` speedup; lowering alone falls from `218.80 ms` to
+  `1.01 ms`. The dense/sparse volume difference is `2.01e-5`.
+- **Regression:** `test_ce_0086_large_positive_jump_crosses_sensor_epoch`,
+  `test_native_sparse_piecewise_aabbs_match_scalar_samples`,
+  `test_piecewise_projection_consumes_and_rebases_past_events`, retained
+  adversarial benchmark
+  `adversarial_piecewise_native_seed8008.json`, and speed benchmark
+  `piecewise_native_speed_seed82408.json`.
+- **Status:** Code and synthetic gates passed. A randomized non-Stage-5
+  physical run is required before accepting the architecture change.

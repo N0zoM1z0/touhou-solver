@@ -5,15 +5,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
 
 from corridor_planner import (
-    AabbHazard,
-    AabbTrajectoryHazard,
     CorridorConfig,
+    PiecewiseAabbHazard,
     _hazard_clearance_volume,
 )
 from touhou_control import native_backend
@@ -24,17 +24,12 @@ from touhou_control.adversarial import (
 )
 
 
-def _lower(scenario: AdversarialScenario) -> tuple[AabbTrajectoryHazard, ...]:
+def _lower(scenario: AdversarialScenario) -> tuple[PiecewiseAabbHazard, ...]:
     return tuple(
-        AabbTrajectoryHazard(
-            tuple(
-                AabbHazard(
-                    *hazard.motion.position(frame),
-                    hazard.half_width,
-                    hazard.half_height,
-                )
-                for frame in range(scenario.horizon_frames + 1)
-            )
+        PiecewiseAabbHazard(
+            motion=hazard.motion,
+            half_width=hazard.half_width,
+            half_height=hazard.half_height,
         )
         for hazard in scenario.hazards
     )
@@ -58,16 +53,20 @@ def compare_scenario(
         player_radius=player_radius,
         danger_radius=clearance_cap,
     )
+    lower_started = time.perf_counter()
     lowered = _lower(scenario)
+    lower_ms = (time.perf_counter() - lower_started) * 1000.0
+    solve_started = time.perf_counter()
     actual = _hazard_clearance_volume(
         grid_x,
         grid_y,
         aabbs=(),
-        aabb_trajectories=lowered,
+        piecewise_aabbs=lowered,
         segments=(),
         segment_trajectories=(),
         config=config,
     )
+    solve_ms = (time.perf_counter() - solve_started) * 1000.0
     if scenario.horizon_frames == 0:
         actual = actual[:1]
     reference = reference_clearance_volume(
@@ -87,6 +86,9 @@ def compare_scenario(
         "horizon_frames": scenario.horizon_frames,
         "grid_step": grid_step,
         "backend": "native" if native_backend.available() else "python",
+        "representation": "sparse_piecewise",
+        "lower_ms": lower_ms,
+        "clearance_ms": solve_ms,
         "maximum_absolute_error": maximum,
         "tolerance": tolerance,
         "first_mismatch": first,

@@ -174,6 +174,10 @@ LIVE_CONTROL_DELAY_MIN = 1
 LIVE_CONTROL_DELAY_MAX = 6
 LIVE_CONTROL_DELAY_WINDOW = 120
 LIVE_CONTROL_DELAY_GUARD_FRAMES = 600
+# A native pool read normally spans zero or one manager update. A wider bound
+# tolerates scheduler stalls but rejects known +1800 logical timer jumps that
+# splice source state and hazard pools from different gameplay epochs.
+MAX_SENSOR_EPOCH_EXTENT_FRAMES = 8
 # A rolling async policy can outlive several estimator updates. Cover the
 # complete configured support instead of assuming only one-step drift.
 ASYNC_POLICY_DELAY_PADDING = (
@@ -3199,6 +3203,9 @@ def run(args: argparse.Namespace) -> int:
                     "control_delay_guard_frames": (
                         LIVE_CONTROL_DELAY_GUARD_FRAMES
                     ),
+                    "maximum_sensor_epoch_extent_frames": (
+                        MAX_SENSOR_EPOCH_EXTENT_FRAMES
+                    ),
                     "global_planner": (
                         "finite_horizon_robust_backward_viability"
                         if not args.local_only
@@ -3631,6 +3638,65 @@ def run(args: argparse.Namespace) -> int:
                     else None
                 ),
             )
+            if not hazard_alignment.fits_epoch(
+                maximum_extent=MAX_SENSOR_EPOCH_EXTENT_FRAMES
+            ):
+                gaps += 1
+                gameplay_epoch += 1
+                safe_mask = previous_mask & SHOT
+                _require_foreground(api, pid)
+                send_transitions(
+                    api,
+                    input_transitions(
+                        previous_mask,
+                        safe_mask,
+                        supported_mask=SUPPORTED_INPUT_MASK,
+                    ),
+                )
+                previous_mask = safe_mask
+                previous_direction = 0
+                decision_frame_deltas.clear()
+                delay_estimator.reset()
+                corridor_solution = None
+                corridor_pending_solution = None
+                corridor_context = None
+                corridor_commitment = CorridorCommitment()
+                ecl_instruction_cache.clear()
+                if corridor_future is not None:
+                    corridor_future.cancel()
+                output.write(
+                    json.dumps(
+                        {
+                            "kind": "sensor_epoch_discontinuity",
+                            "frame": counter_after_read,
+                            "source_frame": state["enemy_manager_frame"],
+                            "gameplay_epoch": gameplay_epoch,
+                            "maximum_extent": (
+                                MAX_SENSOR_EPOCH_EXTENT_FRAMES
+                            ),
+                            "observed_extent": (
+                                hazard_alignment.total_frame_extent
+                            ),
+                            "hazard_window": [
+                                bullet_frame_before,
+                                bullet_frame_after,
+                            ],
+                            "event_window": (
+                                [ecl_frame_before, ecl_frame_after]
+                                if (
+                                    ecl_frame_before is not None
+                                    and ecl_frame_after is not None
+                                )
+                                else None
+                            ),
+                            "spell": state["spell"],
+                            "released_to_mask": safe_mask,
+                        }
+                    )
+                    + "\n"
+                )
+                output.flush()
+                continue
             player_to_hazard_lag = (
                 hazard_alignment.source_to_hazard_lag
             )

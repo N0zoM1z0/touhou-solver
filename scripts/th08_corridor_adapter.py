@@ -7,12 +7,11 @@ import math
 from typing import Protocol
 
 from corridor_planner import (
-    AabbHazard,
-    AabbTrajectoryHazard,
     CorridorBounds,
     CorridorConfig,
     CorridorPlan,
     MovingAabbHazard,
+    PiecewiseAabbHazard,
     RobustControlSpec,
     SegmentHazard,
     SegmentTrajectoryHazard,
@@ -177,15 +176,15 @@ def lower_bullet_trajectories(
     snapshot_lag: int,
     forecast_frames: int = 0,
     horizon_frames: int = TH08_CORRIDOR_CONFIG.horizon_frames,
-) -> tuple[AabbTrajectoryHazard, ...]:
-    """Lower event-driven bullets to exact time-indexed AABB samples."""
+) -> tuple[PiecewiseAabbHazard, ...]:
+    """Lower event-driven bullets without dense per-frame materialization."""
 
     if horizon_frames < 0:
         raise ValueError("bullet trajectory horizon cannot be negative")
     lag = max(0, snapshot_lag)
     forecast = max(0, forecast_frames)
     read_uncertainty = 0.2 * math.sqrt(lag)
-    trajectories: list[AabbTrajectoryHazard] = []
+    trajectories: list[PiecewiseAabbHazard] = []
     for bullet in bullets:
         if not bullet.velocity_changes:
             continue
@@ -196,29 +195,40 @@ def lower_bullet_trajectories(
             bullet.vy,
             bullet.velocity_changes,
         )
-        samples = []
-        for frame in range(horizon_frames + 1):
-            elapsed = lag + forecast + frame
-            x, y = motion.position(elapsed)
-            samples.append(
-                AabbHazard(
-                    x=x,
-                    y=y,
-                    half_width=(
-                        bullet.half_width
-                        + bullet.trajectory_uncertainty_x
-                    ),
-                    half_height=(
-                        bullet.half_height
-                        + bullet.trajectory_uncertainty_y
-                    ),
-                    base_uncertainty=(
-                        read_uncertainty + 0.05 * forecast
-                    ),
-                    uncertainty_per_frame=0.05,
-                )
+        elapsed = lag + forecast
+        projected_x, projected_y = motion.position(elapsed)
+        projected_velocity_x, projected_velocity_y = motion.velocity(elapsed)
+        remaining_changes = tuple(
+            VelocityChange(
+                change.frame - elapsed,
+                change.velocity_x,
+                change.velocity_y,
             )
-        trajectories.append(AabbTrajectoryHazard(tuple(samples)))
+            for change in motion.changes
+            if change.frame > elapsed
+            and change.frame - elapsed <= horizon_frames
+        )
+        trajectories.append(
+            PiecewiseAabbHazard(
+                motion=PiecewiseLinearTrajectory(
+                    projected_x,
+                    projected_y,
+                    projected_velocity_x,
+                    projected_velocity_y,
+                    remaining_changes,
+                ),
+                half_width=(
+                    bullet.half_width
+                    + bullet.trajectory_uncertainty_x
+                ),
+                half_height=(
+                    bullet.half_height
+                    + bullet.trajectory_uncertainty_y
+                ),
+                base_uncertainty=read_uncertainty + 0.05 * forecast,
+                uncertainty_per_frame=0.05,
+            )
+        )
     return tuple(trajectories)
 
 
@@ -367,7 +377,7 @@ def plan_th08_corridor(
                 forecast_frames=forecast_frames,
             )
         ),
-        aabb_trajectories=lower_bullet_trajectories(
+        piecewise_aabbs=lower_bullet_trajectories(
             bullets,
             snapshot_lag=snapshot_lag,
             forecast_frames=forecast_frames,

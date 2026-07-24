@@ -15,6 +15,7 @@ _LIBRARY = None
 _VIABILITY_FUNCTION = None
 _CLEARANCE_FUNCTION = None
 _AABB_TRAJECTORY_CLEARANCE_FUNCTION = None
+_PIECEWISE_AABB_CLEARANCE_FUNCTION = None
 _TRAJECTORY_CLEARANCE_FUNCTION = None
 _LOAD_ERROR: OSError | None = None
 
@@ -202,6 +203,49 @@ def _load_aabb_trajectory_clearance_function():
     return function
 
 
+def _load_piecewise_aabb_clearance_function():
+    global _PIECEWISE_AABB_CLEARANCE_FUNCTION
+    if _PIECEWISE_AABB_CLEARANCE_FUNCTION is not None:
+        return _PIECEWISE_AABB_CLEARANCE_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_piecewise_aabb_clearance_v1
+    except AttributeError:
+        return None
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    double_pointer = ctypes.POINTER(ctypes.c_double)
+    function.argtypes = [
+        ctypes.c_float,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        double_pointer,
+        double_pointer,
+        double_pointer,
+        double_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int32),
+        ctypes.POINTER(ctypes.c_int32),
+        double_pointer,
+        double_pointer,
+        ctypes.c_int,
+        float_pointer,
+    ]
+    function.restype = ctypes.c_int
+    _PIECEWISE_AABB_CLEARANCE_FUNCTION = function
+    return function
+
+
 def available() -> bool:
     return _load_library() is not None
 
@@ -210,6 +254,14 @@ def _attribute_array(items: tuple[object, ...], name: str) -> np.ndarray:
     return np.fromiter(
         (float(getattr(item, name)) for item in items),
         dtype=np.float32,
+        count=len(items),
+    )
+
+
+def _attribute_array64(items: tuple[object, ...], name: str) -> np.ndarray:
+    return np.fromiter(
+        (float(getattr(item, name)) for item in items),
+        dtype=np.float64,
         count=len(items),
     )
 
@@ -419,6 +471,92 @@ def apply_aabb_trajectory_clearance(
     if result != 0:
         raise RuntimeError(
             f"native AABB trajectory clearance kernel returned {result}"
+        )
+    return output
+
+
+def apply_piecewise_aabb_clearance(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    player_radius: float,
+    piecewise_aabbs: tuple[object, ...],
+    clearance_volume: np.ndarray,
+) -> np.ndarray | None:
+    """Project sparse velocity events and apply their AABBs natively."""
+
+    function = _load_piecewise_aabb_clearance_function()
+    if function is None:
+        return None
+    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
+    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
+    output = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    if output.shape[1:] != (len(y_axis), len(x_axis)):
+        raise ValueError("clearance volume does not match the supplied axes")
+
+    motions = tuple(hazard.motion for hazard in piecewise_aabbs)
+    hazard_fields = (
+        _attribute_array64(motions, "x"),
+        _attribute_array64(motions, "y"),
+        _attribute_array64(motions, "velocity_x"),
+        _attribute_array64(motions, "velocity_y"),
+        *(
+            _attribute_array(piecewise_aabbs, name)
+            for name in (
+                "half_width",
+                "half_height",
+                "base_uncertainty",
+                "uncertainty_per_frame",
+            )
+        ),
+    )
+    event_offsets = np.empty(len(motions) + 1, dtype=np.int32)
+    event_offsets[0] = 0
+    event_frames: list[int] = []
+    event_velocity_x: list[float] = []
+    event_velocity_y: list[float] = []
+    for index, motion in enumerate(motions):
+        for change in motion.changes:
+            event_frames.append(change.frame)
+            event_velocity_x.append(change.velocity_x)
+            event_velocity_y.append(change.velocity_y)
+        event_offsets[index + 1] = len(event_frames)
+    packed_event_frames = np.asarray(event_frames, dtype=np.int32)
+    packed_event_velocity_x = np.asarray(event_velocity_x, dtype=np.float64)
+    packed_event_velocity_y = np.asarray(event_velocity_y, dtype=np.float64)
+
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    double_pointer = ctypes.POINTER(ctypes.c_double)
+    result = function(
+        float(x_axis[0]),
+        float(x_axis[1] - x_axis[0]),
+        len(x_axis),
+        float(y_axis[0]),
+        float(y_axis[1] - y_axis[0]),
+        len(y_axis),
+        output.shape[0],
+        player_radius,
+        *(
+            values.ctypes.data_as(double_pointer)
+            for values in hazard_fields[:4]
+        ),
+        *(
+            values.ctypes.data_as(float_pointer)
+            for values in hazard_fields[4:]
+        ),
+        len(motions),
+        event_offsets.ctypes.data_as(ctypes.POINTER(ctypes.c_int32)),
+        packed_event_frames.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_int32)
+        ),
+        packed_event_velocity_x.ctypes.data_as(double_pointer),
+        packed_event_velocity_y.ctypes.data_as(double_pointer),
+        len(event_frames),
+        output.ctypes.data_as(float_pointer),
+    )
+    if result != 0:
+        raise RuntimeError(
+            f"native piecewise AABB clearance kernel returned {result}"
         )
     return output
 

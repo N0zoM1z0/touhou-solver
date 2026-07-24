@@ -734,6 +734,7 @@ def run_trial(
             expected_stage=stage.route_index,
             terminal_stage=stage.route_index,
             trace_transform_runtime=args.trace_transform_runtime,
+            safety_value_horizon=args.safety_value_horizon,
         )
         batch_process, batch_log = launch_patch_batch(
             game_dir=game_dir,
@@ -972,6 +973,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="retain transform-relevant bullets from the complete native pool",
     )
     parser.add_argument(
+        "--safety-value-horizon",
+        type=int,
+        default=0,
+        help=(
+            "enable the compact max-min empty-kernel preference for this "
+            "many game frames"
+        ),
+    )
+    parser.add_argument(
         "--refuse-existing",
         action="store_false",
         dest="kill_existing",
@@ -995,6 +1005,8 @@ def main(argv: list[str] | None = None) -> int:
         raise RuntimeError("unattended physical control requires --armed")
     if args.repeat <= 0:
         raise ValueError("--repeat must be positive")
+    if args.safety_value_horizon < 0:
+        raise ValueError("--safety-value-horizon cannot be negative")
     if min(
         args.cooldown,
         args.launch_timeout,

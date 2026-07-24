@@ -56,7 +56,10 @@ def build_long_run_arguments(
     expected_stage: int | None = None,
     terminal_stage: int | None = None,
     trace_transform_runtime: bool = False,
+    safety_value_horizon: int = 0,
 ) -> list[str]:
+    if safety_value_horizon < 0:
+        raise ValueError("safety-value horizon cannot be negative")
     arguments = [
         str(output),
         "--pid",
@@ -88,6 +91,10 @@ def build_long_run_arguments(
         arguments.extend(("--terminal-stage", str(terminal_stage)))
     if trace_transform_runtime:
         arguments.append("--trace-transform-runtime")
+    if safety_value_horizon:
+        arguments.extend(
+            ("--safety-value-horizon", str(safety_value_horizon))
+        )
     return arguments
 
 
@@ -98,6 +105,7 @@ class AgentHotkey:
         expected_stage: int | None = None,
         terminal_stage: int | None = None,
         trace_transform_runtime: bool = False,
+        safety_value_horizon: int = 0,
     ) -> None:
         if os.name != "nt":
             raise RuntimeError("th08_agent_hotkey.py must run under Windows Python")
@@ -134,6 +142,7 @@ class AgentHotkey:
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
         self.trace_transform_runtime = trace_transform_runtime
+        self.safety_value_horizon = safety_value_horizon
         self.artifact_dir = (
             Path(__file__).resolve().parent.parent
             / "artifacts"
@@ -239,6 +248,7 @@ class AgentHotkey:
                 expected_stage=self.expected_stage,
                 terminal_stage=self.terminal_stage,
                 trace_transform_runtime=self.trace_transform_runtime,
+                safety_value_horizon=self.safety_value_horizon,
             )
             if not gameplay_active:
                 arguments.extend(("--wait-gameplay", "--wait-timeout", "30"))

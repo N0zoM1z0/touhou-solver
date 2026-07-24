@@ -114,13 +114,22 @@ class PracticeSupervisorTests(unittest.TestCase):
 
     def test_parser_accepts_repeatable_stage_selection(self) -> None:
         args = build_parser().parse_args(
-            ["--stage", "6a", "--repeat", "3", "--armed"]
+            [
+                "--stage",
+                "6a",
+                "--repeat",
+                "3",
+                "--safety-value-horizon",
+                "32",
+                "--armed",
+            ]
         )
         self.assertEqual(args.stage.key, "6a")
         self.assertEqual(args.stage.route_index, 6)
         self.assertEqual(args.repeat, 3)
         self.assertTrue(args.armed)
         self.assertTrue(args.kill_existing)
+        self.assertEqual(args.safety_value_horizon, 32)
 
     def test_tail_reader_handles_a_record_larger_than_one_block(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

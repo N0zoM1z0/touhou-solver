@@ -141,8 +141,8 @@ Their checkpoint summary is
 ## Build And Deployment
 
 ```bash
-PYTHONPATH=scripts python scripts/build_native_planner.py --target linux
-PYTHONPATH=scripts python scripts/build_native_planner.py --target windows
+PYTHONPATH=scripts python scripts/tools/build_native_planner.py --target linux
+PYTHONPATH=scripts python scripts/tools/build_native_planner.py --target windows
 ```
 
 The rebuildable `.so` and `.dll` are ignored. The Windows x86-64 DLL is
@@ -210,8 +210,9 @@ benchmarks and parity diagnosis.
 ## Remaining Limits
 
 - Native acceleration does not repair an inaccurate future hazard oracle.
-  Current transformed-bullet and laser uncertainty still grows through the
-  forecast interval.
+  Unknown transform-bearing bullets and lasers without executable lifecycle
+  state still grow through the forecast interval. State-backed lasers now
+  execute their native lifecycle without generic horizon drift.
 - The live policy still sees current projectiles projected forward. Exact ECL
   spawn, transform, and laser execution is required to model hazards that do
   not yet exist in the snapshot.

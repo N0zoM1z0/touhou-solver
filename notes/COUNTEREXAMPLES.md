@@ -444,7 +444,8 @@ Status: observed | inferred | unknown | fixed
   search; the local MPC must preserve that selected component instead of
   choosing a late waypoint.
 - **Regression:** The companion JSON contains one retained witness for each
-  native hit. `th08_fullrun_regression.py` now validates every case ID,
+  native hit. `scripts/analysis/th08_fullrun_regression.py` now validates
+  every case ID,
   classification witness, factor, resource field, and stage count. Cases remain
   separate until executor replay proves equivalent root causes.
 - **Status:** corpus executable; full phase/resource solver correction open.
@@ -2012,7 +2013,7 @@ Status: observed | inferred | unknown | fixed
   changed 1/100 actions through floating-point reduction order. The branch
   was removed.
 - **Regression/artifacts:** `test_fused_laser_projection_exactly_matches_object_pipeline`,
-  `benchmark_local_laser_fusion.py`,
+  `scripts/benchmarks/benchmark_local_laser_fusion.py`,
   `132007.local_laser_fusion_benchmark.json`, the three
   `132007.safety_value_*_replay.json` ablations, and the complete Stage-3
   dossier.

@@ -410,7 +410,7 @@ it starts the waiting agent before sending the final confirm. F9 creates a
 safe-stop request. The long-run profile retains every native phase-2 edge,
 resources, stage/spell identity, nearby projectiles, corridor state, and
 latency until F9, scene unload, foreground loss, or duration. Raw JSONL stays
-local; `scripts/th08_run_dossier.py` stitches trace segments into compact
+local; `scripts/analysis/th08_run_dossier.py` stitches trace segments into compact
 provenance, per-stage/per-spell, hit-ledger, and regression artifacts.
 
 ## Cross-Game Boundary

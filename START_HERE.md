@@ -13,28 +13,31 @@ runtime evidence remain in `notes/`.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - Handoff base before the current checkpoint:
-  `4510a2a Reject stale live refinement and record strategy ledger`.
-- The current checkpoint adds stable native Boss HP/phase telemetry and
-  safe-set damage shadowing. A physical Stage-4A experiment rejected
-  horizontal Boss alignment as live damage authority: it improved its
-  geometric proxy but did not improve native HP response. The architecture is
-  now a reusable mechanics/safety core plus explicit game/team/stage/phase
-  practiced profiles. Linux and Windows complete suites pass 420 quick unit
-  tests; Linux runtime is about 1.4 seconds after moving full differential
-  solves out of unit-test setup. Read
+  `a776264 Record boss telemetry and practiced strategy boundary`.
+- The current maintenance checkpoint fixes non-native exact-laser horizon
+  drift in the local MPC and non-native bullet-size clamps in both live
+  decoders. It separates offline analysis, benchmarks, and explicit tools
+  from importable/live modules; extracts laser runtime projection and the C++
+  transition cache; records the research-tier test/artifact policy; and
+  removes ignored raw captures after preserving compact evidence. Linux and
+  Windows complete suites pass 423 quick unit tests in 1.368 and 2.714
+  seconds. Read
+  `notes/MODEL_SOLVER_MAINTENANCE_AUDIT_20260724.md`,
   `notes/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`,
   `notes/DELIVERY_AWARE_STRATEGY_REASSESSMENT_20260724.md`,
   `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`, and `STRATEGY.md`
   before changing the recovery, refinement, or objective layers.
 - The only expected untracked pre-existing file is `image.png`. It is a user
   screenshot. Do not add, delete, overwrite, or otherwise clean it.
-- The latest Stage-4A and Stage-5 raw JSONL files and launch logs remain local
-  and ignored. Compact review/regression artifacts are committed.
+- Ignored raw JSONL, viability capsules, screenshots, launch logs, caches, and
+  native build outputs were cleaned after compact review/regression artifacts
+  were verified. New raw captures are temporary unless a named active
+  differential still needs them.
 - No runtime session or half-edited experiment is part of the checkpoint.
 - The IDA database has newer metadata than Git: the transform functions listed
   in section 10 were renamed/commented during the callback investigation.
-- The REA binary session used for the latest transform analysis was closed
-  before this handoff.
+- Workspace policy now forbids new REA use. Historical REA Evidence IDs remain
+  provenance only; use the connected IDA Pro MCP for new binary analysis.
 
 Sanity check:
 
@@ -118,8 +121,8 @@ into Git, logs, shell history, or artifacts.
 Rebuild both ignored native libraries after changing the C++ kernel:
 
 ```bash
-PYTHONPATH=scripts python3 scripts/build_native_planner.py --target linux
-PYTHONPATH=scripts python3 scripts/build_native_planner.py --target windows
+PYTHONPATH=scripts python3 scripts/tools/build_native_planner.py --target linux
+PYTHONPATH=scripts python3 scripts/tools/build_native_planner.py --target windows
 ```
 
 The agent falls back to NumPy if a native library is absent, but that path is
@@ -233,7 +236,7 @@ Inspect any growing trace explicitly:
 
 ```bash
 trace=$(ls -1t artifacts/runtime_reports/*unattended*.jsonl | head -n1)
-PYTHONPATH=scripts python3 scripts/th08_longrun_status.py "$trace"
+PYTHONPATH=scripts python3 scripts/analysis/th08_longrun_status.py "$trace"
 tail -n 1 "$trace"
 ```
 
@@ -361,12 +364,20 @@ The command must include `PYTHONPATH=scripts`. Running bare unittest discovery
 causes import errors for every script module; that is a test invocation error,
 not a product regression.
 
-Windows-focused test shell:
+Windows Python cannot use the ordinary CLI discovery command directly on this
+UNC workspace: `unittest discover -s <UNC>` treats the non-package `tests/`
+directory as non-importable. `cmd.exe` also cannot make UNC a current
+directory, and a session-local PowerShell `PSDrive` is not visible to the
+external Python process. From WSL, use the loader directly and give it the
+same UNC directory as `start_dir` and `top_level_dir`:
 
-```bat
-set PYTHONPATH=\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\scripts
-%LOCALAPPDATA%\Microsoft\WindowsApps\python.exe -m unittest discover -s \\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\tests -p test_th08_live_dodge_agent.py
+```bash
+/mnt/c/Users/21992/AppData/Local/Microsoft/WindowsApps/python.exe -c \
+  'import sys,unittest; root=r"\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08"; sys.path.insert(0,root+r"\scripts"); tests=root+r"\tests"; suite=unittest.TestLoader().discover(tests,pattern="test_*.py",top_level_dir=tests); result=unittest.TextTestRunner(verbosity=1).run(suite); raise SystemExit(0 if result.wasSuccessful() else 1)'
 ```
+
+Change only the `pattern` for a focused Windows file. This exact form passed
+all 423 tests in 2.714 seconds at the 2026-07-24 maintenance checkpoint.
 
 Before commit:
 
@@ -446,7 +457,7 @@ Latest Stage-5 evidence:
 - The 27-hit count must not be compared causally with `191313`: RNG,
   respawn/Power, and the old synchronous capture path differ.
 
-## 10. IDA Pro MCP And REA
+## 10. IDA Pro MCP
 
 ### IDA Pro MCP
 
@@ -481,40 +492,11 @@ Comments were added at:
   world-position derivative.
 - `0x0042CA54`: lethal/render world position `+0x2D88` is composed later.
 
-### REA
-
-Read the installed `reverse-engineer-anything` skill before using REA. For a
-native binary, open it, get the overview, request bounded function analysis,
-cite Evidence IDs in durable notes, and close the binary session when done.
-Do not repeat identical analysis calls merely to reread output.
-
-Binary:
-
-```text
-/mnt/d/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)/th08.exe
-```
-
-Important Evidence IDs:
-
-- Binary overview:
-  `ev_907e44b397cc9bfc6e0d9f2579bdc22bd4b98e32cc8a36fc959b21f255159edf`
-- Spawn/copy/queue initialization:
-  `ev_7f655f7f0cb4948ce0753ef441b6bef7a3008601e345b6b8f40d40db44054338`
-- Queue executor and stop setup:
-  `ev_f80073c867ce14ae63fe52283dcfeeea322b83b3368b790fb539960fcd65ae2d`
-- Stop-turn handler:
-  `ev_cb4ea55181ccda8975025583d74b724906f398c642cb3cbfb4ab7e3935304de0`
-- Stop-snap handler:
-  `ev_32f2db8cee21ec27800551c2a308ed12c19f57c8d0593bf894f68bed4c59b37f`
-- Stop-reaim handler:
-  `ev_7cf3f4a46e21867c5be0c74c5188fd83f6b6843f6784f33a01f715e024fd34d5`
-- Timer elapsed float/current/advance:
-  `ev_8cd3b7f623c9bb779121d7d21491b3812bc30fcf9d5284100e63f9868c1050ae`,
-  `ev_ba62f112b8bfb52df89711e970634c49babc138aaea9889f1e8dbe6fe05bd41e`,
-  `ev_5c50a5e1604263f7141eb0013c3567acf78174ebb964cf6c66a5214889725ae9`
-
-Tool feedback for later REA MCP improvement belongs in
-`/tmp/rea_mcp_feedback.md`, not Git.
+Do not use REA, its skill, setup, or doctor commands for TH08. Historical REA
+Evidence IDs in older notes remain provenance for already-recorded
+conclusions. New static conclusions must come from the connected IDA Pro
+database and new execution claims must come from native runtime
+traces/probes.
 
 ## 11. Current Blockers
 
@@ -741,7 +723,7 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 10. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
 11. `notes/NATIVE_PLANNER_BACKEND.md`
 12. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
-13. `scripts/viability_differential_audit.py`
+13. `scripts/analysis/viability_differential_audit.py`
 14. `scripts/th08_live_dodge_agent.py`
 15. `scripts/touhou_control/reachability_oracle.py`
 16. `scripts/th08_bullet_transform_model.py`

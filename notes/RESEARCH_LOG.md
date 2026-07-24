@@ -835,7 +835,7 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 ### Patched Lunatic Runtime And Physical Dodge Smoke Test
 
 - Migrated the no-life-decrement attach helper into
-  `scripts/th08_attach_no_life_decrement.py` and updated the supplied launcher
+  `scripts/tools/th08_attach_no_life_decrement.py` and updated the supplied launcher
   batch file to use it. The helper now refuses ambiguous processes and verifies
   exact path, executable SHA-256, PE identity, and patch-site byte before the
   single runtime write at `0x0044D0FA`. Runtime probes report byte `00` and
@@ -898,7 +898,7 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 
 ### Durable Outputs And Post-Run Fixes
 
-- `scripts/th08_run_dossier.py` streams multiple large JSONL segments and emits
+- `scripts/analysis/th08_run_dossier.py` streams multiple large JSONL segments and emits
   the review Markdown, provenance/hit JSON dossier, 91-row CSV, and 91-case
   regression input under `notes/runs/` and `artifacts/runtime_reports/`.
 - Live observations now decode `g_spell_card_state` flags, owner pointer,
@@ -910,7 +910,7 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 
 ### Executable Corpus And Gate Commitment
 
-- `scripts/th08_fullrun_regression.py` validates all 91 retained case IDs and
+- `scripts/analysis/th08_fullrun_regression.py` validates all 91 retained case IDs and
   their geometry, classification priority, resource fields, corridor/latency/
   density factors, stage totals, and spell-attribution status. The corpus now
   contains full exact geometry for 35 bullet and 11 laser contact witnesses.
@@ -1013,7 +1013,7 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   2.99 s p95, and 3.20 s maximum; solution age reached 193 frames p95.
   This is a planner freshness failure in addition to incomplete laser
   witnesses, not merely a waypoint-scoring problem.
-- Added `scripts/th08_practice_dossier.py` and focused tests. Durable outputs
+- Added `scripts/analysis/th08_practice_dossier.py` and focused tests. Durable outputs
   are the scoped dossier, 16-row death CSV, 16-case regression JSON, and
   `notes/runs/2026-07-23_lunatic_route2_stage3_nobomb.md`.
 - REA independently covered the shipped executable and both collision
@@ -1919,7 +1919,8 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   ran.
 - Added an explicit `--trace-transform-runtime` diagnostic that serializes
   only transform-relevant bullets from the full native pool. Default
-  acceptance traces remain unchanged. `th08_transform_trace.py` streams raw
+  acceptance traces remain unchanged. `scripts/analysis/th08_transform_trace.py`
+  streams raw
   JSONL into a compact, hashed same-slot differential with coverage, flag,
   queue, timer, motion, angle, and repeat evidence.
 - The next behavior-neutral Stage-5 run must enable this diagnostic and
@@ -2472,7 +2473,8 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   “flags2 bit 0x2” meant bit **index** 2; the concrete mask is `1 << 2 = 0x4`.
   Two preliminary sessions loaded the wrong mask and were safely stopped and
   marked discarded before strategy interpretation.
-- Added `th08_boss_phase.py`, the read-only `th08_boss_probe.py`, and the
+- Added `th08_boss_phase.py`, the read-only
+  `scripts/tools/th08_boss_probe.py`, and the
   game-neutral `touhou_control.phase_progress` tracker/lexicographic
   safe-objective primitive. The live trace now observes registered nonspell
   Bosses as well as spell owners and records stable HP, phase boundary, timer,
@@ -2519,3 +2521,51 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `0x0042D349`, and `0x0042DCB3` for max/current/phase HP writes, native
   damage commit, and the current/max UI consumer. No REA session was used for
   this checkpoint.
+
+## 2026-07-24: Model, Solver, Structure, And Storage Audit
+
+- **Observed exact-laser inconsistency:** The global adapter already honored
+  CE-0078 and added no generic horizon drift to state-backed lasers, but local
+  MPC still added `min(6, 0.08 * step)` to every laser. Exact
+  `LaserState` records now carry zero per-frame growth; only missing-state
+  fallback records retain the conservative `0.08`. Legacy trace replay also
+  restores exact records with zero growth.
+- A 100-row paired Spell-50 replay changed 7 selected actions and 90 complete
+  decisions when the non-native growth was removed, with effectively equal
+  median time (`15.20` versus `14.99 ms`). Compact hashed evidence is
+  `artifacts/benchmarks/local_laser_model_audit_20260724.json`.
+- **Observed bullet-size inconsistency from IDA only:**
+  `bullet_spawn_from_emission_descriptor` (`0x0042F5F0`) copies template
+  collision dimensions to bullet `+0xD34`, and
+  `player_test_bullet_collision_or_cancel` (`0x0044A230`) divides those values
+  by two directly. Native code has no `[1,24]` half-extent clamp. Both compact
+  and diagnostic live decoders now preserve positive sizes exactly; a
+  regression covers 0.5- and 96-pixel widths. Added concise reproduction
+  comments at `0x0042FA12` and `0x0044A284` in the connected IDA database.
+- **Solver audit:** 24 seeds of 2,048 generated piecewise hazards, 48 frames,
+  and up to six events all matched the independent scalar oracle with maximum
+  absolute error `9.835e-7`. Heavy-corridor warm median was `152.97 ms`, split
+  into `146.39 ms` clearance and `5.24 ms` viability. Clearance construction,
+  not Boolean induction, remains the global performance target.
+- **Structural split:** Laser trace/projection/packing moved to
+  `th08_laser_runtime.py`; the separable C++ delay/lattice transition cache
+  moved to `native/robust_transition_table.hpp`. Fourteen offline timing and
+  ablation programs moved to `scripts/benchmarks/`, eleven differential and
+  dossier programs to `scripts/analysis/`, and build/probe/patch/capture entry
+  points to `scripts/tools/`. Root `scripts/` remains the importable/live
+  boundary.
+- **Research test decision:** No quick regression was disabled. The complete
+  Linux/Windows suites pass 423 tests in `1.368/2.714 s`; expensive raw
+  replay, multi-resolution solve, Windows duplication, and physical trials
+  remain conditional tiers. The correct Windows UNC loader command and three
+  invalid approaches are recorded in `START_HERE.md` and `AGENTS.md`.
+- **Storage cleanup:** 203 ignored runtime JSONL/PNG/log files
+  (11,040,649,198 bytes), 1,889 ignored viability capsules (104,309,566
+  bytes), ten menu PNGs (5,065,295 bytes), caches, stop sentinels, and
+  rebuildable native libraries were removed after compact artifacts were
+  verified. Workspace size fell from about 11 GiB to 74 MiB. The user's
+  untracked `image.png` was not touched.
+- Detailed evidence, unresolved transform/birth/HP-delta boundaries, and the
+  next decomposition order are in
+  `notes/MODEL_SOLVER_MAINTENANCE_AUDIT_20260724.md`. New binary analysis is
+  restricted to connected IDA Pro MCP; REA use is prohibited by `AGENTS.md`.

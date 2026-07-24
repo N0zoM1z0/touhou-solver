@@ -15,7 +15,10 @@ any raw capture cited by a conclusion or regression test.
 ## Layout
 
 - `notes/`: curated findings and chronological research logs
-- `scripts/`: runtime entry points plus TH08 inspection and extraction tools
+- `scripts/`: importable models, adapters, and live entry points
+- `scripts/analysis/`: offline differentials, reports, dossiers, regressions
+- `scripts/benchmarks/`: offline timing and ablation experiments
+- `scripts/tools/`: explicit build, probe, patch, and capture entry points
 - `scripts/touhou_control/`: game-neutral online control components
 - `tests/`: unit and retained-counterexample regression tests
 - `artifacts/`: generated reports and small derived metadata (no game binaries)
@@ -83,7 +86,7 @@ Bomb/Last-Spell outcomes remain explicit differential targets.
 exact executable hash, reads solver-critical state with `ReadProcessMemory`,
 and exposes an explicitly armed, foreground-gated `SendInput` path. Screenshots
 are retained only for menu/bootstrap audits and are not a gameplay sensor.
-`scripts/th08_attach_no_life_decrement.py` is the exact-image runtime patcher
+`scripts/tools/th08_attach_no_life_decrement.py` is the exact-image runtime patcher
 used by `run_th08_no_life_decrement_attach.bat`; the bridge reports the live
 patch byte on every probe. `scripts/touhou_control/viability.py` implements
 game-neutral finite-horizon backward reachability with the exact control
@@ -144,10 +147,12 @@ python th08/scripts/th08_live_dodge_agent.py \
   th08/artifacts/runtime_reports/live_dodge.jsonl --duration 60 --armed
 
 # Stitch a completed multi-segment run into review and regression artifacts.
-python th08/scripts/th08_run_dossier.py --help
+PYTHONPATH=th08/scripts \
+  python th08/scripts/analysis/th08_run_dossier.py --help
 
 # Execute structural/geometric invariants for every retained native hit.
-python th08/scripts/th08_fullrun_regression.py \
+PYTHONPATH=th08/scripts \
+  python th08/scripts/analysis/th08_fullrun_regression.py \
   th08/artifacts/runtime_reports/lunatic_route2_fullrun_20260723.regressions.json
 ```
 

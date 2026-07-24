@@ -527,7 +527,8 @@ can be replayed.
 
 `touhou_control.adversarial` generates deterministic dense AABB trajectories
 with straight, stop, resume, redirect, and reversal motion. Density is not
-limited to a game's pool capacity. `adversarial_planner_diff.py` compares the
+limited to a game's pool capacity.
+`scripts/analysis/adversarial_planner_diff.py` compares the
 optimized/native volume against an independent scalar oracle and shrinks a
 failing hazard set while preserving its seed.
 
@@ -561,7 +562,8 @@ from action dynamics and the learned delay support; it has no stage, spell,
 screen-half, or hazard-type rule. It cannot override a locally safe action
 requirement, and edge occupancy remains legal when geometry demands it.
 
-`benchmark_recovery_control_reserve.py` replays retained trace-radius hazards
+`scripts/benchmarks/benchmark_recovery_control_reserve.py` replays retained
+trace-radius hazards
 with reserve enabled and disabled in alternating order. It is an action and
 cost ablation, not a survival simulator. Stage-1, Stage-3, Stage-4A, and
 Stage-6B artifacts show broad action changes with no material cost increase.

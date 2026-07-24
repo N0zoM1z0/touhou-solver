@@ -21,18 +21,29 @@ These instructions apply to every file and task below this directory.
 - Rename functions/data and add concise comments or types in the connected IDA
   database when a conclusion is strong enough. Record important IDA changes in
   `notes/RESEARCH_LOG.md`.
-- Prefer first-party evidence from the shipped game, runtime traces, IDA, and
-  REA. Internet material is not a dependency unless the user explicitly asks
-  for it.
-- When REA is used, cite its Evidence IDs in the durable note. Record tool
-  friction and concrete REA feature requests in a Markdown file under `/tmp`
-  for later MCP improvement.
+- Prefer first-party evidence from the shipped game, runtime traces, and the
+  connected IDA Pro database. Internet material is not a dependency unless
+  the user explicitly asks for it.
+- Do not use REA or the `reverse-engineer-anything` skill in this workspace.
+  Use IDA Pro MCP for new binary static analysis and native runtime
+  traces/probes for execution evidence. Historical REA Evidence IDs remain
+  provenance for old conclusions, but they are not authorization to open a
+  new REA session or run REA setup/doctor commands.
 
 ## Architecture And Algorithms
 
 - Put reusable, game-neutral control and planning code in
   `scripts/touhou_control/`. Keep TH08 memory addresses, input masks, movement
   constants, ECL details, and pool layouts in TH08 adapters.
+- Keep importable models, adapters, and live entry points out of experiment
+  modules. Put offline timing/ablation programs in `scripts/benchmarks/`,
+  differential/report/dossier programs in `scripts/analysis/`, and explicit
+  build/probe/patch/capture entry points in `scripts/tools/`. A benchmark must
+  not become a production dependency.
+- Treat `th08_live_dodge_agent.py` as orchestration, not the permanent owner
+  of every model. Move independently testable trace schemas, projection,
+  sensing, policy, and strategy logic behind narrow modules while preserving
+  one explicit physical-frame and uncertainty contract.
 - Treat TH08 stages, spells, and retained deaths as validation workloads and
   counterexamples, not planner identities. Whenever practical, improve the
   accuracy, performance, uncertainty handling, or reachability semantics of
@@ -91,6 +102,19 @@ These instructions apply to every file and task below this directory.
   tests deterministic and fast; full native solves, multi-resolution audits,
   replay corpora, memory benchmarks, and physical trials are retained research
   experiments rather than unit-test setup.
+- Invoke focused files through discovery because `tests/` is not a Python
+  package, for example:
+
+  ```bash
+  PYTHONPATH=scripts python -m unittest discover -s tests \
+    -p 'test_th08_laser_model.py'
+  ```
+
+- Optimize tests for research evidence, not engineering completeness. Do not
+  add duplicate formatting, CLI-help, schema-plumbing, or private-call tests
+  unless they protect a concrete failure, evidence artifact, or safety
+  contract. Prefer one oracle/differential invariant over many
+  implementation-shaped examples.
 - Run the quick complete unit suite before a code checkpoint:
 
   ```bash
@@ -101,6 +125,15 @@ These instructions apply to every file and task below this directory.
   Run Windows tests only for Windows/process/input/parser/native changes or
   immediately before physical promotion. A documentation or offline-analysis
   checkpoint does not require duplicating the complete suite on Windows.
+- When Windows Python reads this WSL workspace, use the UNC-safe loader command
+  recorded in `START_HERE.md`: insert the UNC `scripts` directory into
+  `sys.path` and pass the same UNC `tests` directory as both `start_dir` and
+  `top_level_dir`. Do not retry CLI discovery with `-s <UNC>`, `cmd.exe`
+  `cd/pushd` to UNC, or a PowerShell-only `PSDrive`; those interfaces do not
+  provide an importable test root to the external Windows Python process.
+- The quick suite is the default checkpoint gate only while it remains on the
+  order of seconds. Never put complete 16/8/4-pixel solves, large trace scans,
+  native memory/RSS benchmarks, or physical integration in that suite.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 
@@ -109,6 +142,12 @@ These instructions apply to every file and task below this directory.
 - Keep raw runtime JSONL local and ignored. Every completed Lunatic, Extra, or
   focused thprac trial used for a conclusion must produce compact tracked
   artifacts sufficient to review and regress it.
+- Raw JSONL, viability capsules, screenshots, logs, caches, and native build
+  outputs are temporary working data. Once the compact dossier, ledger,
+  regression cases, comparison, and note have been verified and committed,
+  delete the raw copy by default. Retain raw data only for a named active
+  differential; record why it is still needed and remove it when that
+  experiment closes.
 - A complete-run record must include scope and provenance, controller/model
   version, difficulty/team/stage/phase, every hit and Bomb boundary, resources,
   item and power outcomes, action/delay timing, corridor/viability health, and

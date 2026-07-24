@@ -525,7 +525,8 @@ Normal traces attach the payload only to player-nearby bullets. The explicit
 list containing transform-relevant records from the complete pool. It is
 opt-in because it increases raw capture size and is evidence instrumentation,
 not a gameplay sensor required by the planner. The compact
-`th08_transform_trace.py` report hashes the raw source and retains coverage
+`scripts/analysis/th08_transform_trace.py` report hashes the raw source and
+retains coverage
 plus adjacent same-slot lifecycle changes.
 
 ### Tagged Callback Velocity Toggles

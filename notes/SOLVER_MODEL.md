@@ -691,11 +691,14 @@ reserve_deficit =
     )
 ```
 
-It ranks after exact collision count, terminal gate, and local safety
-deficit, but before scalar distant recovery distance. Thus it cannot reject a
-locally necessary edge action or trade a known collision for centrality. It
-only preserves the ability to issue a later command while the global kernel
-is already empty.
+It ranks after exact collision count, robust first-action delay-certificate
+violations, terminal gate, and local safety deficit, but before scalar distant
+recovery distance. The delay certificate must be computed before beam
+deduplication and width pruning; calculating it only during final selection
+allows the soft reserve term to erase a safer first action. Thus reserve
+cannot reject a locally necessary edge action or trade a known collision for
+centrality. It only preserves the ability to issue a later command while the
+global kernel is already empty.
 
 The retained Stage-1, Stage-3, Stage-4A, and Stage-6B ablations change
 93--127 of 200 broad recovery samples on three earlier traces and 54 of 200
@@ -704,7 +707,13 @@ trace, zero-deficit selections rose from 79 to 151 of 200. The physical run
 reduced hits from 27 to 19 and pre-hit bottom occupancy from 40.5 to 23.2
 percent, but 16 of 19 hit windows still followed global-kernel exhaustion.
 This accepts reserve ranking as a general fallback improvement, not as a
-complete robust bridge.
+complete robust bridge. Fresh Stage-6B paired replay found the original
+ordering violated that contract: enabling reserve increased robust-collision
+selections from 24 to 26 in 300 rows because certificates were applied only
+after pruning. Preflight certificate ordering makes enabled and disabled
+variants equal at 22 robust-collision and 36 negative-certificate selections
+while retaining the reserve effect. Physical acceptance of this correction is
+pending.
 
 The stronger game-neutral recovery value still needs to account for the
 entire bridge:

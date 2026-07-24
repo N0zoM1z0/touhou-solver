@@ -1,0 +1,74 @@
+{
+  "schema": "th08-bullet-decode-benchmark-v1",
+  "scope": "Synthetic allocated native-pool records with nonzero original transform tags and no pending queue record. Planning parity covers every field consumed by gameplay; diagnostic queue/stop state is deliberately excluded from the planning path.",
+  "number_per_repeat": 40,
+  "repeat_count": 11,
+  "planning_vector_threshold": 512,
+  "results": [
+    {
+      "active_bullets": 200,
+      "diagnostic_runtime": {
+        "median_ms": 2.2655388253042474,
+        "max_repeat_ms": 3.484433075209381
+      },
+      "planning_runtime": {
+        "median_ms": 1.0135404503671452,
+        "max_repeat_ms": 1.7379318749590311
+      },
+      "median_speedup": 2.2352722325819143,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 400,
+      "diagnostic_runtime": {
+        "median_ms": 4.061263025505468,
+        "max_repeat_ms": 5.8568036249198485
+      },
+      "planning_runtime": {
+        "median_ms": 2.5446573505178094,
+        "max_repeat_ms": 3.6043292500835378
+      },
+      "median_speedup": 1.595996028572981,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 600,
+      "diagnostic_runtime": {
+        "median_ms": 5.901823900057934,
+        "max_repeat_ms": 7.816029425157467
+      },
+      "planning_runtime": {
+        "median_ms": 4.509387325379066,
+        "max_repeat_ms": 5.706689674843801
+      },
+      "median_speedup": 1.308786199589058,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 800,
+      "diagnostic_runtime": {
+        "median_ms": 8.28088834969094,
+        "max_repeat_ms": 9.027064974361565
+      },
+      "planning_runtime": {
+        "median_ms": 5.598378099966794,
+        "max_repeat_ms": 6.441754524712451
+      },
+      "median_speedup": 1.4791584637236375,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 1200,
+      "diagnostic_runtime": {
+        "median_ms": 11.17076385053224,
+        "max_repeat_ms": 14.100265949673485
+      },
+      "planning_runtime": {
+        "median_ms": 8.904510849970393,
+        "max_repeat_ms": 10.650588499993319
+      },
+      "median_speedup": 1.254506175436844,
+      "gameplay_field_parity": true
+    }
+  ]
+}

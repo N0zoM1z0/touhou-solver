@@ -1,0 +1,802 @@
+{
+  "schema": "th08-practice-comparison-v2",
+  "baseline_run_id": "lunatic_route2_stage6b_unattended_20260724_081952",
+  "candidate_run_id": "lunatic_route2_stage6b_unattended_20260724_135201",
+  "scope_compatibility": {
+    "same_stage_route_index": true,
+    "candidate_selected_frame_epoch_index": 0,
+    "candidate_frame_epoch_count": 1,
+    "candidate_pre_scope_decisions_excluded": 0,
+    "candidate_raw_summary_scope_valid": true,
+    "candidate_accepted_completion": true
+  },
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 18,
+    "candidate": 27,
+    "delta": 9,
+    "reduction_fraction": -0.5
+  },
+  "robust_viability": {
+    "counts": {
+      "policy_decision_count": {
+        "baseline": 14216,
+        "candidate": 12507,
+        "delta": -1709,
+        "reduction_fraction": 0.12021665728756331
+      },
+      "decision_without_query_count": {
+        "baseline": 147,
+        "candidate": 133,
+        "delta": -14,
+        "reduction_fraction": 0.09523809523809523
+      },
+      "unique_solution_count": {
+        "baseline": 1951,
+        "candidate": 2382,
+        "delta": 431,
+        "reduction_fraction": -0.22091235263967196
+      },
+      "query_count": {
+        "baseline": 14069,
+        "candidate": 12374,
+        "delta": -1695,
+        "reduction_fraction": 0.12047764588812282
+      },
+      "available_query_count": {
+        "baseline": 14069,
+        "candidate": 12374,
+        "delta": -1695,
+        "reduction_fraction": 0.12047764588812282
+      },
+      "support_uncovered_query_count": {
+        "baseline": 49,
+        "candidate": 0,
+        "delta": -49,
+        "reduction_fraction": 1.0
+      },
+      "viable_query_count": {
+        "baseline": 7800,
+        "candidate": 6856,
+        "delta": -944,
+        "reduction_fraction": 0.12102564102564102
+      },
+      "empty_action_set_count": {
+        "baseline": 6269,
+        "candidate": 5518,
+        "delta": -751,
+        "reduction_fraction": 0.11979582070505662
+      },
+      "constrained_decision_count": {
+        "baseline": 7494,
+        "candidate": 6563,
+        "delta": -931,
+        "reduction_fraction": 0.12423271950894049
+      },
+      "serial_worker_serviceable_count": {
+        "baseline": 14116,
+        "candidate": 12413,
+        "delta": -1703,
+        "reduction_fraction": 0.12064324171153301
+      },
+      "queryable_policy_decisions": {
+        "baseline": 14065,
+        "candidate": 12374,
+        "delta": -1691,
+        "reduction_fraction": 0.12022751510842516
+      },
+      "expired_policy_decisions": {
+        "baseline": 107,
+        "candidate": 99,
+        "delta": -8,
+        "reduction_fraction": 0.07476635514018691
+      }
+    },
+    "solve_ms": {
+      "median": {
+        "baseline": 246.00339998141862,
+        "candidate": 266.79675000195857,
+        "delta": 20.793350020539947,
+        "reduction_fraction": -0.08452464487121125
+      },
+      "p95": {
+        "baseline": 389.4758000096772,
+        "candidate": 431.74299999373034,
+        "delta": 42.26719998405315,
+        "reduction_fraction": -0.10852330230274371
+      },
+      "max": {
+        "baseline": 559.8116999899503,
+        "candidate": 671.5388000011444,
+        "delta": 111.72710001119412,
+        "reduction_fraction": -0.19957978729847883
+      }
+    },
+    "backend_counts": {
+      "baseline": {
+        "native": 1951
+      },
+      "candidate": {
+        "native": 2382
+      }
+    },
+    "solver_phase_ms": {
+      "baseline": {
+        "clearance": {
+          "median": 111.92979998304509,
+          "p95": 254.13829999160953,
+          "max": 416.2456000049133
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 15.282000007573515,
+          "max": 44.55620000953786
+        },
+        "viability": {
+          "median": 92.79000002425164,
+          "p95": 347.5054999871645,
+          "max": 428.721799980849
+        }
+      },
+      "candidate": {
+        "clearance": {
+          "median": 118.55475000629667,
+          "p95": 256.1578000022564,
+          "max": 388.304899999639
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 17.06670000567101,
+          "max": 36.01929999422282
+        },
+        "safety_value": {
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "viability": {
+          "median": 108.55540000193287,
+          "p95": 391.3377999851946,
+          "max": 467.5709000148345
+        }
+      }
+    },
+    "serial_coverage_margin_frames": {
+      "baseline": {
+        "median": 61.0,
+        "p95": 64.0,
+        "max": 64.0
+      },
+      "candidate": {
+        "median": 57.0,
+        "p95": 64.0,
+        "max": 64.0
+      }
+    }
+  },
+  "prehit_behavior": {
+    "fast_fraction": {
+      "baseline": 0.2937062937062937,
+      "candidate": 0.28023598820059,
+      "delta": -0.013470305505703717,
+      "reduction_fraction": 0.04586318303132456
+    },
+    "bottom_8px_fraction": {
+      "baseline": 0.5174825174825175,
+      "candidate": 0.30678466076696165,
+      "delta": -0.21069785671555585,
+      "reduction_fraction": 0.4071593717611417
+    },
+    "nonpositive_pipeline_fraction": {
+      "baseline": 0.0944055944055944,
+      "candidate": 0.12684365781710916,
+      "delta": 0.032438063411514756,
+      "reduction_fraction": -0.34360319021086
+    },
+    "negative_corridor_slack_fraction": {
+      "baseline": 0.0,
+      "candidate": 0.03125,
+      "delta": 0.03125,
+      "reduction_fraction": null
+    },
+    "control_reserve_deficit_mean": {
+      "baseline": null,
+      "candidate": 10.043080738512112,
+      "delta": null,
+      "reduction_fraction": null
+    },
+    "positive_control_reserve_deficit_fraction": {
+      "baseline": null,
+      "candidate": 0.45427728613569324,
+      "delta": null,
+      "reduction_fraction": null
+    }
+  },
+  "input_visible_next_observation_fraction": {
+    "baseline": 0.8736606030401196,
+    "candidate": 0.8424713584288053,
+    "delta": -0.031189244611314337,
+    "reduction_fraction": 0.03569949761129619
+  },
+  "per_phase": {
+    "nonspell": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 4,
+        "candidate": 4,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 6549,
+        "candidate": 5753,
+        "delta": -796,
+        "reduction_fraction": 0.12154527408764697
+      },
+      "query_count": {
+        "baseline": 6303,
+        "candidate": 5492,
+        "delta": -811,
+        "reduction_fraction": 0.1286688878311915
+      },
+      "empty_action_set_count": {
+        "baseline": 2544,
+        "candidate": 2381,
+        "delta": -163,
+        "reduction_fraction": 0.06407232704402516
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 256.15790000301786,
+          "candidate": 276.56715000921395,
+          "delta": 20.40925000619609,
+          "reduction_fraction": -0.07967448985940173
+        },
+        "p95": {
+          "baseline": 396.1583999916911,
+          "candidate": 434.4635999877937,
+          "delta": 38.3051999961026,
+          "reduction_fraction": -0.09669162637194112
+        },
+        "max": {
+          "baseline": 448.5026999900583,
+          "candidate": 485.4163999843877,
+          "delta": 36.91369999432936,
+          "reduction_fraction": -0.08230429826876763
+        }
+      }
+    },
+    "150": {
+      "spell_name": "薬符「壺中の大銀河」",
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 2,
+        "delta": 2,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 761,
+        "candidate": 704,
+        "delta": -57,
+        "reduction_fraction": 0.07490144546649145
+      },
+      "query_count": {
+        "baseline": 738,
+        "candidate": 678,
+        "delta": -60,
+        "reduction_fraction": 0.08130081300813008
+      },
+      "empty_action_set_count": {
+        "baseline": 308,
+        "candidate": 193,
+        "delta": -115,
+        "reduction_fraction": 0.37337662337662336
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 305.3956000076141,
+          "candidate": 363.79149998538196,
+          "delta": 58.39589997776784,
+          "reduction_fraction": -0.1912139532341393
+        },
+        "p95": {
+          "baseline": 381.5210000029765,
+          "candidate": 444.10799999604933,
+          "delta": 62.58699999307282,
+          "reduction_fraction": -0.1640460157962066
+        },
+        "max": {
+          "baseline": 446.5073000174016,
+          "candidate": 484.19339998508804,
+          "delta": 37.68609996768646,
+          "reduction_fraction": -0.08440197946644486
+        }
+      }
+    },
+    "154": {
+      "spell_name": "神宝「ブリリアントドラゴンバレッタ」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 4,
+        "delta": 3,
+        "reduction_fraction": -3.0
+      },
+      "decision_count": {
+        "baseline": 348,
+        "candidate": 476,
+        "delta": 128,
+        "reduction_fraction": -0.367816091954023
+      },
+      "query_count": {
+        "baseline": 333,
+        "candidate": 461,
+        "delta": 128,
+        "reduction_fraction": -0.3843843843843844
+      },
+      "empty_action_set_count": {
+        "baseline": 77,
+        "candidate": 136,
+        "delta": 59,
+        "reduction_fraction": -0.7662337662337663
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 246.44380001700483,
+          "candidate": 290.6053000187967,
+          "delta": 44.161500001791865,
+          "reduction_fraction": -0.1791950132190166
+        },
+        "p95": {
+          "baseline": 346.2029999936931,
+          "candidate": 454.0180999902077,
+          "delta": 107.81509999651462,
+          "reduction_fraction": -0.3114216225696448
+        },
+        "max": {
+          "baseline": 363.07920000399463,
+          "candidate": 503.18450000486337,
+          "delta": 140.10530000086874,
+          "reduction_fraction": -0.3858808215929948
+        }
+      }
+    },
+    "158": {
+      "spell_name": "神宝「ブディストダイアモンド」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 0,
+        "delta": -1,
+        "reduction_fraction": 1.0
+      },
+      "decision_count": {
+        "baseline": 1229,
+        "candidate": 1091,
+        "delta": -138,
+        "reduction_fraction": 0.11228641171684296
+      },
+      "query_count": {
+        "baseline": 1221,
+        "candidate": 1085,
+        "delta": -136,
+        "reduction_fraction": 0.11138411138411139
+      },
+      "empty_action_set_count": {
+        "baseline": 661,
+        "candidate": 620,
+        "delta": -41,
+        "reduction_fraction": 0.06202723146747353
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 134.2882000026293,
+          "candidate": 143.78584999940358,
+          "delta": 9.497649996774271,
+          "reduction_fraction": -0.07072587164462932
+        },
+        "p95": {
+          "baseline": 265.1836999866646,
+          "candidate": 218.68199997697957,
+          "delta": -46.50170000968501,
+          "reduction_fraction": 0.17535655476570944
+        },
+        "max": {
+          "baseline": 426.2847999925725,
+          "candidate": 466.3863999885507,
+          "delta": 40.10159999597818,
+          "reduction_fraction": -0.09407231971835942
+        }
+      }
+    },
+    "162": {
+      "spell_name": "神宝「サラマンダーシールド」",
+      "hit_count": {
+        "baseline": 2,
+        "candidate": 2,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 967,
+        "candidate": 804,
+        "delta": -163,
+        "reduction_fraction": 0.16856256463288521
+      },
+      "query_count": {
+        "baseline": 961,
+        "candidate": 800,
+        "delta": -161,
+        "reduction_fraction": 0.1675338189386056
+      },
+      "empty_action_set_count": {
+        "baseline": 471,
+        "candidate": 427,
+        "delta": -44,
+        "reduction_fraction": 0.09341825902335456
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 218.8198499934515,
+          "candidate": 235.08770001353696,
+          "delta": 16.26785002008546,
+          "reduction_fraction": -0.0743435754140783
+        },
+        "p95": {
+          "baseline": 300.67899997811764,
+          "candidate": 359.7670000162907,
+          "delta": 59.08800003817305,
+          "reduction_fraction": -0.1965152206920778
+        },
+        "max": {
+          "baseline": 399.53769999556243,
+          "candidate": 429.8066000046674,
+          "delta": 30.268900009104982,
+          "reduction_fraction": -0.07575980942334395
+        }
+      }
+    },
+    "166": {
+      "spell_name": "神宝「ライフスプリングインフィニティ」",
+      "hit_count": {
+        "baseline": 3,
+        "candidate": 7,
+        "delta": 4,
+        "reduction_fraction": -1.3333333333333333
+      },
+      "decision_count": {
+        "baseline": 1210,
+        "candidate": 1107,
+        "delta": -103,
+        "reduction_fraction": 0.08512396694214876
+      },
+      "query_count": {
+        "baseline": 1202,
+        "candidate": 1100,
+        "delta": -102,
+        "reduction_fraction": 0.08485856905158069
+      },
+      "empty_action_set_count": {
+        "baseline": 403,
+        "candidate": 417,
+        "delta": 14,
+        "reduction_fraction": -0.034739454094292806
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 257.12759999441914,
+          "candidate": 278.7780999788083,
+          "delta": 21.65049998438917,
+          "reduction_fraction": -0.08420138477883778
+        },
+        "p95": {
+          "baseline": 361.16910001146607,
+          "candidate": 431.0766000126023,
+          "delta": 69.90750000113621,
+          "reduction_fraction": -0.19355891741269354
+        },
+        "max": {
+          "baseline": 452.6950999861583,
+          "candidate": 505.6750999938231,
+          "delta": 52.980000007664785,
+          "reduction_fraction": -0.11703241322754479
+        }
+      }
+    },
+    "170": {
+      "spell_name": "神宝「蓬莱の玉の枝  -夢色の郷-」",
+      "hit_count": {
+        "baseline": 6,
+        "candidate": 6,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 1624,
+        "candidate": 1453,
+        "delta": -171,
+        "reduction_fraction": 0.10529556650246305
+      },
+      "query_count": {
+        "baseline": 1608,
+        "candidate": 1440,
+        "delta": -168,
+        "reduction_fraction": 0.1044776119402985
+      },
+      "empty_action_set_count": {
+        "baseline": 661,
+        "candidate": 545,
+        "delta": -116,
+        "reduction_fraction": 0.17549167927382753
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 249.1751000052318,
+          "candidate": 283.93980002147146,
+          "delta": 34.76470001623966,
+          "reduction_fraction": -0.13951915747404023
+        },
+        "p95": {
+          "baseline": 332.0409000152722,
+          "candidate": 392.22029998200014,
+          "delta": 60.17939996672794,
+          "reduction_fraction": -0.18124092533166847
+        },
+        "max": {
+          "baseline": 485.63609999837354,
+          "candidate": 486.9597000069916,
+          "delta": 1.3236000086180866,
+          "reduction_fraction": -0.0027254975662281272
+        }
+      }
+    },
+    "174": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 355,
+        "candidate": 257,
+        "delta": -98,
+        "reduction_fraction": 0.27605633802816903
+      },
+      "query_count": {
+        "baseline": 344,
+        "candidate": 234,
+        "delta": -110,
+        "reduction_fraction": 0.31976744186046513
+      },
+      "empty_action_set_count": {
+        "baseline": 214,
+        "candidate": 135,
+        "delta": -79,
+        "reduction_fraction": 0.3691588785046729
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 315.11429999955,
+          "candidate": 355.7583500078181,
+          "delta": 40.644050008268096,
+          "reduction_fraction": -0.12898192817122592
+        },
+        "p95": {
+          "baseline": 411.837599996943,
+          "candidate": 422.86109999986365,
+          "delta": 11.023500002920628,
+          "reduction_fraction": -0.026766618693879463
+        },
+        "max": {
+          "baseline": 447.175299981609,
+          "candidate": 462.4286999751348,
+          "delta": 15.253399993525818,
+          "reduction_fraction": -0.034110560207938914
+        }
+      }
+    },
+    "178": {
+      "spell_name": "「永夜返し  -子の四つ-」",
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 1,
+        "delta": 1,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 253,
+        "candidate": 171,
+        "delta": -82,
+        "reduction_fraction": 0.3241106719367589
+      },
+      "query_count": {
+        "baseline": 236,
+        "candidate": 149,
+        "delta": -87,
+        "reduction_fraction": 0.3686440677966102
+      },
+      "empty_action_set_count": {
+        "baseline": 168,
+        "candidate": 80,
+        "delta": -88,
+        "reduction_fraction": 0.5238095238095238
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 336.81369999249,
+          "candidate": 400.0066999869887,
+          "delta": 63.19299999449868,
+          "reduction_fraction": -0.18762004038406901
+        },
+        "p95": {
+          "baseline": 409.64540001004934,
+          "candidate": 473.82819998892955,
+          "delta": 64.18279997888021,
+          "reduction_fraction": -0.15667892273977857
+        },
+        "max": {
+          "baseline": 463.7518999807071,
+          "candidate": 475.5645999975968,
+          "delta": 11.812700016889721,
+          "reduction_fraction": -0.025472025057754265
+        }
+      }
+    },
+    "182": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 362,
+        "candidate": 332,
+        "delta": -30,
+        "reduction_fraction": 0.08287292817679558
+      },
+      "query_count": {
+        "baseline": 341,
+        "candidate": 311,
+        "delta": -30,
+        "reduction_fraction": 0.08797653958944282
+      },
+      "empty_action_set_count": {
+        "baseline": 265,
+        "candidate": 237,
+        "delta": -28,
+        "reduction_fraction": 0.10566037735849057
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 143.91285000601783,
+          "candidate": 158.37419999297708,
+          "delta": 14.461349986959249,
+          "reduction_fraction": -0.10048685705518677
+        },
+        "p95": {
+          "baseline": 400.28989998972975,
+          "candidate": 438.2290999928955,
+          "delta": 37.93920000316575,
+          "reduction_fraction": -0.09477930870636296
+        },
+        "max": {
+          "baseline": 443.6127000080887,
+          "candidate": 483.2367000053637,
+          "delta": 39.62399999727495,
+          "reduction_fraction": -0.08932115784005384
+        }
+      }
+    },
+    "186": {
+      "spell_name": "「永夜返し  -寅の四つ-」",
+      "hit_count": {
+        "baseline": 1,
+        "candidate": 1,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      },
+      "decision_count": {
+        "baseline": 228,
+        "candidate": 118,
+        "delta": -110,
+        "reduction_fraction": 0.4824561403508772
+      },
+      "query_count": {
+        "baseline": 210,
+        "candidate": 96,
+        "delta": -114,
+        "reduction_fraction": 0.5428571428571428
+      },
+      "empty_action_set_count": {
+        "baseline": 136,
+        "candidate": 20,
+        "delta": -116,
+        "reduction_fraction": 0.8529411764705882
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 405.0691000011284,
+          "candidate": 445.91704999038484,
+          "delta": 40.84794998925645,
+          "reduction_fraction": -0.10084193039938781
+        },
+        "p95": {
+          "baseline": 527.3968999972567,
+          "candidate": 581.2268999870867,
+          "delta": 53.82999998982996,
+          "reduction_fraction": -0.10206734243244502
+        },
+        "max": {
+          "baseline": 559.8116999899503,
+          "candidate": 671.5388000011444,
+          "delta": 111.72710001119412,
+          "reduction_fraction": -0.19957978729847883
+        }
+      }
+    },
+    "190": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 598,
+        "candidate": 552,
+        "delta": -46,
+        "reduction_fraction": 0.07692307692307693
+      },
+      "query_count": {
+        "baseline": 572,
+        "candidate": 528,
+        "delta": -44,
+        "reduction_fraction": 0.07692307692307693
+      },
+      "empty_action_set_count": {
+        "baseline": 361,
+        "candidate": 327,
+        "delta": -34,
+        "reduction_fraction": 0.09418282548476455
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 177.7425000036601,
+          "candidate": 183.9785999909509,
+          "delta": 6.2360999872908,
+          "reduction_fraction": -0.03508502461235993
+        },
+        "p95": {
+          "baseline": 419.367800001055,
+          "candidate": 352.38859997480176,
+          "delta": -66.97920002625324,
+          "reduction_fraction": 0.15971469441880073
+        },
+        "max": {
+          "baseline": 442.3829999868758,
+          "candidate": 460.3959000087343,
+          "delta": 18.012900021858513,
+          "reduction_fraction": -0.04071788477946237
+        }
+      }
+    }
+  },
+  "candidate_primary_cause_counts": {
+    "sensor_gap_or_unmodeled_hazard": 2,
+    "modeled_committed_prefix_collision": 10,
+    "observed_bullet_overlap": 8,
+    "observed_laser_overlap": 6,
+    "active_laser_without_observed_overlap": 1
+  },
+  "candidate_planner_failure_counts": {
+    "global_viability_kernel_exhausted_before_hit": 24,
+    "robust_action_set_exhausted_before_hit": 2,
+    "missing_pre_hit_alive_decision": 1
+  }
+}

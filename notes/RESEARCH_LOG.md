@@ -2091,3 +2091,45 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Linux and Windows Python each pass 360 tests. Both ignored native libraries
   were rebuilt from the retained source. Physical verification must now use a
   different randomized stage with safety value disabled.
+
+## 2026-07-24: Stage-6B Cross-Control And Hard-Before-Soft Pruning
+
+- Complete randomized Stage-6B run `20260724_135201` reached
+  `route_complete`, emitted no Bomb input, and recorded 27 native hits.
+  Retained complete Stage-6B hit counts are `42,30,18,27`; native RNG differs,
+  so the result is a cross-stage workload rather than an improvement or
+  regression claim.
+- The fused laser path passed its physical performance check. Spell 154 local
+  planning changed from 41.9/115.1 to 31.8/111.7 ms median/p95 against the
+  comparison run. Total local planning was 24.48/46.69 ms, and global spell-
+  154 solves remained 290.61/454.02 ms, so four spell hits keep survival open.
+- Twenty-four of 27 hit windows followed global viability exhaustion.
+  5,518/12,374 queries had empty action sets, 17 hits carried a boundary
+  factor, and pre-hit control-reserve deficit averaged 10.043 versus 1.422
+  elsewhere.
+- Paired replay exposed CE-0089: soft boundary reserve participated in beam
+  pruning before uncertain-delay first-action certificates were computed.
+  Enabling reserve increased robust-collision selections `24 -> 26` and
+  negative-certificate selections `39 -> 42` over 300 identical decisions.
+- The planner now computes those existing certificates before beam expansion,
+  ranks certificate collision/negative clearance before every soft term, and
+  reuses the result during final robust selection. Corrected enabled/disabled
+  counts are equal at 22/36 over 300 rows and 56/72 over 213 pre-hit rows.
+  `test_ce_0089_delay_certificate_precedes_recovery_beam_pruning` pins the
+  beam-width-one failure.
+- Default live bullet decoding now omits diagnostic queue/stop runtime objects
+  while retaining every gameplay field, including original callback tags.
+  Explicit `--trace-transform-runtime` retains the full evidence path. The
+  stable trace runtime field remains null in planning mode; a separate compact
+  projection payload retains callback tags, phase, attached velocity events,
+  and uncertainty so default physical failures remain reproducible. A dense
+  800-record regression exercises the NumPy gather branch. The retained
+  200--1,200-record benchmark reports exact gameplay-field parity and
+  1.25x--2.24x median decode speedup.
+- A new algorithm review formalizes the solver as a robust min-max game,
+  requires hard dominance at every approximate search operator, sketches a
+  time-expanded recovery-band value, and sets objective gates for future C++
+  boundaries. A naive action-stratified beam that broke terminal-threat
+  regressions was removed rather than weakening tests.
+- Linux and Windows Python each pass all 362 tests. No native source changed
+  in this checkpoint.

@@ -187,6 +187,10 @@ MAX_SENSOR_EPOCH_EXTENT_FRAMES = 8
 # before input issue without mislabeling an ordinary 7..20-frame overrun as a
 # new gameplay epoch.
 MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES = 120
+# Below this active-pool density, consolidated scalar unpacking is faster
+# than allocating NumPy gather arrays. Retained synthetic sweeps place the
+# crossover between 400 and 600 records on the current host.
+PLANNING_BULLET_VECTOR_THRESHOLD = 512
 # A rolling async policy can outlive several estimator updates. Cover the
 # complete configured support instead of assuming only one-step drift.
 ASYNC_POLICY_DELAY_PADDING = (
@@ -243,6 +247,7 @@ class Bullet:
     velocity_changes: tuple[VelocityChange, ...] = ()
     trajectory_uncertainty_x: float = 0.0
     trajectory_uncertainty_y: float = 0.0
+    original_transform_flags: int = 0
 
 
 def _serialize_transform_record(
@@ -264,7 +269,7 @@ def _serialize_transform_record(
 def serialize_bullet_trace(
     bullet: Bullet,
 ) -> list[object]:
-    """Retain legacy geometry plus optional native transform runtime.
+    """Retain legacy geometry plus optional diagnostic/gameplay state.
 
     Fields 0..7 are the stable historical trace contract. Field 8 is either
     null or a compact transform payload:
@@ -273,6 +278,13 @@ def serialize_bullet_trace(
     timer_fraction, timer_elapsed, duration, resume_speed, angle_operand,
     repeat_limit, repeat_count, callback_phase_state, callback_aux_state,
     velocity_changes, trajectory_uncertainty_x,
+    trajectory_uncertainty_y]``.
+
+    When diagnostic runtime was not requested, field 8 remains null and an
+    optional field 9 retains only gameplay projection state:
+
+    ``[speed, angle, original_flags, callback_phase_state,
+    callback_aux_state, velocity_changes, trajectory_uncertainty_x,
     trajectory_uncertainty_y]``.
     """
 
@@ -288,6 +300,33 @@ def serialize_bullet_trace(
     ]
     runtime = bullet.transform_runtime
     if runtime is None:
+        if (
+            bullet.original_transform_flags
+            or bullet.velocity_changes
+            or bullet.trajectory_uncertainty_x
+            or bullet.trajectory_uncertainty_y
+        ):
+            return [
+                *legacy,
+                None,
+                [
+                    bullet.speed,
+                    bullet.angle,
+                    bullet.original_transform_flags,
+                    bullet.callback_phase_state,
+                    bullet.callback_aux_state,
+                    [
+                        [
+                            change.frame,
+                            change.velocity_x,
+                            change.velocity_y,
+                        ]
+                        for change in bullet.velocity_changes
+                    ],
+                    bullet.trajectory_uncertainty_x,
+                    bullet.trajectory_uncertainty_y,
+                ],
+            ]
         return [*legacy, None]
     return [
         *legacy,
@@ -771,7 +810,187 @@ def _finite(values: tuple[float, ...]) -> bool:
     return all(math.isfinite(value) for value in values)
 
 
-def decode_bullets(blob: bytes) -> tuple[Bullet, ...]:
+def _decode_planning_bullets(blob: bytes) -> tuple[Bullet, ...]:
+    """Decode the gameplay fields in bulk without diagnostic queue objects."""
+
+    required_size = BULLET_POOL_SIZE * BULLET_STRIDE
+    if len(blob) < required_size:
+        raise ValueError(f"bullet pool requires {required_size} bytes")
+
+    def scalar_field(offset: int, dtype: str) -> np.ndarray:
+        return np.ndarray(
+            (BULLET_POOL_SIZE,),
+            dtype=dtype,
+            buffer=blob,
+            offset=offset,
+            strides=(BULLET_STRIDE,),
+        )
+
+    def pair_field(offset: int, dtype: str) -> np.ndarray:
+        item_size = np.dtype(dtype).itemsize
+        return np.ndarray(
+            (BULLET_POOL_SIZE, 2),
+            dtype=dtype,
+            buffer=blob,
+            offset=offset,
+            strides=(BULLET_STRIDE, item_size),
+        )
+
+    slots = np.flatnonzero(
+        scalar_field(BULLET_STATE_OFFSET, "<u2")
+    )
+    if not slots.size:
+        return ()
+    if slots.size < PLANNING_BULLET_VECTOR_THRESHOLD:
+        bullets: list[Bullet] = []
+        for slot in slots:
+            base = int(slot) * BULLET_STRIDE
+            width, height = struct.unpack_from(
+                "<ff",
+                blob,
+                base + BULLET_GEOMETRY_OFFSET,
+            )
+            x, y = struct.unpack_from(
+                "<ff",
+                blob,
+                base + BULLET_POSITION_OFFSET,
+            )
+            vx, vy = struct.unpack_from(
+                "<ff",
+                blob,
+                base + BULLET_VELOCITY_OFFSET,
+            )
+            if not _finite((x, y, vx, vy, width, height)):
+                continue
+            speed = struct.unpack_from(
+                "<f",
+                blob,
+                base + BULLET_SPEED_OFFSET,
+            )[0]
+            angle = struct.unpack_from(
+                "<f",
+                blob,
+                base + BULLET_ANGLE_OFFSET,
+            )[0]
+            bullets.append(
+                Bullet(
+                    x=x,
+                    y=y,
+                    vx=vx,
+                    vy=vy,
+                    half_width=min(max(abs(width) * 0.5, 1.0), 24.0),
+                    half_height=min(max(abs(height) * 0.5, 1.0), 24.0),
+                    transform_flags=struct.unpack_from(
+                        "<I",
+                        blob,
+                        base + BULLET_TRANSFORM_FLAGS_OFFSET,
+                    )[0],
+                    slot=int(slot),
+                    speed=speed if math.isfinite(speed) else None,
+                    angle=angle if math.isfinite(angle) else None,
+                    callback_phase_state=struct.unpack_from(
+                        "<h",
+                        blob,
+                        base + BULLET_CALLBACK_PHASE_STATE_OFFSET,
+                    )[0],
+                    callback_aux_state=blob[
+                        base + BULLET_CALLBACK_AUX_STATE_OFFSET
+                    ],
+                    original_transform_flags=struct.unpack_from(
+                        "<I",
+                        blob,
+                        base + BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET,
+                    )[0],
+                )
+            )
+        return tuple(bullets)
+    geometry = pair_field(BULLET_GEOMETRY_OFFSET, "<f4")[slots]
+    position = pair_field(BULLET_POSITION_OFFSET, "<f4")[slots]
+    velocity = pair_field(BULLET_VELOCITY_OFFSET, "<f4")[slots]
+    finite = np.isfinite(
+        np.concatenate((geometry, position, velocity), axis=1)
+    ).all(axis=1)
+    if not np.all(finite):
+        slots = slots[finite]
+        geometry = geometry[finite]
+        position = position[finite]
+        velocity = velocity[finite]
+    speed = scalar_field(BULLET_SPEED_OFFSET, "<f4")[slots]
+    angle = scalar_field(BULLET_ANGLE_OFFSET, "<f4")[slots]
+    transform_flags = scalar_field(
+        BULLET_TRANSFORM_FLAGS_OFFSET,
+        "<u4",
+    )[slots]
+    original_flags = scalar_field(
+        BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET,
+        "<u4",
+    )[slots]
+    callback_phase = scalar_field(
+        BULLET_CALLBACK_PHASE_STATE_OFFSET,
+        "<i2",
+    )[slots]
+    callback_aux = scalar_field(
+        BULLET_CALLBACK_AUX_STATE_OFFSET,
+        "u1",
+    )[slots]
+    half_size = np.clip(np.abs(geometry) * 0.5, 1.0, 24.0)
+    return tuple(
+        Bullet(
+            x=float(x),
+            y=float(y),
+            vx=float(vx),
+            vy=float(vy),
+            half_width=float(half_width),
+            half_height=float(half_height),
+            transform_flags=int(active_flags),
+            slot=int(slot),
+            speed=float(native_speed) if math.isfinite(native_speed) else None,
+            angle=float(native_angle) if math.isfinite(native_angle) else None,
+            callback_phase_state=int(phase),
+            callback_aux_state=int(auxiliary),
+            original_transform_flags=int(tag_flags),
+        )
+        for (
+            slot,
+            (x, y),
+            (vx, vy),
+            (half_width, half_height),
+            active_flags,
+            native_speed,
+            native_angle,
+            tag_flags,
+            phase,
+            auxiliary,
+        ) in zip(
+            slots,
+            position,
+            velocity,
+            half_size,
+            transform_flags,
+            speed,
+            angle,
+            original_flags,
+            callback_phase,
+            callback_aux,
+        )
+    )
+
+
+def decode_bullets(
+    blob: bytes,
+    *,
+    retain_transform_runtime: bool = True,
+) -> tuple[Bullet, ...]:
+    """Decode active bullets, optionally retaining diagnostic queue state.
+
+    Gameplay planning needs original tag flags, active transform flags, and
+    callback state on every bullet. The larger queue/stop runtime is only an
+    observation artifact until a separately validated transform projector
+    consumes it.
+    """
+
+    if not retain_transform_runtime:
+        return _decode_planning_bullets(blob)
     bullets: list[Bullet] = []
     for index in range(BULLET_POOL_SIZE):
         base = index * BULLET_STRIDE
@@ -799,66 +1018,67 @@ def decode_bullets(blob: bytes) -> tuple[Bullet, ...]:
             blob,
             base + BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET,
         )[0]
-        queue_cursor = struct.unpack_from(
-            "<i",
-            blob,
-            base + BULLET_TRANSFORM_QUEUE_CURSOR_OFFSET,
-        )[0]
-        next_record = parse_next_transform_record(
-            blob,
-            program_offset=base + BULLET_TRANSFORM_PROGRAM_OFFSET,
-            queue_cursor=queue_cursor,
-        )
         if not _finite((x, y, vx, vy, width, height)):
             continue
         half_width = min(max(abs(width) * 0.5, 1.0), 24.0)
         half_height = min(max(abs(height) * 0.5, 1.0), 24.0)
         transform_runtime = None
-        if (
-            transform_flags
-            or original_transform_flags
-            or (next_record is not None and next_record.kind)
-        ):
-            transform_runtime = BulletTransformRuntime(
-                original_flags=original_transform_flags,
+        if retain_transform_runtime:
+            queue_cursor = struct.unpack_from(
+                "<i",
+                blob,
+                base + BULLET_TRANSFORM_QUEUE_CURSOR_OFFSET,
+            )[0]
+            next_record = parse_next_transform_record(
+                blob,
+                program_offset=base + BULLET_TRANSFORM_PROGRAM_OFFSET,
                 queue_cursor=queue_cursor,
-                next_record=next_record,
-                timer_fraction=struct.unpack_from(
-                    "<f",
-                    blob,
-                    base + BULLET_STOP_TIMER_FRACTION_OFFSET,
-                )[0],
-                timer_elapsed=struct.unpack_from(
-                    "<i",
-                    blob,
-                    base + BULLET_STOP_TIMER_ELAPSED_OFFSET,
-                )[0],
-                resume_speed=struct.unpack_from(
-                    "<f",
-                    blob,
-                    base + BULLET_STOP_RESUME_SPEED_OFFSET,
-                )[0],
-                angle_operand=struct.unpack_from(
-                    "<f",
-                    blob,
-                    base + BULLET_STOP_ANGLE_OPERAND_OFFSET,
-                )[0],
-                duration=struct.unpack_from(
-                    "<i",
-                    blob,
-                    base + BULLET_STOP_DURATION_OFFSET,
-                )[0],
-                repeat_limit=struct.unpack_from(
-                    "<i",
-                    blob,
-                    base + BULLET_STOP_REPEAT_LIMIT_OFFSET,
-                )[0],
-                repeat_count=struct.unpack_from(
-                    "<i",
-                    blob,
-                    base + BULLET_STOP_REPEAT_COUNT_OFFSET,
-                )[0],
             )
+            if (
+                transform_flags
+                or original_transform_flags
+                or (next_record is not None and next_record.kind)
+            ):
+                transform_runtime = BulletTransformRuntime(
+                    original_flags=original_transform_flags,
+                    queue_cursor=queue_cursor,
+                    next_record=next_record,
+                    timer_fraction=struct.unpack_from(
+                        "<f",
+                        blob,
+                        base + BULLET_STOP_TIMER_FRACTION_OFFSET,
+                    )[0],
+                    timer_elapsed=struct.unpack_from(
+                        "<i",
+                        blob,
+                        base + BULLET_STOP_TIMER_ELAPSED_OFFSET,
+                    )[0],
+                    resume_speed=struct.unpack_from(
+                        "<f",
+                        blob,
+                        base + BULLET_STOP_RESUME_SPEED_OFFSET,
+                    )[0],
+                    angle_operand=struct.unpack_from(
+                        "<f",
+                        blob,
+                        base + BULLET_STOP_ANGLE_OPERAND_OFFSET,
+                    )[0],
+                    duration=struct.unpack_from(
+                        "<i",
+                        blob,
+                        base + BULLET_STOP_DURATION_OFFSET,
+                    )[0],
+                    repeat_limit=struct.unpack_from(
+                        "<i",
+                        blob,
+                        base + BULLET_STOP_REPEAT_LIMIT_OFFSET,
+                    )[0],
+                    repeat_count=struct.unpack_from(
+                        "<i",
+                        blob,
+                        base + BULLET_STOP_REPEAT_COUNT_OFFSET,
+                    )[0],
+                )
         bullets.append(
             Bullet(
                 x=x,
@@ -874,6 +1094,7 @@ def decode_bullets(blob: bytes) -> tuple[Bullet, ...]:
                 transform_runtime=transform_runtime,
                 callback_phase_state=callback_phase_state,
                 callback_aux_state=callback_aux_state,
+                original_transform_flags=original_transform_flags,
             )
         )
     return tuple(bullets)
@@ -900,7 +1121,10 @@ def attach_tagged_velocity_toggles(
     attached: list[Bullet] = []
     for bullet in bullets:
         runtime = bullet.transform_runtime
-        tag_flags = runtime.original_flags if runtime is not None else 0
+        tag_flags = (
+            bullet.original_transform_flags
+            or (runtime.original_flags if runtime is not None else 0)
+        )
         changes = velocity_changes_for_tagged_bullet(
             tag_flags=tag_flags,
             phase_state=bullet.callback_phase_state,
@@ -2429,22 +2653,31 @@ def choose_action(
         lasers,
         horizon=laser_timeline_horizon,
     )
-    viability_preflight_certificates: dict[
+    robust_preflight_certificates: dict[
         str, RobustActionCertificate
     ] = {}
-    if viability_degeneracy == "off_grid_singleton":
-        assert allowed_first_actions is not None
-        allowed_names = set(allowed_first_actions)
-        allowed_actions = tuple(
+    if (
+        control_delay_candidates is not None
+        or viability_degeneracy == "off_grid_singleton"
+    ):
+        preflight_names = (
+            set(allowed_first_actions)
+            if (
+                allowed_first_actions is not None
+                and viability_degeneracy is None
+            )
+            else None
+        )
+        preflight_actions = tuple(
             action
             for action in _PLANNER_ACTIONS
-            if action.name in allowed_names
+            if preflight_names is None or action.name in preflight_names
         )
-        viability_preflight_certificates = _robust_action_certificates(
+        robust_preflight_certificates = _robust_action_certificates(
             player_x=observed_player_x,
             player_y=observed_player_y,
             previous_mask=delayed_mask,
-            actions=allowed_actions,
+            actions=preflight_actions,
             delay_frames=certificate_delay_frames,
             action_hold_frames=action_hold_frames,
             bullets=bullets,
@@ -2453,6 +2686,18 @@ def choose_action(
             snapshot_lag=snapshot_lag,
             laser_frames=laser_timeline[:certificate_horizon],
         )
+    viability_preflight_certificates = (
+        {
+            name: robust_preflight_certificates[name]
+            for name in allowed_first_actions
+            if name in robust_preflight_certificates
+        }
+        if (
+            viability_degeneracy == "off_grid_singleton"
+            and allowed_first_actions is not None
+        )
+        else {}
+    )
     viability_constraint_relaxed = (
         viability_degeneracy == "complete_clamped_alias"
         or (
@@ -2532,8 +2777,21 @@ def choose_action(
             target_y=target_y,
             target_deadline=target_deadline,
         )
+        certificate = robust_preflight_certificates.get(
+            node.first_action.name
+        )
         return (
             base[0],
+            (
+                certificate.worst_collisions
+                if certificate is not None
+                else 0
+            ),
+            (
+                max(-certificate.min_clearance, 0.0)
+                if certificate is not None
+                else 0.0
+            ),
             base[1],
             base[2],
             (
@@ -2784,14 +3042,9 @@ def choose_action(
                 incumbent
             ):
                 nodes_by_action[action_name] = node
-        if (
-            viability_preflight_certificates
-            and not viability_constraint_relaxed
-            and actions_by_name.keys()
-            <= viability_preflight_certificates.keys()
-        ):
+        if actions_by_name.keys() <= robust_preflight_certificates.keys():
             robust_certificates = {
-                action_name: viability_preflight_certificates[action_name]
+                action_name: robust_preflight_certificates[action_name]
                 for action_name in actions_by_name
             }
         else:
@@ -3868,7 +4121,10 @@ def run(args: argparse.Namespace) -> int:
                     hazard_alignment.event_frame_uncertainty
                 )
             decode_started = time.perf_counter()
-            bullets = decode_bullets(bullet_blob)
+            bullets = decode_bullets(
+                bullet_blob,
+                retain_transform_runtime=args.trace_transform_runtime,
+            )
             if ecl_vm_snapshot is not None and tagged_velocity_toggles:
                 bullets = attach_tagged_velocity_toggles(
                     bullets,
@@ -4310,9 +4566,15 @@ def run(args: argparse.Namespace) -> int:
                         for bullet in bullets
                         if (
                             ecl_vm_snapshot is not None
-                            and bullet.transform_runtime is not None
                             and (
-                                bullet.transform_runtime.original_flags
+                                (
+                                    bullet.original_transform_flags
+                                    or (
+                                        bullet.transform_runtime.original_flags
+                                        if bullet.transform_runtime is not None
+                                        else 0
+                                    )
+                                )
                                 & ecl_vm_snapshot.tag_mask
                             )
                         )

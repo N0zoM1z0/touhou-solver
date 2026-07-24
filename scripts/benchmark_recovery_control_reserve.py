@@ -238,6 +238,30 @@ def main(argv: list[str] | None = None) -> int:
                 "median": statistics.median(recovery),
                 "p95": _p95(recovery),
             },
+            "robust_collision_count": sum(
+                decision.robust_collisions > 0
+                for decision in variants[enabled]
+            ),
+            "negative_robust_clearance_count": sum(
+                decision.robust_min_clearance < 0.0
+                for decision in variants[enabled]
+            ),
+            "terminal_collision_count": sum(
+                decision.terminal_threat_collisions > 0
+                for decision in variants[enabled]
+            ),
+            "minimum_clearance": {
+                "median": statistics.median(
+                    decision.min_clearance
+                    for decision in variants[enabled]
+                ),
+                "p05": sorted(
+                    decision.min_clearance
+                    for decision in variants[enabled]
+                )[
+                    round(0.05 * (len(variants[enabled]) - 1))
+                ],
+            },
         }
 
     action_changes = [

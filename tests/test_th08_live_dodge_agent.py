@@ -61,6 +61,7 @@ from th08_live_dodge_agent import (
     LEFT,
     Laser,
     RIGHT,
+    RobustActionCertificate,
     UP,
     _auto_confirm_eligible,
     _action_name_from_mask,
@@ -1082,6 +1083,46 @@ class LiveDodgeAgentTests(unittest.TestCase):
         )
         self.assertEqual(decision.action, "left")
         self.assertEqual(decision.viability_recovery_distance, 48.0)
+
+    def test_ce_0089_delay_certificate_precedes_recovery_beam_pruning(
+        self,
+    ) -> None:
+        def certificates(*, actions, delay_frames, **_kwargs):
+            return {
+                action.name: RobustActionCertificate(
+                    action=action.name,
+                    delay_frames=delay_frames,
+                    worst_collisions=1 if action.name == "left" else 0,
+                    min_clearance=-1.0 if action.name == "left" else 10.0,
+                    cvar_risk=100.0 if action.name == "left" else 0.0,
+                    worst_delay=max(delay_frames),
+                )
+                for action in actions
+            }
+
+        with patch(
+            "th08_live_dodge_agent._robust_action_certificates",
+            side_effect=certificates,
+        ):
+            decision = choose_action(
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                previous_direction=0,
+                can_bomb=False,
+                control_delay_frames=2,
+                control_delay_candidates=(2, 3),
+                action_hold_frames=2,
+                horizon=4,
+                beam_width=1,
+                viability_recovery_distances=(
+                    ("left", 0.0),
+                    ("right", 100.0),
+                ),
+            )
+        self.assertEqual(decision.action, "right")
+        self.assertEqual(decision.robust_collisions, 0)
 
     def test_exact_local_collision_outranks_coarse_repair_volume(self) -> None:
         decision = choose_action(

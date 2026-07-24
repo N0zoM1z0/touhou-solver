@@ -176,6 +176,27 @@ model remains an opt-in oracle while the live default stays disabled. A future
 attempt requires a measured end-to-end compute budget and repeated physical
 A/B, not only threshold equivalence.
 
+### Hard Ordering In Approximate Local Search
+
+Final robust action selection cannot recover a first action that beam pruning
+has already discarded. Every available hard survival discriminator must
+therefore participate before any soft recovery, boundary, item, or position
+term at deduplication and width truncation.
+
+The live local planner uses a short uncertain-delay certificate for each first
+action. Its collision count and negative clearance are computed before beam
+expansion, ranked before soft margins, and reused for final robust selection.
+The certificate covers the committed prefix plus the emitted action until the
+next command can take effect. It does not replace the longer local search or
+global backward kernel.
+
+Stage-6B paired replay is the regression witness. With post-beam certificates,
+enabling boundary reserve changed 300 retained decisions from 24 to 26 robust
+collision selections and 39 to 42 negative-clearance selections. With
+preflight ordering, the enabled/disabled counts are equal at 22 and 36. The
+pre-hit subset is equal at 56 and 72. This restores lexicographic semantics in
+the approximation but remains an offline gate until physically exercised.
+
 ## Approximation Boundary
 
 This first kernel is a finite-horizon lattice abstraction, not yet a proof over

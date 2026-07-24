@@ -2019,3 +2019,47 @@ Status: observed | inferred | unknown | fixed
 - **Status:** Failed live variant retained as a counterexample. Fused numeric
   laser projection passed offline differential/performance gates; physical
   cross-stage verification is pending.
+
+## CE-0089: Soft boundary reserve pruned a safer delay-robust action
+
+- **Observed cross-stage run:** Complete hard-no-Bomb Stage-6B run
+  `20260724_135201` reached `route_complete` with 27 hits. Safety-value
+  guidance was disabled and the fused laser path was active. Retained
+  complete Stage-6B hit counts are `42,30,18,27`; different RNG states make
+  the new count a workload, not evidence of regression or improvement.
+- **Physical failure shape:** Twenty-four of 27 hits followed global
+  viability-kernel exhaustion, 17 carried a playfield-boundary factor, and
+  5,518/12,374 policy queries had an empty robust action set. Pre-hit
+  bottom-eight-pixel occupancy was 0.307 versus 0.132 elsewhere; mean selected
+  control-reserve deficit was 10.043 versus 1.422.
+- **Root cause exposed by paired replay:** Boundary control reserve is a soft
+  recovery preference used during beam pruning. The uncertain-delay
+  first-action certificate was previously computed only after the fixed-width
+  beam, so reserve could erase a first action before its harder collision
+  evidence existed. On 300 identical retained decisions, enabling reserve
+  changed robust-collision selections `24 -> 26` and negative-certificate
+  selections `39 -> 42`. On 213 pre-hit rows they changed `60 -> 61` and
+  `73 -> 75`.
+- **General correction:** Compute the existing certificate for eligible first
+  actions before beam expansion. Rank modeled collision, certificate collision
+  and negative clearance before every soft clearance, boundary, recovery,
+  risk, item, and position objective. Reuse the same certificate at final
+  robust selection instead of paying twice.
+- **Corrected differential:** Across 300 rows, reserve disabled/enabled now
+  both select 22 robust collisions and 36 negative certificates; zero-reserve
+  selections still improve `60 -> 186`. Across 213 pre-hit rows, both select
+  56/72 while zero-reserve selections improve `10 -> 55`. Median local
+  clearance is lower under reserve, so this accepts only hard-order
+  preservation, not a general clearance improvement.
+- **Regression/artifacts:**
+  `test_ce_0089_delay_certificate_precedes_recovery_beam_pruning`, the four
+  `135201.control_reserve*_replay.json` paired artifacts, and
+  `notes/ALGORITHM_REVIEW_20260724.md`.
+- **Independent performance correction:** Default live decoding no longer
+  builds diagnostic transform queue/stop objects. Explicit
+  `--trace-transform-runtime` preserves that evidence path. The retained
+  200--1,200-bullet synthetic benchmark keeps exact gameplay-field parity and
+  measures 1.25x--2.24x median speedups.
+- **Status:** Algorithmic and offline differential gates pass. The 27-hit
+  Stage-6B run remains the physical counterexample; the corrected ordering
+  has not yet been physically accepted.

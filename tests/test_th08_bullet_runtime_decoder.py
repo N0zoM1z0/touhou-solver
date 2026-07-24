@@ -19,6 +19,8 @@ from th08_corridor_adapter import lower_bullets
 from th08_ecl_runtime import EclVmSnapshot, TaggedVelocityToggle
 from th08_live_dodge_agent import (
     BULLET_ANGLE_OFFSET,
+    BULLET_CALLBACK_AUX_STATE_OFFSET,
+    BULLET_CALLBACK_PHASE_STATE_OFFSET,
     BULLET_GEOMETRY_OFFSET,
     BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET,
     BULLET_POOL_SIZE,
@@ -213,6 +215,147 @@ class BulletRuntimeDecoderTests(unittest.TestCase):
             (runtime.next_record.index, runtime.next_record.kind),
             (3, TransformKind.REFLECT_ALL_EDGES),
         )
+        compact = decode_bullets(
+            bytes(blob),
+            retain_transform_runtime=False,
+        )[0]
+        self.assertIsNone(compact.transform_runtime)
+        self.assertEqual(
+            compact.original_transform_flags,
+            runtime.original_flags,
+        )
+        compact_trace = serialize_bullet_trace(compact)
+        self.assertIsNone(compact_trace[8])
+        self.assertEqual(
+            compact_trace[9],
+            [
+                0.0,
+                1.5,
+                runtime.original_flags,
+                0,
+                0,
+                [],
+                0.0,
+                0.0,
+            ],
+        )
+        for field in (
+            "x",
+            "y",
+            "vx",
+            "vy",
+            "half_width",
+            "half_height",
+            "transform_flags",
+            "slot",
+            "speed",
+            "angle",
+            "callback_phase_state",
+            "callback_aux_state",
+        ):
+            self.assertEqual(getattr(compact, field), getattr(bullet, field))
+
+    def test_dense_planning_decoder_matches_diagnostic_gameplay_fields(
+        self,
+    ) -> None:
+        blob = bytearray(BULLET_POOL_SIZE * BULLET_STRIDE)
+        for slot in range(800):
+            base = slot * BULLET_STRIDE
+            struct.pack_into("<H", blob, base + BULLET_STATE_OFFSET, 1 + slot % 2)
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_GEOMETRY_OFFSET,
+                -2.0 - slot % 50,
+                4.0 + slot % 60,
+            )
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_POSITION_OFFSET,
+                float(slot) * 0.25,
+                448.0 - float(slot) * 0.125,
+            )
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_VELOCITY_OFFSET,
+                float(slot % 7) - 3.0,
+                float(slot % 11) - 5.0,
+            )
+            struct.pack_into(
+                "<f",
+                blob,
+                base + BULLET_SPEED_OFFSET,
+                float("nan") if slot == 17 else 0.5 + slot * 0.001,
+            )
+            struct.pack_into(
+                "<f",
+                blob,
+                base + BULLET_ANGLE_OFFSET,
+                float("inf") if slot == 31 else -1.0 + slot * 0.002,
+            )
+            struct.pack_into(
+                "<I",
+                blob,
+                base + BULLET_TRANSFORM_FLAGS_OFFSET,
+                slot * 3,
+            )
+            struct.pack_into(
+                "<I",
+                blob,
+                base + BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET,
+                0x00100202 if slot % 3 == 0 else 0,
+            )
+            struct.pack_into(
+                "<h",
+                blob,
+                base + BULLET_CALLBACK_PHASE_STATE_OFFSET,
+                slot % 32767,
+            )
+            blob[base + BULLET_CALLBACK_AUX_STATE_OFFSET] = slot % 256
+            struct.pack_into(
+                "<i",
+                blob,
+                base + BULLET_TRANSFORM_QUEUE_CURSOR_OFFSET,
+                18,
+            )
+        invalid_base = 799 * BULLET_STRIDE
+        struct.pack_into(
+            "<f",
+            blob,
+            invalid_base + BULLET_POSITION_OFFSET,
+            float("nan"),
+        )
+
+        diagnostic = decode_bullets(bytes(blob))
+        planning = decode_bullets(
+            bytes(blob),
+            retain_transform_runtime=False,
+        )
+        self.assertEqual(len(diagnostic), 799)
+        self.assertEqual(len(planning), len(diagnostic))
+        gameplay_fields = (
+            "x",
+            "y",
+            "vx",
+            "vy",
+            "half_width",
+            "half_height",
+            "transform_flags",
+            "slot",
+            "speed",
+            "angle",
+            "callback_phase_state",
+            "callback_aux_state",
+            "original_transform_flags",
+        )
+        for compact, full in zip(planning, diagnostic):
+            self.assertIsNone(compact.transform_runtime)
+            self.assertEqual(
+                tuple(getattr(compact, field) for field in gameplay_fields),
+                tuple(getattr(full, field) for field in gameplay_fields),
+            )
 
     def test_trace_keeps_first_eight_fields_and_appends_compact_runtime(
         self,
@@ -348,19 +491,8 @@ class BulletRuntimeDecoderTests(unittest.TestCase):
             3.0,
             speed=2.0,
             angle=0.0,
-            transform_runtime=BulletTransformRuntime(
-                original_flags=0x100202,
-                queue_cursor=0,
-                next_record=None,
-                timer_fraction=0.0,
-                timer_elapsed=0,
-                resume_speed=0.0,
-                angle_operand=0.0,
-                duration=0,
-                repeat_limit=0,
-                repeat_count=0,
-            ),
             callback_phase_state=1,
+            original_transform_flags=0x100202,
         )
         snapshot = EclVmSnapshot(
             0x500000,

@@ -149,6 +149,28 @@ inline float segment_clearance(
     ) - occupied_radius;
 }
 
+inline float segment_distance_squared(
+    float sample_x,
+    float sample_y,
+    const SegmentGeometry& segment
+) {
+    float projection = 0.0F;
+    if (segment.length_squared > 1e-9F) {
+        projection = (
+            (sample_x - segment.start_x) * segment.vector_x
+            + (sample_y - segment.start_y) * segment.vector_y
+        ) / segment.length_squared;
+        projection = std::min(1.0F, std::max(0.0F, projection));
+    }
+    const float delta_x = (
+        sample_x - (segment.start_x + projection * segment.vector_x)
+    );
+    const float delta_y = (
+        sample_y - (segment.start_y + projection * segment.vector_y)
+    );
+    return delta_x * delta_x + delta_y * delta_y;
+}
+
 #include "robust_transition_table.hpp"
 
 }  // namespace
@@ -534,12 +556,41 @@ TOUHOU_EXPORT int touhou_segment_trajectory_clearance_v1(
                 ) {
                     const float sample_x = x_start + column * x_step;
                     const std::size_t output_index = clearance_index(
-                    frame,
-                    row,
-                    column,
-                    row_count,
-                    column_count
+                        frame,
+                        row,
+                        column,
+                        row_count,
+                        column_count
                     );
+                    const float improvement_distance = (
+                        inout[output_index] + occupied_radius[index]
+                    );
+                    if (improvement_distance <= 0.0F) {
+                        continue;
+                    }
+                    const float distance_squared = segment_distance_squared(
+                        sample_x,
+                        sample_y,
+                        segment
+                    );
+                    const float improvement_squared = (
+                        improvement_distance * improvement_distance
+                    );
+                    const float rounding_guard = (
+                        8.0F
+                        * std::numeric_limits<float>::epsilon()
+                        * (
+                            std::abs(distance_squared)
+                            + std::abs(improvement_squared)
+                            + 1.0F
+                        )
+                    );
+                    if (
+                        distance_squared
+                        > improvement_squared + rounding_guard
+                    ) {
+                        continue;
+                    }
                     inout[output_index] = std::min(
                         inout[output_index],
                         segment_clearance(

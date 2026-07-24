@@ -2569,3 +2569,18 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   next decomposition order are in
   `notes/MODEL_SOLVER_MAINTENANCE_AUDIT_20260724.md`. New binary analysis is
   restricted to connected IDA Pro MCP; REA use is prohibited by `AGENTS.md`.
+
+## 2026-07-25: Clearance Pipeline Optimization
+
+- Reclassified the earlier 1,500-AABB/250-static-segment/200-trajectory
+  benchmark as a game-neutral stress workload rather than a live TH08 cost
+  attribution. TH08 lasers use the segment-trajectory path; the stress
+  workload's static and trajectory geometry also substantially overlaps.
+- Added a conservative squared-distance rejection before the authoritative
+  `std::hypot` call in the native segment-trajectory kernel. Against the old
+  native library, 500 randomized workloads and one generated live-like
+  800-AABB/200-trajectory workload were bit-identical. Raw trajectory median
+  improved from 21.92 to 6.25 ms.
+- The ordered architecture, benchmark separation, packed frame-major
+  contract, static broad phase, and shadow-only Boolean/query-local proposal
+  are recorded in `notes/CLEARANCE_PIPELINE_OPTIMIZATION_20260725.md`.

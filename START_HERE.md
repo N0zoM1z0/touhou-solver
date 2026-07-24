@@ -9,8 +9,8 @@ test, physical-trial, and commit requirements are binding.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - Handoff base commit:
-  `ee66ed1 Guard issue-time enemy spawns and bound native clearance`
-- Complete Linux and Windows test gates at that commit: `378 tests` each, all
+  `02174c9 Enforce versioned reach-avoid safety contracts`
+- Complete Linux and Windows test gates at that commit: `386 tests` each, all
   passing.
 - The only expected untracked pre-existing file is `image.png`. It is a user
   screenshot. Do not add, delete, overwrite, or otherwise clean it.
@@ -552,7 +552,10 @@ Current partial corrections:
 - worker submission interval reduced from 24 to 8 frames;
 - every async policy solves full delay support `{1..6}`;
 - phase telemetry records `age % frames_per_layer`;
-- stale-mask local retry exists as an opt-in experiment but is disabled.
+- the cached action mask is always intersected with the fresh local
+  delay-plus-hold certificate;
+- a separate longer-terminal-horizon retry remains an opt-in experiment and
+  is disabled.
 
 Why it remains open:
 
@@ -579,12 +582,12 @@ collision-free bridge back to the viable set. Stage 6B had 5,518 empty kernels
 and 24 kernel-exhausted hit windows despite policy availability and complete
 delay-support coverage.
 
-Read `notes/ALGORITHM_REVIEW_20260724.md` before changing this layer. The next
-candidate is a time-expanded min-max recovery band whose lexicographic cost
-includes every intermediate collision/clearance violation, boundary control
-loss, and terminal distance to the Boolean viability kernel. Build it first
-against a small independent scalar oracle and multi-stage/adversarial replay.
-Do not promote endpoint distance or centrality into a survival certificate.
+Read `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md` before changing this layer.
+On the same exact graph, a collision-free robust bridge into the future kernel
+would already make its predecessor viable. Endpoint distance therefore cannot
+be promoted into a survival certificate. The retained scalar oracle instead
+maximizes guaranteed safe physical frames, then bottleneck clearance. Its
+next step is an adaptive/refined native policy, not another recovery weight.
 
 ### CE-0087/0088: Compute Deadline And Optional Safety Value
 
@@ -625,12 +628,13 @@ action issued at 35,415. Slot 18 made stable exact contact at frame 35,420.
 This is a computation-window observation failure, not SendInput latency.
 
 Every local decision now merges one synchronous 64-slot enemy prefix with the
-complete async tail, then reads the prefix again before input. A pointer,
-contact-mode, size, velocity, or nonlinear-motion change triggers a fast
-all-action robust recertificate. This has offline causal and regression
-coverage but no physical acceptance yet. The next Stage-4A run must report
-prefix-read p50/p95, change/recertificate/override counts, cadence, and whether
-the old ring-contact class recurs.
+complete async tail, then reads the prefix again before input. A manager-frame
+crossing retries the contiguous read once. A pointer, contact-mode, size,
+velocity, or nonlinear-motion change triggers a fast all-action robust
+recertificate. This has offline causal and regression coverage but no physical
+acceptance yet. The next Stage-4A run must report prefix attempts/stability,
+read p50/p95, change/recertificate/override counts, cadence, and whether the
+old ring-contact class recurs.
 
 The existing C++ moving-AABB clearance kernel now uses a cap-bounded
 hazard-major traversal. A fixed 1,360-AABB workload improved `5.74x` by median
@@ -639,23 +643,46 @@ medians are `76.15 ms` Linux and `82.83 ms` Windows. This checkpoint supports
 compact numerical C++ boundaries, not translating the full Python
 orchestrator.
 
+### CE-0093: Versioned Winning Actions And Survival Horizon
+
+The earlier `36.217% global-empty/local-safe` statement compared different
+questions. Local guaranteed only an 8--12-frame prefix; global required
+another 48--80 frames. It is not false-empty evidence.
+
+The aligned failure is concrete: 30/6,613 selected actions were inside the
+cached global winning set but contradicted by the fresh local tube checker.
+The global mask is now intersected with fresh prefix-safe actions; an empty
+intersection triggers one rare all-17-action recertificate and relaxes the
+cached version. Paired retained replay improved 10/30 hard vectors, regressed
+zero, and changed robust-collision decisions `29 -> 23`; physical acceptance
+is pending.
+
+Outside the exact winning set, use no risk weight. The independent scalar game
+maximizes guaranteed collision-free frames first and bottleneck signed
+clearance second. It matches Boolean policy membership/masks. On 4,905 losing
+generated states, margin-only fallback forfeited guaranteed frames on 190.
+The adversarial generator now includes delayed births. Read the dedicated
+architecture note before changing global/local contracts.
+
 ## 12. Files To Read In Order
 
 1. `AGENTS.md`
 2. `START_HERE.md`
-3. `notes/ALGORITHM_REVIEW_20260724.md`
-4. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0092
-5. `notes/RESEARCH_LOG.md`, latest four dated sections
-6. `notes/ROBUST_VIABILITY.md`
-7. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
-8. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
-9. `notes/NATIVE_PLANNER_BACKEND.md`
-10. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
-11. `scripts/th08_live_dodge_agent.py`
-12. `scripts/th08_bullet_transform_model.py`
-13. `scripts/th08_corridor_adapter.py`
-14. `scripts/touhou_control/viability.py`
-15. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
+3. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
+4. `notes/ALGORITHM_REVIEW_20260724.md`
+5. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0093
+6. `notes/RESEARCH_LOG.md`, latest four dated sections
+7. `notes/ROBUST_VIABILITY.md`
+8. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
+9. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
+10. `notes/NATIVE_PLANNER_BACKEND.md`
+11. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
+12. `scripts/th08_live_dodge_agent.py`
+13. `scripts/touhou_control/reachability_oracle.py`
+14. `scripts/th08_bullet_transform_model.py`
+15. `scripts/th08_corridor_adapter.py`
+16. `scripts/touhou_control/viability.py`
+17. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
     `notes/runs/lunatic_route2_stage3_unattended_20260724_132007.md`,
     `notes/runs/lunatic_route2_stage4a_unattended_20260724_155932.md`,
     `notes/runs/lunatic_route2_stage5_unattended_20260724_144805.md`, and
@@ -681,8 +708,9 @@ orchestrator.
 - Clamp local movement exactly like native TH08; discarding out-of-bounds raw
   successors caused a `KeyError('stay')`.
 - A coarse safe-action mask is not automatically invalid at an off-grid
-  position. Preserve it only with the existing redundant continuous safety
-  certificate.
+  position. A margin certificate must pay live-to-lattice position error plus
+  model error; otherwise preserve it only through the fresh continuous tube
+  checker.
 - Policy availability, delay-support coverage, kernel non-emptiness, and
   hazard correctness are separate gates.
 - Hard survival ordering must hold during deduplication and beam truncation,
@@ -710,33 +738,37 @@ should:
 2. Retain the complete dossier, death ledger, regression cases, comparison,
    session/summary, and human-readable run note.
 3. Compare decode/local/global p50/p95, both prefix-read tails,
-   issue-time geometry changes/recertificates/overrides, cadence, deadline
+   prefix retry/stability, issue-time geometry changes/recertificates/
+   overrides, fresh global-mask filters/relaxations, cadence, deadline
    suppression, kernel exhaustion, boundary occupancy, and every hit window.
    Do not tune a stage/spell direction.
 4. Add a counterexample and smallest useful regression for every new concrete
-   failure; pass the complete 378-plus Linux and Windows suites.
+   failure; pass the complete 386-plus Linux and Windows suites.
 5. Commit the verified cross-control while leaving raw traces, logs, native
    binaries, and `image.png` untracked.
-6. Then prototype recovery-band semantics offline across multiple stages and
-   adversarial generated workloads with an independent scalar oracle. Do not
-   introduce another C++ boundary until profiling shows an end-to-end limiter
-   and the oracle/action-parity gate is defined.
+6. Then attribute the 30 direct cached-global/fresh-local contradictions,
+   prototype adaptive fine-grid value induction, and move the proven
+   survival-horizon recurrence to C++. The next issue-time native boundary is
+   packed bullet/laser/enemy decode-plus-project-plus-certificate; require
+   whole-pipeline gain and scalar/action parity.
 
 ## 15. Suggested First Prompt For A New Codex
 
 ```text
 Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
 START_HERE.md completely, then inspect git status and the latest commit. Keep
-hard no-Bomb and leave safety value disabled. Continue from ee66ed1. Stage-4A
-CE-0092 proved that an 18-body contact ring spawned while the old Python local
-decision was computing. The adapter now reads a synchronous 64-slot prefix at
-capture and issue time and robustly recertifies geometry changes; physically
-validate its timing and overrides on focused Stage 4A before accepting it.
-Items are survival-neutral. The bounded native clearance kernel passed
-Linux/Windows parity and a 5.74x microbenchmark; do not infer physical timing
-until the new run. Analyze every hit and global/local mismatch, then prototype
-the robust time-expanded recovery band against an independent scalar oracle
-and adversarial generated cases. Keep generic planners game-neutral, retain
-compact artifacts/counterexamples, run both complete suites, commit verified
-checkpoints, and cleanly stop every runtime session.
+hard no-Bomb and leave safety value disabled. Continue from 02174c9. CE-0092
+proved that an 18-body contact ring spawned while the old local decision was
+computing. Prefix capture now retries crossed-frame reads and validates again
+at issue time. CE-0093 corrected the horizon semantics: 2,395 global-losing/
+local-prefix-safe rows are not contradictions; 30 selected cached-winning
+actions were contradicted by the fresh local tube. The controller now
+intersects those contracts and relaxes only on an empty fresh intersection.
+Physically validate prefix stability, issue overrides, and fresh-mask filter/
+relax counts on focused Stage 4A. Then attribute direct contradictions and
+prototype adaptive native value induction plus the proven survival-horizon
+oracle. The next C++ boundary is packed issue-time bullet/laser/enemy
+decode-plus-project-plus-certificate with scalar/action parity. Keep generic
+planners game-neutral, retain artifacts/counterexamples, run both complete
+suites, commit verified checkpoints, and stop every runtime session.
 ```

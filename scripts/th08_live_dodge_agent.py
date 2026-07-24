@@ -28,7 +28,12 @@ from th08_bullet_transform_model import (
     TransformRecord,
     parse_next_transform_record,
 )
-from th08_corridor_adapter import TH08_CORRIDOR_CONFIG, plan_th08_corridor
+from th08_corridor_adapter import (
+    LoweredCorridorHazards,
+    TH08_CORRIDOR_CONFIG,
+    lower_th08_corridor_hazards,
+    plan_lowered_th08_corridor,
+)
 from th08_ecl_runtime import (
     EclLookaheadResult,
     EclInstructionCache,
@@ -64,6 +69,9 @@ from touhou_control import native_backend
 from touhou_control.async_policy import (
     AsyncPolicyLead,
     delay_support_envelope,
+)
+from touhou_control.viability_audit_capsule import (
+    write_viability_audit_capsule,
 )
 from touhou_control.delay import AdaptiveControlDelay
 from touhou_control.epochs import (
@@ -699,6 +707,11 @@ class CorridorSolution:
     required_gate_lane: str | None = None
     constraint_honored: bool = False
     context_key: tuple[int, int, int | None] | None = None
+    audit_capsule: str | None = None
+    audit_write_ms: float | None = None
+    audit_error: str | None = None
+    worker_ms: float | None = None
+    audit_future: Future[tuple[float, str | None]] | None = None
 
 
 @dataclass
@@ -3866,6 +3879,29 @@ def _project_player_for_read_lag(
     )
 
 
+def _write_corridor_audit_capsule(
+    *,
+    capsule_path: Path,
+    metadata: dict[str, object],
+    hazards: LoweredCorridorHazards,
+) -> tuple[float, str | None]:
+    """Write one diagnostic capsule without delaying policy publication."""
+
+    started = time.perf_counter()
+    error_text = None
+    try:
+        write_viability_audit_capsule(
+            capsule_path,
+            metadata=metadata,
+            aabbs=hazards.aabbs,
+            piecewise_aabbs=hazards.piecewise_aabbs,
+            segment_trajectories=hazards.segment_trajectories,
+        )
+    except Exception as error:
+        error_text = f"{type(error).__name__}: {error}"
+    return (time.perf_counter() - started) * 1000.0, error_text
+
+
 def _solve_corridor(
     *,
     source_frame: int,
@@ -3883,16 +3919,22 @@ def _solve_corridor(
     safety_value_horizon_frames: int = 0,
     required_gate_lane: str | None = None,
     context_key: tuple[int, int, int | None] | None = None,
+    audit_capsule_dir: Path | None = None,
+    audit_executor: ThreadPoolExecutor | None = None,
 ) -> CorridorSolution:
     started = time.perf_counter()
-    plan = plan_th08_corridor(
-        player_x=player_x,
-        player_y=player_y,
+    hazards = lower_th08_corridor_hazards(
         bullets=bullets,
         lasers=lasers,
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         forecast_frames=forecast_lead_frames,
+        horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
+    )
+    plan = plan_lowered_th08_corridor(
+        player_x=player_x,
+        player_y=player_y,
+        hazards=hazards,
         required_gate_lane=required_gate_lane,
         control_delay_candidates=control_delay_candidates,
         nominal_control_delay=nominal_control_delay,
@@ -3908,28 +3950,73 @@ def _solve_corridor(
         and not constraint_honored
         and plan.planning_mode != "robust_viability"
     ):
-        plan = plan_th08_corridor(
+        plan = plan_lowered_th08_corridor(
             player_x=player_x,
             player_y=player_y,
-            bullets=bullets,
-            lasers=lasers,
-            enemy_bodies=enemy_bodies,
-            snapshot_lag=snapshot_lag,
-            forecast_frames=forecast_lead_frames,
+            hazards=hazards,
             control_delay_candidates=control_delay_candidates,
             nominal_control_delay=nominal_control_delay,
             active_action=active_action,
             safety_value_horizon_frames=safety_value_horizon_frames,
         )
+    solve_finished = time.perf_counter()
+    audit_capsule = None
+    audit_write_ms = None
+    audit_error = None
+    audit_future = None
+    if audit_capsule_dir is not None:
+        capsule_path = audit_capsule_dir / (
+            f"policy_{snapshot_frame}_{source_frame}.npz"
+        )
+        metadata = {
+            "source_frame": source_frame,
+            "snapshot_frame": snapshot_frame,
+            "forecast_lead_frames": forecast_lead_frames,
+            "player_x": player_x,
+            "player_y": player_y,
+            "snapshot_lag": snapshot_lag,
+            "control_delay_candidates": control_delay_candidates,
+            "nominal_control_delay": nominal_control_delay,
+            "active_action": active_action,
+            "required_gate_lane": required_gate_lane,
+            "context_key": context_key,
+            "grid_step": TH08_CORRIDOR_CONFIG.grid_step,
+            "frames_per_layer": TH08_CORRIDOR_CONFIG.frames_per_layer,
+            "horizon_frames": TH08_CORRIDOR_CONFIG.horizon_frames,
+            "bullet_slots": [bullet.slot for bullet in bullets],
+            "laser_slots": [laser.slot for laser in lasers],
+            "enemy_pointers": [body.pointer for body in enemy_bodies],
+            "plan_reachable": plan.reachable,
+        }
+        writer_arguments = {
+            "capsule_path": capsule_path,
+            "metadata": metadata,
+            "hazards": hazards,
+        }
+        if audit_executor is None:
+            audit_write_ms, audit_error = (
+                _write_corridor_audit_capsule(**writer_arguments)
+            )
+        else:
+            audit_future = audit_executor.submit(
+                _write_corridor_audit_capsule,
+                **writer_arguments,
+            )
+        audit_capsule = str(capsule_path)
     return CorridorSolution(
         source_frame=source_frame,
         plan=plan,
-        solve_ms=(time.perf_counter() - started) * 1000.0,
+        solve_ms=(solve_finished - started) * 1000.0,
         snapshot_frame=snapshot_frame,
         forecast_lead_frames=forecast_lead_frames,
         required_gate_lane=required_gate_lane,
         constraint_honored=constraint_honored,
         context_key=context_key,
+        audit_capsule=audit_capsule,
+        audit_write_ms=audit_write_ms,
+        audit_error=audit_error,
+        worker_ms=(time.perf_counter() - started) * 1000.0,
+        audit_future=audit_future,
     )
 
 
@@ -4135,6 +4222,7 @@ def run(args: argparse.Namespace) -> int:
     termination_reason = "duration"
     corridor_executor: ThreadPoolExecutor | None = None
     corridor_future: Future[CorridorSolution] | None = None
+    audit_executor: ThreadPoolExecutor | None = None
     enemy_executor: ThreadPoolExecutor | None = None
     enemy_future: Future[EnemyPoolSnapshot] | None = None
     enemy_snapshot: EnemyPoolSnapshot | None = None
@@ -4193,6 +4281,11 @@ def run(args: argparse.Namespace) -> int:
         corridor_executor = ThreadPoolExecutor(
             max_workers=1,
             thread_name_prefix="th08-corridor",
+        )
+    if args.viability_audit_dir is not None:
+        audit_executor = ThreadPoolExecutor(
+            max_workers=1,
+            thread_name_prefix="th08-viability-audit",
         )
     enemy_executor = ThreadPoolExecutor(
         max_workers=1,
@@ -4297,6 +4390,11 @@ def run(args: argparse.Namespace) -> int:
                     "native_planner_backend": native_backend.available(),
                     "viability_quantifiers": (
                         "exists_action_forall_delay"
+                    ),
+                    "viability_audit_capsules": (
+                        str(args.viability_audit_dir)
+                        if args.viability_audit_dir is not None
+                        else None
                     ),
                 }
             )
@@ -4915,7 +5013,11 @@ def run(args: argparse.Namespace) -> int:
             if corridor_future is not None and corridor_future.done():
                 completed_solution = corridor_future.result()
                 corridor_future = None
-                corridor_policy_lead.observe(completed_solution.solve_ms)
+                corridor_policy_lead.observe(
+                    completed_solution.worker_ms
+                    if completed_solution.worker_ms is not None
+                    else completed_solution.solve_ms
+                )
                 (
                     corridor_solution,
                     corridor_pending_solution,
@@ -4982,6 +5084,8 @@ def run(args: argparse.Namespace) -> int:
                         corridor_commitment.active_lane(counter_after_read)
                     ),
                     context_key=corridor_context,
+                    audit_capsule_dir=args.viability_audit_dir,
+                    audit_executor=audit_executor,
                 )
                 corridor_last_submit = counter_after_read
             corridor_target = _corridor_target(
@@ -5723,6 +5827,19 @@ def run(args: argparse.Namespace) -> int:
                         current_frame=counter_at_action,
                         max_age_frames=args.corridor_max_age,
                     )
+                    audit_write_ms = (
+                        corridor_report_solution.audit_write_ms
+                    )
+                    audit_error = corridor_report_solution.audit_error
+                    audit_pending = False
+                    if corridor_report_solution.audit_future is not None:
+                        audit_pending = (
+                            not corridor_report_solution.audit_future.done()
+                        )
+                        if not audit_pending:
+                            audit_write_ms, audit_error = (
+                                corridor_report_solution.audit_future.result()
+                            )
                     corridor_record = {
                         "source_frame": corridor_report_solution.source_frame,
                         "snapshot_frame": (
@@ -5734,6 +5851,7 @@ def run(args: argparse.Namespace) -> int:
                         "age": counter_at_action
                         - corridor_report_solution.source_frame,
                         "solve_ms": corridor_report_solution.solve_ms,
+                        "worker_ms": corridor_report_solution.worker_ms,
                         "reachable": corridor_report_solution.plan.reachable,
                         "planning_mode": (
                             corridor_report_solution.plan.planning_mode
@@ -5744,6 +5862,12 @@ def run(args: argparse.Namespace) -> int:
                         "solver_timing_ms": dict(
                             corridor_report_solution.plan.solver_timing_ms
                         ),
+                        "audit_capsule": (
+                            corridor_report_solution.audit_capsule
+                        ),
+                        "audit_write_ms": audit_write_ms,
+                        "audit_error": audit_error,
+                        "audit_pending": audit_pending,
                         "lane": corridor_report_solution.plan.lane,
                         "bottleneck_clearance": (
                             corridor_report_solution.plan.bottleneck_clearance
@@ -6067,6 +6191,8 @@ def run(args: argparse.Namespace) -> int:
                     corridor_future.cancel()
                 if corridor_executor is not None:
                     corridor_executor.shutdown(wait=True, cancel_futures=True)
+                if audit_executor is not None:
+                    audit_executor.shutdown(wait=True)
                 if enemy_future is not None:
                     enemy_future.cancel()
                 if enemy_executor is not None:
@@ -6132,6 +6258,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "optional compact max-min fallback horizon in game frames; "
             "zero disables the research policy"
+        ),
+    )
+    parser.add_argument(
+        "--viability-audit-dir",
+        type=Path,
+        help=(
+            "write ignored neutral policy-input capsules for offline "
+            "differential audit; diagnostic I/O may perturb timing"
         ),
     )
     parser.add_argument(

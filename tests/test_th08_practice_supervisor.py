@@ -121,6 +121,7 @@ class PracticeSupervisorTests(unittest.TestCase):
                 "3",
                 "--safety-value-horizon",
                 "32",
+                "--viability-audit",
                 "--armed",
             ]
         )
@@ -130,6 +131,7 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertTrue(args.armed)
         self.assertTrue(args.kill_existing)
         self.assertEqual(args.safety_value_horizon, 32)
+        self.assertTrue(args.viability_audit)
 
     def test_tail_reader_handles_a_record_larger_than_one_block(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

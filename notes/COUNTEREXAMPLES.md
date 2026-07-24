@@ -2322,6 +2322,12 @@ Status: observed | inferred | unknown | fixed
   time-indexed hazard contract.
 - **Regression:** Retained case `LUN-S3-F13035-T1` plus
   `test_future_birth_must_be_in_the_event_model_or_revalidated`.
+- **Stage-5 corroboration:** Differential capsule
+  `policy_32530_32546.npz` did not contain bullet slot 1446. Before native hit
+  32,581, later same-context capsules observed a new ring at slots 1420..1457,
+  and retained hit geometry identifies slot 1446 as the exact overlap. The
+  governing policy was already losing, so this is birth-model evidence rather
+  than the cause of that empty kernel.
 - **Status:** Observed and classified; ECL projectile-spawn coverage remains
   open.
 
@@ -2426,3 +2432,69 @@ Status: observed | inferred | unknown | fixed
   `lunatic_route2_stage5_unattended_20260724_191313.regressions.json` and
   pinned by
   `test_ce_0098_stage5_retains_strict_enemy_version_failures`.
+
+## CE-0099: Audit capture was wired into the wrong planner call
+
+- **Observed harness failure:** Audit-enabled Stage-5 session
+  `lunatic_route2_stage5_unattended_20260724_201536` failed before gameplay
+  with `_stage_corridor_solution() got an unexpected keyword argument
+  'audit_capsule_dir'`. Menu identity, Lunatic, route 2, Sakuya/Remilia, image
+  hash, and no-life-decrement patch had passed, but no gameplay sample was
+  accepted.
+- **Cause and correction:** The new keyword had been attached to the staging
+  helper instead of the asynchronous `_solve_corridor` submission. It is now
+  routed only to the worker. The failed session remains tracked as discarded;
+  it is not merged into a physical baseline.
+- **Instrumentation correction:** The subsequent complete capture showed that
+  synchronous capsule I/O added `91.58/117.58 ms` median/p95 to a
+  `100.17/166.71 ms` policy solve. Capsule writes now drain through an
+  independent one-worker queue so policy publication does not wait for I/O.
+- **Regression:**
+  `test_ce_0099_audit_capsule_is_wired_to_corridor_worker` executes the exact
+  worker keyword path, waits for the asynchronous receipt, and reads the
+  produced file.
+
+## CE-0100: A 16-pixel lattice erased three physically queried action sets
+
+- **Observed differential:** The last two available pre-hit queries for all
+  27 hits in Stage-5 run `20260724_201636` were reconstructed from exact
+  ignored hazard capsules. All 54 live 16-pixel results reproduced. Three
+  phase-103 queries that were empty at 16 pixels became winning with the same
+  eight-frame layer and full delay support at both 8 and 4 pixels.
+- **Witnesses:** Decision/query `23867/23862` changed from zero actions to
+  3/4 at 8/4 pixels. `25560/25554` changed to 11/12, and `25569/25562`
+  changed to 3/9. Their live-to-cell projection errors fell from
+  `9.707/8.416/8.416` pixels to `1.882/0.559/0.559` at 4 pixels.
+- **Scope limit:** No sampled phase-107 empty became viable at 8 or 4 pixels.
+  This refutes uniform 16-pixel completeness; it does not prove that global
+  4-pixel induction fixes Reisen or that any one refined action would have
+  prevented the later hit.
+- **General correction:** Refine reachable tubes and alleged empty boundaries
+  adaptively. Do not encode phase-103 positions or switch the whole live field
+  to 4 pixels.
+- **Regressions:** Compact audit
+  `artifacts/viability_audit/stage5_20260724_201636.json` plus
+  `test_narrow_tunnel_requires_spatial_refinement_not_a_weight`.
+
+## CE-0101: Endpoint-distance recovery chose a shorter survival branch
+
+- **Observed modeled counterfactual:** Before native hit 3,491 in complete
+  Stage-5 run `20260724_201636`, decision/query `3486/3483` had an empty
+  Boolean kernel. The fused native/scalar-parity label guaranteed 10
+  collision-free modeled frames for `stay`, `left`, `down`, `down_left`,
+  `left_fast`, `down_fast`, and `down_left_fast`. The hit was eight frames
+  after the query.
+- **Old fallback:** Distant-kernel endpoint recovery selected and issued
+  `down_right_fast`, which was absent from the survival-best mask. The retained
+  local certificate already reported one collision and minimum clearance
+  `-1.699`.
+- **Interpretation:** This is a discrete-model counterexample to endpoint
+  distance as the primary losing-state objective, not a physical replay proof
+  that one of the seven alternatives avoids the native hit. In the other
+  53 sampled queries, guaranteed survival was shorter than query-to-hit.
+- **General correction:** Losing-state fallback must maximize guaranteed safe
+  frames before bottleneck margin or kernel distance. Keep the fused result in
+  shadow until its issue-time action path and whole-pipeline budget pass.
+- **Regressions:** Full native/scalar label-and-mask parity in
+  `test_native_fused_survival_labels_match_scalar_oracle`, plus the retained
+  frame-3,491 audit observation.

@@ -57,6 +57,7 @@ def build_long_run_arguments(
     terminal_stage: int | None = None,
     trace_transform_runtime: bool = False,
     safety_value_horizon: int = 0,
+    viability_audit_dir: Path | None = None,
 ) -> list[str]:
     if safety_value_horizon < 0:
         raise ValueError("safety-value horizon cannot be negative")
@@ -95,6 +96,10 @@ def build_long_run_arguments(
         arguments.extend(
             ("--safety-value-horizon", str(safety_value_horizon))
         )
+    if viability_audit_dir is not None:
+        arguments.extend(
+            ("--viability-audit-dir", str(viability_audit_dir))
+        )
     return arguments
 
 
@@ -106,6 +111,7 @@ class AgentHotkey:
         terminal_stage: int | None = None,
         trace_transform_runtime: bool = False,
         safety_value_horizon: int = 0,
+        viability_audit_dir: Path | None = None,
     ) -> None:
         if os.name != "nt":
             raise RuntimeError("th08_agent_hotkey.py must run under Windows Python")
@@ -143,6 +149,7 @@ class AgentHotkey:
         self.terminal_stage = terminal_stage
         self.trace_transform_runtime = trace_transform_runtime
         self.safety_value_horizon = safety_value_horizon
+        self.viability_audit_dir = viability_audit_dir
         self.artifact_dir = (
             Path(__file__).resolve().parent.parent
             / "artifacts"
@@ -249,6 +256,7 @@ class AgentHotkey:
                 terminal_stage=self.terminal_stage,
                 trace_transform_runtime=self.trace_transform_runtime,
                 safety_value_horizon=self.safety_value_horizon,
+                viability_audit_dir=self.viability_audit_dir,
             )
             if not gameplay_active:
                 arguments.extend(("--wait-gameplay", "--wait-timeout", "30"))

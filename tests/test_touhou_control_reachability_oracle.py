@@ -7,6 +7,7 @@ import unittest
 
 import numpy as np
 
+from touhou_control import native_backend
 from touhou_control.adversarial import (
     AdversarialAabb,
     AdversarialScenario,
@@ -26,6 +27,126 @@ from touhou_control.trajectory import PiecewiseLinearTrajectory
 
 
 class RobustSurvivalOracleTests(unittest.TestCase):
+    def test_native_fused_survival_labels_match_scalar_oracle(
+        self,
+    ) -> None:
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("left", -2.0, 0.0),
+            ControlAction("right", 2.0, 0.0),
+        )
+        x_axis = np.arange(8.0, 40.1, 8.0, dtype=np.float32)
+        y_axis = np.arange(16.0, 40.1, 8.0, dtype=np.float32)
+        config = ViabilityConfig(
+            frames_per_layer=2,
+            required_clearance=0.25,
+            clamp_to_bounds=True,
+        )
+        scenario = generate_adversarial_scenario(
+            0xCE0098,
+            hazard_count=10,
+            horizon_frames=4,
+            left=8.0,
+            right=40.0,
+            top=16.0,
+            bottom=40.0,
+            maximum_events=2,
+        )
+        clearance = reference_clearance_volume(
+            x_axis=x_axis,
+            y_axis=y_axis,
+            scenario=scenario,
+            player_radius=2.0,
+            clearance_cap=48.0,
+        )
+        native = native_backend.build_survival_viability_arrays(
+            x_axis=x_axis,
+            y_axis=y_axis,
+            clearance_volume=clearance,
+            velocity_x=np.asarray(
+                [action.velocity_x for action in actions],
+                dtype=np.float64,
+            ),
+            velocity_y=np.asarray(
+                [action.velocity_y for action in actions],
+                dtype=np.float64,
+            ),
+            delay_frames=np.asarray((0, 1, 2), dtype=np.int32),
+            frames_per_layer=config.frames_per_layer,
+            required_clearance=config.required_clearance,
+            clamp_to_bounds=config.clamp_to_bounds,
+        )
+        if native is None:
+            self.skipTest("native survival-viability backend is not built")
+        (
+            survival_frames,
+            bottleneck_margins,
+            best_masks,
+            viable,
+            safe_masks,
+        ) = native
+        for layer in range(survival_frames.shape[0] - 1):
+            for active_index, active in enumerate(actions):
+                for row in range(len(y_axis)):
+                    for column in range(len(x_axis)):
+                        scalar = scalar_robust_survival_query(
+                            x_axis=x_axis,
+                            y_axis=y_axis,
+                            clearance_volume=clearance,
+                            actions=actions,
+                            delay_frames=(0, 1, 2),
+                            config=config,
+                            layer=layer,
+                            row=row,
+                            column=column,
+                            active_action=active.name,
+                        )
+                        state_index = (
+                            layer,
+                            active_index,
+                            row,
+                            column,
+                        )
+                        self.assertEqual(
+                            int(survival_frames[state_index]),
+                            scalar.state_label.guaranteed_frames,
+                        )
+                        self.assertAlmostEqual(
+                            float(bottleneck_margins[state_index]),
+                            scalar.state_label.bottleneck_margin,
+                            places=5,
+                        )
+                        expected_best_mask = 0
+                        expected_safe_mask = 0
+                        for selected_index, selected in enumerate(actions):
+                            if selected.name in scalar.best_actions:
+                                expected_best_mask |= 1 << selected_index
+                            label = scalar.action_label(selected.name)
+                            if (
+                                label.guaranteed_frames
+                                == scalar.remaining_frames
+                                and label.bottleneck_margin > 0.0
+                            ):
+                                expected_safe_mask |= 1 << selected_index
+                        action_index = (
+                            layer,
+                            active_index,
+                            row,
+                            column,
+                        )
+                        self.assertEqual(
+                            int(best_masks[action_index]),
+                            expected_best_mask,
+                        )
+                        self.assertEqual(
+                            int(safe_masks[action_index]),
+                            expected_safe_mask,
+                        )
+                        self.assertEqual(
+                            bool(viable[state_index]),
+                            scalar.winning,
+                        )
+
     def test_scalar_winning_labels_match_vectorized_boolean_game(
         self,
     ) -> None:

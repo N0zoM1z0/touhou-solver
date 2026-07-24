@@ -304,6 +304,64 @@ class RobustViabilityTests(unittest.TestCase):
             )
             self.assertEqual(native.backend, "native")
 
+    @unittest.skipUnless(
+        native_available(),
+        "native viability backend is not built",
+    )
+    def test_terminal_continuation_mask_has_native_numpy_parity(
+        self,
+    ) -> None:
+        rng = np.random.default_rng(0xCE0099)
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("left", -0.8, 0.0),
+            ControlAction("right", 0.8, 0.0),
+        )
+        x_axis = np.arange(5, dtype=np.float32) * 2.0
+        y_axis = np.arange(4, dtype=np.float32) * 2.0
+        config = ViabilityConfig(
+            frames_per_layer=3,
+            clamp_to_bounds=False,
+        )
+        clearance = rng.uniform(
+            -2.0,
+            8.0,
+            size=(7, len(y_axis), len(x_axis)),
+        ).astype(np.float32)
+        terminal = rng.integers(
+            0,
+            2,
+            size=(len(actions), len(y_axis), len(x_axis)),
+            dtype=np.uint8,
+        ).astype(np.bool_)
+        policies = tuple(
+            build_robust_viability_policy(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                clearance_volume=clearance,
+                actions=actions,
+                delay_frames=(0, 2, 3),
+                nominal_delay=2,
+                config=config,
+                backend=backend,
+                terminal_viable=terminal,
+            )
+            for backend in ("numpy", "native")
+        )
+        reference, native = policies
+        np.testing.assert_array_equal(native.viable, reference.viable)
+        np.testing.assert_array_equal(
+            native.safe_action_masks,
+            reference.safe_action_masks,
+        )
+        expected_terminal = (
+            clearance[-1] > config.required_clearance
+        )[None] & terminal
+        np.testing.assert_array_equal(
+            native.viable[-1],
+            expected_terminal,
+        )
+
     def test_clear_lattice_exposes_all_robust_actions_and_repair_volume(
         self,
     ) -> None:

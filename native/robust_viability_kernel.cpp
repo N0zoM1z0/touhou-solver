@@ -160,8 +160,14 @@ struct TransitionTable {
     std::vector<double> velocity_y;
     int frames_per_layer;
     bool clamp_to_bounds;
-    std::vector<std::int32_t> sample_indices;
-    std::vector<float> sample_errors;
+    // Regular-lattice movement is separable.  Caching one full 2-D sample
+    // for every state repeats the same x transition for every row and the
+    // same y transition for every column.  Keep the two axes independently
+    // and reconstruct the Cartesian sample in the recurrence instead.
+    std::vector<std::int32_t> sample_columns;
+    std::vector<std::int32_t> sample_rows;
+    std::vector<double> sample_x_errors;
+    std::vector<double> sample_y_errors;
 
     bool matches(
         double requested_x_start,
@@ -237,15 +243,15 @@ inline Sample sample_lattice(
     };
 }
 
-inline std::size_t transition_sample_index(
+inline std::size_t transition_axis_index(
     int active,
     int selected,
     int delay,
-    int state,
+    int coordinate,
     int step,
     int action_count,
     int delay_slot_count,
-    int state_count,
+    int coordinate_count,
     int frames_per_layer
 ) {
     return (
@@ -258,12 +264,58 @@ inline std::size_t transition_sample_index(
                 * delay_slot_count
                 + static_cast<std::size_t>(delay)
             )
-            * state_count
-            + static_cast<std::size_t>(state)
+            * coordinate_count
+            + static_cast<std::size_t>(coordinate)
         )
         * frames_per_layer
         + static_cast<std::size_t>(step)
     );
+}
+
+inline Sample transition_sample(
+    const TransitionTable& table,
+    int active,
+    int selected,
+    int delay,
+    int row,
+    int column,
+    int step,
+    int action_count
+) {
+    const int delay_slot_count = table.frames_per_layer + 1;
+    const std::size_t x_index = transition_axis_index(
+        active,
+        selected,
+        delay,
+        column,
+        step,
+        action_count,
+        delay_slot_count,
+        table.column_count,
+        table.frames_per_layer
+    );
+    const std::size_t y_index = transition_axis_index(
+        active,
+        selected,
+        delay,
+        row,
+        step,
+        action_count,
+        delay_slot_count,
+        table.row_count,
+        table.frames_per_layer
+    );
+    const std::int32_t sample_column = table.sample_columns[x_index];
+    const std::int32_t sample_row = table.sample_rows[y_index];
+    return {
+        sample_row,
+        sample_column,
+        std::hypot(
+            table.sample_x_errors[x_index],
+            table.sample_y_errors[y_index]
+        ),
+        sample_column >= 0 && sample_row >= 0,
+    };
 }
 
 std::shared_ptr<const TransitionTable> transition_table(
@@ -313,72 +365,104 @@ std::shared_ptr<const TransitionTable> transition_table(
     table->frames_per_layer = frames_per_layer;
     table->clamp_to_bounds = clamp_to_bounds;
 
-    const int state_count = row_count * column_count;
     const int delay_slot_count = frames_per_layer + 1;
-    const std::size_t sample_count = (
+    const std::size_t x_sample_count = (
         static_cast<std::size_t>(action_count)
         * action_count
         * delay_slot_count
-        * state_count
+        * column_count
         * frames_per_layer
     );
-    table->sample_indices.resize(sample_count);
-    table->sample_errors.resize(sample_count);
+    const std::size_t y_sample_count = (
+        static_cast<std::size_t>(action_count)
+        * action_count
+        * delay_slot_count
+        * row_count
+        * frames_per_layer
+    );
+    table->sample_columns.resize(x_sample_count);
+    table->sample_rows.resize(y_sample_count);
+    table->sample_x_errors.resize(x_sample_count);
+    table->sample_y_errors.resize(y_sample_count);
     for (int active = 0; active < action_count; ++active) {
         for (int selected = 0; selected < action_count; ++selected) {
             for (int delay = 0; delay <= frames_per_layer; ++delay) {
+                for (int column = 0; column < column_count; ++column) {
+                    const double start_x = x_start + column * x_step;
+                    for (
+                        int step = 1;
+                        step <= frames_per_layer;
+                        ++step
+                    ) {
+                        const int active_frames = std::min(step, delay);
+                        const int selected_frames = std::max(step - delay, 0);
+                        const Sample sample = sample_lattice(
+                            start_x
+                                + velocity_x[active] * active_frames
+                                + velocity_x[selected] * selected_frames,
+                            y_start,
+                            x_start,
+                            x_step,
+                            column_count,
+                            y_start,
+                            y_step,
+                            row_count,
+                            clamp_to_bounds
+                        );
+                        const std::size_t output_index = transition_axis_index(
+                            active,
+                            selected,
+                            delay,
+                            column,
+                            step - 1,
+                            action_count,
+                            delay_slot_count,
+                            column_count,
+                            frames_per_layer
+                        );
+                        table->sample_columns[output_index] = (
+                            sample.inside ? sample.column : -1
+                        );
+                        table->sample_x_errors[output_index] = sample.error;
+                    }
+                }
                 for (int row = 0; row < row_count; ++row) {
                     const double start_y = y_start + row * y_step;
-                    for (int column = 0; column < column_count; ++column) {
-                        const double start_x = x_start + column * x_step;
-                        const int state = row * column_count + column;
-                        for (
-                            int step = 1;
-                            step <= frames_per_layer;
-                            ++step
-                        ) {
-                            const int active_frames = std::min(step, delay);
-                            const int selected_frames = std::max(
-                                step - delay,
-                                0
-                            );
-                            const Sample sample = sample_lattice(
-                                start_x
-                                    + velocity_x[active] * active_frames
-                                    + velocity_x[selected] * selected_frames,
-                                start_y
-                                    + velocity_y[active] * active_frames
-                                    + velocity_y[selected] * selected_frames,
-                                x_start,
-                                x_step,
-                                column_count,
-                                y_start,
-                                y_step,
-                                row_count,
-                                clamp_to_bounds
-                            );
-                            const std::size_t output_index = (
-                                transition_sample_index(
-                                    active,
-                                    selected,
-                                    delay,
-                                    state,
-                                    step - 1,
-                                    action_count,
-                                    delay_slot_count,
-                                    state_count,
-                                    frames_per_layer
-                                )
-                            );
-                            table->sample_indices[output_index] = (
-                                sample.inside
-                                ? sample.row * column_count + sample.column
-                                : -1
-                            );
-                            table->sample_errors[output_index] = (
-                                static_cast<float>(sample.error)
-                            );
-                        }
+                    for (
+                        int step = 1;
+                        step <= frames_per_layer;
+                        ++step
+                    ) {
+                        const int active_frames = std::min(step, delay);
+                        const int selected_frames = std::max(step - delay, 0);
+                        const Sample sample = sample_lattice(
+                            x_start,
+                            start_y
+                                + velocity_y[active] * active_frames
+                                + velocity_y[selected] * selected_frames,
+                            x_start,
+                            x_step,
+                            column_count,
+                            y_start,
+                            y_step,
+                            row_count,
+                            clamp_to_bounds
+                        );
+                        const std::size_t output_index = transition_axis_index(
+                            active,
+                            selected,
+                            delay,
+                            row,
+                            step - 1,
+                            action_count,
+                            delay_slot_count,
+                            row_count,
+                            frames_per_layer
+                        );
+                        table->sample_rows[output_index] = (
+                            sample.inside ? sample.row : -1
+                        );
+                        table->sample_y_errors[output_index] = sample.error;
                     }
                 }
             }
@@ -1168,7 +1252,7 @@ TOUHOU_EXPORT int touhou_piecewise_aabb_clearance_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_robust_viability_v1(
+static int robust_viability(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -1185,6 +1269,7 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
     int frames_per_layer,
     float required_clearance,
     int clamp_to_bounds,
+    const std::uint8_t* terminal_viable,
     std::uint8_t* viable,
     std::uint32_t* safe_action_masks
 ) {
@@ -1237,7 +1322,7 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
     for (int action = 0; action < action_count; ++action) {
         for (int row = 0; row < row_count; ++row) {
             for (int column = 0; column < column_count; ++column) {
-                viable[state_index(
+                const std::size_t output_index = state_index(
                     layer_count,
                     action,
                     row,
@@ -1245,7 +1330,17 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
                     action_count,
                     row_count,
                     column_count
-                )] = (
+                );
+                const std::size_t terminal_index = state_index(
+                    0,
+                    action,
+                    row,
+                    column,
+                    action_count,
+                    row_count,
+                    column_count
+                );
+                viable[output_index] = (
                     clearance[clearance_index(
                         horizon_frame,
                         row,
@@ -1253,6 +1348,10 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
                         row_count,
                         column_count
                     )] > required_clearance
+                    && (
+                        terminal_viable == nullptr
+                        || terminal_viable[terminal_index] != 0
+                    )
                 );
             }
         }
@@ -1260,7 +1359,6 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
 
     const bool clamp = clamp_to_bounds != 0;
     const int state_count = row_count * column_count;
-    const int delay_slot_count = frames_per_layer + 1;
     const auto transitions = transition_table(
         x_start,
         x_step,
@@ -1274,12 +1372,25 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
         frames_per_layer,
         clamp
     );
+    const int layer_work = action_count * state_count;
+    const unsigned hardware_threads = std::thread::hardware_concurrency();
+    const int worker_count = std::max(
+        1,
+        std::min(
+            4,
+            static_cast<int>(
+                hardware_threads == 0 ? 1 : hardware_threads
+            )
+        )
+    );
     for (int layer = layer_count - 1; layer >= 0; --layer) {
         const int start_frame = layer * frames_per_layer;
-        for (int active = 0; active < action_count; ++active) {
-            for (int row = 0; row < row_count; ++row) {
-                for (int column = 0; column < column_count; ++column) {
-                    const int state = row * column_count + column;
+        const auto solve_range = [&](int begin, int end) {
+            for (int work_index = begin; work_index < end; ++work_index) {
+                    const int active = work_index / state_count;
+                    const int state = work_index % state_count;
+                    const int row = state / column_count;
+                    const int column = state % column_count;
                     if (
                         clearance[clearance_index(
                             start_frame,
@@ -1310,22 +1421,24 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
                                 step <= frames_per_layer;
                                 ++step
                             ) {
-                                const std::size_t sample_offset = (
-                                    transition_sample_index(
-                                        active,
-                                        selected,
-                                        delay,
-                                        state,
-                                        step - 1,
-                                        action_count,
-                                        delay_slot_count,
-                                        state_count,
-                                        frames_per_layer
-                                    )
+                                const Sample sample = transition_sample(
+                                    *transitions,
+                                    active,
+                                    selected,
+                                    delay,
+                                    row,
+                                    column,
+                                    step - 1,
+                                    action_count
                                 );
-                                terminal_state = transitions->sample_indices[
-                                    sample_offset
-                                ];
+                                terminal_state = (
+                                    sample.inside
+                                    ? (
+                                        sample.row * column_count
+                                        + sample.column
+                                    )
+                                    : -1
+                                );
                                 if (
                                     terminal_state < 0
                                     || clearance[clearance_index(
@@ -1334,9 +1447,7 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
                                         terminal_state % column_count,
                                         row_count,
                                         column_count
-                                    )] - transitions->sample_errors[
-                                        sample_offset
-                                    ]
+                                    )] - static_cast<float>(sample.error)
                                         <= required_clearance
                                 ) {
                                     robust = false;
@@ -1373,11 +1484,114 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
                     );
                     safe_action_masks[output_index] = mask;
                     viable[output_index] = mask != 0;
-                }
             }
+        };
+        if (worker_count == 1) {
+            solve_range(0, layer_work);
+            continue;
+        }
+        std::vector<std::thread> workers;
+        workers.reserve(worker_count);
+        for (int worker = 0; worker < worker_count; ++worker) {
+            const int begin = layer_work * worker / worker_count;
+            const int end = layer_work * (worker + 1) / worker_count;
+            workers.emplace_back(solve_range, begin, end);
+        }
+        for (auto& worker : workers) {
+            worker.join();
         }
     }
     return 0;
+}
+
+TOUHOU_EXPORT int touhou_robust_viability_v1(
+    const float* clearance,
+    int frame_count,
+    int row_count,
+    int column_count,
+    double x_start,
+    double x_step,
+    double y_start,
+    double y_step,
+    const double* velocity_x,
+    const double* velocity_y,
+    int action_count,
+    const int* delay_frames,
+    int delay_count,
+    int frames_per_layer,
+    float required_clearance,
+    int clamp_to_bounds,
+    std::uint8_t* viable,
+    std::uint32_t* safe_action_masks
+) {
+    return robust_viability(
+        clearance,
+        frame_count,
+        row_count,
+        column_count,
+        x_start,
+        x_step,
+        y_start,
+        y_step,
+        velocity_x,
+        velocity_y,
+        action_count,
+        delay_frames,
+        delay_count,
+        frames_per_layer,
+        required_clearance,
+        clamp_to_bounds,
+        nullptr,
+        viable,
+        safe_action_masks
+    );
+}
+
+TOUHOU_EXPORT int touhou_robust_viability_terminal_v1(
+    const float* clearance,
+    int frame_count,
+    int row_count,
+    int column_count,
+    double x_start,
+    double x_step,
+    double y_start,
+    double y_step,
+    const double* velocity_x,
+    const double* velocity_y,
+    int action_count,
+    const int* delay_frames,
+    int delay_count,
+    int frames_per_layer,
+    float required_clearance,
+    int clamp_to_bounds,
+    const std::uint8_t* terminal_viable,
+    std::uint8_t* viable,
+    std::uint32_t* safe_action_masks
+) {
+    if (terminal_viable == nullptr) {
+        return 1;
+    }
+    return robust_viability(
+        clearance,
+        frame_count,
+        row_count,
+        column_count,
+        x_start,
+        x_step,
+        y_start,
+        y_step,
+        velocity_x,
+        velocity_y,
+        action_count,
+        delay_frames,
+        delay_count,
+        frames_per_layer,
+        required_clearance,
+        clamp_to_bounds,
+        terminal_viable,
+        viable,
+        safe_action_masks
+    );
 }
 
 TOUHOU_EXPORT int touhou_robust_safety_value_v1(
@@ -1474,7 +1688,6 @@ TOUHOU_EXPORT int touhou_robust_safety_value_v1(
 
     const bool clamp = clamp_to_bounds != 0;
     const int state_count = row_count * column_count;
-    const int delay_slot_count = frames_per_layer + 1;
     const auto transitions = transition_table(
         x_start,
         x_step,
@@ -1523,22 +1736,24 @@ TOUHOU_EXPORT int touhou_robust_safety_value_v1(
                                 step <= frames_per_layer;
                                 ++step
                             ) {
-                                const std::size_t sample_offset = (
-                                    transition_sample_index(
-                                        active,
-                                        selected,
-                                        delay,
-                                        state,
-                                        step - 1,
-                                        action_count,
-                                        delay_slot_count,
-                                        state_count,
-                                        frames_per_layer
-                                    )
+                                const Sample sample = transition_sample(
+                                    *transitions,
+                                    active,
+                                    selected,
+                                    delay,
+                                    row,
+                                    column,
+                                    step - 1,
+                                    action_count
                                 );
-                                terminal_state = transitions->sample_indices[
-                                    sample_offset
-                                ];
+                                terminal_state = (
+                                    sample.inside
+                                    ? (
+                                        sample.row * column_count
+                                        + sample.column
+                                    )
+                                    : -1
+                                );
                                 if (terminal_state < 0) {
                                     branch_value = negative_infinity;
                                     break;
@@ -1551,9 +1766,7 @@ TOUHOU_EXPORT int touhou_robust_safety_value_v1(
                                         terminal_state % column_count,
                                         row_count,
                                         column_count
-                                    )] - transitions->sample_errors[
-                                        sample_offset
-                                    ]
+                                    )] - static_cast<float>(sample.error)
                                 );
                             }
                             if (terminal_state >= 0) {
@@ -1694,7 +1907,6 @@ TOUHOU_EXPORT int touhou_robust_safety_policy_v1(
 
     const bool clamp = clamp_to_bounds != 0;
     const int state_count = row_count * column_count;
-    const int delay_slot_count = frames_per_layer + 1;
     const auto transitions = transition_table(
         x_start,
         x_step,
@@ -1774,22 +1986,24 @@ TOUHOU_EXPORT int touhou_robust_safety_policy_v1(
                                 step <= frames_per_layer;
                                 ++step
                             ) {
-                                const std::size_t sample_offset = (
-                                    transition_sample_index(
-                                        active,
-                                        selected,
-                                        delay,
-                                        state,
-                                        step - 1,
-                                        action_count,
-                                        delay_slot_count,
-                                        state_count,
-                                        frames_per_layer
-                                    )
+                                const Sample sample = transition_sample(
+                                    *transitions,
+                                    active,
+                                    selected,
+                                    delay,
+                                    row,
+                                    column,
+                                    step - 1,
+                                    action_count
                                 );
-                                terminal_state = transitions->sample_indices[
-                                    sample_offset
-                                ];
+                                terminal_state = (
+                                    sample.inside
+                                    ? (
+                                        sample.row * column_count
+                                        + sample.column
+                                    )
+                                    : -1
+                                );
                                 if (terminal_state < 0) {
                                     branch_value = negative_infinity;
                                     break;
@@ -1802,9 +2016,7 @@ TOUHOU_EXPORT int touhou_robust_safety_policy_v1(
                                         terminal_state % column_count,
                                         row_count,
                                         column_count
-                                    )] - transitions->sample_errors[
-                                        sample_offset
-                                    ]
+                                    )] - static_cast<float>(sample.error)
                                 );
                                 if (branch_value < best_value) {
                                     dominated = true;
@@ -1860,6 +2072,355 @@ TOUHOU_EXPORT int touhou_robust_safety_policy_v1(
                     );
                     state_values[output_index] = best_value;
                     best_action_masks[output_index] = best_mask;
+            }
+        };
+        if (worker_count == 1) {
+            solve_range(0, layer_work);
+            continue;
+        }
+        std::vector<std::thread> workers;
+        workers.reserve(worker_count);
+        for (int worker = 0; worker < worker_count; ++worker) {
+            const int begin = layer_work * worker / worker_count;
+            const int end = layer_work * (worker + 1) / worker_count;
+            workers.emplace_back(solve_range, begin, end);
+        }
+        for (auto& worker : workers) {
+            worker.join();
+        }
+    }
+    return 0;
+}
+
+TOUHOU_EXPORT int touhou_robust_survival_viability_v1(
+    const float* clearance,
+    int frame_count,
+    int row_count,
+    int column_count,
+    double x_start,
+    double x_step,
+    double y_start,
+    double y_step,
+    const double* velocity_x,
+    const double* velocity_y,
+    int action_count,
+    const int* delay_frames,
+    int delay_count,
+    int frames_per_layer,
+    float required_clearance,
+    int clamp_to_bounds,
+    std::uint16_t* state_survival_frames,
+    float* state_bottleneck_margins,
+    std::uint32_t* best_action_masks,
+    std::uint8_t* viable,
+    std::uint32_t* safe_action_masks
+) {
+    if (
+        clearance == nullptr || velocity_x == nullptr
+        || velocity_y == nullptr || delay_frames == nullptr
+        || state_survival_frames == nullptr
+        || state_bottleneck_margins == nullptr
+        || best_action_masks == nullptr || viable == nullptr
+        || safe_action_masks == nullptr
+    ) {
+        return 1;
+    }
+    if (
+        frame_count < 2 || row_count < 2 || column_count < 2
+        || x_step <= 0.0 || y_step <= 0.0
+        || action_count < 1 || action_count > 32
+        || delay_count < 1 || frames_per_layer < 1
+        || (frame_count - 1) % frames_per_layer != 0
+        || frame_count - 1 > std::numeric_limits<std::uint16_t>::max()
+    ) {
+        return 2;
+    }
+    for (int index = 0; index < delay_count; ++index) {
+        if (
+            delay_frames[index] < 0
+            || delay_frames[index] > frames_per_layer
+            || (index > 0 && delay_frames[index - 1] >= delay_frames[index])
+        ) {
+            return 3;
+        }
+    }
+
+    const int layer_count = (frame_count - 1) / frames_per_layer;
+    const std::size_t layer_state_count = (
+        static_cast<std::size_t>(action_count)
+        * row_count
+        * column_count
+    );
+    const std::size_t state_output_count = (
+        static_cast<std::size_t>(layer_count + 1) * layer_state_count
+    );
+    const std::size_t action_output_count = (
+        static_cast<std::size_t>(layer_count) * layer_state_count
+    );
+    std::fill(
+        state_survival_frames,
+        state_survival_frames + state_output_count,
+        std::uint16_t{0}
+    );
+    std::fill(
+        state_bottleneck_margins,
+        state_bottleneck_margins + state_output_count,
+        -std::numeric_limits<float>::infinity()
+    );
+    std::fill(
+        best_action_masks,
+        best_action_masks + action_output_count,
+        std::uint32_t{0}
+    );
+    std::fill(
+        viable,
+        viable + state_output_count,
+        std::uint8_t{0}
+    );
+    std::fill(
+        safe_action_masks,
+        safe_action_masks + action_output_count,
+        std::uint32_t{0}
+    );
+
+    const int horizon_frame = frame_count - 1;
+    for (int action = 0; action < action_count; ++action) {
+        for (int row = 0; row < row_count; ++row) {
+            for (int column = 0; column < column_count; ++column) {
+                const std::size_t output_index = state_index(
+                    layer_count,
+                    action,
+                    row,
+                    column,
+                    action_count,
+                    row_count,
+                    column_count
+                );
+                const float margin = clearance[clearance_index(
+                    horizon_frame,
+                    row,
+                    column,
+                    row_count,
+                    column_count
+                )] - required_clearance;
+                state_bottleneck_margins[output_index] = margin;
+                viable[output_index] = margin > 0.0F;
+            }
+        }
+    }
+
+    const bool clamp = clamp_to_bounds != 0;
+    const int state_count = row_count * column_count;
+    const auto transitions = transition_table(
+        x_start,
+        x_step,
+        column_count,
+        y_start,
+        y_step,
+        row_count,
+        velocity_x,
+        velocity_y,
+        action_count,
+        frames_per_layer,
+        clamp
+    );
+    const int layer_work = action_count * state_count;
+    const unsigned hardware_threads = std::thread::hardware_concurrency();
+    const int worker_count = std::max(
+        1,
+        std::min(
+            4,
+            static_cast<int>(
+                hardware_threads == 0 ? 1 : hardware_threads
+            )
+        )
+    );
+
+    const auto label_less = [](
+        std::uint16_t left_frames,
+        float left_margin,
+        std::uint16_t right_frames,
+        float right_margin
+    ) {
+        return (
+            left_frames < right_frames
+            || (
+                left_frames == right_frames
+                && left_margin < right_margin
+            )
+        );
+    };
+    const std::uint32_t every_action_mask = (
+        action_count == 32
+        ? std::numeric_limits<std::uint32_t>::max()
+        : (std::uint32_t{1} << action_count) - 1
+    );
+
+    for (int layer = layer_count - 1; layer >= 0; --layer) {
+        const int start_frame = layer * frames_per_layer;
+        const std::uint16_t remaining_frames = static_cast<std::uint16_t>(
+            (layer_count - layer) * frames_per_layer
+        );
+        const auto solve_range = [&](int begin, int end) {
+            for (int work_index = begin; work_index < end; ++work_index) {
+                const int active = work_index / state_count;
+                const int state = work_index % state_count;
+                const int row = state / column_count;
+                const int column = state % column_count;
+                const std::size_t output_index = state_index(
+                    layer,
+                    active,
+                    row,
+                    column,
+                    action_count,
+                    row_count,
+                    column_count
+                );
+                const float current_margin = clearance[clearance_index(
+                    start_frame,
+                    row,
+                    column,
+                    row_count,
+                    column_count
+                )] - required_clearance;
+                if (current_margin <= 0.0F) {
+                    state_bottleneck_margins[output_index] = current_margin;
+                    best_action_masks[output_index] = every_action_mask;
+                    continue;
+                }
+
+                std::uint16_t best_frames = 0;
+                float best_margin = -std::numeric_limits<float>::infinity();
+                std::uint32_t best_mask = 0;
+                std::uint32_t winning_mask = 0;
+                for (int selected = 0; selected < action_count; ++selected) {
+                    std::uint16_t robust_frames =
+                        std::numeric_limits<std::uint16_t>::max();
+                    float robust_margin =
+                        std::numeric_limits<float>::infinity();
+                    for (
+                        int delay_index = 0;
+                        delay_index < delay_count;
+                        ++delay_index
+                    ) {
+                        const int delay = delay_frames[delay_index];
+                        std::uint16_t branch_frames = 0;
+                        float branch_margin = current_margin;
+                        std::int32_t terminal_state = -1;
+                        bool failed = false;
+                        for (
+                            int step = 1;
+                            step <= frames_per_layer;
+                            ++step
+                        ) {
+                            const Sample sample = transition_sample(
+                                *transitions,
+                                active,
+                                selected,
+                                delay,
+                                row,
+                                column,
+                                step - 1,
+                                action_count
+                            );
+                            terminal_state = (
+                                sample.inside
+                                ? sample.row * column_count + sample.column
+                                : -1
+                            );
+                            if (terminal_state < 0) {
+                                branch_frames = static_cast<std::uint16_t>(
+                                    step - 1
+                                );
+                                branch_margin =
+                                    -std::numeric_limits<float>::infinity();
+                                failed = true;
+                                break;
+                            }
+                            const float margin = (
+                                clearance[clearance_index(
+                                    start_frame + step,
+                                    terminal_state / column_count,
+                                    terminal_state % column_count,
+                                    row_count,
+                                    column_count
+                                )]
+                                - static_cast<float>(sample.error)
+                                - required_clearance
+                            );
+                            branch_margin = std::min(branch_margin, margin);
+                            if (margin <= 0.0F) {
+                                branch_frames = static_cast<std::uint16_t>(
+                                    step - 1
+                                );
+                                failed = true;
+                                break;
+                            }
+                        }
+                        if (!failed) {
+                            const std::size_t successor_index = state_index(
+                                layer + 1,
+                                selected,
+                                terminal_state / column_count,
+                                terminal_state % column_count,
+                                action_count,
+                                row_count,
+                                column_count
+                            );
+                            branch_frames = static_cast<std::uint16_t>(
+                                frames_per_layer
+                                + state_survival_frames[successor_index]
+                            );
+                            branch_margin = std::min(
+                                branch_margin,
+                                state_bottleneck_margins[successor_index]
+                            );
+                        }
+                        if (
+                            label_less(
+                                branch_frames,
+                                branch_margin,
+                                robust_frames,
+                                robust_margin
+                            )
+                        ) {
+                            robust_frames = branch_frames;
+                            robust_margin = branch_margin;
+                        }
+                    }
+                    const std::uint32_t action_bit = (
+                        std::uint32_t{1} << selected
+                    );
+                    if (
+                        robust_frames == remaining_frames
+                        && robust_margin > 0.0F
+                    ) {
+                        winning_mask |= action_bit;
+                    }
+                    if (
+                        best_mask == 0
+                        || label_less(
+                            best_frames,
+                            best_margin,
+                            robust_frames,
+                            robust_margin
+                        )
+                    ) {
+                        best_frames = robust_frames;
+                        best_margin = robust_margin;
+                        best_mask = action_bit;
+                    } else if (
+                        best_frames == robust_frames
+                        && best_margin == robust_margin
+                    ) {
+                        best_mask |= action_bit;
+                    }
+                }
+                state_survival_frames[output_index] = best_frames;
+                state_bottleneck_margins[output_index] = best_margin;
+                best_action_masks[output_index] = best_mask;
+                safe_action_masks[output_index] = winning_mask;
+                viable[output_index] = winning_mask != 0;
             }
         };
         if (worker_count == 1) {

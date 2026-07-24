@@ -12,6 +12,12 @@ test, physical-trial, and commit requirements are binding.
   `cebf74b Model hybrid enemy observation lifecycles`
 - Complete Linux and Windows test gates at that commit: `394 tests` each, all
   passing.
+- The post-base working checkpoint adds exact Stage-5 viability capsules,
+  differential 16/8/4-pixel audits, fused native survival labels, terminal
+  masks, and a separable transition cache. Linux and Windows complete suites
+  pass 404 tests. Read
+  `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md` before changing the
+  recovery or refinement layers.
 - The only expected untracked pre-existing file is `image.png`. It is a user
   screenshot. Do not add, delete, overwrite, or otherwise clean it.
 - The latest Stage-4A and Stage-5 raw JSONL files and launch logs remain local
@@ -372,7 +378,7 @@ same-seed A/B trials:
 | 3 | `123136` | 8 | default safety-value-off cross-control |
 | 3 | `132007` | 15 | rejected safety-value-on experiment |
 | 4A | `185059` | 26 | corrected world-motion/lifecycle model; two post-issue births |
-| 5 | `191313` | 28 | strict version cross-control; CE-0098 kernel exhaustion |
+| 5 | `201636` | 27 | differential-capture corpus; CE-0100/0101 witnesses |
 | 6B | `135201` | 27 | latest fused-laser cross-control |
 
 Do not sum these rows into a route score. Native RNG, controller versions,
@@ -408,22 +414,27 @@ Key accepted improvements:
 
 Latest Stage-5 evidence:
 
-- Run ID: `lunatic_route2_stage5_unattended_20260724_191313`
-- Frames: `2..45204`
-- Hits: 28; Bomb input: zero; accepted completion: yes
-- Contact classes: 11 exact bullet overlaps, 16 committed-prefix collisions,
-  one sensor gap, and zero exact enemy-body overlaps in seven stable captures.
-- Local plan median/p95: `28.53/57.24 ms`; cadence `4/7` frames.
-- Global solve median/p95: `151.78/365.36 ms`.
-- Available policy queries: 7,054; empty action sets: 4,514 (64.0 percent).
-  Spell 107 alone had 635/769 empty queries and 12 hits.
-- Strict issue guard: 2,307 recertificates, 870 overrides,
-  `2.24/4.72 ms` read and `12.24/22.15 ms` recertificate median/p95.
-- Twenty-six hits followed global-kernel exhaustion. After excluding 1,474
-  observed newer issue versions, zero selected cached actions contradicted
-  the fresh local prefix certificate.
-- The 21-to-28 hit delta against the prior Stage-5 run is not causal: RNG,
-  respawn, Power, and phase duration differ.
+- Run ID: `lunatic_route2_stage5_unattended_20260724_201636`
+- Frames: `2..46642`
+- Hits: 27; Bomb input: zero; accepted completion: yes
+- Contact classes: 10 exact bullet overlaps, 16 committed-prefix collisions,
+  and one sensor gap.
+- Local plan median/p95: `28.45/60.51 ms`; cadence `4/8` frames.
+- Global solve median/p95: `100.17/166.71 ms`, excluding diagnostic capsule
+  I/O. Synchronous capture added `91.58/117.58 ms` and made this run
+  unsuitable for a hit-count or service-time comparison. Writes are now
+  asynchronous, with physical timing pending.
+- Available policy queries: 7,309; empty action sets: 4,635. The last two
+  available pre-hit queries for all 27 hits were reconstructed exactly.
+- Differential primary classes are 51 modeled-losing/unresolved and three
+  16-pixel spatial coarse false-empties. One separate phase-107 collision
+  bullet was absent from the governing policy source.
+- Fused survival labels cover 54/54 samples. One query before hit 3,491
+  guaranteed 10 modeled safe frames over an eight-frame hit interval while
+  endpoint recovery issued an action outside the best mask; the other 53
+  guarantees were shorter than time-to-hit.
+- The 27-hit count must not be compared causally with `191313`: RNG,
+  respawn/Power, and the old synchronous capture path differ.
 
 ## 10. IDA Pro MCP And REA
 
@@ -599,6 +610,14 @@ be promoted into a survival certificate. The retained scalar oracle instead
 maximizes guaranteed safe physical frames, then bottleneck clearance. Its
 next step is an adaptive/refined native policy, not another recovery weight.
 
+The `201636` differential has now separated the sampled cases. Exact
+reconstruction matches 54/54 live results; three are proven 16-pixel spatial
+false-empties and 51 remain losing at 4 pixels. Fused survival labels identify
+one query where endpoint recovery chose outside the longest-survival mask.
+Therefore the next correction is targeted boundary refinement plus a
+survival-first losing-state action, not global 4-pixel induction and not a
+single tuned distance weight.
+
 ### CE-0087/0088: Compute Deadline And Optional Safety Value
 
 The issue-time guard now suppresses expired new directions and invalidates
@@ -627,6 +646,11 @@ budget and paired physical A/B.
   compact numerical batches, but require whole-pipeline gain and oracle/action
   parity. A C++ decoder that reconstructs the same per-bullet Python objects
   is not a useful boundary.
+- The old 4-pixel transition cache was a real native scaling defect:
+  203,190,120 samples and roughly 1.514 GiB raw. Separable x/y caching reduces
+  it to 4,119,984 samples and about 47.15 MiB with full scalar/NumPy parity.
+  An isolated 4-pixel capsule solve now peaks at 94,080 KiB, but the complete
+  offline audit still peaks near 1.27 GiB and requires separate profiling.
 - Extra still has five unresolved native Bomb/Last-Spell replay boundaries;
   hard no-Bomb Lunatic practice remains the immediate diagnostic scope.
 
@@ -698,23 +722,25 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 1. `AGENTS.md`
 2. `START_HERE.md`
 3. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
-4. `notes/ALGORITHM_REVIEW_20260724.md`
-5. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0098
-6. `notes/RESEARCH_LOG.md`, latest four dated sections
-7. `notes/ROBUST_VIABILITY.md`
-8. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
-9. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
-10. `notes/NATIVE_PLANNER_BACKEND.md`
-11. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
-12. `scripts/th08_live_dodge_agent.py`
-13. `scripts/touhou_control/reachability_oracle.py`
-14. `scripts/th08_bullet_transform_model.py`
-15. `scripts/th08_corridor_adapter.py`
-16. `scripts/touhou_control/viability.py`
-17. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
+4. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
+5. `notes/ALGORITHM_REVIEW_20260724.md`
+6. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0101
+7. `notes/RESEARCH_LOG.md`, latest five dated sections
+8. `notes/ROBUST_VIABILITY.md`
+9. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
+10. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
+11. `notes/NATIVE_PLANNER_BACKEND.md`
+12. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
+13. `scripts/viability_differential_audit.py`
+14. `scripts/th08_live_dodge_agent.py`
+15. `scripts/touhou_control/reachability_oracle.py`
+16. `scripts/th08_bullet_transform_model.py`
+17. `scripts/th08_corridor_adapter.py`
+18. `scripts/touhou_control/viability.py`
+19. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
     `notes/runs/lunatic_route2_stage3_unattended_20260724_132007.md`,
     `notes/runs/lunatic_route2_stage4a_unattended_20260724_185059.md`,
-    `notes/runs/lunatic_route2_stage5_unattended_20260724_191313.md`, and
+    `notes/runs/lunatic_route2_stage5_unattended_20260724_201636.md`, and
     `notes/runs/lunatic_route2_stage6b_unattended_20260724_135201.md`
 
 ## 13. Common Traps Already Paid For
@@ -762,19 +788,22 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 A good next commit is not "the randomized stage had fewer hits" by itself. It
 should:
 
-1. Move the proven lexicographic survival-horizon/bottleneck recurrence into
-   the existing native backward induction; keep the scalar implementation as
-   an independent oracle.
-2. Prototype adaptive fine-grid induction only around empty/contradicted
-   continuous viability boundaries.
+1. Prototype adaptive 16/8/4-pixel induction only around reachable
+   empty/contradicted boundaries, and reproduce all three CE-0100 witnesses
+   without globally paying for a fine grid.
+2. Turn the scalar-parity fused survival shadow into a packed or query-local
+   losing-state action certificate. It must reproduce CE-0101 and meet the
+   live worker/issue deadline before controlling the game.
 3. Add ECL/timeline `BirthWindow` coverage for enemy allocations and
    projectile emissions without putting TH08 details in the generic planner.
-4. Prototype the packed native issue-time bullet/laser/enemy
+4. Audit instant-winning terminal states and add pending-command/remaining-
+   delay state before claiming exact four-frame or event-time layers.
+5. Prototype the packed native issue-time bullet/laser/enemy
    decode-plus-project-plus-certificate boundary to recover local p95; never
    weaken the strict version contract merely for cadence.
-5. Require randomized delayed-birth/stop/reverse/redirect parity, Linux and
+6. Require randomized delayed-birth/stop/reverse/redirect parity, Linux and
    Windows builds/tests, and whole-pipeline timing before physical use.
-6. Run a different randomized stage, retain every required artifact and
+7. Run a different randomized stage, retain every required artifact and
    counterexample, then commit while leaving raw traces, logs, native binaries,
    and `image.png` untracked.
 
@@ -783,17 +812,16 @@ should:
 ```text
 Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
 START_HERE.md completely, then inspect git status and the latest commit. Keep
-hard no-Bomb and leave safety value disabled. Continue from `cebf74b`. CE-0092
-has been physically resolved into lifecycle/versioned observation plus genuine
-post-issue births. Stage-4A and Stage-5 now exercise contact-disabled/dormant
-geometry, observed lethal-world motion, strict issue-time recertification, and
-fresh cached/local action intersection. CE-0098 shows the main remaining
-failure: 26/28 Stage-5 hits followed kernel exhaustion, especially 635/769
-empty queries on spell 107. Implement the proven lexicographic
-survival-horizon recurrence in the native backend with scalar parity, then
-adaptive boundary refinement. In parallel lower TH08 ECL/timeline births to
-generic `BirthWindow` events and prototype a packed issue-time
-bullet/laser/enemy certificate to recover local p95. Keep generic planners
-game-neutral, retain artifacts/counterexamples, run both complete suites,
-commit verified checkpoints, and stop every runtime session.
+hard no-Bomb and leave safety value disabled. Read the 20260724 Stage-5
+differential note and CE-0099..0101. Exact capsule replay found 3/54 spatial
+coarse false-empties, 51/54 still losing at 4px, one orthogonal future-bullet
+birth gap, and one endpoint-recovery action with a shorter survival guarantee.
+The fused native recurrence already has scalar parity and the transition cache
+is axis-factored. Implement adaptive reachable-boundary refinement and a
+deadline-safe packed/query-local survival fallback without enabling them live
+prematurely. In parallel lower TH08 ECL/timeline births to generic
+`BirthWindow` events, audit winning terminal overlap, and prototype a packed
+issue-time bullet/laser/enemy certificate. Keep generic planners game-neutral,
+retain artifacts/counterexamples, run both complete suites, commit verified
+checkpoints, and stop every runtime session.
 ```

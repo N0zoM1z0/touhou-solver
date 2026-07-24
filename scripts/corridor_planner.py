@@ -243,6 +243,7 @@ class RobustControlSpec:
     nominal_delay: int
     active_action: str
     safety_value_horizon_frames: int = 0
+    terminal_viable: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         if not self.actions:
@@ -956,6 +957,7 @@ def _plan_robust_corridor(
             clamp_to_bounds=True,
             repair_radius_cells=1,
         ),
+        terminal_viable=robust_control.terminal_viable,
     )
     viability_finished = time.perf_counter()
     safety_value_policy = None

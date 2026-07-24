@@ -13,8 +13,10 @@ ROOT = Path(__file__).resolve().parents[2]
 _DISABLE_ENV = "TOUHOU_DISABLE_NATIVE_PLANNER"
 _LIBRARY = None
 _VIABILITY_FUNCTION = None
+_TERMINAL_VIABILITY_FUNCTION = None
 _SAFETY_VALUE_FUNCTION = None
 _SAFETY_POLICY_FUNCTION = None
+_SURVIVAL_VIABILITY_FUNCTION = None
 _CLEARANCE_FUNCTION = None
 _AABB_TRAJECTORY_CLEARANCE_FUNCTION = None
 _PIECEWISE_AABB_CLEARANCE_FUNCTION = None
@@ -87,6 +89,43 @@ def _load_viability_function():
     return function
 
 
+def _load_terminal_viability_function():
+    global _TERMINAL_VIABILITY_FUNCTION
+    if _TERMINAL_VIABILITY_FUNCTION is not None:
+        return _TERMINAL_VIABILITY_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_robust_viability_terminal_v1
+    except AttributeError:
+        return None
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_uint8),
+        ctypes.POINTER(ctypes.c_uint8),
+        ctypes.POINTER(ctypes.c_uint32),
+    ]
+    function.restype = ctypes.c_int
+    _TERMINAL_VIABILITY_FUNCTION = function
+    return function
+
+
 def _load_safety_value_function():
     global _SAFETY_VALUE_FUNCTION
     if _SAFETY_VALUE_FUNCTION is not None:
@@ -154,6 +193,45 @@ def _load_safety_policy_function():
     ]
     function.restype = ctypes.c_int
     _SAFETY_POLICY_FUNCTION = function
+    return function
+
+
+def _load_survival_viability_function():
+    global _SURVIVAL_VIABILITY_FUNCTION
+    if _SURVIVAL_VIABILITY_FUNCTION is not None:
+        return _SURVIVAL_VIABILITY_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_robust_survival_viability_v1
+    except AttributeError:
+        return None
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_uint8),
+        ctypes.POINTER(ctypes.c_uint32),
+    ]
+    function.restype = ctypes.c_int
+    _SURVIVAL_VIABILITY_FUNCTION = function
     return function
 
 
@@ -644,8 +722,13 @@ def build_viability_arrays(
     frames_per_layer: int,
     required_clearance: float,
     clamp_to_bounds: bool,
+    terminal_viable: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray] | None:
-    function = _load_viability_function()
+    function = (
+        _load_terminal_viability_function()
+        if terminal_viable is not None
+        else _load_viability_function()
+    )
     if function is None:
         return None
     x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
@@ -658,6 +741,15 @@ def build_viability_arrays(
     action_count = len(velocity_x)
     rows = len(y_axis)
     columns = len(x_axis)
+    terminal = None
+    if terminal_viable is not None:
+        terminal = np.ascontiguousarray(terminal_viable, dtype=np.bool_)
+        expected_shape = (action_count, rows, columns)
+        if terminal.shape != expected_shape:
+            raise ValueError(
+                "terminal viability mask must have shape "
+                f"{expected_shape}, got {terminal.shape}"
+            )
     viable = np.zeros(
         (layer_count + 1, action_count, rows, columns),
         dtype=np.bool_,
@@ -666,7 +758,7 @@ def build_viability_arrays(
         (layer_count, action_count, rows, columns),
         dtype=np.uint32,
     )
-    result = function(
+    arguments = [
         clearance.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
         clearance.shape[0],
         rows,
@@ -683,9 +775,16 @@ def build_viability_arrays(
         frames_per_layer,
         required_clearance,
         int(clamp_to_bounds),
+    ]
+    if terminal is not None:
+        arguments.append(
+            terminal.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8))
+        )
+    arguments.extend((
         viable.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
         masks.ctypes.data_as(ctypes.POINTER(ctypes.c_uint32)),
-    )
+    ))
+    result = function(*arguments)
     if result != 0:
         raise RuntimeError(f"native viability kernel returned {result}")
     return viable, masks
@@ -813,3 +912,97 @@ def build_safety_policy_arrays(
     if result != 0:
         raise RuntimeError(f"native safety policy kernel returned {result}")
     return state_values, best_action_masks
+
+
+def build_survival_viability_arrays(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    clearance_volume: np.ndarray,
+    velocity_x: np.ndarray,
+    velocity_y: np.ndarray,
+    delay_frames: np.ndarray,
+    frames_per_layer: int,
+    required_clearance: float,
+    clamp_to_bounds: bool,
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+] | None:
+    """Build lexicographic survival labels and Boolean certificates once."""
+
+    function = _load_survival_viability_function()
+    if function is None:
+        return None
+    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
+    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
+    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
+    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
+    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    layer_count = (clearance.shape[0] - 1) // frames_per_layer
+    action_count = len(velocity_x)
+    rows = len(y_axis)
+    columns = len(x_axis)
+    state_shape = (
+        layer_count + 1,
+        action_count,
+        rows,
+        columns,
+    )
+    action_shape = (
+        layer_count,
+        action_count,
+        rows,
+        columns,
+    )
+    survival_frames = np.empty(state_shape, dtype=np.uint16)
+    bottleneck_margins = np.empty(state_shape, dtype=np.float32)
+    best_action_masks = np.empty(action_shape, dtype=np.uint32)
+    viable = np.empty(state_shape, dtype=np.bool_)
+    safe_action_masks = np.empty(action_shape, dtype=np.uint32)
+    result = function(
+        clearance.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        clearance.shape[0],
+        rows,
+        columns,
+        float(x_axis[0]),
+        float(x_axis[1] - x_axis[0]),
+        float(y_axis[0]),
+        float(y_axis[1] - y_axis[0]),
+        velocity_x.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        velocity_y.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        action_count,
+        delays.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
+        len(delays),
+        frames_per_layer,
+        required_clearance,
+        int(clamp_to_bounds),
+        survival_frames.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint16)
+        ),
+        bottleneck_margins.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_float)
+        ),
+        best_action_masks.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint32)
+        ),
+        viable.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+        safe_action_masks.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint32)
+        ),
+    )
+    if result != 0:
+        raise RuntimeError(
+            f"native survival-viability kernel returned {result}"
+        )
+    return (
+        survival_frames,
+        bottleneck_margins,
+        best_action_masks,
+        viable,
+        safe_action_masks,
+    )

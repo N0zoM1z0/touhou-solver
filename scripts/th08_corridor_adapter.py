@@ -4,7 +4,10 @@
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 from typing import Protocol
+
+import numpy as np
 
 from corridor_planner import (
     CorridorBounds,
@@ -131,6 +134,15 @@ TH08_VIABILITY_ACTIONS = (
         for name, unit_x, unit_y in _DIRECTION_VECTORS
     ),
 )
+
+
+@dataclass(frozen=True)
+class LoweredCorridorHazards:
+    """Game-neutral hazards projected from one native TH08 snapshot."""
+
+    aabbs: tuple[MovingAabbHazard, ...]
+    piecewise_aabbs: tuple[PiecewiseAabbHazard, ...]
+    segment_trajectories: tuple[SegmentTrajectoryHazard, ...]
 
 
 def lower_bullets(
@@ -332,6 +344,91 @@ def lower_enemy_bodies(
     )
 
 
+def lower_th08_corridor_hazards(
+    *,
+    bullets: tuple[BulletSnapshot, ...],
+    lasers: tuple[LaserSnapshot, ...],
+    enemy_bodies: tuple[EnemyBodySnapshot, ...] = (),
+    snapshot_lag: int = 0,
+    forecast_frames: int = 0,
+    horizon_frames: int = TH08_CORRIDOR_CONFIG.horizon_frames,
+) -> LoweredCorridorHazards:
+    """Lower one TH08 sensor epoch without constructing a planner policy."""
+
+    return LoweredCorridorHazards(
+        aabbs=(
+            lower_bullets(
+                bullets,
+                snapshot_lag=snapshot_lag,
+                forecast_frames=forecast_frames,
+            )
+            + lower_enemy_bodies(
+                enemy_bodies,
+                snapshot_lag=snapshot_lag,
+                forecast_frames=forecast_frames,
+            )
+        ),
+        piecewise_aabbs=lower_bullet_trajectories(
+            bullets,
+            snapshot_lag=snapshot_lag,
+            forecast_frames=forecast_frames,
+            horizon_frames=horizon_frames,
+        ),
+        segment_trajectories=lower_lasers(
+            lasers,
+            snapshot_lag=snapshot_lag,
+            forecast_frames=forecast_frames,
+            horizon_frames=horizon_frames,
+        ),
+    )
+
+
+def plan_lowered_th08_corridor(
+    *,
+    player_x: float,
+    player_y: float,
+    hazards: LoweredCorridorHazards,
+    preferred_x: float = 192.0,
+    preferred_y: float = 368.0,
+    required_gate_lane: str | None = None,
+    config: CorridorConfig = TH08_CORRIDOR_CONFIG,
+    control_delay_candidates: tuple[int, ...] | None = None,
+    nominal_control_delay: int | None = None,
+    active_action: str = "stay",
+    safety_value_horizon_frames: int = 0,
+    terminal_viable: np.ndarray | None = None,
+) -> CorridorPlan:
+    """Plan from retained neutral hazards at any compatible resolution."""
+
+    robust_control = None
+    if control_delay_candidates is not None:
+        if nominal_control_delay is None:
+            raise ValueError(
+                "nominal control delay is required for robust viability"
+            )
+        robust_control = RobustControlSpec(
+            actions=TH08_VIABILITY_ACTIONS,
+            delay_frames=control_delay_candidates,
+            nominal_delay=nominal_control_delay,
+            active_action=active_action,
+            safety_value_horizon_frames=safety_value_horizon_frames,
+            terminal_viable=terminal_viable,
+        )
+    return plan_corridor(
+        start_x=player_x,
+        start_y=player_y,
+        bounds=TH08_PLAYFIELD,
+        aabbs=hazards.aabbs,
+        piecewise_aabbs=hazards.piecewise_aabbs,
+        segment_trajectories=hazards.segment_trajectories,
+        preferred_x=preferred_x,
+        preferred_y=preferred_y,
+        required_gate_lane=required_gate_lane,
+        config=config,
+        robust_control=robust_control,
+    )
+
+
 def plan_th08_corridor(
     *,
     player_x: float,
@@ -349,53 +446,29 @@ def plan_th08_corridor(
     nominal_control_delay: int | None = None,
     active_action: str = "stay",
     safety_value_horizon_frames: int = 0,
+    terminal_viable: np.ndarray | None = None,
 ) -> CorridorPlan:
-    robust_control = None
-    if control_delay_candidates is not None:
-        if nominal_control_delay is None:
-            raise ValueError(
-                "nominal control delay is required for robust viability"
-            )
-        robust_control = RobustControlSpec(
-            actions=TH08_VIABILITY_ACTIONS,
-            delay_frames=control_delay_candidates,
-            nominal_delay=nominal_control_delay,
-            active_action=active_action,
-            safety_value_horizon_frames=safety_value_horizon_frames,
-        )
-    return plan_corridor(
-        start_x=player_x,
-        start_y=player_y,
-        bounds=TH08_PLAYFIELD,
-        aabbs=(
-            lower_bullets(
-                bullets,
-                snapshot_lag=snapshot_lag,
-                forecast_frames=forecast_frames,
-            )
-            + lower_enemy_bodies(
-                enemy_bodies,
-                snapshot_lag=snapshot_lag,
-                forecast_frames=forecast_frames,
-            )
-        ),
-        piecewise_aabbs=lower_bullet_trajectories(
-            bullets,
-            snapshot_lag=snapshot_lag,
-            forecast_frames=forecast_frames,
-            horizon_frames=config.horizon_frames,
-        ),
-        segment_trajectories=lower_lasers(
-            lasers,
-            snapshot_lag=snapshot_lag,
-            forecast_frames=forecast_frames,
-            horizon_frames=config.horizon_frames,
-        ),
+    hazards = lower_th08_corridor_hazards(
+        bullets=bullets,
+        lasers=lasers,
+        enemy_bodies=enemy_bodies,
+        snapshot_lag=snapshot_lag,
+        forecast_frames=forecast_frames,
+        horizon_frames=config.horizon_frames,
+    )
+    return plan_lowered_th08_corridor(
+        player_x=player_x,
+        player_y=player_y,
+        hazards=hazards,
         preferred_x=preferred_x,
         preferred_y=preferred_y,
         required_gate_lane=required_gate_lane,
         config=config,
-        robust_control=robust_control,
+        control_delay_candidates=control_delay_candidates,
+        nominal_control_delay=nominal_control_delay,
+        active_action=active_action,
+        safety_value_horizon_frames=safety_value_horizon_frames,
+        terminal_viable=terminal_viable,
     )
 
 

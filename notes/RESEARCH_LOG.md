@@ -2376,3 +2376,44 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   validator.
 - Focused TH08 discovery passes 303 tests. Linux and Windows Python each pass
   the complete 394-test suite.
+
+## 2026-07-24: Stage-5 Differential Viability Audit
+
+- Complete hard-no-Bomb Stage-5 capture `20260724_201636` reached
+  `route_complete` with 27 retained hits. It wrote 1,879 exact lowered-hazard
+  capsules; raw JSONL/capsules remain ignored and compact run/audit artifacts
+  are retained.
+- The last two available pre-hit queries for every hit produced 54/54 exact
+  16-pixel reconstruction matches. Primary empty classification is 51 modeled
+  losing/unresolved and three spatial coarse false-empties. The 8/4-pixel
+  winners all occur in phase 103; no sampled phase-107 empty became winning.
+- Bullet slot 1446 was absent from the frame-32546 governing capsule, appeared
+  in a later 1420..1457 ring, and made exact contact at hit 32581. Because the
+  governing state was already losing, the birth is recorded as orthogonal
+  hazard evidence, not the cause of its empty kernel.
+- Added a fused native lexicographic survival-horizon/bottleneck pass with
+  full scalar parity. All 54 queries now have labels. One query before hit
+  3491 guaranteed 10 modeled safe frames against an eight-frame hit interval,
+  while endpoint-distance recovery issued an action outside the best mask.
+  The other 53 labels were shorter than time-to-hit, so the shadow is a
+  specific fallback correction rather than a general Stage-5 solution.
+- Added optional terminal masks to native and NumPy Boolean induction. The
+  selected cohort was already empty, so next-policy overlap had zero winning
+  samples. Its monotonic role is now explicit: it may reject instant-safe
+  terminal wins but cannot rescue an empty predecessor.
+- The first 4-pixel audit exposed a 203,190,120-sample, roughly 1.514-GiB
+  native transition table. Factoring regular-lattice x/y transitions reduces
+  it to 4,119,984 axis samples and about 47.15 MiB. Randomized Boolean,
+  safety-value, and fused-survival parity pass. An isolated retained 4-pixel
+  solve now peaks at 94,080 KiB RSS; the complete audit still peaks near
+  1.27 GiB and needs separate offline allocation profiling.
+- Synchronous capsule I/O added `91.58/117.58 ms` median/p95 and doubled
+  policy worker service in the capture run. Audit writes now use an independent
+  one-worker queue and are drained on exit; physical timing acceptance remains
+  pending.
+- CE-0099..0101 retain the harness wiring failure, physical coarse
+  false-empty witnesses, and survival-vs-endpoint counterexample. The durable
+  design analysis is
+  `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`.
+- Linux and Windows builds succeed, and both complete Python suites pass 404
+  tests.

@@ -31,6 +31,12 @@ STRICT_ENEMY_VERSION_STAGE5_CORPUS = (
     / "runtime_reports"
     / "lunatic_route2_stage5_unattended_20260724_191313.regressions.json"
 )
+DIFFERENTIAL_AUDIT_STAGE5_CORPUS = (
+    ROOT
+    / "artifacts"
+    / "runtime_reports"
+    / "lunatic_route2_stage5_unattended_20260724_201636.regressions.json"
+)
 
 
 class Th08FullrunRegressionTests(unittest.TestCase):
@@ -79,6 +85,22 @@ class Th08FullrunRegressionTests(unittest.TestCase):
             },
         )
         self.assertEqual(summary.exact_bullet_witnesses, 11)
+        self.assertEqual(summary.exact_enemy_body_witnesses, 0)
+
+    def test_ce_0100_stage5_retains_differential_audit_failures(self) -> None:
+        summary = load_and_validate(DIFFERENTIAL_AUDIT_STAGE5_CORPUS)
+        self.assertEqual(summary.case_count, 27)
+        self.assertEqual(summary.deathbomb_count, 0)
+        self.assertEqual(summary.stage_counts, {"Stage 5": 27})
+        self.assertEqual(
+            summary.cause_counts,
+            {
+                "observed_bullet_overlap": 10,
+                "modeled_committed_prefix_collision": 16,
+                "sensor_gap_or_unmodeled_hazard": 1,
+            },
+        )
+        self.assertEqual(summary.exact_bullet_witnesses, 10)
         self.assertEqual(summary.exact_enemy_body_witnesses, 0)
 
     def test_every_retained_native_hit_is_a_valid_unique_witness(self) -> None:

@@ -171,6 +171,38 @@ and `82.83 ms` on Windows; warm clearance is `63.44/67.00 ms` respectively.
 `test_native_bounded_aabb_traversal_matches_adversarial_dense_oracle` covers
 moving, growing, off-playfield, and boundary workloads.
 
+### 2026-07-24 separable transition cache and survival labels
+
+The first exact 4-pixel differential audit made the original transition cache
+scale with `row_count * column_count`. For the TH08 field it materialized
+203,190,120 samples, about 1.514 GiB before policy/output memory. This was an
+offline fine-grid scaling defect; it is not an explanation for old 16-pixel
+live latency.
+
+Constant-velocity movement on a rectangular lattice is separable. The native
+cache now stores nearest-column/x-error and nearest-row/y-error independently,
+then reconstructs the original sample error with `hypot`. The same 4-pixel
+configuration stores 4,119,984 axis samples, about 47.15 MiB. Full randomized
+native/NumPy Boolean and safety-value parity plus native/scalar fused-survival
+parity pass on Linux and Windows builds.
+
+One retained Stage-5 capsule gives these isolated end-to-end process
+measurements:
+
+| Grid | Elapsed | Peak RSS |
+| --- | ---: | ---: |
+| 16px / 8f | 0.30 s | 47 MiB |
+| 8px / 8f | 0.46 s | 60 MiB |
+| 4px / 8f | 0.82 s | 92 MiB |
+
+The native backend also exposes a shadow fused recurrence that returns
+Boolean viability/masks and lexicographic `(guaranteed survival frames,
+bottleneck margin)` labels in one pass. On the retained 16-pixel volume, warm
+Boolean/fused medians are `11.38/42.46 ms`. Fused labels remain offline shadow
+output until a packed or query-local form meets the physical worker budget.
+Exact data and limitations are retained in
+`viability_transition_axis_benchmark_20260724.json`.
+
 If the native library is absent, the planner uses the NumPy reference
 implementation. `TOUHOU_DISABLE_NATIVE_PLANNER=1` forces that path for
 benchmarks and parity diagnosis.

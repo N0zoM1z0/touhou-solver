@@ -723,6 +723,7 @@ def run_trial(
         "menu_plan": [asdict(tap) for tap in menu_plan],
         "hard_no_bomb": True,
         "trace_transform_runtime": args.trace_transform_runtime,
+        "viability_audit": args.viability_audit,
         "started_at": datetime.now().astimezone().isoformat(),
     }
     batch_process: subprocess.Popen[bytes] | None = None
@@ -735,6 +736,15 @@ def run_trial(
             terminal_stage=stage.route_index,
             trace_transform_runtime=args.trace_transform_runtime,
             safety_value_horizon=args.safety_value_horizon,
+            viability_audit_dir=(
+                ROOT
+                / "artifacts"
+                / "viability_audit"
+                / "raw"
+                / run_id
+                if args.viability_audit
+                else None
+            ),
         )
         batch_process, batch_log = launch_patch_batch(
             game_dir=game_dir,
@@ -979,6 +989,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "enable the compact max-min empty-kernel preference for this "
             "many game frames"
+        ),
+    )
+    parser.add_argument(
+        "--viability-audit",
+        action="store_true",
+        help=(
+            "retain ignored neutral policy capsules for offline "
+            "multi-resolution audit; do not treat timing as a baseline"
         ),
     )
     parser.add_argument(

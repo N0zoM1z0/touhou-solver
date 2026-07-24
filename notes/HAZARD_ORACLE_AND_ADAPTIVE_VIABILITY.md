@@ -250,6 +250,32 @@ A later Touhou game then replaces its bytecode, record layouts, callbacks, and
 movement constants while retaining the occupancy, refinement, viability, and
 policy-chain algorithms.
 
+## Stage-5 Differential Update
+
+The exact capsule audit in
+`STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md` narrows several statements
+that were hypotheses when this design was written:
+
+- 3/54 sampled pre-hit empty queries are proven 16-pixel coarse false-empties;
+  all three are in phase 103.
+- 51/54 remain losing at 8 and 4 pixels. No sampled phase-107 query is rescued
+  by spatial refinement, so a uniform fine grid is not the main Reisen fix.
+- One phase-107 collision bullet is proven absent at the governing policy
+  source. Since that state was already losing, future-birth completeness and
+  empty-set diagnosis remain separate axes.
+- Next-policy overlap cannot rescue an empty kernel; it must be audited on a
+  distinct instant-winning cohort.
+- Exact four-frame/event layers cannot preserve delays above four frames
+  without pending-command and remaining-delay state.
+- Fused survival labels expose one retained case where endpoint recovery chose
+  an action with a shorter modeled survival guarantee. They do not outlive the
+  hit interval in the other 53 sampled queries.
+
+Adaptive refinement is therefore still required, but it should be triggered
+at a reachable boundary or alleged coarse empty rather than applied uniformly.
+ECL/timeline events and survival-first losing-state action selection remain
+independent corrections.
+
 ## Implementation Order And Gates
 
 1. **Code-complete, physical differential pending.** Live laser snapshots now
@@ -263,9 +289,12 @@ policy-chain algorithms.
 3. Implement the enemy ECL VM executor that turns the existing static route
    graph into actual frame-ordered spawn/mutation events. Connect its output to
    the existing bullet, laser, item, and player executor.
-4. Add adaptive 16/4/2-pixel refinement and refuse to report a true empty set
-   from the coarse lattice alone.
-5. Add terminal-kernel overlap and policy-chain certificates.
+4. Add adaptive 16/8/4-pixel refinement around reachable tubes and alleged
+   empty boundaries. The three retained Stage-5 coarse witnesses are the
+   first physical regression gate.
+5. Audit instant-winning terminal states, then add terminal-kernel overlap and
+   policy-chain certificates. Do not present overlap as an empty-state
+   recovery mechanism.
 6. Run shadow prediction on retained traces, then focused thprac trials for
    spells 154, 158, 162, 166, and 170. Retain exact false-positive,
    false-negative, and first-divergence artifacts.

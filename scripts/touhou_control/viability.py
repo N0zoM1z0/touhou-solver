@@ -859,12 +859,15 @@ def build_robust_viability_policy(
     nominal_delay: int,
     config: ViabilityConfig,
     backend: str = "auto",
+    terminal_viable: np.ndarray | None = None,
 ) -> RobustViabilityPolicy:
     """Compute ``exists action, forall delay`` backward reachability.
 
     ``clearance_volume`` contains frames ``0..horizon`` inclusive. A transition
     checks every physical frame in its layer and conservatively subtracts the
-    nearest-lattice sampling distance from clearance.
+    nearest-lattice sampling distance from clearance. ``terminal_viable`` can
+    further restrict the final safe cells to an externally certified
+    continuation set, indexed by active action, row, and column.
     """
 
     x_axis = np.asarray(x_axis, dtype=np.float32)
@@ -897,6 +900,19 @@ def build_robust_viability_policy(
     horizon_frames = clearance_volume.shape[0] - 1
     if horizon_frames <= 0 or horizon_frames % config.frames_per_layer:
         raise ValueError("clearance horizon must divide into complete layers")
+    terminal_mask = None
+    if terminal_viable is not None:
+        terminal_mask = np.asarray(terminal_viable, dtype=np.bool_)
+        expected_terminal_shape = (
+            len(actions),
+            len(y_axis),
+            len(x_axis),
+        )
+        if terminal_mask.shape != expected_terminal_shape:
+            raise ValueError(
+                "terminal viability mask must have shape "
+                f"{expected_terminal_shape}, got {terminal_mask.shape}"
+            )
 
     if backend in {"auto", "native"}:
         native_arrays = native_backend.build_viability_arrays(
@@ -915,6 +931,7 @@ def build_robust_viability_policy(
             frames_per_layer=config.frames_per_layer,
             required_clearance=config.required_clearance,
             clamp_to_bounds=config.clamp_to_bounds,
+            terminal_viable=terminal_mask,
         )
         if native_arrays is not None:
             viable, safe_action_masks = native_arrays
@@ -980,6 +997,8 @@ def build_robust_viability_policy(
         clearance_volume[horizon_frames] > config.required_clearance
     )
     viable[layer_count] = terminal_safe[None, :, :]
+    if terminal_mask is not None:
+        viable[layer_count] &= terminal_mask
 
     for layer in range(layer_count - 1, -1, -1):
         start_frame = layer * config.frames_per_layer

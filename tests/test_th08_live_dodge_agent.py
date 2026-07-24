@@ -5,8 +5,12 @@ from __future__ import annotations
 
 import math
 import struct
+import tempfile
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
+from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
@@ -82,6 +86,7 @@ from th08_live_dodge_agent import (
     _hazards_for_positions,
     _pack_laser_frame,
     _stage_corridor_solution,
+    _solve_corridor,
     build_laser_collision_frames,
     capture_enemy_pool_prefix_contiguous,
     choose_action,
@@ -104,6 +109,81 @@ from touhou_control.viability import ControlAction
 
 
 class LiveDodgeAgentTests(unittest.TestCase):
+    def test_ce_0099_audit_capsule_is_wired_to_corridor_worker(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            with ThreadPoolExecutor(max_workers=1) as audit_executor:
+                solution = _solve_corridor(
+                    source_frame=16,
+                    snapshot_frame=8,
+                    forecast_lead_frames=8,
+                    player_x=192.0,
+                    player_y=384.0,
+                    bullets=(),
+                    lasers=(),
+                    enemy_bodies=(),
+                    snapshot_lag=0,
+                    control_delay_candidates=(1, 2),
+                    nominal_control_delay=1,
+                    active_action="stay",
+                    context_key=(0, 5, None),
+                    audit_capsule_dir=Path(temporary),
+                    audit_executor=audit_executor,
+                )
+                self.assertIsNotNone(solution.audit_future)
+                assert solution.audit_future is not None
+                _, audit_error = solution.audit_future.result()
+            self.assertIsNone(solution.audit_error)
+            self.assertIsNone(audit_error)
+            self.assertIsNotNone(solution.audit_capsule)
+            assert solution.audit_capsule is not None
+            self.assertTrue(Path(solution.audit_capsule).is_file())
+            self.assertGreaterEqual(
+                solution.worker_ms or 0.0,
+                solution.solve_ms,
+            )
+
+    def test_audit_file_io_does_not_delay_policy_publication(self) -> None:
+        writer_started = threading.Event()
+        release_writer = threading.Event()
+
+        def blocked_writer(**_kwargs):
+            writer_started.set()
+            self.assertTrue(release_writer.wait(timeout=2.0))
+            return 123.0, None
+
+        with tempfile.TemporaryDirectory() as temporary:
+            with ThreadPoolExecutor(max_workers=1) as audit_executor:
+                with patch(
+                    "th08_live_dodge_agent._write_corridor_audit_capsule",
+                    side_effect=blocked_writer,
+                ):
+                    solution = _solve_corridor(
+                        source_frame=16,
+                        snapshot_frame=8,
+                        forecast_lead_frames=8,
+                        player_x=192.0,
+                        player_y=384.0,
+                        bullets=(),
+                        lasers=(),
+                        enemy_bodies=(),
+                        snapshot_lag=0,
+                        control_delay_candidates=(1, 2),
+                        nominal_control_delay=1,
+                        active_action="stay",
+                        audit_capsule_dir=Path(temporary),
+                        audit_executor=audit_executor,
+                    )
+                    self.assertTrue(writer_started.wait(timeout=1.0))
+                    assert solution.audit_future is not None
+                    self.assertFalse(solution.audit_future.done())
+                    release_writer.set()
+                    self.assertEqual(
+                        solution.audit_future.result(),
+                        (123.0, None),
+                    )
+
     def test_async_policy_minimum_covers_two_layers_and_control_latency(
         self,
     ) -> None:

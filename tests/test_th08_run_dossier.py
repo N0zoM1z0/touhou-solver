@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import unittest
 
-from th08_run_dossier import (
+from analysis.th08_run_dossier import (
     TraceProvenance,
     _classify_death,
     _death_clusters,

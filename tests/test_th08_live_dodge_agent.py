@@ -21,6 +21,7 @@ from corridor_planner import (
     RobustControlSpec,
     plan_corridor,
 )
+from th08_laser_model import LaserPhase, LaserState
 from th08_live_dodge_agent import (
     ASYNC_POLICY_DELAY_PADDING,
     AutoConfirmPulse,
@@ -1311,7 +1312,7 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(laser.state.collision_enable_frame, 5)
         self.assertEqual(
             serialize_laser_trace(laser)[15:],
-            [10, 5, 20, 10, 5, 0.0, 0.75],
+            [10, 5, 20, 10, 5, 0.0, 0.75, 0.0],
         )
         frames = build_laser_collision_frames(lasers, horizon=2)
         self.assertEqual(frames[0], ())
@@ -1419,6 +1420,7 @@ class LiveDodgeAgentTests(unittest.TestCase):
                 "segment_y",
                 "collision_radius",
                 "base_uncertainty",
+                "uncertainty_per_frame",
             ):
                 np.testing.assert_allclose(
                     getattr(actual_frame, field),
@@ -1426,6 +1428,87 @@ class LiveDodgeAgentTests(unittest.TestCase):
                     rtol=0.0,
                     atol=1e-12,
                 )
+
+    def test_ce_0078_exact_local_laser_has_no_invented_horizon_drift(
+        self,
+    ) -> None:
+        state = LaserState(
+            origin_x=100.0,
+            origin_y=200.0,
+            angle=0.0,
+            tail_distance=0.0,
+            head_distance=80.0,
+            maximum_length=80.0,
+            width=16.0,
+            speed=0.0,
+            warmup_frames=0,
+            active_frames=120,
+            fade_frames=0,
+            collision_enable_frame=0,
+            collision_disable_frame=0,
+            phase=LaserPhase.ACTIVE,
+        )
+        exact = Laser(
+            100.0,
+            200.0,
+            0.0,
+            0.0,
+            80.0,
+            4.0,
+            state=state,
+            uncertainty=0.75,
+            uncertainty_per_frame=0.0,
+        )
+        fallback = Laser(
+            100.0,
+            200.0,
+            0.0,
+            0.0,
+            80.0,
+            4.0,
+            uncertainty=0.75,
+        )
+        exact_frame = _build_packed_laser_collision_frames(
+            (exact,),
+            horizon=1,
+        )[0]
+        fallback_frame = _build_packed_laser_collision_frames(
+            (fallback,),
+            horizon=1,
+        )[0]
+        positions_x = np.asarray([140.0], dtype=np.float32)
+        positions_y = np.asarray([212.0], dtype=np.float32)
+        bullet_frame = tuple(
+            np.asarray([], dtype=np.float32) for _ in range(5)
+        )
+
+        exact_near = _hazards_for_positions(
+            positions_x,
+            positions_y,
+            step=1,
+            bullet_frame=bullet_frame,
+            lasers=exact_frame,
+            enemy_bodies=(),
+        )[2][0]
+        exact_far = _hazards_for_positions(
+            positions_x,
+            positions_y,
+            step=40,
+            bullet_frame=bullet_frame,
+            lasers=exact_frame,
+            enemy_bodies=(),
+        )[2][0]
+        fallback_far = _hazards_for_positions(
+            positions_x,
+            positions_y,
+            step=40,
+            bullet_frame=bullet_frame,
+            lasers=fallback_frame,
+            enemy_bodies=(),
+        )[2][0]
+
+        self.assertEqual(exact_near, exact_far)
+        self.assertAlmostEqual(exact_far - fallback_far, 3.2)
 
     def test_incoming_bullet_forces_lateral_motion(self) -> None:
         decision = choose_action(

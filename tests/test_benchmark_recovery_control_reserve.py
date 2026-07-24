@@ -10,10 +10,46 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from benchmark_recovery_control_reserve import _bullet_from_trace, main
+from benchmarks.benchmark_recovery_control_reserve import (
+    _bullet_from_trace,
+    _laser_from_trace,
+    main,
+)
 
 
 class RecoveryControlReserveBenchmarkTests(unittest.TestCase):
+    def test_legacy_exact_laser_replay_does_not_restore_horizon_drift(
+        self,
+    ) -> None:
+        laser = _laser_from_trace(
+            [
+                100.0,
+                200.0,
+                0.0,
+                0.0,
+                80.0,
+                4.0,
+                7,
+                80.0,
+                16.0,
+                16.0,
+                0.0,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                120,
+                0,
+                0,
+                0.0,
+                0.75,
+            ]
+        )
+        self.assertIsNotNone(laser.state)
+        self.assertEqual(laser.uncertainty_per_frame, 0.0)
+
     def test_replay_retains_lightweight_piecewise_projection(self) -> None:
         bullet = _bullet_from_trace(
             [

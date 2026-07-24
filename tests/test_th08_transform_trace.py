@@ -8,7 +8,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from th08_transform_trace import analyze_transform_trace, decode_trace_bullet
+from analysis.th08_transform_trace import (
+    analyze_transform_trace,
+    decode_trace_bullet,
+)
 
 
 def _bullet(

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import unittest
 
-from th08_practice_compare import compare_dossiers
+from analysis.th08_practice_compare import compare_dossiers
 
 
 def _dossier(run_id: str, *, hits: int, solve_ms: float) -> dict[str, object]:

@@ -7,7 +7,7 @@ import json
 import unittest
 from pathlib import Path
 
-from th08_practice_dossier import (
+from analysis.th08_practice_dossier import (
     _adaptive_control_summary,
     _action_hold_summary,
     _behavior_context,
@@ -23,8 +23,8 @@ from th08_practice_dossier import (
     _spell_phase_summary,
     render_markdown,
 )
-from th08_fullrun_regression import load_and_validate
-from th08_run_dossier import _input_mask_action
+from analysis.th08_fullrun_regression import load_and_validate
+from analysis.th08_run_dossier import _input_mask_action
 
 
 ROOT = Path(__file__).resolve().parent.parent

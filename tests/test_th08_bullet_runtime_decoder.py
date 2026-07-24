@@ -65,6 +65,47 @@ def _record(
 
 
 class BulletRuntimeDecoderTests(unittest.TestCase):
+    def test_native_bullet_dimensions_are_not_clamped_by_visual_size(
+        self,
+    ) -> None:
+        blob = bytearray(BULLET_POOL_SIZE * BULLET_STRIDE)
+        for slot, dimensions in enumerate(((0.5, 0.25), (96.0, 80.0))):
+            base = slot * BULLET_STRIDE
+            struct.pack_into("<H", blob, base + BULLET_STATE_OFFSET, 1)
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_GEOMETRY_OFFSET,
+                *dimensions,
+            )
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_POSITION_OFFSET,
+                100.0 + slot,
+                200.0,
+            )
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_VELOCITY_OFFSET,
+                0.0,
+                0.0,
+            )
+        expected = ((0.25, 0.125), (48.0, 40.0))
+        for retain_runtime in (False, True):
+            bullets = decode_bullets(
+                bytes(blob),
+                retain_transform_runtime=retain_runtime,
+            )
+            self.assertEqual(
+                tuple(
+                    (bullet.half_width, bullet.half_height)
+                    for bullet in bullets
+                ),
+                expected,
+            )
+
     def test_native_record_parser_preserves_signed_operands_and_gate(self) -> None:
         blob = struct.pack(
             "<ffiiII",

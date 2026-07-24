@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from th08_longrun_status import load_rows, summarize_progress
+from analysis.th08_longrun_status import load_rows, summarize_progress
 
 
 class Th08LongrunStatusTests(unittest.TestCase):

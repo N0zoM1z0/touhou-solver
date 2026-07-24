@@ -24,8 +24,8 @@ from th08_automation.practice_menu import (
     build_practice_menu_plan,
     parse_practice_stage,
 )
-from th08_practice_compare import compare_dossiers
-from th08_practice_dossier import main as build_practice_dossier
+from analysis.th08_practice_compare import compare_dossiers
+from analysis.th08_practice_dossier import main as build_practice_dossier
 from th08_runtime_agent import (
     ADDR_DIFFICULTY_INDEX,
     ADDR_NO_LIFE_DECREMENT_PATCH,

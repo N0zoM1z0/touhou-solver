@@ -10,7 +10,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from benchmark_safety_value_replay import main
+from benchmarks.benchmark_safety_value_replay import main
 
 
 class SafetyValueReplayBenchmarkTests(unittest.TestCase):

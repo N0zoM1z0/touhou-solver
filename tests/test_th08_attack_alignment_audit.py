@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from th08_attack_alignment_audit import build_report
+from analysis.th08_attack_alignment_audit import build_report
 
 
 class Th08AttackAlignmentAuditTests(unittest.TestCase):

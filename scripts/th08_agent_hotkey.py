@@ -28,7 +28,7 @@ from th08_runtime_agent import (
     send_transitions,
     verify_target,
 )
-from th08_trial_report import summarize_rows
+from analysis.th08_trial_report import summarize_rows
 
 
 HOTKEY_ARM = 1

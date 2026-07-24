@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import unittest
 
-from analyze_laser_geometry_differential import analyze
+from analysis.analyze_laser_geometry_differential import analyze
 
 
 def _laser(

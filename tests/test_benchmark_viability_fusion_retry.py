@@ -10,7 +10,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from benchmark_viability_fusion_retry import main
+from benchmarks.benchmark_viability_fusion_retry import main
 
 
 class ViabilityFusionRetryBenchmarkTests(unittest.TestCase):

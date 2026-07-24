@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import unittest
 
-from th08_trial_report import summarize_rows
+from analysis.th08_trial_report import summarize_rows
 
 
 def _decision(frame: int, slack: float, *, hit: bool = False) -> dict:

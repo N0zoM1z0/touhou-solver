@@ -10,7 +10,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from benchmark_fresh_viability_intersection import main
+from benchmarks.benchmark_fresh_viability_intersection import main
 
 
 class FreshViabilityIntersectionBenchmarkTests(unittest.TestCase):

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import unittest
 
-from adversarial_planner_diff import compare_scenario
+from analysis.adversarial_planner_diff import compare_scenario
 from touhou_control.adversarial import generate_adversarial_scenario
 
 

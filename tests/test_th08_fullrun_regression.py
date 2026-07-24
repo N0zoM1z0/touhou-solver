@@ -6,7 +6,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from th08_fullrun_regression import (
+from analysis.th08_fullrun_regression import (
     _action_lag_factor_expected,
     load_and_validate,
 )

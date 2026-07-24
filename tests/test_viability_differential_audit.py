@@ -12,7 +12,10 @@ from unittest.mock import patch
 from touhou_control.viability_audit_capsule import (
     write_viability_audit_capsule,
 )
-from viability_differential_audit import _classify_empty_query, audit
+from analysis.viability_differential_audit import (
+    _classify_empty_query,
+    audit,
+)
 
 
 class ViabilityDifferentialAuditTests(unittest.TestCase):
@@ -117,11 +120,11 @@ class ViabilityDifferentialAuditTests(unittest.TestCase):
             }
             with (
                 patch(
-                    "viability_differential_audit.AuditSolver.solve",
+                    "analysis.viability_differential_audit.AuditSolver.solve",
                     return_value=object(),
                 ),
                 patch(
-                    "viability_differential_audit._query_payload",
+                    "analysis.viability_differential_audit._query_payload",
                     return_value=recomputed,
                 ),
             ):

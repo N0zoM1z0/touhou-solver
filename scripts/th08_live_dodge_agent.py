@@ -60,7 +60,14 @@ from th08_ecl_runtime import (
 from th08_laser_model import (
     LaserPhase,
     LaserState,
-    laser_collision_geometry_frames,
+)
+from th08_laser_runtime import (
+    Laser,
+    PackedLaserFrame as _PackedLaserFrame,
+    build_laser_collision_frames,
+    build_packed_laser_collision_frames as _build_packed_laser_collision_frames,
+    pack_laser_frame as _pack_laser_frame,
+    serialize_laser_trace,
 )
 from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
@@ -411,60 +418,6 @@ def serialize_bullet_trace(
             bullet.trajectory_uncertainty_y,
         ],
     ]
-
-
-@dataclass(frozen=True)
-class Laser:
-    origin_x: float
-    origin_y: float
-    angle: float
-    tail: float
-    head: float
-    half_width: float
-    state: LaserState | None = None
-    slot: int = -1
-    collision_flag: int = 0
-    uncertainty: float = 0.0
-
-
-def serialize_laser_trace(laser: Laser) -> list[float | int | None]:
-    """Retain enough native lifecycle state for offline reprojection."""
-
-    state = laser.state
-    return [
-        laser.origin_x,
-        laser.origin_y,
-        laser.angle,
-        laser.tail,
-        laser.head,
-        laser.half_width,
-        laser.slot,
-        state.maximum_length if state is not None else None,
-        state.width if state is not None else None,
-        state.current_width if state is not None else None,
-        state.speed if state is not None else None,
-        int(state.phase) if state is not None else None,
-        state.timer if state is not None else None,
-        state.flags if state is not None else None,
-        laser.collision_flag,
-        state.warmup_frames if state is not None else None,
-        state.collision_enable_frame if state is not None else None,
-        state.active_frames if state is not None else None,
-        state.fade_frames if state is not None else None,
-        state.collision_disable_frame if state is not None else None,
-        state.timer_fraction if state is not None else None,
-        laser.uncertainty,
-    ]
-
-
-@dataclass(frozen=True)
-class _PackedLaserFrame:
-    start_x: np.ndarray
-    start_y: np.ndarray
-    segment_x: np.ndarray
-    segment_y: np.ndarray
-    collision_radius: np.ndarray
-    base_uncertainty: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -958,6 +911,20 @@ def _finite(values: tuple[float, ...]) -> bool:
     return all(math.isfinite(value) for value in values)
 
 
+def _native_bullet_half_extents(
+    width: float,
+    height: float,
+) -> tuple[float, float]:
+    """Preserve the dimensions passed to native bullet collision.
+
+    Native templates are expected to contain positive dimensions.  Absolute
+    value remains a conservative guard for a malformed signed snapshot, but
+    there is no native minimum/maximum clamp.
+    """
+
+    return abs(width) * 0.5, abs(height) * 0.5
+
+
 def _decode_planning_bullets(blob: bytes) -> tuple[Bullet, ...]:
     """Decode the gameplay fields in bulk without diagnostic queue objects."""
 
@@ -1010,6 +977,10 @@ def _decode_planning_bullets(blob: bytes) -> tuple[Bullet, ...]:
             )
             if not _finite((x, y, vx, vy, width, height)):
                 continue
+            half_width, half_height = _native_bullet_half_extents(
+                width,
+                height,
+            )
             speed = struct.unpack_from(
                 "<f",
                 blob,
@@ -1026,8 +997,8 @@ def _decode_planning_bullets(blob: bytes) -> tuple[Bullet, ...]:
                     y=y,
                     vx=vx,
                     vy=vy,
-                    half_width=min(max(abs(width) * 0.5, 1.0), 24.0),
-                    half_height=min(max(abs(height) * 0.5, 1.0), 24.0),
+                    half_width=half_width,
+                    half_height=half_height,
                     transform_flags=struct.unpack_from(
                         "<I",
                         blob,
@@ -1081,7 +1052,7 @@ def _decode_planning_bullets(blob: bytes) -> tuple[Bullet, ...]:
         BULLET_CALLBACK_AUX_STATE_OFFSET,
         "u1",
     )[slots]
-    half_size = np.clip(np.abs(geometry) * 0.5, 1.0, 24.0)
+    half_size = np.abs(geometry) * 0.5
     return tuple(
         Bullet(
             x=float(x),
@@ -1168,8 +1139,10 @@ def decode_bullets(
         )[0]
         if not _finite((x, y, vx, vy, width, height)):
             continue
-        half_width = min(max(abs(width) * 0.5, 1.0), 24.0)
-        half_height = min(max(abs(height) * 0.5, 1.0), 24.0)
+        half_width, half_height = _native_bullet_half_extents(
+            width,
+            height,
+        )
         transform_runtime = None
         if retain_transform_runtime:
             queue_cursor = struct.unpack_from(
@@ -1406,6 +1379,7 @@ def decode_lasers(blob: bytes) -> tuple[Laser, ...]:
                 index,
                 collision_flag,
                 0.75,
+                0.0,
             )
         )
     return tuple(lasers)
@@ -2230,173 +2204,6 @@ def _build_bullet_frames(
     return tuple(frames)
 
 
-def build_laser_collision_frames(
-    lasers: tuple[Laser, ...],
-    *,
-    horizon: int,
-    snapshot_lag: int = 0,
-) -> tuple[tuple[Laser, ...], ...]:
-    """Project allocated records into the lethal segments for each update."""
-
-    if horizon < 0 or snapshot_lag < 0:
-        raise ValueError("laser projection horizon and lag cannot be negative")
-    frames: list[list[Laser]] = [[] for _ in range(horizon)]
-    total_frames = snapshot_lag + horizon
-    for laser in lasers:
-        state = laser.state
-        if state is None:
-            for projected in frames:
-                projected.append(laser)
-            continue
-        geometry_frames = laser_collision_geometry_frames(
-            state,
-            frame_count=total_frames,
-        )[snapshot_lag:]
-        for projected, geometry in zip(frames, geometry_frames):
-            projected.extend(
-                Laser(
-                    origin_x=state.origin_x,
-                    origin_y=state.origin_y,
-                    angle=state.angle,
-                    tail=tail,
-                    head=head,
-                    half_width=half_width,
-                    slot=laser.slot,
-                    collision_flag=laser.collision_flag,
-                    uncertainty=laser.uncertainty,
-                )
-                for tail, head, half_width in geometry
-            )
-    return tuple(tuple(frame) for frame in frames)
-
-
-def _pack_laser_frame(
-    lasers: tuple[Laser, ...],
-) -> _PackedLaserFrame:
-    angle = np.fromiter(
-        (laser.angle for laser in lasers),
-        dtype=np.float64,
-        count=len(lasers),
-    )
-    tail = np.fromiter(
-        (laser.tail for laser in lasers),
-        dtype=np.float64,
-        count=len(lasers),
-    )
-    head = np.fromiter(
-        (laser.head for laser in lasers),
-        dtype=np.float64,
-        count=len(lasers),
-    )
-    cosine = np.cos(angle)
-    sine = np.sin(angle)
-    origin_x = np.fromiter(
-        (laser.origin_x for laser in lasers),
-        dtype=np.float64,
-        count=len(lasers),
-    )
-    origin_y = np.fromiter(
-        (laser.origin_y for laser in lasers),
-        dtype=np.float64,
-        count=len(lasers),
-    )
-    return _PackedLaserFrame(
-        start_x=origin_x + cosine * tail,
-        start_y=origin_y + sine * tail,
-        segment_x=cosine * (head - tail),
-        segment_y=sine * (head - tail),
-        collision_radius=np.fromiter(
-            (
-                laser.half_width + PLAYER_RADIUS
-                for laser in lasers
-            ),
-            dtype=np.float64,
-            count=len(lasers),
-        ),
-        base_uncertainty=np.fromiter(
-            (
-                laser.uncertainty
-                for laser in lasers
-            ),
-            dtype=np.float64,
-            count=len(lasers),
-        ),
-    )
-
-
-def _build_packed_laser_collision_frames(
-    lasers: tuple[Laser, ...],
-    *,
-    horizon: int,
-    snapshot_lag: int = 0,
-) -> tuple[_PackedLaserFrame, ...]:
-    """Fuse lifecycle projection and numeric packing without Laser objects."""
-
-    if horizon < 0 or snapshot_lag < 0:
-        raise ValueError("laser projection horizon and lag cannot be negative")
-    packed_values: list[list[float]] = [[] for _ in range(horizon)]
-    total_frames = snapshot_lag + horizon
-    for laser in lasers:
-        state = laser.state
-        cosine = math.cos(laser.angle)
-        sine = math.sin(laser.angle)
-        if state is None:
-            segment_length = laser.head - laser.tail
-            values = (
-                laser.origin_x + cosine * laser.tail,
-                laser.origin_y + sine * laser.tail,
-                cosine * segment_length,
-                sine * segment_length,
-                laser.half_width + PLAYER_RADIUS,
-                laser.uncertainty,
-            )
-            for frame_values in packed_values:
-                frame_values.extend(values)
-            continue
-        geometry_frames = laser_collision_geometry_frames(
-            state,
-            frame_count=total_frames,
-        )[snapshot_lag:]
-        for frame_values, geometry in zip(
-            packed_values,
-            geometry_frames,
-        ):
-            for tail, head, half_width in geometry:
-                segment_length = head - tail
-                frame_values.extend(
-                    (
-                        state.origin_x + cosine * tail,
-                        state.origin_y + sine * tail,
-                        cosine * segment_length,
-                        sine * segment_length,
-                        half_width + PLAYER_RADIUS,
-                        laser.uncertainty,
-                    )
-                )
-    frames: list[_PackedLaserFrame] = []
-    for values in packed_values:
-        # One transposed copy makes every field contiguous. The local
-        # collision kernel consumes fields repeatedly, so column views over
-        # an interleaved matrix would merely defer the same copies.
-        fields = (
-            np.asarray(values, dtype=np.float64)
-            .reshape((-1, 6))
-            .transpose()
-            .copy()
-        )
-        frames.append(
-            _PackedLaserFrame(
-                start_x=fields[0],
-                start_y=fields[1],
-                segment_x=fields[2],
-                segment_y=fields[3],
-                collision_radius=fields[4],
-                base_uncertainty=fields[5],
-            )
-        )
-    return tuple(frames)
-
-
 def _hazards_for_positions(
     positions_x: np.ndarray,
     positions_y: np.ndarray,
@@ -2458,7 +2265,10 @@ def _hazards_for_positions(
         segment_y = packed_lasers.segment_y
         uncertainty = (
             packed_lasers.base_uncertainty
-            + min(6.0, 0.08 * step)
+            + np.minimum(
+                6.0,
+                packed_lasers.uncertainty_per_frame * step,
+            )
         )
         occupied_radius = packed_lasers.collision_radius + uncertainty
         margin = 56.0

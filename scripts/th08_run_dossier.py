@@ -197,6 +197,16 @@ def _nearest_enemy_body(
                         "y_at_observation": y,
                         "velocity_x": float(body[3]),
                         "velocity_y": float(body[4]),
+                        "internal_motion_x": (
+                            float(body[9])
+                            if len(body) >= 11 and body[9] is not None
+                            else None
+                        ),
+                        "internal_motion_y": (
+                            float(body[10])
+                            if len(body) >= 11 and body[10] is not None
+                            else None
+                        ),
                         "half_width": half_width,
                         "half_height": half_height,
                         "flags": int(body[7]),
@@ -244,6 +254,16 @@ def _nearest_enemy_body(
                 "y_at_snapshot": float(body[2]),
                 "velocity_x": float(body[3]),
                 "velocity_y": float(body[4]),
+                "internal_motion_x": (
+                    float(body[9])
+                    if len(body) >= 11 and body[9] is not None
+                    else None
+                ),
+                "internal_motion_y": (
+                    float(body[10])
+                    if len(body) >= 11 and body[10] is not None
+                    else None
+                ),
                 "projected_x_at_action": x,
                 "projected_y_at_action": y,
                 "half_width": float(body[5]),
@@ -342,6 +362,18 @@ def _compact_decision(
         "active_items": int(row.get("active_items", 0)),
         "active_enemy_bodies": int(
             row.get("active_enemy_bodies", 0)
+        ),
+        "enemy_body_contact_enabled_count": int(
+            row.get(
+                "enemy_body_contact_enabled_count",
+                row.get("active_enemy_bodies", 0),
+            )
+        ),
+        "enemy_body_anticipatory_count": int(
+            row.get("enemy_body_anticipatory_count", 0)
+        ),
+        "enemy_body_dormant_count": int(
+            row.get("enemy_body_dormant_count", 0)
         ),
         "enemy_body_snapshot_frame": int(
             row.get("enemy_body_snapshot_frame", row["frame"])
@@ -780,6 +812,8 @@ def _planner_consistency_summary(
     """
 
     comparable = []
+    excluded_hazard_version_change_count = 0
+    excluded_deadline_hold_count = 0
     for row in decisions:
         player = row.get("player")
         if isinstance(player, dict) and (
@@ -795,6 +829,25 @@ def _planner_consistency_summary(
             or not bool(viability.get("support_covers_current", True))
             or not isinstance(robust, dict)
         ):
+            continue
+        issue_guard = row.get("issue_time_enemy_guard")
+        if (
+            isinstance(issue_guard, dict)
+            and bool(issue_guard.get("changes"))
+        ):
+            # The global policy and its action mask belong to the pre-issue
+            # hazard version.  The issue guard deliberately invalidates that
+            # version and recertifies against a newer local snapshot.
+            excluded_hazard_version_change_count += 1
+            continue
+        deadline_guard = row.get("deadline_guard")
+        if (
+            isinstance(deadline_guard, dict)
+            and bool(deadline_guard.get("input_suppressed"))
+        ):
+            # The traced action is the already-active input, not the newly
+            # planned action whose global membership was queried.
+            excluded_deadline_hold_count += 1
             continue
         global_safe = (
             bool(viability.get("state_viable"))
@@ -872,11 +925,18 @@ def _planner_consistency_summary(
             else None
         ),
         "selected_action_outside_global_winning_set_count": selected_outside,
+        "excluded_hazard_version_change_count": (
+            excluded_hazard_version_change_count
+        ),
+        "excluded_deadline_hold_count": excluded_deadline_hold_count,
         "semantics": (
             "global is a remaining-horizon winning-set claim; local is a "
-            "delay-plus-hold prefix claim. Only a selected action inside the "
-            "global winning set but locally unsafe is a direct contract "
-            "contradiction."
+            "delay-plus-hold prefix claim. After excluding observed "
+            "issue-time invalidations, a selected cached-policy action that "
+            "the fresh local prefix finds unsafe is a forecast/version "
+            "contradiction; future births can still make the cached hazard "
+            "set older than the local one. Deadline holds are excluded "
+            "because their final input is not governed by that policy query."
         ),
     }
 

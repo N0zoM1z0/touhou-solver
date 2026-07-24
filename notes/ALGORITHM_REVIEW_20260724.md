@@ -359,3 +359,89 @@ off-playfield/boundary oracle pass. Both Linux and Windows x86-64 libraries
 build. This is a meaningful C++ optimization of an existing compact numerical
 boundary; it does not justify translating orchestration, tracing, or TH08
 memory adapters into C++.
+
+## Stage-4A Observation-Lifecycle Audit
+
+Five complete no-Bomb Stage-4A runs isolated observation lifecycle from
+solver weights:
+
+| Run | Relevant variant | Hits | Exact body overlaps absent from governing action |
+| --- | --- | ---: | ---: |
+| `173718` | issue prefix only | 22 | 3 |
+| `175647` | active/contact-mode union | 25 | 1 |
+| `181700` | bounded inactive-slot memory | 21 | 0 |
+| `183707` | world estimator plus unjustified 16px widening | 34 | 0 |
+| `185059` | world estimator, exact measurement, aligned guard | 26 | 2 |
+
+Totals are descriptive because RNG, respawns, Power, and phase length differ.
+The lifecycle predicates are causal: the first three absent bodies reused
+previously observed pointers across native mode changes, while the final two
+were first allocated only 4/5 frames after the governing action's issue
+observation.
+
+The `183707` failure rejects a tempting but mathematically invalid robustification.
+Adding a constant 16-pixel radius to an unknown velocity does not represent
+the reachable position set at future time `t`; it only destroys narrow
+components. It affected 79,809/85,788 body samples, raised issue trajectory
+changes to 26,004, and increased distant-recovery selection near hits. Once
+removed, `185059` restored global empty queries to `3,391` versus the earlier
+`3,376`, local planning to `27.05/49.96 ms`, and cadence to `4/6` frames.
+
+The correct abstraction is a hybrid reach-avoid game with declared modes:
+
+```text
+mode state:
+    observed contact-enabled
+    observed contact-disabled
+    recently absent but previously observed
+    future allocation declared by an event model
+```
+
+The first three modes can be conservatively unioned from state observations.
+The fourth cannot be inferred from current geometry. For it, the adapter must
+decode ECL/timeline spawn commands and lower a `BirthWindow` containing
+activation time, reachable initial geometry, and branch uncertainty. The
+game-neutral solver then consumes the event like any generated adversarial
+birth case.
+
+This also answers the C++ boundary. Moving Python orchestration to C++ cannot
+make a post-observation birth observable. A packed native issue shield is
+still useful for bullets/lasers/enemy bodies because it reduces the
+observe-to-act window and recertificate cost, but the next semantic task is
+ECL birth/emission coverage. Performance work and event-model work are
+complementary, not substitutes.
+
+## Stage-5 Strict-Version Cross-Control
+
+The final 0.25-pixel aligned trajectory guard was exercised on a different
+stage in complete no-Bomb run `20260724_191313`. The route reached terminal
+unload with 28 hits. Seven stable contact captures contained no exact
+enemy-body overlap, so the Stage-4 lifecycle/world-motion defect did not
+reappear. The guard recertified 2,307 of 7,223 decisions and overrode 870
+actions. After excluding 1,474 observed issue-version changes, zero of 3,753
+comparable selected cached actions contradicted the fresh prefix certificate.
+
+The cross-control also exposes the current limiting abstraction. Of 7,054
+available global queries, 4,514 were losing; 26 of 28 hits were preceded by
+kernel exhaustion. Spell 107 had 635 empty sets among 769 queries and 12
+hits. The present distant-kernel endpoint distance is useful telemetry but is
+not a recovery proof. It can steer toward a future viable cell without
+certifying the intervening tube, especially after the coarse kernel has
+already vanished.
+
+Strict versioning is not free. Local planning changed from
+`27.85/47.50 ms` to `28.53/57.24 ms` median/p95 and cadence from `4/6` to
+`4/7` frames against the earlier Stage-5 baseline. Conversely, the bounded
+C++ clearance traversal reduced global solve time from `285.01/474.16` to
+`151.78/365.36 ms`. This supports two distinct next steps:
+
+1. implement survival-horizon and bottleneck labels inside the existing
+   native backward induction, with scalar parity and generated adversarial
+   tests;
+2. pack issue-time decode/project/certification to recover the local p95
+   without weakening the 0.25-pixel version contract.
+
+Neither step supplies missing future emissions. ECL/timeline `BirthWindow`
+lowering remains required in parallel. Aggregate hits `21 -> 28` are not a
+causal estimate because the physical runs have different RNG, respawn, Power,
+and phase trajectories.

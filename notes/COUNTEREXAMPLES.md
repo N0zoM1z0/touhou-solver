@@ -2178,9 +2178,10 @@ Status: observed | inferred | unknown | fixed
   improvement or regression claim.
 - **Observed exact contact:** Hit frame 35,419 has a stable crossed-frame
   contact observation at frame 35,420. Ordinary pool slot 18
-  (`0x005E0B60`) was at `(325.859,128.534)`, velocity
-  `(-2.274,2.251)`, half-size `(18,18)`, and overlapped the native player
-  lethal AABB with clearance `-16.625`.
+  (`0x005E0B60`) was at `(325.859,128.534)`, with then-captured internal
+  motion component `(-2.274,2.251)`, half-size `(18,18)`, and overlapped the
+  native player lethal AABB with clearance `-16.625`. CE-0096 later proved
+  that `+0x2D4C` is not generally world velocity.
 - **Observed causal gap:** The last alive decision used source frame 35,412,
   captured bullets at frame 35,412, and issued at frame 35,415. Its async
   enemy snapshot was frame 35,410 and contained only the boss. The next
@@ -2211,9 +2212,11 @@ Status: observed | inferred | unknown | fixed
   `test_ce_0092_synchronous_prefix_exposes_new_contact_ring`,
   `test_ce_0092_issue_time_ring_recertifies_stale_up_right`, and
   `test_ce_0092_hit_row_visibility_is_not_causal_visibility`.
-- **Status:** Causal replay and focused tests pass. No physical run has yet
-  validated the issue-time guard or its read tail, so the original hit remains
-  an open physical counterexample.
+- **Status:** Later complete Stage-4A and Stage-5 trials physically exercised
+  the issue-time guard. The strict Stage-5 run recertified 2,307 decisions
+  with `2.24/4.72 ms` read and `12.24/22.15 ms` recertificate median/p95.
+  CE-0094 and CE-0097 separate mode-lifecycle and genuinely post-issue births
+  that the original prefix-only correction cannot solve.
 
 ## CE-0093: Different-horizon Booleans hid a direct stale-action contradiction
 
@@ -2252,6 +2255,174 @@ Status: observed | inferred | unknown | fixed
   `20260724_stage4a_fresh_viability_intersection.json`, and
   `20260724_survival_horizon_oracle.json`.
 - **Status:** Reporter semantics, local hard ordering, scalar-oracle parity,
-  and deterministic adversarial tests pass. The fresh-prefix intersection is
-  not physically accepted until a focused Stage-4A run records its filter/
-  relaxation counts and every new hit window.
+  and deterministic adversarial tests pass. Complete Stage-4A follow-ups and
+  CE-0098's Stage-5 cross-control physically exercised the ordering. After
+  excluding 1,474 observed issue-version changes, CE-0098 retained zero
+  selected cached-action/fresh-prefix contradictions. This does not accept
+  losing-state recovery.
+
+## CE-0094: Enemy contact geometry disappeared across native mode switches
+
+- **Observed first follow-up:** Complete hard-no-Bomb Stage-4A run
+  `20260724_173718` reached `route_complete` with 22 hits. Three stable exact
+  enemy-body overlaps occurred at frames 9,813, 29,012, and 29,474; all three
+  pointers were absent from the action snapshot that governed the collision.
+- **Observed lifecycle:** The frame-9,813 slot existed through frame 9,785,
+  disappeared from the contact-enabled set, and returned in a 34-body ring at
+  issue frame 9,811. The frame-29,012 and 29,474 pointers likewise followed
+  continuous positions across contact-bit changes. Treating these as wholly
+  new objects was false.
+- **First correction:** The synchronous 64-slot safety prefix now retains
+  active, non-blocked collision geometry even while contact bit `0x04` is
+  clear. Complete run `20260724_175647` physically exercised this
+  anticipatory union on 1,294 decisions, with as many as 49 latent bodies.
+  Exact body overlaps fell from three to one, while total hits changed
+  `22 -> 25` and is not a causal aggregate comparison.
+- **Second lifecycle mode:** The remaining exact overlap at frame 36,180 used
+  pointer `0x005B1910`. It was active through frame 36,144, absent for about
+  35 frames, then re-enabled on a continuous curved trajectory at issue frame
+  36,179. Contact-bit union alone cannot retain an active bit that also clears.
+- **General correction:** A context-scoped observation memory retains absent
+  ordinary slots for the 80-frame policy horizon, projects their last
+  validated world motion, and adds only snapshot-age uncertainty. It resets
+  on gameplay epoch, stage, or spell context changes. Complete run
+  `20260724_181700` exercised dormant geometry on 3,785 decisions, maximum 52
+  bodies. Its one exact body overlap was present in the action snapshot;
+  absent-from-action exact overlaps changed `3 -> 0`. Cadence remained
+  `4/6` frames and local planning `27.89/50.41 ms` median/p95.
+- **Regressions:**
+  `test_ce_0094_prefix_retains_latent_contact_disabled_body`,
+  `test_ce_0094_contact_toggle_is_a_mode_change_not_a_respawn`,
+  `test_ce_0094_latent_ring_avoids_the_frame_9813_reactivation`,
+  `test_ce_0094_dormant_memory_avoids_frame_36180_reactivation`, and
+  `test_dormant_enemy_memory_expires_and_resets_by_context`.
+- **Limit:** Bounded memory covers previously observed slots, not a pointer
+  that is allocated for the first time after the last observation. CE-0097
+  keeps that separate instead of extending the TTL without evidence.
+
+## CE-0095: A cached winning action did not contain a future bullet emission
+
+- **Observed direct contradiction:** In run `20260724_175647`, the frame-13,028
+  selected `down_fast`. The cached policy was built from snapshot frame
+  13,001, queried at 13,025, and reported all 16 non-active alternatives
+  winning. The fresh local capture at frame 13,024 found minimum clearance
+  `-0.153` and no prefix-safe action; an observed bullet hit followed at
+  frame 13,035.
+- **Invalid assumption:** A policy and a local certificate can be called the
+  same hazard version merely because no enemy-prefix topology change occurred.
+  The global snapshot-to-local interval was 23 frames and did not include
+  later projectile births/emissions.
+- **Reporting correction:** Issue-time enemy invalidations and deadline-held
+  old input are excluded from cached-global/local consistency counts. The
+  remaining direct count is explicitly a forecast/version contradiction, not
+  a same-snapshot theorem failure.
+- **Algorithmic consequence:** No risk weight can reconstruct a projectile
+  absent from the event set. The TH08 adapter must lower upcoming ECL/timeline
+  emissions or a conservative declared birth envelope into the game-neutral
+  time-indexed hazard contract.
+- **Regression:** Retained case `LUN-S3-F13035-T1` plus
+  `test_future_birth_must_be_in_the_event_model_or_revalidated`.
+- **Status:** Observed and classified; ECL projectile-spawn coverage remains
+  open.
+
+## CE-0096: Internal enemy motion was misused as lethal world velocity
+
+- **Static observation:** `sub_42DEB0` at `0x0042DEB0` adds
+  `enemy+0x2D4C` only to the internal motion component at `+0x2D34`.
+  `enemy_manager_update` later composes lethal/render world position
+  `+0x2D88` from multiple motion/relative components before the contact call.
+  Therefore `+0x2D4C != d(+0x2D88)/dt` in general. IDA comments at
+  `0x42DF57` and `0x42CA54` record this correction.
+- **Runtime proof:** In `20260724_181700`, pointer `0x00597600` retained world
+  `y=164` while the second `+0x2D4C` float rose from `18.512` to `146.910`.
+  Its world x position also performed a scripted `405.410 -> -14.963` mode
+  jump. The old planner projected the body vertically by hundreds of pixels
+  even though the lethal AABB stayed on the same y coordinate.
+- **General correction:** Consecutive `+0x2D88` observations estimate planner
+  world velocity. Secants above 32 px/frame are hybrid jumps: the exact new
+  position is accepted and the last validated velocity is retained.
+  `+0x2D4C` remains in compact telemetry only as an internal diagnostic.
+  Issue-time motion invalidation compares trajectories aligned to the same
+  player epoch; raw snapshots contribute topology/contact/size changes only.
+- **Rejected over-conservative attempt:** The first estimator widened every
+  unknown or jump sample by 16 px. Run `20260724_183707` rose to 34 hits;
+  79,809/85,788 body samples carried uncertainty, issue trajectory changes
+  exploded `6,004 -> 26,004`, and recertificates rose `2,841 -> 3,566`.
+  This fixed margin had no reachability meaning and was removed.
+- **Corrected physical follow-up:** Run `20260724_185059` completed with 26
+  hits and zero Bomb. It is not an aggregate improvement claim against the
+  21-hit RNG-distinct baseline. The relevant gates passed: global empty
+  queries were `3,391` versus `3,376`, local planning was
+  `27.05/49.96 ms` versus `27.89/50.41`, cadence stayed `4/6` frames, and
+  issue changes/trajectory changes fell to `1,258/1,574`. The old 28.8k
+  scripted-wrap body collision did not recur.
+- **Regressions:**
+  `test_ce_0096_internal_motion_component_is_not_world_velocity` and
+  `test_ce_0096_issue_guard_uses_aligned_world_trajectory`.
+
+## CE-0097: New collision rings were born after the final issue observation
+
+- **Observed post-issue births:** In run `20260724_185059`, the action issued
+  at frame 18,749 observed one prefix body. Pointer `0x005A7170` first appeared
+  with four other bodies on the frame-18,753 hit decision and made exact
+  contact. Separately, the action at frame 35,533 observed one body; pointer
+  `0x005E5F30` first appeared in a 15-body set on the frame-35,538 hit
+  decision. Both exact bodies were absent from the governing action snapshot.
+- **What the guard did correctly:** The before-input prefix read was stable
+  and contained no such pointer. The births occurred 4 and 5 frames later,
+  after final validation. Faster issue recertification cannot observe a
+  future allocation, and dormant memory cannot retain a never-observed slot.
+- **Information-theoretic boundary:** For an adversary allowed to create an
+  arbitrary overlapping body after observation, no state-only controller can
+  certify survival. Earlier planning helps only if the spawn event, RNG
+  branch, or a sound spatial-temporal envelope is part of the model.
+- **Required correction:** Decode upcoming TH08 ECL/timeline enemy-spawn
+  commands and lower them to a game-neutral `BirthWindow`/reachable-set event.
+  Until coverage is known, an explicit conservative envelope is preferable
+  to pretending a larger geometric weight is proof.
+- **Regressions:** The two executable retained hit cases and
+  `test_future_birth_must_be_in_the_event_model_or_revalidated`.
+- **Status:** Open and now the highest-priority enemy-contact model gap.
+
+## CE-0098: Strict enemy versioning did not prevent Stage-5 kernel exhaustion
+
+- **Observed cross-stage trial:** Complete hard-no-Bomb Stage-5 run
+  `lunatic_route2_stage5_unattended_20260724_191313` used the final
+  0.25-pixel aligned world-trajectory tolerance and reached
+  `route_complete`. Its 28 native hit frames were
+  `[1934, 4448, 8254, 10690, 11061, 12485, 14270, 22809, 23413, 24500,
+  25238, 29403, 29714, 30053, 30369, 30707, 31143, 31439, 31801, 32121,
+  32543, 32884, 33410, 39856, 41629, 42782, 43465, 44729]`.
+- **Retained contact classes:** Eleven rows have exact bullet overlap, 16
+  have a modeled committed-prefix collision, and frame 10,690 remains a
+  positive-clearance sensor gap. The seven stable crossed-frame contact
+  captures contain no exact enemy-body overlap. Therefore this cross-control
+  does not reproduce CE-0094/0096 as the physical contact cause.
+- **Planner failure:** Twenty-six of 28 rows lost the long-horizon viability
+  kernel before impact; the other two lack a pre-hit alive decision. Spell
+  107 alone has 12 hits and 635 empty sets in 769 available queries. Across
+  the route, 4,514 of 7,054 available queries are empty. The controller often
+  receives tens or hundreds of frames of warning but its endpoint-distance
+  recovery does not certify or reliably find a safe bridge back into the
+  kernel.
+- **Version guard evidence:** The strict issue guard detected and
+  recertified 2,307/7,223 decisions, overrode 870 actions, and excluded 1,474
+  newer hazard versions from the global/local comparison. Among the remaining
+  3,753 comparable decisions, no selected cached-policy action contradicted
+  the fresh local prefix certificate. This accepts version ordering, not the
+  quality of the losing-state fallback.
+- **Cost and non-causal aggregate:** Local planning was `28.53/57.24 ms`
+  median/p95 and cadence `4/7` frames, versus `27.85/47.50 ms` and `4/6` in
+  the earlier Stage-5 baseline without this guard. Global native solve time
+  improved `285.01/474.16 -> 151.78/365.36 ms` after the bounded C++
+  clearance traversal. Hit count changed `21 -> 28`, but RNG, respawns,
+  Power, and phase duration make that unsuitable as a causal regression
+  estimate.
+- **General correction gate:** Replace endpoint-distance recovery with native
+  lexicographic survival-horizon induction, then refine only around the
+  continuous viability boundary. ECL/timeline birth envelopes and a packed
+  issue-time native shield remain separate model/freshness gates.
+- **Regression:** All 28 cases are retained in
+  `lunatic_route2_stage5_unattended_20260724_191313.regressions.json` and
+  pinned by
+  `test_ce_0098_stage5_retains_strict_enemy_version_failures`.

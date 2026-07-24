@@ -2307,3 +2307,72 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   adding a separate 80-frame safety-value pass raised it to `151.30 ms`, with
   `87.59 ms` in value induction. The next C++ experiment should fuse outputs
   or refine on demand rather than stacking two complete recurrences.
+
+## 2026-07-24: Enemy Lifecycle, World Motion, And Post-Issue Births
+
+- Five complete Stage-4A hard-no-Bomb trials
+  (`173718`, `175647`, `181700`, `183707`, `185059`) reached
+  `route_complete`; all compact dossiers, death ledgers, executable
+  regressions, comparisons, summaries, sessions, and run notes are retained.
+- CE-0094 distinguishes object identity from native active/contact modes.
+  The synchronous prefix now unions contact-enabled and active
+  contact-disabled geometry, then retains recently absent observed slots for
+  the 80-frame policy horizon. Physical anticipatory/dormant coverage reached
+  1,294/3,785 decisions. Exact body overlaps absent from the governing action
+  changed from three in `173718` to zero in `181700`; aggregate hit counts are
+  not causal.
+- IDA at `0x42DEB0` proves `enemy+0x2D4C` advances only internal motion
+  `+0x2D34`, while lethal world position `+0x2D88` is composed later. Comments
+  were added at `0x42DF57` and `0x42CA54`. Runtime pointer `0x00597600`
+  retained world `y=164` while the second internal float reached `146.910`.
+- CE-0096 replaces that false world-velocity projection with consecutive
+  `+0x2D88` secants and compares issue snapshots after aligning them to the
+  same player epoch. Raw state supplies only topology/contact/size changes.
+- A first attempt widened unknown/jump bodies by 16 pixels. `183707` rose to
+  34 hits, affected 79,809/85,788 body samples, and produced 26,004 trajectory
+  invalidations. This was a failed reachable-set approximation and was
+  removed, not tuned.
+- Corrected run `185059` completed with 26 hits and zero Bomb. Relative to
+  `181700`, global empty queries were `3,391` versus `3,376`, local planning
+  `27.05/49.96` versus `27.89/50.41 ms`, and cadence remained `4/6` frames.
+  Issue changes fell `2,841 -> 1,258` and trajectory invalidations
+  `6,004 -> 1,574`. These accept model/performance gates, not aggregate
+  survival improvement.
+- CE-0095 retains a 23-frame cached-policy bullet-emission contradiction.
+  CE-0097 adds exact enemy contacts from rings first observed 4/5 frames after
+  the governing action's final issue observation. State-only speedups, larger
+  margins, and dormant TTL cannot predict never-observed births; ECL/timeline
+  spawn/emission lowering is the next semantic target.
+- Planner-consistency reporting now excludes observed issue invalidations and
+  deadline-held input, while describing remaining direct cases as
+  forecast/version contradictions rather than same-snapshot theorem failures.
+
+## 2026-07-24: Stage-5 Strict-Version Cross-Control
+
+- Complete hard-no-Bomb Stage-5 run
+  `lunatic_route2_stage5_unattended_20260724_191313` exercised the final
+  0.25-pixel aligned trajectory guard through `route_complete`. The
+  unattended session verified Lunatic, route 2, Sakuya/Remilia, the
+  no-life-decrement patch, terminal unload, and process cleanup.
+- The 28 retained hits classify as 11 exact bullet overlaps, 16 modeled
+  committed-prefix collisions, and one positive-clearance sensor gap. Seven
+  stable hit contact captures contained no exact enemy-body overlap; CE-0094
+  and CE-0096 did not recur as the contact cause on this stage.
+- Twenty-six hits followed global viability-kernel exhaustion. Overall
+  losing queries were 4,514/7,054; spell 107 contributed 12 hits and
+  635/769 empty queries. This makes native survival-horizon induction and
+  adaptive boundary refinement the next general planning target.
+- The strict issue guard recertified 2,307/7,223 decisions, overrode 870
+  actions, and excluded 1,474 newer hazard versions. Zero remaining selected
+  cached actions contradicted the fresh prefix checker. The relevant cost was
+  local plan `28.53/57.24 ms` and cadence `4/7` frames, versus
+  `27.85/47.50 ms` and `4/6` in the prior Stage-5 baseline.
+- The bounded native clearance traversal improved global solve
+  `285.01/474.16 -> 151.78/365.36 ms` median/p95 on this cross-stage
+  comparison. Total hits `21 -> 28` are descriptive only because RNG,
+  respawn, Power, and phase duration differ.
+- All 28 failures are retained in the compact executable corpus and CE-0098.
+  The six new physical corpora from this checkpoint pass the independent
+  validator.
+- Focused TH08 discovery passes 303 tests. Linux and Windows Python each pass
+  the complete 394-test suite.

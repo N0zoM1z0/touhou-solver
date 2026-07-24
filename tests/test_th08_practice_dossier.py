@@ -276,6 +276,27 @@ class Th08PracticeDossierTests(unittest.TestCase):
             row["enemy_body_snapshot_frame"] = source
             row["active_enemy_bodies"] = bodies
             row["timing_ms"] = {"read_enemy_pool": read_ms}
+        rows[1]["enemy_body_contact_enabled_count"] = 3
+        rows[1]["enemy_body_anticipatory_count"] = 1
+        rows[1]["enemy_body_dormant_count"] = 2
+        rows[2]["enemy_body_contact_enabled_count"] = 2
+        rows[2]["enemy_body_anticipatory_count"] = 0
+        rows[2]["enemy_body_dormant_count"] = 0
+        rows[2]["enemy_bodies"] = [
+            [
+                0x5826C0,
+                100.0,
+                120.0,
+                2.0,
+                0.0,
+                18.0,
+                18.0,
+                5,
+                0.0,
+                1.0,
+                90.0,
+            ]
+        ]
         summary = _enemy_sensor_summary(rows)
         self.assertIsNotNone(summary)
         assert summary is not None
@@ -286,6 +307,31 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(summary["snapshot_interval_frames"]["median"], 7.0)
         self.assertEqual(summary["decision_count_with_active_bodies"], 2)
         self.assertEqual(summary["max_active_bodies"], 4)
+        self.assertEqual(
+            summary["decision_count_with_contact_enabled_bodies"],
+            2,
+        )
+        self.assertEqual(summary["max_contact_enabled_bodies"], 3)
+        self.assertEqual(
+            summary["decision_count_with_anticipatory_bodies"],
+            1,
+        )
+        self.assertEqual(summary["max_anticipatory_bodies"], 1)
+        self.assertEqual(
+            summary["decision_count_with_dormant_bodies"],
+            1,
+        )
+        self.assertEqual(summary["max_dormant_bodies"], 2)
+        self.assertEqual(summary["observed_world_motion_sample_count"], 1)
+        self.assertEqual(summary["observed_world_speed"]["median"], 2.0)
+        self.assertEqual(
+            summary["world_internal_motion_disagreement"]["median"],
+            90.0,
+        )
+        self.assertEqual(
+            summary["world_internal_motion_disagreement_over_1px_count"],
+            1,
+        )
 
     def test_spell_owner_guard_retains_out_of_pool_evidence(self) -> None:
         rows = [_decision(100), _decision(103), _decision(106)]

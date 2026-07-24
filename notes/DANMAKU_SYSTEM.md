@@ -363,6 +363,15 @@ that nonspell and simultaneous enemies cannot be omitted. It now scans all 480
 fixed slots and captures the native player lethal rectangle plus every enabled
 enemy AABB in one stable manager-frame epoch on each new hit edge.
 
+**Observed motion-layout correction:** `sub_42DEB0` (`0x0042DEB0`) integrates
+the vector at enemy `+0x2D4C` into the internal component at `+0x2D34`.
+The update path later composes world collision/render position `+0x2D88` with
+other relative/scripted motion. Thus `+0x2D4C` is not generally the derivative
+of `+0x2D88`. Stage-4A pointer `0x00597600` retained world `y=164` while the
+second `+0x2D4C` float increased from `18.512` to `146.910`, providing runtime
+proof. Planner world motion is now estimated from consecutive `+0x2D88`
+observations; the internal vector remains diagnostic evidence.
+
 **Observed, presentation-only** for opcode `0x9F`: enemy byte `+0x332F`
 selects one of four linked render lists. `enemy_manager_render` consumes layers
 0/1 in its early wrapper and 2/3 in its late wrapper. The 38 shipped writes use

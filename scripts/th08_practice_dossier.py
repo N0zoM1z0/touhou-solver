@@ -500,6 +500,47 @@ def _enemy_sensor_summary(
         int(row.get("active_enemy_bodies", 0))
         for row, _source, _age, _timing in valid_rows
     ]
+    contact_enabled_counts = [
+        int(
+            row.get(
+                "enemy_body_contact_enabled_count",
+                row.get("active_enemy_bodies", 0),
+            )
+        )
+        for row, _source, _age, _timing in valid_rows
+    ]
+    anticipatory_counts = [
+        int(row.get("enemy_body_anticipatory_count", 0))
+        for row, _source, _age, _timing in valid_rows
+    ]
+    dormant_counts = [
+        int(row.get("enemy_body_dormant_count", 0))
+        for row, _source, _age, _timing in valid_rows
+    ]
+    extended_bodies = [
+        body
+        for row, _source, _age, _timing in valid_rows
+        for body in row.get("enemy_bodies", ())
+        if isinstance(body, list) and len(body) >= 11
+    ]
+    world_speeds = [
+        max(abs(float(body[3])), abs(float(body[4])))
+        for body in extended_bodies
+    ]
+    internal_speeds = [
+        max(
+            abs(float(body[9] or 0.0)),
+            abs(float(body[10] or 0.0)),
+        )
+        for body in extended_bodies
+    ]
+    motion_disagreements = [
+        max(
+            abs(float(body[3]) - float(body[9] or 0.0)),
+            abs(float(body[4]) - float(body[10] or 0.0)),
+        )
+        for body in extended_bodies
+    ]
     operational_ages = [
         age for _row, _source, age, _timing in valid_rows if age < 120
     ]
@@ -516,6 +557,30 @@ def _enemy_sensor_summary(
             count > 0 for count in body_counts
         ),
         "max_active_bodies": max(body_counts, default=0),
+        "decision_count_with_contact_enabled_bodies": sum(
+            count > 0 for count in contact_enabled_counts
+        ),
+        "max_contact_enabled_bodies": max(
+            contact_enabled_counts,
+            default=0,
+        ),
+        "decision_count_with_anticipatory_bodies": sum(
+            count > 0 for count in anticipatory_counts
+        ),
+        "max_anticipatory_bodies": max(anticipatory_counts, default=0),
+        "decision_count_with_dormant_bodies": sum(
+            count > 0 for count in dormant_counts
+        ),
+        "max_dormant_bodies": max(dormant_counts, default=0),
+        "observed_world_motion_sample_count": len(extended_bodies),
+        "observed_world_speed": _percentiles(world_speeds),
+        "internal_component_speed": _percentiles(internal_speeds),
+        "world_internal_motion_disagreement": _percentiles(
+            motion_disagreements
+        ),
+        "world_internal_motion_disagreement_over_1px_count": sum(
+            value > 1.0 for value in motion_disagreements
+        ),
     }
 
 
@@ -546,6 +611,28 @@ def _issue_enemy_guard_summary(
             str(guard.get("planned_action_before_guard"))
             != str(guard.get("action_after_guard"))
             for guard in guards
+        ),
+        "observation_count_with_anticipatory_bodies": sum(
+            int(guard.get("anticipatory_count", 0)) > 0
+            for guard in guards
+        ),
+        "max_anticipatory_bodies": max(
+            (
+                int(guard.get("anticipatory_count", 0))
+                for guard in guards
+            ),
+            default=0,
+        ),
+        "observation_count_with_dormant_bodies": sum(
+            int(guard.get("dormant_count", 0)) > 0
+            for guard in guards
+        ),
+        "max_dormant_bodies": max(
+            (
+                int(guard.get("dormant_count", 0))
+                for guard in guards
+            ),
+            default=0,
         ),
         "change_kind_counts": dict(
             Counter(change.split(":", 1)[0] for change in changes)
@@ -1742,8 +1829,20 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"{enemy_sensor['snapshot_age_discontinuity_count']} "
                 "phase-counter discontinuities were excluded; "
                 f"{enemy_sensor['decision_count_with_active_bodies']} "
-                "decisions retained at least one contact-enabled body "
-                f"(maximum {enemy_sensor['max_active_bodies']})."
+                "decisions retained at least one robust-union body "
+                f"(maximum {enemy_sensor['max_active_bodies']}); "
+                f"{enemy_sensor['decision_count_with_anticipatory_bodies']} "
+                "decisions contained latent contact-disabled geometry "
+                f"(maximum {enemy_sensor['max_anticipatory_bodies']}), and "
+                f"{enemy_sensor['decision_count_with_dormant_bodies']} "
+                "contained bounded inactive-slot memory "
+                f"(maximum {enemy_sensor['max_dormant_bodies']}). "
+                f"{enemy_sensor.get('observed_world_motion_sample_count', 0)} "
+                "body samples retained observed world-motion estimates; "
+                "world/internal speed and disagreement were "
+                f"`{enemy_sensor.get('observed_world_speed')}` / "
+                f"`{enemy_sensor.get('internal_component_speed')}` / "
+                f"`{enemy_sensor.get('world_internal_motion_disagreement')}`."
             )
             if isinstance(enemy_sensor, dict)
             else "- No full enemy-pool sensor telemetry was present.",
@@ -1756,7 +1855,13 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"overrode {issue_enemy_guard['action_override_count']} "
                 "actions. Read/recertificate timing was "
                 f"`{issue_enemy_guard['read_ms']}` / "
-                f"`{issue_enemy_guard['recertificate_ms']}` ms."
+                f"`{issue_enemy_guard['recertificate_ms']}` ms; "
+                f"{issue_enemy_guard['observation_count_with_anticipatory_bodies']} "
+                "issue captures contained latent bodies "
+                f"(maximum {issue_enemy_guard['max_anticipatory_bodies']}), "
+                f"and {issue_enemy_guard['observation_count_with_dormant_bodies']} "
+                "contained dormant bodies "
+                f"(maximum {issue_enemy_guard['max_dormant_bodies']})."
             )
             if isinstance(issue_enemy_guard, dict)
             else "- No issue-time enemy-geometry guard telemetry was present.",
@@ -1842,7 +1947,12 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 "selected globally certified actions contradicted the fresh "
                 "local prefix checker, and "
                 f"{planner_consistency['selected_action_outside_global_winning_set_count']} "
-                "selected actions were outside the reported winning set."
+                "selected actions were outside the reported winning set. "
+                f"{planner_consistency.get('excluded_hazard_version_change_count', 0)} "
+                "newer issue-time hazard versions and "
+                f"{planner_consistency.get('excluded_deadline_hold_count', 0)} "
+                "deadline-held old inputs were excluded from the aligned "
+                "comparison."
             ),
             (
                 "- The rolling worker produced "

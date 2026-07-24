@@ -31,6 +31,7 @@ from th08_live_dodge_agent import (
     ENEMY_BODY_READ_OFFSET,
     ENEMY_BODY_READ_SIZE,
     ENEMY_CONTACT_SIZE_OFFSET,
+    ENEMY_DORMANT_MEMORY_FRAMES,
     ENEMY_FLAGS_OFFSET,
     ENEMY_LOCAL_PREFIX_SIZE,
     ENEMY_POOL_BASE,
@@ -39,6 +40,7 @@ from th08_live_dodge_agent import (
     ENEMY_STRIDE,
     ENEMY_VELOCITY_OFFSET,
     EnemyBody,
+    EnemyBodyModeMemory,
     EnemyPoolSnapshot,
     GameplaySceneGuard,
     Item,
@@ -88,6 +90,7 @@ from th08_live_dodge_agent import (
     decode_spell_enemy_body_guard,
     enemy_pointer_in_scanned_pool,
     enemy_pool_snapshot_changes,
+    issue_enemy_snapshot_changes,
     decode_lasers,
     decode_player_lethal_aabb,
     merge_spell_enemy_body_guard,
@@ -376,7 +379,8 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertIsNotNone(body)
         assert body is not None
         self.assertEqual((body.half_width, body.half_height), (24.0, 18.0))
-        self.assertEqual((body.vx, body.vy), (1.5, -0.5))
+        self.assertEqual((body.vx, body.vy), (0.0, 0.0))
+        self.assertEqual((body.internal_vx, body.internal_vy), (1.5, -0.5))
         struct.pack_into(
             "<I",
             blob,
@@ -427,6 +431,281 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(
             (bodies[0].half_width, bodies[0].half_height),
             (15.0, 9.0),
+        )
+
+    def test_ce_0094_prefix_retains_latent_contact_disabled_body(self) -> None:
+        blob = bytearray(ENEMY_LOCAL_PREFIX_SIZE * ENEMY_STRIDE)
+        slot = 18
+        base = slot * ENEMY_STRIDE
+        struct.pack_into(
+            "<ff",
+            blob,
+            base + ENEMY_VELOCITY_OFFSET,
+            -0.11290890723466873,
+            3.198007583618164,
+        )
+        struct.pack_into(
+            "<ff",
+            blob,
+            base + ENEMY_CONTACT_SIZE_OFFSET,
+            24.0,
+            24.0,
+        )
+        struct.pack_into(
+            "<ff",
+            blob,
+            base + ENEMY_POSITION_OFFSET,
+            156.9927892908454,
+            331.7983570098877,
+        )
+        struct.pack_into(
+            "<I",
+            blob,
+            base + ENEMY_FLAGS_OFFSET,
+            0x01,
+        )
+        self.assertEqual(
+            decode_enemy_bodies(
+                bytes(blob),
+                pool_size=ENEMY_LOCAL_PREFIX_SIZE,
+            ),
+            (),
+        )
+        latent = decode_enemy_bodies(
+            bytes(blob),
+            pool_size=ENEMY_LOCAL_PREFIX_SIZE,
+            include_contact_disabled=True,
+        )
+        self.assertEqual(len(latent), 1)
+        self.assertEqual(
+            latent[0].pointer,
+            ENEMY_POOL_BASE + slot * ENEMY_STRIDE,
+        )
+        self.assertEqual(
+            (latent[0].half_width, latent[0].half_height),
+            (18.0, 18.0),
+        )
+
+        class Reader:
+            def u32(self, _address: int) -> int:
+                return 9806
+
+            def read(self, _address: int, _size: int) -> bytes:
+                return bytes(blob)
+
+        snapshot = capture_enemy_pool_prefix_contiguous(Reader())
+        self.assertEqual(snapshot.bodies, latent)
+
+    def test_ce_0094_contact_toggle_is_a_mode_change_not_a_respawn(self) -> None:
+        disabled = EnemyBody(
+            ENEMY_POOL_BASE + 18 * ENEMY_STRIDE,
+            156.9927892908454,
+            331.7983570098877,
+            -0.11290890723466873,
+            3.198007583618164,
+            18.0,
+            18.0,
+            0x01,
+        )
+        enabled = replace(
+            disabled,
+            x=disabled.x + 3.0 * disabled.vx,
+            y=disabled.y + 3.0 * disabled.vy,
+            flags=0x05,
+        )
+        self.assertEqual(
+            enemy_pool_snapshot_changes(
+                EnemyPoolSnapshot(9806, 9806, (disabled,), 1.0),
+                EnemyPoolSnapshot(9809, 9809, (enabled,), 1.0),
+            ),
+            (f"contact_mode:{disabled.pointer:#x}",),
+        )
+
+    def test_ce_0094_dormant_memory_avoids_frame_36180_reactivation(
+        self,
+    ) -> None:
+        memory = EnemyBodyModeMemory(
+            maximum_age_frames=ENEMY_DORMANT_MEMORY_FRAMES
+        )
+        memory.set_context((0, 3, None))
+        body = EnemyBody(
+            5970192,
+            99.62682342529297,
+            286.17047119140625,
+            1.4705986976623535,
+            2.8420660495758057,
+            18.0,
+            18.0,
+            285217101,
+        )
+        observed, dormant = memory.merge_snapshot(
+            EnemyPoolSnapshot(36144, 36144, (body,), 1.0),
+            frame=36144,
+        )
+        self.assertEqual(observed, (body,))
+        self.assertEqual(dormant, frozenset())
+        projected, dormant = memory.merge_snapshot(
+            EnemyPoolSnapshot(36171, 36171, (), 1.0),
+            frame=36171,
+        )
+        self.assertEqual(dormant, frozenset((body.pointer,)))
+        self.assertEqual(projected[0].uncertainty, 16.0)
+
+        stale_decision = Decision(
+            SHOT | UP | LEFT,
+            "up_left_fast",
+            9.381558418273926,
+            9.381558418273926,
+            0.0,
+            False,
+            planned_focus=False,
+            robust_delay_frames=(3, 4, 5, 6),
+            robust_min_clearance=9.381558418273926,
+        )
+        corrected = recertify_action_for_fresh_hazards(
+            stale_decision,
+            player_x=172.36550903320312,
+            player_y=432.0,
+            previous_mask=SHOT | DOWN | RIGHT,
+            delay_frames=(3, 4, 5, 6),
+            action_hold_frames=6,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=projected,
+            snapshot_lag=1,
+        )
+        self.assertEqual(corrected.action, "right_fast")
+        self.assertTrue(corrected.robust_override)
+        self.assertEqual(corrected.robust_collisions, 0)
+        self.assertGreater(corrected.robust_min_clearance, 0.0)
+
+    def test_dormant_enemy_memory_expires_and_resets_by_context(self) -> None:
+        memory = EnemyBodyModeMemory(maximum_age_frames=10)
+        body = EnemyBody(
+            ENEMY_POOL_BASE,
+            100.0,
+            120.0,
+            1.0,
+            2.0,
+            18.0,
+            18.0,
+            0x05,
+        )
+        memory.set_context((0, 3, None))
+        memory.merge_snapshot(
+            EnemyPoolSnapshot(100, 100, (body,), 1.0),
+            frame=100,
+        )
+        projected, dormant = memory.merge_snapshot(
+            EnemyPoolSnapshot(110, 110, (), 1.0),
+            frame=110,
+        )
+        self.assertEqual(len(projected), 1)
+        self.assertEqual(dormant, frozenset((body.pointer,)))
+        expired, dormant = memory.merge_snapshot(
+            EnemyPoolSnapshot(111, 111, (), 1.0),
+            frame=111,
+        )
+        self.assertEqual(expired, ())
+        self.assertEqual(dormant, frozenset())
+        memory.merge_snapshot(
+            EnemyPoolSnapshot(112, 112, (body,), 1.0),
+            frame=112,
+        )
+        self.assertTrue(memory.set_context((0, 3, 57)))
+        cleared, dormant = memory.merge_snapshot(
+            EnemyPoolSnapshot(113, 113, (), 1.0),
+            frame=113,
+        )
+        self.assertEqual(cleared, ())
+        self.assertEqual(dormant, frozenset())
+
+    def test_ce_0096_internal_motion_component_is_not_world_velocity(
+        self,
+    ) -> None:
+        memory = EnemyBodyModeMemory(maximum_age_frames=80)
+        memory.set_context((0, 3, None))
+        pointer = 5862912
+        samples = (
+            (28779, 381.9375305175781, 14.763214111328125, 18.511810302734375),
+            (28784, -8.736358642578125, 14.07257080078125, 32.55963134765625),
+            (28788, 59.03617858886719, 13.209136962890625, 49.1673583984375),
+            (28792, 110.14616394042969, 12.518463134765625, 61.691925048828125),
+            (28796, 158.49349975585938, 11.827789306640625, 73.53948974609375),
+            (28800, 204.078125, 11.137115478515625, 84.71005249023438),
+            (28803, 246.89999389648438, 10.446441650390625, 95.20358276367188),
+            (28807, 277.2033996582031, 9.928497314453125, 102.62945556640625),
+            (28811, 315.1906433105469, 9.23785400390625, 111.93829345703125),
+            (28815, 350.4150695800781, 8.547149658203125, 120.570068359375),
+            (28818, 382.8768310546875, 7.85650634765625, 128.52484130859375),
+            (28822, 405.41009521484375, 7.33837890625, 134.04666137695312),
+            (28826, -14.962890625, 6.647705078125, 140.81668090820312),
+            (28830, 9.9014892578125, 5.95709228515625, 146.90972900390625),
+        )
+        tracked = ()
+        for frame, x, internal_x, internal_y in samples:
+            body = EnemyBody(
+                pointer,
+                x,
+                164.0,
+                0.0,
+                0.0,
+                36.0,
+                24.0,
+                287907919,
+                internal_vx=internal_x,
+                internal_vy=internal_y,
+            )
+            tracked, dormant = memory.merge_snapshot(
+                EnemyPoolSnapshot(frame, frame, (body,), 1.0),
+                frame=frame,
+            )
+            self.assertEqual(dormant, frozenset())
+
+        self.assertEqual(len(tracked), 1)
+        estimated = tracked[0]
+        self.assertAlmostEqual(estimated.vx, 6.216094970703125)
+        self.assertEqual(estimated.vy, 0.0)
+        self.assertEqual(estimated.internal_vy, 146.90972900390625)
+        self.assertEqual(estimated.y + 6.0 * estimated.vy, 164.0)
+        self.assertLess(
+            abs(178.264404296875 - estimated.y)
+            - (2.0 + estimated.half_height),
+            0.0,
+        )
+
+    def test_ce_0096_issue_guard_uses_aligned_world_trajectory(self) -> None:
+        pointer = ENEMY_POOL_BASE
+        raw_before = EnemyBody(
+            pointer,
+            100.0,
+            120.0,
+            0.0,
+            0.0,
+            18.0,
+            18.0,
+            0x05,
+            internal_vx=1.0,
+            internal_vy=90.0,
+        )
+        raw_after = replace(raw_before, x=110.0)
+        self.assertEqual(
+            enemy_pool_snapshot_changes(
+                EnemyPoolSnapshot(100, 100, (raw_before,), 1.0),
+                EnemyPoolSnapshot(102, 102, (raw_after,), 1.0),
+            ),
+            (f"trajectory:{pointer:#x}",),
+        )
+        aligned_before = replace(raw_before, vx=5.0)
+        aligned_after = replace(raw_after, x=100.0, vx=5.0)
+        self.assertEqual(
+            issue_enemy_snapshot_changes(
+                EnemyPoolSnapshot(100, 100, (raw_before,), 1.0),
+                EnemyPoolSnapshot(102, 102, (raw_after,), 1.0),
+                EnemyPoolSnapshot(90, 90, (aligned_before,), 1.0),
+                EnemyPoolSnapshot(90, 90, (aligned_after,), 1.0),
+            ),
+            (),
         )
 
     def test_ce_0090_latent_spell_owner_replaces_stale_pool_body(self) -> None:
@@ -823,6 +1102,48 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertNotEqual(corrected.action, "up_right_fast")
         self.assertTrue(corrected.robust_override)
         self.assertLess(corrected.robust_min_clearance, 0.0)
+
+    def test_ce_0094_latent_ring_avoids_the_frame_9813_reactivation(self) -> None:
+        stale_decision = Decision(
+            SHOT | UP | RIGHT,
+            "up_right_fast",
+            75.65016174316406,
+            75.65016174316406,
+            0.0,
+            False,
+            planned_focus=False,
+            robust_delay_frames=(3, 4, 5, 6),
+            robust_min_clearance=75.65016174316406,
+        )
+        # Slot 7 was observed through frame 9785, then its native contact mode
+        # disappeared from the old action snapshot before exact frame-9813
+        # contact. Its position and velocity remained a continuous trajectory.
+        body = EnemyBody(
+            5927280,
+            156.9927892908454,
+            331.7983570098877,
+            -0.11290890723466873,
+            3.198007583618164,
+            18.0,
+            18.0,
+            285217101 & ~0x04,
+        )
+        corrected = recertify_action_for_fresh_hazards(
+            stale_decision,
+            player_x=137.5178680419922,
+            player_y=386.86676025390625,
+            previous_mask=SHOT | 0x04 | RIGHT,
+            delay_frames=(3, 4, 5, 6),
+            action_hold_frames=5,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(body,),
+            snapshot_lag=0,
+        )
+        self.assertEqual(corrected.action, "down_fast")
+        self.assertTrue(corrected.robust_override)
+        self.assertEqual(corrected.robust_collisions, 0)
+        self.assertGreater(corrected.robust_min_clearance, 0.0)
 
     def test_enemy_body_is_a_local_planner_hazard(self) -> None:
         decision = choose_action(

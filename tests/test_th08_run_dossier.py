@@ -186,6 +186,39 @@ class Th08RunDossierTests(unittest.TestCase):
                     "min_clearance": -1.0,
                 },
             },
+            {
+                "action": "left",
+                "viability": {
+                    "available": True,
+                    "support_covers_current": True,
+                    "state_viable": True,
+                    "safe_action_count": 1,
+                    "safe_actions": ["left"],
+                },
+                "robust_control": {
+                    "worst_collisions": 1,
+                    "min_clearance": -1.0,
+                },
+                "issue_time_enemy_guard": {
+                    "changes": ["contact_mode:0x592230"],
+                    "recertified": True,
+                },
+            },
+            {
+                "action": "left",
+                "viability": {
+                    "available": True,
+                    "support_covers_current": True,
+                    "state_viable": True,
+                    "safe_action_count": 1,
+                    "safe_actions": ["left"],
+                },
+                "robust_control": {
+                    "worst_collisions": 1,
+                    "min_clearance": -1.0,
+                },
+                "deadline_guard": {"input_suppressed": True},
+            },
         ]
         summary = _planner_consistency_summary(rows)
         self.assertEqual(summary["comparable_decision_count"], 3)
@@ -207,6 +240,11 @@ class Th08RunDossierTests(unittest.TestCase):
             summary["selected_action_outside_global_winning_set_count"],
             1,
         )
+        self.assertEqual(
+            summary["excluded_hazard_version_change_count"],
+            1,
+        )
+        self.assertEqual(summary["excluded_deadline_hold_count"], 1)
 
     def test_global_viability_exhaustion_requires_available_empty_query(
         self,
@@ -394,6 +432,9 @@ class Th08RunDossierTests(unittest.TestCase):
                     12.0,
                     10.0,
                     5,
+                    0.0,
+                    -1.0,
+                    90.0,
                 ]
             ],
         }
@@ -405,6 +446,8 @@ class Th08RunDossierTests(unittest.TestCase):
         self.assertTrue(enemy["exact_same_epoch"])
         self.assertLessEqual(enemy["aabb_clearance"], 0.0)
         self.assertFalse(enemy["present_in_action_snapshot"])
+        self.assertEqual(enemy["internal_motion_x"], -1.0)
+        self.assertEqual(enemy["internal_motion_y"], 90.0)
         self.assertIn(
             "enemy_body_absent_from_action_snapshot",
             contributing,

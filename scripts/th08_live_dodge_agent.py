@@ -132,6 +132,9 @@ ITEM_ACTIVE_OFFSET = 0x02D5
 ITEM_MOTION_STATE_OFFSET = 0x02D7
 ITEM_FULL_VALUE_OFFSET = 0x02D8
 
+# This vector advances the enemy's internal +0x2D34 motion component in
+# sub_42DEB0.  It is not, in general, the derivative of the lethal world
+# position at +0x2D88 because scripted/relative motion contributes separately.
 ENEMY_VELOCITY_OFFSET = 0x2D4C
 ENEMY_CONTACT_SIZE_OFFSET = 0x2D70
 ENEMY_POSITION_OFFSET = 0x2D88
@@ -233,6 +236,11 @@ CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES = max(
     2 * TH08_CORRIDOR_CONFIG.frames_per_layer,
     LIVE_CONTROL_DELAY_MAX + LIVE_ACTION_HOLD_MAX,
 )
+# An ordinary enemy slot can clear its active/contact mode while its geometry
+# continues and later re-enable inside the current robust-policy horizon.
+# Retain the last observed mode envelope for exactly that modeled horizon.
+ENEMY_DORMANT_MEMORY_FRAMES = TH08_CORRIDOR_CONFIG.horizon_frames
+ENEMY_MAX_OBSERVED_WORLD_SPEED = 32.0
 CORRIDOR_MIN_COMMIT_FRAMES = 32
 CORRIDOR_INITIAL_SUBMIT_FRAME = -1_000_000
 STAGE_TRANSITION_TIMEOUT_SECONDS = 90.0
@@ -445,6 +453,8 @@ class EnemyBody:
     half_height: float
     flags: int
     uncertainty: float = 0.0
+    internal_vx: float | None = None
+    internal_vy: float | None = None
 
 
 @dataclass(frozen=True)
@@ -466,6 +476,139 @@ class EnemyPoolSnapshot:
     @property
     def stable(self) -> bool:
         return self.frame_before == self.frame_after
+
+
+class EnemyBodyModeMemory:
+    """Estimate world motion and retain bodies hidden by native mode switches.
+
+    Native +0x2D4C advances only one internal motion component.  The lethal
+    +0x2D88 position can also contain scripted or relative motion, so its
+    derivative must be estimated from consecutive world-position samples.
+    Implausible secants are treated as hybrid jumps and preserve the last
+    validated velocity.  Exact current-position measurements are not widened
+    to pretend that an unobserved future mode has become known.
+    """
+
+    def __init__(
+        self,
+        *,
+        maximum_age_frames: int,
+        maximum_world_speed: float = ENEMY_MAX_OBSERVED_WORLD_SPEED,
+    ) -> None:
+        if maximum_age_frames <= 0:
+            raise ValueError("enemy body memory age must be positive")
+        if maximum_world_speed <= 0.0:
+            raise ValueError("enemy world speed limit must be positive")
+        self.maximum_age_frames = maximum_age_frames
+        self.maximum_world_speed = maximum_world_speed
+        self._context: object = None
+        self._samples: dict[int, tuple[int, EnemyBody, bool]] = {}
+
+    def set_context(self, context: object) -> bool:
+        if context == self._context:
+            return False
+        self._context = context
+        self._samples.clear()
+        return True
+
+    def clear(self) -> None:
+        self._samples.clear()
+
+    def merge_snapshot(
+        self,
+        snapshot: EnemyPoolSnapshot,
+        *,
+        frame: int,
+    ) -> tuple[tuple[EnemyBody, ...], frozenset[int]]:
+        """Merge current bodies with bounded projections of absent slots."""
+
+        observed_pointers = {body.pointer for body in snapshot.bodies}
+        for body in snapshot.bodies:
+            previous = self._samples.get(body.pointer)
+            velocity_known = body.internal_vx is None
+            velocity_x = body.vx if velocity_known else 0.0
+            velocity_y = body.vy if velocity_known else 0.0
+            uncertainty = body.uncertainty
+            if previous is not None:
+                previous_frame, previous_body, previous_known = previous
+                elapsed = snapshot.frame_after - previous_frame
+                if elapsed > 0:
+                    measured_x = (body.x - previous_body.x) / elapsed
+                    measured_y = (body.y - previous_body.y) / elapsed
+                    if (
+                        abs(measured_x) <= self.maximum_world_speed
+                        and abs(measured_y) <= self.maximum_world_speed
+                    ):
+                        velocity_x = measured_x
+                        velocity_y = measured_y
+                        velocity_known = True
+                        uncertainty = body.uncertainty
+                    else:
+                        velocity_x = (
+                            previous_body.vx if previous_known else 0.0
+                        )
+                        velocity_y = (
+                            previous_body.vy if previous_known else 0.0
+                        )
+                        velocity_known = previous_known
+                        uncertainty = body.uncertainty
+                elif elapsed == 0:
+                    velocity_x = previous_body.vx
+                    velocity_y = previous_body.vy
+                    velocity_known = previous_known
+                    uncertainty = max(
+                        body.uncertainty,
+                        previous_body.uncertainty,
+                    )
+                else:
+                    continue
+            tracked = replace(
+                body,
+                vx=velocity_x,
+                vy=velocity_y,
+                uncertainty=uncertainty,
+            )
+            self._samples[body.pointer] = (
+                snapshot.frame_after,
+                tracked,
+                velocity_known,
+            )
+        expired = [
+            pointer
+            for pointer, (
+                sample_frame,
+                _body,
+                _velocity_known,
+            ) in self._samples.items()
+            if snapshot.frame_after - sample_frame > self.maximum_age_frames
+        ]
+        for pointer in expired:
+            del self._samples[pointer]
+
+        bodies = []
+        dormant = set()
+        for pointer, (
+            sample_frame,
+            body,
+            _velocity_known,
+        ) in sorted(self._samples.items()):
+            age = frame - sample_frame
+            if pointer not in observed_pointers:
+                if age < 0 or age > self.maximum_age_frames:
+                    continue
+                dormant.add(pointer)
+            bodies.append(
+                replace(
+                    body,
+                    x=body.x + body.vx * age,
+                    y=body.y + body.vy * age,
+                    uncertainty=(
+                        body.uncertainty
+                        + min(16.0, 0.75 * abs(age))
+                    ),
+                )
+            )
+        return tuple(bodies), frozenset(dormant)
 
 
 @dataclass(frozen=True)
@@ -1333,7 +1476,11 @@ def _decode_enemy_body_geometry(
     contact_offset = ENEMY_CONTACT_SIZE_OFFSET - ENEMY_BODY_READ_OFFSET
     position_offset = ENEMY_POSITION_OFFSET - ENEMY_BODY_READ_OFFSET
     flags_offset = ENEMY_FLAGS_OFFSET - ENEMY_BODY_READ_OFFSET
-    vx, vy = struct.unpack_from("<ff", blob, velocity_offset)
+    internal_vx, internal_vy = struct.unpack_from(
+        "<ff",
+        blob,
+        velocity_offset,
+    )
     contact_width, contact_height = struct.unpack_from(
         "<ff",
         blob,
@@ -1343,7 +1490,16 @@ def _decode_enemy_body_geometry(
     flags = struct.unpack_from("<I", blob, flags_offset)[0]
     if not flags & ENEMY_ACTIVE_FLAG:
         return None
-    if not _finite((x, y, vx, vy, contact_width, contact_height)):
+    if not _finite(
+        (
+            x,
+            y,
+            internal_vx,
+            internal_vy,
+            contact_width,
+            contact_height,
+        )
+    ):
         return None
     if contact_width < 0.0 or contact_height < 0.0:
         return None
@@ -1351,12 +1507,17 @@ def _decode_enemy_body_geometry(
         pointer=pointer,
         x=x,
         y=y,
-        vx=vx,
-        vy=vy,
+        # +0x2D4C advances an internal motion component, not necessarily the
+        # collision position.  EnemyBodyModeMemory supplies the observed
+        # world-position derivative before this body reaches planning.
+        vx=0.0,
+        vy=0.0,
         # Native path: full contact size * 1.5, then center +/- size/2.
         half_width=0.75 * contact_width,
         half_height=0.75 * contact_height,
         flags=flags,
+        internal_vx=internal_vx,
+        internal_vy=internal_vy,
     )
 
 
@@ -1368,6 +1529,15 @@ def decode_enemy_body(blob: bytes, *, pointer: int) -> EnemyBody | None:
     ):
         return None
     return body
+
+
+def enemy_body_contact_enabled(body: EnemyBody) -> bool:
+    """Return the native contact-mode gate represented by one body sample."""
+
+    return bool(
+        body.flags & ENEMY_CONTACT_ENABLED_FLAG
+        and not body.flags & ENEMY_CONTACT_BLOCKING_FLAGS
+    )
 
 
 def enemy_pointer_in_scanned_pool(pointer: int) -> bool:
@@ -1410,8 +1580,15 @@ def decode_enemy_bodies(
     blob: bytes,
     *,
     pool_size: int = ENEMY_POOL_SIZE,
+    include_contact_disabled: bool = False,
 ) -> tuple[EnemyBody, ...]:
-    """Decode contact-enabled slots from a contiguous native pool prefix."""
+    """Decode ordinary enemy collision geometry from a contiguous pool.
+
+    The default preserves the exact currently-enabled native contact set.
+    A synchronous safety guard may instead request active, non-blocked bodies
+    whose contact bit is currently disabled.  Those bodies represent the
+    robust union over a contact mode that can toggle before actuator pickup.
+    """
 
     if not 0 <= pool_size <= ENEMY_POOL_SIZE:
         raise ValueError("enemy pool size must belong to the native pool")
@@ -1430,11 +1607,14 @@ def decode_enemy_bodies(
         )[0]
         if (
             not flags & ENEMY_ACTIVE_FLAG
-            or not flags & ENEMY_CONTACT_ENABLED_FLAG
             or flags & ENEMY_CONTACT_BLOCKING_FLAGS
+            or (
+                not include_contact_disabled
+                and not flags & ENEMY_CONTACT_ENABLED_FLAG
+            )
         ):
             continue
-        vx, vy = struct.unpack_from(
+        internal_vx, internal_vy = struct.unpack_from(
             "<ff",
             blob,
             base + ENEMY_VELOCITY_OFFSET,
@@ -1449,20 +1629,37 @@ def decode_enemy_bodies(
             blob,
             base + ENEMY_POSITION_OFFSET,
         )
-        if not _finite((x, y, vx, vy, contact_width, contact_height)):
+        if not _finite(
+            (
+                x,
+                y,
+                internal_vx,
+                internal_vy,
+                contact_width,
+                contact_height,
+            )
+        ):
             continue
         if contact_width < 0.0 or contact_height < 0.0:
+            continue
+        if (
+            include_contact_disabled
+            and not flags & ENEMY_CONTACT_ENABLED_FLAG
+            and (contact_width == 0.0 or contact_height == 0.0)
+        ):
             continue
         bodies.append(
             EnemyBody(
                 pointer=ENEMY_POOL_BASE + base,
                 x=x,
                 y=y,
-                vx=vx,
-                vy=vy,
+                vx=0.0,
+                vy=0.0,
                 half_width=0.75 * contact_width,
                 half_height=0.75 * contact_height,
                 flags=flags,
+                internal_vx=internal_vx,
+                internal_vy=internal_vy,
             )
         )
     return tuple(bodies)
@@ -1511,7 +1708,11 @@ def capture_enemy_pool_prefix_contiguous(
         snapshot = EnemyPoolSnapshot(
             frame_before,
             frame_after,
-            decode_enemy_bodies(blob, pool_size=pool_size),
+            decode_enemy_bodies(
+                blob,
+                pool_size=pool_size,
+                include_contact_disabled=True,
+            ),
             (time.perf_counter() - started) * 1000.0,
             attempt,
         )
@@ -1660,6 +1861,37 @@ def enemy_pool_snapshot_changes(
     return tuple(changes)
 
 
+def issue_enemy_snapshot_changes(
+    planned_raw: EnemyPoolSnapshot,
+    current_raw: EnemyPoolSnapshot,
+    planned_aligned: EnemyPoolSnapshot,
+    current_aligned: EnemyPoolSnapshot,
+) -> tuple[str, ...]:
+    """Version an issue guard by topology and aligned world trajectories."""
+
+    raw_changes = enemy_pool_snapshot_changes(planned_raw, current_raw)
+    aligned_changes = enemy_pool_snapshot_changes(
+        planned_aligned,
+        current_aligned,
+    )
+    topology_kinds = {
+        "added",
+        "removed",
+        "size",
+        "contact_mode",
+        "unstable_capture",
+        "frame_reversed",
+    }
+    return tuple(
+        dict.fromkeys(
+            change
+            for change in (*raw_changes, *aligned_changes)
+            if change.split(":", 1)[0] in topology_kinds
+            or change in aligned_changes
+        )
+    )
+
+
 def recertify_action_for_fresh_hazards(
     decision: Decision,
     *,
@@ -1796,7 +2028,7 @@ def decode_player_lethal_aabb(
 
 def _serialized_enemy_bodies(
     bodies: tuple[EnemyBody, ...],
-) -> list[list[float | int]]:
+) -> list[list[float | int | None]]:
     return [
         [
             body.pointer,
@@ -1804,10 +2036,12 @@ def _serialized_enemy_bodies(
             body.y,
             body.vx,
             body.vy,
-                            body.half_width,
-                            body.half_height,
-                            body.flags,
-                            body.uncertainty,
+            body.half_width,
+            body.half_height,
+            body.flags,
+            body.uncertainty,
+            body.internal_vx,
+            body.internal_vy,
         ]
         for body in bodies
     ]
@@ -3910,6 +4144,20 @@ def run(args: argparse.Namespace) -> int:
     corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
     corridor_commitment = CorridorCommitment()
     corridor_context: tuple[int, int, int | None] | None = None
+    enemy_body_memory = EnemyBodyModeMemory(
+        maximum_age_frames=ENEMY_DORMANT_MEMORY_FRAMES
+    )
+    enemy_background_memory = EnemyBodyModeMemory(
+        maximum_age_frames=ENEMY_DORMANT_MEMORY_FRAMES
+    )
+    spell_enemy_body_memory = EnemyBodyModeMemory(
+        maximum_age_frames=ENEMY_DORMANT_MEMORY_FRAMES
+    )
+    enemy_body_memories = (
+        enemy_body_memory,
+        enemy_background_memory,
+        spell_enemy_body_memory,
+    )
     gameplay_epoch = 0
     auto_confirm = AutoConfirmPulse(
         interval_frames=args.auto_confirm_every,
@@ -3972,10 +4220,17 @@ def run(args: argparse.Namespace) -> int:
                         else "certified_viable_tiebreaker"
                     ),
                     "enemy_body_sensor": (
-                        "synchronous_prefix_plus_async_complete_pool"
+                        "synchronous_latent_contact_prefix_plus_"
+                        "async_enabled_tail_with_observed_world_motion"
                     ),
                     "enemy_body_synchronous_prefix_slots": (
                         ENEMY_LOCAL_PREFIX_SIZE
+                    ),
+                    "enemy_body_dormant_memory_frames": (
+                        ENEMY_DORMANT_MEMORY_FRAMES
+                    ),
+                    "enemy_body_max_observed_world_speed": (
+                        ENEMY_MAX_OBSERVED_WORLD_SPEED
                     ),
                     "control_delay_policy": (
                         "adaptive_end_to_end_distribution_robust_mpc"
@@ -4151,6 +4406,8 @@ def run(args: argparse.Namespace) -> int:
                     previous_direction = 0
                     corridor_solution = None
                     corridor_pending_solution = None
+                    for memory in enemy_body_memories:
+                        memory.clear()
                     if corridor_future is not None and corridor_future.cancel():
                         corridor_future = None
                     output.write(
@@ -4247,6 +4504,8 @@ def run(args: argparse.Namespace) -> int:
                 corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
                 corridor_context = None
                 corridor_commitment = CorridorCommitment()
+                for memory in enemy_body_memories:
+                    memory.clear()
                 ecl_instruction_cache.clear()
                 if corridor_future is not None and corridor_future.cancel():
                     corridor_future = None
@@ -4319,6 +4578,8 @@ def run(args: argparse.Namespace) -> int:
             corridor_context_changed = corridor_commitment.set_context(
                 corridor_context
             )
+            for memory in enemy_body_memories:
+                memory.set_context(corridor_context)
             if corridor_context_changed:
                 corridor_solution = None
                 corridor_pending_solution = None
@@ -4346,10 +4607,17 @@ def run(args: argparse.Namespace) -> int:
                     reader,
                 )
                 enemy_last_submit = counter
-            enemy_bodies = project_enemy_pool_snapshot(
-                enemy_snapshot,
-                frame=int(state["enemy_manager_frame"]),
-            )
+            if enemy_snapshot is None:
+                enemy_bodies = ()
+                background_dormant_enemy_body_pointers = frozenset()
+            else:
+                (
+                    enemy_bodies,
+                    background_dormant_enemy_body_pointers,
+                ) = enemy_background_memory.merge_snapshot(
+                    enemy_snapshot,
+                    frame=int(state["enemy_manager_frame"]),
+                )
             enemy_pool_read_ms = (
                 enemy_snapshot.read_ms
                 if enemy_snapshot is not None
@@ -4363,9 +4631,23 @@ def run(args: argparse.Namespace) -> int:
             enemy_prefix_snapshot = capture_enemy_pool_prefix_contiguous(
                 reader
             )
-            enemy_prefix_bodies = project_enemy_pool_snapshot(
+            (
+                enemy_prefix_bodies,
+                prefix_dormant_enemy_body_pointers,
+            ) = enemy_body_memory.merge_snapshot(
                 enemy_prefix_snapshot,
                 frame=int(state["enemy_manager_frame"]),
+            )
+            prefix_end = (
+                ENEMY_POOL_BASE + ENEMY_LOCAL_PREFIX_SIZE * ENEMY_STRIDE
+            )
+            dormant_enemy_body_pointers = frozenset(
+                set(prefix_dormant_enemy_body_pointers)
+                | {
+                    pointer
+                    for pointer in background_dormant_enemy_body_pointers
+                    if pointer >= prefix_end
+                }
             )
             enemy_bodies = merge_enemy_pool_prefix(
                 enemy_bodies,
@@ -4428,6 +4710,23 @@ def run(args: argparse.Namespace) -> int:
                         f"{type(error).__name__}: {error}"
                     )
                 ecl_frame_after = reader.u32(0x0164D30C)
+                if spell_enemy_body_guard is not None:
+                    tracked_spell_bodies, _dormant = (
+                        spell_enemy_body_memory.merge_snapshot(
+                            EnemyPoolSnapshot(
+                                ecl_frame_before,
+                                ecl_frame_after,
+                                (spell_enemy_body_guard.body,),
+                                0.0,
+                            ),
+                            frame=int(state["enemy_manager_frame"]),
+                        )
+                    )
+                    if tracked_spell_bodies:
+                        spell_enemy_body_guard = replace(
+                            spell_enemy_body_guard,
+                            body=tracked_spell_bodies[0],
+                        )
             enemy_bodies = merge_spell_enemy_body_guard(
                 enemy_bodies,
                 spell_enemy_body_guard,
@@ -4494,6 +4793,8 @@ def run(args: argparse.Namespace) -> int:
                 corridor_pending_solution = None
                 corridor_context = None
                 corridor_commitment = CorridorCommitment()
+                for memory in enemy_body_memories:
+                    memory.clear()
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
@@ -4836,18 +5137,37 @@ def run(args: argparse.Namespace) -> int:
             issue_enemy_read_ms = (
                 time.perf_counter() - issue_enemy_read_started
             ) * 1000.0
-            issue_enemy_changes = enemy_pool_snapshot_changes(
+            (
+                issue_enemy_prefix_bodies,
+                issue_dormant_enemy_body_pointers,
+            ) = enemy_body_memory.merge_snapshot(
+                issue_enemy_prefix_snapshot,
+                frame=int(state["enemy_manager_frame"]),
+            )
+            alignment_frame = int(state["enemy_manager_frame"])
+            issue_enemy_changes = issue_enemy_snapshot_changes(
                 enemy_prefix_snapshot,
                 issue_enemy_prefix_snapshot,
+                EnemyPoolSnapshot(
+                    alignment_frame,
+                    alignment_frame,
+                    enemy_prefix_bodies,
+                    enemy_prefix_snapshot.read_ms,
+                    enemy_prefix_snapshot.attempts,
+                ),
+                EnemyPoolSnapshot(
+                    alignment_frame,
+                    alignment_frame,
+                    issue_enemy_prefix_bodies,
+                    issue_enemy_prefix_snapshot.read_ms,
+                    issue_enemy_prefix_snapshot.attempts,
+                ),
             )
             issue_enemy_recertificate_ms = 0.0
             if issue_enemy_changes:
                 issue_enemy_bodies = merge_enemy_pool_prefix(
                     enemy_bodies,
-                    project_enemy_pool_snapshot(
-                        issue_enemy_prefix_snapshot,
-                        frame=int(state["enemy_manager_frame"]),
-                    ),
+                    issue_enemy_prefix_bodies,
                 )
                 issue_recertificate_started = time.perf_counter()
                 decision = recertify_action_for_fresh_hazards(
@@ -4902,6 +5222,8 @@ def run(args: argparse.Namespace) -> int:
                 corridor_pending_solution = None
                 corridor_context = None
                 corridor_commitment = CorridorCommitment()
+                for memory in enemy_body_memories:
+                    memory.clear()
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
@@ -5196,6 +5518,20 @@ def run(args: argparse.Namespace) -> int:
                     "active_lasers": len(lasers),
                     "active_items": len(items),
                     "active_enemy_bodies": len(enemy_bodies),
+                    "enemy_body_contact_enabled_count": sum(
+                        body.pointer not in dormant_enemy_body_pointers
+                        and enemy_body_contact_enabled(body)
+                        for body in enemy_bodies
+                    ),
+                    "enemy_body_anticipatory_count": sum(
+                        body.pointer not in dormant_enemy_body_pointers
+                        and not enemy_body_contact_enabled(body)
+                        for body in enemy_bodies
+                    ),
+                    "enemy_body_dormant_count": sum(
+                        body.pointer in dormant_enemy_body_pointers
+                        for body in enemy_bodies
+                    ),
                     "hazard_alignment": {
                         "bullet_frame_before": bullet_frame_before,
                         "bullet_frame_after": bullet_frame_after,
@@ -5207,6 +5543,22 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "enemy_prefix_body_count": len(
                             enemy_prefix_bodies
+                        ),
+                        "enemy_prefix_observed_body_count": len(
+                            enemy_prefix_snapshot.bodies
+                        ),
+                        "enemy_prefix_contact_enabled_count": sum(
+                            body.pointer not in dormant_enemy_body_pointers
+                            and enemy_body_contact_enabled(body)
+                            for body in enemy_prefix_bodies
+                        ),
+                        "enemy_prefix_anticipatory_count": sum(
+                            body.pointer not in dormant_enemy_body_pointers
+                            and not enemy_body_contact_enabled(body)
+                            for body in enemy_prefix_bodies
+                        ),
+                        "enemy_prefix_dormant_count": len(
+                            dormant_enemy_body_pointers
                         ),
                         "enemy_prefix_attempts": (
                             enemy_prefix_snapshot.attempts
@@ -5231,7 +5583,21 @@ def run(args: argparse.Namespace) -> int:
                             issue_enemy_prefix_snapshot.frame_after
                         ),
                         "body_count": len(
+                            issue_enemy_prefix_bodies
+                        ),
+                        "observed_body_count": len(
                             issue_enemy_prefix_snapshot.bodies
+                        ),
+                        "contact_enabled_count": sum(
+                            enemy_body_contact_enabled(body)
+                            for body in issue_enemy_prefix_snapshot.bodies
+                        ),
+                        "anticipatory_count": sum(
+                            not enemy_body_contact_enabled(body)
+                            for body in issue_enemy_prefix_snapshot.bodies
+                        ),
+                        "dormant_count": len(
+                            issue_dormant_enemy_body_pointers
                         ),
                         "attempts": (
                             issue_enemy_prefix_snapshot.attempts

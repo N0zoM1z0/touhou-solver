@@ -25,6 +25,12 @@ ROBUST_NO_BOMB_CORPUS = (
     / "runtime_reports"
     / "lunatic_route2_fullrun_robust_viability_20260723_194644.regressions.json"
 )
+STRICT_ENEMY_VERSION_STAGE5_CORPUS = (
+    ROOT
+    / "artifacts"
+    / "runtime_reports"
+    / "lunatic_route2_stage5_unattended_20260724_191313.regressions.json"
+)
 
 
 class Th08FullrunRegressionTests(unittest.TestCase):
@@ -58,6 +64,22 @@ class Th08FullrunRegressionTests(unittest.TestCase):
                 "Final B / Kaguya": 33,
             },
         )
+
+    def test_ce_0098_stage5_retains_strict_enemy_version_failures(self) -> None:
+        summary = load_and_validate(STRICT_ENEMY_VERSION_STAGE5_CORPUS)
+        self.assertEqual(summary.case_count, 28)
+        self.assertEqual(summary.deathbomb_count, 0)
+        self.assertEqual(summary.stage_counts, {"Stage 5": 28})
+        self.assertEqual(
+            summary.cause_counts,
+            {
+                "observed_bullet_overlap": 11,
+                "modeled_committed_prefix_collision": 16,
+                "sensor_gap_or_unmodeled_hazard": 1,
+            },
+        )
+        self.assertEqual(summary.exact_bullet_witnesses, 11)
+        self.assertEqual(summary.exact_enemy_body_witnesses, 0)
 
     def test_every_retained_native_hit_is_a_valid_unique_witness(self) -> None:
         summary = load_and_validate(CORPUS)

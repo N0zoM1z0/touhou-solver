@@ -1,9 +1,10 @@
 # Versioned Safety Transactions And Weight-Free Reach-Avoid
 
-Status: architecture and offline checkpoint on 2026-07-24. The local
-cached-policy intersection is implemented and replay-tested but has not yet
-passed a physical Stage-4A run. The survival-horizon game remains an
-independent scalar oracle, not a live controller.
+Status: architecture and physical Stage-4A checkpoint on 2026-07-24. The
+local cached-policy intersection, enemy lifecycle union, observed world-motion
+estimator, and aligned issue guard have executed in complete no-Bomb trials.
+The survival-horizon game remains an independent scalar oracle, not a live
+controller.
 
 ## Observed Evidence
 
@@ -57,6 +58,48 @@ A useful guarantee requires explicit assumptions:
 When any assumption changes, the plan version is invalid. Continuing to issue
 it is a correctness error.
 
+## Enemy Geometry Is A Hybrid Observation Process
+
+CE-0094 and CE-0096 expose two distinct hidden-state errors.
+
+First, native active/contact flags are modes of an enemy slot, not object
+identity. A contact body can clear bit `0x04`, or even clear the active mode
+for tens of frames, and later resume a continuous lethal trajectory. The
+robust geometry for an already observed slot is therefore the union of:
+
+```text
+currently contact-enabled body
+active but contact-disabled body
+bounded projection of a recently absent slot
+```
+
+The union is scoped to gameplay epoch, stage, and spell context and expires at
+the 80-frame planning horizon. It is not an unbounded ghost cache.
+
+Second, TH08 `enemy+0x2D4C` is the velocity of an internal motion component,
+not generally the derivative of lethal world position `+0x2D88`. Static code
+at `0x42DEB0` proves where the component is integrated; runtime pointer
+`0x00597600` proves the fields diverge, retaining world `y=164` while the
+second internal float reaches `146.910`.
+
+The adapter now estimates world velocity from consecutive `+0x2D88`
+observations. An implausible secant is a hybrid jump, so the exact new
+position is accepted while the last validated velocity is retained. A failed
+trial widened every unknown/jump by 16 pixels; that produced 34 hits and
+26,004 false trajectory invalidations. The fixed margin was rejected because
+it was neither a reachable set nor a calibrated error bound.
+
+Motion invalidation is now computed after aligning both tracked snapshots to
+the same player epoch. Raw snapshots still supply allocation, removal,
+contact-mode, and size transitions. In the corrected physical run, issue
+observations with changes fell from 2,841 to 1,258 while local-plan and cadence
+tails remained at `49.96 ms` and `6` frames.
+
+This model cannot cover a never-observed slot. CE-0097 contains two exact
+collisions from rings born 4 and 5 frames after the governing action's final
+issue observation. Those require a future spawn event or a sound birth
+envelope, not a longer memory TTL.
+
 ## Observe-Plan-Validate-Act As A Transaction
 
 The controller should behave like optimistic concurrency control:
@@ -76,8 +119,8 @@ capture coherent version v
 
 The TH08 adapter now retries one synchronous 64-slot prefix read when the
 enemy-manager frame changes across the read. It reads that prefix before and
-after local planning. Adds/removes, contact-mode changes, size/velocity
-changes, and nonlinear residuals invalidate the old enemy-body certificate.
+after local planning. Adds/removes, contact-mode changes, size changes, and
+aligned world-trajectory residuals invalidate the old enemy-body certificate.
 
 This closes the observed enemy-prefix race only under its observation scope.
 Bullets and lasers can also be born during planning. The general next native
@@ -187,14 +230,15 @@ physical improvement.
 
 ## Ordered Implementation
 
-1. Physically validate the enemy-prefix retry, issue-time recertificate, and
-   fresh global/local intersection on focused Stage 4A.
+1. Keep the physically validated enemy lifecycle and issue-time version
+   contract as a hard gate; use Stage 4A and Stage 5 retained corpora for
+   regression.
 2. Attribute every direct action-contract contradiction to stale births,
    policy age, off-grid margin, or a transition-model difference.
-3. Prototype adaptive fine-grid value induction around contradicted/empty
+3. Move lexicographic survival-horizon induction into the existing native
+   viability recurrence and require scalar-oracle parity.
+4. Prototype adaptive fine-grid value induction around contradicted/empty
    queries and require scalar-oracle parity.
-4. Move robust survival-horizon induction to the existing native viability
-   backend. Do not put the scalar oracle on the live path.
 5. Build the packed issue-time bullet/laser/enemy safety shield in C++ and
    compare its full action certificates with the Python oracle before physical
    use.

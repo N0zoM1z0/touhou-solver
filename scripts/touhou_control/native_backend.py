@@ -8,6 +8,8 @@ from pathlib import Path
 
 import numpy as np
 
+from .packed_hazards import PackedSegmentFrames
+
 
 ROOT = Path(__file__).resolve().parents[2]
 _DISABLE_ENV = "TOUHOU_DISABLE_NATIVE_PLANNER"
@@ -499,6 +501,31 @@ def apply_segment_trajectory_clearance(
 ) -> np.ndarray | None:
     """Apply finite segment samples to an existing clearance volume."""
 
+    if _load_trajectory_clearance_function() is None:
+        return None
+    packed = PackedSegmentFrames.from_trajectories(
+        segment_trajectories,
+        frame_count=clearance_volume.shape[0],
+    )
+    return apply_packed_segment_clearance(
+        x_axis=x_axis,
+        y_axis=y_axis,
+        player_radius=player_radius,
+        packed_segments=packed,
+        clearance_volume=clearance_volume,
+    )
+
+
+def apply_packed_segment_clearance(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    player_radius: float,
+    packed_segments: PackedSegmentFrames,
+    clearance_volume: np.ndarray,
+) -> np.ndarray | None:
+    """Apply an already frame-major segment batch without object repacking."""
+
     function = _load_trajectory_clearance_function()
     if function is None:
         return None
@@ -508,30 +535,19 @@ def apply_segment_trajectory_clearance(
     frame_count = output.shape[0]
     if output.shape[1:] != (len(y_axis), len(x_axis)):
         raise ValueError("clearance volume does not match the supplied axes")
-
-    frame_offsets = np.empty(frame_count + 1, dtype=np.int32)
-    samples: list[object] = []
-    for frame in range(frame_count):
-        frame_offsets[frame] = len(samples)
-        samples.extend(
-            sample
-            for trajectory in segment_trajectories
-            if (sample := trajectory.sample(frame)) is not None
+    if packed_segments.frame_count != frame_count:
+        raise ValueError(
+            "packed segment frame count does not match clearance volume"
         )
-    frame_offsets[frame_count] = len(samples)
-    packed_samples = tuple(samples)
-    segment_fields = tuple(
-        _attribute_array(packed_samples, name)
-        for name in (
-            "origin_x",
-            "origin_y",
-            "angle",
-            "tail",
-            "head",
-            "half_width",
-            "base_uncertainty",
-            "uncertainty_per_frame",
-        )
+    segment_fields = (
+        packed_segments.origin_x,
+        packed_segments.origin_y,
+        packed_segments.angle,
+        packed_segments.tail,
+        packed_segments.head,
+        packed_segments.half_width,
+        packed_segments.base_uncertainty,
+        packed_segments.uncertainty_per_frame,
     )
     float_pointer = ctypes.POINTER(ctypes.c_float)
     result = function(
@@ -543,12 +559,14 @@ def apply_segment_trajectory_clearance(
         len(y_axis),
         frame_count,
         player_radius,
-        frame_offsets.ctypes.data_as(ctypes.POINTER(ctypes.c_int32)),
+        packed_segments.frame_offsets.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_int32)
+        ),
         *(
             values.ctypes.data_as(float_pointer)
             for values in segment_fields
         ),
-        len(packed_samples),
+        packed_segments.sample_count,
         output.ctypes.data_as(float_pointer),
     )
     if result != 0:

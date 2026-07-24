@@ -7,6 +7,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import numpy as np
+
 from corridor_planner import (
     MovingAabbHazard,
     PiecewiseAabbHazard,
@@ -17,6 +19,7 @@ from touhou_control.trajectory import (
     PiecewiseLinearTrajectory,
     VelocityChange,
 )
+from touhou_control.packed_hazards import PackedSegmentFrames
 from touhou_control.viability_audit_capsule import (
     read_viability_audit_capsule,
     write_viability_audit_capsule,
@@ -107,6 +110,50 @@ class ViabilityAuditCapsuleTests(unittest.TestCase):
         self.assertEqual(retained.aabbs, ())
         self.assertEqual(retained.piecewise_aabbs, ())
         self.assertEqual(retained.segment_trajectories, ())
+
+    def test_packed_frame_major_lasers_round_trip_losslessly(self) -> None:
+        packed = PackedSegmentFrames.from_frame_rows(
+            (
+                (),
+                (
+                    (10.0, 20.0, 0.5, -2.0, 40.0, 3.0, 0.75, 0.0),
+                    (30.0, 40.0, 1.0, 0.0, 20.0, 2.0, 0.25, 0.1),
+                ),
+            )
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "packed.npz"
+            write_viability_audit_capsule(
+                path,
+                metadata={"source_frame": 7},
+                aabbs=(),
+                piecewise_aabbs=(),
+                segment_trajectories=(),
+                packed_segments=packed,
+            )
+            retained = read_viability_audit_capsule(path)
+        self.assertIsNotNone(retained.packed_segments)
+        assert retained.packed_segments is not None
+        self.assertEqual(retained.packed_segments.frame_count, 2)
+        self.assertEqual(retained.packed_segments.sample_count, 2)
+        np.testing.assert_array_equal(
+            retained.packed_segments.frame_offsets,
+            packed.frame_offsets,
+        )
+        for field in (
+            "origin_x",
+            "origin_y",
+            "angle",
+            "tail",
+            "head",
+            "half_width",
+            "base_uncertainty",
+            "uncertainty_per_frame",
+        ):
+            np.testing.assert_array_equal(
+                getattr(retained.packed_segments, field),
+                getattr(packed, field),
+            )
 
 
 if __name__ == "__main__":

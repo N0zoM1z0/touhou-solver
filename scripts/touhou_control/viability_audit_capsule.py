@@ -22,7 +22,12 @@ from corridor_planner import (
     SegmentHazard,
     SegmentTrajectoryHazard,
 )
+from .packed_hazards import PackedSegmentFrames, SEGMENT_FIELD_NAMES
 from .trajectory import PiecewiseLinearTrajectory, VelocityChange
+
+
+_SCHEMA_V1 = "touhou-viability-audit-capsule-v1"
+_SCHEMA_V2 = "touhou-viability-audit-capsule-v2"
 
 
 @dataclass(frozen=True)
@@ -31,6 +36,7 @@ class ViabilityAuditCapsule:
     aabbs: tuple[MovingAabbHazard, ...]
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...]
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...]
+    packed_segments: PackedSegmentFrames | None = None
 
 
 def _rows(
@@ -49,6 +55,7 @@ def write_viability_audit_capsule(
     aabbs: tuple[MovingAabbHazard, ...],
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...],
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
+    packed_segments: PackedSegmentFrames | None = None,
 ) -> None:
     """Atomically retain one exact neutral policy input epoch."""
 
@@ -133,10 +140,23 @@ def write_viability_audit_capsule(
 
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.tmp")
+    packed_arrays = {}
+    if packed_segments is not None:
+        packed_arrays["packed_segment_frame_offsets"] = (
+            packed_segments.frame_offsets
+        )
+        packed_arrays.update(
+            {
+                f"packed_segment_{name}": getattr(packed_segments, name)
+                for name in SEGMENT_FIELD_NAMES
+            }
+        )
     with temporary.open("wb") as output:
         np.savez(
             output,
-            schema=np.asarray("touhou-viability-audit-capsule-v1"),
+            schema=np.asarray(
+                _SCHEMA_V2 if packed_segments is not None else _SCHEMA_V1
+            ),
             metadata=np.asarray(
                 json.dumps(
                     dict(metadata),
@@ -153,6 +173,7 @@ def write_viability_audit_capsule(
             piecewise_events=_rows(piecewise_events, 3),
             segment_offsets=np.asarray(segment_offsets, dtype=np.int64),
             segment_samples=_rows(segment_samples, 9),
+            **packed_arrays,
         )
     os.replace(temporary, path)
 
@@ -162,7 +183,7 @@ def read_viability_audit_capsule(path: Path) -> ViabilityAuditCapsule:
 
     with np.load(path, allow_pickle=False) as data:
         schema = str(data["schema"])
-        if schema != "touhou-viability-audit-capsule-v1":
+        if schema not in (_SCHEMA_V1, _SCHEMA_V2):
             raise ValueError(f"unsupported viability audit schema {schema!r}")
         metadata = json.loads(str(data["metadata"]))
         moving = np.asarray(data["moving"], dtype=np.float64)
@@ -180,6 +201,21 @@ def read_viability_audit_capsule(path: Path) -> ViabilityAuditCapsule:
             data["segment_samples"],
             dtype=np.float64,
         )
+        packed_segments = None
+        if schema == _SCHEMA_V2:
+            packed_segments = PackedSegmentFrames(
+                np.ascontiguousarray(
+                    data["packed_segment_frame_offsets"],
+                    dtype=np.int32,
+                ),
+                *(
+                    np.ascontiguousarray(
+                        data[f"packed_segment_{name}"],
+                        dtype=np.float32,
+                    )
+                    for name in SEGMENT_FIELD_NAMES
+                ),
+            )
 
     if moving.ndim != 2 or moving.shape[1] != 8:
         raise ValueError("invalid moving-AABB capsule array")
@@ -268,6 +304,7 @@ def read_viability_audit_capsule(path: Path) -> ViabilityAuditCapsule:
         aabbs=aabbs,
         piecewise_aabbs=tuple(piecewise_aabbs),
         segment_trajectories=tuple(segment_trajectories),
+        packed_segments=packed_segments,
     )
 
 
@@ -276,7 +313,7 @@ def read_viability_audit_metadata(path: Path) -> dict[str, object]:
 
     with np.load(path, allow_pickle=False) as data:
         schema = str(data["schema"])
-        if schema != "touhou-viability-audit-capsule-v1":
+        if schema not in (_SCHEMA_V1, _SCHEMA_V2):
             raise ValueError(f"unsupported viability audit schema {schema!r}")
         metadata = json.loads(str(data["metadata"]))
     if not isinstance(metadata, dict):

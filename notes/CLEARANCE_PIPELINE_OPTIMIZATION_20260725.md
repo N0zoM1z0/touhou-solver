@@ -116,3 +116,31 @@ different reported distance.
 - complete Linux quick suite: 423 tests in 1.328 seconds.
 
 This is offline and synthetic acceptance. It is not physical promotion.
+
+## Checkpoint 2: Packed Frame-Major Laser Contract
+
+**Implemented:** `PackedSegmentFrames` is a game-neutral structure-of-arrays
+contract with one monotone `int32` offset table and eight contiguous
+`float32` geometry arrays. `lower_lasers_packed` writes samples directly in
+frame-major order. The live TH08 lowering boundary now returns this batch
+instead of creating `SegmentHazard` and `SegmentTrajectoryHazard` objects;
+the object route remains only as a reference/compatibility input. Both routes
+enter the same native C ABI.
+
+Audit capsules use schema v2 when a packed batch is present and preserve the
+arrays without converting them back to objects. The reader still accepts
+schema v1 capsules. Offline differential and adaptive replay tools pass the
+packed batch through to the planner.
+
+**Observed parity and timing:**
+
+- exact frame-offset and float32-array equality between direct packed
+  lowering and the object reference across missing-state and lifecycle
+  warning/active/fade inputs;
+- bit-identical native clearance volumes for object and packed entry paths;
+- a generated 215-laser, 81-frame active-lifecycle workload contained 17,415
+  samples. Warm medians were 26.43 ms for object lowering plus 14.13 ms for
+  repacking (40.47 ms combined), versus 16.67 ms for direct packed lowering;
+- the complete Linux quick suite passes 432 tests in 1.227 seconds.
+
+The timing is a generated lifecycle workload, not a retained physical trace.

@@ -133,6 +133,7 @@ def _write_corridor_audit_capsule(
             aabbs=hazards.aabbs,
             piecewise_aabbs=hazards.piecewise_aabbs,
             segment_trajectories=hazards.segment_trajectories,
+            packed_segments=hazards.packed_segments,
         )
     except Exception as error:
         error_text = f"{type(error).__name__}: {error}"

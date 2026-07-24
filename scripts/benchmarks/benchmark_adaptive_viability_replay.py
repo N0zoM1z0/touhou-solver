@@ -77,6 +77,7 @@ def main(argv: list[str] | None = None) -> int:
                     capsule.aabbs,
                     capsule.piecewise_aabbs,
                     capsule.segment_trajectories,
+                    capsule.packed_segments,
                 ),
                 control_delay_candidates=tuple(
                     int(value)

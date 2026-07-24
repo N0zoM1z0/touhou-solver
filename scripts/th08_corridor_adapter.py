@@ -25,6 +25,7 @@ from th08_laser_model import (
     laser_collision_geometry_frames,
 )
 from th08_movement_model import ROUTE2_MOVEMENT_PROFILE
+from touhou_control.packed_hazards import PackedSegmentFrames
 from touhou_control.viability import ControlAction
 from touhou_control.trajectory import (
     PiecewiseLinearTrajectory,
@@ -143,6 +144,7 @@ class LoweredCorridorHazards:
     aabbs: tuple[MovingAabbHazard, ...]
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...]
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...]
+    packed_segments: PackedSegmentFrames | None = None
 
 
 def lower_bullets(
@@ -317,6 +319,63 @@ def lower_lasers(
     return tuple(trajectories)
 
 
+def lower_lasers_packed(
+    lasers: tuple[LaserSnapshot, ...],
+    *,
+    snapshot_lag: int,
+    forecast_frames: int = 0,
+    horizon_frames: int = TH08_CORRIDOR_CONFIG.horizon_frames,
+) -> PackedSegmentFrames:
+    """Lower laser geometry directly into the native frame-major contract."""
+
+    if horizon_frames < 0:
+        raise ValueError("laser trajectory horizon cannot be negative")
+    lag = max(0, snapshot_lag)
+    forecast = max(0, forecast_frames)
+    frames: list[list[tuple[float, ...]]] = [
+        [] for _ in range(horizon_frames + 1)
+    ]
+    for laser in lasers:
+        state = laser.state
+        if state is None:
+            row = (
+                laser.origin_x,
+                laser.origin_y,
+                laser.angle,
+                laser.tail,
+                laser.head,
+                laser.half_width,
+                (
+                    laser.uncertainty
+                    + min(12.0, 0.4 * lag)
+                    + 0.4 * forecast
+                ),
+                0.4,
+            )
+            for frame_rows in frames:
+                frame_rows.append(row)
+            continue
+        geometry_frames = laser_collision_geometry_frames(
+            state,
+            frame_count=lag + forecast + horizon_frames + 1,
+        )[lag + forecast:]
+        for frame_rows, geometry in zip(frames, geometry_frames):
+            frame_rows.extend(
+                (
+                    state.origin_x,
+                    state.origin_y,
+                    state.angle,
+                    tail,
+                    head,
+                    half_width,
+                    laser.uncertainty,
+                    0.0,
+                )
+                for tail, head, half_width in geometry
+            )
+    return PackedSegmentFrames.from_frame_rows(frames)
+
+
 def lower_enemy_bodies(
     bodies: tuple[EnemyBodySnapshot, ...],
     *,
@@ -374,7 +433,8 @@ def lower_th08_corridor_hazards(
             forecast_frames=forecast_frames,
             horizon_frames=horizon_frames,
         ),
-        segment_trajectories=lower_lasers(
+        segment_trajectories=(),
+        packed_segments=lower_lasers_packed(
             lasers,
             snapshot_lag=snapshot_lag,
             forecast_frames=forecast_frames,
@@ -425,6 +485,7 @@ def plan_lowered_th08_corridor(
         aabbs=hazards.aabbs,
         piecewise_aabbs=hazards.piecewise_aabbs,
         segment_trajectories=hazards.segment_trajectories,
+        packed_segments=hazards.packed_segments,
         preferred_x=preferred_x,
         preferred_y=preferred_y,
         required_gate_lane=required_gate_lane,

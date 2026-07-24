@@ -6,6 +6,8 @@ from __future__ import annotations
 import unittest
 from dataclasses import replace
 
+import numpy as np
+
 from th08_corridor_adapter import (
     TH08_CORRIDOR_CONFIG,
     TH08_VIABILITY_ACTIONS,
@@ -13,10 +15,13 @@ from th08_corridor_adapter import (
     lower_bullets,
     lower_enemy_bodies,
     lower_lasers,
+    lower_lasers_packed,
+    lower_th08_corridor_hazards,
 )
 from th08_live_dodge_agent import Bullet, EnemyBody, Laser
 from th08_laser_model import LaserPhase, spawn_laser_state
 from touhou_control.trajectory import VelocityChange
+from touhou_control.packed_hazards import PackedSegmentFrames
 
 
 class Th08CorridorAdapterTests(unittest.TestCase):
@@ -232,6 +237,79 @@ class Th08CorridorAdapterTests(unittest.TestCase):
             {sample.uncertainty_per_frame for sample in samples},
             {0.0},
         )
+
+    def test_packed_laser_lowering_matches_object_reference_by_frame(
+        self,
+    ) -> None:
+        state = replace(
+            spawn_laser_state(
+                origin_x=12.0,
+                origin_y=34.0,
+                angle=0.25,
+                speed=1.5,
+                tail_distance=0.0,
+                head_distance=80.0,
+                maximum_length=80.0,
+                width=16.0,
+                warmup_frames=3,
+                active_frames=5,
+                fade_frames=3,
+                collision_enable_frame=2,
+                collision_disable_frame=2,
+            ),
+            timer=1,
+        )
+        lasers = (
+            Laser(12.0, 34.0, 0.25, 0.0, 80.0, 4.0, state, 0.75),
+            Laser(80.0, 42.0, 1.0, -2.0, 40.0, 3.0),
+        )
+        reference = PackedSegmentFrames.from_trajectories(
+            lower_lasers(
+                lasers,
+                snapshot_lag=1,
+                forecast_frames=1,
+                horizon_frames=10,
+            ),
+            frame_count=11,
+        )
+        packed = lower_lasers_packed(
+            lasers,
+            snapshot_lag=1,
+            forecast_frames=1,
+            horizon_frames=10,
+        )
+        np.testing.assert_array_equal(
+            packed.frame_offsets,
+            reference.frame_offsets,
+        )
+        for field in (
+            "origin_x",
+            "origin_y",
+            "angle",
+            "tail",
+            "head",
+            "half_width",
+            "base_uncertainty",
+            "uncertainty_per_frame",
+        ):
+            np.testing.assert_array_equal(
+                getattr(packed, field),
+                getattr(reference, field),
+            )
+
+    def test_live_lowering_emits_packed_lasers_without_segment_objects(
+        self,
+    ) -> None:
+        hazards = lower_th08_corridor_hazards(
+            bullets=(),
+            lasers=(Laser(12.0, 34.0, 0.5, 4.0, 80.0, 6.0),),
+            horizon_frames=4,
+        )
+        self.assertEqual(hazards.segment_trajectories, ())
+        self.assertIsNotNone(hazards.packed_segments)
+        assert hazards.packed_segments is not None
+        self.assertEqual(hazards.packed_segments.frame_count, 5)
+        self.assertEqual(hazards.packed_segments.sample_count, 5)
 
     def test_enemy_body_keeps_native_half_extents_and_motion(self) -> None:
         hazard = lower_enemy_bodies(

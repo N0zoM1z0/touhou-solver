@@ -138,6 +138,7 @@ def _clearance(
         piecewise_aabbs=capsule.piecewise_aabbs,
         segments=(),
         segment_trajectories=capsule.segment_trajectories,
+        packed_segments=capsule.packed_segments,
         config=config,
     )
     return x_axis, y_axis, volume

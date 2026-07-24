@@ -17,6 +17,7 @@ from dataclasses import dataclass, replace
 import numpy as np
 
 from touhou_control import native_backend
+from touhou_control.packed_hazards import PackedSegmentFrames
 from touhou_control.trajectory import PiecewiseLinearTrajectory
 from touhou_control.viability import (
     ControlAction,
@@ -667,6 +668,56 @@ def _segment_clearance_field(
     return clearance.min(axis=1).reshape(grid_x.shape).astype(np.float32)
 
 
+def _packed_segment_clearance_field(
+    grid_x: np.ndarray,
+    grid_y: np.ndarray,
+    packed_segments: PackedSegmentFrames,
+    *,
+    frame: int,
+    player_radius: float,
+) -> np.ndarray:
+    selected = packed_segments.frame_slice(frame)
+    if selected.start == selected.stop:
+        return np.full(grid_x.shape, np.inf, dtype=np.float32)
+    origin_x = packed_segments.origin_x[selected]
+    origin_y = packed_segments.origin_y[selected]
+    angle = packed_segments.angle[selected]
+    tail = packed_segments.tail[selected]
+    head = packed_segments.head[selected]
+    cosine = np.cos(angle)
+    sine = np.sin(angle)
+    start_x = origin_x + cosine * tail
+    start_y = origin_y + sine * tail
+    segment_x = cosine * (head - tail)
+    segment_y = sine * (head - tail)
+    length_sq = segment_x * segment_x + segment_y * segment_y
+    flat_x = grid_x.reshape(-1, 1)
+    flat_y = grid_y.reshape(-1, 1)
+    numerator = (
+        (flat_x - start_x[None, :]) * segment_x[None, :]
+        + (flat_y - start_y[None, :]) * segment_y[None, :]
+    )
+    projection = np.divide(
+        numerator,
+        length_sq[None, :],
+        out=np.zeros_like(numerator),
+        where=length_sq[None, :] > 1e-9,
+    )
+    projection = np.clip(projection, 0.0, 1.0)
+    distance = np.hypot(
+        flat_x - (start_x + projection * segment_x),
+        flat_y - (start_y + projection * segment_y),
+    )
+    occupied_radius = (
+        packed_segments.half_width[selected]
+        + player_radius
+        + packed_segments.base_uncertainty[selected]
+        + packed_segments.uncertainty_per_frame[selected] * frame
+    )
+    clearance = distance - occupied_radius[None, :]
+    return clearance.min(axis=1).reshape(grid_x.shape).astype(np.float32)
+
+
 def _clearance_field(
     grid_x: np.ndarray,
     grid_y: np.ndarray,
@@ -677,6 +728,7 @@ def _clearance_field(
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...],
     segments: tuple[SegmentHazard, ...],
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
+    packed_segments: PackedSegmentFrames | None,
     frame: int,
     config: CorridorConfig,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -694,6 +746,24 @@ def _clearance_field(
         for trajectory in segment_trajectories
         if (sample := trajectory.sample(frame)) is not None
     )
+    segment_clearance = _segment_clearance_field(
+        grid_x,
+        grid_y,
+        frame_segments,
+        frame=frame,
+        player_radius=config.player_radius,
+    )
+    if packed_segments is not None:
+        segment_clearance = np.minimum(
+            segment_clearance,
+            _packed_segment_clearance_field(
+                grid_x,
+                grid_y,
+                packed_segments,
+                frame=frame,
+                player_radius=config.player_radius,
+            ),
+        )
     hazard_clearance = np.minimum(
         np.minimum(
             _aabb_clearance_field(
@@ -711,13 +781,7 @@ def _clearance_field(
                 player_radius=config.player_radius,
             ),
         ),
-        _segment_clearance_field(
-            grid_x,
-            grid_y,
-            frame_segments,
-            frame=frame,
-            player_radius=config.player_radius,
-        ),
+        segment_clearance,
     )
     boundary_clearance = np.minimum.reduce(
         (
@@ -741,13 +805,22 @@ def _hazard_clearance_volume(
     config: CorridorConfig,
     aabb_trajectories: tuple[AabbTrajectoryHazard, ...] = (),
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...] = (),
+    packed_segments: PackedSegmentFrames | None = None,
 ) -> np.ndarray:
     """Build physical-frame clearance without treating legal bounds as hazards."""
 
+    expected_frame_count = config.horizon_frames + 1
+    if (
+        packed_segments is not None
+        and packed_segments.frame_count != expected_frame_count
+    ):
+        raise ValueError(
+            "packed segment frame count does not match planning horizon"
+        )
     native_volume = native_backend.build_clearance_volume(
         x_axis=grid_x[0],
         y_axis=grid_y[:, 0],
-        frame_count=config.horizon_frames + 1,
+        frame_count=expected_frame_count,
         player_radius=config.player_radius,
         clearance_cap=config.danger_radius,
         aabbs=aabbs,
@@ -821,23 +894,46 @@ def _hazard_clearance_volume(
                 )
             )
             if trajectory_volume is not None:
-                return trajectory_volume
-            for frame in range(config.horizon_frames + 1):
-                frame_segments = tuple(
-                    sample
-                    for trajectory in segment_trajectories
-                    if (sample := trajectory.sample(frame)) is not None
-                )
-                native_volume[frame] = np.minimum(
-                    native_volume[frame],
-                    _segment_clearance_field(
-                        grid_x,
-                        grid_y,
-                        frame_segments,
-                        frame=frame,
-                        player_radius=config.player_radius,
-                    ),
-                )
+                native_volume = trajectory_volume
+            else:
+                for frame in range(config.horizon_frames + 1):
+                    frame_segments = tuple(
+                        sample
+                        for trajectory in segment_trajectories
+                        if (sample := trajectory.sample(frame)) is not None
+                    )
+                    native_volume[frame] = np.minimum(
+                        native_volume[frame],
+                        _segment_clearance_field(
+                            grid_x,
+                            grid_y,
+                            frame_segments,
+                            frame=frame,
+                            player_radius=config.player_radius,
+                        ),
+                    )
+        if packed_segments is not None:
+            packed_volume = native_backend.apply_packed_segment_clearance(
+                x_axis=grid_x[0],
+                y_axis=grid_y[:, 0],
+                player_radius=config.player_radius,
+                packed_segments=packed_segments,
+                clearance_volume=native_volume,
+            )
+            if packed_volume is not None:
+                native_volume = packed_volume
+            else:
+                for frame in range(config.horizon_frames + 1):
+                    native_volume[frame] = np.minimum(
+                        native_volume[frame],
+                        _packed_segment_clearance_field(
+                            grid_x,
+                            grid_y,
+                            packed_segments,
+                            frame=frame,
+                            player_radius=config.player_radius,
+                        ),
+                    )
         return native_volume
 
     volume = _aabb_clearance_volume(
@@ -883,6 +979,17 @@ def _hazard_clearance_volume(
                 player_radius=config.player_radius,
             ),
         )
+        if packed_segments is not None:
+            volume[frame] = np.minimum(
+                volume[frame],
+                _packed_segment_clearance_field(
+                    grid_x,
+                    grid_y,
+                    packed_segments,
+                    frame=frame,
+                    player_radius=config.player_radius,
+                ),
+            )
     return volume
 
 
@@ -944,6 +1051,7 @@ def _plan_robust_corridor(
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...],
     segments: tuple[SegmentHazard, ...],
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
+    packed_segments: PackedSegmentFrames | None,
     preferred_x: float | None,
     preferred_y: float | None,
     required_gate_lane: str | None,
@@ -962,6 +1070,7 @@ def _plan_robust_corridor(
         piecewise_aabbs=piecewise_aabbs,
         segments=segments,
         segment_trajectories=segment_trajectories,
+        packed_segments=packed_segments,
         config=config,
     )
     clearance_finished = time.perf_counter()
@@ -1024,6 +1133,7 @@ def _plan_robust_corridor(
             piecewise_aabbs=piecewise_aabbs,
             segments=segments,
             segment_trajectories=segment_trajectories,
+            packed_segments=packed_segments,
             config=refined_config,
         )
         refinement_clearance_finished = time.perf_counter()
@@ -1318,6 +1428,7 @@ def plan_corridor(
     piecewise_aabbs: tuple[PiecewiseAabbHazard, ...] = (),
     segments: tuple[SegmentHazard, ...] = (),
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...] = (),
+    packed_segments: PackedSegmentFrames | None = None,
     preferred_x: float | None = None,
     preferred_y: float | None = None,
     required_gate_lane: str | None = None,
@@ -1343,6 +1454,7 @@ def plan_corridor(
             piecewise_aabbs=piecewise_aabbs,
             segments=segments,
             segment_trajectories=segment_trajectories,
+            packed_segments=packed_segments,
             preferred_x=preferred_x,
             preferred_y=preferred_y,
             required_gate_lane=required_gate_lane,
@@ -1375,6 +1487,7 @@ def plan_corridor(
             piecewise_aabbs=piecewise_aabbs,
             segments=segments,
             segment_trajectories=segment_trajectories,
+            packed_segments=packed_segments,
             frame=frame,
             config=config,
         )

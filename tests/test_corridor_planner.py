@@ -27,6 +27,7 @@ from corridor_planner import (
     plan_corridor,
 )
 from touhou_control.native_backend import available as native_available
+from touhou_control.packed_hazards import PackedSegmentFrames
 from touhou_control.trajectory import PiecewiseLinearTrajectory, VelocityChange
 from touhou_control.viability import ControlAction, ViabilityQuery
 
@@ -617,6 +618,87 @@ class CorridorPlannerTests(unittest.TestCase):
                 config=config,
             )
         np.testing.assert_allclose(actual, reference, atol=3e-5)
+
+    @unittest.skipUnless(
+        native_available(),
+        "native planner backend is not built",
+    )
+    def test_packed_segments_are_bit_identical_to_object_adapter(self) -> None:
+        grid_x, grid_y = np.meshgrid(
+            np.arange(0.0, 65.0, 4.0, dtype=np.float32),
+            np.arange(0.0, 49.0, 4.0, dtype=np.float32),
+        )
+        trajectories = (
+            SegmentTrajectoryHazard(
+                (
+                    None,
+                    SegmentHazard(8.0, 8.0, 0.2, -4.0, 22.0, 2.0),
+                    SegmentHazard(10.0, 12.0, 0.5, -2.0, 28.0, 2.5),
+                    None,
+                )
+            ),
+            SegmentTrajectoryHazard(
+                tuple(
+                    SegmentHazard(
+                        52.0 - frame,
+                        4.0 + frame * 3.0,
+                        1.8 - frame * 0.13,
+                        -8.0,
+                        30.0,
+                        1.0 + frame * 0.2,
+                        0.2,
+                    )
+                    for frame in range(4)
+                )
+            ),
+        )
+        config = CorridorConfig(
+            grid_step=4.0,
+            frames_per_layer=1,
+            horizon_frames=3,
+            danger_radius=16.0,
+        )
+        object_volume = _hazard_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs=(),
+            segments=(),
+            segment_trajectories=trajectories,
+            config=config,
+        )
+        packed_volume = _hazard_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs=(),
+            segments=(),
+            segment_trajectories=(),
+            packed_segments=PackedSegmentFrames.from_trajectories(
+                trajectories,
+                frame_count=4,
+            ),
+            config=config,
+        )
+        np.testing.assert_array_equal(packed_volume, object_volume)
+
+    def test_packed_segment_horizon_mismatch_is_rejected(self) -> None:
+        grid_x, grid_y = np.meshgrid(
+            np.asarray([0.0, 8.0], dtype=np.float32),
+            np.asarray([0.0, 8.0], dtype=np.float32),
+        )
+        with self.assertRaisesRegex(ValueError, "planning horizon"):
+            _hazard_clearance_volume(
+                grid_x,
+                grid_y,
+                aabbs=(),
+                segments=(),
+                segment_trajectories=(),
+                packed_segments=PackedSegmentFrames.empty(2),
+                config=CorridorConfig(
+                    grid_step=8.0,
+                    frames_per_layer=1,
+                    horizon_frames=2,
+                ),
+            )
 
     def test_clear_field_reaches_preferred_region_without_touching_boundary(self) -> None:
         plan = plan_corridor(

@@ -2584,3 +2584,9 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - The ordered architecture, benchmark separation, packed frame-major
   contract, static broad phase, and shadow-only Boolean/query-local proposal
   are recorded in `notes/CLEARANCE_PIPELINE_OPTIMIZATION_20260725.md`.
+- Added the packed frame-major segment contract and changed live TH08 laser
+  lowering to produce it directly. Object and packed native clearance were
+  bit-identical; direct lowering of a generated 215-laser/17,415-sample epoch
+  measured 16.67 ms versus 40.47 ms for object lowering plus repacking.
+  Capsule schema v2 preserves packed arrays while the reader remains
+  compatible with v1. The complete Linux quick suite passes 432 tests.

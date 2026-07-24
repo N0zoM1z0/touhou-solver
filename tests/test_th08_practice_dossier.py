@@ -154,6 +154,7 @@ class Th08PracticeDossierTests(unittest.TestCase):
             "safe_action_count": 3,
             "selected_repair_volume": 12,
             "age": 20,
+            "phase_frames": 4,
             "support_covers_current": True,
         }
         rows[0]["robust_control"] = {"viability_constrained": True}
@@ -171,6 +172,7 @@ class Th08PracticeDossierTests(unittest.TestCase):
             "recovery_distances": {"left": 48.0, "right": 16.0},
             "selected_recovery_distance": 16.0,
             "age": 23,
+            "phase_frames": 7,
             "support_covers_current": False,
         }
         rows[1]["robust_control"] = {
@@ -202,6 +204,10 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(
             summary["planning_mode_counts"],
             {"robust_viability": 2},
+        )
+        self.assertEqual(
+            summary["policy_phase_frame_counts"],
+            {"4": 1, "7": 1},
         )
 
     def test_spell_phase_summary_is_not_tied_to_stage3_spell50(

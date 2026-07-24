@@ -143,11 +143,17 @@ LIVE_CONTROL_DELAY_MIN = 1
 LIVE_CONTROL_DELAY_MAX = 6
 LIVE_CONTROL_DELAY_WINDOW = 120
 LIVE_CONTROL_DELAY_GUARD_FRAMES = 600
-ASYNC_POLICY_DELAY_PADDING = 1
+# A rolling async policy can outlive several estimator updates. Cover the
+# complete configured support instead of assuming only one-step drift.
+ASYNC_POLICY_DELAY_PADDING = (
+    LIVE_CONTROL_DELAY_MAX - LIVE_CONTROL_DELAY_MIN
+)
 ENEMY_SENSOR_INTERVAL_FRAMES = 4
 COLLECTION_HALF_WIDTH = 24.0
 ITEM_SAFETY_CLEARANCE = 8.0
-CORRIDOR_REPLAN_FRAMES = 24
+# Keep the single worker work-conserving. There is never more than one queued
+# solve, so native solve throughput remains the hard rate limit.
+CORRIDOR_REPLAN_FRAMES = TH08_CORRIDOR_CONFIG.frames_per_layer
 CORRIDOR_LOOKAHEAD_FRAMES = 16
 CORRIDOR_MAX_AGE_FRAMES = (
     TH08_CORRIDOR_CONFIG.horizon_frames - 1
@@ -1907,6 +1913,9 @@ def choose_action(
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_position_error: float = 0.0,
     recovery_control_reserve: bool = True,
+    relax_stale_viability_contradiction: bool = False,
+    _force_terminal_threat: bool = False,
+    _viability_retry: bool = False,
 ) -> Decision:
     if horizon <= 0 or beam_width <= 0:
         raise ValueError("planner horizon and beam width must be positive")
@@ -2013,7 +2022,9 @@ def choose_action(
         else 0
     )
     potential_threat_horizon = (
-        threat_horizon if viability_relaxation_candidate else horizon
+        threat_horizon
+        if viability_relaxation_candidate or _force_terminal_threat
+        else horizon
     )
     laser_timeline_horizon = max(
         control_delay_frames,
@@ -2439,7 +2450,7 @@ def choose_action(
     pipeline_clearance = (
         9999.0 if math.isinf(prefix_clearance) else prefix_clearance
     )
-    return Decision(
+    decision = Decision(
         SHOT | focus_mask | direction_mask | (BOMB if use_bomb else 0),
         action.name,
         minimum,
@@ -2486,6 +2497,74 @@ def choose_action(
             reserve_distance=diagnostic_recovery_reserve_distance,
         ),
     )
+    if (
+        effective_allowed_first_actions is not None
+        and effective_threat_horizon > horizon
+        and (
+            threat_collisions > 0
+            or decision.robust_collisions > 0
+            or decision.min_clearance <= 0.0
+        )
+        and relax_stale_viability_contradiction
+        and not _viability_retry
+    ):
+        retry = choose_action(
+            player_x=observed_player_x,
+            player_y=observed_player_y,
+            bullets=bullets,
+            lasers=lasers,
+            previous_direction=previous_direction,
+            can_bomb=can_bomb,
+            enemy_bodies=enemy_bodies,
+            items=items,
+            power=power,
+            bombs=bombs,
+            previous_focus=previous_focus,
+            snapshot_lag=snapshot_lag,
+            control_delay_frames=control_delay_frames,
+            control_delay_candidates=control_delay_candidates,
+            action_hold_frames=action_hold_frames,
+            horizon=horizon,
+            threat_horizon=threat_horizon,
+            beam_width=beam_width,
+            target_x=target_x,
+            target_y=target_y,
+            target_deadline=target_deadline,
+            allowed_first_actions=None,
+            viability_repair_volumes=viability_repair_volumes,
+            viability_recovery_distances=viability_recovery_distances,
+            viability_position_error=viability_position_error,
+            recovery_control_reserve=recovery_control_reserve,
+            relax_stale_viability_contradiction=(
+                relax_stale_viability_contradiction
+            ),
+            _force_terminal_threat=True,
+            _viability_retry=True,
+        )
+
+        def contradiction_key(candidate: Decision) -> tuple[object, ...]:
+            return (
+                candidate.robust_collisions,
+                max(-candidate.robust_min_clearance, 0.0),
+                -candidate.robust_min_clearance,
+                candidate.terminal_threat_collisions,
+                max(
+                    -candidate.terminal_threat_min_clearance,
+                    0.0,
+                ),
+                max(-candidate.min_clearance, 0.0),
+                candidate.score,
+            )
+
+        if contradiction_key(retry) < contradiction_key(decision):
+            return replace(
+                retry,
+                viability_safe_action_count=len(
+                    allowed_first_actions or ()
+                ),
+                viability_constraint_relaxed=True,
+            )
+    return decision
 
 
 def _project_player_for_read_lag(
@@ -2850,6 +2929,9 @@ def run(args: argparse.Namespace) -> int:
                     ),
                     "async_policy_delay_support_padding": (
                         ASYNC_POLICY_DELAY_PADDING
+                    ),
+                    "async_policy_submit_interval_frames": (
+                        args.corridor_every
                     ),
                     "native_planner_backend": native_backend.available(),
                     "viability_quantifiers": (
@@ -3730,6 +3812,13 @@ def run(args: argparse.Namespace) -> int:
                             "query_frame": counter_after_read,
                             "age": counter_after_read
                             - corridor_solution.source_frame,
+                            "phase_frames": (
+                                (
+                                    counter_after_read
+                                    - corridor_solution.source_frame
+                                )
+                                % policy.config.frames_per_layer
+                            ),
                             "layer": viability_query.layer,
                             "available": viability_query.available,
                             "state_viable": viability_query.state_viable,

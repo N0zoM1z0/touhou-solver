@@ -68,6 +68,7 @@ def _replay_decision(
     row: dict[str, object],
     *,
     recovery_control_reserve: bool,
+    relax_stale_viability_contradiction: bool = False,
 ):
     bullets = tuple(
         Bullet(
@@ -133,6 +134,9 @@ def _replay_decision(
             viability.get("position_error", 0.0)
         ),
         recovery_control_reserve=recovery_control_reserve,
+        relax_stale_viability_contradiction=(
+            relax_stale_viability_contradiction
+        ),
     )
 
 

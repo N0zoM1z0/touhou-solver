@@ -1815,3 +1815,64 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   means. Stage 4A still had 16 global-kernel-exhausted hit windows and 11
   boundary hits; pre-hit mean deficit was 3.654 versus 0.581 outside. CE-0082
   therefore remains open for a collision-checked bridge back to viability.
+
+## 2026-07-24: Full Async Delay Envelope And Stage-2/5 Random Gates
+
+- Async corridor solves now cover the complete configured control-delay
+  support `{1..6}`. A cached policy can outlive several estimator updates, so
+  padding only the current support by one did not establish the universal
+  delay contract at query time.
+- The single policy worker is now work-conserving with an eight-frame minimum
+  submit interval. It still permits only one solve in flight; this changes
+  freshness without creating a stale backlog. Query records retain
+  `phase_frames = age % frames_per_layer`.
+- Random Stage-2 run `20260724_091120` completed frames `1..23129` with three
+  hits and zero Bomb. Total hits rose by one versus complete baseline
+  `052616`, but all four spell phases became hitless. The final nonspell hit
+  exposed CE-0083: a layer-3 certificate at age 30 represented the age-24
+  boundary and was six frames out of phase.
+- Random Stage-5 run `20260724_093713` completed frames `2..40607` with 15
+  hits and zero Bomb, down from 24 in complete baseline `030420`. Available
+  policy queries rose from 7,806 to 8,010, unique policies from 626 to 1,283,
+  unsupported-delay queries fell from 148 to zero, and decisions without a
+  query fell from 201 to 71. Solve median/p95 changed from 291/422 to
+  299/445 ms.
+- Stage-5 phase hits changed from nonspell/spells 103/107/111/115 counts
+  `11/4/2/4/3` to `3/2/1/6/3`. The aggregate gain therefore does not accept
+  spell 111. Three of its six retained hits had no modeled contact despite
+  exactly 96 stopped bullets, opening CE-0084.
+- An exact local retry that drops a contradicted stale mask was benchmarked
+  across retained Stage 2, 3, 4A, and 6B samples. It had inconsistent
+  collision effects and approximately doubled local planning on the sampled
+  contradictions. It remains an explicit, default-off research switch; the
+  physical Stage-2/5 runs used the hard certificate path.
+- Linux passed 312 tests plus 14 subtests. Focused Windows live-agent,
+  async-policy, and fusion-benchmark suites passed 63 tests.
+
+## 2026-07-24: Native Stop/Resume Runtime Layout
+
+- REA evidence `ev_7f655f7f0cb4948ce0753ef441b6bef7a3008601e345b6b8f40d40db44054338`
+  confirms bullet spawn copies `0x6C` dwords (432 bytes, 18 records) to
+  `+0xDD0`, copies original flags to `+0xDB0`, clears active flags at
+  `+0xDAC`, initializes queue index `+0xDCC`, then calls
+  `bullet_apply_next_transform`.
+- Queue/setup evidence
+  `ev_f80073c867ce14ae63fe52283dcfeeea322b83b3368b790fb539960fcd65ae2d`
+  confirms each record is 24 bytes and the 0x40/0x80/0x100 shared setup stores
+  record floats in `+0x1014/+0x1010`, resets the timer at `+0x1004`, and
+  stores duration/repeat limit/count at `+0x1024/+0x1028/+0x102C`.
+- Handler evidence
+  `ev_cb4ea55181ccda8975025583d74b724906f398c642cb3cbfb4ab7e3935304de0`,
+  `ev_32f2db8cee21ec27800551c2a308ed12c19f57c8d0593bf894f68bed4c59b37f`,
+  and
+  `ev_7cf3f4a46e21867c5be0c74c5188fd83f6b6843f6784f33a01f715e024fd34d5`
+  establish turn, absolute snap, and player-relative re-aim completion
+  behavior respectively.
+- Timer evidence
+  `ev_8cd3b7f623c9bb779121d7d21491b3812bc30fcf9d5284100e63f9868c1050ae`,
+  `ev_ba62f112b8bfb52df89711e970634c49babc138aaea9889f1e8dbe6fe05bd41e`,
+  and
+  `ev_5c50a5e1604263f7141eb0013c3567acf78174ebb964cf6c66a5214889725ae9`
+  identify elapsed integer at timer `+8`, fractional elapsed at `+4`, and the
+  per-update integer advance. For the bullet timer rooted at `+0x1004`, these
+  are `+0x100C` and `+0x1008`.

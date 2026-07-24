@@ -79,6 +79,17 @@ class AsyncPolicyLeadTests(unittest.TestCase):
             (1, 2, 3, 4, 5, 6),
         )
 
+    def test_full_padding_covers_multiple_async_estimator_updates(self) -> None:
+        self.assertEqual(
+            delay_support_envelope(
+                (2, 3, 4),
+                minimum=1,
+                maximum=6,
+                padding=5,
+            ),
+            (1, 2, 3, 4, 5, 6),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

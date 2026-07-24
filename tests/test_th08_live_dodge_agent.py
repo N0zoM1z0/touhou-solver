@@ -17,10 +17,12 @@ from corridor_planner import (
     plan_corridor,
 )
 from th08_live_dodge_agent import (
+    ASYNC_POLICY_DELAY_PADDING,
     AutoConfirmPulse,
     Bullet,
     CorridorCommitment,
     CORRIDOR_INITIAL_SUBMIT_FRAME,
+    CORRIDOR_REPLAN_FRAMES,
     CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES,
     CorridorSolution,
     DOWN,
@@ -89,6 +91,8 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self,
     ) -> None:
         self.assertEqual(CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES, 16)
+        self.assertEqual(CORRIDOR_REPLAN_FRAMES, 8)
+        self.assertEqual(ASYNC_POLICY_DELAY_PADDING, 5)
 
     def test_action_name_preserves_focus_speed_and_native_direction_priority(
         self,
@@ -994,6 +998,38 @@ class LiveDodgeAgentTests(unittest.TestCase):
         )
         self.assertEqual(decision.action, "right")
         self.assertEqual(decision.viability_repair_volume, 1)
+
+    def test_newer_terminal_collision_can_relax_stale_global_mask(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=432.0,
+            bullets=(
+                Bullet(160.0, 432.0, 4.0, 0.0, 2.0, 2.0),
+            ),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            control_delay_frames=3,
+            control_delay_candidates=(3, 4, 5, 6),
+            action_hold_frames=5,
+            horizon=10,
+            threat_horizon=32,
+            allowed_first_actions=("stay", "down", "left"),
+            viability_repair_volumes=(
+                ("stay", 10),
+                ("down", 10),
+                ("left", 10),
+            ),
+            relax_stale_viability_contradiction=True,
+        )
+        self.assertEqual(decision.action, "up_right_fast")
+        self.assertFalse(decision.viability_constrained)
+        self.assertTrue(decision.viability_constraint_relaxed)
+        self.assertEqual(decision.robust_collisions, 0)
+        self.assertEqual(decision.terminal_threat_collisions, 0)
 
     def test_async_viability_policy_is_queried_at_current_layer(self) -> None:
         actions = (

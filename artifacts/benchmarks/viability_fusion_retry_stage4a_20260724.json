@@ -1,0 +1,64 @@
+{
+  "schema": "th08-viability-fusion-retry-benchmark-v1",
+  "trace": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260724_084835.jsonl",
+  "trace_sha256": "80593be13438a756fe92ec1f2831aee2f61e2cc32a38c9964011feb0e3b2d432",
+  "sample_count": 23,
+  "scope": "Offline ablation over retained trace-radius hazards and exact laser lifecycle state; this is not physical survival evidence.",
+  "variants": {
+    "disabled": {
+      "median_ms": 15.937527001369745,
+      "p95_ms": 24.38023898866959,
+      "constraint_relaxed_count": 6,
+      "robust_collision_count": 38,
+      "terminal_collision_count": 21,
+      "negative_min_clearance_count": 12
+    },
+    "enabled": {
+      "median_ms": 27.09829597733915,
+      "p95_ms": 39.326444995822385,
+      "constraint_relaxed_count": 10,
+      "robust_collision_count": 34,
+      "terminal_collision_count": 22,
+      "negative_min_clearance_count": 12
+    }
+  },
+  "action_change_count": 4,
+  "action_changes": [
+    {
+      "frame": 9854,
+      "disabled": "up_right",
+      "enabled": "up_fast",
+      "disabled_robust_collisions": 7,
+      "enabled_robust_collisions": 6,
+      "disabled_terminal_collisions": 0,
+      "enabled_terminal_collisions": 0
+    },
+    {
+      "frame": 12040,
+      "disabled": "up_fast",
+      "enabled": "down",
+      "disabled_robust_collisions": 3,
+      "enabled_robust_collisions": 0,
+      "disabled_terminal_collisions": 0,
+      "enabled_terminal_collisions": 1
+    },
+    {
+      "frame": 12059,
+      "disabled": "up_right",
+      "enabled": "up_right_fast",
+      "disabled_robust_collisions": 1,
+      "enabled_robust_collisions": 1,
+      "disabled_terminal_collisions": 0,
+      "enabled_terminal_collisions": 0
+    },
+    {
+      "frame": 12645,
+      "disabled": "down_fast",
+      "enabled": "right_fast",
+      "disabled_robust_collisions": 1,
+      "enabled_robust_collisions": 1,
+      "disabled_terminal_collisions": 0,
+      "enabled_terminal_collisions": 0
+    }
+  ]
+}

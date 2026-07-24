@@ -1723,3 +1723,59 @@ Status: observed | inferred | unknown | fixed
   an intermediate collision-free bridge.
 - **Status:** Partial correction physically accepted. CE-0082 remains open
   for backward-reachable recovery bands and long-horizon path connectivity.
+
+## CE-0083: A coarse policy layer was treated as phase-invariant
+
+- **Observed symptom:** Complete Stage-2 run `20260724_091120` had three
+  hard-no-Bomb hits. At frame 17,480 a policy sourced at frame 17,450 was
+  queried at age 30. Integer division selected layer 3, whose geometry starts
+  at age 24, so the certificate was six frames behind the physical state and
+  allowed `left_fast`. A new policy arrived at frame 17,483 with an empty
+  kernel; contact followed eight frames later.
+- **Invalid assumption:** Every frame inside one eight-frame corridor layer
+  has the same reachable state and hazard occupancy. The policy stores one
+  lattice slice per layer, but a query at phase `age % frames_per_layer` is
+  not equivalent to the layer boundary.
+- **Immediate correction:** The rolling worker is work-conserving at one
+  layer (eight frames) instead of waiting 24 frames, and every async solve
+  covers the full configured delay support `{1..6}`. Query telemetry now
+  retains the within-layer phase. This removes estimator-support drift and
+  reduces stale-policy exposure but does not make a coarse layer phase-exact.
+- **Physical evidence:** Stage 5 run `20260724_093713` had 8,010 available
+  queries, zero unsupported-delay queries, and 1,283 unique policies. Its
+  8,010 phase samples were spread across all offsets 0 through 7, proving
+  phase mismatch is the normal case rather than a rare boundary condition.
+- **Rejected shortcut:** Retrying local planning without the policy mask when
+  current exact geometry contradicts it changed no sampled Stage-2/3 actions,
+  changed 4/23 Stage-4A and 3/14 Stage-6B actions, and gave inconsistent
+  terminal-collision results while nearly doubling local planning time. The
+  implementation remains opt-in and is disabled in physical control.
+- **Correction gate:** Add phase-indexed occupancy/reachability or advance a
+  certificate conservatively through the residual frames. The replacement
+  must preserve the existential-action/universal-delay quantifiers and cannot
+  encode a Stage-2 direction.
+- **Status:** Open.
+
+## CE-0084: Active transform flags hid stopped bullets that later resumed
+
+- **Observed symptom:** Stage-5 spell 111, `懶惰「生神停止
+  (マインドストッパー)」`, produced sensor-gap hits at frames 35,751,
+  36,607, and 36,980. Each snapshot contained exactly 96 active bullets and
+  no laser; the linear oracle reported 24.6 to 30.8 pixels of robust
+  clearance, while the native game registered contact. Nearby stopped bullets
+  had zero velocity and `+0xDAC == 0`.
+- **Invalid assumption:** Bullet `+0xDAC` is a durable "has transforms" flag.
+  It is only the set of handlers active on the current update. The original
+  flags remain at `+0xDB0`, the next queue index is at `+0xDCC`, and 18
+  24-byte records begin at `+0xDD0`. A handler can clear its active bit while
+  later queue work or a resume transition remains behaviorally relevant.
+- **Native evidence:** Spawn copies 432 bytes of transform records to
+  `+0xDD0`, stores original flags at `+0xDB0`, clears active flags, initializes
+  `+0xDCC`, and invokes the queue executor. The stop handlers use timer
+  elapsed `+0x100C`, duration `+0x1024`, resume speed `+0x1010`, angle
+  parameter `+0x1014`, and repeat limit/count `+0x1028/+0x102C`.
+- **Correction gate:** Retain the original flags, queue cursor, records, and
+  runtime timer state in live snapshots and traces. Project current stop
+  lifecycles exactly; represent future player-relative re-aim as a trajectory
+  set or conservative envelope rather than one guessed line.
+- **Status:** Open; runtime decoder and physical differential gate pending.

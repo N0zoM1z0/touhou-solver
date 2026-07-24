@@ -1,0 +1,55 @@
+{
+  "schema": "th08-viability-fusion-retry-benchmark-v1",
+  "trace": "artifacts/runtime_reports/lunatic_route2_stage6b_unattended_20260724_081952.jsonl",
+  "trace_sha256": "f4df359f9420093af5d96d686acafe33b39cebda0cc199974d476f471b239329",
+  "sample_count": 14,
+  "scope": "Offline ablation over retained trace-radius hazards and exact laser lifecycle state; this is not physical survival evidence.",
+  "variants": {
+    "disabled": {
+      "median_ms": 31.209566514007747,
+      "p95_ms": 46.890232973964885,
+      "constraint_relaxed_count": 9,
+      "robust_collision_count": 5,
+      "terminal_collision_count": 37,
+      "negative_min_clearance_count": 5
+    },
+    "enabled": {
+      "median_ms": 28.573129020514898,
+      "p95_ms": 50.38752398104407,
+      "constraint_relaxed_count": 12,
+      "robust_collision_count": 5,
+      "terminal_collision_count": 31,
+      "negative_min_clearance_count": 5
+    }
+  },
+  "action_change_count": 3,
+  "action_changes": [
+    {
+      "frame": 32455,
+      "disabled": "stay",
+      "enabled": "down_left",
+      "disabled_robust_collisions": 0,
+      "enabled_robust_collisions": 0,
+      "disabled_terminal_collisions": 1,
+      "enabled_terminal_collisions": 0
+    },
+    {
+      "frame": 32467,
+      "disabled": "down_fast",
+      "enabled": "up_right_fast",
+      "disabled_robust_collisions": 0,
+      "enabled_robust_collisions": 0,
+      "disabled_terminal_collisions": 3,
+      "enabled_terminal_collisions": 0
+    },
+    {
+      "frame": 49804,
+      "disabled": "down_right_fast",
+      "enabled": "right_fast",
+      "disabled_robust_collisions": 0,
+      "enabled_robust_collisions": 0,
+      "disabled_terminal_collisions": 2,
+      "enabled_terminal_collisions": 0
+    }
+  ]
+}

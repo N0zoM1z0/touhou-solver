@@ -1,0 +1,27 @@
+{
+  "schema": "th08-viability-fusion-retry-benchmark-v1",
+  "trace": "artifacts/runtime_reports/lunatic_route2_stage2_unattended_20260724_091120.jsonl",
+  "trace_sha256": "e6cadc735a10fb06262dd7139da8606e20328800459df53116311b6b08c05014",
+  "sample_count": 7,
+  "scope": "Offline ablation over retained trace-radius hazards and exact laser lifecycle state; this is not physical survival evidence.",
+  "variants": {
+    "disabled": {
+      "median_ms": 19.604091998189688,
+      "p95_ms": 21.74006900168024,
+      "constraint_relaxed_count": 2,
+      "robust_collision_count": 7,
+      "terminal_collision_count": 19,
+      "negative_min_clearance_count": 4
+    },
+    "enabled": {
+      "median_ms": 39.47721599251963,
+      "p95_ms": 40.39209199254401,
+      "constraint_relaxed_count": 3,
+      "robust_collision_count": 7,
+      "terminal_collision_count": 19,
+      "negative_min_clearance_count": 4
+    }
+  },
+  "action_change_count": 0,
+  "action_changes": []
+}

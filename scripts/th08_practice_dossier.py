@@ -728,9 +728,18 @@ def _robust_viability_summary(
         for row in decisions
         if row.get("corridor_planning_mode") is not None
     )
+    policy_phase_frames = Counter(
+        str(query["phase_frames"])
+        for query in queries
+        if query.get("phase_frames") is not None
+    )
     return {
         "planning_mode_counts": {
             key: planning_modes[key] for key in sorted(planning_modes)
+        },
+        "policy_phase_frame_counts": {
+            key: policy_phase_frames[key]
+            for key in sorted(policy_phase_frames, key=int)
         },
         "policy_decision_count": len(policy_rows),
         "decision_without_query_count": len(policy_rows) - len(queries),
@@ -1642,6 +1651,11 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"`{robust_viability.get('selected_recovery_distance')}`, "
                 "and "
                 f"`{robust_viability.get('selected_control_reserve_deficit')}`."
+            ),
+            (
+                "- Queried policy phase offsets within the coarse control "
+                "layer were "
+                f"`{robust_viability.get('policy_phase_frame_counts', {})}`."
             ),
             (
                 "- The rolling worker produced "

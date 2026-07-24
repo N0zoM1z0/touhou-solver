@@ -55,6 +55,7 @@ def build_long_run_arguments(
     difficulty: int,
     expected_stage: int | None = None,
     terminal_stage: int | None = None,
+    trace_transform_runtime: bool = False,
 ) -> list[str]:
     arguments = [
         str(output),
@@ -85,6 +86,8 @@ def build_long_run_arguments(
         arguments.extend(("--expected-stage", str(expected_stage)))
     if terminal_stage is not None:
         arguments.extend(("--terminal-stage", str(terminal_stage)))
+    if trace_transform_runtime:
+        arguments.append("--trace-transform-runtime")
     return arguments
 
 
@@ -94,6 +97,7 @@ class AgentHotkey:
         *,
         expected_stage: int | None = None,
         terminal_stage: int | None = None,
+        trace_transform_runtime: bool = False,
     ) -> None:
         if os.name != "nt":
             raise RuntimeError("th08_agent_hotkey.py must run under Windows Python")
@@ -129,6 +133,7 @@ class AgentHotkey:
         self.output: Path | None = None
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
+        self.trace_transform_runtime = trace_transform_runtime
         self.artifact_dir = (
             Path(__file__).resolve().parent.parent
             / "artifacts"
@@ -233,6 +238,7 @@ class AgentHotkey:
                 difficulty=difficulty,
                 expected_stage=self.expected_stage,
                 terminal_stage=self.terminal_stage,
+                trace_transform_runtime=self.trace_transform_runtime,
             )
             if not gameplay_active:
                 arguments.extend(("--wait-gameplay", "--wait-timeout", "30"))

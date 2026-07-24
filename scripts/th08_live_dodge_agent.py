@@ -4069,6 +4069,12 @@ def run(args: argparse.Namespace) -> int:
                         ]
                         for item in items
                     ]
+                if args.trace_transform_runtime:
+                    record["transform_bullets"] = [
+                        serialize_bullet_trace(bullet)
+                        for bullet in bullets
+                        if bullet.transform_runtime is not None
+                    ]
                 trace_started = time.perf_counter()
                 output.write(json.dumps(record) + "\n")
                 output.flush()
@@ -4284,6 +4290,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=float,
         default=0.0,
         help="include native projectile/item geometry within this player radius",
+    )
+    parser.add_argument(
+        "--trace-transform-runtime",
+        action="store_true",
+        help="include transform-relevant bullets from the full native pool",
     )
     bomb_group = parser.add_mutually_exclusive_group()
     bomb_group.add_argument(

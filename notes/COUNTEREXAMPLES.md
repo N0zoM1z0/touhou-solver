@@ -1784,5 +1784,15 @@ Status: observed | inferred | unknown | fixed
   payload extends `nearby_bullets` without changing its eight legacy fields.
   Regression tests prove that neither local nor global projection consumes
   the new state yet.
-- **Status:** Open; behavior-neutral decoder is code-complete and the physical
-  same-slot differential gate is pending.
+- **Physical decoder gate:** Complete behavior-neutral Stage-5 run
+  `20260724_103617` retained 159,692 spell-111 runtime samples, but the
+  player-centered trace covered only 61.5 percent of the active pool at its
+  median decision. All retained active flags were already zero, leaving no
+  adjacent active-stop pair. This is evidence that the fields are readable,
+  not stop/resume parity.
+- **Diagnostic correction:** Full-pool runtime capture is now an explicit
+  opt-in and records only transform-relevant bullets. A streaming compactor
+  retains hashed coverage and same-slot flag/queue/timer/motion/angle/repeat
+  transitions without adding full-pool cost to normal acceptance traces.
+- **Status:** Open; behavior-neutral decoder is physically readable and the
+  full-pool same-slot differential gate is pending.

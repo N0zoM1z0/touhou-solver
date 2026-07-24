@@ -722,6 +722,7 @@ def run_trial(
         "launch_bat": str(launch_bat),
         "menu_plan": [asdict(tap) for tap in menu_plan],
         "hard_no_bomb": True,
+        "trace_transform_runtime": args.trace_transform_runtime,
         "started_at": datetime.now().astimezone().isoformat(),
     }
     batch_process: subprocess.Popen[bytes] | None = None
@@ -732,6 +733,7 @@ def run_trial(
         agent = AgentHotkey(
             expected_stage=stage.route_index,
             terminal_stage=stage.route_index,
+            trace_transform_runtime=args.trace_transform_runtime,
         )
         batch_process, batch_log = launch_patch_batch(
             game_dir=game_dir,
@@ -964,6 +966,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="stop and kill when the runtime trace makes no progress",
     )
     parser.add_argument("--status-seconds", type=float, default=30.0)
+    parser.add_argument(
+        "--trace-transform-runtime",
+        action="store_true",
+        help="retain transform-relevant bullets from the complete native pool",
+    )
     parser.add_argument(
         "--refuse-existing",
         action="store_false",

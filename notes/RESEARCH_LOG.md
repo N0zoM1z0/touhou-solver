@@ -1899,3 +1899,29 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Five CE-0084 parser/decoder/schema/neutrality regressions and 33 adjacent
   transform, corridor, dossier, and report tests pass. The physical
   differential remains pending.
+
+## 2026-07-24: Stage-5 Decoder Capture And Full-Pool Diagnostic Gate
+
+- Failed bootstrap session `20260724_103511` lost foreground before gameplay,
+  invoked the existing fail-closed cleanup, and is excluded from all physical
+  conclusions. No target or agent process remained.
+- Complete behavior-neutral Stage-5 run `20260724_103617` covered frames
+  `2..41593`, recorded 12 hits and zero Bomb input, reached
+  `route_complete`, handled no-save automatically, and terminated the exact
+  target. Spell 111 itself was hitless in this randomized attempt.
+- The compact spell-111 transform report covers 798 decisions and 159,692
+  decoded runtime samples. A radius-160 trace saw a median 229 relevant
+  bullets but only 61.5 percent of the native active pool. Every retained
+  active flag was zero, so it contained no active-stop adjacent pair.
+- **Inference:** The decoder is physically readable but the player-centered
+  trace cannot validate an offscreen transform lifecycle. Absence of active
+  flags in this partial observation is not evidence that the handler never
+  ran.
+- Added an explicit `--trace-transform-runtime` diagnostic that serializes
+  only transform-relevant bullets from the full native pool. Default
+  acceptance traces remain unchanged. `th08_transform_trace.py` streams raw
+  JSONL into a compact, hashed same-slot differential with coverage, flag,
+  queue, timer, motion, angle, and repeat evidence.
+- The next behavior-neutral Stage-5 run must enable this diagnostic and
+  produce adjacent active stop/resume samples before projection code is
+  allowed to consume the runtime state.

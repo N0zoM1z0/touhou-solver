@@ -510,6 +510,14 @@ record establish transform relevance. **Inferred design boundary:** decoding
 this TH08-native state is observational; neither local nor global planning may
 change until a native same-slot differential validates its frame semantics.
 
+Normal traces attach the payload only to player-nearby bullets. The explicit
+`--trace-transform-runtime` diagnostic adds a separate `transform_bullets`
+list containing transform-relevant records from the complete pool. It is
+opt-in because it increases raw capture size and is evidence instrumentation,
+not a gameplay sensor required by the planner. The compact
+`th08_transform_trace.py` report hashes the raw source and retains coverage
+plus adjacent same-slot lifecycle changes.
+
 ## Per-Frame Bullet Runtime
 
 **Observed** in `bullet_manager_update` (`0x00431240`):

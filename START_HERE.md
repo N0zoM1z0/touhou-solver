@@ -489,40 +489,30 @@ Tool feedback for later REA MCP improvement belongs in
 
 ## 11. Current Blockers
 
-### CE-0090: Latent Spell-Owner Contact At A Context Boundary
+### CE-0090: Missing Special Boss Slot
 
-Priority 1.
+Targeted Stage-5 gate passed once at `6fb9f9c`; cross-stage gate remains open.
 
-Five independent Stage-5 runs contain a spell-115 hit at upper-center
-coordinates with zero bullets, zero lasers, and zero asynchronously sensed
-bodies. The latest hit is frame 36,493 at `(184.49,120.69)`. Its hit-edge read
-crossed two manager frames, so body contact is a strong repeated hypothesis,
-not an exact native overlap witness.
+The authoritative owner pointer is `0x0057D2F0`, exactly one enemy stride
+before the ordinary async pool base `0x005826C0`. The old “full enemy pool”
+never scanned Reisen. Complete Stage-5 run `20260724_152719` retained 2,658
+error-free synchronous owner observations, all outside the ordinary range;
+2,640 were contact-enabled and 18 anticipatory.
 
-The exact chain carried a pre-spell `up_fast` target into the new spell,
-retained it with the old context's 24-point reversal penalty, and later added
-residual-item approach potential. The adapter could not represent a spell
-owner whose contact bit enables between the sparse body snapshot and actuator
-pickup.
+The five old zero-projectile spell-115 hit coordinates lie inside the observed
+boss rectangle `x=156..228, y=104..152`. After the correction, no zero-bullet
+spell-115 row placed the player above `y=160`. The only spell-115 death was at
+the bottom amid 1,145 bullets with negative modeled clearance.
 
-Correction at `66960dd`:
+This accepts the missing-owner correction, not overall survival. Total hits
+changed `16 -> 21`, spell-107 hits `3 -> 9`, and every hit still followed
+global viability-kernel exhaustion. Different RNG/respawn/Power histories
+make the aggregate comparison non-causal. The next gate is a randomized
+non-Stage-5 control, with no stage/spell-specific tuning.
 
-- synchronously read the active owner geometry window;
-- lower the union of latent contact-disabled/enabled modes into both planners;
-- retain contact/anticipatory telemetry;
-- keep the old physical command in the committed delay prefix but drop its
-  soft direction inertia when the stage/spell context changes;
-- sharply reduce and saturate item approach influence.
-
-Next physical gate:
-
-1. Run Stage 5 once with hard no-Bomb and safety value disabled.
-2. Verify `spell_enemy_body_guard` geometry plus observed/anticipatory mode.
-3. Inspect the spell-115 entry transition and require no repeated
-   zero-projectile upper-center contact.
-4. Compare timing, empty kernels, item behavior, and every hit; a lower total
-   hit count is not sufficient.
-5. Then run a randomized non-Stage-5 control to detect over-conservatism.
+The secondary latent-contact union, context-reset inertia rule, and bounded
+low-priority item utility remain active. Item pickup is only a tie-breaker
+inside the viable action set; survival remains the hard constraint.
 
 ### CE-0089: Hard-Before-Soft Ordering
 
@@ -687,41 +677,37 @@ budget and paired physical A/B.
 A good next commit is not "the randomized stage had fewer hits" by itself. It
 should:
 
-1. Run one focused Stage-5 physical trial with hard no-Bomb, safety value
-   disabled, and the CE-0090 latent-owner guard active.
+1. Choose one randomized non-Stage-5 practice route from Stage 1, 2, 3, 4A,
+   or Final B. Keep hard no-Bomb and safety value disabled.
 2. Retain the complete dossier, death ledger, regression cases, comparison,
    session/summary, and human-readable run note.
-3. Verify owner geometry/mode telemetry and compact planning callback events.
-4. Compare decode/local/global p50/p95, decision cadence, deadline suppression,
-   robust hard-vector counts, kernel exhaustion, boundary occupancy, and every
-   hit window.
-5. Add a counterexample and smallest useful regression for every new concrete
-   failure. Do not tune a stage/spell direction.
-6. Pass the complete 368-plus Linux and Windows suites.
-7. Commit the verified checkpoint while leaving raw traces, logs, native
+3. Compare decode/local/global p50/p95, cadence, deadline suppression,
+   owner-guard coverage, kernel exhaustion, boundary occupancy, item behavior,
+   and every hit window. Do not tune a stage/spell direction.
+4. Add a counterexample and smallest useful regression for every new concrete
+   failure; pass the complete 370-plus Linux and Windows suites.
+5. Commit the verified cross-control while leaving raw traces, logs, native
    binaries, and `image.png` untracked.
-
-After the Stage-5 gate, run one randomized non-Stage-5 control before
-prototyping recovery-band semantics offline across multiple stages and
-adversarial generated workloads. Do not introduce another C++ boundary until
-profiling shows an end-to-end limiter and the independent oracle/action-parity
-gate is defined.
+6. Then prototype recovery-band semantics offline across multiple stages and
+   adversarial generated workloads with an independent scalar oracle. Do not
+   introduce another C++ boundary until profiling shows an end-to-end limiter
+   and the oracle/action-parity gate is defined.
 
 ## 15. Suggested First Prompt For A New Codex
 
 ```text
 Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
 START_HERE.md completely, then inspect git status and the latest commit. Keep
-hard no-Bomb and leave safety value disabled. Continue from 66960dd: physically
-validate CE-0090 on Stage 5. Verify synchronous spell-owner geometry and
-observed/anticipatory contact mode, inspect the spell-115 entry transition,
-and analyze every hit, empty-kernel state, item behavior, and timing—not only
-aggregate hit count. Then run a randomized non-Stage-5 control before accepting
-the conservative owner union. Keep generic planners game-neutral and TH08
-memory/contact mechanics in the adapter. After those gates, investigate a
-robust time-expanded recovery band with an independent scalar oracle and
-adversarial generated cases. Use C++ only at a packed numerical boundary with
-whole-pipeline performance and parity evidence. Run complete Linux and Windows
-tests, retain compact artifacts/counterexamples, update notes, commit verified
-checkpoints, and cleanly stop every runtime session.
+hard no-Bomb and leave safety value disabled. Continue from 6fb9f9c: the
+Stage-5 missing-owner gate passed once after proving Reisen is special slot
+-1 outside the async pool, but aggregate survival did not improve. Run one
+randomized non-Stage-5 control before accepting cross-stage behavior. Analyze
+every hit, empty-kernel state, item behavior, owner coverage, and timing—not
+only hit count. Keep generic planners game-neutral and TH08 memory/contact
+mechanics in the adapter. Next investigate a robust time-expanded recovery
+band with an independent scalar oracle and adversarial generated cases. Use
+C++ only at a packed numerical boundary with whole-pipeline performance and
+parity evidence. Run complete Linux and Windows tests, retain compact
+artifacts/counterexamples, update notes, commit verified checkpoints, and
+cleanly stop every runtime session.
 ```

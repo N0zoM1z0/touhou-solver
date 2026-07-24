@@ -1554,7 +1554,9 @@ Status: observed | inferred | unknown | fixed
   four and global solve median changed 220.53 to 216.93 ms. This rejects a
   sparse-phase regression but cannot accept dense-laser survival.
 - **Status:** Computational correction accepted; dense-laser physical
-  acceptance remains pending on Stage 3 or 6B.
+  acceptance is now complete. Stage-3 spell-50 solve median/p95 fell from
+  1255/1565 to 263/333 ms and policy queries rose 243 to 301. Hits remained
+  three, so throughput is fixed but survival is not.
 
 ## CE-0077: Distance to a viable endpoint did not prove a safe recovery bridge
 
@@ -1581,3 +1583,68 @@ Status: observed | inferred | unknown | fixed
   defined; action smoothing alone is not a safety proof.
 - **Status:** Observed and retained. No stage-specific motion rule has been
   added.
+
+## CE-0078: Exact state-backed lasers carried invented horizon drift
+
+- **Observed symptom:** Although Stage-3 spell-50 laser head/origin/angle
+  projection was deterministic, the global adapter expanded every exact
+  lifecycle sample by another `0.08 * (forecast + frame)` pixels, capped at
+  six. With 150--200 radial lasers this erased narrow corridors.
+- **Differential evidence:** Across 33,230 same-allocation, same-phase native
+  timer pairs, head/tail p99 error was zero. Only 13/10 pairs exceeded `1e-4`,
+  with 2.5-pixel maxima at the excluded transition boundary; origin and angle
+  error were identically zero. Full lifecycle thresholds and timer fraction
+  are now retained for future cross-phase parity.
+- **Counterfactual:** At retained frame 26,220, 150 lasers plus 12 nearby
+  bullets changed from unreachable/zero safe actions to reachable/13 safe
+  actions when only this unsupported growth was removed. Two later snapshots
+  showed larger viable sets but one remained truly empty.
+- **Correction:** Exact `LaserState` trajectories retain the measured
+  per-record read uncertainty only. Unknown-state fallback lasers keep their
+  conservative age and horizon inflation.
+- **Physical gate:** Spell-50 empty queries fell 180 to 121 (33 percent) in
+  run `20260724_073640`, while solve latency and three hits were unchanged.
+  This accepts model calibration, not a survival improvement.
+- **Status:** Fixed for same-phase geometry. Cross-phase collision-width
+  differential is enabled by the extended trace schema and remains a fidelity
+  gate.
+
+## CE-0079: Synchronous local laser work consumed live game frames
+
+- **Observed symptom:** In run `20260724_073640`, the frame-26,892 planner
+  recomputed the same laser lifecycle three times for prefix, beam, terminal,
+  and robust checks. It then rebuilt seven segment arrays in every hazard
+  call. The decision took about 100 ms in game and its snapshot-to-action lag
+  reached 14 frames, beyond the modeled maximum six; a laser hit followed.
+- **Correction:** One exact timeline now covers the maximum required physical
+  frame. Prefix, main beam, terminal warning, and robust certificates take
+  slices from it. Each frame is packed once into segment arrays shared by
+  every node/delay evaluation.
+- **Equivalence gate:** The retained frame-26,892 decision remains `right`
+  with identical pipeline, local, and robust clearance. Warm offline solve
+  fell to 30.64 ms, and a regression requires exactly one lifecycle
+  projection call.
+- **Physical gate:** Run `20260724_075004` reduced spell-50 local plan
+  median/p95 from 62.46/163.12 to 45.90/135.03 ms, cadence from 6/13 to 5/11
+  frames, and over-model decisions from 103 to 87. Three hits remained.
+- **Status:** Exact sharing accepted as a partial throughput correction.
+  Synchronous tail latency still crosses the six-frame certificate and needs
+  either a bounded safety shield or a faster lifecycle/bullet kernel.
+
+## CE-0080: Certificate downgrade abandoned a still-safe global action
+
+- **Observed symptom:** At Stage-3 frame 26,892, the global policy's sole safe
+  action was `down_fast`. Off-grid singleton handling discarded the hard mask,
+  local planning chose `right`, and an exact laser overlap occurred eight
+  frames later. In another run, frame 26,928 similarly discarded sole-safe
+  `stay`, selected `up`, and hit ten frames later.
+- **Invalid assumption:** Any off-grid singleton or clamped alias invalidates
+  the whole coarse action mask. The lattice certificate is not continuous,
+  but a global action that also passes exact continuous prefix geometry is
+  stronger evidence than an unrestricted local alternative.
+- **Correction gate:** Before relaxing, certify the globally allowed actions
+  at the observed continuous state under the current delay support. Preserve
+  the mask when any allowed action has zero prefix collisions and nonnegative
+  clearance. Relax only when every allowed action already fails exact local
+  geometry.
+- **Status:** Observed; next semantic correction.

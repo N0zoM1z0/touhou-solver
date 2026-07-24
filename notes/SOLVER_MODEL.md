@@ -609,6 +609,20 @@ does not depend on TH08 laser IDs, spell names, lifecycle phases, or pool
 counts. Adapters for another game need only supply finite `SegmentHazard`
 samples.
 
+State-backed laser trajectories do not add generic horizon growth. Their
+future geometry is produced by the reverse-engineered lifecycle executor, and
+runtime timer differentials show zero p99 longitudinal drift away from phase
+boundaries. A game adapter may add uncertainty only for a measured read or
+model residual. Records without executable state remain a separate
+conservative fallback.
+
+Within one local decision, every consumer must share a common physical-frame
+timeline. TH08 builds one timeline long enough for the committed prefix,
+short beam, optional terminal warning, and robust delay certificate. Packed
+segment arrays are immutable per frame and reused across node batches. This
+preserves a single hazard clock and avoids both repeated state-machine work
+and repeated geometry-array construction.
+
 ## Distant-Kernel Recovery
 
 Backward viability is a proof only while the queried state remains in its

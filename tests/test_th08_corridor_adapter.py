@@ -14,7 +14,7 @@ from th08_corridor_adapter import (
     lower_lasers,
 )
 from th08_live_dodge_agent import Bullet, EnemyBody, Laser
-from th08_laser_model import spawn_laser_state
+from th08_laser_model import LaserPhase, spawn_laser_state
 
 
 class Th08CorridorAdapterTests(unittest.TestCase):
@@ -132,6 +132,57 @@ class Th08CorridorAdapterTests(unittest.TestCase):
         self.assertIsNotNone(enabled)
         assert enabled is not None
         self.assertLess(enabled.head - enabled.tail, 10.0)
+
+    def test_state_backed_laser_does_not_invent_horizon_drift(self) -> None:
+        state = replace(
+            spawn_laser_state(
+                origin_x=12.0,
+                origin_y=34.0,
+                angle=0.0,
+                speed=2.5,
+                tail_distance=0.0,
+                head_distance=80.0,
+                maximum_length=80.0,
+                width=16.0,
+                warmup_frames=0,
+                active_frames=200,
+                fade_frames=10,
+                collision_enable_frame=0,
+                collision_disable_frame=5,
+            ),
+            phase=LaserPhase.ACTIVE,
+        )
+        trajectory = lower_lasers(
+            (
+                Laser(
+                    12.0,
+                    34.0,
+                    0.0,
+                    0.0,
+                    80.0,
+                    4.0,
+                    state,
+                    uncertainty=0.75,
+                ),
+            ),
+            snapshot_lag=3,
+            forecast_frames=16,
+            horizon_frames=80,
+        )[0]
+        samples = tuple(
+            sample
+            for sample in trajectory.samples
+            if sample is not None
+        )
+        self.assertTrue(samples)
+        self.assertEqual(
+            {sample.base_uncertainty for sample in samples},
+            {0.75},
+        )
+        self.assertEqual(
+            {sample.uncertainty_per_frame for sample in samples},
+            {0.0},
+        )
 
     def test_enemy_body_keeps_native_half_extents_and_motion(self) -> None:
         hazard = lower_enemy_bodies(

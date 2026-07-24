@@ -425,3 +425,21 @@ Mixed scalar-volume equality holds within `3e-5` on both platforms. Stage 1
 physically establishes sparse-phase non-regression only. A fresh Stage-3 or
 Stage-6B dense-laser trial is still required before claiming that control
 cadence and laser survival are repaired.
+
+The dense Stage-3 physical gate now separates throughput from survival.
+Spell-50 robust solves fell from 1255/1565 to 263/333 ms median/p95, but all
+three post-change runs still contained three spell hits. The global native
+raster is therefore accepted; further survival work must not be justified as
+another clearance-volume speed fix.
+
+Same-phase timer differentials also reject horizon-dependent drift for
+state-backed lasers. Exact lifecycle projection now retains only native read
+uncertainty. Unknown-state fallback geometry remains inflated. This reduced
+spell-50 empty queries by one third without changing its hit count.
+
+Local MPC previously projected the same lifecycle independently for committed
+prefix, beam/terminal, and delay-certificate paths. A single packed timeline
+now supplies all three exact views. Physical median/p95 planning improved by
+27/17 percent in spell 50, but p95 snapshot-to-action lag remains ten frames
+against a six-frame support ceiling. This residual is an architecture
+boundary, not evidence that segment geometry should be simplified.

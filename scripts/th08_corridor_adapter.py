@@ -203,10 +203,10 @@ def lower_lasers(
                         tail=tail,
                         head=head,
                         half_width=half_width,
-                        base_uncertainty=(
-                            laser.uncertainty
-                            + min(6.0, 0.08 * (forecast + frame))
-                        ),
+                        # The reverse-engineered lifecycle is stepped to the
+                        # exact target frame. Retain measured read uncertainty
+                        # without inventing horizon-dependent model drift.
+                        base_uncertainty=laser.uncertainty,
                     )
                 )
                 for tail, head, half_width in geometry

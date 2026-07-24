@@ -1,0 +1,58 @@
+{
+  "schema": "th08-laser-same-phase-differential-v1",
+  "spell_id": 50,
+  "max_frame_gap": 10,
+  "tolerance": 0.0001,
+  "decision_count": 309,
+  "matched_pair_count": 33230,
+  "head_error": {
+    "count": 33230,
+    "median": 0.0,
+    "p95": 0.0,
+    "p99": 0.0,
+    "maximum": 2.5,
+    "over_tolerance_count": 13
+  },
+  "tail_error": {
+    "count": 33230,
+    "median": 0.0,
+    "p95": 0.0,
+    "p99": 0.0,
+    "maximum": 2.5,
+    "over_tolerance_count": 10
+  },
+  "origin_error": {
+    "count": 33230,
+    "median": 0.0,
+    "p95": 0.0,
+    "p99": 0.0,
+    "maximum": 0.0,
+    "over_tolerance_count": 0
+  },
+  "angle_error": {
+    "count": 33230,
+    "median": 0.0,
+    "p95": 0.0,
+    "p99": 0.0,
+    "maximum": 0.0,
+    "over_tolerance_count": 0
+  },
+  "frame_gap": {
+    "count": 33230,
+    "median": 7.0,
+    "p95": 10.0,
+    "p99": 10.0,
+    "maximum": 10.0,
+    "over_tolerance_count": 33230
+  },
+  "timer_gap": {
+    "count": 33230,
+    "median": 6.0,
+    "p95": 10.0,
+    "p99": 11.0,
+    "maximum": 11.0,
+    "over_tolerance_count": 33230
+  },
+  "evidence_boundary": "Pairs are restricted to the same slot, allocation fields, phase, flags, and increasing native timer. Lifecycle transitions and collision-width parity require the extended trace schema.",
+  "trace": "lunatic_route2_stage3_unattended_20260724_072026.jsonl"
+}

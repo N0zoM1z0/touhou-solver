@@ -1736,3 +1736,34 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   kernel; the canonical frame-1,444 path chattered near a boundary after the
   gate became infeasible. The next general planning correction must make
   recovery path-aware rather than adding a spell-specific steering rule.
+
+## 2026-07-24: Stage-3 Dense-Laser Separation
+
+- Stage-3 run `20260724_072026` physically accepts CE-0076 throughput:
+  spell-50 solve median/p95 fell 1255/1565 to 263/333 ms, maximum fell 1660
+  to 381 ms, and query coverage rose 243 to 301. The phase still had three
+  hits, so no survival claim is attached.
+- A new raw-trace analyzer matched 33,230 same-allocation/same-phase laser
+  pairs. Head/tail p99 error was zero, maxima were 2.5 pixels for 13/10
+  boundary pairs, and origin/angle never drifted. The trace now retains all
+  lifecycle thresholds, timer fraction, and uncertainty for cross-phase
+  reprojection.
+- CE-0078 removes unsupported `0.08/frame` growth only from exact state-backed
+  trajectories. Unknown-state fallback behavior is unchanged. Stage-3 run
+  `20260724_073640` reduced spell-50 empty queries 180 to 121 while hits stayed
+  at three. Total hits rose 10 to 12 under a different route realization, so
+  this is model calibration rather than aggregate survival acceptance.
+- Retained frame 26,892 profiled three repeated lifecycle projections plus
+  repeated array packing. CE-0079 creates one maximum-horizon timeline and
+  shares packed frame geometry across prefix, beam, terminal, and robust
+  checks. The exact decision and clearance tuple are unchanged; warm offline
+  solve is 30.64 ms.
+- Physical run `20260724_075004` reduced spell-50 local plan median/p95
+  62.46/163.12 to 45.90/135.03 ms, cadence 6/13 to 5/11 frames, and
+  over-model decisions 103 to 87. The persistent three hits reject latency as
+  the only cause.
+- CE-0080 is now the semantic priority. Twice, off-grid singleton downgrade
+  discarded a sole global safe action that still had positive exact prefix
+  clearance, selected an unrestricted local alternative, and was followed by
+  a hit. Relaxation must be conditional on all globally allowed actions
+  failing continuous-state prefix validation.

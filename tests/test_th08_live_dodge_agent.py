@@ -6,6 +6,7 @@ from __future__ import annotations
 import math
 import struct
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -77,6 +78,7 @@ from th08_live_dodge_agent import (
     decode_player_lethal_aabb,
     project_enemy_pool_snapshot,
     read_enemy_bodies_sparse,
+    serialize_laser_trace,
 )
 from touhou_control.viability import ControlAction
 
@@ -545,6 +547,10 @@ class LiveDodgeAgentTests(unittest.TestCase):
         assert laser.state is not None
         self.assertEqual(laser.state.current_width, 8.0)
         self.assertEqual(laser.state.collision_enable_frame, 5)
+        self.assertEqual(
+            serialize_laser_trace(laser)[15:],
+            [10, 5, 20, 10, 5, 0.0, 0.75],
+        )
         frames = build_laser_collision_frames(lasers, horizon=2)
         self.assertEqual(frames[0], ())
         self.assertEqual(len(frames[1]), 1)
@@ -578,6 +584,28 @@ class LiveDodgeAgentTests(unittest.TestCase):
         )
         for left, right in zip(expected, actual):
             np.testing.assert_allclose(left, right)
+
+    def test_local_planner_projects_one_shared_laser_timeline(self) -> None:
+        laser = Laser(80.0, 100.0, 0.0, 0.0, 180.0, 2.0)
+        with patch(
+            "th08_live_dodge_agent.build_laser_collision_frames",
+            wraps=build_laser_collision_frames,
+        ) as build:
+            choose_action(
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(laser,),
+                previous_direction=0,
+                can_bomb=False,
+                control_delay_frames=2,
+                control_delay_candidates=(2, 3),
+                action_hold_frames=3,
+                horizon=4,
+                threat_horizon=8,
+            )
+        self.assertEqual(build.call_count, 1)
+        self.assertEqual(build.call_args.kwargs["horizon"], 6)
 
     def test_incoming_bullet_forces_lateral_motion(self) -> None:
         decision = choose_action(

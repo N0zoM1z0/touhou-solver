@@ -201,6 +201,46 @@ class Laser:
     uncertainty: float = 0.0
 
 
+def serialize_laser_trace(laser: Laser) -> list[float | int | None]:
+    """Retain enough native lifecycle state for offline reprojection."""
+
+    state = laser.state
+    return [
+        laser.origin_x,
+        laser.origin_y,
+        laser.angle,
+        laser.tail,
+        laser.head,
+        laser.half_width,
+        laser.slot,
+        state.maximum_length if state is not None else None,
+        state.width if state is not None else None,
+        state.current_width if state is not None else None,
+        state.speed if state is not None else None,
+        int(state.phase) if state is not None else None,
+        state.timer if state is not None else None,
+        state.flags if state is not None else None,
+        laser.collision_flag,
+        state.warmup_frames if state is not None else None,
+        state.collision_enable_frame if state is not None else None,
+        state.active_frames if state is not None else None,
+        state.fade_frames if state is not None else None,
+        state.collision_disable_frame if state is not None else None,
+        state.timer_fraction if state is not None else None,
+        laser.uncertainty,
+    ]
+
+
+@dataclass(frozen=True)
+class _PackedLaserFrame:
+    start_x: np.ndarray
+    start_y: np.ndarray
+    segment_x: np.ndarray
+    segment_y: np.ndarray
+    collision_radius: np.ndarray
+    base_uncertainty: np.ndarray
+
+
 @dataclass(frozen=True)
 class EnemyBody:
     pointer: int
@@ -1173,13 +1213,67 @@ def build_laser_collision_frames(
     return tuple(tuple(frame) for frame in frames)
 
 
+def _pack_laser_frame(
+    lasers: tuple[Laser, ...],
+) -> _PackedLaserFrame:
+    angle = np.fromiter(
+        (laser.angle for laser in lasers),
+        dtype=np.float64,
+        count=len(lasers),
+    )
+    tail = np.fromiter(
+        (laser.tail for laser in lasers),
+        dtype=np.float64,
+        count=len(lasers),
+    )
+    head = np.fromiter(
+        (laser.head for laser in lasers),
+        dtype=np.float64,
+        count=len(lasers),
+    )
+    cosine = np.cos(angle)
+    sine = np.sin(angle)
+    origin_x = np.fromiter(
+        (laser.origin_x for laser in lasers),
+        dtype=np.float64,
+        count=len(lasers),
+    )
+    origin_y = np.fromiter(
+        (laser.origin_y for laser in lasers),
+        dtype=np.float64,
+        count=len(lasers),
+    )
+    return _PackedLaserFrame(
+        start_x=origin_x + cosine * tail,
+        start_y=origin_y + sine * tail,
+        segment_x=cosine * (head - tail),
+        segment_y=sine * (head - tail),
+        collision_radius=np.fromiter(
+            (
+                laser.half_width + PLAYER_RADIUS
+                for laser in lasers
+            ),
+            dtype=np.float64,
+            count=len(lasers),
+        ),
+        base_uncertainty=np.fromiter(
+            (
+                laser.uncertainty
+                for laser in lasers
+            ),
+            dtype=np.float64,
+            count=len(lasers),
+        ),
+    )
+
+
 def _hazards_for_positions(
     positions_x: np.ndarray,
     positions_y: np.ndarray,
     *,
     step: int,
     bullet_frame: tuple[np.ndarray, ...],
-    lasers: tuple[Laser, ...],
+    lasers: tuple[Laser, ...] | _PackedLaserFrame,
     enemy_bodies: tuple[EnemyBody, ...],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     count = positions_x.size
@@ -1222,45 +1316,21 @@ def _hazards_for_positions(
             minimum = np.minimum(minimum, robust_clearance.min(axis=1))
             danger = np.maximum(44.0 - robust_clearance, 0.0)
             risk += np.square(danger).sum(axis=1) * time_weight
-    if lasers:
-        origin_x = np.fromiter(
-            (laser.origin_x for laser in lasers),
-            dtype=np.float64,
+    packed_lasers = (
+        lasers
+        if isinstance(lasers, _PackedLaserFrame)
+        else _pack_laser_frame(lasers)
+    )
+    if packed_lasers.start_x.size:
+        start_x = packed_lasers.start_x
+        start_y = packed_lasers.start_y
+        segment_x = packed_lasers.segment_x
+        segment_y = packed_lasers.segment_y
+        uncertainty = (
+            packed_lasers.base_uncertainty
+            + min(6.0, 0.08 * step)
         )
-        origin_y = np.fromiter(
-            (laser.origin_y for laser in lasers),
-            dtype=np.float64,
-        )
-        angle = np.fromiter(
-            (laser.angle for laser in lasers),
-            dtype=np.float64,
-        )
-        tail = np.fromiter(
-            (laser.tail for laser in lasers),
-            dtype=np.float64,
-        )
-        head = np.fromiter(
-            (laser.head for laser in lasers),
-            dtype=np.float64,
-        )
-        half_widths = np.fromiter(
-            (laser.half_width for laser in lasers),
-            dtype=np.float64,
-        )
-        uncertainty = np.fromiter(
-            (
-                laser.uncertainty + min(6.0, 0.08 * step)
-                for laser in lasers
-            ),
-            dtype=np.float64,
-        )
-        cosine = np.cos(angle)
-        sine = np.sin(angle)
-        start_x = origin_x + cosine * tail
-        start_y = origin_y + sine * tail
-        segment_x = cosine * (head - tail)
-        segment_y = sine * (head - tail)
-        occupied_radius = half_widths + PLAYER_RADIUS + uncertainty
+        occupied_radius = packed_lasers.collision_radius + uncertainty
         margin = 56.0
         relevant = (
             (
@@ -1289,7 +1359,7 @@ def _hazards_for_positions(
             start_y = start_y[relevant]
             segment_x = segment_x[relevant]
             segment_y = segment_y[relevant]
-            half_widths = half_widths[relevant]
+            collision_radius = packed_lasers.collision_radius[relevant]
             uncertainty = uncertainty[relevant]
             length_sq = segment_x * segment_x + segment_y * segment_y
             flat_x = positions_x[:, None]
@@ -1309,9 +1379,7 @@ def _hazards_for_positions(
                 flat_x - (start_x + projection * segment_x),
                 flat_y - (start_y + projection * segment_y),
             )
-            clearance = (
-                distance - half_widths[None, :] - PLAYER_RADIUS
-            )
+            clearance = distance - collision_radius[None, :]
             collisions += (clearance <= 0.0).sum(
                 axis=1,
                 dtype=np.int32,
@@ -1378,6 +1446,7 @@ def _control_prefix_hazards(
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
     frames: int,
+    laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
 ) -> tuple[float, int, float]:
     """Evaluate motion already committed before a new decision can take effect."""
 
@@ -1388,10 +1457,16 @@ def _control_prefix_hazards(
         horizon=frames,
         snapshot_lag=-max(0, snapshot_lag),
     )
-    laser_frames = build_laser_collision_frames(
-        lasers,
-        horizon=frames,
-    )
+    if laser_frames is None:
+        laser_frames = tuple(
+            _pack_laser_frame(frame)
+            for frame in build_laser_collision_frames(
+                lasers,
+                horizon=frames,
+            )
+        )
+    if len(laser_frames) < frames:
+        raise ValueError("laser timeline does not cover the control prefix")
     risk = 0.0
     collisions = 0
     minimum = math.inf
@@ -1428,6 +1503,7 @@ def _robust_action_certificates(
     lasers: tuple[Laser, ...],
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
+    laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
 ) -> dict[str, RobustActionCertificate]:
     """Certify the emitted action until the following command can take effect."""
 
@@ -1439,10 +1515,16 @@ def _robust_action_certificates(
         horizon=maximum_step,
         snapshot_lag=-max(0, snapshot_lag),
     )
-    laser_frames = build_laser_collision_frames(
-        lasers,
-        horizon=maximum_step,
-    )
+    if laser_frames is None:
+        laser_frames = tuple(
+            _pack_laser_frame(frame)
+            for frame in build_laser_collision_frames(
+                lasers,
+                horizon=maximum_step,
+            )
+        )
+    if len(laser_frames) < maximum_step:
+        raise ValueError("laser timeline does not cover robust certificates")
     action_count = len(actions)
     risk_by_delay: dict[int, np.ndarray] = {}
     collisions_by_delay: dict[int, np.ndarray] = {}
@@ -1876,6 +1958,27 @@ def choose_action(
     observed_player_y = player_y
     selected_items = _select_items(items, power=power, bombs=bombs)
     delayed_mask = previous_direction | (FOCUS if previous_focus else 0)
+    main_laser_offset = max(
+        0,
+        control_delay_frames - max(0, snapshot_lag),
+    )
+    certificate_horizon = (
+        action_hold_frames + max(control_delay_candidates)
+        if control_delay_candidates is not None
+        else 0
+    )
+    laser_timeline_horizon = max(
+        control_delay_frames,
+        main_laser_offset + effective_threat_horizon,
+        certificate_horizon,
+    )
+    laser_timeline = tuple(
+        _pack_laser_frame(frame)
+        for frame in build_laser_collision_frames(
+            lasers,
+            horizon=laser_timeline_horizon,
+        )
+    )
     prefix_risk, prefix_collisions, prefix_clearance = _control_prefix_hazards(
         player_x=player_x,
         player_y=player_y,
@@ -1885,6 +1988,7 @@ def choose_action(
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         frames=control_delay_frames,
+        laser_frames=laser_timeline[:control_delay_frames],
     )
     player_x, player_y = _project_player_for_read_lag(
         player_x,
@@ -1900,14 +2004,14 @@ def choose_action(
             control_delay_frames - max(0, snapshot_lag),
         ),
     )
-    laser_frames = build_laser_collision_frames(
-        lasers,
-        horizon=effective_threat_horizon,
-        snapshot_lag=max(
-            0,
-            control_delay_frames - max(0, snapshot_lag),
-        ),
-    )
+    laser_frames = laser_timeline[
+        main_laser_offset:
+        main_laser_offset + effective_threat_horizon
+    ]
+    if len(laser_frames) < effective_threat_horizon:
+        raise RuntimeError(
+            "shared laser timeline does not cover local planning horizon"
+        )
     neutral = _PLANNER_ACTIONS[0]
     beam = [
         SearchNode(
@@ -2172,6 +2276,7 @@ def choose_action(
             lasers=lasers,
             enemy_bodies=enemy_bodies,
             snapshot_lag=snapshot_lag,
+            laser_frames=laser_timeline[:certificate_horizon],
         )
         nominal_certificate = robust_certificates[best.first_action.name]
         if (
@@ -3593,51 +3698,7 @@ def run(args: argparse.Namespace) -> int:
                         and abs(bullet.y - projected_player_y) <= radius
                     ]
                     record["lasers"] = [
-                        [
-                            laser.origin_x,
-                            laser.origin_y,
-                            laser.angle,
-                            laser.tail,
-                            laser.head,
-                            laser.half_width,
-                            laser.slot,
-                            (
-                                laser.state.maximum_length
-                                if laser.state is not None
-                                else None
-                            ),
-                            (
-                                laser.state.width
-                                if laser.state is not None
-                                else None
-                            ),
-                            (
-                                laser.state.current_width
-                                if laser.state is not None
-                                else None
-                            ),
-                            (
-                                laser.state.speed
-                                if laser.state is not None
-                                else None
-                            ),
-                            (
-                                int(laser.state.phase)
-                                if laser.state is not None
-                                else None
-                            ),
-                            (
-                                laser.state.timer
-                                if laser.state is not None
-                                else None
-                            ),
-                            (
-                                laser.state.flags
-                                if laser.state is not None
-                                else None
-                            ),
-                            laser.collision_flag,
-                        ]
+                        serialize_laser_trace(laser)
                         for laser in lasers
                     ]
                     record["items"] = [

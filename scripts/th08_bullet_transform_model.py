@@ -10,6 +10,7 @@ records and is used by the stage-8/Extra corpus.
 from __future__ import annotations
 
 import math
+import struct
 from dataclasses import dataclass, replace
 from enum import IntEnum
 from typing import Mapping
@@ -18,6 +19,7 @@ from typing import Mapping
 PLAYFIELD_WIDTH = 384.0
 PLAYFIELD_HEIGHT = 448.0
 TRANSFORM_PROGRAM_LENGTH = 18
+TRANSFORM_RECORD_SIZE = 24
 
 
 class TransformKind(IntEnum):
@@ -52,6 +54,22 @@ class TransformRecord:
 
 
 @dataclass(frozen=True)
+class BulletTransformRuntime:
+    """Native queue and stop-handler state retained by a live bullet."""
+
+    original_flags: int
+    queue_cursor: int
+    next_record: TransformRecord | None
+    timer_fraction: float
+    timer_elapsed: int
+    resume_speed: float
+    angle_operand: float
+    duration: int
+    repeat_limit: int
+    repeat_count: int
+
+
+@dataclass(frozen=True)
 class DerivedPattern:
     kill_parent: bool
     mode: int
@@ -77,6 +95,47 @@ class ReflectionState:
     event_limit: int
     event_count: int = 0
     active: bool = True
+
+
+def parse_transform_record(
+    blob: bytes | bytearray | memoryview,
+    *,
+    offset: int = 0,
+    index: int = 0,
+) -> TransformRecord:
+    """Parse one native 24-byte record without interpreting its kind."""
+
+    float_0, float_1, int_0, int_1, kind, allow_while_active = struct.unpack_from(
+        "<ffiiII",
+        blob,
+        offset,
+    )
+    return TransformRecord(
+        index=index,
+        kind=kind,
+        allow_while_active=bool(allow_while_active),
+        int_0=int_0,
+        int_1=int_1,
+        float_0=float_0,
+        float_1=float_1,
+    )
+
+
+def parse_next_transform_record(
+    blob: bytes | bytearray | memoryview,
+    *,
+    program_offset: int,
+    queue_cursor: int,
+) -> TransformRecord | None:
+    """Parse the next unconsumed record selected by the native queue cursor."""
+
+    if not 0 <= queue_cursor < TRANSFORM_PROGRAM_LENGTH:
+        return None
+    return parse_transform_record(
+        blob,
+        offset=program_offset + queue_cursor * TRANSFORM_RECORD_SIZE,
+        index=queue_cursor,
+    )
 
 
 def transform_record_from_decoded(

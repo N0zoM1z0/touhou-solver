@@ -1876,3 +1876,26 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   identify elapsed integer at timer `+8`, fractional elapsed at `+4`, and the
   per-update integer advance. For the bullet timer rooted at `+0x1004`, these
   are `+0x100C` and `+0x1008`.
+
+## 2026-07-24: Behavior-Neutral Live Transform Decoder
+
+- **Observed in IDA:** `bullet_apply_next_transform` computes
+  `bullet + 0xDD0 + 24 * queue_cursor` at `0x00430001`. It advances
+  `+0xDCC` when a record is skipped, executed immediately, or installed as an
+  active handler. The cursor therefore selects the next unconsumed record;
+  the active stop record has already moved into `+0x1010..+0x102C`.
+- Added native 24-byte record parsing and a compact
+  `BulletTransformRuntime`. Live bullets now retain finite native speed/angle,
+  original flags, queue cursor and next record, timer fraction/elapsed,
+  duration, resume speed, angle operand, and repeat limit/count.
+- The first eight `nearby_bullets` fields remain byte-for-byte structurally
+  compatible with dossiers and retained replay tools. A ninth optional list
+  carries transform runtime only for transform-relevant bullets.
+- **Inferred architecture:** TH08 owns runtime layout and transform semantics.
+  This checkpoint deliberately leaves the local linear bullet frames and
+  global `MovingAabbHazard` lowering unchanged; a later native same-slot
+  differential must validate stop/resume/re-aim timing before either planner
+  consumes the fields.
+- Five CE-0084 parser/decoder/schema/neutrality regressions and 33 adjacent
+  transform, corridor, dossier, and report tests pass. The physical
+  differential remains pending.

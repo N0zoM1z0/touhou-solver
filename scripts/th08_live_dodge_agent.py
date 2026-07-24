@@ -23,6 +23,11 @@ import numpy as np
 
 from corridor_planner import CorridorPlan
 from runtime_agent import input_transitions
+from th08_bullet_transform_model import (
+    BulletTransformRuntime,
+    TransformRecord,
+    parse_next_transform_record,
+)
 from th08_corridor_adapter import TH08_CORRIDOR_CONFIG, plan_th08_corridor
 from th08_laser_model import (
     LaserPhase,
@@ -61,8 +66,20 @@ BULLET_STRIDE = 0x10B8
 BULLET_GEOMETRY_OFFSET = 0x0D34
 BULLET_POSITION_OFFSET = 0x0D44
 BULLET_VELOCITY_OFFSET = 0x0D50
+BULLET_SPEED_OFFSET = 0x0D68
+BULLET_ANGLE_OFFSET = 0x0D74
 BULLET_TRANSFORM_FLAGS_OFFSET = 0x0DAC
+BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET = 0x0DB0
 BULLET_STATE_OFFSET = 0x0DB8
+BULLET_TRANSFORM_QUEUE_CURSOR_OFFSET = 0x0DCC
+BULLET_TRANSFORM_PROGRAM_OFFSET = 0x0DD0
+BULLET_STOP_TIMER_FRACTION_OFFSET = 0x1008
+BULLET_STOP_TIMER_ELAPSED_OFFSET = 0x100C
+BULLET_STOP_RESUME_SPEED_OFFSET = 0x1010
+BULLET_STOP_ANGLE_OPERAND_OFFSET = 0x1014
+BULLET_STOP_DURATION_OFFSET = 0x1024
+BULLET_STOP_REPEAT_LIMIT_OFFSET = 0x1028
+BULLET_STOP_REPEAT_COUNT_OFFSET = 0x102C
 
 LASER_POOL_BASE = 0x015B57C8
 LASER_POOL_SIZE = 256
@@ -191,6 +208,70 @@ class Bullet:
     half_height: float
     transform_flags: int = 0
     slot: int = -1
+    speed: float | None = None
+    angle: float | None = None
+    transform_runtime: BulletTransformRuntime | None = None
+
+
+def _serialize_transform_record(
+    record: TransformRecord | None,
+) -> list[float | int] | None:
+    if record is None:
+        return None
+    return [
+        record.index,
+        record.kind,
+        int(record.allow_while_active),
+        float(record.float_0),
+        float(record.float_1),
+        record.int_0,
+        record.int_1,
+    ]
+
+
+def serialize_bullet_trace(
+    bullet: Bullet,
+) -> list[object]:
+    """Retain legacy geometry plus optional native transform runtime.
+
+    Fields 0..7 are the stable historical trace contract. Field 8 is either
+    null or a compact transform payload:
+
+    ``[speed, angle, original_flags, queue_cursor, next_record,
+    timer_fraction, timer_elapsed, duration, resume_speed, angle_operand,
+    repeat_limit, repeat_count]``.
+    """
+
+    legacy: list[object] = [
+        bullet.slot,
+        bullet.x,
+        bullet.y,
+        bullet.vx,
+        bullet.vy,
+        bullet.half_width,
+        bullet.half_height,
+        bullet.transform_flags,
+    ]
+    runtime = bullet.transform_runtime
+    if runtime is None:
+        return [*legacy, None]
+    return [
+        *legacy,
+        [
+            bullet.speed,
+            bullet.angle,
+            runtime.original_flags,
+            runtime.queue_cursor,
+            _serialize_transform_record(runtime.next_record),
+            runtime.timer_fraction,
+            runtime.timer_elapsed,
+            runtime.duration,
+            runtime.resume_speed,
+            runtime.angle_operand,
+            runtime.repeat_limit,
+            runtime.repeat_count,
+        ],
+    ]
 
 
 @dataclass(frozen=True)
@@ -652,15 +733,90 @@ def decode_bullets(blob: bytes) -> tuple[Bullet, ...]:
         width, height = struct.unpack_from("<ff", blob, base + BULLET_GEOMETRY_OFFSET)
         x, y = struct.unpack_from("<ff", blob, base + BULLET_POSITION_OFFSET)
         vx, vy = struct.unpack_from("<ff", blob, base + BULLET_VELOCITY_OFFSET)
+        speed = struct.unpack_from("<f", blob, base + BULLET_SPEED_OFFSET)[0]
+        angle = struct.unpack_from("<f", blob, base + BULLET_ANGLE_OFFSET)[0]
         transform_flags = struct.unpack_from(
             "<I", blob, base + BULLET_TRANSFORM_FLAGS_OFFSET
         )[0]
+        original_transform_flags = struct.unpack_from(
+            "<I",
+            blob,
+            base + BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET,
+        )[0]
+        queue_cursor = struct.unpack_from(
+            "<i",
+            blob,
+            base + BULLET_TRANSFORM_QUEUE_CURSOR_OFFSET,
+        )[0]
+        next_record = parse_next_transform_record(
+            blob,
+            program_offset=base + BULLET_TRANSFORM_PROGRAM_OFFSET,
+            queue_cursor=queue_cursor,
+        )
         if not _finite((x, y, vx, vy, width, height)):
             continue
         half_width = min(max(abs(width) * 0.5, 1.0), 24.0)
         half_height = min(max(abs(height) * 0.5, 1.0), 24.0)
+        transform_runtime = None
+        if (
+            transform_flags
+            or original_transform_flags
+            or (next_record is not None and next_record.kind)
+        ):
+            transform_runtime = BulletTransformRuntime(
+                original_flags=original_transform_flags,
+                queue_cursor=queue_cursor,
+                next_record=next_record,
+                timer_fraction=struct.unpack_from(
+                    "<f",
+                    blob,
+                    base + BULLET_STOP_TIMER_FRACTION_OFFSET,
+                )[0],
+                timer_elapsed=struct.unpack_from(
+                    "<i",
+                    blob,
+                    base + BULLET_STOP_TIMER_ELAPSED_OFFSET,
+                )[0],
+                resume_speed=struct.unpack_from(
+                    "<f",
+                    blob,
+                    base + BULLET_STOP_RESUME_SPEED_OFFSET,
+                )[0],
+                angle_operand=struct.unpack_from(
+                    "<f",
+                    blob,
+                    base + BULLET_STOP_ANGLE_OPERAND_OFFSET,
+                )[0],
+                duration=struct.unpack_from(
+                    "<i",
+                    blob,
+                    base + BULLET_STOP_DURATION_OFFSET,
+                )[0],
+                repeat_limit=struct.unpack_from(
+                    "<i",
+                    blob,
+                    base + BULLET_STOP_REPEAT_LIMIT_OFFSET,
+                )[0],
+                repeat_count=struct.unpack_from(
+                    "<i",
+                    blob,
+                    base + BULLET_STOP_REPEAT_COUNT_OFFSET,
+                )[0],
+            )
         bullets.append(
-            Bullet(x, y, vx, vy, half_width, half_height, transform_flags, index)
+            Bullet(
+                x,
+                y,
+                vx,
+                vy,
+                half_width,
+                half_height,
+                transform_flags,
+                index,
+                speed if math.isfinite(speed) else None,
+                angle if math.isfinite(angle) else None,
+                transform_runtime,
+            )
         )
     return tuple(bullets)
 
@@ -3891,16 +4047,7 @@ def run(args: argparse.Namespace) -> int:
                 if args.trace_radius > 0.0:
                     radius = args.trace_radius
                     record["nearby_bullets"] = [
-                        [
-                            bullet.slot,
-                            bullet.x,
-                            bullet.y,
-                            bullet.vx,
-                            bullet.vy,
-                            bullet.half_width,
-                            bullet.half_height,
-                            bullet.transform_flags,
-                        ]
+                        serialize_bullet_trace(bullet)
                         for bullet in bullets
                         if abs(bullet.x - projected_player_x) <= radius
                         and abs(bullet.y - projected_player_y) <= radius

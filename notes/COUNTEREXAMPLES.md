@@ -1778,4 +1778,11 @@ Status: observed | inferred | unknown | fixed
   runtime timer state in live snapshots and traces. Project current stop
   lifecycles exactly; represent future player-relative re-aim as a trajectory
   set or conservative envelope rather than one guessed line.
-- **Status:** Open; runtime decoder and physical differential gate pending.
+- **Implemented observation slice:** The live decoder now retains native
+  speed/angle, original flags, the next unconsumed record selected by
+  `+0xDCC`, and the stop timer/operand/repeat state. A ninth optional compact
+  payload extends `nearby_bullets` without changing its eight legacy fields.
+  Regression tests prove that neither local nor global projection consumes
+  the new state yet.
+- **Status:** Open; behavior-neutral decoder is code-complete and the physical
+  same-slot differential gate is pending.

@@ -482,6 +482,34 @@ There are 18 records per bullet. `kind == 0` terminates the queue. A record is
 eligible only when its kind occurs in the emission's original transform flags;
 `wait_for_active_clear == 0` delays it until existing active transforms clear.
 
+**Observed** in `bullet_apply_next_transform` (`0x0042FFC0`):
+
+- `+0xDCC` is the index of the next unconsumed record. The executor forms
+  `bullet + 0xDD0 + 24 * queue_cursor` at `0x00430001`.
+- Ineligible and immediate records advance the cursor and continue scanning.
+  A record that installs an active handler advances the cursor before the
+  executor returns. The record at the cursor is therefore not the currently
+  active stop record.
+- The active 0x40/0x80/0x100 record has already been consumed. Its live
+  operands and repeat progress must be read from `+0x1010..+0x102C`, while
+  `+0xDCC/+0xDD0` describe later work.
+
+The behavior-neutral live trace retains the historical eight bullet fields
+unchanged and appends one optional compact runtime payload:
+
+```text
+[speed, angle, original_flags, queue_cursor, next_record,
+ timer_fraction, timer_elapsed, duration, resume_speed, angle_operand,
+ repeat_limit, repeat_count]
+```
+
+`next_record` uses
+`[index, kind, allow_while_active, float_0, float_1, int_0, int_1]`.
+The payload is present only when active/original flags or a nonzero pending
+record establish transform relevance. **Inferred design boundary:** decoding
+this TH08-native state is observational; neither local nor global planning may
+change until a native same-slot differential validates its frame semantics.
+
 ## Per-Frame Bullet Runtime
 
 **Observed** in `bullet_manager_update` (`0x00431240`):

@@ -9,13 +9,13 @@ test, physical-trial, and commit requirements are binding.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - Handoff base commit:
-  `66960dd Guard latent spell bodies across phase changes`
-- Complete Linux and Windows test gates at that commit: `368 tests` each, all
+  `ee66ed1 Guard issue-time enemy spawns and bound native clearance`
+- Complete Linux and Windows test gates at that commit: `378 tests` each, all
   passing.
 - The only expected untracked pre-existing file is `image.png`. It is a user
   screenshot. Do not add, delete, overwrite, or otherwise clean it.
-- The latest 174 MB Stage-5 raw JSONL and its launch log remain local and
-  ignored. Compact review/regression artifacts are committed.
+- The latest Stage-4A and Stage-5 raw JSONL files and launch logs remain local
+  and ignored. Compact review/regression artifacts are committed.
 - No runtime session or half-edited experiment is part of the checkpoint.
 - The IDA database has newer metadata than Git: the transform functions listed
   in section 10 were renamed/commented during the callback investigation.
@@ -491,7 +491,10 @@ Tool feedback for later REA MCP improvement belongs in
 
 ### CE-0090: Missing Special Boss Slot
 
-Targeted Stage-5 gate passed once at `6fb9f9c`; cross-stage gate remains open.
+Targeted Stage-5 gate passed once at `6fb9f9c`. The randomized Stage-4A
+cross-control at `ee66ed1` exercised another stage, but exposed CE-0092; the
+cross-stage acceptance gate therefore remains open until that generic
+issue-time observation fix is physically validated.
 
 The authoritative owner pointer is `0x0057D2F0`, exactly one enemy stride
 before the ordinary async pool base `0x005826C0`. The old “full enemy pool”
@@ -507,12 +510,13 @@ the bottom amid 1,145 bullets with negative modeled clearance.
 This accepts the missing-owner correction, not overall survival. Total hits
 changed `16 -> 21`, spell-107 hits `3 -> 9`, and every hit still followed
 global viability-kernel exhaustion. Different RNG/respawn/Power histories
-make the aggregate comparison non-causal. The next gate is a randomized
-non-Stage-5 control, with no stage/spell-specific tuning.
+make the aggregate comparison non-causal. The subsequent Stage-4A control
+supplied the required non-Stage-5 evidence and motivated a generic observation
+fix, without any stage/spell-specific direction tuning.
 
-The secondary latent-contact union, context-reset inertia rule, and bounded
-low-priority item utility remain active. Item pickup is only a tie-breaker
-inside the viable action set; survival remains the hard constraint.
+The secondary latent-contact union and context-reset inertia rule remain
+active. Item objectives are disabled during survival acceptance: pickups are
+still measured, but item utility cannot prune or rank an action.
 
 ### CE-0089: Hard-Before-Soft Ordering
 
@@ -603,8 +607,8 @@ budget and paired physical A/B.
   is true controllability loss versus quantization or conservative uncertainty.
   Calibrate stable same-slot residuals after excluding callbacks, phase
   boundaries, epoch jumps, and unmatched slots.
-- Item/power objectives are present but cannot repair a missing survival
-  certificate.
+- Item/power objectives are disabled during the current survival acceptance
+  phase. Passive collection remains observable but cannot affect decisions.
 - Global solve p95 remains hundreds of milliseconds. Continue using C++ for
   compact numerical batches, but require whole-pipeline gain and oracle/action
   parity. A C++ decoder that reconstructs the same per-bullet Python objects
@@ -612,12 +616,35 @@ budget and paired physical A/B.
 - Extra still has five unresolved native Bomb/Last-Spell replay boundaries;
   hard no-Bomb Lunatic practice remains the immediate diagnostic scope.
 
+### CE-0092: During-Plan Enemy Spawn And Issue-Time Guard
+
+The complete randomized Stage-4A run `20260724_155932` retained 19 hits and
+zero Bomb input. At hit 35,419, the causal decision captured hazards at frame
+35,412, an 18-body ring appeared in a frame-35,413 async snapshot, and the old
+action issued at 35,415. Slot 18 made stable exact contact at frame 35,420.
+This is a computation-window observation failure, not SendInput latency.
+
+Every local decision now merges one synchronous 64-slot enemy prefix with the
+complete async tail, then reads the prefix again before input. A pointer,
+contact-mode, size, velocity, or nonlinear-motion change triggers a fast
+all-action robust recertificate. This has offline causal and regression
+coverage but no physical acceptance yet. The next Stage-4A run must report
+prefix-read p50/p95, change/recertificate/override counts, cadence, and whether
+the old ring-contact class recurs.
+
+The existing C++ moving-AABB clearance kernel now uses a cap-bounded
+hazard-major traversal. A fixed 1,360-AABB workload improved `5.74x` by median
+with an identical retained float32 volume checksum. Warm full synthetic solve
+medians are `76.15 ms` Linux and `82.83 ms` Windows. This checkpoint supports
+compact numerical C++ boundaries, not translating the full Python
+orchestrator.
+
 ## 12. Files To Read In Order
 
 1. `AGENTS.md`
 2. `START_HERE.md`
 3. `notes/ALGORITHM_REVIEW_20260724.md`
-4. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0090
+4. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0092
 5. `notes/RESEARCH_LOG.md`, latest four dated sections
 6. `notes/ROBUST_VIABILITY.md`
 7. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
@@ -628,8 +655,9 @@ budget and paired physical A/B.
 12. `scripts/th08_bullet_transform_model.py`
 13. `scripts/th08_corridor_adapter.py`
 14. `scripts/touhou_control/viability.py`
-15. Latest Stage-3, Stage-5, and Stage-6B notes:
+15. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
     `notes/runs/lunatic_route2_stage3_unattended_20260724_132007.md`,
+    `notes/runs/lunatic_route2_stage4a_unattended_20260724_155932.md`,
     `notes/runs/lunatic_route2_stage5_unattended_20260724_144805.md`, and
     `notes/runs/lunatic_route2_stage6b_unattended_20260724_135201.md`
 
@@ -677,15 +705,16 @@ budget and paired physical A/B.
 A good next commit is not "the randomized stage had fewer hits" by itself. It
 should:
 
-1. Choose one randomized non-Stage-5 practice route from Stage 1, 2, 3, 4A,
-   or Final B. Keep hard no-Bomb and safety value disabled.
+1. Re-run focused Stage 4A once to validate the synchronous prefix and
+   issue-time recertificate. Keep hard no-Bomb and safety value disabled.
 2. Retain the complete dossier, death ledger, regression cases, comparison,
    session/summary, and human-readable run note.
-3. Compare decode/local/global p50/p95, cadence, deadline suppression,
-   owner-guard coverage, kernel exhaustion, boundary occupancy, item behavior,
-   and every hit window. Do not tune a stage/spell direction.
+3. Compare decode/local/global p50/p95, both prefix-read tails,
+   issue-time geometry changes/recertificates/overrides, cadence, deadline
+   suppression, kernel exhaustion, boundary occupancy, and every hit window.
+   Do not tune a stage/spell direction.
 4. Add a counterexample and smallest useful regression for every new concrete
-   failure; pass the complete 370-plus Linux and Windows suites.
+   failure; pass the complete 378-plus Linux and Windows suites.
 5. Commit the verified cross-control while leaving raw traces, logs, native
    binaries, and `image.png` untracked.
 6. Then prototype recovery-band semantics offline across multiple stages and
@@ -698,16 +727,16 @@ should:
 ```text
 Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
 START_HERE.md completely, then inspect git status and the latest commit. Keep
-hard no-Bomb and leave safety value disabled. Continue from 6fb9f9c: the
-Stage-5 missing-owner gate passed once after proving Reisen is special slot
--1 outside the async pool, but aggregate survival did not improve. Run one
-randomized non-Stage-5 control before accepting cross-stage behavior. Analyze
-every hit, empty-kernel state, item behavior, owner coverage, and timing—not
-only hit count. Keep generic planners game-neutral and TH08 memory/contact
-mechanics in the adapter. Next investigate a robust time-expanded recovery
-band with an independent scalar oracle and adversarial generated cases. Use
-C++ only at a packed numerical boundary with whole-pipeline performance and
-parity evidence. Run complete Linux and Windows tests, retain compact
-artifacts/counterexamples, update notes, commit verified checkpoints, and
-cleanly stop every runtime session.
+hard no-Bomb and leave safety value disabled. Continue from ee66ed1. Stage-4A
+CE-0092 proved that an 18-body contact ring spawned while the old Python local
+decision was computing. The adapter now reads a synchronous 64-slot prefix at
+capture and issue time and robustly recertifies geometry changes; physically
+validate its timing and overrides on focused Stage 4A before accepting it.
+Items are survival-neutral. The bounded native clearance kernel passed
+Linux/Windows parity and a 5.74x microbenchmark; do not infer physical timing
+until the new run. Analyze every hit and global/local mismatch, then prototype
+the robust time-expanded recovery band against an independent scalar oracle
+and adversarial generated cases. Keep generic planners game-neutral, retain
+compact artifacts/counterexamples, run both complete suites, commit verified
+checkpoints, and cleanly stop every runtime session.
 ```

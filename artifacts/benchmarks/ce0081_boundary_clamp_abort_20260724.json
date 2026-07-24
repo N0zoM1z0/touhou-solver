@@ -1,0 +1,53 @@
+{
+  "schema": "th08-controller-counterexample-v1",
+  "run_id": "lunatic_route2_stage6b_unattended_20260724_081231",
+  "raw_trace_sha256": "d2ac4e680904150252f3fc7d20e844ba1a254d3036079f9249b8a668f0d5be36",
+  "scope": "Retained controller-lifecycle failure; the raw JSONL remains ignored.",
+  "termination": {
+    "reason": "agent_error",
+    "error_type": "KeyError",
+    "error": "'stay'",
+    "last_frame": 22801,
+    "hit_count": 9
+  },
+  "last_decision": {
+    "frame": 22801,
+    "player_x": 351.7697448730469,
+    "player_y": 412.4698486328125,
+    "projected_x": 354.06974482536316,
+    "projected_y": 412.4698486328125,
+    "control_origin_x": 365.5697445869446,
+    "control_origin_y": 412.4698486328125,
+    "current_input_mask": 133,
+    "previous_input_mask": 165,
+    "selected_action": "down_left_fast",
+    "allowed_actions": [
+      "down_left_fast",
+      "down_right_fast"
+    ],
+    "repair_volumes": {
+      "down_left_fast": 10,
+      "down_right_fast": 2
+    },
+    "position_error": 6.901441524171802,
+    "control_delay_candidates": [
+      4,
+      5,
+      6
+    ],
+    "action_hold_frames": 6,
+    "constraint_relaxed": false
+  },
+  "root_cause": "The robust certificate and native game clamp boundary motion per axis, while the local beam discarded any successor with an out-of-bounds component. A prolonged allowed action could therefore empty the beam, create a neutral stay fallback outside the preflight certificate domain, and fail certificate reuse with KeyError('stay').",
+  "correction": "Clamp every local beam successor to native playfield bounds and reuse preflight certificates only when their action domain covers every surviving first action.",
+  "regression": "test_boundary_clamps_allowed_action_without_neutral_fallback",
+  "physical_gate": {
+    "run_id": "lunatic_route2_stage6b_unattended_20260724_081952",
+    "completion": "route_complete",
+    "first_frame": 2,
+    "last_frame": 75091,
+    "hard_no_bomb": true,
+    "hit_count": 18,
+    "crossed_abort_frame": true
+  }
+}

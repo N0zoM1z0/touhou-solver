@@ -1767,3 +1767,29 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   clearance, selected an unrestricted local alternative, and was followed by
   a hit. Relaxation must be conditional on all globally allowed actions
   failing continuous-state prefix validation.
+
+## 2026-07-24: Certificate Preservation And Stage-6B Boundary Contract
+
+- CE-0080 now distinguishes a degenerate coarse mask from a failed
+  certificate. Partial clamped aliases keep any real unclamped motion and use
+  the 32-frame warning without dropping the mask. An off-grid singleton is
+  preserved only with exact delay-prefix safety and repair volume greater
+  than one. Retained frames 26,892 and 27,216 remain globally constrained;
+  frame 26,928 still relaxes because its allowed action fails exact geometry.
+- The first random Stage-6B run `081231` exposed CE-0081 at frame 22,801.
+  Robust certificates and TH08 clamp motion, but the local beam discarded raw
+  out-of-bounds successors. A prolonged constrained diagonal emptied the beam
+  and the neutral fallback caused `KeyError('stay')` during certificate reuse.
+- Local motion now clamps per axis, and certificate reuse checks complete
+  action-domain coverage. The retained boundary regression plus all 307 Linux
+  tests and three focused Windows tests pass.
+- Repeat `081952` completed Final B frames `2..75091`, hard no-Bomb, with 18
+  hits and automatic dialogue/no-save handling. Against complete baseline
+  `060039`, hits fell 30 to 18 and spell-154 solve median/p95 fell
+  936/1345 to 246/346 ms. Multiple intervening accepted changes prevent
+  isolated survival attribution.
+- The complete run opens CE-0082. Every hit followed global-kernel exhaustion,
+  12 involved a boundary, and pre-hit bottom occupancy increased 30.4 to 51.7
+  percent. Spell 170 alone produced six bullet-only hits at the bottom edge.
+  Scalar distant recovery needs a robust path/control-reserve extension; the
+  next change must preserve the earlier cross-stage recovery acceptance.

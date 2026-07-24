@@ -1642,9 +1642,65 @@ Status: observed | inferred | unknown | fixed
   the whole coarse action mask. The lattice certificate is not continuous,
   but a global action that also passes exact continuous prefix geometry is
   stronger evidence than an unrestricted local alternative.
-- **Correction gate:** Before relaxing, certify the globally allowed actions
-  at the observed continuous state under the current delay support. Preserve
-  the mask when any allowed action has zero prefix collisions and nonnegative
-  clearance. Relax only when every allowed action already fails exact local
-  geometry.
-- **Status:** Observed; next semantic correction.
+- **Correction:** Degeneracy and relaxation are now separate. A partial
+  clamped alias with a real unclamped motion remains constrained and receives
+  the extended terminal warning. An off-grid singleton remains constrained
+  only when its action has zero exact prefix collisions, nonnegative
+  clearance under every current delay, and repair volume greater than one.
+  A complete outward alias or a singleton without that redundant certificate
+  is still downgraded.
+- **Retained gate:** Frame 26,892 changes from unrestricted `right` to the
+  globally certified `down_fast`; frame 27,216 remains inside its four-action
+  mask. Frame 26,928 still relaxes because `stay` fails exact prefix geometry,
+  proving that this is not unconditional trust in the coarse policy.
+- **Regression:** The Stage-2 clamped-alias and unsafe singleton escapes remain
+  intact, while a safe redundant singleton is required to keep `stay`.
+- **Status:** Fixed in offline retained geometry. Stage-6B completed with the
+  contract active; an isolated Stage-3 survival gate remains pending.
+
+## CE-0081: Local beam rejected native-clamped successors and aborted
+
+- **Observed symptom:** Automated Stage-6B run `20260724_081231` reached
+  frame 22,801 and then terminated with `KeyError('stay')`. The final global
+  mask allowed `down_left_fast` and `down_right_fast`, with repair volumes 10
+  and 2, at `(351.77, 412.47)`.
+- **Root cause:** Native TH08 motion and the robust certificate clamp each
+  coordinate to the playfield. The local beam instead discarded a successor
+  when either raw coordinate left the bounds. A held diagonal at the lower
+  boundary eventually emptied the beam, installed the legacy neutral `stay`
+  fallback, and then attempted to reuse a preflight certificate map that did
+  not contain `stay`.
+- **Correction:** Local successors now use the same per-axis clamp as the
+  native movement model, terminal rollout, and robust certificate. Preflight
+  certificates are reused only when their key domain covers every surviving
+  first action.
+- **Regression:** `test_boundary_clamps_allowed_action_without_neutral_fallback`
+  reproduces the retained position, delay support, hold, mask, and repair
+  volumes. The selected action remains in the global mask.
+- **Physical gate:** Repeat `20260724_081952` crossed the abort frame and
+  completed frames `2..75091`, hard no-Bomb, with automatic no-save exit.
+- **Status:** Fixed and physically accepted as a lifecycle/control-model
+  consistency correction.
+
+## CE-0082: Empty-kernel recovery consumed boundary controllability
+
+- **Observed symptom:** Complete Stage-6B run `20260724_081952` improved total
+  hits from 30 to 18 versus the most recent complete baseline, but all 18 hit
+  windows had exhausted the global viability kernel. Twelve occurred at a
+  playfield boundary. Pre-hit bottom-eight-pixel occupancy rose from 30.4 to
+  51.7 percent.
+- **Canonical phase:** Spell 170 contributed six bullet-only hits. In each
+  retained window the safe-action mask was empty and distant recovery ranked
+  scalar distances to a next-layer viable slice while the player repeatedly
+  reached `y=432`.
+- **Invalid assumption:** A smaller endpoint-to-kernel distance is sufficient
+  soft progress when the endpoint has lost control authority. At a clamped
+  boundary, outward/stationary actions can look closer to a different
+  action-indexed viable slice while preserving no robust bridge and reducing
+  the speed available to the next command.
+- **Correction gate:** Extend recovery from a scalar endpoint distance to a
+  path-aware value that prices intermediate collision clearance and boundary
+  control reserve under every delay branch. It must retain the previously
+  accepted Stage-1/Stage-3 distant-recovery gains and cannot encode Stage-6B
+  or spell-170 directions.
+- **Status:** Open. The complete run and all 18 death windows are retained.

@@ -657,6 +657,37 @@ gate reduced pre-laser hits from 11 to four relative to the prior complete
 baseline while maintaining 3/5-frame cadence. This accepts the fallback as
 soft recovery, not as proof that an empty kernel has become viable.
 
+The local controller must use the same clamping semantics as that tensor.
+Rejecting raw out-of-bounds successors is incorrect: TH08 clamps each axis,
+and a diagonal can retain tangential motion while its outward component is
+blocked. Robust certificates, local beam motion, terminal rollout, and the
+native player model now share this rule.
+
+Coarse-mask degeneracy does not by itself authorize unrestricted local
+control. Partial aliases retain any genuine unclamped motion and remain hard
+constraints. An off-grid singleton remains hard only when it has a
+zero-collision exact prefix certificate across the current delay support and
+more than one next-layer repair state. Complete outward alias collapse and
+fragile/unsafe singletons remain explicit certificate downgrades.
+
+Stage-6B shows the limit of scalar distant recovery. When the player is
+outside the viability kernel, endpoint distance can repeatedly prefer an
+action-indexed target near a clamped edge and consume future control reserve.
+The next game-neutral recovery value must account for the entire bridge:
+
+```text
+recovery_cost(action) =
+    worst over delay branches (
+        intermediate collision/safety cost
+        + distance to a viable next-layer state
+        + loss of boundary control reserve
+    )
+```
+
+This remains a soft fallback until every intermediate state is included in a
+backward-reachable recovery band. Boundary reserve cannot become a hard
+global margin because valid patterns may require edge use.
+
 ## Verification Gates
 
 1. File parsers reproduce all decoded ECL/SHT corpus boundaries exactly.

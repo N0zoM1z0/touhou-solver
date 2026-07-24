@@ -1812,22 +1812,23 @@ def _terminal_threat_scores(
     }
 
 
-def _terminal_threat_required(
+def _terminal_threat_degeneracy(
     *,
     player_x: float,
     player_y: float,
     action_hold_frames: int,
     allowed_first_actions: tuple[str, ...] | None,
     viability_position_error: float,
-) -> bool:
+) -> str | None:
     """Detect stale-policy control collapse near a clamped boundary."""
 
     if allowed_first_actions is None:
-        return False
+        return None
     allowed = set(allowed_first_actions)
     successors: set[tuple[float, float]] = set()
     action_count = 0
     clamped = False
+    unclamped_motion = False
     for action in _PLANNER_ACTIONS:
         if action.name not in allowed:
             continue
@@ -1836,14 +1837,25 @@ def _terminal_threat_required(
         raw_y = player_y + action.dy * action_hold_frames
         successor_x = min(PLAYFIELD_RIGHT, max(PLAYFIELD_LEFT, raw_x))
         successor_y = min(PLAYFIELD_BOTTOM, max(PLAYFIELD_TOP, raw_y))
-        clamped |= successor_x != raw_x or successor_y != raw_y
+        action_clamped = successor_x != raw_x or successor_y != raw_y
+        clamped |= action_clamped
+        unclamped_motion |= (
+            not action_clamped
+            and (abs(action.dx) > 1e-6 or abs(action.dy) > 1e-6)
+        )
         successors.add((round(successor_x, 3), round(successor_y, 3)))
     off_grid_singleton = (
         action_count == 1 and viability_position_error > 1e-3
     )
-    return off_grid_singleton or (
-        clamped and 0 < len(successors) < action_count
-    )
+    if off_grid_singleton:
+        return "off_grid_singleton"
+    if clamped and 0 < len(successors) < action_count:
+        return (
+            "partial_clamped_alias"
+            if unclamped_motion
+            else "complete_clamped_alias"
+        )
+    return None
 
 
 def choose_action(
@@ -1912,22 +1924,18 @@ def choose_action(
             raise ValueError(
                 f"unknown allowed first actions: {sorted(unknown_actions)}"
             )
-    viability_constraint_relaxed = (
-        threat_horizon > horizon
-        and _terminal_threat_required(
+    viability_degeneracy = (
+        _terminal_threat_degeneracy(
             player_x=player_x,
             player_y=player_y,
             action_hold_frames=action_hold_frames,
             allowed_first_actions=allowed_first_actions,
             viability_position_error=viability_position_error,
         )
+        if threat_horizon > horizon
+        else None
     )
-    effective_allowed_first_actions = (
-        None if viability_constraint_relaxed else allowed_first_actions
-    )
-    effective_threat_horizon = (
-        threat_horizon if viability_constraint_relaxed else horizon
-    )
+    viability_relaxation_candidate = viability_degeneracy is not None
     repair_by_action = dict(viability_repair_volumes)
     if len(repair_by_action) != len(viability_repair_volumes):
         raise ValueError("viability repair action names must be unique")
@@ -1962,14 +1970,22 @@ def choose_action(
         0,
         control_delay_frames - max(0, snapshot_lag),
     )
-    certificate_horizon = (
-        action_hold_frames + max(control_delay_candidates)
+    certificate_delay_frames = (
+        control_delay_candidates
         if control_delay_candidates is not None
+        else (control_delay_frames,)
+    )
+    certificate_horizon = (
+        action_hold_frames + max(certificate_delay_frames)
+        if control_delay_candidates is not None or viability_relaxation_candidate
         else 0
+    )
+    potential_threat_horizon = (
+        threat_horizon if viability_relaxation_candidate else horizon
     )
     laser_timeline_horizon = max(
         control_delay_frames,
-        main_laser_offset + effective_threat_horizon,
+        main_laser_offset + potential_threat_horizon,
         certificate_horizon,
     )
     laser_timeline = tuple(
@@ -1979,6 +1995,47 @@ def choose_action(
             horizon=laser_timeline_horizon,
         )
     )
+    viability_preflight_certificates: dict[
+        str, RobustActionCertificate
+    ] = {}
+    if viability_degeneracy == "off_grid_singleton":
+        assert allowed_first_actions is not None
+        allowed_names = set(allowed_first_actions)
+        allowed_actions = tuple(
+            action
+            for action in _PLANNER_ACTIONS
+            if action.name in allowed_names
+        )
+        viability_preflight_certificates = _robust_action_certificates(
+            player_x=observed_player_x,
+            player_y=observed_player_y,
+            previous_mask=delayed_mask,
+            actions=allowed_actions,
+            delay_frames=certificate_delay_frames,
+            action_hold_frames=action_hold_frames,
+            bullets=bullets,
+            lasers=lasers,
+            enemy_bodies=enemy_bodies,
+            snapshot_lag=snapshot_lag,
+            laser_frames=laser_timeline[:certificate_horizon],
+        )
+    viability_constraint_relaxed = (
+        viability_degeneracy == "complete_clamped_alias"
+        or (
+            viability_degeneracy == "off_grid_singleton"
+            and not any(
+                certificate.worst_collisions == 0
+                and certificate.min_clearance >= 0.0
+                and repair_by_action.get(action_name, 0) > 1
+                for action_name, certificate
+                in viability_preflight_certificates.items()
+            )
+        )
+    )
+    effective_allowed_first_actions = (
+        None if viability_constraint_relaxed else allowed_first_actions
+    )
+    effective_threat_horizon = potential_threat_horizon
     prefix_risk, prefix_collisions, prefix_clearance = _control_prefix_hazards(
         player_x=player_x,
         player_y=player_y,
@@ -2086,13 +2143,14 @@ def choose_action(
                     action for action in actions if action.name in allowed
                 )
             for action in actions:
-                x = node.x + action.dx
-                y = node.y + action.dy
-                if not (
-                    PLAYFIELD_LEFT <= x <= PLAYFIELD_RIGHT
-                    and PLAYFIELD_TOP <= y <= PLAYFIELD_BOTTOM
-                ):
-                    continue
+                x = min(
+                    PLAYFIELD_RIGHT,
+                    max(PLAYFIELD_LEFT, node.x + action.dx),
+                )
+                y = min(
+                    PLAYFIELD_BOTTOM,
+                    max(PLAYFIELD_TOP, node.y + action.dy),
+                )
                 transition_risk = 0.0
                 transition_risk += _boundary_risk(x, y)
                 if action.direction != node.last_action.direction:
@@ -2265,19 +2323,30 @@ def choose_action(
                 incumbent
             ):
                 nodes_by_action[action_name] = node
-        robust_certificates = _robust_action_certificates(
-            player_x=observed_player_x,
-            player_y=observed_player_y,
-            previous_mask=delayed_mask,
-            actions=tuple(actions_by_name.values()),
-            delay_frames=control_delay_candidates,
-            action_hold_frames=action_hold_frames,
-            bullets=bullets,
-            lasers=lasers,
-            enemy_bodies=enemy_bodies,
-            snapshot_lag=snapshot_lag,
-            laser_frames=laser_timeline[:certificate_horizon],
-        )
+        if (
+            viability_preflight_certificates
+            and not viability_constraint_relaxed
+            and actions_by_name.keys()
+            <= viability_preflight_certificates.keys()
+        ):
+            robust_certificates = {
+                action_name: viability_preflight_certificates[action_name]
+                for action_name in actions_by_name
+            }
+        else:
+            robust_certificates = _robust_action_certificates(
+                player_x=observed_player_x,
+                player_y=observed_player_y,
+                previous_mask=delayed_mask,
+                actions=tuple(actions_by_name.values()),
+                delay_frames=control_delay_candidates,
+                action_hold_frames=action_hold_frames,
+                bullets=bullets,
+                lasers=lasers,
+                enemy_bodies=enemy_bodies,
+                snapshot_lag=snapshot_lag,
+                laser_frames=laser_timeline[:certificate_horizon],
+            )
         nominal_certificate = robust_certificates[best.first_action.name]
         if (
             nominal_certificate.worst_collisions > 0

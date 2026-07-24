@@ -376,11 +376,19 @@ geometry may select any physical first action and the extended warning ranks
 the result. This downgrade is explicitly logged and remains a heuristic until
 the global policy supports continuous query uncertainty.
 
-An off-grid singleton mask is downgraded for the same reason: it has no action
-redundancy with which to absorb the initial snap error. A complete Stage-6B
-run exercised 1,237 such or clamped-alias downgrades at 3/5-frame
-median/p95 cadence, accepting the runtime cost but not proving a survival
-effect.
+An off-grid singleton has no action-label redundancy, but that does not mean
+its only action is physically invalid. It is preserved when the action passes
+exact continuous prefix geometry for every current delay and its repair
+volume contains more than one next-layer state. Unsafe or one-state
+singletons are still downgraded. Partial clamped aliases also remain
+constrained when at least one allowed action has genuine unclamped motion;
+the terminal warning ranks those allowed motions. Only complete outward alias
+collapse is downgraded unconditionally.
+
+The local beam, robust certificate, terminal warning, and native game all
+clamp motion per coordinate. This matters at corners: rejecting a diagonal
+because one component is outward incorrectly removes its valid tangential
+component and can empty the beam.
 
 ## Laser Projection Reuse
 

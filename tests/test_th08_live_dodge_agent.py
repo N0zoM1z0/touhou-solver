@@ -23,6 +23,7 @@ from th08_live_dodge_agent import (
     CORRIDOR_INITIAL_SUBMIT_FRAME,
     CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES,
     CorridorSolution,
+    DOWN,
     ENEMY_BODY_READ_OFFSET,
     ENEMY_BODY_READ_SIZE,
     ENEMY_CONTACT_SIZE_OFFSET,
@@ -1143,6 +1144,34 @@ class LiveDodgeAgentTests(unittest.TestCase):
         )
         self.assertEqual(decision.action, "right_fast")
 
+    def test_boundary_clamps_allowed_action_without_neutral_fallback(self) -> None:
+        decision = choose_action(
+            player_x=351.7697448730469,
+            player_y=412.4698486328125,
+            bullets=(),
+            lasers=(),
+            previous_direction=DOWN | RIGHT,
+            previous_focus=True,
+            snapshot_lag=0,
+            control_delay_frames=6,
+            control_delay_candidates=(4, 5, 6),
+            action_hold_frames=6,
+            can_bomb=False,
+            horizon=10,
+            threat_horizon=32,
+            allowed_first_actions=("down_left_fast", "down_right_fast"),
+            viability_repair_volumes=(
+                ("down_left_fast", 10),
+                ("down_right_fast", 2),
+            ),
+            viability_position_error=6.901441524171802,
+        )
+        self.assertIn(
+            decision.action,
+            ("down_left_fast", "down_right_fast"),
+        )
+        self.assertTrue(decision.viability_constrained)
+
     def test_ce_stage2_frame_13517_terminal_threat_leaves_clamped_aliases(
         self,
     ) -> None:
@@ -1233,8 +1262,9 @@ class LiveDodgeAgentTests(unittest.TestCase):
         }
         legacy = choose_action(**common, threat_horizon=10)
         decision = choose_action(**common, threat_horizon=32)
-        self.assertEqual(legacy.action, "stay")
+        self.assertIn(legacy.action, ("stay", "down", "down_fast"))
         self.assertEqual(decision.action, "left_fast")
+        self.assertFalse(decision.viability_constraint_relaxed)
         self.assertEqual(decision.terminal_threat_horizon, 32)
         self.assertGreater(
             decision.terminal_threat_min_clearance,
@@ -1274,8 +1304,14 @@ class LiveDodgeAgentTests(unittest.TestCase):
             **coarse_grid_common,
             threat_horizon=32,
         )
-        self.assertEqual(coarse_grid_legacy.action, "stay")
-        self.assertNotEqual(coarse_grid_alias.action, "stay")
+        self.assertIn(
+            coarse_grid_legacy.action,
+            ("stay", "down", "down_fast"),
+        )
+        self.assertNotIn(
+            coarse_grid_alias.action,
+            ("stay", "down", "down_fast"),
+        )
         self.assertTrue(coarse_grid_alias.viability_constraint_relaxed)
         self.assertEqual(coarse_grid_alias.terminal_threat_horizon, 32)
 
@@ -1311,6 +1347,24 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(singleton_legacy.action, "stay")
         self.assertNotEqual(singleton_fixed.action, "stay")
         self.assertTrue(singleton_fixed.viability_constraint_relaxed)
+
+        safe_singleton = choose_action(
+            **{
+                **common,
+                "player_x": 192.37,
+                "player_y": 400.0,
+                "bullets": (),
+                "snapshot_lag": 0,
+                "control_delay_frames": 4,
+                "allowed_first_actions": ("stay",),
+                "viability_repair_volumes": (("stay", 3),),
+                "viability_position_error": 3.63,
+            },
+            threat_horizon=32,
+        )
+        self.assertEqual(safe_singleton.action, "stay")
+        self.assertFalse(safe_singleton.viability_constraint_relaxed)
+        self.assertEqual(safe_singleton.terminal_threat_horizon, 32)
 
         interior = choose_action(
             **{**common, "player_y": 400.0},

@@ -25,6 +25,9 @@ from th08_trial_report import STAGE_ROUTE_LABELS
 ROOT = Path(__file__).resolve().parent.parent
 BOMB_INPUT_BIT = 0x02
 TERMINAL_THREAT_SAFETY_CLEARANCE = 8.0
+ENEMY_POOL_BASE = 0x005826C0
+ENEMY_POOL_SIZE = 480
+ENEMY_STRIDE = 0x53D0
 
 
 @dataclass(frozen=True)
@@ -508,6 +511,71 @@ def _enemy_sensor_summary(
             count > 0 for count in body_counts
         ),
         "max_active_bodies": max(body_counts, default=0),
+    }
+
+
+def _spell_owner_guard_summary(
+    decisions: list[dict[str, object]],
+) -> dict[str, object] | None:
+    """Retain compact evidence for the synchronous spell-owner observation."""
+
+    rows = [
+        (row, guard)
+        for row in decisions
+        if isinstance((guard := row.get("spell_enemy_body_guard")), dict)
+    ]
+    if not rows:
+        return None
+
+    observed = [
+        (row, guard)
+        for row, guard in rows
+        if isinstance(guard.get("body"), list) and guard["body"]
+    ]
+    pointer_counts: Counter[int] = Counter()
+    per_spell: dict[str, Counter[str]] = {}
+    outside_async_pool_count = 0
+    for row, guard in observed:
+        body = guard["body"]
+        pointer = int(body[0])
+        pointer_counts[pointer] += 1
+        offset = pointer - ENEMY_POOL_BASE
+        covered = (
+            0 <= offset < ENEMY_POOL_SIZE * ENEMY_STRIDE
+            and offset % ENEMY_STRIDE == 0
+        )
+        if not covered:
+            outside_async_pool_count += 1
+        spell = row.get("spell")
+        spell_id = (
+            str(spell.get("spell_id"))
+            if isinstance(spell, dict) and spell.get("spell_id") is not None
+            else "unknown"
+        )
+        counts = per_spell.setdefault(spell_id, Counter())
+        counts["observation_count"] += 1
+        counts["contact_enabled_count"] += bool(guard.get("contact_enabled"))
+        counts["anticipatory_count"] += bool(guard.get("anticipatory"))
+
+    return {
+        "row_count": len(rows),
+        "observation_count": len(observed),
+        "error_count": sum(bool(guard.get("error")) for _row, guard in rows),
+        "contact_enabled_count": sum(
+            bool(guard.get("contact_enabled")) for _row, guard in observed
+        ),
+        "anticipatory_count": sum(
+            bool(guard.get("anticipatory")) for _row, guard in observed
+        ),
+        "outside_async_pool_count": outside_async_pool_count,
+        "pointer_counts": {
+            f"0x{pointer:08X}": count
+            for pointer, count in sorted(pointer_counts.items())
+        },
+        "per_spell": {
+            spell_id: dict(sorted(counts.items()))
+            for spell_id, counts in sorted(per_spell.items())
+        },
     }
 
 
@@ -1309,6 +1377,7 @@ def build_dossier(
             "input_visibility": _input_visibility_summary(decisions),
             "runtime_timing_ms": _runtime_timing(decisions),
             "enemy_sensor": _enemy_sensor_summary(decisions),
+            "spell_owner_guard": _spell_owner_guard_summary(decisions),
             "terminal_threat": _terminal_threat_summary(decisions),
             "behavior_context": _behavior_context(decisions, deaths),
             "per_spell": _spell_phase_summary(decisions, deaths),
@@ -1563,6 +1632,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
     robust_viability = totals["robust_viability"]
     input_visibility = totals["input_visibility"]
     enemy_sensor = totals.get("enemy_sensor")
+    spell_owner_guard = totals.get("spell_owner_guard")
     terminal_threat = totals.get("terminal_threat")
     body_overlaps = sum(
         death["observed_enemy_body_contact_candidate"] is not None
@@ -1608,6 +1678,20 @@ def render_markdown(dossier: dict[str, object]) -> str:
             )
             if isinstance(enemy_sensor, dict)
             else "- No full enemy-pool sensor telemetry was present.",
+            (
+                "- The synchronous spell-owner guard retained "
+                f"{spell_owner_guard['observation_count']} observations "
+                f"({spell_owner_guard['contact_enabled_count']} contact "
+                "enabled, "
+                f"{spell_owner_guard['anticipatory_count']} anticipatory, "
+                f"{spell_owner_guard['error_count']} errors). "
+                f"{spell_owner_guard['outside_async_pool_count']} observed "
+                "owners were outside the ordinary 480-slot async scan; "
+                f"pointer counts were "
+                f"`{spell_owner_guard['pointer_counts']}`."
+            )
+            if isinstance(spell_owner_guard, dict)
+            else "- No synchronous spell-owner guard telemetry was present.",
             (
                 "- The terminal-threat heuristic covered "
                 f"{terminal_threat['decision_count']} decisions with horizon "

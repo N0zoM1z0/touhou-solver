@@ -81,6 +81,7 @@ from th08_live_dodge_agent import (
     decode_enemy_body,
     decode_enemy_bodies,
     decode_spell_enemy_body_guard,
+    enemy_pointer_in_scanned_pool,
     decode_lasers,
     decode_player_lethal_aabb,
     merge_spell_enemy_body_guard,
@@ -421,7 +422,22 @@ class LiveDodgeAgentTests(unittest.TestCase):
         )
 
     def test_ce_0090_latent_spell_owner_replaces_stale_pool_body(self) -> None:
-        pointer = ENEMY_POOL_BASE
+        # Observed Reisen owner: a special slot immediately before the
+        # ordinary 480-slot timeline-enemy pool.
+        pointer = ENEMY_POOL_BASE - ENEMY_STRIDE
+        self.assertEqual(pointer, 0x57D2F0)
+        self.assertFalse(enemy_pointer_in_scanned_pool(pointer))
+        self.assertTrue(enemy_pointer_in_scanned_pool(ENEMY_POOL_BASE))
+        self.assertTrue(
+            enemy_pointer_in_scanned_pool(
+                ENEMY_POOL_BASE + (ENEMY_POOL_SIZE - 1) * ENEMY_STRIDE
+            )
+        )
+        self.assertFalse(
+            enemy_pointer_in_scanned_pool(
+                ENEMY_POOL_BASE + ENEMY_POOL_SIZE * ENEMY_STRIDE
+            )
+        )
         blob = bytearray(ENEMY_BODY_READ_SIZE)
         struct.pack_into(
             "<ff",

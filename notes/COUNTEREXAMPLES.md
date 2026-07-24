@@ -2085,16 +2085,13 @@ Status: observed | inferred | unknown | fixed
 - Fifteen of 16 physical hits still follow global viability-kernel
   exhaustion. The run accepts activation and performance, not survival.
 
-## CE-0090: A spell transition carried soft upward momentum into a latent body
+## CE-0090: The active boss occupied an unscanned special enemy slot
 
 - **Repeated observation:** Five independent complete Stage-5 runs contain a
   spell-115 hit with zero bullets and zero lasers near the upper center:
   `(179.47,118.21)`, `(208.43,136.33)`, `(192.92,125.69)`,
   `(208.83,118.31)`, and `(184.49,120.69)`. Every asynchronous action
-  snapshot reported zero enemy bodies. This repeated spatial cluster is
-  observed; enemy-body contact remains a strong hypothesis because the
-  `20260724_144805` hit-edge read crossed frames 36,496..36,497 and was not a
-  stable native overlap witness.
+  snapshot reported zero enemy bodies.
 - **Exact latest chain:** At frame 36,472, after spell 111 ended, a retained
   corridor target at `(184,16)` issued `up_fast`. Spell 115 became active at
   frame 36,475 with the player at `y=192.69`, zero projectiles, and a live
@@ -2103,12 +2100,25 @@ Status: observed | inferred | unknown | fixed
   after the spell context changed. Fourteen residual items supplied additional
   approach potential; one 24-value item became a predicted collection at
   frame 36,490. The hit began at frame 36,493 at `y=120.69`.
-- **Modeling error:** The async pool sensor observes only bodies whose native
-  contact mode is already enabled. It cannot represent the robust hidden-mode
-  question: contact may enable between the latest body snapshot and actuator
-  pickup. Separately, unbounded raw item scale and previous-context direction
-  inertia were allowed to dominate conservative position after the viability
-  context had changed.
+- **Observed address-set error:** The authoritative spell owner is
+  `0x0057D2F0`. The asynchronous scan begins at `0x005826C0`; their difference
+  is exactly one `0x53D0` enemy stride. The owner is therefore special slot
+  `-1`, outside every one of the 480 ordinary timeline-enemy slots. Calling
+  that scan the “full enemy pool” was false. This directly explains why its
+  snapshots never contained Reisen even while her native contact bit was
+  enabled.
+- **Observed physical geometry:** The follow-up run retained 2,658 successful
+  synchronous owner observations, all at `0x0057D2F0` and all outside the
+  asynchronous range. Of these, 2,640 were contact-enabled and 18 were
+  anticipatory transition observations. At spell-115 entry the owner was
+  centered at `(192,128)` with half-size `(36,24)`, whose lethal rectangle
+  `x=156..228, y=104..152` contains all five old hit coordinates. This makes
+  boss contact the supported explanation for the old cluster; the crossed
+  hit-edge read alone had not proved it.
+- **Secondary uncertainty:** Even a pointer covered by the async scan can
+  change its contact bit between snapshot and actuator pickup. The robust
+  enabled/disabled union remains a valid adapter-level uncertainty treatment,
+  but it was not the primary reason Reisen was absent.
 - **General correction:** The TH08 adapter synchronously reads only the active
   spell owner's 1,500-byte geometry window. Planning takes the union of
   contact-disabled and contact-enabled modes, replacing the older copy of
@@ -2126,7 +2136,34 @@ Status: observed | inferred | unknown | fixed
   `test_ce_0090_latent_spell_owner_blocks_post_spell_item_chase`,
   `test_ce_0090_spell_context_switch_drops_old_direction_inertia`, and
   `test_small_top_item_does_not_override_conservative_position`.
-- **Acceptance gate:** A fresh Stage-5 trial must retain the synchronous owner
-  geometry/contact mode and avoid the zero-projectile upper-center spell-115
-  collision. Other stages must not show a new empty-kernel or timing
-  regression from the conservative latent-body union.
+- **Physical follow-up:** Complete hard-no-Bomb Stage-5 run
+  `20260724_152719` reached `route_complete` with 21 hits. It retained 700
+  spell-115 owner observations and never placed the player above `y=160`
+  during a zero-bullet spell-115 row. The only spell-115 death was frame
+  41,768 at `(8,432)` amid 1,145 bullets with pipeline/robust clearance
+  `-2.441`; it was a modeled viability-kernel exhaustion, not the old contact
+  cluster. This accepts the targeted CE once, not overall survival.
+- **Non-acceptance:** Total hits rose `16 -> 21`, spell-107 hits rose `3 -> 9`,
+  and pre-hit bottom occupancy/control-reserve deficit also worsened. Different
+  RNG, respawn, Power, and phase histories prevent attributing this aggregate
+  delta to the guard. A randomized non-Stage-5 control remains required before
+  accepting cross-stage behavior.
+
+## CE-0091: Regression validation ignored the last-alive deadline miss
+
+- **Observed symptom:** The freshly generated Stage-5 regression corpus failed
+  its executable validator at `LUN-S5-F30748-T1`. The hit row had action lag
+  `6` within support `[5,6]`, while its last alive row had lag `7`; the dossier
+  correctly attributed `action_lag_over_model`, but the validator compared
+  only the hit row against nominal delay.
+- **Invalid assumption:** A contributing factor attributed over a pre-hit
+  window can always be validated from the hit row alone. This had already been
+  corrected in dossier generation for CE-0087 but not in the independent
+  corpus validator.
+- **General correction:** Executable validation now evaluates the complete
+  delay-support high value on both the hit and retained last-alive decisions.
+  When detailed deadline context is present, its stored booleans are also
+  checked against the retained lag/support bounds.
+- **Regression:** `test_action_lag_factor_includes_last_alive_support_miss`.
+  The 21-case `20260724_152719` corpus and both older full-run corpora pass the
+  executable gate.

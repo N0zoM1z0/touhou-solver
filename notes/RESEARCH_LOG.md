@@ -2171,3 +2171,45 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   saturating. No spell ID or coordinate is special-cased.
 - Linux and Windows Python each pass all 368 tests. Native source did not
   change.
+
+## 2026-07-24: Stage-5 Owner-Slot Root Cause And Physical Follow-Up
+
+- **Observed:** Reisen's active spell-owner pointer is `0x0057D2F0`, exactly
+  one `0x53D0` enemy stride before the ordinary 480-slot scan base
+  `0x005826C0`. The previous “full enemy pool” sensor omitted the boss by
+  construction.
+- The live adapter now exposes whether the authoritative owner is covered by
+  the async range. The regression uses the observed special-slot address and
+  pins both range boundaries. This stays in the TH08 adapter; no generic
+  planner contains a Reisen, stage, spell, or coordinate exception.
+- Complete hard-no-Bomb Stage-5 run `20260724_152719` reached
+  `route_complete` with 21 native hits. The compact dossier retains 2,658
+  synchronous owner observations: 2,640 contact-enabled, 18 anticipatory,
+  zero errors, and all 2,658 outside the ordinary scan.
+- **Inferred from observed geometry:** At spell-115 entry the boss body was
+  centered at `(192,128)` with half-size `(36,24)`. Its rectangle contains
+  every coordinate in the five-run zero-projectile upper-center death
+  cluster. The targeted cluster did not recur: no zero-bullet spell-115 row
+  placed the player above `y=160`.
+- The sole spell-115 death was frame 41,768 at `(8,432)` amid 1,145 bullets
+  with negative modeled pipeline/robust clearance. All 21 run hits followed
+  global viability-kernel exhaustion; 17 were modeled committed-prefix
+  collisions and four had exact bullet overlap.
+- Total hits changed `16 -> 21`; spell-107 changed `3 -> 9`. This is not an
+  overall-regression or improvement claim because RNG, respawn, Power, and
+  phase duration differ. Overall local planning remained `27.85/47.50 ms`
+  median/p95 and global solve `285.01/474.16 ms`; spell-115 read time
+  `13.64/17.45 ms` shows no material synchronous-read tail regression.
+- Compact dossier output now retains synchronous owner counts, contact modes,
+  errors, pointer frequencies, per-spell counts, and async-range coverage so
+  the ignored raw trace is not required to reproduce this conclusion.
+- The next physical gate is a randomized non-Stage-5 control. The remaining
+  algorithmic target is general recovery before kernel exhaustion, tested
+  first against generated adversarial workloads and an independent oracle.
+- The new regression corpus initially failed executable validation at frame
+  30,748 because its factor came from a last-alive lag `7 > 6`, while the
+  validator inspected only the in-support hit row. CE-0091 aligns validation
+  with CE-0087's two-row attribution and checks stored deadline context.
+- Linux and Windows Python each pass all 370 tests. The 21-case Stage-5
+  corpus passes its independent executable validator. Native source did not
+  change.

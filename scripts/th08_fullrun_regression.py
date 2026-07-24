@@ -53,6 +53,26 @@ def _require(
         raise CorpusError(f"{case_id}: {message}")
 
 
+def _action_lag_factor_expected(case: dict[str, object]) -> bool:
+    """Match dossier attribution across the hit and last-alive decisions."""
+
+    def exceeds_support(row: dict[str, object]) -> bool:
+        support = tuple(
+            int(value) for value in row.get("control_delay_candidates", ())
+        )
+        support_high = (
+            max(support)
+            if support
+            else int(row.get("control_delay_frames", 3))
+        )
+        return int(row.get("action_lag", 0)) > support_high
+
+    last_alive = case.get("last_alive_decision")
+    return exceeds_support(case) or (
+        isinstance(last_alive, dict) and exceeds_support(last_alive)
+    )
+
+
 def validate_case(case: dict[str, object]) -> None:
     case_id = str(case.get("case_id", "<missing-case-id>"))
     cause = str(case.get("primary_cause_class"))
@@ -172,13 +192,29 @@ def validate_case(case: dict[str, object]) -> None:
     )
     _require(
         ("action_lag_over_model" in factors)
-        == (
-            int(case["action_lag"])
-            > int(case.get("control_delay_frames", 3))
-        ),
+        == _action_lag_factor_expected(case),
         case_id=case_id,
         message="action-lag factor disagrees with retained lag",
     )
+    deadline = case.get("action_deadline_miss")
+    if isinstance(deadline, dict):
+        hit_expected = (
+            int(case.get("action_lag", 0))
+            > int(deadline.get("hit_support_high", 3))
+        )
+        last_lag = deadline.get("last_alive_action_lag")
+        last_high = deadline.get("last_alive_support_high")
+        last_expected = (
+            last_lag is not None
+            and last_high is not None
+            and int(last_lag) > int(last_high)
+        )
+        _require(
+            bool(deadline.get("at_hit")) == hit_expected
+            and bool(deadline.get("last_alive")) == last_expected,
+            case_id=case_id,
+            message="stored deadline context disagrees with retained bounds",
+        )
     _require(
         ("pool_density_over_1000" in factors)
         == (int(case["active_bullets"]) >= 1000),

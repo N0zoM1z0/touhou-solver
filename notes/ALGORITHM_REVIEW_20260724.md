@@ -184,7 +184,7 @@ that immediately reconstructs the same Python objects.
    p95. Move another boundary to C++ only if it remains a measured end-to-end
    limiter.
 
-## Stage-5 Cross-Check And Hidden Contact Mode
+## Stage-5 Cross-Check, Observation Completeness, And Hidden Contact Mode
 
 Stage-5 run `20260724_144805` physically closes the sparse piecewise
 performance gate, not the survival gate. Spell-107/111 local-plan p95 and
@@ -192,10 +192,18 @@ decision-cadence tails fell sharply, and lightweight planning traces prove
 that stop/resume events remained attached without diagnostic queue objects.
 Fifteen of 16 hits still followed global-kernel exhaustion.
 
-CE-0090 adds a second robust-game dimension. The spell owner has a discrete
-contact mode that can change between observation and actuator pickup. When
-that transition is not yet observable, the survival set is the intersection
-of viable sets for both modes:
+The follow-up isolated a more basic error before the robust-game dimension:
+the active owner pointer `0x0057D2F0` is exactly one `0x53D0` enemy stride
+before the ordinary asynchronous pool at `0x005826C0`. The sensor's
+observation set excluded the boss entirely. A planner cannot compensate for a
+hazard missing from every state estimate, regardless of search quality or
+native throughput.
+
+After repairing observation completeness, CE-0090 still adds a second
+robust-game dimension. The spell owner has a discrete contact mode that can
+change between observation and actuator pickup. When that transition is not
+yet observable, the survival set is the intersection of viable sets for both
+modes:
 
 ```text
 K_robust = K(contact disabled) intersect K(contact enabled)
@@ -213,3 +221,12 @@ also separate physical actuator state from preference memory: the old command
 still defines the uncontrollable delay prefix, but its reversal penalty does
 not survive into a new spell context. This is a hybrid-system reset rule, not
 a spell-115 route.
+
+Physical Stage-5 run `20260724_152719` retained 2,658 error-free synchronous
+owner samples: 2,640 contact-enabled and 18 anticipatory. All pointers were
+outside the ordinary pool. The old zero-projectile upper-center spell-115
+cluster disappeared once, while total hits increased `16 -> 21` under a
+different RNG/respawn history. This accepts observation completeness for the
+targeted failure only. Remaining failures still concentrate on global-kernel
+exhaustion and motivate the generated recovery-band/oracle work rather than
+more spell-specific weights.

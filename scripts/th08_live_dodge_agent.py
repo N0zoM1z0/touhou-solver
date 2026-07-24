@@ -136,6 +136,9 @@ ENEMY_VELOCITY_OFFSET = 0x2D4C
 ENEMY_CONTACT_SIZE_OFFSET = 0x2D70
 ENEMY_POSITION_OFFSET = 0x2D88
 ENEMY_FLAGS_OFFSET = 0x3324
+# This is the first of 480 ordinary timeline-enemy slots. Runtime spell-owner
+# pointers are not guaranteed to belong to this range: Stage 5 Reisen was
+# observed at 0x57D2F0, exactly one stride before this base.
 ENEMY_POOL_BASE = 0x005826C0
 ENEMY_POOL_SIZE = 480
 ENEMY_STRIDE = 0x53D0
@@ -1353,17 +1356,28 @@ def decode_enemy_body(blob: bytes, *, pointer: int) -> EnemyBody | None:
     return body
 
 
+def enemy_pointer_in_scanned_pool(pointer: int) -> bool:
+    """Return whether an enemy pointer is one of the 480 async-scanned slots."""
+
+    offset = pointer - ENEMY_POOL_BASE
+    return (
+        0 <= offset < ENEMY_POOL_SIZE * ENEMY_STRIDE
+        and offset % ENEMY_STRIDE == 0
+    )
+
+
 def decode_spell_enemy_body_guard(
     blob: bytes,
     *,
     pointer: int,
 ) -> SpellEnemyBodyGuard | None:
-    """Retain a spell owner's body across a latent contact-bit transition.
+    """Retain the spell owner even when the async pool cannot observe it.
 
-    The asynchronous pool reader observes only bodies whose contact mode is
-    already enabled. A spell owner can enable contact between that snapshot
-    and the next actuator pickup, so survival planning takes the union of the
-    enabled and disabled mode geometries.
+    The owner may live outside the 480-slot timeline-enemy pool. Even for an
+    owner inside that pool, the asynchronous reader observes only bodies whose
+    contact mode is already enabled. Survival planning therefore reads the
+    authoritative owner pointer synchronously and takes the union of enabled
+    and disabled contact-mode geometries.
     """
 
     body = _decode_enemy_body_geometry(blob, pointer=pointer)
@@ -4853,6 +4867,11 @@ def run(args: argparse.Namespace) -> int:
                             ),
                             "anticipatory": (
                                 not spell_enemy_body_guard.contact_enabled
+                            ),
+                            "covered_by_async_pool": (
+                                enemy_pointer_in_scanned_pool(
+                                    spell_enemy_body_guard.body.pointer
+                                )
                             ),
                             "error": None,
                         }

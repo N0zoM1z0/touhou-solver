@@ -486,6 +486,11 @@ def _compact_decision(
         ),
         "viability": viability,
         "spell": row.get("spell"),
+        "spell_enemy_body_guard": (
+            row.get("spell_enemy_body_guard")
+            if isinstance(row.get("spell_enemy_body_guard"), dict)
+            else None
+        ),
     }
     if compact["hit_started"]:
         compact["nearby_bullets"] = row.get("nearby_bullets", [])

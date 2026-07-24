@@ -6,7 +6,10 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from th08_fullrun_regression import load_and_validate
+from th08_fullrun_regression import (
+    _action_lag_factor_expected,
+    load_and_validate,
+)
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -25,6 +28,21 @@ ROBUST_NO_BOMB_CORPUS = (
 
 
 class Th08FullrunRegressionTests(unittest.TestCase):
+    def test_action_lag_factor_includes_last_alive_support_miss(self) -> None:
+        case = {
+            "action_lag": 6,
+            "control_delay_frames": 6,
+            "control_delay_candidates": [5, 6],
+            "last_alive_decision": {
+                "action_lag": 7,
+                "control_delay_frames": 6,
+                "control_delay_candidates": [5, 6],
+            },
+        }
+        self.assertTrue(_action_lag_factor_expected(case))
+        case["last_alive_decision"]["action_lag"] = 6
+        self.assertFalse(_action_lag_factor_expected(case))
+
     def test_robust_fullrun_retains_all_hard_no_bomb_failures(self) -> None:
         summary = load_and_validate(ROBUST_NO_BOMB_CORPUS)
         self.assertEqual(summary.case_count, 90)

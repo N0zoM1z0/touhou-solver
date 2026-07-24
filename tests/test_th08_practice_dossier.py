@@ -19,6 +19,7 @@ from th08_practice_dossier import (
     _promote_enemy_body_candidates,
     _robust_viability_summary,
     _select_frame_epoch,
+    _spell_owner_guard_summary,
     _spell_phase_summary,
     render_markdown,
 )
@@ -285,6 +286,52 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(summary["snapshot_interval_frames"]["median"], 7.0)
         self.assertEqual(summary["decision_count_with_active_bodies"], 2)
         self.assertEqual(summary["max_active_bodies"], 4)
+
+    def test_spell_owner_guard_retains_out_of_pool_evidence(self) -> None:
+        rows = [_decision(100), _decision(103), _decision(106)]
+        for row in rows[:2]:
+            row["spell"] = {"active": True, "spell_id": 115}
+            row["spell_enemy_body_guard"] = {
+                "body": [
+                    0x57D2F0,
+                    192.0,
+                    128.0,
+                    0.0,
+                    0.0,
+                    36.0,
+                    24.0,
+                    0x1139004F,
+                    0.0,
+                ],
+                "contact_enabled": row is rows[0],
+                "anticipatory": row is rows[1],
+                "error": None,
+            }
+        rows[2]["spell_enemy_body_guard"] = {"error": "fixture failure"}
+        compacted, _end, _scenes, _post = _extract_scope(
+            rows,
+            trace_path=Path("owner-guard-fixture.jsonl"),
+        )
+        summary = _spell_owner_guard_summary(compacted)
+        self.assertIsNotNone(summary)
+        assert summary is not None
+        self.assertEqual(summary["row_count"], 3)
+        self.assertEqual(summary["observation_count"], 2)
+        self.assertEqual(summary["error_count"], 1)
+        self.assertEqual(summary["contact_enabled_count"], 1)
+        self.assertEqual(summary["anticipatory_count"], 1)
+        self.assertEqual(summary["outside_async_pool_count"], 2)
+        self.assertEqual(summary["pointer_counts"], {"0x0057D2F0": 2})
+        self.assertEqual(
+            summary["per_spell"],
+            {
+                "115": {
+                    "anticipatory_count": 1,
+                    "contact_enabled_count": 1,
+                    "observation_count": 2,
+                }
+            },
+        )
 
     def test_retained_stage3_corpus_is_executable_and_no_bomb(self) -> None:
         summary = load_and_validate(PRACTICE_CORPUS)

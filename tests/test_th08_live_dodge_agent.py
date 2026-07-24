@@ -71,7 +71,9 @@ from th08_live_dodge_agent import (
     _estimate_live_action_hold,
     _enemy_sensor_submit_due,
     _frozen_auto_confirm_eligible,
+    _build_packed_laser_collision_frames,
     _hazards_for_positions,
+    _pack_laser_frame,
     _stage_corridor_solution,
     build_laser_collision_frames,
     choose_action,
@@ -593,8 +595,9 @@ class LiveDodgeAgentTests(unittest.TestCase):
     def test_local_planner_projects_one_shared_laser_timeline(self) -> None:
         laser = Laser(80.0, 100.0, 0.0, 0.0, 180.0, 2.0)
         with patch(
-            "th08_live_dodge_agent.build_laser_collision_frames",
-            wraps=build_laser_collision_frames,
+            "th08_live_dodge_agent."
+            "_build_packed_laser_collision_frames",
+            wraps=_build_packed_laser_collision_frames,
         ) as build:
             choose_action(
                 player_x=192.0,
@@ -611,6 +614,63 @@ class LiveDodgeAgentTests(unittest.TestCase):
             )
         self.assertEqual(build.call_count, 1)
         self.assertEqual(build.call_args.kwargs["horizon"], 6)
+
+    def test_fused_laser_projection_exactly_matches_object_pipeline(
+        self,
+    ) -> None:
+        blob = bytearray(LASER_POOL_SIZE * LASER_STRIDE)
+        struct.pack_into("<I", blob, LASER_ACTIVE_OFFSET, 1)
+        struct.pack_into("<ff", blob, LASER_ORIGIN_OFFSET, 100.0, 200.0)
+        struct.pack_into("<f", blob, LASER_ANGLE_OFFSET, 0.25)
+        struct.pack_into("<f", blob, LASER_TAIL_OFFSET, 4.0)
+        struct.pack_into("<f", blob, LASER_HEAD_OFFSET, 84.0)
+        struct.pack_into("<f", blob, LASER_MAXIMUM_LENGTH_OFFSET, 120.0)
+        struct.pack_into("<f", blob, LASER_WIDTH_OFFSET, 16.0)
+        struct.pack_into("<f", blob, LASER_CURRENT_WIDTH_OFFSET, 8.0)
+        struct.pack_into("<f", blob, LASER_SPEED_OFFSET, 3.0)
+        struct.pack_into(
+            "<iiiii",
+            blob,
+            LASER_WARMUP_FRAMES_OFFSET,
+            10,
+            5,
+            20,
+            10,
+            5,
+        )
+        struct.pack_into("<i", blob, LASER_TIMER_OFFSET, 4)
+        blob[LASER_PHASE_OFFSET] = 0
+        stateful = decode_lasers(bytes(blob))[0]
+        static = Laser(80.0, 100.0, 0.5, 3.0, 90.0, 2.0)
+        lasers = (stateful, static)
+        expected = tuple(
+            _pack_laser_frame(frame)
+            for frame in build_laser_collision_frames(
+                lasers,
+                horizon=8,
+                snapshot_lag=2,
+            )
+        )
+        actual = _build_packed_laser_collision_frames(
+            lasers,
+            horizon=8,
+            snapshot_lag=2,
+        )
+        for expected_frame, actual_frame in zip(expected, actual):
+            for field in (
+                "start_x",
+                "start_y",
+                "segment_x",
+                "segment_y",
+                "collision_radius",
+                "base_uncertainty",
+            ):
+                np.testing.assert_allclose(
+                    getattr(actual_frame, field),
+                    getattr(expected_frame, field),
+                    rtol=0.0,
+                    atol=1e-12,
+                )
 
     def test_incoming_bullet_forces_lateral_motion(self) -> None:
         decision = choose_action(

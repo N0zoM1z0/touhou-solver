@@ -1,0 +1,517 @@
+{
+  "schema": "th08-practice-comparison-v2",
+  "baseline_run_id": "lunatic_route2_stage3_unattended_20260724_123136",
+  "candidate_run_id": "lunatic_route2_stage3_unattended_20260724_132007",
+  "scope_compatibility": {
+    "same_stage_route_index": true,
+    "candidate_selected_frame_epoch_index": 0,
+    "candidate_frame_epoch_count": 1,
+    "candidate_pre_scope_decisions_excluded": 0,
+    "candidate_raw_summary_scope_valid": true,
+    "candidate_accepted_completion": true
+  },
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 8,
+    "candidate": 15,
+    "delta": 7,
+    "reduction_fraction": -0.875
+  },
+  "robust_viability": {
+    "counts": {
+      "policy_decision_count": {
+        "baseline": 5469,
+        "candidate": 5460,
+        "delta": -9,
+        "reduction_fraction": 0.0016456390565002743
+      },
+      "decision_without_query_count": {
+        "baseline": 48,
+        "candidate": 47,
+        "delta": -1,
+        "reduction_fraction": 0.020833333333333332
+      },
+      "unique_solution_count": {
+        "baseline": 1138,
+        "candidate": 1017,
+        "delta": -121,
+        "reduction_fraction": 0.1063268892794376
+      },
+      "query_count": {
+        "baseline": 5421,
+        "candidate": 5413,
+        "delta": -8,
+        "reduction_fraction": 0.0014757424829367274
+      },
+      "available_query_count": {
+        "baseline": 5421,
+        "candidate": 5413,
+        "delta": -8,
+        "reduction_fraction": 0.0014757424829367274
+      },
+      "support_uncovered_query_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "viable_query_count": {
+        "baseline": 2462,
+        "candidate": 2547,
+        "delta": 85,
+        "reduction_fraction": -0.03452477660438668
+      },
+      "empty_action_set_count": {
+        "baseline": 2959,
+        "candidate": 2866,
+        "delta": -93,
+        "reduction_fraction": 0.03142953700574518
+      },
+      "constrained_decision_count": {
+        "baseline": 2366,
+        "candidate": 2472,
+        "delta": 106,
+        "reduction_fraction": -0.044801352493660185
+      },
+      "serial_worker_serviceable_count": {
+        "baseline": 5370,
+        "candidate": 5363,
+        "delta": -7,
+        "reduction_fraction": 0.0013035381750465549
+      },
+      "queryable_policy_decisions": {
+        "baseline": 5422,
+        "candidate": 5411,
+        "delta": -11,
+        "reduction_fraction": 0.002028771670970122
+      },
+      "expired_policy_decisions": {
+        "baseline": 15,
+        "candidate": 19,
+        "delta": 4,
+        "reduction_fraction": -0.26666666666666666
+      }
+    },
+    "solve_ms": {
+      "median": {
+        "baseline": 245.10844999167603,
+        "candidate": 300.8634000143502,
+        "delta": 55.754950022674166,
+        "reduction_fraction": -0.2274705340618311
+      },
+      "p95": {
+        "baseline": 398.4403999929782,
+        "candidate": 461.0570000077132,
+        "delta": 62.61660001473501,
+        "reduction_fraction": -0.15715424443866263
+      },
+      "max": {
+        "baseline": 478.3097000035923,
+        "candidate": 604.5472999976482,
+        "delta": 126.23759999405593,
+        "reduction_fraction": -0.26392439875902124
+      }
+    },
+    "backend_counts": {
+      "baseline": {
+        "native": 1138
+      },
+      "candidate": {
+        "native": 1017
+      }
+    },
+    "solver_phase_ms": {
+      "baseline": {
+        "clearance": {
+          "median": 97.98940000473522,
+          "p95": 155.5889000010211,
+          "max": 215.48519999487326
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 15.749000012874603,
+          "max": 32.299000013154
+        },
+        "viability": {
+          "median": 126.5234999882523,
+          "p95": 348.1090000132099,
+          "max": 444.7719000163488
+        }
+      },
+      "candidate": {
+        "clearance": {
+          "median": 92.74789999471977,
+          "p95": 158.5627000022214,
+          "max": 219.91309997974895
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 17.34809999470599,
+          "max": 33.05999998701736
+        },
+        "safety_value": {
+          "median": 49.970599997323006,
+          "p95": 58.70429999777116,
+          "max": 81.01520000491291
+        },
+        "viability": {
+          "median": 137.9185999976471,
+          "p95": 346.724400005769,
+          "max": 444.0061999775935
+        }
+      }
+    },
+    "serial_coverage_margin_frames": {
+      "baseline": {
+        "median": 61.0,
+        "p95": 64.0,
+        "max": 64.0
+      },
+      "candidate": {
+        "median": 57.0,
+        "p95": 64.0,
+        "max": 64.0
+      }
+    }
+  },
+  "prehit_behavior": {
+    "fast_fraction": {
+      "baseline": 0.35802469135802467,
+      "candidate": 0.3072289156626506,
+      "delta": -0.05079577569537408,
+      "reduction_fraction": 0.14187785625259658
+    },
+    "bottom_8px_fraction": {
+      "baseline": 0.2716049382716049,
+      "candidate": 0.42168674698795183,
+      "delta": 0.1500818087163469,
+      "reduction_fraction": -0.5525739320920046
+    },
+    "nonpositive_pipeline_fraction": {
+      "baseline": 0.1111111111111111,
+      "candidate": 0.09036144578313253,
+      "delta": -0.020749665327978575,
+      "reduction_fraction": 0.1867469879518072
+    },
+    "negative_corridor_slack_fraction": {
+      "baseline": null,
+      "candidate": 0.56,
+      "delta": null,
+      "reduction_fraction": null
+    },
+    "control_reserve_deficit_mean": {
+      "baseline": 7.876432904490718,
+      "candidate": 7.390772579664207,
+      "delta": -0.4856603248265108,
+      "reduction_fraction": 0.06165993295640383
+    },
+    "positive_control_reserve_deficit_fraction": {
+      "baseline": 0.5061728395061729,
+      "candidate": 0.5060240963855421,
+      "delta": -0.00014874312063073436,
+      "reduction_fraction": 0.00029385836027047516
+    }
+  },
+  "input_visible_next_observation_fraction": {
+    "baseline": 0.8475509080902587,
+    "candidate": 0.8610363391655451,
+    "delta": 0.013485431075286436,
+    "reduction_fraction": -0.01591105731415289
+  },
+  "per_phase": {
+    "nonspell": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 4,
+        "candidate": 6,
+        "delta": 2,
+        "reduction_fraction": -0.5
+      },
+      "decision_count": {
+        "baseline": 3083,
+        "candidate": 3052,
+        "delta": -31,
+        "reduction_fraction": 0.010055141096334739
+      },
+      "query_count": {
+        "baseline": 2988,
+        "candidate": 2960,
+        "delta": -28,
+        "reduction_fraction": 0.009370816599732263
+      },
+      "empty_action_set_count": {
+        "baseline": 1263,
+        "candidate": 1330,
+        "delta": 67,
+        "reduction_fraction": -0.05304829770387965
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 270.74824999726843,
+          "candidate": 325.18420001724735,
+          "delta": 54.43595001997892,
+          "reduction_fraction": -0.2010574399669365
+        },
+        "p95": {
+          "baseline": 420.77500000596046,
+          "candidate": 458.6904999741819,
+          "delta": 37.91549996822141,
+          "reduction_fraction": -0.0901087278656867
+        },
+        "max": {
+          "baseline": 478.3097000035923,
+          "candidate": 520.9409999952186,
+          "delta": 42.63129999162629,
+          "reduction_fraction": -0.089129072630779
+        }
+      }
+    },
+    "35": {
+      "spell_name": "産霊「ファーストピラミッド」",
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 1,
+        "delta": 1,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 551,
+        "candidate": 584,
+        "delta": 33,
+        "reduction_fraction": -0.05989110707803993
+      },
+      "query_count": {
+        "baseline": 540,
+        "candidate": 573,
+        "delta": 33,
+        "reduction_fraction": -0.06111111111111111
+      },
+      "empty_action_set_count": {
+        "baseline": 435,
+        "candidate": 389,
+        "delta": -46,
+        "reduction_fraction": 0.10574712643678161
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 213.17590001854114,
+          "candidate": 253.89899997389875,
+          "delta": 40.72309995535761,
+          "reduction_fraction": -0.1910305055675416
+        },
+        "p95": {
+          "baseline": 294.40459999023005,
+          "candidate": 394.29110000492074,
+          "delta": 99.88650001469068,
+          "reduction_fraction": -0.33928308191517886
+        },
+        "max": {
+          "baseline": 443.37130000349134,
+          "candidate": 468.2186999998521,
+          "delta": 24.847399996360764,
+          "reduction_fraction": -0.05604196752510842
+        }
+      }
+    },
+    "38": {
+      "spell_name": "始符「エフェメラリティ137」",
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 3,
+        "delta": 3,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 565,
+        "candidate": 589,
+        "delta": 24,
+        "reduction_fraction": -0.04247787610619469
+      },
+      "query_count": {
+        "baseline": 554,
+        "candidate": 578,
+        "delta": 24,
+        "reduction_fraction": -0.04332129963898917
+      },
+      "empty_action_set_count": {
+        "baseline": 271,
+        "candidate": 217,
+        "delta": -54,
+        "reduction_fraction": 0.1992619926199262
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 220.7029999990482,
+          "candidate": 271.45539998309687,
+          "delta": 50.75239998404868,
+          "reduction_fraction": -0.22995790716151368
+        },
+        "p95": {
+          "baseline": 398.4403999929782,
+          "candidate": 446.8977000215091,
+          "delta": 48.45730002853088,
+          "reduction_fraction": -0.12161743645821271
+        },
+        "max": {
+          "baseline": 438.086399983149,
+          "candidate": 497.30560000170954,
+          "delta": 59.219200018560514,
+          "reduction_fraction": -0.13517698796593178
+        }
+      }
+    },
+    "42": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 484,
+        "candidate": 492,
+        "delta": 8,
+        "reduction_fraction": -0.01652892561983471
+      },
+      "query_count": {
+        "baseline": 469,
+        "candidate": 478,
+        "delta": 9,
+        "reduction_fraction": -0.019189765458422176
+      },
+      "empty_action_set_count": {
+        "baseline": 394,
+        "candidate": 387,
+        "delta": -7,
+        "reduction_fraction": 0.017766497461928935
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 173.35989999992307,
+          "candidate": 229.37095000816043,
+          "delta": 56.01105000823736,
+          "reduction_fraction": -0.3230911531920716
+        },
+        "p95": {
+          "baseline": 224.33070000261068,
+          "candidate": 275.0802999944426,
+          "delta": 50.74959999183193,
+          "reduction_fraction": -0.22622672684229722
+        },
+        "max": {
+          "baseline": 415.2182000107132,
+          "candidate": 461.66729999822564,
+          "delta": 46.449099987512454,
+          "reduction_fraction": -0.1118667244988635
+        }
+      }
+    },
+    "46": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 586,
+        "candidate": 547,
+        "delta": -39,
+        "reduction_fraction": 0.06655290102389079
+      },
+      "query_count": {
+        "baseline": 578,
+        "candidate": 536,
+        "delta": -42,
+        "reduction_fraction": 0.0726643598615917
+      },
+      "empty_action_set_count": {
+        "baseline": 437,
+        "candidate": 390,
+        "delta": -47,
+        "reduction_fraction": 0.10755148741418764
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 225.76505001052283,
+          "candidate": 277.53829999710433,
+          "delta": 51.773249986581504,
+          "reduction_fraction": -0.22932358212295645
+        },
+        "p95": {
+          "baseline": 265.86610000231303,
+          "candidate": 335.138199996436,
+          "delta": 69.27209999412298,
+          "reduction_fraction": -0.26055258640917484
+        },
+        "max": {
+          "baseline": 371.2272999982815,
+          "candidate": 435.46719997539185,
+          "delta": 64.23989997711033,
+          "reduction_fraction": -0.17304734855816828
+        }
+      }
+    },
+    "50": {
+      "spell_name": "虚史「幻想郷伝説」",
+      "hit_count": {
+        "baseline": 4,
+        "candidate": 5,
+        "delta": 1,
+        "reduction_fraction": -0.25
+      },
+      "decision_count": {
+        "baseline": 308,
+        "candidate": 297,
+        "delta": -11,
+        "reduction_fraction": 0.03571428571428571
+      },
+      "query_count": {
+        "baseline": 292,
+        "candidate": 288,
+        "delta": -4,
+        "reduction_fraction": 0.0136986301369863
+      },
+      "empty_action_set_count": {
+        "baseline": 159,
+        "candidate": 153,
+        "delta": -6,
+        "reduction_fraction": 0.03773584905660377
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 292.09264999371953,
+          "candidate": 413.8710999977775,
+          "delta": 121.77845000405796,
+          "reduction_fraction": -0.4169172007809043
+        },
+        "p95": {
+          "baseline": 366.21730000479147,
+          "candidate": 533.720599982189,
+          "delta": 167.50329997739755,
+          "reduction_fraction": -0.4573877312055056
+        },
+        "max": {
+          "baseline": 466.904999979306,
+          "candidate": 604.5472999976482,
+          "delta": 137.6423000183422,
+          "reduction_fraction": -0.2947972286106226
+        }
+      }
+    }
+  },
+  "candidate_primary_cause_counts": {
+    "modeled_committed_prefix_collision": 7,
+    "observed_bullet_overlap": 5,
+    "active_laser_without_observed_overlap": 3
+  },
+  "candidate_planner_failure_counts": {
+    "global_viability_kernel_exhausted_before_hit": 14,
+    "robust_action_set_exhausted_before_hit": 1
+  }
+}

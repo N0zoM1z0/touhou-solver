@@ -1592,6 +1592,79 @@ def _pack_laser_frame(
     )
 
 
+def _build_packed_laser_collision_frames(
+    lasers: tuple[Laser, ...],
+    *,
+    horizon: int,
+    snapshot_lag: int = 0,
+) -> tuple[_PackedLaserFrame, ...]:
+    """Fuse lifecycle projection and numeric packing without Laser objects."""
+
+    if horizon < 0 or snapshot_lag < 0:
+        raise ValueError("laser projection horizon and lag cannot be negative")
+    packed_values: list[list[float]] = [[] for _ in range(horizon)]
+    total_frames = snapshot_lag + horizon
+    for laser in lasers:
+        state = laser.state
+        cosine = math.cos(laser.angle)
+        sine = math.sin(laser.angle)
+        if state is None:
+            segment_length = laser.head - laser.tail
+            values = (
+                laser.origin_x + cosine * laser.tail,
+                laser.origin_y + sine * laser.tail,
+                cosine * segment_length,
+                sine * segment_length,
+                laser.half_width + PLAYER_RADIUS,
+                laser.uncertainty,
+            )
+            for frame_values in packed_values:
+                frame_values.extend(values)
+            continue
+        geometry_frames = laser_collision_geometry_frames(
+            state,
+            frame_count=total_frames,
+        )[snapshot_lag:]
+        for frame_values, geometry in zip(
+            packed_values,
+            geometry_frames,
+        ):
+            for tail, head, half_width in geometry:
+                segment_length = head - tail
+                frame_values.extend(
+                    (
+                        state.origin_x + cosine * tail,
+                        state.origin_y + sine * tail,
+                        cosine * segment_length,
+                        sine * segment_length,
+                        half_width + PLAYER_RADIUS,
+                        laser.uncertainty,
+                    )
+                )
+    frames: list[_PackedLaserFrame] = []
+    for values in packed_values:
+        # One transposed copy makes every field contiguous. The local
+        # collision kernel consumes fields repeatedly, so column views over
+        # an interleaved matrix would merely defer the same copies.
+        fields = (
+            np.asarray(values, dtype=np.float64)
+            .reshape((-1, 6))
+            .transpose()
+            .copy()
+        )
+        frames.append(
+            _PackedLaserFrame(
+                start_x=fields[0],
+                start_y=fields[1],
+                segment_x=fields[2],
+                segment_y=fields[3],
+                collision_radius=fields[4],
+                base_uncertainty=fields[5],
+            )
+        )
+    return tuple(frames)
+
+
 def _hazards_for_positions(
     positions_x: np.ndarray,
     positions_y: np.ndarray,
@@ -1783,12 +1856,9 @@ def _control_prefix_hazards(
         snapshot_lag=-max(0, snapshot_lag),
     )
     if laser_frames is None:
-        laser_frames = tuple(
-            _pack_laser_frame(frame)
-            for frame in build_laser_collision_frames(
-                lasers,
-                horizon=frames,
-            )
+        laser_frames = _build_packed_laser_collision_frames(
+            lasers,
+            horizon=frames,
         )
     if len(laser_frames) < frames:
         raise ValueError("laser timeline does not cover the control prefix")
@@ -1841,12 +1911,9 @@ def _robust_action_certificates(
         snapshot_lag=-max(0, snapshot_lag),
     )
     if laser_frames is None:
-        laser_frames = tuple(
-            _pack_laser_frame(frame)
-            for frame in build_laser_collision_frames(
-                lasers,
-                horizon=maximum_step,
-            )
+        laser_frames = _build_packed_laser_collision_frames(
+            lasers,
+            horizon=maximum_step,
         )
     if len(laser_frames) < maximum_step:
         raise ValueError("laser timeline does not cover robust certificates")
@@ -2358,12 +2425,9 @@ def choose_action(
         main_laser_offset + potential_threat_horizon,
         certificate_horizon,
     )
-    laser_timeline = tuple(
-        _pack_laser_frame(frame)
-        for frame in build_laser_collision_frames(
-            lasers,
-            horizon=laser_timeline_horizon,
-        )
+    laser_timeline = _build_packed_laser_collision_frames(
+        lasers,
+        horizon=laser_timeline_horizon,
     )
     viability_preflight_certificates: dict[
         str, RobustActionCertificate

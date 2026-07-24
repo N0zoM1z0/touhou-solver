@@ -2051,3 +2051,43 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   problem remains separate. The next solver experiment is a max-min robust
   clearance value whose positive threshold must exactly reproduce Boolean
   viability before negative-margin ranking is considered.
+
+## 2026-07-24: Max-Min Live Rejection And Fused Laser Projection
+
+- Added a threshold-free robust max-min clearance recurrence and compact
+  native policy. For every clearance threshold its positive set exactly
+  matches the existing Boolean viability kernel. Full and compact native
+  implementations match the scalar/NumPy oracle; the compact 32-frame policy
+  benchmark is approximately `38 ms` and `0.40 MB` on the Linux host.
+- Complete Stage-3 run `20260724_132007` explicitly enabled the 32-frame
+  safety value. It reached `route_complete`, emitted zero Bomb input, and
+  recorded 15 hits—the worst of seven retained complete Stage-3 attempts.
+  Because the native RNG states differ, this aggregate is a failed experiment,
+  not a controlled causal estimate.
+- Global solve median/p95 rose `245.11/398.44 -> 300.86/461.06 ms`; the
+  safety-value phase cost `49.97/58.70 ms`. Spell-50 local-plan p95 rose
+  `134.69 -> 210.37 ms`, pre-trace p95 `182.58 -> 258.44 ms`, and action-lag
+  p95 `10 -> 15` frames. The model remains an offline/opt-in oracle and live
+  default remains zero.
+- A retained paired replay made the safety guidance active on identical
+  hazards. It changed 168/300 actions without increasing robust-collision or
+  negative-clearance counts. The evidence therefore separates a plausible
+  compute-contention failure from an unproved ranking failure.
+- The issue-time guard suppressed all 96 expired new actions and caught one
+  `+1803` post-capture logical jump at issue frame 21,141. It released input
+  and invalidated the gameplay epoch. This physically closes stale new-input
+  injection, but five spell-50 hits show that holding the older command is not
+  a survival certificate.
+- Profiling the 200-laser phase found an avoidable object pipeline:
+  lifecycle geometry became thousands of `Laser` dataclasses and was then
+  immediately unpacked into NumPy arrays. Fusing lifecycle projection into
+  contiguous structure-of-arrays frames reduced retained whole-decision
+  median/p95 `33.97/56.96 -> 23.44/46.52 ms` (`1.45x/1.22x`) with zero
+  complete-decision differences on 100 spell-50 samples.
+- A C++ finite-segment micro-kernel was prototyped and rejected. After fusion
+  it only improved whole-decision median/p95
+  `23.31/42.29 -> 22.19/39.09 ms`, while a changed reduction order altered
+  1/100 actions. No native code from that exploration is retained.
+- Linux and Windows Python each pass 360 tests. Both ignored native libraries
+  were rebuilt from the retained source. Physical verification must now use a
+  different randomized stage with safety value disabled.

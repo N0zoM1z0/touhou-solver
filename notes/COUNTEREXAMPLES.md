@@ -1960,3 +1960,62 @@ Status: observed | inferred | unknown | fixed
   must show zero stale newly injected directions near its former hit windows;
   holding an old actuator command is fail-closed observability, not itself a
   survival proof.
+
+### Physical follow-up
+
+- Complete Stage-3 run `20260724_132007` exercised the guard. It suppressed
+  all 96 expired newly planned inputs, including 95 during spell 50, and
+  recorded no stale new direction after a deadline miss.
+- The action-side epoch check caught issue frame 21,141 after source/capture
+  frames 19,337/19,338 and a post-capture advance of 1,803. It released
+  movement and invalidated the policy epoch rather than issuing the stale
+  plan.
+- Spell 50 still recorded five hits. Holding the older command closes the
+  unmodeled-transition bug but does not create a newly certified fallback
+  action. The next algorithmic correction must either predict a wider
+  compute-delay tail before search or cheaply re-certify at issue time.
+- **Status:** Observability and stale-input suppression physically passed;
+  survival handling of a missed deadline remains open.
+
+## CE-0088: Exact max-min safety ranking exceeded the live compute budget
+
+- **Observed symptom:** Complete hard-no-Bomb Stage-3 run
+  `20260724_132007`, with the optional 32-frame safety-value fallback enabled,
+  recorded 15 hits. This is worse than the prior six complete Stage-3 runs,
+  whose counts were `11,7,10,12,11,8`.
+- **Controlled timing evidence:** Relative to the immediately preceding
+  Stage-3 run, global solve median/p95 increased
+  `245.11/398.44 -> 300.86/461.06 ms`; safety-value induction itself cost
+  `49.97/58.70 ms`. Overall local median was unchanged, but spell-50 local
+  p95 rose `134.69 -> 210.37 ms`, pre-trace p95
+  `182.58 -> 258.44 ms`, and action-lag p95 `10 -> 15` frames.
+- **What is not established:** The attempts used different native RNG states,
+  so the hit-count regression alone is not a causal estimate. A paired
+  retained-hazard ablation changed 168/300 actions while preserving identical
+  robust-collision and negative-clearance counts. The max-min ranking is not
+  shown to be geometrically unsafe.
+- **Invalid assumption:** Exact equivalence to Boolean viability at positive
+  thresholds made negative-margin ranking suitable for the live critical
+  path. Mathematical correctness did not provide a wall-clock budget or
+  prevent CPU/memory contention with the 200-laser local planner.
+- **Correction:** Keep the game-neutral max-min recurrence and compact native
+  implementation as an offline oracle/explicit experiment. Live practice
+  remains default-off (`--safety-value-horizon 0`) until compute is shared or
+  amortized without worsening local tail latency.
+- **Independent local correction:** Fuse TH08 laser lifecycle projection
+  directly into contiguous numeric frames rather than constructing and
+  unpacking thousands of Python objects. On 100 retained spell-50 decisions,
+  whole-decision median/p95 fell `33.97/56.96 -> 23.44/46.52 ms`, with zero
+  action or full-decision differences.
+- **Rejected C++ exploration:** A native per-call segment-hazard kernel only
+  reduced the fused decision median/p95 `23.31/42.29 -> 22.19/39.09 ms` and
+  changed 1/100 actions through floating-point reduction order. The branch
+  was removed.
+- **Regression/artifacts:** `test_fused_laser_projection_exactly_matches_object_pipeline`,
+  `benchmark_local_laser_fusion.py`,
+  `132007.local_laser_fusion_benchmark.json`, the three
+  `132007.safety_value_*_replay.json` ablations, and the complete Stage-3
+  dossier.
+- **Status:** Failed live variant retained as a counterexample. Fused numeric
+  laser projection passed offline differential/performance gates; physical
+  cross-stage verification is pending.

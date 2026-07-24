@@ -1,0 +1,2391 @@
+{
+  "schema": "th08-safety-value-replay-v1",
+  "trace": "artifacts/runtime_reports/lunatic_route2_stage3_unattended_20260724_132007.jsonl",
+  "trace_sha256": "dd7493016bfdb8678d5ed10be043ba16eece3a6c55f61ca749f5bdb742258ec9",
+  "scope": "Offline paired ablation over retained trace-radius hazards and exact laser lifecycle state. It is not physical survival evidence, and replay can diverge from the live full-hazard decision.",
+  "eligible_count": 147,
+  "sample_count": 147,
+  "prehit_window": 60,
+  "spell_id": null,
+  "variants": {
+    "disabled": {
+      "median_ms": 15.456378983799368,
+      "p95_ms": 44.762999983504415,
+      "robust_collision_count": 33,
+      "negative_robust_clearance_count": 38,
+      "terminal_collision_count": 0,
+      "negative_terminal_clearance_count": 0,
+      "minimum_clearance": {
+        "median": 2.965653896331787,
+        "p05": -3.9717814922332764
+      }
+    },
+    "enabled": {
+      "median_ms": 16.106662020320073,
+      "p95_ms": 42.65630300506018,
+      "robust_collision_count": 33,
+      "negative_robust_clearance_count": 38,
+      "terminal_collision_count": 0,
+      "negative_terminal_clearance_count": 0,
+      "minimum_clearance": {
+        "median": 2.5095419883728027,
+        "p05": -3.9717814922332764
+      }
+    }
+  },
+  "action_change_count": 71,
+  "enabled_live_action_match_count": 115,
+  "action_changes": [
+    {
+      "frame": 690,
+      "spell_id": 0,
+      "safety_state_value": -2.4519529342651367,
+      "best_actions": [
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 11.662269592285156,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 15.045217514038086,
+        "immediate_clearance": 17.663637161254883,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.602654457092285,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.827556610107422,
+        "immediate_clearance": 17.663637161254883,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 693,
+      "spell_id": 0,
+      "safety_state_value": 9.755708694458008,
+      "best_actions": [
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.475439071655273,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.949299812316895,
+        "immediate_clearance": 19.429826736450195,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 17.474313735961914,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.949299812316895,
+        "immediate_clearance": 21.954219818115234,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 697,
+      "spell_id": 0,
+      "safety_state_value": 12.732879638671875,
+      "best_actions": [
+        "right",
+        "down_right",
+        "right_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 7.991644859313965,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 6.929874420166016,
+        "immediate_clearance": 18.802257537841797,
+        "recovery_distance": 35.77708763999664,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 19.545734405517578,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 15.543229103088379,
+        "immediate_clearance": 22.5600528717041,
+        "recovery_distance": 65.96969000988257,
+        "control_reserve_deficit": 16.699260711669922
+      }
+    },
+    {
+      "frame": 701,
+      "spell_id": 0,
+      "safety_state_value": 5.057598114013672,
+      "best_actions": [
+        "down_right",
+        "right_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 14.708489418029785,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 4.980790615081787,
+        "immediate_clearance": 19.170734405517578,
+        "recovery_distance": 65.96969000988257,
+        "control_reserve_deficit": 0.6992731094360352
+      },
+      "enabled": {
+        "action": "down_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 18.67604637145996,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 8.874589920043945,
+        "immediate_clearance": 21.876543045043945,
+        "recovery_distance": 64.0,
+        "control_reserve_deficit": 14.05887508392334
+      }
+    },
+    {
+      "frame": 705,
+      "spell_id": 0,
+      "safety_state_value": 12.732879638671875,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 3.58742356300354,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 9.678936958312988,
+        "immediate_clearance": 16.032827377319336,
+        "recovery_distance": 50.59644256269407,
+        "control_reserve_deficit": 4.686291694641113
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 14.142345428466797,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 6.593817710876465,
+        "immediate_clearance": 18.861257553100586,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 14.05887508392334
+      }
+    },
+    {
+      "frame": 709,
+      "spell_id": 0,
+      "safety_state_value": 12.732879638671875,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.388455867767334,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 8.705404281616211,
+        "immediate_clearance": 13.740071296691895,
+        "recovery_distance": 50.59644256269407,
+        "control_reserve_deficit": 4.686291694641113
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 13.869405746459961,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 8.15151596069336,
+        "immediate_clearance": 16.565664291381836,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 14.05887508392334
+      }
+    },
+    {
+      "frame": 714,
+      "spell_id": 0,
+      "safety_state_value": 12.378933906555176,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.464862823486328,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 14.545624732971191,
+        "immediate_clearance": 14.545624732971191,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 14.011948585510254,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 14.011948585510254,
+        "immediate_clearance": 14.157869338989258,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 718,
+      "spell_id": 0,
+      "safety_state_value": 12.378933906555176,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 10.762944221496582,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 10.466113090515137,
+        "immediate_clearance": 14.440963745117188,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 4.686291694641113
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 14.440963745117188,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.686443328857422,
+        "immediate_clearance": 14.440963745117188,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 14.05887508392334
+      }
+    },
+    {
+      "frame": 721,
+      "spell_id": 0,
+      "safety_state_value": 12.378933906555176,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 11.850356101989746,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 8.428032875061035,
+        "immediate_clearance": 16.197349548339844,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 4.686291694641113
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 15.486268997192383,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 10.329678535461426,
+        "immediate_clearance": 16.197349548339844,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 17.372583389282227
+      }
+    },
+    {
+      "frame": 725,
+      "spell_id": 0,
+      "safety_state_value": 13.210186958312988,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.5451340675354,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 3.6584982872009277,
+        "immediate_clearance": 15.227076530456543,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 8.17258358001709
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 15.615474700927734,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.087087154388428,
+        "immediate_clearance": 15.615474700927734,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 17.372583389282227
+      }
+    },
+    {
+      "frame": 729,
+      "spell_id": 0,
+      "safety_state_value": 13.210186958312988,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 1.66060471534729,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 4.2726969718933105,
+        "immediate_clearance": 15.942936897277832,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 30.38334846496582
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 15.942936897277832,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 3.6928024291992188,
+        "immediate_clearance": 15.942936897277832,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 30.180909156799316
+      }
+    },
+    {
+      "frame": 734,
+      "spell_id": 0,
+      "safety_state_value": 13.917094230651855,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_right_fast",
+        "robust_collisions": 1,
+        "robust_min_clearance": -1.135324239730835,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -1.0929970741271973,
+        "immediate_clearance": 19.687429428100586,
+        "recovery_distance": 96.0,
+        "control_reserve_deficit": 46.44436550140381
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 13.03037166595459,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.4626365303993225,
+        "immediate_clearance": 19.687429428100586,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 48.0
+      }
+    },
+    {
+      "frame": 745,
+      "spell_id": 0,
+      "safety_state_value": -10.30474853515625,
+      "best_actions": [
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "left_fast",
+        "robust_collisions": 5,
+        "robust_min_clearance": -3.331247091293335,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -1.521154522895813,
+        "immediate_clearance": -1.521154522895813,
+        "recovery_distance": 64.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_fast",
+        "robust_collisions": 5,
+        "robust_min_clearance": -3.1076958179473877,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -1.521154522895813,
+        "immediate_clearance": -1.521154522895813,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 17.372583389282227
+      }
+    },
+    {
+      "frame": 2295,
+      "spell_id": 0,
+      "safety_state_value": -8.77581787109375,
+      "best_actions": [
+        "right_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 3.3336336612701416,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 3.0226640701293945,
+        "immediate_clearance": 3.5066540241241455,
+        "recovery_distance": 32.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 0.8883718252182007,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 3.5066540241241455,
+        "immediate_clearance": 3.5066540241241455,
+        "recovery_distance": 210.44714300745449,
+        "control_reserve_deficit": 13.493758916854858
+      }
+    },
+    {
+      "frame": 2304,
+      "spell_id": 0,
+      "safety_state_value": -2.3261656761169434,
+      "best_actions": [
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "down_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.088809490203857,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.7452293038368225,
+        "immediate_clearance": 8.684871673583984,
+        "recovery_distance": 181.01933598375618,
+        "control_reserve_deficit": 15.868271827697754
+      },
+      "enabled": {
+        "action": "down_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 8.764429092407227,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 3.266022205352783,
+        "immediate_clearance": 10.117293357849121,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 24.0
+      }
+    },
+    {
+      "frame": 2312,
+      "spell_id": 0,
+      "safety_state_value": -6.533032417297363,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 2.5688018798828125,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -3.3303933143615723,
+        "immediate_clearance": 7.471955299377441,
+        "recovery_distance": 176.0,
+        "control_reserve_deficit": 36.50000023841858
+      },
+      "enabled": {
+        "action": "right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 2.5688018798828125,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -2.9372968673706055,
+        "immediate_clearance": 9.171967506408691,
+        "recovery_distance": 176.0,
+        "control_reserve_deficit": 28.0
+      }
+    },
+    {
+      "frame": 2599,
+      "spell_id": 0,
+      "safety_state_value": -1.9726848602294922,
+      "best_actions": [
+        "up_left_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 3.8410849571228027,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 6.756775379180908,
+        "immediate_clearance": 9.132725715637207,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 8.179031372070312,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 9.132725715637207,
+        "immediate_clearance": 9.132725715637207,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 2602,
+      "spell_id": 0,
+      "safety_state_value": -10.845890045166016,
+      "best_actions": [
+        "stay",
+        "left",
+        "up",
+        "down",
+        "up_left",
+        "down_left",
+        "down_right",
+        "left_fast",
+        "down_fast",
+        "up_left_fast",
+        "down_left_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.765225410461426,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.765225410461426,
+        "immediate_clearance": 5.765225410461426,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.765225410461426,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.765225410461426,
+        "immediate_clearance": 5.765225410461426,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 5870,
+      "spell_id": 35,
+      "safety_state_value": 0.874359130859375,
+      "best_actions": [
+        "stay",
+        "up",
+        "up_fast"
+      ],
+      "disabled": {
+        "action": "down",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.1579413414001465,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.1579413414001465,
+        "immediate_clearance": 5.1579413414001465,
+        "recovery_distance": 112.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.1579413414001465,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.1579413414001465,
+        "immediate_clearance": 5.1579413414001465,
+        "recovery_distance": 102.44998779892558,
+        "control_reserve_deficit": 9.857864618301392
+      }
+    },
+    {
+      "frame": 5883,
+      "spell_id": 35,
+      "safety_state_value": -5.510132312774658,
+      "best_actions": [
+        "stay",
+        "right",
+        "up",
+        "up_right",
+        "down_right",
+        "up_fast",
+        "up_right_fast"
+      ],
+      "disabled": {
+        "action": "down",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.972067832946777,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 9.45988655090332,
+        "immediate_clearance": 12.727102279663086,
+        "recovery_distance": 96.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 9.995392799377441,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 12.295430183410645,
+        "immediate_clearance": 12.295430183410645,
+        "recovery_distance": 112.0,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 5886,
+      "spell_id": 35,
+      "safety_state_value": -6.847436428070068,
+      "best_actions": [
+        "right",
+        "up_right",
+        "up_right_fast"
+      ],
+      "disabled": {
+        "action": "down_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 11.543095588684082,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 12.008295059204102,
+        "immediate_clearance": 12.008295059204102,
+        "recovery_distance": 112.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "up_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 11.532078742980957,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 2.5095419883728027,
+        "immediate_clearance": 11.930655479431152,
+        "recovery_distance": 97.32420048477151,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 5893,
+      "spell_id": 35,
+      "safety_state_value": -4.422744274139404,
+      "best_actions": [
+        "up_right"
+      ],
+      "disabled": {
+        "action": "down_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 7.399397373199463,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 3.3905539512634277,
+        "immediate_clearance": 13.669220924377441,
+        "recovery_distance": 128.9961239727768,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "up_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 13.172224998474121,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 1.5916647911071777,
+        "immediate_clearance": 13.669220924377441,
+        "recovery_distance": 128.0,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 5896,
+      "spell_id": 35,
+      "safety_state_value": -1.1449646949768066,
+      "best_actions": [
+        "up_right"
+      ],
+      "disabled": {
+        "action": "right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 13.447661399841309,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 2.2687888145446777,
+        "immediate_clearance": 13.772905349731445,
+        "recovery_distance": 208.0,
+        "control_reserve_deficit": 2.429435968399048
+      },
+      "enabled": {
+        "action": "up_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.851317405700684,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.4123740792274475,
+        "immediate_clearance": 13.60731315612793,
+        "recovery_distance": 224.57070156189118,
+        "control_reserve_deficit": 2.061163902282715
+      }
+    },
+    {
+      "frame": 5899,
+      "spell_id": 35,
+      "safety_state_value": -6.259045600891113,
+      "best_actions": [
+        "up",
+        "up_fast"
+      ],
+      "disabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 6.855649471282959,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 1.5586462020874023,
+        "immediate_clearance": 12.814413070678711,
+        "recovery_distance": 160.0,
+        "control_reserve_deficit": 10.67674732208252
+      },
+      "enabled": {
+        "action": "up",
+        "robust_collisions": 0,
+        "robust_min_clearance": 7.544462203979492,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 2.3006181716918945,
+        "immediate_clearance": 11.513323783874512,
+        "recovery_distance": 160.0,
+        "control_reserve_deficit": 9.857864618301392
+      }
+    },
+    {
+      "frame": 5906,
+      "spell_id": 35,
+      "safety_state_value": -1.1449646949768066,
+      "best_actions": [
+        "right",
+        "up_right"
+      ],
+      "disabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 7.841477870941162,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.375575542449951,
+        "immediate_clearance": 7.873571395874023,
+        "recovery_distance": 147.5127113166862,
+        "control_reserve_deficit": 24.0
+      },
+      "enabled": {
+        "action": "right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 6.401692867279053,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.8585734367370605,
+        "immediate_clearance": 7.873571395874023,
+        "recovery_distance": 208.0,
+        "control_reserve_deficit": 46.98559546470642
+      }
+    },
+    {
+      "frame": 8010,
+      "spell_id": 35,
+      "safety_state_value": 11.365686416625977,
+      "best_actions": [
+        "stay",
+        "right",
+        "right_fast"
+      ],
+      "disabled": {
+        "action": "left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 9.283044815063477,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 10.902396202087402,
+        "immediate_clearance": 14.752277374267578,
+        "recovery_distance": 187.275198571514,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 14.752277374267578,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 14.752277374267578,
+        "immediate_clearance": 14.752277374267578,
+        "recovery_distance": 186.59046063504962,
+        "control_reserve_deficit": 4.0
+      }
+    },
+    {
+      "frame": 8014,
+      "spell_id": 35,
+      "safety_state_value": 14.10977554321289,
+      "best_actions": [
+        "stay",
+        "right",
+        "right_fast"
+      ],
+      "disabled": {
+        "action": "left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 8.512479782104492,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 8.38316535949707,
+        "immediate_clearance": 19.098644256591797,
+        "recovery_distance": 193.32873557751316,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 19.098644256591797,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 10.602190017700195,
+        "immediate_clearance": 19.098644256591797,
+        "recovery_distance": 186.59046063504962,
+        "control_reserve_deficit": 4.0
+      }
+    },
+    {
+      "frame": 8019,
+      "spell_id": 35,
+      "safety_state_value": 14.10977554321289,
+      "best_actions": [
+        "stay",
+        "right",
+        "right_fast"
+      ],
+      "disabled": {
+        "action": "left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.312442779541016,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 6.684326648712158,
+        "immediate_clearance": 26.546022415161133,
+        "recovery_distance": 208.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 26.546022415161133,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 4.752197742462158,
+        "immediate_clearance": 26.546022415161133,
+        "recovery_distance": 186.59046063504962,
+        "control_reserve_deficit": 4.0
+      }
+    },
+    {
+      "frame": 8024,
+      "spell_id": 35,
+      "safety_state_value": 23.239728927612305,
+      "best_actions": [
+        "stay",
+        "right",
+        "right_fast"
+      ],
+      "disabled": {
+        "action": "down_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 8.113203048706055,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.2000532150268555,
+        "immediate_clearance": 26.064437866210938,
+        "recovery_distance": 224.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 19.115234375,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.416450023651123,
+        "immediate_clearance": 26.83608055114746,
+        "recovery_distance": 186.59046063504962,
+        "control_reserve_deficit": 9.857864618301392
+      }
+    },
+    {
+      "frame": 8030,
+      "spell_id": 35,
+      "safety_state_value": 2.98105525970459,
+      "best_actions": [
+        "stay",
+        "right",
+        "right_fast"
+      ],
+      "disabled": {
+        "action": "up_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 7.506164073944092,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 8.048079490661621,
+        "immediate_clearance": 19.51295280456543,
+        "recovery_distance": 208.61447696648477,
+        "control_reserve_deficit": 1.7261364459991455
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 14.165009498596191,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 9.568174362182617,
+        "immediate_clearance": 20.772912979125977,
+        "recovery_distance": 102.44998779892558,
+        "control_reserve_deficit": 9.857864618301392
+      }
+    },
+    {
+      "frame": 8035,
+      "spell_id": 35,
+      "safety_state_value": 2.98105525970459,
+      "best_actions": [
+        "stay",
+        "right",
+        "right_fast"
+      ],
+      "disabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.924962520599365,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.6346440315246582,
+        "immediate_clearance": 13.137706756591797,
+        "recovery_distance": 208.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.253836631774902,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.583577632904053,
+        "immediate_clearance": 12.83816909790039,
+        "recovery_distance": 102.44998779892558,
+        "control_reserve_deficit": 9.857864618301392
+      }
+    },
+    {
+      "frame": 8040,
+      "spell_id": 35,
+      "safety_state_value": 2.98105525970459,
+      "best_actions": [
+        "up"
+      ],
+      "disabled": {
+        "action": "up_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 8.948939323425293,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.3536381721496582,
+        "immediate_clearance": 12.419454574584961,
+        "recovery_distance": 200.47942537826668,
+        "control_reserve_deficit": 4.368272066116333
+      },
+      "enabled": {
+        "action": "up",
+        "robust_collisions": 0,
+        "robust_min_clearance": 11.543246269226074,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 1.7637944221496582,
+        "immediate_clearance": 12.419454574584961,
+        "recovery_distance": 200.47942537826668,
+        "control_reserve_deficit": 9.857864618301392
+      }
+    },
+    {
+      "frame": 8045,
+      "spell_id": 35,
+      "safety_state_value": 2.498650550842285,
+      "best_actions": [
+        "stay",
+        "right",
+        "up",
+        "right_fast"
+      ],
+      "disabled": {
+        "action": "down_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.339629173278809,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 1.2084938287734985,
+        "immediate_clearance": 15.475218772888184,
+        "recovery_distance": 208.61447696648477,
+        "control_reserve_deficit": 9.857864618301392
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 13.487649917602539,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.1732182502746582,
+        "immediate_clearance": 15.475218772888184,
+        "recovery_distance": 113.13708498984761,
+        "control_reserve_deficit": 12.500000238418579
+      }
+    },
+    {
+      "frame": 9083,
+      "spell_id": 35,
+      "safety_state_value": -4.694741249084473,
+      "best_actions": [
+        "down"
+      ],
+      "disabled": {
+        "action": "left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.262851238250732,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.8373580574989319,
+        "immediate_clearance": 12.878425598144531,
+        "recovery_distance": 50.59644256269407,
+        "control_reserve_deficit": 24.0
+      },
+      "enabled": {
+        "action": "down",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.832367897033691,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.802906513214111,
+        "immediate_clearance": 12.00832748413086,
+        "recovery_distance": 64.0,
+        "control_reserve_deficit": 32.20244884490967
+      }
+    },
+    {
+      "frame": 9103,
+      "spell_id": 35,
+      "safety_state_value": -8.11924934387207,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 2.722321033477783,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 2.965653896331787,
+        "immediate_clearance": 3.6159827709198,
+        "recovery_distance": 176.72577627499618,
+        "control_reserve_deficit": 14.70783519744873
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 3.6159827709198,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.8891502022743225,
+        "immediate_clearance": 3.6159827709198,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 14.800000190734863
+      }
+    },
+    {
+      "frame": 9110,
+      "spell_id": 35,
+      "safety_state_value": -12.317004203796387,
+      "best_actions": [
+        "right",
+        "down_left",
+        "right_fast",
+        "down_left_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 7.372200965881348,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 4.099513530731201,
+        "immediate_clearance": 9.234707832336426,
+        "recovery_distance": 321.5960198758685,
+        "control_reserve_deficit": 24.0
+      },
+      "enabled": {
+        "action": "down_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 7.677031517028809,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 1.7030730247497559,
+        "immediate_clearance": 8.411608695983887,
+        "recovery_distance": null,
+        "control_reserve_deficit": 25.213217735290527
+      }
+    },
+    {
+      "frame": 9114,
+      "spell_id": 35,
+      "safety_state_value": -7.859897613525391,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_left",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.091950416564941,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 3.802367687225342,
+        "immediate_clearance": 6.3588409423828125,
+        "recovery_distance": 320.3997503120126,
+        "control_reserve_deficit": 24.0
+      },
+      "enabled": {
+        "action": "down_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 6.3588409423828125,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 2.286560535430908,
+        "immediate_clearance": 6.3588409423828125,
+        "recovery_distance": 323.57997465850696,
+        "control_reserve_deficit": 28.0
+      }
+    },
+    {
+      "frame": 9131,
+      "spell_id": 35,
+      "safety_state_value": -9.724617958068848,
+      "best_actions": [
+        "up",
+        "up_fast",
+        "up_left_fast"
+      ],
+      "disabled": {
+        "action": "up_right",
+        "robust_collisions": 3,
+        "robust_min_clearance": -3.6252493858337402,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -3.6252493858337402,
+        "immediate_clearance": -3.6252493858337402,
+        "recovery_distance": 403.8217428519668,
+        "control_reserve_deficit": 15.736543655395508
+      },
+      "enabled": {
+        "action": "up_fast",
+        "robust_collisions": 2,
+        "robust_min_clearance": -3.6252493858337402,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -3.6252493858337402,
+        "immediate_clearance": -3.6252493858337402,
+        "recovery_distance": 329.84845004941286,
+        "control_reserve_deficit": 9.857864618301392
+      }
+    },
+    {
+      "frame": 9135,
+      "spell_id": 35,
+      "safety_state_value": -12.124319076538086,
+      "best_actions": [
+        "down",
+        "up_left",
+        "down_left",
+        "up_fast",
+        "up_left_fast",
+        "down_left_fast"
+      ],
+      "disabled": {
+        "action": "up_right",
+        "robust_collisions": 1,
+        "robust_min_clearance": -0.42463818192481995,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -2.9138283729553223,
+        "immediate_clearance": -0.42463818192481995,
+        "recovery_distance": 390.60977970347847,
+        "control_reserve_deficit": 1.7261364459991455
+      },
+      "enabled": {
+        "action": "up_fast",
+        "robust_collisions": 1,
+        "robust_min_clearance": -0.42463818192481995,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -0.42463818192481995,
+        "immediate_clearance": -0.42463818192481995,
+        "recovery_distance": 314.350123270216,
+        "control_reserve_deficit": 9.857864618301392
+      }
+    },
+    {
+      "frame": 13734,
+      "spell_id": 35,
+      "safety_state_value": 38.05314254760742,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 16.45170783996582,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 21.426959991455078,
+        "immediate_clearance": 43.43107986450195,
+        "recovery_distance": 93.29523031752481,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 40.5521240234375,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 19.053152084350586,
+        "immediate_clearance": 45.8952751159668,
+        "recovery_distance": 81.58431221748455,
+        "control_reserve_deficit": 4.0
+      }
+    },
+    {
+      "frame": 13738,
+      "spell_id": 35,
+      "safety_state_value": 11.542749404907227,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.127263069152832,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 9.501260757446289,
+        "immediate_clearance": 35.130863189697266,
+        "recovery_distance": 86.16263691415206,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 29.533727645874023,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 14.2738037109375,
+        "immediate_clearance": 38.71796417236328,
+        "recovery_distance": 67.88225099390856,
+        "control_reserve_deficit": 4.0
+      }
+    },
+    {
+      "frame": 13742,
+      "spell_id": 35,
+      "safety_state_value": 11.542749404907227,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.82062292098999,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.214264392852783,
+        "immediate_clearance": 29.761384963989258,
+        "recovery_distance": 86.16263691415206,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 25.454851150512695,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 6.987236976623535,
+        "immediate_clearance": 33.0606575012207,
+        "recovery_distance": 67.88225099390856,
+        "control_reserve_deficit": 4.0
+      }
+    },
+    {
+      "frame": 13746,
+      "spell_id": 35,
+      "safety_state_value": 11.542749404907227,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up",
+        "robust_collisions": 0,
+        "robust_min_clearance": 8.695083618164062,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.214264392852783,
+        "immediate_clearance": 25.318227767944336,
+        "recovery_distance": 71.55417527999327,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 22.696399688720703,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.855064868927002,
+        "immediate_clearance": 26.834123611450195,
+        "recovery_distance": 67.88225099390856,
+        "control_reserve_deficit": 9.857864618301392
+      }
+    },
+    {
+      "frame": 13778,
+      "spell_id": 35,
+      "safety_state_value": -14.214123725891113,
+      "best_actions": [
+        "left",
+        "right",
+        "up_right",
+        "down_left",
+        "down_right",
+        "right_fast",
+        "up_right_fast",
+        "down_left_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up",
+        "robust_collisions": 0,
+        "robust_min_clearance": 0.7004343271255493,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.09375894069671631,
+        "immediate_clearance": 0.7004343271255493,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 4.368272066116333
+      },
+      "enabled": {
+        "action": "up_right",
+        "robust_collisions": 1,
+        "robust_min_clearance": -1.655236840248108,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.7004343271255493,
+        "immediate_clearance": 0.7004343271255493,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 15.868271827697754
+      }
+    },
+    {
+      "frame": 13790,
+      "spell_id": 35,
+      "safety_state_value": -15.345489501953125,
+      "best_actions": [
+        "left",
+        "right",
+        "up",
+        "down",
+        "up_left",
+        "up_right",
+        "right_fast",
+        "up_fast",
+        "down_fast",
+        "down_left_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 0.49254098534584045,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 2.1164002418518066,
+        "immediate_clearance": 2.1164002418518066,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "up_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 0.49254098534584045,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 1.6473844051361084,
+        "immediate_clearance": 1.6473844051361084,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 15885,
+      "spell_id": 38,
+      "safety_state_value": 7.509586334228516,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 16.2685604095459,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 10.254502296447754,
+        "immediate_clearance": 28.153045654296875,
+        "recovery_distance": 157.58172482873766,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 25.54889488220215,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.530298233032227,
+        "immediate_clearance": 29.779388427734375,
+        "recovery_distance": 150.94369811290565,
+        "control_reserve_deficit": 2.2245028018951416
+      }
+    },
+    {
+      "frame": 15888,
+      "spell_id": 38,
+      "safety_state_value": 7.509586334228516,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 13.19540786743164,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 10.635221481323242,
+        "immediate_clearance": 25.718841552734375,
+        "recovery_distance": 157.58172482873766,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 23.365734100341797,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 10.954692840576172,
+        "immediate_clearance": 27.345184326171875,
+        "recovery_distance": 150.94369811290565,
+        "control_reserve_deficit": 2.2245028018951416
+      }
+    },
+    {
+      "frame": 15892,
+      "spell_id": 38,
+      "safety_state_value": 7.509586334228516,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 11.364508628845215,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.051021575927734,
+        "immediate_clearance": 23.377466201782227,
+        "recovery_distance": 157.58172482873766,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 22.111568450927734,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.37412166595459,
+        "immediate_clearance": 24.915451049804688,
+        "recovery_distance": 150.94369811290565,
+        "control_reserve_deficit": 2.2245028018951416
+      }
+    },
+    {
+      "frame": 15896,
+      "spell_id": 38,
+      "safety_state_value": 7.509586334228516,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 11.484511375427246,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.633744239807129,
+        "immediate_clearance": 21.57132339477539,
+        "recovery_distance": 178.88543819998318,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 18.648229598999023,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.94430923461914,
+        "immediate_clearance": 22.58574104309082,
+        "recovery_distance": 178.88543819998318,
+        "control_reserve_deficit": 2.2245028018951416
+      }
+    },
+    {
+      "frame": 15900,
+      "spell_id": 38,
+      "safety_state_value": 7.509586334228516,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.042375564575195,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.73652458190918,
+        "immediate_clearance": 18.25836181640625,
+        "recovery_distance": 178.88543819998318,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 14.768769264221191,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 12.603167533874512,
+        "immediate_clearance": 19.88470458984375,
+        "recovery_distance": 178.88543819998318,
+        "control_reserve_deficit": 2.2245028018951416
+      }
+    },
+    {
+      "frame": 15904,
+      "spell_id": 38,
+      "safety_state_value": -6.176761627197266,
+      "best_actions": [
+        "stay",
+        "left",
+        "right",
+        "down",
+        "down_left",
+        "down_right",
+        "left_fast",
+        "down_fast",
+        "down_left_fast"
+      ],
+      "disabled": {
+        "action": "up_right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.537422180175781,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 12.657621383666992,
+        "immediate_clearance": 14.463802337646484,
+        "recovery_distance": 172.32527382830412,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 11.184896469116211,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 12.932693481445312,
+        "immediate_clearance": 16.20769691467285,
+        "recovery_distance": 164.730082255792,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 15908,
+      "spell_id": 38,
+      "safety_state_value": -6.176761627197266,
+      "best_actions": [
+        "stay",
+        "left",
+        "right",
+        "down",
+        "down_left",
+        "down_right",
+        "left_fast",
+        "down_fast",
+        "down_left_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 9.525041580200195,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 9.121614456176758,
+        "immediate_clearance": 13.117986679077148,
+        "recovery_distance": 178.88543819998318,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 9.664444923400879,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 1.222550392150879,
+        "immediate_clearance": 12.584746360778809,
+        "recovery_distance": 150.94369811290565,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 15912,
+      "spell_id": 38,
+      "safety_state_value": -6.176761627197266,
+      "best_actions": [
+        "left_fast"
+      ],
+      "disabled": {
+        "action": "up_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 12.228925704956055,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 4.721712112426758,
+        "immediate_clearance": 12.228925704956055,
+        "recovery_distance": 213.46662502602135,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 3.4353299140930176,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.289944171905518,
+        "immediate_clearance": 12.228925704956055,
+        "recovery_distance": 237.8570999570961,
+        "control_reserve_deficit": 2.2245028018951416
+      }
+    },
+    {
+      "frame": 26256,
+      "spell_id": 50,
+      "safety_state_value": 40.48528289794922,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 54.79483120617101,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 52.54171439361398,
+        "immediate_clearance": 269.7947998046875,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 77.8326298526056,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 52.58591094377052,
+        "immediate_clearance": 269.7947998046875,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 26262,
+      "spell_id": 50,
+      "safety_state_value": 40.48528289794922,
+      "best_actions": [
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up",
+        "robust_collisions": 0,
+        "robust_min_clearance": 42.25865936943365,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 52.49585221541993,
+        "immediate_clearance": 109.22535288627438,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 55.037453834002505,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 49.920637677974796,
+        "immediate_clearance": 108.93314455573223,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 26268,
+      "spell_id": 50,
+      "safety_state_value": 40.48528289794922,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up",
+        "robust_collisions": 0,
+        "robust_min_clearance": 32.19538257637351,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 39.365046335514215,
+        "immediate_clearance": 54.34053601792071,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 47.132738666770926,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 39.85279731858568,
+        "immediate_clearance": 56.48002418800636,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 26274,
+      "spell_id": 50,
+      "safety_state_value": 44.4216194152832,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "down_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 33.102925591217875,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 30.1640257138563,
+        "immediate_clearance": 48.544733957844976,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 38.574730469018185,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 30.45934698152291,
+        "immediate_clearance": 48.46473395784498,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 26293,
+      "spell_id": 50,
+      "safety_state_value": 3.302285671234131,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "right",
+        "robust_collisions": 0,
+        "robust_min_clearance": 3.481022123719037,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 9.40740777789161,
+        "immediate_clearance": 18.405012326977026,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 6.502419375092011,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 8.602222727788671,
+        "immediate_clearance": 18.325012326977024,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 26673,
+      "spell_id": 50,
+      "safety_state_value": 8.517642974853516,
+      "best_actions": [
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "down_right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 19.52820587158203,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 19.52820587158203,
+        "immediate_clearance": 19.52820587158203,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 19.52820587158203,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 19.52820587158203,
+        "immediate_clearance": 19.52820587158203,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 26678,
+      "spell_id": 50,
+      "safety_state_value": 9.498575210571289,
+      "best_actions": [
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "down_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 19.91357349187797,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 19.91357349187797,
+        "immediate_clearance": 19.91357349187797,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 19.91357349187797,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 19.91357349187797,
+        "immediate_clearance": 19.91357349187797,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 26683,
+      "spell_id": 50,
+      "safety_state_value": 9.498575210571289,
+      "best_actions": [
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "down_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 23.055299758911133,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 13.218527793884277,
+        "immediate_clearance": 23.055299758911133,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 21.6506404876709,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 12.808709144592285,
+        "immediate_clearance": 22.584997177124023,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 26696,
+      "spell_id": 50,
+      "safety_state_value": -0.5481996536254883,
+      "best_actions": [
+        "stay",
+        "right",
+        "right_fast"
+      ],
+      "disabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 6.7723283767700195,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 7.250560760498047,
+        "immediate_clearance": 19.612510681152344,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 6.7723283767700195,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 8.273347854614258,
+        "immediate_clearance": 19.612510681152344,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 26710,
+      "spell_id": 50,
+      "safety_state_value": -5.496087551116943,
+      "best_actions": [
+        "stay",
+        "right",
+        "down",
+        "down_right",
+        "right_fast",
+        "down_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 4,
+        "robust_min_clearance": -3.2429556846618652,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -3.2429556846618652,
+        "immediate_clearance": -3.2429556846618652,
+        "recovery_distance": 203.64675298172568,
+        "control_reserve_deficit": 8.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 4,
+        "robust_min_clearance": -3.2429556846618652,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -3.2429556846618652,
+        "immediate_clearance": -3.2429556846618652,
+        "recovery_distance": 32.0,
+        "control_reserve_deficit": 25.372583389282227
+      }
+    },
+    {
+      "frame": 27006,
+      "spell_id": 50,
+      "safety_state_value": -8.197976112365723,
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "up_fast"
+      ],
+      "disabled": {
+        "action": "up_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 3.379938402449599,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 4.666681429122946,
+        "immediate_clearance": 4.666681429122946,
+        "recovery_distance": 45.254833995939045,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "up",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.666681429122946,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 4.666681429122946,
+        "immediate_clearance": 4.666681429122946,
+        "recovery_distance": 48.0,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 27295,
+      "spell_id": 50,
+      "safety_state_value": -4.298829555511475,
+      "best_actions": [
+        "left",
+        "up_right",
+        "down_right",
+        "up_right_fast",
+        "down_left_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.4174885749816895,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.4174885749816895,
+        "immediate_clearance": 5.4174885749816895,
+        "recovery_distance": 32.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "up_right_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.4174885749816895,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.4174885749816895,
+        "immediate_clearance": 5.4174885749816895,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 27302,
+      "spell_id": 50,
+      "safety_state_value": -10.533685684204102,
+      "best_actions": [
+        "left",
+        "right",
+        "down_right",
+        "right_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up",
+        "robust_collisions": 5,
+        "robust_min_clearance": -4.564745997058963,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -1.2481753227581907,
+        "immediate_clearance": -1.2481753227581907,
+        "recovery_distance": 128.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_right_fast",
+        "robust_collisions": 5,
+        "robust_min_clearance": -5.684906718763806,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": -1.2481753227581907,
+        "immediate_clearance": -1.2481753227581907,
+        "recovery_distance": 275.27440854536405,
+        "control_reserve_deficit": 12.686291694641113
+      }
+    },
+    {
+      "frame": 27317,
+      "spell_id": 50,
+      "safety_state_value": -10.401957511901855,
+      "best_actions": [
+        "left",
+        "right",
+        "down_left",
+        "down_right",
+        "down_left_fast"
+      ],
+      "disabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.929358005523682,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 6.280261516571045,
+        "immediate_clearance": 6.280261516571045,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "up_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 3.3320972762117362,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 6.280261516571045,
+        "immediate_clearance": 6.280261516571045,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 27325,
+      "spell_id": 50,
+      "safety_state_value": -9.039083480834961,
+      "best_actions": [
+        "stay",
+        "down",
+        "down_left",
+        "down_right",
+        "right_fast",
+        "down_fast"
+      ],
+      "disabled": {
+        "action": "up_left_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.80467063144806,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 4.80467063144806,
+        "immediate_clearance": 4.80467063144806,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 4.80467063144806,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 4.80467063144806,
+        "immediate_clearance": 4.80467063144806,
+        "recovery_distance": null,
+        "control_reserve_deficit": 8.0
+      }
+    },
+    {
+      "frame": 27637,
+      "spell_id": 50,
+      "safety_state_value": 13.308831214904785,
+      "best_actions": [
+        "stay",
+        "left",
+        "right",
+        "left_fast"
+      ],
+      "disabled": {
+        "action": "down",
+        "robust_collisions": 0,
+        "robust_min_clearance": 20.370342254638672,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 11.090347290039062,
+        "immediate_clearance": 21.293636322021484,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "stay",
+        "robust_collisions": 0,
+        "robust_min_clearance": 8.461139678955078,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 8.461139678955078,
+        "immediate_clearance": 19.097400665283203,
+        "recovery_distance": null,
+        "control_reserve_deficit": 0.0
+      }
+    },
+    {
+      "frame": 27662,
+      "spell_id": 50,
+      "safety_state_value": -9.077032089233398,
+      "best_actions": [
+        "right",
+        "up",
+        "down_left",
+        "up_fast"
+      ],
+      "disabled": {
+        "action": "up_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.633328437805176,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.633328437805176,
+        "immediate_clearance": 5.633328437805176,
+        "recovery_distance": 354.17509793885847,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "down_left",
+        "robust_collisions": 0,
+        "robust_min_clearance": 5.633328437805176,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 5.633328437805176,
+        "immediate_clearance": 5.633328437805176,
+        "recovery_distance": 102.44998779892558,
+        "control_reserve_deficit": 8.0
+      }
+    },
+    {
+      "frame": 27671,
+      "spell_id": 50,
+      "safety_state_value": -9.46723747253418,
+      "best_actions": [
+        "stay",
+        "left",
+        "right",
+        "up",
+        "down",
+        "up_right",
+        "down_left",
+        "down_right",
+        "left_fast",
+        "right_fast",
+        "up_fast",
+        "down_fast",
+        "up_right_fast",
+        "down_left_fast",
+        "down_right_fast"
+      ],
+      "disabled": {
+        "action": "up_fast",
+        "robust_collisions": 0,
+        "robust_min_clearance": 0.644787609577179,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.644787609577179,
+        "immediate_clearance": 0.644787609577179,
+        "recovery_distance": 96.0,
+        "control_reserve_deficit": 0.0
+      },
+      "enabled": {
+        "action": "up",
+        "robust_collisions": 0,
+        "robust_min_clearance": 0.644787609577179,
+        "terminal_threat_collisions": 0,
+        "terminal_threat_clearance": 9999.0,
+        "minimum_clearance": 0.644787609577179,
+        "immediate_clearance": 0.644787609577179,
+        "recovery_distance": 64.0,
+        "control_reserve_deficit": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "th08-local-laser-fusion-benchmark-v1",
+  "trace": "artifacts/runtime_reports/lunatic_route2_stage3_unattended_20260724_132007.jsonl",
+  "trace_sha256": "dd7493016bfdb8678d5ed10be043ba16eece3a6c55f61ca749f5bdb742258ec9",
+  "scope": "Offline paired replay over retained trace-radius hazards and exact TH08 laser lifecycle state; this is performance and semantic-parity evidence, not physical survival evidence.",
+  "spell_id": 50,
+  "eligible_count": 241,
+  "sample_count": 100,
+  "variants": {
+    "legacy_object_pipeline": {
+      "median_ms": 33.97402900736779,
+      "p95_ms": 56.957486987812445,
+      "max_ms": 112.01210098806769
+    },
+    "fused_numeric_pipeline": {
+      "median_ms": 23.435681010596454,
+      "p95_ms": 46.51598000782542,
+      "max_ms": 65.43987599434331
+    }
+  },
+  "median_speedup": 1.4496710802645938,
+  "p95_speedup": 1.224471396243408,
+  "action_difference_count": 0,
+  "full_decision_difference_count": 0,
+  "differences": []
+}

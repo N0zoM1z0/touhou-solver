@@ -140,6 +140,42 @@ neighborhood state-action count for its safe actions on demand. Survival
 semantics and action ordering are unchanged, while the global build avoids the
 full repair tensor and its repeated successor gathers.
 
+### Threshold-Free Max-Min Safety Value
+
+Boolean viability answers whether a clearance threshold is maintainable but
+collapses every already-empty state to the same `false` value. The experimental
+threshold-free recurrence retains the worst robust margin:
+
+```text
+W[k, active, state] =
+    max over selected_action
+    min over delay in D
+      min(
+        current clearance,
+        every intermediate clearance minus interpolation error,
+        W[k + 1, selected_action, successor]
+      )
+```
+
+For every threshold `c`, `W > c` is exactly the Boolean robust-viability
+recurrence evaluated at required clearance `c`. Randomized scalar/native
+differentials and explicit threshold tests pin this property. A compact native
+policy stores only state values and best-action masks; it does not materialize
+the full selected-action tensor.
+
+Negative `W` is a useful counterexample ranking—“least bad robust
+bottleneck”—but it is not a survival certificate. The live controller may use
+it only after local collision, robust-prefix, and terminal-threat priorities,
+and only when the Boolean kernel is already empty.
+
+The first physical experiment (`Stage 3 20260724_132007`, 32-frame value
+horizon) is rejected for live use. It added about 50 ms median to the
+background solve and coincided with spell-50 local tail-latency regression.
+Paired offline replay did not show additional local collision failures, so the
+model remains an opt-in oracle while the live default stays disabled. A future
+attempt requires a measured end-to-end compute budget and repeated physical
+A/B, not only threshold equivalence.
+
 ## Approximation Boundary
 
 This first kernel is a finite-horizon lattice abstraction, not yet a proof over

@@ -15,6 +15,8 @@ from pathlib import Path
 STOP_TRANSFORM_MASK = 0x40 | 0x80 | 0x100
 RUNTIME_PAYLOAD_INDEX = 8
 RUNTIME_PAYLOAD_LENGTH = 12
+PROJECTION_PAYLOAD_INDEX = 9
+PROJECTION_PAYLOAD_LENGTH = 8
 
 
 def _hex_counter(counter: Counter[int]) -> dict[str, int]:
@@ -36,21 +38,48 @@ def _summary(values: list[float]) -> dict[str, float] | None:
 
 
 def decode_trace_bullet(values: object) -> dict[str, object] | None:
-    """Decode the optional ninth-field runtime payload from a trace bullet."""
+    """Decode full diagnostics or the lightweight gameplay projection."""
 
-    if not isinstance(values, list) or len(values) <= RUNTIME_PAYLOAD_INDEX:
+    if not isinstance(values, list):
         return None
-    runtime = values[RUNTIME_PAYLOAD_INDEX]
-    if not isinstance(runtime, list) or len(runtime) < RUNTIME_PAYLOAD_LENGTH:
+    runtime = (
+        values[RUNTIME_PAYLOAD_INDEX]
+        if len(values) > RUNTIME_PAYLOAD_INDEX
+        else None
+    )
+    projection = (
+        values[PROJECTION_PAYLOAD_INDEX]
+        if len(values) > PROJECTION_PAYLOAD_INDEX
+        else None
+    )
+    diagnostic_runtime = (
+        isinstance(runtime, list)
+        and len(runtime) >= RUNTIME_PAYLOAD_LENGTH
+    )
+    planning_projection = (
+        not diagnostic_runtime
+        and isinstance(projection, list)
+        and len(projection) >= PROJECTION_PAYLOAD_LENGTH
+    )
+    if not diagnostic_runtime and not planning_projection:
         return None
-    next_record = runtime[4]
+    payload = runtime if diagnostic_runtime else projection
+    assert isinstance(payload, list)
+    next_record = runtime[4] if diagnostic_runtime else None
     next_kind = None
     if isinstance(next_record, list) and len(next_record) >= 2:
         next_kind = int(next_record[1])
     vx = float(values[3])
     vy = float(values[4])
-    speed = float(runtime[0]) if runtime[0] is not None else None
+    speed = float(payload[0]) if payload[0] is not None else None
     stopped = math.hypot(vx, vy) <= 1e-6
+    velocity_changes = (
+        runtime[14]
+        if diagnostic_runtime and len(runtime) > 14
+        else projection[5]
+        if planning_projection
+        else ()
+    )
     return {
         "slot": int(values[0]),
         "x": float(values[1]),
@@ -59,23 +88,40 @@ def decode_trace_bullet(values: object) -> dict[str, object] | None:
         "vy": vy,
         "active_flags": int(values[7]),
         "speed": speed,
-        "angle": float(runtime[1]) if runtime[1] is not None else None,
-        "original_flags": int(runtime[2]),
-        "queue_cursor": int(runtime[3]),
+        "angle": float(payload[1]) if payload[1] is not None else None,
+        "original_flags": int(payload[2]),
+        "queue_cursor": int(runtime[3]) if diagnostic_runtime else None,
         "next_kind": next_kind,
-        "timer_fraction": float(runtime[5]),
-        "timer_elapsed": int(runtime[6]),
-        "duration": int(runtime[7]),
-        "resume_speed": float(runtime[8]),
-        "angle_operand": float(runtime[9]),
-        "repeat_limit": int(runtime[10]),
-        "repeat_count": int(runtime[11]),
+        "timer_fraction": (
+            float(runtime[5]) if diagnostic_runtime else None
+        ),
+        "timer_elapsed": int(runtime[6]) if diagnostic_runtime else None,
+        "duration": int(runtime[7]) if diagnostic_runtime else None,
+        "resume_speed": float(runtime[8]) if diagnostic_runtime else None,
+        "angle_operand": float(runtime[9]) if diagnostic_runtime else None,
+        "repeat_limit": int(runtime[10]) if diagnostic_runtime else None,
+        "repeat_count": int(runtime[11]) if diagnostic_runtime else None,
         "callback_phase_state": (
-            int(runtime[12]) if len(runtime) > 12 else None
+            int(runtime[12])
+            if diagnostic_runtime and len(runtime) > 12
+            else int(projection[3])
+            if planning_projection
+            else None
         ),
         "callback_aux_state": (
-            int(runtime[13]) if len(runtime) > 13 else None
+            int(runtime[13])
+            if diagnostic_runtime and len(runtime) > 13
+            else int(projection[4])
+            if planning_projection
+            else None
         ),
+        "velocity_change_count": (
+            len(velocity_changes)
+            if isinstance(velocity_changes, list)
+            else 0
+        ),
+        "diagnostic_runtime": diagnostic_runtime,
+        "planning_projection": planning_projection,
         "motion": "stopped" if stopped else "moving",
     }
 
@@ -85,8 +131,15 @@ def _changed_events(
     current: dict[str, object],
 ) -> tuple[str, ...]:
     events: list[str] = []
-    for field in ("active_flags", "queue_cursor", "next_kind", "repeat_count"):
+    for field in ("active_flags",):
         if previous[field] != current[field]:
+            events.append(field)
+    for field in ("queue_cursor", "next_kind", "repeat_count"):
+        if (
+            previous[field] is not None
+            and current[field] is not None
+            and previous[field] != current[field]
+        ):
             events.append(field)
     for field in ("callback_phase_state", "callback_aux_state"):
         if (
@@ -164,6 +217,9 @@ def analyze_transform_trace(
     lookahead_pcs: Counter[int] = Counter()
     runtime_counts: list[float] = []
     coverage_ratios: list[float] = []
+    diagnostic_runtime_samples = 0
+    planning_projection_samples = 0
+    projected_velocity_event_samples = 0
     adjacent_pairs = 0
     active_stop_pairs = 0
     timer_progression_pairs = 0
@@ -240,11 +296,23 @@ def analyze_transform_trace(
             for state in decoded:
                 active_flags[int(state["active_flags"])] += 1
                 original_flags[int(state["original_flags"])] += 1
-                queue_cursors[int(state["queue_cursor"])] += 1
+                diagnostic_runtime_samples += int(
+                    bool(state["diagnostic_runtime"])
+                )
+                planning_projection_samples += int(
+                    bool(state["planning_projection"])
+                )
+                projected_velocity_event_samples += int(
+                    int(state["velocity_change_count"]) > 0
+                )
+                if state["queue_cursor"] is not None:
+                    queue_cursors[int(state["queue_cursor"])] += 1
                 if state["next_kind"] is not None:
                     next_kinds[int(state["next_kind"])] += 1
-                durations[int(state["duration"])] += 1
-                repeat_limits[int(state["repeat_limit"])] += 1
+                if state["duration"] is not None:
+                    durations[int(state["duration"])] += 1
+                if state["repeat_limit"] is not None:
+                    repeat_limits[int(state["repeat_limit"])] += 1
                 callback_phase = state["callback_phase_state"]
                 callback_aux = state["callback_aux_state"]
                 if callback_phase is not None and callback_aux is not None:
@@ -279,6 +347,9 @@ def analyze_transform_trace(
                     if (
                         previous_active & STOP_TRANSFORM_MASK
                         or current_active & STOP_TRANSFORM_MASK
+                    ) and (
+                        previous["timer_elapsed"] is not None
+                        and current["timer_elapsed"] is not None
                     ):
                         active_stop_pairs += 1
                         timer_delta = int(current["timer_elapsed"]) - int(
@@ -333,6 +404,11 @@ def analyze_transform_trace(
         "source_fields": dict(sorted(source_fields.items())),
         "runtime_samples_per_decision": _summary(runtime_counts),
         "active_pool_coverage_ratio": _summary(coverage_ratios),
+        "diagnostic_runtime_sample_count": diagnostic_runtime_samples,
+        "planning_projection_sample_count": planning_projection_samples,
+        "projected_velocity_event_sample_count": (
+            projected_velocity_event_samples
+        ),
         "active_flags": _hex_counter(active_flags),
         "original_flags": _hex_counter(original_flags),
         "queue_cursors": {

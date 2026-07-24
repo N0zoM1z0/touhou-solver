@@ -2063,3 +2063,70 @@ Status: observed | inferred | unknown | fixed
 - **Status:** Algorithmic and offline differential gates pass. The 27-hit
   Stage-6B run remains the physical counterexample; the corrected ordering
   has not yet been physically accepted.
+
+### Stage-5 physical and paired follow-up
+
+- Complete hard-no-Bomb Stage-5 run `20260724_144805` reached
+  `route_complete` with 16 native hits. The preceding comparable run had 31,
+  but native RNG, respawns, Power, and phase lengths differ; the aggregate
+  delta is not a causal survival estimate.
+- The C++ sparse piecewise boundary passed its physical performance gate.
+  Spell 107 local-plan p95 fell `463.61 -> 50.44 ms` and decision-cadence p95
+  `37 -> 8` frames. Spell 111 fell `142.72 -> 40.95 ms` and `13 -> 6`
+  frames. Default planning traces retained 186,521/104,595 lightweight
+  trajectory samples for spells 107/111, including 99,176/102,870 samples
+  with projected velocity events; diagnostic queue objects remained absent.
+- A corrected replay decoder now reconstructs those retained piecewise events
+  instead of silently replaying only current velocity. On 300 Stage-5 rows,
+  reserve disabled/enabled both select 28 robust collisions and 45 negative
+  certificates; on 60 pre-hit rows both select 18/24. Zero-reserve selections
+  increase `87 -> 206` and `8 -> 27`. This cross-stage replay preserves the
+  hard-ordering claim.
+- Fifteen of 16 physical hits still follow global viability-kernel
+  exhaustion. The run accepts activation and performance, not survival.
+
+## CE-0090: A spell transition carried soft upward momentum into a latent body
+
+- **Repeated observation:** Five independent complete Stage-5 runs contain a
+  spell-115 hit with zero bullets and zero lasers near the upper center:
+  `(179.47,118.21)`, `(208.43,136.33)`, `(192.92,125.69)`,
+  `(208.83,118.31)`, and `(184.49,120.69)`. Every asynchronous action
+  snapshot reported zero enemy bodies. This repeated spatial cluster is
+  observed; enemy-body contact remains a strong hypothesis because the
+  `20260724_144805` hit-edge read crossed frames 36,496..36,497 and was not a
+  stable native overlap witness.
+- **Exact latest chain:** At frame 36,472, after spell 111 ended, a retained
+  corridor target at `(184,16)` issued `up_fast`. Spell 115 became active at
+  frame 36,475 with the player at `y=192.69`, zero projectiles, and a live
+  owner pointer, but the old planner continued upward through frames
+  36,478..36,490. A 24-point reversal penalty preserved the previous command
+  after the spell context changed. Fourteen residual items supplied additional
+  approach potential; one 24-value item became a predicted collection at
+  frame 36,490. The hit began at frame 36,493 at `y=120.69`.
+- **Modeling error:** The async pool sensor observes only bodies whose native
+  contact mode is already enabled. It cannot represent the robust hidden-mode
+  question: contact may enable between the latest body snapshot and actuator
+  pickup. Separately, unbounded raw item scale and previous-context direction
+  inertia were allowed to dominate conservative position after the viability
+  context had changed.
+- **General correction:** The TH08 adapter synchronously reads only the active
+  spell owner's 1,500-byte geometry window. Planning takes the union of
+  contact-disabled and contact-enabled modes, replacing the older copy of
+  that pointer from the async pool. Trace rows distinguish observed
+  `contact_enabled` from an `anticipatory` latent guard. This is an adapter
+  uncertainty model, not a spell-ID or coordinate exception.
+- **Soft-policy correction:** Item approach shaping is reduced from `0.18` to
+  `0.02`; total item influence is saturating and bounded. A context boundary
+  preserves the old command in the physical delay prefix but drops only its
+  soft first-action reversal penalty. Replaying the exact first spell-115
+  state changes the first counterfactual command from `up_fast` to `down`;
+  later old rows are not a valid closed-loop replay after that divergence.
+- **Regressions:**
+  `test_ce_0090_latent_spell_owner_replaces_stale_pool_body`,
+  `test_ce_0090_latent_spell_owner_blocks_post_spell_item_chase`,
+  `test_ce_0090_spell_context_switch_drops_old_direction_inertia`, and
+  `test_small_top_item_does_not_override_conservative_position`.
+- **Acceptance gate:** A fresh Stage-5 trial must retain the synchronous owner
+  geometry/contact mode and avoid the zero-projectile upper-center spell-115
+  collision. Other stages must not show a new empty-kernel or timing
+  regression from the conservative latent-body union.

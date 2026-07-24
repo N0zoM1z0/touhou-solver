@@ -42,6 +42,18 @@ def _dossier(run_id: str, *, hits: int, solve_ms: float) -> dict[str, object]:
                     "spell_name": "fixture",
                     "hit_count": hits,
                     "decision_count": 20,
+                    "decision_cadence_frames": {
+                        "median": solve_ms / 10.0,
+                        "p95": solve_ms / 10.0,
+                        "max": solve_ms / 10.0,
+                    },
+                    "runtime_timing_ms": {
+                        "decode_pools": {
+                            "median": solve_ms / 20.0,
+                            "p95": solve_ms / 20.0,
+                            "max": solve_ms / 20.0,
+                        },
+                    },
                     "robust_viability": {
                         "query_count": 8,
                         "empty_action_set_count": hits,
@@ -76,6 +88,12 @@ class Th08PracticeCompareTests(unittest.TestCase):
         self.assertEqual(
             comparison["per_phase"]["166"]["hit_count"]["delta"],
             -1,
+        )
+        self.assertEqual(
+            comparison["per_phase"]["166"]["runtime_timing_ms"][
+                "decode_pools"
+            ]["p95"]["reduction_fraction"],
+            0.75,
         )
         self.assertTrue(
             comparison["scope_compatibility"][

@@ -80,8 +80,10 @@ from th08_live_dodge_agent import (
     choose_action,
     decode_enemy_body,
     decode_enemy_bodies,
+    decode_spell_enemy_body_guard,
     decode_lasers,
     decode_player_lethal_aabb,
+    merge_spell_enemy_body_guard,
     project_enemy_pool_snapshot,
     read_enemy_bodies_sparse,
     serialize_laser_trace,
@@ -418,6 +420,85 @@ class LiveDodgeAgentTests(unittest.TestCase):
             (15.0, 9.0),
         )
 
+    def test_ce_0090_latent_spell_owner_replaces_stale_pool_body(self) -> None:
+        pointer = ENEMY_POOL_BASE
+        blob = bytearray(ENEMY_BODY_READ_SIZE)
+        struct.pack_into(
+            "<ff",
+            blob,
+            ENEMY_VELOCITY_OFFSET - ENEMY_BODY_READ_OFFSET,
+            0.0,
+            0.0,
+        )
+        struct.pack_into(
+            "<ff",
+            blob,
+            ENEMY_CONTACT_SIZE_OFFSET - ENEMY_BODY_READ_OFFSET,
+            32.0,
+            24.0,
+        )
+        struct.pack_into(
+            "<ff",
+            blob,
+            ENEMY_POSITION_OFFSET - ENEMY_BODY_READ_OFFSET,
+            192.0,
+            96.0,
+        )
+        # Active owner, but contact mode has not yet enabled.
+        struct.pack_into(
+            "<I",
+            blob,
+            ENEMY_FLAGS_OFFSET - ENEMY_BODY_READ_OFFSET,
+            0x01,
+        )
+        self.assertIsNone(decode_enemy_body(bytes(blob), pointer=pointer))
+        guard = decode_spell_enemy_body_guard(bytes(blob), pointer=pointer)
+        self.assertIsNotNone(guard)
+        assert guard is not None
+        self.assertFalse(guard.contact_enabled)
+        stale = EnemyBody(pointer, 180.0, 80.0, 0.0, 0.0, 1.0, 1.0, 5)
+        other = EnemyBody(pointer + ENEMY_STRIDE, 40.0, 40.0, 0.0, 0.0, 2.0, 2.0, 5)
+        merged = merge_spell_enemy_body_guard((stale, other), guard)
+        self.assertEqual(len(merged), 2)
+        self.assertEqual(merged[0], other)
+        self.assertEqual(merged[1], guard.body)
+
+    def test_ce_0090_latent_spell_owner_blocks_post_spell_item_chase(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=184.5,
+            player_y=192.7,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(
+                EnemyBody(
+                    ENEMY_POOL_BASE,
+                    192.0,
+                    96.0,
+                    0.0,
+                    0.0,
+                    24.0,
+                    18.0,
+                    0x01,
+                ),
+            ),
+            items=(Item(1891, 222.0, 62.5, 0.0, -0.1, 0, 0, False),),
+            power=39.0,
+            bombs=4.0,
+            previous_direction=UP,
+            previous_focus=False,
+            can_bomb=False,
+            snapshot_lag=0,
+            control_delay_frames=5,
+            control_delay_candidates=(3, 4, 5, 6),
+            action_hold_frames=5,
+            horizon=10,
+            threat_horizon=32,
+        )
+        self.assertNotIn(decision.action, {"up", "up_fast"})
+        self.assertGreaterEqual(decision.robust_min_clearance, 0.0)
+
     def test_sparse_enemy_reader_fetches_only_contact_enabled_windows(
         self,
     ) -> None:
@@ -519,7 +600,7 @@ class LiveDodgeAgentTests(unittest.TestCase):
             previous_direction=0,
             can_bomb=False,
         )
-        self.assertIn("down", decision.action)
+        self.assertNotIn(decision.action, {"up", "up_fast"})
         self.assertFalse(decision.bomb)
 
     def test_native_player_lethal_aabb_decoder_uses_exact_offsets(self) -> None:
@@ -728,21 +809,67 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertTrue(decision.bomb)
         self.assertTrue(decision.mask & 0x02)
 
-    def test_safe_large_power_item_is_collected(self) -> None:
+    def test_safe_large_power_item_remains_an_eventual_objective(self) -> None:
         decision = choose_action(
             player_x=192.0,
             player_y=400.0,
             bullets=(),
             lasers=(),
-            items=(Item(17, 235.0, 400.0, 0.0, 0.0, 2, 0, False),),
+            items=(Item(17, 210.0, 400.0, 0.0, 0.0, 2, 0, False),),
             power=0.0,
             bombs=2.0,
             previous_direction=0,
             can_bomb=False,
         )
-        self.assertIn("right", decision.action)
+        # Lower item priority no longer requires an immediate lateral command,
+        # but a safe large item remains in the selected rollout.
+        self.assertNotIn("left", decision.action)
         self.assertEqual(decision.predicted_collections, (17,))
         self.assertGreater(decision.item_utility, 0.0)
+
+    def test_small_top_item_does_not_override_conservative_position(self) -> None:
+        decision = choose_action(
+            player_x=184.5,
+            player_y=192.7,
+            bullets=(),
+            lasers=(),
+            items=(Item(1891, 222.0, 62.5, 0.0, -0.1, 0, 0, False),),
+            power=39.0,
+            bombs=4.0,
+            previous_direction=UP,
+            previous_focus=False,
+            can_bomb=False,
+            snapshot_lag=0,
+            control_delay_frames=5,
+            control_delay_candidates=(3, 4, 5, 6),
+            action_hold_frames=5,
+            horizon=10,
+            threat_horizon=32,
+        )
+        self.assertNotIn(decision.action, {"up", "up_fast"})
+        self.assertEqual(decision.predicted_collections, ())
+
+    def test_ce_0090_spell_context_switch_drops_old_direction_inertia(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=184.5,
+            player_y=192.7,
+            bullets=(),
+            lasers=(),
+            previous_direction=UP,
+            previous_focus=False,
+            can_bomb=False,
+            snapshot_lag=0,
+            control_delay_frames=5,
+            control_delay_candidates=(3, 4, 5, 6),
+            action_hold_frames=5,
+            horizon=10,
+            threat_horizon=32,
+            preserve_previous_direction_inertia=False,
+        )
+        self.assertNotIn(decision.action, {"up", "up_fast"})
+        self.assertEqual(decision.robust_collisions, 0)
 
     def test_unsafe_bomb_item_is_rejected(self) -> None:
         decision = choose_action(

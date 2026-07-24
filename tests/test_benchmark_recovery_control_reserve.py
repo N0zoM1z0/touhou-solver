@@ -10,10 +10,46 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from benchmark_recovery_control_reserve import main
+from benchmark_recovery_control_reserve import _bullet_from_trace, main
 
 
 class RecoveryControlReserveBenchmarkTests(unittest.TestCase):
+    def test_replay_retains_lightweight_piecewise_projection(self) -> None:
+        bullet = _bullet_from_trace(
+            [
+                7,
+                100.0,
+                200.0,
+                1.0,
+                0.0,
+                2.0,
+                3.0,
+                0,
+                None,
+                [
+                    1.0,
+                    0.0,
+                    0x00100202,
+                    0,
+                    1,
+                    [[5, 0.0, 0.0], [8, -1.0, 0.5]],
+                    0.25,
+                    0.5,
+                ],
+            ]
+        )
+        self.assertEqual(bullet.original_transform_flags, 0x00100202)
+        self.assertEqual(bullet.callback_aux_state, 1)
+        self.assertEqual(
+            [
+                (change.frame, change.velocity_x, change.velocity_y)
+                for change in bullet.velocity_changes
+            ],
+            [(5, 0.0, 0.0), (8, -1.0, 0.5)],
+        )
+        self.assertEqual(bullet.trajectory_uncertainty_x, 0.25)
+        self.assertEqual(bullet.trajectory_uncertainty_y, 0.5)
+
     def test_main_compares_same_retained_decision(self) -> None:
         row = {
             "kind": "decision",

@@ -2133,3 +2133,41 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   regressions was removed rather than weakening tests.
 - Linux and Windows Python each pass all 362 tests. No native source changed
   in this checkpoint.
+
+## 2026-07-24: Stage-5 Cross-Check, Latent Spell Body, And Soft Objective Scale
+
+- Complete randomized Stage-5 run `20260724_144805` reached
+  `route_complete`, emitted no Bomb input, and recorded 16 native hits.
+  Different RNG and respawn histories make the prior 31-to-16 delta
+  descriptive only.
+- The sparse C++ piecewise trajectory path is now physically performance-
+  accepted. Against `20260724_120128`, spell-107 local-plan p95 changed
+  `463.61 -> 50.44 ms` and cadence p95 `37 -> 8` frames; spell 111 changed
+  `142.72 -> 40.95 ms` and `13 -> 6`. Overall global solve p95 changed
+  `623.50 -> 485.81 ms`.
+- Default trace analysis initially reported zero transform coverage because
+  it understood only the optional diagnostic field. It now decodes the
+  lightweight planning projection. Spell 107 retained 186,521 projected
+  samples, 99,176 with velocity events; spell 111 retained 104,595/102,870.
+  The latter includes 28,761 stopped and 75,834 moving callback states.
+- The recovery-reserve benchmark now reconstructs full diagnostic or
+  lightweight piecewise trajectories. Stage-5 paired replay preserves
+  disabled/enabled hard counts at 28/45 over 300 rows and 18/24 over 60
+  pre-hit rows while materially reducing selected boundary deficit.
+- Fifteen of 16 hits still followed global-kernel exhaustion. Thirty-two of
+  6,901 decisions missed the issue-delay support; three coincided with hits,
+  but all three were already modeled collisions. Two `+1803/+1806` action
+  epoch jumps were rejected. Performance and stale-input gates pass; survival
+  recovery remains open.
+- CE-0090 records a repeated spell-115 zero-projectile collision cluster at
+  upper-center coordinates across five independent runs. The latest chain
+  carried a pre-spell corridor `up_fast` through a context change, retained it
+  with a 24-point reversal penalty, and then reinforced the climb with
+  residual-item potential.
+- The adapter now reads the current spell-owner geometry synchronously and
+  lowers the union of latent contact-disabled/enabled modes. Context changes
+  retain the physical old-command prefix but remove previous-context soft
+  inertia. Item approach potential is reduced, and total item influence is
+  saturating. No spell ID or coordinate is special-cased.
+- Linux and Windows Python each pass all 368 tests. Native source did not
+  change.

@@ -1,0 +1,180 @@
+{
+  "schema": "th08-recovery-control-reserve-benchmark-v1",
+  "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260724_144805.jsonl",
+  "trace_sha256": "aeaa3bc3040efa15a54c06ccb3a27c0595774a6bb789fdbfbe53fa66399d8ecb",
+  "sample_count": 60,
+  "prehit_window": 60,
+  "scope": "Offline ablation over retained trace-radius hazards and exact laser lifecycle state; this is not physical survival evidence.",
+  "reserve_distance": "unfocused_cardinal_speed * maximum current delay support",
+  "variants": {
+    "disabled": {
+      "median_ms": 14.51217599969823,
+      "p95_ms": 23.0351869831793,
+      "selected_reserve_deficit": {
+        "median": 22.13006627559662,
+        "p95": 28.949951171875,
+        "zero_count": 8
+      },
+      "selected_recovery_distance": {
+        "median": 121.85236969382254,
+        "p95": 288.0
+      },
+      "robust_collision_count": 18,
+      "negative_robust_clearance_count": 24,
+      "terminal_collision_count": 0,
+      "minimum_clearance": {
+        "median": 1.1917022466659546,
+        "p05": -8.11642837524414
+      }
+    },
+    "enabled": {
+      "median_ms": 14.55607199750375,
+      "p95_ms": 23.83634401485324,
+      "selected_reserve_deficit": {
+        "median": 2.9280959367752075,
+        "p95": 24.0,
+        "zero_count": 27
+      },
+      "selected_recovery_distance": {
+        "median": 128.9961239727768,
+        "p95": 295.0254226333724
+      },
+      "robust_collision_count": 18,
+      "negative_robust_clearance_count": 24,
+      "terminal_collision_count": 0,
+      "minimum_clearance": {
+        "median": 0.3333771079778671,
+        "p05": -8.11642837524414
+      }
+    }
+  },
+  "action_change_count": 18,
+  "action_changes": [
+    {
+      "frame": 2101,
+      "disabled": "left",
+      "enabled": "down_left_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 13.157974481582642
+    },
+    {
+      "frame": 2126,
+      "disabled": "down",
+      "enabled": "down_right",
+      "disabled_reserve_deficit": 46.43687391281128,
+      "enabled_reserve_deficit": 23.631667137145996
+    },
+    {
+      "frame": 2160,
+      "disabled": "stay",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 26.273529291152954,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 11186,
+      "disabled": "right_fast",
+      "enabled": "down_right",
+      "disabled_reserve_deficit": 28.949951171875,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 11204,
+      "disabled": "stay",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 22534,
+      "disabled": "stay",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 22579,
+      "disabled": "left_fast",
+      "enabled": "up",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 22592,
+      "disabled": "down_fast",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 14.800000190734863,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 23187,
+      "disabled": "stay",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 2.928217887878418
+    },
+    {
+      "frame": 23672,
+      "disabled": "down_fast",
+      "enabled": "stay",
+      "disabled_reserve_deficit": 16.16339111328125,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 23684,
+      "disabled": "down_fast",
+      "enabled": "down",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 23700,
+      "disabled": "down_right",
+      "enabled": "right_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 15.631516456604004
+    },
+    {
+      "frame": 33898,
+      "disabled": "stay",
+      "enabled": "up_left",
+      "disabled_reserve_deficit": 18.24251937866211,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 34691,
+      "disabled": "up",
+      "enabled": "up_fast",
+      "disabled_reserve_deficit": 21.715988636016846,
+      "enabled_reserve_deficit": 8.0
+    },
+    {
+      "frame": 35415,
+      "disabled": "up_right_fast",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 2.927973985671997
+    },
+    {
+      "frame": 35426,
+      "disabled": "right",
+      "enabled": "up_right",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 8.0
+    },
+    {
+      "frame": 38888,
+      "disabled": "stay",
+      "enabled": "up_right_fast",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 0.0
+    },
+    {
+      "frame": 38901,
+      "disabled": "down_fast",
+      "enabled": "down_left",
+      "disabled_reserve_deficit": 24.0,
+      "enabled_reserve_deficit": 3.8474419116973877
+    }
+  ]
+}

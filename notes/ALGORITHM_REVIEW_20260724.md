@@ -166,18 +166,50 @@ that immediately reconstructs the same Python objects.
 
 ## Ordered Experiments
 
-1. Physically cross-check CE-0089 on a randomized non-Stage-6B stage with the
-   safety-value experiment disabled. Acceptance requires hard-certificate
-   telemetry, cadence, and per-phase evidence, not a lower aggregate hit count.
-2. Build a same-input offline differential over retained Stage-1, Stage-3,
+1. Physically validate CE-0090 on Stage 5. The trace must expose synchronous
+   owner geometry and whether the contact mode was observed or anticipated.
+   The repeated zero-projectile upper-center collision is the primary gate.
+2. Cross-check the latent-owner union on a randomized non-Stage-5 stage for
+   timing and false empty-kernel regressions. Do not judge it only on Reisen.
+3. Build a same-input offline differential over retained Stage-1, Stage-3,
    Stage-4A, Stage-5, and Stage-6B rows. Compare hard-vector counts before any
    soft recovery metric.
-3. Calibrate motion uncertainty from stable same-slot one-step residuals,
+4. Calibrate motion uncertainty from stable same-slot one-step residuals,
    excluding phase boundaries, epoch discontinuities, callback events, and
    unmatched slots. Do not tune uncertainty from mixed raw residuals.
-4. Prototype the robust recovery-band recurrence against a small independent
+5. Prototype the robust recovery-band recurrence against a small independent
    scalar oracle and adversarial generated cases. Retain failing seeds and
    shrink them.
-5. Re-profile live decode, local projection, policy lowering, and native solve
+6. Re-profile live decode, local projection, policy lowering, and native solve
    p95. Move another boundary to C++ only if it remains a measured end-to-end
    limiter.
+
+## Stage-5 Cross-Check And Hidden Contact Mode
+
+Stage-5 run `20260724_144805` physically closes the sparse piecewise
+performance gate, not the survival gate. Spell-107/111 local-plan p95 and
+decision-cadence tails fell sharply, and lightweight planning traces prove
+that stop/resume events remained attached without diagnostic queue objects.
+Fifteen of 16 hits still followed global-kernel exhaustion.
+
+CE-0090 adds a second robust-game dimension. The spell owner has a discrete
+contact mode that can change between observation and actuator pickup. When
+that transition is not yet observable, the survival set is the intersection
+of viable sets for both modes:
+
+```text
+K_robust = K(contact disabled) intersect K(contact enabled)
+```
+
+For geometry this is equivalent to lowering the owner body while its mode is
+latent. TH08 owns the owner pointer and layout; the local/global planners
+remain game-neutral.
+
+The same failure exposed soft-objective scale. Raw item values previously
+entered the node cost with an effective multiplier of six and unbounded
+aggregate approach potential. Item influence is now saturating and bounded,
+and approach shaping is an order of magnitude smaller. Context transitions
+also separate physical actuator state from preference memory: the old command
+still defines the uncontrollable delay prefix, but its reversal penalty does
+not survive into a new spell context. This is a hybrid-system reset rule, not
+a spell-115 route.

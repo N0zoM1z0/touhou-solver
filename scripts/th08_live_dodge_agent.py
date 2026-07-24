@@ -199,6 +199,13 @@ ASYNC_POLICY_DELAY_PADDING = (
 ENEMY_SENSOR_INTERVAL_FRAMES = 4
 COLLECTION_HALF_WIDTH = 24.0
 ITEM_SAFETY_CLEARANCE = 8.0
+# Item value is a bounded tie-breaker inside the viable action set. Raw item
+# values range into the hundreds and previously overwhelmed the entire
+# conservative-position cost, so a dense post-phase drop could pull the
+# player through an incompletely observed boss-contact transition.
+ITEM_UTILITY_WEIGHT = 0.25
+ITEM_UTILITY_SATURATION = 32.0
+ITEM_APPROACH_POTENTIAL_WEIGHT = 0.02
 # Keep the single worker work-conserving. There is never more than one queued
 # solve, so native solve throughput remains the hard rate limit.
 CORRIDOR_REPLAN_FRAMES = TH08_CORRIDOR_CONFIG.frames_per_layer
@@ -424,6 +431,14 @@ class EnemyBody:
     half_height: float
     flags: int
     uncertainty: float = 0.0
+
+
+@dataclass(frozen=True)
+class SpellEnemyBodyGuard:
+    """Current spell-owner geometry under an uncertain contact mode."""
+
+    body: EnemyBody
+    contact_enabled: bool
 
 
 @dataclass(frozen=True)
@@ -1288,7 +1303,11 @@ def decode_items(blob: bytes) -> tuple[Item, ...]:
     return tuple(items)
 
 
-def decode_enemy_body(blob: bytes, *, pointer: int) -> EnemyBody | None:
+def _decode_enemy_body_geometry(
+    blob: bytes,
+    *,
+    pointer: int,
+) -> EnemyBody | None:
     if len(blob) < ENEMY_BODY_READ_SIZE:
         raise ValueError(
             f"enemy body window requires {ENEMY_BODY_READ_SIZE} bytes"
@@ -1305,11 +1324,7 @@ def decode_enemy_body(blob: bytes, *, pointer: int) -> EnemyBody | None:
     )
     x, y = struct.unpack_from("<ff", blob, position_offset)
     flags = struct.unpack_from("<I", blob, flags_offset)[0]
-    if (
-        not flags & ENEMY_ACTIVE_FLAG
-        or not flags & ENEMY_CONTACT_ENABLED_FLAG
-        or flags & ENEMY_CONTACT_BLOCKING_FLAGS
-    ):
+    if not flags & ENEMY_ACTIVE_FLAG:
         return None
     if not _finite((x, y, vx, vy, contact_width, contact_height)):
         return None
@@ -1325,6 +1340,41 @@ def decode_enemy_body(blob: bytes, *, pointer: int) -> EnemyBody | None:
         half_width=0.75 * contact_width,
         half_height=0.75 * contact_height,
         flags=flags,
+    )
+
+
+def decode_enemy_body(blob: bytes, *, pointer: int) -> EnemyBody | None:
+    body = _decode_enemy_body_geometry(blob, pointer=pointer)
+    if body is None or (
+        not body.flags & ENEMY_CONTACT_ENABLED_FLAG
+        or body.flags & ENEMY_CONTACT_BLOCKING_FLAGS
+    ):
+        return None
+    return body
+
+
+def decode_spell_enemy_body_guard(
+    blob: bytes,
+    *,
+    pointer: int,
+) -> SpellEnemyBodyGuard | None:
+    """Retain a spell owner's body across a latent contact-bit transition.
+
+    The asynchronous pool reader observes only bodies whose contact mode is
+    already enabled. A spell owner can enable contact between that snapshot
+    and the next actuator pickup, so survival planning takes the union of the
+    enabled and disabled mode geometries.
+    """
+
+    body = _decode_enemy_body_geometry(blob, pointer=pointer)
+    if body is None:
+        return None
+    return SpellEnemyBodyGuard(
+        body=body,
+        contact_enabled=bool(
+            body.flags & ENEMY_CONTACT_ENABLED_FLAG
+            and not body.flags & ENEMY_CONTACT_BLOCKING_FLAGS
+        ),
     )
 
 
@@ -1485,6 +1535,35 @@ def read_spell_enemy_bodies(
     )
     body = decode_enemy_body(blob, pointer=pointer)
     return (body,) if body is not None else ()
+
+
+def read_spell_enemy_body_guard(
+    reader: ProcessReader,
+    spell: dict[str, object],
+) -> SpellEnemyBodyGuard | None:
+    if not bool(spell.get("active")):
+        return None
+    pointer = int(spell.get("enemy_pointer", 0))
+    if pointer == 0:
+        return None
+    return decode_spell_enemy_body_guard(
+        reader.read(
+            pointer + ENEMY_BODY_READ_OFFSET,
+            ENEMY_BODY_READ_SIZE,
+        ),
+        pointer=pointer,
+    )
+
+
+def merge_spell_enemy_body_guard(
+    bodies: tuple[EnemyBody, ...],
+    guard: SpellEnemyBodyGuard | None,
+) -> tuple[EnemyBody, ...]:
+    if guard is None:
+        return bodies
+    return tuple(
+        body for body in bodies if body.pointer != guard.body.pointer
+    ) + (guard.body,)
 
 
 def decode_player_lethal_aabb(
@@ -2296,7 +2375,13 @@ def _node_key(
         if node.min_clearance >= ITEM_SAFETY_CLEARANCE
         else 0.0
     )
-    utility = usable_item_utility + 0.18 * potential
+    raw_utility = (
+        usable_item_utility
+        + ITEM_APPROACH_POTENTIAL_WEIGHT * potential
+    )
+    utility = ITEM_UTILITY_SATURATION * (
+        1.0 - math.exp(-raw_utility / ITEM_UTILITY_SATURATION)
+    )
     safety_deficit = max(ITEM_SAFETY_CLEARANCE - node.min_clearance, 0.0)
     gate_deficit = 0.0
     if (
@@ -2318,7 +2403,7 @@ def _node_key(
         node.collisions,
         gate_deficit,
         safety_deficit,
-        node.risk - 6.0 * utility,
+        node.risk - ITEM_UTILITY_WEIGHT * utility,
         -node.min_clearance,
     )
 
@@ -2524,6 +2609,7 @@ def choose_action(
     viability_safety_state_value: float | None = None,
     viability_position_error: float = 0.0,
     recovery_control_reserve: bool = True,
+    preserve_previous_direction_inertia: bool = True,
     relax_stale_viability_contradiction: bool = False,
     _force_terminal_threat: bool = False,
     _viability_retry: bool = False,
@@ -2865,7 +2951,7 @@ def choose_action(
                     transition_risk += 24.0
                 if action.focused != node.last_action.focused:
                     transition_risk += 0.12
-                if step == 1:
+                if step == 1 and preserve_previous_direction_inertia:
                     if action.direction != previous_direction:
                         transition_risk += 0.08
                     if _directions_opposed(action.direction, previous_direction):
@@ -3203,6 +3289,9 @@ def choose_action(
             viability_safety_state_value=viability_safety_state_value,
             viability_position_error=viability_position_error,
             recovery_control_reserve=recovery_control_reserve,
+            preserve_previous_direction_inertia=(
+                preserve_previous_direction_inertia
+            ),
             relax_stale_viability_contradiction=(
                 relax_stale_viability_contradiction
             ),
@@ -3930,7 +4019,10 @@ def run(args: argparse.Namespace) -> int:
                     else None
                 ),
             )
-            if corridor_commitment.set_context(corridor_context):
+            corridor_context_changed = corridor_commitment.set_context(
+                corridor_context
+            )
+            if corridor_context_changed:
                 corridor_solution = None
                 corridor_pending_solution = None
                 if (
@@ -3987,15 +4079,25 @@ def run(args: argparse.Namespace) -> int:
             ecl_lookahead_error: str | None = None
             ecl_frame_before: int | None = None
             ecl_frame_after: int | None = None
+            spell_enemy_body_guard: SpellEnemyBodyGuard | None = None
+            spell_enemy_body_guard_error: str | None = None
             spell_enemy_pointer = int(spell_state.get("enemy_pointer", 0))
             if spell_state.get("active") and spell_enemy_pointer:
+                ecl_frame_before = reader.u32(0x0164D30C)
                 try:
-                    ecl_frame_before = reader.u32(0x0164D30C)
+                    spell_enemy_body_guard = read_spell_enemy_body_guard(
+                        reader,
+                        spell_state,
+                    )
+                except (OSError, RuntimeError, ValueError, struct.error) as error:
+                    spell_enemy_body_guard_error = (
+                        f"{type(error).__name__}: {error}"
+                    )
+                try:
                     ecl_vm_snapshot = read_main_ecl_vm_snapshot(
                         reader,
                         spell_enemy_pointer,
                     )
-                    ecl_frame_after = reader.u32(0x0164D30C)
                     ecl_lookahead = analyze_tagged_velocity_toggles(
                         ecl_vm_snapshot,
                         instruction_at=lambda address: (
@@ -4017,6 +4119,11 @@ def run(args: argparse.Namespace) -> int:
                     ecl_lookahead_error = (
                         f"{type(error).__name__}: {error}"
                     )
+                ecl_frame_after = reader.u32(0x0164D30C)
+            enemy_bodies = merge_spell_enemy_body_guard(
+                enemy_bodies,
+                spell_enemy_body_guard,
+            )
             counter_after_read = reader.u32(0x0164D30C)
             read_ms = (time.perf_counter() - read_started) * 1000.0
             if (
@@ -4398,6 +4505,9 @@ def run(args: argparse.Namespace) -> int:
                     if viability_guidance is not None
                     else 0.0
                 ),
+                preserve_previous_direction_inertia=(
+                    not corridor_context_changed
+                ),
             )
             plan_ms = (time.perf_counter() - plan_started) * 1000.0
             phase_now = reader.u8(0x017D5EF8)
@@ -4732,6 +4842,26 @@ def run(args: argparse.Namespace) -> int:
                         counter_after_read - enemy_body_snapshot_frame
                         if enemy_body_snapshot_frame is not None
                         else None
+                    ),
+                    "spell_enemy_body_guard": (
+                        {
+                            "body": _serialized_enemy_bodies(
+                                (spell_enemy_body_guard.body,)
+                            )[0],
+                            "contact_enabled": (
+                                spell_enemy_body_guard.contact_enabled
+                            ),
+                            "anticipatory": (
+                                not spell_enemy_body_guard.contact_enabled
+                            ),
+                            "error": None,
+                        }
+                        if spell_enemy_body_guard is not None
+                        else (
+                            {"error": spell_enemy_body_guard_error}
+                            if spell_enemy_body_guard_error is not None
+                            else None
+                        )
                     ),
                     "action": decision.action,
                     "mask": decision.mask,

@@ -53,6 +53,38 @@ def _bullet(
     ]
 
 
+def _planning_bullet(
+    *,
+    slot: int = 7,
+    x: float = 100.0,
+    vx: float = 1.0,
+    callback_phase: int = 1,
+    callback_aux: int = 0,
+    velocity_changes: list[list[float | int]] | None = None,
+) -> list[object]:
+    return [
+        slot,
+        x,
+        200.0,
+        vx,
+        0.0,
+        2.0,
+        2.0,
+        0,
+        None,
+        [
+            1.0,
+            0.0,
+            0x00100202,
+            callback_phase,
+            callback_aux,
+            velocity_changes or [],
+            0.0,
+            0.0,
+        ],
+    ]
+
+
 class TransformTraceTests(unittest.TestCase):
     def test_runtime_payload_decoder_keeps_stop_state(self) -> None:
         state = decode_trace_bullet(
@@ -70,6 +102,42 @@ class TransformTraceTests(unittest.TestCase):
             (7, 0x80, 5, 1, "stopped"),
         )
         self.assertIsNone(decode_trace_bullet(_bullet()[:8]))
+
+    def test_planning_projection_keeps_callback_events_without_queue_state(
+        self,
+    ) -> None:
+        state = decode_trace_bullet(
+            _planning_bullet(velocity_changes=[[5, 0.0, 0.0]])
+        )
+        self.assertIsNotNone(state)
+        self.assertTrue(state["planning_projection"])
+        self.assertFalse(state["diagnostic_runtime"])
+        self.assertIsNone(state["queue_cursor"])
+        self.assertEqual(state["original_flags"], 0x00100202)
+        self.assertEqual(state["callback_phase_state"], 1)
+        self.assertEqual(state["velocity_change_count"], 1)
+
+        row = {
+            "kind": "decision",
+            "frame": 100,
+            "snapshot_frame": 100,
+            "active_bullets": 1,
+            "spell": {"spell_id": 111},
+            "nearby_bullets": [
+                _planning_bullet(velocity_changes=[[5, 0.0, 0.0]])
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "trace.jsonl"
+            path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+            report = analyze_transform_trace(path, spell_id=111)
+        self.assertEqual(report["diagnostic_runtime_sample_count"], 0)
+        self.assertEqual(report["planning_projection_sample_count"], 1)
+        self.assertEqual(report["projected_velocity_event_sample_count"], 1)
+        self.assertEqual(
+            report["callback_states"],
+            {"phase=1,aux=0,motion=moving": 1},
+        )
 
     def test_full_pool_trace_retains_same_slot_stop_and_resume(self) -> None:
         rows = [

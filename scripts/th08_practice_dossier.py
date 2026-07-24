@@ -424,8 +424,13 @@ def _decision_cadence(
         for left, right in zip(decisions, decisions[1:])
         if 0 < int(right["frame"]) - int(left["frame"]) < 120
     ]
+    percentiles = _percentiles(deltas) or {
+        "median": None,
+        "p95": None,
+        "max": None,
+    }
     return {
-        **_percentiles(deltas),
+        **percentiles,
         "mean": sum(deltas) / len(deltas) if deltas else None,
         "sample_count": len(deltas),
     }
@@ -1126,6 +1131,8 @@ def _spell_phase_summary(
                     int(row["active_lasers"]) for row in rows
                 ),
                 "behavior_alive": _behavior_slice(alive),
+                "decision_cadence_frames": _decision_cadence(rows),
+                "runtime_timing_ms": _runtime_timing(rows),
                 "robust_viability": viability,
             }
         )

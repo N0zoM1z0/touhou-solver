@@ -116,6 +116,8 @@ def compare_dossiers(
         candidate_phase = candidate_phases.get(key, {})
         before_phase_robust = baseline_phase.get("robust_viability", {})
         after_phase_robust = candidate_phase.get("robust_viability", {})
+        before_phase_timing = baseline_phase.get("runtime_timing_ms", {})
+        after_phase_timing = candidate_phase.get("runtime_timing_ms", {})
         per_phase[key] = {
             "spell_name": (
                 candidate_phase.get("spell_name")
@@ -141,6 +143,23 @@ def compare_dossiers(
                 before_phase_robust.get("solve_ms"),
                 after_phase_robust.get("solve_ms"),
             ),
+            "decision_cadence_frames": _percentile_change(
+                baseline_phase.get("decision_cadence_frames"),
+                candidate_phase.get("decision_cadence_frames"),
+            ),
+            "runtime_timing_ms": {
+                timing_key: change
+                for timing_key in sorted(
+                    set(before_phase_timing) | set(after_phase_timing)
+                )
+                if (
+                    change := _percentile_change(
+                        before_phase_timing.get(timing_key),
+                        after_phase_timing.get(timing_key),
+                    )
+                )
+                is not None
+            },
         }
 
     before_prehit = before.get("behavior_context", {}).get(

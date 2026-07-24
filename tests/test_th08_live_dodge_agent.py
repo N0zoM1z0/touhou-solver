@@ -596,6 +596,7 @@ class LiveDodgeAgentTests(unittest.TestCase):
         reader = Reader()
         snapshot = capture_enemy_pool_prefix_contiguous(reader)
         self.assertTrue(snapshot.stable)
+        self.assertEqual(snapshot.attempts, 1)
         self.assertEqual(snapshot.bodies, ())
         self.assertEqual(
             reader.reads,
@@ -606,6 +607,29 @@ class LiveDodgeAgentTests(unittest.TestCase):
                 )
             ],
         )
+
+    def test_local_enemy_prefix_retries_one_crossed_frame_snapshot(
+        self,
+    ) -> None:
+        blob = bytes(ENEMY_LOCAL_PREFIX_SIZE * ENEMY_STRIDE)
+
+        class Reader:
+            def __init__(self) -> None:
+                self.frames = iter((100, 101, 102, 102))
+                self.reads = 0
+
+            def u32(self, _address: int) -> int:
+                return next(self.frames)
+
+            def read(self, _address: int, _size: int) -> bytes:
+                self.reads += 1
+                return blob
+
+        reader = Reader()
+        snapshot = capture_enemy_pool_prefix_contiguous(reader)
+        self.assertTrue(snapshot.stable)
+        self.assertEqual(snapshot.attempts, 2)
+        self.assertEqual(reader.reads, 2)
 
     def test_async_enemy_snapshot_projects_age_with_bounded_uncertainty(
         self,
@@ -1495,7 +1519,7 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(decision.action, "right")
         self.assertEqual(decision.viability_repair_volume, 1)
 
-    def test_newer_terminal_collision_can_relax_stale_global_mask(
+    def test_fresh_prefix_contradiction_relaxes_stale_global_mask(
         self,
     ) -> None:
         decision = choose_action(
@@ -1519,11 +1543,11 @@ class LiveDodgeAgentTests(unittest.TestCase):
                 ("down", 10),
                 ("left", 10),
             ),
-            relax_stale_viability_contradiction=True,
         )
         self.assertEqual(decision.action, "up_right_fast")
         self.assertFalse(decision.viability_constrained)
         self.assertTrue(decision.viability_constraint_relaxed)
+        self.assertTrue(decision.viability_fresh_prefix_relaxed)
         self.assertEqual(decision.robust_collisions, 0)
         self.assertEqual(decision.terminal_threat_collisions, 0)
 

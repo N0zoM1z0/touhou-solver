@@ -94,6 +94,47 @@ class SafetyValueQuery:
                 return value
         return -math.inf
 
+    def certified_actions(
+        self,
+        *,
+        required_clearance: float = 0.0,
+        additional_position_error: float = 0.0,
+    ) -> tuple[str, ...]:
+        """Return actions whose margin covers the off-grid query error.
+
+        Euclidean hazard clearance is 1-Lipschitz in player position and the
+        clamped constant-velocity dynamics are nonexpansive.  Subtracting the
+        live-to-lattice projection distance therefore turns the lattice value
+        into a continuous-position certificate for this model.  Additional
+        adapter/model error can be supplied separately.
+        """
+
+        if not math.isfinite(required_clearance):
+            raise ValueError("required clearance must be finite")
+        if (
+            not math.isfinite(additional_position_error)
+            or additional_position_error < 0.0
+        ):
+            raise ValueError(
+                "additional position error must be finite and nonnegative"
+            )
+        if not self.available:
+            return ()
+        if not self.action_values:
+            raise ValueError(
+                "certified actions require retained per-action values"
+            )
+        threshold = (
+            required_clearance
+            + self.position_error
+            + additional_position_error
+        )
+        return tuple(
+            name
+            for name, value in self.action_values
+            if value > threshold
+        )
+
 
 @dataclass(frozen=True)
 class _TransitionBatch:

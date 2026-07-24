@@ -19,10 +19,30 @@ class AdversarialAabb:
     motion: PiecewiseLinearTrajectory
     half_width: float
     half_height: float
+    active_from_frame: int = 0
+    inactive_from_frame: int | None = None
 
     def __post_init__(self) -> None:
         if self.half_width < 0.0 or self.half_height < 0.0:
             raise ValueError("adversarial AABB extents cannot be negative")
+        if self.active_from_frame < 0:
+            raise ValueError("adversarial AABB birth frame cannot be negative")
+        if (
+            self.inactive_from_frame is not None
+            and self.inactive_from_frame <= self.active_from_frame
+        ):
+            raise ValueError(
+                "adversarial AABB inactive frame must follow its birth"
+            )
+
+    def active_at(self, frame: int) -> bool:
+        return (
+            frame >= self.active_from_frame
+            and (
+                self.inactive_from_frame is None
+                or frame < self.inactive_from_frame
+            )
+        )
 
 
 @dataclass(frozen=True)
@@ -46,11 +66,18 @@ def generate_adversarial_scenario(
     top: float = 16.0,
     bottom: float = 432.0,
     maximum_events: int = 3,
+    maximum_birth_frame: int = 0,
 ) -> AdversarialScenario:
-    """Generate dense straight/stop/reverse/redirect motion without game IDs."""
+    """Generate dense birth/stop/reverse/redirect motion without game IDs."""
 
-    if hazard_count < 0 or horizon_frames < 0 or maximum_events < 0:
+    if (
+        hazard_count < 0
+        or horizon_frames < 0
+        or maximum_events < 0
+        or maximum_birth_frame < 0
+    ):
         raise ValueError("adversarial generator counts cannot be negative")
+    maximum_birth_frame = min(maximum_birth_frame, horizon_frames)
     rng = random.Random(seed)
     hazards: list[AdversarialAabb] = []
     edge_x = (left, right, (left + right) * 0.5)
@@ -106,6 +133,11 @@ def generate_adversarial_scenario(
                 ),
                 half_width=rng.uniform(0.5, 12.0),
                 half_height=rng.uniform(0.5, 12.0),
+                active_from_frame=(
+                    rng.randrange(maximum_birth_frame + 1)
+                    if maximum_birth_frame
+                    else 0
+                ),
             )
         )
     return AdversarialScenario(seed, horizon_frames, tuple(hazards))
@@ -133,21 +165,28 @@ def reference_clearance_volume(
     )
     if not scenario.hazards:
         return output.astype(np.float32)
-    half_width = np.asarray(
-        [hazard.half_width for hazard in scenario.hazards],
-        dtype=np.float64,
-    )
-    half_height = np.asarray(
-        [hazard.half_height for hazard in scenario.hazards],
-        dtype=np.float64,
-    )
     flat_x = grid_x.reshape(-1, 1)
     flat_y = grid_y.reshape(-1, 1)
     for frame in range(scenario.horizon_frames + 1):
+        active = tuple(
+            hazard
+            for hazard in scenario.hazards
+            if hazard.active_at(frame)
+        )
+        if not active:
+            continue
         positions = [
             hazard.motion.position(frame)
-            for hazard in scenario.hazards
+            for hazard in active
         ]
+        half_width = np.asarray(
+            [hazard.half_width for hazard in active],
+            dtype=np.float64,
+        )
+        half_height = np.asarray(
+            [hazard.half_height for hazard in active],
+            dtype=np.float64,
+        )
         hazard_x = np.fromiter(
             (position[0] for position in positions),
             dtype=np.float64,

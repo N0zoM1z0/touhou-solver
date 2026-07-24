@@ -769,7 +769,15 @@ def _robust_viability_summary(
 def _planner_consistency_summary(
     decisions: list[dict[str, object]],
 ) -> dict[str, object]:
-    """Compare the global lattice claim with the local continuous certificate."""
+    """Cross-tab distinct global-horizon and local-prefix safety contracts.
+
+    A global winning state promises a policy over the remaining corridor
+    horizon.  The local certificate only checks the selected action over its
+    delay-plus-hold prefix.  Those Boolean values are useful together, but
+    disagreement is not itself a contradiction.  The action-level
+    contradiction is narrower: an action in the global winning set that the
+    fresh local tube checker finds unsafe.
+    """
 
     comparable = []
     for row in decisions:
@@ -801,40 +809,74 @@ def _planner_consistency_summary(
         }
         comparable.append(
             {
-                "global_safe": global_safe,
-                "local_safe": local_safe,
-                "selected_outside": (
-                    global_safe
-                    and bool(safe_actions)
-                    and str(row.get("action", "")) not in safe_actions
+                "global_winning": global_safe,
+                "local_prefix_safe": local_safe,
+                "selected_in_winning_set": (
+                    str(row.get("action", "")) in safe_actions
                 ),
             }
         )
     count = len(comparable)
-    global_safe_local_unsafe = sum(
-        item["global_safe"] and not item["local_safe"]
-        for item in comparable
+
+    def count_where(predicate) -> int:
+        return sum(bool(predicate(item)) for item in comparable)
+
+    global_winning_local_prefix_unsafe = count_where(
+        lambda item: (
+            item["global_winning"] and not item["local_prefix_safe"]
+        )
     )
-    global_empty_local_safe = sum(
-        not item["global_safe"] and item["local_safe"]
-        for item in comparable
+    global_losing_local_prefix_safe = count_where(
+        lambda item: (
+            not item["global_winning"] and item["local_prefix_safe"]
+        )
+    )
+    certified_action_local_prefix_unsafe = count_where(
+        lambda item: (
+            item["global_winning"]
+            and item["selected_in_winning_set"]
+            and not item["local_prefix_safe"]
+        )
+    )
+    selected_outside = count_where(
+        lambda item: (
+            item["global_winning"]
+            and not item["selected_in_winning_set"]
+        )
     )
     return {
         "comparable_decision_count": count,
-        "agreement_count": sum(
-            item["global_safe"] == item["local_safe"]
-            for item in comparable
+        "global_winning_local_prefix_safe_count": count_where(
+            lambda item: (
+                item["global_winning"] and item["local_prefix_safe"]
+            )
         ),
-        "global_safe_local_unsafe_count": global_safe_local_unsafe,
-        "global_safe_local_unsafe_fraction": (
-            global_safe_local_unsafe / count if count else None
+        "global_winning_local_prefix_unsafe_count": (
+            global_winning_local_prefix_unsafe
         ),
-        "global_empty_local_safe_count": global_empty_local_safe,
-        "global_empty_local_safe_fraction": (
-            global_empty_local_safe / count if count else None
+        "global_losing_local_prefix_safe_count": (
+            global_losing_local_prefix_safe
         ),
-        "selected_action_outside_global_safe_set_count": sum(
-            item["selected_outside"] for item in comparable
+        "global_losing_local_prefix_unsafe_count": count_where(
+            lambda item: (
+                not item["global_winning"]
+                and not item["local_prefix_safe"]
+            )
+        ),
+        "selected_certified_action_local_prefix_unsafe_count": (
+            certified_action_local_prefix_unsafe
+        ),
+        "selected_certified_action_local_prefix_unsafe_fraction": (
+            certified_action_local_prefix_unsafe / count
+            if count
+            else None
+        ),
+        "selected_action_outside_global_winning_set_count": selected_outside,
+        "semantics": (
+            "global is a remaining-horizon winning-set claim; local is a "
+            "delay-plus-hold prefix claim. Only a selected action inside the "
+            "global winning set but locally unsafe is a direct contract "
+            "contradiction."
         ),
     }
 
@@ -2060,13 +2102,17 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "- Robust-policy decisions without any usable query: "
             f"{viability['decision_without_query_count']}/"
             f"{viability['policy_decision_count']}.",
-            "- Global/local comparable decisions: "
-            f"{consistency['comparable_decision_count']}; global-safe/local-"
-            f"unsafe: {consistency['global_safe_local_unsafe_count']}; "
-            "global-empty/local-safe: "
-            f"{consistency['global_empty_local_safe_count']}; selected action "
-            "outside the reported global safe set: "
-            f"{consistency['selected_action_outside_global_safe_set_count']}.",
+            "- Global-horizon/local-prefix cross-tab: "
+            f"{consistency['comparable_decision_count']} decisions; winning "
+            "global state with unsafe selected prefix: "
+            f"{consistency['global_winning_local_prefix_unsafe_count']}; "
+            "losing global state with safe short prefix: "
+            f"{consistency['global_losing_local_prefix_safe_count']}; "
+            "selected globally certified action contradicted by the fresh "
+            "local prefix checker: "
+            f"{consistency['selected_certified_action_local_prefix_unsafe_count']}; "
+            "selected action outside the reported winning set: "
+            f"{consistency['selected_action_outside_global_winning_set_count']}.",
             "- Live spell attribution was recorded at every hit edge; exact "
             "per-spell counts are preserved below.",
             f"- `{sensor_gap_count}` hit edges remain in the "

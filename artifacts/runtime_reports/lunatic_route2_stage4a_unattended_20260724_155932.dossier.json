@@ -282,6 +282,8 @@
       "robust_override_count": 140,
       "robust_collision_prediction_count": 259,
       "robust_negative_clearance_count": 304,
+      "fresh_prefix_filtered_count": 0,
+      "fresh_prefix_relaxed_count": 0,
       "robust_min_clearance": {
         "median": 23.634614944458008,
         "p95": 9999.0,
@@ -402,12 +404,14 @@
     },
     "planner_consistency": {
       "comparable_decision_count": 6613,
-      "agreement_count": 4186,
-      "global_safe_local_unsafe_count": 32,
-      "global_safe_local_unsafe_fraction": 0.0048389535762891275,
-      "global_empty_local_safe_count": 2395,
-      "global_empty_local_safe_fraction": 0.3621654317253894,
-      "selected_action_outside_global_safe_set_count": 99
+      "global_winning_local_prefix_safe_count": 4048,
+      "global_winning_local_prefix_unsafe_count": 32,
+      "global_losing_local_prefix_safe_count": 2395,
+      "global_losing_local_prefix_unsafe_count": 138,
+      "selected_certified_action_local_prefix_unsafe_count": 30,
+      "selected_certified_action_local_prefix_unsafe_fraction": 0.004536518977771057,
+      "selected_action_outside_global_winning_set_count": 99,
+      "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. Only a selected action inside the global winning set but locally unsafe is a direct contract contradiction."
     },
     "input_visibility": {
       "interpretation": "Heuristic SendInput-to-observation evidence. Output transitions already equal to the current game input are excluded as ambiguous; visibility means the next decision snapshot reports the newly sent mask.",
@@ -494,6 +498,7 @@
       "decision_count_with_active_bodies": 6393,
       "max_active_bodies": 37
     },
+    "issue_enemy_guard": null,
     "spell_owner_guard": {
       "row_count": 3395,
       "observation_count": 3395,
@@ -810,12 +815,14 @@
         },
         "planner_consistency": {
           "comparable_decision_count": 3840,
-          "agreement_count": 2711,
-          "global_safe_local_unsafe_count": 22,
-          "global_safe_local_unsafe_fraction": 0.005729166666666666,
-          "global_empty_local_safe_count": 1107,
-          "global_empty_local_safe_fraction": 0.28828125,
-          "selected_action_outside_global_safe_set_count": 75
+          "global_winning_local_prefix_safe_count": 2652,
+          "global_winning_local_prefix_unsafe_count": 22,
+          "global_losing_local_prefix_safe_count": 1107,
+          "global_losing_local_prefix_unsafe_count": 59,
+          "selected_certified_action_local_prefix_unsafe_count": 20,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.005208333333333333,
+          "selected_action_outside_global_winning_set_count": 75,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. Only a selected action inside the global winning set but locally unsafe is a direct contract contradiction."
         }
       },
       {
@@ -1011,12 +1018,14 @@
         },
         "planner_consistency": {
           "comparable_decision_count": 388,
-          "agreement_count": 311,
-          "global_safe_local_unsafe_count": 7,
-          "global_safe_local_unsafe_fraction": 0.01804123711340206,
-          "global_empty_local_safe_count": 70,
-          "global_empty_local_safe_fraction": 0.18041237113402062,
-          "selected_action_outside_global_safe_set_count": 2
+          "global_winning_local_prefix_safe_count": 289,
+          "global_winning_local_prefix_unsafe_count": 7,
+          "global_losing_local_prefix_safe_count": 70,
+          "global_losing_local_prefix_unsafe_count": 22,
+          "selected_certified_action_local_prefix_unsafe_count": 7,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.01804123711340206,
+          "selected_action_outside_global_winning_set_count": 2,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. Only a selected action inside the global winning set but locally unsafe is a direct contract contradiction."
         }
       },
       {
@@ -1208,12 +1217,14 @@
         },
         "planner_consistency": {
           "comparable_decision_count": 656,
-          "agreement_count": 490,
-          "global_safe_local_unsafe_count": 3,
-          "global_safe_local_unsafe_fraction": 0.004573170731707317,
-          "global_empty_local_safe_count": 163,
-          "global_empty_local_safe_fraction": 0.24847560975609756,
-          "selected_action_outside_global_safe_set_count": 12
+          "global_winning_local_prefix_safe_count": 488,
+          "global_winning_local_prefix_unsafe_count": 3,
+          "global_losing_local_prefix_safe_count": 163,
+          "global_losing_local_prefix_unsafe_count": 2,
+          "selected_certified_action_local_prefix_unsafe_count": 3,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.004573170731707317,
+          "selected_action_outside_global_winning_set_count": 12,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. Only a selected action inside the global winning set but locally unsafe is a direct contract contradiction."
         }
       },
       {
@@ -1405,12 +1416,14 @@
         },
         "planner_consistency": {
           "comparable_decision_count": 487,
-          "agreement_count": 113,
-          "global_safe_local_unsafe_count": 0,
-          "global_safe_local_unsafe_fraction": 0.0,
-          "global_empty_local_safe_count": 374,
-          "global_empty_local_safe_fraction": 0.7679671457905544,
-          "selected_action_outside_global_safe_set_count": 3
+          "global_winning_local_prefix_safe_count": 90,
+          "global_winning_local_prefix_unsafe_count": 0,
+          "global_losing_local_prefix_safe_count": 374,
+          "global_losing_local_prefix_unsafe_count": 23,
+          "selected_certified_action_local_prefix_unsafe_count": 0,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.0,
+          "selected_action_outside_global_winning_set_count": 3,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. Only a selected action inside the global winning set but locally unsafe is a direct contract contradiction."
         }
       },
       {
@@ -1600,12 +1613,14 @@
         },
         "planner_consistency": {
           "comparable_decision_count": 686,
-          "agreement_count": 304,
-          "global_safe_local_unsafe_count": 0,
-          "global_safe_local_unsafe_fraction": 0.0,
-          "global_empty_local_safe_count": 382,
-          "global_empty_local_safe_fraction": 0.5568513119533528,
-          "selected_action_outside_global_safe_set_count": 6
+          "global_winning_local_prefix_safe_count": 295,
+          "global_winning_local_prefix_unsafe_count": 0,
+          "global_losing_local_prefix_safe_count": 382,
+          "global_losing_local_prefix_unsafe_count": 9,
+          "selected_certified_action_local_prefix_unsafe_count": 0,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.0,
+          "selected_action_outside_global_winning_set_count": 6,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. Only a selected action inside the global winning set but locally unsafe is a direct contract contradiction."
         }
       },
       {
@@ -1797,12 +1812,14 @@
         },
         "planner_consistency": {
           "comparable_decision_count": 556,
-          "agreement_count": 257,
-          "global_safe_local_unsafe_count": 0,
-          "global_safe_local_unsafe_fraction": 0.0,
-          "global_empty_local_safe_count": 299,
-          "global_empty_local_safe_fraction": 0.5377697841726619,
-          "selected_action_outside_global_safe_set_count": 1
+          "global_winning_local_prefix_safe_count": 234,
+          "global_winning_local_prefix_unsafe_count": 0,
+          "global_losing_local_prefix_safe_count": 299,
+          "global_losing_local_prefix_unsafe_count": 23,
+          "selected_certified_action_local_prefix_unsafe_count": 0,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.0,
+          "selected_action_outside_global_winning_set_count": 1,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. Only a selected action inside the global winning set but locally unsafe is a direct contract contradiction."
         }
       }
     ],

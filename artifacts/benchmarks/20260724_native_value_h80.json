@@ -1,0 +1,34 @@
+{
+  "aabbs": 1360,
+  "segments": 0,
+  "trajectory_segments": 0,
+  "runs": 6,
+  "forecast_frames": 48,
+  "danger_radius": 48.0,
+  "delay_support": [
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "nominal_delay": 4,
+  "safety_value_horizon": 80,
+  "viability_backend": "native",
+  "cold_ms": 509.1309380077291,
+  "warm_median_ms": 151.30393000436015,
+  "samples_ms": [
+    509.1309380077291,
+    134.87881602486596,
+    136.91814901540056,
+    171.61277899867855,
+    151.30393000436015,
+    165.49555299570784
+  ],
+  "phase_warm_median_ms": {
+    "clearance": 39.64351399918087,
+    "viability": 20.920644979923964,
+    "safety_value": 87.5859830121044,
+    "rollout": 0.0
+  }
+}

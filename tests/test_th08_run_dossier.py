@@ -140,7 +140,7 @@ class Th08RunDossierTests(unittest.TestCase):
         self.assertEqual(summary["constrained_decision_count"], 1)
         self.assertEqual(summary["solve_ms"]["median"], 700.0)
 
-    def test_planner_consistency_separates_false_safe_and_false_empty(
+    def test_planner_consistency_separates_horizon_from_action_contract(
         self,
     ) -> None:
         rows = [
@@ -172,14 +172,39 @@ class Th08RunDossierTests(unittest.TestCase):
                     "min_clearance": 4.0,
                 },
             },
+            {
+                "action": "left",
+                "viability": {
+                    "available": True,
+                    "support_covers_current": True,
+                    "state_viable": True,
+                    "safe_action_count": 1,
+                    "safe_actions": ["left"],
+                },
+                "robust_control": {
+                    "worst_collisions": 1,
+                    "min_clearance": -1.0,
+                },
+            },
         ]
         summary = _planner_consistency_summary(rows)
-        self.assertEqual(summary["comparable_decision_count"], 2)
-        self.assertEqual(summary["agreement_count"], 0)
-        self.assertEqual(summary["global_safe_local_unsafe_count"], 1)
-        self.assertEqual(summary["global_empty_local_safe_count"], 1)
+        self.assertEqual(summary["comparable_decision_count"], 3)
         self.assertEqual(
-            summary["selected_action_outside_global_safe_set_count"],
+            summary["global_winning_local_prefix_unsafe_count"],
+            2,
+        )
+        self.assertEqual(
+            summary["global_losing_local_prefix_safe_count"],
+            1,
+        )
+        self.assertEqual(
+            summary[
+                "selected_certified_action_local_prefix_unsafe_count"
+            ],
+            1,
+        )
+        self.assertEqual(
+            summary["selected_action_outside_global_winning_set_count"],
             1,
         )
 

@@ -111,6 +111,11 @@ def main() -> int:
     )
     parser.add_argument("--nominal-delay", type=int, default=2)
     parser.add_argument(
+        "--safety-value-horizon",
+        type=int,
+        default=0,
+    )
+    parser.add_argument(
         "--danger-radius",
         type=float,
         default=TH08_CORRIDOR_CONFIG.danger_radius,
@@ -129,6 +134,11 @@ def main() -> int:
         or args.delay_support[0] < 0
         or args.delay_support[-1] > TH08_CORRIDOR_CONFIG.frames_per_layer
         or args.nominal_delay not in args.delay_support
+        or args.safety_value_horizon < 0
+        or args.safety_value_horizon
+        > TH08_CORRIDOR_CONFIG.horizon_frames
+        or args.safety_value_horizon
+        % TH08_CORRIDOR_CONFIG.frames_per_layer
     ):
         parser.error("invalid hazard, run, or delay arguments")
 
@@ -143,6 +153,7 @@ def main() -> int:
         delay_frames=tuple(args.delay_support),
         nominal_delay=args.nominal_delay,
         active_action="stay",
+        safety_value_horizon_frames=args.safety_value_horizon,
     )
     config = replace(
         TH08_CORRIDOR_CONFIG,
@@ -179,6 +190,7 @@ def main() -> int:
         "danger_radius": args.danger_radius,
         "delay_support": args.delay_support,
         "nominal_delay": args.nominal_delay,
+        "safety_value_horizon": args.safety_value_horizon,
         "viability_backend": backend,
         "cold_ms": samples[0],
         "warm_median_ms": statistics.median(samples[1:] or samples),

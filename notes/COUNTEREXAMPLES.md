@@ -2214,3 +2214,44 @@ Status: observed | inferred | unknown | fixed
 - **Status:** Causal replay and focused tests pass. No physical run has yet
   validated the issue-time guard or its read tail, so the original hit remains
   an open physical counterexample.
+
+## CE-0093: Different-horizon Booleans hid a direct stale-action contradiction
+
+- **Observed reporting defect:** The first Stage-4A consistency report called
+  2,395 rows “global-empty/local-safe.” Global asked for a robust policy over
+  another 48--80 frames, while local certified only an 8--12-frame selected
+  action prefix. Those are not opposite answers to one proposition.
+- **Observed action-level defect:** After aligning the contract, 30 of 6,613
+  comparable rows selected an action that belonged to the cached global
+  winning-action set even though the fresh local uncertain-delay tube checker
+  predicted collision. The policy's underlying hazard snapshot was 19--48
+  frames old on those rows. Several local clearances were `-10..-22`, so
+  initial lattice projection alone cannot explain every contradiction.
+- **Invalid assumption:** A cached long-horizon action mask can remain a hard
+  constraint after a fresher, shorter-horizon collision certificate
+  contradicts it. Long horizon does not make old hazard evidence newer.
+- **General correction:** Global winning actions are intersected with the
+  fresh prefix-safe action set before beam expansion. If the intersection is
+  empty, the controller recertifies all 17 actions and relaxes the cached
+  mask. Telemetry distinguishes filtering from full relaxation. This is a
+  version-order invariant, not a Stage-4 direction or spell rule.
+- **Offline evidence:** On the 30 retained contradiction rows, paired
+  trace-radius replay changed 16 actions, improved the hard vector on 10,
+  regressed on zero, reduced robust-collision decisions `29 -> 23`, and
+  reduced negative-certificate rows `30 -> 23`. Eligible median/p95 cost rose
+  `11.39/21.12 -> 20.00/36.08 ms`; the contradiction path represented only
+  30/6,613 comparable live rows.
+- **Algorithm correction:** “Recovery distance” to a next-layer endpoint is
+  not a proof. The new scalar oracle instead maximizes guaranteed safe frames
+  and only then bottleneck clearance. On 4,905 losing generated states,
+  max-min margin alone forfeited guaranteed frames on 190 states.
+- **Regressions/artifacts:**
+  `test_fresh_prefix_contradiction_relaxes_stale_global_mask`,
+  `test_planner_consistency_separates_horizon_from_action_contract`,
+  `test_survival_horizon_outranks_shallower_immediate_collision`,
+  `20260724_stage4a_fresh_viability_intersection.json`, and
+  `20260724_survival_horizon_oracle.json`.
+- **Status:** Reporter semantics, local hard ordering, scalar-oracle parity,
+  and deterministic adversarial tests pass. The fresh-prefix intersection is
+  not physically accepted until a focused Stage-4A run records its filter/
+  relaxation counts and every new hit window.

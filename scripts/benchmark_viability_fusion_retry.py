@@ -86,6 +86,7 @@ def main(argv: list[str] | None = None) -> int:
                     row,
                     recovery_control_reserve=True,
                     relax_stale_viability_contradiction=enabled,
+                    enforce_fresh_viability_intersection=False,
                 )
             )
             durations[enabled].append(

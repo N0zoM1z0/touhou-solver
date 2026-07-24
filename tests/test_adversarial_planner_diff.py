@@ -41,6 +41,22 @@ class AdversarialPlannerDiffTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertGreater(len(first.hazards), 1536)
 
+    def test_generator_can_delay_births_without_moving_them_into_adapters(
+        self,
+    ) -> None:
+        scenario = generate_adversarial_scenario(
+            0xCE0092,
+            hazard_count=64,
+            horizon_frames=8,
+            maximum_birth_frame=6,
+        )
+        self.assertTrue(
+            any(hazard.active_from_frame > 0 for hazard in scenario.hazards)
+        )
+        self.assertTrue(
+            all(0 <= hazard.active_from_frame <= 6 for hazard in scenario.hazards)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

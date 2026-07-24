@@ -139,6 +139,7 @@ def _replay_decision(
     *,
     recovery_control_reserve: bool,
     relax_stale_viability_contradiction: bool = False,
+    enforce_fresh_viability_intersection: bool = True,
     viability_safety_actions: tuple[str, ...] = (),
     viability_safety_state_value: float | None = None,
 ):
@@ -201,6 +202,9 @@ def _replay_decision(
         recovery_control_reserve=recovery_control_reserve,
         relax_stale_viability_contradiction=(
             relax_stale_viability_contradiction
+        ),
+        enforce_fresh_viability_intersection=(
+            enforce_fresh_viability_intersection
         ),
     )
 

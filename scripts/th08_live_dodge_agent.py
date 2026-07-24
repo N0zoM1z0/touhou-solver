@@ -461,6 +461,7 @@ class EnemyPoolSnapshot:
     frame_after: int
     bodies: tuple[EnemyBody, ...]
     read_ms: float
+    attempts: int = 1
 
     @property
     def stable(self) -> bool:
@@ -508,6 +509,8 @@ class Decision:
     viability_control_reserve_deficit: float = 0.0
     viability_safety_value_preferred: bool = False
     viability_safety_state_value: float | None = None
+    viability_fresh_prefix_filtered: bool = False
+    viability_fresh_prefix_relaxed: bool = False
 
 
 @dataclass(frozen=True)
@@ -1487,6 +1490,7 @@ def capture_enemy_pool_prefix_contiguous(
     reader: ProcessReader,
     *,
     pool_size: int = ENEMY_LOCAL_PREFIX_SIZE,
+    maximum_attempts: int = 2,
 ) -> EnemyPoolSnapshot:
     """Capture the allocation head once per local decision.
 
@@ -1496,16 +1500,25 @@ def capture_enemy_pool_prefix_contiguous(
 
     if not 0 < pool_size <= ENEMY_POOL_SIZE:
         raise ValueError("enemy prefix size must belong to the native pool")
+    if maximum_attempts <= 0:
+        raise ValueError("enemy prefix attempts must be positive")
     started = time.perf_counter()
-    frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
-    blob = reader.read(ENEMY_POOL_BASE, pool_size * ENEMY_STRIDE)
-    frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
-    return EnemyPoolSnapshot(
-        frame_before,
-        frame_after,
-        decode_enemy_bodies(blob, pool_size=pool_size),
-        (time.perf_counter() - started) * 1000.0,
-    )
+    snapshot = None
+    for attempt in range(1, maximum_attempts + 1):
+        frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+        blob = reader.read(ENEMY_POOL_BASE, pool_size * ENEMY_STRIDE)
+        frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
+        snapshot = EnemyPoolSnapshot(
+            frame_before,
+            frame_after,
+            decode_enemy_bodies(blob, pool_size=pool_size),
+            (time.perf_counter() - started) * 1000.0,
+            attempt,
+        )
+        if snapshot.stable:
+            return snapshot
+    assert snapshot is not None
+    return snapshot
 
 
 def read_enemy_bodies_sparse(
@@ -1605,6 +1618,8 @@ def enemy_pool_snapshot_changes(
 ) -> tuple[str, ...]:
     """Detect contact-topology or non-linear geometry changes during planning."""
 
+    if not planned.stable or not current.stable:
+        return ("unstable_capture",)
     if current.frame_after < planned.frame_after:
         return ("frame_reversed",)
     planned_by_pointer = {body.pointer: body for body in planned.bodies}
@@ -2808,6 +2823,7 @@ def choose_action(
     recovery_control_reserve: bool = True,
     preserve_previous_direction_inertia: bool = True,
     relax_stale_viability_contradiction: bool = False,
+    enforce_fresh_viability_intersection: bool = True,
     _force_terminal_threat: bool = False,
     _viability_retry: bool = False,
 ) -> Decision:
@@ -3001,6 +3017,67 @@ def choose_action(
     effective_allowed_first_actions = (
         None if viability_constraint_relaxed else allowed_first_actions
     )
+    viability_fresh_prefix_filtered = False
+    viability_fresh_prefix_relaxed = False
+    if (
+        enforce_fresh_viability_intersection
+        and effective_allowed_first_actions is not None
+        and robust_preflight_certificates
+    ):
+        locally_safe_global_actions = tuple(
+            action_name
+            for action_name in effective_allowed_first_actions
+            if (
+                robust_preflight_certificates[action_name].worst_collisions
+                == 0
+                and robust_preflight_certificates[action_name].min_clearance
+                >= 0.0
+            )
+        )
+        if locally_safe_global_actions:
+            viability_fresh_prefix_filtered = (
+                len(locally_safe_global_actions)
+                != len(effective_allowed_first_actions)
+            )
+            effective_allowed_first_actions = locally_safe_global_actions
+        else:
+            # A cached long-horizon mask cannot force an action that a fresher
+            # short-horizon tube check already proves unsafe.  Evaluate every
+            # action only on this rare contradiction path, then let the local
+            # hard ordering choose either a prefix-safe escape or its
+            # least-bad unavoidable-contact fallback.
+            robust_preflight_certificates = _robust_action_certificates(
+                player_x=observed_player_x,
+                player_y=observed_player_y,
+                previous_mask=delayed_mask,
+                actions=_PLANNER_ACTIONS,
+                delay_frames=certificate_delay_frames,
+                action_hold_frames=action_hold_frames,
+                bullets=bullets,
+                lasers=lasers,
+                enemy_bodies=enemy_bodies,
+                snapshot_lag=snapshot_lag,
+                laser_frames=laser_timeline[:certificate_horizon],
+            )
+            locally_safe_actions = tuple(
+                action.name
+                for action in _PLANNER_ACTIONS
+                if (
+                    robust_preflight_certificates[
+                        action.name
+                    ].worst_collisions
+                    == 0
+                    and robust_preflight_certificates[
+                        action.name
+                    ].min_clearance
+                    >= 0.0
+                )
+            )
+            effective_allowed_first_actions = (
+                locally_safe_actions or None
+            )
+            viability_constraint_relaxed = True
+            viability_fresh_prefix_relaxed = True
     effective_threat_horizon = potential_threat_horizon
     prefix_risk, prefix_collisions, prefix_clearance = _control_prefix_hazards(
         player_x=player_x,
@@ -3431,7 +3508,10 @@ def choose_action(
             if robust_certificate is not None
             else None
         ),
-        effective_allowed_first_actions is not None,
+        (
+            effective_allowed_first_actions is not None
+            and not viability_fresh_prefix_relaxed
+        ),
         len(allowed_first_actions or ()),
         repair_by_action.get(action.name, 0),
         viability_constraint_relaxed,
@@ -3449,6 +3529,8 @@ def choose_action(
             and action.name in safety_value_actions
         ),
         viability_safety_state_value,
+        viability_fresh_prefix_filtered,
+        viability_fresh_prefix_relaxed,
     )
     if (
         effective_allowed_first_actions is not None
@@ -3495,6 +3577,9 @@ def choose_action(
             ),
             relax_stale_viability_contradiction=(
                 relax_stale_viability_contradiction
+            ),
+            enforce_fresh_viability_intersection=(
+                enforce_fresh_viability_intersection
             ),
             _force_terminal_threat=True,
             _viability_retry=True,
@@ -5123,6 +5208,9 @@ def run(args: argparse.Namespace) -> int:
                         "enemy_prefix_body_count": len(
                             enemy_prefix_bodies
                         ),
+                        "enemy_prefix_attempts": (
+                            enemy_prefix_snapshot.attempts
+                        ),
                         "bullet_capture_span": bullet_capture_span,
                         "hazard_snapshot_age": hazard_snapshot_age,
                         "player_to_hazard_lag": player_to_hazard_lag,
@@ -5144,6 +5232,12 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "body_count": len(
                             issue_enemy_prefix_snapshot.bodies
+                        ),
+                        "attempts": (
+                            issue_enemy_prefix_snapshot.attempts
+                        ),
+                        "stable": (
+                            issue_enemy_prefix_snapshot.stable
                         ),
                         "changes": list(issue_enemy_changes),
                         "recertified": bool(issue_enemy_changes),
@@ -5217,6 +5311,12 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "viability_safety_state_value": (
                             decision.viability_safety_state_value
+                        ),
+                        "viability_fresh_prefix_filtered": (
+                            decision.viability_fresh_prefix_filtered
+                        ),
+                        "viability_fresh_prefix_relaxed": (
+                            decision.viability_fresh_prefix_relaxed
                         ),
                     },
                     "terminal_threat": {

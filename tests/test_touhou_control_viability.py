@@ -10,6 +10,7 @@ import numpy as np
 from touhou_control import native_backend
 from touhou_control.viability import (
     ControlAction,
+    SafetyValueQuery,
     ViabilityConfig,
     build_robust_safety_value_policy,
     build_robust_viability_policy,
@@ -18,6 +19,29 @@ from touhou_control.native_backend import available as native_available
 
 
 class RobustViabilityTests(unittest.TestCase):
+    def test_safety_value_certificate_pays_initial_off_grid_error(
+        self,
+    ) -> None:
+        query = SafetyValueQuery(
+            available=True,
+            layer=0,
+            row=0,
+            column=0,
+            active_action="stay",
+            state_value=1.0,
+            action_values=(("left", 0.75), ("right", 0.4)),
+            best_actions=("left",),
+            position_error=0.5,
+            reason="test",
+        )
+        self.assertEqual(query.certified_actions(), ("left",))
+        self.assertEqual(
+            query.certified_actions(additional_position_error=0.3),
+            (),
+        )
+        with self.assertRaisesRegex(ValueError, "nonnegative"):
+            query.certified_actions(additional_position_error=-0.1)
+
     def test_safety_value_threshold_exactly_recovers_boolean_policy(
         self,
     ) -> None:

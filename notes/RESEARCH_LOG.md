@@ -2239,11 +2239,11 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   affect beam pruning, action ranking, utility, or predicted collections.
   Passive pickup remains. A fixed local workload improves from
   `11.68/19.44` to `8.10/12.54 ms` median/p95.
-- Alive global/local telemetry covers 6,613 decisions: 32 global-safe/local-
-  unsafe, 2,395 global-empty/local-safe, and 99 selected actions outside the
-  reported global set. All 99 are explicit local degeneracy relaxations. The
-  bidirectional mismatch rejects a scalar-weight fix and keeps the robust
-  recovery-band recurrence as the next correctness experiment.
+- Alive global/local telemetry covers 6,613 decisions. The initial report
+  cross-tabbed 32 global-winning/local-prefix-unsafe and 2,395
+  global-losing/local-prefix-safe rows, but those horizons were not the same
+  contract. The action-aligned reinterpretation and correction are recorded
+  in the following checkpoint.
 - The existing native moving-AABB clearance loop was still dense over every
   hazard and cell. A cap-bounded hazard-major traversal preserves the fixed-
   seed float32 volume checksum while reducing the 1,360-AABB, 81-frame
@@ -2255,3 +2255,55 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Windows warm synthetic solve is `82.83 ms` median with `67.00/13.70 ms`
   clearance/viability. Physical Stage-4A validation remains required for the
   two synchronous reads, issue-time override rate, timing tail, and survival.
+
+## 2026-07-24: Versioned Safety Contract And Survival-Horizon Oracle
+
+- **Reporting correction:** Global viability covers another 48--80 frames;
+  local robust certification covers only an 8--12-frame selected-action
+  prefix. Therefore the 2,395 global-losing/local-prefix-safe rows are not
+  false-empty proofs. The regenerated Stage-4A dossier now uses explicit
+  horizon semantics.
+- **Observed direct contradiction:** Thirty selected actions belonged to the
+  cached global winning set but had a fresh local collision certificate.
+  Their underlying hazard snapshots were 19--48 frames old, and some local
+  margins were `-10..-22`. Missing births/later geometry are inferred
+  contributors; exact source-snapshot attribution remains open.
+- The local controller now intersects cached global actions with fresh
+  prefix-safe actions. An empty intersection triggers an all-17-action
+  recertificate and relaxes the cached mask. This is a generic version-order
+  invariant. Future traces report filtered and relaxed counts.
+- On all 30 retained direct contradictions, paired trace-radius replay changed
+  16 actions, improved the hard vector on 10, regressed on zero, changed
+  robust-collision decisions `29 -> 23`, and changed negative certificates
+  `30 -> 23`. Eligible median/p95 cost changed
+  `11.39/21.12 -> 20.00/36.08 ms`. This rare-path replay is not physical
+  acceptance.
+- Synchronous enemy-prefix capture now retries once when the manager frame
+  crosses the contiguous read and records attempt/stability telemetry. An
+  arbitrary hazard born after the final observation remains theoretically
+  unpreventable unless its event/envelope is in the model.
+- Added an independent scalar robust-game oracle. It maximizes guaranteed
+  collision-free physical frames first and bottleneck signed clearance
+  second. It matches the vectorized Boolean winning set and action masks on
+  randomized small games.
+- Across 9,720 states from 24 deterministic dense generated games, 4,905 were
+  losing. Margin-only and survival-horizon best-action sets differed on 3,882;
+  margin-only selection forfeited guaranteed survival frames on 190 states,
+  losing 226 frames in aggregate. This invalidates max-min clearance as the
+  first fallback outside the positive kernel while retaining it as a margin
+  certificate inside the kernel.
+- Added birth windows to the game-neutral adversarial generator. A regression
+  proves that a future birth omitted from the event model can turn a stale
+  winning result into an immediate losing result. Faster planning narrows the
+  race; planning ahead helps only when births are modeled; issue-time
+  validation remains necessary.
+- The next justified C++ boundary is a packed issue-time
+  decode/project/all-action certificate over bullets, lasers, and enemy
+  bodies, followed by native survival-horizon induction. Both remain gated on
+  scalar parity, Linux/Windows tests, whole-pipeline timing, and physical
+  Stage-4A validation.
+- A fixed native timing pair prevents prematurely enabling the old
+  full-horizon margin fallback. Boolean-only warm median was `67.28 ms`;
+  adding a separate 80-frame safety-value pass raised it to `151.30 ms`, with
+  `87.59 ms` in value induction. The next C++ experiment should fuse outputs
+  or refine on demand rather than stacking two complete recurrences.

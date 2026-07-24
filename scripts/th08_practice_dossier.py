@@ -763,6 +763,14 @@ def _adaptive_control_summary(
             float(robust.get("min_clearance", 9999.0)) < 0.0
             for robust in robust_rows
         ),
+        "fresh_prefix_filtered_count": sum(
+            bool(robust.get("viability_fresh_prefix_filtered"))
+            for robust in robust_rows
+        ),
+        "fresh_prefix_relaxed_count": sum(
+            bool(robust.get("viability_fresh_prefix_relaxed"))
+            for robust in robust_rows
+        ),
         "robust_min_clearance": _percentiles(clearances),
         "guard_active_decision_count": sum(
             bool(estimator.get("guard_active"))
@@ -1684,9 +1692,10 @@ def render_markdown(dossier: dict[str, object]) -> str:
         "planner_consistency",
         {
             "comparable_decision_count": 0,
-            "global_safe_local_unsafe_count": 0,
-            "global_empty_local_safe_count": 0,
-            "selected_action_outside_global_safe_set_count": 0,
+            "global_winning_local_prefix_unsafe_count": 0,
+            "global_losing_local_prefix_safe_count": 0,
+            "selected_certified_action_local_prefix_unsafe_count": 0,
+            "selected_action_outside_global_winning_set_count": 0,
         },
     )
     input_visibility = totals["input_visibility"]
@@ -1822,15 +1831,18 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"`{robust_viability.get('policy_phase_frame_counts', {})}`."
             ),
             (
-                "- Global/local certificate comparison covered "
+                "- Global-horizon/local-prefix cross-tab covered "
                 f"{planner_consistency['comparable_decision_count']} "
                 "decisions: "
-                f"{planner_consistency['global_safe_local_unsafe_count']} "
-                "were global-safe/local-unsafe, "
-                f"{planner_consistency['global_empty_local_safe_count']} "
-                "were global-empty/local-safe, and "
-                f"{planner_consistency['selected_action_outside_global_safe_set_count']} "
-                "selected actions were outside the reported global safe set."
+                f"{planner_consistency['global_winning_local_prefix_unsafe_count']} "
+                "had a winning global state but unsafe selected prefix, "
+                f"{planner_consistency['global_losing_local_prefix_safe_count']} "
+                "had a losing global state but safe short prefix, "
+                f"{planner_consistency['selected_certified_action_local_prefix_unsafe_count']} "
+                "selected globally certified actions contradicted the fresh "
+                "local prefix checker, and "
+                f"{planner_consistency['selected_action_outside_global_winning_set_count']} "
+                "selected actions were outside the reported winning set."
             ),
             (
                 "- The rolling worker produced "

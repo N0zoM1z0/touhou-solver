@@ -25,6 +25,14 @@ from touhou_control.adversarial import (
 
 
 def _lower(scenario: AdversarialScenario) -> tuple[PiecewiseAabbHazard, ...]:
+    if any(
+        hazard.active_from_frame != 0
+        or hazard.inactive_from_frame is not None
+        for hazard in scenario.hazards
+    ):
+        raise ValueError(
+            "piecewise differential lowering does not encode birth windows"
+        )
     return tuple(
         PiecewiseAabbHazard(
             motion=hazard.motion,

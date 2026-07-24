@@ -276,24 +276,30 @@ certified survival-equivalent action class.
 
 ## Stage-4A Global/Local Consistency Audit
 
-The dossier now compares only alive, action-eligible rows with an available
-global query and a local uncertain-delay certificate. Of 6,613 comparable
-decisions:
+The dossier compares only alive, action-eligible rows with an available global
+query and a local uncertain-delay certificate. The first report incorrectly
+treated their Boolean values as the same proposition. Global viability covers
+the remaining 48--80-frame policy horizon; the local certificate covers only
+the selected action's 8--12-frame delay-plus-hold prefix.
 
-- 4,186 global/local Boolean claims agreed;
-- 32 (`0.484%`) were global-safe but local-unsafe;
-- 2,395 (`36.217%`) were global-empty but local-safe;
-- 99 selected actions lay outside the reported global safe set, and every one
-  was an explicitly recorded local degeneracy relaxation.
+Of 6,613 comparable decisions:
 
-The last count is explained behavior rather than a hidden constraint leak.
-The other two mismatches prove that the global lattice is neither uniformly
-optimistic nor uniformly conservative. The small optimistic set is consistent
-with nearest-cell query error, policy age, and hazards missing from the older
-forecast. The much larger false-empty set is consistent with 16-pixel spatial
-quantization, 8-frame layers, growing forecast uncertainty, and finite-horizon
-kernel erosion. These are inferences; phase-stratified exact counterfactuals
-are still needed to allocate causality.
+- 4,048 had a winning global state and safe selected prefix;
+- 32 had a winning global state but unsafe selected prefix;
+- 2,395 had a losing global state but safe short prefix;
+- 138 were losing globally and unsafe locally;
+- 99 selected actions lay outside the global winning set under an explicitly
+  recorded local degeneracy relaxation;
+- 30 selected actions belonged to the cached global winning set but were
+  contradicted by the fresh local prefix checker.
+
+The 2,395 rows are not false-empty evidence: surviving 8--12 frames does not
+prove that a policy exists for another 48--80. The 30 action-aligned rows are
+direct contract contradictions. Their underlying hazard snapshots were
+19--48 frames old, and several local clearances were `-10..-22`, so missing
+births/later geometry are more plausible than a small nearest-cell margin;
+per-row source-snapshot differentials are still required for causal
+allocation.
 
 The Boolean recurrence itself remains correct for its discrete model:
 `exists issued action / forall delay`, every physical frame is checked, and
@@ -304,11 +310,23 @@ transition sampling error is subtracted. Two theory/practice gaps remain:
    off-grid error. The local certificate must remain authoritative.
 2. Outside the Boolean kernel, `recovery_distance` measures only the
    next-layer endpoint's distance to a viable cell. It does not certify the
-   bridge. The next algorithm experiment remains the time-expanded min-max
-   recovery-band recurrence, first against a scalar oracle and generated
-   adversarial seeds.
+   bridge. On the same exact graph, a safe robust bridge into the future
+   kernel would already make its predecessor viable.
 
-No scalar risk-weight adjustment can correct both mismatch directions.
+The implemented hard fusion now intersects cached winning actions with the
+fresh local prefix-safe set. If the intersection is empty, every action is
+recertified and the cached mask is relaxed. On the 30 retained contradictions,
+paired trace-radius replay improved the hard vector on 10 rows, regressed on
+zero, and changed robust-collision decisions `29 -> 23`; this is not physical
+evidence.
+
+The next exact fallback is not a risk weight or endpoint recovery distance.
+It lexicographically maximizes guaranteed collision-free frames and then
+bottleneck clearance. The independent scalar recurrence matched Boolean
+winning sets/action masks on generated games. Across 4,905 losing states,
+margin-only action selection forfeited guaranteed survival frames on 190
+states. Full rationale and implementation order are in
+`notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`.
 
 ## Native Clearance Traversal Checkpoint
 

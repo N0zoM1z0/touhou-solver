@@ -4,20 +4,24 @@ This is the operational handoff for continuing the TH08 Sakuya/Remilia
 Lunatic/Extra no-Bomb solver. Read `AGENTS.md` first; its evidence, artifact,
 test, physical-trial, and commit requirements are binding.
 
+Read `STRATEGY.md` before changing control objectives. It is the status ledger
+for live, shadow, rejected, and proposed strategies; detailed derivations and
+runtime evidence remain in `notes/`.
+
 ## 1. Exact Checkpoint
 
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
-- Handoff base commit:
-  `cebf74b Model hybrid enemy observation lifecycles`
-- Complete Linux and Windows test gates at that commit: `394 tests` each, all
-  passing.
-- The post-base working checkpoint adds exact Stage-5 viability capsules,
-  differential 16/8/4-pixel audits, fused native survival labels, terminal
-  masks, and a separable transition cache. Linux and Windows complete suites
-  pass 404 tests. Read
-  `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md` before changing the
-  recovery or refinement layers.
+- Handoff base before the current checkpoint:
+  `60be630 Audit Stage 5 viability failures`.
+- The current verified checkpoint adds adaptive-refinement replay, fused
+  survival-label query infrastructure, and a corridor-runtime/policy-guidance
+  module split, but explicitly keeps refinement and survival labels out of
+  live control after physical rejection. Linux and Windows complete suites
+  pass 416 tests. Read
+  `notes/DELIVERY_AWARE_STRATEGY_REASSESSMENT_20260724.md`,
+  `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`, and `STRATEGY.md`
+  before changing the recovery, refinement, or objective layers.
 - The only expected untracked pre-existing file is `image.png`. It is a user
   screenshot. Do not add, delete, overwrite, or otherwise clean it.
 - The latest Stage-4A and Stage-5 raw JSONL files and launch logs remain local
@@ -788,40 +792,44 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 A good next commit is not "the randomized stage had fewer hits" by itself. It
 should:
 
-1. Prototype adaptive 16/8/4-pixel induction only around reachable
-   empty/contradicted boundaries, and reproduce all three CE-0100 witnesses
-   without globally paying for a fine grid.
-2. Turn the scalar-parity fused survival shadow into a packed or query-local
-   losing-state action certificate. It must reproduce CE-0101 and meet the
-   live worker/issue deadline before controlling the game.
-3. Add ECL/timeline `BirthWindow` coverage for enemy allocations and
+1. Prototype a packed native issue-time bullet/laser/enemy
+   decode-plus-project-plus-all-action certificate with a fixed service
+   budget. It must preserve the strict version contract and improve
+   whole-decision p95, not only a micro-kernel.
+2. Add ECL/timeline `BirthWindow` coverage for enemy allocations and
    projectile emissions without putting TH08 details in the generic planner.
-4. Audit instant-winning terminal states and add pending-command/remaining-
-   delay state before claiming exact four-frame or event-time layers.
-5. Prototype the packed native issue-time bullet/laser/enemy
-   decode-plus-project-plus-certificate boundary to recover local p95; never
-   weaken the strict version contract merely for cadence.
-6. Require randomized delayed-birth/stop/reverse/redirect parity, Linux and
+3. Make background planning anytime/cancellable and publish explicit source
+   version, event coverage, delay support, terminal invariant, and expiry.
+4. Keep CE-0100 refinement query-local or inside a reachable tube. Reproduce
+   all three witnesses in shadow without increasing live expiry, missing
+   queries, or local latency.
+5. Add read-only boss HP, health-threshold, damageability, phase timer/exit,
+   shot-cadence, and option telemetry. Validate observed HP delta before the
+   damage-aware phase-progress hypothesis can rank survival-equivalent
+   actions.
+6. Audit instant-winning terminal states and add pending-command/remaining-
+   delay state before claiming exact event-time layers.
+7. Require randomized delayed-birth/stop/reverse/redirect parity, Linux and
    Windows builds/tests, and whole-pipeline timing before physical use.
-7. Run a different randomized stage, retain every required artifact and
-   counterexample, then commit while leaving raw traces, logs, native binaries,
-   and `image.png` untracked.
+8. Use a focused boss phase and then a different stage for physical A/B.
+   Retain every required artifact and counterexample while leaving raw traces,
+   logs, native binaries, and `image.png` untracked.
 
 ## 15. Suggested First Prompt For A New Codex
 
 ```text
 Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
-START_HERE.md completely, then inspect git status and the latest commit. Keep
-hard no-Bomb and leave safety value disabled. Read the 20260724 Stage-5
-differential note and CE-0099..0101. Exact capsule replay found 3/54 spatial
-coarse false-empties, 51/54 still losing at 4px, one orthogonal future-bullet
-birth gap, and one endpoint-recovery action with a shorter survival guarantee.
-The fused native recurrence already has scalar parity and the transition cache
-is axis-factored. Implement adaptive reachable-boundary refinement and a
-deadline-safe packed/query-local survival fallback without enabling them live
-prematurely. In parallel lower TH08 ECL/timeline births to generic
-`BirthWindow` events, audit winning terminal overlap, and prototype a packed
-issue-time bullet/laser/enemy certificate. Keep generic planners game-neutral,
-retain artifacts/counterexamples, run both complete suites, commit verified
+START_HERE.md and STRATEGY.md completely, then inspect git status and the
+latest commit. Keep hard no-Bomb; keep safety value, fused survival labels,
+and fine refinement shadow-only. Read the 20260724 Stage-5 differential and
+delivery-aware reassessment notes plus CE-0099..0103. Exact capsule replay
+found 3/54 spatial coarse false-empties, but the live full-horizon 8px
+promotion raised solve p95 to 1.174 seconds and expired far more policies.
+Build delivery-aware control: a packed issue-time bullet/laser/enemy
+certificate, versioned/cancellable background policies, and ECL/timeline
+`BirthWindow` events. Separately add read-only boss HP/damage/phase telemetry
+and validate a damage-aware tie-breaker only inside fresh
+survival-equivalent actions. Keep generic planners game-neutral, retain
+artifacts/counterexamples, run both complete suites, commit verified
 checkpoints, and stop every runtime session.
 ```

@@ -47,6 +47,10 @@ These instructions apply to every file and task below this directory.
   rejected approach, assumption, and limitation. Use a dedicated design note
   for the algorithm and summarize the checkpoint in
   `notes/RESEARCH_LOG.md`.
+- Keep `STRATEGY.md` as the strategy ledger. Before promoting or retiring a
+  control objective, update its live/shadow/rejected status, evidence,
+  failure mode, and the measurable condition under which it may be tried
+  again. A new strategy must not silently erase an older counterexample.
 - Survival is a hard constraint. Graze, item collection, power, score, damage,
   and positional preference are objectives only inside the currently viable
   action set.

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import math
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 
@@ -222,9 +222,11 @@ class CorridorPlan:
     planning_mode: str = "forward_reachability"
     viability_policy: RobustViabilityPolicy | None = None
     safety_value_policy: RobustSafetyValuePolicy | None = None
+    survival_policy: RobustViabilityPolicy | None = None
     initial_safe_action_count: int = 0
     initial_repair_volume: int = 0
     viability_backend: str | None = None
+    viability_grid_step: float | None = None
     solver_timing_ms: tuple[tuple[str, float], ...] = ()
 
     def waypoint(self, frame: int) -> CorridorPoint:
@@ -244,6 +246,8 @@ class RobustControlSpec:
     active_action: str
     safety_value_horizon_frames: int = 0
     terminal_viable: np.ndarray | None = None
+    survival_labels: bool = False
+    refinement_grid_steps: tuple[float, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.actions:
@@ -252,6 +256,23 @@ class RobustControlSpec:
             raise ValueError("active action is absent from robust action set")
         if self.safety_value_horizon_frames < 0:
             raise ValueError("safety-value horizon cannot be negative")
+        if (
+            any(
+                not math.isfinite(step) or step <= 0.0
+                for step in self.refinement_grid_steps
+            )
+            or tuple(
+                sorted(set(self.refinement_grid_steps), reverse=True)
+            )
+            != self.refinement_grid_steps
+        ):
+            raise ValueError(
+                "refinement grid steps must be unique positive descending"
+            )
+        if self.refinement_grid_steps and self.terminal_viable is not None:
+            raise ValueError(
+                "adaptive refinement does not yet remap terminal masks"
+            )
 
 
 def _axis(start: float, end: float, step: float) -> np.ndarray:
@@ -958,10 +979,93 @@ def _plan_robust_corridor(
             repair_radius_cells=1,
         ),
         terminal_viable=robust_control.terminal_viable,
+        survival_labels=robust_control.survival_labels,
     )
     viability_finished = time.perf_counter()
+    survival_policy = (
+        policy if robust_control.survival_labels else None
+    )
+    start_query = policy.query(
+        frame=0,
+        x=start_x,
+        y=start_y,
+        active_action=robust_control.active_action,
+    )
+    refinement_clearance_ms = 0.0
+    refinement_viability_ms = 0.0
+    for refinement_step in robust_control.refinement_grid_steps:
+        if start_query.state_viable:
+            break
+        if refinement_step >= config.grid_step:
+            raise ValueError(
+                "refinement grid step must be smaller than the active grid"
+            )
+        refined_config = replace(config, grid_step=refinement_step)
+        refinement_started = time.perf_counter()
+        refined_x_axis = _axis(
+            bounds.left,
+            bounds.right,
+            refined_config.grid_step,
+        )
+        refined_y_axis = _axis(
+            bounds.top,
+            bounds.bottom,
+            refined_config.grid_step,
+        )
+        refined_grid_x, refined_grid_y = np.meshgrid(
+            refined_x_axis,
+            refined_y_axis,
+        )
+        refined_clearance = _hazard_clearance_volume(
+            refined_grid_x,
+            refined_grid_y,
+            aabbs=aabbs,
+            aabb_trajectories=aabb_trajectories,
+            piecewise_aabbs=piecewise_aabbs,
+            segments=segments,
+            segment_trajectories=segment_trajectories,
+            config=refined_config,
+        )
+        refinement_clearance_finished = time.perf_counter()
+        refined_policy = build_robust_viability_policy(
+            x_axis=refined_x_axis,
+            y_axis=refined_y_axis,
+            clearance_volume=refined_clearance,
+            actions=robust_control.actions,
+            delay_frames=robust_control.delay_frames,
+            nominal_delay=robust_control.nominal_delay,
+            config=ViabilityConfig(
+                frames_per_layer=refined_config.frames_per_layer,
+                required_clearance=refined_config.required_clearance,
+                clamp_to_bounds=True,
+                repair_radius_cells=1,
+            ),
+            # Fine refinement recovers Boolean false-empties.  Retain the
+            # coarse fused policy for losing-state labels instead of paying
+            # the all-state survival recurrence twice.
+            survival_labels=False,
+        )
+        refinement_finished = time.perf_counter()
+        refinement_clearance_ms += (
+            refinement_clearance_finished - refinement_started
+        ) * 1000.0
+        refinement_viability_ms += (
+            refinement_finished - refinement_clearance_finished
+        ) * 1000.0
+        config = refined_config
+        x_axis = refined_x_axis
+        y_axis = refined_y_axis
+        clearance_volume = refined_clearance
+        policy = refined_policy
+        start_query = policy.query(
+            frame=0,
+            x=start_x,
+            y=start_y,
+            active_action=robust_control.active_action,
+        )
     safety_value_policy = None
-    safety_value_finished = viability_finished
+    safety_value_started = time.perf_counter()
+    safety_value_finished = safety_value_started
     safety_value_horizon = robust_control.safety_value_horizon_frames
     if safety_value_horizon:
         if (
@@ -1000,14 +1104,10 @@ def _plan_robust_corridor(
         ),
         (
             "safety_value",
-            (safety_value_finished - viability_finished) * 1000.0,
+            (safety_value_finished - safety_value_started) * 1000.0,
         ),
-    )
-    start_query = policy.query(
-        frame=0,
-        x=start_x,
-        y=start_y,
-        active_action=robust_control.active_action,
+        ("refinement_clearance", refinement_clearance_ms),
+        ("refinement_viability", refinement_viability_ms),
     )
     if not start_query.state_viable:
         return CorridorPlan(
@@ -1021,7 +1121,9 @@ def _plan_robust_corridor(
             planning_mode="robust_viability",
             viability_policy=policy,
             safety_value_policy=safety_value_policy,
+            survival_policy=survival_policy,
             viability_backend=policy.backend,
+            viability_grid_step=config.grid_step,
             solver_timing_ms=(
                 *base_timing,
                 ("rollout", 0.0),
@@ -1063,9 +1165,11 @@ def _plan_robust_corridor(
                 planning_mode="robust_viability",
                 viability_policy=policy,
                 safety_value_policy=safety_value_policy,
+                survival_policy=survival_policy,
                 initial_safe_action_count=start_query.safe_action_count,
                 initial_repair_volume=initial_repair_volume,
                 viability_backend=policy.backend,
+                viability_grid_step=config.grid_step,
                 solver_timing_ms=(
                     *base_timing,
                     (
@@ -1160,9 +1264,11 @@ def _plan_robust_corridor(
             planning_mode="robust_viability",
             viability_policy=policy,
             safety_value_policy=safety_value_policy,
+            survival_policy=survival_policy,
             initial_safe_action_count=start_query.safe_action_count,
             initial_repair_volume=initial_repair_volume,
             viability_backend=policy.backend,
+            viability_grid_step=config.grid_step,
             solver_timing_ms=(
                 *base_timing,
                 (
@@ -1187,9 +1293,11 @@ def _plan_robust_corridor(
         planning_mode="robust_viability",
         viability_policy=policy,
         safety_value_policy=safety_value_policy,
+        survival_policy=survival_policy,
         initial_safe_action_count=start_query.safe_action_count,
         initial_repair_volume=initial_repair_volume,
         viability_backend=policy.backend,
+        viability_grid_step=config.grid_step,
         solver_timing_ms=(
             *base_timing,
             (

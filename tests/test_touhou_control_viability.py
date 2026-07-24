@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -303,6 +304,110 @@ class RobustViabilityTests(unittest.TestCase):
                 reference.safe_action_masks,
             )
             self.assertEqual(native.backend, "native")
+
+    @unittest.skipUnless(
+        native_available(),
+        "native viability backend is not built",
+    )
+    def test_fused_survival_labels_are_constant_time_query_fields(
+        self,
+    ) -> None:
+        actions = (
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("left", -1.0, 0.0),
+            ControlAction("right", 1.0, 0.0),
+        )
+        clearance = np.full((5, 2, 5), 10.0, dtype=np.float32)
+        clearance[4, :, :2] = -4.0
+        policy = build_robust_viability_policy(
+            x_axis=np.arange(5, dtype=np.float32),
+            y_axis=np.arange(2, dtype=np.float32),
+            clearance_volume=clearance,
+            actions=actions,
+            delay_frames=(0, 1),
+            nominal_delay=1,
+            config=ViabilityConfig(frames_per_layer=2),
+            backend="native",
+            survival_labels=True,
+        )
+        query = policy.query(
+            frame=0,
+            x=2.0,
+            y=0.0,
+            active_action="stay",
+        )
+        state_index = (0, 0, 0, 2)
+        self.assertEqual(policy.backend, "native_fused_survival")
+        self.assertEqual(
+            query.survival_frames,
+            int(policy.survival_frames[state_index]),
+        )
+        self.assertEqual(
+            query.survival_bottleneck_margin,
+            float(policy.survival_bottleneck_margins[state_index]),
+        )
+        expected_mask = int(
+            policy.survival_best_action_masks[state_index]
+        )
+        self.assertEqual(
+            query.survival_best_actions,
+            tuple(
+                action.name
+                for index, action in enumerate(actions)
+                if expected_mask & (1 << index)
+            ),
+        )
+
+    def test_survival_labels_reject_unimplemented_terminal_semantics(
+        self,
+    ) -> None:
+        with self.assertRaisesRegex(ValueError, "terminal mask"):
+            build_robust_viability_policy(
+                x_axis=np.arange(3, dtype=np.float32),
+                y_axis=np.arange(2, dtype=np.float32),
+                clearance_volume=np.full(
+                    (3, 2, 3),
+                    10.0,
+                    dtype=np.float32,
+                ),
+                actions=(ControlAction("stay", 0.0, 0.0),),
+                delay_frames=(0,),
+                nominal_delay=0,
+                config=ViabilityConfig(frames_per_layer=2),
+                terminal_viable=np.ones((1, 2, 3), dtype=np.bool_),
+                survival_labels=True,
+            )
+
+    def test_survival_labels_never_silently_fall_back_to_boolean(self) -> None:
+        arguments = {
+            "x_axis": np.arange(3, dtype=np.float32),
+            "y_axis": np.arange(2, dtype=np.float32),
+            "clearance_volume": np.full(
+                (3, 2, 3),
+                10.0,
+                dtype=np.float32,
+            ),
+            "actions": (ControlAction("stay", 0.0, 0.0),),
+            "delay_frames": (0,),
+            "nominal_delay": 0,
+            "config": ViabilityConfig(frames_per_layer=2),
+            "survival_labels": True,
+        }
+        with self.assertRaisesRegex(ValueError, "native backend"):
+            build_robust_viability_policy(
+                **arguments,
+                backend="numpy",
+            )
+        with patch(
+            "touhou_control.viability."
+            "native_backend.build_survival_viability_arrays",
+            return_value=None,
+        ):
+            with self.assertRaisesRegex(RuntimeError, "unavailable"):
+                build_robust_viability_policy(
+                    **arguments,
+                    backend="auto",
+                )
 
     @unittest.skipUnless(
         native_available(),

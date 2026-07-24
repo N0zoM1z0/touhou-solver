@@ -1,0 +1,417 @@
+{
+  "schema": "robust-survival-horizon-oracle-benchmark-v1",
+  "seed_start": 20260724,
+  "seed_count": 64,
+  "hazards_per_seed": 30,
+  "horizon_frames": 4,
+  "frames_per_layer": 2,
+  "delay_frames": [
+    0,
+    1,
+    2
+  ],
+  "total_states": 25920,
+  "winning_states": 8759,
+  "losing_states": 17161,
+  "losing_best_action_set_difference_count": 13943,
+  "margin_fallback_loses_guaranteed_frames_count": 631,
+  "guaranteed_frame_gain_sum": 824,
+  "scope": "Deterministic game-neutral adversarial lattice experiment. It validates fallback semantics for the discrete model; it is not a TH08 physical-survival result.",
+  "examples": [
+    {
+      "seed": 20260724,
+      "active_action": "left",
+      "row": 6,
+      "column": 7,
+      "margin_actions": [
+        "stay"
+      ],
+      "survival_actions": [
+        "left"
+      ],
+      "margin_guaranteed_frames": 0,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -3.6605019569396973,
+      "survival_bottleneck_margin": -1.1919944286346436
+    },
+    {
+      "seed": 20260724,
+      "active_action": "down",
+      "row": 2,
+      "column": 3,
+      "margin_actions": [
+        "up"
+      ],
+      "survival_actions": [
+        "stay"
+      ],
+      "margin_guaranteed_frames": 2,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -0.18036913871765137,
+      "survival_bottleneck_margin": -0.6179080605506897
+    },
+    {
+      "seed": 20260725,
+      "active_action": "stay",
+      "row": 6,
+      "column": 7,
+      "margin_actions": [
+        "left"
+      ],
+      "survival_actions": [
+        "stay"
+      ],
+      "margin_guaranteed_frames": 0,
+      "survival_guaranteed_frames": 1,
+      "margin_value": -3.568727731704712,
+      "survival_bottleneck_margin": -1.9995275735855103
+    },
+    {
+      "seed": 20260726,
+      "active_action": "stay",
+      "row": 0,
+      "column": 3,
+      "margin_actions": [
+        "right"
+      ],
+      "survival_actions": [
+        "stay",
+        "up"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -0.16892695426940918,
+      "survival_bottleneck_margin": -2.6296565532684326
+    },
+    {
+      "seed": 20260726,
+      "active_action": "stay",
+      "row": 1,
+      "column": 2,
+      "margin_actions": [
+        "down"
+      ],
+      "survival_actions": [
+        "stay"
+      ],
+      "margin_guaranteed_frames": 0,
+      "survival_guaranteed_frames": 1,
+      "margin_value": -4.567221164703369,
+      "survival_bottleneck_margin": -1.8988224267959595
+    },
+    {
+      "seed": 20260726,
+      "active_action": "stay",
+      "row": 1,
+      "column": 3,
+      "margin_actions": [
+        "right"
+      ],
+      "survival_actions": [
+        "stay"
+      ],
+      "margin_guaranteed_frames": 2,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -2.8958230018615723,
+      "survival_bottleneck_margin": -4.002188682556152
+    },
+    {
+      "seed": 20260726,
+      "active_action": "stay",
+      "row": 1,
+      "column": 4,
+      "margin_actions": [
+        "up"
+      ],
+      "survival_actions": [
+        "stay"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -0.16892695426940918,
+      "survival_bottleneck_margin": -2.0601236820220947
+    },
+    {
+      "seed": 20260726,
+      "active_action": "left",
+      "row": 0,
+      "column": 4,
+      "margin_actions": [
+        "stay",
+        "up"
+      ],
+      "survival_actions": [
+        "right"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -2.6296565532684326,
+      "survival_bottleneck_margin": -6.4361350536346436
+    },
+    {
+      "seed": 20260726,
+      "active_action": "left",
+      "row": 0,
+      "column": 5,
+      "margin_actions": [
+        "down"
+      ],
+      "survival_actions": [
+        "left"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -2.0601236820220947,
+      "survival_bottleneck_margin": -0.16892695426940918
+    },
+    {
+      "seed": 20260726,
+      "active_action": "left",
+      "row": 1,
+      "column": 4,
+      "margin_actions": [
+        "right"
+      ],
+      "survival_actions": [
+        "stay"
+      ],
+      "margin_guaranteed_frames": 2,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -2.8958230018615723,
+      "survival_bottleneck_margin": -4.002188682556152
+    },
+    {
+      "seed": 20260726,
+      "active_action": "left",
+      "row": 2,
+      "column": 5,
+      "margin_actions": [
+        "stay"
+      ],
+      "survival_actions": [
+        "left",
+        "right"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -3.5830881595611572,
+      "survival_bottleneck_margin": -4.766503393650055
+    },
+    {
+      "seed": 20260726,
+      "active_action": "left",
+      "row": 3,
+      "column": 5,
+      "margin_actions": [
+        "stay"
+      ],
+      "survival_actions": [
+        "left",
+        "right"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -1.949918508529663,
+      "survival_bottleneck_margin": -4.766503393650055
+    },
+    {
+      "seed": 20260726,
+      "active_action": "right",
+      "row": 0,
+      "column": 4,
+      "margin_actions": [
+        "stay",
+        "up"
+      ],
+      "survival_actions": [
+        "right"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -2.4361350536346436,
+      "survival_bottleneck_margin": -6.4361350536346436
+    },
+    {
+      "seed": 20260726,
+      "active_action": "right",
+      "row": 1,
+      "column": 3,
+      "margin_actions": [
+        "up"
+      ],
+      "survival_actions": [
+        "stay"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -2.6296565532684326,
+      "survival_bottleneck_margin": -4.002188682556152
+    },
+    {
+      "seed": 20260726,
+      "active_action": "right",
+      "row": 1,
+      "column": 4,
+      "margin_actions": [
+        "right"
+      ],
+      "survival_actions": [
+        "stay"
+      ],
+      "margin_guaranteed_frames": 2,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -1.4108150005340576,
+      "survival_bottleneck_margin": -2.0601236820220947
+    },
+    {
+      "seed": 20260726,
+      "active_action": "right",
+      "row": 4,
+      "column": 7,
+      "margin_actions": [
+        "left",
+        "down"
+      ],
+      "survival_actions": [
+        "stay",
+        "right"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -4.796658515930176,
+      "survival_bottleneck_margin": -0.7966583371162415
+    },
+    {
+      "seed": 20260726,
+      "active_action": "right",
+      "row": 5,
+      "column": 7,
+      "margin_actions": [
+        "down"
+      ],
+      "survival_actions": [
+        "stay",
+        "right"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -1.0054616928100586,
+      "survival_bottleneck_margin": -0.7966583371162415
+    },
+    {
+      "seed": 20260726,
+      "active_action": "up",
+      "row": 0,
+      "column": 3,
+      "margin_actions": [
+        "right"
+      ],
+      "survival_actions": [
+        "stay",
+        "up"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -0.16892695426940918,
+      "survival_bottleneck_margin": -2.6296565532684326
+    },
+    {
+      "seed": 20260726,
+      "active_action": "up",
+      "row": 3,
+      "column": 4,
+      "margin_actions": [
+        "stay"
+      ],
+      "survival_actions": [
+        "up"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -3.5830881595611572,
+      "survival_bottleneck_margin": -4.766503393650055
+    },
+    {
+      "seed": 20260726,
+      "active_action": "down",
+      "row": 0,
+      "column": 3,
+      "margin_actions": [
+        "right"
+      ],
+      "survival_actions": [
+        "stay"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -2.8958230018615723,
+      "survival_bottleneck_margin": -4.002188682556152
+    },
+    {
+      "seed": 20260726,
+      "active_action": "down",
+      "row": 1,
+      "column": 4,
+      "margin_actions": [
+        "stay"
+      ],
+      "survival_actions": [
+        "up",
+        "down"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -3.5830881595611572,
+      "survival_bottleneck_margin": -4.766503393650055
+    },
+    {
+      "seed": 20260726,
+      "active_action": "down",
+      "row": 2,
+      "column": 4,
+      "margin_actions": [
+        "stay"
+      ],
+      "survival_actions": [
+        "up"
+      ],
+      "margin_guaranteed_frames": 1,
+      "survival_guaranteed_frames": 2,
+      "margin_value": -3.5830881595611572,
+      "survival_bottleneck_margin": -4.766503393650055
+    },
+    {
+      "seed": 20260726,
+      "active_action": "down",
+      "row": 5,
+      "column": 1,
+      "margin_actions": [
+        "right"
+      ],
+      "survival_actions": [
+        "down"
+      ],
+      "margin_guaranteed_frames": 0,
+      "survival_guaranteed_frames": 3,
+      "margin_value": -0.2670705318450928,
+      "survival_bottleneck_margin": -4.465056419372559
+    },
+    {
+      "seed": 20260727,
+      "active_action": "stay",
+      "row": 0,
+      "column": 7,
+      "margin_actions": [
+        "left"
+      ],
+      "survival_actions": [
+        "stay",
+        "up"
+      ],
+      "margin_guaranteed_frames": 0,
+      "survival_guaranteed_frames": 1,
+      "margin_value": -1.5707221031188965,
+      "survival_bottleneck_margin": -1.4839482307434082
+    }
+  ]
+}

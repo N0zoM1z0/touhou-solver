@@ -55,6 +55,9 @@ class ViabilityQuery:
     position_error: float
     reason: str
     recovery_distances: tuple[tuple[str, float], ...] = ()
+    survival_frames: int | None = None
+    survival_bottleneck_margin: float | None = None
+    survival_best_actions: tuple[str, ...] = ()
 
     @property
     def safe_action_count(self) -> int:
@@ -160,6 +163,9 @@ class RobustViabilityPolicy:
     viable: np.ndarray
     safe_action_masks: np.ndarray
     backend: str = "numpy"
+    survival_frames: np.ndarray | None = None
+    survival_bottleneck_margins: np.ndarray | None = None
+    survival_best_action_masks: np.ndarray | None = None
 
     @property
     def layer_count(self) -> int:
@@ -317,6 +323,27 @@ class RobustViabilityPolicy:
                 )
             )
         state_viable = bool(self.viable[layer, action_index, row, column])
+        survival_frames = None
+        survival_bottleneck_margin = None
+        survival_best_actions = ()
+        if (
+            self.survival_frames is not None
+            and self.survival_bottleneck_margins is not None
+            and self.survival_best_action_masks is not None
+        ):
+            state_index = (layer, action_index, row, column)
+            survival_frames = int(self.survival_frames[state_index])
+            survival_bottleneck_margin = float(
+                self.survival_bottleneck_margins[state_index]
+            )
+            best_mask = int(
+                self.survival_best_action_masks[state_index]
+            )
+            survival_best_actions = tuple(
+                action.name
+                for index, action in enumerate(self.actions)
+                if best_mask & (1 << index)
+            )
         return ViabilityQuery(
             True,
             layer,
@@ -344,6 +371,9 @@ class RobustViabilityPolicy:
                 )
             ),
             recovery_distances,
+            survival_frames,
+            survival_bottleneck_margin,
+            survival_best_actions,
         )
 
     def _repair_volume(
@@ -860,6 +890,7 @@ def build_robust_viability_policy(
     config: ViabilityConfig,
     backend: str = "auto",
     terminal_viable: np.ndarray | None = None,
+    survival_labels: bool = False,
 ) -> RobustViabilityPolicy:
     """Compute ``exists action, forall delay`` backward reachability.
 
@@ -913,25 +944,82 @@ def build_robust_viability_policy(
                 "terminal viability mask must have shape "
                 f"{expected_terminal_shape}, got {terminal_mask.shape}"
             )
+    if survival_labels and terminal_mask is not None:
+        raise ValueError(
+            "survival labels do not yet support an external terminal mask"
+        )
+    if survival_labels and backend == "numpy":
+        raise ValueError(
+            "fused survival labels currently require the native backend"
+        )
 
     if backend in {"auto", "native"}:
-        native_arrays = native_backend.build_viability_arrays(
-            x_axis=x_axis,
-            y_axis=y_axis,
-            clearance_volume=clearance_volume,
-            velocity_x=np.asarray(
-                [action.velocity_x for action in actions],
-                dtype=np.float64,
-            ),
-            velocity_y=np.asarray(
-                [action.velocity_y for action in actions],
-                dtype=np.float64,
-            ),
-            delay_frames=np.asarray(delay_frames, dtype=np.int32),
-            frames_per_layer=config.frames_per_layer,
-            required_clearance=config.required_clearance,
-            clamp_to_bounds=config.clamp_to_bounds,
-            terminal_viable=terminal_mask,
+        velocity_x = np.asarray(
+            [action.velocity_x for action in actions],
+            dtype=np.float64,
+        )
+        velocity_y = np.asarray(
+            [action.velocity_y for action in actions],
+            dtype=np.float64,
+        )
+        native_survival = (
+            native_backend.build_survival_viability_arrays(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                clearance_volume=clearance_volume,
+                velocity_x=velocity_x,
+                velocity_y=velocity_y,
+                delay_frames=np.asarray(delay_frames, dtype=np.int32),
+                frames_per_layer=config.frames_per_layer,
+                required_clearance=config.required_clearance,
+                clamp_to_bounds=config.clamp_to_bounds,
+            )
+            if survival_labels
+            else None
+        )
+        if native_survival is not None:
+            (
+                survival_frames,
+                survival_bottleneck_margins,
+                survival_best_action_masks,
+                viable,
+                safe_action_masks,
+            ) = native_survival
+            return RobustViabilityPolicy(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                actions=actions,
+                delay_frames=delay_frames,
+                nominal_delay=nominal_delay,
+                config=config,
+                viable=viable,
+                safe_action_masks=safe_action_masks,
+                backend="native_fused_survival",
+                survival_frames=survival_frames,
+                survival_bottleneck_margins=(
+                    survival_bottleneck_margins
+                ),
+                survival_best_action_masks=survival_best_action_masks,
+            )
+        if survival_labels:
+            raise RuntimeError(
+                "native fused survival-label backend is unavailable"
+            )
+        native_arrays = (
+            native_backend.build_viability_arrays(
+                x_axis=x_axis,
+                y_axis=y_axis,
+                clearance_volume=clearance_volume,
+                velocity_x=velocity_x,
+                velocity_y=velocity_y,
+                delay_frames=np.asarray(delay_frames, dtype=np.int32),
+                frames_per_layer=config.frames_per_layer,
+                required_clearance=config.required_clearance,
+                clamp_to_bounds=config.clamp_to_bounds,
+                terminal_viable=terminal_mask,
+            )
+            if not survival_labels
+            else None
         )
         if native_arrays is not None:
             viable, safe_action_masks = native_arrays

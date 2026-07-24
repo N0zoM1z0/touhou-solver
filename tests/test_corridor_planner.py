@@ -886,6 +886,68 @@ class CorridorPlannerTests(unittest.TestCase):
         self.assertIsNotNone(plan.viability_policy)
         self.assertIn("action set is empty", plan.reason)
 
+    def test_ce_0100_coarse_empty_triggers_generic_full_horizon_refinement(
+        self,
+    ) -> None:
+        bounds = CorridorBounds(0.0, 4.0, 0.0, 2.0)
+        config = CorridorConfig(
+            grid_step=2.0,
+            frames_per_layer=1,
+            horizon_frames=2,
+            cardinal_speed=1.0,
+            diagonal_axis_speed=1.0,
+            player_radius=0.0,
+            required_clearance=0.0,
+        )
+        walls = (
+            MovingAabbHazard(
+                x=0.0,
+                y=1.0,
+                velocity_x=0.0,
+                velocity_y=0.0,
+                half_width=0.4,
+                half_height=4.0,
+            ),
+            MovingAabbHazard(
+                x=3.0,
+                y=1.0,
+                velocity_x=0.0,
+                velocity_y=0.0,
+                half_width=1.4,
+                half_height=4.0,
+            ),
+        )
+        plan = plan_corridor(
+            start_x=1.0,
+            start_y=1.0,
+            bounds=bounds,
+            aabbs=walls,
+            config=config,
+            robust_control=RobustControlSpec(
+                actions=(ControlAction("stay", 0.0, 0.0),),
+                delay_frames=(0,),
+                nominal_delay=0,
+                active_action="stay",
+                refinement_grid_steps=(1.0,),
+            ),
+        )
+        self.assertTrue(plan.reachable)
+        self.assertEqual(plan.viability_grid_step, 1.0)
+        self.assertIsNotNone(plan.viability_policy)
+        assert plan.viability_policy is not None
+        self.assertTrue(
+            plan.viability_policy.query(
+                frame=0,
+                x=1.0,
+                y=1.0,
+                active_action="stay",
+            ).state_viable
+        )
+        self.assertGreater(
+            dict(plan.solver_timing_ms)["refinement_clearance"],
+            0.0,
+        )
+
     def test_representative_rollout_mismatch_degrades_without_crashing(
         self,
     ) -> None:

@@ -397,6 +397,8 @@ def plan_lowered_th08_corridor(
     active_action: str = "stay",
     safety_value_horizon_frames: int = 0,
     terminal_viable: np.ndarray | None = None,
+    survival_labels: bool = False,
+    refinement_grid_steps: tuple[float, ...] = (),
 ) -> CorridorPlan:
     """Plan from retained neutral hazards at any compatible resolution."""
 
@@ -413,6 +415,8 @@ def plan_lowered_th08_corridor(
             active_action=active_action,
             safety_value_horizon_frames=safety_value_horizon_frames,
             terminal_viable=terminal_viable,
+            survival_labels=survival_labels,
+            refinement_grid_steps=refinement_grid_steps,
         )
     return plan_corridor(
         start_x=player_x,
@@ -447,6 +451,8 @@ def plan_th08_corridor(
     active_action: str = "stay",
     safety_value_horizon_frames: int = 0,
     terminal_viable: np.ndarray | None = None,
+    survival_labels: bool = False,
+    refinement_grid_steps: tuple[float, ...] = (),
 ) -> CorridorPlan:
     hazards = lower_th08_corridor_hazards(
         bullets=bullets,
@@ -469,6 +475,8 @@ def plan_th08_corridor(
         active_action=active_action,
         safety_value_horizon_frames=safety_value_horizon_frames,
         terminal_viable=terminal_viable,
+        survival_labels=survival_labels,
+        refinement_grid_steps=refinement_grid_steps,
     )
 
 

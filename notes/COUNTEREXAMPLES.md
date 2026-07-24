@@ -2498,3 +2498,50 @@ Status: observed | inferred | unknown | fixed
 - **Regressions:** Full native/scalar label-and-mask parity in
   `test_native_fused_survival_labels_match_scalar_oracle`, plus the retained
   frame-3,491 audit observation.
+
+## CE-0102: Fine viability reduced empty sets but expired the delivered policy
+
+- **Observed physical result:** Complete hard-no-Bomb Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260724_220032` enabled coarse fused
+  survival labels and full-horizon 8-pixel refinement after coarse source
+  emptiness. It reached `route_complete` with 40 hits.
+- **Direct delivery regression:** Against the RNG-distinct Boolean comparison,
+  solve median/p95 changed `170.77/380.59 -> 532.04/1174.21 ms`, unique
+  policies `1728 -> 630`, decisions without queries `68 -> 274`, and expired
+  decisions `34 -> 178`. Local-plan median/p95 also changed
+  `27.05/49.96 -> 31.06/63.11 ms`.
+- **Misleading local success:** Empty queried sets fell
+  `3391 -> 2434` (28.2 percent), but fewer model-empty states did not produce
+  a fresher or safer delivered controller.
+- **Cause:** The purported adaptive step recomputed a complete 8-pixel field
+  over the complete 80-frame horizon. It improved a frozen-snapshot discrete
+  model while consuming the validity window needed at action issue.
+- **Correction:** Live refinement and survival-label authority are disabled;
+  both remain shadow/offline. Worker counts and piecewise frame parallelism
+  return to the previous committed native path.
+- **Regression:**
+  `test_rejected_fine_and_survival_strategies_remain_shadow_only`.
+- **Reactivation gate:** Query-local/reachable-tube refinement must meet a
+  whole-policy service SLO and may not increase expiry, missing-query, or
+  local-latency tails. Model parity alone is insufficient.
+
+## CE-0103: Coarse-survival isolation trial ended unreadable and is discarded
+
+- **Observed session:** Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260724_221253` disabled fine refinement
+  but retained coarse fused survival labels. It stopped at frame 13,077 after
+  2,070 decisions and 12 hits with
+  `termination_reason=process_unreadable`.
+- **Integrity status:** The session records `status=discarded`,
+  `trial_accepted=false`, and `game_terminated_after_trial=false`. The compact
+  dossier and hit cases remain valid discovery artifacts, but the partial
+  trace cannot be merged into a completion baseline.
+- **What it can show:** Solve median/p95 returned to
+  `196.09/354.90 ms`, supporting the attribution of CE-0102's largest
+  background cost to fine refinement.
+- **What it cannot show:** It does not establish whether coarse survival
+  ranking helps or harms physical survival, and it does not explain why the
+  process became unreadable.
+- **Correction:** Coarse survival is also returned to shadow until an
+  independently complete, delivery-safe experiment is justified. No further
+  physical run is launched merely to rescue this strategy.

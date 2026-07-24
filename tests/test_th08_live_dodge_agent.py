@@ -156,7 +156,7 @@ class LiveDodgeAgentTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             with ThreadPoolExecutor(max_workers=1) as audit_executor:
                 with patch(
-                    "th08_live_dodge_agent._write_corridor_audit_capsule",
+                    "th08_corridor_runtime._write_corridor_audit_capsule",
                     side_effect=blocked_writer,
                 ):
                     solution = _solve_corridor(
@@ -1779,6 +1779,56 @@ class LiveDodgeAgentTests(unittest.TestCase):
         )
         self.assertNotEqual(decision.action, "right")
         self.assertFalse(decision.viability_safety_value_preferred)
+
+    def test_ce_0101_survival_horizon_precedes_endpoint_recovery(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            horizon=2,
+            viability_survival_actions=("left",),
+            viability_survival_frames=10,
+            viability_survival_bottleneck_margin=-1.699,
+            viability_recovery_distances=(
+                ("left", 48.0),
+                ("right", 0.0),
+            ),
+        )
+        self.assertEqual(decision.action, "left")
+        self.assertTrue(decision.viability_survival_preferred)
+        self.assertEqual(decision.viability_survival_frames, 10)
+        self.assertEqual(
+            decision.viability_survival_bottleneck_margin,
+            -1.699,
+        )
+        self.assertEqual(decision.viability_recovery_distance, 48.0)
+
+    def test_local_collision_precedes_survival_horizon_label(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(
+                Bullet(184.0, 400.0, 0.0, 0.0, 2.0, 2.0),
+            ),
+            lasers=(),
+            previous_direction=0,
+            previous_focus=True,
+            can_bomb=False,
+            horizon=2,
+            viability_survival_actions=("left",),
+            viability_survival_frames=10,
+            viability_survival_bottleneck_margin=-1.0,
+        )
+        self.assertNotEqual(decision.action, "left")
+        self.assertFalse(decision.viability_survival_preferred)
 
     def test_ce_stage1_frame_2512_distant_recovery_survives_beam_pruning(
         self,

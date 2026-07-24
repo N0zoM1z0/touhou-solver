@@ -2417,3 +2417,43 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`.
 - Linux and Windows builds succeed, and both complete Python suites pass 404
   tests.
+
+## 2026-07-24: Live Refinement Rejection And Strategy Ledger
+
+- Full-horizon 8-pixel refinement reproduced all three CE-0100 coarse
+  false-empty capsules offline, and fused survival labels retained scalar
+  parity. Short terminal-stitch experiments did not provide a general rescue:
+  only one of three witnesses could reconnect to the exact coarse
+  continuation under the tested endpoints.
+- Complete Stage-4A run `20260724_220032` physically rejected the combined
+  live promotion. Empty queries fell `3391 -> 2434`, but solve median/p95 rose
+  `170.77/380.59 -> 532.04/1174.21 ms`, delivered policies fell
+  `1728 -> 630`, expired decisions rose `34 -> 178`, and the run retained 40
+  hits versus 26 in the RNG-distinct comparison.
+- An isolation run with fine refinement disabled returned solve median/p95 to
+  `196.09/354.90 ms` but ended `process_unreadable` at frame 13,077. It is
+  explicitly discarded and cannot accept or reject survival-label ranking.
+- Live control is restored to the coarse Boolean path: refinement steps are
+  empty, fused survival labels are off, prewarm is Boolean-only, and
+  experimental native concurrency is reverted. Both experimental policies
+  remain shadow/offline and are pinned by
+  `test_rejected_fine_and_survival_strategies_remain_shadow_only`.
+- Survival-label requests now fail explicitly if the fused native backend is
+  unavailable instead of silently returning an unlabeled Boolean policy.
+- The oversized live module is partially decomposed:
+  `th08_corridor_runtime.py` owns asynchronous corridor epochs/queries and
+  `touhou_control/policy_guidance.py` owns the pure global-to-local guidance
+  contract. Live entry points remain stable.
+- Added root `STRATEGY.md` as the durable status ledger for live, shadow,
+  rejected, infrastructure, and hypothesis strategies. `AGENTS.md` now
+  requires updating it when a strategy changes status.
+- A new damage-aware phase-completion hypothesis is recorded, not enabled.
+  Existing traces already hold Shot on 97.38--97.78 percent of output
+  decisions, but the controller has no boss-HP/damage objective. The shadow
+  alignment audit records large and phase-dependent player/boss horizontal
+  error while post-hit Power is commonly depleted. Native HP delta,
+  damageability, shot cadence/options, phase timer, and exit cause must be
+  traced before damage can break ties between survival-equivalent actions.
+- Detailed evidence and the new architecture order are in
+  `notes/DELIVERY_AWARE_STRATEGY_REASSESSMENT_20260724.md`; CE-0102/0103 retain
+  the complete delivery regression and discarded isolation run.

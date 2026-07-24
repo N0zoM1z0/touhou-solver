@@ -21,19 +21,28 @@ from pathlib import Path
 
 import numpy as np
 
-from corridor_planner import CorridorPlan
 from runtime_agent import input_transitions
 from th08_bullet_transform_model import (
     BulletTransformRuntime,
     TransformRecord,
     parse_next_transform_record,
 )
-from th08_corridor_adapter import (
-    LoweredCorridorHazards,
-    TH08_CORRIDOR_CONFIG,
-    lower_th08_corridor_hazards,
-    plan_lowered_th08_corridor,
+from th08_corridor_runtime import (
+    CorridorCommitment,
+    CorridorSolution,
+    LIVE_REFINEMENT_GRID_STEPS,
+    LIVE_SURVIVAL_LABELS,
+    SHADOW_REFINEMENT_GRID_STEPS,
+    SHADOW_SURVIVAL_LABELS,
+    corridor_policy_status as _corridor_policy_status,
+    corridor_safety_value_query as _corridor_safety_value_query,
+    corridor_submit_due as _corridor_submit_due,
+    corridor_target as _corridor_target,
+    corridor_viability_query as _corridor_viability_query,
+    solve_corridor as _solve_corridor,
+    stage_corridor_solution as _stage_corridor_solution,
 )
+from th08_corridor_adapter import TH08_CORRIDOR_CONFIG
 from th08_ecl_runtime import (
     EclLookaheadResult,
     EclInstructionCache,
@@ -70,17 +79,14 @@ from touhou_control.async_policy import (
     AsyncPolicyLead,
     delay_support_envelope,
 )
-from touhou_control.viability_audit_capsule import (
-    write_viability_audit_capsule,
-)
 from touhou_control.delay import AdaptiveControlDelay
 from touhou_control.epochs import (
     ActionIssueAlignment,
     FrameWindow,
     HazardEpochAlignment,
 )
+from touhou_control.policy_guidance import assemble_local_policy_guidance
 from touhou_control.trajectory import VelocityChange
-from touhou_control.viability import SafetyValueQuery, ViabilityQuery
 
 
 BULLET_POOL_BASE = 0x00F6F710
@@ -662,6 +668,9 @@ class Decision:
     viability_safety_state_value: float | None = None
     viability_fresh_prefix_filtered: bool = False
     viability_fresh_prefix_relaxed: bool = False
+    viability_survival_preferred: bool = False
+    viability_survival_frames: int | None = None
+    viability_survival_bottleneck_margin: float | None = None
 
 
 @dataclass(frozen=True)
@@ -695,73 +704,6 @@ class SearchNode:
     immediate_clearance: float
     collected_mask: int
     item_utility: float
-
-
-@dataclass(frozen=True)
-class CorridorSolution:
-    source_frame: int
-    plan: CorridorPlan
-    solve_ms: float
-    snapshot_frame: int | None = None
-    forecast_lead_frames: int = 0
-    required_gate_lane: str | None = None
-    constraint_honored: bool = False
-    context_key: tuple[int, int, int | None] | None = None
-    audit_capsule: str | None = None
-    audit_write_ms: float | None = None
-    audit_error: str | None = None
-    worker_ms: float | None = None
-    audit_future: Future[tuple[float, str | None]] | None = None
-
-
-@dataclass
-class CorridorCommitment:
-    """Retain a viable gate component across asynchronous replans."""
-
-    lane: str | None = None
-    expires_frame: int = -1
-    context_key: tuple[int, int, int | None] | None = None
-
-    def set_context(
-        self,
-        context_key: tuple[int, int, int | None],
-    ) -> bool:
-        if self.context_key == context_key:
-            return False
-        self.context_key = context_key
-        self.lane = None
-        self.expires_frame = -1
-        return True
-
-    def active_lane(self, frame: int) -> str | None:
-        if self.lane is None or frame >= self.expires_frame:
-            return None
-        return self.lane
-
-    def accept(self, solution: CorridorSolution, *, current_frame: int) -> None:
-        if not solution.plan.reachable or solution.plan.gate is None:
-            return
-        active_lane = self.active_lane(current_frame)
-        if (
-            active_lane is not None
-            and (
-                (
-                    solution.required_gate_lane == active_lane
-                    and solution.constraint_honored
-                )
-                or solution.plan.lane == active_lane
-            )
-        ):
-            return
-        if active_lane is None and solution.required_gate_lane is not None:
-            self.lane = None
-            self.expires_frame = -1
-            return
-        self.lane = solution.plan.lane
-        self.expires_frame = max(
-            current_frame + CORRIDOR_MIN_COMMIT_FRAMES,
-            solution.source_frame + solution.plan.gate.frame,
-        )
 
 
 @dataclass
@@ -3066,6 +3008,9 @@ def choose_action(
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_safety_actions: tuple[str, ...] = (),
     viability_safety_state_value: float | None = None,
+    viability_survival_actions: tuple[str, ...] = (),
+    viability_survival_frames: int | None = None,
+    viability_survival_bottleneck_margin: float | None = None,
     viability_position_error: float = 0.0,
     recovery_control_reserve: bool = True,
     preserve_previous_direction_inertia: bool = True,
@@ -3150,6 +3095,23 @@ def choose_action(
     if set(viability_safety_actions) - planner_action_names:
         raise ValueError("safety value contains unknown action")
     safety_value_actions = set(viability_safety_actions)
+    if len(set(viability_survival_actions)) != len(
+        viability_survival_actions
+    ):
+        raise ValueError("survival-label actions must be unique")
+    if set(viability_survival_actions) - planner_action_names:
+        raise ValueError("survival label contains unknown action")
+    if viability_survival_frames is not None and (
+        viability_survival_frames < 0
+        or viability_survival_frames > 0xFFFF
+    ):
+        raise ValueError("survival frames must fit an unsigned 16-bit label")
+    if (
+        viability_survival_bottleneck_margin is not None
+        and not math.isfinite(viability_survival_bottleneck_margin)
+    ):
+        raise ValueError("survival bottleneck margin must be finite")
+    survival_actions = set(viability_survival_actions)
     if (target_x is None) != (target_y is None):
         raise ValueError("target_x and target_y must be supplied together")
     if target_x is not None:
@@ -3403,6 +3365,15 @@ def choose_action(
                 if certificate is not None
                 else 0.0
             ),
+            max(-node.min_clearance, 0.0),
+            (
+                0
+                if (
+                    not survival_actions
+                    or node.first_action.name in survival_actions
+                )
+                else 1
+            ),
             base[1],
             base[2],
             (
@@ -3432,6 +3403,7 @@ def choose_action(
         and not repair_by_action
         and not recovery_by_action
         and not safety_value_actions
+        and not survival_actions
     ):
         return Decision(
             SHOT | FOCUS,
@@ -3609,6 +3581,14 @@ def choose_action(
             max(-node.min_clearance, 0.0),
             threat_collisions,
             max(-threat_clearance, 0.0),
+            (
+                0
+                if (
+                    not survival_actions
+                    or node.first_action.name in survival_actions
+                )
+                else 1
+            ),
             max(ITEM_SAFETY_CLEARANCE - threat_clearance, 0.0),
             (
                 0
@@ -3778,6 +3758,9 @@ def choose_action(
         viability_safety_state_value,
         viability_fresh_prefix_filtered,
         viability_fresh_prefix_relaxed,
+        bool(survival_actions and action.name in survival_actions),
+        viability_survival_frames,
+        viability_survival_bottleneck_margin,
     )
     if (
         effective_allowed_first_actions is not None
@@ -3817,6 +3800,11 @@ def choose_action(
             viability_recovery_distances=viability_recovery_distances,
             viability_safety_actions=viability_safety_actions,
             viability_safety_state_value=viability_safety_state_value,
+            viability_survival_actions=viability_survival_actions,
+            viability_survival_frames=viability_survival_frames,
+            viability_survival_bottleneck_margin=(
+                viability_survival_bottleneck_margin
+            ),
             viability_position_error=viability_position_error,
             recovery_control_reserve=recovery_control_reserve,
             preserve_previous_direction_inertia=(
@@ -3877,250 +3865,6 @@ def _project_player_for_read_lag(
         min(PLAYFIELD_RIGHT, max(PLAYFIELD_LEFT, x + horizontal * speed * frames)),
         min(PLAYFIELD_BOTTOM, max(PLAYFIELD_TOP, y + vertical * speed * frames)),
     )
-
-
-def _write_corridor_audit_capsule(
-    *,
-    capsule_path: Path,
-    metadata: dict[str, object],
-    hazards: LoweredCorridorHazards,
-) -> tuple[float, str | None]:
-    """Write one diagnostic capsule without delaying policy publication."""
-
-    started = time.perf_counter()
-    error_text = None
-    try:
-        write_viability_audit_capsule(
-            capsule_path,
-            metadata=metadata,
-            aabbs=hazards.aabbs,
-            piecewise_aabbs=hazards.piecewise_aabbs,
-            segment_trajectories=hazards.segment_trajectories,
-        )
-    except Exception as error:
-        error_text = f"{type(error).__name__}: {error}"
-    return (time.perf_counter() - started) * 1000.0, error_text
-
-
-def _solve_corridor(
-    *,
-    source_frame: int,
-    snapshot_frame: int,
-    forecast_lead_frames: int,
-    player_x: float,
-    player_y: float,
-    bullets: tuple[Bullet, ...],
-    lasers: tuple[Laser, ...],
-    enemy_bodies: tuple[EnemyBody, ...],
-    snapshot_lag: int,
-    control_delay_candidates: tuple[int, ...],
-    nominal_control_delay: int,
-    active_action: str,
-    safety_value_horizon_frames: int = 0,
-    required_gate_lane: str | None = None,
-    context_key: tuple[int, int, int | None] | None = None,
-    audit_capsule_dir: Path | None = None,
-    audit_executor: ThreadPoolExecutor | None = None,
-) -> CorridorSolution:
-    started = time.perf_counter()
-    hazards = lower_th08_corridor_hazards(
-        bullets=bullets,
-        lasers=lasers,
-        enemy_bodies=enemy_bodies,
-        snapshot_lag=snapshot_lag,
-        forecast_frames=forecast_lead_frames,
-        horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
-    )
-    plan = plan_lowered_th08_corridor(
-        player_x=player_x,
-        player_y=player_y,
-        hazards=hazards,
-        required_gate_lane=required_gate_lane,
-        control_delay_candidates=control_delay_candidates,
-        nominal_control_delay=nominal_control_delay,
-        active_action=active_action,
-        safety_value_horizon_frames=safety_value_horizon_frames,
-    )
-    constraint_honored = (
-        required_gate_lane is None
-        or (plan.reachable and plan.lane == required_gate_lane)
-    )
-    if (
-        required_gate_lane is not None
-        and not constraint_honored
-        and plan.planning_mode != "robust_viability"
-    ):
-        plan = plan_lowered_th08_corridor(
-            player_x=player_x,
-            player_y=player_y,
-            hazards=hazards,
-            control_delay_candidates=control_delay_candidates,
-            nominal_control_delay=nominal_control_delay,
-            active_action=active_action,
-            safety_value_horizon_frames=safety_value_horizon_frames,
-        )
-    solve_finished = time.perf_counter()
-    audit_capsule = None
-    audit_write_ms = None
-    audit_error = None
-    audit_future = None
-    if audit_capsule_dir is not None:
-        capsule_path = audit_capsule_dir / (
-            f"policy_{snapshot_frame}_{source_frame}.npz"
-        )
-        metadata = {
-            "source_frame": source_frame,
-            "snapshot_frame": snapshot_frame,
-            "forecast_lead_frames": forecast_lead_frames,
-            "player_x": player_x,
-            "player_y": player_y,
-            "snapshot_lag": snapshot_lag,
-            "control_delay_candidates": control_delay_candidates,
-            "nominal_control_delay": nominal_control_delay,
-            "active_action": active_action,
-            "required_gate_lane": required_gate_lane,
-            "context_key": context_key,
-            "grid_step": TH08_CORRIDOR_CONFIG.grid_step,
-            "frames_per_layer": TH08_CORRIDOR_CONFIG.frames_per_layer,
-            "horizon_frames": TH08_CORRIDOR_CONFIG.horizon_frames,
-            "bullet_slots": [bullet.slot for bullet in bullets],
-            "laser_slots": [laser.slot for laser in lasers],
-            "enemy_pointers": [body.pointer for body in enemy_bodies],
-            "plan_reachable": plan.reachable,
-        }
-        writer_arguments = {
-            "capsule_path": capsule_path,
-            "metadata": metadata,
-            "hazards": hazards,
-        }
-        if audit_executor is None:
-            audit_write_ms, audit_error = (
-                _write_corridor_audit_capsule(**writer_arguments)
-            )
-        else:
-            audit_future = audit_executor.submit(
-                _write_corridor_audit_capsule,
-                **writer_arguments,
-            )
-        audit_capsule = str(capsule_path)
-    return CorridorSolution(
-        source_frame=source_frame,
-        plan=plan,
-        solve_ms=(solve_finished - started) * 1000.0,
-        snapshot_frame=snapshot_frame,
-        forecast_lead_frames=forecast_lead_frames,
-        required_gate_lane=required_gate_lane,
-        constraint_honored=constraint_honored,
-        context_key=context_key,
-        audit_capsule=audit_capsule,
-        audit_write_ms=audit_write_ms,
-        audit_error=audit_error,
-        worker_ms=(time.perf_counter() - started) * 1000.0,
-        audit_future=audit_future,
-    )
-
-
-def _corridor_target(
-    solution: CorridorSolution | None,
-    *,
-    current_frame: int,
-    lookahead_frames: int,
-    max_age_frames: int,
-) -> tuple[float, float, int] | None:
-    if solution is None or not solution.plan.reachable:
-        return None
-    age = current_frame - solution.source_frame
-    if age < 0 or age > max_age_frames:
-        return None
-    waypoint = solution.plan.waypoint(age + lookahead_frames)
-    return waypoint.x, waypoint.y, max(waypoint.frame - age, 0)
-
-
-def _corridor_viability_query(
-    solution: CorridorSolution | None,
-    *,
-    current_frame: int,
-    player_x: float,
-    player_y: float,
-    active_action: str,
-    max_age_frames: int,
-) -> ViabilityQuery | None:
-    if solution is None or solution.plan.viability_policy is None:
-        return None
-    age = current_frame - solution.source_frame
-    if age < 0 or age > max_age_frames:
-        return None
-    return solution.plan.viability_policy.query(
-        frame=age,
-        x=player_x,
-        y=player_y,
-        active_action=active_action,
-    )
-
-
-def _corridor_safety_value_query(
-    solution: CorridorSolution | None,
-    *,
-    current_frame: int,
-    player_x: float,
-    player_y: float,
-    active_action: str,
-    max_age_frames: int,
-) -> SafetyValueQuery | None:
-    if solution is None or solution.plan.safety_value_policy is None:
-        return None
-    age = current_frame - solution.source_frame
-    if age < 0 or age > max_age_frames:
-        return None
-    return solution.plan.safety_value_policy.query(
-        frame=age,
-        x=player_x,
-        y=player_y,
-        active_action=active_action,
-    )
-
-
-def _corridor_policy_status(
-    solution: CorridorSolution | None,
-    *,
-    current_frame: int,
-    max_age_frames: int,
-) -> str:
-    if solution is None or solution.plan.viability_policy is None:
-        return "unavailable"
-    age = current_frame - solution.source_frame
-    if age < 0:
-        return "pending_future_epoch"
-    if age > max_age_frames:
-        return "expired"
-    if age >= solution.plan.viability_policy.horizon_frames:
-        return "outside_policy_horizon"
-    return "queryable"
-
-
-def _stage_corridor_solution(
-    active: CorridorSolution | None,
-    candidate: CorridorSolution,
-    *,
-    current_frame: int,
-    context_key: tuple[int, int, int | None],
-) -> tuple[CorridorSolution | None, CorridorSolution | None]:
-    """Keep the active policy until a matching future epoch is reached."""
-
-    if candidate.context_key != context_key:
-        return active, None
-    if candidate.source_frame <= current_frame:
-        return candidate, None
-    return active, candidate
-
-
-def _corridor_submit_due(
-    *,
-    current_frame: int,
-    last_submit_frame: int,
-    interval_frames: int,
-) -> bool:
-    return current_frame - last_submit_frame >= interval_frames
 
 
 def _enemy_sensor_submit_due(
@@ -4347,6 +4091,24 @@ def run(args: argparse.Namespace) -> int:
                         else "disabled"
                     ),
                     "viability_grid_step": TH08_CORRIDOR_CONFIG.grid_step,
+                    "viability_refinement_grid_steps": (
+                        LIVE_REFINEMENT_GRID_STEPS
+                    ),
+                    "viability_shadow_refinement_grid_steps": (
+                        SHADOW_REFINEMENT_GRID_STEPS
+                    ),
+                    "viability_refinement_trigger": (
+                        "shadow_only_after_stage4a_latency_rejection"
+                    ),
+                    "viability_survival_labels": (
+                        {
+                            "live": LIVE_SURVIVAL_LABELS,
+                            "shadow": SHADOW_SURVIVAL_LABELS,
+                            "reason": (
+                                "shadow_only_after_stage4a_delivery_rejection"
+                            ),
+                        }
+                    ),
                     "viability_frames_per_layer": (
                         TH08_CORRIDOR_CONFIG.frames_per_layer
                     ),
@@ -5118,53 +4880,15 @@ def run(args: argparse.Namespace) -> int:
                 if corridor_solution is not None
                 else None
             )
-            viability_support_covers_current = (
-                viability_policy is not None
-                and set(delay_estimate.support).issubset(
+            policy_guidance = assemble_local_policy_guidance(
+                viability_query=viability_query,
+                safety_value_query=safety_value_query,
+                policy_delay_frames=(
                     viability_policy.delay_frames
-                )
-            )
-            viability_guidance = (
-                viability_query
-                if (
-                    viability_query is not None
-                    and viability_query.available
-                    and viability_query.state_viable
-                    and viability_query.safe_actions
-                    and viability_support_covers_current
-                )
-                else None
-            )
-            viability_repair_guidance = (
-                viability_query.repair_volumes
-                if (
-                    viability_query is not None
-                    and viability_query.available
-                    and viability_support_covers_current
-                )
-                else ()
-            )
-            viability_recovery_guidance = (
-                viability_query.recovery_distances
-                if (
-                    viability_query is not None
-                    and viability_query.available
-                    and viability_support_covers_current
-                )
-                else ()
-            )
-            safety_value_guidance = (
-                safety_value_query
-                if (
-                    safety_value_query is not None
-                    and safety_value_query.available
-                    and safety_value_query.best_actions
-                    and viability_query is not None
-                    and viability_query.available
-                    and not viability_query.state_viable
-                    and viability_support_covers_current
-                )
-                else None
+                    if viability_policy is not None
+                    else None
+                ),
+                current_delay_frames=delay_estimate.support,
             )
             corridor_overhead_ms = (
                 time.perf_counter() - corridor_started
@@ -5201,32 +4925,23 @@ def run(args: argparse.Namespace) -> int:
                 target_deadline=(
                     corridor_target[2] if corridor_target is not None else None
                 ),
-                allowed_first_actions=(
-                    viability_guidance.safe_actions
-                    if viability_guidance is not None
-                    else None
-                ),
-                viability_repair_volumes=(
-                    viability_repair_guidance
-                ),
+                allowed_first_actions=policy_guidance.allowed_first_actions,
+                viability_repair_volumes=policy_guidance.repair_volumes,
                 viability_recovery_distances=(
-                    viability_recovery_guidance
+                    policy_guidance.recovery_distances
                 ),
-                viability_safety_actions=(
-                    safety_value_guidance.best_actions
-                    if safety_value_guidance is not None
-                    else ()
-                ),
+                viability_safety_actions=policy_guidance.safety_actions,
                 viability_safety_state_value=(
-                    safety_value_guidance.state_value
-                    if safety_value_guidance is not None
-                    else None
+                    policy_guidance.safety_state_value
                 ),
-                viability_position_error=(
-                    viability_guidance.position_error
-                    if viability_guidance is not None
-                    else 0.0
+                viability_survival_actions=(
+                    policy_guidance.survival_actions
                 ),
+                viability_survival_frames=policy_guidance.survival_frames,
+                viability_survival_bottleneck_margin=(
+                    policy_guidance.survival_bottleneck_margin
+                ),
+                viability_position_error=policy_guidance.position_error,
                 preserve_previous_direction_inertia=(
                     not corridor_context_changed
                 ),
@@ -5788,6 +5503,15 @@ def run(args: argparse.Namespace) -> int:
                         "viability_fresh_prefix_relaxed": (
                             decision.viability_fresh_prefix_relaxed
                         ),
+                        "viability_survival_preferred": (
+                            decision.viability_survival_preferred
+                        ),
+                        "viability_survival_frames": (
+                            decision.viability_survival_frames
+                        ),
+                        "viability_survival_bottleneck_margin": (
+                            decision.viability_survival_bottleneck_margin
+                        ),
                     },
                     "terminal_threat": {
                         "mode": (
@@ -5858,6 +5582,16 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "viability_backend": (
                             corridor_report_solution.plan.viability_backend
+                        ),
+                        "viability_grid_step": (
+                            corridor_report_solution.plan.viability_grid_step
+                        ),
+                        "survival_backend": (
+                            corridor_report_solution.plan
+                            .survival_policy.backend
+                            if corridor_report_solution.plan
+                            .survival_policy is not None
+                            else None
                         ),
                         "solver_timing_ms": dict(
                             corridor_report_solution.plan.solver_timing_ms
@@ -5969,12 +5703,25 @@ def run(args: argparse.Namespace) -> int:
                             "recovery_distances": dict(
                                 viability_query.recovery_distances
                             ),
+                            "survival_frames": (
+                                viability_query.survival_frames
+                            ),
+                            "survival_bottleneck_margin": (
+                                viability_query
+                                .survival_bottleneck_margin
+                            ),
+                            "survival_best_actions": (
+                                viability_query.survival_best_actions
+                            ),
                             "selected_action": decision.action,
                             "selected_repair_volume": (
                                 decision.viability_repair_volume
                             ),
                             "selected_recovery_distance": (
                                 decision.viability_recovery_distance
+                            ),
+                            "selected_survival_preferred": (
+                                decision.viability_survival_preferred
                             ),
                             "position_error": (
                                 viability_query.position_error
@@ -5984,7 +5731,7 @@ def run(args: argparse.Namespace) -> int:
                                 delay_estimate.support
                             ),
                             "support_covers_current": (
-                                viability_support_covers_current
+                                policy_guidance.support_covers_current
                             ),
                             "nominal_delay": policy.nominal_delay,
                             "horizon_frames": policy.horizon_frames,

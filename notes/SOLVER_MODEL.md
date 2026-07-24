@@ -236,6 +236,13 @@ also hostile geometry: TH08 scales the native full contact size by 1.5 before
 the player AABB test, so the corresponding planner half-extents are
 `0.75 * contact_size`. A snapshot-only velocity model is insufficient.
 
+The reusable hazard boundary therefore accepts finite piecewise velocity
+changes and time-indexed AABB trajectories. TH08 callback indices and VM
+addresses terminate in its adapter; the planner sees only frame-numbered
+motion events. Sensor captures also carry explicit frame windows so player
+state lag, hazard age, and event-to-hazard offset cannot be represented by one
+ambiguous clock value.
+
 ## Collision And Graze Constraints
 
 For each frame, let `P_t` be the player collision shape and `H_i(t)` each active

@@ -10,6 +10,8 @@ from unittest.mock import Mock, patch
 import numpy as np
 
 from corridor_planner import (
+    AabbHazard,
+    AabbTrajectoryHazard,
     CorridorBounds,
     CorridorConfig,
     MovingAabbHazard,
@@ -18,6 +20,7 @@ from corridor_planner import (
     SegmentTrajectoryHazard,
     _aabb_clearance_field,
     _aabb_clearance_volume,
+    _aabb_sample_clearance_field,
     _hazard_clearance_volume,
     _segment_clearance_field,
     plan_corridor,
@@ -263,6 +266,116 @@ class CorridorPlannerTests(unittest.TestCase):
         self.assertGreater(volume[0, 1, 1], 0.0)
         self.assertLessEqual(volume[1, 1, 1], 0.0)
         self.assertGreater(volume[2, 1, 1], 0.0)
+
+    def test_time_indexed_aabb_follows_piecewise_samples(self) -> None:
+        trajectory = AabbTrajectoryHazard(
+            (
+                AabbHazard(8.0, 8.0, 2.0, 3.0),
+                AabbHazard(40.0, 40.0, 2.0, 3.0),
+                None,
+            )
+        )
+        grid_x, grid_y = np.meshgrid(
+            np.asarray([8.0, 40.0], dtype=np.float32),
+            np.asarray([8.0, 40.0], dtype=np.float32),
+        )
+        config = CorridorConfig(
+            grid_step=32.0,
+            frames_per_layer=1,
+            horizon_frames=2,
+            danger_radius=12.0,
+        )
+        volume = _hazard_clearance_volume(
+            grid_x,
+            grid_y,
+            aabbs=(),
+            aabb_trajectories=(trajectory,),
+            segments=(),
+            segment_trajectories=(),
+            config=config,
+        )
+        self.assertLessEqual(volume[0, 0, 0], 0.0)
+        self.assertGreater(volume[0, 1, 1], 0.0)
+        self.assertGreater(volume[1, 0, 0], 0.0)
+        self.assertLessEqual(volume[1, 1, 1], 0.0)
+        self.assertGreater(volume[2, 0, 0], 0.0)
+        self.assertGreater(volume[2, 1, 1], 0.0)
+
+    @unittest.skipUnless(
+        native_available(),
+        "native planner backend is not built",
+    )
+    def test_native_time_indexed_aabbs_match_framewise_geometry(self) -> None:
+        grid_x, grid_y = np.meshgrid(
+            np.arange(0.0, 49.0, 8.0, dtype=np.float32),
+            np.arange(0.0, 41.0, 8.0, dtype=np.float32),
+        )
+        trajectories = (
+            AabbTrajectoryHazard(
+                (
+                    None,
+                    AabbHazard(8.0, 8.0, 2.0, 3.0),
+                    AabbHazard(16.0, 14.0, 4.0, 1.0, 0.5, 0.1),
+                    None,
+                    AabbHazard(36.0, 28.0, 3.0, 5.0, 0.25),
+                )
+            ),
+            AabbTrajectoryHazard(
+                tuple(
+                    AabbHazard(
+                        42.0 - frame * 2.0,
+                        4.0 + frame * 3.0,
+                        1.0 + frame * 0.25,
+                        2.0,
+                        0.2,
+                    )
+                    for frame in range(5)
+                )
+            ),
+        )
+        config = CorridorConfig(
+            grid_step=8.0,
+            frames_per_layer=1,
+            horizon_frames=4,
+            danger_radius=12.0,
+        )
+        reference = np.full(
+            (5, *grid_x.shape),
+            config.danger_radius,
+            dtype=np.float32,
+        )
+        for frame in range(5):
+            samples = tuple(
+                sample
+                for trajectory in trajectories
+                if (sample := trajectory.sample(frame)) is not None
+            )
+            reference[frame] = np.minimum(
+                reference[frame],
+                _aabb_sample_clearance_field(
+                    grid_x,
+                    grid_y,
+                    samples,
+                    frame=frame,
+                    player_radius=config.player_radius,
+                ),
+            )
+        with patch(
+            "corridor_planner._aabb_sample_clearance_field",
+            side_effect=AssertionError(
+                "native AABB trajectory path fell back to Python geometry"
+            ),
+        ):
+            actual = _hazard_clearance_volume(
+                grid_x,
+                grid_y,
+                aabbs=(),
+                aabb_trajectories=trajectories,
+                segments=(),
+                segment_trajectories=(),
+                config=config,
+            )
+        np.testing.assert_allclose(actual, reference, atol=3e-5)
 
     @unittest.skipUnless(
         native_available(),

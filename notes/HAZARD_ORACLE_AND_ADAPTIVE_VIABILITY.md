@@ -452,6 +452,55 @@ now supplies all three exact views. Physical median/p95 planning improved by
 against a six-frame support ceiling. This residual is an architecture
 boundary, not evidence that segment geometry should be simplified.
 
+## Piecewise AABB Trajectories And Sensor Epochs
+
+Constant velocity is no longer the neutral projectile contract.
+`PiecewiseLinearTrajectory` stores finite velocity replacements whose event
+applies before movement on that update. The local vectorized oracle applies
+the same delta-velocity correction, while the global planner receives exact
+per-frame `AabbTrajectoryHazard` samples. The optional native backend consumes
+frame offsets plus flattened AABBs and is differential-tested against the
+scalar clearance oracle.
+
+This interface contains no spell or TH08 opcode. A game adapter may obtain
+events from an ECL VM, a projectile state machine, a replay, or another
+engine, but it must emit the same frame-indexed trajectory contract.
+
+Asynchronous capture requires more than one value called “snapshot lag”:
+
+```text
+source_to_hazard_lag = hazard_window.after - source_state_frame
+hazard_age           = planning_frame - hazard_window.after
+event_frame_offset   = event_window.after - hazard_window.after
+timing_uncertainty   = hazard_window.span + event_window.span
+```
+
+All differences are clamped at zero after epoch/reset validation.
+`HazardEpochAlignment` implements these game-neutral relations. The local
+controller uses source-to-hazard lag when comparing an old player position to
+a newly read pool. The asynchronous corridor uses only hazard age plus its
+future policy lead. Callback events are rebased by the event offset, and the
+velocity-delta displacement produced by the timing window inflates the AABB.
+
+This fixes a prior double projection: TH08's fresh bullet pool was advanced by
+the older player sensor lag in the corridor. Trace records now retain both
+capture bounds and all derived values, so alignment can be replayed.
+
+## Synthetic Adversarial Differential Gate
+
+`touhou_control.adversarial` generates deterministic dense AABB trajectories
+with straight, stop, resume, redirect, and reversal motion. Density is not
+limited to a game's pool capacity. `adversarial_planner_diff.py` compares the
+optimized/native volume against an independent scalar oracle and shrinks a
+failing hazard set while preserving its seed.
+
+The retained seed-8008 benchmark covers four seeds, 2,048 hazards per seed,
+and 32 frames. Maximum absolute native/reference error is `1.72e-5`, below the
+`5e-5` gate. These workloads are deliberately harder and denser than the
+1,536-slot TH08 pool. Passing them establishes implementation parity for the
+tested geometry; it does not establish game-state fidelity or physical
+survival.
+
 ## Empty-Kernel Control Reserve
 
 When no robust action remains, scalar distance to a later viable slice can

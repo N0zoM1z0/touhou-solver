@@ -61,6 +61,13 @@ These instructions apply to every file and task below this directory.
 - Every native hit, unexpected Bomb, missed transition, stale-plan failure, or
   other concrete failure must become a durable counterexample in
   `notes/COUNTEREXAMPLES.md`.
+- Use deterministic synthetic adversarial workloads to stress reusable
+  trajectory, collision, and viability kernels before spending a physical
+  trial. Permit densities above any one game's native pool and include stop,
+  resume, redirect, and reversal events. Compare optimized/native results to
+  an independent scalar oracle, retain failing seeds, and shrink failures to
+  a minimal reproducible hazard set. Synthetic success is a differential
+  gate, never a substitute for native physical acceptance.
 - Add the smallest useful regression test or retained regression artifact for
   each understood failure. A strangely specific test name should explain the
   exact way the agent once failed.

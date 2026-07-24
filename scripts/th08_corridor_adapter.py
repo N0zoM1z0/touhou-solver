@@ -7,6 +7,8 @@ import math
 from typing import Protocol
 
 from corridor_planner import (
+    AabbHazard,
+    AabbTrajectoryHazard,
     CorridorBounds,
     CorridorConfig,
     CorridorPlan,
@@ -22,6 +24,10 @@ from th08_laser_model import (
 )
 from th08_movement_model import ROUTE2_MOVEMENT_PROFILE
 from touhou_control.viability import ControlAction
+from touhou_control.trajectory import (
+    PiecewiseLinearTrajectory,
+    VelocityChange,
+)
 
 
 class BulletSnapshot(Protocol):
@@ -32,6 +38,9 @@ class BulletSnapshot(Protocol):
     half_width: float
     half_height: float
     transform_flags: int
+    velocity_changes: tuple[VelocityChange, ...]
+    trajectory_uncertainty_x: float
+    trajectory_uncertainty_y: float
 
 
 class LaserSnapshot(Protocol):
@@ -136,6 +145,8 @@ def lower_bullets(
     read_uncertainty = 0.2 * math.sqrt(lag)
     hazards = []
     for bullet in bullets:
+        if bullet.velocity_changes:
+            continue
         growth = 0.35 if bullet.transform_flags else 0.05
         hazards.append(
             MovingAabbHazard(
@@ -147,6 +158,10 @@ def lower_bullets(
                 half_height=bullet.half_height,
                 base_uncertainty=(
                     read_uncertainty
+                    + max(
+                        bullet.trajectory_uncertainty_x,
+                        bullet.trajectory_uncertainty_y,
+                    )
                     + (3.0 if bullet.transform_flags else 0.0)
                     + growth * forecast
                 ),
@@ -154,6 +169,57 @@ def lower_bullets(
             )
         )
     return tuple(hazards)
+
+
+def lower_bullet_trajectories(
+    bullets: tuple[BulletSnapshot, ...],
+    *,
+    snapshot_lag: int,
+    forecast_frames: int = 0,
+    horizon_frames: int = TH08_CORRIDOR_CONFIG.horizon_frames,
+) -> tuple[AabbTrajectoryHazard, ...]:
+    """Lower event-driven bullets to exact time-indexed AABB samples."""
+
+    if horizon_frames < 0:
+        raise ValueError("bullet trajectory horizon cannot be negative")
+    lag = max(0, snapshot_lag)
+    forecast = max(0, forecast_frames)
+    read_uncertainty = 0.2 * math.sqrt(lag)
+    trajectories: list[AabbTrajectoryHazard] = []
+    for bullet in bullets:
+        if not bullet.velocity_changes:
+            continue
+        motion = PiecewiseLinearTrajectory(
+            bullet.x,
+            bullet.y,
+            bullet.vx,
+            bullet.vy,
+            bullet.velocity_changes,
+        )
+        samples = []
+        for frame in range(horizon_frames + 1):
+            elapsed = lag + forecast + frame
+            x, y = motion.position(elapsed)
+            samples.append(
+                AabbHazard(
+                    x=x,
+                    y=y,
+                    half_width=(
+                        bullet.half_width
+                        + bullet.trajectory_uncertainty_x
+                    ),
+                    half_height=(
+                        bullet.half_height
+                        + bullet.trajectory_uncertainty_y
+                    ),
+                    base_uncertainty=(
+                        read_uncertainty + 0.05 * forecast
+                    ),
+                    uncertainty_per_frame=0.05,
+                )
+            )
+        trajectories.append(AabbTrajectoryHazard(tuple(samples)))
+    return tuple(trajectories)
 
 
 def lower_lasers(
@@ -300,6 +366,12 @@ def plan_th08_corridor(
                 snapshot_lag=snapshot_lag,
                 forecast_frames=forecast_frames,
             )
+        ),
+        aabb_trajectories=lower_bullet_trajectories(
+            bullets,
+            snapshot_lag=snapshot_lag,
+            forecast_frames=forecast_frames,
+            horizon_frames=config.horizon_frames,
         ),
         segment_trajectories=lower_lasers(
             lasers,

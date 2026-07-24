@@ -500,7 +500,8 @@ unchanged and appends one optional compact runtime payload:
 ```text
 [speed, angle, original_flags, queue_cursor, next_record,
  timer_fraction, timer_elapsed, duration, resume_speed, angle_operand,
- repeat_limit, repeat_count]
+ repeat_limit, repeat_count, callback_phase, callback_aux,
+ velocity_changes, trajectory_uncertainty_x, trajectory_uncertainty_y]
 ```
 
 `next_record` uses
@@ -517,6 +518,61 @@ opt-in because it increases raw capture size and is evidence instrumentation,
 not a gameplay sensor required by the planner. The compact
 `th08_transform_trace.py` report hashes the raw source and retains coverage
 plus adjacent same-slot lifecycle changes.
+
+### Tagged Callback Velocity Toggles
+
+Spell 111 established a second motion mechanism that is independent of the
+18-record transform queue.
+
+**Observed in decoded `ecldata5` sub 63**:
+
+- At local time 350, the VM sets tag mask `0x00100000`, callback angle
+  `2.356194`, callback speed zero, then invokes callback 12.
+- At local time 450 it sets the same tag mask and invokes callback 12 again.
+- At local time 710 opcode `0x04` sets VM time to 350 and applies displacement
+  `-280`, targeting instruction `0x6ED0`. The stop/resume schedule therefore
+  repeats every 360 local updates.
+
+**Observed in callback 12 at `0x00424A20`**:
+
+- Ignore inactive bullets and bullets for which
+  `(vm_tag_mask & bullet_tag_flags) == 0`.
+- If bullet phase `+0x1FC` is one, change it to zero, select the alternate
+  presentation/animation, set aux byte `+0x10B4` to one, and construct
+  velocity from VM angle/speed `+0x38/+0x3C`.
+- Otherwise restore phase one, base presentation/animation, aux zero, and
+  velocity from bullet base angle `+0xD74` and speed `+0xD68`.
+- Both speed paths multiply by the native gameplay time scale.
+
+**Observed physical separation from queued transforms**:
+
+- Full-pool run `20260724_105457` retained 189,877 spell-111 samples at
+  100 percent active-pool coverage. Active transform flags were always zero,
+  original/tag flags were always `0x00100202`, and the queue cursor was always
+  zero.
+- Normal run `20260724_113250` retained 42,377 nearby samples with
+  `(phase=0, aux=1, velocity=0)` and 83,930 with
+  `(phase=1, aux=0, velocity!=0)`. Adjacent same-slot evidence contains 3,037
+  coordinated phase/aux/motion changes.
+- Runtime instruction pointer `0x0B1D6FCC` maps to the pending time-450
+  instruction and overwhelmingly coincides with stopped bullets;
+  `0x0B1D7030` maps to the pending time-710 jump and overwhelmingly coincides
+  with moving bullets. The runtime resource base for this observation was
+  `0x0B1D0048`; it is not a stable address.
+
+The TH08 adapter follows literal main-VM control flow and lowers callback 12
+to game-neutral `VelocityChange` events. Its decoded instruction cache knows
+TH08 addresses and opcodes; the local and global planners consume only
+piecewise trajectories and time-indexed AABBs. Unsupported dynamic control
+flow stops lookahead and records a reason instead of guessing.
+
+The first physical integration attempt did not activate. Run
+`20260724_113250` read a separate wait timer at VM `+0x94/+0x98`, so all 844
+lookahead rows reported timer zero, no events, and zero attached bullets.
+Native opcode-4 code at `0x004186F1..0x0041870F` and direct VM memory establish
+the main timer root/fraction/integer fields at `+0x04/+0x08/+0x0C`.
+The corrected implementation is offline-regressed against the real sub-63
+bytes; physical planner acceptance remains pending.
 
 ## Per-Frame Bullet Runtime
 

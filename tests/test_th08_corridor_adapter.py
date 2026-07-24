@@ -9,12 +9,14 @@ from dataclasses import replace
 from th08_corridor_adapter import (
     TH08_CORRIDOR_CONFIG,
     TH08_VIABILITY_ACTIONS,
+    lower_bullet_trajectories,
     lower_bullets,
     lower_enemy_bodies,
     lower_lasers,
 )
 from th08_live_dodge_agent import Bullet, EnemyBody, Laser
 from th08_laser_model import LaserPhase, spawn_laser_state
+from touhou_control.trajectory import VelocityChange
 
 
 class Th08CorridorAdapterTests(unittest.TestCase):
@@ -78,6 +80,30 @@ class Th08CorridorAdapterTests(unittest.TestCase):
         )[0]
         self.assertEqual((future.x, future.y), (36.0, 7.0))
         self.assertGreater(future.base_uncertainty, present.base_uncertainty)
+
+    def test_velocity_event_bullet_uses_time_indexed_trajectory(self) -> None:
+        bullet = Bullet(
+            10.0,
+            20.0,
+            2.0,
+            0.0,
+            3.0,
+            4.0,
+            velocity_changes=(
+                VelocityChange(3, 0.0, 0.0),
+                VelocityChange(6, -1.0, 0.0),
+            ),
+        )
+        self.assertEqual(lower_bullets((bullet,), snapshot_lag=0), ())
+        trajectory = lower_bullet_trajectories(
+            (bullet,),
+            snapshot_lag=0,
+            horizon_frames=7,
+        )[0]
+        self.assertEqual(trajectory.sample(2).x, 14.0)
+        self.assertEqual(trajectory.sample(3).x, 14.0)
+        self.assertEqual(trajectory.sample(6).x, 13.0)
+        self.assertEqual(trajectory.sample(7).x, 12.0)
 
     def test_laser_uncertainty_accounts_for_snapshot_age(self) -> None:
         trajectory = lower_lasers(

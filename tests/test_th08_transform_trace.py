@@ -21,7 +21,25 @@ def _bullet(
     angle: float = 0.0,
     timer: int = 0,
     repeat_count: int = 0,
+    callback_phase: int | None = None,
+    callback_aux: int | None = None,
 ) -> list[object]:
+    runtime: list[object] = [
+        speed,
+        angle,
+        0x80,
+        1,
+        [1, 0, 0, 0.0, 0.0, 0, 0],
+        0.0,
+        timer,
+        6,
+        2.0,
+        0.25,
+        2,
+        repeat_count,
+    ]
+    if callback_phase is not None and callback_aux is not None:
+        runtime.extend((callback_phase, callback_aux, []))
     return [
         slot,
         x,
@@ -31,20 +49,7 @@ def _bullet(
         2.0,
         2.0,
         active_flags,
-        [
-            speed,
-            angle,
-            0x80,
-            1,
-            [1, 0, 0, 0.0, 0.0, 0, 0],
-            0.0,
-            timer,
-            6,
-            2.0,
-            0.25,
-            2,
-            repeat_count,
-        ],
+        runtime,
     ]
 
 
@@ -156,6 +161,45 @@ class TransformTraceTests(unittest.TestCase):
             report = analyze_transform_trace(path, spell_id=111)
         self.assertEqual(report["source_fields"], {"nearby_bullets": 1})
         self.assertEqual(report["active_pool_coverage_ratio"]["median"], 0.1)
+
+    def test_callback_state_exposes_lookahead_that_never_activated(self) -> None:
+        row = {
+            "kind": "decision",
+            "frame": 39702,
+            "snapshot_frame": 39700,
+            "active_bullets": 1,
+            "spell": {"spell_id": 111},
+            "bullet_velocity_lookahead": {
+                "instruction_pointer": 0x0B1D6FCC,
+                "timer_elapsed": 0,
+                "events": [],
+                "attached_bullets": 0,
+                "error": None,
+            },
+            "nearby_bullets": [
+                _bullet(
+                    active_flags=0,
+                    speed=1.2,
+                    vx=0.0,
+                    callback_phase=0,
+                    callback_aux=1,
+                )
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "trace.jsonl"
+            path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+            report = analyze_transform_trace(path, spell_id=111)
+        self.assertEqual(
+            report["callback_states"],
+            {"phase=0,aux=1,motion=stopped": 1},
+        )
+        self.assertEqual(report["ecl_lookahead"]["event_rows"], 0)
+        self.assertEqual(report["ecl_lookahead"]["attached_rows"], 0)
+        self.assertEqual(
+            report["ecl_lookahead"]["timer_elapsed"],
+            {"0": 1},
+        )
 
 
 if __name__ == "__main__":

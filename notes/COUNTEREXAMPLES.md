@@ -1756,7 +1756,7 @@ Status: observed | inferred | unknown | fixed
   encode a Stage-2 direction.
 - **Status:** Open.
 
-## CE-0084: Active transform flags hid stopped bullets that later resumed
+## CE-0084: Spell-111 callback motion was misclassified as a queued transform
 
 - **Observed symptom:** Stage-5 spell 111, `懶惰「生神停止
   (マインドストッパー)」`, produced sensor-gap hits at frames 35,751,
@@ -1764,11 +1764,10 @@ Status: observed | inferred | unknown | fixed
   no laser; the linear oracle reported 24.6 to 30.8 pixels of robust
   clearance, while the native game registered contact. Nearby stopped bullets
   had zero velocity and `+0xDAC == 0`.
-- **Invalid assumption:** Bullet `+0xDAC` is a durable "has transforms" flag.
-  It is only the set of handlers active on the current update. The original
-  flags remain at `+0xDB0`, the next queue index is at `+0xDCC`, and 18
-  24-byte records begin at `+0xDD0`. A handler can clear its active bit while
-  later queue work or a resume transition remains behaviorally relevant.
+- **Invalid assumption:** The zero-velocity interval came from queued
+  transform kind `0x40`, `0x80`, or `0x100`, and bullet `+0xDAC` merely hid
+  that lifecycle. The transform layout itself is correct, but it is not the
+  mechanism used by this card.
 - **Native evidence:** Spawn copies 432 bytes of transform records to
   `+0xDD0`, stores original flags at `+0xDB0`, clears active flags, initializes
   `+0xDCC`, and invokes the queue executor. The stop handlers use timer
@@ -1794,5 +1793,60 @@ Status: observed | inferred | unknown | fixed
   opt-in and records only transform-relevant bullets. A streaming compactor
   retains hashed coverage and same-slot flag/queue/timer/motion/angle/repeat
   transitions without adding full-pool cost to normal acceptance traces.
-- **Status:** Open; behavior-neutral decoder is physically readable and the
-  full-pool same-slot differential gate is pending.
+- **Rejected hypothesis:** Complete full-pool run `20260724_105457` retained
+  189,877 spell-111 bullet samples at 100 percent pool coverage. Every active
+  transform flag was zero, every original flag was `0x00100202`, every queue
+  cursor was zero, and no queued stop record activated. Same-slot batches
+  nevertheless stopped and resumed together. This rejects queued-transform
+  projection as the spell-111 fix without invalidating the recovered
+  transform model for patterns that actually use it.
+- **Observed native mechanism:** ECL `ecldata5` sub 63 invokes enemy callback
+  12 at local times 350 and 450, then opcode `0x04` jumps from time 710 back
+  to 350. Callback 12 at `0x00424A20` toggles bullets whose `+0xDB0` tag bits
+  intersect VM `+0x18`: phase `+0x1FC == 1` changes to zero, velocity becomes
+  the VM callback angle/speed, and aux `+0x10B4` becomes one; the other branch
+  restores the bullet's base angle/speed and phase one. This card supplies
+  speed zero for the first toggle.
+- **Physical callback differential:** Run `20260724_113250` retained 42,377
+  nearby samples with `(phase=0, aux=1, velocity=0)` and 83,930 with
+  `(phase=1, aux=0, velocity!=0)`. The pending-time-450 instruction pointer
+  contained 41,632 stopped samples; the pending-time-710 jump pointer
+  contained 74,404 moving samples. All three fields changed together in
+  3,037 adjacent same-slot pairs.
+- **Status:** Causal mechanism corrected. Physical planner acceptance remains
+  open under CE-0085.
+
+## CE-0085: ECL lookahead appeared enabled but attached to zero bullets
+
+- **Observed symptom:** Complete no-Bomb Stage-5 run `20260724_113250`
+  recorded 21 hit edges. Spell 111 was hit at frames 39,706 and 41,151.
+  At frame 39,706 the linear pipeline claimed 49.42 pixels of clearance and
+  classified the contact as a sensor gap.
+- **Implementation failure:** All 844 spell-111 lookahead rows reported
+  `timer_elapsed=0`, zero events, and zero attached bullets with no error.
+  The code had read VM `+0x94/+0x98`, which belongs to a separate
+  `-999`-gated wait timer, instead of the main VM timer rooted at `+0x04`
+  with fraction at `+0x08` and integer elapsed at `+0x0C`. The physical run
+  therefore exercised the old linear model, not the new trajectory model.
+- **Additional clock error:** One variable named `snapshot_lag` represented
+  both the old player-state-to-current delay and the much smaller age of the
+  freshly read projectile pool. The asynchronous corridor projected fresh
+  hazards by the player sensor lag a second time. ECL event frames also lacked
+  an explicit conversion from the ECL capture epoch to the bullet-pool epoch.
+- **Corrections:** Native opcode-4 disassembly at `0x004186F1..0x0041870F`
+  confirms timer integer `VM+0x0C` and target
+  `instruction_pointer + signed displacement`. A real decoded sub-63
+  regression now predicts stop/resume at `+110/+210` from timer 600. The
+  game-neutral `HazardEpochAlignment` separates source-to-hazard lag, hazard
+  age, event offset, and capture-window uncertainty. Trace records now expose
+  scan stop reason, horizon coverage, tagged/stopped/attached counts, and all
+  sensor frame windows.
+- **Retained evidence:** The 21-hit ledger remains in the run dossier; the
+  compact callback differential hashes the raw source and proves
+  event rows/attached rows were both zero. This failed run cannot support an
+  improvement claim.
+- **Acceptance gate:** Before comparing hit counts, a fresh focused Stage-5
+  run must show nonzero callback events and attached tagged bullets on both
+  moving and stopped portions, timer progression through the 350/450/710
+  loop, and event/phase parity within the recorded capture uncertainty.
+- **Status:** Offline correction implemented; physical gate pending.

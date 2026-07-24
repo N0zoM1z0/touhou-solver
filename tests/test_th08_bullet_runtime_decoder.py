@@ -16,6 +16,7 @@ from th08_bullet_transform_model import (
     parse_transform_record,
 )
 from th08_corridor_adapter import lower_bullets
+from th08_ecl_runtime import EclVmSnapshot, TaggedVelocityToggle
 from th08_live_dodge_agent import (
     BULLET_ANGLE_OFFSET,
     BULLET_GEOMETRY_OFFSET,
@@ -38,9 +39,11 @@ from th08_live_dodge_agent import (
     BULLET_VELOCITY_OFFSET,
     Bullet,
     _build_bullet_frames,
+    attach_tagged_velocity_toggles,
     decode_bullets,
     serialize_bullet_trace,
 )
+from touhou_control.trajectory import VelocityChange
 
 
 def _record(
@@ -259,6 +262,11 @@ class BulletRuntimeDecoderTests(unittest.TestCase):
                 0.25,
                 4,
                 1,
+                0,
+                0,
+                [],
+                0.0,
+                0.0,
             ],
         )
         self.assertEqual(
@@ -304,6 +312,90 @@ class BulletRuntimeDecoderTests(unittest.TestCase):
         self.assertEqual(
             lower_bullets((plain,), snapshot_lag=2),
             lower_bullets((observed,), snapshot_lag=2),
+        )
+
+    def test_local_projection_applies_velocity_event_on_native_update(self) -> None:
+        bullet = Bullet(
+            10.0,
+            20.0,
+            2.0,
+            -1.0,
+            2.0,
+            3.0,
+            velocity_changes=(VelocityChange(3, 0.0, 0.0),),
+        )
+        frames = _build_bullet_frames(
+            (bullet,),
+            horizon=5,
+            snapshot_lag=0,
+        )
+        self.assertEqual(
+            [float(frame[0][0]) for frame in frames],
+            [12.0, 14.0, 14.0, 14.0, 14.0],
+        )
+        self.assertEqual(
+            [float(frame[1][0]) for frame in frames],
+            [19.0, 18.0, 18.0, 18.0, 18.0],
+        )
+
+    def test_callback_event_is_rebased_to_bullet_snapshot_epoch(self) -> None:
+        bullet = Bullet(
+            10.0,
+            20.0,
+            2.0,
+            0.0,
+            2.0,
+            3.0,
+            speed=2.0,
+            angle=0.0,
+            transform_runtime=BulletTransformRuntime(
+                original_flags=0x100202,
+                queue_cursor=0,
+                next_record=None,
+                timer_fraction=0.0,
+                timer_elapsed=0,
+                resume_speed=0.0,
+                angle_operand=0.0,
+                duration=0,
+                repeat_limit=0,
+                repeat_count=0,
+            ),
+            callback_phase_state=1,
+        )
+        snapshot = EclVmSnapshot(
+            0x500000,
+            0.0,
+            300,
+            0x100000,
+            0.0,
+            0.0,
+            1.0,
+        )
+        attached = attach_tagged_velocity_toggles(
+            (bullet,),
+            vm_snapshot=snapshot,
+            toggles=(
+                TaggedVelocityToggle(
+                    3,
+                    12,
+                    0x100000,
+                    0.0,
+                    0.0,
+                ),
+            ),
+            frame_offset=2,
+            event_frame_uncertainty=1,
+        )[0]
+        self.assertEqual(attached.velocity_changes[0].frame, 5)
+        self.assertEqual(attached.trajectory_uncertainty_x, 2.0)
+        frames = _build_bullet_frames(
+            (attached,),
+            horizon=6,
+            snapshot_lag=0,
+        )
+        self.assertEqual(
+            [float(frame[0][0]) for frame in frames],
+            [12.0, 14.0, 16.0, 18.0, 18.0, 18.0],
         )
 
 

@@ -29,6 +29,15 @@ from th08_bullet_transform_model import (
     parse_next_transform_record,
 )
 from th08_corridor_adapter import TH08_CORRIDOR_CONFIG, plan_th08_corridor
+from th08_ecl_runtime import (
+    EclLookaheadResult,
+    EclInstructionCache,
+    EclVmSnapshot,
+    TaggedVelocityToggle,
+    analyze_tagged_velocity_toggles,
+    read_main_ecl_vm_snapshot,
+    velocity_changes_for_tagged_bullet,
+)
 from th08_laser_model import (
     LaserPhase,
     LaserState,
@@ -57,6 +66,8 @@ from touhou_control.async_policy import (
     delay_support_envelope,
 )
 from touhou_control.delay import AdaptiveControlDelay
+from touhou_control.epochs import FrameWindow, HazardEpochAlignment
+from touhou_control.trajectory import VelocityChange
 from touhou_control.viability import ViabilityQuery
 
 
@@ -64,6 +75,7 @@ BULLET_POOL_BASE = 0x00F6F710
 BULLET_POOL_SIZE = 1536
 BULLET_STRIDE = 0x10B8
 BULLET_GEOMETRY_OFFSET = 0x0D34
+BULLET_CALLBACK_PHASE_STATE_OFFSET = 0x01FC
 BULLET_POSITION_OFFSET = 0x0D44
 BULLET_VELOCITY_OFFSET = 0x0D50
 BULLET_SPEED_OFFSET = 0x0D68
@@ -80,6 +92,8 @@ BULLET_STOP_ANGLE_OPERAND_OFFSET = 0x1014
 BULLET_STOP_DURATION_OFFSET = 0x1024
 BULLET_STOP_REPEAT_LIMIT_OFFSET = 0x1028
 BULLET_STOP_REPEAT_COUNT_OFFSET = 0x102C
+BULLET_CALLBACK_AUX_STATE_OFFSET = 0x10B4
+ECL_CALLBACK_LOOKAHEAD_FRAMES = 256
 
 LASER_POOL_BASE = 0x015B57C8
 LASER_POOL_SIZE = 256
@@ -211,6 +225,11 @@ class Bullet:
     speed: float | None = None
     angle: float | None = None
     transform_runtime: BulletTransformRuntime | None = None
+    callback_phase_state: int = 0
+    callback_aux_state: int = 0
+    velocity_changes: tuple[VelocityChange, ...] = ()
+    trajectory_uncertainty_x: float = 0.0
+    trajectory_uncertainty_y: float = 0.0
 
 
 def _serialize_transform_record(
@@ -239,7 +258,9 @@ def serialize_bullet_trace(
 
     ``[speed, angle, original_flags, queue_cursor, next_record,
     timer_fraction, timer_elapsed, duration, resume_speed, angle_operand,
-    repeat_limit, repeat_count]``.
+    repeat_limit, repeat_count, callback_phase_state, callback_aux_state,
+    velocity_changes, trajectory_uncertainty_x,
+    trajectory_uncertainty_y]``.
     """
 
     legacy: list[object] = [
@@ -270,6 +291,18 @@ def serialize_bullet_trace(
             runtime.angle_operand,
             runtime.repeat_limit,
             runtime.repeat_count,
+            bullet.callback_phase_state,
+            bullet.callback_aux_state,
+            [
+                [
+                    change.frame,
+                    change.velocity_x,
+                    change.velocity_y,
+                ]
+                for change in bullet.velocity_changes
+            ],
+            bullet.trajectory_uncertainty_x,
+            bullet.trajectory_uncertainty_y,
         ],
     ]
 
@@ -735,6 +768,14 @@ def decode_bullets(blob: bytes) -> tuple[Bullet, ...]:
         vx, vy = struct.unpack_from("<ff", blob, base + BULLET_VELOCITY_OFFSET)
         speed = struct.unpack_from("<f", blob, base + BULLET_SPEED_OFFSET)[0]
         angle = struct.unpack_from("<f", blob, base + BULLET_ANGLE_OFFSET)[0]
+        callback_phase_state = struct.unpack_from(
+            "<h",
+            blob,
+            base + BULLET_CALLBACK_PHASE_STATE_OFFSET,
+        )[0]
+        callback_aux_state = blob[
+            base + BULLET_CALLBACK_AUX_STATE_OFFSET
+        ]
         transform_flags = struct.unpack_from(
             "<I", blob, base + BULLET_TRANSFORM_FLAGS_OFFSET
         )[0]
@@ -805,20 +846,80 @@ def decode_bullets(blob: bytes) -> tuple[Bullet, ...]:
             )
         bullets.append(
             Bullet(
-                x,
-                y,
-                vx,
-                vy,
-                half_width,
-                half_height,
-                transform_flags,
-                index,
-                speed if math.isfinite(speed) else None,
-                angle if math.isfinite(angle) else None,
-                transform_runtime,
+                x=x,
+                y=y,
+                vx=vx,
+                vy=vy,
+                half_width=half_width,
+                half_height=half_height,
+                transform_flags=transform_flags,
+                slot=index,
+                speed=speed if math.isfinite(speed) else None,
+                angle=angle if math.isfinite(angle) else None,
+                transform_runtime=transform_runtime,
+                callback_phase_state=callback_phase_state,
+                callback_aux_state=callback_aux_state,
             )
         )
     return tuple(bullets)
+
+
+def attach_tagged_velocity_toggles(
+    bullets: tuple[Bullet, ...],
+    *,
+    vm_snapshot: EclVmSnapshot,
+    toggles: tuple[TaggedVelocityToggle, ...],
+    frame_offset: int = 0,
+    event_frame_uncertainty: int = 0,
+) -> tuple[Bullet, ...]:
+    """Attach callback-12 events in each bullet snapshot's time coordinate."""
+
+    if frame_offset < 0 or event_frame_uncertainty < 0:
+        raise ValueError("ECL event alignment values cannot be negative")
+    if not toggles:
+        return bullets
+    aligned_toggles = tuple(
+        replace(toggle, frame=toggle.frame + frame_offset)
+        for toggle in toggles
+    )
+    attached: list[Bullet] = []
+    for bullet in bullets:
+        runtime = bullet.transform_runtime
+        tag_flags = runtime.original_flags if runtime is not None else 0
+        changes = velocity_changes_for_tagged_bullet(
+            tag_flags=tag_flags,
+            phase_state=bullet.callback_phase_state,
+            base_speed=bullet.speed,
+            base_angle=bullet.angle,
+            time_scale=vm_snapshot.time_scale,
+            toggles=aligned_toggles,
+        )
+        uncertainty_x = bullet.trajectory_uncertainty_x
+        uncertainty_y = bullet.trajectory_uncertainty_y
+        previous_x = bullet.vx
+        previous_y = bullet.vy
+        for change in changes:
+            uncertainty_x += (
+                abs(change.velocity_x - previous_x)
+                * event_frame_uncertainty
+            )
+            uncertainty_y += (
+                abs(change.velocity_y - previous_y)
+                * event_frame_uncertainty
+            )
+            previous_x = change.velocity_x
+            previous_y = change.velocity_y
+        attached.append(
+            replace(
+                bullet,
+                velocity_changes=changes,
+                trajectory_uncertainty_x=uncertainty_x,
+                trajectory_uncertainty_y=uncertainty_y,
+            )
+            if changes
+            else bullet
+        )
+    return tuple(attached)
 
 
 def decode_lasers(blob: bytes) -> tuple[Laser, ...]:
@@ -1319,15 +1420,61 @@ def _build_bullet_frames(
     velocity_y = np.fromiter((bullet.vy for bullet in bullets), dtype=np.float32)
     half_width = np.fromiter((bullet.half_width for bullet in bullets), dtype=np.float32)
     half_height = np.fromiter((bullet.half_height for bullet in bullets), dtype=np.float32)
+    trajectory_uncertainty_x = np.fromiter(
+        (bullet.trajectory_uncertainty_x for bullet in bullets),
+        dtype=np.float32,
+    )
+    trajectory_uncertainty_y = np.fromiter(
+        (bullet.trajectory_uncertainty_y for bullet in bullets),
+        dtype=np.float32,
+    )
+    half_width = half_width + trajectory_uncertainty_x
+    half_height = half_height + trajectory_uncertainty_y
     transformed = np.fromiter(
         (bool(bullet.transform_flags) for bullet in bullets), dtype=np.bool_
     )
+    event_indices: list[int] = []
+    event_frames: list[int] = []
+    event_delta_x: list[float] = []
+    event_delta_y: list[float] = []
+    for bullet_index, bullet in enumerate(bullets):
+        previous_x = bullet.vx
+        previous_y = bullet.vy
+        for change in bullet.velocity_changes:
+            event_indices.append(bullet_index)
+            event_frames.append(change.frame)
+            event_delta_x.append(change.velocity_x - previous_x)
+            event_delta_y.append(change.velocity_y - previous_y)
+            previous_x = change.velocity_x
+            previous_y = change.velocity_y
+    packed_event_indices = np.asarray(event_indices, dtype=np.intp)
+    packed_event_frames = np.asarray(event_frames, dtype=np.int32)
+    packed_event_delta_x = np.asarray(event_delta_x, dtype=np.float32)
+    packed_event_delta_y = np.asarray(event_delta_y, dtype=np.float32)
     for step in range(1, horizon + 1):
         elapsed = snapshot_lag + step
+        projected_x = base_x + velocity_x * elapsed
+        projected_y = base_y + velocity_y * elapsed
+        if packed_event_indices.size:
+            affected_updates = elapsed - packed_event_frames + 1
+            active = affected_updates > 0
+            if np.any(active):
+                np.add.at(
+                    projected_x,
+                    packed_event_indices[active],
+                    packed_event_delta_x[active]
+                    * affected_updates[active],
+                )
+                np.add.at(
+                    projected_y,
+                    packed_event_indices[active],
+                    packed_event_delta_y[active]
+                    * affected_updates[active],
+                )
         frames.append(
             (
-                base_x + velocity_x * elapsed,
-                base_y + velocity_y * elapsed,
+                projected_x,
+                projected_y,
                 half_width,
                 half_height,
                 transformed,
@@ -3014,6 +3161,7 @@ def run(args: argparse.Namespace) -> int:
         overlap_frames=CORRIDOR_POLICY_OVERLAP_FRAMES,
         minimum_frames=CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES,
     )
+    ecl_instruction_cache = EclInstructionCache()
     previous_iteration_ms: float | None = None
     previous_trace_ms: float | None = None
     if not args.local_only:
@@ -3297,6 +3445,7 @@ def run(args: argparse.Namespace) -> int:
                 corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
                 corridor_context = None
                 corridor_commitment = CorridorCommitment()
+                ecl_instruction_cache.clear()
                 if corridor_future is not None and corridor_future.cancel():
                     corridor_future = None
                 auto_confirm.eligible_since = None
@@ -3406,16 +3555,108 @@ def run(args: argparse.Namespace) -> int:
                 if enemy_snapshot is not None
                 else None
             )
-            bullet_blob = reader.read(BULLET_POOL_BASE, BULLET_POOL_SIZE * BULLET_STRIDE)
+            bullet_frame_before = reader.u32(0x0164D30C)
+            bullet_blob = reader.read(
+                BULLET_POOL_BASE,
+                BULLET_POOL_SIZE * BULLET_STRIDE,
+            )
+            bullet_frame_after = reader.u32(0x0164D30C)
             laser_blob = reader.read(LASER_POOL_BASE, LASER_POOL_SIZE * LASER_STRIDE)
             item_blob = reader.read(
                 ITEM_MANAGER_BASE, ITEM_POOL_SIZE * ITEM_STRIDE
             )
+            ecl_vm_snapshot: EclVmSnapshot | None = None
+            ecl_lookahead: EclLookaheadResult | None = None
+            tagged_velocity_toggles: tuple[TaggedVelocityToggle, ...] = ()
+            ecl_lookahead_error: str | None = None
+            ecl_frame_before: int | None = None
+            ecl_frame_after: int | None = None
+            spell_enemy_pointer = int(spell_state.get("enemy_pointer", 0))
+            if spell_state.get("active") and spell_enemy_pointer:
+                try:
+                    ecl_frame_before = reader.u32(0x0164D30C)
+                    ecl_vm_snapshot = read_main_ecl_vm_snapshot(
+                        reader,
+                        spell_enemy_pointer,
+                    )
+                    ecl_frame_after = reader.u32(0x0164D30C)
+                    ecl_lookahead = analyze_tagged_velocity_toggles(
+                        ecl_vm_snapshot,
+                        instruction_at=lambda address: (
+                            ecl_instruction_cache.instruction(
+                                reader.read,
+                                address,
+                            )
+                        ),
+                        horizon_frames=ECL_CALLBACK_LOOKAHEAD_FRAMES,
+                        active_difficulty_mask=(
+                            1 << int(state["difficulty_index"])
+                        ),
+                    )
+                    tagged_velocity_toggles = ecl_lookahead.events
+                except (OSError, RuntimeError, ValueError, struct.error) as error:
+                    ecl_vm_snapshot = None
+                    ecl_lookahead = None
+                    tagged_velocity_toggles = ()
+                    ecl_lookahead_error = (
+                        f"{type(error).__name__}: {error}"
+                    )
             counter_after_read = reader.u32(0x0164D30C)
             read_ms = (time.perf_counter() - read_started) * 1000.0
+            if (
+                bullet_frame_after < bullet_frame_before
+                or counter_after_read < bullet_frame_after
+                or (
+                    ecl_frame_before is not None
+                    and ecl_frame_after is not None
+                    and ecl_frame_after < ecl_frame_before
+                )
+            ):
+                gaps += 1
+                continue
             snapshot_lag = max(0, counter_after_read - int(state["enemy_manager_frame"]))
+            hazard_alignment = HazardEpochAlignment(
+                source_frame=int(state["enemy_manager_frame"]),
+                hazard_window=FrameWindow(
+                    bullet_frame_before,
+                    bullet_frame_after,
+                ),
+                current_frame=counter_after_read,
+                event_window=(
+                    FrameWindow(ecl_frame_before, ecl_frame_after)
+                    if (
+                        ecl_frame_before is not None
+                        and ecl_frame_after is not None
+                    )
+                    else None
+                ),
+            )
+            player_to_hazard_lag = (
+                hazard_alignment.source_to_hazard_lag
+            )
+            hazard_snapshot_age = hazard_alignment.hazard_age
+            bullet_capture_span = hazard_alignment.hazard_window.span
+            ecl_event_frame_offset: int | None = None
+            ecl_event_frame_uncertainty: int | None = None
+            if ecl_vm_snapshot is not None:
+                ecl_event_frame_offset = (
+                    hazard_alignment.event_frame_offset
+                )
+                ecl_event_frame_uncertainty = (
+                    hazard_alignment.event_frame_uncertainty
+                )
             decode_started = time.perf_counter()
             bullets = decode_bullets(bullet_blob)
+            if ecl_vm_snapshot is not None and tagged_velocity_toggles:
+                bullets = attach_tagged_velocity_toggles(
+                    bullets,
+                    vm_snapshot=ecl_vm_snapshot,
+                    toggles=tagged_velocity_toggles,
+                    frame_offset=ecl_event_frame_offset or 0,
+                    event_frame_uncertainty=(
+                        ecl_event_frame_uncertainty or 0
+                    ),
+                )
             lasers = decode_lasers(laser_blob)
             items = decode_items(item_blob)
             decode_ms = (time.perf_counter() - decode_started) * 1000.0
@@ -3527,7 +3768,7 @@ def run(args: argparse.Namespace) -> int:
                     bullets=bullets,
                     lasers=lasers,
                     enemy_bodies=enemy_bodies,
-                    snapshot_lag=snapshot_lag,
+                    snapshot_lag=hazard_snapshot_age,
                     control_delay_candidates=policy_delay_support,
                     nominal_control_delay=control_delay_frames,
                     active_action=_action_name_from_mask(previous_mask),
@@ -3613,7 +3854,7 @@ def run(args: argparse.Namespace) -> int:
                 power=float(resources["power"]),
                 bombs=float(resources["bombs"]),
                 previous_focus=bool(previous_mask & FOCUS),
-                snapshot_lag=snapshot_lag,
+                snapshot_lag=player_to_hazard_lag,
                 control_delay_frames=control_delay_frames,
                 control_delay_candidates=delay_estimate.support,
                 action_hold_frames=action_hold_frames,
@@ -3726,6 +3967,22 @@ def run(args: argparse.Namespace) -> int:
                 or hit_started
                 or auto_confirm_event is not None
             ):
+                ecl_tagged_bullets = (
+                    tuple(
+                        bullet
+                        for bullet in bullets
+                        if (
+                            ecl_vm_snapshot is not None
+                            and bullet.transform_runtime is not None
+                            and (
+                                bullet.transform_runtime.original_flags
+                                & ecl_vm_snapshot.tag_mask
+                            )
+                        )
+                    )
+                    if ecl_vm_snapshot is not None
+                    else ()
+                )
                 record = {
                     "kind": "decision",
                     "frame": counter_at_action,
@@ -3787,10 +4044,78 @@ def run(args: argparse.Namespace) -> int:
                     "resources": resources,
                     "stage_route_index": state["stage_route_index"],
                     "spell": state["spell"],
+                    "bullet_velocity_lookahead": (
+                        {
+                            "instruction_pointer": (
+                                ecl_vm_snapshot.instruction_pointer
+                            ),
+                            "timer_fraction": ecl_vm_snapshot.timer_fraction,
+                            "timer_elapsed": ecl_vm_snapshot.timer_elapsed,
+                            "time_scale": ecl_vm_snapshot.time_scale,
+                            "tag_mask": ecl_vm_snapshot.tag_mask,
+                            "instructions_scanned": (
+                                ecl_lookahead.instructions_scanned
+                                if ecl_lookahead is not None
+                                else 0
+                            ),
+                            "stop_reason": (
+                                ecl_lookahead.stop_reason
+                                if ecl_lookahead is not None
+                                else None
+                            ),
+                            "horizon_covered": (
+                                ecl_lookahead.horizon_covered
+                                if ecl_lookahead is not None
+                                else False
+                            ),
+                            "events": [
+                                [
+                                    event.frame,
+                                    event.callback_index,
+                                    event.tag_mask,
+                                    event.alternate_velocity_x,
+                                    event.alternate_velocity_y,
+                                ]
+                                for event in tagged_velocity_toggles
+                            ],
+                            "attached_bullets": sum(
+                                bool(bullet.velocity_changes)
+                                for bullet in bullets
+                            ),
+                            "tagged_bullets": len(ecl_tagged_bullets),
+                            "stopped_tagged_bullets": sum(
+                                bullet.callback_phase_state == 0
+                                and bullet.callback_aux_state == 1
+                                for bullet in ecl_tagged_bullets
+                            ),
+                            "event_frame_offset": (
+                                ecl_event_frame_offset
+                            ),
+                            "event_frame_uncertainty": (
+                                ecl_event_frame_uncertainty
+                            ),
+                            "error": ecl_lookahead_error,
+                        }
+                        if ecl_vm_snapshot is not None
+                        else (
+                            {"error": ecl_lookahead_error}
+                            if ecl_lookahead_error is not None
+                            else None
+                        )
+                    ),
                     "active_bullets": len(bullets),
                     "active_lasers": len(lasers),
                     "active_items": len(items),
                     "active_enemy_bodies": len(enemy_bodies),
+                    "hazard_alignment": {
+                        "bullet_frame_before": bullet_frame_before,
+                        "bullet_frame_after": bullet_frame_after,
+                        "bullet_capture_span": bullet_capture_span,
+                        "hazard_snapshot_age": hazard_snapshot_age,
+                        "player_to_hazard_lag": player_to_hazard_lag,
+                        "ecl_frame_before": ecl_frame_before,
+                        "ecl_frame_after": ecl_frame_after,
+                    },
                     "enemy_body_snapshot_frame": enemy_body_snapshot_frame,
                     "enemy_body_snapshot_age": (
                         counter_after_read - enemy_body_snapshot_frame

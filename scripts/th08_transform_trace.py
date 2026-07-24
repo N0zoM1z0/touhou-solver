@@ -50,10 +50,7 @@ def decode_trace_bullet(values: object) -> dict[str, object] | None:
     vx = float(values[3])
     vy = float(values[4])
     speed = float(runtime[0]) if runtime[0] is not None else None
-    stopped = (
-        (speed is None or abs(speed) <= 1e-6)
-        and math.hypot(vx, vy) <= 1e-6
-    )
+    stopped = math.hypot(vx, vy) <= 1e-6
     return {
         "slot": int(values[0]),
         "x": float(values[1]),
@@ -73,6 +70,12 @@ def decode_trace_bullet(values: object) -> dict[str, object] | None:
         "angle_operand": float(runtime[9]),
         "repeat_limit": int(runtime[10]),
         "repeat_count": int(runtime[11]),
+        "callback_phase_state": (
+            int(runtime[12]) if len(runtime) > 12 else None
+        ),
+        "callback_aux_state": (
+            int(runtime[13]) if len(runtime) > 13 else None
+        ),
         "motion": "stopped" if stopped else "moving",
     }
 
@@ -84,6 +87,13 @@ def _changed_events(
     events: list[str] = []
     for field in ("active_flags", "queue_cursor", "next_kind", "repeat_count"):
         if previous[field] != current[field]:
+            events.append(field)
+    for field in ("callback_phase_state", "callback_aux_state"):
+        if (
+            previous[field] is not None
+            and current[field] is not None
+            and previous[field] != current[field]
+        ):
             events.append(field)
     if previous["motion"] != current["motion"]:
         events.append("motion")
@@ -144,6 +154,14 @@ def analyze_transform_trace(
     next_kinds: Counter[int] = Counter()
     durations: Counter[int] = Counter()
     repeat_limits: Counter[int] = Counter()
+    callback_states: Counter[tuple[int, int, str]] = Counter()
+    callback_states_by_pc: dict[int, Counter[tuple[int, int, str]]] = {}
+    lookahead_rows = 0
+    lookahead_event_rows = 0
+    lookahead_attached_rows = 0
+    lookahead_errors: Counter[str] = Counter()
+    lookahead_timers: Counter[int] = Counter()
+    lookahead_pcs: Counter[int] = Counter()
     runtime_counts: list[float] = []
     coverage_ratios: list[float] = []
     adjacent_pairs = 0
@@ -182,6 +200,23 @@ def analyze_transform_trace(
             decisions += 1
             first_frame = frame if first_frame is None else min(first_frame, frame)
             last_frame = frame if last_frame is None else max(last_frame, frame)
+            lookahead = row.get("bullet_velocity_lookahead")
+            lookahead_pc = None
+            if isinstance(lookahead, dict):
+                lookahead_rows += 1
+                if lookahead.get("events"):
+                    lookahead_event_rows += 1
+                if int(lookahead.get("attached_bullets", 0) or 0) > 0:
+                    lookahead_attached_rows += 1
+                error = lookahead.get("error")
+                lookahead_errors[str(error)] += 1
+                timer = lookahead.get("timer_elapsed")
+                if timer is not None:
+                    lookahead_timers[int(timer)] += 1
+                lookahead_pc = lookahead.get("instruction_pointer")
+                if lookahead_pc is not None:
+                    lookahead_pc = int(lookahead_pc)
+                    lookahead_pcs[lookahead_pc] += 1
 
             if isinstance(row.get("transform_bullets"), list):
                 source_field = "transform_bullets"
@@ -210,6 +245,20 @@ def analyze_transform_trace(
                     next_kinds[int(state["next_kind"])] += 1
                 durations[int(state["duration"])] += 1
                 repeat_limits[int(state["repeat_limit"])] += 1
+                callback_phase = state["callback_phase_state"]
+                callback_aux = state["callback_aux_state"]
+                if callback_phase is not None and callback_aux is not None:
+                    callback_state = (
+                        int(callback_phase),
+                        int(callback_aux),
+                        str(state["motion"]),
+                    )
+                    callback_states[callback_state] += 1
+                    if lookahead_pc is not None:
+                        callback_states_by_pc.setdefault(
+                            lookahead_pc,
+                            Counter(),
+                        )[callback_state] += 1
 
             adjacent = (
                 previous_snapshot_frame is not None
@@ -273,7 +322,7 @@ def analyze_transform_trace(
             previous_epoch = epoch
 
     return {
-        "schema": "th08-transform-differential-v1",
+        "schema": "th08-transform-differential-v2",
         "source": str(path),
         "source_sha256": digest.hexdigest(),
         "filter": {"spell_id": spell_id},
@@ -295,6 +344,33 @@ def analyze_transform_trace(
         },
         "repeat_limits": {
             str(value): count for value, count in sorted(repeat_limits.items())
+        },
+        "callback_states": {
+            f"phase={phase},aux={aux},motion={motion}": count
+            for (phase, aux, motion), count in sorted(
+                callback_states.items()
+            )
+        },
+        "callback_states_by_instruction_pointer": {
+            f"0x{pc:08X}": {
+                f"phase={phase},aux={aux},motion={motion}": count
+                for (phase, aux, motion), count in sorted(states.items())
+            }
+            for pc, states in sorted(callback_states_by_pc.items())
+        },
+        "ecl_lookahead": {
+            "rows": lookahead_rows,
+            "event_rows": lookahead_event_rows,
+            "attached_rows": lookahead_attached_rows,
+            "errors": dict(sorted(lookahead_errors.items())),
+            "timer_elapsed": {
+                str(value): count
+                for value, count in sorted(lookahead_timers.items())
+            },
+            "instruction_pointers": {
+                f"0x{value:08X}": count
+                for value, count in sorted(lookahead_pcs.items())
+            },
         },
         "adjacent_pairs": adjacent_pairs,
         "active_stop_pairs": active_stop_pairs,

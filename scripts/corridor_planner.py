@@ -59,6 +59,43 @@ class MovingAabbHazard:
 
 
 @dataclass(frozen=True)
+class AabbHazard:
+    """One time-indexed axis-aligned hazard sample."""
+
+    x: float
+    y: float
+    half_width: float
+    half_height: float
+    base_uncertainty: float = 0.0
+    uncertainty_per_frame: float = 0.0
+
+    def __post_init__(self) -> None:
+        if min(
+            self.half_width,
+            self.half_height,
+            self.base_uncertainty,
+            self.uncertainty_per_frame,
+        ) < 0.0:
+            raise ValueError("hazard dimensions and uncertainty cannot be negative")
+
+
+@dataclass(frozen=True)
+class AabbTrajectoryHazard:
+    """A finite time-indexed AABB trajectory supplied by a game adapter."""
+
+    samples: tuple[AabbHazard | None, ...]
+
+    def __post_init__(self) -> None:
+        if not self.samples:
+            raise ValueError("AABB trajectory must contain at least one frame")
+
+    def sample(self, frame: int) -> AabbHazard | None:
+        if frame < 0 or frame >= len(self.samples):
+            return None
+        return self.samples[frame]
+
+
+@dataclass(frozen=True)
 class SegmentHazard:
     origin_x: float
     origin_y: float
@@ -243,6 +280,48 @@ def _aabb_clearance_field(
     hazard_y = np.fromiter(
         (item.y + item.velocity_y * frame for item in hazards), dtype=np.float32
     )
+    uncertainty = np.fromiter(
+        (
+            item.base_uncertainty + item.uncertainty_per_frame * frame
+            for item in hazards
+        ),
+        dtype=np.float32,
+    )
+    half_width = np.fromiter(
+        (item.half_width for item in hazards), dtype=np.float32
+    )
+    half_height = np.fromiter(
+        (item.half_height for item in hazards), dtype=np.float32
+    )
+    flat_x = grid_x.reshape(-1, 1)
+    flat_y = grid_y.reshape(-1, 1)
+    dx = np.abs(flat_x - hazard_x[None, :]) - (
+        player_radius + half_width[None, :] + uncertainty[None, :]
+    )
+    dy = np.abs(flat_y - hazard_y[None, :]) - (
+        player_radius + half_height[None, :] + uncertainty[None, :]
+    )
+    overlap = (dx <= 0.0) & (dy <= 0.0)
+    clearance = np.where(
+        overlap,
+        np.maximum(dx, dy),
+        np.hypot(np.maximum(dx, 0.0), np.maximum(dy, 0.0)),
+    )
+    return clearance.min(axis=1).reshape(grid_x.shape).astype(np.float32)
+
+
+def _aabb_sample_clearance_field(
+    grid_x: np.ndarray,
+    grid_y: np.ndarray,
+    hazards: tuple[AabbHazard, ...],
+    *,
+    frame: int,
+    player_radius: float,
+) -> np.ndarray:
+    if not hazards:
+        return np.full(grid_x.shape, np.inf, dtype=np.float32)
+    hazard_x = np.fromiter((item.x for item in hazards), dtype=np.float32)
+    hazard_y = np.fromiter((item.y for item in hazards), dtype=np.float32)
     uncertainty = np.fromiter(
         (
             item.base_uncertainty + item.uncertainty_per_frame * frame
@@ -528,23 +607,38 @@ def _clearance_field(
     *,
     bounds: CorridorBounds,
     aabbs: tuple[MovingAabbHazard, ...],
+    aabb_trajectories: tuple[AabbTrajectoryHazard, ...],
     segments: tuple[SegmentHazard, ...],
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
     frame: int,
     config: CorridorConfig,
 ) -> tuple[np.ndarray, np.ndarray]:
+    frame_aabbs = tuple(
+        sample
+        for trajectory in aabb_trajectories
+        if (sample := trajectory.sample(frame)) is not None
+    )
     frame_segments = segments + tuple(
         sample
         for trajectory in segment_trajectories
         if (sample := trajectory.sample(frame)) is not None
     )
     hazard_clearance = np.minimum(
-        _aabb_clearance_field(
-            grid_x,
-            grid_y,
-            aabbs,
-            frame=frame,
-            player_radius=config.player_radius,
+        np.minimum(
+            _aabb_clearance_field(
+                grid_x,
+                grid_y,
+                aabbs,
+                frame=frame,
+                player_radius=config.player_radius,
+            ),
+            _aabb_sample_clearance_field(
+                grid_x,
+                grid_y,
+                frame_aabbs,
+                frame=frame,
+                player_radius=config.player_radius,
+            ),
         ),
         _segment_clearance_field(
             grid_x,
@@ -574,6 +668,7 @@ def _hazard_clearance_volume(
     segments: tuple[SegmentHazard, ...],
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
     config: CorridorConfig,
+    aabb_trajectories: tuple[AabbTrajectoryHazard, ...] = (),
 ) -> np.ndarray:
     """Build physical-frame clearance without treating legal bounds as hazards."""
 
@@ -587,6 +682,33 @@ def _hazard_clearance_volume(
         segments=segments,
     )
     if native_volume is not None:
+        if aabb_trajectories:
+            trajectory_volume = native_backend.apply_aabb_trajectory_clearance(
+                x_axis=grid_x[0],
+                y_axis=grid_y[:, 0],
+                player_radius=config.player_radius,
+                aabb_trajectories=aabb_trajectories,
+                clearance_volume=native_volume,
+            )
+            if trajectory_volume is not None:
+                native_volume = trajectory_volume
+            else:
+                for frame in range(config.horizon_frames + 1):
+                    frame_aabbs = tuple(
+                        sample
+                        for trajectory in aabb_trajectories
+                        if (sample := trajectory.sample(frame)) is not None
+                    )
+                    native_volume[frame] = np.minimum(
+                        native_volume[frame],
+                        _aabb_sample_clearance_field(
+                            grid_x,
+                            grid_y,
+                            frame_aabbs,
+                            frame=frame,
+                            player_radius=config.player_radius,
+                        ),
+                    )
         if segment_trajectories:
             trajectory_volume = (
                 native_backend.apply_segment_trajectory_clearance(
@@ -626,6 +748,21 @@ def _hazard_clearance_volume(
         clearance_cap=config.danger_radius,
     )
     for frame in range(config.horizon_frames + 1):
+        frame_aabbs = tuple(
+            sample
+            for trajectory in aabb_trajectories
+            if (sample := trajectory.sample(frame)) is not None
+        )
+        volume[frame] = np.minimum(
+            volume[frame],
+            _aabb_sample_clearance_field(
+                grid_x,
+                grid_y,
+                frame_aabbs,
+                frame=frame,
+                player_radius=config.player_radius,
+            ),
+        )
         frame_segments = segments + tuple(
             sample
             for trajectory in segment_trajectories
@@ -698,6 +835,7 @@ def _plan_robust_corridor(
     start_y: float,
     bounds: CorridorBounds,
     aabbs: tuple[MovingAabbHazard, ...],
+    aabb_trajectories: tuple[AabbTrajectoryHazard, ...],
     segments: tuple[SegmentHazard, ...],
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
     preferred_x: float | None,
@@ -714,6 +852,7 @@ def _plan_robust_corridor(
         grid_x,
         grid_y,
         aabbs=aabbs,
+        aabb_trajectories=aabb_trajectories,
         segments=segments,
         segment_trajectories=segment_trajectories,
         config=config,
@@ -941,6 +1080,7 @@ def plan_corridor(
     start_y: float,
     bounds: CorridorBounds,
     aabbs: tuple[MovingAabbHazard, ...] = (),
+    aabb_trajectories: tuple[AabbTrajectoryHazard, ...] = (),
     segments: tuple[SegmentHazard, ...] = (),
     segment_trajectories: tuple[SegmentTrajectoryHazard, ...] = (),
     preferred_x: float | None = None,
@@ -964,6 +1104,7 @@ def plan_corridor(
             start_y=start_y,
             bounds=bounds,
             aabbs=aabbs,
+            aabb_trajectories=aabb_trajectories,
             segments=segments,
             segment_trajectories=segment_trajectories,
             preferred_x=preferred_x,
@@ -994,6 +1135,7 @@ def plan_corridor(
             grid_y,
             bounds=bounds,
             aabbs=aabbs,
+            aabb_trajectories=aabb_trajectories,
             segments=segments,
             segment_trajectories=segment_trajectories,
             frame=frame,

@@ -1,0 +1,466 @@
+{
+  "schema": "th08-practice-comparison-v2",
+  "baseline_run_id": "lunatic_route2_stage5_unattended_20260724_103617",
+  "candidate_run_id": "lunatic_route2_stage5_unattended_20260724_105457",
+  "scope_compatibility": {
+    "same_stage_route_index": true,
+    "candidate_selected_frame_epoch_index": 0,
+    "candidate_frame_epoch_count": 1,
+    "candidate_pre_scope_decisions_excluded": 0,
+    "candidate_raw_summary_scope_valid": true,
+    "candidate_accepted_completion": true
+  },
+  "no_bomb_passed": {
+    "baseline": true,
+    "candidate": true
+  },
+  "death_count": {
+    "baseline": 12,
+    "candidate": 14,
+    "delta": 2,
+    "reduction_fraction": -0.16666666666666666
+  },
+  "robust_viability": {
+    "counts": {
+      "policy_decision_count": {
+        "baseline": 8103,
+        "candidate": 7291,
+        "delta": -812,
+        "reduction_fraction": 0.10020979883993583
+      },
+      "decision_without_query_count": {
+        "baseline": 79,
+        "candidate": 71,
+        "delta": -8,
+        "reduction_fraction": 0.10126582278481013
+      },
+      "unique_solution_count": {
+        "baseline": 1289,
+        "candidate": 1240,
+        "delta": -49,
+        "reduction_fraction": 0.03801396431342126
+      },
+      "query_count": {
+        "baseline": 8024,
+        "candidate": 7220,
+        "delta": -804,
+        "reduction_fraction": 0.10019940179461616
+      },
+      "available_query_count": {
+        "baseline": 8024,
+        "candidate": 7220,
+        "delta": -804,
+        "reduction_fraction": 0.10019940179461616
+      },
+      "support_uncovered_query_count": {
+        "baseline": 0,
+        "candidate": 0,
+        "delta": 0,
+        "reduction_fraction": null
+      },
+      "viable_query_count": {
+        "baseline": 3288,
+        "candidate": 3515,
+        "delta": 227,
+        "reduction_fraction": -0.0690389294403893
+      },
+      "empty_action_set_count": {
+        "baseline": 4736,
+        "candidate": 3705,
+        "delta": -1031,
+        "reduction_fraction": 0.21769425675675674
+      },
+      "constrained_decision_count": {
+        "baseline": 3224,
+        "candidate": 3470,
+        "delta": 246,
+        "reduction_fraction": -0.07630272952853598
+      },
+      "serial_worker_serviceable_count": {
+        "baseline": 7992,
+        "candidate": 7194,
+        "delta": -798,
+        "reduction_fraction": 0.09984984984984985
+      },
+      "queryable_policy_decisions": {
+        "baseline": 8022,
+        "candidate": 7219,
+        "delta": -803,
+        "reduction_fraction": 0.10009972575417601
+      },
+      "expired_policy_decisions": {
+        "baseline": 42,
+        "candidate": 42,
+        "delta": 0,
+        "reduction_fraction": 0.0
+      }
+    },
+    "solve_ms": {
+      "median": {
+        "baseline": 305.04999999538995,
+        "candidate": 317.89045000914484,
+        "delta": 12.84045001375489,
+        "reduction_fraction": -0.04209293563005717
+      },
+      "p95": {
+        "baseline": 459.9488000094425,
+        "candidate": 466.9941999891307,
+        "delta": 7.045399979688227,
+        "reduction_fraction": -0.015317791848883155
+      },
+      "max": {
+        "baseline": 530.9502999880351,
+        "candidate": 539.0158999944106,
+        "delta": 8.065600006375462,
+        "reduction_fraction": -0.015190875693181111
+      }
+    },
+    "backend_counts": {
+      "baseline": {
+        "native": 1289
+      },
+      "candidate": {
+        "native": 1240
+      }
+    },
+    "solver_phase_ms": {
+      "baseline": {
+        "clearance": {
+          "median": 138.53359999484383,
+          "p95": 299.0810999763198,
+          "max": 401.2237999995705
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 15.15389999258332,
+          "max": 43.85590000310913
+        },
+        "viability": {
+          "median": 118.13149999943562,
+          "p95": 403.7405999843031,
+          "max": 433.14519998966716
+        }
+      },
+      "candidate": {
+        "clearance": {
+          "median": 133.04325001081452,
+          "p95": 305.85809997865,
+          "max": 424.56150002544746
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 17.98979999148287,
+          "max": 34.3898999853991
+        },
+        "viability": {
+          "median": 147.2448999993503,
+          "p95": 403.35700000287034,
+          "max": 472.7592999988701
+        }
+      }
+    },
+    "serial_coverage_margin_frames": {
+      "baseline": {
+        "median": 55.0,
+        "p95": 64.0,
+        "max": 64.0
+      },
+      "candidate": {
+        "median": 54.0,
+        "p95": 64.0,
+        "max": 64.0
+      }
+    }
+  },
+  "prehit_behavior": {
+    "fast_fraction": {
+      "baseline": 0.33516483516483514,
+      "candidate": 0.17714285714285713,
+      "delta": -0.158021978021978,
+      "reduction_fraction": 0.47147540983606556
+    },
+    "bottom_8px_fraction": {
+      "baseline": 0.43956043956043955,
+      "candidate": 0.37142857142857144,
+      "delta": -0.06813186813186811,
+      "reduction_fraction": 0.15499999999999994
+    },
+    "nonpositive_pipeline_fraction": {
+      "baseline": 0.18681318681318682,
+      "candidate": 0.08571428571428572,
+      "delta": -0.1010989010989011,
+      "reduction_fraction": 0.5411764705882353
+    },
+    "negative_corridor_slack_fraction": {
+      "baseline": 0.7142857142857143,
+      "candidate": 0.0,
+      "delta": -0.7142857142857143,
+      "reduction_fraction": 1.0
+    },
+    "control_reserve_deficit_mean": {
+      "baseline": 8.431733025299323,
+      "candidate": 8.873543623515538,
+      "delta": 0.4418105982162146,
+      "reduction_fraction": -0.05239855162521948
+    },
+    "positive_control_reserve_deficit_fraction": {
+      "baseline": 0.47802197802197804,
+      "candidate": 0.4742857142857143,
+      "delta": -0.003736263736263734,
+      "reduction_fraction": 0.007816091954022983
+    }
+  },
+  "input_visible_next_observation_fraction": {
+    "baseline": 0.8386009270965024,
+    "candidate": 0.937786351579455,
+    "delta": 0.09918542448295264,
+    "reduction_fraction": -0.11827488055178222
+  },
+  "per_phase": {
+    "nonspell": {
+      "spell_name": null,
+      "hit_count": {
+        "baseline": 4,
+        "candidate": 5,
+        "delta": 1,
+        "reduction_fraction": -0.25
+      },
+      "decision_count": {
+        "baseline": 4714,
+        "candidate": 4596,
+        "delta": -118,
+        "reduction_fraction": 0.025031820110309716
+      },
+      "query_count": {
+        "baseline": 4601,
+        "candidate": 4474,
+        "delta": -127,
+        "reduction_fraction": 0.027602695066289935
+      },
+      "empty_action_set_count": {
+        "baseline": 2798,
+        "candidate": 2444,
+        "delta": -354,
+        "reduction_fraction": 0.12651894210150108
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 320.8860000013374,
+          "candidate": 325.5963000119664,
+          "delta": 4.710300010628998,
+          "reduction_fraction": -0.014679044927511225
+        },
+        "p95": {
+          "baseline": 475.2366000029724,
+          "candidate": 474.2383999982849,
+          "delta": -0.9982000046875328,
+          "reduction_fraction": 0.0021004274600931187
+        },
+        "max": {
+          "baseline": 530.9502999880351,
+          "candidate": 539.0158999944106,
+          "delta": 8.065600006375462,
+          "reduction_fraction": -0.015190875693181111
+        }
+      }
+    },
+    "103": {
+      "spell_name": "幻波「赤眼催眠(マインドブローイング)」",
+      "hit_count": {
+        "baseline": 2,
+        "candidate": 1,
+        "delta": -1,
+        "reduction_fraction": 0.5
+      },
+      "decision_count": {
+        "baseline": 864,
+        "candidate": 679,
+        "delta": -185,
+        "reduction_fraction": 0.21412037037037038
+      },
+      "query_count": {
+        "baseline": 840,
+        "candidate": 667,
+        "delta": -173,
+        "reduction_fraction": 0.20595238095238094
+      },
+      "empty_action_set_count": {
+        "baseline": 396,
+        "candidate": 354,
+        "delta": -42,
+        "reduction_fraction": 0.10606060606060606
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 389.29530000314116,
+          "candidate": 388.86989999446087,
+          "delta": -0.4254000086802989,
+          "reduction_fraction": 0.0010927437569291651
+        },
+        "p95": {
+          "baseline": 452.19019998330623,
+          "candidate": 480.96909999730997,
+          "delta": 28.77890001400374,
+          "reduction_fraction": -0.06364335187951041
+        },
+        "max": {
+          "baseline": 495.61719998018816,
+          "candidate": 500.6050000083633,
+          "delta": 4.987800028175116,
+          "reduction_fraction": -0.010063815437346602
+        }
+      }
+    },
+    "107": {
+      "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+      "hit_count": {
+        "baseline": 2,
+        "candidate": 1,
+        "delta": -1,
+        "reduction_fraction": 0.5
+      },
+      "decision_count": {
+        "baseline": 964,
+        "candidate": 529,
+        "delta": -435,
+        "reduction_fraction": 0.4512448132780083
+      },
+      "query_count": {
+        "baseline": 951,
+        "candidate": 512,
+        "delta": -439,
+        "reduction_fraction": 0.4616193480546793
+      },
+      "empty_action_set_count": {
+        "baseline": 821,
+        "candidate": 402,
+        "delta": -419,
+        "reduction_fraction": 0.510353227771011
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 293.6853499850258,
+          "candidate": 290.43470000033267,
+          "delta": -3.2506499846931547,
+          "reduction_fraction": 0.011068478508917439
+        },
+        "p95": {
+          "baseline": 346.3065999967512,
+          "candidate": 370.9569000056945,
+          "delta": 24.650300008943304,
+          "reduction_fraction": -0.07118056661113174
+        },
+        "max": {
+          "baseline": 460.76470002299175,
+          "candidate": 458.76660000067204,
+          "delta": -1.9981000223197043,
+          "reduction_fraction": 0.004336486762592709
+        }
+      }
+    },
+    "111": {
+      "spell_name": "懶惰「生神停止(マインドストッパー)」",
+      "hit_count": {
+        "baseline": 0,
+        "candidate": 5,
+        "delta": 5,
+        "reduction_fraction": null
+      },
+      "decision_count": {
+        "baseline": 773,
+        "candidate": 857,
+        "delta": 84,
+        "reduction_fraction": -0.10866752910737387
+      },
+      "query_count": {
+        "baseline": 757,
+        "candidate": 848,
+        "delta": 91,
+        "reduction_fraction": -0.1202113606340819
+      },
+      "empty_action_set_count": {
+        "baseline": 343,
+        "candidate": 162,
+        "delta": -181,
+        "reduction_fraction": 0.5276967930029155
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 222.82510000513867,
+          "candidate": 312.09034999483265,
+          "delta": 89.26524998969398,
+          "reduction_fraction": -0.4006067987297454
+        },
+        "p95": {
+          "baseline": 404.09700002055615,
+          "candidate": 463.0594000045676,
+          "delta": 58.96239998401143,
+          "reduction_fraction": -0.14591150139944628
+        },
+        "max": {
+          "baseline": 449.58409998798743,
+          "candidate": 493.6131000285968,
+          "delta": 44.02900004060939,
+          "reduction_fraction": -0.09793273392405517
+        }
+      }
+    },
+    "115": {
+      "spell_name": "散符「真実の月(インビジブルフルムーン)」",
+      "hit_count": {
+        "baseline": 4,
+        "candidate": 2,
+        "delta": -2,
+        "reduction_fraction": 0.5
+      },
+      "decision_count": {
+        "baseline": 890,
+        "candidate": 736,
+        "delta": -154,
+        "reduction_fraction": 0.17303370786516853
+      },
+      "query_count": {
+        "baseline": 875,
+        "candidate": 719,
+        "delta": -156,
+        "reduction_fraction": 0.1782857142857143
+      },
+      "empty_action_set_count": {
+        "baseline": 378,
+        "candidate": 343,
+        "delta": -35,
+        "reduction_fraction": 0.09259259259259259
+      },
+      "solve_ms": {
+        "median": {
+          "baseline": 290.79889997956343,
+          "candidate": 287.92619999148883,
+          "delta": -2.8726999880746007,
+          "reduction_fraction": 0.00987864805635952
+        },
+        "p95": {
+          "baseline": 418.7227000074927,
+          "candidate": 428.85409999871626,
+          "delta": 10.131399991223589,
+          "reduction_fraction": -0.02419596547080513
+        },
+        "max": {
+          "baseline": 456.0623999859672,
+          "candidate": 479.7551000083331,
+          "delta": 23.692700022365898,
+          "reduction_fraction": -0.051950566464358625
+        }
+      }
+    }
+  },
+  "candidate_primary_cause_counts": {
+    "modeled_committed_prefix_collision": 5,
+    "observed_bullet_overlap": 7,
+    "sensor_gap_or_unmodeled_hazard": 2
+  },
+  "candidate_planner_failure_counts": {
+    "global_viability_kernel_exhausted_before_hit": 12,
+    "missing_pre_hit_alive_decision": 1,
+    "unresolved_planner_failure": 1
+  }
+}

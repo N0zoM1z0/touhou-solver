@@ -1925,3 +1925,63 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - The next behavior-neutral Stage-5 run must enable this diagnostic and
   produce adjacent active stop/resume samples before projection code is
   allowed to consume the runtime state.
+
+## 2026-07-24: Spell-111 Callback Mechanism And Rejected Transform Hypothesis
+
+- Complete diagnostic run `20260724_105457` covered the whole 1,536-slot
+  bullet pool during spell 111. Its compact source-hashed report retains
+  189,877 samples at 100 percent active-pool coverage. Active flags were
+  always zero, original flags were always `0x00100202`, the queue cursor was
+  always zero, and no queued stop transition occurred.
+- **Observed runtime differential:** Same-slot groups changed from normal
+  velocity to zero together at frames 35,689 and 36,047, then resumed at
+  35,788 and 36,148. The approximately 100-frame zero-velocity interval
+  rejects the queued 0x40/0x80/0x100 hypothesis while preserving the
+  previously recovered transform layout as a separate mechanism.
+- **Observed static/native cause:** `ecldata5` sub 63 invokes callback 12 at
+  local times 350 and 450 and jumps from 710 back to 350. Callback 12
+  (`0x00424A20`) matches VM tag mask `+0x18` against bullet original/tag flags
+  `+0xDB0`, toggles bullet phase `+0x1FC`, presentation state, animation,
+  aux byte `+0x10B4`, and velocity. Its phase-one branch uses VM
+  angle/speed `+0x38/+0x3C`; the other restores bullet base angle/speed.
+- No new REA claim is used for the callback conclusion. The earlier queued
+  transform evidence remains
+  `ev_7f655f7f0cb4948ce0753ef441b6bef7a3008601e345b6b8f40d40db44054338`,
+  `ev_f80073c867ce14ae63fe52283dcfeeea322b83b3368b790fb539960fcd65ae2d`,
+  and the handler Evidence IDs recorded above; the new separation is based on
+  decoded shipped ECL, IDA/native code, and physical same-slot traces.
+
+## 2026-07-24: Piecewise Hazards, Adversarial Differential, And Failed Activation
+
+- Added a game-neutral finite piecewise-linear trajectory contract. A
+  `VelocityChange` applies before movement on its event update. The neutral
+  corridor planner accepts time-indexed AABB trajectories, and both the
+  scalar oracle and native C++ backend lower those trajectories without
+  fitting a constant velocity.
+- Added deterministic adversarial generation with straight, stop, resume,
+  redirect, and reversal cases. The retained benchmark uses seeds
+  `8008..8011`, 2,048 hazards per seed, and 32 frames—denser than TH08's
+  1,536-slot native pool. Native volumes match the independent scalar oracle
+  within `1.72e-5` against a `5e-5` tolerance. Failure paths retain the seed
+  and delta-debug the hazard subset. This is a differential gate, not physical
+  acceptance.
+- Complete Stage-5 run `20260724_113250` recorded 21 hits and zero Bomb.
+  Spell 111 had hits at frames 39,706 and 41,151. The compact callback report
+  retains 42,377 stopped `(phase=0,aux=1)` samples, 83,930 moving
+  `(phase=1,aux=0)` samples, and 3,037 adjacent coordinated state/motion
+  changes.
+- **Failed implementation gate:** Every one of 844 lookahead records had
+  timer zero, zero future events, and zero attached bullets. VM `+0x94/+0x98`
+  had been mistaken for the main timer. Runtime memory and native opcode-4
+  code establish the actual timer at `+0x04/+0x08/+0x0C`; opcode 4 stores its
+  target time to `VM+0x0C` and adds the signed displacement to the current
+  instruction address.
+- The real decoded sub-63 loop now forms an executable regression: from
+  pending jump `0x6FE8` at timer 600 it predicts callbacks at `+110` and
+  `+210`. The live trace exposes instruction count, stop reason, horizon
+  coverage, tag/phase/attachment counts, and capture-frame windows, so a
+  future run cannot silently claim this feature while attaching zero hazards.
+- Corrected a second timing ambiguity before another physical run.
+  `HazardEpochAlignment` distinguishes old source-state lag, fresh hazard age,
+  ECL-to-hazard event offset, and capture-window uncertainty. The corridor no
+  longer advances newly read bullets by the older player-state lag.

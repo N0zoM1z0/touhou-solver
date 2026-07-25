@@ -2000,6 +2000,35 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(decision.viability_recovery_distance, 315.0)
         self.assertEqual(decision.viability_control_reserve_deficit, 0.0)
 
+    def test_repair_state_control_reserve_remains_shadow_only(self) -> None:
+        common = {
+            "player_x": 362.0,
+            "player_y": 30.0,
+            "bullets": (),
+            "lasers": (),
+            "previous_direction": DOWN,
+            "previous_focus": True,
+            "can_bomb": False,
+            "control_delay_frames": 3,
+            "control_delay_candidates": (3, 4, 5, 6),
+            "action_hold_frames": 6,
+            "horizon": 10,
+            "viability_repair_volumes": (
+                ("stay", 1),
+                ("down", 100),
+                ("up_right_fast", 1),
+            ),
+        }
+        baseline = choose_action(**common)
+        shadow = choose_action(
+            **common,
+            losing_control_reserve=True,
+        )
+        self.assertEqual(baseline.action, "down")
+        self.assertEqual(baseline.viability_control_reserve_deficit, 10.0)
+        self.assertEqual(shadow.action, "down_left_fast")
+        self.assertEqual(shadow.viability_control_reserve_deficit, 0.0)
+
     def test_exact_local_collision_outranks_distant_kernel_recovery(
         self,
     ) -> None:

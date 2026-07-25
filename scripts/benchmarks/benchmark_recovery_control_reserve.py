@@ -147,6 +147,10 @@ def _replay_decision(
     enforce_fresh_viability_intersection: bool = True,
     viability_safety_actions: tuple[str, ...] = (),
     viability_safety_state_value: float | None = None,
+    viability_survival_actions: tuple[str, ...] = (),
+    viability_survival_frames: int | None = None,
+    viability_survival_bottleneck_margin: float | None = None,
+    losing_control_reserve: bool = False,
 ):
     bullets = tuple(
         _bullet_from_trace(values)
@@ -204,7 +208,13 @@ def _replay_decision(
         ),
         viability_safety_actions=viability_safety_actions,
         viability_safety_state_value=viability_safety_state_value,
+        viability_survival_actions=viability_survival_actions,
+        viability_survival_frames=viability_survival_frames,
+        viability_survival_bottleneck_margin=(
+            viability_survival_bottleneck_margin
+        ),
         recovery_control_reserve=recovery_control_reserve,
+        losing_control_reserve=losing_control_reserve,
         relax_stale_viability_contradiction=(
             relax_stale_viability_contradiction
         ),

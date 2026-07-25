@@ -149,6 +149,11 @@ These instructions apply to every file and task below this directory.
   query-local successor stays shadow-only until complete viable-state and
   safe-action-mask parity is demonstrated, not only representative endpoint
   parity.
+- A shadow computation that shares the live worker, CPU budget, or
+  publication critical path can change policy age and therefore is not
+  side-effect-free. Publish the authoritative safety result before optional
+  shadow work, or keep the shadow offline; report its delivery cost separately
+  from label-query cost.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 
@@ -171,6 +176,9 @@ These instructions apply to every file and task below this directory.
   comparison summary, and a human-readable note under `notes/runs/`.
 - Record discarded, truncated, reset-tail, lost-foreground, or manually
   contaminated trials as such. Never merge them into an acceptance baseline.
+- Report a fresh canonical attempt separately from later post-hit/respawn
+  discovery. Retained later deaths are valid geometry and planner
+  counterexamples, but they are not independent clean-route survival samples.
 - Stage transitions and dialogue auto-confirm behavior are part of the trial.
   Record manual `Z` intervention and auto-confirm failures.
 

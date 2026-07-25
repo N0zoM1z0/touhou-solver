@@ -12,13 +12,61 @@ from unittest.mock import patch
 from touhou_control.viability_audit_capsule import (
     write_viability_audit_capsule,
 )
+from touhou_control.packed_hazards import PackedSegmentFrames
 from analysis.viability_differential_audit import (
     _classify_empty_query,
+    _empty_rescue_factors,
+    _packed_horizon_prefix,
+    _select_query_rows,
     audit,
 )
 
 
 class ViabilityDifferentialAuditTests(unittest.TestCase):
+    def test_stratified_selection_covers_both_warning_boundaries(self) -> None:
+        rows = [{"frame": frame} for frame in range(9)]
+        selected = _select_query_rows(
+            rows,
+            limit=3,
+            mode="stratified",
+        )
+        self.assertEqual(
+            tuple(row["frame"] for row in selected),
+            (0, 4, 8),
+        )
+
+    def test_short_horizon_slices_packed_laser_frames(self) -> None:
+        packed = PackedSegmentFrames.from_frame_rows(
+            tuple(
+                ((float(frame), 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0),)
+                for frame in range(5)
+            )
+        )
+        prefix = _packed_horizon_prefix(packed, frame_count=3)
+        self.assertIsNotNone(prefix)
+        assert prefix is not None
+        self.assertEqual(prefix.frame_count, 3)
+        self.assertEqual(prefix.sample_count, 3)
+        self.assertEqual(tuple(prefix.origin_x), (0.0, 1.0, 2.0))
+
+    def test_empty_rescue_factors_remain_independent(self) -> None:
+        self.assertEqual(
+            _empty_rescue_factors(
+                trace_empty=True,
+                current_delay_viable=True,
+                spatial_variant_viable=True,
+                uncertainty_no_growth_viable=False,
+                uncertainty_none_viable=True,
+                short_horizon_viable=True,
+            ),
+            (
+                "full_async_delay_envelope",
+                "spatial_quantization",
+                "base_or_forecast_uncertainty",
+                "finite_horizon_requirement",
+            ),
+        )
+
     def test_future_birth_is_evidence_not_the_cause_of_an_empty_kernel(
         self,
     ) -> None:

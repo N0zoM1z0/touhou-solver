@@ -5,7 +5,7 @@ trying to solve, and why they are live, shadow-only, rejected, or still only a
 hypothesis. It is an index, not a replacement for the detailed design notes,
 counterexamples, run dossiers, or `notes/RESEARCH_LOG.md`.
 
-Last updated: 2026-07-24.
+Last updated: 2026-07-25.
 
 ## Status Vocabulary
 
@@ -131,14 +131,25 @@ The next architectural target is a delivery-aware solver:
 - **Observed result:** Cross-stage replay found useful recovery guidance, but
   scalar endpoint distance does not prove a safe bridge. CE-0089 also showed
   that letting a soft reserve enter beam pruning before hard delay
-  certificates can erase safer first actions.
+  certificates can erase safer first actions. The 2026-07-25 Stage-5 audit
+  found the converse gap after the Boolean kernel became empty: repair-volume
+  guidance disabled boundary reserve entirely. At canonical decision 1,680,
+  the fallback chose `down_right_fast` outside the 74-frame survival-best
+  mask with a 24-pixel diagnostic reserve deficit.
 - **Failure mode:** It optimizes an endpoint without representing every
-  intermediate state. Hard-before-soft ordering is now enforced at pruning
-  and selection.
+  intermediate state. Hard-before-soft ordering is enforced at pruning and
+  selection, but the live losing-state order still lacks guaranteed survival
+  horizon and does not apply reserve to repair-neighborhood states.
+- **Current shadow:** A default-off `losing_control_reserve` switch applies
+  delay-scaled reserve to repair/survival states only after fresh hard-vector
+  equivalence. Reserve-only replay improved 13/195 measured deficits and
+  regressed zero; it has no physical authority.
 - **Reactivation/upgrade gate:** Replace endpoint distance with a
-  time-expanded robust recovery band that has scalar-oracle parity and does
-  not worsen hard-vector counts on retained cross-stage rows.
-- **Evidence:** `notes/ALGORITHM_REVIEW_20260724.md`.
+  time-expanded robust survival/recovery band that has scalar-oracle parity,
+  meets the delivery budget, and does not worsen hard-vector counts on
+  retained cross-stage rows.
+- **Evidence:** `notes/ALGORITHM_REVIEW_20260724.md` and
+  `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`.
 
 ### S06 — Max-Min Safety Value
 
@@ -206,6 +217,14 @@ The next architectural target is a delivery-aware solver:
   170.77/380.59 ms to 532.04/1174.21 ms; unique delivered policies fell from
   1,728 to 630; expired decisions rose from 34 to 178. Empty queries fell, but
   the delivered controller became substantially staler.
+- **New shadow evidence:** Exact reconstruction matched all 272 stratified
+  Stage-5 queries; 195 were base-empty. Survival-first replay changed 42/195
+  actions, increased survival-best membership from 134 to 175, and caused
+  zero fresh local hard-vector regressions. Canonical decision 1,680 changed
+  from `down_right_fast` to `stay`. On 48 exact capsules, Boolean/fused viable
+  arrays and action masks matched, but whole-solve median/p95 was
+  `76.96/197.99` versus `125.31/229.58 ms`. Producing the label inline would
+  still delay Boolean publication.
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control
@@ -215,8 +234,9 @@ The next architectural target is a delivery-aware solver:
   time without increasing policy expiry or local latency. Scalar parity alone
   is insufficient.
 - **Evidence:** `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`,
+  `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`,
   `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
-  the retained Stage-4A run dossier.
+  the retained Stage-4A/Stage-5 run dossiers.
 
 ### S10 — Damage-Aware Phase Completion
 

@@ -2599,3 +2599,39 @@ Status: observed | inferred | unknown | fixed
   route-complete summary/dossier gate. The recovered session records why its
   temporary postprocessing status changed from discarded to completed.
 - **Regression:** `test_terminal_unload_precedes_route_complete_summary`.
+
+## CE-0106: Empty-kernel fallback ignored survival horizon and repair-state reserve
+
+- **Observed witness:** In the fresh Stage-5 attempt
+  `lunatic_route2_stage5_unattended_20260725_103655`, the exact reconstructed
+  Boolean query became empty at decision 1,680, 126 frames before the first
+  hit. The fused oracle guaranteed 74 modeled frames for `stay` and
+  `up_fast`, while the live fallback selected `down_right_fast`.
+- **Hard-vector relation:** The selected action still had zero fresh local
+  robust collisions and `+6.443` minimum clearance. This is therefore an
+  objective-ordering defect after loss, not evidence that the local
+  certificate accepted an immediate collision.
+- **Reserve defect:** Repair volumes were present, so the old reserve term was
+  disabled. Exact replay measured a 24-pixel control-reserve deficit for the
+  selected action. At decision 1,760 the same ordering chose `down_right`
+  instead of the nine-frame survival-best `stay`.
+- **Correction boundary:** `losing_control_reserve` is explicit and
+  default-off; survival/reserve variants remain shadow-only. Across 195 losing
+  queries, survival-first changed 42 actions and improved best-mask membership
+  `134 -> 175`; reserve-only improved 13 measured deficits and regressed zero.
+  Neither result authorizes physical input.
+- **Regression:** `test_repair_state_control_reserve_remains_shadow_only`.
+- **Evidence:** `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`.
+
+## CE-0107: Short-horizon audit reused an unsliced packed laser batch
+
+- **Observed failure:** The first short-horizon differential passed a packed
+  laser trajectory containing 81 frames into a 32/48/64-frame solver
+  configuration. The native contract correctly rejected the mismatched frame
+  count instead of silently truncating it.
+- **Cause:** The audit shortened `horizon_frames` but retained the base
+  frame-major offsets and samples. Object trajectories had been naturally
+  re-lowered; the packed fast path had not.
+- **Correction:** `_packed_horizon_prefix` now slices both offsets and sample
+  storage at the requested frame boundary before the counterfactual solve.
+- **Regression:** `test_packed_horizon_prefix_slices_frames_and_samples`.

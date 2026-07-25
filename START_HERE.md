@@ -648,6 +648,26 @@ Therefore the next correction is targeted boundary refinement plus a
 survival-first losing-state action, not global 4-pixel induction and not a
 single tuned distance weight.
 
+The 2026-07-25 focused Stage-5 audit sharpens that result. Exact
+reconstruction matched all 272 stratified queries; 195 were empty. Independent
+single-factor ablations rescued 16 with 4-pixel refinement, 6 with current
+delay support, 24 without uncertainty growth, 34 without retained
+uncertainty, and 45 with at least one shorter horizon; the sets overlap and
+147 had no tested single-factor rescue. Only frame 1,804 is a fresh canonical
+hit. At decision 1,680, 126 frames earlier, the live fallback selected
+`down_right_fast` outside the 74-frame survival-best mask and incurred a
+24-pixel diagnostic reserve deficit because repair-volume guidance disabled
+the old reserve term.
+
+Offline survival-first replay changed 42/195 losing actions, raised
+survival-best membership from 134 to 175, and caused zero fresh local
+hard-vector regressions. Fused production is not live-ready: on 48 exact
+capsules its whole-solve median/p95 was `125.31/229.58 ms` versus
+`76.96/197.99 ms` for Boolean induction. A shadow sharing the publication
+worker would still stale the authoritative policy. Keep both survival labels
+and the new repair-state reserve switch default-off. Read
+`notes/LOSING_STATE_ROOT_CAUSE_20260725.md`.
+
 ### CE-0087/0088: Compute Deadline And Optional Safety Value
 
 The issue-time guard now suppresses expired new directions and invalidates
@@ -751,23 +771,24 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 
 1. `AGENTS.md`
 2. `START_HERE.md`
-3. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
-4. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
-5. `notes/ALGORITHM_REVIEW_20260724.md`
-6. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0101
-7. `notes/RESEARCH_LOG.md`, latest five dated sections
-8. `notes/ROBUST_VIABILITY.md`
-9. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
-10. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
-11. `notes/NATIVE_PLANNER_BACKEND.md`
-12. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
-13. `scripts/analysis/viability_differential_audit.py`
-14. `scripts/th08_live_dodge_agent.py`
-15. `scripts/touhou_control/reachability_oracle.py`
-16. `scripts/th08_bullet_transform_model.py`
-17. `scripts/th08_corridor_adapter.py`
-18. `scripts/touhou_control/viability.py`
-19. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
+3. `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
+4. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
+5. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
+6. `notes/ALGORITHM_REVIEW_20260724.md`
+7. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0107
+8. `notes/RESEARCH_LOG.md`, latest five dated sections
+9. `notes/ROBUST_VIABILITY.md`
+10. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
+11. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
+12. `notes/NATIVE_PLANNER_BACKEND.md`
+13. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
+14. `scripts/analysis/viability_differential_audit.py`
+15. `scripts/th08_live_dodge_agent.py`
+16. `scripts/touhou_control/reachability_oracle.py`
+17. `scripts/th08_bullet_transform_model.py`
+18. `scripts/th08_corridor_adapter.py`
+19. `scripts/touhou_control/viability.py`
+20. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
     `notes/runs/lunatic_route2_stage3_unattended_20260724_132007.md`,
     `notes/runs/lunatic_route2_stage4a_unattended_20260724_185059.md`,
     `notes/runs/lunatic_route2_stage5_unattended_20260724_201636.md`, and
@@ -818,27 +839,35 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 A good next commit is not "the randomized stage had fewer hits" by itself. It
 should:
 
-1. Prototype a packed native issue-time bullet/laser/enemy
+1. Publish the Boolean policy before optional shadow work, then make fused
+   losing-state labels query-local or otherwise fit a measured service
+   budget. Preserve ordering: fresh hard vector, guaranteed survival frames,
+   bottleneck clearance, control reserve, then recovery distance.
+2. Add explicit pending-command/remaining-delay state to an independent
+   reachability oracle. Recheck canonical Stage-5 decision 1,680 and a
+   predefined cross-stage cohort before calling unresolved empty states
+   genuinely uncontrollable.
+3. Prototype a packed native issue-time bullet/laser/enemy
    decode-plus-project-plus-all-action certificate with a fixed service
    budget. It must preserve the strict version contract and improve
    whole-decision p95, not only a micro-kernel.
-2. Add ECL/timeline `BirthWindow` coverage for enemy allocations and
+4. Add ECL/timeline `BirthWindow` coverage for enemy allocations and
    projectile emissions without putting TH08 details in the generic planner.
-3. Make background planning anytime/cancellable and publish explicit source
+5. Make background planning anytime/cancellable and publish explicit source
    version, event coverage, delay support, terminal invariant, and expiry.
-4. Keep CE-0100 refinement query-local or inside a reachable tube. Reproduce
+6. Keep CE-0100 refinement query-local or inside a reachable tube. Reproduce
    all three witnesses in shadow without increasing live expiry, missing
    queries, or local latency.
-5. Use the now-validated Boss HP/phase sensor with the existing executable
+7. Use the now-validated Boss HP/phase sensor with the existing executable
    SHT/option/cadence model. Validate predicted versus native HP delta in
    shadow; do not restore the rejected Boss-x live proxy.
-6. Audit instant-winning terminal states and add pending-command/remaining-
-   delay state before claiming exact event-time layers.
-7. Require randomized delayed-birth/stop/reverse/redirect parity, relevant
+8. Audit instant-winning terminal states before claiming exact event-time
+   layers.
+9. Require randomized delayed-birth/stop/reverse/redirect parity, relevant
    platform/native tests, and whole-pipeline timing before physical use.
-8. Use a focused boss phase and then a different stage for physical A/B.
-   Retain every required artifact and counterexample while leaving raw traces,
-   logs, native binaries, and `image.png` untracked.
+10. Use repeated fresh Stage-5 focused attempts and then a different stage
+    for physical A/B. Retain every required artifact and counterexample while
+    leaving raw traces, logs, native binaries, and `image.png` untracked.
 
 ## 15. Suggested First Prompt For A New Codex
 
@@ -846,17 +875,19 @@ should:
 Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
 START_HERE.md and STRATEGY.md completely, then inspect git status and the
 latest commit. Keep hard no-Bomb; keep safety value, fused survival labels,
-and fine refinement shadow-only. Read the route-conditioned strategy,
-20260724 Stage-5 differential, and delivery-aware reassessment notes plus
-CE-0099..0104. Exact capsule replay
-found 3/54 spatial coarse false-empties, but the live full-horizon 8px
-promotion raised solve p95 to 1.174 seconds and expired far more policies.
-Build delivery-aware control: a packed issue-time bullet/laser/enemy
-certificate, versioned/cancellable background policies, and ECL/timeline
-`BirthWindow` events. Preserve the validated native Boss HP/phase sensor;
-replace the rejected horizontal-alignment proxy with the executable SHT and
-option damage model in shadow. Keep mechanics/safety game-neutral while
-allowing explicit route/stage/phase practiced profiles. Retain
-artifacts/counterexamples, use tiered relevant tests, commit verified
+fine refinement shadow-only. Read
+`notes/LOSING_STATE_ROOT_CAUSE_20260725.md` plus CE-0106/0107. The exact
+Stage-5 audit reconstructed 272/272 queries and confirmed that global
+emptiness has mixed causes, while canonical decision 1,680 proves the live
+fallback can choose outside a 74-frame survival-best mask and ignore a
+24-pixel reserve deficit. Offline survival-first replay improved best-mask
+membership without fresh hard-vector regressions, but fused induction still
+costs about 48 ms median and must not delay Boolean publication. Build an
+independent pending-command/remaining-delay oracle and a query-local or
+post-publication losing-state label before physical promotion. Continue the
+packed issue-time certificate and ECL/timeline `BirthWindow` work; keep
+mechanics/safety game-neutral while allowing explicit practiced profiles.
+Retain compact artifacts and counterexamples, separate canonical attempts
+from post-respawn discovery, use tiered relevant tests, commit verified
 checkpoints, and stop every runtime session.
 ```

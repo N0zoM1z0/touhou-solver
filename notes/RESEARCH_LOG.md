@@ -2655,3 +2655,34 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   The physical run itself was never interrupted; its session preserves the
   temporary status error and recovery reason. A focused regression protects
   the corrected two-stage completion contract.
+
+## 2026-07-25: Stage-5 Losing-State Root Cause And Shadow Repair
+
+- Completed focused hard-no-Bomb Stage-5 capture
+  `lunatic_route2_stage5_unattended_20260725_103655`: 6,884 decisions, 34 hit
+  edges, zero Bomb-input violations, and clean `route_complete`. Only the
+  first hit is a fresh canonical attempt; later respawn deaths remain
+  discovery counterexamples.
+- Exact differential reconstructed all 272 stratified policy queries. Of 195
+  base-empty states, independent ablations rescued 16 at 4-pixel resolution,
+  6 with query-time delay support, 24 without uncertainty growth, 34 without
+  retained uncertainty, and 45 with at least one shorter horizon. No single
+  factor rescued the remaining 147.
+- Confirmed the fallback ordering defect at canonical decision 1,680: the
+  live policy selected `down_right_fast` outside the 74-frame survival-best
+  mask and carried a 24-pixel diagnostic reserve deficit. Repair-volume
+  guidance had disabled the prior boundary-reserve term.
+- Added default-off losing-state reserve diagnostics and exact offline
+  survival/reserve replay. Survival-first changed 42/195 actions and improved
+  survival-best membership `134 -> 175`; combined ordering changed 50/195.
+  Fresh local hard vectors regressed on zero rows.
+- Whole-solve delivery audit on 48 exact capsules preserved Boolean/fused
+  viable and action-mask parity, but fused median/p95 remained
+  `125.31/229.58 ms` versus `76.96/197.99 ms`. Survival labels and fine
+  refinement therefore remain shadow/offline.
+- Linux and Windows quick suites both passed 441 tests in 1.450/2.881
+  seconds. The default live strategy remains unchanged.
+- Recorded CE-0106 for the losing fallback and CE-0107 for packed
+  short-horizon slicing. The unresolved temporal hypothesis is an explicit
+  pending-command/remaining-delay state, not a Stage-107 special case.
+- Full analysis: `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`.

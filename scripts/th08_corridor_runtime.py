@@ -154,6 +154,7 @@ def solve_corridor(
     control_delay_candidates: tuple[int, ...],
     nominal_control_delay: int,
     active_action: str,
+    observed_control_delay_candidates: tuple[int, ...] | None = None,
     safety_value_horizon_frames: int = 0,
     required_gate_lane: str | None = None,
     context_key: tuple[int, int, int | None] | None = None,
@@ -202,6 +203,11 @@ def solve_corridor(
             "player_y": player_y,
             "snapshot_lag": snapshot_lag,
             "control_delay_candidates": control_delay_candidates,
+            "observed_control_delay_candidates": (
+                observed_control_delay_candidates
+                if observed_control_delay_candidates is not None
+                else control_delay_candidates
+            ),
             "nominal_control_delay": nominal_control_delay,
             "active_action": active_action,
             "required_gate_lane": required_gate_lane,

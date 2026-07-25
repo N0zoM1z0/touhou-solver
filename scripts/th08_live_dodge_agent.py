@@ -2854,6 +2854,7 @@ def choose_action(
     damage_target_half_width: float = 0.0,
     damageable: bool = False,
     recovery_control_reserve: bool = True,
+    losing_control_reserve: bool = False,
     preserve_previous_direction_inertia: bool = True,
     relax_stale_viability_contradiction: bool = False,
     enforce_fresh_viability_intersection: bool = True,
@@ -2984,14 +2985,20 @@ def choose_action(
         if control_delay_candidates is not None
         else (control_delay_frames,)
     )
-    diagnostic_recovery_reserve_distance = (
+    diagnostic_losing_reserve_distance = (
         UNFOCUSED_CARDINAL_SPEED * max(certificate_delay_frames)
-        if recovery_by_action
+        if recovery_by_action or repair_by_action or survival_actions
         else 0.0
     )
     recovery_reserve_distance = (
-        diagnostic_recovery_reserve_distance
-        if recovery_control_reserve
+        diagnostic_losing_reserve_distance
+        if (
+            (recovery_control_reserve and recovery_by_action)
+            or (
+                losing_control_reserve
+                and (repair_by_action or survival_actions)
+            )
+        )
         else 0.0
     )
     certificate_horizon = (
@@ -3664,7 +3671,7 @@ def choose_action(
         _boundary_control_reserve_deficit(
             best.x,
             best.y,
-            reserve_distance=diagnostic_recovery_reserve_distance,
+            reserve_distance=diagnostic_losing_reserve_distance,
         ),
         bool(
             safety_value_actions
@@ -3729,6 +3736,7 @@ def choose_action(
             ),
             viability_position_error=viability_position_error,
             recovery_control_reserve=recovery_control_reserve,
+            losing_control_reserve=losing_control_reserve,
             preserve_previous_direction_inertia=(
                 preserve_previous_direction_inertia
             ),
@@ -4832,6 +4840,9 @@ def run(args: argparse.Namespace) -> int:
                     enemy_bodies=enemy_bodies,
                     snapshot_lag=hazard_snapshot_age,
                     control_delay_candidates=policy_delay_support,
+                    observed_control_delay_candidates=(
+                        delay_estimate.support
+                    ),
                     nominal_control_delay=control_delay_frames,
                     active_action=_action_name_from_mask(previous_mask),
                     safety_value_horizon_frames=(

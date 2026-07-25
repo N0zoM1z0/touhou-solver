@@ -39,6 +39,10 @@ from touhou_control.viability_audit_capsule import (
     read_viability_audit_capsule,
     read_viability_audit_metadata,
 )
+from touhou_control.packed_hazards import (
+    SEGMENT_FIELD_NAMES,
+    PackedSegmentFrames,
+)
 
 
 @dataclass(frozen=True)
@@ -49,6 +53,8 @@ class AuditVariant:
     horizon_frames: int
     delay_mode: str = "exact"
     causal_role: str = "classification"
+    delay_frames: tuple[int, ...] | None = None
+    uncertainty_mode: str = "modeled"
 
 
 @dataclass(frozen=True)
@@ -70,6 +76,30 @@ TIME_4_CLIPPED = AuditVariant(
     80,
     delay_mode="clip",
     causal_role="diagnostic_only",
+)
+QUERY_DELAY_SUPPORT = AuditVariant(
+    "space16_time8_h80_delay_current_query",
+    16.0,
+    8,
+    80,
+    delay_mode="override",
+    causal_role="diagnostic_only",
+)
+NO_GROWTH_UNCERTAINTY = AuditVariant(
+    "space16_time8_h80_uncertainty_no_growth",
+    16.0,
+    8,
+    80,
+    causal_role="diagnostic_only",
+    uncertainty_mode="no_growth",
+)
+NO_UNCERTAINTY = AuditVariant(
+    "space16_time8_h80_uncertainty_none",
+    16.0,
+    8,
+    80,
+    causal_role="diagnostic_only",
+    uncertainty_mode="none",
 )
 SHORT_HORIZONS = tuple(
     AuditVariant(f"space16_time8_h{horizon}", 16.0, 8, horizon)
@@ -96,7 +126,12 @@ def _variant_delays(
     variant: AuditVariant,
 ) -> tuple[tuple[int, ...], int]:
     raw = metadata["control_delay_candidates"]
-    delays = tuple(int(value) for value in raw)
+    delays = (
+        variant.delay_frames
+        if variant.delay_mode == "override"
+        and variant.delay_frames is not None
+        else tuple(int(value) for value in raw)
+    )
     nominal = int(metadata["nominal_control_delay"])
     if variant.delay_mode == "clip":
         delays = tuple(
@@ -112,12 +147,104 @@ def _variant_delays(
             f"delay {delays[-1]} exceeds {variant.frames_per_layer}-frame "
             "layer without pending-command state"
         )
+    if nominal not in delays:
+        nominal = min(delays, key=lambda delay: abs(delay - nominal))
     return delays, nominal
+
+
+def _uncertainty_adjusted_hazards(
+    capsule: ViabilityAuditCapsule,
+    mode: str,
+) -> tuple[
+    tuple[object, ...],
+    tuple[object, ...],
+    tuple[object, ...],
+    PackedSegmentFrames | None,
+]:
+    if mode == "modeled":
+        return (
+            capsule.aabbs,
+            capsule.piecewise_aabbs,
+            capsule.segment_trajectories,
+            capsule.packed_segments,
+        )
+    if mode not in {"no_growth", "none"}:
+        raise ValueError(f"unknown uncertainty mode {mode!r}")
+
+    def adjusted(hazard: object) -> object:
+        return replace(
+            hazard,
+            base_uncertainty=(
+                0.0
+                if mode == "none"
+                else float(getattr(hazard, "base_uncertainty"))
+            ),
+            uncertainty_per_frame=0.0,
+        )
+
+    aabbs = tuple(adjusted(hazard) for hazard in capsule.aabbs)
+    piecewise = tuple(
+        adjusted(hazard) for hazard in capsule.piecewise_aabbs
+    )
+    trajectories = tuple(
+        replace(
+            trajectory,
+            samples=tuple(
+                adjusted(sample) if sample is not None else None
+                for sample in trajectory.samples
+            ),
+        )
+        for trajectory in capsule.segment_trajectories
+    )
+    packed = capsule.packed_segments
+    if packed is not None:
+        packed = replace(
+            packed,
+            base_uncertainty=(
+                np.zeros_like(packed.base_uncertainty)
+                if mode == "none"
+                else packed.base_uncertainty
+            ),
+            uncertainty_per_frame=np.zeros_like(
+                packed.uncertainty_per_frame
+            ),
+        )
+    return aabbs, piecewise, trajectories, packed
+
+
+def _packed_horizon_prefix(
+    packed: PackedSegmentFrames | None,
+    *,
+    frame_count: int,
+) -> PackedSegmentFrames | None:
+    if packed is None or packed.frame_count == frame_count:
+        return packed
+    if packed.frame_count < frame_count:
+        raise ValueError(
+            "packed segment trajectory does not cover audit horizon"
+        )
+    offsets = np.ascontiguousarray(
+        packed.frame_offsets[: frame_count + 1],
+        dtype=np.int32,
+    )
+    sample_count = int(offsets[-1])
+    return PackedSegmentFrames(
+        offsets,
+        *(
+            np.ascontiguousarray(
+                getattr(packed, name)[:sample_count],
+                dtype=np.float32,
+            )
+            for name in SEGMENT_FIELD_NAMES
+        ),
+    )
 
 
 def _clearance(
     capsule: ViabilityAuditCapsule,
     config: CorridorConfig,
+    *,
+    variant: AuditVariant,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     x_axis = _axis(
         TH08_PLAYFIELD.left,
@@ -130,15 +257,28 @@ def _clearance(
         config.grid_step,
     )
     grid_x, grid_y = np.meshgrid(x_axis, y_axis)
+    (
+        aabbs,
+        piecewise_aabbs,
+        segment_trajectories,
+        packed_segments,
+    ) = _uncertainty_adjusted_hazards(
+        capsule,
+        variant.uncertainty_mode,
+    )
+    packed_segments = _packed_horizon_prefix(
+        packed_segments,
+        frame_count=config.horizon_frames + 1,
+    )
     volume = _hazard_clearance_volume(
         grid_x,
         grid_y,
-        aabbs=capsule.aabbs,
+        aabbs=aabbs,
         aabb_trajectories=(),
-        piecewise_aabbs=capsule.piecewise_aabbs,
+        piecewise_aabbs=piecewise_aabbs,
         segments=(),
-        segment_trajectories=capsule.segment_trajectories,
-        packed_segments=capsule.packed_segments,
+        segment_trajectories=segment_trajectories,
+        packed_segments=packed_segments,
         config=config,
     )
     return x_axis, y_axis, volume
@@ -180,7 +320,11 @@ class AuditSolver:
             return solved
         capsule = self.capsule(path)
         config = _variant_config(variant)
-        x_axis, y_axis, clearance = _clearance(capsule, config)
+        x_axis, y_axis, clearance = _clearance(
+            capsule,
+            config,
+            variant=variant,
+        )
         delays, nominal = _variant_delays(capsule.metadata, variant)
         terminal_viable = None
         if continuation_path is not None:
@@ -309,6 +453,26 @@ def _capsule_basename(raw: object) -> str | None:
     if not isinstance(raw, str) or not raw:
         return None
     return raw.replace("\\", "/").rsplit("/", 1)[-1]
+
+
+def _select_query_rows(
+    candidates: list[dict[str, object]],
+    *,
+    limit: int,
+    mode: str,
+) -> tuple[dict[str, object], ...]:
+    if limit <= 0:
+        raise ValueError("query selection limit must be positive")
+    if mode == "tail":
+        return tuple(candidates[-limit:])
+    if mode != "stratified":
+        raise ValueError(f"unknown query selection mode {mode!r}")
+    if len(candidates) <= limit:
+        return tuple(candidates)
+    indices = np.rint(
+        np.linspace(0, len(candidates) - 1, limit)
+    ).astype(np.int64)
+    return tuple(candidates[int(index)] for index in indices)
 
 
 def _query_payload(
@@ -487,6 +651,33 @@ def _classify_empty_query(
     return classification, evidence
 
 
+def _empty_rescue_factors(
+    *,
+    trace_empty: bool,
+    current_delay_viable: bool,
+    spatial_variant_viable: bool,
+    uncertainty_no_growth_viable: bool,
+    uncertainty_none_viable: bool,
+    short_horizon_viable: bool,
+) -> tuple[str, ...]:
+    """Report independent counterfactuals that rescue one empty query."""
+
+    if not trace_empty:
+        return ()
+    factors = []
+    if current_delay_viable:
+        factors.append("full_async_delay_envelope")
+    if spatial_variant_viable:
+        factors.append("spatial_quantization")
+    if uncertainty_no_growth_viable:
+        factors.append("forecast_uncertainty_growth")
+    elif uncertainty_none_viable:
+        factors.append("base_or_forecast_uncertainty")
+    if short_horizon_viable:
+        factors.append("finite_horizon_requirement")
+    return tuple(factors)
+
+
 def audit(
     *,
     trace_path: Path,
@@ -495,6 +686,7 @@ def audit(
     pre_hit_frames: int,
     max_queries_per_hit: int,
     maximum_cached_solutions: int = 2,
+    selection_mode: str = "tail",
 ) -> dict[str, object]:
     rows = _read_trace(trace_path)
     hit_frames = [
@@ -529,7 +721,11 @@ def audit(
             candidates.append(row)
         selected.extend(
             (hit_frame, row)
-            for row in candidates[-max_queries_per_hit:]
+            for row in _select_query_rows(
+                candidates,
+                limit=max_queries_per_hit,
+                mode=selection_mode,
+            )
         )
 
     solver = AuditSolver(
@@ -546,10 +742,25 @@ def audit(
             missing_capsules[capsule_name or "null"] += 1
             continue
         query_frame = int(viability["query_frame"])
+        raw_current_delays = row.get("control_delay_candidates")
+        if not isinstance(raw_current_delays, (list, tuple)):
+            raw_current_delays = metadata[path].get(
+                "observed_control_delay_candidates",
+                metadata[path]["control_delay_candidates"],
+            )
+        current_delays = tuple(int(value) for value in raw_current_delays)
+        query_delay_variant = replace(
+            QUERY_DELAY_SUPPORT,
+            delay_frames=current_delays,
+        )
         base_solved = solver.solve(path, BASE, survival_shadow=True)
         base = _query_payload(base_solved, row)
         variant_results = {
             BASE.name: base,
+            QUERY_DELAY_SUPPORT.name: _query_payload(
+                solver.solve(path, query_delay_variant),
+                row,
+            ),
             SPACE_8.name: _query_payload(
                 solver.solve(path, SPACE_8),
                 row,
@@ -560,6 +771,14 @@ def audit(
             ),
             TIME_4_CLIPPED.name: _query_payload(
                 solver.solve(path, TIME_4_CLIPPED),
+                row,
+            ),
+            NO_GROWTH_UNCERTAINTY.name: _query_payload(
+                solver.solve(path, NO_GROWTH_UNCERTAINTY),
+                row,
+            ),
+            NO_UNCERTAINTY.name: _query_payload(
+                solver.solve(path, NO_UNCERTAINTY),
                 row,
             ),
         }
@@ -644,9 +863,31 @@ def audit(
             short_horizon_viable=bool(short_winning),
             collision_hazard_absent_at_source=collision_birth,
         )
+        rescue_factors = _empty_rescue_factors(
+            trace_empty=trace_empty,
+            current_delay_viable=bool(
+                variant_results[QUERY_DELAY_SUPPORT.name][
+                    "state_viable"
+                ]
+            ),
+            spatial_variant_viable=bool(
+                variant_results[SPACE_8.name]["state_viable"]
+                or variant_results[SPACE_4.name]["state_viable"]
+            ),
+            uncertainty_no_growth_viable=bool(
+                variant_results[NO_GROWTH_UNCERTAINTY.name][
+                    "state_viable"
+                ]
+            ),
+            uncertainty_none_viable=bool(
+                variant_results[NO_UNCERTAINTY.name]["state_viable"]
+            ),
+            short_horizon_viable=bool(short_winning),
+        )
         labels = (
             ([classification] if classification is not None else [])
             + list(evidence_flags)
+            + list(rescue_factors)
         )
         observations.append(
             {
@@ -668,6 +909,7 @@ def audit(
                     viability["position_error"]
                 ),
                 "active_action": str(viability["active_action"]),
+                "current_delay_support": current_delays,
                 "selected_recovery_action": viability.get(
                     "selected_action"
                 ),
@@ -695,6 +937,7 @@ def audit(
                 },
                 "primary_classification": classification,
                 "evidence_flags": evidence_flags,
+                "empty_rescue_factors": rescue_factors,
                 "labels": labels,
             }
         )
@@ -714,6 +957,40 @@ def audit(
         for observation in empty_observations
         for evidence in observation["evidence_flags"]
     )
+    rescue_factor_counts = Counter(
+        factor
+        for observation in empty_observations
+        for factor in observation["empty_rescue_factors"]
+    )
+    rescue_combination_counts = Counter(
+        "+".join(observation["empty_rescue_factors"]) or "none"
+        for observation in empty_observations
+    )
+    survival_shadow = [
+        observation
+        for observation in empty_observations
+        if observation["variants"][BASE.name].get("best_actions")
+    ]
+    survival_covers_hit = [
+        observation
+        for observation in survival_shadow
+        if int(
+            observation["variants"][BASE.name]["survival_frames"]
+        )
+        >= int(observation["time_to_hit"])
+    ]
+    issued_outside_survival = [
+        observation
+        for observation in survival_shadow
+        if observation.get("issued_action")
+        not in observation["variants"][BASE.name]["best_actions"]
+    ]
+    covering_issued_outside = [
+        observation
+        for observation in survival_covers_hit
+        if observation.get("issued_action")
+        not in observation["variants"][BASE.name]["best_actions"]
+    ]
     terminal_cohort = [
         observation
         for observation in observations
@@ -731,6 +1008,7 @@ def audit(
             "capsule_dir": str(capsule_dir),
             "pre_hit_frames": pre_hit_frames,
             "max_queries_per_hit": max_queries_per_hit,
+            "selection_mode": selection_mode,
             "maximum_cached_solutions": maximum_cached_solutions,
             "hit_count": len(hit_frames),
             "selected_pre_hit_queries": len(selected),
@@ -746,6 +1024,11 @@ def audit(
                 *(variant.name for variant in SHORT_HORIZONS),
             ],
             "diagnostic_only_variants": [TIME_4_CLIPPED.name],
+            "root_cause_diagnostic_variants": [
+                QUERY_DELAY_SUPPORT.name,
+                NO_GROWTH_UNCERTAINTY.name,
+                NO_UNCERTAINTY.name,
+            ],
             "time4_limitation": (
                 "The live delay support can exceed four frames. Exact "
                 "four-frame layers require pending-command and remaining-"
@@ -771,9 +1054,41 @@ def audit(
                 "geometry is not yet injected, so birth-aware parity remains "
                 "unresolved."
             ),
+            "birth_monotonicity": (
+                "Adding future hazards can remove winning states but cannot "
+                "rescue an empty kernel. Birth gaps are soundness evidence, "
+                "not a false-empty explanation."
+            ),
+            "query_delay_status": (
+                "The current-query delay support is an exact reconstruction "
+                "of that query's estimator support but not a live async "
+                "contract: a published policy must still handle support "
+                "changes until expiry."
+            ),
+            "uncertainty_status": (
+                "Uncertainty ablations preserve the retained trajectories "
+                "but remove growth or all inflation. They diagnose "
+                "conservatism; they are not safe live models."
+            ),
         },
         "classification_counts": dict(classification_counts),
         "orthogonal_evidence_counts": dict(evidence_counts),
+        "empty_rescue_factor_counts": dict(rescue_factor_counts),
+        "empty_rescue_combination_counts": dict(
+            rescue_combination_counts
+        ),
+        "losing_state_shadow": {
+            "labeled_query_count": len(survival_shadow),
+            "survival_horizon_reaches_hit_count": len(
+                survival_covers_hit
+            ),
+            "issued_outside_best_mask_count": len(
+                issued_outside_survival
+            ),
+            "covering_query_issued_outside_best_mask_count": len(
+                covering_issued_outside
+            ),
+        },
         "terminal_overlap": {
             "instant_winning_with_comparable_overlap": len(
                 terminal_cohort
@@ -816,6 +1131,43 @@ def _markdown(report: dict[str, object]) -> str:
         report["classification_counts"].items()
     ):
         lines.append(f"| `{label}` | {count} |")
+    lines.extend(
+        [
+            "",
+            "## Independent empty-set rescue factors",
+            "",
+            "| Counterfactual factor | Count |",
+            "| --- | ---: |",
+        ]
+    )
+    for label, count in sorted(
+        report["empty_rescue_factor_counts"].items()
+    ):
+        lines.append(f"| `{label}` | {count} |")
+    losing = report["losing_state_shadow"]
+    lines.extend(
+        [
+            "",
+            "## Losing-state survival shadow",
+            "",
+            (
+                f"- Labeled losing queries: "
+                f"{losing['labeled_query_count']}."
+            ),
+            (
+                "- Label reaches the later native hit: "
+                f"{losing['survival_horizon_reaches_hit_count']}."
+            ),
+            (
+                "- Issued action outside survival-best mask: "
+                f"{losing['issued_outside_best_mask_count']}."
+            ),
+            (
+                "- Reaches hit but issued outside best mask: "
+                f"{losing['covering_query_issued_outside_best_mask_count']}."
+            ),
+        ]
+    )
     lines.extend(
         [
             "",
@@ -890,6 +1242,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--regressions", type=Path)
     parser.add_argument("--pre-hit-frames", type=int, default=32)
     parser.add_argument("--max-queries-per-hit", type=int, default=8)
+    parser.add_argument(
+        "--selection-mode",
+        choices=("tail", "stratified"),
+        default="tail",
+    )
     parser.add_argument("--solution-cache-size", type=int, default=2)
     args = parser.parse_args(argv)
     if (
@@ -907,6 +1264,7 @@ def main(argv: list[str] | None = None) -> int:
         pre_hit_frames=args.pre_hit_frames,
         max_queries_per_hit=args.max_queries_per_hit,
         maximum_cached_solutions=args.solution_cache_size,
+        selection_mode=args.selection_mode,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(

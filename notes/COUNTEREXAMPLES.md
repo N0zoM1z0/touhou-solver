@@ -2687,3 +2687,30 @@ Status: observed | inferred | unknown | fixed
   `artifacts/viability_audit/stage5_20260725_122624_pending_pipeline.json`,
   `artifacts/viability_audit/stage5_20260725_125037_pending_pipeline.json`,
   and `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`.
+
+## CE-0110: Same-version rolling speed hid two cold decisions per policy
+
+- **Observed failure:** The first rolling exact-root benchmark reported seed
+  wall separately from Python frontier/continuation-root enumeration. After
+  complete preparation was placed inside the four-frame service boundary, the
+  retained five-policy workload met the deadline on only 14/25 decisions.
+- **Cold/steady split:** Decisions one and two missed in all ten
+  policy/decision samples; decision three passed 4/5, and decisions four/five
+  passed 10/10. The one decision-three miss was `67.086 ms` against a
+  `66.667 ms` budget. Labels still matched every monolithic exact oracle, so
+  these are delivery misses rather than model errors.
+- **Invalid assumption:** A steady same-version memo was treated as evidence
+  for live delivery without comparing its warm-up length to immutable policy
+  lifetime. The live controller's earlier global-solve and solution-age
+  telemetry makes replacement within the first one or two decisions
+  plausible.
+- **Correction:** Root and seed enumeration are now included in end-to-end
+  timing. A newer version receives a fresh executor and cancels old native
+  work, but no memo is reused across changed clearance. S09 stays shadow-only
+  until overlap with Boolean induction demonstrates a useful current-version
+  exact-hit rate without delivery contention.
+- **Regression/evidence:**
+  `test_cancel_interrupts_running_native_expansion`,
+  `test_new_publication_rejects_every_old_result`,
+  `artifacts/benchmarks/rolling_pipeline_prewarm_20260725.json`, and
+  `notes/ROLLING_PIPELINE_PREWARM_20260725.md`.

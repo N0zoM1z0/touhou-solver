@@ -2794,3 +2794,47 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   pass 460 tests in `1.629/3.182 s`.
 - Full design and evidence boundary:
   `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`.
+
+## 2026-07-25: Cancellable Rolling Exact-Root Prewarm
+
+- Added atomic native cancellation and per-query deadlines throughout the
+  augmented pending-pipeline recurrence. Cancellation is permanent; deadline
+  expiry may retain completed state values but never a partial public root.
+- Added continuation-only prewarm and exact-compatible memo merge. Merge
+  requires the same immutable Python problem/version and native equality of
+  axes, action motion, delay/fixed-cadence contract, boundary semantics, and
+  clearance values.
+- Added a game-neutral bounded newest-version scheduler. Each new policy
+  cancels the old native work and uses a fresh executor; rolling extensions
+  are rejected while a prior round runs, exact specialization replaces its
+  older batch, and controller consumption remains lookup-only.
+- Removed duplicate native branch construction between continuation action
+  upper bounds and exact action evaluation. Shared Python root-enumeration
+  validation plus terminal-only lattice rounding also moved enumeration cost
+  from an exploratory `15--32 ms` range to retained
+  `8.894/12.729 ms` median/p95.
+- Retained
+  `artifacts/benchmarks/rolling_pipeline_prewarm_20260725.json`: 256
+  scheduler/scalar differentials and 25 TH08-shaped rolling decisions have
+  zero label failures; every exact specialization adds zero continuation
+  states. Preparation plus seed plus specialization is
+  `59.125/228.992/295.904 ms`, and lookup is
+  `0.066/0.135/0.445 ms`.
+- The first two decisions of all five immutable-policy cases miss a
+  four-frame budget; decision three passes 4/5 and decisions four/five pass
+  10/10. Five stale replacements take `5.265/5.348/6.312 ms` and never expose
+  old results.
+- Reran the independent 512-seed augmented differential plus ten full
+  TH08-size v1 cases, and the 512-seed one-transition differential plus 70
+  phase-specialized TH08 roots, with zero failures after the branch-reuse
+  change.
+- **Decision:** accept cancellation, exact memo merge, and bounded scheduling
+  as offline infrastructure. Keep S09 shadow-only. The unresolved blocker is
+  now cross-version cold start: a live policy may be replaced during its first
+  two decisions, before same-version rolling becomes useful. The next shadow
+  must overlap seed work with Boolean induction and measure policy lifetime,
+  current-version hit rate, discarded work, and delivery contention.
+- Both native libraries were rebuilt; Linux and Windows complete quick suites
+  pass 465 tests in `1.710/3.131 s`.
+- Full contract and evidence boundary:
+  `notes/ROLLING_PIPELINE_PREWARM_20260725.md`.

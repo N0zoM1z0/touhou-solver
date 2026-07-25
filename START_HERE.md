@@ -13,14 +13,15 @@ runtime evidence remain in `notes/`.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `5c9eea9 Add exact pending pipeline workspace`. It adds a deduplicated
-  issued-action/next-decision root frontier, one-transition cadence-robust
-  public roots, phase-sharded skeleton prewarming, and a lookup-only exact
-  consumption API. Offline specialization is fast after a phase seed, but
-  rolling delivery and live hit rate remain unresolved; the workspace is
-  shadow/offline and is not called by the live controller.
-- Linux and Windows complete suites pass 460 tests in `1.629/3.182 s`.
-  Both native libraries were rebuilt. Read
+  `cd8ef9c Prototype exact root frontier prewarming`. It adds native
+  cooperative cancellation/deadlines, exact continuation-memo merge, a
+  bounded newest-version-wins rolling scheduler, and a retained whole-prewarm
+  benchmark whose timing includes Python root/seed enumeration. The first two
+  decisions of each immutable policy remain cold misses, so this infrastructure
+  stays shadow/offline and is not called by the live controller.
+- Both native libraries were rebuilt. Linux and Windows complete quick suites
+  pass 465 tests in `1.710/3.131 s`. Read
+  `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
   `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
   `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
@@ -948,12 +949,16 @@ classification and best actions. Read
 `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`. Its versioned sparse
 C++ recurrence passes 512 scalar and ten full-size v1 differentials; warm
 exact roots are about 0.1 ms, but cold/incremental TH08 p95 is 104.46 ms.
-Read `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`. Phase-sharded prewarm,
-70 TH08-shaped exact-root specializations, and lookup-only consumption pass
-offline, but the phase seed p95 is 122.02 ms and no rolling physical hit rate
-has been measured. Keep it shadow-only. Add the isolated rolling scheduler,
-cooperative cancellation, exact-root/version publication, and miss telemetry;
-fall back on every miss before considering veto-only A/B. Continue the packed
+Read `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md` and
+`notes/ROLLING_PIPELINE_PREWARM_20260725.md`. The exact continuation-bank
+scheduler, native cancellation/deadlines, newest-version replacement, 256
+scalar differentials, and 25 TH08-shaped rolling decisions pass offline.
+Within one immutable policy, the first two decisions always miss the
+four-frame budget while decisions four/five pass 10/10. Keep it shadow-only.
+The next experiment must begin seeds when clearance exists, overlap Boolean
+induction, and measure live policy lifetime, current-version exact hit rate,
+discarded work, and CPU/delivery contention; fall back on every miss before
+considering veto-only A/B. Continue the packed
 issue-time certificate
 and ECL/timeline `BirthWindow` work; keep mechanics/safety game-neutral while
 allowing explicit practiced profiles.

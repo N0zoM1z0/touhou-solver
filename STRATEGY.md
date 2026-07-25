@@ -263,27 +263,40 @@ The next architectural target is a delivery-aware solver:
   `39.61/49.35/62.50 ms` median/p95/max and lookup-only consumption to
   `0.061/0.100/0.143 ms`. Phase seed wall remained
   `112.51/122.02/140.69 ms`, so a seed started only at issue time is too late.
+- **Cancellable rolling prototype:** A bounded newest-version scheduler now
+  uses native cooperative cancellation/deadlines, a fresh executor per
+  immutable policy, exact continuation-memo merge, and lookup-only
+  specialization. Across 256 scheduler/scalar differentials and 25
+  TH08-shaped rolling decisions, labels had zero failures and specialization
+  added zero continuation states. Full preparation plus seed plus
+  specialization measured `59.13/228.99/295.90 ms` median/p95/max; exact
+  lookup measured `0.066/0.135/0.445 ms`. The first two decisions of every
+  fresh policy missed a four-frame budget, decision three passed 4/5, and
+  decisions four/five passed 10/10. Five stale replacements completed in
+  `5.27/5.35/6.31 ms`, and old results were never consumable.
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control
   after their delivery relevance had decayed. Dense labels also use a
   source-layer state without the exact observed/pending input pipeline.
-- **Reactivation gate:** Query-local/reachable-tube refinement with a hard
-  service budget and explicit layer-phase/observed/pending/remaining-delay
-  state. Exact recurrence, frontier enumeration, lookup-only consumption, and
-  phase specialization now pass offline. The remaining gate is an isolated
-  rolling phase scheduler with cooperative cancellation, newest-version-wins
-  publication, and a measured exact-root hit rate. Shadow evidence must show
-  useful hits and issue-time action changes without increasing policy expiry,
-  local latency, action lag, or Boolean worker contention. Scalar parity alone
-  is insufficient.
+- **Reactivation gate:** Exact recurrence, frontier enumeration,
+  lookup-only consumption, cooperative cancellation, newest-version
+  scheduling, and rolling specialization now pass offline. The remaining gate
+  is current-version physical-shadow delivery: begin work when clearance
+  exists, overlap Boolean induction, and measure policy lifetime, cold/steady
+  exact-hit rate, discarded work, and CPU contention. Shadow evidence must
+  show useful hits and issue-time action changes without increasing policy
+  expiry, local latency, action lag, or Boolean worker contention. Scalar
+  parity and same-version steady timing are insufficient.
 - **Evidence:** `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
   `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
   `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
+  `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
   `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json`,
   `artifacts/benchmarks/exact_root_frontier_20260725.json`,
+  `artifacts/benchmarks/rolling_pipeline_prewarm_20260725.json`,
   `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
   the retained Stage-4A/Stage-5 run dossiers.
 

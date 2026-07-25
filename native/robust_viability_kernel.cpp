@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <atomic>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <limits>

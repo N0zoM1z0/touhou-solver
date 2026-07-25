@@ -8,8 +8,13 @@ constexpr int PIPELINE_MAX_DELAYS = 64;
 constexpr int PIPELINE_MAX_DECISION_FRAMES = 16;
 constexpr int PIPELINE_MAX_BRANCHES =
     PIPELINE_MAX_DELAYS * PIPELINE_MAX_DECISION_FRAMES;
+constexpr int PIPELINE_RESULT_CANCELLED = 5;
+constexpr int PIPELINE_RESULT_DEADLINE = 6;
 constexpr std::uint64_t PIPELINE_EMPTY_KEY =
     std::numeric_limits<std::uint64_t>::max();
+
+struct PipelineCancelledSignal {};
+struct PipelineDeadlineSignal {};
 
 struct PipelineLabel {
     std::uint16_t frames;
@@ -87,6 +92,16 @@ public:
         return size_;
     }
 
+    std::size_t merge_from(const PipelineFlatMemo& source) {
+        const std::size_t before = size_;
+        for (const Entry& entry : source.entries_) {
+            if (entry.key != PIPELINE_EMPTY_KEY) {
+                insert(entry.key, entry.label);
+            }
+        }
+        return size_ - before;
+    }
+
 private:
     struct Entry {
         std::uint64_t key = PIPELINE_EMPTY_KEY;
@@ -137,6 +152,39 @@ private:
 };
 
 class PipelineSurvivalWorkspace {
+private:
+    using PipelineClock = std::chrono::steady_clock;
+
+    void begin_query(int timeout_ms) {
+        abort_poll_counter_ = 0;
+        deadline_active_ = timeout_ms > 0;
+        if (deadline_active_) {
+            deadline_ = (
+                PipelineClock::now()
+                + std::chrono::milliseconds(timeout_ms)
+            );
+        }
+    }
+
+    void finish_query() {
+        deadline_active_ = false;
+    }
+
+    class QueryScope {
+    public:
+        QueryScope(PipelineSurvivalWorkspace* owner, int timeout_ms)
+            : owner_(owner) {
+            owner_->begin_query(timeout_ms);
+        }
+
+        ~QueryScope() {
+            owner_->finish_query();
+        }
+
+    private:
+        PipelineSurvivalWorkspace* owner_;
+    };
+
 public:
     PipelineSurvivalWorkspace(
         const float* clearance,
@@ -178,6 +226,11 @@ public:
               decision_frame_support + decision_frame_count
           ) {
         root_memo_.reserve(1024);
+        continuation_branch_scratch_.resize(
+            static_cast<std::size_t>(frame_count_)
+            * static_cast<std::size_t>(action_count_)
+            * delay_frames_.size()
+        );
     }
 
     int query(
@@ -188,6 +241,7 @@ public:
         int pending_action,
         const int* pending_remaining_frames,
         int pending_remaining_count,
+        int timeout_ms,
         std::uint16_t* output_state_frames,
         float* output_state_margin,
         std::uint16_t* output_action_frames,
@@ -203,6 +257,7 @@ public:
             || pending_action < -1 || pending_action >= action_count_
             || pending_remaining_count < 0
             || pending_remaining_count > PIPELINE_MAX_DELAYS
+            || timeout_ms < 0
             || (
                 pending_action < 0
                 && pending_remaining_count != 0
@@ -231,6 +286,8 @@ public:
             }
         }
         std::lock_guard<std::mutex> guard(mutex_);
+        QueryScope query_scope(this, timeout_ms);
+        check_abort(true);
         const Counters before = counters_;
         const std::size_t memo_before = memo_.size();
 
@@ -388,7 +445,213 @@ public:
         return 0;
     }
 
+    int prewarm_continuation(
+        int start_frame,
+        int start_row,
+        int start_column,
+        int observed_action,
+        int pending_action,
+        const int* pending_remaining_frames,
+        int pending_remaining_count,
+        int timeout_ms,
+        std::uint16_t* output_frames,
+        float* output_margin,
+        std::uint64_t* output_stats
+    ) {
+        if (
+            output_frames == nullptr || output_margin == nullptr
+            || output_stats == nullptr
+            || start_frame < 0 || start_frame >= frame_count_
+            || start_row < 0 || start_row >= row_count_
+            || start_column < 0 || start_column >= column_count_
+            || observed_action < 0 || observed_action >= action_count_
+            || pending_action < -1 || pending_action >= action_count_
+            || pending_remaining_count < 0
+            || pending_remaining_count > PIPELINE_MAX_DELAYS
+            || timeout_ms < 0
+            || (
+                pending_action < 0
+                && pending_remaining_count != 0
+            )
+            || (
+                pending_action >= 0
+                && (
+                    pending_remaining_frames == nullptr
+                    || pending_remaining_count == 0
+                )
+            )
+        ) {
+            return 1;
+        }
+        for (int index = 0; index < pending_remaining_count; ++index) {
+            if (
+                pending_remaining_frames[index] <= 0
+                || pending_remaining_frames[index] > frame_count_ - 1
+                || (
+                    index > 0
+                    && pending_remaining_frames[index - 1]
+                        >= pending_remaining_frames[index]
+                )
+            ) {
+                return 1;
+            }
+        }
+
+        std::lock_guard<std::mutex> guard(mutex_);
+        QueryScope query_scope(this, timeout_ms);
+        check_abort(true);
+        const Counters before = counters_;
+        const std::size_t memo_before = memo_.size();
+        PipelineLabel robust;
+        if (pending_action < 0) {
+            robust = solve(
+                PipelineState{
+                    start_frame,
+                    observed_action,
+                    -1,
+                    0,
+                    start_row,
+                    start_column,
+                }
+            );
+        } else {
+            robust = solve(
+                PipelineState{
+                    start_frame,
+                    observed_action,
+                    pending_action,
+                    pending_remaining_frames[0],
+                    start_row,
+                    start_column,
+                }
+            );
+            for (int index = 1; index < pending_remaining_count; ++index) {
+                const PipelineLabel branch = solve(
+                    PipelineState{
+                        start_frame,
+                        observed_action,
+                        pending_action,
+                        pending_remaining_frames[index],
+                        start_row,
+                        start_column,
+                    }
+                );
+                if (pipeline_label_less(branch, robust)) {
+                    robust = branch;
+                }
+            }
+        }
+        *output_frames = robust.frames;
+        *output_margin = robust.margin;
+        output_stats[0] = static_cast<std::uint64_t>(memo_.size());
+        output_stats[1] = static_cast<std::uint64_t>(
+            memo_.size() - memo_before
+        );
+        output_stats[2] = counters_.memo_hits - before.memo_hits;
+        output_stats[3] = (
+            counters_.action_upper_prunes - before.action_upper_prunes
+        );
+        output_stats[4] = (
+            counters_.delay_incumbent_prunes
+            - before.delay_incumbent_prunes
+        );
+        output_stats[5] = (
+            counters_.canonicalizations - before.canonicalizations
+        );
+        output_stats[6] = 0;
+        output_stats[7] = (
+            counters_.branch_simulations - before.branch_simulations
+        );
+        return 0;
+    }
+
+    int merge_continuation(
+        PipelineSurvivalWorkspace* source,
+        std::uint64_t* output_added_states
+    ) {
+        if (source == nullptr || output_added_states == nullptr) {
+            return 1;
+        }
+        if (source == this) {
+            *output_added_states = 0;
+            return 0;
+        }
+        std::unique_lock<std::mutex> destination_lock(
+            mutex_,
+            std::defer_lock
+        );
+        std::unique_lock<std::mutex> source_lock(
+            source->mutex_,
+            std::defer_lock
+        );
+        std::lock(destination_lock, source_lock);
+        check_abort(true);
+        source->check_abort(true);
+        if (!continuation_compatible(*source)) {
+            return 2;
+        }
+        *output_added_states = static_cast<std::uint64_t>(
+            memo_.merge_from(source->memo_)
+        );
+        return 0;
+    }
+
+    void request_cancel() {
+        cancel_requested_.store(true, std::memory_order_release);
+    }
+
 private:
+    void check_abort(bool force = false) {
+        ++abort_poll_counter_;
+        if (cancel_requested_.load(std::memory_order_acquire)) {
+            throw PipelineCancelledSignal{};
+        }
+        if (
+            deadline_active_
+            && (
+                force
+                || (abort_poll_counter_ & std::uint64_t{63}) == 0
+            )
+            && PipelineClock::now() >= deadline_
+        ) {
+            throw PipelineDeadlineSignal{};
+        }
+    }
+
+    bool continuation_compatible(
+        const PipelineSurvivalWorkspace& other
+    ) const {
+        if (
+            frame_count_ != other.frame_count_
+            || row_count_ != other.row_count_
+            || column_count_ != other.column_count_
+            || x_start_ != other.x_start_
+            || x_step_ != other.x_step_
+            || y_start_ != other.y_start_
+            || y_step_ != other.y_step_
+            || action_count_ != other.action_count_
+            || continuation_decision_frames_
+                != other.continuation_decision_frames_
+            || required_clearance_ != other.required_clearance_
+            || clamp_to_bounds_ != other.clamp_to_bounds_
+            || velocity_x_ != other.velocity_x_
+            || velocity_y_ != other.velocity_y_
+            || delay_frames_ != other.delay_frames_
+        ) {
+            return false;
+        }
+        const std::size_t clearance_count = (
+            static_cast<std::size_t>(frame_count_)
+            * static_cast<std::size_t>(row_count_)
+            * static_cast<std::size_t>(column_count_)
+        );
+        return std::equal(
+            clearance_,
+            clearance_ + clearance_count,
+            other.clearance_
+        );
+    }
+
     struct Counters {
         std::uint64_t memo_hits = 0;
         std::uint64_t action_upper_prunes = 0;
@@ -472,6 +735,7 @@ private:
         int delay,
         int decision_frames
     ) {
+        check_abort();
         ++counters_.branch_simulations;
         const int horizon_frame = frame_count_ - 1;
         const int step_count = std::min(
@@ -486,6 +750,7 @@ private:
         const double state_x = x_start_ + state.column * x_step_;
         const double state_y = y_start_ + state.row * y_step_;
         for (int step = 1; step <= step_count; ++step) {
+            check_abort();
             int motion = state.active;
             if (step > delay) {
                 motion = selected;
@@ -586,73 +851,62 @@ private:
         };
     }
 
-    PipelineLabel action_upper(
-        const PipelineState& state,
-        int selected,
-        bool root_transition
+    Branch* continuation_branch_scratch(
+        int frame,
+        int action
     ) {
-        PipelineLabel upper{
-            std::numeric_limits<std::uint16_t>::max(),
-            std::numeric_limits<float>::infinity(),
-        };
-        const int decision_count = (
-            root_transition
-            ? static_cast<int>(decision_frame_support_.size())
-            : 1
-        );
-        for (int decision_index = 0; decision_index < decision_count;
-             ++decision_index) {
-            const int decision_frames = (
-                root_transition
-                ? decision_frame_support_[decision_index]
-                : continuation_decision_frames_
-            );
-            for (int delay : delay_frames_) {
-                const Branch branch = prepare_branch(
-                    state,
-                    selected,
-                    delay,
-                    decision_frames
-                );
-                if (pipeline_label_less(branch.upper, upper)) {
-                    upper = branch.upper;
-                }
-            }
-        }
-        return upper;
+        const std::size_t offset = (
+            (
+                static_cast<std::size_t>(frame)
+                * static_cast<std::size_t>(action_count_)
+            ) + static_cast<std::size_t>(action)
+        ) * delay_frames_.size();
+        return continuation_branch_scratch_.data() + offset;
     }
 
     PipelineLabel evaluate_action(
         const PipelineState& state,
         int selected,
         const PipelineLabel* incumbent,
-        bool root_transition
+        bool root_transition,
+        Branch* prepared_branches = nullptr
     ) {
-        std::array<Branch, PIPELINE_MAX_BRANCHES> branches;
+        std::array<Branch, PIPELINE_MAX_BRANCHES> local_branches;
         std::array<int, PIPELINE_MAX_BRANCHES> order;
         const int delay_count = static_cast<int>(delay_frames_.size());
         const int decision_count = static_cast<int>(
             root_transition ? decision_frame_support_.size() : 1
         );
         const int branch_count = delay_count * decision_count;
-        int branch_index = 0;
-        for (int decision_index = 0; decision_index < decision_count;
-             ++decision_index) {
-            const int decision_frames = (
-                root_transition
-                ? decision_frame_support_[decision_index]
-                : continuation_decision_frames_
-            );
-            for (int delay : delay_frames_) {
-                branches[branch_index] = prepare_branch(
-                    state,
-                    selected,
-                    delay,
-                    decision_frames
+        Branch* branches = (
+            prepared_branches == nullptr
+            ? local_branches.data()
+            : prepared_branches
+        );
+        if (prepared_branches == nullptr) {
+            int branch_index = 0;
+            for (int decision_index = 0;
+                 decision_index < decision_count;
+                 ++decision_index) {
+                const int decision_frames = (
+                    root_transition
+                    ? decision_frame_support_[decision_index]
+                    : continuation_decision_frames_
                 );
-                order[branch_index] = branch_index;
-                ++branch_index;
+                for (int delay : delay_frames_) {
+                    branches[branch_index] = prepare_branch(
+                        state,
+                        selected,
+                        delay,
+                        decision_frames
+                    );
+                    ++branch_index;
+                }
             }
+        }
+        for (int branch_index = 0; branch_index < branch_count;
+             ++branch_index) {
+            order[branch_index] = branch_index;
         }
         std::sort(
             order.begin(),
@@ -701,6 +955,7 @@ private:
     }
 
     PipelineLabel solve(PipelineState state) {
+        check_abort();
         state = canonicalize(state);
         const std::uint64_t key = state_key(state);
         PipelineLabel cached;
@@ -718,9 +973,35 @@ private:
 
         std::array<ActionCandidate, PIPELINE_MAX_ACTIONS> candidates;
         for (int action = 0; action < action_count_; ++action) {
+            Branch* branches = continuation_branch_scratch(
+                state.frame,
+                action
+            );
+            PipelineLabel upper{
+                std::numeric_limits<std::uint16_t>::max(),
+                std::numeric_limits<float>::infinity(),
+            };
+            for (std::size_t delay_index = 0;
+                 delay_index < delay_frames_.size();
+                 ++delay_index) {
+                branches[delay_index] = prepare_branch(
+                    state,
+                    action,
+                    delay_frames_[delay_index],
+                    continuation_decision_frames_
+                );
+                if (
+                    pipeline_label_less(
+                        branches[delay_index].upper,
+                        upper
+                    )
+                ) {
+                    upper = branches[delay_index].upper;
+                }
+            }
             candidates[action] = ActionCandidate{
                 action,
-                action_upper(state, action, false),
+                upper,
             };
         }
         std::sort(
@@ -749,7 +1030,11 @@ private:
                 state,
                 candidate.action,
                 have_best ? &best : nullptr,
-                false
+                false,
+                continuation_branch_scratch(
+                    state.frame,
+                    candidate.action
+                )
             );
             if (!have_best || pipeline_label_less(best, action_label)) {
                 best = action_label;
@@ -761,6 +1046,7 @@ private:
     }
 
     RootNode query_root(PipelineState state) {
+        check_abort();
         state = canonicalize(state);
         const std::uint64_t key = state_key(state);
         const auto found = root_memo_.find(key);
@@ -810,9 +1096,14 @@ private:
     std::vector<double> velocity_y_;
     std::vector<int> delay_frames_;
     std::vector<int> decision_frame_support_;
+    std::vector<Branch> continuation_branch_scratch_;
     PipelineFlatMemo memo_;
     std::unordered_map<std::uint64_t, RootNode> root_memo_;
     Counters counters_;
+    std::atomic<bool> cancel_requested_{false};
+    bool deadline_active_ = false;
+    PipelineClock::time_point deadline_{};
+    std::uint64_t abort_poll_counter_ = 0;
     std::mutex mutex_;
 };
 
@@ -990,6 +1281,7 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_query_v1(
             pending_action,
             pending_remaining_frames,
             pending_remaining_count,
+            0,
             output_state_frames,
             output_state_margin,
             output_action_frames,
@@ -997,6 +1289,10 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_query_v1(
             output_best_action_mask,
             output_stats
         );
+    } catch (const PipelineCancelledSignal&) {
+        return PIPELINE_RESULT_CANCELLED;
+    } catch (const PipelineDeadlineSignal&) {
+        return PIPELINE_RESULT_DEADLINE;
     } catch (...) {
         return 2;
     }
@@ -1032,6 +1328,146 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_contains_root_v1(
     } catch (...) {
         return 2;
     }
+}
+
+TOUHOU_EXPORT int touhou_pipeline_survival_workspace_query_v2(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int timeout_ms,
+    std::uint16_t* output_state_frames,
+    float* output_state_margin,
+    std::uint16_t* output_action_frames,
+    float* output_action_margins,
+    std::uint32_t* output_best_action_mask,
+    std::uint64_t* output_stats
+) {
+    if (
+        workspace == nullptr || output_state_frames == nullptr
+        || output_state_margin == nullptr
+        || output_action_frames == nullptr
+        || output_action_margins == nullptr
+        || output_best_action_mask == nullptr || output_stats == nullptr
+    ) {
+        return 1;
+    }
+    PipelineSurvivalWorkspace* typed =
+        static_cast<PipelineSurvivalWorkspace*>(workspace);
+    try {
+        return typed->query(
+            start_frame,
+            start_row,
+            start_column,
+            observed_action,
+            pending_action,
+            pending_remaining_frames,
+            pending_remaining_count,
+            timeout_ms,
+            output_state_frames,
+            output_state_margin,
+            output_action_frames,
+            output_action_margins,
+            output_best_action_mask,
+            output_stats
+        );
+    } catch (const PipelineCancelledSignal&) {
+        return PIPELINE_RESULT_CANCELLED;
+    } catch (const PipelineDeadlineSignal&) {
+        return PIPELINE_RESULT_DEADLINE;
+    } catch (...) {
+        return 2;
+    }
+}
+
+TOUHOU_EXPORT int
+touhou_pipeline_survival_workspace_prewarm_continuation_v1(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int timeout_ms,
+    std::uint16_t* output_frames,
+    float* output_margin,
+    std::uint64_t* output_stats
+) {
+    if (
+        workspace == nullptr || output_frames == nullptr
+        || output_margin == nullptr || output_stats == nullptr
+    ) {
+        return 1;
+    }
+    PipelineSurvivalWorkspace* typed =
+        static_cast<PipelineSurvivalWorkspace*>(workspace);
+    try {
+        return typed->prewarm_continuation(
+            start_frame,
+            start_row,
+            start_column,
+            observed_action,
+            pending_action,
+            pending_remaining_frames,
+            pending_remaining_count,
+            timeout_ms,
+            output_frames,
+            output_margin,
+            output_stats
+        );
+    } catch (const PipelineCancelledSignal&) {
+        return PIPELINE_RESULT_CANCELLED;
+    } catch (const PipelineDeadlineSignal&) {
+        return PIPELINE_RESULT_DEADLINE;
+    } catch (...) {
+        return 2;
+    }
+}
+
+TOUHOU_EXPORT int
+touhou_pipeline_survival_workspace_merge_continuation_v1(
+    void* destination_workspace,
+    void* source_workspace,
+    std::uint64_t* output_added_states
+) {
+    if (
+        destination_workspace == nullptr || source_workspace == nullptr
+        || output_added_states == nullptr
+    ) {
+        return 1;
+    }
+    PipelineSurvivalWorkspace* destination =
+        static_cast<PipelineSurvivalWorkspace*>(destination_workspace);
+    PipelineSurvivalWorkspace* source =
+        static_cast<PipelineSurvivalWorkspace*>(source_workspace);
+    try {
+        return destination->merge_continuation(
+            source,
+            output_added_states
+        );
+    } catch (const PipelineCancelledSignal&) {
+        return PIPELINE_RESULT_CANCELLED;
+    } catch (const PipelineDeadlineSignal&) {
+        return PIPELINE_RESULT_DEADLINE;
+    } catch (...) {
+        return 2;
+    }
+}
+
+TOUHOU_EXPORT int touhou_pipeline_survival_workspace_cancel_v1(
+    void* workspace
+) {
+    if (workspace == nullptr) {
+        return 1;
+    }
+    static_cast<PipelineSurvivalWorkspace*>(workspace)->request_cancel();
+    return 0;
 }
 
 TOUHOU_EXPORT void touhou_pipeline_survival_workspace_destroy_v1(

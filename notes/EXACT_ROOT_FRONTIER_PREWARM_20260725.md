@@ -3,6 +3,12 @@
 Date: 2026-07-25
 Status: verified offline prototype; shadow-only
 
+Follow-up: `notes/ROLLING_PIPELINE_PREWARM_20260725.md` implements the
+cancellation/newest-version scheduler proposed here and includes seed
+enumeration in its timing boundary. It resolves stale native backlog, but
+shows that the first two decisions of each immutable policy remain cold
+misses; live cross-version hit rate is still unmeasured.
+
 ## Question
 
 The augmented pending-input workspace made an identical exact root cheap
@@ -213,31 +219,29 @@ Phase seeding and specialization use three concurrent phase-shard workspaces.
 4. Frontier enumeration starts from a lattice cell. The continuous-to-lattice
    projection error is still not paid in the exact-root key or margin and must
    be certified before authority.
-5. The workspace remains synchronous internally and has no cooperative native
-   deadline/cancellation check. Python future cancellation cannot stop a C++
-   query already running.
+5. This checkpoint originally lacked cooperative native cancellation. The
+   rolling follow-up adds atomic cancellation and deadlines; this item is
+   retained as historical motivation, not a current implementation limit.
 6. Three workers can compete with Boolean publication and local planning.
    Offline wall time does not prove side-effect-free live delivery.
 7. `H=(4,5,6)` omits cadence tails until calibrated from native traces.
-8. A policy version change invalidates every phase shard and exact result.
-   Newest-version-wins scheduling must prevent stale backlog.
+8. A policy version change invalidates every phase shard and exact result. The
+   rolling follow-up now prevents stale backlog, but cannot make an obsolete
+   exact memo valid for the new clearance volume.
 
 ## Next Experiment
 
-Implement an isolated, bounded rolling scheduler in shadow only:
+This experiment was completed offline in
+`notes/ROLLING_PIPELINE_PREWARM_20260725.md`. The remaining physical-shadow
+experiment is:
 
-1. On Boolean publication, create phase shards for a small future-frame ring.
-2. Seed likely cells around the latest reachable tube before the exact action
-   is known; cap workers and record CPU contention.
-3. Once an action is issued, enumerate and prioritize its exact frontier,
-   specialize until a hard deadline, and publish only complete roots.
-4. At issue time, use lookup-only with exact policy/root matching. Record
-   misses without synchronous recovery computation.
-5. Measure per-version seed completion, specialization deadline, exact hit
-   rate, root distance from seed, discarded work, Boolean expiry, local p95,
-   action lag, and shadow action changes on the retained Stage-5 cohorts.
-6. Add cooperative cancellation/deadline polling in C++ before allowing a
-   continuously rolling physical shadow.
+1. Start exact continuation work when the clearance volume exists, overlapping
+   Boolean induction rather than waiting for publication.
+2. Measure immutable policy lifetime and current-version exact hit rate.
+3. Record CPU contention, Boolean expiry, local p95, action lag, discarded
+   work, and shadow action changes on retained Stage-5 cohorts.
+4. Keep lookup-only exact matching and Boolean plus fresh-certificate fallback
+   on every cold, stale, deadline, or root miss.
 
 Only after useful hit rate and zero delivery regression should the existing
 veto-only gate be reconsidered.

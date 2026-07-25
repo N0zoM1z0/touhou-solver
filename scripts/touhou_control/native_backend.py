@@ -23,6 +23,9 @@ _QUERY_LOCAL_SURVIVAL_FUNCTION = None
 _PIPELINE_WORKSPACE_CREATE_FUNCTION = None
 _PIPELINE_WORKSPACE_QUERY_FUNCTION = None
 _PIPELINE_WORKSPACE_CONTAINS_FUNCTION = None
+_PIPELINE_WORKSPACE_PREWARM_FUNCTION = None
+_PIPELINE_WORKSPACE_MERGE_FUNCTION = None
+_PIPELINE_WORKSPACE_CANCEL_FUNCTION = None
 _PIPELINE_WORKSPACE_DESTROY_FUNCTION = None
 _LOSING_SURVIVAL_LABELS_FUNCTION = None
 _CLEARANCE_FUNCTION = None
@@ -294,17 +297,26 @@ def _load_pipeline_workspace_functions():
     global _PIPELINE_WORKSPACE_CREATE_FUNCTION
     global _PIPELINE_WORKSPACE_QUERY_FUNCTION
     global _PIPELINE_WORKSPACE_CONTAINS_FUNCTION
+    global _PIPELINE_WORKSPACE_PREWARM_FUNCTION
+    global _PIPELINE_WORKSPACE_MERGE_FUNCTION
+    global _PIPELINE_WORKSPACE_CANCEL_FUNCTION
     global _PIPELINE_WORKSPACE_DESTROY_FUNCTION
     if (
         _PIPELINE_WORKSPACE_CREATE_FUNCTION is not None
         and _PIPELINE_WORKSPACE_QUERY_FUNCTION is not None
         and _PIPELINE_WORKSPACE_CONTAINS_FUNCTION is not None
+        and _PIPELINE_WORKSPACE_PREWARM_FUNCTION is not None
+        and _PIPELINE_WORKSPACE_MERGE_FUNCTION is not None
+        and _PIPELINE_WORKSPACE_CANCEL_FUNCTION is not None
         and _PIPELINE_WORKSPACE_DESTROY_FUNCTION is not None
     ):
         return (
             _PIPELINE_WORKSPACE_CREATE_FUNCTION,
             _PIPELINE_WORKSPACE_QUERY_FUNCTION,
             _PIPELINE_WORKSPACE_CONTAINS_FUNCTION,
+            _PIPELINE_WORKSPACE_PREWARM_FUNCTION,
+            _PIPELINE_WORKSPACE_MERGE_FUNCTION,
+            _PIPELINE_WORKSPACE_CANCEL_FUNCTION,
             _PIPELINE_WORKSPACE_DESTROY_FUNCTION,
         )
     library = _load_library()
@@ -312,10 +324,18 @@ def _load_pipeline_workspace_functions():
         return None
     try:
         create = library.touhou_pipeline_survival_workspace_create_v2
-        query = library.touhou_pipeline_survival_workspace_query_v1
+        query = library.touhou_pipeline_survival_workspace_query_v2
         contains = (
             library.touhou_pipeline_survival_workspace_contains_root_v1
         )
+        prewarm = (
+            library
+            .touhou_pipeline_survival_workspace_prewarm_continuation_v1
+        )
+        merge = (
+            library.touhou_pipeline_survival_workspace_merge_continuation_v1
+        )
+        cancel = library.touhou_pipeline_survival_workspace_cancel_v1
         destroy = library.touhou_pipeline_survival_workspace_destroy_v1
     except AttributeError:
         return None
@@ -350,6 +370,7 @@ def _load_pipeline_workspace_functions():
         ctypes.c_int,
         ctypes.POINTER(ctypes.c_int),
         ctypes.c_int,
+        ctypes.c_int,
         ctypes.POINTER(ctypes.c_uint16),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_uint16),
@@ -370,13 +391,39 @@ def _load_pipeline_workspace_functions():
         ctypes.POINTER(ctypes.c_int),
     ]
     contains.restype = ctypes.c_int
+    prewarm.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_uint64),
+    ]
+    prewarm.restype = ctypes.c_int
+    merge.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_void_p,
+        ctypes.POINTER(ctypes.c_uint64),
+    ]
+    merge.restype = ctypes.c_int
+    cancel.argtypes = [ctypes.c_void_p]
+    cancel.restype = ctypes.c_int
     destroy.argtypes = [ctypes.c_void_p]
     destroy.restype = None
     _PIPELINE_WORKSPACE_CREATE_FUNCTION = create
     _PIPELINE_WORKSPACE_QUERY_FUNCTION = query
     _PIPELINE_WORKSPACE_CONTAINS_FUNCTION = contains
+    _PIPELINE_WORKSPACE_PREWARM_FUNCTION = prewarm
+    _PIPELINE_WORKSPACE_MERGE_FUNCTION = merge
+    _PIPELINE_WORKSPACE_CANCEL_FUNCTION = cancel
     _PIPELINE_WORKSPACE_DESTROY_FUNCTION = destroy
-    return create, query, contains, destroy
+    return create, query, contains, prewarm, merge, cancel, destroy
 
 
 def _load_losing_survival_labels_function():
@@ -1301,6 +1348,28 @@ def query_local_survival_arrays(
     )
 
 
+class PipelineNativeCancelledError(RuntimeError):
+    """A native workspace was invalidated while expanding."""
+
+
+class PipelineNativeDeadlineError(RuntimeError):
+    """A native workspace query exceeded its cooperative deadline."""
+
+
+def _raise_pipeline_result(operation: str, result: int) -> None:
+    if result == 5:
+        raise PipelineNativeCancelledError(
+            f"native pipeline workspace {operation} was cancelled"
+        )
+    if result == 6:
+        raise PipelineNativeDeadlineError(
+            f"native pipeline workspace {operation} exceeded its deadline"
+        )
+    raise RuntimeError(
+        f"native pipeline workspace {operation} returned {result}"
+    )
+
+
 class PipelineSurvivalNativeWorkspace:
     """Persistent native memo for one immutable clearance policy version."""
 
@@ -1310,6 +1379,9 @@ class PipelineSurvivalNativeWorkspace:
         create,
         query,
         contains,
+        prewarm,
+        merge,
+        cancel,
         destroy,
         x_axis: np.ndarray,
         y_axis: np.ndarray,
@@ -1343,6 +1415,9 @@ class PipelineSurvivalNativeWorkspace:
         )
         self._query = query
         self._contains = contains
+        self._prewarm = prewarm
+        self._merge = merge
+        self._cancel = cancel
         self._destroy = destroy
         self._handle = ctypes.c_void_p()
         result = create(
@@ -1412,6 +1487,7 @@ class PipelineSurvivalNativeWorkspace:
         observed_action_index: int,
         pending_action_index: int = -1,
         pending_remaining_frames: np.ndarray | None = None,
+        timeout_ms: int = 0,
     ) -> tuple[
         int,
         float,
@@ -1450,6 +1526,7 @@ class PipelineSurvivalNativeWorkspace:
                 else None
             ),
             len(pending),
+            timeout_ms,
             ctypes.byref(state_frames),
             ctypes.byref(state_margin),
             action_frames.ctypes.data_as(
@@ -1462,9 +1539,7 @@ class PipelineSurvivalNativeWorkspace:
             stats.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)),
         )
         if result != 0:
-            raise RuntimeError(
-                f"native pipeline workspace query returned {result}"
-            )
+            _raise_pipeline_result("query", result)
         return (
             int(state_frames.value),
             float(state_margin.value),
@@ -1518,6 +1593,81 @@ class PipelineSurvivalNativeWorkspace:
             )
         return bool(present.value)
 
+    def prewarm_continuation(
+        self,
+        *,
+        start_frame: int,
+        start_row: int,
+        start_column: int,
+        observed_action_index: int,
+        pending_action_index: int = -1,
+        pending_remaining_frames: np.ndarray | None = None,
+        timeout_ms: int = 0,
+    ) -> tuple[int, float, np.ndarray]:
+        """Populate fixed-cadence continuation values without root labels."""
+
+        if self.closed:
+            raise RuntimeError("native pipeline workspace is closed")
+        pending = np.ascontiguousarray(
+            (
+                np.empty(0, dtype=np.int32)
+                if pending_remaining_frames is None
+                else pending_remaining_frames
+            ),
+            dtype=np.int32,
+        )
+        state_frames = ctypes.c_uint16()
+        state_margin = ctypes.c_float()
+        stats = np.empty(8, dtype=np.uint64)
+        result = self._prewarm(
+            self._handle,
+            start_frame,
+            start_row,
+            start_column,
+            observed_action_index,
+            pending_action_index,
+            (
+                pending.ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+                if len(pending)
+                else None
+            ),
+            len(pending),
+            timeout_ms,
+            ctypes.byref(state_frames),
+            ctypes.byref(state_margin),
+            stats.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)),
+        )
+        if result != 0:
+            _raise_pipeline_result("prewarm", result)
+        return int(state_frames.value), float(state_margin.value), stats
+
+    def merge_continuation_from(
+        self,
+        source: PipelineSurvivalNativeWorkspace,
+    ) -> int:
+        """Merge completed continuation labels from a compatible workspace."""
+
+        if self.closed or source.closed:
+            raise RuntimeError("cannot merge a closed pipeline workspace")
+        added = ctypes.c_uint64()
+        result = self._merge(
+            self._handle,
+            source._handle,
+            ctypes.byref(added),
+        )
+        if result != 0:
+            _raise_pipeline_result("merge", result)
+        return int(added.value)
+
+    def cancel(self) -> None:
+        """Cooperatively invalidate current and future native expansion."""
+
+        if self.closed:
+            return
+        result = self._cancel(self._handle)
+        if result != 0:
+            _raise_pipeline_result("cancel", result)
+
 
 def create_pipeline_survival_workspace(
     *,
@@ -1537,11 +1687,14 @@ def create_pipeline_survival_workspace(
     functions = _load_pipeline_workspace_functions()
     if functions is None:
         return None
-    create, query, contains, destroy = functions
+    create, query, contains, prewarm, merge, cancel, destroy = functions
     return PipelineSurvivalNativeWorkspace(
         create=create,
         query=query,
         contains=contains,
+        prewarm=prewarm,
+        merge=merge,
+        cancel=cancel,
         destroy=destroy,
         x_axis=x_axis,
         y_axis=y_axis,

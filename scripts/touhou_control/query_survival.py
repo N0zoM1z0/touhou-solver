@@ -37,6 +37,13 @@ from .viability import (
     build_robust_viability_policy,
 )
 
+PipelineWorkspaceCancelledError = (
+    native_backend.PipelineNativeCancelledError
+)
+PipelineWorkspaceDeadlineError = (
+    native_backend.PipelineNativeDeadlineError
+)
+
 
 @dataclass(frozen=True)
 class PendingCommand:
@@ -343,6 +350,11 @@ class PipelineSurvivalWorkspace:
     def close(self) -> None:
         self._native.close()
 
+    def cancel(self) -> None:
+        """Cooperatively invalidate native work for this policy version."""
+
+        self._native.cancel()
+
     def __enter__(self) -> PipelineSurvivalWorkspace:
         if self.closed:
             raise RuntimeError("pipeline survival workspace is closed")
@@ -360,6 +372,7 @@ class PipelineSurvivalWorkspace:
         y: float,
         observed_action: str,
         pending_command: PendingCommand | None = None,
+        timeout_ms: int = 0,
     ) -> QueryLocalSurvivalResult:
         row, column, _ = self.problem.project_to_lattice(x=x, y=y)
         return self.query_cell(
@@ -369,6 +382,7 @@ class PipelineSurvivalWorkspace:
             column=column,
             observed_action=observed_action,
             pending_command=pending_command,
+            timeout_ms=timeout_ms,
         )
 
     def query_cell(
@@ -380,6 +394,7 @@ class PipelineSurvivalWorkspace:
         column: int,
         observed_action: str,
         pending_command: PendingCommand | None = None,
+        timeout_ms: int = 0,
     ) -> QueryLocalSurvivalResult:
         if policy_version != self.policy_version:
             raise StalePipelineWorkspaceError(
@@ -410,6 +425,7 @@ class PipelineSurvivalWorkspace:
                 if pending_command is not None
                 else None
             ),
+            timeout_ms=timeout_ms,
         )
         (
             state_frames,
@@ -454,6 +470,73 @@ class PipelineSurvivalWorkspace:
             ),
             workspace_stats=stats,
         )
+
+    def prewarm_continuation_cell(
+        self,
+        *,
+        policy_version: Hashable,
+        frame: int,
+        row: int,
+        column: int,
+        observed_action: str,
+        pending_command: PendingCommand | None = None,
+        timeout_ms: int = 0,
+    ) -> tuple[SurvivalLabel, PipelineSurvivalQueryStats]:
+        """Populate fixed-cadence state values without public root labels."""
+
+        if policy_version != self.policy_version:
+            raise StalePipelineWorkspaceError(
+                "pipeline workspace policy version does not match prewarm"
+            )
+        if observed_action not in self._action_indices:
+            raise ValueError("observed action is absent from the action set")
+        if (
+            pending_command is not None
+            and pending_command.action not in self._action_indices
+        ):
+            raise ValueError("pending action is absent from the action set")
+        frames, margin, raw_stats = self._native.prewarm_continuation(
+            start_frame=frame,
+            start_row=row,
+            start_column=column,
+            observed_action_index=self._action_indices[observed_action],
+            pending_action_index=(
+                self._action_indices[pending_command.action]
+                if pending_command is not None
+                else -1
+            ),
+            pending_remaining_frames=(
+                np.asarray(
+                    pending_command.remaining_frames,
+                    dtype=np.int32,
+                )
+                if pending_command is not None
+                else None
+            ),
+            timeout_ms=timeout_ms,
+        )
+        return (
+            SurvivalLabel(frames, margin),
+            PipelineSurvivalQueryStats(
+                *[int(value) for value in raw_stats]
+            ),
+        )
+
+    def merge_continuation_from(
+        self,
+        source: PipelineSurvivalWorkspace,
+    ) -> int:
+        """Merge exact fixed-continuation values from the same problem."""
+
+        if self.policy_version != source.policy_version:
+            raise StalePipelineWorkspaceError(
+                "cannot merge pipeline workspaces from different versions"
+            )
+        if self.problem is not source.problem:
+            raise ValueError(
+                "continuation merge requires the same immutable problem"
+            )
+        return self._native.merge_continuation_from(source._native)
 
     def lookup_cell(
         self,
@@ -813,6 +896,50 @@ def scalar_query_local_survival(
     )
 
 
+@dataclass(frozen=True)
+class _RootEnumerationContext:
+    x_values: np.ndarray
+    y_values: np.ndarray
+    x_step: float
+    y_step: float
+    cadence_support: tuple[int, ...]
+    action_by_name: dict[str, ControlAction]
+
+
+def _prepare_root_enumeration_context(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    actions: tuple[ControlAction, ...],
+    delay_frames: tuple[int, ...],
+    decision_frame_support: tuple[int, ...],
+    config: ViabilityConfig,
+) -> _RootEnumerationContext:
+    x_values, x_step = _uniform_axis(x_axis, "x")
+    y_values, y_step = _uniform_axis(y_axis, "y")
+    cadence_support = _normalize_decision_frame_support(
+        decision_frame_support,
+        default=config.frames_per_layer,
+    )
+    if (
+        not delay_frames
+        or tuple(sorted(set(delay_frames))) != delay_frames
+        or delay_frames[0] < 0
+    ):
+        raise ValueError("delay support is invalid")
+    action_by_name = {action.name: action for action in actions}
+    if len(action_by_name) != len(actions) or not actions:
+        raise ValueError("actions must be nonempty with unique names")
+    return _RootEnumerationContext(
+        x_values=x_values,
+        y_values=y_values,
+        x_step=x_step,
+        y_step=y_step,
+        cadence_support=cadence_support,
+        action_by_name=action_by_name,
+    )
+
+
 def enumerate_next_decision_roots(
     *,
     x_axis: np.ndarray,
@@ -828,6 +955,7 @@ def enumerate_next_decision_roots(
     observed_action: str,
     selected_action: str,
     pending_command: PendingCommand | None = None,
+    _context: _RootEnumerationContext | None = None,
 ) -> tuple[ReachablePipelineRoot, ...]:
     """Enumerate the exact-root frontier after issuing one selected action.
 
@@ -837,18 +965,24 @@ def enumerate_next_decision_roots(
     delay support of their pending command.
     """
 
-    x_values, x_step = _uniform_axis(x_axis, "x")
-    y_values, y_step = _uniform_axis(y_axis, "y")
-    cadence_support = _normalize_decision_frame_support(
-        decision_frame_support,
-        default=config.frames_per_layer,
+    context = (
+        _prepare_root_enumeration_context(
+            x_axis=x_axis,
+            y_axis=y_axis,
+            actions=actions,
+            delay_frames=delay_frames,
+            decision_frame_support=decision_frame_support,
+            config=config,
+        )
+        if _context is None
+        else _context
     )
-    if (
-        not delay_frames
-        or tuple(sorted(set(delay_frames))) != delay_frames
-        or delay_frames[0] < 0
-    ):
-        raise ValueError("delay support is invalid")
+    x_values = context.x_values
+    y_values = context.y_values
+    x_step = context.x_step
+    y_step = context.y_step
+    cadence_support = context.cadence_support
+    action_by_name = context.action_by_name
     if not 0 <= start_frame <= horizon_frame:
         raise ValueError("start frame is outside the requested horizon")
     if not 0 <= row < len(y_values) or not 0 <= column < len(x_values):
@@ -924,24 +1058,30 @@ def enumerate_next_decision_roots(
                     if not inside and not config.clamp_to_bounds:
                         reachable = False
                         break
-                    target_x = min(x_end, max(x_start, target_x))
-                    target_y = min(y_end, max(y_start, target_y))
-                    terminal_column = min(
-                        len(x_values) - 1,
-                        max(
-                            0,
-                            int(round((target_x - x_start) / x_step)),
-                        ),
-                    )
-                    terminal_row = min(
-                        len(y_values) - 1,
-                        max(
-                            0,
-                            int(round((target_y - y_start) / y_step)),
-                        ),
-                    )
                 if not reachable:
                     continue
+                target_x = min(
+                    x_end,
+                    max(x_start, state_x + displacement_x),
+                )
+                target_y = min(
+                    y_end,
+                    max(y_start, state_y + displacement_y),
+                )
+                terminal_column = min(
+                    len(x_values) - 1,
+                    max(
+                        0,
+                        int(round((target_x - x_start) / x_step)),
+                    ),
+                )
+                terminal_row = min(
+                    len(y_values) - 1,
+                    max(
+                        0,
+                        int(round((target_y - y_start) / y_step)),
+                    ),
+                )
 
                 if delay < step_count or delay == step_count:
                     successor_active = selected_action
@@ -1150,6 +1290,8 @@ def query_local_survival(
 
 __all__ = [
     "PendingCommand",
+    "PipelineWorkspaceCancelledError",
+    "PipelineWorkspaceDeadlineError",
     "PipelineSurvivalQueryStats",
     "PipelineSurvivalWorkspace",
     "QueryLocalSurvivalResult",

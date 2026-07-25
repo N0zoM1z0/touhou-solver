@@ -184,7 +184,20 @@ These instructions apply to every file and task below this directory.
   full frame/cell/observed/pending/remaining-support root after issuance.
   Controller-side consumption must use lookup-only semantics: a miss must
   never start cold C++ expansion. Report phase-seed, root-specialization, and
-  consumption timings separately, including measured worker contention.
+  consumption timings separately, including root/seed enumeration and
+  measured worker contention.
+- Native background expansion must have cooperative cancellation and a hard
+  deadline before it is attached to a rolling executor. A newer immutable
+  policy cancels every older native workspace and receives a fresh bounded
+  executor; do not rely on Python future cancellation or put new work behind
+  a stale FIFO queue. Do not destroy a native handle until its running future
+  has stopped.
+- Merge continuation memos only for the exact same immutable policy problem
+  and fixed-continuation contract. A clearance or version change invalidates
+  the memo. Report cold per-version decisions separately from steady rolling
+  decisions and compare the warm-up length with measured live policy lifetime;
+  a steady-state timing win is not a delivery win if most policies expire
+  during warm-up.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 

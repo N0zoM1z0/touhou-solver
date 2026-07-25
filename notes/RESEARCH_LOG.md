@@ -3050,3 +3050,45 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Rebuilt Linux and Windows native libraries. The complete quick suite passes
   471 tests in `1.400/2.415 s`; the retained 128-case full benchmark has zero
   belief, upper, lower-bound, or threshold-mask failures.
+
+## 2026-07-25: Feasibility-First Dual-Bound Policy Synthesis
+
+- Formalized per-root-action attainable lower and optimistic upper labels,
+  with separate stopping conditions for finite-horizon feasibility and
+  unrestricted optimality. A full-horizon positive candidate lower is enough
+  for modeled feasibility; it does not require completing the upper.
+- Implemented scalar/native greedy-prefix lower policy classes, exact
+  singleton continuation portfolios, robust proposal-first exact action
+  ordering, and action-column CEGIS. Every candidate preserves all modeled
+  hidden delay/cadence branches. A timeout contributes no label; every
+  proposed column is exactly re-solved before it can raise the incumbent.
+- The retained 128-case differential has zero exact parity, candidate parity,
+  candidate/portfolio-above-exact, upper, or certificate failures.
+- On structured seed 0, unrestricted exact belief cost `4379.39 ms` and the
+  old nine-action lower cost `733.42 ms`. Two singleton candidates prove
+  full-horizon feasibility in median `4.01 ms`; all 17 candidates cost
+  `36.68 ms` and leave only `up_left_fast` unresolved. Gap-directed columns
+  `down_right_fast, up_left_fast, up` reach the exact
+  `(32, 18.80272)` label and certify optimality in median `287.64 ms`.
+- On seed 3, the first `always_stay` candidate proves feasibility in
+  `1.90 ms`; dual optimality costs `38.36 ms` versus `209.30 ms`
+  unrestricted exact. The old approximately 113-ms upper is therefore no
+  longer a synchronous prerequisite on roots with a completed winning lower.
+- Added scalar/native remaining-delay bucket upper bounds. Six randomized
+  cohorts verify nested physical/bucketed/exact bounds. The hard first upper
+  remains `114.25--120.99 ms` across widths and still correctly leaves
+  `up_left_fast` unresolved, rejecting information coarsening as the main
+  performance lever.
+- Added safe cross-version proposal-order reuse. Prior labels rank candidates
+  only; every current-version candidate is re-solved. On a root with every
+  future clearance cell changed by `+0.125`, median feasibility time changed
+  `3.980 -> 2.200 ms`, candidates `2 -> 1`, while complete current-version
+  per-action labels remained order-invariant.
+- Design:
+  `notes/ANYTIME_DUAL_BOUND_POLICY_SYNTHESIS_20260725.md`. Retained artifacts:
+  `artifacts/benchmarks/dual_bound_policy_synthesis_20260725.json` and
+  `artifacts/benchmarks/upper_hierarchy_cross_version_20260725.json`.
+- This is offline finite-model evidence, not live authority. No physical
+  trial, binary reverse engineering, IDA mutation, or REA session was used.
+- Rebuilt Linux and Windows native libraries. Both complete quick suites pass
+  475 tests in `2.270/4.056 s`.

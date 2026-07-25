@@ -338,6 +338,23 @@ The next architectural target is a delivery-aware solver:
   algorithmic gate is targeted lower refinement only for unresolved actions
   plus earlier losing-state prevention, not blind budget widening or
   synchronous complete upper.
+- **Feasibility-first candidate synthesis:** Exact stationary continuation
+  portfolios now answer the cheaper question first: whether any causal policy
+  survives the finite horizon. On retained structured seeds 0/3 the first
+  full-horizon witness costs median `4.01/1.90 ms`. Seed 0 previously cost
+  `733.42 ms` for the nine-action lower and `4379.39 ms` for unrestricted
+  exact belief. If optimality is requested, the unresolved upper action and a
+  worst restricted path propose new action columns; every proposal is
+  re-solved exactly before it raises the lower. The three-column seed-0 class
+  reaches the exact unrestricted label in median `287.64 ms`. A
+  previous-version candidate ranking may reduce current-version cold start,
+  but every label is recomputed: one changed-clearance root improved
+  `3.980 -> 2.200 ms` median with full-portfolio order invariance.
+  Remaining-delay bucket upper bounds pass nested scalar/native parity but
+  did not reduce the hard first-upper cost. **Status remains
+  offline/shadow-only.** The next gate is retained Stage-6B capsule replay and
+  whole-controller contention/delivery, not another unrestricted synchronous
+  solve.
 - **Stage 6B physical counterexample:** Instrumented hard-no-Bomb run
   `lunatic_route2_stage6b_unattended_20260725_204521` completed with 31 hits
   versus 27 in the RNG-distinct comparison. Global solve median improved
@@ -369,6 +386,7 @@ The next architectural target is a delivery-aware solver:
   `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`,
   `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
   `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,
+  `notes/ANYTIME_DUAL_BOUND_POLICY_SYNTHESIS_20260725.md`,
   `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
   `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json`,
   `artifacts/benchmarks/exact_root_frontier_20260725.json`,
@@ -376,6 +394,8 @@ The next architectural target is a delivery-aware solver:
   `artifacts/benchmarks/belief_pipeline_workspace_20260725.json`,
   `artifacts/benchmarks/budgeted_belief_refinement_20260725.json`,
   `artifacts/benchmarks/resumable_upper_certification_20260725.json`,
+  `artifacts/benchmarks/dual_bound_policy_synthesis_20260725.json`,
+  `artifacts/benchmarks/upper_hierarchy_cross_version_20260725.json`,
   `artifacts/viability_audit/pipeline_formal_correctness_20260725.json`,
   `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
   the retained Stage-4A/Stage-5 run dossiers.

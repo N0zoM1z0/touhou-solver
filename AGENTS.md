@@ -111,6 +111,30 @@ These instructions apply to every file and task below this directory.
   uncertainty branches or authorize hard safety without an exact adversarial
   verifier. See
   `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`.
+- Use the feasibility question before paying for unrestricted optimality. A
+  completed exact solve of a declared causal candidate/restricted
+  continuation policy is an attainable lower bound. The maximum per root
+  action across completed candidates is also attainable only when the
+  selected candidate witness is retained as part of that public root
+  decision. Full-horizon positive lower margin is sufficient to establish
+  modeled feasibility; it does not prove the action uniquely optimal.
+  Timed-out or unfinished candidates contribute no label. An upper solve is
+  required only to reject actions that may still beat the incumbent or to
+  claim optimality. See
+  `notes/ANYTIME_DUAL_BOUND_POLICY_SYNTHESIS_20260725.md`.
+- Candidate-policy, action-order, beam, learned, Monte Carlo, or MCTS output
+  is proposal-only. It gains safety authority only after exact universal
+  verification over the declared finite delay/cadence/hazard model. Across a
+  policy/model version change, reuse candidate order or policy shape only;
+  recompute every label under the new immutable version. Never carry a prior
+  feasibility/optimality label or proof memo across versions without a
+  content-complete dependency identity and a documented invalidation proof.
+- Remaining-delay bucket upper bounds may refine the physical observation but
+  may never merge distinct physical observations. Width one reveals exact
+  remaining delay; coarser positive widths remain optimistic only when every
+  physical observation class is preserved or partitioned. Require nested
+  scalar/native bound checks before using a new information partition, and
+  keep every such upper outside live action authority.
 - Put reusable, game-neutral control and planning code in
   `scripts/touhou_control/`. Keep TH08 memory addresses, input masks, movement
   constants, ECL details, and pool layouts in TH08 adapters.

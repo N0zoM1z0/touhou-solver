@@ -30,6 +30,7 @@ _PIPELINE_WORKSPACE_DESTROY_FUNCTION = None
 _BELIEF_PIPELINE_CREATE_FUNCTION = None
 _BELIEF_PIPELINE_QUERY_FUNCTION = None
 _BELIEF_PIPELINE_CERTIFY_FUNCTION = None
+_BELIEF_PIPELINE_RECOMMEND_FUNCTION = None
 _BELIEF_PIPELINE_CANCEL_FUNCTION = None
 _BELIEF_PIPELINE_DESTROY_FUNCTION = None
 _LOSING_SURVIVAL_LABELS_FUNCTION = None
@@ -435,12 +436,14 @@ def _load_belief_pipeline_workspace_functions():
     global _BELIEF_PIPELINE_CREATE_FUNCTION
     global _BELIEF_PIPELINE_QUERY_FUNCTION
     global _BELIEF_PIPELINE_CERTIFY_FUNCTION
+    global _BELIEF_PIPELINE_RECOMMEND_FUNCTION
     global _BELIEF_PIPELINE_CANCEL_FUNCTION
     global _BELIEF_PIPELINE_DESTROY_FUNCTION
     if (
         _BELIEF_PIPELINE_CREATE_FUNCTION is not None
         and _BELIEF_PIPELINE_QUERY_FUNCTION is not None
         and _BELIEF_PIPELINE_CERTIFY_FUNCTION is not None
+        and _BELIEF_PIPELINE_RECOMMEND_FUNCTION is not None
         and _BELIEF_PIPELINE_CANCEL_FUNCTION is not None
         and _BELIEF_PIPELINE_DESTROY_FUNCTION is not None
     ):
@@ -448,6 +451,7 @@ def _load_belief_pipeline_workspace_functions():
             _BELIEF_PIPELINE_CREATE_FUNCTION,
             _BELIEF_PIPELINE_QUERY_FUNCTION,
             _BELIEF_PIPELINE_CERTIFY_FUNCTION,
+            _BELIEF_PIPELINE_RECOMMEND_FUNCTION,
             _BELIEF_PIPELINE_CANCEL_FUNCTION,
             _BELIEF_PIPELINE_DESTROY_FUNCTION,
         )
@@ -455,10 +459,14 @@ def _load_belief_pipeline_workspace_functions():
     if library is None:
         return None
     try:
-        create = library.touhou_belief_pipeline_workspace_create_v4
+        create = library.touhou_belief_pipeline_workspace_create_v6
         query = library.touhou_belief_pipeline_workspace_query_v2
         certify = (
             library.touhou_belief_pipeline_workspace_certify_upper_v2
+        )
+        recommend = (
+            library
+            .touhou_belief_pipeline_workspace_recommend_action_column_v1
         )
         cancel = library.touhou_belief_pipeline_workspace_cancel_v1
         destroy = library.touhou_belief_pipeline_workspace_destroy_v1
@@ -478,6 +486,7 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.c_int,
         ctypes.c_uint32,
         ctypes.c_uint32,
+        ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,
         ctypes.POINTER(ctypes.c_int),
@@ -526,6 +535,33 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.POINTER(ctypes.c_uint64),
     ]
     certify.restype = ctypes.c_int
+    recommend.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_uint64),
+        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_uint64),
+    ]
+    recommend.restype = ctypes.c_int
     cancel.argtypes = [ctypes.c_void_p]
     cancel.restype = ctypes.c_int
     destroy.argtypes = [ctypes.c_void_p]
@@ -533,9 +569,10 @@ def _load_belief_pipeline_workspace_functions():
     _BELIEF_PIPELINE_CREATE_FUNCTION = create
     _BELIEF_PIPELINE_QUERY_FUNCTION = query
     _BELIEF_PIPELINE_CERTIFY_FUNCTION = certify
+    _BELIEF_PIPELINE_RECOMMEND_FUNCTION = recommend
     _BELIEF_PIPELINE_CANCEL_FUNCTION = cancel
     _BELIEF_PIPELINE_DESTROY_FUNCTION = destroy
-    return create, query, certify, cancel, destroy
+    return create, query, certify, recommend, cancel, destroy
 
 
 def _load_losing_survival_labels_function():
@@ -1830,6 +1867,7 @@ class BeliefPipelineNativeWorkspace:
         create,
         query,
         certify,
+        recommend,
         cancel,
         destroy,
         x_axis: np.ndarray,
@@ -1840,7 +1878,8 @@ class BeliefPipelineNativeWorkspace:
         base_action_mask: int,
         budgeted_action_mask: int,
         continuation_action_budget: int,
-        reveal_remaining_delay: bool,
+        remaining_delay_bucket_size: int,
+        continuation_policy_mode: int,
         delay_frames: np.ndarray,
         decision_frame_support: np.ndarray,
         required_clearance: float,
@@ -1870,6 +1909,7 @@ class BeliefPipelineNativeWorkspace:
         )
         self._query = query
         self._certify = certify
+        self._recommend = recommend
         self._cancel = cancel
         self._destroy = destroy
         self._handle = ctypes.c_void_p()
@@ -1894,7 +1934,8 @@ class BeliefPipelineNativeWorkspace:
             base_action_mask,
             budgeted_action_mask,
             continuation_action_budget,
-            int(reveal_remaining_delay),
+            remaining_delay_bucket_size,
+            continuation_policy_mode,
             self._delays.ctypes.data_as(
                 ctypes.POINTER(ctypes.c_int)
             ),
@@ -2082,6 +2123,105 @@ class BeliefPipelineNativeWorkspace:
             stats,
         )
 
+    def recommend_action_column(
+        self,
+        *,
+        start_frame: int,
+        start_row: int,
+        start_column: int,
+        observed_action_index: int,
+        target_root_action_index: int,
+        pending_action_index: int = -1,
+        pending_remaining_frames: np.ndarray | None = None,
+        max_depth: int = 64,
+        timeout_ms: int = 0,
+    ) -> tuple[
+        int,
+        tuple[int, int, int, int, int, int],
+        tuple[int, float],
+        tuple[int, float],
+        int,
+        np.ndarray,
+    ]:
+        """Find one excluded action improving a worst restricted path."""
+
+        if self.closed:
+            raise RuntimeError("belief pipeline workspace is closed")
+        pending = np.ascontiguousarray(
+            (
+                np.empty(0, dtype=np.int32)
+                if pending_remaining_frames is None
+                else pending_remaining_frames
+            ),
+            dtype=np.int32,
+        )
+        recommended_action = ctypes.c_int()
+        witness_frame = ctypes.c_int()
+        witness_row = ctypes.c_int()
+        witness_column = ctypes.c_int()
+        witness_active = ctypes.c_int()
+        witness_pending = ctypes.c_int()
+        witness_remaining_mask = ctypes.c_uint64()
+        current_frames = ctypes.c_uint16()
+        current_margin = ctypes.c_float()
+        recommended_frames = ctypes.c_uint16()
+        recommended_margin = ctypes.c_float()
+        depth = ctypes.c_int()
+        stats = np.empty(8, dtype=np.uint64)
+        result = self._recommend(
+            self._handle,
+            start_frame,
+            start_row,
+            start_column,
+            observed_action_index,
+            pending_action_index,
+            (
+                pending.ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+                if len(pending)
+                else None
+            ),
+            len(pending),
+            target_root_action_index,
+            max_depth,
+            timeout_ms,
+            ctypes.byref(recommended_action),
+            ctypes.byref(witness_frame),
+            ctypes.byref(witness_row),
+            ctypes.byref(witness_column),
+            ctypes.byref(witness_active),
+            ctypes.byref(witness_pending),
+            ctypes.byref(witness_remaining_mask),
+            ctypes.byref(current_frames),
+            ctypes.byref(current_margin),
+            ctypes.byref(recommended_frames),
+            ctypes.byref(recommended_margin),
+            ctypes.byref(depth),
+            stats.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)),
+        )
+        if result != 0:
+            _raise_pipeline_result(
+                "belief action-column recommendation",
+                result,
+            )
+        return (
+            int(recommended_action.value),
+            (
+                int(witness_frame.value),
+                int(witness_row.value),
+                int(witness_column.value),
+                int(witness_active.value),
+                int(witness_pending.value),
+                int(witness_remaining_mask.value),
+            ),
+            (int(current_frames.value), float(current_margin.value)),
+            (
+                int(recommended_frames.value),
+                float(recommended_margin.value),
+            ),
+            int(depth.value),
+            stats,
+        )
+
 
 def create_belief_pipeline_survival_workspace(
     *,
@@ -2093,7 +2233,8 @@ def create_belief_pipeline_survival_workspace(
     base_action_mask: int,
     budgeted_action_mask: int = 0,
     continuation_action_budget: int = 0,
-    reveal_remaining_delay: bool = False,
+    remaining_delay_bucket_size: int = 0,
+    continuation_policy_mode: int = 0,
     delay_frames: np.ndarray,
     decision_frame_support: np.ndarray,
     required_clearance: float,
@@ -2104,11 +2245,12 @@ def create_belief_pipeline_survival_workspace(
     functions = _load_belief_pipeline_workspace_functions()
     if functions is None:
         return None
-    create, query, certify, cancel, destroy = functions
+    create, query, certify, recommend, cancel, destroy = functions
     return BeliefPipelineNativeWorkspace(
         create=create,
         query=query,
         certify=certify,
+        recommend=recommend,
         cancel=cancel,
         destroy=destroy,
         x_axis=x_axis,
@@ -2119,7 +2261,8 @@ def create_belief_pipeline_survival_workspace(
         base_action_mask=base_action_mask,
         budgeted_action_mask=budgeted_action_mask,
         continuation_action_budget=continuation_action_budget,
-        reveal_remaining_delay=reveal_remaining_delay,
+        remaining_delay_bucket_size=remaining_delay_bucket_size,
+        continuation_policy_mode=continuation_policy_mode,
         delay_frames=delay_frames,
         decision_frame_support=decision_frame_support,
         required_clearance=required_clearance,

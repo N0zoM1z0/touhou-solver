@@ -325,6 +325,106 @@ class VariableCadenceOracleTests(unittest.TestCase):
                 0,
             )
 
+    def test_delay_buckets_are_nested_native_upper_bounds(self) -> None:
+        actions = (
+            ControlAction("left", -1.0, 0.0),
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("right", 1.0, 0.0),
+        )
+        config = ViabilityConfig(
+            frames_per_layer=2,
+            required_clearance=0.0,
+            clamp_to_bounds=True,
+        )
+        for seed in range(6):
+            random = np.random.default_rng(300 + seed)
+            clearance = np.where(
+                random.random((8, 2, 3)) < 0.22,
+                -1.0,
+                1.0,
+            ).astype(np.float32)
+            clearance[0, :, 1] = 1.0
+            common = {
+                "x_axis": self.x_axis,
+                "y_axis": self.y_axis,
+                "clearance_volume": clearance,
+                "actions": actions,
+                "delay_frames": (0, 1, 2, 3, 4),
+                "decision_frame_support": (1, 2),
+                "config": config,
+                "start_frame": 0,
+                "row": 0,
+                "column": 1,
+                "observed_action": "stay",
+            }
+            scalar_results = {
+                width: scalar_belief_cadence_survival(
+                    **common,
+                    remaining_delay_bucket_size=width,
+                )
+                for width in (0, 62, 4, 2, 1)
+            }
+            self.assertEqual(
+                scalar_results[0].action_labels,
+                scalar_results[62].action_labels,
+            )
+            for lower_width, upper_width in ((0, 4), (4, 2), (2, 1)):
+                for action in actions:
+                    self.assertLessEqual(
+                        scalar_results[lower_width].action_label(
+                            action.name
+                        ),
+                        scalar_results[upper_width].action_label(
+                            action.name
+                        ),
+                    )
+
+            problem = SurvivalQueryProblem(
+                x_axis=self.x_axis,
+                y_axis=self.y_axis,
+                clearance_volume=clearance,
+                actions=actions,
+                delay_frames=(0, 1, 2, 3, 4),
+                nominal_delay=2,
+                config=config,
+            )
+            native_results = {}
+            for width in (0, 62, 4, 2, 1):
+                version = ("delay-bucket", seed, width)
+                try:
+                    workspace = problem.build_belief_pipeline_workspace(
+                        policy_version=version,
+                        decision_frame_support=(1, 2),
+                        remaining_delay_bucket_size=width,
+                    )
+                except RuntimeError as error:
+                    self.skipTest(str(error))
+                with workspace:
+                    native = workspace.query_cell(
+                        policy_version=version,
+                        frame=0,
+                        row=0,
+                        column=1,
+                        observed_action="stay",
+                    )
+                scalar = scalar_results[width]
+                native_results[width] = native
+                for action in actions:
+                    native_label = native.action_label(action.name)
+                    scalar_label = scalar.action_label(action.name)
+                    self.assertEqual(
+                        native_label.guaranteed_frames,
+                        scalar_label.guaranteed_frames,
+                    )
+                    self.assertAlmostEqual(
+                        native_label.bottleneck_margin,
+                        scalar_label.bottleneck_margin,
+                        places=5,
+                    )
+            self.assertEqual(
+                native_results[0].action_labels,
+                native_results[62].action_labels,
+            )
     def test_budgeted_continuation_is_nested_attainable_lower_bound(
         self,
     ) -> None:

@@ -498,6 +498,9 @@ def scalar_belief_cadence_survival(
     budgeted_continuation_actions: tuple[str, ...] | None = None,
     continuation_action_budget: int = 0,
     recursive_cadence: bool = True,
+    continuation_policy: str = "optimal",
+    candidate_policy_width: int = 1,
+    remaining_delay_bucket_size: int = 0,
 ) -> QueryLocalSurvivalResult:
     """Solve the non-clairvoyant variable-cadence information-set game.
 
@@ -511,6 +514,19 @@ def scalar_belief_cadence_survival(
     cadence support only at the public root and then uses the configured
     nominal layer interval.  That mode is an independent, no-write-correct
     specification of the older one-transition contract.
+
+    ``continuation_policy="greedy_prefix"`` retains the top
+    ``candidate_policy_width`` continuation actions under their robust
+    one-transition prefix labels, then solves that causal restricted policy
+    class exactly. Root actions remain exhaustive. Width one is a fixed
+    deterministic candidate policy; increasing widths gives nested attainable
+    lower bounds, not unrestricted optimality until every legal action is
+    retained.
+
+    A positive ``remaining_delay_bucket_size`` partitions otherwise
+    indistinguishable successors by ranges of hidden pending-command delay.
+    Width one reveals exact delay. These partitions are optimistic upper
+    relaxations; zero is the physical information set.
     """
 
     problem, active_index, pending_index, pending_support = _prepare_problem(
@@ -566,6 +582,89 @@ def scalar_belief_cadence_survival(
         action_indices[name] for name in budgeted_names
     )
     continuation_index_set = frozenset(continuation_indices)
+    if continuation_policy not in ("optimal", "greedy_prefix"):
+        raise ValueError(
+            "continuation policy must be 'optimal' or 'greedy_prefix'"
+        )
+    if not 1 <= candidate_policy_width <= len(problem.actions):
+        raise ValueError("candidate policy width must fit the action set")
+    if not 0 <= remaining_delay_bucket_size <= 62:
+        raise ValueError(
+            "remaining-delay bucket size must be in [0, 62]"
+        )
+    if (
+        remaining_delay_bucket_size > 0
+        and continuation_policy != "optimal"
+    ):
+        raise ValueError(
+            "candidate policy lower bounds cannot reveal hidden delay"
+        )
+
+    def remaining_delay_bucket(remaining: int) -> int:
+        if remaining_delay_bucket_size == 0 or remaining == 0:
+            return 0
+        return 1 + (
+            (remaining - 1) // remaining_delay_bucket_size
+        )
+
+    def greedy_prefix_actions(
+        *,
+        frame: int,
+        state_row: int,
+        state_column: int,
+        active: int,
+        pending: int,
+        remaining_support: tuple[int, ...],
+        selected_actions: tuple[int, ...],
+        public_root: bool,
+    ) -> tuple[int, ...]:
+        scored: list[tuple[SurvivalLabel, int]] = []
+        remaining_horizon = problem.horizon_frame - frame
+        desired = pending if pending >= 0 else active
+        cadence_support = (
+            problem.cadence_frames
+            if public_root or recursive_cadence
+            else (problem.config.frames_per_layer,)
+        )
+        for selected in sorted(selected_actions):
+            robust = SurvivalLabel(remaining_horizon, math.inf)
+            selected_delays: tuple[int | None, ...] = (
+                (None,)
+                if selected == desired
+                else problem.delay_frames
+            )
+            for remaining in remaining_support:
+                hidden = _HiddenState(
+                    frame,
+                    state_row,
+                    state_column,
+                    active,
+                    pending,
+                    remaining,
+                )
+                for cadence in cadence_support:
+                    for delay in selected_delays:
+                        transition = problem.transition(
+                            hidden,
+                            selected=selected,
+                            delay=delay,
+                            cadence=cadence,
+                        )
+                        branch = (
+                            transition.failed_label
+                            if transition.failed_label is not None
+                            else SurvivalLabel(
+                                remaining_horizon,
+                                transition.bottleneck_margin,
+                            )
+                        )
+                        robust = min(robust, branch)
+            scored.append((robust, selected))
+        scored.sort(key=lambda item: (item[0], -item[1]), reverse=True)
+        return tuple(
+            action
+            for _, action in scored[:candidate_policy_width]
+        )
 
     @lru_cache(maxsize=None)
     def solve(
@@ -601,6 +700,17 @@ def scalar_belief_cadence_survival(
                 else continuation_indices
             )
         )
+        if not public_root and continuation_policy == "greedy_prefix":
+            selected_actions = greedy_prefix_actions(
+                frame=frame,
+                state_row=state_row,
+                state_column=state_column,
+                active=active,
+                pending=pending,
+                remaining_support=remaining_support,
+                selected_actions=selected_actions,
+                public_root=False,
+            )
         for selected in selected_actions:
             successor_action_budget = (
                 remaining_action_budget
@@ -609,7 +719,7 @@ def scalar_belief_cadence_survival(
             )
             failed_labels: list[SurvivalLabel] = []
             grouped: dict[
-                tuple[int, int, int, int, int],
+                tuple[int, int, int, int, int, int],
                 tuple[set[int], float],
             ] = {}
             desired = pending if pending >= 0 else active
@@ -658,6 +768,9 @@ def scalar_belief_cadence_survival(
                             successor.column,
                             successor.active,
                             successor.pending,
+                            remaining_delay_bucket(
+                                successor.remaining
+                            ),
                         )
                         support, prefix_margin = grouped.get(
                             observation,
@@ -686,6 +799,7 @@ def scalar_belief_cadence_survival(
                     successor_column,
                     successor_active,
                     successor_pending,
+                    _successor_remaining_bucket,
                 ) = observation
                 successor, _ = solve(
                     successor_frame,
@@ -732,7 +846,21 @@ def scalar_belief_cadence_survival(
         action_labels=root_action_labels,
         evaluated_states=solve.cache_info().currsize,
         backend=(
-            "scalar_belief_variable_cadence_pipeline"
+            (
+                (
+                    "scalar_clairvoyant_variable_cadence_pipeline"
+                    if remaining_delay_bucket_size == 1
+                    else (
+                        "scalar_bucketed_upper_variable_cadence_pipeline"
+                        if remaining_delay_bucket_size > 1
+                        else (
+                            "scalar_greedy_prefix_belief_pipeline"
+                            if continuation_policy == "greedy_prefix"
+                            else "scalar_belief_variable_cadence_pipeline"
+                        )
+                    )
+                )
+            )
             if recursive_cadence
             else "scalar_belief_one_transition_cadence_pipeline"
         ),

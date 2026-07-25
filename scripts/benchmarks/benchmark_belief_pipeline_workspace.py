@@ -22,6 +22,10 @@ from touhou_control.query_survival import (
     PipelineWorkspaceDeadlineError,
     SurvivalQueryProblem,
 )
+from touhou_control.policy_synthesis import (
+    evaluate_candidate_policy_portfolio,
+    singleton_continuation_candidates,
+)
 from touhou_control.variable_cadence_oracle import (
     scalar_belief_cadence_survival,
     scalar_clairvoyant_recursive_cadence_survival,
@@ -91,11 +95,19 @@ def _small_differential(case_count: int) -> dict[str, object]:
     warm_ms = []
     upper_scalar_ms = []
     upper_native_ms = []
+    candidate_scalar_ms = []
+    candidate_native_ms = []
+    candidate_states = []
+    portfolio_ms = []
+    portfolio_states = []
     upper_certification_ms = []
     certification_states = []
     certification_hidden_simulations = []
     failures = []
     upper_failures = []
+    candidate_failures = []
+    candidate_bound_violation_seeds = []
+    portfolio_bound_violation_seeds = []
     certification_failures = []
     bound_violation_seeds = []
     native_states = []
@@ -143,6 +155,14 @@ def _small_differential(case_count: int) -> dict[str, object]:
         started = time.perf_counter()
         scalar = scalar_belief_cadence_survival(**arguments)
         scalar_ms.append((time.perf_counter() - started) * 1000.0)
+        started = time.perf_counter()
+        scalar_candidate = scalar_belief_cadence_survival(
+            **arguments,
+            continuation_policy="greedy_prefix",
+        )
+        candidate_scalar_ms.append(
+            (time.perf_counter() - started) * 1000.0
+        )
         upper_arguments = {
             key: value
             for key, value in arguments.items()
@@ -152,6 +172,11 @@ def _small_differential(case_count: int) -> dict[str, object]:
                 "continuation_action_budget",
             }
         }
+        scalar_exact = (
+            scalar
+            if continuation_actions is None
+            else scalar_belief_cadence_survival(**upper_arguments)
+        )
         started = time.perf_counter()
         scalar_upper = scalar_clairvoyant_recursive_cadence_survival(
             **upper_arguments
@@ -192,6 +217,64 @@ def _small_differential(case_count: int) -> dict[str, object]:
         native_states.append(native.evaluated_state_count)
         if not _equal(native, scalar) or not _equal(warm, scalar):
             failures.append(seed)
+        with problem.build_belief_pipeline_workspace(
+            policy_version=("candidate", seed),
+            decision_frame_support=cadence,
+            continuation_actions=continuation_actions,
+            budgeted_continuation_actions=budgeted_actions,
+            continuation_action_budget=continuation_budget,
+            continuation_policy="greedy_prefix",
+        ) as workspace:
+            started = time.perf_counter()
+            native_candidate = workspace.query_cell(
+                policy_version=("candidate", seed),
+                frame=0,
+                row=0,
+                column=1,
+                observed_action="stay",
+                pending_command=pending,
+            )
+            candidate_native_ms.append(
+                (time.perf_counter() - started) * 1000.0
+            )
+        candidate_states.append(
+            native_candidate.evaluated_state_count
+        )
+        if not _equal(native_candidate, scalar_candidate):
+            candidate_failures.append(seed)
+        if any(
+            candidate_label > optimal_label
+            for (_, candidate_label), (_, optimal_label) in zip(
+                scalar_candidate.action_labels,
+                scalar.action_labels,
+            )
+        ):
+            candidate_bound_violation_seeds.append(seed)
+        started = time.perf_counter()
+        portfolio = evaluate_candidate_policy_portfolio(
+            problem=problem,
+            policy_version=("portfolio", seed),
+            decision_frame_support=cadence,
+            candidates=singleton_continuation_candidates(problem),
+            frame=0,
+            row=0,
+            column=1,
+            observed_action="stay",
+            pending_command=pending,
+            stop_on_feasibility=False,
+        )
+        portfolio_ms.append((time.perf_counter() - started) * 1000.0)
+        portfolio_states.append(
+            portfolio.result.evaluated_state_count
+        )
+        if any(
+            portfolio_label > exact_label
+            for (_, portfolio_label), (_, exact_label) in zip(
+                portfolio.result.action_labels,
+                scalar_exact.action_labels,
+            )
+        ):
+            portfolio_bound_violation_seeds.append(seed)
         with problem.build_belief_pipeline_workspace(
             policy_version=("upper", seed),
             decision_frame_support=cadence,
@@ -255,6 +338,20 @@ def _small_differential(case_count: int) -> dict[str, object]:
         "failures": failures,
         "upper_failure_count": len(upper_failures),
         "upper_failures": upper_failures,
+        "candidate_failure_count": len(candidate_failures),
+        "candidate_failures": candidate_failures,
+        "candidate_bound_violation_count": len(
+            candidate_bound_violation_seeds
+        ),
+        "candidate_bound_violation_seeds": (
+            candidate_bound_violation_seeds
+        ),
+        "portfolio_bound_violation_count": len(
+            portfolio_bound_violation_seeds
+        ),
+        "portfolio_bound_violation_seeds": (
+            portfolio_bound_violation_seeds
+        ),
         "certification_failure_count": len(certification_failures),
         "certification_failures": certification_failures,
         "bound_violation_count": len(bound_violation_seeds),
@@ -264,6 +361,15 @@ def _small_differential(case_count: int) -> dict[str, object]:
         "native_warm_ms": _summary(warm_ms),
         "scalar_upper_ms": _summary(upper_scalar_ms),
         "native_upper_ms": _summary(upper_native_ms),
+        "scalar_candidate_ms": _summary(candidate_scalar_ms),
+        "native_candidate_ms": _summary(candidate_native_ms),
+        "native_candidate_memoized_states": _summary(
+            [float(value) for value in candidate_states]
+        ),
+        "native_singleton_portfolio_ms": _summary(portfolio_ms),
+        "native_singleton_portfolio_memoized_states": _summary(
+            [float(value) for value in portfolio_states]
+        ),
         "native_upper_certification_ms": _summary(
             upper_certification_ms
         ),

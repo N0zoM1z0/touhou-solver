@@ -305,3 +305,15 @@ The next work is cadence semantics, then bounded optimality:
 6. Re-run Stage-5 capsules offline before any physical shadow.  Require
    action-label parity where exact completion is available, explicit bound
    gaps where it is not, and a whole-controller CPU budget.
+
+## Subsequent Budgeted Refinement
+
+`BUDGETED_BELIEF_REFINEMENT_20260725.md` implements the first conservative
+anytime step from item 3: all root actions remain available, while future
+non-base actions consume a per-history budget. The resulting values are nested
+attainable lower bounds and share one budget-indexed native memo. This does
+not use adjacent-budget agreement as a certificate. A second native mode now
+reveals hidden remaining delay and provides the proved optimistic upper bound
+from item 4. On the retained structured workload its maximum equals `L_0`,
+certifying the unrestricted finite-model state value. The remaining work is
+to make that upper computation selective and deadline-serviceable.

@@ -5,6 +5,9 @@
 // information-set game with physical hold/no-write semantics.  The held
 // desired action is pending when pending >= 0, otherwise active.  Selecting
 // that action sends no new command and carries the old pending countdown.
+// A public continuation budget limits non-base future actions and produces
+// nested attainable lower bounds.  The optional revealed-remaining partition
+// is an explicit optimistic information relaxation.
 // It is separate from the older always-issue/one-transition workspace so
 // experiments cannot silently change either contract.
 namespace {
@@ -17,6 +20,7 @@ struct BeliefPipelineState {
     int column;
     int active;
     int pending;
+    int continuation_budget;
     std::uint64_t remaining_mask;
 
     bool operator==(const BeliefPipelineState& other) const {
@@ -26,6 +30,7 @@ struct BeliefPipelineState {
             && column == other.column
             && active == other.active
             && pending == other.pending
+            && continuation_budget == other.continuation_budget
             && remaining_mask == other.remaining_mask
         );
     }
@@ -41,6 +46,10 @@ struct BeliefPipelineStateHash {
             | (
                 static_cast<std::uint64_t>(state.pending + 1)
                 << 41
+            )
+            | (
+                static_cast<std::uint64_t>(state.continuation_budget)
+                << 47
             )
         );
         first += 0x9e3779b97f4a7c15ULL;
@@ -82,6 +91,8 @@ struct BeliefPipelineObservation {
     int column;
     int active;
     int pending;
+    int continuation_budget;
+    std::uint64_t revealed_remaining_mask;
 
     bool operator==(const BeliefPipelineObservation& other) const {
         return (
@@ -90,6 +101,9 @@ struct BeliefPipelineObservation {
             && column == other.column
             && active == other.active
             && pending == other.pending
+            && continuation_budget == other.continuation_budget
+            && revealed_remaining_mask
+                == other.revealed_remaining_mask
         );
     }
 };
@@ -105,7 +119,8 @@ struct BeliefPipelineObservationHash {
                 observation.column,
                 observation.active,
                 observation.pending,
-                0,
+                observation.continuation_budget,
+                observation.revealed_remaining_mask,
             }
         );
     }
@@ -187,7 +202,10 @@ public:
         const double* velocity_x,
         const double* velocity_y,
         int action_count,
-        std::uint32_t continuation_action_mask,
+        std::uint32_t base_action_mask,
+        std::uint32_t budgeted_action_mask,
+        int continuation_budget,
+        bool reveal_remaining_delay,
         const int* delay_frames,
         int delay_count,
         const int* cadence_frames,
@@ -204,7 +222,10 @@ public:
           y_start_(y_start),
           y_step_(y_step),
           action_count_(action_count),
-          continuation_action_mask_(continuation_action_mask),
+          base_action_mask_(base_action_mask),
+          budgeted_action_mask_(budgeted_action_mask),
+          continuation_budget_(continuation_budget),
+          reveal_remaining_delay_(reveal_remaining_delay),
           required_clearance_(required_clearance),
           clamp_to_bounds_(clamp_to_bounds),
           velocity_x_(velocity_x, velocity_x + action_count),
@@ -223,6 +244,7 @@ public:
         int pending_action,
         const int* pending_remaining_frames,
         int pending_remaining_count,
+        int root_continuation_budget,
         int timeout_ms,
         std::uint16_t* output_state_frames,
         float* output_state_margin,
@@ -231,6 +253,11 @@ public:
         std::uint32_t* output_best_action_mask,
         std::uint64_t* output_stats
     ) {
+        const int query_budget = (
+            root_continuation_budget < 0
+            ? continuation_budget_
+            : root_continuation_budget
+        );
         if (
             start_frame < 0 || start_frame >= frame_count_
             || start_row < 0 || start_row >= row_count_
@@ -239,6 +266,8 @@ public:
             || pending_action < -1 || pending_action >= action_count_
             || pending_remaining_count < 0
             || pending_remaining_count > BELIEF_PIPELINE_MAX_REMAINING
+            || query_budget < 0
+            || query_budget > continuation_budget_
             || timeout_ms < 0
             || (
                 pending_action < 0
@@ -286,6 +315,7 @@ public:
                 start_column,
                 observed_action,
                 pending_action,
+                query_budget,
                 remaining_mask,
             }
         );
@@ -384,7 +414,8 @@ private:
         int selected,
         int delay,
         bool issued,
-        int cadence
+        int cadence,
+        int successor_budget
     ) {
         check_abort();
         ++counters_.hidden_simulations;
@@ -494,6 +525,7 @@ private:
             terminal.column,
             successor_active,
             successor_pending,
+            successor_budget,
             std::uint64_t{1} << successor_remaining,
         };
         successor = canonicalize(successor);
@@ -549,6 +581,12 @@ private:
                 successor.column,
                 successor.active,
                 successor.pending,
+                successor.continuation_budget,
+                (
+                    reveal_remaining_delay_
+                    ? successor.remaining_mask
+                    : std::uint64_t{0}
+                ),
             };
             auto inserted = groups.emplace(
                 observation,
@@ -620,6 +658,7 @@ private:
                     observation.column,
                     observation.active,
                     observation.pending,
+                    observation.continuation_budget,
                     group.remaining_mask,
                 }
             );
@@ -646,9 +685,18 @@ private:
 
     PreparedAction prepare_action(
         const BeliefPipelineState& state,
-        int selected
+        int selected,
+        bool public_root
     ) {
         PreparedAction prepared;
+        const bool base_action = (
+            base_action_mask_ & (std::uint32_t{1} << selected)
+        ) != 0;
+        const int successor_budget = (
+            public_root || base_action
+            ? state.continuation_budget
+            : state.continuation_budget - 1
+        );
         const std::uint16_t remaining_horizon =
             static_cast<std::uint16_t>(
                 frame_count_ - 1 - state.frame
@@ -712,7 +760,8 @@ private:
                         selected,
                         delay,
                         issued,
-                        cadence
+                        cadence,
+                        successor_budget
                     );
                     prepared.transitions.push_back(transition);
                     const PipelineLabel branch_upper = (
@@ -763,13 +812,16 @@ private:
         std::array<Candidate, PIPELINE_MAX_ACTIONS> candidates;
         int candidate_count = 0;
         for (int action = 0; action < action_count_; ++action) {
-            if (
-                (continuation_action_mask_
-                 & (std::uint32_t{1} << action)) == 0
-            ) {
+            const std::uint32_t bit = std::uint32_t{1} << action;
+            const bool base_action = (base_action_mask_ & bit) != 0;
+            const bool budgeted_action = (
+                state.continuation_budget > 0
+                && (budgeted_action_mask_ & bit) != 0
+            );
+            if (!base_action && !budgeted_action) {
                 continue;
             }
-            prepared[action] = prepare_action(state, action);
+            prepared[action] = prepare_action(state, action, false);
             candidates[candidate_count++] = Candidate{
                 action,
                 prepared[action].upper,
@@ -823,7 +875,8 @@ private:
             for (int action = 0; action < action_count_; ++action) {
                 const PreparedAction prepared = prepare_action(
                     state,
-                    action
+                    action,
+                    true
                 );
                 node.actions[action] = evaluate_action(
                     state,
@@ -856,7 +909,10 @@ private:
     double y_start_;
     double y_step_;
     int action_count_;
-    std::uint32_t continuation_action_mask_;
+    std::uint32_t base_action_mask_;
+    std::uint32_t budgeted_action_mask_;
+    int continuation_budget_;
+    bool reveal_remaining_delay_;
     float required_clearance_;
     bool clamp_to_bounds_;
     std::vector<double> velocity_x_;
@@ -883,7 +939,7 @@ private:
 
 }  // namespace
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
+TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v4(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -895,7 +951,10 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
     const double* velocity_x,
     const double* velocity_y,
     int action_count,
-    std::uint32_t continuation_action_mask,
+    std::uint32_t base_action_mask,
+    std::uint32_t budgeted_action_mask,
+    int continuation_budget,
+    int reveal_remaining_delay,
     const int* delay_frames,
     int delay_count,
     const int* cadence_frames,
@@ -917,9 +976,10 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
         || column_count < 2 || column_count > 1024
         || x_step <= 0.0 || y_step <= 0.0
         || action_count < 1 || action_count > PIPELINE_MAX_ACTIONS
-        || continuation_action_mask == 0
+        || base_action_mask == 0
+        || continuation_budget < 0 || continuation_budget > 65535
         || (
-            continuation_action_mask
+            (base_action_mask | budgeted_action_mask)
             & ~(
                 action_count == 32
                 ? std::numeric_limits<std::uint32_t>::max()
@@ -929,6 +989,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
                 )
             )
         ) != 0
+        || (base_action_mask & budgeted_action_mask) != 0
         || delay_count < 1 || delay_count > PIPELINE_MAX_DELAYS
         || cadence_count < 1
         || cadence_count > PIPELINE_MAX_DECISION_FRAMES
@@ -972,7 +1033,10 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
             velocity_x,
             velocity_y,
             action_count,
-            continuation_action_mask,
+            base_action_mask,
+            budgeted_action_mask,
+            continuation_budget,
+            reveal_remaining_delay != 0,
             delay_frames,
             delay_count,
             cadence_frames,
@@ -985,6 +1049,101 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
         return 4;
     }
     return 0;
+}
+
+TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v3(
+    const float* clearance,
+    int frame_count,
+    int row_count,
+    int column_count,
+    double x_start,
+    double x_step,
+    double y_start,
+    double y_step,
+    const double* velocity_x,
+    const double* velocity_y,
+    int action_count,
+    std::uint32_t base_action_mask,
+    std::uint32_t budgeted_action_mask,
+    int continuation_budget,
+    const int* delay_frames,
+    int delay_count,
+    const int* cadence_frames,
+    int cadence_count,
+    float required_clearance,
+    int clamp_to_bounds,
+    void** output_workspace
+) {
+    return touhou_belief_pipeline_workspace_create_v4(
+        clearance,
+        frame_count,
+        row_count,
+        column_count,
+        x_start,
+        x_step,
+        y_start,
+        y_step,
+        velocity_x,
+        velocity_y,
+        action_count,
+        base_action_mask,
+        budgeted_action_mask,
+        continuation_budget,
+        0,
+        delay_frames,
+        delay_count,
+        cadence_frames,
+        cadence_count,
+        required_clearance,
+        clamp_to_bounds,
+        output_workspace
+    );
+}
+
+TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
+    const float* clearance,
+    int frame_count,
+    int row_count,
+    int column_count,
+    double x_start,
+    double x_step,
+    double y_start,
+    double y_step,
+    const double* velocity_x,
+    const double* velocity_y,
+    int action_count,
+    std::uint32_t continuation_action_mask,
+    const int* delay_frames,
+    int delay_count,
+    const int* cadence_frames,
+    int cadence_count,
+    float required_clearance,
+    int clamp_to_bounds,
+    void** output_workspace
+) {
+    return touhou_belief_pipeline_workspace_create_v3(
+        clearance,
+        frame_count,
+        row_count,
+        column_count,
+        x_start,
+        x_step,
+        y_start,
+        y_step,
+        velocity_x,
+        velocity_y,
+        action_count,
+        continuation_action_mask,
+        0,
+        0,
+        delay_frames,
+        delay_count,
+        cadence_frames,
+        cadence_count,
+        required_clearance,
+        clamp_to_bounds,
+        output_workspace
+    );
 }
 
 TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v1(
@@ -1038,7 +1197,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v1(
     );
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
+TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v2(
     void* workspace,
     int start_frame,
     int start_row,
@@ -1047,6 +1206,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
     int pending_action,
     const int* pending_remaining_frames,
     int pending_remaining_count,
+    int continuation_action_budget,
     int timeout_ms,
     std::uint16_t* output_state_frames,
     float* output_state_margin,
@@ -1075,6 +1235,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
             pending_action,
             pending_remaining_frames,
             pending_remaining_count,
+            continuation_action_budget,
             timeout_ms,
             output_state_frames,
             output_state_margin,
@@ -1090,6 +1251,43 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
     } catch (...) {
         return 2;
     }
+}
+
+TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int timeout_ms,
+    std::uint16_t* output_state_frames,
+    float* output_state_margin,
+    std::uint16_t* output_action_frames,
+    float* output_action_margins,
+    std::uint32_t* output_best_action_mask,
+    std::uint64_t* output_stats
+) {
+    return touhou_belief_pipeline_workspace_query_v2(
+        workspace,
+        start_frame,
+        start_row,
+        start_column,
+        observed_action,
+        pending_action,
+        pending_remaining_frames,
+        pending_remaining_count,
+        -1,
+        timeout_ms,
+        output_state_frames,
+        output_state_margin,
+        output_action_frames,
+        output_action_margins,
+        output_best_action_mask,
+        output_stats
+    );
 }
 
 TOUHOU_EXPORT int touhou_belief_pipeline_workspace_cancel_v1(

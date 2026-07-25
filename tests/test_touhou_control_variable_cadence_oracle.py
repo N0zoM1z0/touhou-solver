@@ -35,7 +35,7 @@ class VariableCadenceOracleTests(unittest.TestCase):
             required_clearance=0.0,
             clamp_to_bounds=True,
         )
-        for seed in range(12):
+        for seed in range(4):
             random = np.random.default_rng(seed)
             clearance = np.where(
                 random.random((7, 2, 3)) < 0.2,
@@ -218,7 +218,7 @@ class VariableCadenceOracleTests(unittest.TestCase):
             required_clearance=0.0,
             clamp_to_bounds=True,
         )
-        for seed in range(12):
+        for seed in range(4):
             random = np.random.default_rng(seed + 100)
             clearance = np.where(
                 random.random((6, 2, 3)) < 0.2,
@@ -248,6 +248,128 @@ class VariableCadenceOracleTests(unittest.TestCase):
                     belief.action_label(action.name),
                     clairvoyant.action_label(action.name),
                 )
+            problem = SurvivalQueryProblem(
+                x_axis=self.x_axis,
+                y_axis=self.y_axis,
+                clearance_volume=clearance,
+                actions=actions,
+                delay_frames=(2, 3),
+                nominal_delay=2,
+                config=config,
+            )
+            try:
+                workspace = problem.build_belief_pipeline_workspace(
+                    policy_version=("clairvoyant", seed),
+                    decision_frame_support=(1,),
+                    reveal_remaining_delay=True,
+                )
+            except RuntimeError as error:
+                self.skipTest(str(error))
+            with workspace:
+                native_upper = workspace.query_cell(
+                    policy_version=("clairvoyant", seed),
+                    frame=0,
+                    row=0,
+                    column=0,
+                    observed_action="stay",
+                )
+            self.assertEqual(
+                native_upper.action_labels,
+                clairvoyant.action_labels,
+            )
+            self.assertEqual(
+                native_upper.best_actions,
+                clairvoyant.best_actions,
+            )
+
+    def test_budgeted_continuation_is_nested_attainable_lower_bound(
+        self,
+    ) -> None:
+        actions = (
+            ControlAction("left", -1.0, 0.0),
+            ControlAction("stay", 0.0, 0.0),
+            ControlAction("right", 1.0, 0.0),
+        )
+        config = ViabilityConfig(
+            frames_per_layer=1,
+            required_clearance=0.0,
+            clamp_to_bounds=True,
+        )
+        for seed in range(4):
+            random = np.random.default_rng(seed + 40_000)
+            clearance = np.where(
+                random.random((7, 2, 3)) < 0.2,
+                -1.0,
+                1.0,
+            ).astype(np.float32)
+            clearance[0, :, 1] = 1.0
+            common = {
+                "x_axis": self.x_axis,
+                "y_axis": self.y_axis,
+                "clearance_volume": clearance,
+                "actions": actions,
+                "delay_frames": (0, 1, 2),
+                "decision_frame_support": (1, 2),
+                "config": config,
+                "start_frame": 0,
+                "row": 0,
+                "column": 1,
+                "observed_action": "stay",
+            }
+            values = [
+                scalar_belief_cadence_survival(
+                    **common,
+                    continuation_actions=("left", "stay"),
+                    budgeted_continuation_actions=("right",),
+                    continuation_action_budget=budget,
+                )
+                for budget in range(3)
+            ]
+            unrestricted = scalar_belief_cadence_survival(**common)
+            for action in actions:
+                labels = [
+                    value.action_label(action.name) for value in values
+                ]
+                self.assertLessEqual(labels[0], labels[1])
+                self.assertLessEqual(labels[1], labels[2])
+                self.assertLessEqual(
+                    labels[2],
+                    unrestricted.action_label(action.name),
+                )
+        problem = SurvivalQueryProblem(
+            x_axis=self.x_axis,
+            y_axis=self.y_axis,
+            clearance_volume=clearance,
+            actions=actions,
+            delay_frames=(0, 1, 2),
+            nominal_delay=1,
+            config=config,
+        )
+        try:
+            workspace = problem.build_belief_pipeline_workspace(
+                policy_version="budgeted-progressive",
+                decision_frame_support=(1, 2),
+                continuation_actions=("left", "stay"),
+                budgeted_continuation_actions=("right",),
+                continuation_action_budget=2,
+            )
+        except RuntimeError as error:
+            self.skipTest(str(error))
+        with workspace:
+            native_values = [
+                workspace.query_cell(
+                    policy_version="budgeted-progressive",
+                    frame=0,
+                    row=0,
+                    column=1,
+                    observed_action="stay",
+                    continuation_action_budget=budget,
+                )
+                for budget in range(3)
+            ]
+        for native, expected in zip(native_values, values):
+            self.assertEqual(native.action_labels, expected.action_labels)
+            self.assertEqual(native.best_actions, expected.best_actions)
 
     def test_native_belief_workspace_matches_independent_oracle(
         self,
@@ -262,7 +384,7 @@ class VariableCadenceOracleTests(unittest.TestCase):
             required_clearance=0.0,
             clamp_to_bounds=True,
         )
-        for seed in range(24):
+        for seed in range(6):
             with self.subTest(seed=seed):
                 random = np.random.default_rng(seed + 20_000)
                 clearance = np.where(
@@ -284,6 +406,12 @@ class VariableCadenceOracleTests(unittest.TestCase):
                     if seed % 3 == 0
                     else None
                 )
+                budgeted_actions = (
+                    ("right",)
+                    if continuation_actions is not None
+                    else None
+                )
+                continuation_budget = 1 if seed == 3 else 0
                 arguments = {
                     "x_axis": self.x_axis,
                     "y_axis": self.y_axis,
@@ -298,6 +426,8 @@ class VariableCadenceOracleTests(unittest.TestCase):
                     "observed_action": "stay",
                     "pending_command": pending,
                     "continuation_actions": continuation_actions,
+                    "budgeted_continuation_actions": budgeted_actions,
+                    "continuation_action_budget": continuation_budget,
                 }
                 expected = scalar_belief_cadence_survival(**arguments)
                 problem = SurvivalQueryProblem(
@@ -314,6 +444,8 @@ class VariableCadenceOracleTests(unittest.TestCase):
                         policy_version=seed,
                         decision_frame_support=(1, 2),
                         continuation_actions=continuation_actions,
+                        budgeted_continuation_actions=budgeted_actions,
+                        continuation_action_budget=continuation_budget,
                     )
                 except RuntimeError as error:
                     self.skipTest(str(error))

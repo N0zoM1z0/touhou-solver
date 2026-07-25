@@ -2898,3 +2898,55 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   482 tests in `3.010/5.410 s`.
 - Full analysis:
   `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`.
+
+## 2026-07-25: Research Test Gate And Budgeted Belief Refinement
+
+- Audited the complete unit suite by file and test. The main avoidable costs
+  were retired prepublication-prewarm integration, audit-capsule file I/O,
+  benchmark/report CLI plumbing, repeated route-manifest construction, and
+  broad randomized counts already covered by retained differential programs.
+- Removed seven benchmark/report CLI tests, three rejected legacy-prewarm
+  integration tests, and two optional audit-file-wiring tests. Retained the
+  constant-time assertion that rejected refinement/survival strategies remain
+  shadow-only. Route manifests are now constructed once per class, and quick
+  randomized oracle smoke counts are separated from the 128-case retained
+  benchmark.
+- Linux quick-suite runtime changed from 482 tests in `3.010 s` to 471 tests
+  in `1.324 s`; Windows passes the same 471 tests in `2.481 s`. This is a
+  research-gate reduction, not removal of scalar/native parity, concrete
+  counterexamples, collision semantics, or live-authority boundaries.
+- The independent Python formal audit now defaults to 16 cases per cohort and
+  takes about `1.26 s`; `--cases 128` remains the retained full gate. It was
+  not replaced with C++ because it specifies/checks the recurrence
+  independently. The belief benchmark defaults to a roughly `1.1 s` quick
+  profile; unrestricted, long-horizon, wide-cadence, and deliberate timeout
+  cases require `--profile full`.
+- Formalized and implemented per-history continuation-action budgets. Every
+  root still evaluates all actions; later non-base actions consume budget.
+  The resulting policy sets give nested attainable bounds
+  `L_0 <= L_1 <= ... <= V_unrestricted`, and a sufficiently large budget
+  recovers the exact unrestricted finite policy class.
+- Added budget to scalar and native memo state, C ABI v3 action
+  base/extra/budget construction, C ABI v2 per-query budget selection, and
+  progressive `B=0,1,2` reuse inside one workspace. The retained 128-case
+  scalar/native differential exercises budgets 0, 1, and 2 with zero
+  failures.
+- Added C ABI v4/native revealed-remaining-delay information relaxation. This
+  is a proved optimistic upper bound because it preserves transitions and
+  uncertainty while giving the controller more information. Another 128
+  scalar/native comparisons have zero failures.
+- On the TH08-shaped 32-frame `(4,5,6)` workload, `B=0` costs `32.30 ms`;
+  progressive `B=1/2` increments cost `687.54/1054.42 ms`. The unrestricted
+  belief solve costs `1488.38 ms`, and the complete upper costs `1471.15 ms`.
+  `L_0` and the upper both equal `(32, 8.9031067)`, formally certifying the
+  unrestricted state value for this instance. This certificate does not
+  generalize to other fields without recomputing valid bounds.
+- C++ removes interpreter overhead but not policy-state growth. The next
+  performance target is incumbent-seeded selective upper evaluation and
+  per-action certification, followed by retained Stage-5 capsule coverage;
+  blind budget widening is not the next step.
+- Retained design and benchmark:
+  `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md` and
+  `artifacts/benchmarks/budgeted_belief_refinement_20260725.json`.
+- No physical trial, binary reverse engineering, IDA mutation, or REA session
+  was used for this offline checkpoint.

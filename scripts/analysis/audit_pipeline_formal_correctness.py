@@ -536,7 +536,12 @@ def audit(case_count: int) -> dict[str, object]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("output", type=Path)
-    parser.add_argument("--cases", type=int, default=128)
+    parser.add_argument(
+        "--cases",
+        type=int,
+        default=16,
+        help="cases per cohort; use 128 for the retained full audit",
+    )
     arguments = parser.parse_args()
     if arguments.cases <= 0:
         raise SystemExit("--cases must be positive")

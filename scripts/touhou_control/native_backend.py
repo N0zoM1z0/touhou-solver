@@ -451,8 +451,8 @@ def _load_belief_pipeline_workspace_functions():
     if library is None:
         return None
     try:
-        create = library.touhou_belief_pipeline_workspace_create_v2
-        query = library.touhou_belief_pipeline_workspace_query_v1
+        create = library.touhou_belief_pipeline_workspace_create_v4
+        query = library.touhou_belief_pipeline_workspace_query_v2
         cancel = library.touhou_belief_pipeline_workspace_cancel_v1
         destroy = library.touhou_belief_pipeline_workspace_destroy_v1
     except AttributeError:
@@ -470,6 +470,9 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.POINTER(ctypes.c_double),
         ctypes.c_int,
         ctypes.c_uint32,
+        ctypes.c_uint32,
+        ctypes.c_int,
+        ctypes.c_int,
         ctypes.POINTER(ctypes.c_int),
         ctypes.c_int,
         ctypes.POINTER(ctypes.c_int),
@@ -487,6 +490,7 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.c_int,
         ctypes.c_int,
         ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,
         ctypes.POINTER(ctypes.c_uint16),
@@ -1806,7 +1810,10 @@ class BeliefPipelineNativeWorkspace:
         clearance_volume: np.ndarray,
         velocity_x: np.ndarray,
         velocity_y: np.ndarray,
-        continuation_action_mask: int,
+        base_action_mask: int,
+        budgeted_action_mask: int,
+        continuation_action_budget: int,
+        reveal_remaining_delay: bool,
         delay_frames: np.ndarray,
         decision_frame_support: np.ndarray,
         required_clearance: float,
@@ -1856,7 +1863,10 @@ class BeliefPipelineNativeWorkspace:
                 ctypes.POINTER(ctypes.c_double)
             ),
             len(self._velocity_x),
-            continuation_action_mask,
+            base_action_mask,
+            budgeted_action_mask,
+            continuation_action_budget,
+            int(reveal_remaining_delay),
             self._delays.ctypes.data_as(
                 ctypes.POINTER(ctypes.c_int)
             ),
@@ -1907,6 +1917,7 @@ class BeliefPipelineNativeWorkspace:
         observed_action_index: int,
         pending_action_index: int = -1,
         pending_remaining_frames: np.ndarray | None = None,
+        continuation_action_budget: int | None = None,
         timeout_ms: int = 0,
     ) -> tuple[
         int,
@@ -1946,6 +1957,11 @@ class BeliefPipelineNativeWorkspace:
                 else None
             ),
             len(pending),
+            (
+                -1
+                if continuation_action_budget is None
+                else continuation_action_budget
+            ),
             timeout_ms,
             ctypes.byref(state_frames),
             ctypes.byref(state_margin),
@@ -1984,7 +2000,10 @@ def create_belief_pipeline_survival_workspace(
     clearance_volume: np.ndarray,
     velocity_x: np.ndarray,
     velocity_y: np.ndarray,
-    continuation_action_mask: int,
+    base_action_mask: int,
+    budgeted_action_mask: int = 0,
+    continuation_action_budget: int = 0,
+    reveal_remaining_delay: bool = False,
     delay_frames: np.ndarray,
     decision_frame_support: np.ndarray,
     required_clearance: float,
@@ -2006,7 +2025,10 @@ def create_belief_pipeline_survival_workspace(
         clearance_volume=clearance_volume,
         velocity_x=velocity_x,
         velocity_y=velocity_y,
-        continuation_action_mask=continuation_action_mask,
+        base_action_mask=base_action_mask,
+        budgeted_action_mask=budgeted_action_mask,
+        continuation_action_budget=continuation_action_budget,
+        reveal_remaining_delay=reveal_remaining_delay,
         delay_frames=delay_frames,
         decision_frame_support=decision_frame_support,
         required_clearance=required_clearance,

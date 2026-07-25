@@ -38,10 +38,17 @@ EXPECTED_CALLBACK_INDICES = {
 
 
 class RouteManifestTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.manifests = {
+            profile.name: build_manifest(DECODED, profile)
+            for profile in PROFILES
+        }
+
     def test_acceptance_route_spell_sets(self) -> None:
         for profile in PROFILES:
             with self.subTest(profile=profile.name):
-                manifest = build_manifest(DECODED, profile)
+                manifest = self.manifests[profile.name]
                 self.assertEqual(
                     set(manifest["reachable_unique_spell_ids"]),
                     EXPECTED_SPELL_IDS[profile.name],
@@ -52,7 +59,7 @@ class RouteManifestTests(unittest.TestCase):
     def test_acceptance_route_callback_sets(self) -> None:
         for profile in PROFILES:
             with self.subTest(profile=profile.name):
-                manifest = build_manifest(DECODED, profile)
+                manifest = self.manifests[profile.name]
                 self.assertEqual(
                     set(manifest["reachable_callback_indices"]),
                     EXPECTED_CALLBACK_INDICES[profile.name],
@@ -67,7 +74,7 @@ class RouteManifestTests(unittest.TestCase):
 
     def test_lunatic_stage_three_selects_only_lunatic_variants(self) -> None:
         for profile in PROFILES[:2]:
-            manifest = build_manifest(DECODED, profile)
+            manifest = self.manifests[profile.name]
             stage_three = next(
                 stage
                 for stage in manifest["stages"]
@@ -81,12 +88,12 @@ class RouteManifestTests(unittest.TestCase):
 
     def test_extra_enemy_end_edges_reach_keine_sequence(self) -> None:
         profile = PROFILES[2]
-        manifest = build_manifest(DECODED, profile)
+        manifest = self.manifests[profile.name]
         extra = manifest["stages"][0]
         self.assertTrue({191, 192, 193}.issubset(extra["reachable_unique_spell_ids"]))
 
     def test_extra_spell_components_stop_at_phase_transitions(self) -> None:
-        manifest = build_manifest(DECODED, PROFILES[2])
+        manifest = self.manifests[PROFILES[2].name]
         spells = {
             spell["spell_id"]: spell
             for spell in manifest["stages"][0]["reachable_spell_occurrences"]

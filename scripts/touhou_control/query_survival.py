@@ -307,14 +307,22 @@ class SurvivalQueryProblem:
         policy_version: Hashable,
         decision_frame_support: tuple[int, ...],
         continuation_actions: tuple[str, ...] | None = None,
+        budgeted_continuation_actions: tuple[str, ...] | None = None,
+        continuation_action_budget: int = 0,
+        reveal_remaining_delay: bool = False,
     ) -> BeliefPipelineSurvivalWorkspace:
-        """Create the recursive non-clairvoyant research workspace."""
+        """Create a recursive belief or revealed-delay research workspace."""
 
         return BeliefPipelineSurvivalWorkspace(
             problem=self,
             policy_version=policy_version,
             decision_frame_support=decision_frame_support,
             continuation_actions=continuation_actions,
+            budgeted_continuation_actions=(
+                budgeted_continuation_actions
+            ),
+            continuation_action_budget=continuation_action_budget,
+            reveal_remaining_delay=reveal_remaining_delay,
         )
 
 
@@ -637,6 +645,10 @@ class BeliefPipelineSurvivalWorkspace:
     that command as the held desired input; a root without one assumes the
     observed action is also held.  It is an offline/shadow research backend;
     it has no live lookup or prewarm authority yet.
+
+    ``reveal_remaining_delay`` partitions successors by exact remaining
+    delay. With unrestricted continuation actions this is an optimistic
+    information relaxation, not the physical controller value.
     """
 
     def __init__(
@@ -646,6 +658,9 @@ class BeliefPipelineSurvivalWorkspace:
         policy_version: Hashable,
         decision_frame_support: tuple[int, ...],
         continuation_actions: tuple[str, ...] | None = None,
+        budgeted_continuation_actions: tuple[str, ...] | None = None,
+        continuation_action_budget: int = 0,
+        reveal_remaining_delay: bool = False,
     ) -> None:
         self.problem = problem
         self.policy_version = policy_version
@@ -674,11 +689,36 @@ class BeliefPipelineSurvivalWorkspace:
                 "belief continuation actions must be unique known actions"
             )
         self.continuation_actions = continuation_names
-        continuation_action_mask = 0
+        budgeted_names = (
+            ()
+            if budgeted_continuation_actions is None
+            else budgeted_continuation_actions
+        )
+        if (
+            continuation_action_budget < 0
+            or len(set(budgeted_names)) != len(budgeted_names)
+            or any(
+                name not in self._action_indices
+                for name in budgeted_names
+            )
+            or set(continuation_names).intersection(budgeted_names)
+        ):
+            raise ValueError(
+                "budgeted belief continuation actions must be unique, "
+                "known, disjoint from base actions, with a nonnegative "
+                "budget"
+            )
+        self.budgeted_continuation_actions = budgeted_names
+        self.continuation_action_budget = continuation_action_budget
+        self.reveal_remaining_delay = reveal_remaining_delay
+        base_action_mask = 0
         for name in continuation_names:
-            continuation_action_mask |= (
+            base_action_mask |= (
                 1 << self._action_indices[name]
             )
+        budgeted_action_mask = 0
+        for name in budgeted_names:
+            budgeted_action_mask |= 1 << self._action_indices[name]
         self._native = (
             native_backend.create_belief_pipeline_survival_workspace(
                 x_axis=problem.x_axis,
@@ -692,7 +732,10 @@ class BeliefPipelineSurvivalWorkspace:
                     [action.velocity_y for action in problem.actions],
                     dtype=np.float64,
                 ),
-                continuation_action_mask=continuation_action_mask,
+                base_action_mask=base_action_mask,
+                budgeted_action_mask=budgeted_action_mask,
+                continuation_action_budget=continuation_action_budget,
+                reveal_remaining_delay=reveal_remaining_delay,
                 delay_frames=np.asarray(
                     problem.delay_frames,
                     dtype=np.int32,
@@ -737,6 +780,7 @@ class BeliefPipelineSurvivalWorkspace:
         column: int,
         observed_action: str,
         pending_command: PendingCommand | None = None,
+        continuation_action_budget: int | None = None,
         timeout_ms: int = 0,
     ) -> QueryLocalSurvivalResult:
         if policy_version != self.policy_version:
@@ -750,6 +794,18 @@ class BeliefPipelineSurvivalWorkspace:
             and pending_command.action not in self._action_indices
         ):
             raise ValueError("pending action is absent from the action set")
+        if (
+            continuation_action_budget is not None
+            and (
+                continuation_action_budget < 0
+                or continuation_action_budget
+                > self.continuation_action_budget
+            )
+        ):
+            raise ValueError(
+                "query continuation budget must be between zero and the "
+                "workspace maximum"
+            )
         (
             state_frames,
             state_margin,
@@ -775,6 +831,7 @@ class BeliefPipelineSurvivalWorkspace:
                 if pending_command is not None
                 else None
             ),
+            continuation_action_budget=continuation_action_budget,
             timeout_ms=timeout_ms,
         )
         action_labels = tuple(
@@ -805,7 +862,11 @@ class BeliefPipelineSurvivalWorkspace:
                 if best_mask & (1 << index)
             ),
             evaluated_state_count=stats.memoized_state_count,
-            backend="native_belief_variable_cadence_pipeline",
+            backend=(
+                "native_clairvoyant_variable_cadence_pipeline"
+                if self.reveal_remaining_delay
+                else "native_belief_variable_cadence_pipeline"
+            ),
             workspace_stats=stats,
         )
 

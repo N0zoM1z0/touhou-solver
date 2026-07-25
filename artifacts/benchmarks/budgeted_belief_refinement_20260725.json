@@ -1,0 +1,1149 @@
+{
+  "contract": "conditional hold/no-write, recursive cadence, and non-clairvoyant remaining-delay information-set merging; future non-base actions consume a finite decision budget; revealed remaining delay is an explicit optimistic relaxation",
+  "profile": "full",
+  "schema": "th08.belief_pipeline_workspace_benchmark.v5",
+  "small_differential": {
+    "bound_violation_count": 0,
+    "bound_violation_seeds": [],
+    "case_count": 128,
+    "failure_count": 0,
+    "failures": [],
+    "native_cold_ms": {
+      "max": 0.3385139862075448,
+      "median": 0.13311902876012027,
+      "p95": 0.24008500622585416
+    },
+    "native_memoized_states": {
+      "max": 141.0,
+      "median": 43.5,
+      "p95": 94.0
+    },
+    "native_upper_ms": {
+      "max": 0.5652650143019855,
+      "median": 0.09785898146219552,
+      "p95": 0.17616897821426392
+    },
+    "native_warm_ms": {
+      "max": 0.12198695912957191,
+      "median": 0.028231501346454024,
+      "p95": 0.03927998477593064
+    },
+    "scalar_ms": {
+      "max": 19.49738198891282,
+      "median": 7.954623986734077,
+      "p95": 14.735631993971765
+    },
+    "scalar_upper_ms": {
+      "max": 17.600847000721842,
+      "median": 8.275353000499308,
+      "p95": 12.379359046462923
+    },
+    "upper_failure_count": 0,
+    "upper_failures": []
+  },
+  "th08_structured_bound_certification": {
+    "available": true,
+    "best_lower": {
+      "frames": 32,
+      "margin": 8.903106689453125
+    },
+    "best_upper": {
+      "frames": 32,
+      "margin": 8.903106689453125
+    },
+    "bound_violations": [],
+    "lower_best_actions": [
+      "stay",
+      "up",
+      "down",
+      "down_right",
+      "down_fast"
+    ],
+    "lower_policy": "all-root/focused-continuation B=0",
+    "state_value_certified": true,
+    "unresolved_actions": [
+      "stay",
+      "up",
+      "down",
+      "down_right",
+      "down_fast"
+    ],
+    "upper_policy": "unrestricted with revealed remaining delay"
+  },
+  "th08_structured_scaling": [
+    {
+      "action_count": 9,
+      "action_labels": {
+        "down": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_left": {
+          "frames": 9,
+          "margin": -8.382768630981445
+        },
+        "down_right": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "left": {
+          "frames": 8,
+          "margin": -1.6541109085083008
+        },
+        "right": {
+          "frames": 32,
+          "margin": 6.199080467224121
+        },
+        "stay": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up_left": {
+          "frames": 9,
+          "margin": -3.92954158782959
+        },
+        "up_right": {
+          "frames": 5,
+          "margin": -6.990850448608398
+        }
+      },
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "down_right"
+      ],
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": true,
+      "continuation_action_budget": 0,
+      "continuation_action_count": 9,
+      "elapsed_ms": 11.04350300738588,
+      "horizon": 32,
+      "refinement_steps": [
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right"
+          ],
+          "budget": 0,
+          "completed": true,
+          "elapsed_ms": 11.04350300738588,
+          "new_state_count": 569,
+          "state_frames": 32,
+          "state_margin": 8.903106689453125
+        }
+      ],
+      "reveal_remaining_delay": false,
+      "state_label": {
+        "frames": 32,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 4432,
+        "branch_incumbent_prune_count": 0,
+        "hidden_simulation_count": 93051,
+        "memo_hit_count": 1390,
+        "memoized_state_count": 569,
+        "new_state_count": 569,
+        "observation_merge_count": 2275,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "total_refinement_ms": 11.04350300738588,
+      "warm_matches": true,
+      "warm_ms": 0.10865996591746807
+    },
+    {
+      "action_count": 17,
+      "action_labels": {
+        "down": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_fast": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_left": {
+          "frames": 9,
+          "margin": -8.382768630981445
+        },
+        "down_left_fast": {
+          "frames": 7,
+          "margin": -8.471810340881348
+        },
+        "down_right": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_right_fast": {
+          "frames": 32,
+          "margin": 8.499215126037598
+        },
+        "left": {
+          "frames": 8,
+          "margin": -1.6541109085083008
+        },
+        "left_fast": {
+          "frames": 5,
+          "margin": -4.711034774780273
+        },
+        "right": {
+          "frames": 32,
+          "margin": 6.199080467224121
+        },
+        "right_fast": {
+          "frames": 32,
+          "margin": 3.555330276489258
+        },
+        "stay": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up_fast": {
+          "frames": 32,
+          "margin": 3.286296844482422
+        },
+        "up_left": {
+          "frames": 9,
+          "margin": -3.92954158782959
+        },
+        "up_left_fast": {
+          "frames": 32,
+          "margin": 4.895512580871582
+        },
+        "up_right": {
+          "frames": 5,
+          "margin": -6.990850448608398
+        },
+        "up_right_fast": {
+          "frames": 3,
+          "margin": -12.282858848571777
+        }
+      },
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "down_right",
+        "down_fast"
+      ],
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": true,
+      "continuation_action_budget": 0,
+      "continuation_action_count": 9,
+      "elapsed_ms": 32.29842096334323,
+      "horizon": 32,
+      "refinement_steps": [
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "budget": 0,
+          "completed": true,
+          "elapsed_ms": 32.29842096334323,
+          "new_state_count": 1625,
+          "state_frames": 32,
+          "state_margin": 8.903106689453125
+        }
+      ],
+      "reveal_remaining_delay": false,
+      "state_label": {
+        "frames": 32,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 11837,
+        "branch_incumbent_prune_count": 108,
+        "hidden_simulation_count": 270189,
+        "memo_hit_count": 4486,
+        "memoized_state_count": 1625,
+        "new_state_count": 1625,
+        "observation_merge_count": 10068,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "total_refinement_ms": 32.29842096334323,
+      "warm_matches": true,
+      "warm_ms": 0.10040099732577801
+    },
+    {
+      "action_count": 17,
+      "action_labels": {
+        "down": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_fast": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_left": {
+          "frames": 9,
+          "margin": -8.382768630981445
+        },
+        "down_left_fast": {
+          "frames": 7,
+          "margin": -8.471810340881348
+        },
+        "down_right": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_right_fast": {
+          "frames": 32,
+          "margin": 8.499215126037598
+        },
+        "left": {
+          "frames": 8,
+          "margin": -1.6541109085083008
+        },
+        "left_fast": {
+          "frames": 5,
+          "margin": -4.711034774780273
+        },
+        "right": {
+          "frames": 32,
+          "margin": 6.199080467224121
+        },
+        "right_fast": {
+          "frames": 32,
+          "margin": 3.555330276489258
+        },
+        "stay": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up_fast": {
+          "frames": 32,
+          "margin": 3.286296844482422
+        },
+        "up_left": {
+          "frames": 9,
+          "margin": -3.92954158782959
+        },
+        "up_left_fast": {
+          "frames": 32,
+          "margin": 4.895512580871582
+        },
+        "up_right": {
+          "frames": 5,
+          "margin": -6.990850448608398
+        },
+        "up_right_fast": {
+          "frames": 3,
+          "margin": -12.282858848571777
+        }
+      },
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "down_right",
+        "down_fast"
+      ],
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": true,
+      "continuation_action_budget": 1,
+      "continuation_action_count": 9,
+      "elapsed_ms": 687.5442460295744,
+      "horizon": 32,
+      "refinement_steps": [
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "budget": 0,
+          "completed": true,
+          "elapsed_ms": 32.10312401643023,
+          "new_state_count": 1625,
+          "state_frames": 32,
+          "state_margin": 8.903106689453125
+        },
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "budget": 1,
+          "completed": true,
+          "elapsed_ms": 687.5442460295744,
+          "new_state_count": 24414,
+          "state_frames": 32,
+          "state_margin": 8.903106689453125
+        }
+      ],
+      "reveal_remaining_delay": false,
+      "state_label": {
+        "frames": 32,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 210457,
+        "branch_incumbent_prune_count": 4920,
+        "hidden_simulation_count": 5195652,
+        "memo_hit_count": 79950,
+        "memoized_state_count": 26039,
+        "new_state_count": 24414,
+        "observation_merge_count": 280250,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "total_refinement_ms": 719.6473700460047,
+      "warm_matches": true,
+      "warm_ms": 0.11003203690052032
+    },
+    {
+      "action_count": 17,
+      "action_labels": {
+        "down": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_fast": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_left": {
+          "frames": 9,
+          "margin": -8.382768630981445
+        },
+        "down_left_fast": {
+          "frames": 7,
+          "margin": -8.471810340881348
+        },
+        "down_right": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_right_fast": {
+          "frames": 32,
+          "margin": 8.499215126037598
+        },
+        "left": {
+          "frames": 8,
+          "margin": -1.6541109085083008
+        },
+        "left_fast": {
+          "frames": 5,
+          "margin": -4.711034774780273
+        },
+        "right": {
+          "frames": 32,
+          "margin": 6.199080467224121
+        },
+        "right_fast": {
+          "frames": 32,
+          "margin": 3.555330276489258
+        },
+        "stay": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up_fast": {
+          "frames": 32,
+          "margin": 3.286296844482422
+        },
+        "up_left": {
+          "frames": 9,
+          "margin": -3.92954158782959
+        },
+        "up_left_fast": {
+          "frames": 32,
+          "margin": 4.895512580871582
+        },
+        "up_right": {
+          "frames": 5,
+          "margin": -6.990850448608398
+        },
+        "up_right_fast": {
+          "frames": 3,
+          "margin": -12.282858848571777
+        }
+      },
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "down_right",
+        "down_fast"
+      ],
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": true,
+      "continuation_action_budget": 0,
+      "continuation_action_count": 17,
+      "elapsed_ms": 1471.1462240084074,
+      "horizon": 32,
+      "refinement_steps": [
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "budget": 0,
+          "completed": true,
+          "elapsed_ms": 1471.1462240084074,
+          "new_state_count": 62237,
+          "state_frames": 32,
+          "state_margin": 8.903106689453125
+        }
+      ],
+      "reveal_remaining_delay": true,
+      "state_label": {
+        "frames": 32,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 711955,
+        "branch_incumbent_prune_count": 17140,
+        "hidden_simulation_count": 13368249,
+        "memo_hit_count": 260067,
+        "memoized_state_count": 62237,
+        "new_state_count": 62237,
+        "observation_merge_count": 524203,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "total_refinement_ms": 1471.1462240084074,
+      "warm_matches": true,
+      "warm_ms": 0.1133409678004682
+    },
+    {
+      "action_count": 17,
+      "action_labels": {
+        "down": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_fast": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_left": {
+          "frames": 9,
+          "margin": -8.382768630981445
+        },
+        "down_left_fast": {
+          "frames": 7,
+          "margin": -8.471810340881348
+        },
+        "down_right": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_right_fast": {
+          "frames": 32,
+          "margin": 8.499215126037598
+        },
+        "left": {
+          "frames": 8,
+          "margin": -1.6541109085083008
+        },
+        "left_fast": {
+          "frames": 5,
+          "margin": -4.711034774780273
+        },
+        "right": {
+          "frames": 32,
+          "margin": 6.199080467224121
+        },
+        "right_fast": {
+          "frames": 32,
+          "margin": 3.555330276489258
+        },
+        "stay": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up_fast": {
+          "frames": 32,
+          "margin": 3.286296844482422
+        },
+        "up_left": {
+          "frames": 9,
+          "margin": -3.92954158782959
+        },
+        "up_left_fast": {
+          "frames": 32,
+          "margin": 4.895512580871582
+        },
+        "up_right": {
+          "frames": 5,
+          "margin": -6.990850448608398
+        },
+        "up_right_fast": {
+          "frames": 3,
+          "margin": -12.282858848571777
+        }
+      },
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "down_right",
+        "down_fast"
+      ],
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": true,
+      "continuation_action_budget": 2,
+      "continuation_action_count": 9,
+      "elapsed_ms": 1054.4231939711608,
+      "horizon": 32,
+      "refinement_steps": [
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "budget": 0,
+          "completed": true,
+          "elapsed_ms": 30.809089017566293,
+          "new_state_count": 1625,
+          "state_frames": 32,
+          "state_margin": 8.903106689453125
+        },
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "budget": 1,
+          "completed": true,
+          "elapsed_ms": 576.6439489671029,
+          "new_state_count": 24414,
+          "state_frames": 32,
+          "state_margin": 8.903106689453125
+        },
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "budget": 2,
+          "completed": true,
+          "elapsed_ms": 1054.4231939711608,
+          "new_state_count": 36368,
+          "state_frames": 32,
+          "state_margin": 8.903106689453125
+        }
+      ],
+      "reveal_remaining_delay": false,
+      "state_label": {
+        "frames": 32,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 377240,
+        "branch_incumbent_prune_count": 9888,
+        "hidden_simulation_count": 9607020,
+        "memo_hit_count": 142214,
+        "memoized_state_count": 62407,
+        "new_state_count": 36368,
+        "observation_merge_count": 546760,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "total_refinement_ms": 1661.87623195583,
+      "warm_matches": true,
+      "warm_ms": 0.1010129926726222
+    },
+    {
+      "action_count": 17,
+      "action_labels": {
+        "down": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_fast": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_left": {
+          "frames": 9,
+          "margin": -8.382768630981445
+        },
+        "down_left_fast": {
+          "frames": 7,
+          "margin": -8.471810340881348
+        },
+        "down_right": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "down_right_fast": {
+          "frames": 32,
+          "margin": 8.499215126037598
+        },
+        "left": {
+          "frames": 8,
+          "margin": -1.6541109085083008
+        },
+        "left_fast": {
+          "frames": 5,
+          "margin": -4.711034774780273
+        },
+        "right": {
+          "frames": 32,
+          "margin": 6.199080467224121
+        },
+        "right_fast": {
+          "frames": 32,
+          "margin": 3.555330276489258
+        },
+        "stay": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up": {
+          "frames": 32,
+          "margin": 8.903106689453125
+        },
+        "up_fast": {
+          "frames": 32,
+          "margin": 3.286296844482422
+        },
+        "up_left": {
+          "frames": 9,
+          "margin": -3.92954158782959
+        },
+        "up_left_fast": {
+          "frames": 32,
+          "margin": 4.895512580871582
+        },
+        "up_right": {
+          "frames": 5,
+          "margin": -6.990850448608398
+        },
+        "up_right_fast": {
+          "frames": 3,
+          "margin": -12.282858848571777
+        }
+      },
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "down_right",
+        "down_fast"
+      ],
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": true,
+      "continuation_action_budget": 0,
+      "continuation_action_count": 17,
+      "elapsed_ms": 1488.3824450080283,
+      "horizon": 32,
+      "refinement_steps": [
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "budget": 0,
+          "completed": true,
+          "elapsed_ms": 1488.3824450080283,
+          "new_state_count": 45116,
+          "state_frames": 32,
+          "state_margin": 8.903106689453125
+        }
+      ],
+      "reveal_remaining_delay": false,
+      "state_label": {
+        "frames": 32,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 556970,
+        "branch_incumbent_prune_count": 12980,
+        "hidden_simulation_count": 14112336,
+        "memo_hit_count": 170581,
+        "memoized_state_count": 45116,
+        "new_state_count": 45116,
+        "observation_merge_count": 697497,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "total_refinement_ms": 1488.3824450080283,
+      "warm_matches": true,
+      "warm_ms": 0.12294098269194365
+    },
+    {
+      "action_count": 17,
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": false,
+      "continuation_action_budget": 0,
+      "continuation_action_count": 9,
+      "horizon": 80,
+      "refinement_steps": [
+        {
+          "budget": 0,
+          "completed": false,
+          "elapsed_ms": 3000.1568070147187
+        }
+      ],
+      "reveal_remaining_delay": false,
+      "timeout_ms": 3000
+    },
+    {
+      "action_count": 17,
+      "action_labels": {
+        "down": {
+          "frames": 8,
+          "margin": 8.903106689453125
+        },
+        "down_fast": {
+          "frames": 8,
+          "margin": 7.05008602142334
+        },
+        "down_left": {
+          "frames": 8,
+          "margin": 6.095003128051758
+        },
+        "down_left_fast": {
+          "frames": 7,
+          "margin": -8.471810340881348
+        },
+        "down_right": {
+          "frames": 8,
+          "margin": 8.903106689453125
+        },
+        "down_right_fast": {
+          "frames": 8,
+          "margin": 8.903106689453125
+        },
+        "left": {
+          "frames": 8,
+          "margin": 8.903106689453125
+        },
+        "left_fast": {
+          "frames": 5,
+          "margin": -4.711034774780273
+        },
+        "right": {
+          "frames": 8,
+          "margin": 6.199080467224121
+        },
+        "right_fast": {
+          "frames": 8,
+          "margin": 3.555330276489258
+        },
+        "stay": {
+          "frames": 8,
+          "margin": 8.903106689453125
+        },
+        "up": {
+          "frames": 8,
+          "margin": 8.903106689453125
+        },
+        "up_fast": {
+          "frames": 8,
+          "margin": 3.286296844482422
+        },
+        "up_left": {
+          "frames": 8,
+          "margin": 8.464215278625488
+        },
+        "up_left_fast": {
+          "frames": 8,
+          "margin": 4.895512580871582
+        },
+        "up_right": {
+          "frames": 5,
+          "margin": -6.990850448608398
+        },
+        "up_right_fast": {
+          "frames": 3,
+          "margin": -12.282858848571777
+        }
+      },
+      "best_actions": [
+        "stay",
+        "left",
+        "up",
+        "down",
+        "down_right",
+        "down_right_fast"
+      ],
+      "cadence": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "completed": true,
+      "continuation_action_budget": 0,
+      "continuation_action_count": 9,
+      "elapsed_ms": 50.155493954662234,
+      "horizon": 8,
+      "refinement_steps": [
+        {
+          "best_actions": [
+            "stay",
+            "left",
+            "up",
+            "down",
+            "down_right",
+            "down_right_fast"
+          ],
+          "budget": 0,
+          "completed": true,
+          "elapsed_ms": 50.155493954662234,
+          "new_state_count": 1446,
+          "state_frames": 8,
+          "state_margin": 8.903106689453125
+        }
+      ],
+      "reveal_remaining_delay": false,
+      "state_label": {
+        "frames": 8,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 7777,
+        "branch_incumbent_prune_count": 103,
+        "hidden_simulation_count": 848656,
+        "memo_hit_count": 3805,
+        "memoized_state_count": 1446,
+        "new_state_count": 1446,
+        "observation_merge_count": 71389,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "total_refinement_ms": 50.155493954662234,
+      "warm_matches": true,
+      "warm_ms": 0.09203603258356452
+    },
+    {
+      "action_count": 17,
+      "action_labels": {
+        "down": {
+          "frames": 16,
+          "margin": 8.615429878234863
+        },
+        "down_fast": {
+          "frames": 16,
+          "margin": 7.05008602142334
+        },
+        "down_left": {
+          "frames": 9,
+          "margin": -8.382768630981445
+        },
+        "down_left_fast": {
+          "frames": 7,
+          "margin": -8.471810340881348
+        },
+        "down_right": {
+          "frames": 16,
+          "margin": 8.903106689453125
+        },
+        "down_right_fast": {
+          "frames": 16,
+          "margin": 8.499215126037598
+        },
+        "left": {
+          "frames": 8,
+          "margin": -1.6541109085083008
+        },
+        "left_fast": {
+          "frames": 5,
+          "margin": -4.711034774780273
+        },
+        "right": {
+          "frames": 16,
+          "margin": 6.199080467224121
+        },
+        "right_fast": {
+          "frames": 16,
+          "margin": 3.555330276489258
+        },
+        "stay": {
+          "frames": 16,
+          "margin": 8.903106689453125
+        },
+        "up": {
+          "frames": 16,
+          "margin": 8.903106689453125
+        },
+        "up_fast": {
+          "frames": 16,
+          "margin": 3.286296844482422
+        },
+        "up_left": {
+          "frames": 9,
+          "margin": -3.92954158782959
+        },
+        "up_left_fast": {
+          "frames": 16,
+          "margin": 4.895512580871582
+        },
+        "up_right": {
+          "frames": 5,
+          "margin": -6.990850448608398
+        },
+        "up_right_fast": {
+          "frames": 3,
+          "margin": -12.282858848571777
+        }
+      },
+      "best_actions": [
+        "stay",
+        "up",
+        "down_right"
+      ],
+      "cadence": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "completed": true,
+      "continuation_action_budget": 0,
+      "continuation_action_count": 9,
+      "elapsed_ms": 501.3574649929069,
+      "horizon": 16,
+      "refinement_steps": [
+        {
+          "best_actions": [
+            "stay",
+            "up",
+            "down_right"
+          ],
+          "budget": 0,
+          "completed": true,
+          "elapsed_ms": 501.3574649929069,
+          "new_state_count": 7482,
+          "state_frames": 16,
+          "state_margin": 8.903106689453125
+        }
+      ],
+      "reveal_remaining_delay": false,
+      "state_label": {
+        "frames": 16,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 52134,
+        "branch_incumbent_prune_count": 749,
+        "hidden_simulation_count": 5522504,
+        "memo_hit_count": 52879,
+        "memoized_state_count": 7482,
+        "new_state_count": 7482,
+        "observation_merge_count": 314767,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "total_refinement_ms": 501.3574649929069,
+      "warm_matches": true,
+      "warm_ms": 0.10160100646317005
+    },
+    {
+      "action_count": 17,
+      "cadence": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "completed": false,
+      "continuation_action_budget": 0,
+      "continuation_action_count": 9,
+      "horizon": 32,
+      "refinement_steps": [
+        {
+          "budget": 0,
+          "completed": false,
+          "elapsed_ms": 3000.123657984659
+        }
+      ],
+      "reveal_remaining_delay": false,
+      "timeout_ms": 3000
+    }
+  ]
+}

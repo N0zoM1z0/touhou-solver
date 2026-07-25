@@ -403,3 +403,31 @@ cadence/workload process the controller can actually guarantee, whether the
 one-pending estimator invariant matches multi-key native input, and which
 bounded policy class can be delivered without perturbing the hard-safety
 loop.
+
+## 12. Budgeted Policy-Class Refinement
+
+The first bounded policy family is now implemented and specified in
+`BUDGETED_BELIEF_REFINEMENT_20260725.md`. With complete root actions `A`,
+base continuation actions `F`, extra actions `E = A \ F`, and per-history
+budget `B`, the controller may choose `E` at no more than `B` future decision
+epochs. This changes only the policy set, not the belief transition:
+
+```text
+Pi_0 subset Pi_1 subset ... subset Pi_unrestricted
+L_0 <= L_1 <= ... <= V_unrestricted
+```
+
+Each completed `L_B` is an attainable non-clairvoyant lower bound. If `B`
+covers every possible remaining decision epoch, the finite policy class is
+unrestricted. A small `B` is not an optimality certificate, even when two
+adjacent labels agree. Native memo identity includes `B`, and progressive
+queries may reuse completed lower-budget states without mixing their values.
+
+The revealed-remaining-delay recurrence is now implemented as a proved
+optimistic native upper bound and matches its independent scalar oracle.
+Combined with `L_0`, it certifies the unrestricted state value of the retained
+structured 32-frame workload. The remaining algorithmic gap is selective
+upper evaluation: seed its branch-and-bound with the completed lower label and
+avoid solving root actions that cannot change the selected set. Until bounds
+meet on a particular root, deadline expiry may publish only the last completed
+lower-bound policy or the existing fail-closed fallback.

@@ -495,17 +495,22 @@ def scalar_belief_cadence_survival(
     observed_action: str,
     pending_command: PendingCommand | None = None,
     continuation_actions: tuple[str, ...] | None = None,
+    budgeted_continuation_actions: tuple[str, ...] | None = None,
+    continuation_action_budget: int = 0,
     recursive_cadence: bool = True,
 ) -> QueryLocalSurvivalResult:
     """Solve the non-clairvoyant variable-cadence information-set game.
 
     Every action remains available at the public root.  When
     ``continuation_actions`` is supplied, later decisions use only that
-    declared policy class, producing an attainable lower bound on the
-    unrestricted controller value.  Setting ``recursive_cadence`` false keeps
-    the robust cadence support only at the public root and then uses the
-    configured nominal layer interval.  That mode is an independent,
-    no-write-correct specification of the older one-transition contract.
+    declared base policy class.  ``budgeted_continuation_actions`` may be
+    selected at no more than ``continuation_action_budget`` future decision
+    epochs.  Root actions do not consume this budget.  Increasing the budget
+    therefore gives nested attainable lower bounds on the unrestricted
+    controller value.  Setting ``recursive_cadence`` false keeps the robust
+    cadence support only at the public root and then uses the configured
+    nominal layer interval.  That mode is an independent, no-write-correct
+    specification of the older one-transition contract.
     """
 
     problem, active_index, pending_index, pending_support = _prepare_problem(
@@ -542,6 +547,25 @@ def scalar_belief_cadence_survival(
     continuation_indices = tuple(
         action_indices[name] for name in continuation_names
     )
+    budgeted_names = (
+        ()
+        if budgeted_continuation_actions is None
+        else budgeted_continuation_actions
+    )
+    if (
+        continuation_action_budget < 0
+        or len(set(budgeted_names)) != len(budgeted_names)
+        or any(name not in action_indices for name in budgeted_names)
+        or set(continuation_names).intersection(budgeted_names)
+    ):
+        raise ValueError(
+            "budgeted continuation actions must be unique, known, "
+            "disjoint from base actions, with a nonnegative budget"
+        )
+    budgeted_indices = tuple(
+        action_indices[name] for name in budgeted_names
+    )
+    continuation_index_set = frozenset(continuation_indices)
 
     @lru_cache(maxsize=None)
     def solve(
@@ -551,6 +575,7 @@ def scalar_belief_cadence_survival(
         active: int,
         pending: int,
         remaining_support: tuple[int, ...],
+        remaining_action_budget: int,
         public_root: bool,
     ) -> tuple[SurvivalLabel, tuple[SurvivalLabel, ...]]:
         representative = _HiddenState(
@@ -570,9 +595,18 @@ def scalar_belief_cadence_survival(
         selected_actions = (
             tuple(range(len(problem.actions)))
             if public_root
-            else continuation_indices
+            else (
+                continuation_indices + budgeted_indices
+                if remaining_action_budget > 0
+                else continuation_indices
+            )
         )
         for selected in selected_actions:
+            successor_action_budget = (
+                remaining_action_budget
+                if public_root or selected in continuation_index_set
+                else remaining_action_budget - 1
+            )
             failed_labels: list[SurvivalLabel] = []
             grouped: dict[
                 tuple[int, int, int, int, int],
@@ -660,6 +694,7 @@ def scalar_belief_cadence_survival(
                     successor_active,
                     successor_pending,
                     tuple(sorted(successor_support)),
+                    successor_action_budget,
                     False,
                 )
                 branch_labels.append(
@@ -684,6 +719,7 @@ def scalar_belief_cadence_survival(
         active_index,
         pending_index,
         pending_support,
+        continuation_action_budget,
         True,
     )
     return _result(

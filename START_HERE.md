@@ -31,20 +31,28 @@ physical relevance, solver/bound validity, and issue-time deliverability.
 Engineering approximations are encouraged when useful, but unknown-direction
 ones remain shadow-only.
 
+For continuation-action growth, also read
+`notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`.  The active native/scalar
+prototype gives nested attainable lower bounds `L_0 <= L_1 <= ... <=
+V_unrestricted`; agreement between adjacent budgets is not an unrestricted
+optimality proof.
+
 ## 1. Exact Checkpoint
 
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `d4d0f68 Add cancellable rolling exact-root prewarm`. It adds physical
-  rolling-prewarm shadows, direct cadence/delivery replay, a formal
-  information-set problem, an independent no-write scalar oracle, and a
-  cancellable C++ belief workspace. Three minimized counterexamples separate
-  planner-hold/input-issue semantics, recursive cadence, and hidden-delay
-  non-anticipativity. The legacy prewarm is invalid as a physical value and
-  the corrected belief workspace remains offline/shadow-only.
+  `8b9668b Formalize and correct belief pipeline control`. It adds a
+  budget-indexed scalar/native policy class, progressive memo reuse, quick/full
+  offline profiles, a revealed-delay optimistic upper bound, and a
+  research-focused test reduction. Three minimized
+  counterexamples still separate planner-hold/input-issue semantics,
+  recursive cadence, and hidden-delay non-anticipativity. The legacy prewarm
+  remains invalid as a physical value; budgeted belief values remain
+  offline/shadow-only.
 - Both native libraries were rebuilt. Linux and Windows complete quick suites
-  pass 482 tests in `3.010/5.410 s`. Read
+  pass 471 tests in `1.324/2.481 s`. Read
+  `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
   `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
   `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`,
   `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
@@ -439,6 +447,30 @@ Quick complete unit command:
 PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
+The default belief/formal research profiles are intentionally short:
+
+```bash
+PYTHONPATH=scripts python3 \
+  scripts/analysis/audit_pipeline_formal_correctness.py \
+  /tmp/pipeline-formal-quick.json
+PYTHONPATH=scripts python3 \
+  scripts/benchmarks/benchmark_belief_pipeline_workspace.py \
+  /tmp/belief-pipeline-quick.json
+```
+
+When the belief recurrence or native kernel changes, retain the full
+benchmark explicitly:
+
+```bash
+PYTHONPATH=scripts python3 \
+  scripts/benchmarks/benchmark_belief_pipeline_workspace.py \
+  artifacts/benchmarks/budgeted_belief_refinement_20260725.json \
+  --profile full --small-cases 128 --timeout-ms 3000
+```
+
+Use `--cases 128` on the formal audit only when its model/recurrence changes.
+Do not put these full profiles or raw capsule replay into unit-test setup.
+
 The retained augmented-pipeline differential is an experiment, not unit-test
 setup:
 
@@ -474,9 +506,8 @@ same UNC directory as `start_dir` and `top_level_dir`:
   'import sys,unittest; root=r"\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08"; sys.path.insert(0,root+r"\scripts"); tests=root+r"\tests"; suite=unittest.TestLoader().discover(tests,pattern="test_*.py",top_level_dir=tests); result=unittest.TextTestRunner(verbosity=1).run(suite); raise SystemExit(0 if result.wasSuccessful() else 1)'
 ```
 
-Change only the `pattern` for a focused Windows file. This exact form passed
-all 460 tests in 3.182 seconds at the 2026-07-25 exact-root-frontier
-checkpoint.
+Change only the `pattern` for a focused Windows file. Do not retry CLI UNC
+discovery, `cmd.exe` UNC `cd/pushd`, or a PowerShell-only drive mapping.
 
 Before commit:
 
@@ -852,30 +883,31 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 1. `AGENTS.md`
 2. `START_HERE.md`
 3. `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`
-4. `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`
-5. `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`
-6. `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
-7. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
-8. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
-9. `notes/ALGORITHM_REVIEW_20260724.md`
-10. `notes/COUNTEREXAMPLES.md`, especially CE-0106..0114
-11. `notes/RESEARCH_LOG.md`, latest five dated sections
-12. `notes/ROBUST_VIABILITY.md`
-13. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
-14. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
-15. `notes/NATIVE_PLANNER_BACKEND.md`
-16. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
-17. `scripts/touhou_control/query_survival.py`
-18. `scripts/touhou_control/variable_cadence_oracle.py`
-19. `scripts/analysis/audit_pipeline_formal_correctness.py`
-20. `scripts/analysis/postpublished_survival_audit.py`
-21. `scripts/analysis/viability_differential_audit.py`
-22. `scripts/th08_live_dodge_agent.py`
-23. `scripts/touhou_control/reachability_oracle.py`
-24. `scripts/th08_bullet_transform_model.py`
-25. `scripts/th08_corridor_adapter.py`
-26. `scripts/touhou_control/viability.py`
-27. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
+4. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
+5. `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`
+6. `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`
+7. `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
+8. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
+9. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
+10. `notes/ALGORITHM_REVIEW_20260724.md`
+11. `notes/COUNTEREXAMPLES.md`, especially CE-0106..0114
+12. `notes/RESEARCH_LOG.md`, latest five dated sections
+13. `notes/ROBUST_VIABILITY.md`
+14. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
+15. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
+16. `notes/NATIVE_PLANNER_BACKEND.md`
+17. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
+18. `scripts/touhou_control/query_survival.py`
+19. `scripts/touhou_control/variable_cadence_oracle.py`
+20. `scripts/analysis/audit_pipeline_formal_correctness.py`
+21. `scripts/analysis/postpublished_survival_audit.py`
+22. `scripts/analysis/viability_differential_audit.py`
+23. `scripts/th08_live_dodge_agent.py`
+24. `scripts/touhou_control/reachability_oracle.py`
+25. `scripts/th08_bullet_transform_model.py`
+26. `scripts/th08_corridor_adapter.py`
+27. `scripts/touhou_control/viability.py`
+28. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
     `notes/runs/lunatic_route2_stage3_unattended_20260724_132007.md`,
     `notes/runs/lunatic_route2_stage4a_unattended_20260724_185059.md`,
     `notes/runs/lunatic_route2_stage5_unattended_20260725_125037.md`, and

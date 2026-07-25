@@ -38,7 +38,9 @@ These instructions apply to every file and task below this directory.
   and transition back to that contract before optimizing it. For the current
   losing-state/input-pipeline work,
   `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md` is
-  mandatory reading and the active reference.
+  mandatory reading and the active reference. For unrestricted action growth,
+  also read `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`; do not interpret a
+  completed small-budget lower bound as unrestricted optimality.
 - Audit both mathematical semantics and information semantics. In particular,
   a policy may condition only on observations available at that decision.
   Branching hidden states and then maximizing separately can create a
@@ -79,6 +81,15 @@ These instructions apply to every file and task below this directory.
   When a reduction has no concise correctness argument, keep it heuristic,
   measure its action/label error against the independent oracle, and keep it
   outside hard-safety authority.
+- A budgeted continuation solve is an attainable lower bound only for its
+  declared base/extra action partition and per-history budget. Root actions
+  remain unrestricted. Preserve the budget in native memo identity, refine
+  from lower to higher budgets, and publish only a completed lower-bound
+  result. Equal labels at two adjacent budgets are empirical stability, not
+  an optimality certificate. The current revealed-remaining-delay mode is a
+  proved upper bound only when it keeps the unrestricted action class and the
+  same transitions/uncertainty; stopping early requires that bound to meet the
+  completed lower value on the queried root.
 - Put reusable, game-neutral control and planning code in
   `scripts/touhou_control/`. Keep TH08 memory addresses, input masks, movement
   constants, ECL details, and pool layouts in TH08 adapters.
@@ -178,6 +189,11 @@ These instructions apply to every file and task below this directory.
   unless they protect a concrete failure, evidence artifact, or safety
   contract. Prefer one oracle/differential invariant over many
   implementation-shaped examples.
+- Keep benchmark/report CLI wiring and retired shadow integration out of the
+  unit suite unless a concrete artifact or authority boundary failed there.
+  Exercise those programs through quick/full research profiles instead.
+  Retain constant-time live-vs-shadow authority assertions even when the
+  rejected shadow implementation itself is no longer integration-tested.
 - Run the quick complete unit suite before a code checkpoint:
 
   ```bash
@@ -197,6 +213,12 @@ These instructions apply to every file and task below this directory.
 - The quick suite is the default checkpoint gate only while it remains on the
   order of seconds. Never put complete 16/8/4-pixel solves, large trace scans,
   native memory/RSS benchmarks, or physical integration in that suite.
+- Offline belief work has three levels: focused unit tests; the default quick
+  formal/benchmark profiles (16 scalar cases and bounded structured cases);
+  and explicit retained full profiles (128 cases, unrestricted/long-horizon/
+  wide-cadence scaling). Run full only when the recurrence/native kernel
+  changes or evidence is being retained. Keep the formal oracle in independent
+  Python; do not replace it with the C++ implementation it is meant to check.
 - Keep clearance benchmarks separated by workload identity: TH08 live-like
   moving AABBs plus packed laser trajectories, game-neutral static finite
   segments, and piecewise transform adversarial motion. Every performance

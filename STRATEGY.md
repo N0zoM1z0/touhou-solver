@@ -301,6 +301,17 @@ The next architectural target is a delivery-aware solver:
   actions took `29.52 ms`. The latter is a conservative attainable policy
   class, not unrestricted optimality. Wide recursive `(2..9)` cadence remains
   outside budget.
+- **Budgeted anytime refinement:** Future fast actions may now be used at most
+  `B` decision epochs per history while every public root still evaluates all
+  17 actions. This gives proved nested attainable lower bounds
+  `L_0 <= L_1 <= ... <= V_unrestricted`; sufficiently large `B` recovers the
+  unrestricted finite model. A native revealed-delay information relaxation
+  is a proved upper bound and passes independent scalar parity. On the
+  retained structured workload `L_0` equals that upper label, so it certifies
+  the unrestricted state value for that instance. One workspace incrementally
+  solved `B=0/1/2` in `32.30/687.54/1054.42 ms`; the complete upper costs
+  `1471.15 ms`. The next gate is incumbent-seeded selective upper evaluation,
+  not more blind budget widening. **Status remains offline/shadow-only.**
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control
@@ -322,11 +333,13 @@ The next architectural target is a delivery-aware solver:
   `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
   `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
   `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`,
+  `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
   `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
   `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json`,
   `artifacts/benchmarks/exact_root_frontier_20260725.json`,
   `artifacts/benchmarks/rolling_pipeline_prewarm_20260725.json`,
   `artifacts/benchmarks/belief_pipeline_workspace_20260725.json`,
+  `artifacts/benchmarks/budgeted_belief_refinement_20260725.json`,
   `artifacts/viability_audit/pipeline_formal_correctness_20260725.json`,
   `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
   the retained Stage-4A/Stage-5 run dossiers.

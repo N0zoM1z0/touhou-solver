@@ -21,6 +21,12 @@ from th08_corridor_adapter import (
     lower_th08_corridor_hazards,
     plan_lowered_th08_corridor,
 )
+from touhou_control.query_survival import (
+    PendingCommand,
+    PipelineSurvivalWorkspace,
+    QueryLocalSurvivalResult,
+    StalePipelineWorkspaceError,
+)
 from touhou_control.viability import SafetyValueQuery, ViabilityQuery
 from touhou_control.viability import RobustViabilityPolicy
 from touhou_control.viability_audit_capsule import (
@@ -68,6 +74,8 @@ class CorridorSolution:
     postpublished_survival_policy: RobustViabilityPolicy | None = None
     postpublished_survival_ms: float | None = None
     postpublished_survival_parity: bool | None = None
+    pipeline_survival_workspace: PipelineSurvivalWorkspace | None = None
+    pipeline_survival_workspace_ms: float | None = None
 
 
 @dataclass
@@ -378,6 +386,80 @@ def corridor_postpublished_survival_query(
     )
 
 
+def _pipeline_policy_version(
+    solution: CorridorSolution,
+) -> tuple[
+    int,
+    int | None,
+    tuple[int, int, int | None] | None,
+]:
+    return (
+        solution.source_frame,
+        solution.snapshot_frame,
+        solution.context_key,
+    )
+
+
+def prepare_pipeline_survival_workspace(
+    solution: CorridorSolution,
+) -> CorridorSolution:
+    """Attach a versioned exact-phase workspace without querying it."""
+
+    if (
+        solution.pipeline_survival_workspace is not None
+        and not solution.pipeline_survival_workspace.closed
+    ):
+        return solution
+    problem = solution.plan.survival_query_problem
+    if problem is None:
+        return solution
+    started = time.perf_counter()
+    workspace = problem.build_pipeline_workspace(
+        policy_version=_pipeline_policy_version(solution),
+    )
+    return replace(
+        solution,
+        pipeline_survival_workspace=workspace,
+        pipeline_survival_workspace_ms=(
+            (time.perf_counter() - started) * 1000.0
+        ),
+    )
+
+
+def corridor_pipeline_survival_query(
+    solution: CorridorSolution | None,
+    *,
+    current_frame: int,
+    player_x: float,
+    player_y: float,
+    observed_action: str,
+    pending_command: PendingCommand | None,
+    max_age_frames: int,
+) -> QueryLocalSurvivalResult | None:
+    """Run an exact shadow query, with stale versions returning no result.
+
+    This call may expand a cold reachable tube.  Live orchestration must run
+    it on the isolated survival executor until a warm-deadline gate passes.
+    """
+
+    if solution is None or solution.pipeline_survival_workspace is None:
+        return None
+    age = current_frame - solution.source_frame
+    if age < 0 or age > max_age_frames:
+        return None
+    try:
+        return solution.pipeline_survival_workspace.query(
+            policy_version=_pipeline_policy_version(solution),
+            frame=age,
+            x=player_x,
+            y=player_y,
+            observed_action=observed_action,
+            pending_command=pending_command,
+        )
+    except StalePipelineWorkspaceError:
+        return None
+
+
 def corridor_safety_value_query(
     solution: CorridorSolution | None,
     *,
@@ -450,12 +532,14 @@ __all__ = [
     "LIVE_SURVIVAL_LABELS",
     "SHADOW_REFINEMENT_GRID_STEPS",
     "SHADOW_SURVIVAL_LABELS",
+    "corridor_pipeline_survival_query",
     "corridor_policy_status",
     "corridor_postpublished_survival_query",
     "corridor_safety_value_query",
     "corridor_submit_due",
     "corridor_target",
     "corridor_viability_query",
+    "prepare_pipeline_survival_workspace",
     "solve_corridor",
     "solve_postpublished_survival",
     "stage_corridor_solution",

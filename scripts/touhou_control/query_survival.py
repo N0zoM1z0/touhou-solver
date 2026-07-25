@@ -23,6 +23,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from functools import lru_cache
+from typing import Hashable
 
 import numpy as np
 
@@ -58,6 +59,20 @@ class PendingCommand:
 
 
 @dataclass(frozen=True)
+class PipelineSurvivalQueryStats:
+    """Per-query work performed by a persistent augmented-state workspace."""
+
+    memoized_state_count: int
+    new_state_count: int
+    memo_hit_count: int
+    action_upper_bound_prune_count: int
+    delay_incumbent_prune_count: int
+    canonicalization_count: int
+    root_memo_hit_count: int
+    branch_simulation_count: int
+
+
+@dataclass(frozen=True)
 class QueryLocalSurvivalResult:
     """Lexicographic survival labels for one exact physical-frame state."""
 
@@ -72,6 +87,7 @@ class QueryLocalSurvivalResult:
     best_actions: tuple[str, ...]
     evaluated_state_count: int
     backend: str = "scalar_pending_pipeline"
+    workspace_stats: PipelineSurvivalQueryStats | None = None
 
     @property
     def winning(self) -> bool:
@@ -232,6 +248,178 @@ class SurvivalQueryProblem:
             survival_frames=frames,
             survival_bottleneck_margins=margins,
             survival_best_action_masks=masks,
+        )
+
+    def build_pipeline_workspace(
+        self,
+        *,
+        policy_version: Hashable,
+    ) -> PipelineSurvivalWorkspace:
+        """Create one persistent exact-phase workspace for this policy."""
+
+        return PipelineSurvivalWorkspace(
+            problem=self,
+            policy_version=policy_version,
+        )
+
+
+class StalePipelineWorkspaceError(RuntimeError):
+    """A query attempted to use a workspace from another policy version."""
+
+
+class PipelineSurvivalWorkspace:
+    """Versioned persistent memo over exact phase and pending input state."""
+
+    def __init__(
+        self,
+        *,
+        problem: SurvivalQueryProblem,
+        policy_version: Hashable,
+    ) -> None:
+        self.problem = problem
+        self.policy_version = policy_version
+        self._action_indices = {
+            action.name: index
+            for index, action in enumerate(problem.actions)
+        }
+        self._native = native_backend.create_pipeline_survival_workspace(
+            x_axis=problem.x_axis,
+            y_axis=problem.y_axis,
+            clearance_volume=problem.clearance_volume,
+            velocity_x=np.asarray(
+                [action.velocity_x for action in problem.actions],
+                dtype=np.float64,
+            ),
+            velocity_y=np.asarray(
+                [action.velocity_y for action in problem.actions],
+                dtype=np.float64,
+            ),
+            delay_frames=np.asarray(
+                problem.delay_frames,
+                dtype=np.int32,
+            ),
+            decision_frames=problem.config.frames_per_layer,
+            required_clearance=problem.config.required_clearance,
+            clamp_to_bounds=problem.config.clamp_to_bounds,
+        )
+        if self._native is None:
+            raise RuntimeError(
+                "native augmented pipeline workspace is unavailable"
+            )
+
+    @property
+    def closed(self) -> bool:
+        return self._native.closed
+
+    def close(self) -> None:
+        self._native.close()
+
+    def __enter__(self) -> PipelineSurvivalWorkspace:
+        if self.closed:
+            raise RuntimeError("pipeline survival workspace is closed")
+        return self
+
+    def __exit__(self, _exception_type, _exception, _traceback) -> None:
+        self.close()
+
+    def query(
+        self,
+        *,
+        policy_version: Hashable,
+        frame: int,
+        x: float,
+        y: float,
+        observed_action: str,
+        pending_command: PendingCommand | None = None,
+    ) -> QueryLocalSurvivalResult:
+        row, column, _ = self.problem.project_to_lattice(x=x, y=y)
+        return self.query_cell(
+            policy_version=policy_version,
+            frame=frame,
+            row=row,
+            column=column,
+            observed_action=observed_action,
+            pending_command=pending_command,
+        )
+
+    def query_cell(
+        self,
+        *,
+        policy_version: Hashable,
+        frame: int,
+        row: int,
+        column: int,
+        observed_action: str,
+        pending_command: PendingCommand | None = None,
+    ) -> QueryLocalSurvivalResult:
+        if policy_version != self.policy_version:
+            raise StalePipelineWorkspaceError(
+                "pipeline workspace policy version does not match query"
+            )
+        if observed_action not in self._action_indices:
+            raise ValueError("observed action is absent from the action set")
+        if (
+            pending_command is not None
+            and pending_command.action not in self._action_indices
+        ):
+            raise ValueError("pending action is absent from the action set")
+        native_result = self._native.query(
+            start_frame=frame,
+            start_row=row,
+            start_column=column,
+            observed_action_index=self._action_indices[observed_action],
+            pending_action_index=(
+                self._action_indices[pending_command.action]
+                if pending_command is not None
+                else -1
+            ),
+            pending_remaining_frames=(
+                np.asarray(
+                    pending_command.remaining_frames,
+                    dtype=np.int32,
+                )
+                if pending_command is not None
+                else None
+            ),
+        )
+        (
+            state_frames,
+            state_margin,
+            action_frames,
+            action_margins,
+            best_mask,
+            raw_stats,
+        ) = native_result
+        action_labels = tuple(
+            (
+                action.name,
+                SurvivalLabel(
+                    int(action_frames[index]),
+                    float(action_margins[index]),
+                ),
+            )
+            for index, action in enumerate(self.problem.actions)
+        )
+        stats = PipelineSurvivalQueryStats(
+            *[int(value) for value in raw_stats]
+        )
+        return QueryLocalSurvivalResult(
+            start_frame=frame,
+            remaining_frames=self.problem.horizon_frames - frame,
+            row=row,
+            column=column,
+            observed_action=observed_action,
+            pending_command=pending_command,
+            state_label=SurvivalLabel(state_frames, state_margin),
+            action_labels=action_labels,
+            best_actions=tuple(
+                action.name
+                for index, action in enumerate(self.problem.actions)
+                if best_mask & (1 << index)
+            ),
+            evaluated_state_count=stats.memoized_state_count,
+            backend="native_augmented_pipeline_workspace",
+            workspace_stats=stats,
         )
 
 
@@ -621,7 +809,10 @@ def query_local_survival(
 
 __all__ = [
     "PendingCommand",
+    "PipelineSurvivalQueryStats",
+    "PipelineSurvivalWorkspace",
     "QueryLocalSurvivalResult",
+    "StalePipelineWorkspaceError",
     "SurvivalQueryProblem",
     "query_local_survival",
     "scalar_query_local_survival",

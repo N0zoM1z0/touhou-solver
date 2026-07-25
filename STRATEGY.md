@@ -243,6 +243,14 @@ The next architectural target is a delivery-aware solver:
   16-query exact cohorts changed best-action sets 13 times each when the
   older pending command and remaining delay were added; winning classification
   changed 4 and 6 times.
+- **Sparse augmented prototype:** A versioned C++ reachable-tube workspace now
+  preserves exact frame/observed/pending/remaining-delay state and full root
+  action labels. It passed 512 scalar differentials and ten full TH08-size v1
+  differentials with zero failures. TH08 query median/p95 changed from
+  `819.90/986.61 ms` for independent v1 cold queries to
+  `38.76/104.46 ms` for cold/incremental workspace roots; an identical warm
+  root measured `0.103/0.128 ms`. This accepts the pruning recurrence, not
+  issue-time delivery: cold p95 remains outside the live control budget.
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control
@@ -250,12 +258,16 @@ The next architectural target is a delivery-aware solver:
   source-layer state without the exact observed/pending input pipeline.
 - **Reactivation gate:** Query-local/reachable-tube refinement with a hard
   service budget and explicit layer-phase/observed/pending/remaining-delay
-  state; shadow evidence must show useful action changes at issue time without
-  increasing policy expiry, local latency, or action lag. Scalar parity alone
-  is insufficient.
+  state. The exact recurrence gate now passes offline; the remaining gate is
+  background prewarming and exact-root versioned publication. Shadow evidence
+  must show a useful root-cache hit rate and action changes at issue time
+  without increasing policy expiry, local latency, or action lag. Scalar
+  parity alone is insufficient.
 - **Evidence:** `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
+  `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
+  `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json`,
   `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
   the retained Stage-4A/Stage-5 run dossiers.
 

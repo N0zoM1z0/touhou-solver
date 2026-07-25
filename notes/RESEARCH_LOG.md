@@ -2729,3 +2729,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   are in `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`. CE-0108 records
   serialized-shadow delivery, and CE-0109 records active/pending input
   conflation.
+
+## 2026-07-25: Sparse Augmented Pipeline Reachable Tube
+
+- Added a versioned native workspace over exact frame, lattice cell, observed
+  active action, older pending action, and remaining-delay branch. It keeps a
+  persistent flat state-value memo and exact-root action-label cache inside
+  one immutable clearance policy.
+- Added only sound discrete reductions: feasibility termination,
+  last-write-wins pipeline canonicalization, admissible lexicographic action
+  upper bounds, and non-root incumbent delay pruning. Public roots still
+  compute exact labels for every action.
+- Split the C++ workspace out of the already large viability kernel into
+  `native/pipeline_survival_workspace.hpp`; Python owns its clearance-array
+  lifetime behind a narrow ctypes handle. TH08 runtime attachment is explicit,
+  version checked, shadow-only, and not called by the live controller.
+- Retained benchmark
+  `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json` passes 512
+  scalar differentials and ten full TH08-size native-v1 differentials with
+  zero failures.
+- TH08 v1 cold query median/p95 was `819.90/986.61 ms`; persistent workspace
+  cold/incremental roots measured `38.76/104.46 ms`, and repeated exact roots
+  measured `0.103/0.128 ms`. Median state expansion fell from `54,982` to
+  `2,621.5`.
+- **Decision:** accept the optimized recurrence as an offline exact prototype.
+  Do not run cold expansion synchronously or grant action authority. The next
+  experiment is isolated background prewarming and exact root/version
+  publication with measured hit rate and delivery cost.
+- Full proof boundaries, one-pending limitation, and the veto-only promotion
+  gate are in `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`.

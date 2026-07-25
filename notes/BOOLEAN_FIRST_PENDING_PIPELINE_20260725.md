@@ -224,3 +224,13 @@ Before repeated action-authority Stage-5 A/B:
 Until then, the live path remains coarse Boolean viability plus fresh local
 certification.  Post-publication labels and the pending pipeline remain
 shadow/offline diagnostics.
+
+## Follow-Up
+
+The first offline reachable-tube gate is now implemented and recorded in
+`notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`.  Its exact recurrence
+passes scalar and native-v1 differential gates, and an identical warm root is
+sub-millisecond.  Cold/incremental TH08 p95 remains `104.46 ms`, so this does
+not change the shadow-only or no-authority decision above.  The next blocker
+is background prewarming and exact root/version publication, not another
+dense label pass.

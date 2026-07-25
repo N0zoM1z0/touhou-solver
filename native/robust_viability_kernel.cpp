@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <limits>
@@ -2595,6 +2596,8 @@ TOUHOU_EXPORT int touhou_query_local_survival_v1(
     *output_evaluated_state_count = static_cast<std::uint64_t>(memo.size());
     return 0;
 }
+
+#include "pipeline_survival_workspace.hpp"
 
 TOUHOU_EXPORT int touhou_losing_survival_labels_v1(
     const float* clearance,

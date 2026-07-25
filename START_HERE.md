@@ -13,15 +13,16 @@ runtime evidence remain in `notes/`.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `1fb95c6 Diagnose Stage 5 losing-state fallback`. It publishes Boolean
-  viability before optional labels, adds a labels-only native recurrence, and
-  adds scalar/native exact-phase survival with explicit observed input,
-  pending desired command, and remaining-delay support. A serialized physical
-  shadow was rejected; a separate-executor, single-label-worker Stage-5 run
-  restored Boolean expiry to the baseline envelope. Dense labels still omit
-  exact phase/pending state and remain shadow-only.
-- Linux and Windows complete suites pass 453 quick tests in `1.558/4.080 s`.
-  Read `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
+  `13111a0 Isolate Boolean publication and model pending input`. It adds a
+  versioned sparse C++ reachable-tube workspace over exact phase, native
+  observed action, older pending action, and remaining-delay support.
+  Admissible optimality/feasibility pruning preserves complete exact labels
+  at public roots. Repeated exact roots are fast, but cold TH08 p95 remains
+  outside the issue-time budget; the workspace is shadow/offline and is not
+  called by the live controller.
+- Linux and Windows complete suites pass 455 quick tests in `1.542/3.084 s`.
+  Read `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
+  `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`, CE-0108/0109, and
   `STRATEGY.md` before changing viability queries or losing-state authority.
 - The only expected untracked pre-existing file is `image.png`. It is a user
@@ -405,6 +406,16 @@ Quick complete unit command:
 PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
+The retained augmented-pipeline differential is an experiment, not unit-test
+setup:
+
+```bash
+PYTHONPATH=scripts python3 \
+  scripts/benchmarks/benchmark_augmented_pipeline_workspace.py \
+  artifacts/benchmarks/augmented_pipeline_workspace_20260725.json \
+  --scalar-seeds 512 --th08-cases 10
+```
+
 The command must include `PYTHONPATH=scripts`. Running bare unittest discovery
 causes import errors for every script module; that is a test invocation error,
 not a product regression.
@@ -422,7 +433,8 @@ same UNC directory as `start_dir` and `top_level_dir`:
 ```
 
 Change only the `pattern` for a focused Windows file. This exact form passed
-all 453 tests in 4.080 seconds at the 2026-07-25 Boolean-first checkpoint.
+all 455 tests in 3.084 seconds at the 2026-07-25 augmented-pipeline
+checkpoint.
 
 Before commit:
 
@@ -872,16 +884,18 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 A good next commit is not "the randomized stage had fewer hits" by itself. It
 should:
 
-1. Replace dense source-layer action authority with a reachable-tube,
-   incremental, or augmented policy that represents exact phase plus
-   observed/pending/remaining-delay state. Preserve ordering: fresh hard
-   vector, guaranteed survival frames, bottleneck clearance, control reserve,
-   then recovery distance.
-2. Reduce the exact pending-pipeline query from its current physical-cohort
-   p95 of roughly 68--86 ms without increasing Boolean expiry, local p95, or
-   action lag. Recheck both retained 16-query Stage-5 cohorts, canonical
-   decision 1,680, and cross-stage losing witnesses before granting input
-   authority.
+1. Move augmented reachable-tube expansion onto the isolated survival
+   executor and publish results with the complete exact root key and immutable
+   policy version. Measure prewarm neighborhood size, exact-root cache hit
+   rate, new-state count, and miss fallback. Never block the issue-time thread
+   on a cold expansion.
+2. Reduce the current TH08 cold/incremental workspace p95 of `104.46 ms` or
+   hide it behind useful exact-root prewarming without increasing Boolean
+   expiry, local p95, or action lag. Recheck both retained 16-query Stage-5
+   cohorts, canonical decision 1,680, and cross-stage losing witnesses before
+   granting even veto-only authority. Preserve ordering: fresh hard vector,
+   guaranteed survival frames, bottleneck clearance, control reserve, then
+   recovery distance.
 3. Prototype a packed native issue-time bullet/laser/enemy
    decode-plus-project-plus-all-action certificate with a fixed service
    budget. It must preserve the strict version contract and improve
@@ -919,11 +933,15 @@ fallback can choose outside a 74-frame survival-best mask and ignore a
 `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md` and CE-0108/0109. Boolean
 publication is now isolated from labels and its Stage-5 expiry gate passes,
 but issued/native action mismatches and exact pending state change winning
-classification and best actions. Dense labels remain shadow-only. Make the
-phase-exact observed/pending recurrence reachable-tube, incremental, or
-augmented enough for the service budget before action-authority A/B. Continue
-the packed issue-time certificate and ECL/timeline `BirthWindow` work; keep
-mechanics/safety game-neutral while allowing explicit practiced profiles.
+classification and best actions. Read
+`notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`. Its versioned sparse
+C++ recurrence passes 512 scalar and ten full-size v1 differentials; warm
+exact roots are about 0.1 ms, but cold/incremental TH08 p95 is 104.46 ms.
+Keep it shadow-only. Add isolated background prewarming and exact-root/version
+publication, measure cache-hit and delivery cost, and fall back on every miss
+before considering veto-only A/B. Continue the packed issue-time certificate
+and ECL/timeline `BirthWindow` work; keep mechanics/safety game-neutral while
+allowing explicit practiced profiles.
 Retain compact artifacts and counterexamples, separate canonical attempts
 from post-respawn discovery, use tiered relevant tests, commit verified
 checkpoints, and stop every runtime session.

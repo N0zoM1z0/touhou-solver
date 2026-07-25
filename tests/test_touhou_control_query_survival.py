@@ -9,6 +9,7 @@ import numpy as np
 
 from touhou_control.query_survival import (
     PendingCommand,
+    StalePipelineWorkspaceError,
     SurvivalQueryProblem,
     query_local_survival,
     scalar_query_local_survival,
@@ -266,6 +267,110 @@ class QueryLocalSurvivalTests(unittest.TestCase):
                         expected_label.bottleneck_margin,
                         places=5,
                     )
+
+    def test_augmented_workspace_matches_scalar_and_reuses_exact_root(
+        self,
+    ) -> None:
+        for seed in range(16):
+            with self.subTest(seed=seed):
+                rng = np.random.default_rng(30_000 + seed)
+                clearance = rng.uniform(
+                    -2.0,
+                    6.0,
+                    size=(9, 4, 4),
+                ).astype(np.float32)
+                axis = np.arange(4, dtype=np.float32)
+                config = ViabilityConfig(frames_per_layer=2)
+                pending = (
+                    PendingCommand(
+                        self.actions[(seed + 1) % 3].name,
+                        (1, 2, 3),
+                    )
+                    if seed % 2
+                    else None
+                )
+                scalar = scalar_query_local_survival(
+                    x_axis=axis,
+                    y_axis=axis,
+                    clearance_volume=clearance,
+                    actions=self.actions,
+                    delay_frames=(0, 1, 3),
+                    config=config,
+                    start_frame=seed % 4,
+                    row=1 + seed % 2,
+                    column=1 + (seed // 2) % 2,
+                    observed_action=self.actions[seed % 3].name,
+                    pending_command=pending,
+                )
+                problem = SurvivalQueryProblem(
+                    x_axis=axis,
+                    y_axis=axis,
+                    clearance_volume=clearance,
+                    actions=self.actions,
+                    delay_frames=(0, 1, 3),
+                    nominal_delay=1,
+                    config=config,
+                )
+                try:
+                    workspace = problem.build_pipeline_workspace(
+                        policy_version=seed,
+                    )
+                except RuntimeError as error:
+                    self.skipTest(str(error))
+                with workspace:
+                    arguments = {
+                        "policy_version": seed,
+                        "frame": seed % 4,
+                        "row": 1 + seed % 2,
+                        "column": 1 + (seed // 2) % 2,
+                        "observed_action": self.actions[seed % 3].name,
+                        "pending_command": pending,
+                    }
+                    first = workspace.query_cell(**arguments)
+                    second = workspace.query_cell(**arguments)
+                self.assertEqual(first.state_label, scalar.state_label)
+                self.assertEqual(first.action_labels, scalar.action_labels)
+                self.assertEqual(first.best_actions, scalar.best_actions)
+                self.assertGreaterEqual(
+                    first.workspace_stats.new_state_count,
+                    0,
+                )
+                self.assertEqual(second.workspace_stats.new_state_count, 0)
+                self.assertEqual(
+                    second.workspace_stats.branch_simulation_count,
+                    0,
+                )
+                self.assertGreater(
+                    second.workspace_stats.root_memo_hit_count,
+                    0,
+                )
+
+    def test_augmented_workspace_rejects_stale_policy_version(self) -> None:
+        clearance = np.full((5, 3, 3), 10.0, dtype=np.float32)
+        problem = SurvivalQueryProblem(
+            x_axis=self.axis,
+            y_axis=self.axis,
+            clearance_volume=clearance,
+            actions=self.actions,
+            delay_frames=(0, 1),
+            nominal_delay=1,
+            config=ViabilityConfig(frames_per_layer=2),
+        )
+        try:
+            workspace = problem.build_pipeline_workspace(
+                policy_version="policy-a",
+            )
+        except RuntimeError as error:
+            self.skipTest(str(error))
+        with workspace:
+            with self.assertRaises(StalePipelineWorkspaceError):
+                workspace.query_cell(
+                    policy_version="policy-b",
+                    frame=0,
+                    row=1,
+                    column=1,
+                    observed_action="stay",
+                )
 
     def test_postpublished_labels_match_fused_on_every_losing_state(
         self,

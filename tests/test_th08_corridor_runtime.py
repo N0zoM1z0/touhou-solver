@@ -15,8 +15,10 @@ from th08_corridor_runtime import (
     LIVE_SURVIVAL_LABELS,
     SHADOW_REFINEMENT_GRID_STEPS,
     SHADOW_SURVIVAL_LABELS,
+    corridor_pipeline_survival_query,
     corridor_postpublished_survival_query,
     corridor_viability_query,
+    prepare_pipeline_survival_workspace,
     solve_corridor,
     solve_postpublished_survival,
 )
@@ -140,6 +142,29 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
         self.assertIsNotNone(query)
         assert query is not None
         self.assertIsNotNone(query.survival_frames)
+        workspace_solution = prepare_pipeline_survival_workspace(solution)
+        self.assertIsNotNone(
+            workspace_solution.pipeline_survival_workspace,
+        )
+        self.assertIsNotNone(
+            workspace_solution.pipeline_survival_workspace_ms,
+        )
+        exact = corridor_pipeline_survival_query(
+            workspace_solution,
+            current_frame=100,
+            player_x=192.0,
+            player_y=400.0,
+            observed_action="stay",
+            pending_command=None,
+            max_age_frames=79,
+        )
+        self.assertIsNotNone(exact)
+        assert exact is not None
+        self.assertEqual(
+            exact.backend,
+            "native_augmented_pipeline_workspace",
+        )
+        workspace_solution.pipeline_survival_workspace.close()
 
 
 if __name__ == "__main__":

@@ -165,6 +165,14 @@ These instructions apply to every file and task below this directory.
   an explicit option, an executor independent of Boolean publication, and a
   measured worker budget. Passing Boolean/label array parity is not
   authorization for input authority.
+- An augmented/pending-input workspace is owned by one immutable policy
+  version. Never reuse its memo across a clearance volume, axes, action set,
+  delay support, source frame, or context change. Non-root optimality pruning
+  may discard work only when an admissible lexicographic upper bound cannot
+  beat the incumbent; public roots must retain exact labels for every action.
+  A cold reachable-tube expansion must stay off the issue-time thread. Publish
+  and consume only an exact root/version match; otherwise fall back to the
+  Boolean policy plus the fresh local hard certificate.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 

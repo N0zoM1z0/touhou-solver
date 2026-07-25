@@ -1,0 +1,1853 @@
+{
+  "schema": "postpublished-survival-pending-pipeline-audit-v1",
+  "scope": {
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260725_122624.jsonl",
+    "capsule_dir": "artifacts/viability_audit/raw/lunatic_route2_stage5_unattended_20260725_122624",
+    "query_limit": 16,
+    "candidate_positive_label_queries": 4271,
+    "selection": "all observed-vs-issued Boolean classification flips first; then pending-command phase coverage; then high-survival issued-outside-label cases"
+  },
+  "semantics": {
+    "authoritative_policy": "trace Boolean policy",
+    "dense_shadow": "source-layer-aligned observed input, no explicit pending command, policy-wide delay support",
+    "phase_exact_variants": "exact physical query phase and current delay support",
+    "pending_pipeline": "observed active -> older pending -> newly selected command; robust over remaining pending and new-command delays",
+    "limitation": "The exact cohort is diagnostic and deterministic, not an estimate of a fresh-run hit rate."
+  },
+  "trace_aggregate": {
+    "decisions": 8233,
+    "viability_queries": 8077,
+    "active_action_mismatches": 754,
+    "pending_commands": 782,
+    "postpublished_queries": 5562,
+    "observed_state_classification_differences": 9,
+    "legacy_false_winning_states": 8,
+    "legacy_false_losing_states": 1,
+    "overdue_pending_commands": 113,
+    "postpublished_losing_queries": 4152,
+    "issued_outside_dense_losing_best": 1145,
+    "query_phase_counts": {
+      "0": 1223,
+      "1": 1105,
+      "2": 1039,
+      "3": 995,
+      "4": 910,
+      "5": 927,
+      "6": 921,
+      "7": 957
+    },
+    "pending_remaining_support_counts": {
+      "1": 374,
+      "1,2": 361,
+      "1,2,3": 47
+    },
+    "delivery": {
+      "unique_policy_count": 1650,
+      "first_observed_policy_age_frames": {
+        "median": 4.0,
+        "p95": 10.0,
+        "max": 1809.0
+      },
+      "query_policy_age_frames": {
+        "median": 10.0,
+        "p95": 25.0,
+        "max": 79.0
+      },
+      "solve_ms": {
+        "median": 115.86064999573864,
+        "p95": 408.58349998597987,
+        "max": 529.7883999883197
+      },
+      "policy_status_counts": {
+        "pending_future_epoch": 36,
+        "queryable": 8075,
+        "expired": 34
+      },
+      "unique_labeled_policy_count": 1303,
+      "label_ms": {
+        "median": 79.04640000197105,
+        "p95": 131.28549998509698,
+        "max": 174.92270001093857
+      },
+      "first_observed_label_age_frames": {
+        "median": 5.0,
+        "p95": 10.0,
+        "max": 16.0
+      },
+      "parity_failure_policy_count": 0
+    }
+  },
+  "exact_summary": {
+    "selected_queries": 16,
+    "legacy_to_observed_best_set_changes": 14,
+    "pending_pipeline_best_set_changes": 13,
+    "dense_to_pipeline_best_set_changes": 14,
+    "pending_pipeline_issued_rejections": 3,
+    "pending_pipeline_issued_rescues": 1,
+    "dense_to_pipeline_issued_rejections": 3,
+    "dense_to_pipeline_issued_rescues": 0,
+    "trace_boolean_to_pipeline_winning_changes": 2,
+    "trace_boolean_to_pipeline_false_winning": 2,
+    "trace_boolean_to_pipeline_false_losing": 0,
+    "dense_to_pipeline_winning_changes": 7,
+    "dense_to_pipeline_false_winning": 1,
+    "dense_to_pipeline_false_losing": 6,
+    "legacy_to_observed_phase_exact_winning_changes": 7,
+    "legacy_to_observed_phase_exact_false_winning": 5,
+    "legacy_to_observed_phase_exact_false_losing": 2,
+    "observed_to_pending_pipeline_winning_changes": 4,
+    "observed_to_pending_pipeline_false_winning": 1,
+    "observed_to_pending_pipeline_false_losing": 3
+  },
+  "timing_ms": {
+    "clearance": {
+      "median": 10.013105988036841,
+      "p95": 26.292063004802912,
+      "max": 27.060987980803475
+    },
+    "query_variant": {
+      "median": 16.461062492453493,
+      "p95": 86.13392699044198,
+      "max": 183.03823500173166
+    }
+  },
+  "observations": [
+    {
+      "frame": 2096,
+      "spell_id": 0,
+      "capsule": "policy_2071_2087.npz",
+      "capsule_source_frame": 2087,
+      "query_frame": 2094,
+      "phase_frames": 7,
+      "exact_start_frame": 7,
+      "position": [
+        358.9790070056915,
+        419.940798997879
+      ],
+      "legacy_active_action": "up_left_fast",
+      "observed_active_action": "up_fast",
+      "pending_command": {
+        "action": "up_left_fast",
+        "remaining_frames": [
+          1
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "down_fast",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "down_fast"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 1,
+        "bottleneck_margin": -2.4700074195861816,
+        "best_actions": [
+          "stay",
+          "left",
+          "right",
+          "up",
+          "down",
+          "up_left",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "up_fast",
+          "down_fast",
+          "up_left_fast",
+          "up_right_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "issued_in_best": true
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 1,
+          "bottleneck_margin": -0.39411401748657227,
+          "remaining_horizon_frames": 73,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "left",
+            "right",
+            "up",
+            "down",
+            "up_left",
+            "up_right",
+            "down_left",
+            "down_right",
+            "left_fast",
+            "right_fast",
+            "up_fast",
+            "down_fast",
+            "up_left_fast",
+            "up_right_fast",
+            "down_left_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 1,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 0.22883698693476617
+        },
+        "observed_phase_exact": {
+          "survival_frames": 73,
+          "bottleneck_margin": 1.003575325012207,
+          "remaining_horizon_frames": 73,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "right",
+            "up",
+            "down",
+            "up_right",
+            "right_fast",
+            "down_fast",
+            "up_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 12426,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 26.00337500916794
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 73,
+          "bottleneck_margin": 0.21484994888305664,
+          "remaining_horizon_frames": 73,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "right",
+            "up",
+            "up_left",
+            "up_right",
+            "right_fast",
+            "up_left_fast",
+            "up_right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 12418,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 26.402904011774808
+        }
+      },
+      "clearance_ms": 13.055151997832581
+    },
+    {
+      "frame": 3650,
+      "spell_id": 0,
+      "capsule": "policy_3616_3632.npz",
+      "capsule_source_frame": 3632,
+      "query_frame": 3649,
+      "phase_frames": 1,
+      "exact_start_frame": 17,
+      "position": [
+        346.80316162109375,
+        379.486328125
+      ],
+      "legacy_active_action": "stay",
+      "observed_active_action": "up",
+      "pending_command": {
+        "action": "stay",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "stay",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay",
+          "right"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 29,
+        "bottleneck_margin": -1.5567750930786133,
+        "best_actions": [
+          "stay"
+        ],
+        "issued_in_best": true
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 63,
+          "bottleneck_margin": 1.4516820907592773,
+          "remaining_horizon_frames": 63,
+          "winning": true,
+          "best_actions": [
+            "right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 741,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 6.886982009746134
+        },
+        "observed_phase_exact": {
+          "survival_frames": 33,
+          "bottleneck_margin": -0.6402649879455566,
+          "remaining_horizon_frames": 63,
+          "winning": false,
+          "best_actions": [
+            "right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 760,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 6.991045986069366
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 63,
+          "bottleneck_margin": 1.4516820907592773,
+          "remaining_horizon_frames": 63,
+          "winning": true,
+          "best_actions": [
+            "right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 754,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 10.136778990272433
+        }
+      },
+      "clearance_ms": 24.64339099242352
+    },
+    {
+      "frame": 6966,
+      "spell_id": 0,
+      "capsule": "policy_6941_6957.npz",
+      "capsule_source_frame": 6957,
+      "query_frame": 6964,
+      "phase_frames": 7,
+      "exact_start_frame": 7,
+      "position": [
+        93.48681640625,
+        424.12957763671875
+      ],
+      "legacy_active_action": "stay",
+      "observed_active_action": "left",
+      "pending_command": {
+        "action": "stay",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "stay",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay",
+          "up",
+          "down",
+          "down_fast"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 56,
+        "bottleneck_margin": -0.8665065765380859,
+        "best_actions": [
+          "stay",
+          "left",
+          "right",
+          "up",
+          "down",
+          "up_left",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "down_fast",
+          "up_left_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "issued_in_best": true
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 73,
+          "bottleneck_margin": 2.9932258129119873,
+          "remaining_horizon_frames": 73,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 1440,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 11.102410993771628
+        },
+        "observed_phase_exact": {
+          "survival_frames": 73,
+          "bottleneck_margin": 2.9932258129119873,
+          "remaining_horizon_frames": 73,
+          "winning": true,
+          "best_actions": [
+            "left",
+            "down_left_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 1461,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 10.707362001994625
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 73,
+          "bottleneck_margin": 2.9932258129119873,
+          "remaining_horizon_frames": 73,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 1463,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 7.295685994904488
+        }
+      },
+      "clearance_ms": 16.707039991160855
+    },
+    {
+      "frame": 14175,
+      "spell_id": 0,
+      "capsule": "policy_14146_14162.npz",
+      "capsule_source_frame": 14162,
+      "query_frame": 14173,
+      "phase_frames": 3,
+      "exact_start_frame": 11,
+      "position": [
+        296.66217041015625,
+        427.0799560546875
+      ],
+      "legacy_active_action": "stay",
+      "observed_active_action": "left_fast",
+      "pending_command": {
+        "action": "stay",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "down_left",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay",
+          "down",
+          "down_fast"
+        ],
+        "issued_in_safe": false
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 2,
+        "bottleneck_margin": -2.454437494277954,
+        "best_actions": [
+          "stay",
+          "right",
+          "up",
+          "down",
+          "up_right",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "up_fast",
+          "down_fast",
+          "up_right_fast",
+          "down_right_fast"
+        ],
+        "issued_in_best": false
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 69,
+          "bottleneck_margin": 0.8522524833679199,
+          "remaining_horizon_frames": 69,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 1000,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 6.483089993707836
+        },
+        "observed_phase_exact": {
+          "survival_frames": 2,
+          "bottleneck_margin": -4.697113037109375,
+          "remaining_horizon_frames": 69,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "left",
+            "right",
+            "up",
+            "down",
+            "up_left",
+            "up_right",
+            "down_left",
+            "down_right",
+            "left_fast",
+            "right_fast",
+            "up_fast",
+            "down_fast",
+            "up_left_fast",
+            "up_right_fast",
+            "down_left_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 1,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 0.14932698104530573
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 10,
+          "bottleneck_margin": -1.2754981517791748,
+          "remaining_horizon_frames": 69,
+          "winning": false,
+          "best_actions": [
+            "down_right"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 799,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 4.4723730243276805
+        }
+      },
+      "clearance_ms": 8.945701993070543
+    },
+    {
+      "frame": 14186,
+      "spell_id": 0,
+      "capsule": "policy_14164_14180.npz",
+      "capsule_source_frame": 14180,
+      "query_frame": 14185,
+      "phase_frames": 5,
+      "exact_start_frame": 5,
+      "position": [
+        273.6409912109375,
+        417.81683349609375
+      ],
+      "legacy_active_action": "stay",
+      "observed_active_action": "left_fast",
+      "pending_command": {
+        "action": "stay",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "stay",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 1,
+        "bottleneck_margin": -1.3670258522033691,
+        "best_actions": [
+          "stay",
+          "left",
+          "right",
+          "up",
+          "down",
+          "up_left",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "up_fast",
+          "down_fast",
+          "up_left_fast",
+          "up_right_fast",
+          "down_left_fast",
+          "down_right_fast"
+        ],
+        "issued_in_best": true
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 75,
+          "bottleneck_margin": 2.0,
+          "remaining_horizon_frames": 75,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "left",
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 1709,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 8.905246999347582
+        },
+        "observed_phase_exact": {
+          "survival_frames": 1,
+          "bottleneck_margin": -1.8975071907043457,
+          "remaining_horizon_frames": 75,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "left",
+            "right",
+            "up",
+            "down",
+            "up_left",
+            "up_right",
+            "down_left",
+            "down_right",
+            "left_fast",
+            "right_fast",
+            "up_fast",
+            "down_fast",
+            "up_left_fast",
+            "up_right_fast",
+            "down_left_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 1,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 0.11979401460848749
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 1,
+          "bottleneck_margin": -1.8975071907043457,
+          "remaining_horizon_frames": 75,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "left",
+            "right",
+            "up",
+            "down",
+            "up_left",
+            "up_right",
+            "down_left",
+            "down_right",
+            "left_fast",
+            "right_fast",
+            "up_fast",
+            "down_fast",
+            "up_left_fast",
+            "up_right_fast",
+            "down_left_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 1717,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 9.06982901506126
+        }
+      },
+      "clearance_ms": 8.225908008171245
+    },
+    {
+      "frame": 14254,
+      "spell_id": 0,
+      "capsule": "policy_14232_14248.npz",
+      "capsule_source_frame": 14248,
+      "query_frame": 14253,
+      "phase_frames": 5,
+      "exact_start_frame": 5,
+      "position": [
+        237.52319049835205,
+        411.3934965133667
+      ],
+      "legacy_active_action": "down_left",
+      "observed_active_action": "down",
+      "pending_command": {
+        "action": "down_left",
+        "remaining_frames": [
+          1,
+          2,
+          3
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "stay",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay",
+          "down_left"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 3,
+        "bottleneck_margin": -0.320892333984375,
+        "best_actions": [
+          "stay",
+          "left",
+          "right",
+          "up",
+          "down",
+          "up_left",
+          "up_right",
+          "left_fast",
+          "right_fast",
+          "up_fast",
+          "up_left_fast",
+          "up_right_fast"
+        ],
+        "issued_in_best": true
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 75,
+          "bottleneck_margin": 4.927550315856934,
+          "remaining_horizon_frames": 75,
+          "winning": true,
+          "best_actions": [
+            "right"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 27427,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 52.92422798811458
+        },
+        "observed_phase_exact": {
+          "survival_frames": 75,
+          "bottleneck_margin": 5.566436767578125,
+          "remaining_horizon_frames": 75,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 27412,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 57.768767001107335
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 75,
+          "bottleneck_margin": 3.8443002700805664,
+          "remaining_horizon_frames": 75,
+          "winning": true,
+          "best_actions": [
+            "down_right",
+            "down_right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 27454,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 51.72490299446508
+        }
+      },
+      "clearance_ms": 7.612885005073622
+    },
+    {
+      "frame": 34487,
+      "spell_id": 107,
+      "capsule": "policy_34450_34469.npz",
+      "capsule_source_frame": 34469,
+      "query_frame": 34485,
+      "phase_frames": 0,
+      "exact_start_frame": 16,
+      "position": [
+        166.99042963981628,
+        432.0
+      ],
+      "legacy_active_action": "right",
+      "observed_active_action": "stay",
+      "pending_command": {
+        "action": "right",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "stay",
+      "trace_boolean": {
+        "state_viable": false,
+        "safe_actions": [],
+        "issued_in_safe": false
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": true,
+        "survival_frames": 64,
+        "bottleneck_margin": Infinity,
+        "best_actions": [
+          "stay",
+          "down",
+          "down_fast",
+          "down_left_fast"
+        ],
+        "issued_in_best": true
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 3,
+          "bottleneck_margin": -9.425250053405762,
+          "remaining_horizon_frames": 64,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "left",
+            "right",
+            "up",
+            "down",
+            "up_left",
+            "down_left",
+            "left_fast",
+            "right_fast",
+            "up_fast",
+            "down_fast",
+            "up_left_fast",
+            "down_left_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 14404,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 160.10134300449863
+        },
+        "observed_phase_exact": {
+          "survival_frames": 64,
+          "bottleneck_margin": 6.022441864013672,
+          "remaining_horizon_frames": 64,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 16159,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 183.03823500173166
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 4,
+          "bottleneck_margin": -8.649121284484863,
+          "remaining_horizon_frames": 64,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "left",
+            "right",
+            "up",
+            "down",
+            "up_left",
+            "down_left",
+            "left_fast",
+            "up_fast",
+            "down_fast",
+            "up_left_fast",
+            "down_left_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 14752,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 151.77582198521122
+        }
+      },
+      "clearance_ms": 9.48766598594375
+    },
+    {
+      "frame": 39334,
+      "spell_id": 111,
+      "capsule": "policy_39306_39322.npz",
+      "capsule_source_frame": 39322,
+      "query_frame": 39332,
+      "phase_frames": 2,
+      "exact_start_frame": 10,
+      "position": [
+        224.73907470703125,
+        126.50337219238281
+      ],
+      "legacy_active_action": "up_fast",
+      "observed_active_action": "up_right",
+      "pending_command": {
+        "action": "up_fast",
+        "remaining_frames": [
+          1
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "up_fast",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay",
+          "up",
+          "down",
+          "up_fast"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 4,
+        "bottleneck_margin": -2.1461915969848633,
+        "best_actions": [
+          "stay",
+          "left",
+          "up",
+          "down",
+          "up_left",
+          "up_right",
+          "down_left",
+          "down_right",
+          "left_fast",
+          "up_fast",
+          "down_fast",
+          "up_left_fast",
+          "down_left_fast"
+        ],
+        "issued_in_best": true
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 70,
+          "bottleneck_margin": 14.278709411621094,
+          "remaining_horizon_frames": 70,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "up",
+            "up_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 5654,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 45.332715002587065
+        },
+        "observed_phase_exact": {
+          "survival_frames": 4,
+          "bottleneck_margin": -2.285348892211914,
+          "remaining_horizon_frames": 70,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "left",
+            "up",
+            "down",
+            "up_left",
+            "up_right",
+            "down_left",
+            "down_right",
+            "left_fast",
+            "up_fast",
+            "down_fast",
+            "up_left_fast",
+            "up_right_fast",
+            "down_left_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 5254,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 52.03929799608886
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 70,
+          "bottleneck_margin": 12.353094100952148,
+          "remaining_horizon_frames": 70,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "up",
+            "up_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 5639,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 55.158846982521936
+        }
+      },
+      "clearance_ms": 6.392971001332626
+    },
+    {
+      "frame": 39570,
+      "spell_id": 111,
+      "capsule": "policy_39541_39557.npz",
+      "capsule_source_frame": 39557,
+      "query_frame": 39568,
+      "phase_frames": 3,
+      "exact_start_frame": 11,
+      "position": [
+        265.5284729003906,
+        114.97891998291016
+      ],
+      "legacy_active_action": "down_fast",
+      "observed_active_action": "left_fast",
+      "pending_command": {
+        "action": "down_fast",
+        "remaining_frames": [
+          1
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "down_fast",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "down",
+          "down_fast"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 2,
+        "bottleneck_margin": -1.929473876953125,
+        "best_actions": [
+          "stay",
+          "right",
+          "up",
+          "down",
+          "up_right",
+          "down_right",
+          "left_fast",
+          "right_fast",
+          "up_fast",
+          "down_fast",
+          "up_right_fast",
+          "down_right_fast"
+        ],
+        "issued_in_best": true
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 69,
+          "bottleneck_margin": 7.6259260177612305,
+          "remaining_horizon_frames": 69,
+          "winning": true,
+          "best_actions": [
+            "down_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 19822,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 86.13392699044198
+        },
+        "observed_phase_exact": {
+          "survival_frames": 2,
+          "bottleneck_margin": -3.429473876953125,
+          "remaining_horizon_frames": 69,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "left",
+            "right",
+            "up",
+            "down",
+            "up_left",
+            "up_right",
+            "down_left",
+            "down_right",
+            "left_fast",
+            "right_fast",
+            "up_fast",
+            "down_fast",
+            "up_left_fast",
+            "up_right_fast",
+            "down_left_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 1,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 0.14765298692509532
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 69,
+          "bottleneck_margin": 7.6259260177612305,
+          "remaining_horizon_frames": 69,
+          "winning": true,
+          "best_actions": [
+            "down_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 19718,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 83.25866700033657
+        }
+      },
+      "clearance_ms": 26.292063004802912
+    },
+    {
+      "frame": 4446,
+      "spell_id": 0,
+      "capsule": "policy_4421_4437.npz",
+      "capsule_source_frame": 4437,
+      "query_frame": 4445,
+      "phase_frames": 0,
+      "exact_start_frame": 8,
+      "position": [
+        364.7350890636444,
+        409.2740478515625
+      ],
+      "legacy_active_action": "right",
+      "observed_active_action": "stay",
+      "pending_command": {
+        "action": "right",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "down_left",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay",
+          "right",
+          "down",
+          "down_left",
+          "down_right",
+          "right_fast",
+          "down_fast",
+          "down_right_fast"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": true,
+        "survival_frames": 72,
+        "bottleneck_margin": Infinity,
+        "best_actions": [
+          "stay",
+          "right",
+          "down",
+          "down_right",
+          "right_fast",
+          "down_fast",
+          "down_right_fast"
+        ],
+        "issued_in_best": false
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 72,
+          "bottleneck_margin": 2.0831894874572754,
+          "remaining_horizon_frames": 72,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "left",
+            "right",
+            "down_left",
+            "down_right",
+            "right_fast",
+            "down_left_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 646,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 4.010832984931767
+        },
+        "observed_phase_exact": {
+          "survival_frames": 72,
+          "bottleneck_margin": 2.0831894874572754,
+          "remaining_horizon_frames": 72,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "right",
+            "down",
+            "down_right",
+            "right_fast",
+            "down_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 665,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 4.096954013220966
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 72,
+          "bottleneck_margin": 2.0831894874572754,
+          "remaining_horizon_frames": 72,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "right",
+            "down_right",
+            "right_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 697,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 4.581187997246161
+        }
+      },
+      "clearance_ms": 8.435865020146593
+    },
+    {
+      "frame": 806,
+      "spell_id": 0,
+      "capsule": "policy_772_788.npz",
+      "capsule_source_frame": 788,
+      "query_frame": 805,
+      "phase_frames": 1,
+      "exact_start_frame": 17,
+      "position": [
+        312.6469087600708,
+        421.8883638381958
+      ],
+      "legacy_active_action": "up_left",
+      "observed_active_action": "up",
+      "pending_command": {
+        "action": "up_left",
+        "remaining_frames": [
+          1
+        ]
+      },
+      "new_command_delay_support": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "issued_action": "stay",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay",
+          "down",
+          "down_fast"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": true,
+        "survival_frames": 64,
+        "bottleneck_margin": Infinity,
+        "best_actions": [
+          "down",
+          "down_fast"
+        ],
+        "issued_in_best": false
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 63,
+          "bottleneck_margin": 2.9128785133361816,
+          "remaining_horizon_frames": 63,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 2632,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 21.129803004441783
+        },
+        "observed_phase_exact": {
+          "survival_frames": 63,
+          "bottleneck_margin": 2.9128785133361816,
+          "remaining_horizon_frames": 63,
+          "winning": true,
+          "best_actions": [
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 2291,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 18.137788021704182
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 63,
+          "bottleneck_margin": 2.9128785133361816,
+          "remaining_horizon_frames": 63,
+          "winning": true,
+          "best_actions": [
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 2638,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 21.213451982475817
+        }
+      },
+      "clearance_ms": 6.715424999129027
+    },
+    {
+      "frame": 14312,
+      "spell_id": 0,
+      "capsule": "policy_14284_14300.npz",
+      "capsule_source_frame": 14300,
+      "query_frame": 14310,
+      "phase_frames": 2,
+      "exact_start_frame": 10,
+      "position": [
+        241.94746708869934,
+        425.3704254627228
+      ],
+      "legacy_active_action": "up_left_fast",
+      "observed_active_action": "left_fast",
+      "pending_command": {
+        "action": "up_left_fast",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "up_left_fast",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay",
+          "down",
+          "up_left",
+          "down_fast",
+          "up_left_fast"
+        ],
+        "issued_in_safe": true
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": true,
+        "survival_frames": 72,
+        "bottleneck_margin": Infinity,
+        "best_actions": [
+          "stay",
+          "down",
+          "down_fast"
+        ],
+        "issued_in_best": false
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 70,
+          "bottleneck_margin": 3.9380369186401367,
+          "remaining_horizon_frames": 70,
+          "winning": true,
+          "best_actions": [
+            "up",
+            "down",
+            "up_left"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 2079,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 16.51113000116311
+        },
+        "observed_phase_exact": {
+          "survival_frames": 70,
+          "bottleneck_margin": 4.539743423461914,
+          "remaining_horizon_frames": 70,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 2006,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 15.79548098379746
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 70,
+          "bottleneck_margin": 4.8677520751953125,
+          "remaining_horizon_frames": 70,
+          "winning": true,
+          "best_actions": [
+            "up_left",
+            "down_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 2092,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 16.935446008574218
+        }
+      },
+      "clearance_ms": 10.00220698188059
+    },
+    {
+      "frame": 4189,
+      "spell_id": 0,
+      "capsule": "policy_4168_4184.npz",
+      "capsule_source_frame": 4184,
+      "query_frame": 4187,
+      "phase_frames": 3,
+      "exact_start_frame": 3,
+      "position": [
+        174.1519193649292,
+        418.2478666305542
+      ],
+      "legacy_active_action": "down_right",
+      "observed_active_action": "down",
+      "pending_command": {
+        "action": "down_right",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "left",
+      "trace_boolean": {
+        "state_viable": false,
+        "safe_actions": [],
+        "issued_in_safe": false
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 74,
+        "bottleneck_margin": -1.87908935546875,
+        "best_actions": [
+          "stay",
+          "down",
+          "down_fast"
+        ],
+        "issued_in_best": false
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 71,
+          "bottleneck_margin": -1.87908935546875,
+          "remaining_horizon_frames": 77,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 981,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 7.112374994903803
+        },
+        "observed_phase_exact": {
+          "survival_frames": 71,
+          "bottleneck_margin": -1.87908935546875,
+          "remaining_horizon_frames": 77,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "up",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 1019,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 7.982128008734435
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 71,
+          "bottleneck_margin": -1.87908935546875,
+          "remaining_horizon_frames": 77,
+          "winning": false,
+          "best_actions": [
+            "stay",
+            "down",
+            "down_right",
+            "down_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 1012,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 7.8641430009156466
+        }
+      },
+      "clearance_ms": 17.737624002620578
+    },
+    {
+      "frame": 13068,
+      "spell_id": 0,
+      "capsule": "policy_13047_13063.npz",
+      "capsule_source_frame": 13063,
+      "query_frame": 13067,
+      "phase_frames": 4,
+      "exact_start_frame": 4,
+      "position": [
+        161.20928955078125,
+        415.7926025390625
+      ],
+      "legacy_active_action": "stay",
+      "observed_active_action": "right",
+      "pending_command": {
+        "action": "stay",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "stay",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "right",
+          "down",
+          "down_right",
+          "right_fast",
+          "down_fast",
+          "down_right_fast"
+        ],
+        "issued_in_safe": false
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": true,
+        "survival_frames": 80,
+        "bottleneck_margin": Infinity,
+        "best_actions": [
+          "right",
+          "down",
+          "down_right",
+          "right_fast",
+          "down_fast",
+          "down_right_fast"
+        ],
+        "issued_in_best": false
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 76,
+          "bottleneck_margin": 5.928388595581055,
+          "remaining_horizon_frames": 76,
+          "winning": true,
+          "best_actions": [
+            "down_right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 5182,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 20.558574004098773
+        },
+        "observed_phase_exact": {
+          "survival_frames": 76,
+          "bottleneck_margin": 10.601076126098633,
+          "remaining_horizon_frames": 76,
+          "winning": true,
+          "best_actions": [
+            "down_right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 5668,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 26.668701990274712
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 76,
+          "bottleneck_margin": 6.783050537109375,
+          "remaining_horizon_frames": 76,
+          "winning": true,
+          "best_actions": [
+            "right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 5687,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 27.57819098769687
+        }
+      },
+      "clearance_ms": 10.024004994193092
+    },
+    {
+      "frame": 1763,
+      "spell_id": 0,
+      "capsule": "policy_1740_1756.npz",
+      "capsule_source_frame": 1756,
+      "query_frame": 1761,
+      "phase_frames": 5,
+      "exact_start_frame": 5,
+      "position": [
+        353.1367492675781,
+        387.76177978515625
+      ],
+      "legacy_active_action": "stay",
+      "observed_active_action": "left",
+      "pending_command": {
+        "action": "stay",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "stay",
+      "trace_boolean": {
+        "state_viable": false,
+        "safe_actions": [],
+        "issued_in_safe": false
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": false,
+        "survival_frames": 73,
+        "bottleneck_margin": -0.663360595703125,
+        "best_actions": [
+          "down",
+          "right_fast",
+          "down_right_fast"
+        ],
+        "issued_in_best": false
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 68,
+          "bottleneck_margin": -0.663360595703125,
+          "remaining_horizon_frames": 75,
+          "winning": false,
+          "best_actions": [
+            "right",
+            "down",
+            "right_fast",
+            "down_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 3588,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 19.71436300664209
+        },
+        "observed_phase_exact": {
+          "survival_frames": 68,
+          "bottleneck_margin": -0.663360595703125,
+          "remaining_horizon_frames": 75,
+          "winning": false,
+          "best_actions": [
+            "right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 3563,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 20.29494399903342
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 68,
+          "bottleneck_margin": -0.663360595703125,
+          "remaining_horizon_frames": 75,
+          "winning": false,
+          "best_actions": [
+            "right",
+            "down",
+            "right_fast",
+            "down_fast",
+            "down_right_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 3590,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 20.32890499685891
+        }
+      },
+      "clearance_ms": 27.060987980803475
+    },
+    {
+      "frame": 2103,
+      "spell_id": 0,
+      "capsule": "policy_2071_2087.npz",
+      "capsule_source_frame": 2087,
+      "query_frame": 2101,
+      "phase_frames": 6,
+      "exact_start_frame": 14,
+      "position": [
+        353.3221435546875,
+        419.9839355945587
+      ],
+      "legacy_active_action": "up",
+      "observed_active_action": "stay",
+      "pending_command": {
+        "action": "up",
+        "remaining_frames": [
+          1,
+          2
+        ]
+      },
+      "new_command_delay_support": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "issued_action": "up_right_fast",
+      "trace_boolean": {
+        "state_viable": true,
+        "safe_actions": [
+          "stay",
+          "up",
+          "down",
+          "down_left",
+          "down_fast"
+        ],
+        "issued_in_safe": false
+      },
+      "dense_postpublished_observed_no_pending": {
+        "state_viable": true,
+        "survival_frames": 72,
+        "bottleneck_margin": Infinity,
+        "best_actions": [
+          "stay",
+          "up",
+          "down",
+          "down_fast"
+        ],
+        "issued_in_best": false
+      },
+      "exact_variants": {
+        "legacy_phase_exact": {
+          "survival_frames": 66,
+          "bottleneck_margin": 3.020618438720703,
+          "remaining_horizon_frames": 66,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "down",
+            "up_right",
+            "down_fast",
+            "up_right_fast"
+          ],
+          "issued_in_best": true,
+          "evaluated_state_count": 11024,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 16.261733981082216
+        },
+        "observed_phase_exact": {
+          "survival_frames": 66,
+          "bottleneck_margin": 8.239104270935059,
+          "remaining_horizon_frames": 66,
+          "winning": true,
+          "best_actions": [
+            "stay"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 11006,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 16.33723999839276
+        },
+        "pending_pipeline_exact": {
+          "survival_frames": 66,
+          "bottleneck_margin": 3.3626060485839844,
+          "remaining_horizon_frames": 66,
+          "winning": true,
+          "best_actions": [
+            "stay",
+            "down",
+            "down_fast"
+          ],
+          "issued_in_best": false,
+          "evaluated_state_count": 11045,
+          "backend": "native_pending_pipeline",
+          "elapsed_ms": 16.410994983743876
+        }
+      },
+      "clearance_ms": 10.324301983928308
+    }
+  ]
+}

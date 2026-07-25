@@ -2686,3 +2686,46 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   short-horizon slicing. The unresolved temporal hypothesis is an explicit
   pending-command/remaining-delay state, not a Stage-107 special case.
 - Full analysis: `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`.
+
+## 2026-07-25: Boolean-First Publication And Pending-Command Oracle
+
+- Split losing-state label induction from the Boolean publication path.
+  `CorridorPlan` retains an immutable numeric query problem; the labels-only
+  native recurrence reuses the published Boolean arrays, skips winning states,
+  and returns a separate shadow policy that cannot enter live guidance.
+- Added an independent scalar/native phase-exact recurrence with explicit
+  game-observed active action, older pending desired action, remaining-delay
+  support, and new-command delay support. Sixty-four randomized
+  pending-pipeline seeds passed scalar/native parity. Twenty-four full
+  Stage-5-size structured fields passed exact fused/post-publication parity on
+  every losing label and best-action mask.
+- Single-worker post-publication benchmark median/p95 was
+  `71.33/89.36 ms`, versus Boolean `282.88/310.69 ms` and fused
+  `353.88/379.78 ms`. This is an offline workload identity, not live service
+  time.
+- Complete hard-no-Bomb Stage-5 run `20260725_122624` showed that putting
+  shadow labels on the same corridor executor was not side-effect-free:
+  expired decisions rose from the Boolean-only comparison's 14 to 34.
+- Moved physical shadow work to an independent executor and restricted the
+  label kernel to one native worker. Complete RNG-distinct run
+  `20260725_125037` reached `route_complete` with 7,921 decisions, 18 hits,
+  zero Bomb violations, no runtime interruption, and no residual TH08/control
+  process. Boolean solve was `114.91/425.22 ms`, first policy age `4/10`
+  frames, query age `11/27`, expired decisions 15, and local read/plan/action
+  lag `13.08/18.18 ms`, `22.71/42.74 ms`, and `3/5` frames. This accepts
+  publication isolation, not the RNG-distinct hit count.
+- Both physical traces directly falsified issued-action-as-active semantics.
+  Desired/native input mismatched on 754/8,077 and 805/7,772 Boolean queries.
+  Among completed labels, changing only to native observed input flipped
+  winning classification nine times in each run. Two deterministic 16-query
+  exact cohorts then changed 13 best-action sets each when pending command
+  state was added; winning classification changed four and six times.
+- Dense labels therefore remain shadow-only. Query-local exact p95/max on the
+  selected physical cohorts reached `86.13/183.04` and `68.33/250.76 ms`;
+  exact phase/pending semantics need a reachable-tube, incremental, or
+  augmented precomputed form before action-authority A/B.
+- Linux and Windows complete quick suites pass 453 tests in
+  `1.558/4.080 s`. Full design, evidence labels, artifacts, and promotion gate
+  are in `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`. CE-0108 records
+  serialized-shadow delivery, and CE-0109 records active/pending input
+  conflation.

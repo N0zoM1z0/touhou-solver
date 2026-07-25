@@ -724,6 +724,9 @@ def run_trial(
         "hard_no_bomb": True,
         "trace_transform_runtime": args.trace_transform_runtime,
         "viability_audit": args.viability_audit,
+        "postpublished_survival_shadow": (
+            args.postpublished_survival_shadow
+        ),
         "started_at": datetime.now().astimezone().isoformat(),
     }
     batch_process: subprocess.Popen[bytes] | None = None
@@ -744,6 +747,9 @@ def run_trial(
                 / run_id
                 if args.viability_audit
                 else None
+            ),
+            postpublished_survival_shadow=(
+                args.postpublished_survival_shadow
             ),
         )
         batch_process, batch_log = launch_patch_batch(
@@ -997,6 +1003,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "retain ignored neutral policy capsules for offline "
             "multi-resolution audit; do not treat timing as a baseline"
+        ),
+    )
+    parser.add_argument(
+        "--postpublished-survival-shadow",
+        action="store_true",
+        help=(
+            "compute post-Boolean survival labels for telemetry only; "
+            "an isolated executor prevents worker serialization"
         ),
     )
     parser.add_argument(

@@ -2635,3 +2635,55 @@ Status: observed | inferred | unknown | fixed
 - **Correction:** `_packed_horizon_prefix` now slices both offsets and sample
   storage at the requested frame boundary before the counterfactual solve.
 - **Regression:** `test_packed_horizon_prefix_slices_frames_and_samples`.
+
+## CE-0108: Serialized post-publication shadow doubled expired decisions
+
+- **Observed failure:** Complete hard-no-Bomb Stage-5 shadow
+  `lunatic_route2_stage5_unattended_20260725_122624` computed losing labels
+  after Boolean publication but placed the work on the same one-thread
+  corridor executor. It completed `2..44065` with 8,233 decisions and 20
+  native hits, but expired policy decisions rose from the Boolean-only
+  comparison's 14 to 34.
+- **Invalid assumption:** “Computed after publication” was treated as
+  side-effect-free even though it serialized the next Boolean service request.
+  Numeric label parity says nothing about worker availability.
+- **Correction and physical gate:** Labels now use a separate executor and
+  only one native worker. RNG-distinct complete Stage-5 run
+  `lunatic_route2_stage5_unattended_20260725_125037` reached
+  `route_complete` over `2..43338`, recorded 7,921 decisions and 18 native
+  hits, passed hard no-Bomb, and left no runtime process. First policy age was
+  `4/10` frames median/p95, query age `11/27`, and expired decisions 15,
+  versus Boolean-only `6/12`, `11/27`, and 14. Local read/plan and action-lag
+  medians/p95 were `13.08/18.18 ms`, `22.71/42.74 ms`, and `3/5` frames.
+- **Boundary:** This accepts publication isolation, not survival. The 18-hit
+  count is not comparable as a causal improvement. Labels took
+  `150.43/284.57 ms` and remained shadow-only with zero parity failures.
+- **Evidence:** `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`, both run
+  dossiers, and the compact pending-pipeline audit artifacts.
+
+## CE-0109: Issued desired input was not the game-active action
+
+- **Observed failure:** The authoritative dense Boolean query used the last
+  issued desired mask as `active_action`. Native `input_current` disagreed on
+  754/8,077 queries in Stage-5 run `122624` and 805/7,772 in run `125037`.
+  Where post-publication labels were available, querying the same source/layer
+  with native observed input changed winning/losing classification nine times
+  in each run: false-winning/false-losing splits were `8/1` and `5/4`.
+- **Pending witness:** At `122624` frame 528, the dense observed/no-pending
+  shadow guaranteed 18 frames with `stay` best. Exact phase reduced this to
+  14. Adding the older pending `left_fast` command with remaining support
+  `(1, 2)` reduced the guarantee to two frames and tied every new action. A
+  newly selected action could not undo the already pending branch.
+- **Independent differential:** The native pending-pipeline kernel matches
+  the scalar oracle on 64 randomized seeds. In two deterministic 16-query
+  physical-capsule cohorts, adding pending state changed 13 best-action sets
+  in each cohort and changed winning classification 4 and 6 times.
+- **Correction boundary:** Native observed input and pending estimates are now
+  retained, and the phase-exact oracle is implemented. The live dense Boolean
+  recurrence still lacks exact phase/pending state, so post-publication labels
+  have no action authority. Do not “fix” this by simply substituting observed
+  input while ignoring an older pending command.
+- **Evidence:** `artifacts/benchmarks/postpublished_survival_20260725.json`,
+  `artifacts/viability_audit/stage5_20260725_122624_pending_pipeline.json`,
+  `artifacts/viability_audit/stage5_20260725_125037_pending_pipeline.json`,
+  and `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`.

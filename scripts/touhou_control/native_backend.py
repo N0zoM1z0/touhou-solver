@@ -19,6 +19,8 @@ _TERMINAL_VIABILITY_FUNCTION = None
 _SAFETY_VALUE_FUNCTION = None
 _SAFETY_POLICY_FUNCTION = None
 _SURVIVAL_VIABILITY_FUNCTION = None
+_QUERY_LOCAL_SURVIVAL_FUNCTION = None
+_LOSING_SURVIVAL_LABELS_FUNCTION = None
 _CLEARANCE_FUNCTION = None
 _AABB_TRAJECTORY_CLEARANCE_FUNCTION = None
 _PIECEWISE_AABB_CLEARANCE_FUNCTION = None
@@ -234,6 +236,93 @@ def _load_survival_viability_function():
     ]
     function.restype = ctypes.c_int
     _SURVIVAL_VIABILITY_FUNCTION = function
+    return function
+
+
+def _load_query_local_survival_function():
+    global _QUERY_LOCAL_SURVIVAL_FUNCTION
+    if _QUERY_LOCAL_SURVIVAL_FUNCTION is not None:
+        return _QUERY_LOCAL_SURVIVAL_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_query_local_survival_v1
+    except AttributeError:
+        return None
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_uint64),
+    ]
+    function.restype = ctypes.c_int
+    _QUERY_LOCAL_SURVIVAL_FUNCTION = function
+    return function
+
+
+def _load_losing_survival_labels_function():
+    global _LOSING_SURVIVAL_LABELS_FUNCTION
+    if _LOSING_SURVIVAL_LABELS_FUNCTION is not None:
+        return _LOSING_SURVIVAL_LABELS_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_losing_survival_labels_v1
+    except AttributeError:
+        return None
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_uint8),
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_uint32),
+    ]
+    function.restype = ctypes.c_int
+    _LOSING_SURVIVAL_LABELS_FUNCTION = function
     return function
 
 
@@ -1024,3 +1113,164 @@ def build_survival_viability_arrays(
         viable,
         safe_action_masks,
     )
+
+
+def query_local_survival_arrays(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    clearance_volume: np.ndarray,
+    velocity_x: np.ndarray,
+    velocity_y: np.ndarray,
+    delay_frames: np.ndarray,
+    decision_frames: int,
+    required_clearance: float,
+    clamp_to_bounds: bool,
+    start_frame: int,
+    start_row: int,
+    start_column: int,
+    observed_action_index: int,
+    pending_action_index: int = -1,
+    pending_remaining_frames: np.ndarray | None = None,
+) -> tuple[int, float, np.ndarray, np.ndarray, int, int] | None:
+    """Return one phase-exact survival query from the native sparse kernel."""
+
+    function = _load_query_local_survival_function()
+    if function is None:
+        return None
+    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
+    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
+    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
+    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
+    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    pending = np.ascontiguousarray(
+        (
+            np.empty(0, dtype=np.int32)
+            if pending_remaining_frames is None
+            else pending_remaining_frames
+        ),
+        dtype=np.int32,
+    )
+    action_count = len(velocity_x)
+    state_frames = ctypes.c_uint16()
+    state_margin = ctypes.c_float()
+    action_frames = np.empty(action_count, dtype=np.uint16)
+    action_margins = np.empty(action_count, dtype=np.float32)
+    best_mask = ctypes.c_uint32()
+    evaluated_states = ctypes.c_uint64()
+    result = function(
+        clearance.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        clearance.shape[0],
+        len(y_axis),
+        len(x_axis),
+        float(x_axis[0]),
+        float(x_axis[1] - x_axis[0]),
+        float(y_axis[0]),
+        float(y_axis[1] - y_axis[0]),
+        velocity_x.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        velocity_y.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        action_count,
+        delays.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
+        len(delays),
+        decision_frames,
+        required_clearance,
+        int(clamp_to_bounds),
+        start_frame,
+        start_row,
+        start_column,
+        observed_action_index,
+        pending_action_index,
+        (
+            pending.ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+            if len(pending)
+            else None
+        ),
+        len(pending),
+        ctypes.byref(state_frames),
+        ctypes.byref(state_margin),
+        action_frames.ctypes.data_as(ctypes.POINTER(ctypes.c_uint16)),
+        action_margins.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        ctypes.byref(best_mask),
+        ctypes.byref(evaluated_states),
+    )
+    if result != 0:
+        raise RuntimeError(
+            f"native query-local survival kernel returned {result}"
+        )
+    return (
+        int(state_frames.value),
+        float(state_margin.value),
+        action_frames,
+        action_margins,
+        int(best_mask.value),
+        int(evaluated_states.value),
+    )
+
+
+def build_losing_survival_label_arrays(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    clearance_volume: np.ndarray,
+    velocity_x: np.ndarray,
+    velocity_y: np.ndarray,
+    delay_frames: np.ndarray,
+    frames_per_layer: int,
+    required_clearance: float,
+    clamp_to_bounds: bool,
+    viable: np.ndarray,
+    safe_action_masks: np.ndarray,
+    worker_count: int = 1,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray] | None:
+    """Label only Boolean-losing states after policy publication."""
+
+    function = _load_losing_survival_labels_function()
+    if function is None:
+        return None
+    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
+    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
+    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
+    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
+    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    viable = np.ascontiguousarray(viable, dtype=np.bool_)
+    masks = np.ascontiguousarray(safe_action_masks, dtype=np.uint32)
+    survival_frames = np.empty(viable.shape, dtype=np.uint16)
+    bottleneck_margins = np.empty(viable.shape, dtype=np.float32)
+    best_action_masks = np.empty(masks.shape, dtype=np.uint32)
+    result = function(
+        clearance.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        clearance.shape[0],
+        len(y_axis),
+        len(x_axis),
+        float(x_axis[0]),
+        float(x_axis[1] - x_axis[0]),
+        float(y_axis[0]),
+        float(y_axis[1] - y_axis[0]),
+        velocity_x.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        velocity_y.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        len(velocity_x),
+        delays.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
+        len(delays),
+        frames_per_layer,
+        required_clearance,
+        int(clamp_to_bounds),
+        worker_count,
+        viable.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+        masks.ctypes.data_as(ctypes.POINTER(ctypes.c_uint32)),
+        survival_frames.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint16)
+        ),
+        bottleneck_margins.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_float)
+        ),
+        best_action_masks.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint32)
+        ),
+    )
+    if result != 0:
+        raise RuntimeError(
+            f"native losing-survival label kernel returned {result}"
+        )
+    return survival_frames, bottleneck_margins, best_action_masks

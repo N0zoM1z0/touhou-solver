@@ -40,6 +40,7 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertFalse(parsed.trace_transform_runtime)
         self.assertEqual(parsed.safety_value_horizon, 0)
         self.assertIsNone(parsed.viability_audit_dir)
+        self.assertFalse(parsed.postpublished_survival_shadow)
 
     def test_transform_runtime_trace_is_explicitly_opt_in(self) -> None:
         arguments = build_long_run_arguments(
@@ -102,6 +103,17 @@ class AgentHotkeyTests(unittest.TestCase):
             parsed.viability_audit_dir,
             Path("audit-capsules"),
         )
+
+    def test_postpublished_survival_shadow_is_explicitly_opt_in(self) -> None:
+        arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            postpublished_survival_shadow=True,
+        )
+        parsed = build_parser().parse_args(arguments)
+        self.assertTrue(parsed.postpublished_survival_shadow)
 
     def test_completed_trial_exits_before_a_second_f8_can_rearm(self) -> None:
         self.assertFalse(

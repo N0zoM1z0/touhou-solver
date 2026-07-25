@@ -12,21 +12,18 @@ runtime evidence remain in `notes/`.
 
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
-- Handoff base before the current checkpoint:
-  `a776264 Record boss telemetry and practiced strategy boundary`.
-- The current maintenance checkpoint fixes non-native exact-laser horizon
-  drift in the local MPC and non-native bullet-size clamps in both live
-  decoders. It separates offline analysis, benchmarks, and explicit tools
-  from importable/live modules; extracts laser runtime projection and the C++
-  transition cache; records the research-tier test/artifact policy; and
-  removes ignored raw captures after preserving compact evidence. Linux and
-  Windows complete suites pass 423 quick unit tests in 1.368 and 2.714
-  seconds. Read
-  `notes/MODEL_SOLVER_MAINTENANCE_AUDIT_20260724.md`,
-  `notes/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`,
-  `notes/DELIVERY_AWARE_STRATEGY_REASSESSMENT_20260724.md`,
-  `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`, and `STRATEGY.md`
-  before changing the recovery, refinement, or objective layers.
+- The current checkpoint builds on
+  `1fb95c6 Diagnose Stage 5 losing-state fallback`. It publishes Boolean
+  viability before optional labels, adds a labels-only native recurrence, and
+  adds scalar/native exact-phase survival with explicit observed input,
+  pending desired command, and remaining-delay support. A serialized physical
+  shadow was rejected; a separate-executor, single-label-worker Stage-5 run
+  restored Boolean expiry to the baseline envelope. Dense labels still omit
+  exact phase/pending state and remain shadow-only.
+- Linux and Windows complete suites pass 453 quick tests in `1.558/4.080 s`.
+  Read `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
+  `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`, CE-0108/0109, and
+  `STRATEGY.md` before changing viability queries or losing-state authority.
 - The only expected untracked pre-existing file is `image.png`. It is a user
   screenshot. Do not add, delete, overwrite, or otherwise clean it.
 - Ignored raw JSONL, viability capsules, screenshots, launch logs, caches, and
@@ -152,6 +149,16 @@ cd /home/pentester/coding/codex_ida/th08
 /mnt/c/Windows/System32/cmd.exe /d /c call \
   '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
   --stage 5 --status-seconds 15 --stall-timeout 120
+```
+
+For an explicit post-publication label shadow, the direct Windows Python form
+below is also verified. Keep it non-TTY; the supervisor still launches and
+verifies the patch BAT itself:
+
+```bash
+/mnt/c/Users/21992/AppData/Local/Microsoft/WindowsApps/python.exe \
+  '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\scripts\th08_practice_supervisor.py' \
+  --armed --stage 5 --viability-audit --postpublished-survival-shadow
 ```
 
 Important execution detail:
@@ -415,7 +422,7 @@ same UNC directory as `start_dir` and `top_level_dir`:
 ```
 
 Change only the `pattern` for a focused Windows file. This exact form passed
-all 423 tests in 2.714 seconds at the 2026-07-24 maintenance checkpoint.
+all 453 tests in 4.080 seconds at the 2026-07-25 Boolean-first checkpoint.
 
 Before commit:
 
@@ -437,7 +444,9 @@ same-seed A/B trials:
 | 3 | `123136` | 8 | default safety-value-off cross-control |
 | 3 | `132007` | 15 | rejected safety-value-on experiment |
 | 4A | `185059` | 26 | corrected world-motion/lifecycle model; two post-issue births |
-| 5 | `201636` | 27 | differential-capture corpus; CE-0100/0101 witnesses |
+| 5 | `103655` | 34 | Boolean-only losing-state root-cause baseline |
+| 5 | `122624` | 20 | rejected same-executor label shadow; CE-0108 |
+| 5 | `125037` | 18 | accepted delivery isolation; labels had no authority |
 | 6B | `135201` | 27 | latest fused-laser cross-control |
 
 Do not sum these rows into a route score. Native RNG, controller versions,
@@ -471,7 +480,24 @@ Key accepted improvements:
 - Original-game unattended menu, monitor, dialogue, no-save, kill, and
   artifact loop.
 
-Latest Stage-5 evidence:
+Current Stage-5 Boolean-first evidence:
+
+- Boolean-only `103655` had first policy age `6/12` frames, query age
+  `11/27`, and 14 expired decisions.
+- Same-executor shadow `122624` retained Boolean/label array parity but raised
+  expired decisions to 34. It is rejected as a delivery scheduler.
+- Separate-executor, one-label-worker shadow `125037` restored first policy
+  age to `4/10`, query age to `11/27`, and expiry to 15. Local read/plan and
+  action lag remained `13.08/18.18 ms`, `22.71/42.74 ms`, and `3/5` frames.
+- Issued desired input disagreed with game-observed active input on
+  754/8,077 and 805/7,772 queries in the two shadows. Exact pending-pipeline
+  cohorts changed 13/16 best-action sets in each run. Dense labels therefore
+  remain shadow-only; do not compare the RNG-distinct hit totals as a survival
+  effect.
+- Full evidence:
+  `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`.
+
+Historical Stage-5 differential-corpus evidence:
 
 - Run ID: `lunatic_route2_stage5_unattended_20260724_201636`
 - Frames: `2..46642`
@@ -771,27 +797,30 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 
 1. `AGENTS.md`
 2. `START_HERE.md`
-3. `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
-4. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
-5. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
-6. `notes/ALGORITHM_REVIEW_20260724.md`
-7. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0107
-8. `notes/RESEARCH_LOG.md`, latest five dated sections
-9. `notes/ROBUST_VIABILITY.md`
-10. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
-11. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
-12. `notes/NATIVE_PLANNER_BACKEND.md`
-13. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
-14. `scripts/analysis/viability_differential_audit.py`
-15. `scripts/th08_live_dodge_agent.py`
-16. `scripts/touhou_control/reachability_oracle.py`
-17. `scripts/th08_bullet_transform_model.py`
-18. `scripts/th08_corridor_adapter.py`
-19. `scripts/touhou_control/viability.py`
-20. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
+3. `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`
+4. `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
+5. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
+6. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
+7. `notes/ALGORITHM_REVIEW_20260724.md`
+8. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0109
+9. `notes/RESEARCH_LOG.md`, latest five dated sections
+10. `notes/ROBUST_VIABILITY.md`
+11. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
+12. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
+13. `notes/NATIVE_PLANNER_BACKEND.md`
+14. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
+15. `scripts/touhou_control/query_survival.py`
+16. `scripts/analysis/postpublished_survival_audit.py`
+17. `scripts/analysis/viability_differential_audit.py`
+18. `scripts/th08_live_dodge_agent.py`
+19. `scripts/touhou_control/reachability_oracle.py`
+20. `scripts/th08_bullet_transform_model.py`
+21. `scripts/th08_corridor_adapter.py`
+22. `scripts/touhou_control/viability.py`
+23. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
     `notes/runs/lunatic_route2_stage3_unattended_20260724_132007.md`,
     `notes/runs/lunatic_route2_stage4a_unattended_20260724_185059.md`,
-    `notes/runs/lunatic_route2_stage5_unattended_20260724_201636.md`, and
+    `notes/runs/lunatic_route2_stage5_unattended_20260725_125037.md`, and
     `notes/runs/lunatic_route2_stage6b_unattended_20260724_135201.md`
 
 ## 13. Common Traps Already Paid For
@@ -819,6 +848,10 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
   checker.
 - Policy availability, delay-support coverage, kernel non-emptiness, and
   hazard correctness are separate gates.
+- The last issued desired action is not the native active input. Preserve
+  `input_current`, pending desired command, and remaining-delay support
+  separately; do not repair CE-0109 by substituting observed input while
+  dropping the pending branch.
 - Hard survival ordering must hold during deduplication and beam truncation,
   not only final action selection. A soft recovery term can otherwise erase a
   safer first action.
@@ -839,14 +872,16 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 A good next commit is not "the randomized stage had fewer hits" by itself. It
 should:
 
-1. Publish the Boolean policy before optional shadow work, then make fused
-   losing-state labels query-local or otherwise fit a measured service
-   budget. Preserve ordering: fresh hard vector, guaranteed survival frames,
-   bottleneck clearance, control reserve, then recovery distance.
-2. Add explicit pending-command/remaining-delay state to an independent
-   reachability oracle. Recheck canonical Stage-5 decision 1,680 and a
-   predefined cross-stage cohort before calling unresolved empty states
-   genuinely uncontrollable.
+1. Replace dense source-layer action authority with a reachable-tube,
+   incremental, or augmented policy that represents exact phase plus
+   observed/pending/remaining-delay state. Preserve ordering: fresh hard
+   vector, guaranteed survival frames, bottleneck clearance, control reserve,
+   then recovery distance.
+2. Reduce the exact pending-pipeline query from its current physical-cohort
+   p95 of roughly 68--86 ms without increasing Boolean expiry, local p95, or
+   action lag. Recheck both retained 16-query Stage-5 cohorts, canonical
+   decision 1,680, and cross-stage losing witnesses before granting input
+   authority.
 3. Prototype a packed native issue-time bullet/laser/enemy
    decode-plus-project-plus-all-action certificate with a fixed service
    budget. It must preserve the strict version contract and improve
@@ -876,16 +911,18 @@ Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
 START_HERE.md and STRATEGY.md completely, then inspect git status and the
 latest commit. Keep hard no-Bomb; keep safety value, fused survival labels,
 fine refinement shadow-only. Read
-`notes/LOSING_STATE_ROOT_CAUSE_20260725.md` plus CE-0106/0107. The exact
+`notes/LOSING_STATE_ROOT_CAUSE_20260725.md` plus CE-0106..0109. The exact
 Stage-5 audit reconstructed 272/272 queries and confirmed that global
 emptiness has mixed causes, while canonical decision 1,680 proves the live
 fallback can choose outside a 74-frame survival-best mask and ignore a
-24-pixel reserve deficit. Offline survival-first replay improved best-mask
-membership without fresh hard-vector regressions, but fused induction still
-costs about 48 ms median and must not delay Boolean publication. Build an
-independent pending-command/remaining-delay oracle and a query-local or
-post-publication losing-state label before physical promotion. Continue the
-packed issue-time certificate and ECL/timeline `BirthWindow` work; keep
+24-pixel reserve deficit. Read
+`notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md` and CE-0108/0109. Boolean
+publication is now isolated from labels and its Stage-5 expiry gate passes,
+but issued/native action mismatches and exact pending state change winning
+classification and best actions. Dense labels remain shadow-only. Make the
+phase-exact observed/pending recurrence reachable-tube, incremental, or
+augmented enough for the service budget before action-authority A/B. Continue
+the packed issue-time certificate and ECL/timeline `BirthWindow` work; keep
 mechanics/safety game-neutral while allowing explicit practiced profiles.
 Retain compact artifacts and counterexamples, separate canonical attempts
 from post-respawn discovery, use tiered relevant tests, commit verified

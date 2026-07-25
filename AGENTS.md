@@ -48,6 +48,12 @@ These instructions apply to every file and task below this directory.
   of every model. Move independently testable trace schemas, projection,
   sensing, policy, and strategy logic behind narrow modules while preserving
   one explicit physical-frame and uncertainty contract.
+- Never equate the last desired/issued input with the action currently active
+  in the game. Native `input_current` is active-action evidence; an unseen
+  desired input is a pending command with explicit remaining-delay support.
+  Any viability or survival policy that omits layer phase or this pipeline
+  state must remain shadow/diagnostic unless a sound conservative equivalence
+  has been demonstrated.
 - Treat TH08 stages, spells, and retained deaths as validation workloads and
   counterexamples, not planner identities. Whenever practical, improve the
   accuracy, performance, uncertainty handling, or reachability semantics of
@@ -154,6 +160,11 @@ These instructions apply to every file and task below this directory.
   side-effect-free. Publish the authoritative safety result before optional
   shadow work, or keep the shadow offline; report its delivery cost separately
   from label-query cost.
+- Post-publication survival labels must remain a separate policy object and
+  must not silently enter local guidance. Physical shadow collection requires
+  an explicit option, an executor independent of Boolean publication, and a
+  measured worker budget. Passing Boolean/label array parity is not
+  authorization for input authority.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 

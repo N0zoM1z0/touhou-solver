@@ -22,6 +22,7 @@ from th08_corridor_adapter import (
     plan_lowered_th08_corridor,
 )
 from touhou_control.viability import SafetyValueQuery, ViabilityQuery
+from touhou_control.viability import RobustViabilityPolicy
 from touhou_control.viability_audit_capsule import (
     write_viability_audit_capsule,
 )
@@ -64,6 +65,9 @@ class CorridorSolution:
     audit_error: str | None = None
     worker_ms: float | None = None
     audit_future: Future[tuple[float, str | None]] | None = None
+    postpublished_survival_policy: RobustViabilityPolicy | None = None
+    postpublished_survival_ms: float | None = None
+    postpublished_survival_parity: bool | None = None
 
 
 @dataclass
@@ -180,6 +184,7 @@ def solve_corridor(
         active_action=active_action,
         safety_value_horizon_frames=safety_value_horizon_frames,
         survival_labels=LIVE_SURVIVAL_LABELS,
+        retain_query_survival_problem=True,
         refinement_grid_steps=LIVE_REFINEMENT_GRID_STEPS,
     )
     constraint_honored = (
@@ -316,6 +321,63 @@ def corridor_viability_query(
     return query
 
 
+def solve_postpublished_survival(
+    solution: CorridorSolution,
+) -> CorridorSolution:
+    """Build dense survival labels only after the Boolean solution exists."""
+
+    problem = solution.plan.survival_query_problem
+    policy = solution.plan.viability_policy
+    if problem is None or policy is None:
+        return replace(
+            solution,
+            postpublished_survival_parity=False,
+        )
+    started = time.perf_counter()
+    survival = problem.build_postpublished_policy(policy, worker_count=1)
+    parity = (
+        bool((survival.viable == policy.viable).all())
+        and bool(
+            (
+                survival.safe_action_masks
+                == policy.safe_action_masks
+            ).all()
+        )
+    )
+    return replace(
+        solution,
+        postpublished_survival_policy=survival,
+        postpublished_survival_ms=(
+            (time.perf_counter() - started) * 1000.0
+        ),
+        postpublished_survival_parity=parity,
+    )
+
+
+def corridor_postpublished_survival_query(
+    solution: CorridorSolution | None,
+    *,
+    current_frame: int,
+    player_x: float,
+    player_y: float,
+    observed_action: str,
+    max_age_frames: int,
+) -> ViabilityQuery | None:
+    """Query shadow labels without attaching them to live policy guidance."""
+
+    if solution is None or solution.postpublished_survival_policy is None:
+        return None
+    age = current_frame - solution.source_frame
+    if age < 0 or age > max_age_frames:
+        return None
+    return solution.postpublished_survival_policy.query(
+        frame=age,
+        x=player_x,
+        y=player_y,
+        active_action=observed_action,
+    )
+
+
 def corridor_safety_value_query(
     solution: CorridorSolution | None,
     *,
@@ -389,10 +451,12 @@ __all__ = [
     "SHADOW_REFINEMENT_GRID_STEPS",
     "SHADOW_SURVIVAL_LABELS",
     "corridor_policy_status",
+    "corridor_postpublished_survival_query",
     "corridor_safety_value_query",
     "corridor_submit_due",
     "corridor_target",
     "corridor_viability_query",
     "solve_corridor",
+    "solve_postpublished_survival",
     "stage_corridor_solution",
 ]

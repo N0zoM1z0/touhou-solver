@@ -56,6 +56,39 @@ class AdaptiveControlDelayTests(unittest.TestCase):
         self.assertEqual(self.estimator.censored, 1)
         self.assertEqual(len(self.estimator.end_to_end_lags), 0)
 
+    def test_pending_estimate_conditions_remaining_end_to_end_support(
+        self,
+    ) -> None:
+        self.estimator.issued(
+            snapshot_frame=10,
+            issue_frame=12,
+            expected_mask=0x41,
+            support_high=4,
+            support=(2, 3, 4),
+        )
+        estimate = self.estimator.pending_estimate(frame=13)
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate.expected_mask, 0x41)
+        self.assertEqual(estimate.remaining_frames, (1,))
+        self.assertEqual(estimate.snapshot_age, 3)
+        self.assertEqual(estimate.issue_age, 1)
+        self.assertFalse(estimate.overdue)
+
+    def test_overdue_unobserved_command_stays_pending(self) -> None:
+        self.estimator.issued(
+            snapshot_frame=10,
+            issue_frame=12,
+            expected_mask=0x41,
+            support_high=3,
+            support=(2, 3),
+        )
+        estimate = self.estimator.pending_estimate(frame=14)
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate.remaining_frames, (1,))
+        self.assertTrue(estimate.overdue)
+
     def test_hit_temporarily_expands_tail_support(self) -> None:
         for frame, total in enumerate((2, 2, 3, 3, 3, 3), start=100):
             self.estimator.issued(

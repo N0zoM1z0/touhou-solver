@@ -87,6 +87,7 @@ def build_long_run_arguments(
     trace_transform_runtime: bool = False,
     safety_value_horizon: int = 0,
     viability_audit_dir: Path | None = None,
+    postpublished_survival_shadow: bool = False,
     duration_seconds: float = LONG_RUN_DURATION_SECONDS,
 ) -> list[str]:
     if safety_value_horizon < 0:
@@ -132,6 +133,8 @@ def build_long_run_arguments(
         arguments.extend(
             ("--viability-audit-dir", str(viability_audit_dir))
         )
+    if postpublished_survival_shadow:
+        arguments.append("--postpublished-survival-shadow")
     return arguments
 
 
@@ -144,6 +147,7 @@ class AgentHotkey:
         trace_transform_runtime: bool = False,
         safety_value_horizon: int = 0,
         viability_audit_dir: Path | None = None,
+        postpublished_survival_shadow: bool = False,
         duration_seconds: float = LONG_RUN_DURATION_SECONDS,
         detailed_summary: bool = True,
     ) -> None:
@@ -184,6 +188,9 @@ class AgentHotkey:
         self.trace_transform_runtime = trace_transform_runtime
         self.safety_value_horizon = safety_value_horizon
         self.viability_audit_dir = viability_audit_dir
+        self.postpublished_survival_shadow = (
+            postpublished_survival_shadow
+        )
         self.duration_seconds = duration_seconds
         self.detailed_summary = detailed_summary
         self.artifact_dir = (
@@ -298,6 +305,9 @@ class AgentHotkey:
                 trace_transform_runtime=self.trace_transform_runtime,
                 safety_value_horizon=self.safety_value_horizon,
                 viability_audit_dir=self.viability_audit_dir,
+                postpublished_survival_shadow=(
+                    self.postpublished_survival_shadow
+                ),
                 duration_seconds=self.duration_seconds,
             )
             if not gameplay_active:

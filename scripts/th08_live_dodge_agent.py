@@ -40,11 +40,13 @@ from th08_corridor_runtime import (
     SHADOW_REFINEMENT_GRID_STEPS,
     SHADOW_SURVIVAL_LABELS,
     corridor_policy_status as _corridor_policy_status,
+    corridor_postpublished_survival_query as _corridor_postpublished_survival_query,
     corridor_safety_value_query as _corridor_safety_value_query,
     corridor_submit_due as _corridor_submit_due,
     corridor_target as _corridor_target,
     corridor_viability_query as _corridor_viability_query,
     solve_corridor as _solve_corridor,
+    solve_postpublished_survival as _solve_postpublished_survival,
     stage_corridor_solution as _stage_corridor_solution,
 )
 from th08_corridor_adapter import TH08_CORRIDOR_CONFIG
@@ -3896,6 +3898,8 @@ def run(args: argparse.Namespace) -> int:
     termination_reason = "duration"
     corridor_executor: ThreadPoolExecutor | None = None
     corridor_future: Future[CorridorSolution] | None = None
+    survival_executor: ThreadPoolExecutor | None = None
+    corridor_survival_future: Future[CorridorSolution] | None = None
     audit_executor: ThreadPoolExecutor | None = None
     enemy_executor: ThreadPoolExecutor | None = None
     enemy_future: Future[EnemyPoolSnapshot] | None = None
@@ -3957,6 +3961,11 @@ def run(args: argparse.Namespace) -> int:
             max_workers=1,
             thread_name_prefix="th08-corridor",
         )
+        if args.postpublished_survival_shadow:
+            survival_executor = ThreadPoolExecutor(
+                max_workers=1,
+                thread_name_prefix="th08-survival-shadow",
+            )
     if args.viability_audit_dir is not None:
         audit_executor = ThreadPoolExecutor(
             max_workers=1,
@@ -4041,8 +4050,12 @@ def run(args: argparse.Namespace) -> int:
                         {
                             "live": LIVE_SURVIVAL_LABELS,
                             "shadow": SHADOW_SURVIVAL_LABELS,
+                            "postpublished_compute": (
+                                args.postpublished_survival_shadow
+                            ),
                             "reason": (
-                                "shadow_only_after_stage4a_delivery_rejection"
+                                "shadow_isolated_after_serialized_delivery_"
+                                "rejection"
                             ),
                         }
                     ),
@@ -4207,6 +4220,11 @@ def run(args: argparse.Namespace) -> int:
                         memory.clear()
                     if corridor_future is not None and corridor_future.cancel():
                         corridor_future = None
+                    if (
+                        corridor_survival_future is not None
+                        and corridor_survival_future.cancel()
+                    ):
+                        corridor_survival_future = None
                     output.write(
                         json.dumps(
                             {
@@ -4307,6 +4325,11 @@ def run(args: argparse.Namespace) -> int:
                 ecl_instruction_cache.clear()
                 if corridor_future is not None and corridor_future.cancel():
                     corridor_future = None
+                if (
+                    corridor_survival_future is not None
+                    and corridor_survival_future.cancel()
+                ):
+                    corridor_survival_future = None
                 auto_confirm.eligible_since = None
                 auto_confirm.released = False
                 last_frame_progress = now
@@ -4387,6 +4410,11 @@ def run(args: argparse.Namespace) -> int:
                     and corridor_future.cancel()
                 ):
                     corridor_future = None
+                if (
+                    corridor_survival_future is not None
+                    and corridor_survival_future.cancel()
+                ):
+                    corridor_survival_future = None
             iterations += 1
             if iterations % 30 == 0:
                 _require_foreground(api, pid)
@@ -4661,6 +4689,8 @@ def run(args: argparse.Namespace) -> int:
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
+                if corridor_survival_future is not None:
+                    corridor_survival_future.cancel()
                 output.write(
                     json.dumps(
                         {
@@ -4758,6 +4788,28 @@ def run(args: argparse.Namespace) -> int:
             )
             corridor_started = time.perf_counter()
             corridor_updated = False
+            if (
+                corridor_survival_future is not None
+                and corridor_survival_future.done()
+            ):
+                labeled_solution = corridor_survival_future.result()
+                corridor_survival_future = None
+                if (
+                    corridor_solution is not None
+                    and corridor_solution.source_frame
+                    == labeled_solution.source_frame
+                    and corridor_solution.context_key
+                    == labeled_solution.context_key
+                ):
+                    corridor_solution = labeled_solution
+                elif (
+                    corridor_pending_solution is not None
+                    and corridor_pending_solution.source_frame
+                    == labeled_solution.source_frame
+                    and corridor_pending_solution.context_key
+                    == labeled_solution.context_key
+                ):
+                    corridor_pending_solution = labeled_solution
             if corridor_pending_solution is not None:
                 pending_candidate = corridor_pending_solution
                 (
@@ -4856,6 +4908,24 @@ def run(args: argparse.Namespace) -> int:
                     audit_executor=audit_executor,
                 )
                 corridor_last_submit = counter_after_read
+            if (
+                args.postpublished_survival_shadow
+                and survival_executor is not None
+                and corridor_survival_future is None
+            ):
+                survival_candidate = (
+                    corridor_pending_solution or corridor_solution
+                )
+                if (
+                    survival_candidate is not None
+                    and survival_candidate.context_key == corridor_context
+                    and survival_candidate.postpublished_survival_parity
+                    is None
+                ):
+                    corridor_survival_future = survival_executor.submit(
+                        _solve_postpublished_survival,
+                        survival_candidate,
+                    )
             corridor_target = _corridor_target(
                 corridor_solution,
                 current_frame=(
@@ -4872,6 +4942,22 @@ def run(args: argparse.Namespace) -> int:
                 player_y=projected_player_y,
                 active_action=_action_name_from_mask(previous_mask),
                 max_age_frames=args.corridor_max_age,
+            )
+            observed_input_action = _action_name_from_mask(
+                int(state["input_current"])
+            )
+            postpublished_survival_query = (
+                _corridor_postpublished_survival_query(
+                    corridor_solution,
+                    current_frame=counter_after_read,
+                    player_x=projected_player_x,
+                    player_y=projected_player_y,
+                    observed_action=observed_input_action,
+                    max_age_frames=args.corridor_max_age,
+                )
+            )
+            pending_command_estimate = delay_estimator.pending_estimate(
+                frame=counter_after_read,
             )
             safety_value_query = _corridor_safety_value_query(
                 corridor_solution,
@@ -5078,6 +5164,8 @@ def run(args: argparse.Namespace) -> int:
                 ecl_instruction_cache.clear()
                 if corridor_future is not None:
                     corridor_future.cancel()
+                if corridor_survival_future is not None:
+                    corridor_survival_future.cancel()
                 output.write(
                     json.dumps(
                         {
@@ -5183,6 +5271,7 @@ def run(args: argparse.Namespace) -> int:
                     issue_frame=counter_at_action,
                     expected_mask=decision.mask,
                     support_high=delay_estimate.support[-1],
+                    support=delay_estimate.support,
                 )
             previous_mask = decision.mask
             previous_direction = decision.mask & (UP | DOWN | LEFT | RIGHT)
@@ -5695,6 +5784,14 @@ def run(args: argparse.Namespace) -> int:
                             .survival_policy is not None
                             else None
                         ),
+                        "postpublished_survival_ms": (
+                            corridor_report_solution
+                            .postpublished_survival_ms
+                        ),
+                        "postpublished_survival_parity": (
+                            corridor_report_solution
+                            .postpublished_survival_parity
+                        ),
                         "solver_timing_ms": dict(
                             corridor_report_solution.plan.solver_timing_ms
                         ),
@@ -5795,6 +5892,9 @@ def run(args: argparse.Namespace) -> int:
                             "available": viability_query.available,
                             "state_viable": viability_query.state_viable,
                             "active_action": viability_query.active_action,
+                            "observed_input_action": (
+                                observed_input_action
+                            ),
                             "safe_action_count": (
                                 viability_query.safe_action_count
                             ),
@@ -5849,6 +5949,50 @@ def run(args: argparse.Namespace) -> int:
                             ),
                             "reason": viability_query.reason,
                         }
+                    if postpublished_survival_query is not None:
+                        corridor_record["postpublished_survival_shadow"] = {
+                            "role": "shadow_no_action_authority",
+                            "available": (
+                                postpublished_survival_query.available
+                            ),
+                            "state_viable": (
+                                postpublished_survival_query.state_viable
+                            ),
+                            "survival_frames": (
+                                postpublished_survival_query.survival_frames
+                            ),
+                            "survival_bottleneck_margin": (
+                                postpublished_survival_query
+                                .survival_bottleneck_margin
+                            ),
+                            "survival_best_actions": (
+                                postpublished_survival_query
+                                .survival_best_actions
+                            ),
+                            "observed_input_action": (
+                                observed_input_action
+                            ),
+                            "issued_action": decision.action,
+                        }
+                    corridor_record["pending_command"] = (
+                        {
+                            "desired_action": _action_name_from_mask(
+                                pending_command_estimate.expected_mask
+                            ),
+                            "remaining_frames": (
+                                pending_command_estimate.remaining_frames
+                            ),
+                            "snapshot_age": (
+                                pending_command_estimate.snapshot_age
+                            ),
+                            "issue_age": (
+                                pending_command_estimate.issue_age
+                            ),
+                            "overdue": pending_command_estimate.overdue,
+                        }
+                        if pending_command_estimate is not None
+                        else None
+                    )
                     if safety_value_query is not None:
                         assert corridor_solution is not None
                         safety_policy = (
@@ -6038,6 +6182,13 @@ def run(args: argparse.Namespace) -> int:
                         send_scan_key(api, scan_code=0x01, pressed=False)
                 if corridor_future is not None:
                     corridor_future.cancel()
+                if corridor_survival_future is not None:
+                    corridor_survival_future.cancel()
+                if survival_executor is not None:
+                    survival_executor.shutdown(
+                        wait=True,
+                        cancel_futures=True,
+                    )
                 if corridor_executor is not None:
                     corridor_executor.shutdown(wait=True, cancel_futures=True)
                 if audit_executor is not None:
@@ -6107,6 +6258,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "optional compact max-min fallback horizon in game frames; "
             "zero disables the research policy"
+        ),
+    )
+    parser.add_argument(
+        "--postpublished-survival-shadow",
+        action="store_true",
+        help=(
+            "compute dense survival labels only after Boolean publication; "
+            "labels use an isolated executor and have no action authority"
         ),
     )
     parser.add_argument(

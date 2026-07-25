@@ -19,6 +19,7 @@ import numpy as np
 from touhou_control import native_backend
 from touhou_control.packed_hazards import PackedSegmentFrames
 from touhou_control.trajectory import PiecewiseLinearTrajectory
+from touhou_control.query_survival import SurvivalQueryProblem
 from touhou_control.viability import (
     ControlAction,
     RobustSafetyValuePolicy,
@@ -224,6 +225,7 @@ class CorridorPlan:
     viability_policy: RobustViabilityPolicy | None = None
     safety_value_policy: RobustSafetyValuePolicy | None = None
     survival_policy: RobustViabilityPolicy | None = None
+    survival_query_problem: SurvivalQueryProblem | None = None
     initial_safe_action_count: int = 0
     initial_repair_volume: int = 0
     viability_backend: str | None = None
@@ -248,6 +250,7 @@ class RobustControlSpec:
     safety_value_horizon_frames: int = 0
     terminal_viable: np.ndarray | None = None
     survival_labels: bool = False
+    retain_query_survival_problem: bool = False
     refinement_grid_steps: tuple[float, ...] = ()
 
     def __post_init__(self) -> None:
@@ -1173,6 +1176,27 @@ def _plan_robust_corridor(
             y=start_y,
             active_action=robust_control.active_action,
         )
+    survival_query_problem = (
+        SurvivalQueryProblem(
+            x_axis=x_axis,
+            y_axis=y_axis,
+            clearance_volume=clearance_volume,
+            actions=robust_control.actions,
+            delay_frames=robust_control.delay_frames,
+            nominal_delay=robust_control.nominal_delay,
+            config=ViabilityConfig(
+                frames_per_layer=config.frames_per_layer,
+                required_clearance=config.required_clearance,
+                clamp_to_bounds=True,
+                repair_radius_cells=1,
+            ),
+        )
+        if (
+            robust_control.retain_query_survival_problem
+            and robust_control.terminal_viable is None
+        )
+        else None
+    )
     safety_value_policy = None
     safety_value_started = time.perf_counter()
     safety_value_finished = safety_value_started
@@ -1232,6 +1256,7 @@ def _plan_robust_corridor(
             viability_policy=policy,
             safety_value_policy=safety_value_policy,
             survival_policy=survival_policy,
+            survival_query_problem=survival_query_problem,
             viability_backend=policy.backend,
             viability_grid_step=config.grid_step,
             solver_timing_ms=(
@@ -1276,6 +1301,7 @@ def _plan_robust_corridor(
                 viability_policy=policy,
                 safety_value_policy=safety_value_policy,
                 survival_policy=survival_policy,
+                survival_query_problem=survival_query_problem,
                 initial_safe_action_count=start_query.safe_action_count,
                 initial_repair_volume=initial_repair_volume,
                 viability_backend=policy.backend,
@@ -1375,6 +1401,7 @@ def _plan_robust_corridor(
             viability_policy=policy,
             safety_value_policy=safety_value_policy,
             survival_policy=survival_policy,
+            survival_query_problem=survival_query_problem,
             initial_safe_action_count=start_query.safe_action_count,
             initial_repair_volume=initial_repair_volume,
             viability_backend=policy.backend,
@@ -1404,6 +1431,7 @@ def _plan_robust_corridor(
         viability_policy=policy,
         safety_value_policy=safety_value_policy,
         survival_policy=survival_policy,
+        survival_query_problem=survival_query_problem,
         initial_safe_action_count=start_query.safe_action_count,
         initial_repair_volume=initial_repair_volume,
         viability_backend=policy.backend,

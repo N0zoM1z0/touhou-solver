@@ -33,6 +33,18 @@ class _PendingActuation:
     issue_frame: int
     expected_mask: int
     support_high: int
+    support: tuple[int, ...]
+
+
+@dataclass(frozen=True)
+class PendingCommandEstimate:
+    """Conditioned remaining-delay support for an unobserved desired input."""
+
+    expected_mask: int
+    remaining_frames: tuple[int, ...]
+    snapshot_age: int
+    issue_age: int
+    overdue: bool
 
 
 class AdaptiveControlDelay:
@@ -102,14 +114,56 @@ class AdaptiveControlDelay:
         issue_frame: int,
         expected_mask: int,
         support_high: int,
+        support: tuple[int, ...] | None = None,
     ) -> None:
         if self.pending is not None:
             self.censored += 1
+        if support is None:
+            support = tuple(range(self.minimum, support_high + 1))
+        if (
+            not support
+            or tuple(sorted(set(support))) != support
+            or support[0] < self.minimum
+            or support[-1] > self.maximum
+            or support_high != support[-1]
+        ):
+            raise ValueError("pending actuation support is invalid")
         self.pending = _PendingActuation(
             snapshot_frame=snapshot_frame,
             issue_frame=issue_frame,
             expected_mask=expected_mask & self.supported_mask,
             support_high=support_high,
+            support=support,
+        )
+
+    def pending_estimate(
+        self,
+        *,
+        frame: int,
+    ) -> PendingCommandEstimate | None:
+        """Return delay support conditioned on the command still being unseen."""
+
+        pending = self.pending
+        if pending is None:
+            return None
+        snapshot_age = max(0, frame - pending.snapshot_frame)
+        remaining = tuple(
+            delay - snapshot_age
+            for delay in pending.support
+            if delay > snapshot_age
+        )
+        overdue = not remaining
+        if overdue:
+            # The native observation has already disproved the modeled upper
+            # support. Keep one conservative future frame instead of silently
+            # treating the unobserved desired action as active.
+            remaining = (1,)
+        return PendingCommandEstimate(
+            expected_mask=pending.expected_mask,
+            remaining_frames=remaining,
+            snapshot_age=snapshot_age,
+            issue_age=max(0, frame - pending.issue_frame),
+            overdue=overdue,
         )
 
     def record_computation_lag(self, lag: int) -> None:

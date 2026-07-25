@@ -15,7 +15,10 @@ from th08_corridor_runtime import (
     LIVE_SURVIVAL_LABELS,
     SHADOW_REFINEMENT_GRID_STEPS,
     SHADOW_SURVIVAL_LABELS,
+    corridor_postpublished_survival_query,
     corridor_viability_query,
+    solve_corridor,
+    solve_postpublished_survival,
 )
 from touhou_control.viability import (
     ControlAction,
@@ -98,6 +101,45 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
         self.assertEqual(query.survival_frames, 7)
         self.assertEqual(query.survival_bottleneck_margin, -1.5)
         self.assertEqual(query.survival_best_actions, ("stay",))
+
+    def test_live_solve_publishes_boolean_before_survival_labels(self) -> None:
+        solution = solve_corridor(
+            source_frame=100,
+            snapshot_frame=90,
+            forecast_lead_frames=10,
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            control_delay_candidates=(1, 2),
+            nominal_control_delay=1,
+            active_action="stay",
+        )
+        self.assertIsNotNone(solution.plan.viability_policy)
+        self.assertIsNone(solution.plan.survival_policy)
+        self.assertIsNotNone(solution.plan.survival_query_problem)
+        assert solution.plan.survival_query_problem is not None
+        self.assertEqual(
+            solution.plan.survival_query_problem.clearance_volume.shape[0],
+            81,
+        )
+        labeled = solve_postpublished_survival(solution)
+        self.assertIsNone(labeled.plan.survival_policy)
+        self.assertIsNotNone(labeled.postpublished_survival_policy)
+        self.assertTrue(labeled.postpublished_survival_parity)
+        query = corridor_postpublished_survival_query(
+            labeled,
+            current_frame=100,
+            player_x=192.0,
+            player_y=400.0,
+            observed_action="stay",
+            max_age_frames=79,
+        )
+        self.assertIsNotNone(query)
+        assert query is not None
+        self.assertIsNotNone(query.survival_frames)
 
 
 if __name__ == "__main__":

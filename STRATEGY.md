@@ -34,10 +34,13 @@ hard no-Bomb.
 
 ## Current Decision
 
-The live controller is being returned to the last verified coarse Boolean
-viability path. Full-horizon 8-pixel refinement and fused losing-state
-survival labels remain shadow/offline only after the Stage-4A experiment
-increased policy latency and staleness.
+The live controller remains on the verified coarse Boolean viability path.
+Losing-state labels are now computed only after Boolean publication and, when
+explicitly enabled, on an independent single-worker shadow executor. This
+repairs the publication/expiry regression but does not authorize the labels:
+two Stage-5 traces show that exact layer phase, game-observed active input,
+and pending-command remaining delay materially change state classification
+and best-action sets.
 
 The next architectural target is a delivery-aware solver:
 
@@ -101,7 +104,9 @@ The next architectural target is a delivery-aware solver:
   support. The game-neutral delay estimator now records visible pickup,
   computation, censored commands, overruns, and a guarded support.
 - **Limitation:** A delay certificate is only as sound as the hazard snapshot.
-  It cannot cover a bullet or enemy born after that snapshot.
+  It cannot cover a bullet or enemy born after that snapshot. The estimator
+  now exposes one unseen desired command and remaining-delay support, but the
+  live dense viability recurrence does not yet include that state.
 - **Evidence:** `notes/RESEARCH_LOG.md` sections “Dynamic-Hold Physical Run And
   Actuation Split”, “Scalar Delay Rejection And Adaptive Robust Control”, and
   “Adaptive Robust Stage-3 Physical Acceptance”.
@@ -225,16 +230,32 @@ The next architectural target is a delivery-aware solver:
   arrays and action masks matched, but whole-solve median/p95 was
   `76.96/197.99` versus `125.31/229.58 ms`. Producing the label inline would
   still delay Boolean publication.
+- **Boolean-first correction:** The Boolean policy now publishes before an
+  optional labels-only recurrence. A serialized Stage-5 shadow run raised
+  expired decisions `14 -> 34`; a separate-executor, one-label-worker run
+  restored expiry to 15 with first policy age `4/10` frames and query age
+  `11/27`, matching the Boolean-only delivery envelope. Label computation
+  itself moved to `150.43/284.57 ms` median/p95 and remained non-authoritative.
+- **Pending-pipeline rejection of dense authority:** In two complete Stage-5
+  shadows, issued desired input differed from native active input on
+  `754/8077` and `805/7772` Boolean queries. Among labeled queries this changed
+  winning/losing classification nine times in each run. Two deterministic
+  16-query exact cohorts changed best-action sets 13 times each when the
+  older pending command and remaining delay were added; winning classification
+  changed 4 and 6 times.
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control
-  after their delivery relevance had decayed.
+  after their delivery relevance had decayed. Dense labels also use a
+  source-layer state without the exact observed/pending input pipeline.
 - **Reactivation gate:** Query-local/reachable-tube refinement with a hard
-  service budget; shadow evidence must show useful action changes at issue
-  time without increasing policy expiry or local latency. Scalar parity alone
+  service budget and explicit layer-phase/observed/pending/remaining-delay
+  state; shadow evidence must show useful action changes at issue time without
+  increasing policy expiry, local latency, or action lag. Scalar parity alone
   is insufficient.
 - **Evidence:** `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`,
+  `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
   `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
   the retained Stage-4A/Stage-5 run dossiers.
 

@@ -101,6 +101,16 @@ These instructions apply to every file and task below this directory.
   unresolved, and publish an explicit deadline flag. Never reinterpret a
   timeout or unfinished optimistic search as certification. See
   `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`.
+- A threshold search may resume across service slices only when the immutable
+  workspace/policy version, canonical root, absolute frame target, and
+  bit-preserving float32 margin target are identical. Retain only normally
+  completed subproblem and root-action results; an interrupted call stack
+  remains unknown. Reset on any key change, and keep all unknown actions
+  unresolved at deadline. Independent Monte Carlo/MCTS/beam samples may
+  propose search order or candidate policies, but cannot replace universal
+  uncertainty branches or authorize hard safety without an exact adversarial
+  verifier. See
+  `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`.
 - Put reusable, game-neutral control and planning code in
   `scripts/touhou_control/`. Keep TH08 memory addresses, input masks, movement
   constants, ECL details, and pool layouts in TH08 adapters.

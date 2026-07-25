@@ -2855,3 +2855,28 @@ Status: observed | inferred | unknown | fixed
   hit windows, not merely calculate the losing value faster.
 - **Evidence:** The run note, dossier, death ledger, executable regression
   cases, comparison, and both compact belief-certificate reports.
+
+## CE-0117: Repeated short upper queries restarted instead of converging
+
+- **Observed synthetic counterexample:** On deterministic structured seed 0,
+  the 32-frame/17-action revealed-delay upper query needs about 109 ms exact.
+  Before the correction, five calls with a 5-ms deadline each cleared both
+  threshold memos. Every call returned all 17 actions unresolved and rebuilt
+  roughly 1,000--1,175 states; a fresh 25-ms call also returned all 17.
+- **Invalid assumption:** Repeating a deadline-bounded recursive call was
+  treated as time slicing even though no completed proof state or root-action
+  status survived the call boundary. Independent Monte Carlo-like retries do
+  not accumulate a worst-case certificate.
+- **Correction:** A session is keyed by immutable workspace/version,
+  canonical root, absolute lower frame target, and the exact float32 margin
+  bits. It retains only normally completed threshold subproblems and exact
+  root-action statuses. Deadline-interrupted work stays unknown and is
+  returned unresolved; every key change resets the session.
+- **Regression/evidence:** Five retained repetitions completed in 21--23
+  5-ms slices, every intermediate mask was a conservative superset, and every
+  final mask matched the exact eight-action result. Fresh restarts with the
+  same attempt count remained at all 17 unresolved and rebuilt about twice as
+  many states. See
+  `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,
+  `scripts/benchmarks/benchmark_resumable_upper_certification.py`, and
+  `artifacts/benchmarks/resumable_upper_certification_20260725.json`.

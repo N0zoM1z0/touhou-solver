@@ -274,6 +274,14 @@ class VariableCadenceOracleTests(unittest.TestCase):
                     observed_action="stay",
                     lower_bound=belief.state_label,
                 )
+                resumed_certification = workspace.certify_upper_bound(
+                    policy_version=("clairvoyant", seed),
+                    frame=0,
+                    row=0,
+                    column=0,
+                    observed_action="stay",
+                    lower_bound=belief.state_label,
+                )
                 native_upper = workspace.query_cell(
                     policy_version=("clairvoyant", seed),
                     frame=0,
@@ -304,6 +312,18 @@ class VariableCadenceOracleTests(unittest.TestCase):
                 not expected_unresolved,
             )
             self.assertFalse(certification.deadline_expired)
+            self.assertEqual(
+                resumed_certification.unresolved_actions,
+                certification.unresolved_actions,
+            )
+            self.assertEqual(
+                resumed_certification.workspace_stats.new_state_count,
+                0,
+            )
+            self.assertEqual(
+                resumed_certification.workspace_stats.hidden_simulation_count,
+                0,
+            )
 
     def test_budgeted_continuation_is_nested_attainable_lower_bound(
         self,

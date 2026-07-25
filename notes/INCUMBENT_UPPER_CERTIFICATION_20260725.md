@@ -143,9 +143,15 @@ The lower label and upper workspace must describe the same immutable axes,
 clearance volume, action motion, delays, cadence support, root, and boundary
 contract. The implementation does not infer cross-version equivalence.
 
-Threshold memos are cleared between different lower labels. Completed exact
+Threshold memos and root-action proof states now persist across repeated
+calls only when the canonical root, absolute target frame, and
+bit-preserving float32 target margin are identical. They are cleared on any
+key change. Only normally completed recursive states are memoized; an
+interrupted action stays unknown and therefore unresolved. Completed exact
 upper memo entries, when present, may answer a threshold state directly
-because they belong to the same immutable workspace.
+because they belong to the same immutable workspace. Full resumption
+semantics and measurements are in
+`RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`.
 
 ## Differential Evidence
 
@@ -188,10 +194,10 @@ Observed:
 
 | Computation | Wall time |
 | --- | ---: |
-| attainable `L_0` | 32.99 ms |
-| selective upper certificate | 0.062 ms |
-| combined lower + certificate | 33.05 ms |
-| previous complete optimistic upper | about 1,500 ms |
+| attainable `L_0` | 29.96 ms |
+| selective upper certificate | 0.047 ms |
+| combined lower + certificate | 30.01 ms |
+| complete optimistic upper | 1,506.59 ms |
 
 The certificate rejects all 17 root actions from a full-horizon prefix/suffix
 bound, performs 17 root hidden simulations, expands zero recursive threshold
@@ -254,6 +260,10 @@ Retained evidence:
 - An unresolved result is not a failure; it requests a higher budget or more
   targeted lower refinement. A deadline-expired result must remain
   unresolved even if earlier actions were fully rejected.
+- Multiple short calls make progress only as one exact keyed session.
+  Independent retries are restarts, while reusing results across a changed
+  root/version/threshold is invalid. Sampling-based search may order
+  candidates but is not a worst-case certificate.
 - The result remains offline/shadow-only. Stage 6B established useful
   cross-stage coverage and a nontrivial tail, but did not measure an isolated
   shadow executor's CPU/read/local-plan contention.

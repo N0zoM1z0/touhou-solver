@@ -317,17 +317,27 @@ The next architectural target is a delivery-aware solver:
   quantifiers and revealed observation merging, and reports unresolved
   actions rather than incomplete upper labels. Across 128 deterministic
   finite games its unresolved mask exactly matches the independent complete
-  scalar upper. On the retained structured workload `L_0` costs `32.35 ms`,
-  certification now costs `0.062 ms`, and all 17 optimistic actions are certified
+  scalar upper. On the current retained structured workload `L_0` costs
+  `29.96 ms`, certification costs `0.047 ms`, and all 17 optimistic actions are certified
   unable to beat `L_0`; the old complete upper cost about `1.5 s`.
   Fresh Stage 6B capsules expose the nontrivial tail: an uncapped 32-root
   cohort certified 31 roots but took as much as `1907.33 ms`; one root
   retained eight unresolved actions. The 100-ms anytime contract certified
   29 roots, retained the same eight-action gap, and conservatively returned
   all 17 actions unresolved on two deadline roots. **Status remains
-  offline/shadow-only.** The next algorithmic gate is targeted lower
-  refinement only for unresolved actions plus earlier losing-state
-  prevention, not blind budget widening or synchronous complete upper.
+  offline/shadow-only.**
+- **Resumable threshold service:** Exact-root threshold memo and root-action
+  proof states now survive repeated calls only for the same immutable version,
+  canonical root, and bit-identical lower target. On a deterministic hard
+  root, five repetitions completed in 21--23 5-ms slices with exact final
+  eight-action mask parity; total median was `112.92 ms` versus `109.39 ms`
+  one-shot. Fresh restarts spent the same service time but stayed at all 17
+  actions unresolved. This solves bounded service delivery for a sufficiently
+  long-lived root, not cross-version cold start, total CPU, or the remaining
+  lower/upper gap. **Status remains offline/shadow-only.** The next
+  algorithmic gate is targeted lower refinement only for unresolved actions
+  plus earlier losing-state prevention, not blind budget widening or
+  synchronous complete upper.
 - **Stage 6B physical counterexample:** Instrumented hard-no-Bomb run
   `lunatic_route2_stage6b_unattended_20260725_204521` completed with 31 hits
   versus 27 in the RNG-distinct comparison. Global solve median improved
@@ -358,12 +368,14 @@ The next architectural target is a delivery-aware solver:
   `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
   `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`,
   `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
+  `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,
   `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
   `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json`,
   `artifacts/benchmarks/exact_root_frontier_20260725.json`,
   `artifacts/benchmarks/rolling_pipeline_prewarm_20260725.json`,
   `artifacts/benchmarks/belief_pipeline_workspace_20260725.json`,
   `artifacts/benchmarks/budgeted_belief_refinement_20260725.json`,
+  `artifacts/benchmarks/resumable_upper_certification_20260725.json`,
   `artifacts/viability_audit/pipeline_formal_correctness_20260725.json`,
   `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
   the retained Stage-4A/Stage-5 run dossiers.

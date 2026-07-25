@@ -39,29 +39,35 @@ optimality proof. Then read
 `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`: a completed attainable
 lower label can now drive an exact threshold query against the proved
 revealed-delay upper recurrence, without constructing every complete upper
-label.
+label. Then read
+`notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`: hard threshold roots
+can be divided into conservative short service slices only while the
+immutable version, canonical root, and bit-identical lower threshold remain
+unchanged.
 
 ## 1. Exact Checkpoint
 
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `e178bea Certify optimistic upper from lower incumbent`. It adds a
-  deadline-safe form of the
-  incumbent-seeded selective upper certificate that preserves the complete
-  optimistic recurrence's quantifiers but answers only whether each root
-  action can strictly beat the completed attainable lower label. At deadline,
-  the in-flight and unvisited actions remain explicitly unresolved. It also
-  retains the earlier
+  `60b43ef Bound upper certification and audit Stage 6B`. It makes the
+  deadline-safe incumbent threshold search resumable for an exact immutable
+  root and bit-identical lower threshold. Completed proof subproblems and
+  root-action results persist; an interrupted branch remains unknown, and
+  any root/version/threshold change resets the session. It also retains the
+  earlier
   budget-indexed scalar/native policy class, progressive memo reuse, quick/full
   offline profiles, a revealed-delay optimistic upper bound, and a
   research-focused test reduction. Three minimized
   counterexamples still separate planner-hold/input-issue semantics,
   recursive cadence, and hidden-delay non-anticipativity. The legacy prewarm
   remains invalid as a physical value; budgeted belief values remain
-  offline/shadow-only. The retained 128-case differential has zero selective
-  certification-mask errors; on the structured workload the new certificate
-  costs `0.062 ms` instead of the complete upper's roughly `1.5 s`.
+  offline/shadow-only. On the deterministic hard root, five repeated
+  experiments completed exact upper certification in 21--23 bounded 5-ms
+  slices: total median `112.92 ms` versus `109.39 ms` one-shot, with exact
+  final-mask parity and conservative intermediate masks. Fresh 5-ms restarts
+  never reduced the 17-action unresolved set. This repairs time slicing, not
+  total state growth or cross-version cold start.
 - Fresh instrumentation run
   `lunatic_route2_stage6b_unattended_20260725_204521` completed hard-no-Bomb
   Lunatic Stage 6B over frames `2..76235` with 31 native hits and no runtime,
@@ -73,8 +79,9 @@ label.
   `1907.33/540.83 ms`, so the retained 100-ms anytime profile conservatively
   leaves all 17 actions unresolved on those roots instead of blocking.
 - Both native libraries were rebuilt. Linux and Windows complete quick suites
-  pass 471 tests in `1.368/2.422 s`. Read
+  pass 471 tests in `1.400/2.415 s`. Read
   `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`,
+  `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,
   `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
   `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
   `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`,

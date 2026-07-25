@@ -167,6 +167,18 @@ private:
         std::uint64_t canonicalizations = 0;
     };
 
+    enum class ThresholdRootStatus : std::uint8_t {
+        unknown = 0,
+        rejected = 1,
+        exceeds = 2,
+    };
+
+    static std::uint32_t float_bits(float value) {
+        std::uint32_t bits = 0;
+        std::memcpy(&bits, &value, sizeof(bits));
+        return bits;
+    }
+
     class QueryScope {
     public:
         QueryScope(
@@ -452,10 +464,6 @@ public:
         QueryScope scope(this, timeout_ms);
         check_abort(true);
         const Counters before = counters_;
-        threshold_target_frame_ = start_frame + lower_frames;
-        threshold_target_margin_ = lower_margin;
-        threshold_memo_[0].clear();
-        threshold_memo_[1].clear();
         BeliefPipelineState state{
             start_frame,
             start_row,
@@ -466,6 +474,34 @@ public:
             remaining_mask,
         };
         state = canonicalize(state);
+        // A deadline never memoizes its incomplete stack. Reuse only
+        // completed threshold subproblems for this bit-identical session.
+        const int target_frame = start_frame + lower_frames;
+        const std::uint32_t target_margin_bits = float_bits(lower_margin);
+        const bool same_threshold_session = (
+            threshold_session_active_
+            && threshold_session_root_ == state
+            && threshold_session_target_frame_ == target_frame
+            && threshold_session_target_margin_bits_
+                == target_margin_bits
+        );
+        if (!same_threshold_session) {
+            threshold_memo_[0].clear();
+            threshold_memo_[1].clear();
+            threshold_root_status_.fill(
+                ThresholdRootStatus::unknown
+            );
+            threshold_session_active_ = true;
+            threshold_session_root_ = state;
+            threshold_session_target_frame_ = target_frame;
+            threshold_session_target_margin_bits_ =
+                target_margin_bits;
+        }
+        threshold_target_frame_ = target_frame;
+        threshold_target_margin_ = lower_margin;
+        const std::size_t threshold_memo_before = (
+            threshold_memo_[0].size() + threshold_memo_[1].size()
+        );
 
         std::uint32_t unresolved_mask = 0;
         bool deadline_expired = false;
@@ -490,6 +526,14 @@ public:
             int action = 0;
             try {
                 for (; action < action_count_; ++action) {
+                    ThresholdRootStatus& status =
+                        threshold_root_status_[action];
+                    if (status == ThresholdRootStatus::rejected) {
+                        continue;
+                    }
+                    if (status == ThresholdRootStatus::exceeds) {
+                        continue;
+                    }
                     check_abort();
                     const PreparedAction prepared = prepare_action(
                         state,
@@ -500,6 +544,7 @@ public:
                     );
                     if (prepared.threshold_rejected) {
                         ++counters_.branch_incumbent_prunes;
+                        status = ThresholdRootStatus::rejected;
                         continue;
                     }
                     if (!threshold_label_exceeds(
@@ -508,6 +553,7 @@ public:
                             true
                         )) {
                         ++counters_.action_upper_prunes;
+                        status = ThresholdRootStatus::rejected;
                         continue;
                     }
                     if (threshold_action_exceeds(
@@ -515,14 +561,24 @@ public:
                             prepared,
                             true
                         )) {
-                        unresolved_mask |= (
-                            std::uint32_t{1} << action
-                        );
+                        status = ThresholdRootStatus::exceeds;
+                    } else {
+                        status = ThresholdRootStatus::rejected;
                     }
                 }
             } catch (const PipelineDeadlineSignal&) {
                 deadline_expired = true;
-                for (; action < action_count_; ++action) {
+            }
+            for (action = 0; action < action_count_; ++action) {
+                const ThresholdRootStatus status =
+                    threshold_root_status_[action];
+                if (
+                    status == ThresholdRootStatus::exceeds
+                    || (
+                        deadline_expired
+                        && status == ThresholdRootStatus::unknown
+                    )
+                ) {
                     unresolved_mask |= std::uint32_t{1} << action;
                 }
             }
@@ -532,7 +588,9 @@ public:
         output_stats[0] = static_cast<std::uint64_t>(
             threshold_memo_[0].size() + threshold_memo_[1].size()
         );
-        output_stats[1] = output_stats[0];
+        output_stats[1] = static_cast<std::uint64_t>(
+            output_stats[0] - threshold_memo_before
+        );
         output_stats[2] = counters_.memo_hits - before.memo_hits;
         output_stats[3] = (
             counters_.action_upper_prunes
@@ -1389,6 +1447,14 @@ private:
     > threshold_memo_;
     int threshold_target_frame_ = 0;
     float threshold_target_margin_ = 0.0F;
+    bool threshold_session_active_ = false;
+    BeliefPipelineState threshold_session_root_{};
+    int threshold_session_target_frame_ = 0;
+    std::uint32_t threshold_session_target_margin_bits_ = 0;
+    std::array<
+        ThresholdRootStatus,
+        PIPELINE_MAX_ACTIONS
+    > threshold_root_status_{};
     Counters counters_;
     std::atomic<bool> cancel_requested_{false};
     bool deadline_active_ = false;

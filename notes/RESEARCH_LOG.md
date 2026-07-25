@@ -3016,3 +3016,37 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Linux/Windows quick suites pass 471 tests in `1.368/2.422 s`.
 - New counterexamples: CE-0115 and CE-0116. No binary reverse engineering,
   IDA mutation, or REA session was used.
+
+## 2026-07-25: Resumable Incumbent-Threshold Certification
+
+- Formalized repeated short upper work as one exact keyed session, not
+  independent simulation: immutable workspace/version, canonical root,
+  absolute target frame, and bit-preserving float32 margin must all match.
+- Changed the C++ threshold workspace to preserve normally completed
+  subproblem memos and exact root-action tri-state results across deadline
+  slices. Interrupted states are never memoized; known-exceeds plus all
+  unknown actions remain unresolved at deadline. Any key change resets the
+  session.
+- Added a retained hard-root benchmark comparing one-shot exact, resumable
+  5-ms slices, equal-budget one-shot, and fresh 5-ms restarts. Across five
+  repetitions, resumable search completed in 21--23 slices with exact final
+  eight-action mask parity and conservative monotone intermediate masks.
+  Total median/p95 was `112.92/113.61 ms` versus
+  `109.39/110.36 ms` exact.
+- Resumable and one-shot exact both completed 11,436 threshold states.
+  Resumption used about 1.7 percent more hidden simulations; fresh restarts
+  remained at all 17 unresolved and rebuilt a median 24,517 states. The
+  method provides bounded service granularity with about 3 percent wall-time
+  overhead, not a total-CPU speedup.
+- The exact result still retains eight unresolved actions. Root/version
+  churn before roughly 115 ms still causes correct invalidation, so targeted
+  lower refinement and cross-version delivery remain open. Monte Carlo/MCTS/
+  beam search remains proposal/order-only unless followed by an exact
+  adversarial verifier.
+- Added CE-0117, one focused same-session regression assertion, executable
+  benchmark, compact artifact, and
+  `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`. No physical trial,
+  binary reverse engineering, IDA mutation, or REA session was used.
+- Rebuilt Linux and Windows native libraries. The complete quick suite passes
+  471 tests in `1.400/2.415 s`; the retained 128-case full benchmark has zero
+  belief, upper, lower-bound, or threshold-mask failures.

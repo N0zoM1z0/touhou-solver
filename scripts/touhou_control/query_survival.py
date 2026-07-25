@@ -897,6 +897,8 @@ class BeliefPipelineSurvivalWorkspace:
 
         A deadline returns the in-flight and unvisited actions unresolved;
         it never converts unfinished optimistic work into certification.
+        Repeating the exact same root and bit-identical lower threshold on
+        this immutable workspace resumes completed threshold subproblems.
         """
 
         if policy_version != self.policy_version:

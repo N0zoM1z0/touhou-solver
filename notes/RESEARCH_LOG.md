@@ -2610,3 +2610,48 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   are identical; Linux and Windows complete suites pass 434/434 in
   1.074/2.367 seconds. Both native libraries were rebuilt. No physical trial
   or live strategy promotion was performed.
+
+## 2026-07-25: Continuous Lunatic Physical Validation
+
+- Added `run_th08_full_route_agent.bat` and
+  `scripts/th08_full_route_supervisor.py`. The fail-closed normal-start path
+  verifies the exact image and life patch, anchors Game Start with a real
+  Down/Up transition, observes native title modes `0 -> 4 -> 5`, selects
+  Lunatic and Sakuya/Remilia, arms before the final `Z`, expects Stage 1, and
+  accepts only the native successor chain through Final B.
+- Fixed two Windows relocation faults before gameplay: the external patch BAT
+  still named the old pre-reorganization script path, and the relocated tool
+  did not prepend its parent `scripts/` import root. The exact no-life patch
+  gate then passed at `0x0044D0FA`.
+- Linux and Windows quick suites passed 436/436 in 2.039/2.661 seconds before
+  the physical run. The ignored Windows native DLL was rebuilt from the
+  current source.
+- **Observed physical completion:** Continuous run
+  `lunatic_route2_fullrun_unattended_20260725_083917` reached Final-B
+  `terminal_unload` at frame `226864`, then `route_complete`. It contains
+  52,479 decisions, 77 native hit edges, zero deathbomb requests, zero Bomb
+  input violations, zero foreground interruptions, zero runtime errors, and
+  zero JSON decode errors.
+- Stage hit counts are `3/5/6/19/20/24` for
+  Stage 1/2/3/4A/5/Final B. Against the retained complete hard no-Bomb
+  baseline, the deltas are `+2/0/-4/-9/+7/-9`, for `90 -> 77` total.
+  This is one RNG/resource sample; Stage 1 and Stage 5 remain explicit adverse
+  evidence and no route strategy was promoted.
+- **Observed global delivery:** Solve median/p95/max changed
+  `2455.95/4038.64/6141.66 -> 99.99/386.09/540.90 ms`; solution age
+  median/p95 changed `152/259 -> 3/9` frames; unique solutions changed
+  `1,064 -> 9,308`, queries `759 -> 51,747`, and stale reports `484 -> 15`.
+  Current phase telemetry measures clearance
+  `12.11/33.53/104.71 ms` and viability
+  `74.63/372.11/519.15 ms`. The former clearance bottleneck is removed in
+  this live workload; viability induction is now the global tail target.
+- Failure attribution contains 21 exact bullet overlaps, three exact laser
+  overlaps, three exact enemy-body overlaps, 49 modeled committed-prefix
+  collisions, and one remaining sensor-gap/unmodeled case. The old
+  unattributed sensor-gap count was 18, but improved telemetry and differing
+  samples prevent treating that delta as pure causal model-accuracy parity.
+- CE-0105 records a postprocessing contract bug: the final inactive edge is
+  `terminal_unload`, and only the later summary becomes `route_complete`.
+  The physical run itself was never interrupted; its session preserves the
+  temporary status error and recovery reason. A focused regression protects
+  the corrected two-stage completion contract.

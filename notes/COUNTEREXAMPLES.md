@@ -2579,3 +2579,23 @@ Status: observed | inferred | unknown | fixed
   `artifacts/strategy/stage4a_boss_phase_shadow_20260724.json`,
   `artifacts/strategy/stage4a_boss_phase_live_20260724.json`, and
   `notes/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`.
+
+## CE-0105: Final-B inactive evidence precedes route-complete promotion
+
+- **Observed symptom:** The completed full-route trial
+  `lunatic_route2_fullrun_unattended_20260725_083917` ended with an agent
+  summary of `route_complete`, but the first supervisor postprocessor marked
+  the session discarded because it searched for a `scene_inactive` record
+  whose status was also `route_complete`.
+- **Invalid assumption:** The scene guard writes another inactive record when
+  its terminal grace period promotes `terminal_unload` to `route_complete`.
+- **Native trace evidence:** The retained final inactive record has frame
+  `226864`, engine flags `0x1aa10`, stage/transition-from-stage `7`, no expected
+  successor, and status `terminal_unload`. The following summary has
+  `termination_reason=route_complete`; there is deliberately no second
+  inactive edge.
+- **Correction:** Full-route completion extraction now requires the exact
+  Final-B `terminal_unload` record and independently requires the later
+  route-complete summary/dossier gate. The recovered session records why its
+  temporary postprocessing status changed from discarded to completed.
+- **Regression:** `test_terminal_unload_precedes_route_complete_summary`.

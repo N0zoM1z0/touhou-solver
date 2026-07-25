@@ -40,6 +40,10 @@ These instructions apply to every file and task below this directory.
   differential/report/dossier programs in `scripts/analysis/`, and explicit
   build/probe/patch/capture entry points in `scripts/tools/`. A benchmark must
   not become a production dependency.
+- A Windows Python entry point below `scripts/tools/` must explicitly prepend
+  its parent `scripts/` directory to `sys.path`; Windows starts a UNC script
+  with only the tool directory importable. When a tool moves, update the
+  external game-directory BAT path as part of the same checkpoint.
 - Treat `th08_live_dodge_agent.py` as orchestration, not the permanent owner
   of every model. Move independently testable trace schemas, projection,
   sensing, policy, and strategy logic behind narrow modules while preserving
@@ -175,6 +179,14 @@ These instructions apply to every file and task below this directory.
 - The user may select difficulty, team, and thprac stage manually. The daemon
   must already be warm; `F8` starts control with minimal handoff latency and
   `F9` stops it.
+- Use `run_th08_full_route_agent.bat` for one continuous original-game
+  Lunatic Route-2 run. Normal Game Start title modes are main `0`, difficulty
+  `4`, and team `5`. Force a real Down-then-Up cursor transition back to main
+  cursor `0` before confirming Game Start; a freshly read cursor `0` alone
+  does not prove the selection transition is armed.
+- At Final B completion the first inactive record is `terminal_unload`; only
+  after the terminal grace period does the run summary become
+  `route_complete`. Require both records when finalizing a full-run dossier.
 - Verify executable identity, foreground ownership, route 2, difficulty,
   gameplay state, and the no-life-decrement patch before injecting input.
 - Always release injected keys on stop or error. Do not leave a required

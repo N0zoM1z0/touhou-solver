@@ -91,6 +91,11 @@ monitoring, stopping, and decisive process termination when a run stalls.
   `/mnt/d/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)`
 - Required launcher:
   `run_th08_no_life_decrement_attach.bat`
+- That external BAT must invoke
+  `scripts\tools\th08_attach_no_life_decrement.py`. The patcher prepends the
+  parent `scripts\` directory before importing `th08_runtime_agent`; the old
+  pre-reorganization `scripts\th08_attach_no_life_decrement.py` path does not
+  exist.
 - Target:
   `th08.exe`
 - Required SHA-256:
@@ -191,6 +196,39 @@ run_th08_practice_agent.bat --stage 3 --status-seconds 10 --stall-timeout 90
 Do not use `--forever` blindly while developing. Run one complete stage,
 analyze its counterexamples, fix a general cause, test, then run another
 randomized stage.
+
+### Continuous Lunatic Full Route
+
+Use the dedicated normal-Game-Start supervisor for one continuous Stage 1
+through Final B trace:
+
+```bat
+\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_full_route_agent.bat
+```
+
+From WSL/Codex, preserve the same non-TTY and literal-UNC quoting rules:
+
+```bash
+/mnt/c/Windows/System32/cmd.exe /d /c call \
+  '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_full_route_agent.bat' \
+  --status-seconds 30 --stall-timeout 120
+```
+
+The native normal-start title modes are main `0`, difficulty `4`, and team
+`5`. On a fresh launch the supervisor deliberately sends Down then Up and
+verifies main cursor `0` before `Z`; merely reading cursor `0` did not produce
+a reliable Game Start transition. It then selects Lunatic cursor `3`,
+Sakuya/Remilia team cursor `2`, prewarms the agent, and lets the agent's final
+`Z` enter gameplay. The live worker expects Stage 1 and leaves the terminal
+stage unset so the native successor chain must reach route completion.
+
+Full-route acceptance requires a Final-B `scene_inactive` record with status
+`terminal_unload`, followed by the terminal summary
+`termination_reason=route_complete`. The two-stage guard is intentional: the
+summary is promoted only after the terminal inactive grace period. The
+supervisor uses a 4,500-second worker deadline, a 4,650-second outer deadline,
+hard no-Bomb, no safety-value/refinement/survival-label authority, and always
+releases keys and terminates only the exact verified game.
 
 ## 5. Stage Mapping And Randomization
 

@@ -228,5 +228,51 @@ volume and makes no construction-speed claim.
 - Packed object/reference plans have identical clearance, viable arrays,
   safe-action masks, representative paths, gates, and bottlenecks.
 
-No physical trial was run, so this checkpoint changes no strategy promotion
-or physical acceptance claim.
+## Physical Full-Route Validation
+
+The offline checkpoint was followed by one continuous original-game
+Sakuya/Remilia Lunatic Route-2 run,
+`lunatic_route2_fullrun_unattended_20260725_083917`.
+
+**Observed:**
+
+- native Final B scene unload at frame `226864`, followed by
+  `termination_reason=route_complete`;
+- one continuous trace, 52,479 decisions, no foreground interruption, no
+  runtime error, no manual re-arm, and zero JSON decode errors;
+- hard no-Bomb verification passed over every decision; 77 native hit edges
+  and zero deathbomb requests;
+- maximum observed workloads included 1,536 bullets, 240 lasers, and the
+  Stage-3 200-laser pattern;
+- compared with the retained 2026-07-23 complete hard no-Bomb baseline, hits
+  changed `90 -> 77`. Per-stage changes were `+2, 0, -4, -9, +7, -9`, so
+  Stage 1 and especially Stage 5 remain adverse samples rather than being
+  hidden by the total.
+
+**Observed delivery performance:**
+
+- global solve median/p95/max changed
+  `2455.95/4038.64/6141.66 -> 99.99/386.09/540.90 ms`;
+- first-observed solution age median/p95 changed `152/259 -> 3/9` frames;
+- unique delivered solutions changed `1,064 -> 9,308`, queries
+  `759 -> 51,747`, and reported stale solutions `484 -> 15`;
+- the new phase telemetry attributes clearance
+  `12.11/33.53/104.71 ms` median/p95/max and viability
+  `74.63/372.11/519.15 ms`. Clearance is no longer the dominant live global
+  phase; Boolean viability induction is now the tail bottleneck.
+
+**Model evidence and limits:**
+
+- exact failure witnesses classified 21 bullet overlaps, three laser
+  overlaps, and three enemy-body overlaps. The unattributed
+  sensor-gap/unmodeled class changed `18 -> 1`, and
+  active-laser-without-overlap changed `1 -> 0`;
+- this is stronger coverage evidence, but not pure causal accuracy parity:
+  enemy-body telemetry and attribution also improved between runs, and the
+  RNG, entry resources, Power history, and phase durations differ;
+- local read medians rose from roughly 7 ms to 11-12 ms and action-lag
+  medians from one to two frames. The global optimization did not remove the
+  local sensing/issue-time budget;
+- no route strategy was promoted. This is one physical acceptance sample for
+  the packed clearance implementation, not cross-RNG proof of a universally
+  better controller.

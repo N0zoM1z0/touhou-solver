@@ -47,6 +47,35 @@ def one_shot_trial_finished(*, agent_started: bool, agent_alive: bool) -> bool:
     return agent_started and not agent_alive
 
 
+def read_runtime_summary(path: Path) -> dict[str, object]:
+    """Read the terminal in-trace summary without decoding a long raw trace."""
+
+    with path.open("rb") as source:
+        source.seek(0, os.SEEK_END)
+        end = source.tell()
+        source.seek(max(0, end - 64 * 1024))
+        tail = source.read()
+    for binary_line in reversed(tail.splitlines()):
+        try:
+            row = json.loads(binary_line)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            continue
+        if row.get("kind") == "summary":
+            return {
+                "decision_count": None,
+                "first_frame": None,
+                "last_frame": row.get("last_frame"),
+                "termination_reason": row.get(
+                    "termination_reason",
+                    "missing_summary",
+                ),
+                "counter_gaps": row.get("counter_gaps"),
+                "hit_count": row.get("hit_count"),
+                "hit_frames": [],
+            }
+    raise ValueError("trial contains no terminal summary record")
+
+
 def build_long_run_arguments(
     *,
     output: Path,
@@ -58,15 +87,18 @@ def build_long_run_arguments(
     trace_transform_runtime: bool = False,
     safety_value_horizon: int = 0,
     viability_audit_dir: Path | None = None,
+    duration_seconds: float = LONG_RUN_DURATION_SECONDS,
 ) -> list[str]:
     if safety_value_horizon < 0:
         raise ValueError("safety-value horizon cannot be negative")
+    if duration_seconds <= 0.0:
+        raise ValueError("long-run duration must be positive")
     arguments = [
         str(output),
         "--pid",
         str(pid),
         "--duration",
-        str(LONG_RUN_DURATION_SECONDS),
+        str(duration_seconds),
         "--difficulty",
         str(difficulty),
         "--stop-after-hits",
@@ -112,6 +144,8 @@ class AgentHotkey:
         trace_transform_runtime: bool = False,
         safety_value_horizon: int = 0,
         viability_audit_dir: Path | None = None,
+        duration_seconds: float = LONG_RUN_DURATION_SECONDS,
+        detailed_summary: bool = True,
     ) -> None:
         if os.name != "nt":
             raise RuntimeError("th08_agent_hotkey.py must run under Windows Python")
@@ -150,6 +184,8 @@ class AgentHotkey:
         self.trace_transform_runtime = trace_transform_runtime
         self.safety_value_horizon = safety_value_horizon
         self.viability_audit_dir = viability_audit_dir
+        self.duration_seconds = duration_seconds
+        self.detailed_summary = detailed_summary
         self.artifact_dir = (
             Path(__file__).resolve().parent.parent
             / "artifacts"
@@ -188,12 +224,17 @@ class AgentHotkey:
             result = run_agent(build_agent_parser().parse_args(arguments))
             if result:
                 raise RuntimeError(f"agent returned {result}")
-            rows = [
-                json.loads(line)
-                for line in self.output.read_text(encoding="utf-8").splitlines()
-                if line.strip()
-            ]
-            report = summarize_rows(rows)
+            if self.detailed_summary:
+                rows = [
+                    json.loads(line)
+                    for line in self.output.read_text(
+                        encoding="utf-8"
+                    ).splitlines()
+                    if line.strip()
+                ]
+                report = summarize_rows(rows)
+            else:
+                report = read_runtime_summary(self.output)
             self.last_summary = report
             summary = self.output.with_suffix(".summary.json")
             summary.write_text(
@@ -203,7 +244,7 @@ class AgentHotkey:
             print(
                 "trial complete:",
                 f"reason={report['termination_reason']}",
-                f"hits={report['hit_frames']}",
+                f"hits={report.get('hit_count', report.get('hit_frames'))}",
                 f"frames={report['first_frame']}..{report['last_frame']}",
                 f"summary={summary}",
                 flush=True,
@@ -257,6 +298,7 @@ class AgentHotkey:
                 trace_transform_runtime=self.trace_transform_runtime,
                 safety_value_horizon=self.safety_value_horizon,
                 viability_audit_dir=self.viability_audit_dir,
+                duration_seconds=self.duration_seconds,
             )
             if not gameplay_active:
                 arguments.extend(("--wait-gameplay", "--wait-timeout", "30"))

@@ -15,6 +15,12 @@ import time
 from ctypes import wintypes
 from pathlib import Path
 
+# Windows executes this relocated tool by its UNC path, so its directory—not
+# the importable scripts root—is the default sys.path entry.
+SCRIPTS_ROOT = Path(__file__).resolve().parents[1]
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_ROOT))
+
 from th08_runtime_agent import (
     ADDR_NO_LIFE_DECREMENT_PATCH,
     ProcessReader,

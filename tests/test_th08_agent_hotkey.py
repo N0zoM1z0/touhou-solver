@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import unittest
+from tempfile import TemporaryDirectory
 from pathlib import Path
 
 from th08_agent_hotkey import (
     LONG_RUN_DURATION_SECONDS,
     build_long_run_arguments,
     one_shot_trial_finished,
+    read_runtime_summary,
 )
 from th08_live_dodge_agent import build_parser
 
@@ -49,6 +51,32 @@ class AgentHotkeyTests(unittest.TestCase):
         )
         parsed = build_parser().parse_args(arguments)
         self.assertTrue(parsed.trace_transform_runtime)
+
+    def test_full_route_can_extend_the_worker_deadline(self) -> None:
+        arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            duration_seconds=4500.0,
+        )
+        parsed = build_parser().parse_args(arguments)
+        self.assertEqual(parsed.duration, 4500.0)
+
+    def test_full_route_summary_reads_only_the_terminal_contract(self) -> None:
+        with TemporaryDirectory() as temporary:
+            trace = Path(temporary) / "trial.jsonl"
+            trace.write_text(
+                '{"kind":"decision","frame":2}\n'
+                '{"kind":"summary","last_frame":225973,'
+                '"counter_gaps":4,"hit_count":9,'
+                '"termination_reason":"route_complete"}\n',
+                encoding="utf-8",
+            )
+            summary = read_runtime_summary(trace)
+        self.assertEqual(summary["last_frame"], 225973)
+        self.assertEqual(summary["hit_count"], 9)
+        self.assertEqual(summary["termination_reason"], "route_complete")
 
     def test_safety_value_fallback_is_explicitly_opt_in(self) -> None:
         arguments = build_long_run_arguments(

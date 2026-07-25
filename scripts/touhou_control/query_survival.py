@@ -11,7 +11,8 @@ physical frame and distinguishes:
 * the action observed by the game;
 * an older desired action that is still pending;
 * the remaining frames before that pending action may become visible; and
-* the new selected action and its own robust delay support.
+* the new selected action, its robust delay support, and an optional
+  next-decision cadence support at the public root.
 
 The scalar implementation is the independent oracle.  A memoized native
 implementation shares the contract, but its worst-case service time does not
@@ -56,6 +57,17 @@ class PendingCommand:
             raise ValueError(
                 "pending remaining frames must be sorted unique and positive"
             )
+
+
+@dataclass(frozen=True)
+class ReachablePipelineRoot:
+    """One deduplicated exact root at a possible next decision epoch."""
+
+    frame: int
+    row: int
+    column: int
+    observed_action: str
+    pending_command: PendingCommand | None
 
 
 @dataclass(frozen=True)
@@ -254,12 +266,14 @@ class SurvivalQueryProblem:
         self,
         *,
         policy_version: Hashable,
+        decision_frame_support: tuple[int, ...] | None = None,
     ) -> PipelineSurvivalWorkspace:
-        """Create one persistent exact-phase workspace for this policy."""
+        """Create one persistent exact-root workspace for this policy."""
 
         return PipelineSurvivalWorkspace(
             problem=self,
             policy_version=policy_version,
+            decision_frame_support=decision_frame_support,
         )
 
 
@@ -268,16 +282,27 @@ class StalePipelineWorkspaceError(RuntimeError):
 
 
 class PipelineSurvivalWorkspace:
-    """Versioned persistent memo over exact phase and pending input state."""
+    """Versioned memo with a robust public-root cadence transition.
+
+    A public query branches over ``decision_frame_support`` once.  Continuation
+    states retain the planner's configured fixed interval.  This bounded
+    contract is deliberate: recursively branching cadence at every future
+    decision is a different, much larger robust-control problem.
+    """
 
     def __init__(
         self,
         *,
         problem: SurvivalQueryProblem,
         policy_version: Hashable,
+        decision_frame_support: tuple[int, ...] | None = None,
     ) -> None:
         self.problem = problem
         self.policy_version = policy_version
+        self.decision_frame_support = _normalize_decision_frame_support(
+            decision_frame_support,
+            default=problem.config.frames_per_layer,
+        )
         self._action_indices = {
             action.name: index
             for index, action in enumerate(problem.actions)
@@ -298,7 +323,11 @@ class PipelineSurvivalWorkspace:
                 problem.delay_frames,
                 dtype=np.int32,
             ),
-            decision_frames=problem.config.frames_per_layer,
+            decision_frame_support=np.asarray(
+                self.decision_frame_support,
+                dtype=np.int32,
+            ),
+            continuation_decision_frames=problem.config.frames_per_layer,
             required_clearance=problem.config.required_clearance,
             clamp_to_bounds=problem.config.clamp_to_bounds,
         )
@@ -418,9 +447,83 @@ class PipelineSurvivalWorkspace:
                 if best_mask & (1 << index)
             ),
             evaluated_state_count=stats.memoized_state_count,
-            backend="native_augmented_pipeline_workspace",
+            backend=(
+                "native_one_step_cadence_pipeline_workspace"
+                if len(self.decision_frame_support) > 1
+                else "native_augmented_pipeline_workspace"
+            ),
             workspace_stats=stats,
         )
+
+    def lookup_cell(
+        self,
+        *,
+        policy_version: Hashable,
+        frame: int,
+        row: int,
+        column: int,
+        observed_action: str,
+        pending_command: PendingCommand | None = None,
+    ) -> QueryLocalSurvivalResult | None:
+        """Consume a cached exact root without permitting cold expansion."""
+
+        if policy_version != self.policy_version:
+            raise StalePipelineWorkspaceError(
+                "pipeline workspace policy version does not match lookup"
+            )
+        if observed_action not in self._action_indices:
+            raise ValueError("observed action is absent from the action set")
+        if (
+            pending_command is not None
+            and pending_command.action not in self._action_indices
+        ):
+            raise ValueError("pending action is absent from the action set")
+        pending_remaining = (
+            np.asarray(
+                pending_command.remaining_frames,
+                dtype=np.int32,
+            )
+            if pending_command is not None
+            else None
+        )
+        if not self._native.contains_root(
+            start_frame=frame,
+            start_row=row,
+            start_column=column,
+            observed_action_index=self._action_indices[observed_action],
+            pending_action_index=(
+                self._action_indices[pending_command.action]
+                if pending_command is not None
+                else -1
+            ),
+            pending_remaining_frames=pending_remaining,
+        ):
+            return None
+        return self.query_cell(
+            policy_version=policy_version,
+            frame=frame,
+            row=row,
+            column=column,
+            observed_action=observed_action,
+            pending_command=pending_command,
+        )
+
+
+def _normalize_decision_frame_support(
+    support: tuple[int, ...] | None,
+    *,
+    default: int,
+) -> tuple[int, ...]:
+    normalized = (default,) if support is None else tuple(support)
+    if (
+        not normalized
+        or tuple(sorted(set(normalized))) != normalized
+        or normalized[0] <= 0
+    ):
+        raise ValueError(
+            "decision-frame support must be sorted unique and positive"
+        )
+    return normalized
 
 
 def _uniform_axis(axis: np.ndarray, name: str) -> tuple[np.ndarray, float]:
@@ -449,15 +552,20 @@ def scalar_query_local_survival(
     column: int,
     observed_action: str,
     pending_command: PendingCommand | None = None,
+    decision_frame_support: tuple[int, ...] | None = None,
 ) -> QueryLocalSurvivalResult:
-    """Solve one phase-exact state with a last-write-wins input pipeline.
+    """Solve one exact state with a robust last-write-wins input pipeline.
 
     At every decision epoch a newly selected desired action supersedes the
     older pending desired action.  Before the new action becomes visible, the
     older pending action may still become active.  A physical branch therefore
     follows ``observed -> older pending -> newly selected``.  If the new delay
-    exceeds one decision interval, its remaining delay is carried explicitly
-    into the successor state.
+    exceeds the next decision interval, its remaining delay is carried
+    explicitly into the successor state.  At the public root, nature chooses
+    both command delay and the next decision interval from their declared
+    supports.  Deeper continuation values use ``config.frames_per_layer``;
+    this is a one-transition robust value, not an unbounded variable-cadence
+    survival proof.
     """
 
     x_values, x_step = _uniform_axis(x_axis, "x")
@@ -496,7 +604,10 @@ def scalar_query_local_survival(
     x_end = float(x_values[-1])
     y_start = float(y_values[0])
     y_end = float(y_values[-1])
-    decision_frames = config.frames_per_layer
+    cadence_support = _normalize_decision_frame_support(
+        decision_frame_support,
+        default=config.frames_per_layer,
+    )
 
     def sample_cell(
         target_x: float,
@@ -532,6 +643,7 @@ def scalar_query_local_survival(
         pending_remaining: int,
         state_row: int,
         state_column: int,
+        root_transition: bool,
     ) -> tuple[SurvivalLabel, tuple[SurvivalLabel, ...]]:
         current_margin = (
             float(clearance[frame, state_row, state_column])
@@ -541,7 +653,6 @@ def scalar_query_local_survival(
             label = SurvivalLabel(0, current_margin)
             return label, tuple(label for _ in actions)
 
-        step_count = min(decision_frames, horizon_frame - frame)
         state_x = float(x_values[state_column])
         state_y = float(y_values[state_row])
         active = actions[active_index]
@@ -551,89 +662,103 @@ def scalar_query_local_survival(
         selected_labels: list[SurvivalLabel] = []
         for selected_index, selected in enumerate(actions):
             branch_labels: list[SurvivalLabel] = []
-            for delay in delay_frames:
-                bottleneck = current_margin
-                terminal: tuple[int, int, float] | None = None
-                failed: SurvivalLabel | None = None
-                displacement_x = 0.0
-                displacement_y = 0.0
-                for physical_step in range(1, step_count + 1):
-                    if physical_step > delay:
-                        motion = selected
-                    elif (
-                        older_pending is not None
-                        and physical_step > pending_remaining
-                    ):
-                        motion = older_pending
-                    else:
-                        motion = active
-                    displacement_x += motion.velocity_x
-                    displacement_y += motion.velocity_y
-                    terminal = sample_cell(
-                        state_x + displacement_x,
-                        state_y + displacement_y,
-                    )
-                    if terminal is None:
-                        failed = SurvivalLabel(
-                            physical_step - 1,
-                            -math.inf,
+            transition_support = (
+                cadence_support
+                if root_transition
+                else (config.frames_per_layer,)
+            )
+            for decision_frames in transition_support:
+                step_count = min(
+                    decision_frames,
+                    horizon_frame - frame,
+                )
+                for delay in delay_frames:
+                    bottleneck = current_margin
+                    terminal: tuple[int, int, float] | None = None
+                    failed: SurvivalLabel | None = None
+                    displacement_x = 0.0
+                    displacement_y = 0.0
+                    for physical_step in range(1, step_count + 1):
+                        if physical_step > delay:
+                            motion = selected
+                        elif (
+                            older_pending is not None
+                            and physical_step > pending_remaining
+                        ):
+                            motion = older_pending
+                        else:
+                            motion = active
+                        displacement_x += motion.velocity_x
+                        displacement_y += motion.velocity_y
+                        terminal = sample_cell(
+                            state_x + displacement_x,
+                            state_y + displacement_y,
                         )
-                        break
-                    next_row, next_column, sample_error = terminal
-                    margin = (
-                        float(
-                            clearance[
-                                frame + physical_step,
-                                next_row,
-                                next_column,
-                            ]
+                        if terminal is None:
+                            failed = SurvivalLabel(
+                                physical_step - 1,
+                                -math.inf,
+                            )
+                            break
+                        next_row, next_column, sample_error = terminal
+                        margin = (
+                            float(
+                                clearance[
+                                    frame + physical_step,
+                                    next_row,
+                                    next_column,
+                                ]
+                            )
+                            - sample_error
+                            - config.required_clearance
                         )
-                        - sample_error
-                        - config.required_clearance
-                    )
-                    bottleneck = min(bottleneck, margin)
-                    if margin <= 0.0:
-                        failed = SurvivalLabel(
-                            physical_step - 1,
-                            bottleneck,
-                        )
-                        break
-                if failed is not None:
-                    branch_labels.append(failed)
-                    continue
-                assert terminal is not None
-                terminal_row, terminal_column, _ = terminal
-                if delay < step_count:
-                    successor_active = selected_index
-                    successor_pending = -1
-                    successor_remaining = 0
-                else:
-                    if (
-                        older_pending is not None
-                        and pending_remaining <= step_count
-                    ):
-                        successor_active = pending_index
-                    else:
-                        successor_active = active_index
-                    successor_pending = selected_index
-                    successor_remaining = delay - step_count
-                    if successor_remaining == 0:
+                        bottleneck = min(bottleneck, margin)
+                        if margin <= 0.0:
+                            failed = SurvivalLabel(
+                                physical_step - 1,
+                                bottleneck,
+                            )
+                            break
+                    if failed is not None:
+                        branch_labels.append(failed)
+                        continue
+                    assert terminal is not None
+                    terminal_row, terminal_column, _ = terminal
+                    if delay < step_count:
                         successor_active = selected_index
                         successor_pending = -1
-                successor, _ = solve_state(
-                    frame + step_count,
-                    successor_active,
-                    successor_pending,
-                    successor_remaining,
-                    terminal_row,
-                    terminal_column,
-                )
-                branch_labels.append(
-                    SurvivalLabel(
-                        step_count + successor.guaranteed_frames,
-                        min(bottleneck, successor.bottleneck_margin),
+                        successor_remaining = 0
+                    else:
+                        if (
+                            older_pending is not None
+                            and pending_remaining <= step_count
+                        ):
+                            successor_active = pending_index
+                        else:
+                            successor_active = active_index
+                        successor_pending = selected_index
+                        successor_remaining = delay - step_count
+                        if successor_remaining == 0:
+                            successor_active = selected_index
+                            successor_pending = -1
+                    successor, _ = solve_state(
+                        frame + step_count,
+                        successor_active,
+                        successor_pending,
+                        successor_remaining,
+                        terminal_row,
+                        terminal_column,
+                        False,
                     )
-                )
+                    branch_labels.append(
+                        SurvivalLabel(
+                            step_count + successor.guaranteed_frames,
+                            min(
+                                bottleneck,
+                                successor.bottleneck_margin,
+                            ),
+                        )
+                    )
             selected_labels.append(min(branch_labels))
         action_labels = tuple(selected_labels)
         return max(action_labels), action_labels
@@ -657,6 +782,7 @@ def scalar_query_local_survival(
             pending_remaining,
             row,
             column,
+            True,
         )
         for pending_index, pending_remaining in root_states
     )
@@ -684,6 +810,221 @@ def scalar_query_local_survival(
         ),
         best_actions=best_actions,
         evaluated_state_count=solve_state.cache_info().currsize,
+    )
+
+
+def enumerate_next_decision_roots(
+    *,
+    x_axis: np.ndarray,
+    y_axis: np.ndarray,
+    actions: tuple[ControlAction, ...],
+    delay_frames: tuple[int, ...],
+    decision_frame_support: tuple[int, ...],
+    config: ViabilityConfig,
+    start_frame: int,
+    horizon_frame: int,
+    row: int,
+    column: int,
+    observed_action: str,
+    selected_action: str,
+    pending_command: PendingCommand | None = None,
+) -> tuple[ReachablePipelineRoot, ...]:
+    """Enumerate the exact-root frontier after issuing one selected action.
+
+    This is kinematic reachability only.  It intentionally does not certify
+    collision safety; a consumer must still use a fresh local certificate.
+    Branches that produce the same exact root are grouped by the remaining
+    delay support of their pending command.
+    """
+
+    x_values, x_step = _uniform_axis(x_axis, "x")
+    y_values, y_step = _uniform_axis(y_axis, "y")
+    cadence_support = _normalize_decision_frame_support(
+        decision_frame_support,
+        default=config.frames_per_layer,
+    )
+    if (
+        not delay_frames
+        or tuple(sorted(set(delay_frames))) != delay_frames
+        or delay_frames[0] < 0
+    ):
+        raise ValueError("delay support is invalid")
+    if not 0 <= start_frame <= horizon_frame:
+        raise ValueError("start frame is outside the requested horizon")
+    if not 0 <= row < len(y_values) or not 0 <= column < len(x_values):
+        raise ValueError("query cell is outside the lattice")
+    action_by_name = {action.name: action for action in actions}
+    if len(action_by_name) != len(actions) or not actions:
+        raise ValueError("actions must be nonempty with unique names")
+    if observed_action not in action_by_name:
+        raise ValueError("observed action is absent from the action set")
+    if selected_action not in action_by_name:
+        raise ValueError("selected action is absent from the action set")
+    if (
+        pending_command is not None
+        and pending_command.action not in action_by_name
+    ):
+        raise ValueError("pending action is absent from the action set")
+
+    x_start = float(x_values[0])
+    x_end = float(x_values[-1])
+    y_start = float(y_values[0])
+    y_end = float(y_values[-1])
+    state_x = float(x_values[column])
+    state_y = float(y_values[row])
+    active = action_by_name[observed_action]
+    selected = action_by_name[selected_action]
+    older_pending = (
+        action_by_name[pending_command.action]
+        if pending_command is not None
+        else None
+    )
+    older_remaining_support = (
+        pending_command.remaining_frames
+        if pending_command is not None
+        else (0,)
+    )
+
+    grouped: dict[
+        tuple[int, int, int, str, str | None],
+        set[int],
+    ] = {}
+    for older_remaining in older_remaining_support:
+        for decision_frames in cadence_support:
+            step_count = min(
+                decision_frames,
+                horizon_frame - start_frame,
+            )
+            if step_count <= 0:
+                continue
+            for delay in delay_frames:
+                displacement_x = 0.0
+                displacement_y = 0.0
+                terminal_row = row
+                terminal_column = column
+                reachable = True
+                for physical_step in range(1, step_count + 1):
+                    if physical_step > delay:
+                        motion = selected
+                    elif (
+                        older_pending is not None
+                        and physical_step > older_remaining
+                    ):
+                        motion = older_pending
+                    else:
+                        motion = active
+                    displacement_x += motion.velocity_x
+                    displacement_y += motion.velocity_y
+                    target_x = state_x + displacement_x
+                    target_y = state_y + displacement_y
+                    inside = (
+                        x_start <= target_x <= x_end
+                        and y_start <= target_y <= y_end
+                    )
+                    if not inside and not config.clamp_to_bounds:
+                        reachable = False
+                        break
+                    target_x = min(x_end, max(x_start, target_x))
+                    target_y = min(y_end, max(y_start, target_y))
+                    terminal_column = min(
+                        len(x_values) - 1,
+                        max(
+                            0,
+                            int(round((target_x - x_start) / x_step)),
+                        ),
+                    )
+                    terminal_row = min(
+                        len(y_values) - 1,
+                        max(
+                            0,
+                            int(round((target_y - y_start) / y_step)),
+                        ),
+                    )
+                if not reachable:
+                    continue
+
+                if delay < step_count or delay == step_count:
+                    successor_active = selected_action
+                    successor_pending: str | None = None
+                    successor_remaining = 0
+                else:
+                    if (
+                        older_pending is not None
+                        and older_remaining <= step_count
+                    ):
+                        successor_active = older_pending.name
+                    else:
+                        successor_active = observed_action
+                    successor_pending = selected_action
+                    successor_remaining = delay - step_count
+                    if (
+                        successor_pending == successor_active
+                        or (
+                            action_by_name[successor_pending].velocity_x
+                            == action_by_name[successor_active].velocity_x
+                            and action_by_name[successor_pending].velocity_y
+                            == action_by_name[successor_active].velocity_y
+                        )
+                        or successor_remaining >= delay_frames[-1]
+                    ):
+                        successor_pending = None
+                        successor_remaining = 0
+
+                key = (
+                    start_frame + step_count,
+                    terminal_row,
+                    terminal_column,
+                    successor_active,
+                    successor_pending,
+                )
+                grouped.setdefault(key, set())
+                if successor_pending is not None:
+                    grouped[key].add(successor_remaining)
+
+    roots = []
+    for (
+        root_frame,
+        root_row,
+        root_column,
+        root_active,
+        root_pending,
+    ), remaining in grouped.items():
+        roots.append(
+            ReachablePipelineRoot(
+                frame=root_frame,
+                row=root_row,
+                column=root_column,
+                observed_action=root_active,
+                pending_command=(
+                    PendingCommand(
+                        root_pending,
+                        tuple(sorted(remaining)),
+                    )
+                    if root_pending is not None
+                    else None
+                ),
+            )
+        )
+    return tuple(
+        sorted(
+            roots,
+            key=lambda root: (
+                root.frame,
+                root.row,
+                root.column,
+                root.observed_action,
+                (
+                    ""
+                    if root.pending_command is None
+                    else root.pending_command.action
+                ),
+                (
+                    ()
+                    if root.pending_command is None
+                    else root.pending_command.remaining_frames
+                ),
+            ),
+        )
     )
 
 
@@ -812,8 +1153,10 @@ __all__ = [
     "PipelineSurvivalQueryStats",
     "PipelineSurvivalWorkspace",
     "QueryLocalSurvivalResult",
+    "ReachablePipelineRoot",
     "StalePipelineWorkspaceError",
     "SurvivalQueryProblem",
+    "enumerate_next_decision_roots",
     "query_local_survival",
     "scalar_query_local_survival",
 ]

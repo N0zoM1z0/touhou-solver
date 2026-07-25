@@ -9,8 +9,10 @@ import numpy as np
 
 from touhou_control.query_survival import (
     PendingCommand,
+    ReachablePipelineRoot,
     StalePipelineWorkspaceError,
     SurvivalQueryProblem,
+    enumerate_next_decision_roots,
     query_local_survival,
     scalar_query_local_survival,
 )
@@ -371,6 +373,244 @@ class QueryLocalSurvivalTests(unittest.TestCase):
                     column=1,
                     observed_action="stay",
                 )
+
+    def test_workspace_lookup_only_never_expands_a_missing_root(self) -> None:
+        clearance = np.full((5, 3, 3), 10.0, dtype=np.float32)
+        problem = SurvivalQueryProblem(
+            x_axis=self.axis,
+            y_axis=self.axis,
+            clearance_volume=clearance,
+            actions=self.actions,
+            delay_frames=(0, 1),
+            nominal_delay=1,
+            config=ViabilityConfig(frames_per_layer=2),
+        )
+        try:
+            workspace = problem.build_pipeline_workspace(
+                policy_version="lookup",
+            )
+        except RuntimeError as error:
+            self.skipTest(str(error))
+        arguments = {
+            "policy_version": "lookup",
+            "frame": 0,
+            "row": 1,
+            "column": 1,
+            "observed_action": "stay",
+        }
+        with workspace:
+            self.assertIsNone(workspace.lookup_cell(**arguments))
+            workspace.query_cell(**arguments)
+            cached = workspace.lookup_cell(**arguments)
+        self.assertIsNotNone(cached)
+        self.assertEqual(cached.workspace_stats.new_state_count, 0)
+        self.assertGreater(cached.workspace_stats.root_memo_hit_count, 0)
+
+    def test_variable_cadence_workspace_matches_scalar_adversarial_seeds(
+        self,
+    ) -> None:
+        cadence_support = (1, 2, 3)
+        axis = np.arange(4, dtype=np.float32)
+        for seed in range(24):
+            with self.subTest(seed=seed):
+                rng = np.random.default_rng(80_000 + seed)
+                clearance = rng.uniform(
+                    -2.0,
+                    6.0,
+                    size=(9, 4, 4),
+                ).astype(np.float32)
+                pending = (
+                    PendingCommand(
+                        self.actions[(seed + 1) % 3].name,
+                        (1, 2, 4),
+                    )
+                    if seed % 2
+                    else None
+                )
+                arguments = {
+                    "x_axis": axis,
+                    "y_axis": axis,
+                    "clearance_volume": clearance,
+                    "actions": self.actions,
+                    "delay_frames": (0, 2, 4),
+                    "config": ViabilityConfig(frames_per_layer=2),
+                    "start_frame": seed % 4,
+                    "row": 1 + seed % 2,
+                    "column": 1 + (seed // 2) % 2,
+                    "observed_action": self.actions[seed % 3].name,
+                    "pending_command": pending,
+                    "decision_frame_support": cadence_support,
+                }
+                scalar = scalar_query_local_survival(**arguments)
+                problem = SurvivalQueryProblem(
+                    x_axis=axis,
+                    y_axis=axis,
+                    clearance_volume=clearance,
+                    actions=self.actions,
+                    delay_frames=(0, 2, 4),
+                    nominal_delay=2,
+                    config=ViabilityConfig(frames_per_layer=2),
+                )
+                try:
+                    workspace = problem.build_pipeline_workspace(
+                        policy_version=seed,
+                        decision_frame_support=cadence_support,
+                    )
+                except RuntimeError as error:
+                    self.skipTest(str(error))
+                with workspace:
+                    native = workspace.query_cell(
+                        policy_version=seed,
+                        frame=arguments["start_frame"],
+                        row=arguments["row"],
+                        column=arguments["column"],
+                        observed_action=arguments["observed_action"],
+                        pending_command=pending,
+                    )
+                self.assertEqual(
+                    native.state_label.guaranteed_frames,
+                    scalar.state_label.guaranteed_frames,
+                )
+                self.assertAlmostEqual(
+                    native.state_label.bottleneck_margin,
+                    scalar.state_label.bottleneck_margin,
+                    places=5,
+                )
+                self.assertEqual(native.best_actions, scalar.best_actions)
+                for (_, native_label), (_, scalar_label) in zip(
+                    native.action_labels,
+                    scalar.action_labels,
+                ):
+                    self.assertEqual(
+                        native_label.guaranteed_frames,
+                        scalar_label.guaranteed_frames,
+                    )
+                    self.assertAlmostEqual(
+                        native_label.bottleneck_margin,
+                        scalar_label.bottleneck_margin,
+                        places=5,
+                    )
+
+    def test_next_decision_frontier_groups_remaining_delay_support(
+        self,
+    ) -> None:
+        axis = np.arange(7, dtype=np.float32)
+        roots = enumerate_next_decision_roots(
+            x_axis=axis,
+            y_axis=axis,
+            actions=self.actions,
+            delay_frames=(3, 4),
+            decision_frame_support=(2,),
+            config=ViabilityConfig(frames_per_layer=2),
+            start_frame=5,
+            horizon_frame=20,
+            row=3,
+            column=3,
+            observed_action="stay",
+            selected_action="right",
+        )
+        self.assertEqual(len(roots), 1)
+        root = roots[0]
+        self.assertEqual((root.frame, root.row, root.column), (7, 3, 3))
+        self.assertEqual(root.observed_action, "stay")
+        self.assertEqual(
+            root.pending_command,
+            PendingCommand("right", (1, 2)),
+        )
+
+    def test_next_frontier_preserves_older_activation_and_new_pending(
+        self,
+    ) -> None:
+        axis = np.arange(7, dtype=np.float32)
+        roots = enumerate_next_decision_roots(
+            x_axis=axis,
+            y_axis=axis,
+            actions=self.actions,
+            delay_frames=(4,),
+            decision_frame_support=(2,),
+            config=ViabilityConfig(frames_per_layer=2),
+            start_frame=0,
+            horizon_frame=8,
+            row=3,
+            column=3,
+            observed_action="left",
+            selected_action="stay",
+            pending_command=PendingCommand("right", (1,)),
+        )
+        self.assertEqual(len(roots), 1)
+        self.assertEqual(
+            roots[0],
+            ReachablePipelineRoot(
+                frame=2,
+                row=3,
+                column=3,
+                observed_action="right",
+                pending_command=PendingCommand("stay", (2,)),
+            ),
+        )
+
+    def test_variable_cadence_seed_reuses_each_next_phase(self) -> None:
+        axis = np.arange(9, dtype=np.float32)
+        clearance = np.full((13, 9, 9), 10.0, dtype=np.float32)
+        problem = SurvivalQueryProblem(
+            x_axis=axis,
+            y_axis=axis,
+            clearance_volume=clearance,
+            actions=self.actions,
+            delay_frames=(0, 1, 3),
+            nominal_delay=1,
+            config=ViabilityConfig(frames_per_layer=2),
+        )
+        cadence_support = (2, 3, 4)
+        try:
+            workspace = problem.build_pipeline_workspace(
+                policy_version="variable",
+                decision_frame_support=cadence_support,
+            )
+        except RuntimeError as error:
+            self.skipTest(str(error))
+        with workspace:
+            base = workspace.query_cell(
+                policy_version="variable",
+                frame=0,
+                row=4,
+                column=4,
+                observed_action="stay",
+            )
+            roots = enumerate_next_decision_roots(
+                x_axis=axis,
+                y_axis=axis,
+                actions=self.actions,
+                delay_frames=(0, 1, 3),
+                decision_frame_support=cadence_support,
+                config=problem.config,
+                start_frame=0,
+                horizon_frame=problem.horizon_frames,
+                row=4,
+                column=4,
+                observed_action="stay",
+                selected_action="stay",
+            )
+            warmed = [
+                workspace.query_cell(
+                    policy_version="variable",
+                    frame=root.frame,
+                    row=root.row,
+                    column=root.column,
+                    observed_action=root.observed_action,
+                    pending_command=root.pending_command,
+                )
+                for root in roots
+            ]
+        self.assertEqual({root.frame for root in roots}, {2, 3, 4})
+        self.assertGreater(base.workspace_stats.new_state_count, 0)
+        self.assertLess(
+            max(
+                result.workspace_stats.new_state_count
+                for result in warmed
+            ),
+            base.workspace_stats.new_state_count,
+        )
 
     def test_postpublished_labels_match_fused_on_every_losing_state(
         self,

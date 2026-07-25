@@ -5,6 +5,9 @@ namespace {
 
 constexpr int PIPELINE_MAX_ACTIONS = 32;
 constexpr int PIPELINE_MAX_DELAYS = 64;
+constexpr int PIPELINE_MAX_DECISION_FRAMES = 16;
+constexpr int PIPELINE_MAX_BRANCHES =
+    PIPELINE_MAX_DELAYS * PIPELINE_MAX_DECISION_FRAMES;
 constexpr std::uint64_t PIPELINE_EMPTY_KEY =
     std::numeric_limits<std::uint64_t>::max();
 
@@ -149,7 +152,9 @@ public:
         int action_count,
         const int* delay_frames,
         int delay_count,
-        int decision_frames,
+        const int* decision_frame_support,
+        int decision_frame_count,
+        int continuation_decision_frames,
         float required_clearance,
         bool clamp_to_bounds
     )
@@ -162,12 +167,16 @@ public:
           y_start_(y_start),
           y_step_(y_step),
           action_count_(action_count),
-          decision_frames_(decision_frames),
+          continuation_decision_frames_(continuation_decision_frames),
           required_clearance_(required_clearance),
           clamp_to_bounds_(clamp_to_bounds),
           velocity_x_(velocity_x, velocity_x + action_count),
           velocity_y_(velocity_y, velocity_y + action_count),
-          delay_frames_(delay_frames, delay_frames + delay_count) {
+          delay_frames_(delay_frames, delay_frames + delay_count),
+          decision_frame_support_(
+              decision_frame_support,
+              decision_frame_support + decision_frame_count
+          ) {
         root_memo_.reserve(1024);
     }
 
@@ -302,6 +311,83 @@ public:
         return 0;
     }
 
+    int contains_root(
+        int start_frame,
+        int start_row,
+        int start_column,
+        int observed_action,
+        int pending_action,
+        const int* pending_remaining_frames,
+        int pending_remaining_count,
+        int* output_present
+    ) {
+        if (
+            output_present == nullptr
+            || start_frame < 0 || start_frame >= frame_count_
+            || start_row < 0 || start_row >= row_count_
+            || start_column < 0 || start_column >= column_count_
+            || observed_action < 0 || observed_action >= action_count_
+            || pending_action < -1 || pending_action >= action_count_
+            || pending_remaining_count < 0
+            || pending_remaining_count > PIPELINE_MAX_DELAYS
+            || (
+                pending_action < 0
+                && pending_remaining_count != 0
+            )
+            || (
+                pending_action >= 0
+                && (
+                    pending_remaining_frames == nullptr
+                    || pending_remaining_count == 0
+                )
+            )
+        ) {
+            return 1;
+        }
+        for (int index = 0; index < pending_remaining_count; ++index) {
+            if (
+                pending_remaining_frames[index] <= 0
+                || pending_remaining_frames[index] > frame_count_ - 1
+                || (
+                    index > 0
+                    && pending_remaining_frames[index - 1]
+                        >= pending_remaining_frames[index]
+                )
+            ) {
+                return 1;
+            }
+        }
+
+        std::lock_guard<std::mutex> guard(mutex_);
+        auto present = [&](int pending, int remaining) {
+            PipelineState state{
+                start_frame,
+                observed_action,
+                pending,
+                remaining,
+                start_row,
+                start_column,
+            };
+            state = canonicalize(state);
+            return root_memo_.find(state_key(state)) != root_memo_.end();
+        };
+        if (pending_action < 0) {
+            *output_present = present(-1, 0) ? 1 : 0;
+            return 0;
+        }
+        for (int index = 0; index < pending_remaining_count; ++index) {
+            if (!present(
+                    pending_action,
+                    pending_remaining_frames[index]
+                )) {
+                *output_present = 0;
+                return 0;
+            }
+        }
+        *output_present = 1;
+        return 0;
+    }
+
 private:
     struct Counters {
         std::uint64_t memo_hits = 0;
@@ -383,12 +469,13 @@ private:
     Branch prepare_branch(
         const PipelineState& state,
         int selected,
-        int delay
+        int delay,
+        int decision_frames
     ) {
         ++counters_.branch_simulations;
         const int horizon_frame = frame_count_ - 1;
         const int step_count = std::min(
-            decision_frames_,
+            decision_frames,
             horizon_frame - state.frame
         );
         const float initial_margin = current_margin(state);
@@ -501,16 +588,35 @@ private:
 
     PipelineLabel action_upper(
         const PipelineState& state,
-        int selected
+        int selected,
+        bool root_transition
     ) {
         PipelineLabel upper{
             std::numeric_limits<std::uint16_t>::max(),
             std::numeric_limits<float>::infinity(),
         };
-        for (int delay : delay_frames_) {
-            const Branch branch = prepare_branch(state, selected, delay);
-            if (pipeline_label_less(branch.upper, upper)) {
-                upper = branch.upper;
+        const int decision_count = (
+            root_transition
+            ? static_cast<int>(decision_frame_support_.size())
+            : 1
+        );
+        for (int decision_index = 0; decision_index < decision_count;
+             ++decision_index) {
+            const int decision_frames = (
+                root_transition
+                ? decision_frame_support_[decision_index]
+                : continuation_decision_frames_
+            );
+            for (int delay : delay_frames_) {
+                const Branch branch = prepare_branch(
+                    state,
+                    selected,
+                    delay,
+                    decision_frames
+                );
+                if (pipeline_label_less(branch.upper, upper)) {
+                    upper = branch.upper;
+                }
             }
         }
         return upper;
@@ -519,22 +625,38 @@ private:
     PipelineLabel evaluate_action(
         const PipelineState& state,
         int selected,
-        const PipelineLabel* incumbent
+        const PipelineLabel* incumbent,
+        bool root_transition
     ) {
-        std::array<Branch, PIPELINE_MAX_DELAYS> branches;
-        std::array<int, PIPELINE_MAX_DELAYS> order;
+        std::array<Branch, PIPELINE_MAX_BRANCHES> branches;
+        std::array<int, PIPELINE_MAX_BRANCHES> order;
         const int delay_count = static_cast<int>(delay_frames_.size());
-        for (int index = 0; index < delay_count; ++index) {
-            branches[index] = prepare_branch(
-                state,
-                selected,
-                delay_frames_[index]
+        const int decision_count = static_cast<int>(
+            root_transition ? decision_frame_support_.size() : 1
+        );
+        const int branch_count = delay_count * decision_count;
+        int branch_index = 0;
+        for (int decision_index = 0; decision_index < decision_count;
+             ++decision_index) {
+            const int decision_frames = (
+                root_transition
+                ? decision_frame_support_[decision_index]
+                : continuation_decision_frames_
             );
-            order[index] = index;
+            for (int delay : delay_frames_) {
+                branches[branch_index] = prepare_branch(
+                    state,
+                    selected,
+                    delay,
+                    decision_frames
+                );
+                order[branch_index] = branch_index;
+                ++branch_index;
+            }
         }
         std::sort(
             order.begin(),
-            order.begin() + delay_count,
+            order.begin() + branch_count,
             [&](int left, int right) {
                 return pipeline_label_less(
                     branches[left].upper,
@@ -547,7 +669,7 @@ private:
             std::numeric_limits<std::uint16_t>::max(),
             std::numeric_limits<float>::infinity(),
         };
-        for (int rank = 0; rank < delay_count; ++rank) {
+        for (int rank = 0; rank < branch_count; ++rank) {
             const Branch& branch = branches[order[rank]];
             PipelineLabel label;
             if (branch.failed) {
@@ -567,10 +689,10 @@ private:
             if (
                 incumbent != nullptr
                 && pipeline_label_less_equal(robust, *incumbent)
-                && rank + 1 < delay_count
+                && rank + 1 < branch_count
             ) {
                 counters_.delay_incumbent_prunes += (
-                    delay_count - rank - 1
+                    branch_count - rank - 1
                 );
                 break;
             }
@@ -598,7 +720,7 @@ private:
         for (int action = 0; action < action_count_; ++action) {
             candidates[action] = ActionCandidate{
                 action,
-                action_upper(state, action),
+                action_upper(state, action, false),
             };
         }
         std::sort(
@@ -626,7 +748,8 @@ private:
             const PipelineLabel action_label = evaluate_action(
                 state,
                 candidate.action,
-                have_best ? &best : nullptr
+                have_best ? &best : nullptr,
+                false
             );
             if (!have_best || pipeline_label_less(best, action_label)) {
                 best = action_label;
@@ -656,7 +779,8 @@ private:
                 node.actions[action] = evaluate_action(
                     state,
                     action,
-                    nullptr
+                    nullptr,
+                    true
                 );
             }
             node.state = node.actions[0];
@@ -666,7 +790,6 @@ private:
                 }
             }
         }
-        memo_.insert(key, node.state);
         root_memo_.emplace(key, node);
         return node;
     }
@@ -680,12 +803,13 @@ private:
     double y_start_;
     double y_step_;
     int action_count_;
-    int decision_frames_;
+    int continuation_decision_frames_;
     float required_clearance_;
     bool clamp_to_bounds_;
     std::vector<double> velocity_x_;
     std::vector<double> velocity_y_;
     std::vector<int> delay_frames_;
+    std::vector<int> decision_frame_support_;
     PipelineFlatMemo memo_;
     std::unordered_map<std::uint64_t, RootNode> root_memo_;
     Counters counters_;
@@ -694,7 +818,7 @@ private:
 
 }  // namespace
 
-TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
+TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v2(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -708,7 +832,9 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
     int action_count,
     const int* delay_frames,
     int delay_count,
-    int decision_frames,
+    const int* decision_frame_support,
+    int decision_frame_count,
+    int continuation_decision_frames,
     float required_clearance,
     int clamp_to_bounds,
     void** output_workspace
@@ -716,6 +842,7 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
     if (
         clearance == nullptr || velocity_x == nullptr
         || velocity_y == nullptr || delay_frames == nullptr
+        || decision_frame_support == nullptr
         || output_workspace == nullptr
     ) {
         return 1;
@@ -727,7 +854,9 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
         || x_step <= 0.0 || y_step <= 0.0
         || action_count < 1 || action_count > PIPELINE_MAX_ACTIONS
         || delay_count < 1 || delay_count > PIPELINE_MAX_DELAYS
-        || decision_frames < 1
+        || decision_frame_count < 1
+        || decision_frame_count > PIPELINE_MAX_DECISION_FRAMES
+        || continuation_decision_frames < 1
     ) {
         return 2;
     }
@@ -738,6 +867,18 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
             || (
                 index > 0
                 && delay_frames[index - 1] >= delay_frames[index]
+            )
+        ) {
+            return 3;
+        }
+    }
+    for (int index = 0; index < decision_frame_count; ++index) {
+        if (
+            decision_frame_support[index] < 1
+            || (
+                index > 0
+                && decision_frame_support[index - 1]
+                    >= decision_frame_support[index]
             )
         ) {
             return 3;
@@ -758,7 +899,9 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
             action_count,
             delay_frames,
             delay_count,
-            decision_frames,
+            decision_frame_support,
+            decision_frame_count,
+            continuation_decision_frames,
             required_clearance,
             clamp_to_bounds != 0
         );
@@ -767,6 +910,48 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
         return 4;
     }
     return 0;
+}
+
+TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
+    const float* clearance,
+    int frame_count,
+    int row_count,
+    int column_count,
+    double x_start,
+    double x_step,
+    double y_start,
+    double y_step,
+    const double* velocity_x,
+    const double* velocity_y,
+    int action_count,
+    const int* delay_frames,
+    int delay_count,
+    int decision_frames,
+    float required_clearance,
+    int clamp_to_bounds,
+    void** output_workspace
+) {
+    return touhou_pipeline_survival_workspace_create_v2(
+        clearance,
+        frame_count,
+        row_count,
+        column_count,
+        x_start,
+        x_step,
+        y_start,
+        y_step,
+        velocity_x,
+        velocity_y,
+        action_count,
+        delay_frames,
+        delay_count,
+        &decision_frames,
+        1,
+        decision_frames,
+        required_clearance,
+        clamp_to_bounds,
+        output_workspace
+    );
 }
 
 TOUHOU_EXPORT int touhou_pipeline_survival_workspace_query_v1(
@@ -811,6 +996,38 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_query_v1(
             output_action_margins,
             output_best_action_mask,
             output_stats
+        );
+    } catch (...) {
+        return 2;
+    }
+}
+
+TOUHOU_EXPORT int touhou_pipeline_survival_workspace_contains_root_v1(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int* output_present
+) {
+    if (workspace == nullptr || output_present == nullptr) {
+        return 1;
+    }
+    PipelineSurvivalWorkspace* typed =
+        static_cast<PipelineSurvivalWorkspace*>(workspace);
+    try {
+        return typed->contains_root(
+            start_frame,
+            start_row,
+            start_column,
+            observed_action,
+            pending_action,
+            pending_remaining_frames,
+            pending_remaining_count,
+            output_present
         );
     } catch (...) {
         return 2;

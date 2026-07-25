@@ -1,0 +1,304 @@
+{
+  "schema": "exact-root-frontier-benchmark-v1",
+  "algorithm": "A public root is robust to one declared next-decision cadence support; deeper values retain the configured fixed cadence. After an action is issued, kinematic delay/cadence branches are deduplicated into exact next roots. Expensive phase skeletons can be seeded before the exact root is known, then specialized and consumed through a fail-closed lookup-only API.",
+  "timing_boundary": "Clearance construction and workspace construction are excluded. Cold roots execute sequentially. Phase seed and post-issue specialization wall times use three concurrent phase-shard workspaces through a Python thread pool.",
+  "semantic_boundary": "Variable cadence is adversarial only on the public root's first transition. This is a receding-horizon shadow value, not a full unbounded variable-cadence survival certificate.",
+  "one_step_scalar_differential": {
+    "seed_count": 512,
+    "failure_count": 0,
+    "failures": [],
+    "native_cold_ms": {
+      "median": 0.053975003538653255,
+      "p95": 0.463514996226877,
+      "max": 1.8806379521265626
+    }
+  },
+  "th08_phase_shards": {
+    "case_count": 5,
+    "failure_count": 0,
+    "failures": [],
+    "cadence_support": [
+      4,
+      5,
+      6
+    ],
+    "cold_exact_ms": {
+      "median": 90.3692500141915,
+      "p95": 131.9548959727399,
+      "max": 135.83692302927375
+    },
+    "phase_seed_ms": {
+      "median": 102.12545801186934,
+      "p95": 136.40719099203125,
+      "max": 139.7315110079944
+    },
+    "post_issue_specialize_ms": {
+      "median": 5.724364513298497,
+      "p95": 24.94631300214678,
+      "max": 26.191095006652176
+    },
+    "consume_lookup_ms": {
+      "median": 0.06144601502455771,
+      "p95": 0.100477016530931,
+      "max": 0.14276301953941584
+    },
+    "parallel_phase_seed_wall_ms": {
+      "median": 112.50962101621553,
+      "p95": 122.0191849861294,
+      "max": 140.6892699887976
+    },
+    "parallel_post_issue_specialize_wall_ms": {
+      "median": 39.60639896104112,
+      "p95": 49.35071599902585,
+      "max": 62.50340200494975
+    },
+    "cases": [
+      {
+        "seed": 3,
+        "frontier_root_count": 14,
+        "roots_per_frame": {
+          "4": 4,
+          "5": 6,
+          "6": 4
+        },
+        "early_exact_hit_count": 0,
+        "cold_exact_ms": {
+          "median": 88.70015549473464,
+          "p95": 103.11988298781216,
+          "max": 103.30907598836347
+        },
+        "phase_seed_ms": {
+          "4": 98.4781400184147,
+          "5": 88.3703280123882,
+          "6": 89.36212497064844
+        },
+        "specialize_ms": {
+          "4": [
+            17.31401600409299,
+            0.29166199965402484,
+            0.4174209898337722,
+            18.10361898969859
+          ],
+          "5": [
+            9.494090976659209,
+            0.24303904501721263,
+            13.339760014787316,
+            0.09016995318233967,
+            5.402370006777346,
+            8.8978799758479
+          ],
+          "6": [
+            8.15857102861628,
+            11.69879303779453,
+            5.296074028592557,
+            7.846758002415299
+          ]
+        },
+        "parallel_phase_seed_wall_ms": 101.3649280066602,
+        "parallel_post_issue_specialize_wall_ms": 39.60639896104112,
+        "consume_lookup_ms": {
+          "median": 0.07984050898812711,
+          "p95": 0.1350120292045176,
+          "max": 0.14276301953941584
+        }
+      },
+      {
+        "seed": 11,
+        "frontier_root_count": 14,
+        "roots_per_frame": {
+          "4": 4,
+          "5": 6,
+          "6": 4
+        },
+        "early_exact_hit_count": 0,
+        "cold_exact_ms": {
+          "median": 68.95867752609774,
+          "p95": 91.86719002900645,
+          "max": 92.74524595821276
+        },
+        "phase_seed_ms": {
+          "4": 120.99818501155823,
+          "5": 102.12545801186934,
+          "6": 112.53240599762648
+        },
+        "specialize_ms": {
+          "4": [
+            10.88737603276968,
+            1.7454050248488784,
+            0.13778300490230322,
+            6.267976015806198
+          ],
+          "5": [
+            15.06583800073713,
+            0.49495702842250466,
+            5.092428997159004,
+            0.08297699969261885,
+            2.3245459888130426,
+            1.958845998160541
+          ],
+          "6": [
+            13.833648001309484,
+            3.7403100286610425,
+            4.090478003490716,
+            1.9224550342187285
+          ]
+        },
+        "parallel_phase_seed_wall_ms": 122.0191849861294,
+        "parallel_post_issue_specialize_wall_ms": 26.547287998255342,
+        "consume_lookup_ms": {
+          "median": 0.05105350282974541,
+          "p95": 0.0699720112606883,
+          "max": 0.09301298996433616
+        }
+      },
+      {
+        "seed": 19,
+        "frontier_root_count": 14,
+        "roots_per_frame": {
+          "4": 4,
+          "5": 6,
+          "6": 4
+        },
+        "early_exact_hit_count": 0,
+        "cold_exact_ms": {
+          "median": 80.81520648556761,
+          "p95": 97.47041104128584,
+          "max": 98.77283900277689
+        },
+        "phase_seed_ms": {
+          "4": 111.52720398968086,
+          "5": 111.19753395905718,
+          "6": 100.17199296271428
+        },
+        "specialize_ms": {
+          "4": [
+            14.410533010959625,
+            2.0164279849268496,
+            0.17868797294795513,
+            9.981386014260352
+          ],
+          "5": [
+            11.06322999112308,
+            1.818572054617107,
+            4.564637027215213,
+            0.1617170055396855,
+            6.925559951923788,
+            2.166075981222093
+          ],
+          "6": [
+            10.133164993021637,
+            9.26265399903059,
+            3.716990991961211,
+            5.234783049672842
+          ]
+        },
+        "parallel_phase_seed_wall_ms": 112.50962101621553,
+        "parallel_post_issue_specialize_wall_ms": 30.336323019582778,
+        "consume_lookup_ms": {
+          "median": 0.05458298255689442,
+          "p95": 0.08282699855044484,
+          "max": 0.1229490153491497
+        }
+      },
+      {
+        "seed": 27,
+        "frontier_root_count": 14,
+        "roots_per_frame": {
+          "4": 4,
+          "5": 6,
+          "6": 4
+        },
+        "early_exact_hit_count": 0,
+        "cold_exact_ms": {
+          "median": 129.7311969974544,
+          "p95": 135.01840503886342,
+          "max": 135.83692302927375
+        },
+        "phase_seed_ms": {
+          "4": 139.7315110079944,
+          "5": 126.66134198661894,
+          "6": 136.40719099203125
+        },
+        "specialize_ms": {
+          "4": [
+            25.30571597162634,
+            1.3426250079646707,
+            0.10595604544505477,
+            13.291755982208997
+          ],
+          "5": [
+            20.71807999163866,
+            0.9247079724445939,
+            11.318636010400951,
+            0.2758359769359231,
+            8.281540009193122,
+            6.115305004641414
+          ],
+          "6": [
+            19.538929976988584,
+            9.417493944056332,
+            7.263584004249424,
+            6.897635001223534
+          ]
+        },
+        "parallel_phase_seed_wall_ms": 140.6892699887976,
+        "parallel_post_issue_specialize_wall_ms": 49.35071599902585,
+        "consume_lookup_ms": {
+          "median": 0.06218202179297805,
+          "p95": 0.09352597407996655,
+          "max": 0.100477016530931
+        }
+      },
+      {
+        "seed": 35,
+        "frontier_root_count": 14,
+        "roots_per_frame": {
+          "4": 4,
+          "5": 6,
+          "6": 4
+        },
+        "early_exact_hit_count": 0,
+        "cold_exact_ms": {
+          "median": 93.55107697774656,
+          "p95": 109.71126199001446,
+          "max": 110.77397700864822
+        },
+        "phase_seed_ms": {
+          "4": 88.22705096099526,
+          "5": 90.4074750142172,
+          "6": 81.37858100235462
+        },
+        "specialize_ms": {
+          "4": [
+            26.191095006652176,
+            3.047358011826873,
+            0.09675801265984774,
+            24.28973198402673
+          ],
+          "5": [
+            18.996912986040115,
+            0.8297029999084771,
+            4.625024972483516,
+            0.06525102071464062,
+            25.90357098961249,
+            3.911926003638655
+          ],
+          "6": [
+            24.94631300214678,
+            6.046359019819647,
+            25.542340998072177,
+            4.046607995405793
+          ]
+        },
+        "parallel_phase_seed_wall_ms": 91.73641802044585,
+        "parallel_post_issue_specialize_wall_ms": 62.50340200494975,
+        "consume_lookup_ms": {
+          "median": 0.06335452781058848,
+          "p95": 0.07767602801322937,
+          "max": 0.08292996790260077
+        }
+      }
+    ]
+  },
+  "failure_count": 0
+}

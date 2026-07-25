@@ -22,6 +22,7 @@ _SURVIVAL_VIABILITY_FUNCTION = None
 _QUERY_LOCAL_SURVIVAL_FUNCTION = None
 _PIPELINE_WORKSPACE_CREATE_FUNCTION = None
 _PIPELINE_WORKSPACE_QUERY_FUNCTION = None
+_PIPELINE_WORKSPACE_CONTAINS_FUNCTION = None
 _PIPELINE_WORKSPACE_DESTROY_FUNCTION = None
 _LOSING_SURVIVAL_LABELS_FUNCTION = None
 _CLEARANCE_FUNCTION = None
@@ -292,23 +293,29 @@ def _load_query_local_survival_function():
 def _load_pipeline_workspace_functions():
     global _PIPELINE_WORKSPACE_CREATE_FUNCTION
     global _PIPELINE_WORKSPACE_QUERY_FUNCTION
+    global _PIPELINE_WORKSPACE_CONTAINS_FUNCTION
     global _PIPELINE_WORKSPACE_DESTROY_FUNCTION
     if (
         _PIPELINE_WORKSPACE_CREATE_FUNCTION is not None
         and _PIPELINE_WORKSPACE_QUERY_FUNCTION is not None
+        and _PIPELINE_WORKSPACE_CONTAINS_FUNCTION is not None
         and _PIPELINE_WORKSPACE_DESTROY_FUNCTION is not None
     ):
         return (
             _PIPELINE_WORKSPACE_CREATE_FUNCTION,
             _PIPELINE_WORKSPACE_QUERY_FUNCTION,
+            _PIPELINE_WORKSPACE_CONTAINS_FUNCTION,
             _PIPELINE_WORKSPACE_DESTROY_FUNCTION,
         )
     library = _load_library()
     if library is None:
         return None
     try:
-        create = library.touhou_pipeline_survival_workspace_create_v1
+        create = library.touhou_pipeline_survival_workspace_create_v2
         query = library.touhou_pipeline_survival_workspace_query_v1
+        contains = (
+            library.touhou_pipeline_survival_workspace_contains_root_v1
+        )
         destroy = library.touhou_pipeline_survival_workspace_destroy_v1
     except AttributeError:
         return None
@@ -323,6 +330,8 @@ def _load_pipeline_workspace_functions():
         ctypes.c_double,
         ctypes.POINTER(ctypes.c_double),
         ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
         ctypes.c_int,
         ctypes.POINTER(ctypes.c_int),
         ctypes.c_int,
@@ -349,12 +358,25 @@ def _load_pipeline_workspace_functions():
         ctypes.POINTER(ctypes.c_uint64),
     ]
     query.restype = ctypes.c_int
+    contains.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+    ]
+    contains.restype = ctypes.c_int
     destroy.argtypes = [ctypes.c_void_p]
     destroy.restype = None
     _PIPELINE_WORKSPACE_CREATE_FUNCTION = create
     _PIPELINE_WORKSPACE_QUERY_FUNCTION = query
+    _PIPELINE_WORKSPACE_CONTAINS_FUNCTION = contains
     _PIPELINE_WORKSPACE_DESTROY_FUNCTION = destroy
-    return create, query, destroy
+    return create, query, contains, destroy
 
 
 def _load_losing_survival_labels_function():
@@ -1287,6 +1309,7 @@ class PipelineSurvivalNativeWorkspace:
         *,
         create,
         query,
+        contains,
         destroy,
         x_axis: np.ndarray,
         y_axis: np.ndarray,
@@ -1294,7 +1317,8 @@ class PipelineSurvivalNativeWorkspace:
         velocity_x: np.ndarray,
         velocity_y: np.ndarray,
         delay_frames: np.ndarray,
-        decision_frames: int,
+        decision_frame_support: np.ndarray,
+        continuation_decision_frames: int,
         required_clearance: float,
         clamp_to_bounds: bool,
     ) -> None:
@@ -1313,7 +1337,12 @@ class PipelineSurvivalNativeWorkspace:
             dtype=np.float64,
         )
         self._delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+        self._decision_frames = np.ascontiguousarray(
+            decision_frame_support,
+            dtype=np.int32,
+        )
         self._query = query
+        self._contains = contains
         self._destroy = destroy
         self._handle = ctypes.c_void_p()
         result = create(
@@ -1336,7 +1365,11 @@ class PipelineSurvivalNativeWorkspace:
             len(self._velocity_x),
             self._delays.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
             len(self._delays),
-            decision_frames,
+            self._decision_frames.ctypes.data_as(
+                ctypes.POINTER(ctypes.c_int)
+            ),
+            len(self._decision_frames),
+            continuation_decision_frames,
             required_clearance,
             int(clamp_to_bounds),
             ctypes.byref(self._handle),
@@ -1441,6 +1474,50 @@ class PipelineSurvivalNativeWorkspace:
             stats,
         )
 
+    def contains_root(
+        self,
+        *,
+        start_frame: int,
+        start_row: int,
+        start_column: int,
+        observed_action_index: int,
+        pending_action_index: int = -1,
+        pending_remaining_frames: np.ndarray | None = None,
+    ) -> bool:
+        """Return whether every branch of an exact public root is cached."""
+
+        if self.closed:
+            raise RuntimeError("native pipeline workspace is closed")
+        pending = np.ascontiguousarray(
+            (
+                np.empty(0, dtype=np.int32)
+                if pending_remaining_frames is None
+                else pending_remaining_frames
+            ),
+            dtype=np.int32,
+        )
+        present = ctypes.c_int()
+        result = self._contains(
+            self._handle,
+            start_frame,
+            start_row,
+            start_column,
+            observed_action_index,
+            pending_action_index,
+            (
+                pending.ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+                if len(pending)
+                else None
+            ),
+            len(pending),
+            ctypes.byref(present),
+        )
+        if result != 0:
+            raise RuntimeError(
+                f"native pipeline workspace lookup returned {result}"
+            )
+        return bool(present.value)
+
 
 def create_pipeline_survival_workspace(
     *,
@@ -1450,7 +1527,8 @@ def create_pipeline_survival_workspace(
     velocity_x: np.ndarray,
     velocity_y: np.ndarray,
     delay_frames: np.ndarray,
-    decision_frames: int,
+    decision_frame_support: np.ndarray,
+    continuation_decision_frames: int,
     required_clearance: float,
     clamp_to_bounds: bool,
 ) -> PipelineSurvivalNativeWorkspace | None:
@@ -1459,10 +1537,11 @@ def create_pipeline_survival_workspace(
     functions = _load_pipeline_workspace_functions()
     if functions is None:
         return None
-    create, query, destroy = functions
+    create, query, contains, destroy = functions
     return PipelineSurvivalNativeWorkspace(
         create=create,
         query=query,
+        contains=contains,
         destroy=destroy,
         x_axis=x_axis,
         y_axis=y_axis,
@@ -1470,7 +1549,8 @@ def create_pipeline_survival_workspace(
         velocity_x=velocity_x,
         velocity_y=velocity_y,
         delay_frames=delay_frames,
-        decision_frames=decision_frames,
+        decision_frame_support=decision_frame_support,
+        continuation_decision_frames=continuation_decision_frames,
         required_clearance=required_clearance,
         clamp_to_bounds=clamp_to_bounds,
     )

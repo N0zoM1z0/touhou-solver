@@ -2758,3 +2758,39 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   publication with measured hit rate and delivery cost.
 - Full proof boundaries, one-pending limitation, and the veto-only promotion
   gate are in `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`.
+
+## 2026-07-25: Exact-Root Frontier And Phase-Skeleton Prewarm
+
+- Replaced single-next-root prediction with a game-neutral kinematic frontier
+  over issued action, command delay, next-decision interval, observed action,
+  older pending action, and remaining-delay support. Duplicate physical
+  branches are grouped into exact public roots.
+- Tested and rejected naive recursively variable `(4,5,6)` cadence in the
+  sparse TH08-sized workspace: a manual probe did not finish after more than
+  60 seconds and was terminated as `discarded/external_stop`. The retained
+  value branches cadence only on the public root's first transition and states
+  its fixed-continuation boundary explicitly.
+- Added native C ABI v2 support for one-transition root cadence, retained v1
+  construction compatibility, and added lookup-only root consumption. A cache
+  miss returns without expanding the C++ state graph.
+- Added phase-shard prewarming: an expensive likely-cell seed can run before
+  the exact root is known; after issuance, the reachable roots are specialized
+  inside their exact-frame shard and then published.
+- Retained benchmark
+  `artifacts/benchmarks/exact_root_frontier_20260725.json` passes 512
+  scalar/native differentials and 70 TH08-shaped cold/specialized root
+  comparisons with zero failures.
+- Cold exact roots measured `90.37/131.95/135.84 ms`
+  median/p95/max. Three-shard post-issue frontier wall time measured
+  `39.61/49.35/62.50 ms`; lookup-only consumption measured
+  `0.061/0.100/0.143 ms`.
+- Phase-seed wall remained `112.51/122.02/140.69 ms`, and a seed alone was an
+  exact hit for zero of 70 roots. **Decision:** accept the decomposition and
+  fail-closed lookup offline, but keep it shadow-only. The next gate is an
+  isolated rolling scheduler with native cooperative cancellation,
+  newest-version-wins behavior, calibrated cadence support, and physical hit
+  rate/delivery telemetry.
+- Linux and Windows native libraries were rebuilt; both complete quick suites
+  pass 460 tests in `1.629/3.182 s`.
+- Full design and evidence boundary:
+  `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`.

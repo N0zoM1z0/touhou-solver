@@ -173,6 +173,18 @@ These instructions apply to every file and task below this directory.
   A cold reachable-tube expansion must stay off the issue-time thread. Publish
   and consume only an exact root/version match; otherwise fall back to the
   Boolean policy plus the fresh local hard certificate.
+- Treat controller cadence separately from command pickup delay. A
+  variable-cadence public-root value must state whether uncertainty applies
+  once or recursively; the current prototype branches cadence for one
+  transition only and is not a full variable-cadence survival proof. Do not
+  schedule unbounded cadence branching in the sparse recursive workspace
+  without a new bounded-state/performance argument.
+- A warmed phase memo is not a cached exact root. Background code may seed
+  phase skeletons before action selection, but it must still materialize the
+  full frame/cell/observed/pending/remaining-support root after issuance.
+  Controller-side consumption must use lookup-only semantics: a miss must
+  never start cold C++ expansion. Report phase-seed, root-specialization, and
+  consumption timings separately, including measured worker contention.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 

@@ -13,15 +13,16 @@ runtime evidence remain in `notes/`.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `13111a0 Isolate Boolean publication and model pending input`. It adds a
-  versioned sparse C++ reachable-tube workspace over exact phase, native
-  observed action, older pending action, and remaining-delay support.
-  Admissible optimality/feasibility pruning preserves complete exact labels
-  at public roots. Repeated exact roots are fast, but cold TH08 p95 remains
-  outside the issue-time budget; the workspace is shadow/offline and is not
-  called by the live controller.
-- Linux and Windows complete suites pass 455 quick tests in `1.542/3.084 s`.
-  Read `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
+  `5c9eea9 Add exact pending pipeline workspace`. It adds a deduplicated
+  issued-action/next-decision root frontier, one-transition cadence-robust
+  public roots, phase-sharded skeleton prewarming, and a lookup-only exact
+  consumption API. Offline specialization is fast after a phase seed, but
+  rolling delivery and live hit rate remain unresolved; the workspace is
+  shadow/offline and is not called by the live controller.
+- Linux and Windows complete suites pass 460 tests in `1.629/3.182 s`.
+  Both native libraries were rebuilt. Read
+  `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
+  `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`, CE-0108/0109, and
   `STRATEGY.md` before changing viability queries or losing-state authority.
@@ -416,6 +417,15 @@ PYTHONPATH=scripts python3 \
   --scalar-seeds 512 --th08-cases 10
 ```
 
+The retained exact-root frontier/phase-shard experiment is:
+
+```bash
+PYTHONPATH=scripts python3 \
+  scripts/benchmarks/benchmark_exact_root_frontier.py \
+  artifacts/benchmarks/exact_root_frontier_20260725.json \
+  --scalar-seeds 512 --th08-cases 5
+```
+
 The command must include `PYTHONPATH=scripts`. Running bare unittest discovery
 causes import errors for every script module; that is a test invocation error,
 not a product regression.
@@ -433,7 +443,7 @@ same UNC directory as `start_dir` and `top_level_dir`:
 ```
 
 Change only the `pattern` for a focused Windows file. This exact form passed
-all 455 tests in 3.084 seconds at the 2026-07-25 augmented-pipeline
+all 460 tests in 3.182 seconds at the 2026-07-25 exact-root-frontier
 checkpoint.
 
 Before commit:
@@ -884,14 +894,15 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 A good next commit is not "the randomized stage had fewer hits" by itself. It
 should:
 
-1. Move augmented reachable-tube expansion onto the isolated survival
-   executor and publish results with the complete exact root key and immutable
-   policy version. Measure prewarm neighborhood size, exact-root cache hit
-   rate, new-state count, and miss fallback. Never block the issue-time thread
-   on a cold expansion.
-2. Reduce the current TH08 cold/incremental workspace p95 of `104.46 ms` or
-   hide it behind useful exact-root prewarming without increasing Boolean
-   expiry, local p95, or action lag. Recheck both retained 16-query Stage-5
+1. Add a bounded rolling phase-shard scheduler to the isolated survival
+   executor. Begin skeleton work from Boolean publication, use
+   newest-version-wins cooperative cancellation, then specialize the
+   issued-action frontier and publish complete exact root keys. Measure seed
+   distance, deadline completion, exact hit rate, discarded work, and miss
+   fallback. Never block the issue-time thread on cold expansion.
+2. Turn the offline post-seed frontier wall p95 of `49.35 ms` into useful
+   physical shadow hits without increasing Boolean expiry, local p95, CPU
+   contention, or action lag. Recheck both retained 16-query Stage-5
    cohorts, canonical decision 1,680, and cross-stage losing witnesses before
    granting even veto-only authority. Preserve ordering: fresh hard vector,
    guaranteed survival frames, bottleneck clearance, control reserve, then
@@ -937,9 +948,13 @@ classification and best actions. Read
 `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`. Its versioned sparse
 C++ recurrence passes 512 scalar and ten full-size v1 differentials; warm
 exact roots are about 0.1 ms, but cold/incremental TH08 p95 is 104.46 ms.
-Keep it shadow-only. Add isolated background prewarming and exact-root/version
-publication, measure cache-hit and delivery cost, and fall back on every miss
-before considering veto-only A/B. Continue the packed issue-time certificate
+Read `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`. Phase-sharded prewarm,
+70 TH08-shaped exact-root specializations, and lookup-only consumption pass
+offline, but the phase seed p95 is 122.02 ms and no rolling physical hit rate
+has been measured. Keep it shadow-only. Add the isolated rolling scheduler,
+cooperative cancellation, exact-root/version publication, and miss telemetry;
+fall back on every miss before considering veto-only A/B. Continue the packed
+issue-time certificate
 and ECL/timeline `BirthWindow` work; keep mechanics/safety game-neutral while
 allowing explicit practiced profiles.
 Retain compact artifacts and counterexamples, separate canonical attempts

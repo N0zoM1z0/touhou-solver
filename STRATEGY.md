@@ -40,7 +40,9 @@ explicitly enabled, on an independent single-worker shadow executor. This
 repairs the publication/expiry regression but does not authorize the labels:
 two Stage-5 traces show that exact layer phase, game-observed active input,
 and pending-command remaining delay materially change state classification
-and best-action sets.
+and best-action sets. Exact-root frontier work has now validated a
+lookup-only, phase-sharded prewarm decomposition offline, but the rolling
+delivery/hit-rate gate has not been run physically.
 
 The next architectural target is a delivery-aware solver:
 
@@ -251,6 +253,16 @@ The next architectural target is a delivery-aware solver:
   `38.76/104.46 ms` for cold/incremental workspace roots; an identical warm
   root measured `0.103/0.128 ms`. This accepts the pruning recurrence, not
   issue-time delivery: cold p95 remains outside the live control budget.
+- **Exact-root frontier prototype:** The issued action is now lowered into a
+  deduplicated set of next roots over command delay and an experimental
+  `(4,5,6)` next-decision support. A public root may robustly branch over that
+  cadence once while fixed-eight-frame continuation remains explicit; this is
+  not a full variable-cadence certificate. Across 512 scalar differentials
+  and 70 TH08-shaped exact roots, native results had zero failures. Three
+  phase shards reduced post-issue frontier wall time to
+  `39.61/49.35/62.50 ms` median/p95/max and lookup-only consumption to
+  `0.061/0.100/0.143 ms`. Phase seed wall remained
+  `112.51/122.02/140.69 ms`, so a seed started only at issue time is too late.
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control
@@ -258,16 +270,20 @@ The next architectural target is a delivery-aware solver:
   source-layer state without the exact observed/pending input pipeline.
 - **Reactivation gate:** Query-local/reachable-tube refinement with a hard
   service budget and explicit layer-phase/observed/pending/remaining-delay
-  state. The exact recurrence gate now passes offline; the remaining gate is
-  background prewarming and exact-root versioned publication. Shadow evidence
-  must show a useful root-cache hit rate and action changes at issue time
-  without increasing policy expiry, local latency, or action lag. Scalar
-  parity alone is insufficient.
+  state. Exact recurrence, frontier enumeration, lookup-only consumption, and
+  phase specialization now pass offline. The remaining gate is an isolated
+  rolling phase scheduler with cooperative cancellation, newest-version-wins
+  publication, and a measured exact-root hit rate. Shadow evidence must show
+  useful hits and issue-time action changes without increasing policy expiry,
+  local latency, action lag, or Boolean worker contention. Scalar parity alone
+  is insufficient.
 - **Evidence:** `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
   `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
+  `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
   `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json`,
+  `artifacts/benchmarks/exact_root_frontier_20260725.json`,
   `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
   the retained Stage-4A/Stage-5 run dossiers.
 

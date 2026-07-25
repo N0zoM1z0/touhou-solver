@@ -14,9 +14,11 @@ physical frame and distinguishes:
 * the new selected action, its robust delay support, and an optional
   next-decision cadence support at the public root.
 
-The scalar implementation is the independent oracle.  A memoized native
-implementation shares the contract, but its worst-case service time does not
-yet make it a live backend.
+The original scalar/native workspace in this module is retained as a legacy
+always-issue, one-transition-cadence audit target.  The physical no-write,
+recursive-cadence, non-clairvoyant oracle lives in
+``variable_cadence_oracle.py`` and has a separate native belief workspace.
+Neither has live authority.
 """
 
 from __future__ import annotations
@@ -92,6 +94,20 @@ class PipelineSurvivalQueryStats:
 
 
 @dataclass(frozen=True)
+class BeliefPipelineQueryStats:
+    """Work performed by the recursive information-set workspace."""
+
+    memoized_state_count: int
+    new_state_count: int
+    memo_hit_count: int
+    action_upper_bound_prune_count: int
+    branch_incumbent_prune_count: int
+    observation_merge_count: int
+    root_memo_hit_count: int
+    hidden_simulation_count: int
+
+
+@dataclass(frozen=True)
 class QueryLocalSurvivalResult:
     """Lexicographic survival labels for one exact physical-frame state."""
 
@@ -106,7 +122,9 @@ class QueryLocalSurvivalResult:
     best_actions: tuple[str, ...]
     evaluated_state_count: int
     backend: str = "scalar_pending_pipeline"
-    workspace_stats: PipelineSurvivalQueryStats | None = None
+    workspace_stats: (
+        PipelineSurvivalQueryStats | BeliefPipelineQueryStats | None
+    ) = None
 
     @property
     def winning(self) -> bool:
@@ -283,18 +301,36 @@ class SurvivalQueryProblem:
             decision_frame_support=decision_frame_support,
         )
 
+    def build_belief_pipeline_workspace(
+        self,
+        *,
+        policy_version: Hashable,
+        decision_frame_support: tuple[int, ...],
+        continuation_actions: tuple[str, ...] | None = None,
+    ) -> BeliefPipelineSurvivalWorkspace:
+        """Create the recursive non-clairvoyant research workspace."""
+
+        return BeliefPipelineSurvivalWorkspace(
+            problem=self,
+            policy_version=policy_version,
+            decision_frame_support=decision_frame_support,
+            continuation_actions=continuation_actions,
+        )
+
 
 class StalePipelineWorkspaceError(RuntimeError):
     """A query attempted to use a workspace from another policy version."""
 
 
 class PipelineSurvivalWorkspace:
-    """Versioned memo with a robust public-root cadence transition.
+    """Versioned native memo for the legacy always-issue hybrid.
 
-    A public query branches over ``decision_frame_support`` once.  Continuation
-    states retain the planner's configured fixed interval.  This bounded
-    contract is deliberate: recursively branching cadence at every future
-    decision is a different, much larger robust-control problem.
+    Like ``scalar_query_local_survival``, it does not implement live no-write
+    semantics when the selected action equals the held desired input.  A
+    public query branches over ``decision_frame_support`` once and continuation
+    states retain the configured fixed interval.  Keep this workspace
+    shadow/offline and use ``BeliefPipelineSurvivalWorkspace`` for the declared
+    recursive non-clairvoyant finite model.
     """
 
     def __init__(
@@ -592,6 +628,188 @@ class PipelineSurvivalWorkspace:
         )
 
 
+class BeliefPipelineSurvivalWorkspace:
+    """Versioned native memo for the recursively variable-cadence game.
+
+    This workspace treats selecting the already-held desired input as
+    hold/no-write, and groups indistinguishable remaining-delay branches
+    before each future maximization.  A root with a pending command identifies
+    that command as the held desired input; a root without one assumes the
+    observed action is also held.  It is an offline/shadow research backend;
+    it has no live lookup or prewarm authority yet.
+    """
+
+    def __init__(
+        self,
+        *,
+        problem: SurvivalQueryProblem,
+        policy_version: Hashable,
+        decision_frame_support: tuple[int, ...],
+        continuation_actions: tuple[str, ...] | None = None,
+    ) -> None:
+        self.problem = problem
+        self.policy_version = policy_version
+        self.decision_frame_support = _normalize_decision_frame_support(
+            decision_frame_support,
+            default=problem.config.frames_per_layer,
+        )
+        self._action_indices = {
+            action.name: index
+            for index, action in enumerate(problem.actions)
+        }
+        continuation_names = (
+            tuple(self._action_indices)
+            if continuation_actions is None
+            else continuation_actions
+        )
+        if (
+            not continuation_names
+            or len(set(continuation_names)) != len(continuation_names)
+            or any(
+                name not in self._action_indices
+                for name in continuation_names
+            )
+        ):
+            raise ValueError(
+                "belief continuation actions must be unique known actions"
+            )
+        self.continuation_actions = continuation_names
+        continuation_action_mask = 0
+        for name in continuation_names:
+            continuation_action_mask |= (
+                1 << self._action_indices[name]
+            )
+        self._native = (
+            native_backend.create_belief_pipeline_survival_workspace(
+                x_axis=problem.x_axis,
+                y_axis=problem.y_axis,
+                clearance_volume=problem.clearance_volume,
+                velocity_x=np.asarray(
+                    [action.velocity_x for action in problem.actions],
+                    dtype=np.float64,
+                ),
+                velocity_y=np.asarray(
+                    [action.velocity_y for action in problem.actions],
+                    dtype=np.float64,
+                ),
+                continuation_action_mask=continuation_action_mask,
+                delay_frames=np.asarray(
+                    problem.delay_frames,
+                    dtype=np.int32,
+                ),
+                decision_frame_support=np.asarray(
+                    self.decision_frame_support,
+                    dtype=np.int32,
+                ),
+                required_clearance=problem.config.required_clearance,
+                clamp_to_bounds=problem.config.clamp_to_bounds,
+            )
+        )
+        if self._native is None:
+            raise RuntimeError(
+                "native belief pipeline workspace is unavailable"
+            )
+
+    @property
+    def closed(self) -> bool:
+        return self._native.closed
+
+    def close(self) -> None:
+        self._native.close()
+
+    def cancel(self) -> None:
+        self._native.cancel()
+
+    def __enter__(self) -> BeliefPipelineSurvivalWorkspace:
+        if self.closed:
+            raise RuntimeError("belief pipeline workspace is closed")
+        return self
+
+    def __exit__(self, _exception_type, _exception, _traceback) -> None:
+        self.close()
+
+    def query_cell(
+        self,
+        *,
+        policy_version: Hashable,
+        frame: int,
+        row: int,
+        column: int,
+        observed_action: str,
+        pending_command: PendingCommand | None = None,
+        timeout_ms: int = 0,
+    ) -> QueryLocalSurvivalResult:
+        if policy_version != self.policy_version:
+            raise StalePipelineWorkspaceError(
+                "belief pipeline policy version does not match query"
+            )
+        if observed_action not in self._action_indices:
+            raise ValueError("observed action is absent from the action set")
+        if (
+            pending_command is not None
+            and pending_command.action not in self._action_indices
+        ):
+            raise ValueError("pending action is absent from the action set")
+        (
+            state_frames,
+            state_margin,
+            action_frames,
+            action_margins,
+            best_mask,
+            raw_stats,
+        ) = self._native.query(
+            start_frame=frame,
+            start_row=row,
+            start_column=column,
+            observed_action_index=self._action_indices[observed_action],
+            pending_action_index=(
+                self._action_indices[pending_command.action]
+                if pending_command is not None
+                else -1
+            ),
+            pending_remaining_frames=(
+                np.asarray(
+                    pending_command.remaining_frames,
+                    dtype=np.int32,
+                )
+                if pending_command is not None
+                else None
+            ),
+            timeout_ms=timeout_ms,
+        )
+        action_labels = tuple(
+            (
+                action.name,
+                SurvivalLabel(
+                    int(action_frames[index]),
+                    float(action_margins[index]),
+                ),
+            )
+            for index, action in enumerate(self.problem.actions)
+        )
+        stats = BeliefPipelineQueryStats(
+            *[int(value) for value in raw_stats]
+        )
+        return QueryLocalSurvivalResult(
+            start_frame=frame,
+            remaining_frames=self.problem.horizon_frames - frame,
+            row=row,
+            column=column,
+            observed_action=observed_action,
+            pending_command=pending_command,
+            state_label=SurvivalLabel(state_frames, state_margin),
+            action_labels=action_labels,
+            best_actions=tuple(
+                action.name
+                for index, action in enumerate(self.problem.actions)
+                if best_mask & (1 << index)
+            ),
+            evaluated_state_count=stats.memoized_state_count,
+            backend="native_belief_variable_cadence_pipeline",
+            workspace_stats=stats,
+        )
+
+
 def _normalize_decision_frame_support(
     support: tuple[int, ...] | None,
     *,
@@ -637,18 +855,16 @@ def scalar_query_local_survival(
     pending_command: PendingCommand | None = None,
     decision_frame_support: tuple[int, ...] | None = None,
 ) -> QueryLocalSurvivalResult:
-    """Solve one exact state with a robust last-write-wins input pipeline.
+    """Solve the retained legacy always-issue hybrid recurrence.
 
-    At every decision epoch a newly selected desired action supersedes the
-    older pending desired action.  Before the new action becomes visible, the
-    older pending action may still become active.  A physical branch therefore
-    follows ``observed -> older pending -> newly selected``.  If the new delay
-    exceeds the next decision interval, its remaining delay is carried
-    explicitly into the successor state.  At the public root, nature chooses
-    both command delay and the next decision interval from their declared
-    supports.  Deeper continuation values use ``config.frames_per_layer``;
-    this is a one-transition robust value, not an unbounded variable-cadence
-    survival proof.
+    This historical oracle treats every selected action as a newly issued
+    command, even when it equals the controller's already-held desired input.
+    The live actuator emits no transition in that case, so this recurrence is
+    not a physical input-pipeline specification and has no general upper- or
+    lower-bound direction.  It also branches cadence only at the public root
+    and reveals exact remaining delay to continuation maximization.  Retain it
+    for regression/audit of old workspaces only; use the belief oracle for new
+    correctness claims.
     """
 
     x_values, x_step = _uniform_axis(x_axis, "x")
@@ -955,6 +1171,9 @@ def enumerate_next_decision_roots(
     observed_action: str,
     selected_action: str,
     pending_command: PendingCommand | None = None,
+    physical_start_x: float | None = None,
+    physical_start_y: float | None = None,
+    command_issue_offset: int = 0,
     _context: _RootEnumerationContext | None = None,
 ) -> tuple[ReachablePipelineRoot, ...]:
     """Enumerate the exact-root frontier after issuing one selected action.
@@ -963,6 +1182,13 @@ def enumerate_next_decision_roots(
     collision safety; a consumer must still use a fresh local certificate.
     Branches that produce the same exact root are grouped by the remaining
     delay support of their pending command.
+
+    The optional physical anchor and issue offset are scheduling evidence,
+    not a change to the lattice value recurrence.  They let a controller
+    predict the next projected root from the observed subcell position when
+    several game frames elapse between reading state and issuing the newly
+    selected command.  Solver/oracle callers omit them and retain the public
+    root's exact lattice-center, immediate-issue semantics.
     """
 
     context = (
@@ -999,13 +1225,27 @@ def enumerate_next_decision_roots(
         and pending_command.action not in action_by_name
     ):
         raise ValueError("pending action is absent from the action set")
+    if (physical_start_x is None) != (physical_start_y is None):
+        raise ValueError(
+            "physical root prediction requires both x and y"
+        )
+    if command_issue_offset < 0:
+        raise ValueError("command issue offset cannot be negative")
 
     x_start = float(x_values[0])
     x_end = float(x_values[-1])
     y_start = float(y_values[0])
     y_end = float(y_values[-1])
-    state_x = float(x_values[column])
-    state_y = float(y_values[row])
+    state_x = (
+        float(x_values[column])
+        if physical_start_x is None
+        else min(x_end, max(x_start, float(physical_start_x)))
+    )
+    state_y = (
+        float(y_values[row])
+        if physical_start_y is None
+        else min(y_end, max(y_start, float(physical_start_y)))
+    )
     active = action_by_name[observed_action]
     selected = action_by_name[selected_action]
     older_pending = (
@@ -1029,7 +1269,7 @@ def enumerate_next_decision_roots(
                 decision_frames,
                 horizon_frame - start_frame,
             )
-            if step_count <= 0:
+            if step_count <= command_issue_offset:
                 continue
             for delay in delay_frames:
                 displacement_x = 0.0
@@ -1038,7 +1278,10 @@ def enumerate_next_decision_roots(
                 terminal_column = column
                 reachable = True
                 for physical_step in range(1, step_count + 1):
-                    if physical_step > delay:
+                    selected_elapsed = (
+                        physical_step - command_issue_offset
+                    )
+                    if selected_elapsed > delay:
                         motion = selected
                     elif (
                         older_pending is not None
@@ -1083,7 +1326,11 @@ def enumerate_next_decision_roots(
                     ),
                 )
 
-                if delay < step_count or delay == step_count:
+                elapsed_after_issue = max(
+                    step_count - command_issue_offset,
+                    0,
+                )
+                if delay <= elapsed_after_issue:
                     successor_active = selected_action
                     successor_pending: str | None = None
                     successor_remaining = 0
@@ -1096,7 +1343,7 @@ def enumerate_next_decision_roots(
                     else:
                         successor_active = observed_action
                     successor_pending = selected_action
-                    successor_remaining = delay - step_count
+                    successor_remaining = delay - elapsed_after_issue
                     if (
                         successor_pending == successor_active
                         or (
@@ -1289,6 +1536,8 @@ def query_local_survival(
 
 
 __all__ = [
+    "BeliefPipelineQueryStats",
+    "BeliefPipelineSurvivalWorkspace",
     "PendingCommand",
     "PipelineWorkspaceCancelledError",
     "PipelineWorkspaceDeadlineError",

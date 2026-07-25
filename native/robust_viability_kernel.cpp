@@ -2600,6 +2600,7 @@ TOUHOU_EXPORT int touhou_query_local_survival_v1(
 }
 
 #include "pipeline_survival_workspace.hpp"
+#include "belief_pipeline_survival_workspace.hpp"
 
 TOUHOU_EXPORT int touhou_losing_survival_labels_v1(
     const float* clearance,

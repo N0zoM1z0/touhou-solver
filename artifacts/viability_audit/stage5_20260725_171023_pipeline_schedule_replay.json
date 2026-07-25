@@ -1,0 +1,133 @@
+{
+  "schema": "pipeline-prewarm-schedule-replay-v2",
+  "scope": {
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260725_171023.jsonl",
+    "semantics": "Counterfactual kinematic scheduling only. No survival label or collision claim is replayed. Top-K uses the current physical subcell position, read-to-issue offset, previous iteration cadence prediction, and one-frame nominal pickup.",
+    "scheduling_frame_support": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "legacy_scheduling_frame_support": [
+      4,
+      5,
+      6
+    ],
+    "root_limit": 2
+  },
+  "pair_count": 6364,
+  "coverage": {
+    "legacy_frontier": 0.34538026398491517,
+    "physical_frontier": 0.8882778126964174,
+    "top_1": 0.35983658076681335,
+    "top_2": 0.7199874292897549
+  },
+  "timing_context_frames": {
+    "observed_decision_delta": {
+      "median": 3.0,
+      "p95": 5.0,
+      "max": 9.0
+    },
+    "read_to_issue_offset": {
+      "median": 2.0,
+      "p95": 3.0,
+      "max": 7.0
+    },
+    "predicted_decision_delta": {
+      "median": 4.0,
+      "p95": 6.0,
+      "max": 9.0
+    },
+    "prediction_error_actual_minus_predicted": {
+      "median": 0.0,
+      "p95": 1.0,
+      "max": 4.0
+    },
+    "prediction_coverage": {
+      "exact": 0.3994343180389692,
+      "within_1": 0.8731929604022627,
+      "within_2": 0.9833438089252042
+    },
+    "observed_support_by_prediction": {
+      "2": {
+        "1": 4,
+        "2": 42,
+        "3": 41,
+        "4": 6
+      },
+      "3": {
+        "1": 11,
+        "2": 524,
+        "3": 1152,
+        "4": 485,
+        "5": 48,
+        "6": 4
+      },
+      "4": {
+        "1": 3,
+        "2": 244,
+        "3": 1157,
+        "4": 1078,
+        "5": 252,
+        "6": 33,
+        "7": 5,
+        "8": 1
+      },
+      "5": {
+        "2": 35,
+        "3": 210,
+        "4": 366,
+        "5": 195,
+        "6": 54,
+        "7": 21,
+        "8": 6,
+        "9": 1
+      },
+      "6": {
+        "2": 1,
+        "3": 19,
+        "4": 85,
+        "5": 91,
+        "6": 66,
+        "7": 18,
+        "8": 3
+      },
+      "7": {
+        "3": 2,
+        "4": 9,
+        "5": 30,
+        "6": 19,
+        "7": 9,
+        "8": 2,
+        "9": 1
+      },
+      "8": {
+        "4": 4,
+        "5": 12,
+        "6": 9,
+        "7": 2
+      },
+      "9": {
+        "4": 1,
+        "5": 3
+      }
+    }
+  },
+  "root_counts": {
+    "candidate": {
+      "median": 11.0,
+      "p95": 22.0,
+      "max": 43.0
+    },
+    "scheduled": {
+      "median": 2.0,
+      "p95": 2.0,
+      "max": 2.0
+    }
+  }
+}

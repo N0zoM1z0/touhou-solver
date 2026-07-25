@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Callable, Protocol
 
 import numpy as np
 
@@ -26,6 +26,7 @@ from th08_laser_model import (
 )
 from th08_movement_model import ROUTE2_MOVEMENT_PROFILE
 from touhou_control.packed_hazards import PackedSegmentFrames
+from touhou_control.query_survival import SurvivalQueryProblem
 from touhou_control.viability import ControlAction
 from touhou_control.trajectory import (
     PiecewiseLinearTrajectory,
@@ -460,6 +461,9 @@ def plan_lowered_th08_corridor(
     survival_labels: bool = False,
     retain_query_survival_problem: bool = False,
     refinement_grid_steps: tuple[float, ...] = (),
+    pre_viability_problem_hook: (
+        Callable[[SurvivalQueryProblem], None] | None
+    ) = None,
 ) -> CorridorPlan:
     """Plan from retained neutral hazards at any compatible resolution."""
 
@@ -479,6 +483,7 @@ def plan_lowered_th08_corridor(
             survival_labels=survival_labels,
             retain_query_survival_problem=retain_query_survival_problem,
             refinement_grid_steps=refinement_grid_steps,
+            pre_viability_problem_hook=pre_viability_problem_hook,
         )
     return plan_corridor(
         start_x=player_x,

@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import math
 import unittest
+from dataclasses import replace
+from unittest.mock import patch
 
 import numpy as np
 
@@ -16,12 +18,16 @@ from th08_corridor_runtime import (
     SHADOW_REFINEMENT_GRID_STEPS,
     SHADOW_SURVIVAL_LABELS,
     corridor_pipeline_survival_query,
+    corridor_pipeline_prewarm_query,
+    corridor_pipeline_prewarm_retarget,
     corridor_postpublished_survival_query,
     corridor_viability_query,
     prepare_pipeline_survival_workspace,
     solve_corridor,
     solve_postpublished_survival,
+    close_pipeline_prewarm,
 )
+from touhou_control.query_survival import ReachablePipelineRoot
 from touhou_control.viability import (
     ControlAction,
     RobustViabilityPolicy,
@@ -165,6 +171,133 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
             "native_augmented_pipeline_workspace",
         )
         workspace_solution.pipeline_survival_workspace.close()
+
+    def test_prepublication_shadow_is_ready_for_predicted_source_root(
+        self,
+    ) -> None:
+        solution = solve_corridor(
+            source_frame=100,
+            snapshot_frame=84,
+            forecast_lead_frames=16,
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            control_delay_candidates=(1, 2, 3, 4, 5, 6),
+            nominal_control_delay=4,
+            active_action="stay",
+            pipeline_prewarm_shadow=True,
+        )
+        service = solution.pipeline_prewarm_service
+        self.assertIsNotNone(service)
+        assert service is not None
+        try:
+            self.assertTrue(service.wait_until_idle(2.0))
+            query = corridor_pipeline_prewarm_query(
+                solution,
+                current_frame=104,
+                player_x=192.0,
+                player_y=400.0,
+                observed_action="stay",
+                pending_command=None,
+                max_age_frames=79,
+            )
+            self.assertEqual(query.status, "hit")
+            self.assertIsNotNone(query.result)
+            retarget = corridor_pipeline_prewarm_retarget(
+                solution,
+                root=query.root,
+                selected_action="right",
+                physical_x=192.0,
+                physical_y=400.0,
+                command_issue_offset=2,
+                preferred_decision_frame=4,
+            )
+            self.assertEqual(retarget.status, "queued")
+            self.assertGreater(retarget.root_count, 0)
+        finally:
+            close_pipeline_prewarm(solution)
+        self.assertTrue(service.closed)
+
+    def test_prepublication_shadow_rejects_solution_version_mismatch(
+        self,
+    ) -> None:
+        solution = solve_corridor(
+            source_frame=100,
+            snapshot_frame=84,
+            forecast_lead_frames=16,
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            control_delay_candidates=(1, 2, 3, 4, 5, 6),
+            nominal_control_delay=4,
+            active_action="stay",
+            pipeline_prewarm_shadow=True,
+        )
+        try:
+            stale = replace(solution, source_frame=101)
+            query = corridor_pipeline_prewarm_query(
+                stale,
+                current_frame=105,
+                player_x=192.0,
+                player_y=400.0,
+                observed_action="stay",
+                pending_command=None,
+                max_age_frames=79,
+            )
+            self.assertEqual(query.status, "stale_policy_version")
+            retarget = corridor_pipeline_prewarm_retarget(
+                stale,
+                root=ReachablePipelineRoot(
+                    frame=4,
+                    row=24,
+                    column=12,
+                    observed_action="stay",
+                    pending_command=None,
+                ),
+                selected_action="right",
+                physical_x=192.0,
+                physical_y=400.0,
+                command_issue_offset=2,
+                preferred_decision_frame=4,
+            )
+            self.assertEqual(retarget.status, "stale_policy_version")
+        finally:
+            close_pipeline_prewarm(solution)
+
+    def test_prepublication_start_failure_does_not_fail_boolean_policy(
+        self,
+    ) -> None:
+        with patch(
+            "th08_corridor_runtime.PipelinePrewarmService",
+            side_effect=RuntimeError("injected shadow failure"),
+        ):
+            solution = solve_corridor(
+                source_frame=100,
+                snapshot_frame=84,
+                forecast_lead_frames=16,
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                control_delay_candidates=(1, 2, 3, 4, 5, 6),
+                nominal_control_delay=4,
+                active_action="stay",
+                pipeline_prewarm_shadow=True,
+            )
+        self.assertIsNone(solution.pipeline_prewarm_service)
+        self.assertEqual(
+            solution.pipeline_prewarm_start_error,
+            "RuntimeError: injected shadow failure",
+        )
+        self.assertIsNotNone(solution.plan.viability_policy)
 
 
 if __name__ == "__main__":

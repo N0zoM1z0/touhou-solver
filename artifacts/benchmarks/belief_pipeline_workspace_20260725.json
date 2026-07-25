@@ -1,0 +1,250 @@
+{
+  "contract": "conditional hold/no-write, recursive cadence, and non-clairvoyant remaining-delay information-set merging",
+  "schema": "th08.belief_pipeline_workspace_benchmark.v3",
+  "small_differential": {
+    "case_count": 128,
+    "failure_count": 0,
+    "failures": [],
+    "native_cold_ms": {
+      "max": 0.28148398268967867,
+      "median": 0.10535947512835264,
+      "p95": 0.19827100913971663
+    },
+    "native_memoized_states": {
+      "max": 127.0,
+      "median": 40.0,
+      "p95": 72.0
+    },
+    "native_warm_ms": {
+      "max": 0.06818899419158697,
+      "median": 0.027955480618402362,
+      "p95": 0.042956031393259764
+    },
+    "scalar_ms": {
+      "max": 15.803229005541652,
+      "median": 5.941429000813514,
+      "p95": 12.665390968322754
+    }
+  },
+  "th08_structured_scaling": [
+    {
+      "action_count": 9,
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "down_right"
+      ],
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": true,
+      "continuation_action_count": 9,
+      "elapsed_ms": 10.057223960757256,
+      "horizon": 32,
+      "state_label": {
+        "frames": 32,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 4432,
+        "branch_incumbent_prune_count": 0,
+        "hidden_simulation_count": 93051,
+        "memo_hit_count": 1390,
+        "memoized_state_count": 569,
+        "new_state_count": 569,
+        "observation_merge_count": 2275,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "warm_matches": true,
+      "warm_ms": 0.056258984841406345
+    },
+    {
+      "action_count": 17,
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "down_right",
+        "down_fast"
+      ],
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": true,
+      "continuation_action_count": 9,
+      "elapsed_ms": 29.522233991883695,
+      "horizon": 32,
+      "state_label": {
+        "frames": 32,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 11837,
+        "branch_incumbent_prune_count": 108,
+        "hidden_simulation_count": 270189,
+        "memo_hit_count": 4486,
+        "memoized_state_count": 1625,
+        "new_state_count": 1625,
+        "observation_merge_count": 10068,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "warm_matches": true,
+      "warm_ms": 0.08409400470554829
+    },
+    {
+      "action_count": 17,
+      "best_actions": [
+        "stay",
+        "up",
+        "down",
+        "down_right",
+        "down_fast"
+      ],
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": true,
+      "continuation_action_count": 17,
+      "elapsed_ms": 1507.7418150031008,
+      "horizon": 32,
+      "state_label": {
+        "frames": 32,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 556970,
+        "branch_incumbent_prune_count": 12980,
+        "hidden_simulation_count": 14112336,
+        "memo_hit_count": 170581,
+        "memoized_state_count": 45116,
+        "new_state_count": 45116,
+        "observation_merge_count": 697497,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "warm_matches": true,
+      "warm_ms": 0.1023900113068521
+    },
+    {
+      "action_count": 17,
+      "cadence": [
+        4,
+        5,
+        6
+      ],
+      "completed": false,
+      "continuation_action_count": 9,
+      "elapsed_ms": 3000.168122991454,
+      "horizon": 80,
+      "timeout_ms": 3000
+    },
+    {
+      "action_count": 17,
+      "best_actions": [
+        "stay",
+        "left",
+        "up",
+        "down",
+        "down_right",
+        "down_right_fast"
+      ],
+      "cadence": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "completed": true,
+      "continuation_action_count": 9,
+      "elapsed_ms": 54.94012596318498,
+      "horizon": 8,
+      "state_label": {
+        "frames": 8,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 7777,
+        "branch_incumbent_prune_count": 103,
+        "hidden_simulation_count": 848656,
+        "memo_hit_count": 3805,
+        "memoized_state_count": 1446,
+        "new_state_count": 1446,
+        "observation_merge_count": 71389,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "warm_matches": true,
+      "warm_ms": 0.10344100883230567
+    },
+    {
+      "action_count": 17,
+      "best_actions": [
+        "stay",
+        "up",
+        "down_right"
+      ],
+      "cadence": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "completed": true,
+      "continuation_action_count": 9,
+      "elapsed_ms": 552.6930309715681,
+      "horizon": 16,
+      "state_label": {
+        "frames": 16,
+        "margin": 8.903106689453125
+      },
+      "stats": {
+        "action_upper_bound_prune_count": 52134,
+        "branch_incumbent_prune_count": 749,
+        "hidden_simulation_count": 5522504,
+        "memo_hit_count": 52879,
+        "memoized_state_count": 7482,
+        "new_state_count": 7482,
+        "observation_merge_count": 314767,
+        "root_memo_hit_count": 0
+      },
+      "timeout_ms": 3000,
+      "warm_matches": true,
+      "warm_ms": 0.11115899542346597
+    },
+    {
+      "action_count": 17,
+      "cadence": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "completed": false,
+      "continuation_action_count": 9,
+      "elapsed_ms": 3000.107038009446,
+      "horizon": 32,
+      "timeout_ms": 3000
+    }
+  ]
+}

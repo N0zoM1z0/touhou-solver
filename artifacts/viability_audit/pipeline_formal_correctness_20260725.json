@@ -1,0 +1,842 @@
+{
+  "claim_boundary": {
+    "belief_one_transition": "same desired action is hold/no-write; variable cadence at the public root, then fixed cadence; remaining-delay information sets are preserved",
+    "belief_recursive": "variable cadence recursively; indistinguishable remaining delays are merged before future maximization",
+    "clairvoyant_recursive": "variable cadence recursively, but future exact remaining delay is revealed",
+    "legacy_always_issue_hybrid": "every selected action is modeled as a new write; variable cadence at the public root, then fixed cadence; future exact remaining delay is revealed"
+  },
+  "cohorts": [
+    {
+      "case_count": 128,
+      "counts": {
+        "clairvoyant_conservative_state_value": 0,
+        "clairvoyant_optimistic_state_value": 0,
+        "clairvoyant_vs_belief_action_label_mismatch": 0,
+        "clairvoyant_vs_belief_best_action_mismatch": 0,
+        "clairvoyant_vs_belief_winning_mismatch": 0,
+        "hybrid_conservative_state_value": 30,
+        "hybrid_optimistic_state_value": 0,
+        "hybrid_vs_belief_action_label_mismatch": 30,
+        "hybrid_vs_belief_best_action_mismatch": 15,
+        "hybrid_vs_belief_winning_mismatch": 30,
+        "legacy_conservative_state_value": 30,
+        "legacy_optimistic_state_value": 0,
+        "legacy_vs_no_write_action_label_mismatch": 30,
+        "legacy_vs_no_write_best_action_mismatch": 15,
+        "legacy_vs_no_write_winning_mismatch": 30,
+        "one_transition_conservative_state_value": 0,
+        "one_transition_optimistic_state_value": 0,
+        "one_transition_vs_recursive_action_label_mismatch": 0,
+        "one_transition_vs_recursive_best_action_mismatch": 0,
+        "one_transition_vs_recursive_winning_mismatch": 0
+      },
+      "evaluated_states": {
+        "belief_one_transition": {
+          "max": 115,
+          "median": 45.0,
+          "p95": 115.0
+        },
+        "belief_recursive": {
+          "max": 115,
+          "median": 45.0,
+          "p95": 115.0
+        },
+        "clairvoyant_recursive": {
+          "max": 115,
+          "median": 45.0,
+          "p95": 115.0
+        },
+        "legacy_always_issue_hybrid": {
+          "max": 19,
+          "median": 10.0,
+          "p95": 19.0
+        }
+      },
+      "first_mismatch_seeds": {
+        "clairvoyant_vs_belief": [],
+        "hybrid_vs_belief": [
+          20002,
+          20003,
+          20020,
+          20027,
+          20030,
+          20033,
+          20034,
+          20038
+        ],
+        "legacy_vs_no_write": [
+          20002,
+          20003,
+          20020,
+          20027,
+          20030,
+          20033,
+          20034,
+          20038
+        ],
+        "one_transition_vs_recursive": []
+      },
+      "name": "hold_vs_always_issue_fixed_cadence",
+      "problem": {
+        "actions": [
+          "left",
+          "stay",
+          "right"
+        ],
+        "cadence_frames": [
+          1
+        ],
+        "delay_frames": [
+          3
+        ],
+        "hazard_probability": 0.2,
+        "horizon": 6,
+        "hybrid_continuation_frames": 1,
+        "shape": [
+          7,
+          2,
+          3
+        ],
+        "start_column": 1
+      },
+      "seed_start": 20000,
+      "timing_ms": {
+        "belief_one_transition": {
+          "max": 3.266971034463495,
+          "median": 0.7555005140602589,
+          "p95": 1.806570973712951
+        },
+        "belief_recursive": {
+          "max": 2.5916789891198277,
+          "median": 0.7208255119621754,
+          "p95": 1.8568719970062375
+        },
+        "clairvoyant_recursive": {
+          "max": 2.324377011973411,
+          "median": 0.5864999839104712,
+          "p95": 1.42768700607121
+        },
+        "legacy_always_issue_hybrid": {
+          "max": 0.6151730194687843,
+          "median": 0.17007053247652948,
+          "p95": 0.2680199686437845
+        }
+      }
+    },
+    {
+      "case_count": 128,
+      "counts": {
+        "clairvoyant_conservative_state_value": 0,
+        "clairvoyant_optimistic_state_value": 0,
+        "clairvoyant_vs_belief_action_label_mismatch": 0,
+        "clairvoyant_vs_belief_best_action_mismatch": 0,
+        "clairvoyant_vs_belief_winning_mismatch": 0,
+        "hybrid_conservative_state_value": 0,
+        "hybrid_optimistic_state_value": 0,
+        "hybrid_vs_belief_action_label_mismatch": 0,
+        "hybrid_vs_belief_best_action_mismatch": 0,
+        "hybrid_vs_belief_winning_mismatch": 0,
+        "legacy_conservative_state_value": 0,
+        "legacy_optimistic_state_value": 0,
+        "legacy_vs_no_write_action_label_mismatch": 0,
+        "legacy_vs_no_write_best_action_mismatch": 0,
+        "legacy_vs_no_write_winning_mismatch": 0,
+        "one_transition_conservative_state_value": 0,
+        "one_transition_optimistic_state_value": 0,
+        "one_transition_vs_recursive_action_label_mismatch": 0,
+        "one_transition_vs_recursive_best_action_mismatch": 0,
+        "one_transition_vs_recursive_winning_mismatch": 0
+      },
+      "evaluated_states": {
+        "belief_one_transition": {
+          "max": 117,
+          "median": 76.5,
+          "p95": 115.0
+        },
+        "belief_recursive": {
+          "max": 201,
+          "median": 150.0,
+          "p95": 191.0
+        },
+        "clairvoyant_recursive": {
+          "max": 219,
+          "median": 169.5,
+          "p95": 205.0
+        },
+        "legacy_always_issue_hybrid": {
+          "max": 161,
+          "median": 111.0,
+          "p95": 159.0
+        }
+      },
+      "first_mismatch_seeds": {
+        "clairvoyant_vs_belief": [],
+        "hybrid_vs_belief": [],
+        "legacy_vs_no_write": [],
+        "one_transition_vs_recursive": []
+      },
+      "name": "recursive_cadence_and_information",
+      "problem": {
+        "actions": [
+          "left",
+          "stay",
+          "right"
+        ],
+        "cadence_frames": [
+          1,
+          2
+        ],
+        "delay_frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "hazard_probability": 0.2,
+        "horizon": 6,
+        "hybrid_continuation_frames": 2,
+        "shape": [
+          7,
+          2,
+          3
+        ],
+        "start_column": 1
+      },
+      "seed_start": 0,
+      "timing_ms": {
+        "belief_one_transition": {
+          "max": 9.948128019459546,
+          "median": 3.2150939805433154,
+          "p95": 5.129423981998116
+        },
+        "belief_recursive": {
+          "max": 39.94555404642597,
+          "median": 16.292808519210666,
+          "p95": 23.290215991437435
+        },
+        "clairvoyant_recursive": {
+          "max": 25.783836026676,
+          "median": 12.78164898394607,
+          "p95": 18.580059986561537
+        },
+        "legacy_always_issue_hybrid": {
+          "max": 5.566943029407412,
+          "median": 2.268110984005034,
+          "p95": 3.5911989980377257
+        }
+      }
+    },
+    {
+      "case_count": 128,
+      "counts": {
+        "clairvoyant_conservative_state_value": 0,
+        "clairvoyant_optimistic_state_value": 0,
+        "clairvoyant_vs_belief_action_label_mismatch": 0,
+        "clairvoyant_vs_belief_best_action_mismatch": 0,
+        "clairvoyant_vs_belief_winning_mismatch": 0,
+        "hybrid_conservative_state_value": 0,
+        "hybrid_optimistic_state_value": 2,
+        "hybrid_vs_belief_action_label_mismatch": 4,
+        "hybrid_vs_belief_best_action_mismatch": 2,
+        "hybrid_vs_belief_winning_mismatch": 2,
+        "legacy_conservative_state_value": 0,
+        "legacy_optimistic_state_value": 1,
+        "legacy_vs_no_write_action_label_mismatch": 1,
+        "legacy_vs_no_write_best_action_mismatch": 0,
+        "legacy_vs_no_write_winning_mismatch": 1,
+        "one_transition_conservative_state_value": 0,
+        "one_transition_optimistic_state_value": 1,
+        "one_transition_vs_recursive_action_label_mismatch": 3,
+        "one_transition_vs_recursive_best_action_mismatch": 2,
+        "one_transition_vs_recursive_winning_mismatch": 1
+      },
+      "evaluated_states": {
+        "belief_one_transition": {
+          "max": 293,
+          "median": 39.0,
+          "p95": 245.0
+        },
+        "belief_recursive": {
+          "max": 513,
+          "median": 135.5,
+          "p95": 451.0
+        },
+        "clairvoyant_recursive": {
+          "max": 531,
+          "median": 148.5,
+          "p95": 471.0
+        },
+        "legacy_always_issue_hybrid": {
+          "max": 397,
+          "median": 56.5,
+          "p95": 328.0
+        }
+      },
+      "first_mismatch_seeds": {
+        "clairvoyant_vs_belief": [],
+        "hybrid_vs_belief": [
+          90317,
+          90371,
+          90385,
+          90400
+        ],
+        "legacy_vs_no_write": [
+          90371
+        ],
+        "one_transition_vs_recursive": [
+          90317,
+          90385,
+          90400
+        ]
+      },
+      "name": "variable_cadence_wider_longer_adversarial",
+      "problem": {
+        "actions": [
+          "left",
+          "stay",
+          "right"
+        ],
+        "cadence_frames": [
+          1,
+          2
+        ],
+        "delay_frames": [
+          2,
+          3
+        ],
+        "hazard_probability": 0.27,
+        "horizon": 10,
+        "hybrid_continuation_frames": 2,
+        "shape": [
+          11,
+          2,
+          5
+        ],
+        "start_column": 2
+      },
+      "seed_start": 90300,
+      "timing_ms": {
+        "belief_one_transition": {
+          "max": 11.5986269665882,
+          "median": 0.9691699815448374,
+          "p95": 6.687082001008093
+        },
+        "belief_recursive": {
+          "max": 36.908287031110376,
+          "median": 7.860045006964356,
+          "p95": 31.22347401222214
+        },
+        "clairvoyant_recursive": {
+          "max": 30.15163098461926,
+          "median": 5.752044991822913,
+          "p95": 22.588388004805893
+        },
+        "legacy_always_issue_hybrid": {
+          "max": 7.187923009041697,
+          "median": 0.8941149862948805,
+          "p95": 4.327120026573539
+        }
+      }
+    },
+    {
+      "case_count": 128,
+      "counts": {
+        "clairvoyant_conservative_state_value": 0,
+        "clairvoyant_optimistic_state_value": 0,
+        "clairvoyant_vs_belief_action_label_mismatch": 15,
+        "clairvoyant_vs_belief_best_action_mismatch": 11,
+        "clairvoyant_vs_belief_winning_mismatch": 0,
+        "hybrid_conservative_state_value": 8,
+        "hybrid_optimistic_state_value": 0,
+        "hybrid_vs_belief_action_label_mismatch": 23,
+        "hybrid_vs_belief_best_action_mismatch": 16,
+        "hybrid_vs_belief_winning_mismatch": 7,
+        "legacy_conservative_state_value": 8,
+        "legacy_optimistic_state_value": 0,
+        "legacy_vs_no_write_action_label_mismatch": 23,
+        "legacy_vs_no_write_best_action_mismatch": 16,
+        "legacy_vs_no_write_winning_mismatch": 7,
+        "one_transition_conservative_state_value": 0,
+        "one_transition_optimistic_state_value": 0,
+        "one_transition_vs_recursive_action_label_mismatch": 0,
+        "one_transition_vs_recursive_best_action_mismatch": 0,
+        "one_transition_vs_recursive_winning_mismatch": 0
+      },
+      "evaluated_states": {
+        "belief_one_transition": {
+          "max": 51,
+          "median": 34.0,
+          "p95": 51.0
+        },
+        "belief_recursive": {
+          "max": 51,
+          "median": 34.0,
+          "p95": 51.0
+        },
+        "clairvoyant_recursive": {
+          "max": 58,
+          "median": 40.0,
+          "p95": 58.0
+        },
+        "legacy_always_issue_hybrid": {
+          "max": 77,
+          "median": 53.0,
+          "p95": 77.0
+        }
+      },
+      "first_mismatch_seeds": {
+        "clairvoyant_vs_belief": [
+          10016,
+          10019,
+          10034,
+          10039,
+          10041,
+          10049,
+          10062,
+          10067
+        ],
+        "hybrid_vs_belief": [
+          10016,
+          10019,
+          10022,
+          10023,
+          10034,
+          10039,
+          10041,
+          10046
+        ],
+        "legacy_vs_no_write": [
+          10016,
+          10019,
+          10022,
+          10023,
+          10034,
+          10039,
+          10041,
+          10046
+        ],
+        "one_transition_vs_recursive": []
+      },
+      "name": "fixed_cadence_hidden_remaining_information",
+      "problem": {
+        "actions": [
+          "stay",
+          "right"
+        ],
+        "cadence_frames": [
+          1
+        ],
+        "delay_frames": [
+          2,
+          3
+        ],
+        "hazard_probability": 0.2,
+        "horizon": 5,
+        "hybrid_continuation_frames": 1,
+        "shape": [
+          6,
+          2,
+          3
+        ],
+        "start_column": 0
+      },
+      "seed_start": 10000,
+      "timing_ms": {
+        "belief_one_transition": {
+          "max": 1.4921670081093907,
+          "median": 0.6425980245694518,
+          "p95": 1.0112290037795901
+        },
+        "belief_recursive": {
+          "max": 3.5240010474808514,
+          "median": 0.6409864872694016,
+          "p95": 0.9701800299808383
+        },
+        "clairvoyant_recursive": {
+          "max": 1.2620810302905738,
+          "median": 0.5223830230534077,
+          "p95": 0.7516629993915558
+        },
+        "legacy_always_issue_hybrid": {
+          "max": 1.2803569552488625,
+          "median": 0.42185946949757636,
+          "p95": 0.9413690422661602
+        }
+      }
+    }
+  ],
+  "minimal_counterexamples": {
+    "exact_hidden_remaining_is_clairvoyant": {
+      "belief_recursive": {
+        "action_labels": {
+          "right": {
+            "bottleneck_margin": -1.0,
+            "guaranteed_frames": 3
+          },
+          "stay": {
+            "bottleneck_margin": 1.0,
+            "guaranteed_frames": 4
+          }
+        },
+        "backend": "scalar_belief_variable_cadence_pipeline",
+        "best_actions": [
+          "stay"
+        ],
+        "evaluated_state_count": 28,
+        "state_label": {
+          "bottleneck_margin": 1.0,
+          "guaranteed_frames": 4
+        },
+        "winning": true
+      },
+      "clairvoyant_recursive": {
+        "action_labels": {
+          "right": {
+            "bottleneck_margin": 1.0,
+            "guaranteed_frames": 4
+          },
+          "stay": {
+            "bottleneck_margin": 1.0,
+            "guaranteed_frames": 4
+          }
+        },
+        "backend": "scalar_clairvoyant_recursive_cadence_pipeline",
+        "best_actions": [
+          "stay",
+          "right"
+        ],
+        "evaluated_state_count": 34,
+        "state_label": {
+          "bottleneck_margin": 1.0,
+          "guaranteed_frames": 4
+        },
+        "winning": true
+      },
+      "problem": {
+        "actions": [
+          "stay:0",
+          "right:+1"
+        ],
+        "cadence_frames": [
+          1
+        ],
+        "clearance_x_by_frame": [
+          [
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            -1.0,
+            1.0
+          ]
+        ],
+        "delay_frames": [
+          2,
+          3
+        ],
+        "start": [
+          0,
+          0,
+          "stay"
+        ],
+        "x_axis": [
+          0.0,
+          1.0,
+          2.0
+        ]
+      }
+    },
+    "one_transition_cadence_can_be_optimistic": {
+      "belief_one_transition": {
+        "action_labels": {
+          "left": {
+            "bottleneck_margin": -1.0,
+            "guaranteed_frames": 4
+          },
+          "right": {
+            "bottleneck_margin": 1.0,
+            "guaranteed_frames": 10
+          },
+          "stay": {
+            "bottleneck_margin": 1.0,
+            "guaranteed_frames": 10
+          }
+        },
+        "backend": "scalar_belief_one_transition_cadence_pipeline",
+        "best_actions": [
+          "stay",
+          "right"
+        ],
+        "evaluated_state_count": 291,
+        "state_label": {
+          "bottleneck_margin": 1.0,
+          "guaranteed_frames": 10
+        },
+        "winning": true
+      },
+      "belief_recursive": {
+        "action_labels": {
+          "left": {
+            "bottleneck_margin": -1.0,
+            "guaranteed_frames": 4
+          },
+          "right": {
+            "bottleneck_margin": -1.0,
+            "guaranteed_frames": 9
+          },
+          "stay": {
+            "bottleneck_margin": -1.0,
+            "guaranteed_frames": 9
+          }
+        },
+        "backend": "scalar_belief_variable_cadence_pipeline",
+        "best_actions": [
+          "stay",
+          "right"
+        ],
+        "evaluated_state_count": 513,
+        "state_label": {
+          "bottleneck_margin": -1.0,
+          "guaranteed_frames": 9
+        },
+        "winning": false
+      },
+      "problem": {
+        "actions": [
+          "left:-1",
+          "stay:0",
+          "right:+1"
+        ],
+        "cadence_frames": [
+          1,
+          2
+        ],
+        "clearance_x_by_frame": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            -1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            -1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            -1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            -1.0
+          ]
+        ],
+        "delay_frames": [
+          2,
+          3
+        ],
+        "fixed_continuation_frames": 2,
+        "start": [
+          0,
+          2,
+          "stay"
+        ],
+        "unsafe_cells": [
+          [
+            5,
+            0
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            10,
+            4
+          ]
+        ],
+        "x_axis": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0
+        ]
+      }
+    },
+    "selecting_same_desired_is_hold_not_reissue": {
+      "belief_no_write": {
+        "action_labels": {
+          "left": {
+            "bottleneck_margin": 1.0,
+            "guaranteed_frames": 3
+          },
+          "stay": {
+            "bottleneck_margin": -1.0,
+            "guaranteed_frames": 2
+          }
+        },
+        "backend": "scalar_belief_variable_cadence_pipeline",
+        "best_actions": [
+          "left"
+        ],
+        "evaluated_state_count": 10,
+        "state_label": {
+          "bottleneck_margin": 1.0,
+          "guaranteed_frames": 3
+        },
+        "winning": true
+      },
+      "legacy_always_issue": {
+        "action_labels": {
+          "left": {
+            "bottleneck_margin": -1.0,
+            "guaranteed_frames": 2
+          },
+          "stay": {
+            "bottleneck_margin": -1.0,
+            "guaranteed_frames": 2
+          }
+        },
+        "backend": "scalar_pending_pipeline",
+        "best_actions": [
+          "left",
+          "stay"
+        ],
+        "evaluated_state_count": 5,
+        "state_label": {
+          "bottleneck_margin": -1.0,
+          "guaranteed_frames": 2
+        },
+        "winning": false
+      },
+      "problem": {
+        "actions": [
+          "left:-1",
+          "stay:0"
+        ],
+        "cadence_frames": [
+          1
+        ],
+        "clearance_x_by_frame": [
+          [
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            -1.0,
+            1.0
+          ]
+        ],
+        "delay_frames": [
+          3
+        ],
+        "fixed_continuation_frames": 1,
+        "start": [
+          0,
+          1,
+          "stay",
+          "pending:left:remaining=2"
+        ],
+        "x_axis": [
+          0.0,
+          1.0,
+          2.0
+        ]
+      }
+    }
+  },
+  "schema": "th08.pipeline_formal_correctness_audit.v2"
+}

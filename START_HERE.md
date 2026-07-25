@@ -8,32 +8,63 @@ Read `STRATEGY.md` before changing control objectives. It is the status ledger
 for live, shadow, rejected, and proposed strategies; detailed derivations and
 runtime evidence remain in `notes/`.
 
+For any viability, losing-state, delay, cadence, reachable-tube, or prewarm
+change, also read
+`notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md` before
+touching the algorithm.  First check that the implemented state, observation
+partition, transition, uncertainty, and objective still represent the stated
+problem.  An engineering approximation is acceptable without a complete
+proof, but its optimistic/conservative/unknown error direction, oracle gate,
+counterexamples, delivery deadline, and fail-closed fallback must be explicit.
+Python/C++ parity for the same recurrence is not by itself problem
+correctness.  In particular, verify all three mappings before performance
+work:
+
+```text
+planner choice -> input transitions actually sent -> native action observed
+```
+
+Choosing the already-held desired mask is hold/no-write; it does not sample a
+new delay and must not reset an older pending command.  Then answer the five
+formal-review questions in `AGENTS.md`: state equivalence, causal uncertainty,
+physical relevance, solver/bound validity, and issue-time deliverability.
+Engineering approximations are encouraged when useful, but unknown-direction
+ones remain shadow-only.
+
 ## 1. Exact Checkpoint
 
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `cd8ef9c Prototype exact root frontier prewarming`. It adds native
-  cooperative cancellation/deadlines, exact continuation-memo merge, a
-  bounded newest-version-wins rolling scheduler, and a retained whole-prewarm
-  benchmark whose timing includes Python root/seed enumeration. The first two
-  decisions of each immutable policy remain cold misses, so this infrastructure
-  stays shadow/offline and is not called by the live controller.
+  `d4d0f68 Add cancellable rolling exact-root prewarm`. It adds physical
+  rolling-prewarm shadows, direct cadence/delivery replay, a formal
+  information-set problem, an independent no-write scalar oracle, and a
+  cancellable C++ belief workspace. Three minimized counterexamples separate
+  planner-hold/input-issue semantics, recursive cadence, and hidden-delay
+  non-anticipativity. The legacy prewarm is invalid as a physical value and
+  the corrected belief workspace remains offline/shadow-only.
 - Both native libraries were rebuilt. Linux and Windows complete quick suites
-  pass 465 tests in `1.710/3.131 s`. Read
+  pass 482 tests in `3.010/5.410 s`. Read
+  `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
+  `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`,
   `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
   `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
   `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`, CE-0108/0109, and
   `STRATEGY.md` before changing viability queries or losing-state authority.
-- The only expected untracked pre-existing file is `image.png`. It is a user
-  screenshot. Do not add, delete, overwrite, or otherwise clean it.
+- The expected user-owned untracked file is `image.png`. It is a screenshot.
+  Do not add, delete, overwrite, or otherwise clean it. The Codex connector
+  may also materialize a root `node_modules/` plus `package*.json` for its
+  running `leantoken` MCP process; these are not TH08 dependencies or commit
+  candidates. Do not confuse them with project artifacts or terminate/delete
+  them while that external connector is active.
 - Ignored raw JSONL, viability capsules, screenshots, launch logs, caches, and
   native build outputs were cleaned after compact review/regression artifacts
   were verified. New raw captures are temporary unless a named active
   differential still needs them.
-- No runtime session or half-edited experiment is part of the checkpoint.
+- No TH08 runtime/control session or half-edited experiment is part of the
+  checkpoint.
 - The IDA database has newer metadata than Git: the transform functions listed
   in section 10 were renamed/commented during the callback investigation.
 - Workspace policy now forbids new REA use. Historical REA Evidence IDs remain
@@ -820,27 +851,31 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 
 1. `AGENTS.md`
 2. `START_HERE.md`
-3. `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`
-4. `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
-5. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
-6. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
-7. `notes/ALGORITHM_REVIEW_20260724.md`
-8. `notes/COUNTEREXAMPLES.md`, especially CE-0082..0109
-9. `notes/RESEARCH_LOG.md`, latest five dated sections
-10. `notes/ROBUST_VIABILITY.md`
-11. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
-12. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
-13. `notes/NATIVE_PLANNER_BACKEND.md`
-14. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
-15. `scripts/touhou_control/query_survival.py`
-16. `scripts/analysis/postpublished_survival_audit.py`
-17. `scripts/analysis/viability_differential_audit.py`
-18. `scripts/th08_live_dodge_agent.py`
-19. `scripts/touhou_control/reachability_oracle.py`
-20. `scripts/th08_bullet_transform_model.py`
-21. `scripts/th08_corridor_adapter.py`
-22. `scripts/touhou_control/viability.py`
-23. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
+3. `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`
+4. `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`
+5. `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`
+6. `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
+7. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
+8. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
+9. `notes/ALGORITHM_REVIEW_20260724.md`
+10. `notes/COUNTEREXAMPLES.md`, especially CE-0106..0114
+11. `notes/RESEARCH_LOG.md`, latest five dated sections
+12. `notes/ROBUST_VIABILITY.md`
+13. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
+14. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
+15. `notes/NATIVE_PLANNER_BACKEND.md`
+16. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
+17. `scripts/touhou_control/query_survival.py`
+18. `scripts/touhou_control/variable_cadence_oracle.py`
+19. `scripts/analysis/audit_pipeline_formal_correctness.py`
+20. `scripts/analysis/postpublished_survival_audit.py`
+21. `scripts/analysis/viability_differential_audit.py`
+22. `scripts/th08_live_dodge_agent.py`
+23. `scripts/touhou_control/reachability_oracle.py`
+24. `scripts/th08_bullet_transform_model.py`
+25. `scripts/th08_corridor_adapter.py`
+26. `scripts/touhou_control/viability.py`
+27. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
     `notes/runs/lunatic_route2_stage3_unattended_20260724_132007.md`,
     `notes/runs/lunatic_route2_stage4a_unattended_20260724_185059.md`,
     `notes/runs/lunatic_route2_stage5_unattended_20260725_125037.md`, and
@@ -875,6 +910,10 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
   `input_current`, pending desired command, and remaining-delay support
   separately; do not repair CE-0109 by substituting observed input while
   dropping the pending branch.
+- A planner selection is not necessarily an input issue. If the selected full
+  mask equals the held desired mask, no key transition is sent and the old
+  pending countdown continues. CE-0114 shows that inventing a new delay here
+  flips winning classification.
 - Hard survival ordering must hold during deduplication and beam truncation,
   not only final action selection. A soft recovery term can otherwise erase a
   safer first action.
@@ -895,38 +934,44 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 A good next commit is not "the randomized stage had fewer hits" by itself. It
 should:
 
-1. Add a bounded rolling phase-shard scheduler to the isolated survival
-   executor. Begin skeleton work from Boolean publication, use
-   newest-version-wins cooperative cancellation, then specialize the
-   issued-action frontier and publish complete exact root keys. Measure seed
-   distance, deadline completion, exact hit rate, discarded work, and miss
-   fallback. Never block the issue-time thread on cold expansion.
-2. Turn the offline post-seed frontier wall p95 of `49.35 ms` into useful
-   physical shadow hits without increasing Boolean expiry, local p95, CPU
-   contention, or action lag. Recheck both retained 16-query Stage-5
-   cohorts, canonical decision 1,680, and cross-stage losing witnesses before
-   granting even veto-only authority. Preserve ordering: fresh hard vector,
-   guaranteed survival frames, bottleneck clearance, control reserve, then
-   recovery distance.
-3. Prototype a packed native issue-time bullet/laser/enemy
+1. Validate the compact root invariant
+   `pending => held_desired=pending`, `no pending => held_desired=observed`
+   against native multi-key transition traces. If intermediate key edges can
+   remain independently in flight, expand the belief state; do not tune the
+   one-pending model around the witness.
+2. Replace the independent Cartesian cadence envelope with a bounded
+   scheduler/workload automaton only after showing that it covers physical
+   cadence traces and retains CE-0111. A trace predictor is evidence, not a
+   hard timing contract.
+3. Build an anytime bound solver: use all-root/focused-continuation as an
+   attainable lower bound, a proved clairvoyant relaxation as an upper bound,
+   and refine unrestricted actions/states only while the upper bound can beat
+   the incumbent. Report certified actions and unresolved gaps at deadline;
+   never publish unfinished optimistic labels.
+4. Turn the existing physical-shadow evidence into a whole-pipeline CPU
+   budget: belief solve/refinement, read, local plan, telemetry, action lag,
+   stale work, and hits. Never block the issue-time thread on cold expansion
+   or grant veto-only authority while background work worsens the clean
+   controller.
+5. Prototype a packed native issue-time bullet/laser/enemy
    decode-plus-project-plus-all-action certificate with a fixed service
    budget. It must preserve the strict version contract and improve
    whole-decision p95, not only a micro-kernel.
-4. Add ECL/timeline `BirthWindow` coverage for enemy allocations and
+6. Add ECL/timeline `BirthWindow` coverage for enemy allocations and
    projectile emissions without putting TH08 details in the generic planner.
-5. Make background planning anytime/cancellable and publish explicit source
+7. Make background planning anytime/cancellable and publish explicit source
    version, event coverage, delay support, terminal invariant, and expiry.
-6. Keep CE-0100 refinement query-local or inside a reachable tube. Reproduce
+8. Keep CE-0100 refinement query-local or inside a reachable tube. Reproduce
    all three witnesses in shadow without increasing live expiry, missing
    queries, or local latency.
-7. Use the now-validated Boss HP/phase sensor with the existing executable
+9. Use the now-validated Boss HP/phase sensor with the existing executable
    SHT/option/cadence model. Validate predicted versus native HP delta in
    shadow; do not restore the rejected Boss-x live proxy.
-8. Audit instant-winning terminal states before claiming exact event-time
+10. Audit instant-winning terminal states before claiming exact event-time
    layers.
-9. Require randomized delayed-birth/stop/reverse/redirect parity, relevant
+11. Require randomized delayed-birth/stop/reverse/redirect parity, relevant
    platform/native tests, and whole-pipeline timing before physical use.
-10. Use repeated fresh Stage-5 focused attempts and then a different stage
+12. Use repeated fresh Stage-5 focused attempts and then a different stage
     for physical A/B. Retain every required artifact and counterexample while
     leaving raw traces, logs, native binaries, and `image.png` untracked.
 
@@ -937,29 +982,23 @@ Work in /home/pentester/coding/codex_ida/th08. Read AGENTS.md and
 START_HERE.md and STRATEGY.md completely, then inspect git status and the
 latest commit. Keep hard no-Bomb; keep safety value, fused survival labels,
 fine refinement shadow-only. Read
-`notes/LOSING_STATE_ROOT_CAUSE_20260725.md` plus CE-0106..0109. The exact
-Stage-5 audit reconstructed 272/272 queries and confirmed that global
-emptiness has mixed causes, while canonical decision 1,680 proves the live
-fallback can choose outside a 74-frame survival-best mask and ignore a
-24-pixel reserve deficit. Read
-`notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md` and CE-0108/0109. Boolean
-publication is now isolated from labels and its Stage-5 expiry gate passes,
-but issued/native action mismatches and exact pending state change winning
-classification and best actions. Read
-`notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`. Its versioned sparse
-C++ recurrence passes 512 scalar and ten full-size v1 differentials; warm
-exact roots are about 0.1 ms, but cold/incremental TH08 p95 is 104.46 ms.
-Read `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md` and
-`notes/ROLLING_PIPELINE_PREWARM_20260725.md`. The exact continuation-bank
-scheduler, native cancellation/deadlines, newest-version replacement, 256
-scalar differentials, and 25 TH08-shaped rolling decisions pass offline.
-Within one immutable policy, the first two decisions always miss the
-four-frame budget while decisions four/five pass 10/10. Keep it shadow-only.
-The next experiment must begin seeds when clearance exists, overlap Boolean
-induction, and measure live policy lifetime, current-version exact hit rate,
-discarded work, and CPU/delivery contention; fall back on every miss before
-considering veto-only A/B. Continue the packed
-issue-time certificate
+`notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md` first and
+audit every proposed solver against its state, observation partition,
+uncertainty, and non-anticipativity contract. Engineering approximations are
+allowed, but label their error direction and gates; same-recurrence C++/Python
+parity is not proof that the physical problem is solved. Read
+`notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md` plus
+CE-0111..0114. The legacy workspace is not a bound: it invents writes for
+holds, fixes continuation cadence, and exposes hidden remaining delay. The
+independent no-write belief oracle and C++ workspace pass 128 retained
+scalar/native cases, but unrestricted TH08-shaped 32-frame continuation takes
+about 1.51 seconds. All-root/focused-continuation is an attainable lower bound
+at about 29.52 ms; recursive wide cadence remains outside budget. Validate
+the held-desired/pending estimator invariant and design a verified cadence
+automaton plus anytime lower/clairvoyant-upper refinement. Keep every legacy
+prewarm and the new belief workspace shadow/offline; no physical trial is
+authorized until offline bound gaps and whole-controller contention predict a
+safe delivery budget. Continue the packed issue-time certificate
 and ECL/timeline `BirthWindow` work; keep mechanics/safety game-neutral while
 allowing explicit practiced profiles.
 Retain compact artifacts and counterexamples, separate canonical attempts

@@ -40,6 +40,8 @@ from th08_corridor_runtime import (
     SHADOW_REFINEMENT_GRID_STEPS,
     SHADOW_SURVIVAL_LABELS,
     corridor_policy_status as _corridor_policy_status,
+    corridor_pipeline_prewarm_query as _corridor_pipeline_prewarm_query,
+    corridor_pipeline_prewarm_retarget as _corridor_pipeline_prewarm_retarget,
     corridor_postpublished_survival_query as _corridor_postpublished_survival_query,
     corridor_safety_value_query as _corridor_safety_value_query,
     corridor_submit_due as _corridor_submit_due,
@@ -48,6 +50,7 @@ from th08_corridor_runtime import (
     solve_corridor as _solve_corridor,
     solve_postpublished_survival as _solve_postpublished_survival,
     stage_corridor_solution as _stage_corridor_solution,
+    close_retired_pipeline_prewarms as _close_retired_pipeline_prewarms,
 )
 from th08_corridor_adapter import TH08_CORRIDOR_CONFIG
 from th08_ecl_runtime import (
@@ -94,6 +97,7 @@ from touhou_control.async_policy import (
     delay_support_envelope,
 )
 from touhou_control.delay import AdaptiveControlDelay
+from touhou_control.query_survival import PendingCommand
 from touhou_control.epochs import (
     ActionIssueAlignment,
     FrameWindow,
@@ -3901,6 +3905,7 @@ def run(args: argparse.Namespace) -> int:
     survival_executor: ThreadPoolExecutor | None = None
     corridor_survival_future: Future[CorridorSolution] | None = None
     audit_executor: ThreadPoolExecutor | None = None
+    pipeline_retire_executor: ThreadPoolExecutor | None = None
     enemy_executor: ThreadPoolExecutor | None = None
     enemy_future: Future[EnemyPoolSnapshot] | None = None
     enemy_snapshot: EnemyPoolSnapshot | None = None
@@ -3966,6 +3971,11 @@ def run(args: argparse.Namespace) -> int:
                 max_workers=1,
                 thread_name_prefix="th08-survival-shadow",
             )
+        if args.pipeline_prewarm_shadow:
+            pipeline_retire_executor = ThreadPoolExecutor(
+                max_workers=1,
+                thread_name_prefix="th08-pipeline-retire",
+            )
     if args.viability_audit_dir is not None:
         audit_executor = ThreadPoolExecutor(
             max_workers=1,
@@ -3975,6 +3985,39 @@ def run(args: argparse.Namespace) -> int:
         max_workers=1,
         thread_name_prefix="th08-enemy-sensor",
     )
+
+    def retire_pipeline_solutions(
+        candidates: tuple[CorridorSolution | None, ...],
+        retained: tuple[CorridorSolution | None, ...] = (),
+    ) -> None:
+        retained_services = {
+            id(solution.pipeline_prewarm_service)
+            for solution in retained
+            if (
+                solution is not None
+                and solution.pipeline_prewarm_service is not None
+            )
+        }
+        retired = tuple(
+            solution
+            for solution in candidates
+            if (
+                solution is not None
+                and solution.pipeline_prewarm_service is not None
+                and id(solution.pipeline_prewarm_service)
+                not in retained_services
+            )
+        )
+        if not retired:
+            return
+        if pipeline_retire_executor is not None:
+            pipeline_retire_executor.submit(
+                _close_retired_pipeline_prewarms,
+                retired,
+            )
+        else:
+            _close_retired_pipeline_prewarms(retired)
+
     try:
         identity = verify_target(reader)
         output.write(json.dumps({"kind": "identity", **identity}) + "\n")
@@ -4052,6 +4095,9 @@ def run(args: argparse.Namespace) -> int:
                             "shadow": SHADOW_SURVIVAL_LABELS,
                             "postpublished_compute": (
                                 args.postpublished_survival_shadow
+                            ),
+                            "pipeline_prepublication_shadow": (
+                                args.pipeline_prewarm_shadow
                             ),
                             "reason": (
                                 "shadow_isolated_after_serialized_delivery_"
@@ -4214,6 +4260,9 @@ def run(args: argparse.Namespace) -> int:
                     send_transitions(api, transitions)
                     previous_mask = 0
                     previous_direction = 0
+                    retire_pipeline_solutions(
+                        (corridor_solution, corridor_pending_solution)
+                    )
                     corridor_solution = None
                     corridor_pending_solution = None
                     for memory in enemy_body_memories:
@@ -4315,6 +4364,9 @@ def run(args: argparse.Namespace) -> int:
                 delay_estimator.reset()
                 previous_iteration_ms = None
                 previous_trace_ms = None
+                retire_pipeline_solutions(
+                    (corridor_solution, corridor_pending_solution)
+                )
                 corridor_solution = None
                 corridor_pending_solution = None
                 corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
@@ -4403,6 +4455,9 @@ def run(args: argparse.Namespace) -> int:
                 memory.set_context(corridor_context)
             if corridor_context_changed:
                 boss_phase_tracker.reset()
+                retire_pipeline_solutions(
+                    (corridor_solution, corridor_pending_solution)
+                )
                 corridor_solution = None
                 corridor_pending_solution = None
                 if (
@@ -4679,6 +4734,9 @@ def run(args: argparse.Namespace) -> int:
                 previous_direction = 0
                 decision_frame_deltas.clear()
                 delay_estimator.reset()
+                retire_pipeline_solutions(
+                    (corridor_solution, corridor_pending_solution)
+                )
                 corridor_solution = None
                 corridor_pending_solution = None
                 corridor_context = None
@@ -4811,6 +4869,7 @@ def run(args: argparse.Namespace) -> int:
                 ):
                     corridor_pending_solution = labeled_solution
             if corridor_pending_solution is not None:
+                prior_active = corridor_solution
                 pending_candidate = corridor_pending_solution
                 (
                     corridor_solution,
@@ -4827,6 +4886,11 @@ def run(args: argparse.Namespace) -> int:
                         current_frame=counter_after_read,
                     )
                     corridor_updated = True
+                retire_arguments = (
+                    (prior_active, pending_candidate),
+                    (corridor_solution, corridor_pending_solution),
+                )
+                retire_pipeline_solutions(*retire_arguments)
             if corridor_future is not None and corridor_future.done():
                 completed_solution = corridor_future.result()
                 corridor_future = None
@@ -4835,6 +4899,8 @@ def run(args: argparse.Namespace) -> int:
                     if completed_solution.worker_ms is not None
                     else completed_solution.solve_ms
                 )
+                prior_active = corridor_solution
+                prior_pending = corridor_pending_solution
                 (
                     corridor_solution,
                     corridor_pending_solution,
@@ -4853,6 +4919,15 @@ def run(args: argparse.Namespace) -> int:
                         current_frame=counter_after_read,
                     )
                     corridor_updated = True
+                retire_arguments = (
+                    (
+                        prior_active,
+                        prior_pending,
+                        completed_solution,
+                    ),
+                    (corridor_solution, corridor_pending_solution),
+                )
+                retire_pipeline_solutions(*retire_arguments)
             if (
                 corridor_executor is not None
                 and corridor_future is None
@@ -4906,6 +4981,9 @@ def run(args: argparse.Namespace) -> int:
                     context_key=corridor_context,
                     audit_capsule_dir=args.viability_audit_dir,
                     audit_executor=audit_executor,
+                    pipeline_prewarm_shadow=(
+                        args.pipeline_prewarm_shadow
+                    ),
                 )
                 corridor_last_submit = counter_after_read
             if (
@@ -4946,6 +5024,35 @@ def run(args: argparse.Namespace) -> int:
             observed_input_action = _action_name_from_mask(
                 int(state["input_current"])
             )
+            pending_command_estimate = delay_estimator.pending_estimate(
+                frame=counter_after_read,
+            )
+            pipeline_pending_command = (
+                PendingCommand(
+                    _action_name_from_mask(
+                        pending_command_estimate.expected_mask
+                    ),
+                    pending_command_estimate.remaining_frames,
+                )
+                if (
+                    pending_command_estimate is not None
+                    and pending_command_estimate.remaining_frames
+                )
+                else None
+            )
+            pipeline_prewarm_query = (
+                _corridor_pipeline_prewarm_query(
+                    corridor_solution,
+                    current_frame=counter_after_read,
+                    player_x=projected_player_x,
+                    player_y=projected_player_y,
+                    observed_action=observed_input_action,
+                    pending_command=pipeline_pending_command,
+                    max_age_frames=args.corridor_max_age,
+                )
+                if args.pipeline_prewarm_shadow
+                else None
+            )
             postpublished_survival_query = (
                 _corridor_postpublished_survival_query(
                     corridor_solution,
@@ -4955,9 +5062,6 @@ def run(args: argparse.Namespace) -> int:
                     observed_action=observed_input_action,
                     max_age_frames=args.corridor_max_age,
                 )
-            )
-            pending_command_estimate = delay_estimator.pending_estimate(
-                frame=counter_after_read,
             )
             safety_value_query = _corridor_safety_value_query(
                 corridor_solution,
@@ -5154,6 +5258,9 @@ def run(args: argparse.Namespace) -> int:
                 previous_direction = 0
                 decision_frame_deltas.clear()
                 delay_estimator.reset()
+                retire_pipeline_solutions(
+                    (corridor_solution, corridor_pending_solution)
+                )
                 corridor_solution = None
                 corridor_pending_solution = None
                 corridor_context = None
@@ -5275,6 +5382,39 @@ def run(args: argparse.Namespace) -> int:
                 )
             previous_mask = decision.mask
             previous_direction = decision.mask & (UP | DOWN | LEFT | RIGHT)
+            pipeline_prewarm_retarget = (
+                _corridor_pipeline_prewarm_retarget(
+                    corridor_solution,
+                    root=(
+                        pipeline_prewarm_query.root
+                        if pipeline_prewarm_query is not None
+                        else None
+                    ),
+                    selected_action=_action_name_from_mask(decision.mask),
+                    physical_x=projected_player_x,
+                    physical_y=projected_player_y,
+                    command_issue_offset=(
+                        action_alignment.post_capture_advance
+                    ),
+                    preferred_decision_frame=max(
+                        2,
+                        min(
+                            9,
+                            round(
+                                (
+                                    previous_iteration_ms
+                                    if previous_iteration_ms is not None
+                                    else 50.0
+                                )
+                                / (1000.0 / 60.0)
+                            )
+                            + 1,
+                        ),
+                    ),
+                )
+                if args.pipeline_prewarm_shadow
+                else None
+            )
             current_phase = int(player["phase"])
             current_bombs = resources["bombs"]
             current_power = resources["power"]
@@ -5974,6 +6114,196 @@ def run(args: argparse.Namespace) -> int:
                             ),
                             "issued_action": decision.action,
                         }
+                    if pipeline_prewarm_query is not None:
+                        pipeline_result = pipeline_prewarm_query.result
+                        pipeline_root = pipeline_prewarm_query.root
+                        pipeline_service = pipeline_prewarm_query.service
+                        latest_outcome = (
+                            pipeline_service.latest_outcome
+                            if pipeline_service is not None
+                            else None
+                        )
+                        scheduler_snapshot = (
+                            pipeline_service.scheduler
+                            if pipeline_service is not None
+                            else None
+                        )
+                        corridor_record[
+                            "pipeline_prewarm_shadow"
+                        ] = {
+                            "role": "shadow_no_action_authority",
+                            "start_error": (
+                                corridor_report_solution
+                                .pipeline_prewarm_start_error
+                            ),
+                            "status": pipeline_prewarm_query.status,
+                            "lookup_ms": pipeline_prewarm_query.lookup_ms,
+                            "root": (
+                                {
+                                    "frame": pipeline_root.frame,
+                                    "row": pipeline_root.row,
+                                    "column": pipeline_root.column,
+                                    "observed_action": (
+                                        pipeline_root.observed_action
+                                    ),
+                                    "pending_action": (
+                                        pipeline_root.pending_command.action
+                                        if (
+                                            pipeline_root.pending_command
+                                            is not None
+                                        )
+                                        else None
+                                    ),
+                                    "pending_remaining_frames": (
+                                        pipeline_root.pending_command
+                                        .remaining_frames
+                                        if (
+                                            pipeline_root.pending_command
+                                            is not None
+                                        )
+                                        else ()
+                                    ),
+                                }
+                                if pipeline_root is not None
+                                else None
+                            ),
+                            "result": (
+                                {
+                                    "winning": pipeline_result.winning,
+                                    "survival_frames": (
+                                        pipeline_result.state_label
+                                        .guaranteed_frames
+                                    ),
+                                    "bottleneck_margin": (
+                                        pipeline_result.state_label
+                                        .bottleneck_margin
+                                    ),
+                                    "best_actions": (
+                                        pipeline_result.best_actions
+                                    ),
+                                    "issued_in_best": (
+                                        _action_name_from_mask(decision.mask)
+                                        in pipeline_result.best_actions
+                                    ),
+                                }
+                                if pipeline_result is not None
+                                else None
+                            ),
+                            "retarget": (
+                                {
+                                    "status": (
+                                        pipeline_prewarm_retarget.status
+                                    ),
+                                    "revision": (
+                                        pipeline_prewarm_retarget.revision
+                                    ),
+                                    "root_count": (
+                                        pipeline_prewarm_retarget.root_count
+                                    ),
+                                    "candidate_root_count": (
+                                        pipeline_prewarm_retarget
+                                        .candidate_root_count
+                                    ),
+                                    "elapsed_ms": (
+                                        pipeline_prewarm_retarget.elapsed_ms
+                                    ),
+                                }
+                                if pipeline_prewarm_retarget is not None
+                                else None
+                            ),
+                            "service": (
+                                {
+                                    "worker_count": (
+                                        pipeline_service.worker_count
+                                    ),
+                                    "background_low_priority": (
+                                        pipeline_service
+                                        .background_low_priority
+                                    ),
+                                    "submitted_revision": (
+                                        pipeline_service
+                                        .submitted_revision
+                                    ),
+                                    "completed_revision": (
+                                        pipeline_service
+                                        .completed_revision
+                                    ),
+                                    "ready_revision": (
+                                        pipeline_service.ready_revision
+                                    ),
+                                    "target_running": (
+                                        pipeline_service.target_running
+                                    ),
+                                    "target_queued": (
+                                        pipeline_service.target_queued
+                                    ),
+                                    "target_replacement_count": (
+                                        pipeline_service
+                                        .target_replacement_count
+                                    ),
+                                    "lookup_count": (
+                                        pipeline_service.lookup_count
+                                    ),
+                                    "lookup_hit_count": (
+                                        pipeline_service.lookup_hit_count
+                                    ),
+                                    "lookup_miss_count": (
+                                        pipeline_service.lookup_miss_count
+                                    ),
+                                    "created_elapsed_ms": (
+                                        pipeline_service.created_elapsed_ms
+                                    ),
+                                    "latest_outcome": (
+                                        {
+                                            "revision": (
+                                                latest_outcome.revision
+                                            ),
+                                            "root_count": (
+                                                latest_outcome.root_count
+                                            ),
+                                            "seed_count": (
+                                                latest_outcome.seed_count
+                                            ),
+                                            "status": latest_outcome.status,
+                                            "enumeration_ms": (
+                                                latest_outcome
+                                                .enumeration_ms
+                                            ),
+                                            "seed_ms": (
+                                                latest_outcome.seed_ms
+                                            ),
+                                            "specialization_ms": (
+                                                latest_outcome
+                                                .specialization_ms
+                                            ),
+                                            "elapsed_ms": (
+                                                latest_outcome.elapsed_ms
+                                            ),
+                                            "error": latest_outcome.error,
+                                        }
+                                        if latest_outcome is not None
+                                        else None
+                                    ),
+                                    "seed_submitted": (
+                                        scheduler_snapshot.seed_submitted
+                                        if scheduler_snapshot is not None
+                                        else 0
+                                    ),
+                                    "seed_completed": (
+                                        scheduler_snapshot.seed_completed
+                                        if scheduler_snapshot is not None
+                                        else 0
+                                    ),
+                                    "seed_ready": (
+                                        scheduler_snapshot.seed_ready
+                                        if scheduler_snapshot is not None
+                                        else False
+                                    ),
+                                }
+                                if pipeline_service is not None
+                                else None
+                            ),
+                        }
                     corridor_record["pending_command"] = (
                         {
                             "desired_action": _action_name_from_mask(
@@ -6180,6 +6510,9 @@ def run(args: argparse.Namespace) -> int:
                         time.sleep(0.06)
                     finally:
                         send_scan_key(api, scan_code=0x01, pressed=False)
+                retire_pipeline_solutions(
+                    (corridor_solution, corridor_pending_solution)
+                )
                 if corridor_future is not None:
                     corridor_future.cancel()
                 if corridor_survival_future is not None:
@@ -6191,6 +6524,22 @@ def run(args: argparse.Namespace) -> int:
                     )
                 if corridor_executor is not None:
                     corridor_executor.shutdown(wait=True, cancel_futures=True)
+                if (
+                    corridor_future is not None
+                    and corridor_future.done()
+                    and not corridor_future.cancelled()
+                ):
+                    try:
+                        retire_pipeline_solutions(
+                            (corridor_future.result(),)
+                        )
+                    except Exception:
+                        pass
+                if pipeline_retire_executor is not None:
+                    pipeline_retire_executor.shutdown(
+                        wait=True,
+                        cancel_futures=False,
+                    )
                 if audit_executor is not None:
                     audit_executor.shutdown(wait=True)
                 if enemy_future is not None:
@@ -6266,6 +6615,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "compute dense survival labels only after Boolean publication; "
             "labels use an isolated executor and have no action authority"
+        ),
+    )
+    parser.add_argument(
+        "--pipeline-prewarm-shadow",
+        action="store_true",
+        help=(
+            "start exact-root seeds when clearance is ready and record "
+            "lookup-only current-version hits; never changes live actions"
         ),
     )
     parser.add_argument(

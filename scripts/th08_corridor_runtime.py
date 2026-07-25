@@ -25,7 +25,16 @@ from touhou_control.query_survival import (
     PendingCommand,
     PipelineSurvivalWorkspace,
     QueryLocalSurvivalResult,
+    ReachablePipelineRoot,
     StalePipelineWorkspaceError,
+    SurvivalQueryProblem,
+)
+from touhou_control.pipeline_prewarm_service import (
+    PipelinePrewarmService,
+    PipelinePrewarmServiceSnapshot,
+)
+from touhou_control.pipeline_root_schedule import (
+    schedule_pipeline_frontier,
 )
 from touhou_control.viability import SafetyValueQuery, ViabilityQuery
 from touhou_control.viability import RobustViabilityPolicy
@@ -46,6 +55,11 @@ SHADOW_REFINEMENT_GRID_STEPS = (8.0,)
 # callers without allowing them to rank live actions.
 LIVE_SURVIVAL_LABELS = False
 SHADOW_SURVIVAL_LABELS = True
+PIPELINE_PREWARM_DECISION_FRAMES = (4, 5, 6)
+PIPELINE_PREWARM_INITIAL_ROOT_FRAMES = (4,)
+PIPELINE_PREWARM_WORKER_COUNT = 3
+PIPELINE_PREWARM_SCHEDULE_FRAMES = (2, 3, 4, 5, 6, 7, 8, 9)
+PIPELINE_PREWARM_SCHEDULE_ROOT_LIMIT = 2
 
 
 class SlottedHazard(Protocol):
@@ -76,6 +90,30 @@ class CorridorSolution:
     postpublished_survival_parity: bool | None = None
     pipeline_survival_workspace: PipelineSurvivalWorkspace | None = None
     pipeline_survival_workspace_ms: float | None = None
+    pipeline_prewarm_service: PipelinePrewarmService | None = None
+    pipeline_prewarm_start_error: str | None = None
+
+
+@dataclass(frozen=True)
+class PipelinePrewarmShadowQuery:
+    """One lookup-only current-version shadow observation."""
+
+    status: str
+    root: ReachablePipelineRoot | None
+    result: QueryLocalSurvivalResult | None
+    lookup_ms: float
+    service: PipelinePrewarmServiceSnapshot | None
+
+
+@dataclass(frozen=True)
+class PipelinePrewarmRetarget:
+    """One non-authoritative post-issue rolling target request."""
+
+    status: str
+    revision: int | None
+    root_count: int
+    candidate_root_count: int
+    elapsed_ms: float
 
 
 @dataclass
@@ -172,6 +210,7 @@ def solve_corridor(
     context_key: tuple[int, int, int | None] | None = None,
     audit_capsule_dir: Path | None = None,
     audit_executor: ThreadPoolExecutor | None = None,
+    pipeline_prewarm_shadow: bool = False,
 ) -> CorridorSolution:
     started = time.perf_counter()
     hazards = lower_th08_corridor_hazards(
@@ -182,19 +221,70 @@ def solve_corridor(
         forecast_frames=forecast_lead_frames,
         horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
     )
-    plan = plan_lowered_th08_corridor(
-        player_x=player_x,
-        player_y=player_y,
-        hazards=hazards,
-        required_gate_lane=required_gate_lane,
-        control_delay_candidates=control_delay_candidates,
-        nominal_control_delay=nominal_control_delay,
-        active_action=active_action,
-        safety_value_horizon_frames=safety_value_horizon_frames,
-        survival_labels=LIVE_SURVIVAL_LABELS,
-        retain_query_survival_problem=True,
-        refinement_grid_steps=LIVE_REFINEMENT_GRID_STEPS,
+    prewarm_service: PipelinePrewarmService | None = None
+    prewarm_start_error: str | None = None
+    policy_version = (
+        source_frame,
+        snapshot_frame,
+        context_key,
     )
+
+    def start_pipeline_prewarm(problem: SurvivalQueryProblem) -> None:
+        nonlocal prewarm_service, prewarm_start_error
+        row, column, _ = problem.project_to_lattice(
+            x=player_x,
+            y=player_y,
+        )
+        roots = tuple(
+            ReachablePipelineRoot(
+                frame=frame,
+                row=row,
+                column=column,
+                observed_action=active_action,
+                pending_command=None,
+            )
+            for frame in PIPELINE_PREWARM_INITIAL_ROOT_FRAMES
+            if frame < problem.horizon_frames
+        )
+        if not roots:
+            prewarm_start_error = "no initial root inside policy horizon"
+            return
+        try:
+            prewarm_service = PipelinePrewarmService(
+                problem=problem,
+                policy_version=policy_version,
+                initial_roots=roots,
+                decision_frame_support=PIPELINE_PREWARM_DECISION_FRAMES,
+                worker_count=PIPELINE_PREWARM_WORKER_COUNT,
+            )
+        except Exception as error:
+            prewarm_start_error = (
+                f"{type(error).__name__}: {error}"
+            )
+
+    try:
+        plan = plan_lowered_th08_corridor(
+            player_x=player_x,
+            player_y=player_y,
+            hazards=hazards,
+            required_gate_lane=required_gate_lane,
+            control_delay_candidates=control_delay_candidates,
+            nominal_control_delay=nominal_control_delay,
+            active_action=active_action,
+            safety_value_horizon_frames=safety_value_horizon_frames,
+            survival_labels=LIVE_SURVIVAL_LABELS,
+            retain_query_survival_problem=True,
+            refinement_grid_steps=LIVE_REFINEMENT_GRID_STEPS,
+            pre_viability_problem_hook=(
+                start_pipeline_prewarm
+                if pipeline_prewarm_shadow
+                else None
+            ),
+        )
+    except BaseException:
+        if prewarm_service is not None:
+            prewarm_service.close()
+        raise
     constraint_honored = (
         required_gate_lane is None
         or (plan.reachable and plan.lane == required_gate_lane)
@@ -262,6 +352,8 @@ def solve_corridor(
         audit_error=audit_error,
         worker_ms=(time.perf_counter() - started) * 1000.0,
         audit_future=audit_future,
+        pipeline_prewarm_service=prewarm_service,
+        pipeline_prewarm_start_error=prewarm_start_error,
     )
 
 
@@ -460,6 +552,182 @@ def corridor_pipeline_survival_query(
         return None
 
 
+def corridor_pipeline_prewarm_query(
+    solution: CorridorSolution | None,
+    *,
+    current_frame: int,
+    player_x: float,
+    player_y: float,
+    observed_action: str,
+    pending_command: PendingCommand | None,
+    max_age_frames: int,
+) -> PipelinePrewarmShadowQuery:
+    """Lookup one current exact root without starting synchronous work."""
+
+    started = time.perf_counter()
+    if solution is None or solution.pipeline_prewarm_service is None:
+        return PipelinePrewarmShadowQuery(
+            status="unavailable",
+            root=None,
+            result=None,
+            lookup_ms=(time.perf_counter() - started) * 1000.0,
+            service=None,
+        )
+    service = solution.pipeline_prewarm_service
+    if service.policy_version != _pipeline_policy_version(solution):
+        return PipelinePrewarmShadowQuery(
+            status="stale_policy_version",
+            root=None,
+            result=None,
+            lookup_ms=(time.perf_counter() - started) * 1000.0,
+            service=service.snapshot(),
+        )
+    age = current_frame - solution.source_frame
+    problem = service.problem
+    if age < 0:
+        return PipelinePrewarmShadowQuery(
+            status="pending_future_epoch",
+            root=None,
+            result=None,
+            lookup_ms=(time.perf_counter() - started) * 1000.0,
+            service=service.snapshot(),
+        )
+    if age > max_age_frames or age >= problem.horizon_frames:
+        return PipelinePrewarmShadowQuery(
+            status="outside_policy_horizon",
+            root=None,
+            result=None,
+            lookup_ms=(time.perf_counter() - started) * 1000.0,
+            service=service.snapshot(),
+        )
+    row, column, _ = problem.project_to_lattice(
+        x=player_x,
+        y=player_y,
+    )
+    root = ReachablePipelineRoot(
+        frame=age,
+        row=row,
+        column=column,
+        observed_action=observed_action,
+        pending_command=pending_command,
+    )
+    result = service.lookup(root)
+    return PipelinePrewarmShadowQuery(
+        status="hit" if result is not None else "miss",
+        root=root,
+        result=result,
+        lookup_ms=(time.perf_counter() - started) * 1000.0,
+        service=service.snapshot(),
+    )
+
+
+def corridor_pipeline_prewarm_retarget(
+    solution: CorridorSolution | None,
+    *,
+    root: ReachablePipelineRoot | None,
+    selected_action: str,
+    physical_x: float,
+    physical_y: float,
+    command_issue_offset: int,
+    preferred_decision_frame: int,
+) -> PipelinePrewarmRetarget:
+    """Queue a bounded, physically ranked next-root frontier.
+
+    The public-root label remains exact and robust under the service's value
+    contract.  Physical position, issue offset, nominal pickup, and predicted
+    decision cadence are used only to decide which exact roots receive scarce
+    background compute first.
+    """
+
+    started = time.perf_counter()
+    if (
+        solution is None
+        or solution.pipeline_prewarm_service is None
+        or root is None
+    ):
+        return PipelinePrewarmRetarget(
+            status="unavailable",
+            revision=None,
+            root_count=0,
+            candidate_root_count=0,
+            elapsed_ms=(time.perf_counter() - started) * 1000.0,
+        )
+    service = solution.pipeline_prewarm_service
+    if service.policy_version != _pipeline_policy_version(solution):
+        return PipelinePrewarmRetarget(
+            status="stale_policy_version",
+            revision=None,
+            root_count=0,
+            candidate_root_count=0,
+            elapsed_ms=(time.perf_counter() - started) * 1000.0,
+        )
+    problem = service.problem
+    schedule = schedule_pipeline_frontier(
+        problem=problem,
+        root=root,
+        selected_action=selected_action,
+        physical_x=physical_x,
+        physical_y=physical_y,
+        command_issue_offset=command_issue_offset,
+        preferred_decision_frame=preferred_decision_frame,
+        scheduling_frame_support=PIPELINE_PREWARM_SCHEDULE_FRAMES,
+        root_limit=PIPELINE_PREWARM_SCHEDULE_ROOT_LIMIT,
+    )
+    if not schedule.roots:
+        return PipelinePrewarmRetarget(
+            status="empty_frontier",
+            revision=None,
+            root_count=0,
+            candidate_root_count=0,
+            elapsed_ms=(time.perf_counter() - started) * 1000.0,
+        )
+    revision = service.retarget(schedule.roots)
+    return PipelinePrewarmRetarget(
+        status="queued",
+        revision=revision,
+        root_count=len(schedule.roots),
+        candidate_root_count=schedule.candidate_count,
+        elapsed_ms=(time.perf_counter() - started) * 1000.0,
+    )
+
+
+def close_pipeline_prewarm(
+    solution: CorridorSolution | None,
+) -> None:
+    """Cancel and join one solution's shadow service, if present."""
+
+    if (
+        solution is not None
+        and solution.pipeline_prewarm_service is not None
+    ):
+        solution.pipeline_prewarm_service.close()
+
+
+def close_retired_pipeline_prewarms(
+    candidates: tuple[CorridorSolution | None, ...],
+    retained: tuple[CorridorSolution | None, ...] = (),
+) -> None:
+    """Close candidate services that are not shared by retained solutions."""
+
+    retained_services = {
+        id(solution.pipeline_prewarm_service)
+        for solution in retained
+        if (
+            solution is not None
+            and solution.pipeline_prewarm_service is not None
+        )
+    }
+    closed_services: set[int] = set()
+    for solution in candidates:
+        if solution is None or solution.pipeline_prewarm_service is None:
+            continue
+        identity = id(solution.pipeline_prewarm_service)
+        if identity in retained_services or identity in closed_services:
+            continue
+        solution.pipeline_prewarm_service.close()
+        closed_services.add(identity)
+
+
 def corridor_safety_value_query(
     solution: CorridorSolution | None,
     *,
@@ -532,6 +800,12 @@ __all__ = [
     "LIVE_SURVIVAL_LABELS",
     "SHADOW_REFINEMENT_GRID_STEPS",
     "SHADOW_SURVIVAL_LABELS",
+    "PipelinePrewarmRetarget",
+    "PipelinePrewarmShadowQuery",
+    "close_pipeline_prewarm",
+    "close_retired_pipeline_prewarms",
+    "corridor_pipeline_prewarm_query",
+    "corridor_pipeline_prewarm_retarget",
     "corridor_pipeline_survival_query",
     "corridor_policy_status",
     "corridor_postpublished_survival_query",

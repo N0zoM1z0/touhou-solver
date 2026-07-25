@@ -1,0 +1,216 @@
+{
+  "schema": "bounded-pipeline-root-schedule-benchmark-v1",
+  "scope": "TH08 structured 16px/80-frame problems. Both modes reuse the same completed frame-4 seed generation. The full mode schedules every physically reachable 2..9-frame root; bounded mode schedules the top two using subcell position, a two-frame issue offset, four-frame cadence, and one-frame nominal pickup.",
+  "case_count": 5,
+  "failure_count": 0,
+  "failures": [],
+  "timing": {
+    "full_physical_frontier": {
+      "target_ms": {
+        "median": 291.6182650369592,
+        "p95": 296.8359290389344,
+        "max": 390.3004680178128
+      },
+      "seed_ms": {
+        "median": 248.8704969873652,
+        "p95": 256.96215900825337,
+        "max": 346.9830540125258
+      },
+      "specialization_ms": {
+        "median": 17.866127018351108,
+        "p95": 17.99556805053726,
+        "max": 21.00100601091981
+      },
+      "root_count": {
+        "median": 20.0,
+        "p95": 20.0,
+        "max": 20.0
+      },
+      "seed_count": {
+        "median": 1412.0,
+        "p95": 1412.0,
+        "max": 1412.0
+      }
+    },
+    "bounded_top_2": {
+      "target_ms": {
+        "median": 128.01317195408046,
+        "p95": 130.0047660479322,
+        "max": 160.6797340209596
+      },
+      "seed_ms": {
+        "median": 120.87046098895371,
+        "p95": 122.9063420323655,
+        "max": 152.4055569898337
+      },
+      "specialization_ms": {
+        "median": 5.239285004790872,
+        "p95": 5.2482690080069005,
+        "max": 5.511035968083888
+      },
+      "root_count": {
+        "median": 2.0,
+        "p95": 2.0,
+        "max": 2.0
+      },
+      "seed_count": {
+        "median": 281.0,
+        "p95": 281.0,
+        "max": 281.0
+      }
+    }
+  },
+  "bounded_target_median_ratio": 0.43897515108615126,
+  "cases": [
+    {
+      "seed": 3,
+      "schedule_ms": 0.5058550159446895,
+      "candidate_root_count": 20,
+      "scheduled_root_count": 2,
+      "modes": {
+        "full_physical_frontier": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 20,
+          "seed_count": 1412,
+          "target_ms": 291.6182650369592,
+          "seed_ms": 248.8704969873652,
+          "specialization_ms": 17.99556805053726,
+          "lookup_hits": 20,
+          "parity": true
+        },
+        "bounded_top_2": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 2,
+          "seed_count": 281,
+          "target_ms": 120.96899503376335,
+          "seed_ms": 112.84771503414959,
+          "specialization_ms": 5.2482690080069005,
+          "lookup_hits": 2,
+          "parity": true
+        }
+      }
+    },
+    {
+      "seed": 11,
+      "schedule_ms": 0.46027498319745064,
+      "candidate_root_count": 20,
+      "scheduled_root_count": 2,
+      "modes": {
+        "full_physical_frontier": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 20,
+          "seed_count": 1412,
+          "target_ms": 253.926123958081,
+          "seed_ms": 212.9691030131653,
+          "specialization_ms": 17.866127018351108,
+          "lookup_hits": 20,
+          "parity": true
+        },
+        "bounded_top_2": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 2,
+          "seed_count": 281,
+          "target_ms": 99.34833995066583,
+          "seed_ms": 91.89324802719057,
+          "specialization_ms": 5.511035968083888,
+          "lookup_hits": 2,
+          "parity": true
+        }
+      }
+    },
+    {
+      "seed": 19,
+      "schedule_ms": 0.3935510176233947,
+      "candidate_root_count": 20,
+      "scheduled_root_count": 2,
+      "modes": {
+        "full_physical_frontier": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 20,
+          "seed_count": 1412,
+          "target_ms": 240.90251204324886,
+          "seed_ms": 201.76182501018047,
+          "specialization_ms": 17.78887101681903,
+          "lookup_hits": 20,
+          "parity": true
+        },
+        "bounded_top_2": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 2,
+          "seed_count": 281,
+          "target_ms": 128.01317195408046,
+          "seed_ms": 120.87046098895371,
+          "specialization_ms": 5.197079968638718,
+          "lookup_hits": 2,
+          "parity": true
+        }
+      }
+    },
+    {
+      "seed": 27,
+      "schedule_ms": 0.3658440546132624,
+      "candidate_root_count": 20,
+      "scheduled_root_count": 2,
+      "modes": {
+        "full_physical_frontier": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 20,
+          "seed_count": 1412,
+          "target_ms": 390.3004680178128,
+          "seed_ms": 346.9830540125258,
+          "specialization_ms": 21.00100601091981,
+          "lookup_hits": 20,
+          "parity": true
+        },
+        "bounded_top_2": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 2,
+          "seed_count": 281,
+          "target_ms": 160.6797340209596,
+          "seed_ms": 152.4055569898337,
+          "specialization_ms": 5.122459027916193,
+          "lookup_hits": 2,
+          "parity": true
+        }
+      }
+    },
+    {
+      "seed": 35,
+      "schedule_ms": 0.46641204971820116,
+      "candidate_root_count": 20,
+      "scheduled_root_count": 2,
+      "modes": {
+        "full_physical_frontier": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 20,
+          "seed_count": 1412,
+          "target_ms": 296.8359290389344,
+          "seed_ms": 256.96215900825337,
+          "specialization_ms": 17.479482979979366,
+          "lookup_hits": 20,
+          "parity": true
+        },
+        "bounded_top_2": {
+          "revision": 2,
+          "status": "ready",
+          "root_count": 2,
+          "seed_count": 281,
+          "target_ms": 130.0047660479322,
+          "seed_ms": 122.9063420323655,
+          "specialization_ms": 5.239285004790872,
+          "lookup_hits": 2,
+          "parity": true
+        }
+      }
+    }
+  ]
+}

@@ -13,6 +13,7 @@ from __future__ import annotations
 import math
 import time
 from dataclasses import dataclass, replace
+from typing import Callable
 
 import numpy as np
 
@@ -252,6 +253,9 @@ class RobustControlSpec:
     survival_labels: bool = False
     retain_query_survival_problem: bool = False
     refinement_grid_steps: tuple[float, ...] = ()
+    pre_viability_problem_hook: (
+        Callable[[SurvivalQueryProblem], None] | None
+    ) = None
 
     def __post_init__(self) -> None:
         if not self.actions:
@@ -276,6 +280,18 @@ class RobustControlSpec:
         if self.refinement_grid_steps and self.terminal_viable is not None:
             raise ValueError(
                 "adaptive refinement does not yet remap terminal masks"
+            )
+        if (
+            self.pre_viability_problem_hook is not None
+            and (
+                self.refinement_grid_steps
+                or self.terminal_viable is not None
+                or not self.retain_query_survival_problem
+            )
+        ):
+            raise ValueError(
+                "pre-viability query hooks require one retained, "
+                "unrefined policy without an external terminal mask"
             )
 
 
@@ -1077,6 +1093,34 @@ def _plan_robust_corridor(
         config=config,
     )
     clearance_finished = time.perf_counter()
+    survival_query_problem = (
+        SurvivalQueryProblem(
+            x_axis=x_axis,
+            y_axis=y_axis,
+            clearance_volume=clearance_volume,
+            actions=robust_control.actions,
+            delay_frames=robust_control.delay_frames,
+            nominal_delay=robust_control.nominal_delay,
+            config=ViabilityConfig(
+                frames_per_layer=config.frames_per_layer,
+                required_clearance=config.required_clearance,
+                clamp_to_bounds=True,
+                repair_radius_cells=1,
+            ),
+        )
+        if (
+            robust_control.retain_query_survival_problem
+            and robust_control.terminal_viable is None
+            and not robust_control.refinement_grid_steps
+        )
+        else None
+    )
+    if robust_control.pre_viability_problem_hook is not None:
+        assert survival_query_problem is not None
+        robust_control.pre_viability_problem_hook(
+            survival_query_problem
+        )
+    problem_hook_finished = time.perf_counter()
     policy = build_robust_viability_policy(
         x_axis=x_axis,
         y_axis=y_axis,
@@ -1176,8 +1220,12 @@ def _plan_robust_corridor(
             y=start_y,
             active_action=robust_control.active_action,
         )
-    survival_query_problem = (
-        SurvivalQueryProblem(
+    if (
+        survival_query_problem is None
+        and robust_control.retain_query_survival_problem
+        and robust_control.terminal_viable is None
+    ):
+        survival_query_problem = SurvivalQueryProblem(
             x_axis=x_axis,
             y_axis=y_axis,
             clearance_volume=clearance_volume,
@@ -1191,12 +1239,6 @@ def _plan_robust_corridor(
                 repair_radius_cells=1,
             ),
         )
-        if (
-            robust_control.retain_query_survival_problem
-            and robust_control.terminal_viable is None
-        )
-        else None
-    )
     safety_value_policy = None
     safety_value_started = time.perf_counter()
     safety_value_finished = safety_value_started
@@ -1234,7 +1276,11 @@ def _plan_robust_corridor(
         ),
         (
             "viability",
-            (viability_finished - clearance_finished) * 1000.0,
+            (viability_finished - problem_hook_finished) * 1000.0,
+        ),
+        (
+            "pre_viability_hook",
+            (problem_hook_finished - clearance_finished) * 1000.0,
         ),
         (
             "safety_value",

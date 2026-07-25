@@ -727,6 +727,7 @@ def run_trial(
         "postpublished_survival_shadow": (
             args.postpublished_survival_shadow
         ),
+        "pipeline_prewarm_shadow": args.pipeline_prewarm_shadow,
         "started_at": datetime.now().astimezone().isoformat(),
     }
     batch_process: subprocess.Popen[bytes] | None = None
@@ -751,6 +752,7 @@ def run_trial(
             postpublished_survival_shadow=(
                 args.postpublished_survival_shadow
             ),
+            pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
         )
         batch_process, batch_log = launch_patch_batch(
             game_dir=game_dir,
@@ -1011,6 +1013,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "compute post-Boolean survival labels for telemetry only; "
             "an isolated executor prevents worker serialization"
+        ),
+    )
+    parser.add_argument(
+        "--pipeline-prewarm-shadow",
+        action="store_true",
+        help=(
+            "start exact-root prewarm after clearance and record lookup-only "
+            "telemetry; never changes live actions"
         ),
     )
     parser.add_argument(

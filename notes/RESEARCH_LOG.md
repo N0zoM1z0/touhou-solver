@@ -2838,3 +2838,63 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   pass 465 tests in `1.710/3.131 s`.
 - Full contract and evidence boundary:
   `notes/ROLLING_PIPELINE_PREWARM_20260725.md`.
+
+## 2026-07-25: Augmented-Pipeline Problem Formalization
+
+- Formalized the intended robust-control problem as a finite-horizon
+  information-set game over frame, projected position, observed action,
+  pending desired action, and a support of indistinguishable remaining
+  delays.
+- Identified two separate completeness boundaries in the current “exact”
+  prototype: cadence uncertainty is branched only on the first transition,
+  and deeper maximization may condition on a hidden exact remaining delay.
+  Existing scalar/native parity proves implementation parity for that hybrid
+  recurrence, not exactness for the physical controller.
+- Defined the required observation partition, non-anticipativity condition,
+  lexicographic value, proof obligations, performance accounting, and exact,
+  anytime, reachable-tube, and incremental algorithm candidates.
+- The authoritative active specification is
+  `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`.
+
+## 2026-07-25: Belief-Pipeline Correctness And Native Prototype
+
+- Built an independent recursively variable-cadence scalar oracle with
+  physical hold/no-write semantics that merges indistinguishable
+  remaining-delay branches before every future action maximization.
+- Formal review found a third state/transition error after the first
+  prototype: live code emits an input transition only when the selected mask
+  changes, while the legacy recurrence treated every decision as a new issue.
+  CE-0114 shrinks the resulting winning error to three future frames.
+- Replaced the invalid first CE-0111 with a no-write-correct 5-cell/10-frame
+  cadence counterexample. One-transition/fixed-maximum cadence is optimistic
+  there; recursive cadence flips winning to losing. CE-0112 still records
+  hidden-delay clairvoyance.
+- Four deterministic 128-case cohorts now separate the causes:
+  always-issue/no-write has 30 winning mismatches; wider recursive cadence has
+  3 action-label and 1 winning mismatch; fixed-cadence
+  clairvoyant/non-clairvoyant has 15 action-label and 11 best-action
+  mismatches. A smaller cadence cohort has zero mismatches and is retained as
+  negative evidence, not proof.
+- Added a cancellable C++ belief workspace with remaining-delay bitmask memo,
+  conditional no-write, observation grouping, admissible upper bounds, and
+  restricted continuation policy classes. Another 128 scalar/native cases
+  pass with zero failures.
+- Small-model scalar/native median is `5.94/0.105 ms`; warm native lookup is
+  `0.028 ms`. C++ fixes language overhead but not full TH08 state growth.
+- On a TH08-shaped 32-frame `(4,5,6)` workload, all 17 actions recursively
+  required `1507.74 ms`. Allowing all 17 actions at the public root but only
+  nine focused continuation actions required `29.52 ms`; this is an
+  attainable conservative lower bound. A recursive `(2..9)` envelope still
+  required `552.69 ms` at 16 frames and exceeded three seconds at 32.
+- Three physical Stage-5 shadows recorded direct CPU/action-lag regressions
+  despite top-2 exact-hit improvement (CE-0113). No new physical run is
+  authorized by this checkpoint.
+- `AGENTS.md` and `START_HERE.md` now require every later algorithm change to
+  recheck physical/model state equivalence, non-anticipativity, whether the
+  solver actually solves or bounds the recurrence, and issue-time delivery.
+  Complete proof is not mandatory, but unknown-direction approximations
+  remain shadow-only.
+- Rebuilt both native libraries. Linux and Windows complete quick suites pass
+  482 tests in `3.010/5.410 s`.
+- Full analysis:
+  `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`.

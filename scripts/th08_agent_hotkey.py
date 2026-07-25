@@ -88,6 +88,7 @@ def build_long_run_arguments(
     safety_value_horizon: int = 0,
     viability_audit_dir: Path | None = None,
     postpublished_survival_shadow: bool = False,
+    pipeline_prewarm_shadow: bool = False,
     duration_seconds: float = LONG_RUN_DURATION_SECONDS,
 ) -> list[str]:
     if safety_value_horizon < 0:
@@ -135,6 +136,8 @@ def build_long_run_arguments(
         )
     if postpublished_survival_shadow:
         arguments.append("--postpublished-survival-shadow")
+    if pipeline_prewarm_shadow:
+        arguments.append("--pipeline-prewarm-shadow")
     return arguments
 
 
@@ -148,6 +151,7 @@ class AgentHotkey:
         safety_value_horizon: int = 0,
         viability_audit_dir: Path | None = None,
         postpublished_survival_shadow: bool = False,
+        pipeline_prewarm_shadow: bool = False,
         duration_seconds: float = LONG_RUN_DURATION_SECONDS,
         detailed_summary: bool = True,
     ) -> None:
@@ -191,6 +195,7 @@ class AgentHotkey:
         self.postpublished_survival_shadow = (
             postpublished_survival_shadow
         )
+        self.pipeline_prewarm_shadow = pipeline_prewarm_shadow
         self.duration_seconds = duration_seconds
         self.detailed_summary = detailed_summary
         self.artifact_dir = (
@@ -308,6 +313,7 @@ class AgentHotkey:
                 postpublished_survival_shadow=(
                     self.postpublished_survival_shadow
                 ),
+                pipeline_prewarm_shadow=self.pipeline_prewarm_shadow,
                 duration_seconds=self.duration_seconds,
             )
             if not gameplay_active:

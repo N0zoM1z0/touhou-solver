@@ -16,6 +16,9 @@ from touhou_control.query_survival import (
     query_local_survival,
     scalar_query_local_survival,
 )
+from touhou_control.pipeline_root_schedule import (
+    schedule_pipeline_frontier,
+)
 from touhou_control.reachability_oracle import (
     scalar_robust_survival_query,
 )
@@ -548,6 +551,76 @@ class QueryLocalSurvivalTests(unittest.TestCase):
                 pending_command=PendingCommand("stay", (2,)),
             ),
         )
+
+    def test_physical_frontier_respects_subcell_and_issue_offset(
+        self,
+    ) -> None:
+        axis = np.arange(9, dtype=np.float32)
+        roots = enumerate_next_decision_roots(
+            x_axis=axis,
+            y_axis=axis,
+            actions=self.actions,
+            delay_frames=(1,),
+            decision_frame_support=(2, 4),
+            config=ViabilityConfig(frames_per_layer=2),
+            start_frame=0,
+            horizon_frame=8,
+            row=3,
+            column=3,
+            observed_action="stay",
+            selected_action="right",
+            physical_start_x=3.6,
+            physical_start_y=3.0,
+            command_issue_offset=2,
+        )
+        self.assertEqual(
+            roots,
+            (
+                ReachablePipelineRoot(
+                    frame=4,
+                    row=3,
+                    column=5,
+                    observed_action="right",
+                    pending_command=None,
+                ),
+            ),
+        )
+
+    def test_physical_pipeline_schedule_bounds_exact_root_work(
+        self,
+    ) -> None:
+        axis = np.arange(9, dtype=np.float32)
+        problem = SurvivalQueryProblem(
+            x_axis=axis,
+            y_axis=axis,
+            clearance_volume=np.full(
+                (13, 9, 9),
+                10.0,
+                dtype=np.float32,
+            ),
+            actions=self.actions,
+            delay_frames=(1, 2, 3, 4),
+            nominal_delay=3,
+            config=ViabilityConfig(frames_per_layer=2),
+        )
+        schedule = schedule_pipeline_frontier(
+            problem=problem,
+            root=ReachablePipelineRoot(0, 4, 4, "stay", None),
+            selected_action="right",
+            physical_x=4.4,
+            physical_y=4.0,
+            command_issue_offset=1,
+            preferred_decision_frame=4,
+            scheduling_frame_support=(2, 3, 4, 5),
+            root_limit=2,
+            preferred_pickup_delay=1,
+        )
+        self.assertEqual(len(schedule.roots), 2)
+        self.assertGreater(schedule.candidate_count, len(schedule.roots))
+        self.assertEqual(schedule.preferred_decision_frame, 4)
+        self.assertEqual(schedule.preferred_pickup_delay, 1)
+        self.assertEqual(schedule.roots[0].frame, 4)
+        self.assertEqual(schedule.roots[0].observed_action, "right")
 
     def test_variable_cadence_seed_reuses_each_next_phase(self) -> None:
         axis = np.arange(9, dtype=np.float32)

@@ -8,6 +8,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import numpy as np
+import corridor_planner as corridor_planner_module
 
 from corridor_planner import (
     AabbHazard,
@@ -44,6 +45,52 @@ CONFIG = CorridorConfig(
 
 
 class CorridorPlannerTests(unittest.TestCase):
+    def test_retained_query_hook_runs_after_clearance_before_viability(
+        self,
+    ) -> None:
+        events: list[str] = []
+        original_builder = (
+            corridor_planner_module.build_robust_viability_policy
+        )
+
+        def hook(problem) -> None:
+            self.assertEqual(problem.clearance_volume.shape[0], 9)
+            events.append("hook")
+
+        def checked_builder(*args, **kwargs):
+            self.assertEqual(events, ["hook"])
+            events.append("viability")
+            return original_builder(*args, **kwargs)
+
+        with patch(
+            "corridor_planner.build_robust_viability_policy",
+            side_effect=checked_builder,
+        ):
+            plan = plan_corridor(
+                start_x=8.0,
+                start_y=8.0,
+                bounds=CorridorBounds(0.0, 16.0, 0.0, 16.0),
+                config=CorridorConfig(
+                    grid_step=8.0,
+                    frames_per_layer=4,
+                    horizon_frames=8,
+                ),
+                robust_control=RobustControlSpec(
+                    actions=(ControlAction("stay", 0.0, 0.0),),
+                    delay_frames=(1,),
+                    nominal_delay=1,
+                    active_action="stay",
+                    retain_query_survival_problem=True,
+                    pre_viability_problem_hook=hook,
+                ),
+            )
+
+        self.assertEqual(events, ["hook", "viability"])
+        self.assertIsNotNone(plan.survival_query_problem)
+        timing = dict(plan.solver_timing_ms)
+        self.assertIn("pre_viability_hook", timing)
+        self.assertGreaterEqual(timing["pre_viability_hook"], 0.0)
+
     @unittest.skipUnless(
         native_available(),
         "native planner backend is not built",

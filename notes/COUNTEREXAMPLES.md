@@ -2714,3 +2714,91 @@ Status: observed | inferred | unknown | fixed
   `test_new_publication_rejects_every_old_result`,
   `artifacts/benchmarks/rolling_pipeline_prewarm_20260725.json`, and
   `notes/ROLLING_PIPELINE_PREWARM_20260725.md`.
+
+## CE-0111: One-transition cadence falsely certified a winning state
+
+- **Shrunk model:** Five x-cells, actions `left/stay/right`, delay `{2,3}`,
+  cadence `{1,2}`, ten-frame horizon, start x-cell 2, and only four unsafe
+  cells: `(frame,x)={(5,0),(7,1),(9,2),(10,4)}`.
+- **Failure:** The no-write-correct public-root cadence/fixed-2 continuation
+  reports a complete ten-frame win. Recursive cadence admits a phase-shifted
+  short/long sequence that misses the observation/action opportunity assumed
+  by fixed continuation and guarantees only nine frames.
+- **Cohort:** A 128-case 5-cell/10-frame cohort produced 3 action-label,
+  2 best-action, and 1 winning mismatch between one-transition and recursive
+  belief values. A smaller 3-cell/6-frame cohort produced zero mismatches;
+  that negative evidence is not an equivalence proof.
+- **Correction:** The old workspace is now named as a hybrid model only.
+  Recursive-cadence authority requires the belief workspace or an explicitly
+  conservative bounded policy.
+- **Regression/evidence:**
+  `test_recursive_cadence_catches_phase_shifted_observation_gap` and
+  `artifacts/viability_audit/pipeline_formal_correctness_20260725.json`.
+
+## CE-0112: Hidden remaining delay created a clairvoyant best action
+
+- **Minimal model:** Three x-cells, actions `stay/right`, delay `{2,3}`, fixed
+  one-frame cadence, four-frame horizon, and one unsafe cell at frame 4.
+- **Failure:** Maximizing separately after exact hidden-delay successors
+  reports both actions as complete four-frame best actions. Merging
+  indistinguishable remaining-delay branches before the next maximization
+  leaves only `stay` best; `right` guarantees three frames.
+- **Cohort:** Under fixed cadence, clairvoyant and belief recurrences differed
+  on 15/128 action-label sets and 11/128 best-action sets even though the
+  maximum state winning label was unchanged.
+- **Correction:** Remaining delay is stored as a belief-support bitmask in
+  the new scalar/native recurrence and observation classes are merged before
+  every future controller choice.
+- **Regression/evidence:**
+  `test_hidden_remaining_delay_cannot_select_future_action` and
+  `artifacts/viability_audit/pipeline_formal_correctness_20260725.json`.
+
+## CE-0113: Exact-root shadow work slowed the controller before it could help
+
+- **Observed runs:** Complete Stage-5 control `171023`, full-frontier shadow
+  `171925`, and bounded top-2/low-priority shadow `175339` retained 14, 32,
+  and 27 native hits respectively. RNG differs, so hit totals are adverse
+  rather than causal evidence.
+- **Direct delivery regression:** Iteration median changed
+  `45.63 -> 71.82 -> 65.98 ms`, local-plan median
+  `20.35 -> 30.83 -> 29.22 ms`, and action-lag median
+  `2 -> 4 -> 3` frames.
+- **Low useful delivery:** Exact-root hits were `4.49%` for the full frontier
+  and `12.47%` for top-2. Every covered root completed in time was consumed;
+  root/version lookup was not corrupt.
+- **Correction:** Physical prewarm remains explicit shadow-only and disabled
+  by default. Do not run another physical prewarm until the finite value is
+  semantically valid and offline whole-controller CPU accounting predicts no
+  read/local-plan/action-lag regression.
+- **Evidence:** The three run notes,
+  `stage5_20260725_171925_pipeline_prewarm_shadow.json`,
+  `stage5_20260725_175339_pipeline_prewarm_shadow.json`, and
+  `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`.
+
+## CE-0114: A planner hold was modeled as a new input issue
+
+- **Observed actuator semantics:** Live code calls `send_transitions` and
+  `delay_estimator.issued` only when
+  `input_transitions(previous_mask, decision.mask)` is nonempty. Selecting the
+  held desired mask is no-write and cannot reset or replace an older pending
+  command.
+- **Minimal model:** Three x-cells, `left/stay`, fixed one-frame cadence,
+  new-write delay `{3}`, three-frame horizon, observed `stay`, and `left`
+  already pending with remaining delay two. Frame 3 / x-cell 1 is unsafe.
+- **Failure:** Holding `left` lets the existing pending command activate and
+  survives all three frames. The legacy decision-as-write recurrence replaces
+  it at every decision and reports only two guaranteed frames.
+- **Cohort:** With singleton delay/cadence, legacy and no-write recurrences
+  differed on 30/128 action-label sets, 15/128 best-action sets, and 30/128
+  winning classifications. Every state-value difference in this isolated
+  cohort was legacy-conservative; the combined legacy model has no general
+  bound direction.
+- **Correction:** The scalar/native belief workspace issues only when selected
+  action differs from held desired. A no-write transition carries/decrements
+  the old pending support. The root API reconstructs held desired as pending
+  action if present, otherwise observed action, under an explicit estimator
+  invariant.
+- **Regression/evidence:**
+  `test_selecting_same_pending_action_does_not_reset_delay`,
+  `artifacts/viability_audit/pipeline_formal_correctness_20260725.json`, and
+  `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`.

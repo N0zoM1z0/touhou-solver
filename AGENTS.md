@@ -32,6 +32,53 @@ These instructions apply to every file and task below this directory.
 
 ## Architecture And Algorithms
 
+- Begin every major planner/model change from a written problem contract:
+  physical objective, state, observations, actions, uncertainty, transition,
+  horizon, invariants, and delivery deadline. Map each implementation state
+  and transition back to that contract before optimizing it. For the current
+  losing-state/input-pipeline work,
+  `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md` is
+  mandatory reading and the active reference.
+- Audit both mathematical semantics and information semantics. In particular,
+  a policy may condition only on observations available at that decision.
+  Branching hidden states and then maximizing separately can create a
+  clairvoyant policy even when every numeric transition is correct. State
+  explicitly whether cadence/delay uncertainty is handled once, recursively,
+  or as an information-set support.
+- Engineering approximations are allowed; a complete formal proof is not a
+  prerequisite for useful research. Every approximation must nevertheless
+  declare what it omits or relaxes, whether the resulting value is
+  conservative, optimistic, or unknown, and how independent scalar oracles,
+  adversarial counterexamples, retained physical evidence, deadlines, and
+  fail-closed fallback bound the risk. Do not call an approximation “exact”
+  without naming the exact finite model it solves.
+- Kernel parity is not problem correctness. Differential agreement between
+  Python and C++ implementations of the same recurrence establishes only
+  implementation parity. Promotion requires a separate argument that the
+  recurrence matches, conservatively approximates, or acceptably bounds the
+  written physical problem. If an adversarial case disproves that mapping,
+  stop performance iteration on the invalid claim and retain the case.
+- Before optimizing or promoting a major algorithm, write a short formal
+  review in its design note that answers:
+  1. Which physical histories map to one model state, and are they truly
+     control-equivalent under the available observations?
+  2. Does the recurrence admit every physical uncertainty branch and forbid
+     clairvoyant/noncausal choices?
+  3. If solved exactly, would this model answer the physical decision we care
+     about, or only a proxy?
+  4. Does the proposed algorithm actually solve/bound that recurrence, and
+     what counterexample would falsify the claim?
+  5. Can the result be delivered before issue time without changing the
+     modeled cadence or sensing state?
+  A concise argument plus adversarial evidence is sufficient for an
+  engineering approximation; a complete mathematical proof is welcome but
+  not mandatory. Unknown-direction approximations must stay outside hard
+  safety authority.
+- Prefer proof-backed reductions such as feasibility, canonicalization,
+  dominance, admissible bounds, and observation-compatible belief merging.
+  When a reduction has no concise correctness argument, keep it heuristic,
+  measure its action/label error against the independent oracle, and keep it
+  outside hard-safety authority.
 - Put reusable, game-neutral control and planning code in
   `scripts/touhou_control/`. Keep TH08 memory addresses, input masks, movement
   constants, ECL details, and pool layouts in TH08 adapters.
@@ -54,6 +101,12 @@ These instructions apply to every file and task below this directory.
   Any viability or survival policy that omits layer phase or this pipeline
   state must remain shadow/diagnostic unless a sound conservative equivalence
   has been demonstrated.
+- Never equate a planner decision with a new command issue. The actuator sends
+  transitions and samples a new delay only when the selected complete mask
+  differs from the mask it already holds. Selecting the held desired action
+  is no-write: preserve the old pending command and decrement its remaining
+  support. The formal state must carry held desired input separately or state
+  and verify the estimator invariant used to reconstruct it.
 - Treat TH08 stages, spells, and retained deaths as validation workloads and
   counterexamples, not planner identities. Whenever practical, improve the
   accuracy, performance, uncertainty handling, or reachability semantics of
@@ -174,11 +227,20 @@ These instructions apply to every file and task below this directory.
   and consume only an exact root/version match; otherwise fall back to the
   Boolean policy plus the fresh local hard certificate.
 - Treat controller cadence separately from command pickup delay. A
-  variable-cadence public-root value must state whether uncertainty applies
-  once or recursively; the current prototype branches cadence for one
-  transition only and is not a full variable-cadence survival proof. Do not
-  schedule unbounded cadence branching in the sparse recursive workspace
-  without a new bounded-state/performance argument.
+  variable-cadence value must state whether uncertainty applies once,
+  recursively, or through a verified scheduler automaton. The legacy
+  public-root/fixed-continuation workspace is not a full variable-cadence
+  proof; the recursive belief workspace is the finite-model reference but can
+  exceed the service budget. CE-0111 shows that replacing recursive cadence
+  with a single root branch or the maximum interval can be optimistic. Do not
+  narrow cadence schedules without an equivalence proof or an explicitly
+  measured unknown-direction approximation.
+- Remaining-delay support is an information set, not just a list of scalar
+  roots. If several delay branches produce the same next observation, merge
+  them before the next controller maximization. The scalar belief oracle is
+  the specification for this finite recurrence; the legacy exact-remaining
+  memo is an unbounded-direction hybrid research model and must remain
+  shadow-only.
 - A warmed phase memo is not a cached exact root. Background code may seed
   phase skeletons before action selection, but it must still materialize the
   full frame/cell/observed/pending/remaining-support root after issuance.

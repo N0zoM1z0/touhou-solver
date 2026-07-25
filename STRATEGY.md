@@ -41,8 +41,13 @@ repairs the publication/expiry regression but does not authorize the labels:
 two Stage-5 traces show that exact layer phase, game-observed active input,
 and pending-command remaining delay materially change state classification
 and best-action sets. Exact-root frontier work has now validated a
-lookup-only, phase-sharded prewarm decomposition offline, but the rolling
-delivery/hit-rate gate has not been run physically.
+lookup-only, phase-sharded prewarm decomposition offline, but its physical
+shadow regressed controller latency/action lag and its one-transition value
+was then disproved as a complete physical model. The old prewarm remains
+rejected. A recursively variable-cadence belief solver now passes
+scalar/native differentials offline; its conservative
+all-root/focused-continuation policy class is a research candidate, not live
+authority.
 
 The next architectural target is a delivery-aware solver:
 
@@ -274,29 +279,55 @@ The next architectural target is a delivery-aware solver:
   fresh policy missed a four-frame budget, decision three passed 4/5, and
   decisions four/five passed 10/10. Five stale replacements completed in
   `5.27/5.35/6.31 ms`, and old results were never consumable.
+- **Physical prewarm rejection:** Complete Stage-5 no-shadow/full-frontier/
+  top-2-shadow runs recorded iteration medians `45.63/71.82/65.98 ms`,
+  local-plan medians `20.35/30.83/29.22 ms`, and action-lag medians
+  `2/4/3` frames. Top-2 raised exact-root hits from `4.49%` to `12.47%` but
+  did not restore the clean controller budget. RNG-distinct hit totals
+  `14/32/27` are adverse, not causal, evidence.
+- **Formal correctness rejection:** CE-0114 shows the legacy recurrence
+  mistakes hold/no-write for a newly delayed command; an isolated 128-case
+  cohort produced 30 winning errors. Corrected CE-0111 shows
+  one-transition cadence can report a full win when recursive cadence loses
+  one frame. CE-0112 shows exact hidden remaining delay can add a false best
+  action. Therefore the legacy value has unknown error direction and is not an
+  upper or lower bound.
+- **Belief-state replacement candidate:** The new scalar/native recurrence
+  implements conditional issue/no-write, branches cadence recursively, and
+  merges remaining-delay supports by next observation. Native parity passes
+  another 128 retained cases. On a
+  TH08-shaped 32-frame `(4,5,6)` workload, unrestricted 17-action continuation
+  took `1507.74 ms`; all 17 root actions with nine focused continuation
+  actions took `29.52 ms`. The latter is a conservative attainable policy
+  class, not unrestricted optimality. Wide recursive `(2..9)` cadence remains
+  outside budget.
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control
   after their delivery relevance had decayed. Dense labels also use a
   source-layer state without the exact observed/pending input pipeline.
-- **Reactivation gate:** Exact recurrence, frontier enumeration,
-  lookup-only consumption, cooperative cancellation, newest-version
-  scheduling, and rolling specialization now pass offline. The remaining gate
-  is current-version physical-shadow delivery: begin work when clearance
-  exists, overlap Boolean induction, and measure policy lifetime, cold/steady
-  exact-hit rate, discarded work, and CPU contention. Shadow evidence must
-  show useful hits and issue-time action changes without increasing policy
-  expiry, local latency, action lag, or Boolean worker contention. Scalar
-  parity and same-version steady timing are insufficient.
+- **Reactivation gate:** First establish a verified cadence scheduler or
+  bounded cadence automaton and validate the held-desired/pending estimator
+  invariant, then compare conservative policy-class lower bounds with a proved
+  clairvoyant upper bound on retained Stage-5 capsules. Only a
+  non-clairvoyant no-write belief value with an explicit
+  policy-class/horizon claim may be delivered.
+  Offline evidence must predict no CPU/read/local-plan/action-lag regression
+  before another physical shadow. Same-recurrence parity, top-K root coverage,
+  and warm lookup speed are insufficient.
 - **Evidence:** `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
   `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
   `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
   `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
+  `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`,
+  `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
   `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json`,
   `artifacts/benchmarks/exact_root_frontier_20260725.json`,
   `artifacts/benchmarks/rolling_pipeline_prewarm_20260725.json`,
+  `artifacts/benchmarks/belief_pipeline_workspace_20260725.json`,
+  `artifacts/viability_audit/pipeline_formal_correctness_20260725.json`,
   `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
   the retained Stage-4A/Stage-5 run dossiers.
 

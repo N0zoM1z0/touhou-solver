@@ -318,10 +318,23 @@ The next architectural target is a delivery-aware solver:
   actions rather than incomplete upper labels. Across 128 deterministic
   finite games its unresolved mask exactly matches the independent complete
   scalar upper. On the retained structured workload `L_0` costs `32.35 ms`,
-  certification costs `0.223 ms`, and all 17 optimistic actions are certified
+  certification now costs `0.062 ms`, and all 17 optimistic actions are certified
   unable to beat `L_0`; the old complete upper cost about `1.5 s`.
-  **Status remains offline/shadow-only.** The next gate is cross-stage
-  physical-root coverage, starting with Stage 6B, not blind budget widening.
+  Fresh Stage 6B capsules expose the nontrivial tail: an uncapped 32-root
+  cohort certified 31 roots but took as much as `1907.33 ms`; one root
+  retained eight unresolved actions. The 100-ms anytime contract certified
+  29 roots, retained the same eight-action gap, and conservatively returned
+  all 17 actions unresolved on two deadline roots. **Status remains
+  offline/shadow-only.** The next algorithmic gate is targeted lower
+  refinement only for unresolved actions plus earlier losing-state
+  prevention, not blind budget widening or synchronous complete upper.
+- **Stage 6B physical counterexample:** Instrumented hard-no-Bomb run
+  `lunatic_route2_stage6b_unattended_20260725_204521` completed with 31 hits
+  versus 27 in the RNG-distinct comparison. Global solve median improved
+  `266.80 -> 97.41 ms` and clearance median `118.55 -> 13.72 ms`, but
+  `7213/15149` available queries had an empty action set and every hit was
+  attributed to prior global-kernel exhaustion. Performance gains therefore
+  generalize beyond Stage 5, while survival acceptance does not.
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control

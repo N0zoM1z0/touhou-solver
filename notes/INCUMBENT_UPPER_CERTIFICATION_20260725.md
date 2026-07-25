@@ -103,12 +103,31 @@ simulation below that root.
 This proves equivalence with testing the complete optimistic action label
 against `L`; it does not assume adjacent budgets have converged.
 
+For a full-horizon lower label, any nature branch whose traversed prefix
+margin is already `<= target_margin` can never strictly beat the incumbent.
+The implementation rejects that branch before expanding its successor. It
+also uses
+
+```text
+min over future frames (max clearance over all lattice cells)
+```
+
+as a game-relaxed suffix-margin upper bound. This admits teleporting to the
+best cell independently at every frame, so it can only overestimate the real
+controller and is safe for rejection when it still cannot beat the target.
+
+Deadline expiry is also one-sided. Completed action rejections remain proved;
+the action being evaluated and every unvisited action are returned as
+unresolved with `deadline_expired=true`. Thus a shorter deadline can only
+enlarge the unresolved set, never create a certificate.
+
 ## Implementation
 
 - C++ decision recurrence:
   `native/belief_pipeline_survival_workspace.hpp`
 - C ABI:
-  `touhou_belief_pipeline_workspace_certify_upper_v1`
+  `touhou_belief_pipeline_workspace_certify_upper_v2` with a separate
+  deadline output; v1 remains a compatibility wrapper
 - Python/native bridge:
   `BeliefPipelineNativeWorkspace.certify_upper`
 - Public research API:
@@ -139,14 +158,17 @@ Across 128 deterministic randomized finite games:
 - complete revealed-upper scalar/native failures: `0`;
 - lower-above-upper violations: `0`;
 - threshold unresolved-mask mismatches against complete scalar upper: `0`.
+- retained deterministic deadline case: the 1-ms result expires with all 17
+  actions unresolved; the exact result has eight unresolved actions, so the
+  partial set is a conservative superset.
 
 Cold threshold certification:
 
 | Metric | Median | p95 | Max |
 | --- | ---: | ---: | ---: |
-| wall time | 0.030 ms | 0.072 ms | 0.143 ms |
+| wall time | 0.031 ms | 0.065 ms | 0.124 ms |
 | memoized threshold states | 0 | 25 | 79 |
-| hidden simulations | 42 | 294 | 858 |
+| hidden simulations | 14 | 230 | 680 |
 
 The nonzero p95/max state counts exercise recursive threshold decisions; the
 result is not only a root-prefilter smoke test.
@@ -166,19 +188,62 @@ Observed:
 
 | Computation | Wall time |
 | --- | ---: |
-| attainable `L_0` | 32.35 ms |
-| selective upper certificate | 0.223 ms |
-| combined lower + certificate | 32.57 ms |
+| attainable `L_0` | 32.99 ms |
+| selective upper certificate | 0.062 ms |
+| combined lower + certificate | 33.05 ms |
 | previous complete optimistic upper | about 1,500 ms |
 
-The certificate prunes all 17 root actions by their admissible prepared upper
-labels, performs 1,746 root hidden simulations, expands zero recursive
-threshold states, and returns no unresolved action. Therefore this workload's
+The certificate rejects all 17 root actions from a full-horizon prefix/suffix
+bound, performs 17 root hidden simulations, expands zero recursive threshold
+states, and returns no unresolved action. Therefore this workload's
 unrestricted finite-model state value is certified by `L_0`.
 
 The selective certificate is roughly four orders of magnitude cheaper than
 the complete upper on this workload. The remaining cost is the attainable
 lower solve, not upper certification.
+
+## Stage 6B Physical-Capsule Result
+
+Fresh instrumented hard-no-Bomb Lunatic Stage 6B run
+`lunatic_route2_stage6b_unattended_20260725_204521` completed frames
+`2..76235` with 15,536 decisions and 31 native hits. The established
+Boolean/local controller remained authoritative; neither lower labels nor
+upper certificates selected actions.
+
+The offline cohort contains the root closest to 30 frames before each of the
+31 hits plus one stratified non-hit root. It reconstructs exact observed
+input, pending command, current delay support, `(4,5,6)` recursive cadence,
+and a 32-frame capsule window.
+
+Uncapped result:
+
+- 32/32 lower queries completed;
+- 31/32 state values certified;
+- the remaining root retained eight unresolved actions;
+- 30/31 pre-hit roots certified;
+- certificate median/p95/max was `0.039/88.33/1907.33 ms`;
+- the two longest otherwise certified searches cost
+  `1907.33/540.83 ms`, expanding 111,901/22,134 threshold states.
+
+Retained 100-ms anytime result:
+
+- 29/32 roots certified;
+- the same completed root retained eight unresolved actions;
+- two deadline roots conservatively retained all 17 actions unresolved;
+- certificate median/p95/max was `0.040/91.59/100.18 ms`;
+- no lower query timed out.
+
+The physical model was already losing at 28/31 sampled pre-hit roots around
+30 frames before contact. The other three trace-Boolean viable roots had
+full-horizon `L_0`. This separates the questions cleanly: the certificate can
+bound unrestricted value without a complete upper solve, but it cannot rescue
+a model whose viable set has already collapsed.
+
+Retained evidence:
+
+- `artifacts/viability_audit/stage6b_20260725_204521_belief_upper_certification.json`;
+- `artifacts/viability_audit/stage6b_20260725_204521_belief_upper_certification_uncapped.json`;
+- `notes/runs/lunatic_route2_stage6b_unattended_20260725_204521.md`.
 
 ## Boundaries
 
@@ -187,21 +252,21 @@ lower solve, not upper certification.
 - A certificate is invalid if the lower result is stale, optimistic, from a
   different root/version, or not actually attainable.
 - An unresolved result is not a failure; it requests a higher budget or more
-  targeted lower refinement.
-- The result remains offline/shadow-only until retained physical capsules show
-  useful certification coverage without CPU/read/local-plan contention.
-- A physical Stage 6B run should keep the established Boolean/local hard
-  controller authoritative. Apply this certificate to retained Stage 6B
-  workloads offline before considering a shadow executor.
+  targeted lower refinement. A deadline-expired result must remain
+  unresolved even if earlier actions were fully rejected.
+- The result remains offline/shadow-only. Stage 6B established useful
+  cross-stage coverage and a nontrivial tail, but did not measure an isolated
+  shadow executor's CPU/read/local-plan contention.
+- The fresh Stage 6B run correctly kept the established Boolean/local hard
+  controller authoritative. No offline label in this note changed an action.
 
 ## Next Gate
 
-1. Run a fresh Lunatic Stage 6B hard-no-Bomb workload to avoid Stage-5-only
-   selection.
-2. Retain its normal physical dossier and counterexamples.
-3. If exact corridor capsules are available without changing delivery, replay
-   `L_0` plus threshold certification offline.
-4. Measure certification rate, unresolved action masks, lower wall time, and
-   whole-controller relevance.
-5. Only then design an isolated shadow scheduler; no result in this checkpoint
+1. For the one completed eight-action gap, refine only those actions and stop
+   as soon as their lower value meets the upper threshold.
+2. For the two deadline roots, evaluate action ordering and a stronger proved
+   reachable-clearance relaxation; retain 100 ms as the service boundary.
+3. Move the physical diagnosis earlier than the 30-frame losing roots and
+   identify when control reserve/boundary pressure first makes `L_0` collapse.
+4. Only then design an isolated shadow scheduler; no result in this checkpoint
    authorizes synchronous upper/lower work on the issue thread.

@@ -303,6 +303,7 @@ class VariableCadenceOracleTests(unittest.TestCase):
                 certification.certified,
                 not expected_unresolved,
             )
+            self.assertFalse(certification.deadline_expired)
 
     def test_budgeted_continuation_is_nested_attainable_lower_bound(
         self,

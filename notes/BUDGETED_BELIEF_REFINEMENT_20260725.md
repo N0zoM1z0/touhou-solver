@@ -193,16 +193,25 @@ no longer required for routine certification. The incumbent-seeded threshold
 recurrence in `INCUMBENT_UPPER_CERTIFICATION_20260725.md` determines exactly
 which optimistic root actions can strictly beat the completed lower label.
 On the structured workload it costs `0.223 ms`, reports no unresolved
-actions, and replaces the roughly `1.5 s` complete upper. Combined
-lower-plus-certificate time is `32.57 ms`; the attainable lower solve is now
-the larger component.
+actions, and replaces the roughly `1.5 s` complete upper. After the
+full-horizon prefix/suffix shortcut it costs `0.062 ms`; combined
+lower-plus-certificate time is `33.05 ms`.
+
+Fresh Stage 6B capsules show why the service boundary remains necessary. In a
+32-root cohort centered about 30 frames before 31 physical hits, an uncapped
+query certified 31 roots but one completed root retained eight unresolved
+actions, while two otherwise certified margin-only searches cost
+`1907.33/540.83 ms`. A 100-ms deadline profile certified 29 roots, retained
+the eight-action gap, and conservatively returned all 17 actions unresolved
+for the two expired searches. Deadline expiry enlarges uncertainty; it never
+publishes a partial optimistic label as a certificate.
 
 The remaining research sequence is:
 
-1. measure `L_0` certification rate and unresolved masks on retained
-   cross-stage roots, beginning with a fresh Stage 6B workload;
-2. refine budgets only for actions/states whose upper bound can change the
-   selected set;
+1. refine budgets only for the Stage 6B actions/states whose upper bound can
+   change the selected set;
+2. move pre-hit analysis earlier and determine why 28/31 sampled roots were
+   already losing about 30 frames before contact;
 3. measure total lower-plus-certificate CPU and physical delivery relevance
    before creating any live shadow executor;
 4. infer and validate a finite cadence/workload automaton to avoid an

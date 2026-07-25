@@ -114,6 +114,7 @@ class BeliefUpperCertification:
     lower_bound: SurvivalLabel
     certified: bool
     unresolved_actions: tuple[str, ...]
+    deadline_expired: bool
     workspace_stats: BeliefPipelineQueryStats
 
 
@@ -892,7 +893,11 @@ class BeliefPipelineSurvivalWorkspace:
         pending_command: PendingCommand | None = None,
         timeout_ms: int = 0,
     ) -> BeliefUpperCertification:
-        """Certify that no unrestricted optimistic action beats ``lower``."""
+        """Reject optimistic actions that cannot beat ``lower``.
+
+        A deadline returns the in-flight and unvisited actions unresolved;
+        it never converts unfinished optimistic work into certification.
+        """
 
         if policy_version != self.policy_version:
             raise StalePipelineWorkspaceError(
@@ -917,7 +922,11 @@ class BeliefPipelineSurvivalWorkspace:
             and pending_command.action not in self._action_indices
         ):
             raise ValueError("pending action is absent from the action set")
-        unresolved_mask, raw_stats = self._native.certify_upper(
+        (
+            unresolved_mask,
+            deadline_expired,
+            raw_stats,
+        ) = self._native.certify_upper(
             start_frame=frame,
             start_row=row,
             start_column=column,
@@ -951,6 +960,7 @@ class BeliefPipelineSurvivalWorkspace:
             lower_bound=lower_bound,
             certified=not unresolved,
             unresolved_actions=unresolved,
+            deadline_expired=deadline_expired,
             workspace_stats=stats,
         )
 

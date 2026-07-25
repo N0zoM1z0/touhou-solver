@@ -458,7 +458,7 @@ def _load_belief_pipeline_workspace_functions():
         create = library.touhou_belief_pipeline_workspace_create_v4
         query = library.touhou_belief_pipeline_workspace_query_v2
         certify = (
-            library.touhou_belief_pipeline_workspace_certify_upper_v1
+            library.touhou_belief_pipeline_workspace_certify_upper_v2
         )
         cancel = library.touhou_belief_pipeline_workspace_cancel_v1
         destroy = library.touhou_belief_pipeline_workspace_destroy_v1
@@ -522,6 +522,7 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.c_float,
         ctypes.c_int,
         ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_int),
         ctypes.POINTER(ctypes.c_uint64),
     ]
     certify.restype = ctypes.c_int
@@ -2032,7 +2033,7 @@ class BeliefPipelineNativeWorkspace:
         pending_remaining_frames: np.ndarray | None = None,
         continuation_action_budget: int | None = None,
         timeout_ms: int = 0,
-    ) -> tuple[int, np.ndarray]:
+    ) -> tuple[int, bool, np.ndarray]:
         """Return actions whose optimistic value can exceed the lower."""
 
         if self.closed:
@@ -2046,6 +2047,7 @@ class BeliefPipelineNativeWorkspace:
             dtype=np.int32,
         )
         unresolved_mask = ctypes.c_uint32()
+        deadline_expired = ctypes.c_int()
         stats = np.empty(8, dtype=np.uint64)
         result = self._certify(
             self._handle,
@@ -2069,11 +2071,16 @@ class BeliefPipelineNativeWorkspace:
             lower_margin,
             timeout_ms,
             ctypes.byref(unresolved_mask),
+            ctypes.byref(deadline_expired),
             stats.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)),
         )
         if result != 0:
             _raise_pipeline_result("belief upper certification", result)
-        return int(unresolved_mask.value), stats
+        return (
+            int(unresolved_mask.value),
+            bool(deadline_expired.value),
+            stats,
+        )
 
 
 def create_belief_pipeline_survival_workspace(

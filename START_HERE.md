@@ -46,10 +46,12 @@ label.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `199be90 Bound belief growth with certified refinement`. It adds an
+  `e178bea Certify optimistic upper from lower incumbent`. It adds a
+  deadline-safe form of the
   incumbent-seeded selective upper certificate that preserves the complete
   optimistic recurrence's quantifiers but answers only whether each root
-  action can strictly beat the completed attainable lower label. It also
+  action can strictly beat the completed attainable lower label. At deadline,
+  the in-flight and unvisited actions remain explicitly unresolved. It also
   retains the earlier
   budget-indexed scalar/native policy class, progressive memo reuse, quick/full
   offline profiles, a revealed-delay optimistic upper bound, and a
@@ -59,9 +61,19 @@ label.
   remains invalid as a physical value; budgeted belief values remain
   offline/shadow-only. The retained 128-case differential has zero selective
   certification-mask errors; on the structured workload the new certificate
-  costs `0.223 ms` instead of the complete upper's roughly `1.5 s`.
+  costs `0.062 ms` instead of the complete upper's roughly `1.5 s`.
+- Fresh instrumentation run
+  `lunatic_route2_stage6b_unattended_20260725_204521` completed hard-no-Bomb
+  Lunatic Stage 6B over frames `2..76235` with 31 native hits and no runtime,
+  JSON, foreground-control, or manual-rearm failure. This is not survival
+  acceptance: the previous comparable run had 27 hits, and all 31 new hit
+  windows had exhausted global viability. A 32-root capsule replay at about
+  30 frames before each hit found 31/32 exact certificates; the remaining
+  root had eight unresolved actions. Two exact certificates cost
+  `1907.33/540.83 ms`, so the retained 100-ms anytime profile conservatively
+  leaves all 17 actions unresolved on those roots instead of blocking.
 - Both native libraries were rebuilt. Linux and Windows complete quick suites
-  pass 471 tests in `1.391/2.415 s`. Read
+  pass 471 tests in `1.368/2.422 s`. Read
   `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`,
   `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
   `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
@@ -69,6 +81,7 @@ label.
   `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
   `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
   `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
+  `notes/runs/lunatic_route2_stage6b_unattended_20260725_204521.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`, CE-0108/0109, and
   `STRATEGY.md` before changing viability queries or losing-state authority.

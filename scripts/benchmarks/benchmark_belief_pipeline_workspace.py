@@ -238,6 +238,7 @@ def _small_differential(case_count: int) -> dict[str, object]:
         if (
             certification.unresolved_actions != expected_unresolved
             or certification.certified != (not expected_unresolved)
+            or certification.deadline_expired
         ):
             certification_failures.append(seed)
         if any(
@@ -431,10 +432,8 @@ def _th08_case(
     }
 
 
-def _th08_selective_upper_certification(
-    timeout_ms: int,
-) -> dict[str, object]:
-    x_axis, y_axis, full_clearance = _structured_clearance(3)
+def _th08_certification_problem(seed: int):
+    x_axis, y_axis, full_clearance = _structured_clearance(seed)
     clearance = np.ascontiguousarray(
         full_clearance[:33],
         dtype=np.float32,
@@ -464,6 +463,13 @@ def _th08_selective_upper_certification(
             (1, 2, 3, 4, 5, 6),
         ),
     }
+    return problem, actions, cadence, query
+
+
+def _th08_selective_upper_certification(
+    timeout_ms: int,
+) -> dict[str, object]:
+    problem, actions, cadence, query = _th08_certification_problem(3)
     with problem.build_belief_pipeline_workspace(
         policy_version="selective-lower",
         decision_frame_support=cadence,
@@ -507,6 +513,7 @@ def _th08_selective_upper_certification(
             "margin": lower.state_label.bottleneck_margin,
         },
         "certified": certification.certified,
+        "deadline_expired": certification.deadline_expired,
         "unresolved_actions": list(
             certification.unresolved_actions
         ),
@@ -516,6 +523,53 @@ def _th08_selective_upper_certification(
                 certification.workspace_stats
             ).items()
         },
+    }
+
+
+def _th08_deadline_upper_certification(
+    timeout_ms: int,
+) -> dict[str, object]:
+    problem, actions, cadence, query = _th08_certification_problem(0)
+    with problem.build_belief_pipeline_workspace(
+        policy_version="deadline-lower",
+        decision_frame_support=cadence,
+        continuation_actions=tuple(
+            action.name for action in actions[:9]
+        ),
+    ) as lower_workspace:
+        lower = lower_workspace.query_cell(
+            policy_version="deadline-lower",
+            timeout_ms=timeout_ms,
+            **query,
+        )
+
+    def certificate(version: str, deadline_ms: int):
+        with problem.build_belief_pipeline_workspace(
+            policy_version=version,
+            decision_frame_support=cadence,
+            reveal_remaining_delay=True,
+        ) as upper_workspace:
+            return upper_workspace.certify_upper_bound(
+                policy_version=version,
+                lower_bound=lower.state_label,
+                timeout_ms=deadline_ms,
+                **query,
+            )
+
+    partial = certificate("deadline-partial", 1)
+    exact = certificate("deadline-exact", timeout_ms)
+    partial_set = set(partial.unresolved_actions)
+    exact_set = set(exact.unresolved_actions)
+    return {
+        "horizon": 32,
+        "certificate_timeout_ms": 1,
+        "partial_deadline_expired": partial.deadline_expired,
+        "partial_unresolved_actions": list(
+            partial.unresolved_actions
+        ),
+        "exact_deadline_expired": exact.deadline_expired,
+        "exact_unresolved_actions": list(exact.unresolved_actions),
+        "partial_is_conservative_superset": exact_set <= partial_set,
     }
 
 
@@ -653,6 +707,11 @@ def benchmark(
         "small_differential": _small_differential(small_cases),
         "th08_selective_upper_certification": (
             _th08_selective_upper_certification(timeout_ms)
+        ),
+        "th08_deadline_upper_certification": (
+            _th08_deadline_upper_certification(timeout_ms)
+            if profile == "full"
+            else {"available": False}
         ),
         "th08_structured_scaling": scaling_results,
         "th08_structured_bound_certification": (

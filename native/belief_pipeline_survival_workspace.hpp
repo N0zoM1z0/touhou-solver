@@ -154,6 +154,7 @@ private:
             std::numeric_limits<float>::infinity(),
         };
         std::vector<BeliefPipelineTransition> transitions;
+        bool threshold_rejected = false;
     };
 
     struct Counters {
@@ -232,6 +233,28 @@ public:
           velocity_y_(velocity_y, velocity_y + action_count),
           delay_frames_(delay_frames, delay_frames + delay_count),
           cadence_frames_(cadence_frames, cadence_frames + cadence_count) {
+        future_global_margin_upper_.resize(frame_count_);
+        float suffix_upper = std::numeric_limits<float>::infinity();
+        for (int frame = frame_count_ - 1; frame >= 0; --frame) {
+            float frame_upper =
+                -std::numeric_limits<float>::infinity();
+            for (int row = 0; row < row_count_; ++row) {
+                for (int column = 0; column < column_count_; ++column) {
+                    frame_upper = std::max(
+                        frame_upper,
+                        clearance_[clearance_index(
+                            frame,
+                            row,
+                            column,
+                            row_count_,
+                            column_count_
+                        )] - required_clearance_
+                    );
+                }
+            }
+            suffix_upper = std::min(suffix_upper, frame_upper);
+            future_global_margin_upper_[frame] = suffix_upper;
+        }
         memo_.reserve(4096);
         root_memo_.reserve(256);
         threshold_memo_[0].reserve(4096);
@@ -370,6 +393,7 @@ public:
         float lower_margin,
         int timeout_ms,
         std::uint32_t* output_unresolved_action_mask,
+        int* output_deadline_expired,
         std::uint64_t* output_stats
     ) {
         const int query_budget = (
@@ -444,6 +468,7 @@ public:
         state = canonicalize(state);
 
         std::uint32_t unresolved_mask = 0;
+        bool deadline_expired = false;
         const float margin = current_margin(state);
         if (state.frame == frame_count_ - 1 || margin <= 0.0F) {
             const PipelineLabel terminal{0, margin};
@@ -462,31 +487,48 @@ public:
                 );
             }
         } else {
-            for (int action = 0; action < action_count_; ++action) {
-                check_abort();
-                const PreparedAction prepared = prepare_action(
-                    state,
-                    action,
-                    true
-                );
-                if (!threshold_label_exceeds(
-                        state.frame,
-                        prepared.upper,
-                        true
-                    )) {
-                    ++counters_.action_upper_prunes;
-                    continue;
-                }
-                if (threshold_action_exceeds(
+            int action = 0;
+            try {
+                for (; action < action_count_; ++action) {
+                    check_abort();
+                    const PreparedAction prepared = prepare_action(
                         state,
-                        prepared,
+                        action,
+                        true,
+                        true,
                         true
-                    )) {
+                    );
+                    if (prepared.threshold_rejected) {
+                        ++counters_.branch_incumbent_prunes;
+                        continue;
+                    }
+                    if (!threshold_label_exceeds(
+                            state.frame,
+                            prepared.upper,
+                            true
+                        )) {
+                        ++counters_.action_upper_prunes;
+                        continue;
+                    }
+                    if (threshold_action_exceeds(
+                            state,
+                            prepared,
+                            true
+                        )) {
+                        unresolved_mask |= (
+                            std::uint32_t{1} << action
+                        );
+                    }
+                }
+            } catch (const PipelineDeadlineSignal&) {
+                deadline_expired = true;
+                for (; action < action_count_; ++action) {
                     unresolved_mask |= std::uint32_t{1} << action;
                 }
             }
         }
         *output_unresolved_action_mask = unresolved_mask;
+        *output_deadline_expired = deadline_expired ? 1 : 0;
         output_stats[0] = static_cast<std::uint64_t>(
             threshold_memo_[0].size() + threshold_memo_[1].size()
         );
@@ -841,7 +883,9 @@ private:
     PreparedAction prepare_action(
         const BeliefPipelineState& state,
         int selected,
-        bool public_root
+        bool public_root,
+        bool threshold_filter = false,
+        bool prefix_margin_above = true
     ) {
         PreparedAction prepared;
         const bool base_action = (
@@ -924,7 +968,12 @@ private:
                         ? transition.failed_label
                         : PipelineLabel{
                             remaining_horizon,
-                            transition.bottleneck_margin,
+                            std::min(
+                                transition.bottleneck_margin,
+                                future_global_margin_upper_[
+                                    transition.successor.frame
+                                ]
+                            ),
                         }
                     );
                     if (
@@ -934,6 +983,32 @@ private:
                         )
                     ) {
                         prepared.upper = branch_upper;
+                    }
+                    if (threshold_filter) {
+                        if (
+                            transition.failed
+                            && !threshold_label_exceeds(
+                                state.frame,
+                                transition.failed_label,
+                                prefix_margin_above
+                            )
+                        ) {
+                            prepared.threshold_rejected = true;
+                            return prepared;
+                        }
+                        if (
+                            !transition.failed
+                            && threshold_target_frame_
+                                == frame_count_ - 1
+                            && (
+                                !prefix_margin_above
+                                || branch_upper.margin
+                                    <= threshold_target_margin_
+                            )
+                        ) {
+                            prepared.threshold_rejected = true;
+                            return prepared;
+                        }
                     }
                 }
             }
@@ -1095,6 +1170,18 @@ private:
         }
 
         const float margin = current_margin(state);
+        if (
+            threshold_target_frame_ == frame_count_ - 1
+            && (
+                !prefix_margin_above
+                || margin <= threshold_target_margin_
+                || future_global_margin_upper_[state.frame]
+                    <= threshold_target_margin_
+            )
+        ) {
+            threshold_memo.emplace(state, false);
+            return false;
+        }
         if (state.frame == frame_count_ - 1 || margin <= 0.0F) {
             const bool result = threshold_label_exceeds(
                 state.frame,
@@ -1119,8 +1206,14 @@ private:
             const PreparedAction prepared = prepare_action(
                 state,
                 action,
-                false
+                false,
+                true,
+                prefix_margin_above
             );
+            if (prepared.threshold_rejected) {
+                ++counters_.branch_incumbent_prunes;
+                continue;
+            }
             if (!threshold_label_exceeds(
                     state.frame,
                     prepared.upper,
@@ -1275,6 +1368,7 @@ private:
     std::vector<double> velocity_y_;
     std::vector<int> delay_frames_;
     std::vector<int> cadence_frames_;
+    std::vector<float> future_global_margin_upper_;
     std::unordered_map<
         BeliefPipelineState,
         PipelineLabel,
@@ -1656,7 +1750,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
     );
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v1(
+TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v2(
     void* workspace,
     int start_frame,
     int start_row,
@@ -1670,11 +1764,13 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v1(
     float lower_margin,
     int timeout_ms,
     std::uint32_t* output_unresolved_action_mask,
+    int* output_deadline_expired,
     std::uint64_t* output_stats
 ) {
     if (
         workspace == nullptr
         || output_unresolved_action_mask == nullptr
+        || output_deadline_expired == nullptr
         || output_stats == nullptr
     ) {
         return 1;
@@ -1695,6 +1791,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v1(
             lower_margin,
             timeout_ms,
             output_unresolved_action_mask,
+            output_deadline_expired,
             output_stats
         );
     } catch (const PipelineCancelledSignal&) {
@@ -1704,6 +1801,42 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v1(
     } catch (...) {
         return 2;
     }
+}
+
+TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v1(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int continuation_action_budget,
+    std::uint16_t lower_frames,
+    float lower_margin,
+    int timeout_ms,
+    std::uint32_t* output_unresolved_action_mask,
+    std::uint64_t* output_stats
+) {
+    int deadline_expired = 0;
+    return touhou_belief_pipeline_workspace_certify_upper_v2(
+        workspace,
+        start_frame,
+        start_row,
+        start_column,
+        observed_action,
+        pending_action,
+        pending_remaining_frames,
+        pending_remaining_count,
+        continuation_action_budget,
+        lower_frames,
+        lower_margin,
+        timeout_ms,
+        output_unresolved_action_mask,
+        &deadline_expired,
+        output_stats
+    );
 }
 
 TOUHOU_EXPORT int touhou_belief_pipeline_workspace_cancel_v1(

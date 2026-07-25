@@ -2802,3 +2802,56 @@ Status: observed | inferred | unknown | fixed
   `test_selecting_same_pending_action_does_not_reset_delay`,
   `artifacts/viability_audit/pipeline_formal_correctness_20260725.json`, and
   `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`.
+
+## CE-0115: A selective full-horizon margin certificate still grew for two seconds
+
+- **Observed counterexample:** In the fresh Stage 6B capsule cohort, root
+  frame 49830 had completed attainable lower label
+  `(32, 10.2672501)`. The exact selective upper certificate eventually
+  rejected every action, but expanded 111,901 threshold states, ran
+  16,405,134 hidden simulations before the prefix shortcut
+  (10,073,020 after it), and still required `1907.33 ms` in the retained
+  uncapped replay. Root 52885 required `540.83 ms`.
+- **Invalid generalization:** The synthetic structured root's zero-state
+  `0.062 ms` certificate was treated as if incumbent thresholding eliminated
+  unrestricted belief growth on every field. It eliminates irrelevant work,
+  but hard margin-only roots may leave many actions/states genuinely capable
+  of beating the threshold until deep induction.
+- **Correction:** Full-horizon prefix failures now terminate immediately and
+  a global suffix-clearance relaxation supplies another admissible upper
+  bound. More importantly, a certificate deadline returns every in-flight
+  and unvisited action as unresolved with an explicit flag. At 100 ms the two
+  hard roots retained all 17 actions unresolved; no false certificate was
+  published.
+- **Regression/evidence:** The 128-case independent scalar/full-upper
+  differential retains zero mask failures. A retained deterministic 1-ms
+  case returns all 17 actions unresolved, a conservative superset of the
+  exact eight-action gap. Exact and 100-ms physical-capsule reports are
+  `stage6b_20260725_204521_belief_upper_certification_uncapped.json` and
+  `stage6b_20260725_204521_belief_upper_certification.json`.
+
+## CE-0116: Stage 6B reached contact after widespread global-kernel exhaustion
+
+- **Observed run:** Instrumented hard-no-Bomb Lunatic Stage 6B
+  `lunatic_route2_stage6b_unattended_20260725_204521` reached
+  `route_complete` over frames `2..76235`, made 15,536 decisions, and
+  retained 31 native hits. Hard no-Bomb passed and no runtime/JSON/control
+  failure or manual re-arm occurred. The RNG-distinct comparison had 27 hits,
+  so this is not survival improvement.
+- **Failure boundary:** All 31 contacts were attributed to
+  `global_viability_kernel_exhausted_before_hit`. Available policy queries
+  were empty on `7213/15149` decisions. About 30 frames before contact, 28/31
+  retained belief roots were already losing; the three trace-Boolean viable
+  roots had full 32-frame attainable lower labels.
+- **Cross-stage performance:** Global solve median improved
+  `266.80 -> 97.41 ms` and clearance median `118.55 -> 13.72 ms`, confirming
+  the earlier performance work outside Stage 5. The hit causes were 19
+  modeled committed-prefix collisions, five observed bullet overlaps, five
+  observed laser overlaps, one enemy-body overlap, and one residual
+  sensor-gap/unmodeled case.
+- **Next falsifiable gate:** Move the audit earlier until it identifies the
+  first root at which control reserve/boundary pressure collapses the viable
+  set. A correction must preserve a non-empty kernel through retained former
+  hit windows, not merely calculate the losing value faster.
+- **Evidence:** The run note, dossier, death ledger, executable regression
+  cases, comparison, and both compact belief-certificate reports.

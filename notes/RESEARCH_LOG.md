@@ -2977,3 +2977,42 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - This checkpoint grants no live authority and used no physical trial, binary
   reverse engineering, IDA mutation, or REA session. The next physical gate is
   a hard-no-Bomb Lunatic Stage 6B run with the established controller.
+
+## 2026-07-25: Stage 6B Cross-Stage Gate And Deadline-Safe Certification
+
+- Completed instrumented hard-no-Bomb Lunatic Stage 6B run
+  `lunatic_route2_stage6b_unattended_20260725_204521`: frames `2..76235`,
+  15,536 decisions, route complete, 31 native hits, zero Bomb, and no
+  runtime/JSON/control interruption or manual re-arm. No TH08/control process
+  remained after supervisor cleanup.
+- The comparable RNG-distinct Stage 6B dossier had 27 hits. The new run is
+  not survival acceptance. It recorded 19 committed-prefix, five bullet,
+  five laser, one enemy-body, and one residual unmodeled/sensor-gap contact;
+  all 31 hit windows followed global viability exhaustion. Empty action sets
+  occurred on `7213/15149` available queries.
+- Cross-stage performance improved: global solve median changed
+  `266.80 -> 97.41 ms` and clearance median `118.55 -> 13.72 ms`. Local plan
+  remained `18.97/37.70 ms` median/p95; full sensor read was
+  `19.02/43.64 ms`. Thus clearance optimization generalized, while viability
+  completeness and earlier losing-state formation remain.
+- Added `scripts/analysis/belief_upper_certification_audit.py`. A deterministic
+  32-root cohort uses the root nearest 30 frames before every hit plus one
+  stratified non-hit root, exact observed/pending action, current delay
+  support, `(4,5,6)` cadence, and a 32-frame physical capsule window.
+- Uncapped replay certified 31/32 roots; one retained eight unresolved
+  actions. Certificate median/p95/max was `0.039/88.33/1907.33 ms`.
+  The two hard otherwise-certified roots took `1907.33/540.83 ms`, proving
+  selective thresholding does not eliminate unrestricted growth on every
+  full-horizon margin problem.
+- Added proof-safe full-horizon prefix rejection, a teleporting
+  global-clearance suffix upper bound, and deadline-safe partial return.
+  Under a 100-ms certificate service limit, 29/32 roots certified, the
+  eight-action gap remained, and two expired roots retained all 17 actions
+  unresolved. Certificate median/p95/max became
+  `0.040/91.59/100.18 ms`; deadline only enlarged uncertainty.
+- Retained 128-case belief/upper/certificate differential has zero failures
+  and zero lower-above-upper violations. Structured lower/certificate is now
+  `32.99/0.062 ms`; complete upper remains `1493.23 ms` as an offline oracle.
+  Linux/Windows quick suites pass 471 tests in `1.368/2.422 s`.
+- New counterexamples: CE-0115 and CE-0116. No binary reverse engineering,
+  IDA mutation, or REA session was used.

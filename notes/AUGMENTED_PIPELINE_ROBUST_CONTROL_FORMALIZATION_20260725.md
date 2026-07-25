@@ -432,6 +432,9 @@ attainable lower label. Its boolean recursion retains controller existential,
 nature universal, and observation-merge semantics. Across 128 deterministic
 finite games its unresolved mask matches the complete scalar upper; on the
 structured workload it reduces upper certification from about `1.5 s` to
-`0.223 ms`. Until bounds meet on a particular root, deadline expiry may
-publish only the last completed lower-bound policy or the existing
+`0.062 ms`. Fresh Stage 6B capsules contain exact margin-only certificates
+lasting up to `1907.33 ms`, so the native deadline now conservatively marks
+the in-flight and unvisited root actions unresolved. Shortening the deadline
+may only enlarge that set. Until bounds meet on a particular root, publication
+may contain only the last completed lower-bound policy or the existing
 fail-closed fallback.

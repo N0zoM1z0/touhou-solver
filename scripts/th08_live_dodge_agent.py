@@ -39,6 +39,7 @@ from th08_corridor_runtime import (
     LIVE_SURVIVAL_LABELS,
     SHADOW_REFINEMENT_GRID_STEPS,
     SHADOW_SURVIVAL_LABELS,
+    corridor_candidate_verifier_target as _corridor_candidate_verifier_target,
     corridor_policy_status as _corridor_policy_status,
     corridor_pipeline_prewarm_query as _corridor_pipeline_prewarm_query,
     corridor_pipeline_prewarm_retarget as _corridor_pipeline_prewarm_retarget,
@@ -98,6 +99,12 @@ from touhou_control.async_policy import (
 )
 from touhou_control.delay import AdaptiveControlDelay
 from touhou_control.query_survival import PendingCommand
+from touhou_control.candidate_verifier_service import (
+    CandidateVerifierOutcome,
+    CandidateVerifierService,
+    CandidateVerifierSnapshot,
+    CandidateVerifierTarget,
+)
 from touhou_control.epochs import (
     ActionIssueAlignment,
     FrameWindow,
@@ -281,6 +288,9 @@ ENEMY_DORMANT_MEMORY_FRAMES = TH08_CORRIDOR_CONFIG.horizon_frames
 ENEMY_MAX_OBSERVED_WORLD_SPEED = 32.0
 CORRIDOR_MIN_COMMIT_FRAMES = 32
 CORRIDOR_INITIAL_SUBMIT_FRAME = -1_000_000
+CANDIDATE_VERIFIER_HORIZON_FRAMES = 32
+CANDIDATE_VERIFIER_DECISION_FRAMES = (4, 5, 6)
+CANDIDATE_VERIFIER_TIMEOUT_MS = 10
 STAGE_TRANSITION_TIMEOUT_SECONDS = 90.0
 TERMINAL_INACTIVE_GRACE_SECONDS = 5.0
 
@@ -3841,6 +3851,88 @@ def _write_run_summary(
     output.flush()
 
 
+def _candidate_outcome_record(
+    outcome: CandidateVerifierOutcome | None,
+) -> dict[str, object] | None:
+    if outcome is None:
+        return None
+    label = outcome.state_label
+    root = outcome.target.root
+    return {
+        "revision": outcome.revision,
+        "policy_version": outcome.target.policy_version,
+        "root": {
+            "frame": root.frame,
+            "row": root.row,
+            "column": root.column,
+            "observed_action": root.observed_action,
+            "pending_action": (
+                root.pending_command.action
+                if root.pending_command is not None
+                else None
+            ),
+            "pending_remaining_frames": (
+                root.pending_command.remaining_frames
+                if root.pending_command is not None
+                else ()
+            ),
+        },
+        "status": outcome.status,
+        "queue_ms": outcome.queue_ms,
+        "elapsed_ms": outcome.elapsed_ms,
+        "horizon_frames": outcome.horizon_frames,
+        "winning": outcome.winning,
+        "survival_frames": (
+            label.guaranteed_frames if label is not None else None
+        ),
+        "bottleneck_margin": (
+            label.bottleneck_margin if label is not None else None
+        ),
+        "best_actions": outcome.best_actions,
+        "completed_candidates": outcome.completed_candidates,
+        "timed_out_candidates": outcome.timed_out_candidates,
+        "unvisited_candidates": outcome.unvisited_candidates,
+        "stopped_on_feasibility": outcome.stopped_on_feasibility,
+        "budget_exhausted": outcome.budget_exhausted,
+        "background_priority_lowered": (
+            outcome.background_priority_lowered
+        ),
+        "stale_at_completion": outcome.stale_at_completion,
+        "error": outcome.error,
+    }
+
+
+def _candidate_snapshot_record(
+    snapshot: CandidateVerifierSnapshot | None,
+) -> dict[str, object] | None:
+    if snapshot is None:
+        return None
+    return {
+        "horizon_frames": snapshot.horizon_frames,
+        "decision_frame_support": snapshot.decision_frame_support,
+        "timeout_ms_per_candidate": (
+            snapshot.timeout_ms_per_candidate
+        ),
+        "total_timeout_ms": snapshot.total_timeout_ms,
+        "submitted_revision": snapshot.submitted_revision,
+        "completed_revision": snapshot.completed_revision,
+        "ready_revision": snapshot.ready_revision,
+        "target_running": snapshot.target_running,
+        "target_queued": snapshot.target_queued,
+        "target_replacement_count": (
+            snapshot.target_replacement_count
+        ),
+        "target_discard_count": snapshot.target_discard_count,
+        "stale_completion_count": snapshot.stale_completion_count,
+        "lookup_count": snapshot.lookup_count,
+        "lookup_hit_count": snapshot.lookup_hit_count,
+        "lookup_miss_count": snapshot.lookup_miss_count,
+        "latest_outcome": _candidate_outcome_record(
+            snapshot.latest_outcome
+        ),
+    }
+
+
 def run(args: argparse.Namespace) -> int:
     if not args.armed:
         raise RuntimeError("live control requires the explicit --armed flag")
@@ -3904,6 +3996,7 @@ def run(args: argparse.Namespace) -> int:
     corridor_future: Future[CorridorSolution] | None = None
     survival_executor: ThreadPoolExecutor | None = None
     corridor_survival_future: Future[CorridorSolution] | None = None
+    candidate_verifier: CandidateVerifierService | None = None
     audit_executor: ThreadPoolExecutor | None = None
     pipeline_retire_executor: ThreadPoolExecutor | None = None
     enemy_executor: ThreadPoolExecutor | None = None
@@ -3975,6 +4068,16 @@ def run(args: argparse.Namespace) -> int:
             pipeline_retire_executor = ThreadPoolExecutor(
                 max_workers=1,
                 thread_name_prefix="th08-pipeline-retire",
+            )
+        if args.candidate_verifier_shadow:
+            candidate_verifier = CandidateVerifierService(
+                horizon_frames=CANDIDATE_VERIFIER_HORIZON_FRAMES,
+                decision_frame_support=(
+                    CANDIDATE_VERIFIER_DECISION_FRAMES
+                ),
+                timeout_ms_per_candidate=(
+                    CANDIDATE_VERIFIER_TIMEOUT_MS
+                ),
             )
     if args.viability_audit_dir is not None:
         audit_executor = ThreadPoolExecutor(
@@ -4098,6 +4201,9 @@ def run(args: argparse.Namespace) -> int:
                             ),
                             "pipeline_prepublication_shadow": (
                                 args.pipeline_prewarm_shadow
+                            ),
+                            "candidate_verifier_shadow": (
+                                args.candidate_verifier_shadow
                             ),
                             "reason": (
                                 "shadow_isolated_after_serialized_delivery_"
@@ -5040,6 +5146,77 @@ def run(args: argparse.Namespace) -> int:
                 )
                 else None
             )
+            candidate_verifier_target: (
+                CandidateVerifierTarget | None
+            ) = None
+            candidate_verifier_revision: int | None = None
+            candidate_verifier_submit_ms = 0.0
+            candidate_verifier_submit_error: str | None = None
+            candidate_verifier_eligibility = (
+                "boolean_losing"
+                if (
+                    viability_query is not None
+                    and viability_query.available
+                    and not viability_query.state_viable
+                )
+                else (
+                    "boolean_viable"
+                    if (
+                        viability_query is not None
+                        and viability_query.available
+                    )
+                    else "policy_unavailable"
+                )
+            )
+            if (
+                candidate_verifier is not None
+                and candidate_verifier_eligibility == "boolean_losing"
+            ):
+                candidate_request = (
+                    _corridor_candidate_verifier_target(
+                        corridor_solution,
+                        current_frame=counter_after_read,
+                        player_x=projected_player_x,
+                        player_y=projected_player_y,
+                        observed_action=observed_input_action,
+                        pending_command=pipeline_pending_command,
+                        max_age_frames=args.corridor_max_age,
+                        horizon_frames=(
+                            CANDIDATE_VERIFIER_HORIZON_FRAMES
+                        ),
+                    )
+                )
+                if candidate_request is not None:
+                    (
+                        candidate_problem,
+                        candidate_verifier_target,
+                    ) = candidate_request
+                    candidate_submit_started = time.perf_counter()
+                    try:
+                        candidate_verifier_revision = (
+                            candidate_verifier.submit(
+                                problem=candidate_problem,
+                                target=candidate_verifier_target,
+                            )
+                        )
+                    except Exception as error:
+                        candidate_verifier_submit_error = (
+                            f"{type(error).__name__}: {error}"
+                        )
+                    candidate_verifier_submit_ms = (
+                        time.perf_counter() - candidate_submit_started
+                    ) * 1000.0
+            elif candidate_verifier is not None:
+                candidate_submit_started = time.perf_counter()
+                try:
+                    candidate_verifier.discard_target()
+                except Exception as error:
+                    candidate_verifier_submit_error = (
+                        f"{type(error).__name__}: {error}"
+                    )
+                candidate_verifier_submit_ms = (
+                    time.perf_counter() - candidate_submit_started
+                ) * 1000.0
             pipeline_prewarm_query = (
                 _corridor_pipeline_prewarm_query(
                     corridor_solution,
@@ -5364,6 +5541,33 @@ def run(args: argparse.Namespace) -> int:
                 decision = replace(decision, mask=auto_confirm_mask)
             if args.no_bomb and decision.mask & BOMB:
                 raise RuntimeError("no-bomb policy produced a Bomb input")
+            candidate_verifier_outcome: (
+                CandidateVerifierOutcome | None
+            ) = None
+            candidate_verifier_snapshot: (
+                CandidateVerifierSnapshot | None
+            ) = None
+            candidate_verifier_lookup_ms = 0.0
+            candidate_verifier_lookup_error: str | None = None
+            if candidate_verifier is not None:
+                candidate_lookup_started = time.perf_counter()
+                try:
+                    if candidate_verifier_target is not None:
+                        candidate_verifier_outcome = (
+                            candidate_verifier.lookup(
+                                candidate_verifier_target
+                            )
+                        )
+                    candidate_verifier_snapshot = (
+                        candidate_verifier.snapshot()
+                    )
+                except Exception as error:
+                    candidate_verifier_lookup_error = (
+                        f"{type(error).__name__}: {error}"
+                    )
+                candidate_verifier_lookup_ms = (
+                    time.perf_counter() - candidate_lookup_started
+                ) * 1000.0
             transitions = input_transitions(
                 previous_mask,
                 decision.mask,
@@ -5869,6 +6073,102 @@ def run(args: argparse.Namespace) -> int:
                     "auto_confirm": auto_confirm_event,
                     "enemy_bodies": _serialized_enemy_bodies(enemy_bodies),
                 }
+                if candidate_verifier is not None:
+                    candidate_root = (
+                        candidate_verifier_target.root
+                        if candidate_verifier_target is not None
+                        else None
+                    )
+                    if candidate_verifier_submit_error is not None:
+                        candidate_status = "submit_error"
+                    elif candidate_verifier_lookup_error is not None:
+                        candidate_status = "lookup_error"
+                    elif candidate_verifier_target is None:
+                        candidate_status = (
+                            "skipped_boolean_viable"
+                            if candidate_verifier_eligibility
+                            == "boolean_viable"
+                            else "unavailable"
+                        )
+                    elif candidate_verifier_outcome is not None:
+                        candidate_status = "hit"
+                    else:
+                        candidate_status = "miss"
+                    record["candidate_verifier_shadow"] = {
+                        "role": "shadow_no_action_authority",
+                        "status": candidate_status,
+                        "eligibility": (
+                            candidate_verifier_eligibility
+                        ),
+                        "submit_revision": (
+                            candidate_verifier_revision
+                        ),
+                        "submit_ms": candidate_verifier_submit_ms,
+                        "lookup_ms": candidate_verifier_lookup_ms,
+                        "submit_error": (
+                            candidate_verifier_submit_error
+                        ),
+                        "lookup_error": (
+                            candidate_verifier_lookup_error
+                        ),
+                        "target": (
+                            {
+                                "policy_version": (
+                                    candidate_verifier_target
+                                    .policy_version
+                                ),
+                                "frame": candidate_root.frame,
+                                "row": candidate_root.row,
+                                "column": candidate_root.column,
+                                "observed_action": (
+                                    candidate_root.observed_action
+                                ),
+                                "pending_action": (
+                                    candidate_root
+                                    .pending_command.action
+                                    if (
+                                        candidate_root.pending_command
+                                        is not None
+                                    )
+                                    else None
+                                ),
+                                "pending_remaining_frames": (
+                                    candidate_root.pending_command
+                                    .remaining_frames
+                                    if (
+                                        candidate_root.pending_command
+                                        is not None
+                                    )
+                                    else ()
+                                ),
+                            }
+                            if (
+                                candidate_verifier_target is not None
+                                and candidate_root is not None
+                            )
+                            else None
+                        ),
+                        "result": (
+                            {
+                                **(
+                                    _candidate_outcome_record(
+                                        candidate_verifier_outcome
+                                    )
+                                    or {}
+                                ),
+                                "issued_in_best": (
+                                    _action_name_from_mask(decision.mask)
+                                    in candidate_verifier_outcome
+                                    .best_actions
+                                ),
+                            }
+                            if candidate_verifier_outcome is not None
+                            else None
+                        ),
+                        "service": _candidate_snapshot_record(
+                            candidate_verifier_snapshot
+                        ),
+                    }
                 if hit_contact_observation is not None:
                     record["hit_contact_observation"] = (
                         hit_contact_observation
@@ -6522,6 +6822,8 @@ def run(args: argparse.Namespace) -> int:
                         wait=True,
                         cancel_futures=True,
                     )
+                if candidate_verifier is not None:
+                    candidate_verifier.close()
                 if corridor_executor is not None:
                     corridor_executor.shutdown(wait=True, cancel_futures=True)
                 if (
@@ -6623,6 +6925,15 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "start exact-root seeds when clearance is ready and record "
             "lookup-only current-version hits; never changes live actions"
+        ),
+    )
+    parser.add_argument(
+        "--candidate-verifier-shadow",
+        action="store_true",
+        help=(
+            "verify a bounded attainable policy portfolio beside local "
+            "planning and consume only exact-root shadow hits; never changes "
+            "live actions"
         ),
     )
     parser.add_argument(

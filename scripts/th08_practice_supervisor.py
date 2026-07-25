@@ -728,6 +728,9 @@ def run_trial(
             args.postpublished_survival_shadow
         ),
         "pipeline_prewarm_shadow": args.pipeline_prewarm_shadow,
+        "candidate_verifier_shadow": (
+            args.candidate_verifier_shadow
+        ),
         "started_at": datetime.now().astimezone().isoformat(),
     }
     batch_process: subprocess.Popen[bytes] | None = None
@@ -753,6 +756,9 @@ def run_trial(
                 args.postpublished_survival_shadow
             ),
             pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
+            candidate_verifier_shadow=(
+                args.candidate_verifier_shadow
+            ),
         )
         batch_process, batch_log = launch_patch_batch(
             game_dir=game_dir,
@@ -1021,6 +1027,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "start exact-root prewarm after clearance and record lookup-only "
             "telemetry; never changes live actions"
+        ),
+    )
+    parser.add_argument(
+        "--candidate-verifier-shadow",
+        action="store_true",
+        help=(
+            "run bounded exact candidate verification beside local planning "
+            "for telemetry only; never changes live actions"
         ),
     )
     parser.add_argument(

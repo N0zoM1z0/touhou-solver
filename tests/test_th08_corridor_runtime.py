@@ -15,6 +15,7 @@ from th08_corridor_runtime import (
     LIVE_SURVIVAL_LABELS,
     SHADOW_REFINEMENT_GRID_STEPS,
     SHADOW_SURVIVAL_LABELS,
+    corridor_candidate_verifier_target,
     corridor_pipeline_survival_query,
     corridor_postpublished_survival_query,
     corridor_viability_query,
@@ -126,6 +127,36 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
         self.assertEqual(
             solution.plan.survival_query_problem.clearance_volume.shape[0],
             81,
+        )
+        candidate = corridor_candidate_verifier_target(
+            solution,
+            current_frame=100,
+            player_x=192.0,
+            player_y=400.0,
+            observed_action="stay",
+            pending_command=None,
+            max_age_frames=79,
+            horizon_frames=32,
+        )
+        self.assertIsNotNone(candidate)
+        assert candidate is not None
+        candidate_problem, candidate_target = candidate
+        self.assertIs(
+            candidate_problem,
+            solution.plan.survival_query_problem,
+        )
+        self.assertEqual(candidate_target.root.frame, 0)
+        self.assertIsNone(
+            corridor_candidate_verifier_target(
+                solution,
+                current_frame=150,
+                player_x=192.0,
+                player_y=400.0,
+                observed_action="stay",
+                pending_command=None,
+                max_age_frames=79,
+                horizon_frames=32,
+            )
         )
         labeled = solve_postpublished_survival(solution)
         self.assertIsNone(labeled.plan.survival_policy)

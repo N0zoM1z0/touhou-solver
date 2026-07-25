@@ -5,7 +5,7 @@ trying to solve, and why they are live, shadow-only, rejected, or still only a
 hypothesis. It is an index, not a replacement for the detailed design notes,
 counterexamples, run dossiers, or `notes/RESEARCH_LOG.md`.
 
-Last updated: 2026-07-25.
+Last updated: 2026-07-26.
 
 ## Status Vocabulary
 
@@ -47,7 +47,12 @@ was then disproved as a complete physical model. The old prewarm remains
 rejected. A recursively variable-cadence belief solver now passes
 scalar/native differentials offline; its conservative
 all-root/focused-continuation policy class is a research candidate, not live
-authority.
+authority. A bounded stationary-candidate verifier has now passed a physical
+delivery/contention gate only when admitted on available Boolean-losing
+roots: Stage-6B v2 delivered 93.56% of exact roots with zero replacement or
+stale completion and restored baseline latency/action lag. The every-root
+form is rejected. Candidate results remain shadow-only attainable lowers;
+exhaustion is not unrestricted losing.
 
 The next architectural target is a delivery-aware solver:
 
@@ -351,10 +356,19 @@ The next architectural target is a delivery-aware solver:
   but every label is recomputed: one changed-clearance root improved
   `3.980 -> 2.200 ms` median with full-portfolio order invariance.
   Remaining-delay bucket upper bounds pass nested scalar/native parity but
-  did not reduce the hard first-upper cost. **Status remains
-  offline/shadow-only.** The next gate is retained Stage-6B capsule replay and
-  whole-controller contention/delivery, not another unrestricted synchronous
-  solve.
+  did not reduce the hard first-upper cost. Two Stage-6B 32-root cohorts each
+  produced 20 exact-losing, 11 candidate-feasible, and one
+  refinement-feasible root at candidate medians `2.13/2.22 ms`.
+  **Status remains offline/shadow-only for values and actions.**
+- **Candidate physical delivery gate:** Every-root shadow `004142` delivered
+  only `65.50%`, accumulated 205 replacements/1,099 stale completions, raised
+  local-plan median `21.20 -> 26.46 ms`, and raised action lag `2 -> 3`
+  frames; that admission policy is rejected. Losing-only v2 `011639`
+  delivered `6192/6618 = 93.56%` exact roots with zero replacement/stale
+  completion. Iteration median was `44.88 ms`, action lag/cadence `2/3`
+  frames, and policy age `3` frames, matching the Boolean-only envelope.
+  This accepts the executor/admission architecture as an explicit shadow
+  service, not the candidate action.
 - **Stage 6B physical counterexample:** Instrumented hard-no-Bomb run
   `lunatic_route2_stage6b_unattended_20260725_204521` completed with 31 hits
   versus 27 in the RNG-distinct comparison. Global solve median improved
@@ -362,21 +376,24 @@ The next architectural target is a delivery-aware solver:
   `7213/15149` available queries had an empty action set and every hit was
   attributed to prior global-kernel exhaustion. Performance gains therefore
   generalize beyond Stage 5, while survival acceptance does not.
+- **Newest Stage 6B evidence:** Losing-only shadow `011639` completed with 26
+  RNG-distinct hits and zero Bomb. All 26 contacts still followed
+  Boolean-kernel exhaustion. The candidate service had no input authority, so
+  the hit count neither accepts nor rejects candidate actions; it establishes
+  only deliverability without measurable controller contention.
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control
   after their delivery relevance had decayed. Dense labels also use a
   source-layer state without the exact observed/pending input pipeline.
-- **Reactivation gate:** First establish a verified cadence scheduler or
-  bounded cadence automaton and validate the held-desired/pending estimator
-  invariant, then measure conservative policy-class lower bounds and the
-  selective clairvoyant-upper certificate on retained cross-stage capsules.
-  Only a
-  non-clairvoyant no-write belief value with an explicit
-  policy-class/horizon claim may be delivered.
-  Offline evidence must predict no CPU/read/local-plan/action-lag regression
-  before another physical shadow. Same-recurrence parity, top-K root coverage,
-  and warm lookup speed are insufficient.
+- **Reactivation gate:** First counterfactually replay only completed winning
+  exact-key candidate witnesses at former pre-hit roots, retain the witness
+  with its root action/version/deadline, and require a fresh issue-time hard
+  certificate. Validate on another stage and multiple RNG captures before
+  any action authority. A non-winning, exhausted, budget-expired, timed-out,
+  stale, or key-mismatched result must fall back to Boolean plus the local
+  certificate. Same-recurrence parity and delivery rate alone are
+  insufficient.
 - **Evidence:** `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`,
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
@@ -387,6 +404,7 @@ The next architectural target is a delivery-aware solver:
   `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
   `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,
   `notes/ANYTIME_DUAL_BOUND_POLICY_SYNTHESIS_20260725.md`,
+  `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`,
   `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
   `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json`,
   `artifacts/benchmarks/exact_root_frontier_20260725.json`,

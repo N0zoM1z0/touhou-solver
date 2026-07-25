@@ -2880,3 +2880,39 @@ Status: observed | inferred | unknown | fixed
   `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,
   `scripts/benchmarks/benchmark_resumable_upper_certification.py`, and
   `artifacts/benchmarks/resumable_upper_certification_20260725.json`.
+
+## CE-0118: Cheap exact-root lookup hid background verifier contention
+
+- **Observed physical counterexample:** Hard-no-Bomb Stage-6B candidate
+  shadow `lunatic_route2_stage6b_unattended_20260726_004142` submitted a
+  stationary candidate portfolio for every queryable Boolean root. Submit and
+  lookup were cheap (`0.042/0.019 ms` median), but exact issue-time delivery
+  was only `8004/12220 = 65.50%`; the single worker accumulated 205 queued
+  target replacements and 1,099 stale completions.
+- **Controller impact:** Relative to RNG-distinct Boolean-only `000654`,
+  local-plan median increased `21.20 -> 26.46 ms`, full iteration
+  `45.89 -> 53.11 ms`, action lag `2 -> 3` frames, cadence `3 -> 4`, Boolean
+  viability `70.68 -> 79.57 ms`, and first policy age `3 -> 4`. The run's 33
+  hits versus 23 are not a causal comparison, but the direct timing and queue
+  regressions reject the every-root service.
+- **Invalid assumption:** Nonblocking lookup was treated as proof that a
+  shadow worker was side-effect-free. The native candidate expansion still
+  competed with sensing, Boolean viability, and local planning for CPU, while
+  work on short-lived viable roots became obsolete before consumption.
+- **Correction:** Admit only available Boolean-losing roots, apply one
+  below-normal-priority worker and a 12-ms between-candidate budget, discard
+  obsolete desired/queued targets on viable or unavailable decisions, and
+  require exact `(policy version, phase, cell, observed action, pending
+  action, remaining-delay support)` lookup. Completed lower labels remain
+  shadow-only; exhaustion and timeout remain unresolved.
+- **Physical regression:** Corrected v2 `011639` completed Stage 6B with
+  `6192/6618 = 93.56%` exact delivery, zero replacements, and zero stale
+  completions. Read/local-plan/iteration medians were
+  `12.10/21.85/44.88 ms`, action lag/cadence `2/3` frames, viability
+  `69.54 ms`, and policy age `3` frames, all back inside the Boolean-only
+  baseline envelope. Its 26 RNG-distinct hits grant no survival authority.
+- **Evidence:** raw-bundle hashes and physical audits
+  `stage6b_20260726_004142_candidate_verifier_shadow.json` and
+  `stage6b_20260726_011639_candidate_verifier_shadow_v2.json`; full analysis
+  in
+  `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.

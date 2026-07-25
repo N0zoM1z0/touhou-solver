@@ -133,12 +133,24 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertEqual(args.safety_value_horizon, 32)
         self.assertTrue(args.viability_audit)
         self.assertFalse(args.pipeline_prewarm_shadow)
+        self.assertFalse(args.candidate_verifier_shadow)
 
     def test_pipeline_prewarm_shadow_is_explicitly_opt_in(self) -> None:
         args = build_parser().parse_args(
             ["--stage", "5", "--pipeline-prewarm-shadow", "--armed"]
         )
         self.assertTrue(args.pipeline_prewarm_shadow)
+
+    def test_candidate_verifier_shadow_is_explicitly_opt_in(self) -> None:
+        args = build_parser().parse_args(
+            [
+                "--stage",
+                "6b",
+                "--candidate-verifier-shadow",
+                "--armed",
+            ]
+        )
+        self.assertTrue(args.candidate_verifier_shadow)
 
     def test_tail_reader_handles_a_record_larger_than_one_block(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

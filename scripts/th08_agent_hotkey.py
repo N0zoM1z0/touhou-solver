@@ -89,6 +89,7 @@ def build_long_run_arguments(
     viability_audit_dir: Path | None = None,
     postpublished_survival_shadow: bool = False,
     pipeline_prewarm_shadow: bool = False,
+    candidate_verifier_shadow: bool = False,
     duration_seconds: float = LONG_RUN_DURATION_SECONDS,
 ) -> list[str]:
     if safety_value_horizon < 0:
@@ -138,6 +139,8 @@ def build_long_run_arguments(
         arguments.append("--postpublished-survival-shadow")
     if pipeline_prewarm_shadow:
         arguments.append("--pipeline-prewarm-shadow")
+    if candidate_verifier_shadow:
+        arguments.append("--candidate-verifier-shadow")
     return arguments
 
 
@@ -152,6 +155,7 @@ class AgentHotkey:
         viability_audit_dir: Path | None = None,
         postpublished_survival_shadow: bool = False,
         pipeline_prewarm_shadow: bool = False,
+        candidate_verifier_shadow: bool = False,
         duration_seconds: float = LONG_RUN_DURATION_SECONDS,
         detailed_summary: bool = True,
     ) -> None:
@@ -196,6 +200,7 @@ class AgentHotkey:
             postpublished_survival_shadow
         )
         self.pipeline_prewarm_shadow = pipeline_prewarm_shadow
+        self.candidate_verifier_shadow = candidate_verifier_shadow
         self.duration_seconds = duration_seconds
         self.detailed_summary = detailed_summary
         self.artifact_dir = (
@@ -314,6 +319,9 @@ class AgentHotkey:
                     self.postpublished_survival_shadow
                 ),
                 pipeline_prewarm_shadow=self.pipeline_prewarm_shadow,
+                candidate_verifier_shadow=(
+                    self.candidate_verifier_shadow
+                ),
                 duration_seconds=self.duration_seconds,
             )
             if not gameplay_active:

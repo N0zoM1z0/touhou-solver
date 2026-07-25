@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -207,6 +208,31 @@ class PolicySynthesisTests(unittest.TestCase):
             set(reordered.completed_candidates),
             set(default.completed_candidates),
         )
+
+    def test_total_budget_keeps_completed_lower_and_marks_unvisited(
+        self,
+    ) -> None:
+        problem = self.problem(30)
+        candidates = singleton_continuation_candidates(problem)
+        with patch(
+            "touhou_control.policy_synthesis.time.perf_counter",
+            side_effect=(0.0, 0.0, 0.002),
+        ):
+            portfolio = evaluate_candidate_policy_portfolio(
+                problem=problem,
+                policy_version="budgeted",
+                decision_frame_support=(1, 2),
+                candidates=candidates,
+                frame=0,
+                row=0,
+                column=1,
+                observed_action="stay",
+                total_timeout_ms=1,
+                stop_on_feasibility=False,
+            )
+        self.assertEqual(len(portfolio.completed_candidates), 1)
+        self.assertEqual(len(portfolio.unvisited_candidates), 2)
+        self.assertTrue(portfolio.budget_exhausted)
 
 
 if __name__ == "__main__":

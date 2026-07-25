@@ -327,6 +327,15 @@ These instructions apply to every file and task below this directory.
   decisions and compare the warm-up length with measured live policy lifetime;
   a steady-state timing win is not a delivery win if most policies expire
   during warm-up.
+- The stationary candidate verifier is a shadow-only attainable-lower service.
+  Submit it only for an available Boolean-losing exact root, keep one
+  below-normal-priority worker, and consume only an exact `(policy version,
+  phase, cell, observed action, pending action, remaining-delay support)`
+  match. Completed winning candidates prove finite-model feasibility only.
+  `candidate_exhausted`, aggregate-budget exhaustion, timeout, and unvisited
+  candidates are unresolved, never unrestricted losing. The rejected
+  every-root form caused measurable CPU contention; see
+  `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 
@@ -335,12 +344,21 @@ These instructions apply to every file and task below this directory.
 - Keep raw runtime JSONL local and ignored. Every completed Lunatic, Extra, or
   focused thprac trial used for a conclusion must produce compact tracked
   artifacts sufficient to review and regress it.
-- Raw JSONL, viability capsules, screenshots, logs, caches, and native build
-  outputs are temporary working data. Once the compact dossier, ledger,
-  regression cases, comparison, and note have been verified and committed,
-  delete the raw copy by default. Retain raw data only for a named active
-  differential; record why it is still needed and remove it when that
-  experiment closes.
+- For every active physical validation workload, retain the two newest
+  complete replay-capable raw capture bundles. Workload identity includes
+  game/team/difficulty/stage or focused phase plus capture schema/options. A
+  bundle consists of the raw JSONL, matching viability/audit capsule
+  directory, and session provenance needed to reconstruct roots. Do not
+  delete an older replay bundle until two newer bundles for the same workload
+  have completed, their JSONL/capsules pass a read audit, and their compact
+  tracked reports are materialized. Discarded, truncated, reset-tail,
+  foreground-contaminated, or schema-incompatible runs do not count toward
+  the two-bundle floor.
+- Screenshots, logs, caches, native build outputs, and replay bundles older
+  than the newest two remain cleanup candidates. Record material removal.
+  Never claim a retained-capsule replay gate when only the compact report
+  remains; state that raw replay evidence is unavailable and capture a
+  replacement.
 - A complete-run record must include scope and provenance, controller/model
   version, difficulty/team/stage/phase, every hit and Bomb boundary, resources,
   item and power outcomes, action/delay timing, corridor/viability health, and
@@ -370,6 +388,13 @@ These instructions apply to every file and task below this directory.
   `route_complete`. Require both records when finalizing a full-run dossier.
 - Verify executable identity, foreground ownership, route 2, difficulty,
   gameplay state, and the no-life-decrement patch before injecting input.
+- On this WSL host, launching Windows Python or `cmd.exe` can return control to
+  the Linux caller while the Windows supervisor remains attached below
+  `/init`. Do not interpret the WSL command's return as trial completion;
+  monitor the exact Linux interop process, growing trace, terminal summary,
+  and session status. Avoid Windows CLI probes while gameplay is active:
+  opening a console or querying through Windows can steal foreground and make
+  the foreground guard correctly discard the run.
 - Always release injected keys on stop or error. Do not leave a required
   runtime session running unattended at the end of a task.
 - Prefer focused thprac trials for an unresolved spell or nonspell. Require

@@ -29,6 +29,9 @@ from touhou_control.query_survival import (
     StalePipelineWorkspaceError,
     SurvivalQueryProblem,
 )
+from touhou_control.candidate_verifier_service import (
+    CandidateVerifierTarget,
+)
 from touhou_control.pipeline_prewarm_service import (
     PipelinePrewarmService,
     PipelinePrewarmServiceSnapshot,
@@ -492,6 +495,48 @@ def _pipeline_policy_version(
     )
 
 
+def corridor_candidate_verifier_target(
+    solution: CorridorSolution | None,
+    *,
+    current_frame: int,
+    player_x: float,
+    player_y: float,
+    observed_action: str,
+    pending_command: PendingCommand | None,
+    max_age_frames: int,
+    horizon_frames: int,
+) -> tuple[SurvivalQueryProblem, CandidateVerifierTarget] | None:
+    """Construct one exact current root after Boolean publication."""
+
+    if solution is None or solution.plan.survival_query_problem is None:
+        return None
+    problem = solution.plan.survival_query_problem
+    age = current_frame - solution.source_frame
+    if (
+        age < 0
+        or age > max_age_frames
+        or age + horizon_frames > problem.horizon_frames
+    ):
+        return None
+    row, column, _ = problem.project_to_lattice(
+        x=player_x,
+        y=player_y,
+    )
+    return (
+        problem,
+        CandidateVerifierTarget(
+            policy_version=_pipeline_policy_version(solution),
+            root=ReachablePipelineRoot(
+                frame=age,
+                row=row,
+                column=column,
+                observed_action=observed_action,
+                pending_command=pending_command,
+            ),
+        ),
+    )
+
+
 def prepare_pipeline_survival_workspace(
     solution: CorridorSolution,
 ) -> CorridorSolution:
@@ -804,6 +849,7 @@ __all__ = [
     "PipelinePrewarmShadowQuery",
     "close_pipeline_prewarm",
     "close_retired_pipeline_prewarms",
+    "corridor_candidate_verifier_target",
     "corridor_pipeline_prewarm_query",
     "corridor_pipeline_prewarm_retarget",
     "corridor_pipeline_survival_query",

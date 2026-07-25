@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+import time
 from dataclasses import dataclass
 from typing import Hashable
 
@@ -64,6 +66,8 @@ class CandidatePolicyPortfolioResult:
     completed_candidates: tuple[str, ...]
     timed_out_candidates: tuple[str, ...]
     stopped_on_feasibility: bool
+    unvisited_candidates: tuple[str, ...] = ()
+    budget_exhausted: bool = False
 
     @property
     def feasibility_sufficient(self) -> bool:
@@ -159,6 +163,7 @@ def evaluate_candidate_policy_portfolio(
     observed_action: str,
     pending_command: PendingCommand | None = None,
     timeout_ms_per_candidate: int = 0,
+    total_timeout_ms: int = 0,
     stop_on_feasibility: bool = True,
 ) -> CandidatePolicyPortfolioResult:
     """Exactly verify candidates and merge their per-action lower bounds.
@@ -170,6 +175,8 @@ def evaluate_candidate_policy_portfolio(
 
     if not candidates:
         raise ValueError("candidate portfolio cannot be empty")
+    if timeout_ms_per_candidate < 0 or total_timeout_ms < 0:
+        raise ValueError("candidate timeouts cannot be negative")
     known_actions = {action.name for action in problem.actions}
     if len({candidate.name for candidate in candidates}) != len(candidates):
         raise ValueError("candidate policy names must be unique")
@@ -189,10 +196,30 @@ def evaluate_candidate_policy_portfolio(
     completed: list[str] = []
     evaluations: list[CandidatePolicyEvaluation] = []
     timed_out: list[str] = []
+    unvisited: list[str] = []
     aggregate_stats = [0] * 8
     stopped_on_feasibility = False
+    budget_exhausted = False
+    portfolio_started = time.perf_counter()
 
     for candidate_index, candidate in enumerate(candidates):
+        candidate_timeout = timeout_ms_per_candidate
+        if total_timeout_ms:
+            remaining_ms = total_timeout_ms - (
+                time.perf_counter() - portfolio_started
+            ) * 1000.0
+            if remaining_ms <= 0.0:
+                unvisited.extend(
+                    item.name for item in candidates[candidate_index:]
+                )
+                budget_exhausted = True
+                break
+            remaining_timeout = max(1, math.ceil(remaining_ms))
+            candidate_timeout = (
+                min(candidate_timeout, remaining_timeout)
+                if candidate_timeout
+                else remaining_timeout
+            )
         candidate_version = (
             policy_version,
             "candidate",
@@ -212,7 +239,7 @@ def evaluate_candidate_policy_portfolio(
                     column=column,
                     observed_action=observed_action,
                     pending_command=pending_command,
-                    timeout_ms=timeout_ms_per_candidate,
+                    timeout_ms=candidate_timeout,
                 )
             except PipelineWorkspaceDeadlineError:
                 timed_out.append(candidate.name)
@@ -290,6 +317,8 @@ def evaluate_candidate_policy_portfolio(
         completed_candidates=tuple(completed),
         timed_out_candidates=tuple(timed_out),
         stopped_on_feasibility=stopped_on_feasibility,
+        unvisited_candidates=tuple(unvisited),
+        budget_exhausted=budget_exhausted,
     )
 
 

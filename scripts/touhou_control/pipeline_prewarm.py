@@ -12,13 +12,12 @@ Every replacement cancels the superseded native work.  Lookup never computes.
 from __future__ import annotations
 
 import concurrent.futures
-import ctypes
-import os
 import threading
 import time
 from dataclasses import dataclass, field
 from typing import Hashable, Iterable
 
+from .background_priority import lower_current_thread_priority
 from .query_survival import (
     PipelineSurvivalWorkspace,
     PipelineWorkspaceCancelledError,
@@ -232,40 +231,6 @@ def enumerate_continuation_seed_roots(
             ),
         )
     )
-
-
-def _lower_current_thread_priority() -> bool:
-    """Yield CPU to the issue-time controller without changing its thread."""
-
-    try:
-        if os.name == "nt":
-            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-            kernel32.GetCurrentThread.restype = ctypes.c_void_p
-            kernel32.SetThreadPriority.argtypes = [
-                ctypes.c_void_p,
-                ctypes.c_int,
-            ]
-            kernel32.SetThreadPriority.restype = ctypes.c_int
-            # BELOW_NORMAL preserves progress while yielding to the game,
-            # sensor, Boolean publication, and issue-time controller.
-            return bool(
-                kernel32.SetThreadPriority(
-                    kernel32.GetCurrentThread(),
-                    -1,
-                )
-            )
-        if hasattr(os, "setpriority") and hasattr(os, "PRIO_PROCESS"):
-            native_id = threading.get_native_id()
-            current = os.getpriority(os.PRIO_PROCESS, native_id)
-            os.setpriority(
-                os.PRIO_PROCESS,
-                native_id,
-                max(current, 5),
-            )
-            return True
-    except (AttributeError, OSError):
-        return False
-    return False
 
 
 class LatestPipelinePrewarmScheduler:
@@ -689,7 +654,7 @@ class LatestPipelinePrewarmScheduler:
         roots: tuple[ReachablePipelineRoot, ...],
     ) -> list[PipelinePrewarmOutcome]:
         if self.background_low_priority:
-            _lower_current_thread_priority()
+            lower_current_thread_priority()
         workspace = generation.seed_batch.workspaces[residue]
         outcomes = []
         for root in roots:
@@ -761,7 +726,7 @@ class LatestPipelinePrewarmScheduler:
         roots: tuple[ReachablePipelineRoot, ...],
     ) -> list[PipelinePrewarmOutcome]:
         if self.background_low_priority:
-            _lower_current_thread_priority()
+            lower_current_thread_priority()
         workspace = batch.workspaces[residue]
         merge_started = time.perf_counter()
         merged_states = 0

@@ -50,48 +50,50 @@ an exactly verified causal candidate policy can prove a full-horizon action
 in a few milliseconds, while upper work is reserved for unresolved-action
 refinement or an optimality claim. Across versions, reuse search order only;
 every candidate label must be recomputed under the current immutable model.
+Before changing candidate delivery or granting it any authority, read
+`notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`. The
+accepted shadow form submits only available Boolean-losing exact roots to one
+below-normal-priority worker. Candidate/budget exhaustion is unresolved, not
+losing, and every-root submission is physically rejected for contention.
 
 ## 1. Exact Checkpoint
 
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `b23356a Resume incumbent upper certification across slices`. It adds an
-  anytime dual-bound policy synthesizer: exact stationary candidate-policy
-  portfolios, greedy-prefix lower classes, gap-directed action-column CEGIS,
-  remaining-delay bucket upper bounds, and cross-version proposal-order
-  reuse with mandatory current-version re-verification. Three minimized
-  counterexamples still separate planner-hold/input-issue semantics,
-  recursive cadence, and hidden-delay non-anticipativity. The legacy prewarm
-  remains invalid as a physical value; all new synthesis remains
-  offline/shadow-only.
-- On retained structured seed 0, full-horizon modeled feasibility now arrives
-  in median `4.01 ms`, versus `733.42 ms` for the old nine-action lower and
-  `4379.39 ms` for unrestricted exact belief. Gap-directed columns close the
-  exact physical threshold in median `287.64 ms`. Seed 3 feasibility takes
-  median `1.90 ms`, and optimality `38.36 ms` versus `209.30 ms` exact.
-  Therefore the old 113-ms hard upper is no longer a synchronous prerequisite
-  when a candidate lower proves survival; it remains optional
-  optimality/refinement work.
-- Remaining-delay bucket refinement passes independent nested-bound parity
-  but does not materially reduce the retained first upper (`114.25--120.99
-  ms`). Cross-version reuse of proposer order only reduces an adjacent
-  changed-clearance root from median `3.980` to `2.200 ms`; complete
-  current-version portfolios remain order-invariant. Retained artifacts are
-  `artifacts/benchmarks/dual_bound_policy_synthesis_20260725.json` and
-  `artifacts/benchmarks/upper_hierarchy_cross_version_20260725.json`.
-- Fresh instrumentation run
-  `lunatic_route2_stage6b_unattended_20260725_204521` completed hard-no-Bomb
-  Lunatic Stage 6B over frames `2..76235` with 31 native hits and no runtime,
-  JSON, foreground-control, or manual-rearm failure. This is not survival
-  acceptance: the previous comparable run had 27 hits, and all 31 new hit
-  windows had exhausted global viability. A 32-root capsule replay at about
-  30 frames before each hit found 31/32 exact certificates; the remaining
-  root had eight unresolved actions. Two exact certificates cost
-  `1907.33/540.83 ms`, so the retained 100-ms anytime profile conservatively
-  leaves all 17 actions unresolved on those roots instead of blocking.
-- Both native libraries were rebuilt. Linux and Windows complete quick suites
-  pass 475 tests in `2.270/4.056 s`. Read
+  `4c4b480 Synthesize verified anytime belief policies`. It adds a
+  bounded stationary-candidate verifier, aggregate between-candidate budget,
+  newest-target exact-key service, below-normal worker priority, losing-only
+  admission, raw-bundle read/hash audit, and physical contention/delivery
+  analysis. The service remains explicit shadow telemetry and never changes
+  the live mask.
+- Two RNG-distinct Stage-6B capsule cohorts each classified 32 roots as 20
+  exact losing, 11 stationary-candidate feasible, and one feasible only after
+  targeted action-column refinement. Candidate median/p95 was
+  `2.13/6.75 ms` and `2.22/8.09 ms`. One `000654` threshold required
+  `265.77 ms` before refinement found a 32-frame positive witness, proving
+  that stationary-candidate exhaustion is not an unrestricted losing claim.
+- The first physical candidate shadow `004142` ran on every root. It delivered
+  8,004/12,220 exact roots but accumulated 205 queue replacements and 1,099
+  stale completions. Relative to Boolean-only `000654`, local-plan median rose
+  `21.20 -> 26.46 ms`, iteration `45.89 -> 53.11 ms`, action lag `2 -> 3`
+  frames, and policy age `3 -> 4`; this form is rejected.
+- Losing-only v2 `011639` completed hard-no-Bomb Stage 6B over frames
+  `2..74963`, with 14,652 decisions, 26 native hits, zero Bomb, and no runtime,
+  JSON, foreground, or manual-rearm failure. It delivered 6,192/6,618 exact
+  losing roots (`93.56%`) with zero replacement/stale completion. Iteration
+  median was `44.88 ms`, action lag/cadence `2/3` frames, and first policy age
+  `3` frames, all back inside the Boolean-only baseline envelope. This accepts
+  the service architecture as shadow-only; the RNG-distinct hit count is not
+  a survival claim and all 26 hits still followed Boolean-kernel exhaustion.
+- The complete v2 raw bundle passed full JSONL/reference/capsule validation:
+  14,791 records, 14,652 decisions, 2,689 readable capsules, zero missing
+  references, bundle SHA-256
+  `9e8af717c548dc6456d471c15ac2be9777f755d7b94bc3fc6067e4b289b38a77`.
+  The two locally retained complete replay bundles are `004142` and `011639`.
+- Linux and Windows complete quick suites pass 481 tests in
+  `2.187/3.461 s`. Read
+  `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`,
   `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`,
   `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,
   `notes/ANYTIME_DUAL_BOUND_POLICY_SYNTHESIS_20260725.md`,
@@ -101,9 +103,9 @@ every candidate label must be recomputed under the current immutable model.
   `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
   `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
   `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
-  `notes/runs/lunatic_route2_stage6b_unattended_20260725_204521.md`,
+  `notes/runs/lunatic_route2_stage6b_unattended_20260726_011639.md`,
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
-  `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`, CE-0108/0109, and
+  `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`, CE-0108/0109/0118, and
   `STRATEGY.md` before changing viability queries or losing-state authority.
 - The expected user-owned untracked file is `image.png`. It is a screenshot.
   Do not add, delete, overwrite, or otherwise clean it. The Codex connector
@@ -111,10 +113,10 @@ every candidate label must be recomputed under the current immutable model.
   running `leantoken` MCP process; these are not TH08 dependencies or commit
   candidates. Do not confuse them with project artifacts or terminate/delete
   them while that external connector is active.
-- Ignored raw JSONL, viability capsules, screenshots, launch logs, caches, and
-  native build outputs were cleaned after compact review/regression artifacts
-  were verified. New raw captures are temporary unless a named active
-  differential still needs them.
+- Ignored raw JSONL and viability capsules are retained only for the newest
+  two read-audited complete bundles per active workload. Screenshots, launch
+  logs, caches, native build outputs, discarded raw attempts, and older
+  replay bundles are cleanup candidates after compact evidence is verified.
 - No TH08 runtime/control session or half-edited experiment is part of the
   checkpoint.
 - The IDA database has newer metadata than Git: the transform functions listed
@@ -253,6 +255,15 @@ Important execution detail:
   cursor-position query (`ESC[6n`) before the game appeared.
 - With Codex `exec_command`, use a short initial yield (about 1 second). If a
   session ID is returned, poll it with `write_stdin` every 15-30 seconds.
+- On this host, direct Windows Python or `cmd.exe` interop may return from the
+  Linux call while the Windows supervisor remains alive below `/init`. That
+  return is not trial completion. Check the exact interop process, growing
+  JSONL, terminal summary, and final `.session.json` status instead.
+- During gameplay, monitor through low-load Linux reads only. Do not open a
+  Windows console or run PowerShell/process probes merely for status: it can
+  steal foreground and the agent will correctly discard the run. Use Windows
+  process inspection only after the trace has terminated or for supervised
+  recovery from a real stall.
 - Do not end a turn while the required trial session is still running.
 - The supervisor's default whole-trial timeout is 4,500 seconds.
 - Its default no-progress timeout is 120 seconds. It requests an agent stop,
@@ -459,6 +470,14 @@ Raw runtime files are intentionally ignored:
 - `artifacts/runtime_reports/*.jsonl`
 - `artifacts/runtime_reports/*.log`
 - screenshots and caches
+
+Ignored does not mean disposable. For each active physical validation
+workload, keep the two newest complete replay bundles: raw JSONL, matching
+audit-capsule directory, and session provenance. A discarded/truncated or
+schema-incompatible run does not count. Delete an older bundle only after two
+newer same-workload bundles pass a read audit and their compact tracked
+reports exist. This floor prevents a compact summary from being mistaken for
+replayable evidence.
 
 For every complete physical trial used in a conclusion, retain:
 

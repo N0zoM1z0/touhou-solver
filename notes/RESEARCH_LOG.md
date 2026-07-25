@@ -3092,3 +3092,73 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   trial, binary reverse engineering, IDA mutation, or REA session was used.
 - Rebuilt Linux and Windows native libraries. Both complete quick suites pass
   475 tests in `2.270/4.056 s`.
+
+## 2026-07-26: Stage-6B Feasibility-First Replay And Physical Delivery Gate
+
+- Formalized the physical candidate-service boundary around one immutable
+  Boolean policy version and exact public root: phase, lattice cell, native
+  observed action, pending action, and remaining-delay support. Each
+  stationary continuation is solved exactly under recursive cadence
+  `(4,5,6)` and the no-write belief recurrence. Completed candidates are
+  attainable lower bounds; candidate/budget exhaustion and timeout remain
+  unresolved.
+- Added aggregate between-candidate budgeting to the portfolio. The 12-ms
+  service budget retains every completed lower, lists timed-out and unvisited
+  candidates, and never turns unfinished work into a losing label. Added
+  one-worker exact-key candidate delivery, reusable below-normal background
+  priority, TH08 root construction, explicit hotkey/supervisor opt-in, and
+  trace telemetry. The result has no action authority.
+- Replayed 32 retained Stage-6B roots in each of complete captures `000654`
+  and `004142`. Both cohorts classified 20 exact losing, 11
+  stationary-candidate feasible, and one refined feasible. Candidate
+  median/p95/max was `2.13/6.75/12.37 ms` and
+  `2.22/8.09/10.21 ms`. One `000654` exact threshold took `265.77 ms`;
+  targeted action columns then changed a 27-frame losing lower into a
+  positive 32-frame witness and certified optimality. Stationary-candidate
+  exhaustion is therefore directly disproved as an unrestricted losing test.
+- A live-like losing-only `10 ms/candidate, 12 ms aggregate` replay kept two
+  feasible roots in `000654` and seven in `004142`. Incomplete portfolios
+  remained explicitly budget exhausted. The portfolio itself took
+  `3.14/11.74/12.49 ms` and `3.89/11.82/12.40 ms`
+  median/p95/max.
+- Physical every-root shadow `004142` completed Stage 6B hard no-Bomb with
+  12,607 decisions and 33 RNG-distinct hits. It delivered
+  `8004/12220 = 65.50%` exact roots but accumulated 205 queue replacements
+  and 1,099 stale completions. Against Boolean-only `000654`, local-plan
+  median increased `21.20 -> 26.46 ms`, iteration
+  `45.89 -> 53.11 ms`, action lag `2 -> 3` frames, cadence `3 -> 4`, and
+  first policy age `3 -> 4`. This every-root form is rejected as CE-0118.
+- Changed admission to available Boolean-losing roots only, explicitly
+  discarding obsolete targets on viable/unavailable decisions. Physical v2
+  `011639` completed frames `2..74963` with 14,652 decisions, 26
+  RNG-distinct native hits, zero Bomb, and no runtime, JSON, foreground, or
+  manual-rearm failure. It delivered `6192/6618 = 93.56%` exact roots with
+  zero replacement and zero stale completion. Outcomes were 949 feasible,
+  899 fully candidate exhausted, 4,524 budget exhausted, and seven timeout.
+- v2 recovered the Boolean-only controller envelope: read
+  `12.10/17.09 ms`, local plan `21.85/38.95 ms`, iteration
+  `44.88/67.42 ms`, action lag `2/4` frames, cadence `3/5`, viability
+  `69.54/407.96 ms`, and first policy age `3/9`. Submit/lookup medians were
+  only `0.0045/0.0140 ms`; candidate queue/computation medians were
+  `1.41/13.46 ms`. This accepts losing-only candidate delivery as shadow
+  infrastructure, not survival or action authority.
+- Read every v2 hit row. All 26 contacts followed Boolean-kernel exhaustion:
+  18 modeled committed-prefix, five bullet, one laser, one multiple-hazard,
+  and one sensor-gap/unmodeled. Boundary pressure remained strong at 19/26
+  hits. Candidate shadow could not cause or prevent these actions because it
+  never entered live selection.
+- Added a complete raw-bundle auditor and validated all three complete
+  captures before retention cleanup. v2 has 14,791 JSONL records, 2,689
+  readable capsules, zero missing references, and bundle hash
+  `9e8af717c548dc6456d471c15ac2be9777f755d7b94bc3fc6067e4b289b38a77`.
+  The locally retained replay floor is the newest two complete bundles,
+  `004142` and `011639`; compact reports and hashes preserve the older
+  baseline conclusion.
+- Five launch attempts were discarded and excluded from every comparison:
+  `235741` process unreadable at frame 375, `235800` supervisor mutex failure,
+  `000500` and `011113` foreground loss, and `011218` process unreadable at
+  frame 13,011.
+- Focused candidate/policy/corridor/hotkey/supervisor tests pass. Linux and
+  Windows complete quick suites both pass 481 tests in `2.187/3.461 s`.
+- Full design, formal boundary, physical table, limitations, and next gate:
+  `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.

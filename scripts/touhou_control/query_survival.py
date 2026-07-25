@@ -108,6 +108,16 @@ class BeliefPipelineQueryStats:
 
 
 @dataclass(frozen=True)
+class BeliefUpperCertification:
+    """Threshold result from a proved optimistic information relaxation."""
+
+    lower_bound: SurvivalLabel
+    certified: bool
+    unresolved_actions: tuple[str, ...]
+    workspace_stats: BeliefPipelineQueryStats
+
+
+@dataclass(frozen=True)
 class QueryLocalSurvivalResult:
     """Lexicographic survival labels for one exact physical-frame state."""
 
@@ -870,6 +880,80 @@ class BeliefPipelineSurvivalWorkspace:
             workspace_stats=stats,
         )
 
+    def certify_upper_bound(
+        self,
+        *,
+        policy_version: Hashable,
+        frame: int,
+        row: int,
+        column: int,
+        observed_action: str,
+        lower_bound: SurvivalLabel,
+        pending_command: PendingCommand | None = None,
+        timeout_ms: int = 0,
+    ) -> BeliefUpperCertification:
+        """Certify that no unrestricted optimistic action beats ``lower``."""
+
+        if policy_version != self.policy_version:
+            raise StalePipelineWorkspaceError(
+                "belief pipeline policy version does not match query"
+            )
+        if not self.reveal_remaining_delay:
+            raise ValueError(
+                "upper certification requires revealed remaining delay"
+            )
+        if (
+            self.continuation_actions != tuple(self._action_indices)
+            or self.budgeted_continuation_actions
+        ):
+            raise ValueError(
+                "upper certification requires unrestricted continuation "
+                "actions"
+            )
+        if observed_action not in self._action_indices:
+            raise ValueError("observed action is absent from the action set")
+        if (
+            pending_command is not None
+            and pending_command.action not in self._action_indices
+        ):
+            raise ValueError("pending action is absent from the action set")
+        unresolved_mask, raw_stats = self._native.certify_upper(
+            start_frame=frame,
+            start_row=row,
+            start_column=column,
+            observed_action_index=self._action_indices[observed_action],
+            pending_action_index=(
+                self._action_indices[pending_command.action]
+                if pending_command is not None
+                else -1
+            ),
+            pending_remaining_frames=(
+                np.asarray(
+                    pending_command.remaining_frames,
+                    dtype=np.int32,
+                )
+                if pending_command is not None
+                else None
+            ),
+            lower_frames=lower_bound.guaranteed_frames,
+            lower_margin=lower_bound.bottleneck_margin,
+            timeout_ms=timeout_ms,
+        )
+        stats = BeliefPipelineQueryStats(
+            *[int(value) for value in raw_stats]
+        )
+        unresolved = tuple(
+            action.name
+            for index, action in enumerate(self.problem.actions)
+            if unresolved_mask & (1 << index)
+        )
+        return BeliefUpperCertification(
+            lower_bound=lower_bound,
+            certified=not unresolved,
+            unresolved_actions=unresolved,
+            workspace_stats=stats,
+        )
+
 
 def _normalize_decision_frame_support(
     support: tuple[int, ...] | None,
@@ -1599,6 +1683,7 @@ def query_local_survival(
 __all__ = [
     "BeliefPipelineQueryStats",
     "BeliefPipelineSurvivalWorkspace",
+    "BeliefUpperCertification",
     "PendingCommand",
     "PipelineWorkspaceCancelledError",
     "PipelineWorkspaceDeadlineError",

@@ -423,11 +423,15 @@ unrestricted. A small `B` is not an optimality certificate, even when two
 adjacent labels agree. Native memo identity includes `B`, and progressive
 queries may reuse completed lower-budget states without mixing their values.
 
-The revealed-remaining-delay recurrence is now implemented as a proved
-optimistic native upper bound and matches its independent scalar oracle.
-Combined with `L_0`, it certifies the unrestricted state value of the retained
-structured 32-frame workload. The remaining algorithmic gap is selective
-upper evaluation: seed its branch-and-bound with the completed lower label and
-avoid solving root actions that cannot change the selected set. Until bounds
-meet on a particular root, deadline expiry may publish only the last completed
-lower-bound policy or the existing fail-closed fallback.
+The revealed-remaining-delay recurrence is implemented as a proved optimistic
+native upper bound and matches its independent scalar oracle. The
+incumbent-seeded threshold recurrence in
+`INCUMBENT_UPPER_CERTIFICATION_20260725.md` now determines, without complete
+upper labels, exactly which upper root actions can strictly beat a completed
+attainable lower label. Its boolean recursion retains controller existential,
+nature universal, and observation-merge semantics. Across 128 deterministic
+finite games its unresolved mask matches the complete scalar upper; on the
+structured workload it reduces upper certification from about `1.5 s` to
+`0.223 ms`. Until bounds meet on a particular root, deadline expiry may
+publish only the last completed lower-bound policy or the existing
+fail-closed fallback.

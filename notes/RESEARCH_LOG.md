@@ -2950,3 +2950,30 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `artifacts/benchmarks/budgeted_belief_refinement_20260725.json`.
 - No physical trial, binary reverse engineering, IDA mutation, or REA session
   was used for this offline checkpoint.
+
+## 2026-07-25: Incumbent-Seeded Optimistic Upper Certification
+
+- Replaced routine construction of every complete revealed-delay upper label
+  with an exact threshold game: for each root action, ask only whether its
+  optimistic value can strictly exceed the completed attainable lower state
+  label.
+- The C++ recurrence memoizes belief state plus one prefix-clearance bit and
+  preserves controller existential choice, nature-universal delay/cadence/
+  hidden branches, and revealed observation merging. An action/state is
+  pruned only by an admissible lexicographic upper bound. Unfinished queries
+  report unresolved actions and never publish optimistic labels.
+- Added C ABI and Python APIs, native/scalar mask differential coverage, and
+  schema-v6 retained benchmark evidence. All 128 deterministic games have
+  zero belief failures, upper failures, lower-above-upper violations, and
+  selective-certificate mask mismatches.
+- On the retained 32-frame TH08-shaped workload, `L_0` costs `32.35 ms`; the
+  selective upper certificate costs `0.223 ms`, reports no unresolved action,
+  and replaces the complete upper's roughly `1.5 s`. The upper bottleneck is
+  therefore resolved for this workload; the attainable lower solve and
+  cross-stage certification coverage remain.
+- Linux and Windows quick complete suites pass 471 tests in `1.391/2.415 s`.
+  Design: `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`. Retained artifact:
+  `artifacts/benchmarks/budgeted_belief_refinement_20260725.json`.
+- This checkpoint grants no live authority and used no physical trial, binary
+  reverse engineering, IDA mutation, or REA session. The next physical gate is
+  a hard-no-Bomb Lunatic Stage 6B run with the established controller.

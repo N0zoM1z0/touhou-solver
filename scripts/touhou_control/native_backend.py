@@ -29,6 +29,7 @@ _PIPELINE_WORKSPACE_CANCEL_FUNCTION = None
 _PIPELINE_WORKSPACE_DESTROY_FUNCTION = None
 _BELIEF_PIPELINE_CREATE_FUNCTION = None
 _BELIEF_PIPELINE_QUERY_FUNCTION = None
+_BELIEF_PIPELINE_CERTIFY_FUNCTION = None
 _BELIEF_PIPELINE_CANCEL_FUNCTION = None
 _BELIEF_PIPELINE_DESTROY_FUNCTION = None
 _LOSING_SURVIVAL_LABELS_FUNCTION = None
@@ -433,17 +434,20 @@ def _load_pipeline_workspace_functions():
 def _load_belief_pipeline_workspace_functions():
     global _BELIEF_PIPELINE_CREATE_FUNCTION
     global _BELIEF_PIPELINE_QUERY_FUNCTION
+    global _BELIEF_PIPELINE_CERTIFY_FUNCTION
     global _BELIEF_PIPELINE_CANCEL_FUNCTION
     global _BELIEF_PIPELINE_DESTROY_FUNCTION
     if (
         _BELIEF_PIPELINE_CREATE_FUNCTION is not None
         and _BELIEF_PIPELINE_QUERY_FUNCTION is not None
+        and _BELIEF_PIPELINE_CERTIFY_FUNCTION is not None
         and _BELIEF_PIPELINE_CANCEL_FUNCTION is not None
         and _BELIEF_PIPELINE_DESTROY_FUNCTION is not None
     ):
         return (
             _BELIEF_PIPELINE_CREATE_FUNCTION,
             _BELIEF_PIPELINE_QUERY_FUNCTION,
+            _BELIEF_PIPELINE_CERTIFY_FUNCTION,
             _BELIEF_PIPELINE_CANCEL_FUNCTION,
             _BELIEF_PIPELINE_DESTROY_FUNCTION,
         )
@@ -453,6 +457,9 @@ def _load_belief_pipeline_workspace_functions():
     try:
         create = library.touhou_belief_pipeline_workspace_create_v4
         query = library.touhou_belief_pipeline_workspace_query_v2
+        certify = (
+            library.touhou_belief_pipeline_workspace_certify_upper_v1
+        )
         cancel = library.touhou_belief_pipeline_workspace_cancel_v1
         destroy = library.touhou_belief_pipeline_workspace_destroy_v1
     except AttributeError:
@@ -501,15 +508,33 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.POINTER(ctypes.c_uint64),
     ]
     query.restype = ctypes.c_int
+    certify.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_uint16,
+        ctypes.c_float,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_uint64),
+    ]
+    certify.restype = ctypes.c_int
     cancel.argtypes = [ctypes.c_void_p]
     cancel.restype = ctypes.c_int
     destroy.argtypes = [ctypes.c_void_p]
     destroy.restype = None
     _BELIEF_PIPELINE_CREATE_FUNCTION = create
     _BELIEF_PIPELINE_QUERY_FUNCTION = query
+    _BELIEF_PIPELINE_CERTIFY_FUNCTION = certify
     _BELIEF_PIPELINE_CANCEL_FUNCTION = cancel
     _BELIEF_PIPELINE_DESTROY_FUNCTION = destroy
-    return create, query, cancel, destroy
+    return create, query, certify, cancel, destroy
 
 
 def _load_losing_survival_labels_function():
@@ -1803,6 +1828,7 @@ class BeliefPipelineNativeWorkspace:
         *,
         create,
         query,
+        certify,
         cancel,
         destroy,
         x_axis: np.ndarray,
@@ -1842,6 +1868,7 @@ class BeliefPipelineNativeWorkspace:
             dtype=np.int32,
         )
         self._query = query
+        self._certify = certify
         self._cancel = cancel
         self._destroy = destroy
         self._handle = ctypes.c_void_p()
@@ -1992,6 +2019,62 @@ class BeliefPipelineNativeWorkspace:
         if result != 0:
             _raise_pipeline_result("belief cancel", result)
 
+    def certify_upper(
+        self,
+        *,
+        start_frame: int,
+        start_row: int,
+        start_column: int,
+        observed_action_index: int,
+        lower_frames: int,
+        lower_margin: float,
+        pending_action_index: int = -1,
+        pending_remaining_frames: np.ndarray | None = None,
+        continuation_action_budget: int | None = None,
+        timeout_ms: int = 0,
+    ) -> tuple[int, np.ndarray]:
+        """Return actions whose optimistic value can exceed the lower."""
+
+        if self.closed:
+            raise RuntimeError("belief pipeline workspace is closed")
+        pending = np.ascontiguousarray(
+            (
+                np.empty(0, dtype=np.int32)
+                if pending_remaining_frames is None
+                else pending_remaining_frames
+            ),
+            dtype=np.int32,
+        )
+        unresolved_mask = ctypes.c_uint32()
+        stats = np.empty(8, dtype=np.uint64)
+        result = self._certify(
+            self._handle,
+            start_frame,
+            start_row,
+            start_column,
+            observed_action_index,
+            pending_action_index,
+            (
+                pending.ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+                if len(pending)
+                else None
+            ),
+            len(pending),
+            (
+                -1
+                if continuation_action_budget is None
+                else continuation_action_budget
+            ),
+            lower_frames,
+            lower_margin,
+            timeout_ms,
+            ctypes.byref(unresolved_mask),
+            stats.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)),
+        )
+        if result != 0:
+            _raise_pipeline_result("belief upper certification", result)
+        return int(unresolved_mask.value), stats
+
 
 def create_belief_pipeline_survival_workspace(
     *,
@@ -2014,10 +2097,11 @@ def create_belief_pipeline_survival_workspace(
     functions = _load_belief_pipeline_workspace_functions()
     if functions is None:
         return None
-    create, query, cancel, destroy = functions
+    create, query, certify, cancel, destroy = functions
     return BeliefPipelineNativeWorkspace(
         create=create,
         query=query,
+        certify=certify,
         cancel=cancel,
         destroy=destroy,
         x_axis=x_axis,

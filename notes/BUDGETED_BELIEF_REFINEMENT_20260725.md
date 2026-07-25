@@ -125,7 +125,9 @@ Observed:
 - A retained 128-case randomized scalar/native differential, including
   budgets 0, 1, and 2, has zero belief-label failures and zero
   revealed-information upper-bound failures. It also has zero cases where a
-  lower action label exceeds its corresponding upper label.
+  lower action label exceeds its corresponding upper label. Schema v6 also
+  has zero selective-certificate unresolved-mask mismatches against the
+  complete independent scalar upper.
 - Four additional scalar adversarial seeds satisfy
   `L_0 <= L_1 <= L_2 <= V_unrestricted` for every root action.
 - Warm exact-root lookup remains about 0.03 ms on the tiny differential.
@@ -186,25 +188,27 @@ than accepted from adjacent-budget agreement.
 
 ## What Remains
 
-The upper recurrence is currently an independent complete solve. At about
-1.5 seconds on the structured workload it establishes correctness but is not
-a serviceable online algorithm. Search may stop for an action when its upper
-bound cannot beat the best completed attainable lower bound; the native
-workspace does not yet drive upper evaluation from that incumbent or skip
-irrelevant root actions.
+The independent complete upper remains useful as an offline oracle, but it is
+no longer required for routine certification. The incumbent-seeded threshold
+recurrence in `INCUMBENT_UPPER_CERTIFICATION_20260725.md` determines exactly
+which optimistic root actions can strictly beat the completed lower label.
+On the structured workload it costs `0.223 ms`, reports no unresolved
+actions, and replaces the roughly `1.5 s` complete upper. Combined
+lower-plus-certificate time is `32.57 ms`; the attainable lower solve is now
+the larger component.
 
 The remaining research sequence is:
 
-1. add a certification query that seeds upper branch-and-bound with the best
-   completed lower label and evaluates only unresolved root actions;
+1. measure `L_0` certification rate and unresolved masks on retained
+   cross-stage roots, beginning with a fresh Stage 6B workload;
 2. refine budgets only for actions/states whose upper bound can change the
    selected set;
-3. measure how often `B=0` certifies retained Stage-5 capsule roots before
-   computing higher budgets;
+3. measure total lower-plus-certificate CPU and physical delivery relevance
+   before creating any live shadow executor;
 4. infer and validate a finite cadence/workload automaton to avoid an
    unsupported Cartesian cadence product;
-5. replay retained Stage-5 capsules and measure certification rate, bound
-   gaps, total CPU, and delivery contention before any physical shadow.
+5. retain the complete scalar/native upper only as the independent
+   differential and unresolved-case oracle.
 
 Until those gates pass, budgeted belief values remain offline/shadow research
 and the live controller continues to use Boolean viability plus the fresh

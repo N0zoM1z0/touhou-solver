@@ -35,23 +35,34 @@ For continuation-action growth, also read
 `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`.  The active native/scalar
 prototype gives nested attainable lower bounds `L_0 <= L_1 <= ... <=
 V_unrestricted`; agreement between adjacent budgets is not an unrestricted
-optimality proof.
+optimality proof. Then read
+`notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`: a completed attainable
+lower label can now drive an exact threshold query against the proved
+revealed-delay upper recurrence, without constructing every complete upper
+label.
 
 ## 1. Exact Checkpoint
 
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `8b9668b Formalize and correct belief pipeline control`. It adds a
+  `199be90 Bound belief growth with certified refinement`. It adds an
+  incumbent-seeded selective upper certificate that preserves the complete
+  optimistic recurrence's quantifiers but answers only whether each root
+  action can strictly beat the completed attainable lower label. It also
+  retains the earlier
   budget-indexed scalar/native policy class, progressive memo reuse, quick/full
   offline profiles, a revealed-delay optimistic upper bound, and a
   research-focused test reduction. Three minimized
   counterexamples still separate planner-hold/input-issue semantics,
   recursive cadence, and hidden-delay non-anticipativity. The legacy prewarm
   remains invalid as a physical value; budgeted belief values remain
-  offline/shadow-only.
+  offline/shadow-only. The retained 128-case differential has zero selective
+  certification-mask errors; on the structured workload the new certificate
+  costs `0.223 ms` instead of the complete upper's roughly `1.5 s`.
 - Both native libraries were rebuilt. Linux and Windows complete quick suites
-  pass 471 tests in `1.324/2.481 s`. Read
+  pass 471 tests in `1.391/2.415 s`. Read
+  `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`,
   `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
   `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
   `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`,
@@ -975,11 +986,11 @@ should:
    scheduler/workload automaton only after showing that it covers physical
    cadence traces and retains CE-0111. A trace predictor is evidence, not a
    hard timing contract.
-3. Build an anytime bound solver: use all-root/focused-continuation as an
-   attainable lower bound, a proved clairvoyant relaxation as an upper bound,
-   and refine unrestricted actions/states only while the upper bound can beat
-   the incumbent. Report certified actions and unresolved gaps at deadline;
-   never publish unfinished optimistic labels.
+3. Measure the implemented incumbent-seeded upper certificate on retained
+   physical roots outside Stage 5. Refine only the unresolved actions/states
+   whose proved upper can still beat the completed attainable lower label.
+   Report certified actions and unresolved gaps at deadline; never publish
+   unfinished optimistic labels.
 4. Turn the existing physical-shadow evidence into a whole-pipeline CPU
    budget: belief solve/refinement, read, local plan, telemetry, action lag,
    stale work, and hits. Never block the issue-time thread on cold expansion

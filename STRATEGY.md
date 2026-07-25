@@ -310,8 +310,18 @@ The next architectural target is a delivery-aware solver:
   retained structured workload `L_0` equals that upper label, so it certifies
   the unrestricted state value for that instance. One workspace incrementally
   solved `B=0/1/2` in `32.30/687.54/1054.42 ms`; the complete upper costs
-  `1471.15 ms`. The next gate is incumbent-seeded selective upper evaluation,
-  not more blind budget widening. **Status remains offline/shadow-only.**
+  `1471.15 ms`.
+- **Incumbent-seeded selective upper certification:** The native threshold
+  recurrence now asks only which optimistic root actions can strictly beat a
+  completed attainable lower label. It preserves controller/nature
+  quantifiers and revealed observation merging, and reports unresolved
+  actions rather than incomplete upper labels. Across 128 deterministic
+  finite games its unresolved mask exactly matches the independent complete
+  scalar upper. On the retained structured workload `L_0` costs `32.35 ms`,
+  certification costs `0.223 ms`, and all 17 optimistic actions are certified
+  unable to beat `L_0`; the old complete upper cost about `1.5 s`.
+  **Status remains offline/shadow-only.** The next gate is cross-stage
+  physical-root coverage, starting with Stage 6B, not blind budget widening.
 - **Failure mode:** Uniform full-field refinement was called “adaptive” even
   though it recomputed an entire fine horizon after a coarse empty source.
   More precise labels for a frozen hazard snapshot were allowed to control
@@ -319,8 +329,9 @@ The next architectural target is a delivery-aware solver:
   source-layer state without the exact observed/pending input pipeline.
 - **Reactivation gate:** First establish a verified cadence scheduler or
   bounded cadence automaton and validate the held-desired/pending estimator
-  invariant, then compare conservative policy-class lower bounds with a proved
-  clairvoyant upper bound on retained Stage-5 capsules. Only a
+  invariant, then measure conservative policy-class lower bounds and the
+  selective clairvoyant-upper certificate on retained cross-stage capsules.
+  Only a
   non-clairvoyant no-write belief value with an explicit
   policy-class/horizon claim may be delivered.
   Offline evidence must predict no CPU/read/local-plan/action-lag regression

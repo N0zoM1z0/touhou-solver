@@ -234,6 +234,8 @@ public:
           cadence_frames_(cadence_frames, cadence_frames + cadence_count) {
         memo_.reserve(4096);
         root_memo_.reserve(256);
+        threshold_memo_[0].reserve(4096);
+        threshold_memo_[1].reserve(4096);
     }
 
     int query(
@@ -349,6 +351,159 @@ public:
         output_stats[6] = (
             counters_.root_memo_hits - before.root_memo_hits
         );
+        output_stats[7] = (
+            counters_.hidden_simulations - before.hidden_simulations
+        );
+        return 0;
+    }
+
+    int certify_upper(
+        int start_frame,
+        int start_row,
+        int start_column,
+        int observed_action,
+        int pending_action,
+        const int* pending_remaining_frames,
+        int pending_remaining_count,
+        int root_continuation_budget,
+        std::uint16_t lower_frames,
+        float lower_margin,
+        int timeout_ms,
+        std::uint32_t* output_unresolved_action_mask,
+        std::uint64_t* output_stats
+    ) {
+        const int query_budget = (
+            root_continuation_budget < 0
+            ? continuation_budget_
+            : root_continuation_budget
+        );
+        if (
+            !reveal_remaining_delay_
+            || start_frame < 0 || start_frame >= frame_count_
+            || start_row < 0 || start_row >= row_count_
+            || start_column < 0 || start_column >= column_count_
+            || observed_action < 0 || observed_action >= action_count_
+            || pending_action < -1 || pending_action >= action_count_
+            || pending_remaining_count < 0
+            || pending_remaining_count > BELIEF_PIPELINE_MAX_REMAINING
+            || query_budget < 0
+            || query_budget > continuation_budget_
+            || lower_frames > frame_count_ - 1 - start_frame
+            || timeout_ms < 0
+            || (
+                pending_action < 0
+                && pending_remaining_count != 0
+            )
+            || (
+                pending_action >= 0
+                && (
+                    pending_remaining_frames == nullptr
+                    || pending_remaining_count == 0
+                )
+            )
+        ) {
+            return 1;
+        }
+        std::uint64_t remaining_mask = std::uint64_t{1};
+        if (pending_action >= 0) {
+            remaining_mask = 0;
+            for (int index = 0; index < pending_remaining_count; ++index) {
+                const int remaining = pending_remaining_frames[index];
+                if (
+                    remaining <= 0
+                    || remaining > BELIEF_PIPELINE_MAX_REMAINING
+                    || (
+                        index > 0
+                        && pending_remaining_frames[index - 1]
+                            >= remaining
+                    )
+                ) {
+                    return 1;
+                }
+                remaining_mask |= std::uint64_t{1} << remaining;
+            }
+        }
+
+        std::lock_guard<std::mutex> guard(mutex_);
+        QueryScope scope(this, timeout_ms);
+        check_abort(true);
+        const Counters before = counters_;
+        threshold_target_frame_ = start_frame + lower_frames;
+        threshold_target_margin_ = lower_margin;
+        threshold_memo_[0].clear();
+        threshold_memo_[1].clear();
+        BeliefPipelineState state{
+            start_frame,
+            start_row,
+            start_column,
+            observed_action,
+            pending_action,
+            query_budget,
+            remaining_mask,
+        };
+        state = canonicalize(state);
+
+        std::uint32_t unresolved_mask = 0;
+        const float margin = current_margin(state);
+        if (state.frame == frame_count_ - 1 || margin <= 0.0F) {
+            const PipelineLabel terminal{0, margin};
+            if (threshold_label_exceeds(
+                    state.frame,
+                    terminal,
+                    true
+                )) {
+                unresolved_mask = (
+                    action_count_ == 32
+                    ? std::numeric_limits<std::uint32_t>::max()
+                    : (
+                        (std::uint32_t{1} << action_count_)
+                        - std::uint32_t{1}
+                    )
+                );
+            }
+        } else {
+            for (int action = 0; action < action_count_; ++action) {
+                check_abort();
+                const PreparedAction prepared = prepare_action(
+                    state,
+                    action,
+                    true
+                );
+                if (!threshold_label_exceeds(
+                        state.frame,
+                        prepared.upper,
+                        true
+                    )) {
+                    ++counters_.action_upper_prunes;
+                    continue;
+                }
+                if (threshold_action_exceeds(
+                        state,
+                        prepared,
+                        true
+                    )) {
+                    unresolved_mask |= std::uint32_t{1} << action;
+                }
+            }
+        }
+        *output_unresolved_action_mask = unresolved_mask;
+        output_stats[0] = static_cast<std::uint64_t>(
+            threshold_memo_[0].size() + threshold_memo_[1].size()
+        );
+        output_stats[1] = output_stats[0];
+        output_stats[2] = counters_.memo_hits - before.memo_hits;
+        output_stats[3] = (
+            counters_.action_upper_prunes
+            - before.action_upper_prunes
+        );
+        output_stats[4] = (
+            counters_.branch_incumbent_prunes
+            - before.branch_incumbent_prunes
+        );
+        output_stats[5] = (
+            counters_.observation_merges - before.observation_merges
+        );
+        output_stats[6] = 0;
         output_stats[7] = (
             counters_.hidden_simulations - before.hidden_simulations
         );
@@ -786,6 +941,207 @@ private:
         return prepared;
     }
 
+    bool threshold_label_exceeds(
+        int state_frame,
+        const PipelineLabel& label,
+        bool prefix_margin_above
+    ) const {
+        const int endpoint_frame = state_frame + label.frames;
+        if (endpoint_frame != threshold_target_frame_) {
+            return endpoint_frame > threshold_target_frame_;
+        }
+        return (
+            prefix_margin_above
+            && label.margin > threshold_target_margin_
+        );
+    }
+
+    bool threshold_action_exceeds(
+        const BeliefPipelineState& state,
+        const PreparedAction& prepared,
+        bool prefix_margin_above
+    ) {
+        std::unordered_map<
+            BeliefPipelineObservation,
+            BeliefPipelineGroup,
+            BeliefPipelineObservationHash
+        > groups;
+        for (const BeliefPipelineTransition& transition :
+             prepared.transitions) {
+            check_abort();
+            if (transition.failed) {
+                if (!threshold_label_exceeds(
+                        state.frame,
+                        transition.failed_label,
+                        prefix_margin_above
+                    )) {
+                    ++counters_.branch_incumbent_prunes;
+                    return false;
+                }
+                continue;
+            }
+            const BeliefPipelineState& successor = transition.successor;
+            const BeliefPipelineObservation observation{
+                successor.frame,
+                successor.row,
+                successor.column,
+                successor.active,
+                successor.pending,
+                successor.continuation_budget,
+                (
+                    reveal_remaining_delay_
+                    ? successor.remaining_mask
+                    : std::uint64_t{0}
+                ),
+            };
+            auto inserted = groups.emplace(
+                observation,
+                BeliefPipelineGroup{}
+            );
+            BeliefPipelineGroup& group = inserted.first->second;
+            if (!inserted.second) {
+                ++counters_.observation_merges;
+            }
+            group.remaining_mask |= successor.remaining_mask;
+            group.prefix_margin = std::min(
+                group.prefix_margin,
+                transition.bottleneck_margin
+            );
+        }
+
+        std::vector<
+            const std::pair<
+                const BeliefPipelineObservation,
+                BeliefPipelineGroup
+            >*
+        > ordered_groups;
+        ordered_groups.reserve(groups.size());
+        for (const auto& item : groups) {
+            ordered_groups.push_back(&item);
+        }
+        std::sort(
+            ordered_groups.begin(),
+            ordered_groups.end(),
+            [&](const auto* left, const auto* right) {
+                const bool left_prefix = (
+                    prefix_margin_above
+                    && left->second.prefix_margin
+                        > threshold_target_margin_
+                );
+                const bool right_prefix = (
+                    prefix_margin_above
+                    && right->second.prefix_margin
+                        > threshold_target_margin_
+                );
+                if (left_prefix != right_prefix) {
+                    return !left_prefix;
+                }
+                return (
+                    left->first.frame < right->first.frame
+                );
+            }
+        );
+        for (const auto* item : ordered_groups) {
+            check_abort();
+            const BeliefPipelineObservation& observation = item->first;
+            const BeliefPipelineGroup& group = item->second;
+            const bool successor_prefix_above = (
+                prefix_margin_above
+                && group.prefix_margin > threshold_target_margin_
+            );
+            if (!threshold_state_exceeds(
+                    BeliefPipelineState{
+                        observation.frame,
+                        observation.row,
+                        observation.column,
+                        observation.active,
+                        observation.pending,
+                        observation.continuation_budget,
+                        group.remaining_mask,
+                    },
+                    successor_prefix_above
+                )) {
+                ++counters_.branch_incumbent_prunes;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool threshold_state_exceeds(
+        BeliefPipelineState state,
+        bool prefix_margin_above
+    ) {
+        check_abort();
+        state = canonicalize(state);
+        auto& threshold_memo = threshold_memo_[
+            prefix_margin_above ? 1 : 0
+        ];
+        const auto threshold_found = threshold_memo.find(state);
+        if (threshold_found != threshold_memo.end()) {
+            ++counters_.memo_hits;
+            return threshold_found->second;
+        }
+        const auto exact_found = memo_.find(state);
+        if (exact_found != memo_.end()) {
+            ++counters_.memo_hits;
+            const bool result = threshold_label_exceeds(
+                state.frame,
+                exact_found->second,
+                prefix_margin_above
+            );
+            threshold_memo.emplace(state, result);
+            return result;
+        }
+
+        const float margin = current_margin(state);
+        if (state.frame == frame_count_ - 1 || margin <= 0.0F) {
+            const bool result = threshold_label_exceeds(
+                state.frame,
+                PipelineLabel{0, margin},
+                prefix_margin_above
+            );
+            threshold_memo.emplace(state, result);
+            return result;
+        }
+
+        bool result = false;
+        for (int action = 0; action < action_count_; ++action) {
+            const std::uint32_t bit = std::uint32_t{1} << action;
+            const bool base_action = (base_action_mask_ & bit) != 0;
+            const bool budgeted_action = (
+                state.continuation_budget > 0
+                && (budgeted_action_mask_ & bit) != 0
+            );
+            if (!base_action && !budgeted_action) {
+                continue;
+            }
+            const PreparedAction prepared = prepare_action(
+                state,
+                action,
+                false
+            );
+            if (!threshold_label_exceeds(
+                    state.frame,
+                    prepared.upper,
+                    prefix_margin_above
+                )) {
+                ++counters_.action_upper_prunes;
+                continue;
+            }
+            if (threshold_action_exceeds(
+                    state,
+                    prepared,
+                    prefix_margin_above
+                )) {
+                result = true;
+                break;
+            }
+        }
+        threshold_memo.emplace(state, result);
+        return result;
+    }
+
     PipelineLabel solve(BeliefPipelineState state) {
         check_abort();
         state = canonicalize(state);
@@ -929,6 +1285,16 @@ private:
         RootNode,
         BeliefPipelineStateHash
     > root_memo_;
+    std::array<
+        std::unordered_map<
+            BeliefPipelineState,
+            bool,
+            BeliefPipelineStateHash
+        >,
+        2
+    > threshold_memo_;
+    int threshold_target_frame_ = 0;
+    float threshold_target_margin_ = 0.0F;
     Counters counters_;
     std::atomic<bool> cancel_requested_{false};
     bool deadline_active_ = false;
@@ -1288,6 +1654,56 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
         output_best_action_mask,
         output_stats
     );
+}
+
+TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v1(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int continuation_action_budget,
+    std::uint16_t lower_frames,
+    float lower_margin,
+    int timeout_ms,
+    std::uint32_t* output_unresolved_action_mask,
+    std::uint64_t* output_stats
+) {
+    if (
+        workspace == nullptr
+        || output_unresolved_action_mask == nullptr
+        || output_stats == nullptr
+    ) {
+        return 1;
+    }
+    try {
+        return static_cast<BeliefPipelineSurvivalWorkspace*>(
+            workspace
+        )->certify_upper(
+            start_frame,
+            start_row,
+            start_column,
+            observed_action,
+            pending_action,
+            pending_remaining_frames,
+            pending_remaining_count,
+            continuation_action_budget,
+            lower_frames,
+            lower_margin,
+            timeout_ms,
+            output_unresolved_action_mask,
+            output_stats
+        );
+    } catch (const PipelineCancelledSignal&) {
+        return PIPELINE_RESULT_CANCELLED;
+    } catch (const PipelineDeadlineSignal&) {
+        return PIPELINE_RESULT_DEADLINE;
+    } catch (...) {
+        return 2;
+    }
 }
 
 TOUHOU_EXPORT int touhou_belief_pipeline_workspace_cancel_v1(

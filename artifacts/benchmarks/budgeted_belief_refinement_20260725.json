@@ -1,45 +1,91 @@
 {
   "contract": "conditional hold/no-write, recursive cadence, and non-clairvoyant remaining-delay information-set merging; future non-base actions consume a finite decision budget; revealed remaining delay is an explicit optimistic relaxation",
   "profile": "full",
-  "schema": "th08.belief_pipeline_workspace_benchmark.v5",
+  "schema": "th08.belief_pipeline_workspace_benchmark.v6",
   "small_differential": {
     "bound_violation_count": 0,
     "bound_violation_seeds": [],
     "case_count": 128,
+    "certification_failure_count": 0,
+    "certification_failures": [],
     "failure_count": 0,
     "failures": [],
     "native_cold_ms": {
-      "max": 0.3385139862075448,
-      "median": 0.13311902876012027,
-      "p95": 0.24008500622585416
+      "max": 0.31996797770261765,
+      "median": 0.14921301044523716,
+      "p95": 0.25520898634567857
     },
     "native_memoized_states": {
       "max": 141.0,
       "median": 43.5,
       "p95": 94.0
     },
+    "native_upper_certification_hidden_simulations": {
+      "max": 858.0,
+      "median": 42.0,
+      "p95": 294.0
+    },
+    "native_upper_certification_ms": {
+      "max": 0.14279800234362483,
+      "median": 0.03044353798031807,
+      "p95": 0.07246999302878976
+    },
+    "native_upper_certification_states": {
+      "max": 79.0,
+      "median": 0.0,
+      "p95": 25.0
+    },
     "native_upper_ms": {
-      "max": 0.5652650143019855,
-      "median": 0.09785898146219552,
-      "p95": 0.17616897821426392
+      "max": 0.23680500453338027,
+      "median": 0.09942651377059519,
+      "p95": 0.17527304589748383
     },
     "native_warm_ms": {
-      "max": 0.12198695912957191,
-      "median": 0.028231501346454024,
-      "p95": 0.03927998477593064
+      "max": 0.0976049923337996,
+      "median": 0.03275048220530152,
+      "p95": 0.04911498399451375
     },
     "scalar_ms": {
-      "max": 19.49738198891282,
-      "median": 7.954623986734077,
-      "p95": 14.735631993971765
+      "max": 21.772370033431798,
+      "median": 8.981372491689399,
+      "p95": 18.203610030468553
     },
     "scalar_upper_ms": {
-      "max": 17.600847000721842,
-      "median": 8.275353000499308,
-      "p95": 12.379359046462923
+      "max": 21.150452026631683,
+      "median": 8.814688015263528,
+      "p95": 12.869787984527647
     },
     "upper_failure_count": 0,
     "upper_failures": []
+  },
+  "th08_selective_upper_certification": {
+    "action_count": 17,
+    "base_action_count": 9,
+    "cadence": [
+      4,
+      5,
+      6
+    ],
+    "certification_ms": 0.22250699112191796,
+    "certification_stats": {
+      "action_upper_bound_prune_count": 17,
+      "branch_incumbent_prune_count": 0,
+      "hidden_simulation_count": 1746,
+      "memo_hit_count": 0,
+      "memoized_state_count": 0,
+      "new_state_count": 0,
+      "observation_merge_count": 0,
+      "root_memo_hit_count": 0
+    },
+    "certified": true,
+    "horizon": 32,
+    "lower_label": {
+      "frames": 32,
+      "margin": 8.903106689453125
+    },
+    "lower_ms": 32.34608401544392,
+    "total_ms": 32.56859100656584,
+    "unresolved_actions": []
   },
   "th08_structured_bound_certification": {
     "available": true,
@@ -125,7 +171,7 @@
       "completed": true,
       "continuation_action_budget": 0,
       "continuation_action_count": 9,
-      "elapsed_ms": 11.04350300738588,
+      "elapsed_ms": 10.523806035052985,
       "horizon": 32,
       "refinement_steps": [
         {
@@ -137,7 +183,7 @@
           ],
           "budget": 0,
           "completed": true,
-          "elapsed_ms": 11.04350300738588,
+          "elapsed_ms": 10.523806035052985,
           "new_state_count": 569,
           "state_frames": 32,
           "state_margin": 8.903106689453125
@@ -159,9 +205,9 @@
         "root_memo_hit_count": 0
       },
       "timeout_ms": 3000,
-      "total_refinement_ms": 11.04350300738588,
+      "total_refinement_ms": 10.523806035052985,
       "warm_matches": true,
-      "warm_ms": 0.10865996591746807
+      "warm_ms": 0.08728494867682457
     },
     {
       "action_count": 17,
@@ -250,7 +296,7 @@
       "completed": true,
       "continuation_action_budget": 0,
       "continuation_action_count": 9,
-      "elapsed_ms": 32.29842096334323,
+      "elapsed_ms": 30.064507969655097,
       "horizon": 32,
       "refinement_steps": [
         {
@@ -263,7 +309,7 @@
           ],
           "budget": 0,
           "completed": true,
-          "elapsed_ms": 32.29842096334323,
+          "elapsed_ms": 30.064507969655097,
           "new_state_count": 1625,
           "state_frames": 32,
           "state_margin": 8.903106689453125
@@ -285,9 +331,9 @@
         "root_memo_hit_count": 0
       },
       "timeout_ms": 3000,
-      "total_refinement_ms": 32.29842096334323,
+      "total_refinement_ms": 30.064507969655097,
       "warm_matches": true,
-      "warm_ms": 0.10040099732577801
+      "warm_ms": 0.09784696158021688
     },
     {
       "action_count": 17,
@@ -376,7 +422,7 @@
       "completed": true,
       "continuation_action_budget": 1,
       "continuation_action_count": 9,
-      "elapsed_ms": 687.5442460295744,
+      "elapsed_ms": 596.6914230375551,
       "horizon": 32,
       "refinement_steps": [
         {
@@ -389,7 +435,7 @@
           ],
           "budget": 0,
           "completed": true,
-          "elapsed_ms": 32.10312401643023,
+          "elapsed_ms": 30.30854696407914,
           "new_state_count": 1625,
           "state_frames": 32,
           "state_margin": 8.903106689453125
@@ -404,7 +450,7 @@
           ],
           "budget": 1,
           "completed": true,
-          "elapsed_ms": 687.5442460295744,
+          "elapsed_ms": 596.6914230375551,
           "new_state_count": 24414,
           "state_frames": 32,
           "state_margin": 8.903106689453125
@@ -426,9 +472,9 @@
         "root_memo_hit_count": 0
       },
       "timeout_ms": 3000,
-      "total_refinement_ms": 719.6473700460047,
+      "total_refinement_ms": 626.9999700016342,
       "warm_matches": true,
-      "warm_ms": 0.11003203690052032
+      "warm_ms": 0.1534030307084322
     },
     {
       "action_count": 17,
@@ -517,7 +563,7 @@
       "completed": true,
       "continuation_action_budget": 0,
       "continuation_action_count": 17,
-      "elapsed_ms": 1471.1462240084074,
+      "elapsed_ms": 1677.3002680274658,
       "horizon": 32,
       "refinement_steps": [
         {
@@ -530,7 +576,7 @@
           ],
           "budget": 0,
           "completed": true,
-          "elapsed_ms": 1471.1462240084074,
+          "elapsed_ms": 1677.3002680274658,
           "new_state_count": 62237,
           "state_frames": 32,
           "state_margin": 8.903106689453125
@@ -552,9 +598,9 @@
         "root_memo_hit_count": 0
       },
       "timeout_ms": 3000,
-      "total_refinement_ms": 1471.1462240084074,
+      "total_refinement_ms": 1677.3002680274658,
       "warm_matches": true,
-      "warm_ms": 0.1133409678004682
+      "warm_ms": 0.10385498171672225
     },
     {
       "action_count": 17,
@@ -643,7 +689,7 @@
       "completed": true,
       "continuation_action_budget": 2,
       "continuation_action_count": 9,
-      "elapsed_ms": 1054.4231939711608,
+      "elapsed_ms": 1155.4232549970038,
       "horizon": 32,
       "refinement_steps": [
         {
@@ -656,7 +702,7 @@
           ],
           "budget": 0,
           "completed": true,
-          "elapsed_ms": 30.809089017566293,
+          "elapsed_ms": 32.34931902261451,
           "new_state_count": 1625,
           "state_frames": 32,
           "state_margin": 8.903106689453125
@@ -671,7 +717,7 @@
           ],
           "budget": 1,
           "completed": true,
-          "elapsed_ms": 576.6439489671029,
+          "elapsed_ms": 617.0598090393469,
           "new_state_count": 24414,
           "state_frames": 32,
           "state_margin": 8.903106689453125
@@ -686,7 +732,7 @@
           ],
           "budget": 2,
           "completed": true,
-          "elapsed_ms": 1054.4231939711608,
+          "elapsed_ms": 1155.4232549970038,
           "new_state_count": 36368,
           "state_frames": 32,
           "state_margin": 8.903106689453125
@@ -708,9 +754,9 @@
         "root_memo_hit_count": 0
       },
       "timeout_ms": 3000,
-      "total_refinement_ms": 1661.87623195583,
+      "total_refinement_ms": 1804.8323830589652,
       "warm_matches": true,
-      "warm_ms": 0.1010129926726222
+      "warm_ms": 0.1007419778034091
     },
     {
       "action_count": 17,
@@ -799,7 +845,7 @@
       "completed": true,
       "continuation_action_budget": 0,
       "continuation_action_count": 17,
-      "elapsed_ms": 1488.3824450080283,
+      "elapsed_ms": 1600.4621040192433,
       "horizon": 32,
       "refinement_steps": [
         {
@@ -812,7 +858,7 @@
           ],
           "budget": 0,
           "completed": true,
-          "elapsed_ms": 1488.3824450080283,
+          "elapsed_ms": 1600.4621040192433,
           "new_state_count": 45116,
           "state_frames": 32,
           "state_margin": 8.903106689453125
@@ -834,9 +880,9 @@
         "root_memo_hit_count": 0
       },
       "timeout_ms": 3000,
-      "total_refinement_ms": 1488.3824450080283,
+      "total_refinement_ms": 1600.4621040192433,
       "warm_matches": true,
-      "warm_ms": 0.12294098269194365
+      "warm_ms": 0.09707699064165354
     },
     {
       "action_count": 17,
@@ -853,7 +899,7 @@
         {
           "budget": 0,
           "completed": false,
-          "elapsed_ms": 3000.1568070147187
+          "elapsed_ms": 3001.1450109886937
         }
       ],
       "reveal_remaining_delay": false,
@@ -952,7 +998,7 @@
       "completed": true,
       "continuation_action_budget": 0,
       "continuation_action_count": 9,
-      "elapsed_ms": 50.155493954662234,
+      "elapsed_ms": 55.622696003410965,
       "horizon": 8,
       "refinement_steps": [
         {
@@ -966,7 +1012,7 @@
           ],
           "budget": 0,
           "completed": true,
-          "elapsed_ms": 50.155493954662234,
+          "elapsed_ms": 55.622696003410965,
           "new_state_count": 1446,
           "state_frames": 8,
           "state_margin": 8.903106689453125
@@ -988,9 +1034,9 @@
         "root_memo_hit_count": 0
       },
       "timeout_ms": 3000,
-      "total_refinement_ms": 50.155493954662234,
+      "total_refinement_ms": 55.622696003410965,
       "warm_matches": true,
-      "warm_ms": 0.09203603258356452
+      "warm_ms": 0.15178194735199213
     },
     {
       "action_count": 17,
@@ -1082,7 +1128,7 @@
       "completed": true,
       "continuation_action_budget": 0,
       "continuation_action_count": 9,
-      "elapsed_ms": 501.3574649929069,
+      "elapsed_ms": 549.7728129848838,
       "horizon": 16,
       "refinement_steps": [
         {
@@ -1093,7 +1139,7 @@
           ],
           "budget": 0,
           "completed": true,
-          "elapsed_ms": 501.3574649929069,
+          "elapsed_ms": 549.7728129848838,
           "new_state_count": 7482,
           "state_frames": 16,
           "state_margin": 8.903106689453125
@@ -1115,9 +1161,9 @@
         "root_memo_hit_count": 0
       },
       "timeout_ms": 3000,
-      "total_refinement_ms": 501.3574649929069,
+      "total_refinement_ms": 549.7728129848838,
       "warm_matches": true,
-      "warm_ms": 0.10160100646317005
+      "warm_ms": 0.10313204256817698
     },
     {
       "action_count": 17,
@@ -1139,7 +1185,7 @@
         {
           "budget": 0,
           "completed": false,
-          "elapsed_ms": 3000.123657984659
+          "elapsed_ms": 3000.1075660111383
         }
       ],
       "reveal_remaining_delay": false,

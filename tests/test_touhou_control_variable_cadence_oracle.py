@@ -266,6 +266,14 @@ class VariableCadenceOracleTests(unittest.TestCase):
             except RuntimeError as error:
                 self.skipTest(str(error))
             with workspace:
+                certification = workspace.certify_upper_bound(
+                    policy_version=("clairvoyant", seed),
+                    frame=0,
+                    row=0,
+                    column=0,
+                    observed_action="stay",
+                    lower_bound=belief.state_label,
+                )
                 native_upper = workspace.query_cell(
                     policy_version=("clairvoyant", seed),
                     frame=0,
@@ -280,6 +288,20 @@ class VariableCadenceOracleTests(unittest.TestCase):
             self.assertEqual(
                 native_upper.best_actions,
                 clairvoyant.best_actions,
+            )
+            expected_unresolved = tuple(
+                action.name
+                for action in actions
+                if clairvoyant.action_label(action.name)
+                > belief.state_label
+            )
+            self.assertEqual(
+                certification.unresolved_actions,
+                expected_unresolved,
+            )
+            self.assertEqual(
+                certification.certified,
+                not expected_unresolved,
             )
 
     def test_budgeted_continuation_is_nested_attainable_lower_bound(

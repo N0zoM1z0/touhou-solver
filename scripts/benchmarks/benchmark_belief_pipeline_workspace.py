@@ -91,8 +91,12 @@ def _small_differential(case_count: int) -> dict[str, object]:
     warm_ms = []
     upper_scalar_ms = []
     upper_native_ms = []
+    upper_certification_ms = []
+    certification_states = []
+    certification_hidden_simulations = []
     failures = []
     upper_failures = []
+    certification_failures = []
     bound_violation_seeds = []
     native_states = []
     for seed in range(case_count):
@@ -194,6 +198,25 @@ def _small_differential(case_count: int) -> dict[str, object]:
             reveal_remaining_delay=True,
         ) as workspace:
             started = time.perf_counter()
+            certification = workspace.certify_upper_bound(
+                policy_version=("upper", seed),
+                frame=0,
+                row=0,
+                column=1,
+                observed_action="stay",
+                pending_command=pending,
+                lower_bound=scalar.state_label,
+            )
+            upper_certification_ms.append(
+                (time.perf_counter() - started) * 1000.0
+            )
+            certification_states.append(
+                certification.workspace_stats.memoized_state_count
+            )
+            certification_hidden_simulations.append(
+                certification.workspace_stats.hidden_simulation_count
+            )
+            started = time.perf_counter()
             native_upper = workspace.query_cell(
                 policy_version=("upper", seed),
                 frame=0,
@@ -207,6 +230,16 @@ def _small_differential(case_count: int) -> dict[str, object]:
             )
         if not _equal(native_upper, scalar_upper):
             upper_failures.append(seed)
+        expected_unresolved = tuple(
+            name
+            for name, label in scalar_upper.action_labels
+            if label > scalar.state_label
+        )
+        if (
+            certification.unresolved_actions != expected_unresolved
+            or certification.certified != (not expected_unresolved)
+        ):
+            certification_failures.append(seed)
         if any(
             lower_label > upper_label
             for (_, lower_label), (_, upper_label) in zip(
@@ -221,6 +254,8 @@ def _small_differential(case_count: int) -> dict[str, object]:
         "failures": failures,
         "upper_failure_count": len(upper_failures),
         "upper_failures": upper_failures,
+        "certification_failure_count": len(certification_failures),
+        "certification_failures": certification_failures,
         "bound_violation_count": len(bound_violation_seeds),
         "bound_violation_seeds": bound_violation_seeds,
         "scalar_ms": _summary(scalar_ms),
@@ -228,6 +263,18 @@ def _small_differential(case_count: int) -> dict[str, object]:
         "native_warm_ms": _summary(warm_ms),
         "scalar_upper_ms": _summary(upper_scalar_ms),
         "native_upper_ms": _summary(upper_native_ms),
+        "native_upper_certification_ms": _summary(
+            upper_certification_ms
+        ),
+        "native_upper_certification_states": _summary(
+            [float(value) for value in certification_states]
+        ),
+        "native_upper_certification_hidden_simulations": _summary(
+            [
+                float(value)
+                for value in certification_hidden_simulations
+            ]
+        ),
         "native_memoized_states": _summary(
             [float(value) for value in native_states]
         ),
@@ -381,7 +428,95 @@ def _th08_case(
             field: int(value)
             for field, value in vars(result.workspace_stats).items()
         },
-}
+    }
+
+
+def _th08_selective_upper_certification(
+    timeout_ms: int,
+) -> dict[str, object]:
+    x_axis, y_axis, full_clearance = _structured_clearance(3)
+    clearance = np.ascontiguousarray(
+        full_clearance[:33],
+        dtype=np.float32,
+    )
+    actions = TH08_VIABILITY_ACTIONS[:17]
+    cadence = (4, 5, 6)
+    config = ViabilityConfig(
+        frames_per_layer=TH08_CORRIDOR_CONFIG.frames_per_layer,
+        required_clearance=TH08_CORRIDOR_CONFIG.required_clearance,
+    )
+    problem = SurvivalQueryProblem(
+        x_axis=x_axis,
+        y_axis=y_axis,
+        clearance_volume=clearance,
+        actions=actions,
+        delay_frames=(1, 2, 3, 4, 5, 6),
+        nominal_delay=4,
+        config=config,
+    )
+    query = {
+        "frame": 0,
+        "row": 13,
+        "column": 12,
+        "observed_action": "stay",
+        "pending_command": PendingCommand(
+            actions[1].name,
+            (1, 2, 3, 4, 5, 6),
+        ),
+    }
+    with problem.build_belief_pipeline_workspace(
+        policy_version="selective-lower",
+        decision_frame_support=cadence,
+        continuation_actions=tuple(
+            action.name for action in actions[:9]
+        ),
+    ) as lower_workspace:
+        started = time.perf_counter()
+        lower = lower_workspace.query_cell(
+            policy_version="selective-lower",
+            timeout_ms=timeout_ms,
+            **query,
+        )
+        lower_ms = (time.perf_counter() - started) * 1000.0
+
+    with problem.build_belief_pipeline_workspace(
+        policy_version="selective-upper",
+        decision_frame_support=cadence,
+        reveal_remaining_delay=True,
+    ) as upper_workspace:
+        started = time.perf_counter()
+        certification = upper_workspace.certify_upper_bound(
+            policy_version="selective-upper",
+            lower_bound=lower.state_label,
+            timeout_ms=timeout_ms,
+            **query,
+        )
+        certification_ms = (
+            time.perf_counter() - started
+        ) * 1000.0
+    return {
+        "horizon": 32,
+        "action_count": 17,
+        "base_action_count": 9,
+        "cadence": list(cadence),
+        "lower_ms": lower_ms,
+        "certification_ms": certification_ms,
+        "total_ms": lower_ms + certification_ms,
+        "lower_label": {
+            "frames": lower.state_label.guaranteed_frames,
+            "margin": lower.state_label.bottleneck_margin,
+        },
+        "certified": certification.certified,
+        "unresolved_actions": list(
+            certification.unresolved_actions
+        ),
+        "certification_stats": {
+            field: int(value)
+            for field, value in vars(
+                certification.workspace_stats
+            ).items()
+        },
+    }
 
 
 def _bound_certification(
@@ -507,7 +642,7 @@ def benchmark(
         ) in scaling_cases
     ]
     return {
-        "schema": "th08.belief_pipeline_workspace_benchmark.v5",
+        "schema": "th08.belief_pipeline_workspace_benchmark.v6",
         "profile": profile,
         "contract": (
             "conditional hold/no-write, recursive cadence, and "
@@ -516,6 +651,9 @@ def benchmark(
             "revealed remaining delay is an explicit optimistic relaxation"
         ),
         "small_differential": _small_differential(small_cases),
+        "th08_selective_upper_certification": (
+            _th08_selective_upper_certification(timeout_ms)
+        ),
         "th08_structured_scaling": scaling_results,
         "th08_structured_bound_certification": (
             _bound_certification(scaling_results)

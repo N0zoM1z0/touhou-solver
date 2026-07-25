@@ -90,6 +90,15 @@ These instructions apply to every file and task below this directory.
   proved upper bound only when it keeps the unrestricted action class and the
   same transitions/uncertainty; stopping early requires that bound to meet the
   completed lower value on the queried root.
+- A selective upper certificate must compare a completed attainable lower
+  label against a proved optimistic upper recurrence on the same immutable
+  root and policy version. Preserve the original controller-exists /
+  nature-for-all quantifiers, observation merging, cadence, delay support,
+  actions, horizon, and clearance contract. It may prune only when an
+  admissible lexicographic upper bound cannot strictly beat the lower
+  incumbent. Report unresolved root actions; never reinterpret a timeout or
+  unfinished optimistic search as certification. See
+  `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`.
 - Put reusable, game-neutral control and planning code in
   `scripts/touhou_control/`. Keep TH08 memory addresses, input masks, movement
   constants, ECL details, and pool layouts in TH08 adapters.

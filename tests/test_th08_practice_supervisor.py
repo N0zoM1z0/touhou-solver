@@ -14,6 +14,7 @@ import th08_practice_supervisor as supervisor
 from th08_automation.practice_menu import (
     build_practice_menu_plan,
     forward_menu_steps,
+    parse_practice_difficulty,
     parse_practice_stage,
 )
 from th08_practice_supervisor import (
@@ -43,6 +44,32 @@ class PracticeSupervisorTests(unittest.TestCase):
                 stage = parse_practice_stage(key)
                 self.assertEqual(stage.menu_index, menu_index)
                 self.assertEqual(stage.route_index, route_index)
+
+    def test_difficulty_menu_order_matches_original_practice_screen(
+        self,
+    ) -> None:
+        expected = {
+            "easy": 0,
+            "normal": 1,
+            "hard": 2,
+            "lunatic": 3,
+        }
+        for key, menu_index in expected.items():
+            with self.subTest(difficulty=key):
+                difficulty = parse_practice_difficulty(key)
+                self.assertEqual(difficulty.menu_index, menu_index)
+
+    def test_static_menu_intent_names_the_selected_difficulty(self) -> None:
+        plan = build_practice_menu_plan(
+            parse_practice_stage("1"),
+            tap_gap_ms=180,
+            screen_settle_ms=700,
+            difficulty=parse_practice_difficulty("hard"),
+        )
+        self.assertEqual(
+            plan[4].purpose,
+            "accept native-verified Hard",
+        )
 
     def test_plan_stops_before_final_stage_confirm(self) -> None:
         stage = parse_practice_stage("Stage-4B")
@@ -136,6 +163,48 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertFalse(args.candidate_verifier_shadow)
         self.assertFalse(args.input_clock_boundary_shadow)
         self.assertEqual(args.input_clock_shadow_sample_ms, 1.0)
+        self.assertEqual(args.difficulty.key, "lunatic")
+
+    def test_parser_accepts_normal_and_hard_practice_difficulties(
+        self,
+    ) -> None:
+        for key, menu_index in (("normal", 1), ("hard", 2)):
+            with self.subTest(difficulty=key):
+                args = build_parser().parse_args(
+                    [
+                        "--stage",
+                        "1",
+                        "--difficulty",
+                        key,
+                        "--armed",
+                    ]
+                )
+                self.assertEqual(args.difficulty.key, key)
+                self.assertEqual(args.difficulty.menu_index, menu_index)
+
+    def test_preconfirm_gate_uses_difficulty_cursor_before_gameplay_index(
+        self,
+    ) -> None:
+        state = {
+            "mode": supervisor.TITLE_MODE_PRACTICE_STAGE,
+            "substate": 1,
+            "cursor": 0,
+            "difficulty_cursor": 2,
+            "difficulty_index": 0,
+            "route_id": 2,
+        }
+        with patch.object(
+            supervisor,
+            "_read_title_menu_state",
+            return_value=state,
+        ):
+            selected = supervisor._validate_practice_selection(
+                object(),
+                1234,
+                stage=parse_practice_stage("1"),
+                difficulty=parse_practice_difficulty("hard"),
+            )
+        self.assertIs(selected, state)
 
     def test_pipeline_prewarm_shadow_is_explicitly_opt_in(self) -> None:
         args = build_parser().parse_args(
@@ -168,6 +237,63 @@ class PracticeSupervisorTests(unittest.TestCase):
 
         self.assertTrue(args.input_clock_boundary_shadow)
         self.assertEqual(args.input_clock_shadow_sample_ms, 2.5)
+
+    def test_native_local_hazard_backend_is_default_with_numpy_rollback(
+        self,
+    ) -> None:
+        default_args = build_parser().parse_args(
+            ["--stage", "4a", "--armed"]
+        )
+        rollback_args = build_parser().parse_args(
+            [
+                "--stage",
+                "4a",
+                "--local-hazard-backend",
+                "numpy",
+                "--armed",
+            ]
+        )
+
+        self.assertEqual(default_args.local_hazard_backend, "native")
+        self.assertEqual(rollback_args.local_hazard_backend, "numpy")
+
+    def test_native_local_beam_reducer_is_default_with_python_rollback(
+        self,
+    ) -> None:
+        default_args = build_parser().parse_args(
+            ["--stage", "4a", "--armed"]
+        )
+        rollback_args = build_parser().parse_args(
+            [
+                "--stage",
+                "4a",
+                "--local-beam-reducer",
+                "python",
+                "--armed",
+            ]
+        )
+
+        self.assertEqual(default_args.local_beam_reducer, "native")
+        self.assertEqual(rollback_args.local_beam_reducer, "python")
+
+    def test_native_bullet_decoder_is_default_with_python_rollback(
+        self,
+    ) -> None:
+        default_args = build_parser().parse_args(
+            ["--stage", "4a", "--armed"]
+        )
+        rollback_args = build_parser().parse_args(
+            [
+                "--stage",
+                "4a",
+                "--bullet-decode-backend",
+                "python",
+                "--armed",
+            ]
+        )
+
+        self.assertEqual(default_args.bullet_decode_backend, "native")
+        self.assertEqual(rollback_args.bullet_decode_backend, "python")
 
     def test_tail_reader_handles_a_record_larger_than_one_block(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

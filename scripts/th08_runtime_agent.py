@@ -254,8 +254,14 @@ class ProcessReader:
             self.api.kernel32.CloseHandle(self.handle)
             self.handle = None
 
-    def read(self, address: int, size: int) -> bytes:
-        buffer = ctypes.create_string_buffer(size)
+    @staticmethod
+    def allocate_buffer(size: int):
+        if size <= 0:
+            raise ValueError("process read buffer size must be positive")
+        return ctypes.create_string_buffer(size)
+
+    def read_into(self, address: int, buffer):
+        size = ctypes.sizeof(buffer)
         count = ctypes.c_size_t()
         ok = self.api.kernel32.ReadProcessMemory(
             self.handle,
@@ -266,6 +272,11 @@ class ProcessReader:
         )
         if not ok or count.value != size:
             raise _win_error(f"ReadProcessMemory({address:#x}, {size})")
+        return buffer
+
+    def read(self, address: int, size: int) -> bytes:
+        buffer = self.allocate_buffer(size)
+        self.read_into(address, buffer)
         return buffer.raw
 
     def image_path(self) -> Path:

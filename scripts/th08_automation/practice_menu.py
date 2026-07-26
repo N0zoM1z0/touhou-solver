@@ -14,6 +14,13 @@ class PracticeStage:
 
 
 @dataclass(frozen=True)
+class PracticeDifficulty:
+    key: str
+    label: str
+    menu_index: int
+
+
+@dataclass(frozen=True)
 class MenuTap:
     key: str
     purpose: str
@@ -31,7 +38,19 @@ PRACTICE_STAGES = (
     PracticeStage("6b", "Stage 6B", 7, 7),
 )
 
+PRACTICE_DIFFICULTIES = (
+    PracticeDifficulty("easy", "Easy", 0),
+    PracticeDifficulty("normal", "Normal", 1),
+    PracticeDifficulty("hard", "Hard", 2),
+    PracticeDifficulty("lunatic", "Lunatic", 3),
+)
+
 _STAGES_BY_KEY = {stage.key: stage for stage in PRACTICE_STAGES}
+_DIFFICULTIES_BY_KEY = {
+    difficulty.key: difficulty
+    for difficulty in PRACTICE_DIFFICULTIES
+}
+DEFAULT_PRACTICE_DIFFICULTY = _DIFFICULTIES_BY_KEY["lunatic"]
 
 
 def forward_menu_steps(current: int, target: int, option_count: int) -> int:
@@ -55,11 +74,25 @@ def parse_practice_stage(value: str) -> PracticeStage:
         raise ValueError(f"unknown practice stage {value!r}; choices: {choices}") from exc
 
 
+def parse_practice_difficulty(value: str) -> PracticeDifficulty:
+    normalized = value.strip().lower()
+    try:
+        return _DIFFICULTIES_BY_KEY[normalized]
+    except KeyError as exc:
+        choices = ", ".join(
+            difficulty.key for difficulty in PRACTICE_DIFFICULTIES
+        )
+        raise ValueError(
+            f"unknown practice difficulty {value!r}; choices: {choices}"
+        ) from exc
+
+
 def build_practice_menu_plan(
     stage: PracticeStage,
     *,
     tap_gap_ms: int,
     screen_settle_ms: int,
+    difficulty: PracticeDifficulty = DEFAULT_PRACTICE_DIFFICULTY,
 ) -> tuple[MenuTap, ...]:
     """Stop at the selected stage; the waiting agent sends the final confirm."""
 
@@ -70,7 +103,11 @@ def build_practice_menu_plan(
         MenuTap("down", "main-menu Practice Start (3/4)", tap_gap_ms),
         MenuTap("down", "main-menu Practice Start (4/4)", tap_gap_ms),
         MenuTap("confirm", "enter Practice Start", screen_settle_ms),
-        MenuTap("confirm", "accept native-verified Lunatic", screen_settle_ms),
+        MenuTap(
+            "confirm",
+            f"accept native-verified {difficulty.label}",
+            screen_settle_ms,
+        ),
         MenuTap("right", "team Sakuya/Remilia (2/3)", tap_gap_ms),
         MenuTap("right", "team Sakuya/Remilia (3/3)", tap_gap_ms),
         MenuTap("confirm", "accept native-verified Sakuya/Remilia", screen_settle_ms),

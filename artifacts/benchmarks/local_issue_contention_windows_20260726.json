@@ -1,0 +1,559 @@
+{
+  "schema": "th08_local_issue_contention_v1",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "native_library": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\native\\build\\windows-x86_64\\touhou_viability.dll",
+  "samples": 30,
+  "warmup": 3,
+  "rounds": 4,
+  "background_low_priority": false,
+  "geometry_steps_per_sample": 10,
+  "viability_shape": [
+    81,
+    27,
+    24
+  ],
+  "viability_action_count": 17,
+  "round_reports": [
+    {
+      "round": 0,
+      "order": [
+        "idle",
+        "workers_1",
+        "workers_2",
+        "workers_4"
+      ],
+      "variants": {
+        "idle": {
+          "worker_limit": null,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.19934999383986,
+              "p95_ms": 1.886199985165149,
+              "max_ms": 2.9616999672725797
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 14.84054999309592,
+              "p95_ms": 16.967000032309443,
+              "max_ms": 17.119100026320666
+            }
+          },
+          "background_viability": null
+        },
+        "workers_1": {
+          "worker_limit": 1,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.1454499908722937,
+              "p95_ms": 1.276399998459965,
+              "max_ms": 1.2787000159732997
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 14.677150000352412,
+              "p95_ms": 17.29049999266863,
+              "max_ms": 18.446900008711964
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 14,
+              "median_ms": 42.638600018108264,
+              "p95_ms": 125.73550001252443,
+              "max_ms": 125.73550001252443
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        },
+        "workers_2": {
+          "worker_limit": 2,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.3567999994847924,
+              "p95_ms": 2.4237000034190714,
+              "max_ms": 2.4762999964877963
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 14.608199970098212,
+              "p95_ms": 16.892899991944432,
+              "max_ms": 18.82970001315698
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 17,
+              "median_ms": 33.40239997487515,
+              "p95_ms": 39.53940002247691,
+              "max_ms": 39.53940002247691
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        },
+        "workers_4": {
+          "worker_limit": 4,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.21640000725165,
+              "p95_ms": 1.4179000281728804,
+              "max_ms": 1.5928999637253582
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 15.723049989901483,
+              "p95_ms": 17.523600021377206,
+              "max_ms": 20.646999997552484
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 23,
+              "median_ms": 26.577900047414005,
+              "p95_ms": 27.853099978528917,
+              "max_ms": 27.97440002905205
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        }
+      }
+    },
+    {
+      "round": 1,
+      "order": [
+        "workers_1",
+        "workers_2",
+        "workers_4",
+        "idle"
+      ],
+      "variants": {
+        "workers_1": {
+          "worker_limit": 1,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.3599500234704465,
+              "p95_ms": 1.6279999981634319,
+              "max_ms": 1.6469000256620347
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 15.093800000613555,
+              "p95_ms": 15.756600012537092,
+              "max_ms": 16.637900029309094
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 14,
+              "median_ms": 40.819849993567914,
+              "p95_ms": 57.089699956122786,
+              "max_ms": 57.089699956122786
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        },
+        "workers_2": {
+          "worker_limit": 2,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.1488999880384654,
+              "p95_ms": 1.4551999629475176,
+              "max_ms": 1.7197999986819923
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 15.243899979395792,
+              "p95_ms": 20.703000016510487,
+              "max_ms": 21.81970002129674
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 17,
+              "median_ms": 36.07520001241937,
+              "p95_ms": 52.14469996280968,
+              "max_ms": 52.14469996280968
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        },
+        "workers_4": {
+          "worker_limit": 4,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.2368499883450568,
+              "p95_ms": 1.4826999977231026,
+              "max_ms": 1.607899961527437
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 15.555549995042384,
+              "p95_ms": 18.100500048603863,
+              "max_ms": 18.278100003954023
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 23,
+              "median_ms": 25.966199988033623,
+              "p95_ms": 28.390099992975593,
+              "max_ms": 28.714200016111135
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        },
+        "idle": {
+          "worker_limit": null,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.1532499629538506,
+              "p95_ms": 1.2512000394053757,
+              "max_ms": 1.2525999918580055
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 13.967149978270754,
+              "p95_ms": 17.35699997516349,
+              "max_ms": 18.45470000989735
+            }
+          },
+          "background_viability": null
+        }
+      }
+    },
+    {
+      "round": 2,
+      "order": [
+        "workers_2",
+        "workers_4",
+        "idle",
+        "workers_1"
+      ],
+      "variants": {
+        "workers_2": {
+          "worker_limit": 2,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.177199970697984,
+              "p95_ms": 1.2565000215545297,
+              "max_ms": 1.7047000001184642
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 14.59679999970831,
+              "p95_ms": 15.701700001955032,
+              "max_ms": 16.02919999277219
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 16,
+              "median_ms": 36.19074999005534,
+              "p95_ms": 39.638100017327815,
+              "max_ms": 39.638100017327815
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        },
+        "workers_4": {
+          "worker_limit": 4,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.2418499973136932,
+              "p95_ms": 1.3797000283375382,
+              "max_ms": 1.95569999050349
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 14.703950000694022,
+              "p95_ms": 16.657000000122935,
+              "max_ms": 17.73920003324747
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 21,
+              "median_ms": 27.74000004865229,
+              "p95_ms": 29.89870001329109,
+              "max_ms": 30.24710004683584
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        },
+        "idle": {
+          "worker_limit": null,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.1402000091038644,
+              "p95_ms": 1.2657999759539962,
+              "max_ms": 1.437600003555417
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 13.956650014733896,
+              "p95_ms": 14.2900999635458,
+              "max_ms": 14.57170001231134
+            }
+          },
+          "background_viability": null
+        },
+        "workers_1": {
+          "worker_limit": 1,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.1944999860133976,
+              "p95_ms": 1.2923000031150877,
+              "max_ms": 1.3222999987192452
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 14.429600036237389,
+              "p95_ms": 14.952600002288818,
+              "max_ms": 15.176600019913167
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 15,
+              "median_ms": 38.80180005216971,
+              "p95_ms": 41.22409998672083,
+              "max_ms": 41.22409998672083
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        }
+      }
+    },
+    {
+      "round": 3,
+      "order": [
+        "workers_4",
+        "idle",
+        "workers_1",
+        "workers_2"
+      ],
+      "variants": {
+        "workers_4": {
+          "worker_limit": 4,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.2507999781519175,
+              "p95_ms": 1.4334999723359942,
+              "max_ms": 1.8257999909110367
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 14.678599982289597,
+              "p95_ms": 15.512800018768758,
+              "max_ms": 15.724600001703948
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 20,
+              "median_ms": 27.77484999387525,
+              "p95_ms": 29.966200003400445,
+              "max_ms": 30.237499973736703
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        },
+        "idle": {
+          "worker_limit": null,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.2970499810762703,
+              "p95_ms": 1.413299993146211,
+              "max_ms": 1.4182000304572284
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 14.35230000060983,
+              "p95_ms": 14.85889998730272,
+              "max_ms": 14.900200010742992
+            }
+          },
+          "background_viability": null
+        },
+        "workers_1": {
+          "worker_limit": 1,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.202800020109862,
+              "p95_ms": 1.2728999718092382,
+              "max_ms": 1.304199977312237
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 15.276749967597425,
+              "p95_ms": 18.123499990906566,
+              "max_ms": 21.398999961093068
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 13,
+              "median_ms": 45.57409998960793,
+              "p95_ms": 57.40940000396222,
+              "max_ms": 57.40940000396222
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        },
+        "workers_2": {
+          "worker_limit": 2,
+          "geometry": {
+            "certificate_laser_storm": {
+              "count": 30,
+              "median_ms": 1.467749971197918,
+              "p95_ms": 2.4443999864161015,
+              "max_ms": 2.485100005287677
+            },
+            "beam_laser_storm": {
+              "count": 30,
+              "median_ms": 14.488950022496283,
+              "p95_ms": 18.88180000241846,
+              "max_ms": 19.089900015387684
+            }
+          },
+          "background_viability": {
+            "solve": {
+              "count": 16,
+              "median_ms": 37.06250002142042,
+              "p95_ms": 47.1922000288032,
+              "max_ms": 47.1922000288032
+            },
+            "priority_lowered": false,
+            "worker_limit_applied": true
+          }
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "idle": {
+      "worker_limit": null,
+      "geometry": {
+        "certificate_laser_storm": {
+          "count": 120,
+          "median_ms": 1.1830000148620456,
+          "p95_ms": 1.3889999827370048,
+          "max_ms": 2.9616999672725797
+        },
+        "beam_laser_storm": {
+          "count": 120,
+          "median_ms": 14.156199991703033,
+          "p95_ms": 15.378700045403093,
+          "max_ms": 18.45470000989735
+        }
+      },
+      "background_viability": null
+    },
+    "workers_1": {
+      "worker_limit": 1,
+      "geometry": {
+        "certificate_laser_storm": {
+          "count": 120,
+          "median_ms": 1.205600012326613,
+          "p95_ms": 1.46690005203709,
+          "max_ms": 1.6469000256620347
+        },
+        "beam_laser_storm": {
+          "count": 120,
+          "median_ms": 14.796849951380864,
+          "p95_ms": 15.920499979984015,
+          "max_ms": 21.398999961093068
+        }
+      },
+      "background_viability": {
+        "solve": {
+          "count": 56,
+          "median_ms": 40.71634999127127,
+          "p95_ms": 57.089699956122786,
+          "max_ms": 125.73550001252443
+        },
+        "priority_lowered_every_round": false,
+        "worker_limit_applied_every_round": true
+      }
+    },
+    "workers_2": {
+      "worker_limit": 2,
+      "geometry": {
+        "certificate_laser_storm": {
+          "count": 120,
+          "median_ms": 1.2522999895736575,
+          "p95_ms": 2.347300003748387,
+          "max_ms": 2.485100005287677
+        },
+        "beam_laser_storm": {
+          "count": 120,
+          "median_ms": 14.672449993668124,
+          "p95_ms": 18.88180000241846,
+          "max_ms": 21.81970002129674
+        }
+      },
+      "background_viability": {
+        "solve": {
+          "count": 66,
+          "median_ms": 36.070300004212186,
+          "p95_ms": 43.879900011233985,
+          "max_ms": 52.14469996280968
+        },
+        "priority_lowered_every_round": false,
+        "worker_limit_applied_every_round": true
+      }
+    },
+    "workers_4": {
+      "worker_limit": 4,
+      "geometry": {
+        "certificate_laser_storm": {
+          "count": 120,
+          "median_ms": 1.236949989106506,
+          "p95_ms": 1.4334999723359942,
+          "max_ms": 1.95569999050349
+        },
+        "beam_laser_storm": {
+          "count": 120,
+          "median_ms": 14.978449995396659,
+          "p95_ms": 17.282300046645105,
+          "max_ms": 20.646999997552484
+        }
+      },
+      "background_viability": {
+        "solve": {
+          "count": 87,
+          "median_ms": 26.95319999475032,
+          "p95_ms": 29.821000003721565,
+          "max_ms": 30.24710004683584
+        },
+        "priority_lowered_every_round": false,
+        "worker_limit_applied_every_round": true
+      }
+    }
+  }
+}

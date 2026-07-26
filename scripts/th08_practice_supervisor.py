@@ -20,8 +20,10 @@ from runtime_agent import InputTransition
 from th08_agent_hotkey import AgentHotkey
 from th08_automation.practice_menu import (
     MenuTap,
+    PracticeDifficulty,
     PracticeStage,
     build_practice_menu_plan,
+    parse_practice_difficulty,
     parse_practice_stage,
 )
 from analysis.th08_practice_compare import compare_dossiers
@@ -410,6 +412,7 @@ def select_no_save_before_termination(
 def _previous_dossier(
     stage: PracticeStage,
     current: Path,
+    difficulty_key: str = "lunatic",
 ) -> Path | None:
     def accepted_session(dossier: Path) -> bool:
         suffix = ".dossier.json"
@@ -433,7 +436,8 @@ def _previous_dossier(
 
     candidates = sorted(
         RUNTIME_REPORT_DIR.glob(
-            f"lunatic_route2_stage{stage.key}_unattended_*.dossier.json"
+            f"{difficulty_key}_route2_stage{stage.key}_unattended_"
+            "*.dossier.json"
         ),
         key=lambda path: path.stat().st_mtime_ns,
         reverse=True,
@@ -452,6 +456,7 @@ def materialize_artifacts(
     *,
     run_id: str,
     stage: PracticeStage,
+    difficulty: PracticeDifficulty,
     trace: Path,
     session_json: Path,
 ) -> TrialArtifacts:
@@ -477,7 +482,11 @@ def materialize_artifacts(
         ]
     )
     comparison_json = None
-    baseline = _previous_dossier(stage, dossier_json)
+    baseline = _previous_dossier(
+        stage,
+        dossier_json,
+        difficulty.key,
+    )
     if baseline is not None:
         comparison_json = prefix.with_suffix(".comparison.json")
         before = json.loads(baseline.read_text(encoding="utf-8"))
@@ -658,20 +667,22 @@ def _validate_practice_selection(
     pid: int,
     *,
     stage: PracticeStage,
+    difficulty: PracticeDifficulty,
 ) -> dict[str, int]:
     state = _read_title_menu_state(api, pid)
     if (
         state["mode"] != TITLE_MODE_PRACTICE_STAGE
         or state["substate"] != 1
         or state["cursor"] != stage.menu_index
-        or state["difficulty_cursor"] != 3
+        or state["difficulty_cursor"] != difficulty.menu_index
         or state["route_id"] != 2
     ):
         raise RuntimeError(
             "native Practice selection mismatch before final confirm: "
             f"mode={state['mode']} substate={state['substate']} "
             f"cursor={state['cursor']} difficulty_cursor="
-            f"{state['difficulty_cursor']} route={state['route_id']}"
+            f"{state['difficulty_cursor']} difficulty_index="
+            f"{state['difficulty_index']} route={state['route_id']}"
         )
     return state
 
@@ -704,7 +715,10 @@ def run_trial(
         raise RuntimeError("verified TH08 is already running")
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_id = f"lunatic_route2_stage{stage.key}_unattended_{timestamp}"
+    difficulty = args.difficulty
+    run_id = (
+        f"{difficulty.key}_route2_stage{stage.key}_unattended_{timestamp}"
+    )
     trace = RUNTIME_REPORT_DIR / f"{run_id}.jsonl"
     session_json = RUNTIME_REPORT_DIR / f"{run_id}.session.json"
     launch_log = RUNTIME_REPORT_DIR / f"{run_id}.launch.log"
@@ -712,12 +726,14 @@ def run_trial(
         stage,
         tap_gap_ms=args.tap_gap_ms,
         screen_settle_ms=args.screen_settle_ms,
+        difficulty=difficulty,
     )
     session: dict[str, object] = {
         "schema": "th08-unattended-practice-session-v1",
         "run_id": run_id,
         "iteration": iteration,
         "stage": asdict(stage),
+        "difficulty": asdict(difficulty),
         "game_dir": str(game_dir),
         "launch_bat": str(launch_bat),
         "menu_plan": [asdict(tap) for tap in menu_plan],
@@ -737,6 +753,12 @@ def run_trial(
         "input_clock_shadow_sample_ms": (
             args.input_clock_shadow_sample_ms
         ),
+        "local_pipeline_root_shadow_every": (
+            args.local_pipeline_root_shadow_every
+        ),
+        "local_hazard_backend": args.local_hazard_backend,
+        "local_beam_reducer": args.local_beam_reducer,
+        "bullet_decode_backend": args.bullet_decode_backend,
         "started_at": datetime.now().astimezone().isoformat(),
     }
     batch_process: subprocess.Popen[bytes] | None = None
@@ -745,6 +767,7 @@ def run_trial(
     try:
         session["caps_lock_changed"] = ensure_caps_lock_enabled(api)
         agent = AgentHotkey(
+            expected_difficulty=difficulty.menu_index,
             expected_stage=stage.route_index,
             terminal_stage=stage.route_index,
             trace_transform_runtime=args.trace_transform_runtime,
@@ -771,6 +794,12 @@ def run_trial(
             input_clock_shadow_sample_ms=(
                 args.input_clock_shadow_sample_ms
             ),
+            local_pipeline_root_shadow_every=(
+                args.local_pipeline_root_shadow_every
+            ),
+            local_hazard_backend=args.local_hazard_backend,
+            local_beam_reducer=args.local_beam_reducer,
+            bullet_decode_backend=args.bullet_decode_backend,
         )
         batch_process, batch_log = launch_patch_batch(
             game_dir=game_dir,
@@ -834,9 +863,9 @@ def run_trial(
             api,
             pid,
             mode=TITLE_MODE_PRACTICE_DIFFICULTY,
-            target=3,
+            target=difficulty.menu_index,
             option_count=4,
-            purpose="select Lunatic",
+            purpose=f"select {difficulty.label}",
             hold_ms=args.tap_hold_ms,
             tap_gap_ms=args.tap_gap_ms,
             timeout_seconds=transition_timeout,
@@ -847,7 +876,7 @@ def run_trial(
             api,
             pid,
             next_mode=TITLE_MODE_PRACTICE_TEAM,
-            purpose="accept native-verified Lunatic",
+            purpose=f"accept native-verified {difficulty.label}",
             hold_ms=args.tap_hold_ms,
             screen_settle_ms=args.screen_settle_ms,
             timeout_seconds=transition_timeout,
@@ -896,6 +925,7 @@ def run_trial(
             api,
             pid,
             stage=stage,
+            difficulty=difficulty,
         )
         agent.arm(output_path=trace)
         session["agent_armed_at"] = datetime.now().astimezone().isoformat()
@@ -939,6 +969,7 @@ def run_trial(
         artifacts = materialize_artifacts(
             run_id=run_id,
             stage=stage,
+            difficulty=difficulty,
             trace=trace,
             session_json=session_json,
         )
@@ -979,6 +1010,13 @@ def build_parser() -> argparse.ArgumentParser:
         type=parse_practice_stage,
         default=parse_practice_stage("1"),
         metavar="{1,2,3,4a,4b,5,6a,6b}",
+    )
+    parser.add_argument(
+        "--difficulty",
+        type=parse_practice_difficulty,
+        default=parse_practice_difficulty("lunatic"),
+        metavar="{easy,normal,hard,lunatic}",
+        help="Practice Start difficulty; defaults to lunatic",
     )
     parser.add_argument(
         "--game-dir",
@@ -1067,6 +1105,45 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--local-pipeline-root-shadow-every",
+        type=int,
+        default=0,
+        metavar="DECISIONS",
+        help=(
+            "sample a late explicit-root local certificate after input every "
+            "N decisions; zero disables it and sampled work may perturb the "
+            "next cadence"
+        ),
+    )
+    parser.add_argument(
+        "--local-hazard-backend",
+        choices=("numpy", "native"),
+        default="native",
+        help=(
+            "select the local hazard-query implementation; parity-gated "
+            "native is the default and numpy is the reference rollback"
+        ),
+    )
+    parser.add_argument(
+        "--local-beam-reducer",
+        choices=("python", "native"),
+        default="native",
+        help=(
+            "select quantized local beam reduction; parity-gated native is "
+            "the default and python is the reference rollback"
+        ),
+    )
+    parser.add_argument(
+        "--bullet-decode-backend",
+        choices=("python", "native"),
+        default="native",
+        help=(
+            "select planning bullet decode; parity-gated native packed "
+            "snapshots are the default and Python objects are the reference "
+            "rollback"
+        ),
+    )
+    parser.add_argument(
         "--refuse-existing",
         action="store_false",
         dest="kill_existing",
@@ -1095,6 +1172,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.input_clock_shadow_sample_ms <= 0.0:
         raise ValueError(
             "--input-clock-shadow-sample-ms must be positive"
+        )
+    if args.local_pipeline_root_shadow_every < 0:
+        raise ValueError(
+            "--local-pipeline-root-shadow-every cannot be negative"
         )
     if min(
         args.cooldown,

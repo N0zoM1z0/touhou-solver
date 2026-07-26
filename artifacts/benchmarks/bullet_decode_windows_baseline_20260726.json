@@ -1,0 +1,113 @@
+{
+  "schema": "th08-bullet-decode-benchmark-v1",
+  "scope": "Synthetic allocated native-pool records with nonzero original transform tags and no pending queue record. Planning parity covers every field consumed by gameplay; diagnostic queue/stop state is deliberately excluded from the planning path.",
+  "number_per_repeat": 30,
+  "repeat_count": 9,
+  "planning_vector_threshold": 512,
+  "results": [
+    {
+      "active_bullets": 0,
+      "diagnostic_runtime": {
+        "median_ms": 0.3249366670691719,
+        "max_repeat_ms": 0.37121666634144884
+      },
+      "planning_runtime": {
+        "median_ms": 0.0147966668009758,
+        "max_repeat_ms": 0.018523332740490638
+      },
+      "median_speedup": 21.960125982409984,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 50,
+      "diagnostic_runtime": {
+        "median_ms": 0.6012866680976003,
+        "max_repeat_ms": 0.768613334124287
+      },
+      "planning_runtime": {
+        "median_ms": 0.2162900016022225,
+        "max_repeat_ms": 0.2461200017326822
+      },
+      "median_speedup": 2.7800021436192996,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 200,
+      "diagnostic_runtime": {
+        "median_ms": 1.5771900012623519,
+        "max_repeat_ms": 1.6555300001831104
+      },
+      "planning_runtime": {
+        "median_ms": 0.8911166669956099,
+        "max_repeat_ms": 1.1396633325299868
+      },
+      "median_speedup": 1.769902931542994,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 400,
+      "diagnostic_runtime": {
+        "median_ms": 3.371986667237555,
+        "max_repeat_ms": 5.1534433325286955
+      },
+      "planning_runtime": {
+        "median_ms": 2.4218699991858252,
+        "max_repeat_ms": 3.6170333332847804
+      },
+      "median_speedup": 1.3923070471871473,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 600,
+      "diagnostic_runtime": {
+        "median_ms": 4.82454999970893,
+        "max_repeat_ms": 5.611026667368909
+      },
+      "planning_runtime": {
+        "median_ms": 3.4126566684183977,
+        "max_repeat_ms": 3.472353333684926
+      },
+      "median_speedup": 1.4137226414706632,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 800,
+      "diagnostic_runtime": {
+        "median_ms": 5.642466666176915,
+        "max_repeat_ms": 5.759083332183461
+      },
+      "planning_runtime": {
+        "median_ms": 4.625559999840334,
+        "max_repeat_ms": 5.102233334522073
+      },
+      "median_speedup": 1.219845092566453,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 1200,
+      "diagnostic_runtime": {
+        "median_ms": 8.664786668183902,
+        "max_repeat_ms": 10.57253333274275
+      },
+      "planning_runtime": {
+        "median_ms": 6.845896667800844,
+        "max_repeat_ms": 7.507586667391782
+      },
+      "median_speedup": 1.2656905426192115,
+      "gameplay_field_parity": true
+    },
+    {
+      "active_bullets": 1536,
+      "diagnostic_runtime": {
+        "median_ms": 11.552003332568953,
+        "max_repeat_ms": 11.933876667171717
+      },
+      "planning_runtime": {
+        "median_ms": 8.039279999987532,
+        "max_repeat_ms": 8.277193334652111
+      },
+      "median_speedup": 1.4369450165421367,
+      "gameplay_field_parity": true
+    }
+  ]
+}

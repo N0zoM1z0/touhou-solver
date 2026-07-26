@@ -68,6 +68,18 @@ class AgentHotkeyTests(unittest.TestCase):
         parsed = build_parser().parse_args(arguments)
         self.assertEqual(parsed.duration, 4500.0)
 
+    def test_normal_and_hard_runtime_difficulties_are_supported(self) -> None:
+        for difficulty in (1, 2):
+            with self.subTest(difficulty=difficulty):
+                arguments = build_long_run_arguments(
+                    output=Path("trial.jsonl"),
+                    stop_file=Path("trial.stop"),
+                    pid=1234,
+                    difficulty=difficulty,
+                )
+                parsed = build_parser().parse_args(arguments)
+                self.assertEqual(parsed.difficulty, difficulty)
+
     def test_full_route_summary_reads_only_the_terminal_contract(self) -> None:
         with TemporaryDirectory() as temporary:
             trace = Path(temporary) / "trial.jsonl"
@@ -155,6 +167,107 @@ class AgentHotkeyTests(unittest.TestCase):
 
         self.assertTrue(parsed.input_clock_boundary_shadow)
         self.assertEqual(parsed.input_clock_shadow_sample_ms, 2.5)
+
+    def test_direct_root_certificate_shadow_is_explicitly_opt_in(
+        self,
+    ) -> None:
+        arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            local_pipeline_root_shadow_every=16,
+        )
+
+        parsed = build_parser().parse_args(arguments)
+
+        self.assertEqual(parsed.local_pipeline_root_shadow_every, 16)
+
+    def test_native_local_hazard_backend_is_default_with_numpy_rollback(
+        self,
+    ) -> None:
+        default_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+        )
+        rollback_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            local_hazard_backend="numpy",
+        )
+
+        self.assertEqual(
+            build_parser().parse_args(default_arguments).local_hazard_backend,
+            "native",
+        )
+        self.assertEqual(
+            build_parser().parse_args(
+                rollback_arguments
+            ).local_hazard_backend,
+            "numpy",
+        )
+
+    def test_native_local_beam_reducer_is_default_with_python_rollback(
+        self,
+    ) -> None:
+        default_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+        )
+        rollback_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            local_beam_reducer="python",
+        )
+
+        self.assertEqual(
+            build_parser().parse_args(default_arguments).local_beam_reducer,
+            "native",
+        )
+        self.assertEqual(
+            build_parser().parse_args(
+                rollback_arguments
+            ).local_beam_reducer,
+            "python",
+        )
+
+    def test_native_bullet_decoder_is_default_with_python_rollback(
+        self,
+    ) -> None:
+        default_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+        )
+        rollback_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            bullet_decode_backend="python",
+        )
+
+        self.assertEqual(
+            build_parser().parse_args(
+                default_arguments
+            ).bullet_decode_backend,
+            "native",
+        )
+        self.assertEqual(
+            build_parser().parse_args(
+                rollback_arguments
+            ).bullet_decode_backend,
+            "python",
+        )
 
     def test_completed_trial_exits_before_a_second_f8_can_rearm(self) -> None:
         self.assertFalse(

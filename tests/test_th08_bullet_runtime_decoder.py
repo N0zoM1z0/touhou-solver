@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import ctypes
+import random
 import struct
 import unittest
 
@@ -40,9 +42,12 @@ from th08_live_dodge_agent import (
     BULLET_TRANSFORM_QUEUE_CURSOR_OFFSET,
     BULLET_VELOCITY_OFFSET,
     Bullet,
+    PackedBulletSnapshot,
     _build_bullet_frames,
     attach_tagged_velocity_toggles,
     decode_bullets,
+    decode_live_planning_bullets,
+    decode_packed_bullets,
     serialize_bullet_trace,
 )
 from touhou_control.trajectory import VelocityChange
@@ -65,6 +70,205 @@ def _record(
 
 
 class BulletRuntimeDecoderTests(unittest.TestCase):
+    def test_native_packed_decoder_matches_python_object_oracle(
+        self,
+    ) -> None:
+        generator = random.Random(0xB017E7)
+        densities = (0, 1, 7, 64, 511, 512, 800, 1536)
+        for case in range(48):
+            density = (
+                densities[case]
+                if case < len(densities)
+                else generator.randrange(BULLET_POOL_SIZE + 1)
+            )
+            blob = bytearray(BULLET_POOL_SIZE * BULLET_STRIDE)
+            slots = generator.sample(range(BULLET_POOL_SIZE), density)
+            for active_index, slot in enumerate(slots):
+                base = slot * BULLET_STRIDE
+                struct.pack_into(
+                    "<H",
+                    blob,
+                    base + BULLET_STATE_OFFSET,
+                    1 + active_index % 3,
+                )
+                width = generator.uniform(-96.0, 96.0)
+                height = generator.uniform(-96.0, 96.0)
+                x = generator.uniform(-128.0, 512.0)
+                y = generator.uniform(-128.0, 640.0)
+                vx = generator.uniform(-16.0, 16.0)
+                vy = generator.uniform(-16.0, 16.0)
+                if active_index == density - 1 and case % 5 == 0:
+                    x = float("nan")
+                struct.pack_into(
+                    "<ff",
+                    blob,
+                    base + BULLET_GEOMETRY_OFFSET,
+                    width,
+                    height,
+                )
+                struct.pack_into(
+                    "<ff",
+                    blob,
+                    base + BULLET_POSITION_OFFSET,
+                    x,
+                    y,
+                )
+                struct.pack_into(
+                    "<ff",
+                    blob,
+                    base + BULLET_VELOCITY_OFFSET,
+                    vx,
+                    vy,
+                )
+                struct.pack_into(
+                    "<f",
+                    blob,
+                    base + BULLET_SPEED_OFFSET,
+                    (
+                        float("nan")
+                        if active_index % 17 == 0
+                        else generator.uniform(0.0, 16.0)
+                    ),
+                )
+                struct.pack_into(
+                    "<f",
+                    blob,
+                    base + BULLET_ANGLE_OFFSET,
+                    (
+                        float("inf")
+                        if active_index % 19 == 0
+                        else generator.uniform(-4.0, 4.0)
+                    ),
+                )
+                struct.pack_into(
+                    "<I",
+                    blob,
+                    base + BULLET_TRANSFORM_FLAGS_OFFSET,
+                    generator.getrandbits(32),
+                )
+                struct.pack_into(
+                    "<I",
+                    blob,
+                    base + BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET,
+                    generator.getrandbits(32),
+                )
+                struct.pack_into(
+                    "<h",
+                    blob,
+                    base + BULLET_CALLBACK_PHASE_STATE_OFFSET,
+                    generator.randrange(-32768, 32768),
+                )
+                blob[base + BULLET_CALLBACK_AUX_STATE_OFFSET] = (
+                    generator.randrange(256)
+                )
+            expected = decode_bullets(
+                blob,
+                retain_transform_runtime=False,
+            )
+            packed = decode_packed_bullets(blob)
+            self.assertIsInstance(packed, PackedBulletSnapshot)
+            self.assertEqual(
+                tuple(packed),
+                expected,
+                f"native/Python mismatch in randomized case {case}",
+            )
+            self.assertEqual(
+                tuple(
+                    decode_live_planning_bullets(
+                        blob,
+                        backend="native",
+                    )
+                ),
+                expected,
+                f"live hybrid mismatch in randomized case {case}",
+            )
+
+    def test_native_packed_projection_matches_python_object_projection(
+        self,
+    ) -> None:
+        blob = bytearray(BULLET_POOL_SIZE * BULLET_STRIDE)
+        for slot in range(801):
+            base = slot * BULLET_STRIDE
+            struct.pack_into("<H", blob, base + BULLET_STATE_OFFSET, 1)
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_GEOMETRY_OFFSET,
+                -2.0 - slot % 13,
+                4.0 + slot % 17,
+            )
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_POSITION_OFFSET,
+                slot * 0.25,
+                448.0 - slot * 0.125,
+            )
+            struct.pack_into(
+                "<ff",
+                blob,
+                base + BULLET_VELOCITY_OFFSET,
+                slot % 7 - 3.0,
+                slot % 11 - 5.0,
+            )
+            struct.pack_into(
+                "<I",
+                blob,
+                base + BULLET_TRANSFORM_FLAGS_OFFSET,
+                slot % 3,
+            )
+        object_snapshot = decode_bullets(
+            blob,
+            retain_transform_runtime=False,
+        )
+        packed_snapshot = decode_packed_bullets(blob)
+        object_frames = _build_bullet_frames(
+            object_snapshot,
+            horizon=17,
+            snapshot_lag=3,
+        )
+        packed_frames = _build_bullet_frames(
+            packed_snapshot,
+            horizon=17,
+            snapshot_lag=3,
+        )
+        for object_frame, packed_frame in zip(
+            object_frames,
+            packed_frames,
+        ):
+            for object_field, packed_field in zip(
+                object_frame,
+                packed_frame,
+            ):
+                np.testing.assert_array_equal(
+                    packed_field,
+                    object_field,
+                )
+
+    def test_planning_decoder_accepts_persistent_ctypes_pool_buffer(self) -> None:
+        blob = bytearray(BULLET_POOL_SIZE * BULLET_STRIDE)
+        struct.pack_into("<H", blob, BULLET_STATE_OFFSET, 1)
+        struct.pack_into("<ff", blob, BULLET_GEOMETRY_OFFSET, 3.0, 5.0)
+        struct.pack_into("<ff", blob, BULLET_POSITION_OFFSET, 40.0, 70.0)
+        struct.pack_into("<ff", blob, BULLET_VELOCITY_OFFSET, 1.0, -2.0)
+        buffer = ctypes.create_string_buffer(len(blob))
+        ctypes.memmove(buffer, bytes(blob), len(blob))
+
+        from_bytes = decode_bullets(
+            bytes(blob),
+            retain_transform_runtime=False,
+        )
+        from_persistent_buffer = decode_bullets(
+            memoryview(buffer).cast("B"),
+            retain_transform_runtime=False,
+        )
+        packed_from_persistent_buffer = decode_packed_bullets(
+            memoryview(buffer).cast("B")
+        )
+
+        self.assertEqual(from_persistent_buffer, from_bytes)
+        self.assertEqual(tuple(packed_from_persistent_buffer), from_bytes)
+
     def test_native_bullet_dimensions_are_not_clamped_by_visual_size(
         self,
     ) -> None:

@@ -21,6 +21,7 @@ from th08_live_dodge_agent import (
     RIGHT,
     SHOT,
     _PLANNER_ACTIONS,
+    _LocalCertificateTimingAccumulator,
     _boundary_risk,
     _boundary_risk_for_positions,
     _build_bullet_frames,
@@ -28,6 +29,7 @@ from th08_live_dodge_agent import (
     _hazards_for_positions,
     _legacy_robust_action_certificates,
     _robust_action_certificates,
+    _direct_root_certificate_shadow,
 )
 from touhou_control.local_pipeline_oracle import (
     LocalPipelineRoot,
@@ -36,6 +38,71 @@ from touhou_control.local_pipeline_oracle import (
 
 
 class Th08LocalPipelineCertificateTests(unittest.TestCase):
+    def test_explicit_root_certificate_reports_segmented_timing(self) -> None:
+        root = LocalPipelineRoot(
+            active_action="stay",
+            held_desired_action="right",
+            pending_action="right",
+            remaining_delay_support=(1, 2),
+        )
+        timing = _LocalCertificateTimingAccumulator()
+        certificates = _robust_action_certificates(
+            player_x=192.0,
+            player_y=400.0,
+            previous_mask=SHOT | FOCUS | RIGHT,
+            actions=_PLANNER_ACTIONS,
+            delay_frames=(1, 2),
+            action_hold_frames=2,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+            pipeline_root=root,
+            timing_accumulator=timing,
+        )
+
+        snapshot = timing.snapshot()
+        self.assertEqual(snapshot.calls, 1)
+        self.assertEqual(snapshot.explicit_root_calls, 1)
+        self.assertGreater(
+            snapshot.maximum_branch_count,
+            len(_PLANNER_ACTIONS),
+        )
+        self.assertEqual(set(certificates), {
+            action.name for action in _PLANNER_ACTIONS
+        })
+        segmented = (
+            snapshot.validation_ms
+            + snapshot.hazard_projection_ms
+            + snapshot.branch_setup_ms
+            + snapshot.geometry_kernel_ms
+            + snapshot.reduction_ms
+        )
+        self.assertAlmostEqual(
+            snapshot.certificate_total_ms,
+            segmented,
+            places=6,
+        )
+
+        shadow = _direct_root_certificate_shadow(
+            root=root,
+            player_x=192.0,
+            player_y=400.0,
+            previous_mask=SHOT | FOCUS | RIGHT,
+            delay_frames=(1, 2),
+            action_hold_frames=2,
+            bullets=(),
+            lasers=(),
+            enemy_bodies=(),
+            snapshot_lag=0,
+        )
+        self.assertEqual(
+            shadow["role"],
+            "post_issue_shadow_no_action_authority",
+        )
+        self.assertTrue(shadow["computed_after_input"])
+        self.assertEqual(shadow["timing"]["explicit_root_calls"], 1)
+
     def test_direct_trace_root_is_cross_checked(self) -> None:
         active_mask = SHOT | FOCUS | RIGHT
         held_mask = SHOT | FOCUS | DOWN | RIGHT

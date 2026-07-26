@@ -21,6 +21,10 @@ from th08_corridor_adapter import (
     lower_th08_corridor_hazards,
     plan_lowered_th08_corridor,
 )
+from touhou_control import native_backend
+from touhou_control.background_priority import (
+    lower_current_thread_priority,
+)
 from touhou_control.query_survival import (
     PendingCommand,
     PipelineSurvivalWorkspace,
@@ -95,6 +99,9 @@ class CorridorSolution:
     pipeline_survival_workspace_ms: float | None = None
     pipeline_prewarm_service: PipelinePrewarmService | None = None
     pipeline_prewarm_start_error: str | None = None
+    background_priority_lowered: bool = False
+    native_viability_worker_limit: int | None = None
+    native_viability_worker_limit_applied: bool = False
 
 
 @dataclass(frozen=True)
@@ -214,7 +221,26 @@ def solve_corridor(
     audit_capsule_dir: Path | None = None,
     audit_executor: ThreadPoolExecutor | None = None,
     pipeline_prewarm_shadow: bool = False,
+    background_low_priority: bool = False,
+    native_viability_worker_limit: int | None = None,
 ) -> CorridorSolution:
+    if (
+        native_viability_worker_limit is not None
+        and not 1 <= native_viability_worker_limit <= 4
+    ):
+        raise ValueError("native viability worker limit must be 1..4")
+    background_priority_lowered = (
+        lower_current_thread_priority()
+        if background_low_priority
+        else False
+    )
+    native_worker_limit_applied = (
+        native_backend.set_current_thread_viability_worker_limit(
+            native_viability_worker_limit
+        )
+        if native_viability_worker_limit is not None
+        else False
+    )
     started = time.perf_counter()
     hazards = lower_th08_corridor_hazards(
         bullets=bullets,
@@ -357,6 +383,11 @@ def solve_corridor(
         audit_future=audit_future,
         pipeline_prewarm_service=prewarm_service,
         pipeline_prewarm_start_error=prewarm_start_error,
+        background_priority_lowered=background_priority_lowered,
+        native_viability_worker_limit=native_viability_worker_limit,
+        native_viability_worker_limit_applied=(
+            native_worker_limit_applied
+        ),
     )
 
 

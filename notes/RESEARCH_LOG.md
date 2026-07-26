@@ -3475,3 +3475,83 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Linux and Windows complete quick suites pass `521/521` in
   `3.291/7.508 s`. No game, daemon, input injection, or physical trial was
   started.
+
+## 2026-07-26: Native Local Pipeline, Geometry, And Hard Stage-1 Gate
+
+- **Observed full-chain telemetry:** persistent `ReadProcessMemory`
+  destination buffers reduced Windows bullet-pool read from
+  `7.007` to `1.039 ms` median and all-pool read from `11.871` to
+  `3.914 ms`; observe-to-input changed from `36.649` to `30.107 ms` on the
+  paired Stage-6B boundary.
+- **Observed native beam parity/performance:** the quantized no-item reducer
+  passed adversarial/random/end-to-end differential gates. On 128 direct
+  retained roots per trace with two repeats, action and hard-label mismatches
+  were zero. Stage-4A beam changed from `6.423/8.221` to
+  `4.549/5.759 ms` median/p95; Stage-6B changed from
+  `9.547/13.528` to `6.204/8.270 ms`.
+- **Observed packed bullet parity/performance:** native slot-order fields and
+  17-frame projections matched the independent Python decoder across
+  malformed and dense pools. The live sparse crossover is 16 active slots.
+  Final Windows decode-plus-projection p95 was `0.130 ms` at 16,
+  `0.155 ms` at 400, `0.175 ms` at 800, and `0.197 ms` at 1,536 bullets,
+  versus Python `0.167`, `2.623`, `5.150`, and `9.263 ms`.
+- **Observed focused physical gate:** complete Hard Route-2 Stage-1 run
+  `hard_route2_stage1_unattended_20260726_175049` retained 7,099 decisions,
+  zero native hits, zero Bomb, zero deadline misses, and a complete terminal
+  summary. It measured bullet read `1.027/2.382`, bullet decode
+  `1.092/3.836`, local certificate geometry `1.735/4.738`, native beam
+  `7.549/13.430`, local plan `11.956/19.711`, and observe-to-input
+  `22.265/33.234 ms` median/p95. Hard Stage-1 is an implementation gate, not
+  Lunatic/Extra acceptance.
+- **Observed menu-boundary defect CE-0125:** the first Hard attempt `174946`
+  reached the correct stage screen with difficulty cursor 2 while the
+  gameplay difficulty index was still 0. Preconfirm validation now uses the
+  menu cursor; the armed agent separately validates gameplay index 2 after
+  load. The successful `175049` attempt passed both.
+- **Observed direct-root counterexample CE-0124:** an action-epoch
+  discontinuity occurred at frame 16748. At frame 16750,
+  `input_current=0xA5/down_right`, held desired was
+  `0x01/stay_unfocused`, pending support was absent, and
+  `estimator_consistent=false`. This disproves treating the first
+  post-discontinuity root as active-equals-held. The explicit root remains
+  shadow-only.
+- **Observed geometry tail:** Stage-6B frame 22030 had 111 bullets,
+  210 lasers, five bodies, 81 local branches, `67.119 ms` certificate
+  geometry, `95.883 ms` local plan, and `110.549 ms` observe-to-input.
+  Serialized laser records did not hide a segment-count explosion.
+- **Observed hazard-major differential:** hoisting per-hazard segment
+  geometry, candidate-AABB broad phase, and cached float32 laser inputs
+  produced zero action and hard-label mismatches on 64 direct roots from each
+  of Stage 4A `160712` and Stage 6B `165841`. Stage-6B certificate geometry
+  changed from `2.210/4.903` NumPy to `1.337/2.304 ms` native; complete local
+  planning changed from `14.441/23.110` to `12.540/17.223 ms`.
+- **Inferred bottleneck:** a same-size offline native certificate workload
+  costs about 1--2 ms, so the 40--67 ms physical geometry tail is mostly
+  scheduler/background-solver contention rather than irreducible
+  point-to-segment computation. A post-change physical trace is still
+  required to attribute each tail.
+- **Observed planner/contention tradeoff:** four interleaved Windows rounds
+  measured representative native viability at `40.716/57.090 ms`
+  median/p95 with one worker, `36.070/43.880` with two, and
+  `26.953/29.821` with four. Four-worker beam-geometry p95 was `17.282 ms`
+  versus `15.920 ms` with one. Per user priority, authoritative plan
+  freshness wins: the live default remains four normal-priority native
+  workers; smaller limits are ablations.
+- **Hypothesized/deferred:** a dynamic uniform grid/BVH is not justified while
+  exact certificate geometry is already near 1--2 ms outside contention and
+  laser geometry changes every projected frame. Wider SoA/SIMD remains a
+  possible beam optimization only if a physical trace isolates geometry as
+  the remaining bottleneck. Signed clearance cannot be replaced by one
+  occupancy bit.
+- Retained design/evidence:
+  `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`,
+  `notes/LOCAL_NATIVE_HAZARD_QUERY_PROPOSAL_20260726.md`,
+  `notes/LOCAL_NATIVE_BEAM_REDUCTION_PROPOSAL_20260726.md`,
+  `notes/PACKED_NATIVE_BULLET_DECODE_PROPOSAL_20260726.md`, and the new
+  benchmark/runtime artifacts named there.
+- Validation: Linux and Windows quick suites pass `556/556` in
+  `4.764/6.993 s`; `git diff --check` and focused native/corridor/live suites
+  pass. The bounded formal audit completed all four quick profiles and
+  retained only expected legacy/no-write mismatches at seeds `20002/20003`.
+  The quick belief workspace completed 16 cases with zero scalar/native,
+  upper, candidate, certification, or bound failures.

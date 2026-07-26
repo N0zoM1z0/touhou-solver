@@ -1,0 +1,672 @@
+{
+  "schema": "th08-local-pipeline-runtime-telemetry-v1",
+  "claim_boundary": {
+    "full_chain": "observe_to_input ends immediately after SendInput and excludes the post-issue explicit-root shadow",
+    "explicit_root_shadow": "computed after SendInput, has no current-action authority, and can perturb the next cadence",
+    "native_active": "local_pipeline_root.active_action comes from input_current"
+  },
+  "traces": [
+    {
+      "trace": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_151821.jsonl",
+      "trace_sha256": "9e805a3c4d766513cdc01198cc9c1e34b9b096d484435b764f7ce9cc5ce4a95a",
+      "decision_rows": 10080,
+      "prehit_decision_rows": 1367,
+      "first_hit_frame": 4177,
+      "bomb_rows": 0,
+      "deadline_misses": {
+        "count": 1,
+        "frames": [
+          42101
+        ]
+      },
+      "issue_recertification_rows": 2882,
+      "root": {
+        "rows": 10080,
+        "estimator_consistent": 10080,
+        "estimator_inconsistent": 0,
+        "active_held_mismatch": 802,
+        "pending": 818,
+        "overdue": 48
+      },
+      "full_chain_timing": {
+        "observe": {
+          "count": 10080,
+          "median_ms": 0.19829999655485153,
+          "p95_ms": 0.48429996240884066,
+          "p99_ms": 0.5585000035353005,
+          "max_ms": 8.773699984885752,
+          "mean_ms": 0.24210194470859797
+        },
+        "read_pools": {
+          "count": 10080,
+          "median_ms": 12.532749999081716,
+          "p95_ms": 18.061700044199824,
+          "p99_ms": 21.511900005862117,
+          "max_ms": 32.34170004725456,
+          "mean_ms": 13.092333591304763
+        },
+        "read_enemy_issue_prefix": {
+          "count": 10080,
+          "median_ms": 1.8348000012338161,
+          "p95_ms": 3.918499976862222,
+          "p99_ms": 5.606999970041215,
+          "max_ms": 19.858600047882646,
+          "mean_ms": 2.160053899067515
+        },
+        "decode_pools": {
+          "count": 10080,
+          "median_ms": 2.1317499922588468,
+          "p95_ms": 9.243500011507422,
+          "p99_ms": 13.488299970049411,
+          "max_ms": 22.49070000834763,
+          "mean_ms": 3.1611889484222973
+        },
+        "corridor_bookkeeping": {
+          "count": 10080,
+          "median_ms": 0.7952000014483929,
+          "p95_ms": 4.937599995173514,
+          "p99_ms": 7.161799992900342,
+          "max_ms": 14.412800024729222,
+          "mean_ms": 1.4837744643868755
+        },
+        "local_plan_initial": {
+          "count": 10080,
+          "median_ms": 15.884549997281283,
+          "p95_ms": 28.173199971206486,
+          "p99_ms": 34.97189999325201,
+          "max_ms": 48.332200036384165,
+          "mean_ms": 17.041359394485
+        },
+        "local_shared_laser_projection": {
+          "count": 10080,
+          "median_ms": 0.09045,
+          "p95_ms": 0.2717,
+          "p99_ms": 1.1169,
+          "max_ms": 11.8557,
+          "mean_ms": 0.14413622023809525
+        },
+        "local_certificate_total": {
+          "count": 10080,
+          "median_ms": 3.8462499999999995,
+          "p95_ms": 10.2869,
+          "p99_ms": 13.95,
+          "max_ms": 26.3818,
+          "mean_ms": 4.631582242063492
+        },
+        "local_certificate_geometry": {
+          "count": 10080,
+          "median_ms": 2.9419,
+          "p95_ms": 8.713199999999999,
+          "p99_ms": 12.2471,
+          "max_ms": 23.935,
+          "mean_ms": 3.7115537797619043
+        },
+        "issue_enemy_recertificate": {
+          "count": 10080,
+          "median_ms": 0.0,
+          "p95_ms": 5.715100036468357,
+          "p99_ms": 8.689199981745332,
+          "max_ms": 15.653799986466765,
+          "mean_ms": 1.2199001687905466
+        },
+        "issue_certificate_total": {
+          "count": 10080,
+          "median_ms": 0.0,
+          "p95_ms": 5.5844,
+          "p99_ms": 8.5899,
+          "max_ms": 15.5383,
+          "mean_ms": 1.1906109126984128
+        },
+        "issue_path_to_input": {
+          "count": 10080,
+          "median_ms": 3.9340000366792083,
+          "p95_ms": 11.049600027035922,
+          "p99_ms": 15.189099998679012,
+          "max_ms": 53.8055999786593,
+          "mean_ms": 4.870457758079283
+        },
+        "observe_to_input": {
+          "count": 10080,
+          "median_ms": 38.77980000106618,
+          "p95_ms": 57.81920003937557,
+          "p99_ms": 69.36490000225604,
+          "max_ms": 102.03700000420213,
+          "mean_ms": 40.00094096239385
+        },
+        "input": {
+          "count": 10080,
+          "median_ms": 0.5627500067930669,
+          "p95_ms": 4.7648000181652606,
+          "p99_ms": 6.858100008685142,
+          "max_ms": 14.377799991052598,
+          "mean_ms": 1.192281865298846
+        },
+        "post_issue_root_shadow": {
+          "count": 10080,
+          "median_ms": 0.0,
+          "p95_ms": 2.6885,
+          "p99_ms": 5.6833,
+          "max_ms": 15.148,
+          "mean_ms": 0.2515776686507937
+        },
+        "before_trace": {
+          "count": 10080,
+          "median_ms": 39.0957499621436,
+          "p95_ms": 58.524299995042384,
+          "p99_ms": 70.22160000633448,
+          "max_ms": 102.43799997260794,
+          "mean_ms": 40.349241765666406
+        },
+        "previous_iteration": {
+          "count": 10079,
+          "median_ms": 40.96299997763708,
+          "p95_ms": 61.382299987599254,
+          "p99_ms": 73.7430999870412,
+          "max_ms": 104.86089996993542,
+          "mean_ms": 42.29605645381858
+        },
+        "local_search_and_other": {
+          "count": 10080,
+          "median_ms": 11.303800005968661,
+          "p95_ms": 20.245600016068668,
+          "p99_ms": 24.86739997441098,
+          "max_ms": 36.95460001261234,
+          "mean_ms": 12.265640932183413
+        }
+      },
+      "prehit_full_chain_timing": {
+        "observe": {
+          "count": 1367,
+          "median_ms": 0.1710999640636146,
+          "p95_ms": 0.4349999944679439,
+          "p99_ms": 0.5166000337339938,
+          "max_ms": 1.8020000425167382,
+          "mean_ms": 0.20864228247893102
+        },
+        "read_pools": {
+          "count": 1367,
+          "median_ms": 11.777799983974546,
+          "p95_ms": 17.235799983609468,
+          "p99_ms": 21.06550004100427,
+          "max_ms": 25.970599963329732,
+          "mean_ms": 12.410841185227241
+        },
+        "read_enemy_issue_prefix": {
+          "count": 1367,
+          "median_ms": 1.7864999826997519,
+          "p95_ms": 3.7232000031508505,
+          "p99_ms": 5.447399977128953,
+          "max_ms": 15.440599992871284,
+          "mean_ms": 2.1064108999050206
+        },
+        "decode_pools": {
+          "count": 1367,
+          "median_ms": 1.906600024085492,
+          "p95_ms": 5.3471000283025205,
+          "p99_ms": 8.058900013566017,
+          "max_ms": 12.662900029681623,
+          "mean_ms": 2.1599733719759606
+        },
+        "corridor_bookkeeping": {
+          "count": 1367,
+          "median_ms": 0.8127999608404934,
+          "p95_ms": 4.7491000150330365,
+          "p99_ms": 6.5725999884307384,
+          "max_ms": 11.925099999643862,
+          "mean_ms": 1.4976626926751695
+        },
+        "local_plan_initial": {
+          "count": 1367,
+          "median_ms": 15.539699990767986,
+          "p95_ms": 27.595999999903142,
+          "p99_ms": 34.41880003083497,
+          "max_ms": 38.005500042345375,
+          "mean_ms": 16.442484564530094
+        },
+        "local_shared_laser_projection": {
+          "count": 1367,
+          "median_ms": 0.0835,
+          "p95_ms": 0.2361,
+          "p99_ms": 0.7763,
+          "max_ms": 8.5332,
+          "mean_ms": 0.12841916605705925
+        },
+        "local_certificate_total": {
+          "count": 1367,
+          "median_ms": 3.586,
+          "p95_ms": 9.6373,
+          "p99_ms": 13.4108,
+          "max_ms": 20.9329,
+          "mean_ms": 4.305089246525237
+        },
+        "local_certificate_geometry": {
+          "count": 1367,
+          "median_ms": 2.8945,
+          "p95_ms": 8.5964,
+          "p99_ms": 12.4527,
+          "max_ms": 19.7119,
+          "mean_ms": 3.594372860277981
+        },
+        "issue_enemy_recertificate": {
+          "count": 1367,
+          "median_ms": 0.0,
+          "p95_ms": 6.586600036825985,
+          "p99_ms": 9.114000014960766,
+          "max_ms": 14.78349999524653,
+          "mean_ms": 1.8584885151277417
+        },
+        "issue_certificate_total": {
+          "count": 1367,
+          "median_ms": 0.0,
+          "p95_ms": 6.499,
+          "p99_ms": 8.8304,
+          "max_ms": 14.6337,
+          "mean_ms": 1.814000438917337
+        },
+        "issue_path_to_input": {
+          "count": 1367,
+          "median_ms": 4.71879995893687,
+          "p95_ms": 12.292700004763901,
+          "p99_ms": 16.452200012281537,
+          "max_ms": 20.79999999841675,
+          "mean_ms": 5.449672274851195
+        },
+        "observe_to_input": {
+          "count": 1367,
+          "median_ms": 37.404000002425164,
+          "p95_ms": 56.10699998214841,
+          "p99_ms": 65.54159999359399,
+          "max_ms": 81.41050004633144,
+          "mean_ms": 38.274882589141555
+        },
+        "input": {
+          "count": 1367,
+          "median_ms": 0.5216000135987997,
+          "p95_ms": 5.383300012908876,
+          "p99_ms": 7.6071000075899065,
+          "max_ms": 11.739599984139204,
+          "mean_ms": 1.2127623994492032
+        },
+        "post_issue_root_shadow": {
+          "count": 1367,
+          "median_ms": 0.0,
+          "p95_ms": 2.4195,
+          "p99_ms": 5.6833,
+          "max_ms": 12.6239,
+          "mean_ms": 0.24052106803218729
+        },
+        "before_trace": {
+          "count": 1367,
+          "median_ms": 37.62270003790036,
+          "p95_ms": 56.25080002937466,
+          "p99_ms": 67.15550000080839,
+          "max_ms": 81.44880004692823,
+          "mean_ms": 38.5405865398504
+        },
+        "previous_iteration": {
+          "count": 1366,
+          "median_ms": 39.370850019622594,
+          "p95_ms": 58.31470002885908,
+          "p99_ms": 69.05709998682141,
+          "max_ms": 83.5605000029318,
+          "mean_ms": 40.243887628054
+        },
+        "local_search_and_other": {
+          "count": 1367,
+          "median_ms": 11.101000011251866,
+          "p95_ms": 20.167900010388344,
+          "p99_ms": 24.31329997849017,
+          "max_ms": 33.54400004234538,
+          "mean_ms": 12.008976151947795
+        }
+      },
+      "explicit_root_shadow": {
+        "sampled_rows": 630,
+        "complete": 630,
+        "estimator_inconsistent": 0,
+        "safe_action_set_changes": 142,
+        "timing": {
+          "wall": {
+            "count": 630,
+            "median_ms": 3.60215,
+            "p95_ms": 7.5314,
+            "p99_ms": 11.1949,
+            "max_ms": 15.148,
+            "mean_ms": 4.025242698412699
+          },
+          "validation": {
+            "count": 630,
+            "median_ms": 0.0015999999999999999,
+            "p95_ms": 0.0029,
+            "p99_ms": 0.0034999999999999996,
+            "max_ms": 0.0133,
+            "mean_ms": 0.0018177777777777778
+          },
+          "hazard_projection": {
+            "count": 630,
+            "median_ms": 0.46044999999999997,
+            "p95_ms": 1.3867,
+            "p99_ms": 2.1749,
+            "max_ms": 3.2319,
+            "mean_ms": 0.5668336507936508
+          },
+          "branch_setup": {
+            "count": 630,
+            "median_ms": 0.0591,
+            "p95_ms": 0.1104,
+            "p99_ms": 0.1667,
+            "max_ms": 0.29,
+            "mean_ms": 0.0667084126984127
+          },
+          "geometry_kernel": {
+            "count": 630,
+            "median_ms": 2.6627,
+            "p95_ms": 5.9777,
+            "p99_ms": 8.1901,
+            "max_ms": 12.0703,
+            "mean_ms": 3.00849
+          },
+          "reduction": {
+            "count": 630,
+            "median_ms": 0.2991,
+            "p95_ms": 0.6426999999999999,
+            "p99_ms": 0.7585,
+            "max_ms": 1.0344,
+            "mean_ms": 0.3494668253968254
+          },
+          "certificate_total": {
+            "count": 630,
+            "median_ms": 3.5728999999999997,
+            "p95_ms": 7.4864,
+            "p99_ms": 11.142199999999999,
+            "max_ms": 15.0887,
+            "mean_ms": 3.9933166666666664
+          }
+        },
+        "by_active_bullets": {
+          "lt_200": {
+            "count": 271,
+            "timing": {
+              "wall": {
+                "count": 271,
+                "median_ms": 2.9191,
+                "p95_ms": 5.7277,
+                "p99_ms": 7.5842,
+                "max_ms": 8.8338,
+                "mean_ms": 3.0663660516605167
+              },
+              "validation": {
+                "count": 271,
+                "median_ms": 0.0017,
+                "p95_ms": 0.003,
+                "p99_ms": 0.0034999999999999996,
+                "max_ms": 0.0052,
+                "mean_ms": 0.001866789667896679
+              },
+              "hazard_projection": {
+                "count": 271,
+                "median_ms": 0.2787,
+                "p95_ms": 0.5132,
+                "p99_ms": 0.7086,
+                "max_ms": 0.7933,
+                "mean_ms": 0.2879564575645756
+              },
+              "branch_setup": {
+                "count": 271,
+                "median_ms": 0.0593,
+                "p95_ms": 0.1143,
+                "p99_ms": 0.1765,
+                "max_ms": 0.29,
+                "mean_ms": 0.0682180811808118
+              },
+              "geometry_kernel": {
+                "count": 271,
+                "median_ms": 2.1885,
+                "p95_ms": 4.6596,
+                "p99_ms": 6.2661,
+                "max_ms": 7.422499999999999,
+                "mean_ms": 2.318480442804428
+              },
+              "reduction": {
+                "count": 271,
+                "median_ms": 0.30429999999999996,
+                "p95_ms": 0.6850999999999999,
+                "p99_ms": 0.7823,
+                "max_ms": 1.0344,
+                "mean_ms": 0.3614634686346863
+              },
+              "certificate_total": {
+                "count": 271,
+                "median_ms": 2.8945,
+                "p95_ms": 5.6829,
+                "p99_ms": 7.5199,
+                "max_ms": 8.782,
+                "mean_ms": 3.0379852398523983
+              }
+            }
+          },
+          "200_599": {
+            "count": 228,
+            "timing": {
+              "wall": {
+                "count": 228,
+                "median_ms": 3.7274000000000003,
+                "p95_ms": 7.5255,
+                "p99_ms": 9.7005,
+                "max_ms": 12.6239,
+                "mean_ms": 4.271241666666667
+              },
+              "validation": {
+                "count": 228,
+                "median_ms": 0.0015999999999999999,
+                "p95_ms": 0.0026999999999999997,
+                "p99_ms": 0.003,
+                "max_ms": 0.0034999999999999996,
+                "mean_ms": 0.0017210526315789472
+              },
+              "hazard_projection": {
+                "count": 228,
+                "median_ms": 0.53295,
+                "p95_ms": 1.1064,
+                "p99_ms": 1.2731,
+                "max_ms": 1.5756999999999999,
+                "mean_ms": 0.5795368421052631
+              },
+              "branch_setup": {
+                "count": 228,
+                "median_ms": 0.057499999999999996,
+                "p95_ms": 0.1056,
+                "p99_ms": 0.1421,
+                "max_ms": 0.2002,
+                "mean_ms": 0.06442324561403509
+              },
+              "geometry_kernel": {
+                "count": 228,
+                "median_ms": 2.7731,
+                "p95_ms": 6.0816,
+                "p99_ms": 7.6743,
+                "max_ms": 10.807,
+                "mean_ms": 3.2487482456140353
+              },
+              "reduction": {
+                "count": 228,
+                "median_ms": 0.294,
+                "p95_ms": 0.6157,
+                "p99_ms": 0.6869999999999999,
+                "max_ms": 0.8148,
+                "mean_ms": 0.3446657894736842
+              },
+              "certificate_total": {
+                "count": 228,
+                "median_ms": 3.6990999999999996,
+                "p95_ms": 7.4807,
+                "p99_ms": 9.6553,
+                "max_ms": 12.5595,
+                "mean_ms": 4.239095175438596
+              }
+            }
+          },
+          "600_999": {
+            "count": 82,
+            "timing": {
+              "wall": {
+                "count": 82,
+                "median_ms": 4.56285,
+                "p95_ms": 7.9478,
+                "p99_ms": 9.7832,
+                "max_ms": 9.7832,
+                "mean_ms": 5.003209756097561
+              },
+              "validation": {
+                "count": 82,
+                "median_ms": 0.0015999999999999999,
+                "p95_ms": 0.0028,
+                "p99_ms": 0.0133,
+                "max_ms": 0.0133,
+                "mean_ms": 0.0019097560975609754
+              },
+              "hazard_projection": {
+                "count": 82,
+                "median_ms": 0.8071999999999999,
+                "p95_ms": 1.6302999999999999,
+                "p99_ms": 2.1808,
+                "max_ms": 2.1808,
+                "mean_ms": 0.9049951219512195
+              },
+              "branch_setup": {
+                "count": 82,
+                "median_ms": 0.05925,
+                "p95_ms": 0.1066,
+                "p99_ms": 0.1686,
+                "max_ms": 0.1686,
+                "mean_ms": 0.06566951219512195
+              },
+              "geometry_kernel": {
+                "count": 82,
+                "median_ms": 3.3268999999999997,
+                "p95_ms": 6.3839999999999995,
+                "p99_ms": 7.6803,
+                "max_ms": 7.6803,
+                "mean_ms": 3.672323170731707
+              },
+              "reduction": {
+                "count": 82,
+                "median_ms": 0.28564999999999996,
+                "p95_ms": 0.5063,
+                "p99_ms": 0.6332,
+                "max_ms": 0.6332,
+                "mean_ms": 0.32254390243902437
+              },
+              "certificate_total": {
+                "count": 82,
+                "median_ms": 4.5322,
+                "p95_ms": 7.8908,
+                "p99_ms": 9.7417,
+                "max_ms": 9.7417,
+                "mean_ms": 4.967441463414634
+              }
+            }
+          },
+          "ge_1000": {
+            "count": 49,
+            "timing": {
+              "wall": {
+                "count": 49,
+                "median_ms": 5.8052,
+                "p95_ms": 12.2015,
+                "p99_ms": 15.148,
+                "max_ms": 15.148,
+                "mean_ms": 6.547171428571429
+              },
+              "validation": {
+                "count": 49,
+                "median_ms": 0.0017,
+                "p95_ms": 0.0031,
+                "p99_ms": 0.005,
+                "max_ms": 0.005,
+                "mean_ms": 0.0018428571428571426
+              },
+              "hazard_projection": {
+                "count": 49,
+                "median_ms": 1.3398999999999999,
+                "p95_ms": 2.997,
+                "p99_ms": 3.2319,
+                "max_ms": 3.2319,
+                "mean_ms": 1.4841836734693876
+              },
+              "branch_setup": {
+                "count": 49,
+                "median_ms": 0.0622,
+                "p95_ms": 0.1249,
+                "p99_ms": 0.1479,
+                "max_ms": 0.1479,
+                "mean_ms": 0.07073061224489796
+              },
+              "geometry_kernel": {
+                "count": 49,
+                "median_ms": 3.9764999999999997,
+                "p95_ms": 8.518799999999999,
+                "p99_ms": 12.0703,
+                "max_ms": 12.0703,
+                "mean_ms": 4.595824489795918
+              },
+              "reduction": {
+                "count": 49,
+                "median_ms": 0.29769999999999996,
+                "p95_ms": 0.701,
+                "p99_ms": 0.8212999999999999,
+                "max_ms": 0.8212999999999999,
+                "mean_ms": 0.3505122448979592
+              },
+              "certificate_total": {
+                "count": 49,
+                "median_ms": 5.755599999999999,
+                "p95_ms": 12.111099999999999,
+                "p99_ms": 15.0887,
+                "max_ms": 15.0887,
+                "mean_ms": 6.50309387755102
+              }
+            }
+          }
+        }
+      },
+      "shadow_contention": {
+        "warning": "observational comparison only; sampled rows are periodic, not randomized, and hazard/cadence mix may differ",
+        "next_iteration_ms_after_shadow": {
+          "count": 630,
+          "median_ms": 44.653399992967024,
+          "p95_ms": 68.25559999560937,
+          "p99_ms": 77.8019999852404,
+          "max_ms": 100.02539999550208,
+          "mean_ms": 46.440803176734505
+        },
+        "next_iteration_ms_after_plain": {
+          "count": 9446,
+          "median_ms": 40.66870000679046,
+          "p95_ms": 60.66529999952763,
+          "p99_ms": 72.94789998559281,
+          "max_ms": 104.86089996993542,
+          "mean_ms": 42.020140058933976
+        },
+        "next_decision_frame_delta_after_shadow": {
+          "count": 630,
+          "median_frames": 3.0,
+          "p95_frames": 5.0,
+          "p99_frames": 5.0,
+          "max_frames": 6.0,
+          "mean_frames": 3.353968253968254
+        },
+        "next_decision_frame_delta_after_plain": {
+          "count": 9446,
+          "median_frames": 3.0,
+          "p95_frames": 4.0,
+          "p99_frames": 5.0,
+          "max_frames": 1805.0,
+          "mean_frames": 3.925788693626932
+        },
+        "deadline_miss_after_shadow": 1,
+        "deadline_miss_after_plain": 0
+      }
+    }
+  ]
+}

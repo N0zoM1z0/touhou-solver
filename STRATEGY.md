@@ -82,12 +82,37 @@ and producing no sampled hard-vector improvement. A wholesale C++ local
 planner rewrite is deferred; the packed certificate already meets the current
 offline gate, while physical root and deadline validity remain unproved.
 
+Implementation-only native acceleration is now live for the shared local
+hazard query, quantized no-item beam reduction, and packed planning bullet
+decode at 16 or more active slots. All retain Python rollback/oracles and
+inherit the existing hard-certificate and finite-beam authority boundaries.
+Hazard-major iteration had zero action/hard-label mismatches on 128 direct
+retained roots and cut Stage-6B certificate geometry p95 from `4.903` to
+`2.304 ms`. The packed decoder had exact field/projection parity and reduced
+1,536-bullet Windows decode-plus-projection p95 from `9.263` to `0.197 ms`.
+
+Planner freshness takes priority over extracting the last local geometry
+percent. Interleaved Windows contention data showed one native viability
+worker at `40.716/57.090 ms` median/p95 and four at
+`26.953/29.821 ms`; the four-worker beam-geometry p95 cost was only about
+8.5% versus one worker. The authoritative corridor solver therefore remains
+normal-priority with four native workers. Dynamic grid/BVH construction is
+deferred until a physical trace isolates geometry itself as the remaining
+bottleneck.
+
+Hard Stage-1 `175049` was the first focused physical implementation gate:
+7,099 decisions, zero hits, zero Bomb, and zero deadline misses. It also
+produced CE-0124: immediately after an action-epoch discontinuity,
+`input_current=down_right` while held desired was reset to stay. This direct
+root confirms that explicit active/held/pending semantics cannot be promoted
+by assuming discontinuity restores active-equals-held.
+
 Current priority is:
 
 1. validate the semantic boundary across additional workloads and define a
    no-write movement-neutralization/pending-command/one-reset counterfactual;
-2. collect direct local-pipeline-root shadow telemetry and measure the full
-   Windows observe/decode/project/certify/issue boundary before giving the
+2. replay direct local-pipeline-root telemetry, including CE-0124, and
+   reconcile discontinuity/pending initialization before giving the
    explicit-root local certificate action authority;
 3. obtain a clean post-rollback non-Stage-6B candidate-publication shadow with
    exact witness, alternate-action certificate, publication timing, and
@@ -636,10 +661,52 @@ supersede historical sequencing without erasing its counterexamples.
 - **Rejection gate:** Any scalar/packed mismatch, companion-position
   dependence, inconsistent direct root, missed issue deadline, or clean
   physical regression keeps or returns the path to shadow.
-- **Evidence:** CE-0122/0123,
+- **Evidence:** CE-0122/0123/0124,
   `artifacts/benchmarks/local_pipeline_certificate_20260726.json`,
   `artifacts/benchmarks/local_beam_stability_20260726.json`, and
   `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
+
+### S15 — Native Local Implementation Acceleration
+
+- **Status:** Live implementation optimization for shared hazard query,
+  quantized no-item beam reduction, packed planning bullet decode above the
+  measured sparse crossover, and persistent pool-read destinations. It does
+  not change model or strategy authority.
+- **Intent:** Lower observe/decode/project/certify/issue latency without
+  porting the unproved planner or changing collision, uncertainty, delay,
+  action, or no-Bomb semantics.
+- **Model:** Native SoA kernels implement the existing Python/NumPy
+  boundaries. Hazard-major iteration hoists per-hazard laser geometry and
+  performs candidate-AABB broad phase. The bullet decoder owns each snapshot.
+  The beam reducer returns exact retained indices only when quantized mode has
+  no selected items.
+- **Hard constraints:** Exact collision and clearance-sign parity; retained
+  action/hard-label parity; Python rollback; no occupancy replacement for
+  signed clearance; no promotion of beam optimality.
+- **Observed evidence:** Zero action/hard-label mismatches on 64 direct roots
+  from each of Stage 4A and Stage 6B. Stage-6B native hazard geometry is
+  `1.337/2.304 ms` and complete local planning `12.540/17.223 ms`
+  median/p95. Native beam reduced Stage-6B beam p95 from `13.528` to
+  `8.270 ms`. Packed bullet decode/project remained below `0.203 ms` p95
+  from 16 through 1,536 bullets in the final synthetic gate.
+- **Planner-first resource decision:** Keep four normal-priority viability
+  workers. They solve the representative policy at `26.953/29.821 ms`
+  median/p95, versus `40.716/57.090 ms` with one worker. The accepted local
+  beam p95 cost is about 8.5%.
+- **Limitations:** Python/native parity validates implementation only. Hard
+  Stage-1 is not Lunatic/Extra acceptance. Physical Stage-6B contention has
+  not yet been rerun after all changes. Dynamic BVH/grid and wider SIMD remain
+  hypotheses, not missing safety components.
+- **Rejection gate:** Any retained action/hard-label mismatch, sparse
+  crossover regression, diagnostic decoder loss, plan-age regression, or new
+  issue deadline miss restores the relevant Python path or blocks physical
+  use.
+- **Evidence:**
+  `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`,
+  `notes/LOCAL_NATIVE_HAZARD_QUERY_PROPOSAL_20260726.md`,
+  `notes/LOCAL_NATIVE_BEAM_REDUCTION_PROPOSAL_20260726.md`,
+  `notes/PACKED_NATIVE_BULLET_DECODE_PROPOSAL_20260726.md`, and the associated
+  artifacts under `artifacts/benchmarks/`.
 
 ## How To Add A Strategy
 

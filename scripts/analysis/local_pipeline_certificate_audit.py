@@ -13,6 +13,7 @@ from pathlib import Path
 
 from th08_live_dodge_agent import (
     SUPPORTED_INPUT_MASK,
+    _LocalCertificateTimingAccumulator,
     _PLANNER_ACTIONS,
     _action_name_from_mask,
     _legacy_robust_action_certificates,
@@ -409,11 +410,26 @@ def _audit_trace(
     legacy_ms: list[float] = []
     packed_equivalent_ms: list[float] = []
     pipeline_ms: list[float] = []
+    pipeline_segment_ms = {
+        name: []
+        for name in (
+            "validation",
+            "hazard_projection",
+            "branch_setup",
+            "geometry_kernel",
+            "reduction",
+            "certificate_total",
+        )
+    }
     timing_by_density = {
         density: {
             "legacy": [],
             "packed": [],
             "pipeline": [],
+            "pipeline_segments": {
+                name: []
+                for name in pipeline_segment_ms
+            },
         }
         for density in ("lt_200", "200_599", "600_999", "ge_1000")
     }
@@ -473,10 +489,28 @@ def _audit_trace(
                 outputs[variant] = _robust_action_certificates(**common)
                 timings = packed_equivalent_ms
             else:
+                timing_accumulator = (
+                    _LocalCertificateTimingAccumulator()
+                )
                 outputs[variant] = _robust_action_certificates(
                     **common,
                     pipeline_root=reconstructed.root,
+                    timing_accumulator=timing_accumulator,
                 )
+                timing = timing_accumulator.snapshot()
+                segment_values = {
+                    "validation": timing.validation_ms,
+                    "hazard_projection": timing.hazard_projection_ms,
+                    "branch_setup": timing.branch_setup_ms,
+                    "geometry_kernel": timing.geometry_kernel_ms,
+                    "reduction": timing.reduction_ms,
+                    "certificate_total": timing.certificate_total_ms,
+                }
+                for name, value in segment_values.items():
+                    pipeline_segment_ms[name].append(value)
+                    timing_by_density[density][
+                        "pipeline_segments"
+                    ][name].append(value)
                 timings = pipeline_ms
             duration_ms = (time.perf_counter() - started) * 1000.0
             timings.append(duration_ms)
@@ -627,6 +661,10 @@ def _audit_trace(
                 packed_equivalent_ms
             ),
             "packed_pipeline_root": _timing_summary(pipeline_ms),
+            "packed_pipeline_root_segments": {
+                name: _timing_summary(values)
+                for name, values in pipeline_segment_ms.items()
+            },
             "by_active_bullets": {
                 density: {
                     "count": len(values["pipeline"]),
@@ -645,6 +683,16 @@ def _audit_trace(
                         if values["pipeline"]
                         else None
                     ),
+                    "packed_pipeline_root_segments": {
+                        name: (
+                            _timing_summary(segment_values)
+                            if segment_values
+                            else None
+                        )
+                        for name, segment_values in values[
+                            "pipeline_segments"
+                        ].items()
+                    },
                 }
                 for density, values in timing_by_density.items()
             },

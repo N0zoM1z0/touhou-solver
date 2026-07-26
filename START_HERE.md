@@ -27,17 +27,28 @@ Python/C++ parity for the same recurrence is not physical correctness.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - Algorithmic parent:
-  `1a74ecf Validate native input-clock shadow`
-- The current HEAD should be the local pipeline certificate/beam audit
+  `7860a16 Fix local input-pipeline certification`
+- The current HEAD should be the native local implementation/Hard Stage-1
   checkpoint immediately above that parent. If not, inspect the intervening
   diff before trusting this file.
-- The live local geometry now has per-position bullet/laser batch filtering
-  and a faster packed equivalent-root certificate. Explicit native-active,
-  held-desired, and pending-command roots are retained as shadow telemetry and
-  can be replayed, but are not passed into live action selection. First-action
-  beam modes are default-off and rejected for live promotion by the current
-  evidence. No TH08 runtime, daemon, or unfinished experiment should be alive.
-- Linux and Windows quick suites passed `521/521` in `3.291/7.508 s`.
+- The live local implementation defaults to persistent pool-read
+  destinations, native shared hazard queries, native quantized no-item beam
+  reduction, and packed native bullet decode above 16 active slots. Python
+  implementations remain explicit rollback/oracles. Hazard-major geometry
+  and direct-root retained replays had zero action/hard-label mismatches.
+- The authoritative corridor planner remains normal-priority with four native
+  workers. One/two-worker limits are ablations; they are not the default.
+  Dynamic grid/BVH geometry is deferred because exact certificate geometry is
+  already about 1--2 ms outside contention and plan freshness has priority.
+- Complete Hard Stage-1 `175049` had 7,099 decisions, zero hits, zero Bomb,
+  and zero deadline misses. It also established CE-0124: the first
+  post-discontinuity native active input need not equal reset held desired.
+  Explicit active/held/pending roots remain shadow-only.
+- Linux and Windows quick suites pass `556/556` in `4.764/6.993 s`. The
+  bounded formal audit retained only the expected legacy/no-write
+  counterexamples at seeds `20002/20003`; the quick belief workspace had zero
+  scalar/native, upper, candidate, certification, or bound failures.
+- No TH08 runtime, daemon, or unfinished experiment should be alive.
 - The only expected untracked file is user-owned `image.png`. Do not stage,
   modify, delete, or clean it.
 - The connected IDA database contains the FRScreen names, partial types, and
@@ -64,6 +75,7 @@ Expected pre-work status:
 | Status | Component | Meaning |
 | --- | --- | --- |
 | live | native-state sensing and TH08 trajectory/laser/enemy projection | Gameplay sensing is native; screenshots are not a sensor. |
+| live | native local implementation acceleration | Persistent pool buffers, packed bullet decode, hazard-major shared query, and quantized no-item beam reducer implement existing boundaries with Python rollback. They add no model authority. |
 | live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. |
 | live | coarse Boolean robust viability | Current global safety authority, subject to its explicit finite model and the unresolved transition-clock boundary. |
 | shadow | native FRScreen/MSG input-clock boundary | Tri-state native probe and episode tracker identify manager-clock blocking without control-state authority. Synchronous issue-thread reads/logging are physically perturbative and total contention is unmeasured. |
@@ -119,7 +131,7 @@ measure total contention before any explicitly scoped neutralization trial.
 Do not recreate a raw wall-time threshold or promote FRScreen serial into a
 universal player clock.
 
-### P1 — explicit local pipeline roots are measured, not promoted
+### P1 — direct local pipeline roots exposed a discontinuity defect
 
 The local audit found two correctness defects. First, a batched hazard result
 could depend on unrelated companion positions; per-position bullet/laser
@@ -149,10 +161,18 @@ zero hard roots at `191.795/275.649 ms` median, so those modes remain
 default-off. A wholesale C++ rewrite is deferred until a correct explicit-root
 Windows end-to-end boundary demonstrates a deadline miss.
 
-Next collect direct-root shadow evidence, reconcile it with the estimator, and
-measure observe/decode/project/certify/issue timing and staleness before any
-live authority change. See CE-0122/0123 and
-`notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
+Direct roots are now retained. Hard Stage-1 CE-0124 observed
+`input_current=down_right` while held desired had been reset to stay at the
+first decision after an action-epoch discontinuity. There was no reconstructed
+pending support and the estimator correctly marked the root inconsistent.
+Therefore an epoch reset cannot initialize active input from held desired.
+
+The current checkpoint accelerates the existing fallback but does not pass the
+explicit root into live selection. Reconcile discontinuity initialization,
+unknown pending support, CE-0120, and direct-root replay before any authority
+change. See CE-0122 through CE-0124,
+`notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`, and
+`notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`.
 
 ### P2 — candidate publication is measured, not promoted
 
@@ -218,6 +238,9 @@ Retain the two newest complete replay-capable bundles per workload:
 | Lunatic Route-2 Stage 6B, candidate shadow | `004142`, `011639` | `004142` every-root service rejected; `011639` losing-only service accepted shadow-only. |
 | Lunatic Route-2 Stage 4A, publication/clock replay floor | `100451`, `103856` | `100451` is the original CE-0120 witness; `103856` rejects the live guard. Both retain the prior replay-capable floor. |
 | Lunatic Route-2 Stage 4A, semantic input-clock telemetry | `120839`, `122014` | `120839` exposed tracker segmentation; corrected `122014` matched all five delayed pulse groups. Viability capsules were intentionally disabled, so these do not replace the replay floor or support planner-replay claims. |
+| Lunatic Route-2 Stage 4A, native local implementation | `151821`, `160712` | Complete direct-root/replay workloads for pool-buffer, hazard, and native-beam measurement. |
+| Lunatic Route-2 Stage 6B, native local implementation | `163501`, `165841` | Complete direct-root/replay workloads; `165841` contains the 210-laser geometry/contention witness. |
+| Hard Route-2 Stage 1, native local implementation | `175049` | One complete zero-hit/no-Bomb/deadline-miss focused gate. It is not yet a two-bundle workload floor. |
 
 The `103856` `.session.json` says `failed` only because the original
 postprocessor rejected an explicit null enemy snapshot after the accepted
@@ -285,12 +308,17 @@ formalization.
   `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
 - Local active/held/pending certificate and beam audit:
   `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`
+- Native local geometry, decode, beam, and contention:
+  `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`,
+  `notes/LOCAL_NATIVE_HAZARD_QUERY_PROPOSAL_20260726.md`,
+  `notes/LOCAL_NATIVE_BEAM_REDUCTION_PROPOSAL_20260726.md`, and
+  `notes/PACKED_NATIVE_BULLET_DECODE_PROPOSAL_20260726.md`
 - Earlier Boolean/losing root analysis:
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md` and
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
 
 Relevant durable counterexamples include CE-0108, CE-0109, CE-0111, CE-0118,
-and CE-0120 through CE-0123. Do not infer present authority from a historical
+and CE-0120 through CE-0125. Do not infer present authority from a historical
 note; the table above and `STRATEGY.md` control current status.
 
 ## Environment And Build
@@ -361,6 +389,10 @@ Retained local replay evidence:
 
 - `artifacts/benchmarks/local_pipeline_certificate_20260726.json`
 - `artifacts/benchmarks/local_beam_stability_20260726.json`
+- `artifacts/benchmarks/local_native_beam_windows_20260726.json`
+- `artifacts/benchmarks/local_native_hazard_hazard_major_windows_20260726.json`
+- `artifacts/benchmarks/native_packed_bullet_decode_windows_20260726.json`
+- `artifacts/benchmarks/local_issue_contention_windows_20260726.json`
 
 The exact reproduction commands and timing boundaries are in
 `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
@@ -435,6 +467,24 @@ path because it also validates menus, terminal unload, no-save handling,
 artifacts, and cleanup.
 
 ## Next Good Checkpoint
+
+The user requested one complete original-game Hard Route-2 run to validate the
+whole controller and unlock later practice stages. Before launch:
+
+1. add full-route `--difficulty hard` identity/menu support without changing
+   the existing Lunatic default;
+2. add an explicit manual replay-save handoff that stops automation at the
+   save UI, releases injected movement keys, does not select No/quit, and
+   waits for the user;
+3. preserve four normal-priority authoritative viability workers and all
+   native local defaults;
+4. run Linux and Windows quick suites, prewarm the daemon, verify executable,
+   foreground, Hard index 2, Route 2/team 5, gameplay state, and the no-life
+   decrement patch;
+5. monitor the exact supervisor, growing trace, every hit/Bomb/foreground
+   boundary, stage transitions, `terminal_unload`, and `route_complete`;
+6. at the save interface, do not exit or clean the game until the user
+   confirms replay saving; then finish compact evidence and cleanup.
 
 A useful next algorithmic checkpoint is the action consequence of the now
 validated semantic sensor, not another detector or threshold tweak. It should:

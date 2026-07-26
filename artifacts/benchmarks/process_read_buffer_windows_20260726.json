@@ -1,0 +1,24 @@
+{
+  "allocating_bytes": {
+    "count": 96,
+    "max_ms": 6.677099969238043,
+    "median_ms": 5.9070499846711755,
+    "p95_ms": 6.2889999826438725
+  },
+  "byte_parity": true,
+  "median_speedup": 7.719111612251852,
+  "p95_speedup": 6.900183768372946,
+  "pair_count": 96,
+  "persistent_buffer": {
+    "count": 96,
+    "max_ms": 1.120000029914081,
+    "median_ms": 0.7652499771211296,
+    "p95_ms": 0.9114249987760559
+  },
+  "platform": "Windows-11-10.0.22631-SP0",
+  "schema": "th08-process-read-buffer-benchmark-v1",
+  "scope": "Paired alternating Windows ReadProcessMemory calls against the benchmark process itself. allocating_bytes includes a new ctypes destination and bytes copy; persistent_buffer reuses one writable ctypes destination and exposes it directly to decoders. This isolates host implementation overhead and is not a cross-process game timing claim.",
+  "sha256": "0a085ff4957b3b55e01c2ae0445a143cf89567f8c66ac6d20a6b25d0b0b7eb60",
+  "size_bytes": 6574080,
+  "warmup_count": 4
+}

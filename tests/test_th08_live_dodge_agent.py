@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import ctypes
 import math
 import struct
 import unittest
@@ -45,6 +46,14 @@ from th08_live_dodge_agent import (
     EnemyPoolSnapshot,
     GameplaySceneGuard,
     Item,
+    ITEM_ACTIVE_OFFSET,
+    ITEM_FULL_VALUE_OFFSET,
+    ITEM_MOTION_STATE_OFFSET,
+    ITEM_POOL_SIZE,
+    ITEM_POSITION_OFFSET,
+    ITEM_STRIDE,
+    ITEM_TYPE_OFFSET,
+    ITEM_VELOCITY_OFFSET,
     LASER_ACTIVE_OFFSET,
     LASER_ANGLE_OFFSET,
     LASER_COLLISION_DISABLE_FRAME_OFFSET,
@@ -89,6 +98,7 @@ from th08_live_dodge_agent import (
     choose_action,
     decode_enemy_body,
     decode_enemy_bodies,
+    decode_items,
     decode_spell_enemy_body_guard,
     enemy_pointer_in_scanned_pool,
     enemy_pool_snapshot_changes,
@@ -1243,6 +1253,12 @@ class LiveDodgeAgentTests(unittest.TestCase):
         struct.pack_into("<H", blob, LASER_FLAGS_OFFSET, 0)
         blob[LASER_PHASE_OFFSET] = 0
         lasers = decode_lasers(bytes(blob))
+        persistent = ctypes.create_string_buffer(len(blob))
+        ctypes.memmove(persistent, bytes(blob), len(blob))
+        self.assertEqual(
+            decode_lasers(memoryview(persistent).cast("B")),
+            lasers,
+        )
         self.assertEqual(len(lasers), 1)
         laser = lasers[0]
         self.assertEqual(laser.half_width, 4.0)
@@ -1259,6 +1275,22 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(frames[0], ())
         self.assertEqual(len(frames[1]), 1)
         self.assertLess(frames[1][0].head - frames[1][0].tail, 10.0)
+
+    def test_item_decoder_accepts_persistent_unsigned_byte_view(self) -> None:
+        blob = bytearray(ITEM_POOL_SIZE * ITEM_STRIDE)
+        struct.pack_into("<ff", blob, ITEM_POSITION_OFFSET, 100.0, 200.0)
+        struct.pack_into("<ff", blob, ITEM_VELOCITY_OFFSET, 1.0, -2.0)
+        blob[ITEM_TYPE_OFFSET] = 3
+        blob[ITEM_ACTIVE_OFFSET] = 1
+        blob[ITEM_MOTION_STATE_OFFSET] = 2
+        blob[ITEM_FULL_VALUE_OFFSET] = 1
+        persistent = ctypes.create_string_buffer(len(blob))
+        ctypes.memmove(persistent, bytes(blob), len(blob))
+
+        self.assertEqual(
+            decode_items(memoryview(persistent).cast("B")),
+            decode_items(bytes(blob)),
+        )
 
     def test_laser_broad_phase_discards_only_segments_beyond_risk_radius(
         self,

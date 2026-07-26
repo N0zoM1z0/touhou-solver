@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ctypes
+from dataclasses import dataclass
 import os
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from .packed_hazards import PackedSegmentFrames
 ROOT = Path(__file__).resolve().parents[2]
 _DISABLE_ENV = "TOUHOU_DISABLE_NATIVE_PLANNER"
 _LIBRARY = None
+_VIABILITY_WORKER_LIMIT_FUNCTION = None
 _VIABILITY_FUNCTION = None
 _TERMINAL_VIABILITY_FUNCTION = None
 _SAFETY_VALUE_FUNCTION = None
@@ -38,7 +40,32 @@ _CLEARANCE_FUNCTION = None
 _AABB_TRAJECTORY_CLEARANCE_FUNCTION = None
 _PIECEWISE_AABB_CLEARANCE_FUNCTION = None
 _TRAJECTORY_CLEARANCE_FUNCTION = None
+_BULLET_POOL_DECODE_FUNCTION = None
+_LOCAL_HAZARDS_FUNCTION = None
+_LOCAL_BEAM_REDUCE_FUNCTION = None
 _LOAD_ERROR: OSError | None = None
+
+
+@dataclass(frozen=True)
+class DecodedBulletPool:
+    """Owned structure-of-arrays output from the native slot decoder."""
+
+    x: np.ndarray
+    y: np.ndarray
+    velocity_x: np.ndarray
+    velocity_y: np.ndarray
+    half_width: np.ndarray
+    half_height: np.ndarray
+    transform_flags: np.ndarray
+    slots: np.ndarray
+    speed: np.ndarray
+    angle: np.ndarray
+    callback_phase: np.ndarray
+    callback_aux: np.ndarray
+    original_transform_flags: np.ndarray
+
+    def __len__(self) -> int:
+        return len(self.x)
 
 
 def _library_path() -> Path:
@@ -104,6 +131,44 @@ def _load_viability_function():
     function.restype = ctypes.c_int
     _VIABILITY_FUNCTION = function
     return function
+
+
+def _load_viability_worker_limit_function():
+    global _VIABILITY_WORKER_LIMIT_FUNCTION
+    if _VIABILITY_WORKER_LIMIT_FUNCTION is not None:
+        return _VIABILITY_WORKER_LIMIT_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = (
+            library
+            .touhou_set_current_thread_viability_worker_limit_v1
+        )
+    except AttributeError:
+        return None
+    function.argtypes = [ctypes.c_int]
+    function.restype = ctypes.c_int
+    _VIABILITY_WORKER_LIMIT_FUNCTION = function
+    return function
+
+
+def set_current_thread_viability_worker_limit(
+    worker_limit: int,
+) -> bool:
+    """Bound native viability fan-out on the calling Python thread."""
+
+    if not 1 <= worker_limit <= 4:
+        raise ValueError("native viability worker limit must be 1..4")
+    function = _load_viability_worker_limit_function()
+    if function is None:
+        return False
+    result = function(worker_limit)
+    if result != 0:
+        raise RuntimeError(
+            f"native viability worker-limit setter returned {result}"
+        )
+    return True
 
 
 def _load_terminal_viability_function():
@@ -776,6 +841,155 @@ def _load_piecewise_aabb_clearance_function():
     return function
 
 
+def _load_local_hazards_function():
+    global _LOCAL_HAZARDS_FUNCTION
+    if _LOCAL_HAZARDS_FUNCTION is not None:
+        return _LOCAL_HAZARDS_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_local_hazards_v1
+    except AttributeError:
+        return None
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    function.argtypes = [
+        float_pointer,
+        float_pointer,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_float,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        ctypes.POINTER(ctypes.c_uint8),
+        ctypes.c_int,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        ctypes.c_int,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_int32),
+        ctypes.POINTER(ctypes.c_double),
+    ]
+    function.restype = ctypes.c_int
+    _LOCAL_HAZARDS_FUNCTION = function
+    return function
+
+
+def _load_bullet_pool_decode_function():
+    global _BULLET_POOL_DECODE_FUNCTION
+    if _BULLET_POOL_DECODE_FUNCTION is not None:
+        return _BULLET_POOL_DECODE_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_decode_bullet_pool_v1
+    except AttributeError:
+        return None
+    uint8_pointer = ctypes.POINTER(ctypes.c_uint8)
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    function.argtypes = [
+        uint8_pointer,
+        ctypes.c_uint64,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        float_pointer,
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_int32),
+        float_pointer,
+        float_pointer,
+        ctypes.POINTER(ctypes.c_int16),
+        uint8_pointer,
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int32),
+    ]
+    function.restype = ctypes.c_int
+    _BULLET_POOL_DECODE_FUNCTION = function
+    return function
+
+
+def _load_local_beam_reduce_function():
+    global _LOCAL_BEAM_REDUCE_FUNCTION
+    if _LOCAL_BEAM_REDUCE_FUNCTION is not None:
+        return _LOCAL_BEAM_REDUCE_FUNCTION
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        function = library.touhou_local_beam_reduce_v1
+    except AttributeError:
+        return None
+    double_pointer = ctypes.POINTER(ctypes.c_double)
+    int32_pointer = ctypes.POINTER(ctypes.c_int32)
+    uint8_pointer = ctypes.POINTER(ctypes.c_uint8)
+    function.argtypes = [
+        double_pointer,
+        double_pointer,
+        int32_pointer,
+        int32_pointer,
+        uint8_pointer,
+        ctypes.POINTER(ctypes.c_uint32),
+        double_pointer,
+        int32_pointer,
+        double_pointer,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_double,
+        int32_pointer,
+        double_pointer,
+        uint8_pointer,
+        uint8_pointer,
+        double_pointer,
+        ctypes.c_int,
+        int32_pointer,
+        int32_pointer,
+    ]
+    function.restype = ctypes.c_int
+    _LOCAL_BEAM_REDUCE_FUNCTION = function
+    return function
+
+
 def available() -> bool:
     return _load_library() is not None
 
@@ -794,6 +1008,370 @@ def _attribute_array64(items: tuple[object, ...], name: str) -> np.ndarray:
         dtype=np.float64,
         count=len(items),
     )
+
+
+def query_local_hazards(
+    *,
+    positions_x: np.ndarray,
+    positions_y: np.ndarray,
+    step: int,
+    player_radius: float,
+    bullet_x: np.ndarray,
+    bullet_y: np.ndarray,
+    bullet_half_width: np.ndarray,
+    bullet_half_height: np.ndarray,
+    bullet_transformed: np.ndarray,
+    laser_start_x: np.ndarray,
+    laser_start_y: np.ndarray,
+    laser_segment_x: np.ndarray,
+    laser_segment_y: np.ndarray,
+    laser_collision_radius: np.ndarray,
+    laser_base_uncertainty: np.ndarray,
+    laser_uncertainty_per_frame: np.ndarray,
+    body_x: np.ndarray,
+    body_y: np.ndarray,
+    body_half_width: np.ndarray,
+    body_half_height: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray] | None:
+    """Evaluate one local hazard frame through the optional scalar C ABI."""
+
+    function = _load_local_hazards_function()
+    if function is None:
+        return None
+    positions_x = np.ascontiguousarray(positions_x, dtype=np.float32)
+    positions_y = np.ascontiguousarray(positions_y, dtype=np.float32)
+    if (
+        positions_x.ndim != 1
+        or positions_y.shape != positions_x.shape
+        or not len(positions_x)
+    ):
+        raise ValueError("local hazard positions must be nonempty 1D peers")
+    bullet_fields = tuple(
+        np.ascontiguousarray(values, dtype=np.float32)
+        for values in (
+            bullet_x,
+            bullet_y,
+            bullet_half_width,
+            bullet_half_height,
+        )
+    )
+    bullet_transformed = np.ascontiguousarray(bullet_transformed)
+    if bullet_transformed.dtype not in {
+        np.dtype(np.bool_),
+        np.dtype(np.uint8),
+    }:
+        bullet_transformed = np.ascontiguousarray(
+            bullet_transformed,
+            dtype=np.uint8,
+        )
+    bullet_count = len(bullet_fields[0])
+    if any(
+        values.ndim != 1 or len(values) != bullet_count
+        for values in (*bullet_fields, bullet_transformed)
+    ):
+        raise ValueError("local bullet hazard fields must be 1D peers")
+    laser_fields = tuple(
+        np.ascontiguousarray(values, dtype=np.float32)
+        for values in (
+            laser_start_x,
+            laser_start_y,
+            laser_segment_x,
+            laser_segment_y,
+            laser_collision_radius,
+            laser_base_uncertainty,
+            laser_uncertainty_per_frame,
+        )
+    )
+    laser_count = len(laser_fields[0])
+    if any(
+        values.ndim != 1 or len(values) != laser_count
+        for values in laser_fields
+    ):
+        raise ValueError("local laser hazard fields must be 1D peers")
+    body_fields = tuple(
+        np.ascontiguousarray(values, dtype=np.float32)
+        for values in (
+            body_x,
+            body_y,
+            body_half_width,
+            body_half_height,
+        )
+    )
+    body_count = len(body_fields[0])
+    if any(
+        values.ndim != 1 or len(values) != body_count
+        for values in body_fields
+    ):
+        raise ValueError("local body hazard fields must be 1D peers")
+    risk = np.empty(len(positions_x), dtype=np.float64)
+    collisions = np.empty(len(positions_x), dtype=np.int32)
+    minimum = np.empty(len(positions_x), dtype=np.float64)
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    result = function(
+        positions_x.ctypes.data_as(float_pointer),
+        positions_y.ctypes.data_as(float_pointer),
+        len(positions_x),
+        step,
+        player_radius,
+        *(
+            values.ctypes.data_as(float_pointer)
+            for values in bullet_fields
+        ),
+        bullet_transformed.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint8)
+        ),
+        bullet_count,
+        *(
+            values.ctypes.data_as(float_pointer)
+            for values in laser_fields
+        ),
+        laser_count,
+        *(
+            values.ctypes.data_as(float_pointer)
+            for values in body_fields
+        ),
+        body_count,
+        risk.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        collisions.ctypes.data_as(ctypes.POINTER(ctypes.c_int32)),
+        minimum.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+    )
+    if result != 0:
+        raise RuntimeError(f"native local hazard kernel returned {result}")
+    return risk, collisions, minimum
+
+
+def decode_bullet_pool(
+    blob: bytes | bytearray | memoryview,
+    *,
+    record_count: int,
+    stride: int,
+    state_offset: int,
+    geometry_offset: int,
+    position_offset: int,
+    velocity_offset: int,
+    speed_offset: int,
+    angle_offset: int,
+    transform_flags_offset: int,
+    original_transform_flags_offset: int,
+    callback_phase_offset: int,
+    callback_aux_offset: int,
+) -> DecodedBulletPool | None:
+    """Decode active fixed-stride records into an owned packed snapshot."""
+
+    function = _load_bullet_pool_decode_function()
+    if function is None:
+        return None
+    if record_count < 0 or stride <= 0:
+        raise ValueError("bullet record count and stride must be valid")
+    required_size = record_count * stride
+    if len(blob) < required_size:
+        raise ValueError(f"bullet pool requires {required_size} bytes")
+    raw = np.frombuffer(
+        blob,
+        dtype=np.uint8,
+        count=required_size,
+    )
+    float_fields = tuple(
+        np.empty(record_count, dtype=np.float32)
+        for _ in range(8)
+    )
+    transform_flags = np.empty(record_count, dtype=np.uint32)
+    slots = np.empty(record_count, dtype=np.int32)
+    callback_phase = np.empty(record_count, dtype=np.int16)
+    callback_aux = np.empty(record_count, dtype=np.uint8)
+    original_transform_flags = np.empty(
+        record_count,
+        dtype=np.uint32,
+    )
+    output_count = ctypes.c_int32()
+    float_pointer = ctypes.POINTER(ctypes.c_float)
+    result = function(
+        raw.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+        required_size,
+        record_count,
+        stride,
+        state_offset,
+        geometry_offset,
+        position_offset,
+        velocity_offset,
+        speed_offset,
+        angle_offset,
+        transform_flags_offset,
+        original_transform_flags_offset,
+        callback_phase_offset,
+        callback_aux_offset,
+        *(
+            values.ctypes.data_as(float_pointer)
+            for values in float_fields[:6]
+        ),
+        transform_flags.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint32)
+        ),
+        slots.ctypes.data_as(ctypes.POINTER(ctypes.c_int32)),
+        float_fields[6].ctypes.data_as(float_pointer),
+        float_fields[7].ctypes.data_as(float_pointer),
+        callback_phase.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_int16)
+        ),
+        callback_aux.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint8)
+        ),
+        original_transform_flags.ctypes.data_as(
+            ctypes.POINTER(ctypes.c_uint32)
+        ),
+        record_count,
+        ctypes.byref(output_count),
+    )
+    if result != 0:
+        raise RuntimeError(f"native bullet decoder returned {result}")
+    count = int(output_count.value)
+    if count < 0 or count > record_count:
+        raise RuntimeError(
+            f"native bullet decoder returned invalid count {count}"
+        )
+
+    def prefix(values: np.ndarray) -> np.ndarray:
+        return values[:count]
+
+    return DecodedBulletPool(
+        x=prefix(float_fields[0]),
+        y=prefix(float_fields[1]),
+        velocity_x=prefix(float_fields[2]),
+        velocity_y=prefix(float_fields[3]),
+        half_width=prefix(float_fields[4]),
+        half_height=prefix(float_fields[5]),
+        transform_flags=prefix(transform_flags),
+        slots=prefix(slots),
+        speed=prefix(float_fields[6]),
+        angle=prefix(float_fields[7]),
+        callback_phase=prefix(callback_phase),
+        callback_aux=prefix(callback_aux),
+        original_transform_flags=prefix(
+            original_transform_flags
+        ),
+    )
+
+
+def reduce_local_beam(
+    *,
+    draft_x: np.ndarray,
+    draft_y: np.ndarray,
+    first_action: np.ndarray,
+    last_direction: np.ndarray,
+    last_focused: np.ndarray,
+    collected_mask: np.ndarray,
+    risk: np.ndarray,
+    collisions: np.ndarray,
+    minimum_clearance: np.ndarray,
+    step: int,
+    beam_width: int,
+    position_quantization: float,
+    target_x: float | None,
+    target_y: float | None,
+    target_deadline: int | None,
+    item_safety_clearance: float,
+    playfield_left: float,
+    playfield_right: float,
+    playfield_top: float,
+    playfield_bottom: float,
+    reserve_distance: float,
+    diagonal_speed: float,
+    cardinal_speed: float,
+    certificate_collisions: np.ndarray,
+    certificate_minimum: np.ndarray,
+    survival_preferred: np.ndarray,
+    safety_preferred: np.ndarray,
+    recovery_distance: np.ndarray,
+) -> np.ndarray | None:
+    """Return exact retained draft indices for the quantized beam reducer."""
+
+    function = _load_local_beam_reduce_function()
+    if function is None:
+        return None
+    draft_fields = (
+        np.ascontiguousarray(draft_x, dtype=np.float64),
+        np.ascontiguousarray(draft_y, dtype=np.float64),
+        np.ascontiguousarray(first_action, dtype=np.int32),
+        np.ascontiguousarray(last_direction, dtype=np.int32),
+        np.ascontiguousarray(last_focused, dtype=np.uint8),
+        np.ascontiguousarray(collected_mask, dtype=np.uint32),
+        np.ascontiguousarray(risk, dtype=np.float64),
+        np.ascontiguousarray(collisions, dtype=np.int32),
+        np.ascontiguousarray(minimum_clearance, dtype=np.float64),
+    )
+    draft_count = len(draft_fields[0])
+    if (
+        draft_count <= 0
+        or any(values.ndim != 1 or len(values) != draft_count for values in draft_fields)
+    ):
+        raise ValueError("local beam draft fields must be nonempty 1D peers")
+    action_fields = (
+        np.ascontiguousarray(certificate_collisions, dtype=np.int32),
+        np.ascontiguousarray(certificate_minimum, dtype=np.float64),
+        np.ascontiguousarray(survival_preferred, dtype=np.uint8),
+        np.ascontiguousarray(safety_preferred, dtype=np.uint8),
+        np.ascontiguousarray(recovery_distance, dtype=np.float64),
+    )
+    action_count = len(action_fields[0])
+    if (
+        action_count <= 0
+        or any(values.ndim != 1 or len(values) != action_count for values in action_fields)
+    ):
+        raise ValueError("local beam action fields must be nonempty 1D peers")
+    if step <= 0 or beam_width <= 0:
+        raise ValueError("local beam step and width must be positive")
+    target_enabled = target_x is not None
+    if target_enabled != (target_y is not None and target_deadline is not None):
+        raise ValueError("local beam target fields must be all present or absent")
+
+    retained = np.empty(min(beam_width, draft_count), dtype=np.int32)
+    retained_count = ctypes.c_int32()
+    double_pointer = ctypes.POINTER(ctypes.c_double)
+    int32_pointer = ctypes.POINTER(ctypes.c_int32)
+    uint8_pointer = ctypes.POINTER(ctypes.c_uint8)
+    result = function(
+        draft_fields[0].ctypes.data_as(double_pointer),
+        draft_fields[1].ctypes.data_as(double_pointer),
+        draft_fields[2].ctypes.data_as(int32_pointer),
+        draft_fields[3].ctypes.data_as(int32_pointer),
+        draft_fields[4].ctypes.data_as(uint8_pointer),
+        draft_fields[5].ctypes.data_as(ctypes.POINTER(ctypes.c_uint32)),
+        draft_fields[6].ctypes.data_as(double_pointer),
+        draft_fields[7].ctypes.data_as(int32_pointer),
+        draft_fields[8].ctypes.data_as(double_pointer),
+        draft_count,
+        step,
+        beam_width,
+        position_quantization,
+        int(target_enabled),
+        0.0 if target_x is None else target_x,
+        0.0 if target_y is None else target_y,
+        0 if target_deadline is None else target_deadline,
+        item_safety_clearance,
+        playfield_left,
+        playfield_right,
+        playfield_top,
+        playfield_bottom,
+        reserve_distance,
+        diagonal_speed,
+        cardinal_speed,
+        action_fields[0].ctypes.data_as(int32_pointer),
+        action_fields[1].ctypes.data_as(double_pointer),
+        action_fields[2].ctypes.data_as(uint8_pointer),
+        action_fields[3].ctypes.data_as(uint8_pointer),
+        action_fields[4].ctypes.data_as(double_pointer),
+        action_count,
+        retained.ctypes.data_as(int32_pointer),
+        ctypes.byref(retained_count),
+    )
+    if result != 0:
+        raise RuntimeError(f"native local beam reducer returned {result}")
+    count = int(retained_count.value)
+    if count <= 0 or count > len(retained):
+        raise RuntimeError(
+            f"native local beam reducer returned invalid count {count}"
+        )
+    return retained[:count].copy()
 
 
 def build_clearance_volume(

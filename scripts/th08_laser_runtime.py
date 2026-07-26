@@ -9,7 +9,7 @@ from the live agent.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -77,6 +77,27 @@ class PackedLaserFrame:
     collision_radius: np.ndarray
     base_uncertainty: np.ndarray
     uncertainty_per_frame: np.ndarray
+    native_float32_fields: tuple[np.ndarray, ...] | None = field(
+        default=None,
+        repr=False,
+        compare=False,
+    )
+
+    def fields_for_native(self) -> tuple[np.ndarray, ...]:
+        if self.native_float32_fields is not None:
+            return self.native_float32_fields
+        return tuple(
+            np.ascontiguousarray(values, dtype=np.float32)
+            for values in (
+                self.start_x,
+                self.start_y,
+                self.segment_x,
+                self.segment_y,
+                self.collision_radius,
+                self.base_uncertainty,
+                self.uncertainty_per_frame,
+            )
+        )
 
 
 def build_laser_collision_frames(
@@ -150,25 +171,38 @@ def pack_laser_frame(
         dtype=np.float64,
         count=len(lasers),
     )
-    return PackedLaserFrame(
-        start_x=origin_x + cosine * tail,
-        start_y=origin_y + sine * tail,
-        segment_x=cosine * (head - tail),
-        segment_y=sine * (head - tail),
-        collision_radius=np.fromiter(
+    fields = (
+        origin_x + cosine * tail,
+        origin_y + sine * tail,
+        cosine * (head - tail),
+        sine * (head - tail),
+        np.fromiter(
             (laser.half_width + PLAYER_RADIUS for laser in lasers),
             dtype=np.float64,
             count=len(lasers),
         ),
-        base_uncertainty=np.fromiter(
+        np.fromiter(
             (laser.uncertainty for laser in lasers),
             dtype=np.float64,
             count=len(lasers),
         ),
-        uncertainty_per_frame=np.fromiter(
+        np.fromiter(
             (laser.uncertainty_per_frame for laser in lasers),
             dtype=np.float64,
             count=len(lasers),
+        ),
+    )
+    return PackedLaserFrame(
+        start_x=fields[0],
+        start_y=fields[1],
+        segment_x=fields[2],
+        segment_y=fields[3],
+        collision_radius=fields[4],
+        base_uncertainty=fields[5],
+        uncertainty_per_frame=fields[6],
+        native_float32_fields=tuple(
+            np.ascontiguousarray(values, dtype=np.float32)
+            for values in fields
         ),
     )
 
@@ -244,6 +278,13 @@ def build_packed_laser_collision_frames(
                 collision_radius=fields[4],
                 base_uncertainty=fields[5],
                 uncertainty_per_frame=fields[6],
+                native_float32_fields=tuple(
+                    np.ascontiguousarray(
+                        values,
+                        dtype=np.float32,
+                    )
+                    for values in fields
+                ),
             )
         )
     return tuple(frames)

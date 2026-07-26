@@ -38,6 +38,13 @@ VK_F8 = 0x77
 VK_F9 = 0x78
 VK_F10 = 0x79
 LONG_RUN_DURATION_SECONDS = 3600
+DIFFICULTY_NAMES = {
+    0: "easy",
+    1: "normal",
+    2: "hard",
+    3: "lunatic",
+    4: "extra",
+}
 ERROR_ALREADY_EXISTS = 183
 INSTANCE_MUTEX_NAME = r"Local\Codex_TH08_Agent_Hotkey"
 
@@ -92,6 +99,10 @@ def build_long_run_arguments(
     candidate_verifier_shadow: bool = False,
     input_clock_boundary_shadow: bool = False,
     input_clock_shadow_sample_ms: float = 1.0,
+    local_pipeline_root_shadow_every: int = 0,
+    local_hazard_backend: str = "native",
+    local_beam_reducer: str = "native",
+    bullet_decode_backend: str = "native",
     duration_seconds: float = LONG_RUN_DURATION_SECONDS,
 ) -> list[str]:
     if safety_value_horizon < 0:
@@ -100,6 +111,16 @@ def build_long_run_arguments(
         raise ValueError("long-run duration must be positive")
     if input_clock_shadow_sample_ms <= 0.0:
         raise ValueError("input-clock shadow sample cadence must be positive")
+    if local_pipeline_root_shadow_every < 0:
+        raise ValueError(
+            "local pipeline root shadow cadence cannot be negative"
+        )
+    if local_hazard_backend not in {"numpy", "native"}:
+        raise ValueError("unknown local hazard backend")
+    if local_beam_reducer not in {"python", "native"}:
+        raise ValueError("unknown local beam reducer")
+    if bullet_decode_backend not in {"python", "native"}:
+        raise ValueError("unknown bullet decode backend")
     arguments = [
         str(output),
         "--pid",
@@ -153,6 +174,16 @@ def build_long_run_arguments(
                 str(input_clock_shadow_sample_ms),
             )
         )
+    if local_pipeline_root_shadow_every:
+        arguments.extend(
+            (
+                "--local-pipeline-root-shadow-every",
+                str(local_pipeline_root_shadow_every),
+            )
+        )
+    arguments.extend(("--local-hazard-backend", local_hazard_backend))
+    arguments.extend(("--local-beam-reducer", local_beam_reducer))
+    arguments.extend(("--bullet-decode-backend", bullet_decode_backend))
     return arguments
 
 
@@ -160,6 +191,7 @@ class AgentHotkey:
     def __init__(
         self,
         *,
+        expected_difficulty: int | None = None,
         expected_stage: int | None = None,
         terminal_stage: int | None = None,
         trace_transform_runtime: bool = False,
@@ -170,6 +202,10 @@ class AgentHotkey:
         candidate_verifier_shadow: bool = False,
         input_clock_boundary_shadow: bool = False,
         input_clock_shadow_sample_ms: float = 1.0,
+        local_pipeline_root_shadow_every: int = 0,
+        local_hazard_backend: str = "native",
+        local_beam_reducer: str = "native",
+        bullet_decode_backend: str = "native",
         duration_seconds: float = LONG_RUN_DURATION_SECONDS,
         detailed_summary: bool = True,
     ) -> None:
@@ -205,6 +241,16 @@ class AgentHotkey:
         self.last_summary: dict[str, object] | None = None
         self.stop_file: Path | None = None
         self.output: Path | None = None
+        if (
+            expected_difficulty is not None
+            and expected_difficulty not in DIFFICULTY_NAMES
+        ):
+            raise ValueError(
+                f"unsupported expected difficulty {expected_difficulty}"
+            )
+        if bullet_decode_backend not in {"python", "native"}:
+            raise ValueError("unknown bullet decode backend")
+        self.expected_difficulty = expected_difficulty
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
         self.trace_transform_runtime = trace_transform_runtime
@@ -217,6 +263,12 @@ class AgentHotkey:
         self.candidate_verifier_shadow = candidate_verifier_shadow
         self.input_clock_boundary_shadow = input_clock_boundary_shadow
         self.input_clock_shadow_sample_ms = input_clock_shadow_sample_ms
+        self.local_pipeline_root_shadow_every = (
+            local_pipeline_root_shadow_every
+        )
+        self.local_hazard_backend = local_hazard_backend
+        self.local_beam_reducer = local_beam_reducer
+        self.bullet_decode_backend = bullet_decode_backend
         self.duration_seconds = duration_seconds
         self.detailed_summary = detailed_summary
         self.artifact_dir = (
@@ -299,9 +351,17 @@ class AgentHotkey:
             gameplay_active = bool(state["gameplay_active"])
             if gameplay_active:
                 difficulty = int(state["difficulty_index"])
-                if difficulty not in (3, 4):
+                if difficulty not in DIFFICULTY_NAMES:
                     raise RuntimeError(
                         f"active gameplay difficulty is unsupported: {difficulty}"
+                    )
+                if (
+                    self.expected_difficulty is not None
+                    and difficulty != self.expected_difficulty
+                ):
+                    raise RuntimeError(
+                        "active gameplay difficulty mismatch: "
+                        f"expected {self.expected_difficulty}, got {difficulty}"
                     )
                 if int(state["route_id"]) != 2:
                     raise RuntimeError(
@@ -309,11 +369,15 @@ class AgentHotkey:
                         f"{state['route_id']}"
                     )
             else:
-                difficulty = 3
+                difficulty = (
+                    3
+                    if self.expected_difficulty is None
+                    else self.expected_difficulty
+                )
 
             self.artifact_dir.mkdir(parents=True, exist_ok=True)
             stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            mode = "lunatic" if difficulty == 3 else "extra"
+            mode = DIFFICULTY_NAMES[difficulty]
             self.output = output_path or self.artifact_dir / (
                 f"{mode}_route2_hotkey_longrun_{stamp}.jsonl"
             )
@@ -344,6 +408,12 @@ class AgentHotkey:
                 input_clock_shadow_sample_ms=(
                     self.input_clock_shadow_sample_ms
                 ),
+                local_pipeline_root_shadow_every=(
+                    self.local_pipeline_root_shadow_every
+                ),
+                local_hazard_backend=self.local_hazard_backend,
+                local_beam_reducer=self.local_beam_reducer,
+                bullet_decode_backend=self.bullet_decode_backend,
                 duration_seconds=self.duration_seconds,
             )
             if not gameplay_active:

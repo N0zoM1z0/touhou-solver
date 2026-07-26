@@ -257,6 +257,7 @@ MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES = 120
 # than allocating NumPy gather arrays. Retained synthetic sweeps place the
 # crossover between 400 and 600 records on the current host.
 PLANNING_BULLET_VECTOR_THRESHOLD = 512
+NATIVE_PACKED_BULLET_MIN_COUNT = 16
 # A rolling async policy can outlive several estimator updates. Cover the
 # complete configured support instead of assuming only one-step drift.
 ASYNC_POLICY_DELAY_PADDING = (
@@ -334,6 +335,55 @@ class Bullet:
     trajectory_uncertainty_x: float = 0.0
     trajectory_uncertainty_y: float = 0.0
     original_transform_flags: int = 0
+
+
+@dataclass(frozen=True)
+class PackedBulletSnapshot:
+    """Owned planning fields with lazy compatibility materialization."""
+
+    x: np.ndarray
+    y: np.ndarray
+    velocity_x: np.ndarray
+    velocity_y: np.ndarray
+    half_width: np.ndarray
+    half_height: np.ndarray
+    transform_flags: np.ndarray
+    slots: np.ndarray
+    speed: np.ndarray
+    angle: np.ndarray
+    callback_phase: np.ndarray
+    callback_aux: np.ndarray
+    original_transform_flags: np.ndarray
+
+    def __len__(self) -> int:
+        return len(self.x)
+
+    def materialize(self, index: int) -> Bullet:
+        speed = float(self.speed[index])
+        angle = float(self.angle[index])
+        return Bullet(
+            x=float(self.x[index]),
+            y=float(self.y[index]),
+            vx=float(self.velocity_x[index]),
+            vy=float(self.velocity_y[index]),
+            half_width=float(self.half_width[index]),
+            half_height=float(self.half_height[index]),
+            transform_flags=int(self.transform_flags[index]),
+            slot=int(self.slots[index]),
+            speed=speed if math.isfinite(speed) else None,
+            angle=angle if math.isfinite(angle) else None,
+            callback_phase_state=int(self.callback_phase[index]),
+            callback_aux_state=int(self.callback_aux[index]),
+            original_transform_flags=int(
+                self.original_transform_flags[index]
+            ),
+        )
+
+    def __iter__(self):
+        return (
+            self.materialize(index)
+            for index in range(len(self))
+        )
 
 
 def _serialize_transform_record(
@@ -627,6 +677,67 @@ class Item:
 
 
 @dataclass(frozen=True)
+class LocalCertificateTiming:
+    """Low-overhead wall-time decomposition for local hard certificates."""
+
+    calls: int = 0
+    explicit_root_calls: int = 0
+    maximum_branch_count: int = 0
+    shared_laser_projection_ms: float = 0.0
+    validation_ms: float = 0.0
+    hazard_projection_ms: float = 0.0
+    branch_setup_ms: float = 0.0
+    geometry_kernel_ms: float = 0.0
+    reduction_ms: float = 0.0
+    certificate_total_ms: float = 0.0
+    control_prefix_ms: float = 0.0
+    planning_bullet_projection_ms: float = 0.0
+    beam_search_ms: float = 0.0
+    terminal_threat_ms: float = 0.0
+    selection_finalize_ms: float = 0.0
+
+
+@dataclass
+class _LocalCertificateTimingAccumulator:
+    calls: int = 0
+    explicit_root_calls: int = 0
+    maximum_branch_count: int = 0
+    shared_laser_projection_ms: float = 0.0
+    validation_ms: float = 0.0
+    hazard_projection_ms: float = 0.0
+    branch_setup_ms: float = 0.0
+    geometry_kernel_ms: float = 0.0
+    reduction_ms: float = 0.0
+    certificate_total_ms: float = 0.0
+    control_prefix_ms: float = 0.0
+    planning_bullet_projection_ms: float = 0.0
+    beam_search_ms: float = 0.0
+    terminal_threat_ms: float = 0.0
+    selection_finalize_ms: float = 0.0
+
+    def snapshot(self) -> LocalCertificateTiming:
+        return LocalCertificateTiming(
+            calls=self.calls,
+            explicit_root_calls=self.explicit_root_calls,
+            maximum_branch_count=self.maximum_branch_count,
+            shared_laser_projection_ms=self.shared_laser_projection_ms,
+            validation_ms=self.validation_ms,
+            hazard_projection_ms=self.hazard_projection_ms,
+            branch_setup_ms=self.branch_setup_ms,
+            geometry_kernel_ms=self.geometry_kernel_ms,
+            reduction_ms=self.reduction_ms,
+            certificate_total_ms=self.certificate_total_ms,
+            control_prefix_ms=self.control_prefix_ms,
+            planning_bullet_projection_ms=(
+                self.planning_bullet_projection_ms
+            ),
+            beam_search_ms=self.beam_search_ms,
+            terminal_threat_ms=self.terminal_threat_ms,
+            selection_finalize_ms=self.selection_finalize_ms,
+        )
+
+
+@dataclass(frozen=True)
 class Decision:
     mask: int
     action: str
@@ -668,6 +779,12 @@ class Decision:
     damage_eligible_action_count: int = 0
     damage_reason: str = "disabled"
     issue_action_certificates: tuple[RobustActionCertificate, ...] = ()
+    local_certificate_timing: LocalCertificateTiming = (
+        LocalCertificateTiming()
+    )
+    issue_certificate_timing: LocalCertificateTiming = (
+        LocalCertificateTiming()
+    )
 
 
 @dataclass(frozen=True)
@@ -690,6 +807,65 @@ class RobustActionCertificate:
     write_required: bool = True
     pipeline_branch_count: int = 0
     worst_pending_remaining: int | None = None
+
+
+def _local_certificate_timing_record(
+    timing: LocalCertificateTiming,
+) -> dict[str, int | float]:
+    segmented_ms = (
+        timing.validation_ms
+        + timing.hazard_projection_ms
+        + timing.branch_setup_ms
+        + timing.geometry_kernel_ms
+        + timing.reduction_ms
+    )
+    return {
+        "calls": timing.calls,
+        "explicit_root_calls": timing.explicit_root_calls,
+        "maximum_branch_count": timing.maximum_branch_count,
+        "shared_laser_projection_ms": (
+            timing.shared_laser_projection_ms
+        ),
+        "validation_ms": timing.validation_ms,
+        "hazard_projection_ms": timing.hazard_projection_ms,
+        "branch_setup_ms": timing.branch_setup_ms,
+        "geometry_kernel_ms": timing.geometry_kernel_ms,
+        "reduction_ms": timing.reduction_ms,
+        "certificate_total_ms": timing.certificate_total_ms,
+        "control_prefix_ms": timing.control_prefix_ms,
+        "planning_bullet_projection_ms": (
+            timing.planning_bullet_projection_ms
+        ),
+        "beam_search_ms": timing.beam_search_ms,
+        "terminal_threat_ms": timing.terminal_threat_ms,
+        "selection_finalize_ms": timing.selection_finalize_ms,
+        "project_and_certify_ms": (
+            timing.shared_laser_projection_ms
+            + timing.certificate_total_ms
+        ),
+        "certificate_unattributed_ms": max(
+            0.0,
+            timing.certificate_total_ms - segmented_ms,
+        ),
+    }
+
+
+def _robust_action_certificate_record(
+    certificate: RobustActionCertificate,
+) -> dict[str, object]:
+    return {
+        "action": certificate.action,
+        "delay_frames": certificate.delay_frames,
+        "worst_collisions": certificate.worst_collisions,
+        "min_clearance": certificate.min_clearance,
+        "cvar_risk": certificate.cvar_risk,
+        "worst_delay": certificate.worst_delay,
+        "write_required": certificate.write_required,
+        "pipeline_branch_count": certificate.pipeline_branch_count,
+        "worst_pending_remaining": (
+            certificate.worst_pending_remaining
+        ),
+    }
 
 
 @dataclass(frozen=True)
@@ -1055,7 +1231,25 @@ def _native_bullet_half_extents(
     return abs(width) * 0.5, abs(height) * 0.5
 
 
-def _decode_planning_bullets(blob: bytes) -> tuple[Bullet, ...]:
+def _planning_bullet_active_slots(
+    blob: bytes | bytearray | memoryview,
+) -> np.ndarray:
+    return np.flatnonzero(
+        np.ndarray(
+            (BULLET_POOL_SIZE,),
+            dtype="<u2",
+            buffer=blob,
+            offset=BULLET_STATE_OFFSET,
+            strides=(BULLET_STRIDE,),
+        )
+    )
+
+
+def _decode_planning_bullets(
+    blob: bytes | bytearray | memoryview,
+    *,
+    active_slots: np.ndarray | None = None,
+) -> tuple[Bullet, ...]:
     """Decode the gameplay fields in bulk without diagnostic queue objects."""
 
     required_size = BULLET_POOL_SIZE * BULLET_STRIDE
@@ -1081,8 +1275,10 @@ def _decode_planning_bullets(blob: bytes) -> tuple[Bullet, ...]:
             strides=(BULLET_STRIDE, item_size),
         )
 
-    slots = np.flatnonzero(
-        scalar_field(BULLET_STATE_OFFSET, "<u2")
+    slots = (
+        _planning_bullet_active_slots(blob)
+        if active_slots is None
+        else active_slots
     )
     if not slots.size:
         return ()
@@ -1223,6 +1419,67 @@ def _decode_planning_bullets(blob: bytes) -> tuple[Bullet, ...]:
             callback_aux,
         )
     )
+
+
+def decode_packed_bullets(
+    blob: bytes | bytearray | memoryview,
+) -> PackedBulletSnapshot:
+    """Decode the live planning snapshot through the parity-gated C ABI."""
+
+    decoded = native_backend.decode_bullet_pool(
+        blob,
+        record_count=BULLET_POOL_SIZE,
+        stride=BULLET_STRIDE,
+        state_offset=BULLET_STATE_OFFSET,
+        geometry_offset=BULLET_GEOMETRY_OFFSET,
+        position_offset=BULLET_POSITION_OFFSET,
+        velocity_offset=BULLET_VELOCITY_OFFSET,
+        speed_offset=BULLET_SPEED_OFFSET,
+        angle_offset=BULLET_ANGLE_OFFSET,
+        transform_flags_offset=BULLET_TRANSFORM_FLAGS_OFFSET,
+        original_transform_flags_offset=(
+            BULLET_ORIGINAL_TRANSFORM_FLAGS_OFFSET
+        ),
+        callback_phase_offset=BULLET_CALLBACK_PHASE_STATE_OFFSET,
+        callback_aux_offset=BULLET_CALLBACK_AUX_STATE_OFFSET,
+    )
+    if decoded is None:
+        raise RuntimeError("native packed bullet decoder is unavailable")
+    return PackedBulletSnapshot(
+        x=decoded.x,
+        y=decoded.y,
+        velocity_x=decoded.velocity_x,
+        velocity_y=decoded.velocity_y,
+        half_width=decoded.half_width,
+        half_height=decoded.half_height,
+        transform_flags=decoded.transform_flags,
+        slots=decoded.slots,
+        speed=decoded.speed,
+        angle=decoded.angle,
+        callback_phase=decoded.callback_phase,
+        callback_aux=decoded.callback_aux,
+        original_transform_flags=decoded.original_transform_flags,
+    )
+
+
+def decode_live_planning_bullets(
+    blob: bytes | bytearray | memoryview,
+    *,
+    backend: str,
+) -> tuple[Bullet, ...] | PackedBulletSnapshot:
+    """Decode with the selected rollback and the measured sparse crossover."""
+
+    if backend == "python":
+        return _decode_planning_bullets(blob)
+    if backend != "native":
+        raise ValueError(f"unknown bullet decode backend {backend!r}")
+    active_slots = _planning_bullet_active_slots(blob)
+    if len(active_slots) < NATIVE_PACKED_BULLET_MIN_COUNT:
+        return _decode_planning_bullets(
+            blob,
+            active_slots=active_slots,
+        )
+    return decode_packed_bullets(blob)
 
 
 def decode_bullets(
@@ -1985,6 +2242,7 @@ def recertify_action_for_fresh_hazards(
 ) -> Decision:
     """Fast issue-time safety override after the observed hazard set changes."""
 
+    timing = _LocalCertificateTimingAccumulator()
     certificates = _robust_action_certificates(
         player_x=player_x,
         player_y=player_y,
@@ -1997,6 +2255,7 @@ def recertify_action_for_fresh_hazards(
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         pipeline_root=pipeline_root,
+        timing_accumulator=timing,
     )
     planned = certificates.get(decision.action)
     ranked_actions = sorted(
@@ -2043,6 +2302,7 @@ def recertify_action_for_fresh_hazards(
         issue_action_certificates=tuple(
             certificates[action.name] for action in _PLANNER_ACTIONS
         ),
+        issue_certificate_timing=timing.snapshot(),
     )
 
 
@@ -2267,42 +2527,80 @@ def _select_items(
 
 
 def _build_bullet_frames(
-    bullets: tuple[Bullet, ...], *, horizon: int, snapshot_lag: int
+    bullets: tuple[Bullet, ...] | PackedBulletSnapshot,
+    *,
+    horizon: int,
+    snapshot_lag: int,
 ) -> tuple[tuple[np.ndarray, ...], ...]:
     frames: list[tuple[np.ndarray, ...]] = []
-    base_x = np.fromiter((bullet.x for bullet in bullets), dtype=np.float32)
-    base_y = np.fromiter((bullet.y for bullet in bullets), dtype=np.float32)
-    velocity_x = np.fromiter((bullet.vx for bullet in bullets), dtype=np.float32)
-    velocity_y = np.fromiter((bullet.vy for bullet in bullets), dtype=np.float32)
-    half_width = np.fromiter((bullet.half_width for bullet in bullets), dtype=np.float32)
-    half_height = np.fromiter((bullet.half_height for bullet in bullets), dtype=np.float32)
-    trajectory_uncertainty_x = np.fromiter(
-        (bullet.trajectory_uncertainty_x for bullet in bullets),
-        dtype=np.float32,
-    )
-    trajectory_uncertainty_y = np.fromiter(
-        (bullet.trajectory_uncertainty_y for bullet in bullets),
-        dtype=np.float32,
-    )
-    half_width = half_width + trajectory_uncertainty_x
-    half_height = half_height + trajectory_uncertainty_y
-    transformed = np.fromiter(
-        (bool(bullet.transform_flags) for bullet in bullets), dtype=np.bool_
-    )
+    if isinstance(bullets, PackedBulletSnapshot):
+        base_x = bullets.x
+        base_y = bullets.y
+        velocity_x = bullets.velocity_x
+        velocity_y = bullets.velocity_y
+        half_width = bullets.half_width
+        half_height = bullets.half_height
+        transformed = np.not_equal(bullets.transform_flags, 0)
+    else:
+        base_x = np.fromiter(
+            (bullet.x for bullet in bullets),
+            dtype=np.float32,
+        )
+        base_y = np.fromiter(
+            (bullet.y for bullet in bullets),
+            dtype=np.float32,
+        )
+        velocity_x = np.fromiter(
+            (bullet.vx for bullet in bullets),
+            dtype=np.float32,
+        )
+        velocity_y = np.fromiter(
+            (bullet.vy for bullet in bullets),
+            dtype=np.float32,
+        )
+        half_width = np.fromiter(
+            (bullet.half_width for bullet in bullets),
+            dtype=np.float32,
+        )
+        half_height = np.fromiter(
+            (bullet.half_height for bullet in bullets),
+            dtype=np.float32,
+        )
+        trajectory_uncertainty_x = np.fromiter(
+            (
+                bullet.trajectory_uncertainty_x
+                for bullet in bullets
+            ),
+            dtype=np.float32,
+        )
+        trajectory_uncertainty_y = np.fromiter(
+            (
+                bullet.trajectory_uncertainty_y
+                for bullet in bullets
+            ),
+            dtype=np.float32,
+        )
+        half_width = half_width + trajectory_uncertainty_x
+        half_height = half_height + trajectory_uncertainty_y
+        transformed = np.fromiter(
+            (bool(bullet.transform_flags) for bullet in bullets),
+            dtype=np.bool_,
+        )
     event_indices: list[int] = []
     event_frames: list[int] = []
     event_delta_x: list[float] = []
     event_delta_y: list[float] = []
-    for bullet_index, bullet in enumerate(bullets):
-        previous_x = bullet.vx
-        previous_y = bullet.vy
-        for change in bullet.velocity_changes:
-            event_indices.append(bullet_index)
-            event_frames.append(change.frame)
-            event_delta_x.append(change.velocity_x - previous_x)
-            event_delta_y.append(change.velocity_y - previous_y)
-            previous_x = change.velocity_x
-            previous_y = change.velocity_y
+    if not isinstance(bullets, PackedBulletSnapshot):
+        for bullet_index, bullet in enumerate(bullets):
+            previous_x = bullet.vx
+            previous_y = bullet.vy
+            for change in bullet.velocity_changes:
+                event_indices.append(bullet_index)
+                event_frames.append(change.frame)
+                event_delta_x.append(change.velocity_x - previous_x)
+                event_delta_y.append(change.velocity_y - previous_y)
+                previous_x = change.velocity_x
+                previous_y = change.velocity_y
     packed_event_indices = np.asarray(event_indices, dtype=np.intp)
     packed_event_frames = np.asarray(event_frames, dtype=np.int32)
     packed_event_delta_x = np.asarray(event_delta_x, dtype=np.float32)
@@ -2339,7 +2637,7 @@ def _build_bullet_frames(
     return tuple(frames)
 
 
-def _hazards_for_positions(
+def _numpy_hazards_for_positions(
     positions_x: np.ndarray,
     positions_y: np.ndarray,
     *,
@@ -2552,6 +2850,150 @@ def _hazards_for_positions(
     return risk, collisions, minimum
 
 
+def _native_hazards_for_positions(
+    positions_x: np.ndarray,
+    positions_y: np.ndarray,
+    *,
+    step: int,
+    bullet_frame: tuple[np.ndarray, ...],
+    lasers: tuple[Laser, ...] | _PackedLaserFrame,
+    enemy_bodies: tuple[EnemyBody, ...],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Parity-gated native implementation of `_hazards_for_positions`."""
+
+    bullet_x, bullet_y, half_width, half_height, transformed = bullet_frame
+    packed_lasers = (
+        lasers
+        if isinstance(lasers, _PackedLaserFrame)
+        else _pack_laser_frame(lasers)
+    )
+    (
+        laser_start_x,
+        laser_start_y,
+        laser_segment_x,
+        laser_segment_y,
+        laser_collision_radius,
+        laser_base_uncertainty,
+        laser_uncertainty_per_frame,
+    ) = packed_lasers.fields_for_native()
+    body_x = np.fromiter(
+        (body.x + body.vx * step for body in enemy_bodies),
+        dtype=np.float32,
+        count=len(enemy_bodies),
+    )
+    body_y = np.fromiter(
+        (body.y + body.vy * step for body in enemy_bodies),
+        dtype=np.float32,
+        count=len(enemy_bodies),
+    )
+    body_half_width = np.fromiter(
+        (
+            body.half_width + body.uncertainty
+            for body in enemy_bodies
+        ),
+        dtype=np.float32,
+        count=len(enemy_bodies),
+    )
+    body_half_height = np.fromiter(
+        (
+            body.half_height + body.uncertainty
+            for body in enemy_bodies
+        ),
+        dtype=np.float32,
+        count=len(enemy_bodies),
+    )
+    result = native_backend.query_local_hazards(
+        positions_x=positions_x,
+        positions_y=positions_y,
+        step=step,
+        player_radius=PLAYER_RADIUS,
+        bullet_x=bullet_x,
+        bullet_y=bullet_y,
+        bullet_half_width=half_width,
+        bullet_half_height=half_height,
+        bullet_transformed=transformed,
+        laser_start_x=laser_start_x,
+        laser_start_y=laser_start_y,
+        laser_segment_x=laser_segment_x,
+        laser_segment_y=laser_segment_y,
+        laser_collision_radius=laser_collision_radius,
+        laser_base_uncertainty=laser_base_uncertainty,
+        laser_uncertainty_per_frame=laser_uncertainty_per_frame,
+        body_x=body_x,
+        body_y=body_y,
+        body_half_width=body_half_width,
+        body_half_height=body_half_height,
+    )
+    if result is None:
+        raise RuntimeError("native local hazard kernel is unavailable")
+    return result
+
+
+_LOCAL_HAZARD_BACKEND = "numpy"
+_LOCAL_BEAM_REDUCER = "python"
+_LOCAL_BULLET_DECODER = "python"
+
+
+def _configure_local_hazard_backend(backend: str) -> None:
+    global _LOCAL_HAZARD_BACKEND
+    if backend not in {"numpy", "native"}:
+        raise ValueError(f"unknown local hazard backend: {backend}")
+    if (
+        backend == "native"
+        and native_backend._load_local_hazards_function() is None
+    ):
+        raise RuntimeError("native local hazard kernel is unavailable")
+    _LOCAL_HAZARD_BACKEND = backend
+
+
+def _configure_local_beam_reducer(backend: str) -> None:
+    global _LOCAL_BEAM_REDUCER
+    if backend not in {"python", "native"}:
+        raise ValueError(f"unknown local beam reducer {backend!r}")
+    if (
+        backend == "native"
+        and native_backend._load_local_beam_reduce_function() is None
+    ):
+        raise RuntimeError("native local beam reducer is unavailable")
+    _LOCAL_BEAM_REDUCER = backend
+
+
+def _configure_local_bullet_decoder(backend: str) -> None:
+    global _LOCAL_BULLET_DECODER
+    if backend not in {"python", "native"}:
+        raise ValueError(f"unknown local bullet decoder {backend!r}")
+    if (
+        backend == "native"
+        and native_backend._load_bullet_pool_decode_function() is None
+    ):
+        raise RuntimeError("native packed bullet decoder is unavailable")
+    _LOCAL_BULLET_DECODER = backend
+
+
+def _hazards_for_positions(
+    positions_x: np.ndarray,
+    positions_y: np.ndarray,
+    *,
+    step: int,
+    bullet_frame: tuple[np.ndarray, ...],
+    lasers: tuple[Laser, ...] | _PackedLaserFrame,
+    enemy_bodies: tuple[EnemyBody, ...],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    implementation = (
+        _native_hazards_for_positions
+        if _LOCAL_HAZARD_BACKEND == "native"
+        else _numpy_hazards_for_positions
+    )
+    return implementation(
+        positions_x,
+        positions_y,
+        step=step,
+        bullet_frame=bullet_frame,
+        lasers=lasers,
+        enemy_bodies=enemy_bodies,
+    )
+
+
 def _control_prefix_hazards(
     *,
     player_x: float,
@@ -2762,6 +3204,7 @@ def _robust_action_certificates(
     snapshot_lag: int,
     laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
     pipeline_root: LocalPipelineRoot | None = None,
+    timing_accumulator: _LocalCertificateTimingAccumulator | None = None,
 ) -> dict[str, RobustActionCertificate]:
     """Certify all candidate actions over one explicit finite pipeline lease.
 
@@ -2771,6 +3214,8 @@ def _robust_action_certificates(
     no root is supplied, active and held both come from ``previous_mask``.
     """
 
+    total_started_ns = time.perf_counter_ns()
+    explicit_root = pipeline_root is not None
     if not actions or not delay_frames:
         return {}
     if (
@@ -2790,6 +3235,24 @@ def _robust_action_certificates(
             held_desired_action=active_action,
         )
 
+    validation_finished_ns = time.perf_counter_ns()
+    projection_started_ns = validation_finished_ns
+    maximum_step = action_hold_frames + max(delay_frames)
+    bullet_frames = _build_bullet_frames(
+        bullets,
+        horizon=maximum_step,
+        snapshot_lag=-max(0, snapshot_lag),
+    )
+    if laser_frames is None:
+        laser_frames = _build_packed_laser_collision_frames(
+            lasers,
+            horizon=maximum_step,
+        )
+    if len(laser_frames) < maximum_step:
+        raise ValueError("laser timeline does not cover robust certificates")
+    projection_finished_ns = time.perf_counter_ns()
+
+    branch_setup_started_ns = projection_finished_ns
     action_by_name = {
         action.name: action for action in _LOCAL_PIPELINE_STATE_ACTIONS
     }
@@ -2807,20 +3270,6 @@ def _robust_action_certificates(
         raise ValueError(
             f"pipeline root contains unknown actions: {sorted(unknown_names)}"
         )
-
-    maximum_step = action_hold_frames + max(delay_frames)
-    bullet_frames = _build_bullet_frames(
-        bullets,
-        horizon=maximum_step,
-        snapshot_lag=-max(0, snapshot_lag),
-    )
-    if laser_frames is None:
-        laser_frames = _build_packed_laser_collision_frames(
-            lasers,
-            horizon=maximum_step,
-        )
-    if len(laser_frames) < maximum_step:
-        raise ValueError("laser timeline does not cover robust certificates")
 
     branch_action_indices: list[int] = []
     branch_selected_dx: list[float] = []
@@ -2879,6 +3328,8 @@ def _robust_action_certificates(
     )
     has_pending = pipeline_root.pending_action is not None
 
+    branch_setup_finished_ns = time.perf_counter_ns()
+    geometry_started_ns = branch_setup_finished_ns
     positions_x = np.full(branch_count, player_x, dtype=np.float32)
     positions_y = np.full(branch_count, player_y, dtype=np.float32)
     risks = np.zeros(branch_count, dtype=np.float64)
@@ -2931,6 +3382,8 @@ def _robust_action_certificates(
         collisions += hazard_collisions
         minimum = np.minimum(minimum, hazard_clearance)
 
+    geometry_finished_ns = time.perf_counter_ns()
+    reduction_started_ns = geometry_finished_ns
     certificates: dict[str, RobustActionCertificate] = {}
     for action_index, action in enumerate(actions):
         indices = np.flatnonzero(action_indices == action_index)
@@ -2974,7 +3427,111 @@ def _robust_action_certificates(
             pipeline_branch_count=len(indices),
             worst_pending_remaining=worst_pending_remaining,
         )
+    finished_ns = time.perf_counter_ns()
+    if timing_accumulator is not None:
+        nanoseconds_to_ms = 1.0 / 1_000_000.0
+        timing_accumulator.calls += 1
+        timing_accumulator.explicit_root_calls += int(explicit_root)
+        timing_accumulator.maximum_branch_count = max(
+            timing_accumulator.maximum_branch_count,
+            branch_count,
+        )
+        timing_accumulator.validation_ms += (
+            validation_finished_ns - total_started_ns
+        ) * nanoseconds_to_ms
+        timing_accumulator.hazard_projection_ms += (
+            projection_finished_ns - projection_started_ns
+        ) * nanoseconds_to_ms
+        timing_accumulator.branch_setup_ms += (
+            branch_setup_finished_ns - branch_setup_started_ns
+        ) * nanoseconds_to_ms
+        timing_accumulator.geometry_kernel_ms += (
+            geometry_finished_ns - geometry_started_ns
+        ) * nanoseconds_to_ms
+        timing_accumulator.reduction_ms += (
+            finished_ns - reduction_started_ns
+        ) * nanoseconds_to_ms
+        timing_accumulator.certificate_total_ms += (
+            finished_ns - total_started_ns
+        ) * nanoseconds_to_ms
     return certificates
+
+
+def _direct_root_certificate_shadow(
+    *,
+    root: LocalPipelineRoot,
+    player_x: float,
+    player_y: float,
+    previous_mask: int,
+    delay_frames: tuple[int, ...],
+    action_hold_frames: int,
+    bullets: tuple[Bullet, ...],
+    lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
+    snapshot_lag: int,
+    authoritative_certificates: tuple[
+        RobustActionCertificate, ...
+    ] = (),
+) -> dict[str, object]:
+    """Late, counterfactual explicit-root certificate with no action authority."""
+
+    timing_accumulator = _LocalCertificateTimingAccumulator()
+    started_ns = time.perf_counter_ns()
+    certificates = _robust_action_certificates(
+        player_x=player_x,
+        player_y=player_y,
+        previous_mask=previous_mask,
+        actions=_PLANNER_ACTIONS,
+        delay_frames=delay_frames,
+        action_hold_frames=action_hold_frames,
+        bullets=bullets,
+        lasers=lasers,
+        enemy_bodies=enemy_bodies,
+        snapshot_lag=snapshot_lag,
+        pipeline_root=root,
+        timing_accumulator=timing_accumulator,
+    )
+    wall_ms = (time.perf_counter_ns() - started_ns) / 1_000_000.0
+    authoritative_by_action = {
+        certificate.action: certificate
+        for certificate in authoritative_certificates
+    }
+    direct_safe_actions = tuple(
+        action.name
+        for action in _PLANNER_ACTIONS
+        if (
+            certificates[action.name].worst_collisions == 0
+            and certificates[action.name].min_clearance >= 0.0
+        )
+    )
+    authoritative_safe_actions = tuple(
+        action.name
+        for action in _PLANNER_ACTIONS
+        if (
+            action.name in authoritative_by_action
+            and authoritative_by_action[action.name].worst_collisions == 0
+            and authoritative_by_action[action.name].min_clearance >= 0.0
+        )
+    )
+    return {
+        "role": "post_issue_shadow_no_action_authority",
+        "status": "complete",
+        "computed_after_input": True,
+        "wall_ms": wall_ms,
+        "timing": _local_certificate_timing_record(
+            timing_accumulator.snapshot()
+        ),
+        "direct_safe_actions": direct_safe_actions,
+        "authoritative_safe_actions": authoritative_safe_actions,
+        "safe_action_set_changed": (
+            bool(authoritative_by_action)
+            and direct_safe_actions != authoritative_safe_actions
+        ),
+        "certificates": tuple(
+            _robust_action_certificate_record(certificates[action.name])
+            for action in _PLANNER_ACTIONS
+        ),
+    }
 
 
 def _item_potential(
@@ -3298,7 +3855,14 @@ def choose_action(
     enforce_fresh_viability_intersection: bool = True,
     _force_terminal_threat: bool = False,
     _viability_retry: bool = False,
+    _certificate_timing_accumulator: (
+        _LocalCertificateTimingAccumulator | None
+    ) = None,
 ) -> Decision:
+    if _certificate_timing_accumulator is None:
+        _certificate_timing_accumulator = (
+            _LocalCertificateTimingAccumulator()
+        )
     if horizon <= 0 or beam_width <= 0:
         raise ValueError("planner horizon and beam width must be positive")
     if beam_dedup_mode not in {
@@ -3460,10 +4024,14 @@ def choose_action(
         main_laser_offset + potential_threat_horizon,
         certificate_horizon,
     )
+    laser_projection_started_ns = time.perf_counter_ns()
     laser_timeline = _build_packed_laser_collision_frames(
         lasers,
         horizon=laser_timeline_horizon,
     )
+    _certificate_timing_accumulator.shared_laser_projection_ms += (
+        time.perf_counter_ns() - laser_projection_started_ns
+    ) / 1_000_000.0
     robust_preflight_certificates: dict[
         str, RobustActionCertificate
     ] = {}
@@ -3497,6 +4065,7 @@ def choose_action(
             snapshot_lag=snapshot_lag,
             laser_frames=laser_timeline[:certificate_horizon],
             pipeline_root=local_pipeline_root,
+            timing_accumulator=_certificate_timing_accumulator,
         )
     viability_preflight_certificates = (
         {
@@ -3568,6 +4137,7 @@ def choose_action(
                 snapshot_lag=snapshot_lag,
                 laser_frames=laser_timeline[:certificate_horizon],
                 pipeline_root=local_pipeline_root,
+                timing_accumulator=_certificate_timing_accumulator,
             )
             locally_safe_actions = tuple(
                 action.name
@@ -3589,6 +4159,7 @@ def choose_action(
             viability_constraint_relaxed = True
             viability_fresh_prefix_relaxed = True
     effective_threat_horizon = potential_threat_horizon
+    control_prefix_started_ns = time.perf_counter_ns()
     prefix_risk, prefix_collisions, prefix_clearance = _control_prefix_hazards(
         player_x=player_x,
         player_y=player_y,
@@ -3600,12 +4171,16 @@ def choose_action(
         frames=control_delay_frames,
         laser_frames=laser_timeline[:control_delay_frames],
     )
+    _certificate_timing_accumulator.control_prefix_ms += (
+        time.perf_counter_ns() - control_prefix_started_ns
+    ) / 1_000_000.0
     player_x, player_y = _project_player_for_read_lag(
         player_x,
         player_y,
         delayed_mask,
         control_delay_frames,
     )
+    planning_projection_started_ns = time.perf_counter_ns()
     bullet_frames = _build_bullet_frames(
         bullets,
         horizon=effective_threat_horizon,
@@ -3614,6 +4189,9 @@ def choose_action(
             control_delay_frames - max(0, snapshot_lag),
         ),
     )
+    _certificate_timing_accumulator.planning_bullet_projection_ms += (
+        time.perf_counter_ns() - planning_projection_started_ns
+    ) / 1_000_000.0
     laser_frames = laser_timeline[
         main_laser_offset:
         main_laser_offset + effective_threat_horizon
@@ -3714,7 +4292,76 @@ def choose_action(
             0.0,
             False,
             robust_delay_frames=control_delay_candidates or (),
+            local_certificate_timing=(
+                _certificate_timing_accumulator.snapshot()
+            ),
         )
+    native_beam_enabled = (
+        _LOCAL_BEAM_REDUCER == "native"
+        and beam_dedup_mode == "quantized"
+        and not selected_items
+    )
+    planner_action_indices: dict[str, int] = {}
+    native_certificate_collisions = np.empty(0, dtype=np.int32)
+    native_certificate_minimum = np.empty(0, dtype=np.float64)
+    native_survival_preferred = np.empty(0, dtype=np.uint8)
+    native_safety_preferred = np.empty(0, dtype=np.uint8)
+    native_recovery_distance = np.empty(0, dtype=np.float64)
+    if native_beam_enabled:
+        planner_action_indices = {
+            action.name: index
+            for index, action in enumerate(_PLANNER_ACTIONS)
+        }
+        native_certificate_collisions = np.fromiter(
+            (
+                robust_preflight_certificates[
+                    action.name
+                ].worst_collisions
+                if action.name in robust_preflight_certificates
+                else 0
+                for action in _PLANNER_ACTIONS
+            ),
+            dtype=np.int32,
+            count=len(_PLANNER_ACTIONS),
+        )
+        native_certificate_minimum = np.fromiter(
+            (
+                robust_preflight_certificates[
+                    action.name
+                ].min_clearance
+                if action.name in robust_preflight_certificates
+                else 0.0
+                for action in _PLANNER_ACTIONS
+            ),
+            dtype=np.float64,
+            count=len(_PLANNER_ACTIONS),
+        )
+        native_survival_preferred = np.fromiter(
+            (
+                not survival_actions or action.name in survival_actions
+                for action in _PLANNER_ACTIONS
+            ),
+            dtype=np.uint8,
+            count=len(_PLANNER_ACTIONS),
+        )
+        native_safety_preferred = np.fromiter(
+            (
+                not safety_value_actions
+                or action.name in safety_value_actions
+                for action in _PLANNER_ACTIONS
+            ),
+            dtype=np.uint8,
+            count=len(_PLANNER_ACTIONS),
+        )
+        native_recovery_distance = np.fromiter(
+            (
+                recovery_by_action.get(action.name, math.inf)
+                for action in _PLANNER_ACTIONS
+            ),
+            dtype=np.float64,
+            count=len(_PLANNER_ACTIONS),
+        )
+    beam_started_ns = time.perf_counter_ns()
     for step in range(1, horizon + 1):
         drafts: list[
             tuple[SearchNode, PlannerAction, float, float, float, int, float]
@@ -3803,8 +4450,153 @@ def choose_action(
             lasers=laser_frames[step - 1],
             enemy_bodies=enemy_bodies,
         )
+        retained_indices: np.ndarray | None = None
+        if native_beam_enabled:
+            candidate_risk = np.fromiter(
+                (
+                    draft[0].risk
+                    + draft[4]
+                    + float(hazard_risk[index])
+                    for index, draft in enumerate(drafts)
+                ),
+                dtype=np.float64,
+                count=len(drafts),
+            )
+            candidate_collisions = np.fromiter(
+                (
+                    draft[0].collisions
+                    + int(hazard_collisions[index])
+                    for index, draft in enumerate(drafts)
+                ),
+                dtype=np.int32,
+                count=len(drafts),
+            )
+            candidate_minimum = np.fromiter(
+                (
+                    min(
+                        draft[0].min_clearance,
+                        float(hazard_clearance[index]),
+                    )
+                    for index, draft in enumerate(drafts)
+                ),
+                dtype=np.float64,
+                count=len(drafts),
+            )
+            retained_indices = native_backend.reduce_local_beam(
+                draft_x=np.fromiter(
+                    (draft[2] for draft in drafts),
+                    dtype=np.float64,
+                    count=len(drafts),
+                ),
+                draft_y=np.fromiter(
+                    (draft[3] for draft in drafts),
+                    dtype=np.float64,
+                    count=len(drafts),
+                ),
+                first_action=np.fromiter(
+                    (
+                        planner_action_indices[action.name]
+                        for action in draft_first_actions
+                    ),
+                    dtype=np.int32,
+                    count=len(drafts),
+                ),
+                last_direction=np.fromiter(
+                    (draft[1].direction for draft in drafts),
+                    dtype=np.int32,
+                    count=len(drafts),
+                ),
+                last_focused=np.fromiter(
+                    (draft[1].focused for draft in drafts),
+                    dtype=np.uint8,
+                    count=len(drafts),
+                ),
+                collected_mask=np.fromiter(
+                    (draft[5] for draft in drafts),
+                    dtype=np.uint32,
+                    count=len(drafts),
+                ),
+                risk=candidate_risk,
+                collisions=candidate_collisions,
+                minimum_clearance=candidate_minimum,
+                step=step,
+                beam_width=beam_width,
+                position_quantization=0.5,
+                target_x=target_x,
+                target_y=target_y,
+                target_deadline=target_deadline,
+                item_safety_clearance=ITEM_SAFETY_CLEARANCE,
+                playfield_left=PLAYFIELD_LEFT,
+                playfield_right=PLAYFIELD_RIGHT,
+                playfield_top=PLAYFIELD_TOP,
+                playfield_bottom=PLAYFIELD_BOTTOM,
+                reserve_distance=recovery_reserve_distance,
+                diagonal_speed=UNFOCUSED_DIAGONAL_SPEED,
+                cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
+                certificate_collisions=(
+                    native_certificate_collisions
+                ),
+                certificate_minimum=native_certificate_minimum,
+                survival_preferred=native_survival_preferred,
+                safety_preferred=native_safety_preferred,
+                recovery_distance=native_recovery_distance,
+            )
+            if retained_indices is not None:
+                retained_beam: list[SearchNode] = []
+                for retained_index in retained_indices:
+                    draft_index = int(retained_index)
+                    (
+                        node,
+                        action,
+                        x,
+                        y,
+                        _transition_risk,
+                        collected_mask,
+                        item_utility,
+                    ) = drafts[draft_index]
+                    clearance = float(
+                        hazard_clearance[draft_index]
+                    )
+                    retained_beam.append(
+                        SearchNode(
+                            x=x,
+                            y=y,
+                            first_action=(
+                                draft_first_actions[draft_index]
+                            ),
+                            last_action=action,
+                            risk=float(candidate_risk[draft_index]),
+                            collisions=int(
+                                candidate_collisions[draft_index]
+                            ),
+                            min_clearance=float(
+                                candidate_minimum[draft_index]
+                            ),
+                            immediate_clearance=(
+                                min(
+                                    node.immediate_clearance,
+                                    clearance,
+                                )
+                                if step == 1
+                                else node.immediate_clearance
+                            ),
+                            collected_mask=collected_mask,
+                            item_utility=item_utility,
+                        )
+                    )
+                beam = retained_beam
+                continue
+
         for draft_index, draft in enumerate(drafts):
-            node, action, x, y, transition_risk, collected_mask, item_utility = draft
+            (
+                node,
+                action,
+                x,
+                y,
+                transition_risk,
+                collected_mask,
+                item_utility,
+            ) = draft
             clearance = float(hazard_clearance[draft_index])
             first_action = draft_first_actions[draft_index]
             candidate = SearchNode(
@@ -3812,9 +4604,19 @@ def choose_action(
                 y=y,
                 first_action=first_action,
                 last_action=action,
-                risk=node.risk + transition_risk + float(hazard_risk[draft_index]),
-                collisions=node.collisions + int(hazard_collisions[draft_index]),
-                min_clearance=min(node.min_clearance, clearance),
+                risk=(
+                    node.risk
+                    + transition_risk
+                    + float(hazard_risk[draft_index])
+                ),
+                collisions=(
+                    node.collisions
+                    + int(hazard_collisions[draft_index])
+                ),
+                min_clearance=min(
+                    node.min_clearance,
+                    clearance,
+                ),
                 immediate_clearance=(
                     min(node.immediate_clearance, clearance)
                     if step == 1
@@ -3881,6 +4683,10 @@ def choose_action(
                 + ((node.y - target_y) / 8.0) ** 2
             )
         beam[index] = replace(node, risk=node.risk + position_cost)
+    _certificate_timing_accumulator.beam_search_ms += (
+        time.perf_counter_ns() - beam_started_ns
+    ) / 1_000_000.0
+    terminal_threat_started_ns = time.perf_counter_ns()
     terminal_threats = _terminal_threat_scores(
         beam,
         start_step=horizon,
@@ -3890,6 +4696,10 @@ def choose_action(
         laser_frames=laser_frames,
         enemy_bodies=enemy_bodies,
     )
+    _certificate_timing_accumulator.terminal_threat_ms += (
+        time.perf_counter_ns() - terminal_threat_started_ns
+    ) / 1_000_000.0
+    selection_started_ns = time.perf_counter_ns()
 
     def selection_key(node: SearchNode) -> tuple[object, ...]:
         threat_collisions, threat_clearance = terminal_threats[node]
@@ -3969,6 +4779,7 @@ def choose_action(
                 snapshot_lag=snapshot_lag,
                 laser_frames=laser_timeline[:certificate_horizon],
                 pipeline_root=local_pipeline_root,
+                timing_accumulator=_certificate_timing_accumulator,
             )
         nominal_certificate = robust_certificates[best.first_action.name]
         if (
@@ -4159,6 +4970,9 @@ def choose_action(
             if action.name in robust_preflight_certificates
         ),
     )
+    _certificate_timing_accumulator.selection_finalize_ms += (
+        time.perf_counter_ns() - selection_started_ns
+    ) / 1_000_000.0
     if (
         effective_allowed_first_actions is not None
         and effective_threat_horizon > horizon
@@ -4218,6 +5032,9 @@ def choose_action(
             ),
             _force_terminal_threat=True,
             _viability_retry=True,
+            _certificate_timing_accumulator=(
+                _certificate_timing_accumulator
+            ),
         )
 
         def contradiction_key(candidate: Decision) -> tuple[object, ...]:
@@ -4242,7 +5059,12 @@ def choose_action(
                 ),
                 viability_constraint_relaxed=True,
             )
-    return decision
+    return replace(
+        decision,
+        local_certificate_timing=(
+            _certificate_timing_accumulator.snapshot()
+        ),
+    )
 
 
 def _project_player_for_read_lag(
@@ -4570,6 +5392,13 @@ def run(args: argparse.Namespace) -> int:
         raise ValueError("auto-confirm timing arguments cannot be negative")
     if args.input_clock_shadow_sample_ms <= 0.0:
         raise ValueError("input-clock shadow sample cadence must be positive")
+    if args.local_pipeline_root_shadow_every < 0:
+        raise ValueError(
+            "local pipeline root shadow cadence cannot be negative"
+        )
+    _configure_local_hazard_backend(args.local_hazard_backend)
+    _configure_local_beam_reducer(args.local_beam_reducer)
+    _configure_local_bullet_decoder(args.bullet_decode_backend)
     if (
         args.stage_transition_timeout <= 0.0
         or args.terminal_inactive_grace <= 0.0
@@ -4879,6 +5708,33 @@ def run(args: argparse.Namespace) -> int:
                         if args.input_clock_boundary_shadow
                         else "disabled"
                     ),
+                    "local_hazard_backend": args.local_hazard_backend,
+                    "local_hazard_backend_authority": (
+                        "parity_gated_native_default_exact_implementation"
+                        if args.local_hazard_backend == "native"
+                        else "explicit_python_reference_rollback"
+                    ),
+                    "local_beam_reducer": args.local_beam_reducer,
+                    "local_beam_reducer_authority": (
+                        "parity_gated_native_quantized_reduction"
+                        if args.local_beam_reducer == "native"
+                        else "explicit_python_reference_rollback"
+                    ),
+                    "bullet_decode_backend": (
+                        args.bullet_decode_backend
+                    ),
+                    "bullet_decode_backend_authority": (
+                        "python_diagnostic_transform_override"
+                        if args.trace_transform_runtime
+                        else (
+                            "parity_gated_native_packed_with_sparse_python_crossover"
+                            if args.bullet_decode_backend == "native"
+                            else "explicit_python_object_reference_rollback"
+                        )
+                    ),
+                    "pool_read_buffers": (
+                        "persistent_ctypes_destination_unsigned_byte_view"
+                    ),
                     "global_planner": (
                         "finite_horizon_robust_backward_viability"
                         if not args.local_only
@@ -4918,6 +5774,10 @@ def run(args: argparse.Namespace) -> int:
                     ),
                     "viability_horizon_frames": (
                         TH08_CORRIDOR_CONFIG.horizon_frames
+                    ),
+                    "corridor_background_low_priority": False,
+                    "corridor_native_viability_workers": (
+                        args.corridor_native_workers
                     ),
                     "local_planner_horizon_frames": args.horizon,
                     "local_terminal_threat_horizon_frames": (
@@ -5043,6 +5903,18 @@ def run(args: argparse.Namespace) -> int:
             reader,
         )
         enemy_last_submit = int(state["enemy_manager_frame"])
+        bullet_pool_buffer = reader.allocate_buffer(
+            BULLET_POOL_SIZE * BULLET_STRIDE
+        )
+        bullet_blob = memoryview(bullet_pool_buffer).cast("B")
+        laser_pool_buffer = reader.allocate_buffer(
+            LASER_POOL_SIZE * LASER_STRIDE
+        )
+        laser_blob = memoryview(laser_pool_buffer).cast("B")
+        item_pool_buffer = reader.allocate_buffer(
+            ITEM_POOL_SIZE * ITEM_STRIDE
+        )
+        item_blob = memoryview(item_pool_buffer).cast("B")
         deadline = time.perf_counter() + args.duration
         while time.perf_counter() < deadline:
             if args.stop_file is not None and args.stop_file.exists():
@@ -5483,6 +6355,7 @@ def run(args: argparse.Namespace) -> int:
             if iterations % 30 == 0:
                 _require_foreground(api, pid)
             read_started = time.perf_counter()
+            enemy_background_started = read_started
             if enemy_future is not None and enemy_future.done():
                 enemy_snapshot = enemy_future.result()
                 enemy_future = None
@@ -5519,9 +6392,17 @@ def run(args: argparse.Namespace) -> int:
                 if enemy_snapshot is not None
                 else None
             )
+            enemy_background_ms = (
+                time.perf_counter() - enemy_background_started
+            ) * 1000.0
+            enemy_prefix_capture_started = time.perf_counter()
             enemy_prefix_snapshot = capture_enemy_pool_prefix_contiguous(
                 reader
             )
+            enemy_prefix_capture_ms = (
+                time.perf_counter() - enemy_prefix_capture_started
+            ) * 1000.0
+            enemy_prefix_merge_started = time.perf_counter()
             (
                 enemy_prefix_bodies,
                 prefix_dormant_enemy_body_pointers,
@@ -5544,16 +6425,29 @@ def run(args: argparse.Namespace) -> int:
                 enemy_bodies,
                 enemy_prefix_bodies,
             )
+            enemy_prefix_merge_ms = (
+                time.perf_counter() - enemy_prefix_merge_started
+            ) * 1000.0
             bullet_frame_before = reader.u32(0x0164D30C)
-            bullet_blob = reader.read(
+            bullet_pool_read_started = time.perf_counter()
+            reader.read_into(
                 BULLET_POOL_BASE,
-                BULLET_POOL_SIZE * BULLET_STRIDE,
+                bullet_pool_buffer,
             )
+            bullet_pool_read_ms = (
+                time.perf_counter() - bullet_pool_read_started
+            ) * 1000.0
             bullet_frame_after = reader.u32(0x0164D30C)
-            laser_blob = reader.read(LASER_POOL_BASE, LASER_POOL_SIZE * LASER_STRIDE)
-            item_blob = reader.read(
-                ITEM_MANAGER_BASE, ITEM_POOL_SIZE * ITEM_STRIDE
-            )
+            laser_pool_read_started = time.perf_counter()
+            reader.read_into(LASER_POOL_BASE, laser_pool_buffer)
+            laser_pool_read_ms = (
+                time.perf_counter() - laser_pool_read_started
+            ) * 1000.0
+            item_pool_read_started = time.perf_counter()
+            reader.read_into(ITEM_MANAGER_BASE, item_pool_buffer)
+            item_pool_read_ms = (
+                time.perf_counter() - item_pool_read_started
+            ) * 1000.0
             ecl_vm_snapshot: EclVmSnapshot | None = None
             ecl_lookahead: EclLookaheadResult | None = None
             tagged_velocity_toggles: tuple[TaggedVelocityToggle, ...] = ()
@@ -5568,6 +6462,7 @@ def run(args: argparse.Namespace) -> int:
             boss_phase_error: str | None = None
             boss_phase_progress: PhaseProgressObservation | None = None
             spell_enemy_pointer = int(spell_state.get("enemy_pointer", 0))
+            boss_phase_read_started = time.perf_counter()
             try:
                 boss_phase_snapshot = capture_boss_phase_snapshot(
                     reader,
@@ -5579,6 +6474,9 @@ def run(args: argparse.Namespace) -> int:
                 )
             except (OSError, RuntimeError, ValueError, struct.error) as error:
                 boss_phase_error = f"{type(error).__name__}: {error}"
+            boss_phase_read_ms = (
+                time.perf_counter() - boss_phase_read_started
+            ) * 1000.0
             boss_enemy_pointer = (
                 boss_phase_snapshot.pointer
                 if boss_phase_snapshot is not None
@@ -5588,7 +6486,9 @@ def run(args: argparse.Namespace) -> int:
                     else 0
                 )
             )
+            spell_enemy_guard_read_ms = 0.0
             if boss_enemy_pointer:
+                spell_enemy_guard_read_started = time.perf_counter()
                 boss_guard_frame_before = reader.u32(
                     ADDR_ENEMY_MANAGER_FRAME
                 )
@@ -5604,7 +6504,12 @@ def run(args: argparse.Namespace) -> int:
                 boss_guard_frame_after = reader.u32(
                     ADDR_ENEMY_MANAGER_FRAME
                 )
+                spell_enemy_guard_read_ms = (
+                    time.perf_counter() - spell_enemy_guard_read_started
+                ) * 1000.0
+            ecl_lookahead_read_ms = 0.0
             if spell_state.get("active") and spell_enemy_pointer:
+                ecl_lookahead_read_started = time.perf_counter()
                 ecl_frame_before = reader.u32(0x0164D30C)
                 try:
                     ecl_vm_snapshot = read_main_ecl_vm_snapshot(
@@ -5633,6 +6538,10 @@ def run(args: argparse.Namespace) -> int:
                         f"{type(error).__name__}: {error}"
                     )
                 ecl_frame_after = reader.u32(0x0164D30C)
+                ecl_lookahead_read_ms = (
+                    time.perf_counter() - ecl_lookahead_read_started
+                ) * 1000.0
+            hazard_read_bookkeeping_started = time.perf_counter()
             if (
                 spell_enemy_body_guard is not None
                 and boss_guard_frame_before is not None
@@ -5669,6 +6578,9 @@ def run(args: argparse.Namespace) -> int:
                 spell_enemy_body_guard,
             )
             counter_after_read = reader.u32(0x0164D30C)
+            hazard_read_bookkeeping_ms = (
+                time.perf_counter() - hazard_read_bookkeeping_started
+            ) * 1000.0
             read_ms = (time.perf_counter() - read_started) * 1000.0
             if (
                 enemy_prefix_snapshot.frame_after
@@ -5806,10 +6718,22 @@ def run(args: argparse.Namespace) -> int:
                     hazard_alignment.event_frame_uncertainty
                 )
             decode_started = time.perf_counter()
-            bullets = decode_bullets(
-                bullet_blob,
-                retain_transform_runtime=args.trace_transform_runtime,
+            bullet_decode_started = decode_started
+            bullets = (
+                decode_bullets(
+                    bullet_blob,
+                    retain_transform_runtime=True,
+                )
+                if args.trace_transform_runtime
+                else decode_live_planning_bullets(
+                    bullet_blob,
+                    backend=args.bullet_decode_backend,
+                )
             )
+            bullet_decode_ms = (
+                time.perf_counter() - bullet_decode_started
+            ) * 1000.0
+            bullet_event_attach_started = time.perf_counter()
             if ecl_vm_snapshot is not None and tagged_velocity_toggles:
                 bullets = attach_tagged_velocity_toggles(
                     bullets,
@@ -5820,8 +6744,19 @@ def run(args: argparse.Namespace) -> int:
                         ecl_event_frame_uncertainty or 0
                     ),
                 )
+            bullet_event_attach_ms = (
+                time.perf_counter() - bullet_event_attach_started
+            ) * 1000.0
+            laser_decode_started = time.perf_counter()
             lasers = decode_lasers(laser_blob)
+            laser_decode_ms = (
+                time.perf_counter() - laser_decode_started
+            ) * 1000.0
+            item_decode_started = time.perf_counter()
             items = decode_items(item_blob)
+            item_decode_ms = (
+                time.perf_counter() - item_decode_started
+            ) * 1000.0
             decode_ms = (time.perf_counter() - decode_started) * 1000.0
             player = state["player"]
             resources = state["resources"]
@@ -5994,6 +6929,9 @@ def run(args: argparse.Namespace) -> int:
                     pipeline_prewarm_shadow=(
                         args.pipeline_prewarm_shadow
                     ),
+                    native_viability_worker_limit=(
+                        args.corridor_native_workers
+                    ),
                 )
                 corridor_last_submit = counter_after_read
             if (
@@ -6064,6 +7002,38 @@ def run(args: argparse.Namespace) -> int:
                 and pending_command_estimate is not None
                 else None
             )
+            local_pipeline_estimator_consistent = (
+                (
+                    pipeline_pending_command is None
+                    and held_desired_mask == active_supported_mask
+                )
+                or (
+                    pipeline_pending_command is not None
+                    and pending_supported_mask == held_desired_mask
+                )
+            )
+            observed_local_pipeline_root = (
+                LocalPipelineRoot(
+                    active_action=_local_pipeline_action_from_mask(
+                        active_supported_mask
+                    ),
+                    held_desired_action=held_desired_action,
+                    pending_action=(
+                        _local_pipeline_action_from_mask(
+                            int(pending_supported_mask)
+                        )
+                        if pending_supported_mask is not None
+                        else None
+                    ),
+                    remaining_delay_support=(
+                        pipeline_pending_command.remaining_frames
+                        if pipeline_pending_command is not None
+                        else ()
+                    ),
+                )
+                if local_pipeline_estimator_consistent
+                else None
+            )
             local_pipeline_root_record = {
                 "role": "shadow_no_action_authority",
                 "active_action": _local_pipeline_action_from_mask(
@@ -6101,14 +7071,7 @@ def run(args: argparse.Namespace) -> int:
                     else False
                 ),
                 "estimator_consistent": (
-                    (
-                        pipeline_pending_command is None
-                        and held_desired_mask == active_supported_mask
-                    )
-                    or (
-                        pipeline_pending_command is not None
-                        and pending_supported_mask == held_desired_mask
-                    )
+                    local_pipeline_estimator_consistent
                 ),
             }
             candidate_verifier_target: (
@@ -6312,7 +7275,8 @@ def run(args: argparse.Namespace) -> int:
             plan_ms = (time.perf_counter() - plan_started) * 1000.0
             pre_issue_action = decision.action
             pre_issue_mask = decision.mask
-            issue_enemy_read_started = time.perf_counter()
+            issue_path_started = time.perf_counter()
+            issue_enemy_read_started = issue_path_started
             issue_enemy_prefix_snapshot = (
                 capture_enemy_pool_prefix_contiguous(reader)
             )
@@ -6346,11 +7310,13 @@ def run(args: argparse.Namespace) -> int:
                 ),
             )
             issue_enemy_recertificate_ms = 0.0
+            issue_enemy_bodies_for_shadow = enemy_bodies
             if issue_enemy_changes:
                 issue_enemy_bodies = merge_enemy_pool_prefix(
                     enemy_bodies,
                     issue_enemy_prefix_bodies,
                 )
+                issue_enemy_bodies_for_shadow = issue_enemy_bodies
                 issue_recertificate_started = time.perf_counter()
                 decision = recertify_action_for_fresh_hazards(
                     decision,
@@ -6566,6 +7532,12 @@ def run(args: argparse.Namespace) -> int:
             input_started = time.perf_counter()
             send_transitions(api, transitions)
             input_ms = (time.perf_counter() - input_started) * 1000.0
+            issue_path_ms = (
+                time.perf_counter() - issue_path_started
+            ) * 1000.0
+            observe_to_issue_ms = (
+                time.perf_counter() - iteration_started
+            ) * 1000.0
             if transitions:
                 delay_estimator.issued(
                     snapshot_frame=int(state["enemy_manager_frame"]),
@@ -6576,6 +7548,53 @@ def run(args: argparse.Namespace) -> int:
                 )
             previous_mask = decision.mask
             previous_direction = decision.mask & (UP | DOWN | LEFT | RIGHT)
+            local_pipeline_certificate_shadow: (
+                dict[str, object] | None
+            ) = None
+            if (
+                args.local_pipeline_root_shadow_every > 0
+                and iterations % args.local_pipeline_root_shadow_every == 0
+            ):
+                if observed_local_pipeline_root is None:
+                    local_pipeline_certificate_shadow = {
+                        "role": "post_issue_shadow_no_action_authority",
+                        "status": "estimator_inconsistent",
+                        "computed_after_input": True,
+                        "wall_ms": 0.0,
+                    }
+                else:
+                    local_pipeline_certificate_shadow = (
+                        _direct_root_certificate_shadow(
+                            root=observed_local_pipeline_root,
+                            player_x=float(player["x"]),
+                            player_y=float(player["y"]),
+                            previous_mask=held_desired_mask,
+                            delay_frames=delay_estimate.support,
+                            action_hold_frames=action_hold_frames,
+                            bullets=bullets,
+                            lasers=lasers,
+                            enemy_bodies=issue_enemy_bodies_for_shadow,
+                            snapshot_lag=player_to_hazard_lag,
+                            authoritative_certificates=(
+                                decision.issue_action_certificates
+                            ),
+                        )
+                    )
+                    local_pipeline_certificate_shadow.update(
+                        {
+                            "source_frame": int(
+                                state["enemy_manager_frame"]
+                            ),
+                            "capture_frame": counter_after_read,
+                            "issue_frame": counter_at_action,
+                            "post_capture_advance": (
+                                action_alignment.post_capture_advance
+                            ),
+                            "fresh_enemy_prefix_changed": bool(
+                                issue_enemy_changes
+                            ),
+                        }
+                    )
             pipeline_prewarm_retarget = (
                 _corridor_pipeline_prewarm_retarget(
                     corridor_solution,
@@ -6623,6 +7642,7 @@ def run(args: argparse.Namespace) -> int:
                 or hit_started
                 or auto_confirm_event is not None
                 or action_deadline_missed
+                or local_pipeline_certificate_shadow is not None
             ):
                 ecl_tagged_bullets = (
                     tuple(
@@ -6688,12 +7708,32 @@ def run(args: argparse.Namespace) -> int:
                     "timing_ms": {
                         "observe": observe_ms,
                         "read_pools": read_ms,
+                        "read_enemy_background": enemy_background_ms,
+                        "read_enemy_prefix_capture": (
+                            enemy_prefix_capture_ms
+                        ),
+                        "read_enemy_prefix_merge": enemy_prefix_merge_ms,
+                        "read_bullet_pool": bullet_pool_read_ms,
+                        "read_laser_pool": laser_pool_read_ms,
+                        "read_item_pool": item_pool_read_ms,
+                        "read_boss_phase": boss_phase_read_ms,
+                        "read_spell_enemy_guard": (
+                            spell_enemy_guard_read_ms
+                        ),
+                        "read_ecl_lookahead": ecl_lookahead_read_ms,
+                        "read_hazard_bookkeeping": (
+                            hazard_read_bookkeeping_ms
+                        ),
                         "read_enemy_pool": enemy_pool_read_ms,
                         "read_enemy_prefix": (
                             enemy_prefix_snapshot.read_ms
                         ),
                         "read_enemy_issue_prefix": issue_enemy_read_ms,
                         "decode_pools": decode_ms,
+                        "decode_bullets": bullet_decode_ms,
+                        "attach_bullet_events": bullet_event_attach_ms,
+                        "decode_lasers": laser_decode_ms,
+                        "decode_items": item_decode_ms,
                         "corridor_bookkeeping": corridor_overhead_ms,
                         "local_plan": plan_ms,
                         "local_plan_initial": (
@@ -6701,6 +7741,34 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "issue_enemy_recertificate": (
                             issue_enemy_recertificate_ms
+                        ),
+                        "issue_path_to_input": issue_path_ms,
+                        "observe_to_input": observe_to_issue_ms,
+                        "local_shared_laser_projection": (
+                            decision.local_certificate_timing
+                            .shared_laser_projection_ms
+                        ),
+                        "local_certificate_total": (
+                            decision.local_certificate_timing
+                            .certificate_total_ms
+                        ),
+                        "local_certificate_geometry": (
+                            decision.local_certificate_timing
+                            .geometry_kernel_ms
+                        ),
+                        "issue_certificate_total": (
+                            decision.issue_certificate_timing
+                            .certificate_total_ms
+                        ),
+                        "post_issue_root_shadow": (
+                            float(
+                                local_pipeline_certificate_shadow.get(
+                                    "wall_ms",
+                                    0.0,
+                                )
+                            )
+                            if local_pipeline_certificate_shadow is not None
+                            else 0.0
                         ),
                         "input": input_ms,
                         "before_trace": (
@@ -6716,6 +7784,72 @@ def run(args: argparse.Namespace) -> int:
                         "previous": state["input_previous"],
                     },
                     "local_pipeline_root": local_pipeline_root_record,
+                    "local_pipeline_timing": {
+                        "planning": _local_certificate_timing_record(
+                            decision.local_certificate_timing
+                        ),
+                        "issue_recertificate": (
+                            _local_certificate_timing_record(
+                                decision.issue_certificate_timing
+                            )
+                        ),
+                    },
+                    "local_pipeline_certificate_shadow": (
+                        local_pipeline_certificate_shadow
+                    ),
+                    "planner_objective": {
+                        "corridor_target": (
+                            {
+                                "x": corridor_target[0],
+                                "y": corridor_target[1],
+                                "deadline": corridor_target[2],
+                            }
+                            if corridor_target is not None
+                            else None
+                        ),
+                        "damage_target_x": damage_target_x,
+                        "damage_target_half_width": (
+                            damage_target_half_width
+                        ),
+                        "damageable": damageable,
+                        "active_items": len(items),
+                        "item_objectives_enabled": (
+                            ITEM_OBJECTIVES_ENABLED
+                        ),
+                        "damage_action_authority": False,
+                        "preserve_previous_direction_inertia": (
+                            not corridor_context_changed
+                        ),
+                        "corridor_context_changed": (
+                            corridor_context_changed
+                        ),
+                    },
+                    "planner_guidance": {
+                        "support_covers_current": (
+                            policy_guidance.support_covers_current
+                        ),
+                        "allowed_first_actions": (
+                            policy_guidance.allowed_first_actions
+                        ),
+                        "repair_volumes": dict(
+                            policy_guidance.repair_volumes
+                        ),
+                        "recovery_distances": dict(
+                            policy_guidance.recovery_distances
+                        ),
+                        "safety_actions": policy_guidance.safety_actions,
+                        "safety_state_value": (
+                            policy_guidance.safety_state_value
+                        ),
+                        "survival_actions": (
+                            policy_guidance.survival_actions
+                        ),
+                        "survival_frames": policy_guidance.survival_frames,
+                        "survival_bottleneck_margin": (
+                            policy_guidance.survival_bottleneck_margin
+                        ),
+                        "position_error": policy_guidance.position_error,
+                    },
                     "player": {
                         "x": player["x"],
                         "y": player["y"],
@@ -7207,6 +8341,18 @@ def run(args: argparse.Namespace) -> int:
                         - corridor_report_solution.source_frame,
                         "solve_ms": corridor_report_solution.solve_ms,
                         "worker_ms": corridor_report_solution.worker_ms,
+                        "background_priority_lowered": (
+                            corridor_report_solution
+                            .background_priority_lowered
+                        ),
+                        "native_viability_worker_limit": (
+                            corridor_report_solution
+                            .native_viability_worker_limit
+                        ),
+                        "native_viability_worker_limit_applied": (
+                            corridor_report_solution
+                            .native_viability_worker_limit_applied
+                        ),
                         "reachable": corridor_report_solution.plan.reachable,
                         "planning_mode": (
                             corridor_report_solution.plan.planning_mode
@@ -7920,9 +9066,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--difficulty",
         type=int,
-        choices=(3, 4),
+        choices=(0, 1, 2, 3, 4),
         default=3,
-        help="required runtime difficulty index: 3 Lunatic, 4 Extra",
+        help=(
+            "required runtime difficulty index: 0 Easy, 1 Normal, 2 Hard, "
+            "3 Lunatic, 4 Extra"
+        ),
     )
     parser.add_argument(
         "--corridor-every",
@@ -7941,6 +9090,17 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=CORRIDOR_MAX_AGE_FRAMES,
         help="discard a corridor result after this many game frames",
+    )
+    parser.add_argument(
+        "--corridor-native-workers",
+        type=int,
+        choices=(1, 2, 3, 4),
+        default=4,
+        help=(
+            "native viability worker cap on the asynchronous corridor "
+            "thread; four preserves authoritative plan throughput, while "
+            "smaller values are explicit contention ablations"
+        ),
     )
     parser.add_argument(
         "--safety-value-horizon",
@@ -7992,6 +9152,49 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "minimum repeated-frame telemetry sampling cadence; this controls "
             "trace cost only and is never an episode classifier"
+        ),
+    )
+    parser.add_argument(
+        "--local-pipeline-root-shadow-every",
+        type=int,
+        default=0,
+        metavar="DECISIONS",
+        help=(
+            "after input issue, sample an explicit observed/estimated-root "
+            "certificate every N decisions; zero disables it, results never "
+            "change the issued action, and the measured work may perturb the "
+            "next controller cadence"
+        ),
+    )
+    parser.add_argument(
+        "--local-hazard-backend",
+        choices=("numpy", "native"),
+        default="native",
+        help=(
+            "local hazard-query implementation; the parity-gated native C "
+            "ABI is the default and numpy is the explicit reference rollback"
+        ),
+    )
+    parser.add_argument(
+        "--local-beam-reducer",
+        choices=("python", "native"),
+        default="native",
+        help=(
+            "quantized beam deduplication and pruning implementation; the "
+            "parity-gated native reducer is the default and python is the "
+            "explicit reference rollback"
+        ),
+    )
+    parser.add_argument(
+        "--bullet-decode-backend",
+        choices=("python", "native"),
+        default="native",
+        help=(
+            "planning bullet-pool decoder; the parity-gated native packed "
+            "snapshot is the default above its measured sparse crossover, "
+            "python objects are the explicit reference rollback, and "
+            "transform-runtime tracing always uses the diagnostic Python "
+            "decoder"
         ),
     )
     parser.add_argument(

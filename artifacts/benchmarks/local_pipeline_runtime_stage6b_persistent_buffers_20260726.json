@@ -1,0 +1,781 @@
+{
+  "schema": "th08-local-pipeline-runtime-telemetry-v1",
+  "claim_boundary": {
+    "full_chain": "observe_to_input ends immediately after SendInput and excludes the post-issue explicit-root shadow",
+    "explicit_root_shadow": "computed after SendInput, has no current-action authority, and can perturb the next cadence",
+    "native_active": "local_pipeline_root.active_action comes from input_current"
+  },
+  "traces": [
+    {
+      "trace": "artifacts/runtime_reports/lunatic_route2_stage6b_unattended_20260726_165841.jsonl",
+      "trace_sha256": "dffce7544f1fd49ba81007e64358b40f30d4a8de5c57b85e5f0649c15078d469",
+      "decision_rows": 19156,
+      "prehit_decision_rows": 350,
+      "first_hit_frame": 748,
+      "bomb_rows": 0,
+      "deadline_misses": {
+        "count": 1,
+        "frames": [
+          22030
+        ]
+      },
+      "issue_recertification_rows": 709,
+      "root": {
+        "rows": 19156,
+        "estimator_consistent": 19152,
+        "estimator_inconsistent": 4,
+        "active_held_mismatch": 1452,
+        "pending": 1483,
+        "overdue": 24
+      },
+      "full_chain_timing": {
+        "observe": {
+          "count": 19156,
+          "median_ms": 0.21860003471374512,
+          "p95_ms": 0.5112999933771789,
+          "p99_ms": 0.5863000405952334,
+          "max_ms": 10.799800045788288,
+          "mean_ms": 0.27485542371582244
+        },
+        "read_pools": {
+          "count": 19156,
+          "median_ms": 3.9138499996624887,
+          "p95_ms": 6.826299999374896,
+          "p99_ms": 8.42729996656999,
+          "max_ms": 24.30999994976446,
+          "mean_ms": 4.356098110120364
+        },
+        "read_enemy_background": {
+          "count": 19156,
+          "median_ms": 0.03980001201853156,
+          "p95_ms": 0.11800002539530396,
+          "p99_ms": 0.22270000772550702,
+          "max_ms": 0.6018999847583473,
+          "mean_ms": 0.047511865756827205
+        },
+        "read_enemy_prefix_capture": {
+          "count": 19156,
+          "median_ms": 1.7321000050287694,
+          "p95_ms": 3.0521000153385103,
+          "p99_ms": 4.8723999643698335,
+          "max_ms": 16.56409999122843,
+          "mean_ms": 1.9449907548132566
+        },
+        "read_enemy_prefix_merge": {
+          "count": 19156,
+          "median_ms": 0.024200009647756815,
+          "p95_ms": 0.20540005061775446,
+          "p99_ms": 0.31129998387768865,
+          "max_ms": 0.6701000384055078,
+          "mean_ms": 0.06199265500966897
+        },
+        "read_bullet_pool": {
+          "count": 19156,
+          "median_ms": 1.0387999936938286,
+          "p95_ms": 2.433900022879243,
+          "p99_ms": 3.160200023557991,
+          "max_ms": 15.97030000993982,
+          "mean_ms": 1.2386638338668687
+        },
+        "read_laser_pool": {
+          "count": 19156,
+          "median_ms": 0.06839999696239829,
+          "p95_ms": 0.7534999749623239,
+          "p99_ms": 2.1644999505952,
+          "max_ms": 13.959100004285574,
+          "mean_ms": 0.1777399407150712
+        },
+        "read_item_pool": {
+          "count": 19156,
+          "median_ms": 0.2561000292189419,
+          "p95_ms": 0.7618999807164073,
+          "p99_ms": 1.7695000278763473,
+          "max_ms": 7.214299985207617,
+          "mean_ms": 0.36414003954249546
+        },
+        "read_boss_phase": {
+          "count": 19156,
+          "median_ms": 0.15119998715817928,
+          "p95_ms": 0.49210002180188894,
+          "p99_ms": 1.4170999638736248,
+          "max_ms": 5.582000012509525,
+          "mean_ms": 0.20566307170576975
+        },
+        "read_spell_enemy_guard": {
+          "count": 19156,
+          "median_ms": 0.05530001362785697,
+          "p95_ms": 0.3795999800786376,
+          "p99_ms": 1.5057999989949167,
+          "max_ms": 15.046099957544357,
+          "mean_ms": 0.11431836506597737
+        },
+        "read_ecl_lookahead": {
+          "count": 19156,
+          "median_ms": 0.05670002428814769,
+          "p95_ms": 0.16759999562054873,
+          "p99_ms": 0.493600033223629,
+          "max_ms": 5.138400010764599,
+          "mean_ms": 0.06290413954075563
+        },
+        "read_hazard_bookkeeping": {
+          "count": 19156,
+          "median_ms": 0.058500037994235754,
+          "p95_ms": 0.10310002835467458,
+          "p99_ms": 0.19239995162934065,
+          "max_ms": 4.9162000068463385,
+          "mean_ms": 0.06438646387982387
+        },
+        "read_enemy_issue_prefix": {
+          "count": 19156,
+          "median_ms": 1.7941500118467957,
+          "p95_ms": 3.5839000483974814,
+          "p99_ms": 5.119399982504547,
+          "max_ms": 21.824800001922995,
+          "mean_ms": 2.07861977452808
+        },
+        "decode_pools": {
+          "count": 19156,
+          "median_ms": 2.887800015741959,
+          "p95_ms": 7.751600001938641,
+          "p99_ms": 11.152899998705834,
+          "max_ms": 22.92629994917661,
+          "mean_ms": 3.3546605916621806
+        },
+        "decode_bullets": {
+          "count": 19156,
+          "median_ms": 2.4062000156845897,
+          "p95_ms": 7.282299979124218,
+          "p99_ms": 10.647899995092303,
+          "max_ms": 22.36309996806085,
+          "mean_ms": 2.8600066396913215
+        },
+        "attach_bullet_events": {
+          "count": 19156,
+          "median_ms": 0.000400003045797348,
+          "p95_ms": 0.000900006853044033,
+          "p99_ms": 0.001200009137392044,
+          "max_ms": 0.01409999094903469,
+          "mean_ms": 0.00045656199811275767
+        },
+        "decode_lasers": {
+          "count": 19156,
+          "median_ms": 0.04140002420172095,
+          "p95_ms": 0.9069000370800495,
+          "p99_ms": 2.3846999974921346,
+          "max_ms": 15.026199980638921,
+          "mean_ms": 0.23145255826306768
+        },
+        "decode_items": {
+          "count": 19156,
+          "median_ms": 0.19480002811178565,
+          "p95_ms": 0.5386000266298652,
+          "p99_ms": 1.0162999969907105,
+          "max_ms": 5.822100036311895,
+          "mean_ms": 0.2614981516509267
+        },
+        "corridor_bookkeeping": {
+          "count": 19156,
+          "median_ms": 0.7764500041957945,
+          "p95_ms": 4.4797000009566545,
+          "p99_ms": 8.581100031733513,
+          "max_ms": 75.60280000325292,
+          "mean_ms": 1.4721784454035869
+        },
+        "local_plan_initial": {
+          "count": 19156,
+          "median_ms": 16.910599981201813,
+          "p95_ms": 27.71609998308122,
+          "p99_ms": 34.94689997751266,
+          "max_ms": 96.5594999724999,
+          "mean_ms": 18.171664684754255
+        },
+        "local_shared_laser_projection": {
+          "count": 19156,
+          "median_ms": 0.1068,
+          "p95_ms": 2.1405,
+          "p99_ms": 5.9819,
+          "max_ms": 58.4226,
+          "mean_ms": 0.5343276780121111
+        },
+        "local_certificate_total": {
+          "count": 19156,
+          "median_ms": 2.96985,
+          "p95_ms": 7.2425999999999995,
+          "p99_ms": 13.1749,
+          "max_ms": 68.00319999999999,
+          "mean_ms": 3.6183574702443098
+        },
+        "local_certificate_geometry": {
+          "count": 19156,
+          "median_ms": 2.1129,
+          "p95_ms": 5.6109,
+          "p99_ms": 12.0556,
+          "max_ms": 67.1189,
+          "mean_ms": 2.7158098976821883
+        },
+        "local_control_prefix": {
+          "count": 19156,
+          "median_ms": 0.6769499999999999,
+          "p95_ms": 1.4509,
+          "p99_ms": 2.2783,
+          "max_ms": 14.2129,
+          "mean_ms": 0.7728601221549384
+        },
+        "local_planning_bullet_projection": {
+          "count": 19156,
+          "median_ms": 0.3425,
+          "p95_ms": 0.8469,
+          "p99_ms": 1.33,
+          "max_ms": 6.2316,
+          "mean_ms": 0.3798719043641679
+        },
+        "local_beam_search": {
+          "count": 19156,
+          "median_ms": 11.3908,
+          "p95_ms": 19.3095,
+          "p99_ms": 23.8807,
+          "max_ms": 36.145,
+          "mean_ms": 12.117600130507412
+        },
+        "local_terminal_threat": {
+          "count": 19156,
+          "median_ms": 0.0325,
+          "p95_ms": 2.5912,
+          "p99_ms": 4.3535,
+          "max_ms": 18.6611,
+          "mean_ms": 0.24382865942785548
+        },
+        "local_selection_finalize": {
+          "count": 19156,
+          "median_ms": 0.2595,
+          "p95_ms": 0.5175,
+          "p99_ms": 0.6362,
+          "max_ms": 7.632,
+          "mean_ms": 0.28642129880977235
+        },
+        "local_certificate_validation": {
+          "count": 19156,
+          "median_ms": 0.0059,
+          "p95_ms": 0.0117,
+          "p99_ms": 0.0169,
+          "max_ms": 0.4904,
+          "mean_ms": 0.006869795364376697
+        },
+        "local_certificate_hazard_projection": {
+          "count": 19156,
+          "median_ms": 0.41964999999999997,
+          "p95_ms": 1.2046999999999999,
+          "p99_ms": 3.4919,
+          "max_ms": 18.316399999999998,
+          "mean_ms": 0.5433509083315933
+        },
+        "local_certificate_branch_setup": {
+          "count": 19156,
+          "median_ms": 0.0556,
+          "p95_ms": 0.096,
+          "p99_ms": 0.12539999999999998,
+          "max_ms": 0.6053999999999999,
+          "mean_ms": 0.058274556274796406
+        },
+        "local_certificate_reduction": {
+          "count": 19156,
+          "median_ms": 0.27099999999999996,
+          "p95_ms": 0.5983999999999999,
+          "p99_ms": 0.729,
+          "max_ms": 1.2001,
+          "mean_ms": 0.2940523125913552
+        },
+        "issue_enemy_recertificate": {
+          "count": 19156,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 4.585299990139902,
+          "max_ms": 23.974200012162328,
+          "mean_ms": 0.15254258195008408
+        },
+        "issue_certificate_total": {
+          "count": 19156,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 4.4714,
+          "max_ms": 23.7514,
+          "mean_ms": 0.14878093547713508
+        },
+        "issue_path_to_input": {
+          "count": 19156,
+          "median_ms": 2.629099995829165,
+          "p95_ms": 7.528199988882989,
+          "p99_ms": 11.337700008880347,
+          "max_ms": 50.94320001080632,
+          "mean_ms": 3.406863223026365
+        },
+        "observe_to_input": {
+          "count": 19156,
+          "median_ms": 30.10704999906011,
+          "p95_ms": 44.91350002354011,
+          "p99_ms": 54.43709995597601,
+          "max_ms": 110.54879997391254,
+          "mean_ms": 31.13907597620528
+        },
+        "input": {
+          "count": 19156,
+          "median_ms": 0.001500011421740055,
+          "p95_ms": 4.350300005171448,
+          "p99_ms": 6.533399980980903,
+          "max_ms": 13.85009998921305,
+          "mean_ms": 0.9635922687644167
+        },
+        "post_issue_root_shadow": {
+          "count": 19156,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0
+        },
+        "before_trace": {
+          "count": 19156,
+          "median_ms": 30.196100007742643,
+          "p95_ms": 45.02269998192787,
+          "p99_ms": 54.617200046777725,
+          "max_ms": 110.67199998069555,
+          "mean_ms": 31.23037044269959
+        },
+        "previous_iteration": {
+          "count": 19155,
+          "median_ms": 32.27239998523146,
+          "p95_ms": 47.60859999805689,
+          "p99_ms": 57.83589999191463,
+          "max_ms": 114.02599996654317,
+          "mean_ms": 33.29671046187487
+        },
+        "local_search_and_other": {
+          "count": 19156,
+          "median_ms": 13.123499992717802,
+          "p95_ms": 21.845399979670347,
+          "p99_ms": 26.658600042451177,
+          "max_ms": 38.64490002059415,
+          "mean_ms": 14.018979536497836
+        }
+      },
+      "prehit_full_chain_timing": {
+        "observe": {
+          "count": 350,
+          "median_ms": 0.19474996952340007,
+          "p95_ms": 0.4526000120677054,
+          "p99_ms": 0.5702999769710004,
+          "max_ms": 0.8226000354625285,
+          "mean_ms": 0.2287951429441039
+        },
+        "read_pools": {
+          "count": 350,
+          "median_ms": 3.326850011944771,
+          "p95_ms": 6.072700023651123,
+          "p99_ms": 7.3031000210903585,
+          "max_ms": 8.155399991665035,
+          "mean_ms": 3.746441998352696
+        },
+        "read_enemy_background": {
+          "count": 350,
+          "median_ms": 0.03209998249076307,
+          "p95_ms": 0.06250001024454832,
+          "p99_ms": 0.11060002725571394,
+          "max_ms": 0.31049997778609395,
+          "mean_ms": 0.033839426801673005
+        },
+        "read_enemy_prefix_capture": {
+          "count": 350,
+          "median_ms": 1.6056500026024878,
+          "p95_ms": 2.71869997959584,
+          "p99_ms": 5.1188999786973,
+          "max_ms": 6.004599970765412,
+          "mean_ms": 1.7979899995095496
+        },
+        "read_enemy_prefix_merge": {
+          "count": 350,
+          "median_ms": 0.02414998016320169,
+          "p95_ms": 0.26929995510727167,
+          "p99_ms": 0.34870003582909703,
+          "max_ms": 0.4168000305071473,
+          "mean_ms": 0.07064114474425358
+        },
+        "read_bullet_pool": {
+          "count": 350,
+          "median_ms": 0.991149980109185,
+          "p95_ms": 2.3407000117003918,
+          "p99_ms": 3.1257999944500625,
+          "max_ms": 3.857300034724176,
+          "mean_ms": 1.1705120007640548
+        },
+        "read_laser_pool": {
+          "count": 350,
+          "median_ms": 0.0640999642200768,
+          "p95_ms": 0.7540999795310199,
+          "p99_ms": 2.1425000159069896,
+          "max_ms": 3.0016000382602215,
+          "mean_ms": 0.1668639961696629
+        },
+        "read_item_pool": {
+          "count": 350,
+          "median_ms": 0.23980002151802182,
+          "p95_ms": 0.6594000151380897,
+          "p99_ms": 1.7695000278763473,
+          "max_ms": 2.6301999459974468,
+          "mean_ms": 0.33693543202908977
+        },
+        "read_boss_phase": {
+          "count": 350,
+          "median_ms": 0.06644998211413622,
+          "p95_ms": 0.1765000051818788,
+          "p99_ms": 0.728400016669184,
+          "max_ms": 1.6886999947018921,
+          "mean_ms": 0.09047914229865585
+        },
+        "read_spell_enemy_guard": {
+          "count": 350,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0
+        },
+        "read_ecl_lookahead": {
+          "count": 350,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0
+        },
+        "read_hazard_bookkeeping": {
+          "count": 350,
+          "median_ms": 0.007700000423938036,
+          "p95_ms": 0.019799976143985987,
+          "p99_ms": 0.10200001997873187,
+          "max_ms": 0.8799000061117113,
+          "mean_ms": 0.014012572355568409
+        },
+        "read_enemy_issue_prefix": {
+          "count": 350,
+          "median_ms": 1.7088000022340566,
+          "p95_ms": 3.2085999846458435,
+          "p99_ms": 4.325099987909198,
+          "max_ms": 6.046700000297278,
+          "mean_ms": 1.9170300007265593
+        },
+        "decode_pools": {
+          "count": 350,
+          "median_ms": 0.8104000007733703,
+          "p95_ms": 7.605899998452514,
+          "p99_ms": 10.026700037997216,
+          "max_ms": 15.543900022748858,
+          "mean_ms": 2.503869712818414
+        },
+        "decode_bullets": {
+          "count": 350,
+          "median_ms": 0.6323999841697514,
+          "p95_ms": 6.398900004569441,
+          "p99_ms": 9.060900018084794,
+          "max_ms": 12.566399993374944,
+          "mean_ms": 2.078552286173882
+        },
+        "attach_bullet_events": {
+          "count": 350,
+          "median_ms": 0.000200001522898674,
+          "p95_ms": 0.000400003045797348,
+          "p99_ms": 0.000500003807246685,
+          "max_ms": 0.000700005330145359,
+          "mean_ms": 0.0002625715985362019
+        },
+        "decode_lasers": {
+          "count": 350,
+          "median_ms": 0.03619998460635543,
+          "p95_ms": 0.08829997386783361,
+          "p99_ms": 0.10419997852295637,
+          "max_ms": 0.14519999967887998,
+          "mean_ms": 0.043586284653948884
+        },
+        "decode_items": {
+          "count": 350,
+          "median_ms": 0.17245003255084157,
+          "p95_ms": 2.935500000603497,
+          "p99_ms": 3.413699974771589,
+          "max_ms": 5.822100036311895,
+          "mean_ms": 0.38056342845915686
+        },
+        "corridor_bookkeeping": {
+          "count": 350,
+          "median_ms": 0.6565999938175082,
+          "p95_ms": 2.124899998307228,
+          "p99_ms": 4.450000007636845,
+          "max_ms": 5.91760000679642,
+          "mean_ms": 0.8734979996058557
+        },
+        "local_plan_initial": {
+          "count": 350,
+          "median_ms": 14.638849999755621,
+          "p95_ms": 23.58419995289296,
+          "p99_ms": 31.383799971081316,
+          "max_ms": 37.594900000840425,
+          "mean_ms": 13.332675715542532
+        },
+        "local_shared_laser_projection": {
+          "count": 350,
+          "median_ms": 0.07114999999999999,
+          "p95_ms": 0.1853,
+          "p99_ms": 0.2936,
+          "max_ms": 1.6654,
+          "mean_ms": 0.09481999999999999
+        },
+        "local_certificate_total": {
+          "count": 350,
+          "median_ms": 1.8952999999999998,
+          "p95_ms": 4.3648,
+          "p99_ms": 5.547899999999999,
+          "max_ms": 12.664,
+          "mean_ms": 2.252942
+        },
+        "local_certificate_geometry": {
+          "count": 350,
+          "median_ms": 1.28965,
+          "p95_ms": 3.1216,
+          "p99_ms": 4.2766,
+          "max_ms": 10.243699999999999,
+          "mean_ms": 1.607333142857143
+        },
+        "local_control_prefix": {
+          "count": 350,
+          "median_ms": 0.4373,
+          "p95_ms": 1.0629,
+          "p99_ms": 1.7998,
+          "max_ms": 8.519,
+          "mean_ms": 0.5280985714285714
+        },
+        "local_planning_bullet_projection": {
+          "count": 350,
+          "median_ms": 0.1473,
+          "p95_ms": 0.7,
+          "p99_ms": 1.1233,
+          "max_ms": 1.3967,
+          "mean_ms": 0.26603257142857145
+        },
+        "local_beam_search": {
+          "count": 350,
+          "median_ms": 10.7391,
+          "p95_ms": 18.9972,
+          "p99_ms": 25.8428,
+          "max_ms": 29.9819,
+          "mean_ms": 9.689800857142858
+        },
+        "local_terminal_threat": {
+          "count": 350,
+          "median_ms": 0.0283,
+          "p95_ms": 0.0566,
+          "p99_ms": 3.2281,
+          "max_ms": 5.6358,
+          "mean_ms": 0.10358371428571429
+        },
+        "local_selection_finalize": {
+          "count": 350,
+          "median_ms": 0.22865,
+          "p95_ms": 0.4752,
+          "p99_ms": 0.6538,
+          "max_ms": 1.0501,
+          "mean_ms": 0.2155645714285714
+        },
+        "local_certificate_validation": {
+          "count": 350,
+          "median_ms": 0.005,
+          "p95_ms": 0.0096,
+          "p99_ms": 0.0109,
+          "max_ms": 0.0192,
+          "mean_ms": 0.005608285714285714
+        },
+        "local_certificate_hazard_projection": {
+          "count": 350,
+          "median_ms": 0.15905,
+          "p95_ms": 0.829,
+          "p99_ms": 1.2736999999999998,
+          "max_ms": 2.6412999999999998,
+          "mean_ms": 0.3166942857142857
+        },
+        "local_certificate_branch_setup": {
+          "count": 350,
+          "median_ms": 0.04625,
+          "p95_ms": 0.0771,
+          "p99_ms": 0.1025,
+          "max_ms": 0.17099999999999999,
+          "mean_ms": 0.049836
+        },
+        "local_certificate_reduction": {
+          "count": 350,
+          "median_ms": 0.2521,
+          "p95_ms": 0.5680999999999999,
+          "p99_ms": 0.6996,
+          "max_ms": 0.8057,
+          "mean_ms": 0.27347028571428567
+        },
+        "issue_enemy_recertificate": {
+          "count": 350,
+          "median_ms": 0.0,
+          "p95_ms": 3.3369000302627683,
+          "p99_ms": 4.55589999910444,
+          "max_ms": 6.8922999780625105,
+          "mean_ms": 0.35382600052149166
+        },
+        "issue_certificate_total": {
+          "count": 350,
+          "median_ms": 0.0,
+          "p95_ms": 3.2515,
+          "p99_ms": 4.4289,
+          "max_ms": 6.7787,
+          "mean_ms": 0.3453105714285714
+        },
+        "issue_path_to_input": {
+          "count": 350,
+          "median_ms": 2.387099986663088,
+          "p95_ms": 7.301700010430068,
+          "p99_ms": 9.207799972500652,
+          "max_ms": 12.173899973277003,
+          "mean_ms": 3.078040857466736
+        },
+        "observe_to_input": {
+          "count": 350,
+          "median_ms": 24.946699995780364,
+          "p95_ms": 40.05370003869757,
+          "p99_ms": 45.26389995589852,
+          "max_ms": 61.721400008536875,
+          "mean_ms": 23.845039713196456
+        },
+        "input": {
+          "count": 350,
+          "median_ms": 0.000900006853044033,
+          "p95_ms": 3.0701999785378575,
+          "p99_ms": 4.802700015716255,
+          "max_ms": 7.283799990545958,
+          "mean_ms": 0.6152065716949957
+        },
+        "post_issue_root_shadow": {
+          "count": 350,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0
+        },
+        "before_trace": {
+          "count": 350,
+          "median_ms": 24.964199983514845,
+          "p95_ms": 40.10580002795905,
+          "p99_ms": 45.293500006664544,
+          "max_ms": 61.76609999965876,
+          "mean_ms": 23.86492142852928
+        },
+        "previous_iteration": {
+          "count": 349,
+          "median_ms": 26.505500019993633,
+          "p95_ms": 42.5245999940671,
+          "p99_ms": 48.87529998086393,
+          "max_ms": 63.638599996920675,
+          "mean_ms": 25.509499712749772
+        },
+        "local_search_and_other": {
+          "count": 350,
+          "median_ms": 12.059399990091473,
+          "p95_ms": 20.928300017352402,
+          "p99_ms": 28.68599997108132,
+          "max_ms": 30.85600004610643,
+          "mean_ms": 10.98491371554253
+        }
+      },
+      "explicit_root_shadow": {
+        "sampled_rows": 0,
+        "complete": 0,
+        "estimator_inconsistent": 0,
+        "safe_action_set_changes": 0,
+        "timing": {
+          "wall": null,
+          "validation": null,
+          "hazard_projection": null,
+          "branch_setup": null,
+          "geometry_kernel": null,
+          "reduction": null,
+          "certificate_total": null
+        },
+        "by_active_bullets": {
+          "lt_200": {
+            "count": 0,
+            "timing": {
+              "wall": null,
+              "validation": null,
+              "hazard_projection": null,
+              "branch_setup": null,
+              "geometry_kernel": null,
+              "reduction": null,
+              "certificate_total": null
+            }
+          },
+          "200_599": {
+            "count": 0,
+            "timing": {
+              "wall": null,
+              "validation": null,
+              "hazard_projection": null,
+              "branch_setup": null,
+              "geometry_kernel": null,
+              "reduction": null,
+              "certificate_total": null
+            }
+          },
+          "600_999": {
+            "count": 0,
+            "timing": {
+              "wall": null,
+              "validation": null,
+              "hazard_projection": null,
+              "branch_setup": null,
+              "geometry_kernel": null,
+              "reduction": null,
+              "certificate_total": null
+            }
+          },
+          "ge_1000": {
+            "count": 0,
+            "timing": {
+              "wall": null,
+              "validation": null,
+              "hazard_projection": null,
+              "branch_setup": null,
+              "geometry_kernel": null,
+              "reduction": null,
+              "certificate_total": null
+            }
+          }
+        }
+      },
+      "shadow_contention": {
+        "warning": "observational comparison only; sampled rows are periodic, not randomized, and hazard/cadence mix may differ",
+        "next_iteration_ms_after_shadow": null,
+        "next_iteration_ms_after_plain": {
+          "count": 19153,
+          "median_ms": 32.27239998523146,
+          "p95_ms": 47.60419996455312,
+          "p99_ms": 57.83589999191463,
+          "max_ms": 114.02599996654317,
+          "mean_ms": 33.29572309284146
+        },
+        "next_decision_frame_delta_after_shadow": null,
+        "next_decision_frame_delta_after_plain": {
+          "count": 19153,
+          "median_frames": 3.0,
+          "p95_frames": 4.0,
+          "p99_frames": 4.0,
+          "max_frames": 1804.0,
+          "mean_frames": 3.7345585547955933
+        },
+        "deadline_miss_after_shadow": 0,
+        "deadline_miss_after_plain": 1
+      }
+    }
+  ]
+}

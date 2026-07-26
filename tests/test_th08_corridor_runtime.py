@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import math
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -196,6 +197,58 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
             "native_augmented_pipeline_workspace",
         )
         workspace_solution.pipeline_survival_workspace.close()
+
+    def test_background_resource_controls_are_applied_and_reported(self) -> None:
+        with (
+            patch(
+                "th08_corridor_runtime.lower_current_thread_priority",
+                return_value=True,
+            ) as priority,
+            patch(
+                "th08_corridor_runtime.native_backend."
+                "set_current_thread_viability_worker_limit",
+                return_value=True,
+            ) as worker_limit,
+        ):
+            solution = solve_corridor(
+                source_frame=100,
+                snapshot_frame=90,
+                forecast_lead_frames=10,
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                control_delay_candidates=(1, 2),
+                nominal_control_delay=1,
+                active_action="stay",
+                background_low_priority=True,
+                native_viability_worker_limit=2,
+            )
+        priority.assert_called_once_with()
+        worker_limit.assert_called_once_with(2)
+        self.assertTrue(solution.background_priority_lowered)
+        self.assertEqual(solution.native_viability_worker_limit, 2)
+        self.assertTrue(solution.native_viability_worker_limit_applied)
+
+    def test_background_worker_limit_rejects_out_of_range_values(self) -> None:
+        with self.assertRaisesRegex(ValueError, "must be 1..4"):
+            solve_corridor(
+                source_frame=100,
+                snapshot_frame=90,
+                forecast_lead_frames=10,
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                control_delay_candidates=(1,),
+                nominal_control_delay=1,
+                active_action="stay",
+                native_viability_worker_limit=0,
+            )
 
 if __name__ == "__main__":
     unittest.main()

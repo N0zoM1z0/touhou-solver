@@ -3109,3 +3109,57 @@ Status: observed | inferred | unknown | fixed
 - **Evidence:**
   `artifacts/benchmarks/local_pipeline_certificate_20260726.json` and
   `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
+
+## CE-0124: The first post-discontinuity root was active/held inconsistent
+
+- **Observed physical counterexample:** Complete Hard Stage-1 run
+  `hard_route2_stage1_unattended_20260726_175049` emitted an
+  `action_epoch_discontinuity` at manager frame `16748`. At the first retained
+  decision after it, frame `16750`, native `input_current` was mask `0xA5`
+  (`down_right`) while the controller's held desired mask had been reset to
+  `0x01` (`stay_unfocused`). There was no retained pending command or
+  remaining-delay support, and the root record correctly marked
+  `estimator_consistent=false`.
+- **Invalid assumption:** An epoch reset or missing prior-write record does
+  not make native active input equal to the newly initialized held desired
+  value. The actuator can still expose an older active command at the first
+  post-discontinuity observation.
+- **Consequence:** Reconstructing the first root as active-equals-held would
+  erase an observed movement prefix and could certify the wrong first action.
+  The current live local fallback still uses active-equals-held semantics, so
+  explicit active/held/pending roots remain shadow-only.
+- **Correction/gate:** Preserve native `input_current` independently across
+  the discontinuity, treat the missing issue history as unresolved rather
+  than “no pending,” and fail closed on estimator inconsistency. Do not pass
+  the explicit root into live selection until discontinuity initialization,
+  pending support, frozen-manager behavior, direct-root replay, and the full
+  issue deadline are reconciled.
+- **Authority boundary:** The run had zero hits, zero Bomb, and zero deadline
+  misses, but this one root is a causal telemetry counterexample, not evidence
+  that the fallback is generally safe. No new actuator or planner authority
+  follows.
+- **Evidence:** ignored raw replay bundle
+  `hard_route2_stage1_unattended_20260726_175049.jsonl`, compact run artifacts,
+  and `notes/runs/hard_route2_stage1_unattended_20260726_175049.md`.
+
+## CE-0125: Hard Practice preconfirm exposed two different difficulty fields
+
+- **Observed automation counterexample:** The first Hard Stage-1 launch
+  attempt `174946` reached the native Practice stage screen with
+  `mode=11`, `substate=1`, stage cursor `0`, difficulty cursor `2`, and
+  Route 2. The gameplay `difficulty_index` was still `0` before the final
+  stage confirm, so a gate that treated it as the selected menu difficulty
+  rejected a correct Hard menu state.
+- **Invalid assumption:** `difficulty_cursor` is the authoritative
+  preconfirm menu selection; `difficulty_index` becomes authoritative only
+  after gameplay loads. They are not interchangeable at the stage-selection
+  boundary.
+- **Correction:** Validate `difficulty_cursor` before final confirm, then let
+  the armed live agent independently require gameplay `difficulty_index=2`.
+  The next run `175049` passed both gates and completed Stage 1.
+- **Regression:** `test_preconfirm_gate_uses_difficulty_cursor_before_gameplay_index`
+  plus difficulty-order/parser tests in
+  `tests/test_th08_practice_supervisor.py`.
+- **Evidence:** retained failed session
+  `hard_route2_stage1_unattended_20260726_174946.session.json` and complete
+  successor artifacts for `175049`.

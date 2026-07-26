@@ -134,11 +134,36 @@ def _decision(
     items = tuple(Item(*values) for values in row.get("items", ()))
     corridor = row.get("corridor") or {}
     viability = corridor.get("viability") or {}
-    target = corridor.get("target")
+    planner_objective = row.get("planner_objective") or {}
+    planner_guidance = row.get("planner_guidance") or {}
+    target = (
+        corridor.get("target")
+        or planner_objective.get("corridor_target")
+    )
     safe_actions = (
         (forced_first_action,)
         if forced_first_action is not None
-        else tuple(viability.get("safe_actions", ()))
+        else (
+            tuple(planner_guidance["allowed_first_actions"])
+            if planner_guidance.get("allowed_first_actions") is not None
+            else (
+                None
+                if "allowed_first_actions" in planner_guidance
+                else (
+                    tuple(viability.get("safe_actions", ())) or None
+                )
+            )
+        )
+    )
+    repair_volumes = (
+        planner_guidance.get("repair_volumes")
+        if "repair_volumes" in planner_guidance
+        else viability.get("repair_volumes", {})
+    )
+    recovery_distances = (
+        planner_guidance.get("recovery_distances")
+        if "recovery_distances" in planner_guidance
+        else viability.get("recovery_distances", {})
     )
     held_mask = root.held_mask
     return choose_action(
@@ -168,22 +193,40 @@ def _decision(
         target_deadline=(
             int(target["deadline"]) if target is not None else None
         ),
-        allowed_first_actions=safe_actions or None,
+        allowed_first_actions=safe_actions,
         viability_repair_volumes=tuple(
-            viability.get("repair_volumes", {}).items()
+            (repair_volumes or {}).items()
         ),
         viability_recovery_distances=tuple(
-            viability.get("recovery_distances", {}).items()
+            (recovery_distances or {}).items()
+        ),
+        viability_safety_actions=tuple(
+            planner_guidance.get("safety_actions", ())
+        ),
+        viability_safety_state_value=planner_guidance.get(
+            "safety_state_value"
         ),
         viability_survival_actions=tuple(
-            viability.get("survival_best_actions", ())
+            planner_guidance.get(
+                "survival_actions",
+                viability.get("survival_best_actions", ()),
+            )
         ),
-        viability_survival_frames=viability.get("survival_frames"),
+        viability_survival_frames=planner_guidance.get(
+            "survival_frames",
+            viability.get("survival_frames"),
+        ),
         viability_survival_bottleneck_margin=(
-            viability.get("survival_bottleneck_margin")
+            planner_guidance.get(
+                "survival_bottleneck_margin",
+                viability.get("survival_bottleneck_margin"),
+            )
         ),
         viability_position_error=float(
-            viability.get("position_error", 0.0)
+            planner_guidance.get(
+                "position_error",
+                viability.get("position_error", 0.0),
+            )
         ),
         beam_dedup_mode=beam_dedup_mode,
     )

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import ctypes
 import struct
 import unittest
 from unittest.mock import patch
@@ -96,6 +97,58 @@ class _InputClockReader:
 
 
 class Th08RuntimeAgentTests(unittest.TestCase):
+    def test_process_reader_reuses_exact_read_buffer_without_copy(self) -> None:
+        payloads = [b"abcd", b"WXYZ"]
+
+        class Kernel32:
+            @staticmethod
+            def ReadProcessMemory(
+                _handle, _address, buffer, size, count
+            ) -> int:
+                payload = payloads.pop(0)
+                self.assertEqual(size, len(payload))
+                ctypes.memmove(buffer, payload, size)
+                count._obj.value = size
+                return 1
+
+        reader = th08_runtime_agent.ProcessReader.__new__(
+            th08_runtime_agent.ProcessReader
+        )
+        reader.api = type("Api", (), {"kernel32": Kernel32()})()
+        reader.handle = object()
+        buffer = reader.allocate_buffer(4)
+
+        returned = reader.read_into(0x1234, buffer)
+        self.assertIs(returned, buffer)
+        self.assertEqual(buffer.raw, b"abcd")
+        self.assertIs(reader.read_into(0x1234, buffer), buffer)
+        self.assertEqual(buffer.raw, b"WXYZ")
+
+    def test_process_reader_read_keeps_bytes_compatibility(self) -> None:
+        class Kernel32:
+            @staticmethod
+            def ReadProcessMemory(
+                _handle, _address, buffer, size, count
+            ) -> int:
+                ctypes.memmove(buffer, b"data", size)
+                count._obj.value = size
+                return 1
+
+        reader = th08_runtime_agent.ProcessReader.__new__(
+            th08_runtime_agent.ProcessReader
+        )
+        reader.api = type("Api", (), {"kernel32": Kernel32()})()
+        reader.handle = object()
+
+        result = reader.read(0x5678, 4)
+
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(result, b"data")
+
+    def test_process_reader_rejects_nonpositive_buffer(self) -> None:
+        with self.assertRaisesRegex(ValueError, "must be positive"):
+            th08_runtime_agent.ProcessReader.allocate_buffer(0)
+
     def test_decode_spell_state_exposes_active_id_and_shift_jis_name(self) -> None:
         blob = bytearray(th08_runtime_agent.SPELL_STATE_PREFIX_SIZE)
         struct.pack_into("<III", blob, 0, 0x05, 0x12345678, 145)

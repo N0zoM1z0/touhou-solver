@@ -191,14 +191,19 @@ continuations are sufficient for route survival.
 2. Keep losing-only v2 available behind explicit
    `--candidate-verifier-shadow`, with zero action authority.
 3. Do not promote `candidate_exhausted` or `budget_exhausted` to losing.
-4. The next algorithmic experiment should consume only completed winning
-   candidate witnesses in an offline counterfactual first: compare their
-   root actions with the issue-time certificate and replay former pre-hit
-   windows under the same immutable hazard model.
-5. Before physical action authority, add an explicit publication object that
-   retains `(version, root, root action, candidate witness, label, deadline)`
-   and require a fresh issue-time hard certificate. Then run a paired
-   multi-RNG shadow/counterfactual gate outside Stage 6B as well.
+4. The offline counterfactual and explicit publication-object steps are now
+   implemented. Publication retains the immutable version, full augmented
+   root, root action, causal witness, label, deadline, and the already
+   computed all-action hard certificate. See
+   `CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`.
+5. Stage-4A `100451` supplied a clean outside-Stage-6B delivery/integrity
+   shadow; Stage-4A `103856` supplied helper timing but is contaminated by the
+   rejected 50-ms manager-frame guard. Neither grants action authority.
+6. The remaining candidate gate is a fresh uncontaminated post-rollback
+   non-Stage-6B shadow with alternate-action certificates and clean
+   CPU/delivery/policy-age/action-lag comparison. Keep the current controller
+   authoritative until that gate and the separate CE-0120 input-clock
+   boundary are resolved.
 
 ## Retained Evidence
 

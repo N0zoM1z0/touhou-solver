@@ -217,21 +217,38 @@ and CPU contention. Until then, publication remains observation only.
 
 ## Decision And Next Gate
 
-Keep the existing controller authoritative. Run a fresh non-Stage-6B physical
-shadow after Linux and Windows quick-suite parity. The next report must
-separate:
+Keep the existing controller authoritative. Publication remains shadow-only.
 
-- delivered candidate wins;
-- exact best witnesses;
-- alternate actions with safe/unsafe/missing issue certificates;
-- one-shot deadline rejection;
-- modeled feasibility gain over the issued action;
-- publication construction/serialization cost; and
-- full iteration/action-lag deltas against an uncontended baseline.
+The first non-Stage-6B gate is now complete but split across two runs:
 
-Only after repeated clean evidence may a separate experiment allow a
-candidate action to enter the local choice set, still behind the fresh hard
-certificate and with an immediate Boolean/local fallback.
+- Clean Stage-4A `100451` delivered `3,913/4,187 = 93.46%` exact losing
+  roots. Of these, 438 were candidate-winning and 223 raised the issued action
+  from modeled loss to modeled feasibility. Publication integrity errors were
+  zero. This capture predates explicit helper-cost timing.
+- Stage-4A `103856` measured publication construction at approximately
+  `0.0041/0.0059 ms` median/p95 and lookup at `0.0149/0.0208 ms`. Exact
+  delivery was `267/297 = 89.9%`, with 32 winning hits, 17 modeled feasibility
+  gains, and zero integrity errors.
+- `103856` is not a clean survival or contention comparison: the now-rejected
+  50-ms repeated-manager-frame guard fired 2,780 times, churned policy
+  versions, and starved live Boolean availability. Its helper timings and
+  publication-integrity rows remain valid observations, but its control
+  outcome cannot promote the candidate service.
 
-Checkpoint validation: Linux and Windows complete quick suites both pass 487
-tests in `2.210/5.092 s`.
+The next candidate-authority gate therefore requires a fresh uncontaminated
+post-rollback non-Stage-6B shadow. It must retain and report:
+
+- exact root/version and causal winning witness;
+- issued action and every proposed alternate action;
+- safe/unsafe/missing fresh issue-time certificates;
+- one-shot deadline rejection and modeled feasibility gain;
+- construction, serialization, lookup, worker CPU, policy-age, and action-lag
+  deltas against a clean baseline.
+
+Only repeated clean evidence could justify a separately scoped experiment in
+which a candidate enters the local choice set, still behind the fresh hard
+certificate and an immediate Boolean/local fallback. A candidate win remains
+a finite-model feasibility result, not unrestricted optimality.
+
+Latest rollback validation: Linux and Windows complete quick suites both pass
+489 tests in `2.495/4.012 s`.

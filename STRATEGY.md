@@ -34,60 +34,57 @@ hard no-Bomb.
 
 ## Current Decision
 
-The live controller remains on the verified coarse Boolean viability path.
-Losing-state labels are now computed only after Boolean publication and, when
-explicitly enabled, on an independent single-worker shadow executor. This
-repairs the publication/expiry regression but does not authorize the labels:
-two Stage-5 traces show that exact layer phase, game-observed active input,
-and pending-command remaining delay materially change state classification
-and best-action sets. Exact-root frontier work has now validated a
-lookup-only, phase-sharded prewarm decomposition offline, but its physical
-shadow regressed controller latency/action lag and its one-transition value
-was then disproved as a complete physical model. The old prewarm remains
-rejected. A recursively variable-cadence belief solver now passes
-scalar/native differentials offline; its conservative
-all-root/focused-continuation policy class is a research candidate, not live
-authority. A bounded stationary-candidate verifier has now passed a physical
-delivery/contention gate only when admitted on available Boolean-losing
-roots: Stage-6B v2 delivered 93.56% of exact roots with zero replacement or
-stale completion and restored baseline latency/action lag. The every-root
-form is rejected. Candidate results remain shadow-only attainable lowers;
-exhaustion is not unrestricted losing. Candidate witness publication now
-retains the causal policy witness, issued-action label, full augmented root,
-one-shot deadline, and the already-computed hard certificate for each
-proposed best action. This closes an observability gap, not the authority
-gate: the old Stage-6B trace could replay only 47/82 selected historical roots,
-and all 23 auditable action changes lacked a retained alternate-action issue
-certificate.
+The live controller remains on native sensing, the fresh local hard collision
+certificate, and the verified coarse Boolean viability path. Physical
+practice is hard no-Bomb. Exact augmented belief values, stationary
+candidates, survival labels, damage objectives, and candidate witness
+publication remain offline or shadow-only.
 
-The first non-Stage-6B shadow also exposed an actuator-clock defect outside
-the candidate algorithm: post-spell dialogue froze `enemy_manager_frame`
-while held directions continued moving the player. Two directional wall-pulse
-episodes displaced 434.63 and 343.65 pixels to a boundary. The manager-frame
-policy is therefore invalid across such a transition. The attempted 50-ms
-fail-closed release is rejected: it mistook ordinary slow iterations for
-semantic freezes, fired 2,780 times, and starved the live Boolean policy.
-Live authority is restored to the pre-guard controller. CE-0120 remains open;
-any successor must begin as a native-phase/wall-pulse-compatible shadow
-detector with measured false positives. See CE-0120, CE-0121, and
-`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.
+The losing-root stationary-candidate service is accepted only as a
+below-normal-priority shadow service. Stage-6B v2 delivered 93.56% of exact
+losing roots without the latency/action-lag regression caused by every-root
+submission; the every-root form is rejected. A completed exact candidate is
+an attainable finite-model lower bound. Candidate exhaustion, timeout, or
+budget exhaustion is unresolved, never unrestricted losing. Exact witness
+publication now preserves the augmented root, causal witness, issued-action
+label, all-action local certificate, immutable version, and deadline, but
+does not change the selected mask.
 
-The next architectural target is a delivery-aware solver:
+Stage-4A `100451` then exposed the highest-priority defect outside the
+candidate recurrence: post-spell dialogue froze `enemy_manager_frame` while a
+held direction continued moving the player by 434.63 or 343.65 pixels to a
+boundary. The attempted 50-ms repeated-counter guard is rejected by
+Stage-4A `103856`; it fired 2,780 times for only 72 real wall pulses, churned
+policy epochs, and reduced available viability queries from 9,073 to 691.
+Live source behavior is restored to the pre-guard controller. CE-0120 remains
+open and the present live policy has no complete authority claim across this
+transition boundary.
 
-1. a fresh, bounded-cost issue-time shield certifies the action actually sent;
-2. a future non-Stage-6B physical shadow measures an evidence-bound
-   frozen-episode detector without changing the selected mask; the retained
-   `103856` run already measures exact witness publication cost but is
-   rejected as a survival comparison because the live guard corrupted policy
-   availability;
-3. the background planner publishes only versioned policies whose hazard
-   coverage and service deadline are valid;
-4. event-complete ECL/timeline birth and transform forecasts make the future
-   model less stale;
-5. longer-horizon objectives, including boss damage, rank only actions that
-   survive those gates.
+Current priority is:
+
+1. identify and validate a semantic native phase/dialogue/input-clock
+   boundary in shadow, with CE-0120 positives and normal-play negatives;
+2. obtain a clean post-rollback non-Stage-6B candidate-publication shadow with
+   exact witness, alternate-action certificate, publication timing, and
+   CPU/delivery/policy-age measurements;
+3. improve attainable lower refinement on retained Boolean-losing roots
+   without interpreting incomplete search as losing;
+4. run selective upper work only for actions that can still beat the incumbent;
+5. improve event-complete future births/transforms and then use damage,
+   resources, and longer-horizon objectives only inside certified feasible
+   actions.
+
+See `START_HERE.md`, CE-0120/0121,
+`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`,
+`notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`, and
+`notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.
 
 ## Strategy History
+
+Entries below are chronological evidence, not a second current task list.
+Labels such as “next gate” record the gate at that checkpoint unless an entry
+explicitly says it remains active. `Current Decision` and `START_HERE.md`
+supersede historical sequencing without erasing its counterexamples.
 
 ### S01 — Reactive Local Dodge With Emergency Deathbomb
 

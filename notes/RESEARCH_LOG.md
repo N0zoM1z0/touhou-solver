@@ -3271,3 +3271,34 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.
 - Linux and Windows complete quick suites pass 489 tests in
   `2.495/4.012 s`.
+
+## 2026-07-26: Current-State Handoff And Contract Consolidation
+
+- Audited `AGENTS.md`, `START_HERE.md`, `STRATEGY.md`, the active formal
+  notes, the latest Stage-6B/Stage-4A evidence, and the current Git checkpoint
+  before preparing a new Codex session.
+- Reassigned documentation ownership:
+  - `AGENTS.md` now contains durable workspace, evidence, formal-authority,
+    architecture, testing, artifact, and live-control rules;
+  - `START_HERE.md` now contains only the volatile checkpoint, current
+    live/shadow/rejected boundary, P0-P2 problems, retained workloads,
+    reference routing, verified commands, and next gate;
+  - `STRATEGY.md` remains the status ledger;
+  - design notes, counterexamples, run notes, and this log retain derivations
+    and history.
+- Removed stale startup tables and blockers that predated the belief-state,
+  candidate-verifier, publication, and frozen-manager-frame work. Preserved
+  exact WSL/Windows launch, test-discovery, foreground, completion, and cleanup
+  differences needed to avoid repeating known failed command paths.
+- Updated the candidate witness and Stage-6B contention notes: Stage-4A
+  `100451` is the clean publication delivery/integrity shadow; `103856`
+  measures helper cost but cannot serve as a survival/contention gate because
+  the rejected 50-ms guard contaminated live policy availability.
+- Current priority is explicit: CE-0120 semantic input-clock boundary first,
+  a clean post-rollback candidate-publication shadow second, and attainable
+  lower/issue-time coverage on retained Boolean-losing roots third. No shadow
+  component gained live action authority through this documentation change.
+- Documentation checkpoint validation: every newly routed formal/run
+  reference exists, `git diff --check` passes, and the Linux quick suite passes
+  489 tests in `2.235 s`. Windows duplication and a physical trial were
+  intentionally omitted for a documentation-only change.

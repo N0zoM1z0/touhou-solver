@@ -2252,6 +2252,161 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertEqual(shadow.action, "down_left_fast")
         self.assertEqual(shadow.viability_control_reserve_deficit, 0.0)
 
+    def test_preloss_preference_retains_larger_exact_repair_action(
+        self,
+    ) -> None:
+        def bullet(
+            slot: int,
+            x: float,
+            y: float,
+            vx: float,
+            vy: float,
+            half_size: float,
+            speed: float,
+            angle: float,
+            original_flags: int,
+            callback_phase: int,
+        ) -> Bullet:
+            return Bullet(
+                x,
+                y,
+                vx,
+                vy,
+                half_size,
+                half_size,
+                slot=slot,
+                speed=speed,
+                angle=angle,
+                callback_phase_state=callback_phase,
+                original_transform_flags=original_flags,
+            )
+
+        common = {
+            "player_x": 369.55126953125,
+            "player_y": 410.0467529296875,
+            "bullets": (
+                bullet(
+                    213, 352.4305114746094, 355.86749267578125,
+                    0.8665539026260376, 0.9815611839294434,
+                    3.0, 1.309342622756958, 0.8475475311279297, 2, 0,
+                ),
+                bullet(
+                    219, 341.50909423828125, 438.5190124511719,
+                    0.8274074196815491, 1.277809739112854,
+                    3.0, 1.522301197052002, 0.996166467666626, 2, 0,
+                ),
+                bullet(
+                    304, 357.0599060058594, 356.3406982421875,
+                    0.8425205945968628, 1.09906005859375,
+                    3.0, 1.3848371505737305, 0.9167664051055908, 2, 0,
+                ),
+                bullet(
+                    406, 323.64141845703125, 409.4451599121094,
+                    1.030049443244934, 2.140005350112915,
+                    2.0, 2.375, 1.1221957206726074, 514, 1,
+                ),
+                bullet(
+                    441, 377.3912658691406, 377.52679443359375,
+                    1.3860082626342773, 1.9286279678344727,
+                    2.0, 2.375, 0.9476628303527832, 514, 1,
+                ),
+                bullet(
+                    442, 286.3949890136719, 332.0615234375,
+                    0.7833796739578247, 1.6275304555892944,
+                    2.0, 1.806249976158142, 1.1221957206726074, 514, 1,
+                ),
+            ),
+            "lasers": (),
+            "previous_direction": 0,
+            "previous_focus": True,
+            "can_bomb": False,
+            "control_delay_frames": 2,
+            "control_delay_candidates": (2, 3, 4, 5, 6),
+            "action_hold_frames": 3,
+            "horizon": 10,
+            "threat_horizon": 32,
+            "beam_width": 24,
+            "target_x": 360.0,
+            "target_y": 416.0,
+            "target_deadline": 23,
+            "allowed_first_actions": (
+                "stay",
+                "left",
+                "right",
+                "down",
+                "up_left",
+                "down_right",
+                "right_fast",
+                "down_fast",
+                "up_left_fast",
+                "down_right_fast",
+            ),
+            "viability_repair_volumes": (
+                ("stay", 58),
+                ("left", 38),
+                ("right", 50),
+                ("down", 39),
+                ("up_left", 35),
+                ("down_right", 42),
+                ("right_fast", 53),
+                ("down_fast", 38),
+                ("up_left_fast", 40),
+                ("down_right_fast", 41),
+            ),
+            "viability_position_error": 8.776518406450759,
+        }
+        baseline = choose_action(**common)
+        proposal = choose_action(
+            **common,
+            preloss_continuation_preference=True,
+        )
+        self.assertEqual(baseline.action, "left")
+        self.assertEqual(proposal.action, "down")
+        self.assertEqual(proposal.viability_repair_volume, 39)
+        self.assertTrue(
+            proposal.preloss_continuation_preference_active
+        )
+        self.assertEqual(
+            (
+                proposal.robust_collisions,
+                max(-proposal.robust_min_clearance, 0.0),
+                proposal.terminal_threat_collisions,
+                max(-proposal.terminal_threat_min_clearance, 0.0),
+            ),
+            (
+                baseline.robust_collisions,
+                max(-baseline.robust_min_clearance, 0.0),
+                baseline.terminal_threat_collisions,
+                max(-baseline.terminal_threat_min_clearance, 0.0),
+            ),
+        )
+
+    def test_preloss_preference_fails_closed_without_complete_repairs(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=400.0,
+            bullets=(),
+            lasers=(),
+            previous_direction=LEFT,
+            previous_focus=True,
+            can_bomb=False,
+            control_delay_frames=2,
+            control_delay_candidates=(1, 2, 3),
+            action_hold_frames=4,
+            horizon=4,
+            threat_horizon=4,
+            beam_width=1,
+            allowed_first_actions=("left", "right"),
+            viability_repair_volumes=(("left", 1),),
+            preloss_continuation_preference=True,
+        )
+        self.assertEqual(decision.action, "left")
+        self.assertFalse(
+            decision.preloss_continuation_preference_active
+        )
+
     def test_exact_local_collision_outranks_distant_kernel_recovery(
         self,
     ) -> None:

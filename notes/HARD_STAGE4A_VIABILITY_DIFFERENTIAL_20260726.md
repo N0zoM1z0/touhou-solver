@@ -283,3 +283,29 @@ zero intersection, constraint, certificate, selected-strategy, or reason
 violations. Local, recertification, and global-solve latency did not regress.
 CE-0127/0128 are closed for the current enemy-change issue boundary, so
 Option A is now the active design target.
+
+## Option-A First Result
+
+The first implementation placed exact repair volume and delay-scaled
+interior reserve into Python/native beam pruning. It is rejected by CE-0129.
+A fixed 800-root hit-window replay changed 392 actions and improved repair
+volume on 356, but Stage-4A `202439` frame `28412` and `212756` frame `12843`
+had worse later terminal hard vectors. The repair score is exact for the
+global finite recurrence but is not an admissible bound on local terminal
+threat.
+
+The native-v2 experiment was removed and the historical reducer/ABI restored.
+The retained default-off form changes only final selection after terminal
+scoring. Across the same deterministic reservoir method it changed 7/800
+broad actions and 13/800 roots within 300 frames of a hit. Every changed
+action kept an equal hard vector and remained inside the global safe set. In
+the pre-hit cohort, reserve deficit improved on 11/13 actions and repair
+volume on 2/13, with no regressions in either value. Same-root timing and
+single-step replay do not establish prevented hits.
+
+This safely establishes a small final-only proposal, not a sufficient
+pre-loss solution. The next Option-A algorithm should keep the complete
+historical beam as an immutable incumbent and add a bounded supplemental
+continuation lane. Final terminal-hard comparison over the union must leave
+the historical endpoint available. See
+`notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`.

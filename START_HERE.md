@@ -70,12 +70,20 @@ Python/C++ parity for the same recurrence is not physical correctness.
   retained 4,627 transactions with zero silent outside-global selections,
   zero Bomb, and no latency regression. The second reason-aware audit had
   zero violations, closing CE-0127/0128 for this boundary.
+- Option-A pre-loss replay rejected putting repair volume into beam pruning:
+  2/800 hit-window roots regressed the later terminal hard vector (CE-0129),
+  so the native reducer/ABI remains unchanged. A default-off final-only
+  selector changed 7/800 broad and 13/800 pre-hit actions with zero
+  changed-action hard regressions or global-set violations. Pre-hit reserve
+  improved on 11/13 and repair on 2/13; same-root replay is not physical
+  survival evidence. The next stronger design is an immutable historical
+  beam plus a separately budgeted supplemental continuation lane.
 - The original-game full-route supervisor accepts
   `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
   only after accepted `route_complete`: it releases injected keys, closes the
   agent, sends no result/save choice, and leaves the identity-verified game
   process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `571/571` in `4.792/7.298 s`. The
+- Linux and Windows quick suites pass `575/575` in `4.757/7.822 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.
@@ -115,6 +123,8 @@ Expected pre-work status:
 | shadow | exact candidate witness publication | Retains root, witness, issued-action label, all-action local certificate, version, and timing; it never changes the live mask. |
 | offline/shadow | belief lower bounds, revealed-delay upper, resumable threshold refinement | Research tools for feasibility/optimality gaps; too slow and/or too optimistic for live authority as currently integrated. |
 | proposal-only | losing-state control reserve | After Boolean exhaustion, ranks only fresh-hard-equivalent actions by delay-scaled reversal reserve. Hard replay improved reserve deficit without relabeling viability; physical effect is unmeasured. |
+| proposal-only | final-only pre-loss continuation/reserve | Inside a complete nonrelaxed viable set, ranks completed historical beam endpoints after hard terminal scoring. Hard replay changed few actions with zero hard regression; physical effect is unmeasured. |
+| rejected | repair-aware shared beam pruning | CE-0129: root repair volume displaced endpoints before terminal threat was known and regressed 2/800 pre-hit terminal hard vectors. |
 | rejected | every-root candidate submission | Caused measurable live CPU/delivery contention. |
 | rejected | 50-ms repeated-manager-frame guard | CE-0121: fired on ordinary slow decisions, churned policy versions, and starved viability. |
 | rejected | first-action beam deduplication for live use | Changed only soft choices and improved no sampled hard vector; wider/partitioned variants were materially slower. |
@@ -514,20 +524,25 @@ The complete Hard route is finished. The current user-directed algorithmic
 gate is to distinguish a genuinely losing finite model from coarse or stale
 false emptiness before spending more implementation effort:
 
-1. prioritize explicit pre-loss continuation/interior reserve strategy
-   inside the viable set, because boundary factors dominate both Hard
-   workloads;
-2. add exact augmented-root partial-survival candidate witnesses as the
+1. preserve the complete historical beam as an immutable hard incumbent and
+   benchmark a bounded supplemental continuation-biased lane. The rejected
+   shared-pruning form must not return;
+2. retain final-only pre-loss continuation/interior reserve as default-off
+   proposal evidence; it is safe in replay but too low-coverage to be the
+   main fix;
+3. add exact augmented-root partial-survival candidate witnesses as the
    post-loss fallback;
-3. keep 8/4-pixel work query-local and proof-backed. Full-field fine
+4. keep 8/4-pixel work query-local and proof-backed. Full-field fine
    refinement remains rejected by low rescue rate and deadline cost;
-4. use additional CPU through deterministic process-level independent-root
+5. use additional CPU through deterministic process-level independent-root
    shards. Do not raise the four-worker live same-root default without a
    delivery-contention gate.
 
 The current evidence and five formal-review answers are in
 `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md` and
-`notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`.
+`notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`. The current
+pre-loss contract, rejected beam counterexample, and final-only evidence are
+in `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`.
 
 A useful next algorithmic checkpoint is the action consequence of the now
 validated semantic sensor, not another detector or threshold tweak. It should:

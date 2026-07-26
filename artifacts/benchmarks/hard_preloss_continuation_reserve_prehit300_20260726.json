@@ -1,0 +1,330 @@
+{
+  "schema": "th08-preloss-continuation-reserve-benchmark-v1",
+  "scope": "Paired same-root offline replay over retained trace-radius hazards and lifecycle state. This does not replay future controller state and is not physical survival evidence.",
+  "proposal": "After unchanged beam pruning and complete terminal scoring, rank exact worst-delay repair volume and delay-scaled interior reserve before route and ordinary soft costs inside a complete nonrelaxed viable action set.",
+  "traces": [
+    {
+      "path": "artifacts/runtime_reports/hard_route2_fullrun_unattended_20260726_184942.jsonl",
+      "sha256": "2ec3a10df72fbad493cf80014b37028c4b24b26f7f2c0e2866c67d8550e0cb83",
+      "hit_count": 39,
+      "eligible_count": 1648
+    },
+    {
+      "path": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_202439.jsonl",
+      "sha256": "88f54b6a7984878b0e6cf88580fc9f217226b0d6204d29701fb15a7e0af56b41",
+      "hit_count": 15,
+      "eligible_count": 952
+    },
+    {
+      "path": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_211210.jsonl",
+      "sha256": "329407bbc0aac733cfd2b7722b653e0aa2c0b38abefe1df624ff53fc1e7b2fd3",
+      "hit_count": 7,
+      "eligible_count": 286
+    },
+    {
+      "path": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_212756.jsonl",
+      "sha256": "cea41e2914c32d7157082cefca81e60a8d83e6d891886d294fdffcdf5f6c79a2",
+      "hit_count": 6,
+      "eligible_count": 504
+    }
+  ],
+  "eligible_count": 3390,
+  "sample_count": 800,
+  "prehit_window": 300,
+  "alternating_execution_order": true,
+  "variants": {
+    "baseline": {
+      "timing_ms": {
+        "median": 10.6013985,
+        "p05": 7.900551,
+        "p95": 17.187068
+      },
+      "selected_repair_volume": {
+        "median": 88.0,
+        "p05": 6.0,
+        "p95": 153.0
+      },
+      "selected_control_reserve_deficit": {
+        "median": 3.2708619832992554,
+        "p05": 0.0,
+        "p95": 20.271732330322266
+      },
+      "planned_route_gate_deficit": {
+        "median": 0.0,
+        "p05": 0.0,
+        "p95": 0.7854802456101879
+      },
+      "robust_collision_count": 2,
+      "negative_robust_clearance_count": 3,
+      "terminal_collision_count": 12,
+      "negative_terminal_clearance_count": 14,
+      "bomb_count": 0,
+      "preloss_preference_active_count": 0
+    },
+    "proposal": {
+      "timing_ms": {
+        "median": 10.610572000000001,
+        "p05": 7.943024,
+        "p95": 17.264192
+      },
+      "selected_repair_volume": {
+        "median": 88.0,
+        "p05": 6.0,
+        "p95": 153.0
+      },
+      "selected_control_reserve_deficit": {
+        "median": 0.0,
+        "p05": 0.0,
+        "p95": 16.99888300895691
+      },
+      "planned_route_gate_deficit": {
+        "median": 0.0,
+        "p05": 0.0,
+        "p95": 0.7854802456101879
+      },
+      "robust_collision_count": 2,
+      "negative_robust_clearance_count": 3,
+      "terminal_collision_count": 12,
+      "negative_terminal_clearance_count": 14,
+      "bomb_count": 0,
+      "preloss_preference_active_count": 781
+    }
+  },
+  "action_change_count": 13,
+  "changed_action_hard_vector_counts": {
+    "improved": 0,
+    "equal": 13,
+    "regressed": 0
+  },
+  "changed_action_repair_volume_counts": {
+    "improved": 2,
+    "equal": 11,
+    "regressed": 0
+  },
+  "changed_action_reserve_deficit_counts": {
+    "improved": 11,
+    "equal": 2,
+    "regressed": 0
+  },
+  "changed_action_route_gate_deficit_counts": {
+    "improved": 1,
+    "equal": 11,
+    "regressed": 1
+  },
+  "active_global_membership_violation_count": 0,
+  "proposal_inactive_count": 19,
+  "action_change_stage_counts": {
+    "2": 3,
+    "3": 10
+  },
+  "action_changes": [
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_211210.jsonl",
+      "frame": 13111,
+      "stage_route_index": 3,
+      "next_hit_frame": 13294,
+      "time_to_hit": 183,
+      "baseline_action": "down_right",
+      "proposal_action": "stay",
+      "baseline_repair_volume": 141,
+      "proposal_repair_volume": 141,
+      "baseline_reserve_deficit": 14.574087142944336,
+      "proposal_reserve_deficit": 1.8736298084259033,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_202439.jsonl",
+      "frame": 12899,
+      "stage_route_index": 3,
+      "next_hit_frame": 13107,
+      "time_to_hit": 208,
+      "baseline_action": "down_right",
+      "proposal_action": "stay",
+      "baseline_repair_volume": 153,
+      "proposal_repair_volume": 153,
+      "baseline_reserve_deficit": 4.177152633666992,
+      "proposal_reserve_deficit": 0.0,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_fullrun_unattended_20260726_184942.jsonl",
+      "frame": 46600,
+      "stage_route_index": 2,
+      "next_hit_frame": 46801,
+      "time_to_hit": 201,
+      "baseline_action": "left",
+      "proposal_action": "stay",
+      "baseline_repair_volume": 102,
+      "proposal_repair_volume": 102,
+      "baseline_reserve_deficit": 8.989599466323853,
+      "proposal_reserve_deficit": 0.0,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_fullrun_unattended_20260726_184942.jsonl",
+      "frame": 52046,
+      "stage_route_index": 2,
+      "next_hit_frame": 52333,
+      "time_to_hit": 287,
+      "baseline_action": "right",
+      "proposal_action": "stay",
+      "baseline_repair_volume": 153,
+      "proposal_repair_volume": 153,
+      "baseline_reserve_deficit": 3.1151790618896484,
+      "proposal_reserve_deficit": 0.0,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_fullrun_unattended_20260726_184942.jsonl",
+      "frame": 52082,
+      "stage_route_index": 2,
+      "next_hit_frame": 52333,
+      "time_to_hit": 251,
+      "baseline_action": "down",
+      "proposal_action": "down_left",
+      "baseline_repair_volume": 121,
+      "proposal_repair_volume": 121,
+      "baseline_reserve_deficit": 5.018413782119751,
+      "proposal_reserve_deficit": 2.997450828552246,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_211210.jsonl",
+      "frame": 35312,
+      "stage_route_index": 3,
+      "next_hit_frame": 35440,
+      "time_to_hit": 128,
+      "baseline_action": "stay",
+      "proposal_action": "up_left",
+      "baseline_repair_volume": 23,
+      "proposal_repair_volume": 25,
+      "baseline_reserve_deficit": 16.0,
+      "proposal_reserve_deficit": 16.0,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_fullrun_unattended_20260726_184942.jsonl",
+      "frame": 109907,
+      "stage_route_index": 3,
+      "next_hit_frame": 110013,
+      "time_to_hit": 106,
+      "baseline_action": "down",
+      "proposal_action": "down_left",
+      "baseline_repair_volume": 152,
+      "proposal_repair_volume": 152,
+      "baseline_reserve_deficit": 6.01359486579895,
+      "proposal_reserve_deficit": 3.9926319122314453,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_211210.jsonl",
+      "frame": 13181,
+      "stage_route_index": 3,
+      "next_hit_frame": 13294,
+      "time_to_hit": 113,
+      "baseline_action": "down",
+      "proposal_action": "stay",
+      "baseline_repair_volume": 99,
+      "proposal_repair_volume": 99,
+      "baseline_reserve_deficit": 8.2578763961792,
+      "proposal_reserve_deficit": 0.0,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_fullrun_unattended_20260726_184942.jsonl",
+      "frame": 83706,
+      "stage_route_index": 3,
+      "next_hit_frame": 83796,
+      "time_to_hit": 90,
+      "baseline_action": "up_fast",
+      "proposal_action": "up",
+      "baseline_repair_volume": 33,
+      "proposal_repair_volume": 34,
+      "baseline_reserve_deficit": 0.0,
+      "proposal_reserve_deficit": 0.0,
+      "baseline_route_gate_deficit": 2.011189655130739,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_fullrun_unattended_20260726_184942.jsonl",
+      "frame": 84122,
+      "stage_route_index": 3,
+      "next_hit_frame": 84336,
+      "time_to_hit": 214,
+      "baseline_action": "down_right",
+      "proposal_action": "down_right_fast",
+      "baseline_repair_volume": 102,
+      "proposal_repair_volume": 102,
+      "baseline_reserve_deficit": 14.712471961975098,
+      "proposal_reserve_deficit": 7.005007982254028,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_fullrun_unattended_20260726_184942.jsonl",
+      "frame": 84168,
+      "stage_route_index": 3,
+      "next_hit_frame": 84336,
+      "time_to_hit": 168,
+      "baseline_action": "left",
+      "proposal_action": "down_left",
+      "baseline_repair_volume": 37,
+      "proposal_repair_volume": 37,
+      "baseline_reserve_deficit": 17.96514892578125,
+      "proposal_reserve_deficit": 13.96514892578125,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_211210.jsonl",
+      "frame": 12667,
+      "stage_route_index": 3,
+      "next_hit_frame": 12913,
+      "time_to_hit": 246,
+      "baseline_action": "up_left_fast",
+      "proposal_action": "up",
+      "baseline_repair_volume": 46,
+      "proposal_repair_volume": 46,
+      "baseline_reserve_deficit": 20.0,
+      "proposal_reserve_deficit": 15.654929161071777,
+      "baseline_route_gate_deficit": 0.7049478310534036,
+      "proposal_route_gate_deficit": 0.7834281110466712,
+      "hard_vector_direction": "equal"
+    },
+    {
+      "trace": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_211210.jsonl",
+      "frame": 13245,
+      "stage_route_index": 3,
+      "next_hit_frame": 13294,
+      "time_to_hit": 49,
+      "baseline_action": "stay",
+      "proposal_action": "down_left",
+      "baseline_repair_volume": 131,
+      "proposal_repair_volume": 131,
+      "baseline_reserve_deficit": 4.569571495056152,
+      "proposal_reserve_deficit": 0.0,
+      "baseline_route_gate_deficit": 0.0,
+      "proposal_route_gate_deficit": 0.0,
+      "hard_vector_direction": "equal"
+    }
+  ]
+}

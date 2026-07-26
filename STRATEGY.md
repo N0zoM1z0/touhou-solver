@@ -107,22 +107,32 @@ produced CE-0124: immediately after an action-epoch discontinuity,
 root confirms that explicit active/held/pending semantics cannot be promoted
 by assuming discontinuity restores active-equals-held.
 
+Complete Hard Route-2 `184942` and the later Stage-4A audits move the current
+user-directed algorithmic gate to feasibility preservation before Boolean
+kernel exhaustion. The fresh/global issue transaction is now physically
+validated for the current enemy-change boundary. A repair-aware beam
+experiment is rejected by CE-0129 because 2/800 pre-hit roots regressed their
+later terminal hard vector. A final-only continuation/interior-reserve
+ranking remains proposal-only: it changed 7/800 broad and 13/800 pre-hit
+actions with zero changed-action hard regressions and no measurable ranking
+cost, but the coverage is too small to call it the main solution.
+
 Current priority is:
 
-1. validate the semantic boundary across additional workloads and define a
-   no-write movement-neutralization/pending-command/one-reset counterfactual;
-2. replay direct local-pipeline-root telemetry, including CE-0124, and
-   reconcile discontinuity/pending initialization before giving the
-   explicit-root local certificate action authority;
-3. obtain a clean post-rollback non-Stage-6B candidate-publication shadow with
-   exact witness, alternate-action certificate, publication timing, and
-   CPU/delivery/policy-age measurements;
-4. improve attainable lower refinement on retained Boolean-losing roots
-   without interpreting incomplete search as losing;
-5. run selective upper work only for actions that can still beat the incumbent;
-6. improve event-complete future births/transforms and then use damage,
-   resources, and longer-horizon objectives only inside certified feasible
-   actions.
+1. keep CE-0120 shadow-only while its no-write/epoch counterfactual and broader
+   negative workloads remain incomplete;
+2. preserve the historical local beam as an immutable hard incumbent and
+   measure a bounded continuation-biased supplemental candidate lane before
+   another physical strategy trial;
+3. keep the final-only continuation/interior-reserve selector default-off and
+   use it only as a focused physical A/B candidate after the quick Windows
+   gate;
+4. add exact augmented-root partial-survival witnesses as the post-loss
+   fallback without interpreting timeout or exhaustion as losing;
+5. replay direct local-pipeline roots and add future bullet/laser birth
+   coverage before broadening issue authority;
+6. use selective refinement, damage, resources, and longer route objectives
+   only inside certified feasible actions.
 
 See `START_HERE.md`, CE-0120 through CE-0123,
 `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`,
@@ -732,6 +742,38 @@ supersede historical sequencing without erasing its counterexamples.
   `notes/LOCAL_NATIVE_BEAM_REDUCTION_PROPOSAL_20260726.md`,
   `notes/PACKED_NATIVE_BULLET_DECODE_PROPOSAL_20260726.md`, and the associated
   artifacts under `artifacts/benchmarks/`.
+
+### S16 — Pre-Loss Continuation And Interior Reserve
+
+- **Status:** Final-only ranking is proposal-only and default-off.
+  Repair-aware beam pruning is rejected.
+- **Intent:** Before the coarse Boolean kernel becomes empty, prefer a viable
+  first action with more worst-delay next-layer continuation and enough
+  interior room to reverse, without changing global/fresh membership.
+- **Hard constraints:** Historical beam candidates are unchanged. Local
+  collision/negative-clearance and complete terminal
+  collision/negative-clearance columns dominate repair and reserve. The
+  proposal activates only for a complete, nonrelaxed viable query and cannot
+  emit Bomb.
+- **Rejected form:** The first native/Python beam experiment changed 392/800
+  pre-hit actions and improved repair on 356, but CE-0129 found two terminal
+  hard regressions. Repair volume is not an admissible terminal-threat bound,
+  so the native-v2 change was removed.
+- **Retained form:** Final-only selection changed 7/800 broad and 13/800
+  pre-hit actions. All changed actions kept equal hard vectors and stayed in
+  the global set. Pre-hit reserve deficit improved on 11/13, repair improved
+  on 2/13, and neither regressed. Concurrent paired replay measured
+  `10.60/17.19` versus `10.61/17.26 ms` baseline/proposal median/p95.
+- **Limitation:** A final selector cannot recover a high-continuation action
+  already discarded by the historical beam, so its coverage is intentionally
+  small. Same-root replay cannot establish prevented hits.
+- **Next gate:** Preserve the complete historical beam as an immutable
+  incumbent, build a separately budgeted supplemental continuation lane, and
+  compare terminal-hard scores over the union. It must be cancellable and
+  must not delay authoritative publication.
+- **Evidence:** CE-0129,
+  `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`, and the
+  `hard_preloss_*_20260726.json` benchmark artifacts.
 
 ## How To Add A Strategy
 

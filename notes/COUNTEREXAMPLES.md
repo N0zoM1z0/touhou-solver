@@ -3286,3 +3286,40 @@ Status: fixed and physically validated
   trace auditor checks reason/state consistency and a deterministic
   regression covers this branch. Complete second gate `212756` retained 2,210
   reason-aware transactions with zero violations.
+
+## CE-0129: Repair-aware beam pruning regressed a later terminal hard score
+
+Status: aggressive beam variant rejected; final-only proposal retained
+
+- **Observed offline counterexample:** A default-off experiment inserted
+  exact global `repair_volume` and delay-scaled boundary reserve into local
+  beam canonicalization/truncation before the existing route and soft
+  columns. In an 800-root fixed reservoir within 300 frames of the next Hard
+  hit, it changed 392 issued actions and improved repair volume on 356, but
+  two changed actions had worse terminal hard vectors.
+- **Canonical roots:** On Stage-4A `202439` frame `28412`, historical
+  `up_left` had terminal `(collisions=3, negative-clearance deficit=2.226)`;
+  the repair-biased beam chose `up_fast` with `(6, 3.037)`. On Stage-4A
+  `212756` frame `12843`, historical `down_right` had terminal `(0, 0)` while
+  the repair-biased beam chose `up_fast` with `(0, 0.489)`. In both cases the
+  proposal increased repair volume and remained inside the global safe set.
+- **Invalid assumption:** A proof-backed root continuation score does not
+  make it safe to discard a beam endpoint before the longer terminal-threat
+  interval has been evaluated. `repair_volume` is exact for its finite
+  global recurrence, but it is not an admissible bound on the local
+  10-to-32-frame terminal score.
+- **Correction:** Remove the native-v2/beam-ordering change entirely. Keep
+  the historical native reducer and candidate set. The surviving default-off
+  proposal inserts repair and reserve only during final selection, after
+  local and terminal collision/negative-clearance columns. The same fixed
+  reservoirs then had zero hard regressions among 7 broad and 13 pre-hit
+  changed actions.
+- **Future gate:** A stronger candidate-coverage experiment must preserve the
+  complete historical beam as an immutable incumbent and add a separately
+  budgeted supplemental lane. Final comparison over the union must retain the
+  historical hard endpoint; shared pruning cannot silently displace it.
+- **Regression/evidence:** The final-only six-bullet root is reduced in
+  `test_preloss_preference_retains_larger_exact_repair_action`. Rejected and
+  retained paired reports are under `artifacts/benchmarks/` with
+  `hard_preloss_beam_preference_rejected_*` and
+  `hard_preloss_continuation_reserve_*` names.

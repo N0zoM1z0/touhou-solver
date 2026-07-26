@@ -337,6 +337,12 @@ class NativeLocalBeamTests(unittest.TestCase):
                     "target_y": 400.0 if case % 3 else None,
                     "target_deadline": 10 if case % 3 else None,
                     "preserve_previous_direction_inertia": True,
+                    "allowed_first_actions": ("left", "right"),
+                    "viability_repair_volumes": (
+                        ("left", 1 + case % 3),
+                        ("right", 3 - case % 3),
+                    ),
+                    "preloss_continuation_preference": bool(case % 2),
                 }
                 live._configure_local_beam_reducer("python")
                 reference = live.choose_action(**arguments)

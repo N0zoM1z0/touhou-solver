@@ -787,6 +787,8 @@ class Decision:
     )
     viability_control_reserve_valid: bool = True
     issue_recertification: IssueRecertification | None = None
+    preloss_continuation_preference_active: bool = False
+    planned_route_gate_deficit: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -4031,6 +4033,7 @@ def choose_action(
     damageable: bool = False,
     recovery_control_reserve: bool = True,
     losing_control_reserve: bool = False,
+    preloss_continuation_preference: bool = False,
     preserve_previous_direction_inertia: bool = True,
     beam_dedup_mode: str = "quantized",
     relax_stale_viability_contradiction: bool = False,
@@ -4340,6 +4343,20 @@ def choose_action(
             )
             viability_constraint_relaxed = True
             viability_fresh_prefix_relaxed = True
+    effective_action_names = set(effective_allowed_first_actions or ())
+    preloss_continuation_preference_active = bool(
+        preloss_continuation_preference
+        and allowed_first_actions is not None
+        and effective_action_names
+        and not viability_constraint_relaxed
+        and not viability_fresh_prefix_relaxed
+        and effective_action_names <= repair_by_action.keys()
+    )
+    preloss_reserve_distance = (
+        diagnostic_losing_reserve_distance
+        if preloss_continuation_preference_active
+        else 0.0
+    )
     effective_threat_horizon = potential_threat_horizon
     control_prefix_started_ns = time.perf_counter_ns()
     prefix_risk, prefix_collisions, prefix_clearance = _control_prefix_hazards(
@@ -4898,6 +4915,16 @@ def choose_action(
                 )
                 else 1
             ),
+            (
+                -repair_by_action.get(node.first_action.name, 0)
+                if preloss_continuation_preference_active
+                else 0
+            ),
+            _boundary_control_reserve_deficit(
+                node.x,
+                node.y,
+                reserve_distance=preloss_reserve_distance,
+            ),
             max(ITEM_SAFETY_CLEARANCE - threat_clearance, 0.0),
             (
                 0
@@ -5151,6 +5178,23 @@ def choose_action(
             for action in _PLANNER_ACTIONS
             if action.name in robust_preflight_certificates
         ),
+        preloss_continuation_preference_active=(
+            preloss_continuation_preference_active
+        ),
+        planned_route_gate_deficit=(
+            max(
+                _minimum_travel_frames(
+                    best.x,
+                    best.y,
+                    target_x,
+                    target_y,
+                )
+                - max((target_deadline or 0) - horizon, 0),
+                0.0,
+            )
+            if target_x is not None and target_y is not None
+            else 0.0
+        ),
     )
     _certificate_timing_accumulator.selection_finalize_ms += (
         time.perf_counter_ns() - selection_started_ns
@@ -5202,6 +5246,9 @@ def choose_action(
             viability_position_error=viability_position_error,
             recovery_control_reserve=recovery_control_reserve,
             losing_control_reserve=losing_control_reserve,
+            preloss_continuation_preference=(
+                preloss_continuation_preference
+            ),
             preserve_previous_direction_inertia=(
                 preserve_previous_direction_inertia
             ),
@@ -8353,6 +8400,12 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "viability_control_reserve_valid": (
                             decision.viability_control_reserve_valid
+                        ),
+                        "preloss_continuation_preference_active": (
+                            decision.preloss_continuation_preference_active
+                        ),
+                        "planned_route_gate_deficit": (
+                            decision.planned_route_gate_deficit
                         ),
                         "viability_safety_value_preferred": (
                             decision.viability_safety_value_preferred

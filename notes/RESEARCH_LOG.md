@@ -3791,3 +3791,57 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `cea41e2914c32d7157082cefca81e60a8d83e6d891886d294fdffcdf5f6c79a2`.
   Compact transaction audit:
   `artifacts/viability_audit/hard_stage4a_20260726_212756_issue_transaction.json`.
+
+## 2026-07-26: Pre-Loss Continuation Gate And CE-0129
+
+- **Problem contract:** Added
+  `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`. The proposal may
+  rank only a complete nonrelaxed global/fresh viable action set, never
+  changes membership or Bomb authority, and treats repair volume as an exact
+  finite-model continuation score rather than a physical survival proof.
+  The note also rejects unproved screen cropping: hazard pruning must
+  conservatively exclude the complete reachable space-time action tube,
+  including delay/cadence error and stop/resume/redirect/transform/birth
+  envelopes.
+- **Observed opportunity:** Across full Hard `184942` and Stage-4A
+  `202439/211210/212756`, 60,526 decisions had complete viable repair data.
+  The historical selected action was below the maximum repair volume on
+  21,634 viable rows. This is a candidate-ranking opportunity, not proof that
+  maximum local volume is physically optimal.
+- **Rejected aggressive implementation:** Adding repair and reserve to
+  native/Python beam truncation changed `303/800` broad actions and improved
+  repair on 288 with zero broad hard regressions. In the 300-frame pre-hit
+  reservoir it changed `392/800`, improved repair on 356, but regressed two
+  terminal hard vectors. CE-0129 records `202439:F28412` and
+  `212756:F12843`. The experimental native-v2 ABI and beam changes were
+  removed; the existing native reducer is unchanged.
+- **Retained final-only implementation:** `choose_action` has an explicit
+  default-off `preloss_continuation_preference`. It activates only when every
+  effective nonrelaxed global action has same-query repair data. Historical
+  beam pruning remains unchanged; final selection places repair and
+  delay-scaled interior reserve after collision/negative-clearance and
+  terminal hard columns. A reduced six-bullet regression from
+  `212756:F17317` changes `left` repair 38 to `down` repair 39 with equal hard
+  deficits.
+- **Observed paired replay:** On the broad fixed reservoir the final-only
+  form changed `7/800` actions; all seven had equal hard vectors and global
+  membership, repair improved on three, and reserve improved on five. On the
+  pre-hit reservoir it changed `13/800`; all 13 had equal hard vectors and
+  global membership, reserve improved on 11, repair on two, with no repair or
+  reserve regression. Route gate improved/tied/regressed `1/11/1`.
+- **Observed timing:** The two final paired replays intentionally ran
+  concurrently. Pre-hit baseline/proposal median/p95 was
+  `10.601/17.187` versus `10.611/17.264 ms`; broad was
+  `10.212/15.331` versus `10.170/15.296 ms`. This establishes negligible
+  ranking cost under that offline contention workload, not Windows issue
+  WCET.
+- **Validation:** Linux and Windows quick suites pass `575/575` in
+  `4.757/7.822 s`; Python/native end-to-end action parity includes enabled
+  final-only roots. Native beam source, ABI, and default behavior are
+  unchanged.
+- **Decision:** Keep final-only ranking proposal-only and default-off. Its
+  coverage is too small to be the main feasibility fix. The next stronger
+  experiment must preserve the complete historical beam as an immutable
+  incumbent and add a separately budgeted continuation-biased supplemental
+  lane; final hard comparison over the union may improve coverage without
+  making the baseline endpoint unavailable.

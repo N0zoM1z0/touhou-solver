@@ -151,6 +151,7 @@ def _replay_decision(
     viability_survival_frames: int | None = None,
     viability_survival_bottleneck_margin: float | None = None,
     losing_control_reserve: bool = False,
+    preloss_continuation_preference: bool = False,
 ):
     bullets = tuple(
         _bullet_from_trace(values)
@@ -215,6 +216,9 @@ def _replay_decision(
         ),
         recovery_control_reserve=recovery_control_reserve,
         losing_control_reserve=losing_control_reserve,
+        preloss_continuation_preference=(
+            preloss_continuation_preference
+        ),
         relax_stale_viability_contradiction=(
             relax_stale_viability_contradiction
         ),

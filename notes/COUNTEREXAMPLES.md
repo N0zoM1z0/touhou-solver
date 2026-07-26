@@ -3163,3 +3163,50 @@ Status: observed | inferred | unknown | fixed
 - **Evidence:** retained failed session
   `hard_route2_stage1_unattended_20260726_174946.session.json` and complete
   successor artifacts for `175049`.
+
+## CE-0126: Hard full route entered an empty global kernel before 38 of 39 hits
+
+- **Observed physical run:** Continuous original-game Hard Route-2
+  `hard_route2_fullrun_unattended_20260726_184942` reached Final-B
+  `terminal_unload` and the later `route_complete` over frames `1..228661`.
+  It retained 70,699 decisions, 39 native hits, zero Bomb/deathbomb input,
+  zero foreground interruption, zero runtime/JSON error, and the exact stage
+  sequence `0,1,2,3,5,7`. Stage hit counts were `1/1/8/11/9/9`.
+- **Canonical causal witness:** The first fresh-attempt hit is
+  `HARD-S0-F20606-T1`, during Hard spell 8. At the last alive decision,
+  frame `20603`, the fresh local prefix already had one modeled collision and
+  `-1.889` clearance; the global query had an empty safe-action set. Native
+  contact telemetry then observed bullet slot 857 overlapping the player
+  AABB. This is a modeled loss reached before contact, not decoder latency
+  hiding an otherwise safe last-second action.
+- **Observed population shape:** The global viability kernel was already
+  exhausted before 38/39 hits. Primary causes were 23 modeled committed-prefix
+  collisions, 14 observed bullet overlaps, one observed enemy-body overlap,
+  and one sensor-gap/unmodeled case. Contributing factors included
+  playfield boundary on 30/39, fast mode on 29/39, corridor deadline miss on
+  13/39, and pool density above 1,000 on only 4/39.
+- **Observed warning boundary:** Global empty-kernel warning commonly preceded
+  contact by tens to hundreds of frames, while the fresh local robust-prefix
+  warning was usually only a few frames. This means the global planner often
+  knew the route had become losing before the local actuator could repair it.
+  The one remaining `late_collision_after_positive_causal_margin` and six
+  global-winning/fresh-local-unsafe selected actions remain correctness
+  counterexamples; they do not explain the other 38 contacts.
+- **Observed implementation performance:** Per-stage pool-read medians were
+  `4.09..4.71 ms`; local-plan medians were `11.81..14.55 ms` and p95 values
+  `20.86..26.90 ms`, despite maxima of 1,231 bullets and 256 lasers. There was
+  no control stall. Relative to the earlier complete Lunatic run, read and
+  plan timings are materially lower, but difficulty/RNG make its hit count an
+  invalid causal A/B.
+- **Inferred main defect:** The dominant next problem is earlier global
+  feasibility preservation and losing-state strategy—especially boundary
+  reserve, route/tube objectives, lattice false empties, horizon, and
+  event/trajectory forecast—not a wholesale decoder or geometry rewrite.
+  The data do not prove that all empty kernels are physically unavoidable:
+  the live policy uses a 16-pixel/eight-frame/80-frame approximation.
+- **Regression/evidence:** All 39 cases are executable regressions. Compact
+  dossier, death CSV, summary, session, and human-readable review are retained
+  under `artifacts/runtime_reports/` and `notes/runs/`; the 1.84-GB raw JSONL
+  remains ignored and replay-capable. The dossier now derives case prefixes
+  from physical difficulty, preventing Hard witnesses from being mislabeled
+  `LUN`.

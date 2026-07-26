@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from analysis.th08_run_dossier import (
+    _case_prefix_for_difficulty,
     _compact_decision,
     _death_clusters,
     _death_ledger,
@@ -1359,7 +1360,14 @@ def build_dossier(
     trace: PracticeTrace,
 ) -> dict[str, object]:
     decisions = list(trace.decisions)
-    deaths = _death_ledger(decisions)
+    run_difficulty = run_id.split("_", 1)[0].lower()
+    case_prefix = (
+        _case_prefix_for_difficulty(run_difficulty)
+        if run_difficulty
+        in {"easy", "normal", "hard", "lunatic", "extra"}
+        else "LUN"
+    )
+    deaths = _death_ledger(decisions, case_prefix=case_prefix)
     _promote_enemy_body_candidates(deaths)
     no_bomb = _no_bomb_verification(
         decisions,

@@ -28,10 +28,9 @@ Python/C++ parity for the same recurrence is not physical correctness.
 - Branch: `main`
 - Algorithmic parent:
   `7860a16 Fix local input-pipeline certification`
-- The current HEAD should be the native local implementation/Hard Stage-1
-  checkpoint plus the selectable full-route handoff checkpoint immediately
-  above that parent. If not, inspect the intervening diff before trusting
-  this file.
+- The current HEAD should include the native local implementation, selectable
+  full-route handoff, and complete Hard-route evidence checkpoints above that
+  parent. If not, inspect the intervening diff before trusting this file.
 - The live local implementation defaults to persistent pool-read
   destinations, native shared hazard queries, native quantized no-item beam
   reduction, and packed native bullet decode above 16 active slots. Python
@@ -45,12 +44,19 @@ Python/C++ parity for the same recurrence is not physical correctness.
   and zero deadline misses. It also established CE-0124: the first
   post-discontinuity native active input need not equal reset held desired.
   Explicit active/held/pending roots remain shadow-only.
+- Complete original-game Hard Route-2 `184942` reached Final B
+  `route_complete` with 70,699 decisions, 39 hits, zero Bomb, and stage counts
+  `1/1/8/11/9/9`. Global viability was already empty before 38/39 hits;
+  boundary and fast-mode factors occurred on 30 and 29. Per-stage local-plan
+  median/p95 stayed within `11.81..14.55/20.86..26.90 ms` at up to 1,231
+  bullets and 256 lasers. The next primary problem is early feasibility and
+  losing-state/route strategy, not another wholesale local geometry rewrite.
 - The original-game full-route supervisor accepts
   `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
   only after accepted `route_complete`: it releases injected keys, closes the
   agent, sends no result/save choice, and leaves the identity-verified game
   process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `560/560` in `4.840/7.848 s`. The
+- Linux and Windows quick suites pass `561/561` in `4.637/11.793 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.

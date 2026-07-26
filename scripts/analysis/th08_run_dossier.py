@@ -26,6 +26,20 @@ CLUSTER_GAP_FRAMES = 600
 BOMB_INPUT_BIT = 0x02
 
 
+def _case_prefix_for_difficulty(difficulty: str) -> str:
+    prefixes = {
+        "easy": "EASY",
+        "normal": "NORMAL",
+        "hard": "HARD",
+        "lunatic": "LUN",
+        "extra": "EXTRA",
+    }
+    try:
+        return prefixes[difficulty.strip().lower()]
+    except KeyError as exc:
+        raise ValueError(f"unsupported case difficulty {difficulty!r}") from exc
+
+
 @dataclass(frozen=True)
 class TraceProvenance:
     path: str
@@ -1115,6 +1129,8 @@ def _viability_action_set_empty(row: dict[str, object]) -> bool:
 
 def _death_ledger(
     decisions: list[dict[str, object]],
+    *,
+    case_prefix: str = "LUN",
 ) -> list[dict[str, object]]:
     deaths = []
     for index, row in enumerate(decisions):
@@ -1254,7 +1270,7 @@ def _death_ledger(
             planner_failure_class = "unresolved_planner_failure"
         death = {
             "case_id": (
-                f"LUN-S{stage}-F{frame}-"
+                f"{case_prefix}-S{stage}-F{frame}-"
                 f"T{trace_index + 1}"
             ),
             "frame": frame,
@@ -1612,7 +1628,10 @@ def build_dossier(
         raise ValueError("run contains no decisions")
     difficulty = str(manifest["difficulty"])
     difficulty_index = int(manifest["difficulty_index"])
-    deaths = _death_ledger(decisions)
+    deaths = _death_ledger(
+        decisions,
+        case_prefix=_case_prefix_for_difficulty(difficulty),
+    )
     phase_markers = _phase_markers(decisions)
     spell_schema_complete = all(
         isinstance(decision.get("spell"), dict) for decision in decisions

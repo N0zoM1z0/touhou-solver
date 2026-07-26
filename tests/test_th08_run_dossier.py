@@ -10,6 +10,7 @@ from pathlib import Path
 from analysis.th08_run_dossier import (
     TraceProvenance,
     _classify_death,
+    _case_prefix_for_difficulty,
     _compact_decision,
     _death_clusters,
     _nearest_enemy_body,
@@ -50,6 +51,10 @@ def _row(
 
 
 class Th08RunDossierTests(unittest.TestCase):
+    def test_case_prefix_tracks_physical_difficulty(self) -> None:
+        self.assertEqual(_case_prefix_for_difficulty("Hard"), "HARD")
+        self.assertEqual(_case_prefix_for_difficulty("Lunatic"), "LUN")
+
     def test_full_run_markdown_uses_manifest_difficulty(self) -> None:
         path = (
             Path(__file__).resolve().parents[1]

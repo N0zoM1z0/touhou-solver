@@ -3578,3 +3578,42 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Focused full-route, route-manifest, and dossier suites pass `4/4`, `5/5`,
   and `19/19`. Linux and Windows complete quick suites pass `560/560` in
   `4.840/7.848 s`. No physical full-route run had started at this checkpoint.
+
+## 2026-07-26: Complete Hard Route And Feasibility Bottleneck
+
+- **Observed physical completion:** Original-game Hard Route-2
+  `hard_route2_fullrun_unattended_20260726_184942` completed one continuous
+  Sakuya/Remilia path through Final B. The trace has 70,699 decisions over
+  frames `1..228661`, 39 native hits, zero Bomb/deathbomb input, zero
+  foreground interruption, zero runtime/JSON error, and stage counts
+  `1/1/8/11/9/9`.
+- **Observed manual-save handoff:** After `terminal_unload` and
+  `route_complete`, `--leave-game-running` released injected keys, closed the
+  agent, sent no result/save choice, and left the verified PID running. The
+  user saved the replay manually. Cleanup later reverified the full path,
+  SHA-256, and live patch byte before terminating only PID 52660; no matching
+  target remained.
+- **Observed performance:** Stage pool-read median/p95 ranges were
+  `4.09..4.71/7.02..8.15 ms`; local-plan ranges were
+  `11.81..14.55/20.86..26.90 ms`. The run reached 1,231 bullets and 256
+  lasers without a stall. The robust background planner published 9,265
+  native solutions; solve median/p95 was `121.64/422.51 ms` and
+  first-observed age median/p95 was `2/8` frames.
+- **Observed failure split:** 38/39 hit ledgers report global viability-kernel
+  exhaustion before contact. Causes were 23 modeled committed-prefix
+  collisions, 14 exact bullet overlaps, one exact enemy-body overlap, and one
+  sensor-gap/unmodeled contact. Boundary and fast-mode factors occurred on 30
+  and 29 hits; only four hits exceeded 1,000 bullets. Fresh-local/global
+  contradictions remain six selected actions over 56,196 comparable rows.
+- **Inferred priority:** Decoder/native geometry performance is no longer the
+  dominant physical bottleneck. Preserve the residual sensor/body/local-vs-
+  global correctness gaps, but direct new CPU and algorithm work toward
+  earlier feasibility, coarse false-empty separation, survival/control
+  reserve after loss, and explicit route-conditioned tubes.
+- Fixed full-route/practice regression IDs so the case prefix derives from
+  physical difficulty. Rebuilt all 39 cases as
+  `HARD-S0-F20606-T1` through `HARD-S7-F228457-T1`.
+- Validation: Linux and Windows quick suites pass `561/561` in
+  `4.637/11.793 s`; the focused dossier and practice-dossier suites pass.
+  See CE-0126 and
+  `notes/runs/hard_route2_fullrun_unattended_20260726_184942.md`.

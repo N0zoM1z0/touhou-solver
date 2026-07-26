@@ -31,6 +31,13 @@ physical relevance, solver/bound validity, and issue-time deliverability.
 Engineering approximations are encouraged when useful, but unknown-direction
 ones remain shadow-only.
 
+The manager frame is also not an unconditional physical input clock. Read
+`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md` and CE-0120 before
+changing phase-transition, auto-confirm, cadence, or actuator behavior.
+Post-spell dialogue can freeze `enemy_manager_frame` while a held direction
+continues to move the player; no policy/version may cross the resulting
+gameplay-epoch boundary.
+
 For continuation-action growth, also read
 `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`.  The active native/scalar
 prototype gives nested attainable lower bounds `L_0 <= L_1 <= ... <=
@@ -61,7 +68,7 @@ losing, and every-root submission is physically rejected for contention.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `c4dd71d Validate losing-root candidate verification`. It retains the exact
+  `1ce5b44 Retain exact candidate action witnesses`. It retains the exact
   root-action/candidate witness and issued-action label, preserves the
   already-computed all-action hard certificate vector, and joins them into a
   one-shot exact-key publication. The publication remains explicit shadow
@@ -98,8 +105,23 @@ losing, and every-root submission is physically rejected for contention.
   32-frame loss to a modeled win. Every changed action lacked a retained
   alternate-action certificate, so none had retrospective input authority.
   No candidate win was within 32 frames of contact.
-- Linux and Windows complete quick suites pass 487 tests in
-  `2.210/5.092 s`. Read
+- The first non-Stage-6B physical shadow `stage4a_100451` completed 9,222
+  hard-no-Bomb decisions with 21 hits and no runtime/foreground/manual/JSON
+  failure. Exact losing-root candidate delivery was
+  `3913/4187 = 93.46%`; 438 delivered roots were winning, 223 had modeled
+  candidate feasibility gain, and the publication audit found zero integrity
+  errors. This run predates explicit publication-helper timing.
+- Replay review found CE-0120: directional input remained held while
+  `enemy_manager_frame` froze for post-spell dialogue. `up_left_fast` moved
+  434.63 pixels to the top-left boundary across six wall pulses, and
+  `left_fast` moved 343.65 pixels to the left boundary across eight. The live
+  correction now releases movement after 50 ms and creates a fresh gameplay
+  epoch; focused tests pass, but physical validation is pending. Only one
+  complete Stage-4A replay bundle is currently retained, so do not clean it;
+  the next complete run must establish the two-bundle floor.
+- Linux and Windows complete quick suites pass 489 tests in
+  `2.309/3.810 s`. Read
+  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`,
   `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`,
   `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`,
   `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`,
@@ -954,35 +976,36 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
 1. `AGENTS.md`
 2. `START_HERE.md`
 3. `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`
-4. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
-5. `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`
-6. `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`
-7. `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
-8. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
-9. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
-10. `notes/ALGORITHM_REVIEW_20260724.md`
-11. `notes/COUNTEREXAMPLES.md`, especially CE-0106..0114
-12. `notes/RESEARCH_LOG.md`, latest five dated sections
-13. `notes/ROBUST_VIABILITY.md`
-14. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
-15. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
-16. `notes/NATIVE_PLANNER_BACKEND.md`
-17. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
-18. `scripts/touhou_control/query_survival.py`
-19. `scripts/touhou_control/variable_cadence_oracle.py`
-20. `scripts/analysis/audit_pipeline_formal_correctness.py`
-21. `scripts/analysis/postpublished_survival_audit.py`
-22. `scripts/analysis/viability_differential_audit.py`
-23. `scripts/th08_live_dodge_agent.py`
-24. `scripts/touhou_control/reachability_oracle.py`
-25. `scripts/th08_bullet_transform_model.py`
-26. `scripts/th08_corridor_adapter.py`
-27. `scripts/touhou_control/viability.py`
-28. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
+4. `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
+5. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
+6. `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`
+7. `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`
+8. `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
+9. `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`
+10. `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`
+11. `notes/ALGORITHM_REVIEW_20260724.md`
+12. `notes/COUNTEREXAMPLES.md`, especially CE-0118..0120
+13. `notes/RESEARCH_LOG.md`, latest five dated sections
+14. `notes/ROBUST_VIABILITY.md`
+15. `notes/SOLVER_MODEL.md`, especially Distant-Kernel Recovery
+16. `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md`
+17. `notes/NATIVE_PLANNER_BACKEND.md`
+18. `notes/DANMAKU_SYSTEM.md`, Transform Record and callback-motion sections
+19. `scripts/touhou_control/query_survival.py`
+20. `scripts/touhou_control/variable_cadence_oracle.py`
+21. `scripts/analysis/audit_pipeline_formal_correctness.py`
+22. `scripts/analysis/postpublished_survival_audit.py`
+23. `scripts/analysis/viability_differential_audit.py`
+24. `scripts/th08_live_dodge_agent.py`
+25. `scripts/touhou_control/reachability_oracle.py`
+26. `scripts/th08_bullet_transform_model.py`
+27. `scripts/th08_corridor_adapter.py`
+28. `scripts/touhou_control/viability.py`
+29. Latest Stage-3, Stage-4A, Stage-5, and Stage-6B notes:
     `notes/runs/lunatic_route2_stage3_unattended_20260724_132007.md`,
-    `notes/runs/lunatic_route2_stage4a_unattended_20260724_185059.md`,
+    `notes/runs/lunatic_route2_stage4a_unattended_20260726_100451.md`,
     `notes/runs/lunatic_route2_stage5_unattended_20260725_125037.md`, and
-    `notes/runs/lunatic_route2_stage6b_unattended_20260724_135201.md`
+    `notes/runs/lunatic_route2_stage6b_unattended_20260726_011639.md`
 
 ## 13. Common Traps Already Paid For
 
@@ -993,6 +1016,9 @@ speedups cannot predict them. The next semantic adapter task is ECL/timeline
   planner starts.
 - Auto-confirm requires a fresh Z edge: release then press. A continuously held
   Z does not advance every transition.
+- A frozen enemy-manager counter does not imply frozen player motion. Never
+  wall-pulse `Z` while retaining a direction; CE-0120 reached the top-left
+  boundary during post-spell dialogue.
 - At the post-stage save prompt, press Right once for no-save, then kill.
 - Keep the hotkey daemon one-shot. A reused daemon once started a second run.
 - Do not run two daemons; a named Windows mutex now prevents it.

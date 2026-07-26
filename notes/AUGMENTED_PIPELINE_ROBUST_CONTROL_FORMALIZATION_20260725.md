@@ -88,6 +88,26 @@ This non-anticipativity condition is essential.  A recurrence that calls
 `max_action` separately for each hidden `rho` grants the controller
 clairvoyance and can overestimate guaranteed survival.
 
+### Physical-clock equivalence obligation
+
+The physical step `t` above is a player-motion/hazard transition, not
+unconditionally the native enemy-manager counter. Stage-4A physical evidence
+shows that the manager counter can freeze during post-spell dialogue while a
+held movement input continues to change player position. Histories with the
+same manager frame, cell, and desired action before a freeze are therefore not
+equivalent to histories after an unknown number of hidden wall-clock movement
+updates.
+
+The current live approximation does not add an unbounded hidden-time support
+to the recurrence. It fail-closes the actuator: after 50 ms without manager
+counter progress, it releases movement, increments the gameplay epoch,
+invalidates policy/sensor work from the old epoch, and replans from a fresh
+native snapshot after progress resumes. This is conservative after detection
+but does not prove a scheduler-independent bound on displacement before
+detection. No exact or bounded claim in this note extends across that epoch
+boundary. See
+`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md` and CE-0120.
+
 ## 3. Action, Nature, And Last-Write-Wins Transition
 
 At belief state `b`, the controller selects desired action `u`.  This produces

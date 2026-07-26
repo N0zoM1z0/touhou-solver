@@ -79,6 +79,8 @@ from th08_live_dodge_agent import (
     _estimate_live_action_hold,
     _enemy_sensor_submit_due,
     _frozen_auto_confirm_eligible,
+    _frozen_input_neutralization_due,
+    _frozen_input_safe_mask,
     _build_packed_laser_collision_frames,
     _hazards_for_positions,
     _pack_laser_frame,
@@ -211,6 +213,37 @@ class LiveDodgeAgentTests(unittest.TestCase):
         pulse.mark_full_pulse(frame=400)
         self.assertFalse(pulse.released)
         self.assertEqual(pulse.next_release_frame, 415)
+
+    def test_frozen_dialogue_releases_spell_exit_direction_once(self) -> None:
+        # CE-0120: Stage 4A held up-left across six wall-clock dialogue
+        # pulses while the manager counter stayed at 21467, moving from
+        # (252.7, 391.4) to (8.0, 32.2).
+        up_left_fast = SHOT | UP | LEFT
+        self.assertFalse(
+            _frozen_input_neutralization_due(
+                counter=21467,
+                neutralized_counter=None,
+                now=10.049,
+                last_progress=10.0,
+            )
+        )
+        self.assertTrue(
+            _frozen_input_neutralization_due(
+                counter=21467,
+                neutralized_counter=None,
+                now=10.05,
+                last_progress=10.0,
+            )
+        )
+        self.assertFalse(
+            _frozen_input_neutralization_due(
+                counter=21467,
+                neutralized_counter=21467,
+                now=12.0,
+                last_progress=10.0,
+            )
+        )
+        self.assertEqual(_frozen_input_safe_mask(up_left_fast), SHOT)
 
     def test_auto_confirm_hazard_policy_does_not_gate_on_residual_items(
         self,

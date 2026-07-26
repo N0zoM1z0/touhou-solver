@@ -2950,3 +2950,42 @@ Status: observed | inferred | unknown | fixed
   `artifacts/viability_audit/stage6b_20260726_011639_candidate_witness_counterfactual.json`
   and
   `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`.
+
+## CE-0120: A frozen manager counter held movement through post-spell dialogue
+
+- **Observed physical counterexample:** In complete hard-no-Bomb Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260726_100451`, the controller reached
+  post-spell manager frame 21467 at `(252.69, 391.37)` while holding
+  `up_left_fast`. Six `auto_confirm_wall_pulse` records occurred at the same
+  manager frame. The next decision was frame 21470 at `(8.00, 32.16)`, a
+  434.63-pixel displacement in only three reported manager frames. A second
+  episode held `left_fast` across eight wall pulses and moved 343.65 pixels to
+  the left boundary over two reported frames. Equivalent `stay` episodes had
+  zero displacement.
+- **Rejected attribution:** Item utility was zero and predicted collections
+  were empty. The center-lane target legitimately proposed movement in the
+  ordinary manager-frame model; the defect was the unbounded hidden
+  wall-clock hold, not an item or damage objective. The frame-21611 contact
+  followed near the top boundary, but temporal proximity alone is not a
+  causal prevention claim.
+- **Invalid assumption:** `enemy_manager_frame` was treated as the physical
+  clock for both hazards and player motion. During dialogue it can stop while
+  held directional input still moves the player. The repeated-counter branch
+  toggled only `Z`, so a finite planner hold acquired an unmodeled,
+  dialogue-length physical duration. It also left the pre-freeze Boolean
+  policy and async sensor epoch intact.
+- **Correction:** After 50 ms with no manager-counter progress, release every
+  movement/focus key and retain only `SHOT`, once per frozen counter. Create a
+  new gameplay epoch, reset delay/cadence evidence, retire the corridor
+  policy and commitment, clear phase/enemy/ECL memory, and reject background
+  enemy snapshots submitted under an older epoch. Wall-clock auto-confirm
+  may then toggle only `Z`.
+- **Approximation boundary:** The guard prevents persistent movement after
+  detection, but Windows scheduler starvation can delay the user-space
+  deadline. It does not prove zero pre-detection displacement. Fresh physical
+  validation must measure the guard event and next-phase entry state.
+- **Evidence:** compact audit
+  `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_100451.frozen_input.json`,
+  raw JSONL SHA-256
+  `b8e9428f648b6c87ee379291d896804410019469b8b7f86ef6233456e050c5a1`,
+  and `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.

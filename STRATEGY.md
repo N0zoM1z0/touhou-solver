@@ -60,6 +60,16 @@ gate: the old Stage-6B trace could replay only 47/82 selected historical roots,
 and all 23 auditable action changes lacked a retained alternate-action issue
 certificate.
 
+The first non-Stage-6B shadow also exposed an actuator-clock defect outside
+the candidate algorithm: post-spell dialogue froze `enemy_manager_frame`
+while held directions continued moving the player. Two directional wall-pulse
+episodes displaced 434.63 and 343.65 pixels to a boundary. The manager-frame
+policy is therefore invalid across such a transition. A 50-ms fail-closed
+movement release and gameplay-epoch reset is implemented, but remains
+physical-validation pending; no candidate-shadow survival comparison should
+use a run whose next-phase entry was corrupted this way. See CE-0120 and
+`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.
+
 The next architectural target is a delivery-aware solver:
 
 1. a fresh, bounded-cost issue-time shield certifies the action actually sent;

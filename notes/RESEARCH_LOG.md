@@ -3201,3 +3201,35 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Formal review and evidence:
   `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md` and
   `artifacts/viability_audit/stage6b_20260726_011639_candidate_witness_counterfactual.json`.
+
+## 2026-07-26: Stage-4A Candidate Shadow And Frozen Input Clock
+
+- Completed hard-no-Bomb Stage-4A physical candidate shadow
+  `lunatic_route2_stage4a_unattended_20260726_100451`: 9,222 decisions,
+  21 hits, route complete, no foreground/runtime/manual/JSON failure.
+  Candidate delivery hit 3,913/4,187 losing-root attempts (`93.46%`), with
+  438 winning hits, 223 modeled candidate feasibility gains, zero stale
+  completions/replacements, and zero publication-integrity errors. The run
+  predates explicit publication-helper timing, so that field is unavailable.
+- Replay review exposed a separate physical clock defect. At manager frame
+  21467, `up_left_fast` remained held across six wall-clock dialogue pulses
+  and moved `(252.69,391.37) -> (8.00,32.16)`, 434.63 pixels over only three
+  reported manager frames. At frame 30128, eight pulses held `left_fast` and
+  moved 343.65 pixels to the left boundary over two reported frames.
+  Equivalent `stay` wall-pulse episodes had zero displacement. Item utility
+  and predicted collection were zero.
+- Recorded CE-0120 and refined the formal clock contract: the enemy-manager
+  counter is a valid planner clock only inside a contiguous gameplay epoch;
+  it can freeze while player input physics continues.
+- Implemented a fail-closed repeated-counter guard. After 50 ms it releases
+  movement/focus, keeps only `SHOT`, increments the gameplay epoch, resets
+  delay/cadence evidence, retires corridor policy/commitment and phase/ECL/
+  enemy memory, and rejects async enemy snapshots from older epochs. Later
+  wall-clock `Z` pulses cannot reintroduce movement.
+- This bounds persistent movement after user-space detection but is not a
+  scheduler-independent hard-real-time proof. Fresh Stage-4A physical
+  validation must measure `frozen_input_neutralized` delivery and next-phase
+  entry displacement before the correction is accepted.
+- Formal analysis and compact evidence:
+  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md` and
+  `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_100451.frozen_input.json`.

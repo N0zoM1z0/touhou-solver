@@ -100,6 +100,18 @@ def audit(
     seen_outcomes: set[int] = set()
     hit_winning = 0
     hit_issued_best = 0
+    exact_best_witness_rows = 0
+    issued_action_label_rows = 0
+    candidate_feasibility_gain_rows = 0
+    publication_rows = 0
+    publication_count = 0
+    publication_issue_eligible_count = 0
+    publication_issue_eligible_rows = 0
+    publication_would_change_count = 0
+    publication_issue_eligible_change_rows = 0
+    publication_feasibility_gain_rows = 0
+    publication_statuses: Counter[str] = Counter()
+    publication_integrity_errors: list[str] = []
     attempts_by_boolean: Counter[str] = Counter()
     hits_by_boolean: Counter[str] = Counter()
     winning_hits_by_boolean: Counter[str] = Counter()
@@ -107,6 +119,8 @@ def audit(
     exact_hits = 0
     submit_ms: list[float] = []
     lookup_ms: list[float] = []
+    publication_ms: list[float] = []
+    publication_clearance: list[float] = []
     outcome_queue_ms: list[float] = []
     outcome_elapsed_ms: list[float] = []
     outcome_completed_candidates: list[float] = []
@@ -220,6 +234,7 @@ def audit(
             for raw, destination in (
                 (shadow.get("submit_ms"), submit_ms),
                 (shadow.get("lookup_ms"), lookup_ms),
+                (shadow.get("publication_ms"), publication_ms),
             ):
                 value = _number(raw)
                 if value is not None:
@@ -231,12 +246,163 @@ def audit(
                 if status == "hit":
                     hits_by_boolean[boolean_class] += 1
             result = shadow.get("result")
+            row_feasibility_gain = False
             if isinstance(result, dict):
                 hit_winning += int(result.get("winning") is True)
                 if result.get("winning") is True:
                     winning_hits_by_boolean[boolean_class] += 1
                 hit_issued_best += int(
                     result.get("issued_in_best") is True
+                )
+                best_actions = result.get("best_actions")
+                best_witnesses = result.get("best_action_witnesses")
+                completed_candidates = result.get("completed_candidates")
+                if (
+                    isinstance(best_actions, list)
+                    and isinstance(best_witnesses, list)
+                    and isinstance(completed_candidates, list)
+                ):
+                    witness_actions = {
+                        witness.get("root_action")
+                        for witness in best_witnesses
+                        if isinstance(witness, dict)
+                        and witness.get("candidate_policy")
+                        in completed_candidates
+                    }
+                    exact_best_witness_rows += int(
+                        set(best_actions) == witness_actions
+                    )
+                issued_label = result.get("issued_action_label")
+                if isinstance(issued_label, dict):
+                    issued_action_label_rows += 1
+                    horizon = result.get("horizon_frames")
+                    frames = issued_label.get("survival_frames")
+                    margin = _number(
+                        issued_label.get("bottleneck_margin")
+                    )
+                    issued_winning = bool(
+                        isinstance(horizon, int)
+                        and isinstance(frames, int)
+                        and frames == horizon
+                        and margin is not None
+                        and margin > 0.0
+                    )
+                    row_feasibility_gain = bool(
+                        result.get("winning") is True
+                        and not issued_winning
+                    )
+                    candidate_feasibility_gain_rows += int(
+                        row_feasibility_gain
+                    )
+
+            publications = shadow.get("publications")
+            row_has_eligible = False
+            row_has_eligible_change = False
+            if isinstance(publications, list) and publications:
+                publication_rows += 1
+                result_root = (
+                    result.get("root")
+                    if isinstance(result, dict)
+                    else None
+                )
+                result_version = (
+                    result.get("policy_version")
+                    if isinstance(result, dict)
+                    else None
+                )
+                result_revision = (
+                    result.get("revision")
+                    if isinstance(result, dict)
+                    else None
+                )
+                result_best = (
+                    result.get("best_actions")
+                    if isinstance(result, dict)
+                    and isinstance(result.get("best_actions"), list)
+                    else []
+                )
+                for publication_index, publication in enumerate(
+                    publications
+                ):
+                    if not isinstance(publication, dict):
+                        publication_integrity_errors.append(
+                            f"{frame}:{publication_index}:not_object"
+                        )
+                        continue
+                    publication_count += 1
+                    publication_status = publication.get("status")
+                    if not isinstance(publication_status, str):
+                        publication_status = "missing_status"
+                    publication_statuses[publication_status] += 1
+                    eligible = (
+                        publication.get("issue_eligible") is True
+                    )
+                    changes = (
+                        publication.get("would_change_action") is True
+                    )
+                    publication_issue_eligible_count += int(eligible)
+                    publication_would_change_count += int(changes)
+                    row_has_eligible = row_has_eligible or eligible
+                    row_has_eligible_change = (
+                        row_has_eligible_change
+                        or (eligible and changes)
+                    )
+                    certificate = publication.get("issue_certificate")
+                    if isinstance(certificate, dict):
+                        clearance = _number(
+                            certificate.get("min_clearance")
+                        )
+                        if clearance is not None:
+                            publication_clearance.append(clearance)
+                    errors = []
+                    if publication.get("role") != (
+                        "shadow_no_action_authority"
+                    ):
+                        errors.append("authority")
+                    if (
+                        publication.get("valid_for_issue_frame") != frame
+                        or publication.get("expires_after_issue_frame")
+                        != frame
+                    ):
+                        errors.append("deadline")
+                    if (
+                        publication.get("root") != result_root
+                        or publication.get("policy_version")
+                        != result_version
+                        or publication.get("revision")
+                        != result_revision
+                    ):
+                        errors.append("key")
+                    if publication.get("root_action") not in result_best:
+                        errors.append("best_action")
+                    if eligible != (
+                        publication_status == "issue_eligible"
+                    ):
+                        errors.append("status")
+                    if eligible and (
+                        not isinstance(certificate, dict)
+                        or certificate.get("worst_collisions") != 0
+                        or _number(certificate.get("min_clearance"))
+                        is None
+                        or float(certificate["min_clearance"]) < 0.0
+                        or publication.get("deadline_missed") is not False
+                        or publication.get("input_override") is not False
+                        or publication.get("witness_matches_result")
+                        is not True
+                    ):
+                        errors.append("unsafe_eligible")
+                    publication_integrity_errors.extend(
+                        f"{frame}:{publication_index}:{error}"
+                        for error in errors
+                    )
+                publication_issue_eligible_rows += int(
+                    row_has_eligible
+                )
+                publication_issue_eligible_change_rows += int(
+                    row_has_eligible_change
+                )
+                publication_feasibility_gain_rows += int(
+                    row_feasibility_gain and row_has_eligible_change
                 )
             service = shadow.get("service")
             if not isinstance(service, dict):
@@ -310,6 +476,10 @@ def audit(
         ),
         "candidate_submit_ms": _summary(submit_ms),
         "candidate_lookup_ms": _summary(lookup_ms),
+        "candidate_publication_ms": _summary(publication_ms),
+        "candidate_publication_clearance": _summary(
+            publication_clearance
+        ),
         "candidate_queue_ms": _summary(outcome_queue_ms),
         "candidate_elapsed_ms": _summary(outcome_elapsed_ms),
         "candidate_completed_count": _summary(
@@ -343,7 +513,7 @@ def audit(
             )
         }
     return {
-        "schema": "candidate-verifier-physical-shadow-audit-v1",
+        "schema": "candidate-verifier-physical-shadow-audit-v2",
         "scope": {
             "trace": str(trace),
             "baseline_dossier": (
@@ -377,6 +547,11 @@ def audit(
             ),
             "hit_winning_count": hit_winning,
             "hit_issued_in_best_count": hit_issued_best,
+            "exact_best_witness_rows": exact_best_witness_rows,
+            "issued_action_label_rows": issued_action_label_rows,
+            "candidate_feasibility_gain_rows": (
+                candidate_feasibility_gain_rows
+            ),
             "by_boolean_state": {
                 name: {
                     "attempts": attempts_by_boolean[name],
@@ -392,6 +567,24 @@ def audit(
                 for name in ("viable", "losing", "unavailable")
             },
             "final_service": final_service,
+        },
+        "publication": {
+            "rows": publication_rows,
+            "count": publication_count,
+            "statuses": dict(publication_statuses),
+            "issue_eligible_count": publication_issue_eligible_count,
+            "issue_eligible_rows": publication_issue_eligible_rows,
+            "would_change_count": publication_would_change_count,
+            "issue_eligible_change_rows": (
+                publication_issue_eligible_change_rows
+            ),
+            "eligible_feasibility_gain_rows": (
+                publication_feasibility_gain_rows
+            ),
+            "integrity_error_count": len(
+                publication_integrity_errors
+            ),
+            "integrity_error_sample": publication_integrity_errors[:20],
         },
         "timing": timing,
         "baseline": baseline,

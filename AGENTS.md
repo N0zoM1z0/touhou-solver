@@ -163,6 +163,14 @@ These instructions apply to every file and task below this directory.
   is no-write: preserve the old pending command and decrement its remaining
   support. The formal state must carry held desired input separately or state
   and verify the estimator invariant used to reconstruct it.
+- Never equate `enemy_manager_frame` with an always-advancing physical input
+  clock. Post-spell dialogue can freeze that counter while held movement still
+  changes player position. A sustained repeated counter must release movement
+  before wall-clock auto-confirm, create a new gameplay epoch, invalidate old
+  policy/sensor work, and replan from a fresh native snapshot after progress
+  resumes. No viability or delay proof may cross that epoch boundary merely
+  because the manager-frame value is unchanged. Read
+  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md` and CE-0120.
 - Treat TH08 stages, spells, and retained deaths as validation workloads and
   counterexamples, not planner identities. Whenever practical, improve the
   accuracy, performance, uncertainty handling, or reachability semantics of

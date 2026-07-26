@@ -82,32 +82,36 @@ Python/C++ parity for the same recurrence is not physical correctness.
   violations. Its synchronous supplemental cost was `2.449/3.114 ms`
   broad and `2.425/3.026 ms` pre-hit median/p95. This is proposal-only
   same-root evidence, not physical survival or issue-deadline evidence.
-- The direct-root Windows/four-worker gate keeps the width-4 finite selector
-  contract-clean: 1,518 comparisons had zero historical/effective-global,
-  componentwise hard, route, continuation, Bomb, exception, or forced-issue
-  transaction violations. The four-worker planner also passed at
-  `0.998x` solve-p95 and `1.015x` throughput ratios. Synchronous current-issue
-  delivery is rejected by CE-0130: paired compute increment was
-  `2.354/14.273/25.184 ms` median/p95/max, failed fixed
-  `5.0/<16.667 ms` limits, and created one new hybrid deadline-proxy miss.
-  Do not start the focused Hard physical A/B. The next gate is a complete
-  deadline-aware native supplemental boundary or exact-version asynchronous
-  publication, followed by the same Windows contention test.
-- Six generated TH08-semantic intensive geometry workloads cover native-pool
-  and beyond-pool bullets, stop/resume/reverse/redirect transforms,
-  executable and degenerate lasers, bodies, tangent boundaries, and
-  companion-batch invariance. Collision and clearance-sign parity, batch
-  invariance, and end-to-end action/hard labels were exact. Fully off-tube
-  `4096`-bullet/`1024`-laser queries cost only `2.211/2.408 ms` for ten
-  already-lowered native queries, confirming that the current conservative
-  AABB pruning works. Dense genuinely crossing fields remain expensive; no
-  viewport crop or per-decision grid/BVH is promoted.
+- The complete width-4 supplemental rollout, hazard query and reduction now
+  share one persistent native C++ boundary with a 5-ms absolute deadline,
+  cooperative cancellation and complete-only publication.  Its own
+  four-worker cost is `0.876/1.365/1.942 ms` median/p95/max, with 729/729
+  completion, 294/294 action-change retention and zero native/Python or
+  fallback mismatch.  End-to-end paired p95/max remained
+  `7.054/53.721 ms`, so synchronous delivery is rejected.
+- The predeclared exact-version async follow-up is also implemented:
+  below-normal newest-wins worker, stale cancellation/discard, exact identity
+  and nonblocking lookup.  The final identical Windows gate completed
+  728/729, retained 294/294 changes and had zero finite/issue/parity/fallback
+  violations, but paired latency was `2.240/8.139/12.214 ms` and one new
+  hybrid deadline-proxy miss remained.  CE-0131 rejects same-issue optional
+  delivery.  Keep four global workers, keep both supplemental modes
+  default-off, and do not start focused Hard physical A/B.
+- A deterministic replayable/shrinkable TH08-semantic differential harness
+  now covers twelve pattern families at Normal, Hard, Lunatic and beyond-pool
+  density.  Gate/research runs used 256/96 cases; research maxima were 3,900
+  bullets, 1,387 lasers, 62 bodies and horizon 24.  Collision, clearance
+  sign/value, risk, companion-batch and supplemental endpoint mismatches were
+  all zero.  Research NumPy/native geometry p95 was
+  `121.538/40.500 ms`; Python/native supplemental p95 was
+  `9.931/3.337 ms`.  This is generated finite-semantics evidence, not shipped
+  ECL completeness.  No viewport crop or per-decision grid/BVH is promoted.
 - The original-game full-route supervisor accepts
   `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
   only after accepted `route_complete`: it releases injected keys, closes the
   agent, sends no result/save choice, and leaves the identity-verified game
   process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `587/587` in `5.283/8.008 s`. The
+- Linux and Windows quick suites pass `593/593` in `5.366/8.164 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.
@@ -469,6 +473,10 @@ Retained local replay evidence:
 - `artifacts/benchmarks/native_packed_bullet_decode_windows_20260726.json`
 - `artifacts/benchmarks/local_issue_contention_windows_20260726.json`
 - `artifacts/benchmarks/hard_supplemental_direct_root_contention_windows_20260726.json`
+- `artifacts/benchmarks/hard_supplemental_full_native_direct_root_contention_windows_20260726.json`
+- `artifacts/benchmarks/hard_supplemental_exact_async_final_direct_root_contention_windows_20260726.json`
+- `artifacts/benchmarks/th08_semantic_differential_gate_20260726.json`
+- `artifacts/benchmarks/th08_semantic_differential_research_20260726.json`
 
 The exact reproduction commands and timing boundaries are in
 `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
@@ -550,17 +558,15 @@ artifacts, and cleanup.
 
 ## Next Good Checkpoint
 
-The complete Hard route is finished. The immutable supplemental-lane offline
-gate is also complete. The current user-directed algorithmic gate is:
+The complete Hard route and both supplemental delivery gates are finished.
+The current user-directed algorithmic gate is:
 
-1. measure width 4 on direct Windows roots across
-   observe/decode/project/certify/supplemental/issue and under the live
-   four-worker planner contention. A miss or budget overrun must return the
-   historical decision; optional work must not age authoritative
-   publication;
-2. if delivery remains clean, run the lane as side-effect-free focused Hard
-   shadow before considering a physical A/B. Do not add a live CLI or infer
-   prevented hits from same-root replay;
+1. keep four global viability workers and the historical local action
+   authoritative.  CE-0131 blocks both current-issue supplemental delivery
+   forms and the focused Hard physical A/B;
+2. return primary effort to early global feasibility and route/tube
+   preservation.  Use the new semantic fuzzer for recurrence/geometry changes
+   and retained physical roots for delivery claims;
 3. add exact augmented-root partial-survival candidate witnesses as the
    post-loss fallback;
 4. keep 8/4-pixel work query-local and proof-backed. Full-field fine
@@ -571,7 +577,11 @@ gate is also complete. The current user-directed algorithmic gate is:
 6. retain the current AABB geometry pruning. Revisit a per-frame index only
    if direct-root telemetry isolates genuinely relevant dense geometry after
    construction/lowering, rather than planner contention, as the deadline
-   bottleneck.
+   bottleneck;
+7. reopen supplemental publication only if an exact causal hazard/policy
+   version can exist before the issue transaction or execution resources are
+   genuinely isolated.  Never reuse a merely similar root; rerun the
+   unchanged Windows gate before any live/shadow promotion.
 
 The current evidence and five formal-review answers are in
 `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md` and
@@ -580,7 +590,11 @@ pre-loss contract, rejected beam counterexample, and final-only evidence are
 in `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`. The immutable
 supplemental design, replay results, intensive geometry corpus, and promotion
 boundary are in
-`notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`.
+`notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`.  The completed
+native, async-publication and generator contracts/results are in
+`notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`,
+`notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`, and
+`notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`.
 
 A useful next algorithmic checkpoint is the action consequence of the now
 validated semantic sensor, not another detector or threshold tweak. It should:

@@ -30,6 +30,9 @@ from th08_trace_replay import (
     local_pipeline_root_from_trace,
 )
 from touhou_control import native_backend
+from touhou_control.supplemental_local_beam import (
+    ExactVersionSupplementalService,
+)
 
 
 FRAME_MS = 1000.0 / 60.0
@@ -37,6 +40,9 @@ LOCAL_DELTA_P95_LIMIT_MS = 5.0
 LOCAL_DELTA_MAX_LIMIT_MS = FRAME_MS
 BACKGROUND_P95_RATIO_LIMIT = 1.10
 BACKGROUND_THROUGHPUT_RATIO_FLOOR = 0.90
+SUPPLEMENTAL_DEADLINE_MS = 5.0
+SUPPLEMENTAL_COMPLETION_RATIO_FLOOR = 0.95
+SUPPLEMENTAL_ACTION_CHANGE_RETENTION_FLOOR = 0.90
 
 VARIANTS = (
     ("historical_idle", False, False),
@@ -208,6 +214,27 @@ def _hard_components(decision: object) -> tuple[int | float, ...]:
     )
 
 
+def _native_reference_fields(decision: object) -> tuple[object, ...]:
+    """Fields downstream of the completed supplemental endpoint vector."""
+
+    return (
+        decision.action,
+        decision.mask,
+        decision.local_collisions,
+        decision.min_clearance,
+        decision.immediate_clearance,
+        decision.robust_collisions,
+        decision.robust_min_clearance,
+        decision.terminal_threat_collisions,
+        decision.terminal_threat_min_clearance,
+        decision.planned_route_gate_deficit,
+        decision.viability_repair_volume,
+        decision.viability_control_reserve_deficit,
+        decision.preloss_selected_from_supplemental,
+        decision.preloss_supplemental_candidate_count,
+    )
+
+
 def _finite_contract_checks(
     baseline: object,
     decision: object,
@@ -308,6 +335,10 @@ def _evaluate_gate(
     historical_background: dict[str, float],
     supplemental_background: dict[str, float],
     new_deadline_miss_count: int,
+    completion_ratio: float,
+    action_change_retention_ratio: float,
+    completed_native_reference_mismatch_count: int,
+    historical_fallback_mismatch_count: int,
 ) -> dict[str, object]:
     reasons: list[str] = []
     nonzero = {
@@ -359,6 +390,28 @@ def _evaluate_gate(
         )
     if new_deadline_miss_count:
         reasons.append(f"new_deadline_misses:{new_deadline_miss_count}")
+    if completion_ratio < SUPPLEMENTAL_COMPLETION_RATIO_FLOOR:
+        reasons.append(
+            f"supplemental_completion_ratio:{completion_ratio:.6f}"
+        )
+    if (
+        action_change_retention_ratio
+        < SUPPLEMENTAL_ACTION_CHANGE_RETENTION_FLOOR
+    ):
+        reasons.append(
+            "supplemental_action_change_retention_ratio:"
+            f"{action_change_retention_ratio:.6f}"
+        )
+    if completed_native_reference_mismatch_count:
+        reasons.append(
+            "completed_native_reference_mismatches:"
+            f"{completed_native_reference_mismatch_count}"
+        )
+    if historical_fallback_mismatch_count:
+        reasons.append(
+            "historical_fallback_mismatches:"
+            f"{historical_fallback_mismatch_count}"
+        )
     return {
         "passed": not reasons,
         "reasons": reasons,
@@ -374,6 +427,15 @@ def _evaluate_gate(
                 BACKGROUND_THROUGHPUT_RATIO_FLOOR
             ),
             "new_deadline_miss_count_max": 0,
+            "supplemental_deadline_ms": SUPPLEMENTAL_DEADLINE_MS,
+            "supplemental_completion_ratio_min": (
+                SUPPLEMENTAL_COMPLETION_RATIO_FLOOR
+            ),
+            "supplemental_action_change_retention_ratio_min": (
+                SUPPLEMENTAL_ACTION_CHANGE_RETENTION_FLOOR
+            ),
+            "completed_native_reference_mismatch_count_max": 0,
+            "historical_fallback_mismatch_count_max": 0,
         },
         "observed": {
             "workers4_delta_p95_ms": delta_p95,
@@ -381,6 +443,16 @@ def _evaluate_gate(
             "background_solve_p95_ratio": p95_ratio,
             "background_throughput_ratio": throughput_ratio,
             "new_deadline_miss_count": new_deadline_miss_count,
+            "supplemental_completion_ratio": completion_ratio,
+            "supplemental_action_change_retention_ratio": (
+                action_change_retention_ratio
+            ),
+            "completed_native_reference_mismatch_count": (
+                completed_native_reference_mismatch_count
+            ),
+            "historical_fallback_mismatch_count": (
+                historical_fallback_mismatch_count
+            ),
         },
     }
 
@@ -572,7 +644,12 @@ def _load_samples(
     return selected_samples, report, all_valid_rows
 
 
-def _run_one(sample: Sample, *, supplemental: bool) -> ReplayResult:
+def _run_one(
+    sample: Sample,
+    *,
+    supplemental: bool,
+    async_service: ExactVersionSupplementalService | None = None,
+) -> ReplayResult:
     row = sample.row
     total_started = time.perf_counter_ns()
     decode_started = time.perf_counter_ns()
@@ -598,6 +675,13 @@ def _run_one(sample: Sample, *, supplemental: bool) -> ReplayResult:
         recovery_control_reserve=True,
         preloss_continuation_preference=supplemental,
         preloss_supplemental_beam_width=4 if supplemental else 0,
+        preloss_supplemental_deadline_ms=(
+            SUPPLEMENTAL_DEADLINE_MS if supplemental else None
+        ),
+        preloss_supplemental_async_service=async_service,
+        preloss_supplemental_version=(
+            sample.key if async_service is not None else None
+        ),
         local_pipeline_root=root,
         replay_hazards=hazards,
         replay_items=items,
@@ -709,6 +793,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--stress-samples", type=int, default=64)
     parser.add_argument("--prehit-window", type=int, default=300)
     parser.add_argument("--rounds", type=int, default=3)
+    parser.add_argument(
+        "--supplemental-mode",
+        choices=("native_sync", "exact_async"),
+        default="native_sync",
+    )
     args = parser.parse_args(argv)
     if (
         args.broad_samples < 0
@@ -728,6 +817,7 @@ def main(argv: list[str] | None = None) -> int:
         raise RuntimeError("native backend is unavailable")
     live._configure_local_hazard_backend("native")
     live._configure_local_beam_reducer("native")
+    live._configure_local_supplemental_backend("native")
 
     samples, selection_report, _all_rows = _load_samples(
         args.traces,
@@ -757,6 +847,7 @@ def main(argv: list[str] | None = None) -> int:
             "priority_lowered": [],
             "preloss_active_count": 0,
             "issue_global_relaxation_count": 0,
+            "supplemental_status_counts": {},
         }
         for name, supplemental, workers4 in VARIANTS
     }
@@ -772,6 +863,12 @@ def main(argv: list[str] | None = None) -> int:
             executor = None
             future = None
             solve_start = 0
+            async_service = (
+                ExactVersionSupplementalService()
+                if supplemental
+                and args.supplemental_mode == "exact_async"
+                else None
+            )
             if workers4:
                 background, executor, future = _background_start(problem)
                 solve_start = len(background.solve_ms)
@@ -786,6 +883,7 @@ def main(argv: list[str] | None = None) -> int:
                     result = _run_one(
                         sample,
                         supplemental=supplemental,
+                        async_service=async_service,
                     )
                     results[(round_index, name, sample.key)] = result
                     variant_reports[name]["timings"].append(
@@ -794,6 +892,15 @@ def main(argv: list[str] | None = None) -> int:
                     variant_reports[name]["preloss_active_count"] += bool(
                         result.decision
                         .preloss_continuation_preference_active
+                    )
+                    status = (
+                        result.decision.preloss_supplemental_status
+                    )
+                    status_counts = variant_reports[name][
+                        "supplemental_status_counts"
+                    ]
+                    status_counts[status] = (
+                        int(status_counts.get(status, 0)) + 1
                     )
                     issue_transaction = (
                         result.recertified.issue_recertification
@@ -805,6 +912,8 @@ def main(argv: list[str] | None = None) -> int:
                         and issue_transaction.global_constraint_relaxed
                     )
             finally:
+                if async_service is not None:
+                    async_service.close()
                 if workers4:
                     assert (
                         background is not None
@@ -831,6 +940,20 @@ def main(argv: list[str] | None = None) -> int:
                         "background_process_seconds"
                     ] += process_seconds
 
+    # Untimed independent recurrence references cannot perturb the four
+    # contention variants.  One deterministic result per exact root is enough
+    # because no later observation enters this offline replay.
+    python_references: dict[str, ReplayResult] = {}
+    live._configure_local_supplemental_backend("python")
+    try:
+        for sample in samples:
+            python_references[sample.key] = _run_one(
+                sample,
+                supplemental=True,
+            )
+    finally:
+        live._configure_local_supplemental_backend("native")
+
     aggregate_variants: dict[str, object] = {}
     for name, _supplemental, workers4 in VARIANTS:
         raw = variant_reports[name]
@@ -846,6 +969,9 @@ def main(argv: list[str] | None = None) -> int:
             "preloss_active_count": raw["preloss_active_count"],
             "issue_global_relaxation_count": (
                 raw["issue_global_relaxation_count"]
+            ),
+            "supplemental_status_counts": (
+                raw["supplemental_status_counts"]
             ),
             "timing_ms": {
                 timing_name: _summary(
@@ -920,6 +1046,13 @@ def main(argv: list[str] | None = None) -> int:
     }
     workers4_delta_records: list[dict[str, object]] = []
     deadline_records: list[dict[str, object]] = []
+    supplemental_eligible_count = 0
+    supplemental_completed_count = 0
+    reference_action_change_count = 0
+    retained_reference_action_change_count = 0
+    completed_native_reference_mismatch_count = 0
+    historical_fallback_mismatch_count = 0
+    native_reference_mismatch_examples: list[dict[str, object]] = []
     for round_index in range(args.rounds):
         for suffix in ("idle", "workers4"):
             historical_name = f"historical_{suffix}"
@@ -963,6 +1096,70 @@ def main(argv: list[str] | None = None) -> int:
                             ),
                         }
                     )
+
+                if suffix == "workers4":
+                    reference = python_references[sample.key].decision
+                    reference_eligible = bool(
+                        reference.preloss_continuation_preference_active
+                    )
+                    supplemental_eligible_count += reference_eligible
+                    supplemental_completed_count += bool(
+                        reference_eligible
+                        and decision.preloss_supplemental_completed
+                    )
+                    reference_changed = bool(
+                        reference_eligible
+                        and reference.action != baseline.action
+                    )
+                    reference_action_change_count += reference_changed
+                    retained_reference_action_change_count += bool(
+                        reference_changed
+                        and decision.action == reference.action
+                    )
+                    completed_mismatch = bool(
+                        decision.preloss_supplemental_completed
+                        and _native_reference_fields(decision)
+                        != _native_reference_fields(reference)
+                    )
+                    completed_native_reference_mismatch_count += (
+                        completed_mismatch
+                    )
+                    fallback_status = (
+                        decision.preloss_supplemental_status
+                        in {"deadline", "cancelled", "error"}
+                    )
+                    fallback_mismatch = bool(
+                        fallback_status
+                        and (
+                            decision.action != baseline.action
+                            or not decision
+                            .preloss_supplemental_historical_fallback
+                        )
+                    )
+                    historical_fallback_mismatch_count += (
+                        fallback_mismatch
+                    )
+                    if (
+                        (completed_mismatch or fallback_mismatch)
+                        and len(native_reference_mismatch_examples) < 64
+                    ):
+                        native_reference_mismatch_examples.append(
+                            {
+                                "round": round_index,
+                                "root": sample.key,
+                                "status": (
+                                    decision
+                                    .preloss_supplemental_status
+                                ),
+                                "historical_action": baseline.action,
+                                "reference_action": reference.action,
+                                "native_action": decision.action,
+                                "completed_mismatch": (
+                                    completed_mismatch
+                                ),
+                                "fallback_mismatch": fallback_mismatch,
+                            }
+                        )
 
                 delta_ms = candidate.total_ms - historical.total_ms
                 paired_deltas[suffix].append(delta_ms)
@@ -1035,6 +1232,16 @@ def main(argv: list[str] | None = None) -> int:
                                 decision
                                 .preloss_continuation_preference_active
                             ),
+                            "supplemental_status": (
+                                decision.preloss_supplemental_status
+                            ),
+                            "supplemental_completed": (
+                                decision.preloss_supplemental_completed
+                            ),
+                            "supplemental_historical_fallback": (
+                                decision
+                                .preloss_supplemental_historical_fallback
+                            ),
                             "active_bullets": int(
                                 sample.row.get("active_bullets", 0)
                             ),
@@ -1069,6 +1276,17 @@ def main(argv: list[str] | None = None) -> int:
     supplemental_solve = supplemental_background_report["solve_ms"]
     assert isinstance(historical_solve, dict)
     assert isinstance(supplemental_solve, dict)
+    completion_ratio = (
+        supplemental_completed_count / supplemental_eligible_count
+        if supplemental_eligible_count
+        else 0.0
+    )
+    action_change_retention_ratio = (
+        retained_reference_action_change_count
+        / reference_action_change_count
+        if reference_action_change_count
+        else 1.0
+    )
     gate = _evaluate_gate(
         violation_counts=violation_counts,
         invalid_measured_root_count=0,
@@ -1096,9 +1314,19 @@ def main(argv: list[str] | None = None) -> int:
         new_deadline_miss_count=sum(
             bool(record["new_miss"]) for record in deadline_records
         ),
+        completion_ratio=completion_ratio,
+        action_change_retention_ratio=(
+            action_change_retention_ratio
+        ),
+        completed_native_reference_mismatch_count=(
+            completed_native_reference_mismatch_count
+        ),
+        historical_fallback_mismatch_count=(
+            historical_fallback_mismatch_count
+        ),
     )
     report = {
-        "schema": "th08-supplemental-direct-root-contention-gate-v1",
+        "schema": "th08-supplemental-direct-root-contention-gate-v2",
         "platform": platform.platform(),
         "python": platform.python_version(),
         "logical_cpu_count": os.cpu_count(),
@@ -1131,6 +1359,11 @@ def main(argv: list[str] | None = None) -> int:
             "round_orders": round_orders,
             "viability_shape": list(problem["clearance_volume"].shape),
             "viability_action_count": len(problem["actions"]),
+            "supplemental_backend": "complete_native",
+            "supplemental_mode": args.supplemental_mode,
+            "supplemental_absolute_deadline_ms": (
+                SUPPLEMENTAL_DEADLINE_MS
+            ),
         },
         "selection": selection_report,
         "variants": aggregate_variants,
@@ -1160,6 +1393,27 @@ def main(argv: list[str] | None = None) -> int:
             ),
             "violation_counts": violation_counts,
             "failure_examples": failure_examples,
+        },
+        "native_reference": {
+            "supplemental_eligible_count": supplemental_eligible_count,
+            "supplemental_completed_count": supplemental_completed_count,
+            "completion_ratio": completion_ratio,
+            "reference_action_change_count": (
+                reference_action_change_count
+            ),
+            "retained_reference_action_change_count": (
+                retained_reference_action_change_count
+            ),
+            "action_change_retention_ratio": (
+                action_change_retention_ratio
+            ),
+            "completed_native_reference_mismatch_count": (
+                completed_native_reference_mismatch_count
+            ),
+            "historical_fallback_mismatch_count": (
+                historical_fallback_mismatch_count
+            ),
+            "mismatch_examples": native_reference_mismatch_examples,
         },
         "deadline_proxy": {
             "assumed_hz": 60,

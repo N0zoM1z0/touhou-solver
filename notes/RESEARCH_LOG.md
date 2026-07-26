@@ -3972,3 +3972,70 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Validation:** Linux and Windows quick suites pass `587/587` in
   `5.283/8.008 s`; focused gate tests, Python compilation, JSON parsing, and
   `git diff --check` pass.
+
+## 2026-07-26: Complete Native Supplemental Boundary And Semantic Fuzzer
+
+- **Contracts fixed first:** Added
+  `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md` and
+  `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`.  The native
+  lane keeps width four, the historical incumbent, a 5-ms absolute deadline,
+  complete-only publication, cooperative cancellation and historical
+  fallback.  The generator has deterministic schema/digest/replay/shrink
+  semantics and independent NumPy/Python oracles.
+- **Native implementation:** Added a persistent C++ workspace that fuses
+  action expansion, bullet/laser/body hazard queries, transition risk,
+  canonicalization and supplemental reduction behind one C ABI call.
+  Deadline and generation-scoped cancellation are checked inside rollout and
+  bounded hazard loops.  Python exposes complete results only and waits for
+  active work before workspace destruction.
+- **Observed recurrence parity:** deterministic tests plus 50 randomized
+  end-to-end cases found zero Python/complete-native endpoint, order, action
+  or hard-label mismatch.  Forced deadline and cross-thread cancellation
+  returned no partial endpoints.
+- **Observed synchronous Windows gate:** all 729 eligible four-worker calls
+  completed; 294/294 reference action changes were retained; completed
+  native/Python and fallback mismatch counts were zero.  Native rollout
+  median/p95/max was `0.876/1.365/1.942 ms`, but paired total increment was
+  `1.249/7.054/53.721 ms` and produced one new deadline-proxy miss.  The fixed
+  delivery gate therefore failed and triggered exact-version asynchronous
+  publication.
+- **Exact-version implementation:** Added one dedicated newest-wins worker,
+  exact root/policy identity, cooperative cancellation of active stale work,
+  stale-revision discard, nonblocking lookup, complete-only publication and
+  below-normal Windows worker priority.  Historical planning remains
+  authoritative; miss, deadline, cancellation, error or identity mismatch
+  retains the historical action.
+- **Observed final async Windows gate:** 728/729 eligible calls completed and
+  retained 294/294 reference action changes.  All finite, issue,
+  native/Python and fallback checks passed.  Paired increment was
+  `2.240/8.139/12.214 ms`; one new hybrid miss at
+  `212756:E0:F969` took `39.634 + 11.023 = 50.658 ms` against a
+  `50.000-ms` support budget.  Global solve-p95/throughput ratios
+  `0.990x/1.021x` passed.  CE-0131 rejects same-issue publication and blocks
+  physical A/B without weakening the four-worker planner.
+- **Semantic differential harness:** Added twelve TH08-like families across
+  Normal, Hard, Lunatic and beyond-pool densities, complete replay capsules,
+  deterministic shrinking, geometry/batch invariance checks and
+  Python/native supplemental comparison.  The 256-case gate covered
+  87,534 bullets/4,385 lasers/730 bodies; the 96-case research profile covered
+  99,858/19,816/1,383 with per-case maxima 3,900 bullets, 1,387 lasers,
+  62 bodies and horizon 24.  Every collision, clearance sign/value, risk,
+  batch and endpoint mismatch count was zero.
+- **Observed generated performance:** Gate NumPy/native geometry p95 was
+  `9.264/3.079 ms`, and Python/native supplemental p95
+  `3.787/1.131 ms`.  Research values were
+  `121.538/40.500 ms` and `9.931/3.337 ms`.  Native supplemental maximum was
+  `19.341 ms` on beyond-pool boundary-tangent case 91 with 3,090 bullets,
+  89 lasers, 62 bodies and horizon 15.  These are finite generated semantics,
+  not shipped-game completeness or physical authority.
+- **Artifacts:** synchronous native SHA-256
+  `c3a2af979ae4a969aebaace85f0a725ce50c1d597c700a1e2db394d0095f5ed7`;
+  final async
+  `de34b6acd382278647d8d0421e4070010794b2b712afc789a0f5cd186411bdd9`;
+  semantic gate
+  `9604b098171a295a71f10f44dfea019771cb2e75d1cb385952abf2cb6125e207`;
+  semantic research
+  `b53090113945ddb0b7853da5052b840872546a679cc40a92ffcc60c7007e5744`.
+- **Validation:** both native targets rebuilt; Linux and Windows quick suites
+  pass `593/593` in `5.366/8.164 s`.  Focused live-agent, contention and
+  semantic tests pass; Python compilation and `git diff --check` pass.

@@ -245,3 +245,52 @@ The same Windows gate must pass before a focused Hard shadow.  No physical
 A/B is authorized by this checkpoint.
 
 Linux and Windows quick suites pass `587/587` in `5.283/8.008 s`.
+
+## Native And Exact-Version Follow-Up
+
+The predeclared follow-up was implemented without changing this gate's root
+reservoir, three rounds, four-worker global planner, finite checks or delivery
+limits.
+
+**Observed complete-native synchronous result:** one persistent C++ workspace
+now owns the full supplemental rollout, frame-major bullet/laser hazard
+queries, moving bodies, transition risk, quantized reduction and
+all-or-nothing endpoint publication.  The native work itself measured
+`0.876/1.365/1.942 ms` median/p95/max under four workers.  All 729 eligible
+queries completed, all 294 reference action changes were retained, and native
+reference/fallback mismatches were zero.  The complete paired increment still
+measured `1.249/7.054/53.721 ms` with one new hybrid deadline miss, so the
+synchronous form remained rejected.
+
+**Observed exact-version asynchronous result:** a dedicated below-normal
+newest-wins worker submits before the historical beam, cooperatively cancels
+stale work, publishes only exact complete endpoints, and permits only
+nonblocking lookup.  The final identical gate completed 728/729 eligible
+queries, retained 294/294 action changes, and again had zero finite,
+native-reference or fallback violations.  Paired increment was
+`2.240/8.139/12.214 ms`; p95 still failed the fixed `5 ms` limit and one new
+hybrid miss remained.  Global solve-p95 and throughput ratios
+`0.990x/1.021x` passed.
+
+The asynchronous miss witness was Stage-4A `212756`, epoch 0 frame 969.  Its
+recorded physical chain was `39.634 ms`, the paired increment `11.023 ms`,
+and the resulting `50.658 ms` estimate exceeded its `50.000 ms` support
+budget.  All compared actions were `stay`; this is another delivery witness,
+not a finite-action disagreement.  Measured async submit/lookup work was only
+`0.078 ms`, while historical choose and recertify accounted for
+`8.894/2.044 ms` of the increment.
+
+**Decision:** CE-0131 blocks focused Hard shadow and physical A/B for both
+current-issue supplemental modes.  Four global workers remain unchanged.
+Future work must either publish a causally valid exact version before the
+issue transaction or isolate optional execution resources; a merely similar
+prior root is not reusable.
+
+Additional retained artifacts:
+
+- `artifacts/benchmarks/hard_supplemental_full_native_direct_root_contention_windows_20260726.json`,
+  SHA-256
+  `c3a2af979ae4a969aebaace85f0a725ce50c1d597c700a1e2db394d0095f5ed7`;
+- `artifacts/benchmarks/hard_supplemental_exact_async_final_direct_root_contention_windows_20260726.json`,
+  SHA-256
+  `de34b6acd382278647d8d0421e4070010794b2b712afc789a0f5cd186411bdd9`.

@@ -2239,6 +2239,55 @@ TOUHOU_EXPORT int touhou_robust_survival_viability_v1(
     return 0;
 }
 
+namespace {
+
+struct LocalHazardStopContext {
+    const std::atomic<std::uint64_t>* cancel_generation = nullptr;
+    std::uint64_t expected_generation = 0;
+    bool deadline_enabled = false;
+    std::chrono::steady_clock::time_point deadline{};
+};
+
+thread_local LocalHazardStopContext local_hazard_stop_context;
+
+inline int local_hazard_stop_status() {
+    if (
+        local_hazard_stop_context.cancel_generation != nullptr
+        && local_hazard_stop_context.cancel_generation->load(
+            std::memory_order_relaxed
+        ) != local_hazard_stop_context.expected_generation
+    ) {
+        return 5;
+    }
+    if (
+        local_hazard_stop_context.deadline_enabled
+        && std::chrono::steady_clock::now()
+            >= local_hazard_stop_context.deadline
+    ) {
+        return 6;
+    }
+    return 0;
+}
+
+class ScopedLocalHazardStopContext {
+public:
+    explicit ScopedLocalHazardStopContext(
+        LocalHazardStopContext context
+    )
+        : previous_(local_hazard_stop_context) {
+        local_hazard_stop_context = context;
+    }
+
+    ~ScopedLocalHazardStopContext() {
+        local_hazard_stop_context = previous_;
+    }
+
+private:
+    LocalHazardStopContext previous_;
+};
+
+}  // namespace
+
 TOUHOU_EXPORT int touhou_local_hazards_v1(
     const float* positions_x,
     const float* positions_y,
@@ -2325,6 +2374,12 @@ TOUHOU_EXPORT int touhou_local_hazards_v1(
     float position_min_y = positions_y[0];
     float position_max_y = positions_y[0];
     for (int position = 0; position < position_count; ++position) {
+        if ((position & 63) == 0) {
+            const int stop = local_hazard_stop_status();
+            if (stop != 0) {
+                return stop;
+            }
+        }
         if (
             !std::isfinite(positions_x[position])
             || !std::isfinite(positions_y[position])
@@ -2368,6 +2423,12 @@ TOUHOU_EXPORT int touhou_local_hazards_v1(
         0.0F
     );
     for (int bullet = 0; bullet < bullet_count; ++bullet) {
+        if ((bullet & 63) == 0) {
+            const int stop = local_hazard_stop_status();
+            if (stop != 0) {
+                return stop;
+            }
+        }
         if (
             bullet_x[bullet] < position_min_x - bullet_margin
             || bullet_x[bullet] > position_max_x + bullet_margin
@@ -2440,6 +2501,12 @@ TOUHOU_EXPORT int touhou_local_hazards_v1(
         0.0F
     );
     for (int laser = 0; laser < laser_count; ++laser) {
+        if ((laser & 63) == 0) {
+            const int stop = local_hazard_stop_status();
+            if (stop != 0) {
+                return stop;
+            }
+        }
         const float uncertainty = (
             laser_base_uncertainty[laser]
             + std::min(
@@ -2552,6 +2619,12 @@ TOUHOU_EXPORT int touhou_local_hazards_v1(
         0.0F
     );
     for (int body = 0; body < body_count; ++body) {
+        if ((body & 63) == 0) {
+            const int stop = local_hazard_stop_status();
+            if (stop != 0) {
+                return stop;
+            }
+        }
         for (int position = 0; position < position_count; ++position) {
             const float dx = (
                 std::fabs(positions_x[position] - body_x[body])
@@ -2592,7 +2665,7 @@ TOUHOU_EXPORT int touhou_local_hazards_v1(
             * time_weight
         );
     }
-    return 0;
+    return local_hazard_stop_status();
 }
 
 namespace {
@@ -3329,6 +3402,8 @@ TOUHOU_EXPORT int touhou_local_supplemental_beam_reduce_v1(
     *output_count = retained_count;
     return 0;
 }
+
+#include "local_supplemental_workspace.hpp"
 
 TOUHOU_EXPORT int touhou_query_local_survival_v1(
     const float* clearance,

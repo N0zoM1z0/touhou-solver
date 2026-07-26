@@ -3362,3 +3362,57 @@ Status: synchronous current-issue delivery rejected; lane remains offline
   `artifacts/benchmarks/hard_supplemental_direct_root_contention_windows_20260726.json`
   and
   `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`.
+
+## CE-0131: Same-issue exact-version publication still perturbed delivery
+
+Status: exact-version same-issue delivery rejected; offline implementation retained
+
+- **Observed Windows counterexample:** Moving the complete width-four
+  supplemental rollout, hazard query and reduction behind one native C++
+  boundary eliminated the Python rollout tail.  Under four global workers,
+  completed native work itself cost `0.876/1.365/1.942 ms`
+  median/p95/max, retained 100% of reference action changes, and had zero
+  completed-native/Python or historical-fallback mismatch.  Nevertheless the
+  fixed synchronous end-to-end gate still measured
+  `1.249/7.054/53.721 ms` paired median/p95/max and one new deadline-proxy
+  miss.
+- **Rejected asynchronous follow-up:** A dedicated below-normal-priority,
+  newest-wins worker then accepted exact immutable identities, cooperatively
+  cancelled stale work, published only complete results, and made consumer
+  lookup nonblocking.  On the final identical 253-root, three-round Windows
+  gate, 728/729 eligible four-worker queries completed, all 294 reference
+  action changes were retained, and all finite, issue, native/reference, and
+  fallback checks remained clean.  The paired increment was still
+  `2.240/8.139/12.214 ms`; p95 exceeded the fixed `5 ms` limit and one new
+  hybrid deadline-proxy miss remained.
+- **Canonical async witness:** Hard Stage-4A `212756`, epoch 0, frame 969 had
+  123 bullets, no laser, physical `observe_to_input=39.634 ms`,
+  support-high three and post-capture advance two.  The paired increment was
+  `11.023 ms`, producing `50.658 ms` against a `50.000 ms` support budget.
+  Historical, supplemental and recertified actions were all `stay`.
+  `choose_action` and recertification contributed `8.894/2.044 ms` of the
+  increment while measured async submit/lookup work was only `0.078 ms`.
+- **Invalid assumption:** Removing optional work from the Python critical
+  path is not the same as removing its same-issue CPU, cache and scheduler
+  interference.  Exact identity prevents stale reuse but cannot make a
+  current-root result available before the current root exists.
+- **Isolation:** The global planner's supplemental-versus-historical
+  solve-p95 and throughput ratios were `0.990x/1.021x`, within the fixed
+  `1.10x/0.90x` bounds.  The optional native recurrence and publication
+  semantics are implementation-parity clean; the failure is delivery
+  contention, not evidence for reducing the authoritative four-worker
+  planner.
+- **Correction boundary:** Keep all supplemental modes default-off and grant
+  no physical action authority.  A future publication experiment must obtain
+  a causally valid exact hazard/policy version before the issue transaction
+  or use genuinely reserved execution resources; it must not reuse a merely
+  similar prior root.  Otherwise retain the historical action and return to
+  global feasibility/route work.
+- **Regression/evidence:** Cancellation, deadline, newest-wins identity,
+  fallback and endpoint parity have deterministic tests.  Compact reports
+  are
+  `artifacts/benchmarks/hard_supplemental_full_native_direct_root_contention_windows_20260726.json`
+  and
+  `artifacts/benchmarks/hard_supplemental_exact_async_final_direct_root_contention_windows_20260726.json`;
+  the publication contract is
+  `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`.

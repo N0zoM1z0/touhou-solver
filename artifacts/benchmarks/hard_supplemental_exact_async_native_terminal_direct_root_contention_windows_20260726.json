@@ -1,0 +1,3533 @@
+{
+  "schema": "th08-supplemental-direct-root-contention-gate-v2",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "python": "3.12.10",
+  "logical_cpu_count": 20,
+  "native_library": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\native\\build\\windows-x86_64\\touhou_viability.dll",
+  "scope": {
+    "physical": "Retained game-process telemetry includes observe, ReadProcessMemory pool reads, raw decode, local plan, issue path, and SendInput.",
+    "replay": "Windows rows are already parsed JSON. Measured trace-list reconstruction, explicit-root planning, and forced same-snapshot recertification are offline proxies, not pool decode or physical input issue.",
+    "hybrid_deadline": "recorded physical observe_to_input plus paired Windows supplemental-minus-historical direct-root compute delta",
+    "authority": "offline gate; no input injection or action authority"
+  },
+  "configuration": {
+    "rounds": 3,
+    "supplemental_width": 4,
+    "background_worker_limit": 4,
+    "background_parent_priority": "normal",
+    "rotating_variant_order": true,
+    "rotating_root_order": true,
+    "round_orders": [
+      [
+        "historical_idle",
+        "supplemental_idle",
+        "historical_workers4",
+        "supplemental_workers4"
+      ],
+      [
+        "supplemental_idle",
+        "historical_workers4",
+        "supplemental_workers4",
+        "historical_idle"
+      ],
+      [
+        "historical_workers4",
+        "supplemental_workers4",
+        "historical_idle",
+        "supplemental_idle"
+      ]
+    ],
+    "viability_shape": [
+      81,
+      27,
+      24
+    ],
+    "viability_action_count": 17,
+    "supplemental_backend": "complete_native",
+    "supplemental_mode": "exact_async",
+    "supplemental_absolute_deadline_ms": 5.0
+  },
+  "selection": {
+    "traces": [
+      {
+        "path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl",
+        "sha256": "cea41e2914c32d7157082cefca81e60a8d83e6d891886d294fdffcdf5f6c79a2",
+        "decision_count": 13438,
+        "eligible_count": 8188,
+        "valid_direct_root_count": 8180,
+        "invalid_direct_root_count": 0,
+        "overdue_root_count": 8,
+        "hit_count": 6
+      }
+    ],
+    "cohort_requested": {
+      "broad": 128,
+      "prehit": 64,
+      "stress": 64,
+      "prehit_window": 300
+    },
+    "cohort_retained_before_dedup": {
+      "broad": 128,
+      "prehit": 64,
+      "stress": 64
+    },
+    "deduplicated_sample_count": 253,
+    "cohorts_by_root": {
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16303": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|17626": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15344": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|32882": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|9650": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18812": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10354": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16463": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|3180": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|32972": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|4851": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20218": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26428": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|3226": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|33032": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|41775": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|29053": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|17592": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|3050": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|32945": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15187": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|41273": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|32950": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16573": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|13162": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11101": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12015": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26634": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10644": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10295": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18226": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|35407": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|34627": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|21059": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|392": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|42201": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40384": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40167": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|43045": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|21139": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|33012": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36931": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10650": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|9695": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18063": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20954": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|42257": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18738": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40588": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|17666": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|9905": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20969": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|4668": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2040": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40377": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|19457": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16234": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18208": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16536": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18601": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|28151": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36756": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20678": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15491": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37885": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|17988": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16370": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|9007": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12960": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|33075": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|9574": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|17309": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26185": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|29305": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|9770": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|33861": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|8598": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15229": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|27366": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11815": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40284": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|4711": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26439": [
+        "broad",
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|248": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|38021": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16136": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|9188": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26331": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36318": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37100": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40962": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26408": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40340": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12489": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26235": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|400": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|35795": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20755": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15779": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26747": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|28298": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|21113": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|289": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|41752": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|8784": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16921": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|33147": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40451": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|788": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26347": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20234": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2985": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2150": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|13137": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|28338": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|17049": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|41537": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18875": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18160": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36543": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|19183": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10482": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|39985": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12664": [
+        "broad",
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|4937": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|41253": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|3103": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2754": [
+        "broad"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|35884": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12605": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20739": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12112": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36081": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36763": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10527": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12742": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20743": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10309": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10522": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12622": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36598": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20598": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20639": [
+        "prehit",
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10324": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10520": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20769": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20730": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|35867": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20789": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12002": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36683": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12106": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36730": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10505": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10350": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10352": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12251": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20757": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36587": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20741": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12835": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36767": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10434": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10370": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12747": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36085": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12255": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11982": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36699": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|35889": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20695": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10454": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12077": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10392": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|35899": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12260": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10399": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20662": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12609": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20576": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20802": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|35862": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12005": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20728": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10417": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10419": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12680": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12034": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12659": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12634": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12631": [
+        "prehit"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11822": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2129": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|34386": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12138": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|19486": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|42789": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|27951": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10537": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|4391": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|19798": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|17244": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2757": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11595": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12829": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11855": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12546": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10718": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|1571": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36671": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|17703": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37187": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26979": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36553": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20932": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|33923": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11473": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16387": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37630": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|13176": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12420": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37834": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11576": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18740": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37056": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|34799": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|27921": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12571": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|586": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11991": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20726": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|19329": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15151": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40966": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|351": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18440": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|4914": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37782": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|689": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12686": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40718": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18230": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|28837": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15907": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11402": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16400": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40958": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12565": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15479": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|22072": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|9790": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|969": [
+        "stress"
+      ],
+      "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2704": [
+        "stress"
+      ]
+    },
+    "physical_all_valid_direct_roots": {
+      "row_count": 8180,
+      "chain": {
+        "observe_ms": {
+          "count": 8180,
+          "median": 0.22909999825060368,
+          "p95": 0.5255999858491123,
+          "max": 9.264299995265901,
+          "mean": 0.2932698906070273
+        },
+        "read_pools_ms": {
+          "count": 8180,
+          "median": 4.336650017648935,
+          "p95": 7.661700015887618,
+          "max": 24.833900039084256,
+          "mean": 4.866807982650037
+        },
+        "decode_pools_ms": {
+          "count": 8180,
+          "median": 0.5024999845772982,
+          "p95": 1.9860999891534448,
+          "max": 14.604000025428832,
+          "mean": 0.7408421025224358
+        },
+        "local_plan_initial_ms": {
+          "count": 8180,
+          "median": 11.700750008458272,
+          "p95": 20.144400012213737,
+          "max": 38.135799986775964,
+          "mean": 12.507523814202594
+        },
+        "issue_path_to_input_ms": {
+          "count": 8180,
+          "median": 2.723650017287582,
+          "p95": 7.247000001370907,
+          "max": 22.019200026988983,
+          "mean": 3.3904678368508874
+        },
+        "input_ms": {
+          "count": 8180,
+          "median": 0.0009999494068324566,
+          "p95": 3.386800002772361,
+          "max": 15.747500001452863,
+          "mean": 0.6831865769871887
+        },
+        "observe_to_input_ms": {
+          "count": 8180,
+          "median": 21.782649972010404,
+          "p95": 33.22949999710545,
+          "max": 52.722199994605035,
+          "mean": 22.59667669976538
+        },
+        "action_lag_frames": {
+          "count": 8180,
+          "median": 1.0,
+          "p95": 2.0,
+          "max": 3.0,
+          "mean": 1.1654034229828851
+        },
+        "policy_age_frames": {
+          "count": 8180,
+          "median": 11.0,
+          "p95": 28.0,
+          "max": 80.0,
+          "mean": 12.246088019559902
+        },
+        "viability_age_frames": {
+          "count": 8180,
+          "median": 10.0,
+          "p95": 27.0,
+          "max": 79.0,
+          "mean": 11.184474327628362
+        },
+        "support_high_frames": {
+          "count": 8180,
+          "median": 4.0,
+          "p95": 6.0,
+          "max": 6.0,
+          "mean": 4.402444987775061
+        },
+        "post_capture_advance_frames": {
+          "count": 8180,
+          "median": 1.0,
+          "p95": 2.0,
+          "max": 3.0,
+          "mean": 1.0616136919315404
+        }
+      },
+      "deadline_missed_count": 0,
+      "worker_limit_four_count": 8180,
+      "worker_limit_applied_count": 8180
+    },
+    "physical_selected_roots": {
+      "row_count": 253,
+      "chain": {
+        "observe_ms": {
+          "count": 253,
+          "median": 0.23579999106004834,
+          "p95": 0.5425999988801777,
+          "max": 0.644999963697046,
+          "mean": 0.3017075072234062
+        },
+        "read_pools_ms": {
+          "count": 253,
+          "median": 5.125200026668608,
+          "p95": 10.610500001348555,
+          "max": 24.833900039084256,
+          "mean": 5.729669564460651
+        },
+        "decode_pools_ms": {
+          "count": 253,
+          "median": 0.615999975707382,
+          "p95": 2.046799985691905,
+          "max": 6.840899994131178,
+          "mean": 0.7875339926879397
+        },
+        "local_plan_initial_ms": {
+          "count": 253,
+          "median": 13.970299973152578,
+          "p95": 29.550000035669655,
+          "max": 38.135799986775964,
+          "mean": 15.567309486545373
+        },
+        "issue_path_to_input_ms": {
+          "count": 253,
+          "median": 3.3759999787434936,
+          "p95": 11.504800000693649,
+          "max": 22.019200026988983,
+          "mean": 4.6629561297687525
+        },
+        "input_ms": {
+          "count": 253,
+          "median": 0.001100008375942707,
+          "p95": 5.577299976721406,
+          "max": 15.586199995595962,
+          "mean": 1.16788537454103
+        },
+        "observe_to_input_ms": {
+          "count": 253,
+          "median": 25.073900003917515,
+          "p95": 45.045900042168796,
+          "max": 52.722199994605035,
+          "mean": 27.917674703757267
+        },
+        "action_lag_frames": {
+          "count": 253,
+          "median": 1.0,
+          "p95": 3.0,
+          "max": 3.0,
+          "mean": 1.4782608695652173
+        },
+        "policy_age_frames": {
+          "count": 253,
+          "median": 10.0,
+          "p95": 29.0,
+          "max": 47.0,
+          "mean": 11.411067193675889
+        },
+        "viability_age_frames": {
+          "count": 253,
+          "median": 9.0,
+          "p95": 28.0,
+          "max": 46.0,
+          "mean": 10.134387351778656
+        },
+        "support_high_frames": {
+          "count": 253,
+          "median": 4.0,
+          "p95": 6.0,
+          "max": 6.0,
+          "mean": 4.5059288537549405
+        },
+        "post_capture_advance_frames": {
+          "count": 253,
+          "median": 1.0,
+          "p95": 2.0,
+          "max": 3.0,
+          "mean": 1.2766798418972332
+        }
+      },
+      "deadline_missed_count": 0,
+      "worker_limit_four_count": 253,
+      "worker_limit_applied_count": 253
+    }
+  },
+  "variants": {
+    "historical_idle": {
+      "sample_count": 759,
+      "preloss_active_count": 0,
+      "issue_global_relaxation_count": 30,
+      "supplemental_status_counts": {
+        "not_eligible": 759
+      },
+      "timing_ms": {
+        "total_ms": {
+          "count": 759,
+          "median": 10.2949,
+          "p95": 17.2757,
+          "max": 33.2559,
+          "mean": 11.269815019762845
+        },
+        "trace_reconstruction_ms": {
+          "count": 759,
+          "median": 0.1603,
+          "p95": 0.7999,
+          "max": 1.9858,
+          "mean": 0.2581909090909091
+        },
+        "root_parse_ms": {
+          "count": 759,
+          "median": 0.0132,
+          "p95": 0.0195,
+          "max": 0.1181,
+          "mean": 0.0140832674571805
+        },
+        "choose_ms": {
+          "count": 759,
+          "median": 8.3042,
+          "p95": 13.7306,
+          "max": 27.6663,
+          "mean": 9.126181818181818
+        },
+        "recertify_ms": {
+          "count": 759,
+          "median": 1.7002,
+          "p95": 2.8987,
+          "max": 8.1552,
+          "mean": 1.867859420289855
+        },
+        "shared_laser_projection_ms": {
+          "count": 759,
+          "median": 0.147,
+          "p95": 0.4166,
+          "max": 1.1524,
+          "mean": 0.20847812911725958
+        },
+        "control_prefix_ms": {
+          "count": 759,
+          "median": 0.2875,
+          "p95": 0.5237,
+          "max": 1.2749,
+          "mean": 0.31066482213438734
+        },
+        "planning_bullet_projection_ms": {
+          "count": 759,
+          "median": 0.1027,
+          "p95": 0.2993,
+          "max": 0.5303,
+          "mean": 0.1274403162055336
+        },
+        "certificate_total_ms": {
+          "count": 759,
+          "median": 1.3908,
+          "p95": 2.6464,
+          "max": 5.3708,
+          "mean": 1.552207378129117
+        },
+        "beam_search_inclusive_ms": {
+          "count": 759,
+          "median": 5.5823,
+          "p95": 7.893,
+          "max": 21.2305,
+          "mean": 5.914081027667985
+        },
+        "supplemental_beam_ms": {
+          "count": 759,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "terminal_threat_ms": {
+          "count": 759,
+          "median": 0.0296,
+          "p95": 2.3169,
+          "max": 6.5569,
+          "mean": 0.4149486166007906
+        },
+        "selection_finalize_ms": {
+          "count": 759,
+          "median": 0.3638,
+          "p95": 0.4898,
+          "max": 1.6156,
+          "mean": 0.3714262187088274
+        },
+        "issue_certificate_total_ms": {
+          "count": 759,
+          "median": 1.5979999999999999,
+          "p95": 2.8017,
+          "max": 7.9028,
+          "mean": 1.7669602108036888
+        }
+      },
+      "background_viability": null
+    },
+    "supplemental_idle": {
+      "sample_count": 759,
+      "preloss_active_count": 729,
+      "issue_global_relaxation_count": 30,
+      "supplemental_status_counts": {
+        "async_hit": 672,
+        "not_eligible": 30,
+        "async_miss": 57
+      },
+      "timing_ms": {
+        "total_ms": {
+          "count": 759,
+          "median": 11.9149,
+          "p95": 19.1059,
+          "max": 235.2401,
+          "mean": 13.246100263504612
+        },
+        "trace_reconstruction_ms": {
+          "count": 759,
+          "median": 0.1712,
+          "p95": 0.832,
+          "max": 1.5834,
+          "mean": 0.26456706192358365
+        },
+        "root_parse_ms": {
+          "count": 759,
+          "median": 0.0133,
+          "p95": 0.0208,
+          "max": 0.0267,
+          "mean": 0.014478919631093544
+        },
+        "choose_ms": {
+          "count": 759,
+          "median": 9.6818,
+          "p95": 15.7313,
+          "max": 26.3253,
+          "mean": 10.665463372859024
+        },
+        "recertify_ms": {
+          "count": 759,
+          "median": 1.7483,
+          "p95": 3.5899,
+          "max": 227.1373,
+          "mean": 2.297711725955204
+        },
+        "shared_laser_projection_ms": {
+          "count": 759,
+          "median": 0.1506,
+          "p95": 0.4345,
+          "max": 1.1084,
+          "mean": 0.23028563899868248
+        },
+        "control_prefix_ms": {
+          "count": 759,
+          "median": 0.2911,
+          "p95": 0.6107,
+          "max": 1.1663,
+          "mean": 0.322062977602108
+        },
+        "planning_bullet_projection_ms": {
+          "count": 759,
+          "median": 0.1098,
+          "p95": 0.3057,
+          "max": 0.5989,
+          "mean": 0.13226890645586298
+        },
+        "certificate_total_ms": {
+          "count": 759,
+          "median": 1.4115,
+          "p95": 3.0396,
+          "max": 4.523,
+          "mean": 1.6265960474308299
+        },
+        "beam_search_inclusive_ms": {
+          "count": 759,
+          "median": 6.5352,
+          "p95": 11.4819,
+          "max": 21.0144,
+          "mean": 7.321716073781291
+        },
+        "supplemental_beam_ms": {
+          "count": 759,
+          "median": 0.0692,
+          "p95": 0.1345,
+          "max": 0.7048,
+          "mean": 0.08972793148880105
+        },
+        "terminal_threat_ms": {
+          "count": 759,
+          "median": 0.0684,
+          "p95": 2.668,
+          "max": 5.5196,
+          "mean": 0.4949363636363636
+        },
+        "selection_finalize_ms": {
+          "count": 759,
+          "median": 0.5993,
+          "p95": 1.0288,
+          "max": 1.5222,
+          "mean": 0.6333233201581028
+        },
+        "issue_certificate_total_ms": {
+          "count": 759,
+          "median": 1.6383999999999999,
+          "p95": 3.4337999999999997,
+          "max": 227.029,
+          "mean": 2.191279841897233
+        }
+      },
+      "background_viability": null
+    },
+    "historical_workers4": {
+      "sample_count": 759,
+      "preloss_active_count": 0,
+      "issue_global_relaxation_count": 30,
+      "supplemental_status_counts": {
+        "not_eligible": 759
+      },
+      "timing_ms": {
+        "total_ms": {
+          "count": 759,
+          "median": 11.3842,
+          "p95": 16.8061,
+          "max": 33.2941,
+          "mean": 11.93976996047431
+        },
+        "trace_reconstruction_ms": {
+          "count": 759,
+          "median": 0.1731,
+          "p95": 0.85,
+          "max": 1.4807,
+          "mean": 0.26346969696969696
+        },
+        "root_parse_ms": {
+          "count": 759,
+          "median": 0.014,
+          "p95": 0.021,
+          "max": 0.0294,
+          "mean": 0.014712779973649538
+        },
+        "choose_ms": {
+          "count": 759,
+          "median": 9.0501,
+          "p95": 13.3586,
+          "max": 27.7698,
+          "mean": 9.668936363636364
+        },
+        "recertify_ms": {
+          "count": 759,
+          "median": 1.8521,
+          "p95": 3.1499,
+          "max": 4.8032,
+          "mean": 1.9887820816864294
+        },
+        "shared_laser_projection_ms": {
+          "count": 759,
+          "median": 0.1573,
+          "p95": 0.5233,
+          "max": 1.1497,
+          "mean": 0.2344250329380764
+        },
+        "control_prefix_ms": {
+          "count": 759,
+          "median": 0.2981,
+          "p95": 0.5766,
+          "max": 1.2776,
+          "mean": 0.3246096179183136
+        },
+        "planning_bullet_projection_ms": {
+          "count": 759,
+          "median": 0.1067,
+          "p95": 0.2778,
+          "max": 0.6682,
+          "mean": 0.1314528326745718
+        },
+        "certificate_total_ms": {
+          "count": 759,
+          "median": 1.5141,
+          "p95": 2.8836,
+          "max": 5.2061,
+          "mean": 1.6646978919631092
+        },
+        "beam_search_inclusive_ms": {
+          "count": 759,
+          "median": 6.024,
+          "p95": 8.5714,
+          "max": 14.9188,
+          "mean": 6.247938471673255
+        },
+        "supplemental_beam_ms": {
+          "count": 759,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "terminal_threat_ms": {
+          "count": 759,
+          "median": 0.0314,
+          "p95": 2.5888,
+          "max": 5.0252,
+          "mean": 0.44231923583662713
+        },
+        "selection_finalize_ms": {
+          "count": 759,
+          "median": 0.3769,
+          "p95": 0.5507,
+          "max": 0.8089,
+          "mean": 0.3823243741765481
+        },
+        "issue_certificate_total_ms": {
+          "count": 759,
+          "median": 1.7493999999999998,
+          "p95": 2.9939999999999998,
+          "max": 4.609,
+          "mean": 1.8803774703557312
+        }
+      },
+      "background_viability": {
+        "solve_ms": {
+          "count": 305,
+          "median": 29.692000010982156,
+          "p95": 35.03070003353059,
+          "max": 40.03760003251955,
+          "mean": 29.88808721105461
+        },
+        "solve_count": 305,
+        "wall_seconds": 9.115446900075767,
+        "solves_per_second": 33.45968698445984,
+        "process_cpu_to_wall_ratio": 0.35996589481232416,
+        "worker_limit_applied_every_round": true,
+        "priority_lowered_any_round": false
+      }
+    },
+    "supplemental_workers4": {
+      "sample_count": 759,
+      "preloss_active_count": 729,
+      "issue_global_relaxation_count": 30,
+      "supplemental_status_counts": {
+        "async_hit": 663,
+        "async_miss": 66,
+        "not_eligible": 30
+      },
+      "timing_ms": {
+        "total_ms": {
+          "count": 759,
+          "median": 13.481,
+          "p95": 20.775,
+          "max": 26.6676,
+          "mean": 14.52272068511199
+        },
+        "trace_reconstruction_ms": {
+          "count": 759,
+          "median": 0.1734,
+          "p95": 0.8308,
+          "max": 1.9081,
+          "mean": 0.27510355731225294
+        },
+        "root_parse_ms": {
+          "count": 759,
+          "median": 0.0143,
+          "p95": 0.0223,
+          "max": 0.1025,
+          "mean": 0.015565085638998683
+        },
+        "choose_ms": {
+          "count": 759,
+          "median": 11.0323,
+          "p95": 17.4593,
+          "max": 24.321,
+          "mean": 12.031289328063242
+        },
+        "recertify_ms": {
+          "count": 759,
+          "median": 1.9842,
+          "p95": 3.7308,
+          "max": 6.1361,
+          "mean": 2.1965749670619235
+        },
+        "shared_laser_projection_ms": {
+          "count": 759,
+          "median": 0.164,
+          "p95": 0.5467,
+          "max": 1.1124,
+          "mean": 0.24858353096179184
+        },
+        "control_prefix_ms": {
+          "count": 759,
+          "median": 0.304,
+          "p95": 0.5609,
+          "max": 1.1146,
+          "mean": 0.3339961791831357
+        },
+        "planning_bullet_projection_ms": {
+          "count": 759,
+          "median": 0.1093,
+          "p95": 0.275,
+          "max": 0.664,
+          "mean": 0.1335102766798419
+        },
+        "certificate_total_ms": {
+          "count": 759,
+          "median": 1.5477999999999998,
+          "p95": 3.0204,
+          "max": 8.1524,
+          "mean": 1.7233646903820816
+        },
+        "beam_search_inclusive_ms": {
+          "count": 759,
+          "median": 7.5342,
+          "p95": 13.5862,
+          "max": 18.7793,
+          "mean": 8.478755072463768
+        },
+        "supplemental_beam_ms": {
+          "count": 759,
+          "median": 0.0717,
+          "p95": 0.1342,
+          "max": 1.1876,
+          "mean": 0.0945699604743083
+        },
+        "terminal_threat_ms": {
+          "count": 759,
+          "median": 0.0759,
+          "p95": 3.4011,
+          "max": 7.2871,
+          "mean": 0.5848472990777338
+        },
+        "selection_finalize_ms": {
+          "count": 759,
+          "median": 0.6469,
+          "p95": 1.1426,
+          "max": 1.5043,
+          "mean": 0.6882129117259552
+        },
+        "issue_certificate_total_ms": {
+          "count": 759,
+          "median": 1.8647,
+          "p95": 3.553,
+          "max": 5.9593,
+          "mean": 2.080531093544137
+        }
+      },
+      "background_viability": {
+        "solve_ms": {
+          "count": 373,
+          "median": 29.63659999659285,
+          "p95": 34.455300017725676,
+          "max": 40.07129999808967,
+          "mean": 29.726424931277627
+        },
+        "solve_count": 373,
+        "wall_seconds": 11.087458100053482,
+        "solves_per_second": 33.641615294870945,
+        "process_cpu_to_wall_ratio": 0.28325924406287956,
+        "worker_limit_applied_every_round": true,
+        "priority_lowered_any_round": false
+      }
+    }
+  },
+  "paired_compute_delta_ms": {
+    "idle": {
+      "count": 759,
+      "median": 1.4246999999999996,
+      "p95": 7.8774000000000015,
+      "max": 226.45340000000002,
+      "mean": 1.9762852437417655
+    },
+    "workers4": {
+      "count": 759,
+      "median": 2.1968999999999994,
+      "p95": 8.395899999999997,
+      "max": 12.859499999999999,
+      "mean": 2.582950724637681
+    }
+  },
+  "paired_component_delta_ms": {
+    "idle": {
+      "total": {
+        "count": 759,
+        "median": 1.4246999999999996,
+        "p95": 7.8774000000000015,
+        "max": 226.45340000000002,
+        "mean": 1.9762852437417655
+      },
+      "trace_reconstruction": {
+        "count": 759,
+        "median": -0.00020000000000000052,
+        "p95": 0.15799999999999997,
+        "max": 0.6954999999999999,
+        "mean": 0.006376152832674571
+      },
+      "root_parse": {
+        "count": 759,
+        "median": 0.00020000000000000052,
+        "p95": 0.0072000000000000015,
+        "max": 0.012400000000000001,
+        "mean": 0.0003956521739130435
+      },
+      "choose": {
+        "count": 759,
+        "median": 1.3434,
+        "p95": 6.109599999999999,
+        "max": 14.3257,
+        "mean": 1.5392815546772067
+      },
+      "recertify": {
+        "count": 759,
+        "median": 0.01639999999999997,
+        "p95": 1.6769999999999998,
+        "max": 225.6236,
+        "mean": 0.42985230566534915
+      },
+      "supplemental_beam": {
+        "count": 759,
+        "median": 0.0692,
+        "p95": 0.1345,
+        "max": 0.7048,
+        "mean": 0.08972793148880105
+      }
+    },
+    "workers4": {
+      "total": {
+        "count": 759,
+        "median": 2.1968999999999994,
+        "p95": 8.395899999999997,
+        "max": 12.859499999999999,
+        "mean": 2.582950724637681
+      },
+      "trace_reconstruction": {
+        "count": 759,
+        "median": 0.001299999999999999,
+        "p95": 0.1926,
+        "max": 0.7584,
+        "mean": 0.011633860342555995
+      },
+      "root_parse": {
+        "count": 759,
+        "median": 0.0002999999999999999,
+        "p95": 0.008400000000000001,
+        "max": 0.0895,
+        "mean": 0.0008523056653491435
+      },
+      "choose": {
+        "count": 759,
+        "median": 1.9373000000000005,
+        "p95": 6.833,
+        "max": 12.587100000000001,
+        "mean": 2.3623529644268775
+      },
+      "recertify": {
+        "count": 759,
+        "median": 0.08129999999999993,
+        "p95": 1.8613,
+        "max": 3.1359000000000004,
+        "mean": 0.20779288537549406
+      },
+      "supplemental_beam": {
+        "count": 759,
+        "median": 0.0717,
+        "p95": 0.1342,
+        "max": 1.1876,
+        "mean": 0.0945699604743083
+      }
+    }
+  },
+  "workers4_largest_delta_examples": [
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26979",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 91,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 43.45729999477044,
+      "support_high": 5.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "down_fast",
+      "supplemental_action": "down_fast",
+      "recertified_action": "down_fast",
+      "delta_ms": {
+        "total": 12.859499999999999,
+        "trace_reconstruction": 0.003400000000000014,
+        "root_parse": 0.0005999999999999998,
+        "choose": 10.650000000000002,
+        "recertify": 2.2044,
+        "supplemental_beam": 0.0809
+      },
+      "historical_total_ms": 11.438,
+      "supplemental_total_ms": 24.2975
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15479",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 416,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 39.79120001895353,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "down_right_fast",
+      "supplemental_action": "down_right_fast",
+      "recertified_action": "down_right_fast",
+      "delta_ms": {
+        "total": 12.6,
+        "trace_reconstruction": 0.144,
+        "root_parse": 0.006799999999999999,
+        "choose": 12.587100000000001,
+        "recertify": -0.13760000000000017,
+        "supplemental_beam": 0.1129
+      },
+      "historical_total_ms": 13.6929,
+      "supplemental_total_ms": 26.2929
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20234",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 108,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 24.835499993059784,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "down",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 12.2151,
+        "trace_reconstruction": 0.0189,
+        "root_parse": 0.0017000000000000001,
+        "choose": 12.085399999999998,
+        "recertify": 0.10770000000000013,
+        "supplemental_beam": 0.0746
+      },
+      "historical_total_ms": 11.4252,
+      "supplemental_total_ms": 23.6403
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18230",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 299,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 40.03299999749288,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "down",
+      "supplemental_action": "down",
+      "recertified_action": "down",
+      "delta_ms": {
+        "total": 12.1361,
+        "trace_reconstruction": -0.01029999999999999,
+        "root_parse": 0.0005000000000000004,
+        "choose": 10.6693,
+        "recertify": 1.4758,
+        "supplemental_beam": 0.1001
+      },
+      "historical_total_ms": 12.9566,
+      "supplemental_total_ms": 25.0927
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36598",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 522,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 31.57749999081716,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 11.5123,
+        "trace_reconstruction": 0.06990000000000002,
+        "root_parse": 0.0006999999999999992,
+        "choose": 11.101799999999999,
+        "recertify": 0.33930000000000016,
+        "supplemental_beam": 0.0761
+      },
+      "historical_total_ms": 14.2244,
+      "supplemental_total_ms": 25.7367
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20234",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 108,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 24.835499993059784,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "down",
+      "supplemental_action": "down",
+      "recertified_action": "down",
+      "delta_ms": {
+        "total": 11.365100000000002,
+        "trace_reconstruction": 0.005500000000000005,
+        "root_parse": 0.0008000000000000004,
+        "choose": 9.1646,
+        "recertify": 2.1921,
+        "supplemental_beam": 0.0671
+      },
+      "historical_total_ms": 11.8858,
+      "supplemental_total_ms": 23.2509
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|38021",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 700,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 14.536299975588918,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "down_left_fast",
+      "supplemental_action": "down_left_fast",
+      "recertified_action": "down_left_fast",
+      "delta_ms": {
+        "total": 11.254299999999999,
+        "trace_reconstruction": 0.41489999999999994,
+        "root_parse": 0.008499999999999999,
+        "choose": 8.643099999999999,
+        "recertify": 2.1855,
+        "supplemental_beam": 0.1122
+      },
+      "historical_total_ms": 10.437,
+      "supplemental_total_ms": 21.6913
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11101",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 560,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 19.22519999789074,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "up_fast",
+      "supplemental_action": "up_fast",
+      "recertified_action": "up_fast",
+      "delta_ms": {
+        "total": 11.026500000000002,
+        "trace_reconstruction": -0.035199999999999954,
+        "root_parse": -0.002,
+        "choose": 9.271799999999999,
+        "recertify": 1.7890000000000001,
+        "supplemental_beam": 0.0716
+      },
+      "historical_total_ms": 14.1634,
+      "supplemental_total_ms": 25.1899
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|18208",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 63,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 21.325799985788763,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "down_fast",
+      "supplemental_action": "up_fast",
+      "recertified_action": "up_fast",
+      "delta_ms": {
+        "total": 10.735600000000002,
+        "trace_reconstruction": 0.0031999999999999945,
+        "root_parse": -9.99999999999994e-05,
+        "choose": 9.973999999999998,
+        "recertify": 0.7566000000000002,
+        "supplemental_beam": 0.0836
+      },
+      "historical_total_ms": 13.4439,
+      "supplemental_total_ms": 24.1795
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20932",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 0,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 43.26979996403679,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 10.541300000000001,
+        "trace_reconstruction": 0.007300000000000001,
+        "root_parse": 0.0034000000000000002,
+        "choose": 8.3293,
+        "recertify": 2.1984000000000004,
+        "supplemental_beam": 0.0784
+      },
+      "historical_total_ms": 9.0678,
+      "supplemental_total_ms": 19.6091
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|586",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 46,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 41.01929999887943,
+      "support_high": 5.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "down",
+      "supplemental_action": "left_fast",
+      "recertified_action": "left_fast",
+      "delta_ms": {
+        "total": 10.468099999999998,
+        "trace_reconstruction": 0.050600000000000006,
+        "root_parse": 0.007000000000000001,
+        "choose": 8.889799999999997,
+        "recertify": 1.5192999999999999,
+        "supplemental_beam": 0.2792
+      },
+      "historical_total_ms": 10.3069,
+      "supplemental_total_ms": 20.775
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12686",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 537,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 40.062000043690205,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "down",
+      "supplemental_action": "up_left_fast",
+      "recertified_action": "up_left_fast",
+      "delta_ms": {
+        "total": 10.464200000000002,
+        "trace_reconstruction": 0.013500000000000012,
+        "root_parse": 0.0,
+        "choose": 9.7873,
+        "recertify": 0.6625999999999999,
+        "supplemental_beam": 0.0629
+      },
+      "historical_total_ms": 14.1662,
+      "supplemental_total_ms": 24.6304
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37834",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 640,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 41.99870000593364,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "down_left_fast",
+      "supplemental_action": "down_left_fast",
+      "recertified_action": "down_left_fast",
+      "delta_ms": {
+        "total": 10.457400000000002,
+        "trace_reconstruction": 0.053200000000000025,
+        "root_parse": 0.0009999999999999992,
+        "choose": 8.1774,
+        "recertify": 2.2234999999999996,
+        "supplemental_beam": 0.0682
+      },
+      "historical_total_ms": 13.5724,
+      "supplemental_total_ms": 24.0298
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|38021",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 700,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 14.536299975588918,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "down_left_fast",
+      "supplemental_action": "down_left_fast",
+      "recertified_action": "down_left_fast",
+      "delta_ms": {
+        "total": 10.4461,
+        "trace_reconstruction": -0.38760000000000006,
+        "root_parse": -0.004,
+        "choose": 9.2577,
+        "recertify": 1.5789,
+        "supplemental_beam": 0.0797
+      },
+      "historical_total_ms": 11.0982,
+      "supplemental_total_ms": 21.5443
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36587",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 501,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 33.074399980250746,
+      "support_high": 5.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "left_fast",
+      "supplemental_action": "down_left_fast",
+      "recertified_action": "down_left_fast",
+      "delta_ms": {
+        "total": 10.3585,
+        "trace_reconstruction": 0.0019000000000000128,
+        "root_parse": 0.0002999999999999999,
+        "choose": 10.269300000000001,
+        "recertify": 0.08720000000000017,
+        "supplemental_beam": 0.0749
+      },
+      "historical_total_ms": 16.3091,
+      "supplemental_total_ms": 26.6676
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26979",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 91,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 43.45729999477044,
+      "support_high": 5.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "down_fast",
+      "supplemental_action": "down_fast",
+      "recertified_action": "down_fast",
+      "delta_ms": {
+        "total": 10.3362,
+        "trace_reconstruction": -0.01369999999999999,
+        "root_parse": -0.0008000000000000004,
+        "choose": 9.3769,
+        "recertify": 0.974,
+        "supplemental_beam": 0.0669
+      },
+      "historical_total_ms": 12.5237,
+      "supplemental_total_ms": 22.8599
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12106",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 530,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 33.95209996961057,
+      "support_high": 5.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "left",
+      "supplemental_action": "left",
+      "recertified_action": "left",
+      "delta_ms": {
+        "total": 10.1505,
+        "trace_reconstruction": 0.0806,
+        "root_parse": 0.0033999999999999985,
+        "choose": 9.926400000000001,
+        "recertify": 0.11540000000000017,
+        "supplemental_beam": 0.0688
+      },
+      "historical_total_ms": 12.1822,
+      "supplemental_total_ms": 22.3327
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10505",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 420,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 26.682599971536547,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "left",
+      "supplemental_action": "left",
+      "recertified_action": "left",
+      "delta_ms": {
+        "total": 10.048100000000002,
+        "trace_reconstruction": 0.23610000000000003,
+        "root_parse": 0.0175,
+        "choose": 8.030700000000001,
+        "recertify": 1.7610999999999999,
+        "supplemental_beam": 0.6638
+      },
+      "historical_total_ms": 11.843,
+      "supplemental_total_ms": 21.8911
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16463",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 193,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 26.84809995116666,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "up_right_fast",
+      "supplemental_action": "up",
+      "recertified_action": "up",
+      "delta_ms": {
+        "total": 10.017299999999999,
+        "trace_reconstruction": -0.012499999999999997,
+        "root_parse": -0.002800000000000002,
+        "choose": 9.7816,
+        "recertify": 0.25039999999999996,
+        "supplemental_beam": 0.0693
+      },
+      "historical_total_ms": 12.5806,
+      "supplemental_total_ms": 22.5979
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15344",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 417,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 16.142499982379377,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "up_right_fast",
+      "supplemental_action": "up_right_fast",
+      "recertified_action": "up_right_fast",
+      "delta_ms": {
+        "total": 9.8389,
+        "trace_reconstruction": 0.0020000000000000018,
+        "root_parse": 0.0008000000000000004,
+        "choose": 9.6245,
+        "recertify": 0.21089999999999987,
+        "supplemental_beam": 0.0685
+      },
+      "historical_total_ms": 12.4458,
+      "supplemental_total_ms": 22.2847
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|21113",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 121,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 33.8188000023365,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "up_right",
+      "supplemental_action": "up_right",
+      "recertified_action": "up_right",
+      "delta_ms": {
+        "total": 9.823399999999998,
+        "trace_reconstruction": -0.1179,
+        "root_parse": -0.003599999999999999,
+        "choose": 8.180500000000002,
+        "recertify": 1.7637,
+        "supplemental_beam": 0.6891
+      },
+      "historical_total_ms": 10.4196,
+      "supplemental_total_ms": 20.243
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36756",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 649,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 19.820400048047304,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "up_fast",
+      "recertified_action": "up_fast",
+      "delta_ms": {
+        "total": 9.579899999999999,
+        "trace_reconstruction": 0.2588,
+        "root_parse": 0.007899999999999999,
+        "choose": 7.3069999999999995,
+        "recertify": 2.0038,
+        "supplemental_beam": 0.067
+      },
+      "historical_total_ms": 9.555,
+      "supplemental_total_ms": 19.1349
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36598",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 522,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 31.57749999081716,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 9.539900000000001,
+        "trace_reconstruction": -0.017799999999999983,
+        "root_parse": -0.0005999999999999998,
+        "choose": 7.4992,
+        "recertify": 2.0575,
+        "supplemental_beam": 0.0706
+      },
+      "historical_total_ms": 14.9122,
+      "supplemental_total_ms": 24.4521
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|21059",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 80,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 17.775800020899624,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 9.519000000000002,
+        "trace_reconstruction": 0.012599999999999993,
+        "root_parse": 0.002199999999999999,
+        "choose": 8.1385,
+        "recertify": 1.3643,
+        "supplemental_beam": 0.0803
+      },
+      "historical_total_ms": 10.3722,
+      "supplemental_total_ms": 19.8912
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2129",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 133,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 49.36860001180321,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "down",
+      "supplemental_action": "down_left_fast",
+      "recertified_action": "down_left_fast",
+      "delta_ms": {
+        "total": 9.4679,
+        "trace_reconstruction": 0.09259999999999999,
+        "root_parse": 0.007899999999999999,
+        "choose": 8.479,
+        "recertify": 0.8853,
+        "supplemental_beam": 0.4915
+      },
+      "historical_total_ms": 8.817,
+      "supplemental_total_ms": 18.2849
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|4711",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 0,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 29.865899996366352,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 9.384800000000002,
+        "trace_reconstruction": 0.04870000000000001,
+        "root_parse": 0.0144,
+        "choose": 7.712199999999999,
+        "recertify": 1.6063,
+        "supplemental_beam": 0.0656
+      },
+      "historical_total_ms": 9.1467,
+      "supplemental_total_ms": 18.5315
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36085",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 484,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 17.387600033544004,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "up",
+      "recertified_action": "up",
+      "delta_ms": {
+        "total": 8.9664,
+        "trace_reconstruction": 0.030100000000000016,
+        "root_parse": 0.00040000000000000105,
+        "choose": 6.0039,
+        "recertify": 2.9304,
+        "supplemental_beam": 0.0642
+      },
+      "historical_total_ms": 11.6952,
+      "supplemental_total_ms": 20.6616
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26428",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 122,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 21.678299992345273,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 8.941400000000002,
+        "trace_reconstruction": -0.020900000000000002,
+        "root_parse": -0.0019000000000000006,
+        "choose": 7.2614,
+        "recertify": 1.701,
+        "supplemental_beam": 0.1173
+      },
+      "historical_total_ms": 10.2637,
+      "supplemental_total_ms": 19.2051
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11576",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 535,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 41.6319000069052,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "down_left",
+      "supplemental_action": "down_left",
+      "recertified_action": "down_left",
+      "delta_ms": {
+        "total": 8.890999999999998,
+        "trace_reconstruction": -0.012300000000000033,
+        "root_parse": -0.0017999999999999995,
+        "choose": 8.649500000000002,
+        "recertify": 0.25480000000000014,
+        "supplemental_beam": 0.1239
+      },
+      "historical_total_ms": 15.1477,
+      "supplemental_total_ms": 24.0387
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|17049",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 403,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 17.25159998750314,
+      "support_high": 6.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "left_fast",
+      "supplemental_action": "left_fast",
+      "recertified_action": "left_fast",
+      "delta_ms": {
+        "total": 8.8501,
+        "trace_reconstruction": 0.19429999999999997,
+        "root_parse": 0.024100000000000003,
+        "choose": 6.3758,
+        "recertify": 2.2507,
+        "supplemental_beam": 0.0739
+      },
+      "historical_total_ms": 12.5193,
+      "supplemental_total_ms": 21.3694
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37782",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 700,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 40.28929997002706,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "down_fast",
+      "supplemental_action": "down_fast",
+      "recertified_action": "down_fast",
+      "delta_ms": {
+        "total": 8.841899999999999,
+        "trace_reconstruction": 0.09749999999999992,
+        "root_parse": 0.003000000000000001,
+        "choose": 8.207899999999999,
+        "recertify": 0.5323000000000002,
+        "supplemental_beam": 0.8863
+      },
+      "historical_total_ms": 14.293,
+      "supplemental_total_ms": 23.1349
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16536",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 190,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 23.468300001695752,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "right",
+      "recertified_action": "right",
+      "delta_ms": {
+        "total": 8.7965,
+        "trace_reconstruction": 0.006199999999999997,
+        "root_parse": 0.0023,
+        "choose": 6.898599999999999,
+        "recertify": 1.8865999999999998,
+        "supplemental_beam": 0.124
+      },
+      "historical_total_ms": 9.2297,
+      "supplemental_total_ms": 18.0262
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11101",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 560,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 19.22519999789074,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "up_fast",
+      "supplemental_action": "up_right",
+      "recertified_action": "up_right",
+      "delta_ms": {
+        "total": 8.6734,
+        "trace_reconstruction": -0.0489,
+        "root_parse": -0.0029,
+        "choose": 9.5986,
+        "recertify": -0.8732,
+        "supplemental_beam": 0.066
+      },
+      "historical_total_ms": 14.643,
+      "supplemental_total_ms": 23.3164
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|41273",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": false,
+      "supplemental_status": "not_eligible",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 1005,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 18.45179998781532,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "up_left_fast",
+      "supplemental_action": "up_left_fast",
+      "recertified_action": "up_left_fast",
+      "delta_ms": {
+        "total": 8.6066,
+        "trace_reconstruction": 0.5925,
+        "root_parse": 0.009,
+        "choose": 7.955099999999998,
+        "recertify": 0.051000000000000156,
+        "supplemental_beam": 0.0
+      },
+      "historical_total_ms": 13.6644,
+      "supplemental_total_ms": 22.271
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|248",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 0,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 28.37559999898076,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 8.5785,
+        "trace_reconstruction": -0.0005999999999999998,
+        "root_parse": -0.0013000000000000008,
+        "choose": 6.503499999999999,
+        "recertify": 2.0736,
+        "supplemental_beam": 0.0646
+      },
+      "historical_total_ms": 10.3103,
+      "supplemental_total_ms": 18.8888
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|12112",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 524,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 26.054500020109117,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "up",
+      "supplemental_action": "up",
+      "recertified_action": "up",
+      "delta_ms": {
+        "total": 8.5128,
+        "trace_reconstruction": -0.005299999999999971,
+        "root_parse": 9.99999999999994e-05,
+        "choose": 6.1449,
+        "recertify": 2.3723,
+        "supplemental_beam": 0.0697
+      },
+      "historical_total_ms": 13.4748,
+      "supplemental_total_ms": 21.9876
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2985",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 276,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 20.34849999472499,
+      "support_high": 3.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "down",
+      "recertified_action": "down",
+      "delta_ms": {
+        "total": 8.4751,
+        "trace_reconstruction": -0.00799999999999998,
+        "root_parse": -0.0005000000000000004,
+        "choose": 7.1945,
+        "recertify": 1.2874,
+        "supplemental_beam": 0.0708
+      },
+      "historical_total_ms": 10.6897,
+      "supplemental_total_ms": 19.1648
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36730",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 591,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 24.76490003755316,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 8.395899999999997,
+        "trace_reconstruction": 0.03260000000000002,
+        "root_parse": 0.0017999999999999995,
+        "choose": 6.258899999999999,
+        "recertify": 2.1017,
+        "supplemental_beam": 0.0713
+      },
+      "historical_total_ms": 11.1521,
+      "supplemental_total_ms": 19.548
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40340",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 0,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 27.514200017321855,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 8.318,
+        "trace_reconstruction": 0.0016000000000000007,
+        "root_parse": 0.0009999999999999992,
+        "choose": 6.6030999999999995,
+        "recertify": 1.7117999999999998,
+        "supplemental_beam": 0.0746
+      },
+      "historical_total_ms": 10.6347,
+      "supplemental_total_ms": 18.9527
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37056",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 210,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 41.5320000029169,
+      "support_high": 5.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "down",
+      "supplemental_action": "down",
+      "recertified_action": "down",
+      "delta_ms": {
+        "total": 8.1644,
+        "trace_reconstruction": 0.055900000000000005,
+        "root_parse": 0.006900000000000002,
+        "choose": 7.6615,
+        "recertify": 0.4383999999999999,
+        "supplemental_beam": 0.1088
+      },
+      "historical_total_ms": 9.7439,
+      "supplemental_total_ms": 17.9083
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16921",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 172,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 16.53149997582659,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "down_left",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 8.144400000000001,
+        "trace_reconstruction": 0.008800000000000002,
+        "root_parse": 0.0008000000000000004,
+        "choose": 5.9899,
+        "recertify": 2.1414999999999997,
+        "supplemental_beam": 0.0677
+      },
+      "historical_total_ms": 9.7315,
+      "supplemental_total_ms": 17.8759
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|41537",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 1008,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 16.466200002469122,
+      "support_high": 5.0,
+      "post_capture_advance": 0.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 8.0782,
+        "trace_reconstruction": 0.0038000000000000256,
+        "root_parse": -0.0005999999999999998,
+        "choose": 5.942400000000001,
+        "recertify": 2.1315999999999997,
+        "supplemental_beam": 0.0808
+      },
+      "historical_total_ms": 12.0782,
+      "supplemental_total_ms": 20.1564
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|10520",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 431,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 28.619799995794892,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "left",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 8.0422,
+        "trace_reconstruction": 0.1775,
+        "root_parse": 0.008400000000000001,
+        "choose": 6.2371,
+        "recertify": 1.617,
+        "supplemental_beam": 0.0618
+      },
+      "historical_total_ms": 10.8348,
+      "supplemental_total_ms": 18.877
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|2704",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 5,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 39.555300027132034,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 8.0313,
+        "trace_reconstruction": 0.0621,
+        "root_parse": 0.019799999999999998,
+        "choose": 6.453700000000001,
+        "recertify": 1.4929999999999999,
+        "supplemental_beam": 0.5944
+      },
+      "historical_total_ms": 10.9563,
+      "supplemental_total_ms": 18.9876
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|29053",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 194,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 36.62220004480332,
+      "support_high": 5.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "stay",
+      "supplemental_action": "down_fast",
+      "recertified_action": "down_fast",
+      "delta_ms": {
+        "total": 8.027500000000002,
+        "trace_reconstruction": 0.009699999999999986,
+        "root_parse": 0.0014999999999999996,
+        "choose": 5.8497,
+        "recertify": 2.1652,
+        "supplemental_beam": 0.0623
+      },
+      "historical_total_ms": 10.7021,
+      "supplemental_total_ms": 18.7296
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11822",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 554,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 52.722199994605035,
+      "support_high": 5.0,
+      "post_capture_advance": 3.0,
+      "historical_action": "down",
+      "supplemental_action": "down",
+      "recertified_action": "down",
+      "delta_ms": {
+        "total": 7.939500000000001,
+        "trace_reconstruction": 0.01739999999999997,
+        "root_parse": 0.0037999999999999996,
+        "choose": 6.833,
+        "recertify": 1.0836000000000001,
+        "supplemental_beam": 0.0753
+      },
+      "historical_total_ms": 14.9031,
+      "supplemental_total_ms": 22.8426
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40966",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 1005,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 40.50219996133819,
+      "support_high": 6.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "right",
+      "supplemental_action": "down_right",
+      "recertified_action": "down_right",
+      "delta_ms": {
+        "total": 7.9336,
+        "trace_reconstruction": -0.14400000000000002,
+        "root_parse": -0.007299999999999999,
+        "choose": 4.9483,
+        "recertify": 3.1359000000000004,
+        "supplemental_beam": 0.0665
+      },
+      "historical_total_ms": 13.2267,
+      "supplemental_total_ms": 21.1603
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|788",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 171,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 24.232199997641146,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "right",
+      "supplemental_action": "right",
+      "recertified_action": "right",
+      "delta_ms": {
+        "total": 7.8161999999999985,
+        "trace_reconstruction": -0.007000000000000006,
+        "root_parse": -0.0031999999999999997,
+        "choose": 6.356499999999999,
+        "recertify": 1.4676999999999998,
+        "supplemental_beam": 0.0649
+      },
+      "historical_total_ms": 9.8961,
+      "supplemental_total_ms": 17.7123
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|20969",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 18,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 25.010599987581372,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 7.763199999999999,
+        "trace_reconstruction": 0.016799999999999995,
+        "root_parse": 0.0037999999999999996,
+        "choose": 5.4619,
+        "recertify": 2.2787,
+        "supplemental_beam": 0.0843
+      },
+      "historical_total_ms": 10.2298,
+      "supplemental_total_ms": 17.993
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11822",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 554,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 52.722199994605035,
+      "support_high": 5.0,
+      "post_capture_advance": 3.0,
+      "historical_action": "down",
+      "supplemental_action": "down",
+      "recertified_action": "down",
+      "delta_ms": {
+        "total": 7.7021999999999995,
+        "trace_reconstruction": 0.2239,
+        "root_parse": 0.0083,
+        "choose": 6.4803,
+        "recertify": 0.9868999999999999,
+        "supplemental_beam": 0.0704
+      },
+      "historical_total_ms": 12.685,
+      "supplemental_total_ms": 20.3872
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|36931",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 50,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 23.574799997732043,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "right_fast",
+      "supplemental_action": "right_fast",
+      "recertified_action": "right_fast",
+      "delta_ms": {
+        "total": 7.6480999999999995,
+        "trace_reconstruction": 0.0193,
+        "root_parse": 0.008499999999999999,
+        "choose": 5.877699999999999,
+        "recertify": 1.7409000000000001,
+        "supplemental_beam": 0.0705
+      },
+      "historical_total_ms": 10.1952,
+      "supplemental_total_ms": 17.8433
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26408",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 102,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 24.602599965874106,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 7.6381,
+        "trace_reconstruction": 0.004200000000000001,
+        "root_parse": 0.0063,
+        "choose": 5.8701,
+        "recertify": 1.7551,
+        "supplemental_beam": 0.4868
+      },
+      "historical_total_ms": 9.4599,
+      "supplemental_total_ms": 17.098
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|28837",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_miss",
+      "supplemental_completed": false,
+      "supplemental_historical_fallback": true,
+      "active_bullets": 154,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 39.92390003986657,
+      "support_high": 4.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "left_fast",
+      "supplemental_action": "left_fast",
+      "recertified_action": "left_fast",
+      "delta_ms": {
+        "total": 7.5333999999999985,
+        "trace_reconstruction": -0.0029,
+        "root_parse": 0.0013000000000000008,
+        "choose": 6.151400000000001,
+        "recertify": 1.3831000000000002,
+        "supplemental_beam": 0.0588
+      },
+      "historical_total_ms": 10.3514,
+      "supplemental_total_ms": 17.8848
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|35884",
+      "cohorts": [
+        "prehit"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 512,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 30.35519999684766,
+      "support_high": 6.0,
+      "post_capture_advance": 2.0,
+      "historical_action": "left",
+      "supplemental_action": "left",
+      "recertified_action": "left",
+      "delta_ms": {
+        "total": 7.457500000000001,
+        "trace_reconstruction": 0.03990000000000005,
+        "root_parse": 0.0028000000000000004,
+        "choose": 6.5381,
+        "recertify": 0.8762000000000003,
+        "supplemental_beam": 0.0773
+      },
+      "historical_total_ms": 11.6855,
+      "supplemental_total_ms": 19.143
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|1|26428",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 122,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 21.678299992345273,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 7.3986,
+        "trace_reconstruction": 0.04760000000000002,
+        "root_parse": 0.006699999999999999,
+        "choose": 5.576500000000001,
+        "recertify": 1.7657,
+        "supplemental_beam": 0.0654
+      },
+      "historical_total_ms": 9.885,
+      "supplemental_total_ms": 17.2836
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|39985",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 0,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 14.780899975448847,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 7.389099999999999,
+        "trace_reconstruction": 0.025500000000000002,
+        "root_parse": 0.007399999999999999,
+        "choose": 7.3530999999999995,
+        "recertify": 0.0018000000000000238,
+        "supplemental_beam": 0.1184
+      },
+      "historical_total_ms": 9.5003,
+      "supplemental_total_ms": 16.8894
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|4914",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 0,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 40.30960000818595,
+      "support_high": 3.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 7.385100000000001,
+        "trace_reconstruction": -0.0004000000000000002,
+        "root_parse": -9.99999999999994e-05,
+        "choose": 6.4918,
+        "recertify": 0.8924999999999998,
+        "supplemental_beam": 0.0711
+      },
+      "historical_total_ms": 11.915,
+      "supplemental_total_ms": 19.3001
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|37100",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 297,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 20.90860001044348,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "down_fast",
+      "recertified_action": "down_fast",
+      "delta_ms": {
+        "total": 7.3315,
+        "trace_reconstruction": -0.012800000000000006,
+        "root_parse": 0.0006999999999999992,
+        "choose": 5.1287,
+        "recertify": 2.2142,
+        "supplemental_beam": 0.0763
+      },
+      "historical_total_ms": 10.3226,
+      "supplemental_total_ms": 17.6541
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|15344",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 417,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 16.142499982379377,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "up_right_fast",
+      "supplemental_action": "up_right_fast",
+      "recertified_action": "up_right_fast",
+      "delta_ms": {
+        "total": 7.329599999999999,
+        "trace_reconstruction": -0.007900000000000004,
+        "root_parse": -0.0016000000000000007,
+        "choose": 6.023899999999999,
+        "recertify": 1.3131,
+        "supplemental_beam": 0.0732
+      },
+      "historical_total_ms": 13.0658,
+      "supplemental_total_ms": 20.3954
+    },
+    {
+      "round": 0,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|2|40284",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 0,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 17.8029999951832,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "down_fast",
+      "recertified_action": "down_fast",
+      "delta_ms": {
+        "total": 7.311299999999999,
+        "trace_reconstruction": 0.0025000000000000022,
+        "root_parse": 0.0022000000000000006,
+        "choose": 7.1362000000000005,
+        "recertify": 0.1705000000000001,
+        "supplemental_beam": 0.0771
+      },
+      "historical_total_ms": 9.9374,
+      "supplemental_total_ms": 17.2487
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|16136",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 222,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 16.444999957457185,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 7.281600000000001,
+        "trace_reconstruction": -0.0063,
+        "root_parse": -9.99999999999994e-05,
+        "choose": 5.5543,
+        "recertify": 1.7316,
+        "supplemental_beam": 0.0718
+      },
+      "historical_total_ms": 9.916,
+      "supplemental_total_ms": 17.1976
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|11101",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 560,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 19.22519999789074,
+      "support_high": 5.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "up_fast",
+      "supplemental_action": "up_right",
+      "recertified_action": "up_right",
+      "delta_ms": {
+        "total": 7.273300000000001,
+        "trace_reconstruction": 0.3144,
+        "root_parse": 0.019599999999999996,
+        "choose": 6.7791000000000015,
+        "recertify": 0.15789999999999993,
+        "supplemental_beam": 0.0826
+      },
+      "historical_total_ms": 12.0845,
+      "supplemental_total_ms": 19.3578
+    },
+    {
+      "round": 2,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|400",
+      "cohorts": [
+        "broad"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 0,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 24.552799994125962,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 7.257600000000002,
+        "trace_reconstruction": 0.0011999999999999997,
+        "root_parse": 0.003299999999999999,
+        "choose": 5.615500000000001,
+        "recertify": 1.6361,
+        "supplemental_beam": 0.5049
+      },
+      "historical_total_ms": 9.838,
+      "supplemental_total_ms": 17.0956
+    },
+    {
+      "round": 1,
+      "root": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage4a_unattended_20260726_212756.jsonl|0|351",
+      "cohorts": [
+        "stress"
+      ],
+      "supplemental_active": true,
+      "supplemental_status": "async_hit",
+      "supplemental_completed": true,
+      "supplemental_historical_fallback": false,
+      "active_bullets": 0,
+      "laser_count": 0,
+      "recorded_observe_to_input_ms": 40.3844999964349,
+      "support_high": 4.0,
+      "post_capture_advance": 1.0,
+      "historical_action": "stay",
+      "supplemental_action": "stay",
+      "recertified_action": "stay",
+      "delta_ms": {
+        "total": 7.2296,
+        "trace_reconstruction": 0.0002999999999999999,
+        "root_parse": -9.99999999999994e-05,
+        "choose": 6.079799999999999,
+        "recertify": 1.1488999999999998,
+        "supplemental_beam": 0.0636
+      },
+      "historical_total_ms": 11.4735,
+      "supplemental_total_ms": 18.7031
+    }
+  ],
+  "finite_contract": {
+    "comparison_count": 1518,
+    "action_change_count": 525,
+    "recertified_action_change_count": 0,
+    "violation_counts": {
+      "historical_action_mismatch": 0,
+      "global_membership": 0,
+      "hard_component_regression": 0,
+      "route_gate_regression": 0,
+      "continuation_contract": 0,
+      "bomb": 0,
+      "supplemental_failure": 0,
+      "issue_transaction_missing": 0,
+      "issue_global_membership": 0
+    },
+    "failure_examples": []
+  },
+  "native_reference": {
+    "supplemental_eligible_count": 729,
+    "supplemental_completed_count": 663,
+    "completion_ratio": 0.9094650205761317,
+    "reference_action_change_count": 294,
+    "retained_reference_action_change_count": 259,
+    "action_change_retention_ratio": 0.8809523809523809,
+    "completed_native_reference_mismatch_count": 0,
+    "historical_fallback_mismatch_count": 0,
+    "mismatch_examples": []
+  },
+  "deadline_proxy": {
+    "assumed_hz": 60,
+    "record_count": 759,
+    "historical_miss_count": 0,
+    "supplemental_miss_count": 0,
+    "new_miss_count": 0,
+    "strict_worst_phase_miss_count": 0,
+    "estimate_ms": {
+      "count": 759,
+      "median": 27.519799980469795,
+      "p95": 48.75659998455793,
+      "max": 60.66169999460504,
+      "mean": 30.500625428394947
+    },
+    "new_miss_examples": []
+  },
+  "gate": {
+    "passed": false,
+    "reasons": [
+      "workers4_delta_p95_ms:8.395900",
+      "supplemental_completion_ratio:0.909465",
+      "supplemental_action_change_retention_ratio:0.880952"
+    ],
+    "thresholds": {
+      "workers4_delta_p95_ms_max": 5.0,
+      "workers4_delta_max_ms_exclusive": 16.666666666666668,
+      "background_solve_p95_ratio_max": 1.1,
+      "background_throughput_ratio_min": 0.9,
+      "new_deadline_miss_count_max": 0,
+      "supplemental_deadline_ms": 5.0,
+      "supplemental_completion_ratio_min": 0.95,
+      "supplemental_action_change_retention_ratio_min": 0.9,
+      "completed_native_reference_mismatch_count_max": 0,
+      "historical_fallback_mismatch_count_max": 0
+    },
+    "observed": {
+      "workers4_delta_p95_ms": 8.395899999999997,
+      "workers4_delta_max_ms": 12.859499999999999,
+      "background_solve_p95_ratio": 0.9835744071556047,
+      "background_throughput_ratio": 1.005437238862862,
+      "new_deadline_miss_count": 0,
+      "supplemental_completion_ratio": 0.9094650205761317,
+      "supplemental_action_change_retention_ratio": 0.8809523809523809,
+      "completed_native_reference_mismatch_count": 0,
+      "historical_fallback_mismatch_count": 0
+    }
+  }
+}

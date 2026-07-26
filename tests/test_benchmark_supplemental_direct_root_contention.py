@@ -91,6 +91,10 @@ class SupplementalDirectRootContentionGateTests(unittest.TestCase):
                 "solves_per_second": 9.0,
             },
             new_deadline_miss_count=0,
+            completion_ratio=0.95,
+            action_change_retention_ratio=0.90,
+            completed_native_reference_mismatch_count=0,
+            historical_fallback_mismatch_count=0,
         )
         self.assertTrue(gate["passed"], gate["reasons"])
 
@@ -111,6 +115,10 @@ class SupplementalDirectRootContentionGateTests(unittest.TestCase):
                 "solves_per_second": 10.0,
             },
             new_deadline_miss_count=0,
+            completion_ratio=0.94,
+            action_change_retention_ratio=0.89,
+            completed_native_reference_mismatch_count=1,
+            historical_fallback_mismatch_count=1,
         )
         self.assertFalse(gate["passed"])
         self.assertTrue(

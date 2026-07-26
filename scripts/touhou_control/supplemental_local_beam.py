@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import ctypes
+import os
+import threading
+import time
 from typing import Callable
 
 import numpy as np
@@ -39,6 +43,331 @@ TransitionRisk = Callable[
     [SupplementalNode, SupplementalAction, float, float, int],
     float,
 ]
+
+
+_NATIVE_WORKSPACE: native_backend.LocalSupplementalNativeWorkspace | None = (
+    None
+)
+
+
+def native_workspace() -> native_backend.LocalSupplementalNativeWorkspace:
+    """Return the process-local reusable complete-rollout workspace."""
+
+    global _NATIVE_WORKSPACE
+    if _NATIVE_WORKSPACE is None or _NATIVE_WORKSPACE.closed:
+        _NATIVE_WORKSPACE = (
+            native_backend.LocalSupplementalNativeWorkspace()
+        )
+    return _NATIVE_WORKSPACE
+
+
+@dataclass(frozen=True)
+class SupplementalPublication:
+    identity: tuple[object, ...]
+    nodes: tuple[SupplementalNode, ...]
+    terminal_threats: tuple[tuple[int, float], ...] | None
+    compute_ms: float
+
+
+@dataclass(frozen=True)
+class SupplementalWorkResult:
+    nodes: tuple[SupplementalNode, ...]
+    terminal_threats: tuple[tuple[int, float], ...] | None = None
+
+
+class ExactVersionSupplementalService:
+    """Newest-wins worker with exact-identity lookup and no consumer wait."""
+
+    def __init__(self) -> None:
+        self._condition = threading.Condition()
+        self._workspace = (
+            native_backend.LocalSupplementalNativeWorkspace()
+        )
+        self._revision = 0
+        self._pending: tuple[
+            int,
+            tuple[object, ...],
+            Callable[
+                [native_backend.LocalSupplementalNativeWorkspace],
+                list[SupplementalNode] | SupplementalWorkResult,
+            ],
+        ] | None = None
+        self._publication: SupplementalPublication | None = None
+        self._active = False
+        self._closed = False
+        self._priority_lowered = False
+        self._last_outcome = "idle"
+        self._thread = threading.Thread(
+            target=self._run,
+            name="exact-version-supplemental",
+            daemon=True,
+        )
+        self._thread.start()
+
+    def submit(
+        self,
+        identity: tuple[object, ...],
+        job: Callable[
+            [native_backend.LocalSupplementalNativeWorkspace],
+            list[SupplementalNode] | SupplementalWorkResult,
+        ],
+    ) -> int:
+        with self._condition:
+            if self._closed:
+                raise RuntimeError("supplemental service is closed")
+            self._revision += 1
+            revision = self._revision
+            self._pending = (revision, identity, job)
+            self._publication = None
+            self._last_outcome = "submitted"
+            if self._active:
+                self._workspace.cancel()
+            self._condition.notify()
+            return revision
+
+    def lookup(
+        self,
+        identity: tuple[object, ...],
+    ) -> SupplementalPublication | None:
+        with self._condition:
+            publication = self._publication
+            if publication is None or publication.identity != identity:
+                return None
+            return publication
+
+    def snapshot(self) -> dict[str, object]:
+        with self._condition:
+            return {
+                "revision": self._revision,
+                "active": self._active,
+                "pending": self._pending is not None,
+                "published": self._publication is not None,
+                "closed": self._closed,
+                "priority_lowered": self._priority_lowered,
+                "last_outcome": self._last_outcome,
+            }
+
+    def close(self) -> None:
+        with self._condition:
+            if self._closed:
+                return
+            self._closed = True
+            self._pending = None
+            if self._active:
+                self._workspace.cancel()
+            self._condition.notify_all()
+        self._thread.join()
+        self._workspace.close()
+
+    def _run(self) -> None:
+        if os.name == "nt":
+            try:
+                kernel32 = ctypes.windll.kernel32
+                kernel32.GetCurrentThread.restype = ctypes.c_void_p
+                kernel32.SetThreadPriority.argtypes = [
+                    ctypes.c_void_p,
+                    ctypes.c_int,
+                ]
+                self._priority_lowered = bool(
+                    kernel32.SetThreadPriority(
+                        kernel32.GetCurrentThread(),
+                        -1,  # THREAD_PRIORITY_BELOW_NORMAL
+                    )
+                )
+            except (AttributeError, OSError):
+                self._priority_lowered = False
+        while True:
+            with self._condition:
+                while self._pending is None and not self._closed:
+                    self._condition.wait()
+                if self._closed:
+                    return
+                pending = self._pending
+                self._pending = None
+                self._active = True
+            assert pending is not None
+            revision, identity, job = pending
+            started_ns = time.perf_counter_ns()
+            nodes: tuple[SupplementalNode, ...] | None = None
+            terminal_threats: tuple[tuple[int, float], ...] | None = None
+            try:
+                result = job(self._workspace)
+                if isinstance(result, SupplementalWorkResult):
+                    nodes = result.nodes
+                    terminal_threats = result.terminal_threats
+                else:
+                    nodes = tuple(result)
+            except native_backend.LocalSupplementalNativeCancelledError:
+                nodes = None
+                outcome = "cancelled"
+            except native_backend.LocalSupplementalNativeDeadlineError:
+                nodes = None
+                outcome = "deadline"
+            except Exception:
+                nodes = None
+                outcome = "error"
+            else:
+                outcome = "completed"
+            compute_ms = (
+                time.perf_counter_ns() - started_ns
+            ) / 1_000_000.0
+            with self._condition:
+                self._active = False
+                if (
+                    not self._closed
+                    and revision == self._revision
+                    and self._pending is None
+                    and nodes is not None
+                ):
+                    self._publication = SupplementalPublication(
+                        identity,
+                        nodes,
+                        terminal_threats,
+                        compute_ms,
+                    )
+                    self._last_outcome = "published"
+                elif revision != self._revision:
+                    self._last_outcome = "discarded_stale"
+                else:
+                    self._last_outcome = outcome
+                self._condition.notify_all()
+
+
+def search_supplemental_local_beam_native(
+    *,
+    initial: SupplementalNode,
+    actions: tuple[SupplementalAction, ...],
+    allowed_first_actions: frozenset[str],
+    action_hold_frames: int,
+    horizon: int,
+    beam_width: int,
+    bullet_frames: tuple[tuple[np.ndarray, ...], ...],
+    laser_frames: tuple[tuple[np.ndarray, ...], ...],
+    body_base_x: np.ndarray,
+    body_base_y: np.ndarray,
+    body_velocity_x: np.ndarray,
+    body_velocity_y: np.ndarray,
+    body_half_width: np.ndarray,
+    body_half_height: np.ndarray,
+    player_radius: float,
+    control_delay_frames: int,
+    previous_direction: int,
+    previous_focused: bool,
+    preserve_previous_direction_inertia: bool,
+    target_x: float | None,
+    target_y: float | None,
+    target_deadline: int | None,
+    item_safety_clearance: float,
+    playfield_left: float,
+    playfield_right: float,
+    playfield_top: float,
+    playfield_bottom: float,
+    recovery_reserve_distance: float,
+    supplemental_reserve_distance: float,
+    diagonal_speed: float,
+    cardinal_speed: float,
+    certificate_collisions: np.ndarray,
+    certificate_minimum: np.ndarray,
+    survival_preferred: np.ndarray,
+    safety_preferred: np.ndarray,
+    recovery_distance: np.ndarray,
+    repair_volume: np.ndarray,
+    absolute_deadline_ns: int | None = None,
+    workspace: (
+        native_backend.LocalSupplementalNativeWorkspace | None
+    ) = None,
+) -> list[SupplementalNode]:
+    """Run the exact quantized lane behind one all-or-nothing C++ call."""
+
+    action_count = len(actions)
+    result = (workspace or native_workspace()).query(
+        horizon=horizon,
+        action_hold_frames=action_hold_frames,
+        beam_width=beam_width,
+        control_delay_frames=control_delay_frames,
+        initial_x=initial.x,
+        initial_y=initial.y,
+        initial_first_action=initial.first_action,
+        initial_last_action=initial.last_action,
+        initial_risk=initial.risk,
+        initial_collisions=initial.collisions,
+        initial_minimum_clearance=initial.min_clearance,
+        initial_immediate_clearance=initial.immediate_clearance,
+        action_direction=np.fromiter(
+            (action.direction for action in actions),
+            dtype=np.int32,
+            count=action_count,
+        ),
+        action_dx=np.fromiter(
+            (action.dx for action in actions),
+            dtype=np.float64,
+            count=action_count,
+        ),
+        action_dy=np.fromiter(
+            (action.dy for action in actions),
+            dtype=np.float64,
+            count=action_count,
+        ),
+        action_focused=np.fromiter(
+            (action.focused for action in actions),
+            dtype=np.uint8,
+            count=action_count,
+        ),
+        action_allowed=np.fromiter(
+            (
+                action.name in allowed_first_actions
+                for action in actions
+            ),
+            dtype=np.uint8,
+            count=action_count,
+        ),
+        certificate_collisions=certificate_collisions,
+        certificate_minimum=certificate_minimum,
+        survival_preferred=survival_preferred,
+        safety_preferred=safety_preferred,
+        recovery_distance=recovery_distance,
+        repair_volume=repair_volume,
+        bullet_frames=bullet_frames,
+        laser_frames=laser_frames,
+        body_base_x=body_base_x,
+        body_base_y=body_base_y,
+        body_velocity_x=body_velocity_x,
+        body_velocity_y=body_velocity_y,
+        body_half_width=body_half_width,
+        body_half_height=body_half_height,
+        player_radius=player_radius,
+        preserve_previous_direction_inertia=(
+            preserve_previous_direction_inertia
+        ),
+        previous_direction=previous_direction,
+        previous_focused=previous_focused,
+        target_x=target_x,
+        target_y=target_y,
+        target_deadline=target_deadline,
+        item_safety_clearance=item_safety_clearance,
+        playfield_left=playfield_left,
+        playfield_right=playfield_right,
+        playfield_top=playfield_top,
+        playfield_bottom=playfield_bottom,
+        recovery_reserve_distance=recovery_reserve_distance,
+        supplemental_reserve_distance=supplemental_reserve_distance,
+        diagonal_speed=diagonal_speed,
+        cardinal_speed=cardinal_speed,
+        absolute_deadline_ns=absolute_deadline_ns,
+    )
+    return [
+        SupplementalNode(
+            x=float(result.x[index]),
+            y=float(result.y[index]),
+            first_action=int(result.first_action[index]),
+            last_action=int(result.last_action[index]),
+            risk=float(result.risk[index]),
+            collisions=int(result.collisions[index]),
+            min_clearance=float(result.minimum_clearance[index]),
+            immediate_clearance=float(result.immediate_clearance[index]),
+        )
+        for index in range(len(result))
+    ]
 
 
 def _minimum_travel_frames(

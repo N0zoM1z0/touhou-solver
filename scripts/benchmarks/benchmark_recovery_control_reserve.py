@@ -23,6 +23,9 @@ from th08_trace_replay import (
     laser_from_trace as _laser_from_trace,
 )
 from touhou_control.local_pipeline_oracle import LocalPipelineRoot
+from touhou_control.supplemental_local_beam import (
+    ExactVersionSupplementalService,
+)
 
 
 def _p95(values: list[float]) -> float:
@@ -44,6 +47,11 @@ def _replay_decision(
     losing_control_reserve: bool = False,
     preloss_continuation_preference: bool = False,
     preloss_supplemental_beam_width: int = 0,
+    preloss_supplemental_deadline_ms: float | None = None,
+    preloss_supplemental_async_service: (
+        ExactVersionSupplementalService | None
+    ) = None,
+    preloss_supplemental_version: object | None = None,
     local_pipeline_root: LocalPipelineRoot | None = None,
     replay_hazards: (
         tuple[tuple[Bullet, ...], tuple[Laser, ...], tuple[EnemyBody, ...]]
@@ -124,6 +132,15 @@ def _replay_decision(
         ),
         preloss_supplemental_beam_width=(
             preloss_supplemental_beam_width
+        ),
+        preloss_supplemental_deadline_ms=(
+            preloss_supplemental_deadline_ms
+        ),
+        preloss_supplemental_async_service=(
+            preloss_supplemental_async_service
+        ),
+        preloss_supplemental_version=(
+            preloss_supplemental_version
         ),
         relax_stale_viability_contradiction=(
             relax_stale_viability_contradiction

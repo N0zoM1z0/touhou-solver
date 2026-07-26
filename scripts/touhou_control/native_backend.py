@@ -6,6 +6,7 @@ import ctypes
 from dataclasses import dataclass
 import os
 from pathlib import Path
+import time
 
 import numpy as np
 
@@ -44,6 +45,7 @@ _BULLET_POOL_DECODE_FUNCTION = None
 _LOCAL_HAZARDS_FUNCTION = None
 _LOCAL_BEAM_REDUCE_FUNCTION = None
 _LOCAL_SUPPLEMENTAL_BEAM_REDUCE_FUNCTION = None
+_LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS = None
 _LOAD_ERROR: OSError | None = None
 
 
@@ -67,6 +69,122 @@ class DecodedBulletPool:
 
     def __len__(self) -> int:
         return len(self.x)
+
+
+class LocalSupplementalNativeCancelledError(RuntimeError):
+    """The complete native supplemental rollout was cancelled."""
+
+
+class LocalSupplementalNativeDeadlineError(RuntimeError):
+    """The complete native supplemental rollout missed its deadline."""
+
+
+@dataclass(frozen=True)
+class LocalSupplementalNativeResult:
+    """Completed endpoint vectors from one all-or-nothing native rollout."""
+
+    x: np.ndarray
+    y: np.ndarray
+    first_action: np.ndarray
+    last_action: np.ndarray
+    risk: np.ndarray
+    collisions: np.ndarray
+    minimum_clearance: np.ndarray
+    immediate_clearance: np.ndarray
+
+    def __len__(self) -> int:
+        return len(self.x)
+
+
+_C_FLOAT_POINTER = ctypes.POINTER(ctypes.c_float)
+_C_DOUBLE_POINTER = ctypes.POINTER(ctypes.c_double)
+_C_INT32_POINTER = ctypes.POINTER(ctypes.c_int32)
+_C_UINT8_POINTER = ctypes.POINTER(ctypes.c_uint8)
+
+
+class _LocalSupplementalQueryV1(ctypes.Structure):
+    _fields_ = [
+        ("struct_size", ctypes.c_uint32),
+        ("horizon", ctypes.c_int),
+        ("action_hold_frames", ctypes.c_int),
+        ("beam_width", ctypes.c_int),
+        ("control_delay_frames", ctypes.c_int),
+        ("action_count", ctypes.c_int),
+        ("initial_x", ctypes.c_double),
+        ("initial_y", ctypes.c_double),
+        ("initial_first_action", ctypes.c_int32),
+        ("initial_last_action", ctypes.c_int32),
+        ("initial_risk", ctypes.c_double),
+        ("initial_collisions", ctypes.c_int32),
+        ("initial_minimum_clearance", ctypes.c_double),
+        ("initial_immediate_clearance", ctypes.c_double),
+        ("action_direction", _C_INT32_POINTER),
+        ("action_dx", _C_DOUBLE_POINTER),
+        ("action_dy", _C_DOUBLE_POINTER),
+        ("action_focused", _C_UINT8_POINTER),
+        ("action_allowed", _C_UINT8_POINTER),
+        ("certificate_collisions", _C_INT32_POINTER),
+        ("certificate_minimum", _C_DOUBLE_POINTER),
+        ("survival_preferred", _C_UINT8_POINTER),
+        ("safety_preferred", _C_UINT8_POINTER),
+        ("recovery_distance", _C_DOUBLE_POINTER),
+        ("repair_volume", _C_INT32_POINTER),
+        ("bullet_offsets", _C_INT32_POINTER),
+        ("bullet_x", _C_FLOAT_POINTER),
+        ("bullet_y", _C_FLOAT_POINTER),
+        ("bullet_half_width", _C_FLOAT_POINTER),
+        ("bullet_half_height", _C_FLOAT_POINTER),
+        ("bullet_transformed", _C_UINT8_POINTER),
+        ("laser_offsets", _C_INT32_POINTER),
+        ("laser_start_x", _C_FLOAT_POINTER),
+        ("laser_start_y", _C_FLOAT_POINTER),
+        ("laser_segment_x", _C_FLOAT_POINTER),
+        ("laser_segment_y", _C_FLOAT_POINTER),
+        ("laser_collision_radius", _C_FLOAT_POINTER),
+        ("laser_base_uncertainty", _C_FLOAT_POINTER),
+        ("laser_uncertainty_per_frame", _C_FLOAT_POINTER),
+        ("body_count", ctypes.c_int),
+        ("body_base_x", _C_FLOAT_POINTER),
+        ("body_base_y", _C_FLOAT_POINTER),
+        ("body_velocity_x", _C_FLOAT_POINTER),
+        ("body_velocity_y", _C_FLOAT_POINTER),
+        ("body_half_width", _C_FLOAT_POINTER),
+        ("body_half_height", _C_FLOAT_POINTER),
+        ("player_radius", ctypes.c_float),
+        ("preserve_previous_direction_inertia", ctypes.c_int),
+        ("previous_direction", ctypes.c_int32),
+        ("previous_focused", ctypes.c_uint8),
+        ("target_enabled", ctypes.c_int),
+        ("target_x", ctypes.c_double),
+        ("target_y", ctypes.c_double),
+        ("target_deadline", ctypes.c_int),
+        ("item_safety_clearance", ctypes.c_double),
+        ("playfield_left", ctypes.c_double),
+        ("playfield_right", ctypes.c_double),
+        ("playfield_top", ctypes.c_double),
+        ("playfield_bottom", ctypes.c_double),
+        ("recovery_reserve_distance", ctypes.c_double),
+        ("supplemental_reserve_distance", ctypes.c_double),
+        ("diagonal_speed", ctypes.c_double),
+        ("cardinal_speed", ctypes.c_double),
+        ("timeout_nanoseconds", ctypes.c_uint64),
+    ]
+
+
+class _LocalSupplementalOutputV1(ctypes.Structure):
+    _fields_ = [
+        ("struct_size", ctypes.c_uint32),
+        ("capacity", ctypes.c_int),
+        ("x", _C_DOUBLE_POINTER),
+        ("y", _C_DOUBLE_POINTER),
+        ("first_action", _C_INT32_POINTER),
+        ("last_action", _C_INT32_POINTER),
+        ("risk", _C_DOUBLE_POINTER),
+        ("collisions", _C_INT32_POINTER),
+        ("minimum_clearance", _C_DOUBLE_POINTER),
+        ("immediate_clearance", _C_DOUBLE_POINTER),
+        ("count", _C_INT32_POINTER),
+    ]
 
 
 def _library_path() -> Path:
@@ -1047,6 +1165,45 @@ def _load_local_supplemental_beam_reduce_function():
     return function
 
 
+def _load_local_supplemental_workspace_functions():
+    global _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS
+    if _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS is not None:
+        return _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS
+    library = _load_library()
+    if library is None:
+        return None
+    try:
+        create = library.touhou_local_supplemental_workspace_create_v1
+        query = library.touhou_local_supplemental_workspace_query_v1
+        cancel = library.touhou_local_supplemental_workspace_cancel_v1
+        active = library.touhou_local_supplemental_workspace_active_v1
+        destroy = library.touhou_local_supplemental_workspace_destroy_v1
+    except AttributeError:
+        return None
+    create.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    create.restype = ctypes.c_int
+    query.argtypes = [
+        ctypes.c_void_p,
+        ctypes.POINTER(_LocalSupplementalQueryV1),
+        ctypes.POINTER(_LocalSupplementalOutputV1),
+    ]
+    query.restype = ctypes.c_int
+    cancel.argtypes = [ctypes.c_void_p]
+    cancel.restype = ctypes.c_int
+    active.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_int)]
+    active.restype = ctypes.c_int
+    destroy.argtypes = [ctypes.c_void_p]
+    destroy.restype = ctypes.c_int
+    _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS = (
+        create,
+        query,
+        cancel,
+        active,
+        destroy,
+    )
+    return _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS
+
+
 def available() -> bool:
     return _load_library() is not None
 
@@ -1579,6 +1736,382 @@ def reduce_local_supplemental_beam(
             f"{count}"
         )
     return retained[:count].copy()
+
+
+def _frame_major_fields(
+    frames: tuple[tuple[np.ndarray, ...], ...],
+    *,
+    field_count: int,
+    dtypes: tuple[np.dtype, ...],
+) -> tuple[np.ndarray, tuple[np.ndarray, ...]]:
+    """Pack peer fields with one offset table without changing frame order."""
+
+    if len(dtypes) != field_count:
+        raise ValueError("frame-major field dtype count mismatch")
+    offsets = np.empty(len(frames) + 1, dtype=np.int32)
+    offsets[0] = 0
+    normalized: list[tuple[np.ndarray, ...]] = []
+    for frame_index, frame in enumerate(frames):
+        if len(frame) != field_count:
+            raise ValueError("frame-major field count mismatch")
+        converted = tuple(
+            np.ascontiguousarray(values, dtype=dtypes[field])
+            for field, values in enumerate(frame)
+        )
+        count = len(converted[0])
+        if any(
+            values.ndim != 1 or len(values) != count
+            for values in converted
+        ):
+            raise ValueError("frame-major fields must be 1D peers")
+        if offsets[frame_index] > np.iinfo(np.int32).max - count:
+            raise ValueError("frame-major hazard count exceeds int32")
+        offsets[frame_index + 1] = offsets[frame_index] + count
+        normalized.append(converted)
+    flattened = tuple(
+        (
+            np.concatenate(
+                [frame[field] for frame in normalized],
+            )
+            if offsets[-1]
+            else np.empty(0, dtype=dtypes[field])
+        )
+        for field in range(field_count)
+    )
+    return offsets, flattened
+
+
+class LocalSupplementalNativeWorkspace:
+    """Persistent allocation/cancellation scope for complete local rollouts."""
+
+    def __init__(self) -> None:
+        functions = _load_local_supplemental_workspace_functions()
+        if functions is None:
+            raise RuntimeError(
+                "native supplemental rollout workspace is unavailable"
+            )
+        (
+            self._create,
+            self._query,
+            self._cancel,
+            self._active,
+            self._destroy,
+        ) = functions
+        self._handle = ctypes.c_void_p()
+        result = self._create(ctypes.byref(self._handle))
+        if result != 0 or not self._handle.value:
+            self._handle = ctypes.c_void_p()
+            raise RuntimeError(
+                "native supplemental workspace create returned "
+                f"{result}"
+            )
+
+    @property
+    def closed(self) -> bool:
+        return not bool(self._handle.value)
+
+    def close(self) -> None:
+        if self._handle.value:
+            result = self._destroy(self._handle)
+            self._handle = ctypes.c_void_p()
+            if result != 0:
+                raise RuntimeError(
+                    "native supplemental workspace destroy returned "
+                    f"{result}"
+                )
+
+    def __enter__(self):
+        if self.closed:
+            raise RuntimeError("native supplemental workspace is closed")
+        return self
+
+    def __exit__(self, _type, _exception, _traceback) -> None:
+        self.close()
+
+    def __del__(self) -> None:
+        try:
+            self.close()
+        except (AttributeError, OSError, RuntimeError):
+            pass
+
+    def cancel(self) -> None:
+        if self.closed:
+            return
+        result = self._cancel(self._handle)
+        if result != 0:
+            raise RuntimeError(
+                f"native supplemental workspace cancel returned {result}"
+            )
+
+    @property
+    def active(self) -> bool:
+        if self.closed:
+            return False
+        value = ctypes.c_int()
+        result = self._active(self._handle, ctypes.byref(value))
+        if result != 0:
+            raise RuntimeError(
+                f"native supplemental workspace active returned {result}"
+            )
+        return bool(value.value)
+
+    def query(
+        self,
+        *,
+        horizon: int,
+        action_hold_frames: int,
+        beam_width: int,
+        control_delay_frames: int,
+        initial_x: float,
+        initial_y: float,
+        initial_first_action: int,
+        initial_last_action: int,
+        initial_risk: float,
+        initial_collisions: int,
+        initial_minimum_clearance: float,
+        initial_immediate_clearance: float,
+        action_direction: np.ndarray,
+        action_dx: np.ndarray,
+        action_dy: np.ndarray,
+        action_focused: np.ndarray,
+        action_allowed: np.ndarray,
+        certificate_collisions: np.ndarray,
+        certificate_minimum: np.ndarray,
+        survival_preferred: np.ndarray,
+        safety_preferred: np.ndarray,
+        recovery_distance: np.ndarray,
+        repair_volume: np.ndarray,
+        bullet_frames: tuple[tuple[np.ndarray, ...], ...],
+        laser_frames: tuple[tuple[np.ndarray, ...], ...],
+        body_base_x: np.ndarray,
+        body_base_y: np.ndarray,
+        body_velocity_x: np.ndarray,
+        body_velocity_y: np.ndarray,
+        body_half_width: np.ndarray,
+        body_half_height: np.ndarray,
+        player_radius: float,
+        preserve_previous_direction_inertia: bool,
+        previous_direction: int,
+        previous_focused: bool,
+        target_x: float | None,
+        target_y: float | None,
+        target_deadline: int | None,
+        item_safety_clearance: float,
+        playfield_left: float,
+        playfield_right: float,
+        playfield_top: float,
+        playfield_bottom: float,
+        recovery_reserve_distance: float,
+        supplemental_reserve_distance: float,
+        diagonal_speed: float,
+        cardinal_speed: float,
+        absolute_deadline_ns: int | None = None,
+    ) -> LocalSupplementalNativeResult:
+        """Return only a complete endpoint vector; never expose partial work."""
+
+        if self.closed:
+            raise RuntimeError("native supplemental workspace is closed")
+        if len(bullet_frames) != horizon or len(laser_frames) != horizon:
+            raise ValueError(
+                "supplemental hazard frame count must equal horizon"
+            )
+        action_fields = (
+            np.ascontiguousarray(action_direction, dtype=np.int32),
+            np.ascontiguousarray(action_dx, dtype=np.float64),
+            np.ascontiguousarray(action_dy, dtype=np.float64),
+            np.ascontiguousarray(action_focused, dtype=np.uint8),
+            np.ascontiguousarray(action_allowed, dtype=np.uint8),
+            np.ascontiguousarray(
+                certificate_collisions,
+                dtype=np.int32,
+            ),
+            np.ascontiguousarray(certificate_minimum, dtype=np.float64),
+            np.ascontiguousarray(survival_preferred, dtype=np.uint8),
+            np.ascontiguousarray(safety_preferred, dtype=np.uint8),
+            np.ascontiguousarray(recovery_distance, dtype=np.float64),
+            np.ascontiguousarray(repair_volume, dtype=np.int32),
+        )
+        action_count = len(action_fields[0])
+        if (
+            action_count <= 0
+            or any(
+                values.ndim != 1 or len(values) != action_count
+                for values in action_fields
+            )
+        ):
+            raise ValueError(
+                "native supplemental action fields must be nonempty peers"
+            )
+        bullet_offsets, bullets = _frame_major_fields(
+            bullet_frames,
+            field_count=5,
+            dtypes=(
+                np.dtype(np.float32),
+                np.dtype(np.float32),
+                np.dtype(np.float32),
+                np.dtype(np.float32),
+                np.dtype(np.uint8),
+            ),
+        )
+        laser_offsets, lasers = _frame_major_fields(
+            laser_frames,
+            field_count=7,
+            dtypes=(np.dtype(np.float32),) * 7,
+        )
+        body_fields = tuple(
+            np.ascontiguousarray(values, dtype=np.float32)
+            for values in (
+                body_base_x,
+                body_base_y,
+                body_velocity_x,
+                body_velocity_y,
+                body_half_width,
+                body_half_height,
+            )
+        )
+        body_count = len(body_fields[0])
+        if any(
+            values.ndim != 1 or len(values) != body_count
+            for values in body_fields
+        ):
+            raise ValueError("native supplemental body fields must be peers")
+        target_enabled = target_x is not None
+        if target_enabled != (
+            target_y is not None and target_deadline is not None
+        ):
+            raise ValueError(
+                "native supplemental target fields must be all present"
+            )
+        timeout_nanoseconds = 0
+        if absolute_deadline_ns is not None:
+            timeout_nanoseconds = absolute_deadline_ns - time.perf_counter_ns()
+            if timeout_nanoseconds <= 0:
+                raise LocalSupplementalNativeDeadlineError(
+                    "native supplemental packing exceeded its deadline"
+                )
+
+        capacity = beam_width
+        x = np.empty(capacity, dtype=np.float64)
+        y = np.empty(capacity, dtype=np.float64)
+        first_action = np.empty(capacity, dtype=np.int32)
+        last_action = np.empty(capacity, dtype=np.int32)
+        risk = np.empty(capacity, dtype=np.float64)
+        collisions = np.empty(capacity, dtype=np.int32)
+        minimum = np.empty(capacity, dtype=np.float64)
+        immediate = np.empty(capacity, dtype=np.float64)
+        count = ctypes.c_int32()
+        query = _LocalSupplementalQueryV1(
+            ctypes.sizeof(_LocalSupplementalQueryV1),
+            horizon,
+            action_hold_frames,
+            beam_width,
+            control_delay_frames,
+            action_count,
+            initial_x,
+            initial_y,
+            initial_first_action,
+            initial_last_action,
+            initial_risk,
+            initial_collisions,
+            initial_minimum_clearance,
+            initial_immediate_clearance,
+            action_fields[0].ctypes.data_as(_C_INT32_POINTER),
+            action_fields[1].ctypes.data_as(_C_DOUBLE_POINTER),
+            action_fields[2].ctypes.data_as(_C_DOUBLE_POINTER),
+            action_fields[3].ctypes.data_as(_C_UINT8_POINTER),
+            action_fields[4].ctypes.data_as(_C_UINT8_POINTER),
+            action_fields[5].ctypes.data_as(_C_INT32_POINTER),
+            action_fields[6].ctypes.data_as(_C_DOUBLE_POINTER),
+            action_fields[7].ctypes.data_as(_C_UINT8_POINTER),
+            action_fields[8].ctypes.data_as(_C_UINT8_POINTER),
+            action_fields[9].ctypes.data_as(_C_DOUBLE_POINTER),
+            action_fields[10].ctypes.data_as(_C_INT32_POINTER),
+            bullet_offsets.ctypes.data_as(_C_INT32_POINTER),
+            bullets[0].ctypes.data_as(_C_FLOAT_POINTER),
+            bullets[1].ctypes.data_as(_C_FLOAT_POINTER),
+            bullets[2].ctypes.data_as(_C_FLOAT_POINTER),
+            bullets[3].ctypes.data_as(_C_FLOAT_POINTER),
+            bullets[4].ctypes.data_as(_C_UINT8_POINTER),
+            laser_offsets.ctypes.data_as(_C_INT32_POINTER),
+            lasers[0].ctypes.data_as(_C_FLOAT_POINTER),
+            lasers[1].ctypes.data_as(_C_FLOAT_POINTER),
+            lasers[2].ctypes.data_as(_C_FLOAT_POINTER),
+            lasers[3].ctypes.data_as(_C_FLOAT_POINTER),
+            lasers[4].ctypes.data_as(_C_FLOAT_POINTER),
+            lasers[5].ctypes.data_as(_C_FLOAT_POINTER),
+            lasers[6].ctypes.data_as(_C_FLOAT_POINTER),
+            body_count,
+            body_fields[0].ctypes.data_as(_C_FLOAT_POINTER),
+            body_fields[1].ctypes.data_as(_C_FLOAT_POINTER),
+            body_fields[2].ctypes.data_as(_C_FLOAT_POINTER),
+            body_fields[3].ctypes.data_as(_C_FLOAT_POINTER),
+            body_fields[4].ctypes.data_as(_C_FLOAT_POINTER),
+            body_fields[5].ctypes.data_as(_C_FLOAT_POINTER),
+            player_radius,
+            int(preserve_previous_direction_inertia),
+            previous_direction,
+            int(previous_focused),
+            int(target_enabled),
+            0.0 if target_x is None else target_x,
+            0.0 if target_y is None else target_y,
+            0 if target_deadline is None else target_deadline,
+            item_safety_clearance,
+            playfield_left,
+            playfield_right,
+            playfield_top,
+            playfield_bottom,
+            recovery_reserve_distance,
+            supplemental_reserve_distance,
+            diagonal_speed,
+            cardinal_speed,
+            timeout_nanoseconds,
+        )
+        output = _LocalSupplementalOutputV1(
+            ctypes.sizeof(_LocalSupplementalOutputV1),
+            capacity,
+            x.ctypes.data_as(_C_DOUBLE_POINTER),
+            y.ctypes.data_as(_C_DOUBLE_POINTER),
+            first_action.ctypes.data_as(_C_INT32_POINTER),
+            last_action.ctypes.data_as(_C_INT32_POINTER),
+            risk.ctypes.data_as(_C_DOUBLE_POINTER),
+            collisions.ctypes.data_as(_C_INT32_POINTER),
+            minimum.ctypes.data_as(_C_DOUBLE_POINTER),
+            immediate.ctypes.data_as(_C_DOUBLE_POINTER),
+            ctypes.pointer(count),
+        )
+        result = self._query(
+            self._handle,
+            ctypes.byref(query),
+            ctypes.byref(output),
+        )
+        if result == 5:
+            raise LocalSupplementalNativeCancelledError(
+                "native supplemental rollout was cancelled"
+            )
+        if result == 6:
+            raise LocalSupplementalNativeDeadlineError(
+                "native supplemental rollout exceeded its deadline"
+            )
+        if result != 0:
+            raise RuntimeError(
+                f"native supplemental rollout returned {result}"
+            )
+        retained = int(count.value)
+        if retained <= 0 or retained > capacity:
+            raise RuntimeError(
+                "native supplemental rollout returned invalid count "
+                f"{retained}"
+            )
+        return LocalSupplementalNativeResult(
+            x=x[:retained].copy(),
+            y=y[:retained].copy(),
+            first_action=first_action[:retained].copy(),
+            last_action=last_action[:retained].copy(),
+            risk=risk[:retained].copy(),
+            collisions=collisions[:retained].copy(),
+            minimum_clearance=minimum[:retained].copy(),
+            immediate_clearance=immediate[:retained].copy(),
+        )
 
 
 def build_clearance_volume(

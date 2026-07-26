@@ -603,6 +603,11 @@ def _issue_enemy_guard_summary(
         for guard in guards
         for change in guard.get("changes", ())
     ]
+    transactions = [
+        transaction
+        for guard in guards
+        if isinstance((transaction := guard.get("transaction")), dict)
+    ]
     return {
         "observation_count": len(guards),
         "changed_observation_count": sum(
@@ -615,6 +620,34 @@ def _issue_enemy_guard_summary(
             str(guard.get("planned_action_before_guard"))
             != str(guard.get("action_after_guard"))
             for guard in guards
+        ),
+        "transaction_count": len(transactions),
+        "selection_reason_counts": dict(
+            Counter(
+                str(transaction.get("selection_reason"))
+                for transaction in transactions
+            )
+        ),
+        "planned_action_preserved_count": sum(
+            str(transaction.get("planned_action"))
+            == str(transaction.get("selected_action"))
+            for transaction in transactions
+        ),
+        "fresh_global_intersection_count": sum(
+            bool(transaction.get("fresh_global_intersection"))
+            for transaction in transactions
+        ),
+        "global_constraint_relaxation_count": sum(
+            bool(transaction.get("global_constraint_relaxed"))
+            for transaction in transactions
+        ),
+        "silent_outside_global_count": sum(
+            bool(
+                transaction.get(
+                    "selected_outside_global_without_relaxation"
+                )
+            )
+            for transaction in transactions
         ),
         "observation_count_with_anticipatory_bodies": sum(
             int(guard.get("anticipatory_count", 0)) > 0
@@ -934,6 +967,12 @@ def _robust_viability_summary(
         float(row["robust_control"]["viability_control_reserve_deficit"])
         for row in decisions
         if isinstance(row.get("robust_control"), dict)
+        and bool(
+            row["robust_control"].get(
+                "viability_control_reserve_valid",
+                True,
+            )
+        )
         and row["robust_control"].get(
             "viability_recovery_distance"
         ) is not None
@@ -1872,7 +1911,15 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"(maximum {issue_enemy_guard['max_anticipatory_bodies']}), "
                 f"and {issue_enemy_guard['observation_count_with_dormant_bodies']} "
                 "contained dormant bodies "
-                f"(maximum {issue_enemy_guard['max_dormant_bodies']})."
+                f"(maximum {issue_enemy_guard['max_dormant_bodies']}). "
+                f"Fresh/global transactions preserved "
+                f"{issue_enemy_guard['planned_action_preserved_count']}/"
+                f"{issue_enemy_guard['transaction_count']} planned actions, "
+                f"explicitly relaxed "
+                f"{issue_enemy_guard['global_constraint_relaxation_count']}, "
+                "and recorded "
+                f"{issue_enemy_guard['silent_outside_global_count']} silent "
+                "outside-global selections."
             )
             if isinstance(issue_enemy_guard, dict)
             else "- No issue-time enemy-geometry guard telemetry was present.",

@@ -15,6 +15,7 @@ from analysis.th08_practice_dossier import (
     _enemy_sensor_summary,
     _extract_scope,
     _input_visibility_summary,
+    _issue_enemy_guard_summary,
     _no_bomb_verification,
     _promote_enemy_body_candidates,
     _robust_viability_summary,
@@ -210,6 +211,50 @@ class Th08PracticeDossierTests(unittest.TestCase):
             summary["policy_phase_frame_counts"],
             {"4": 1, "7": 1},
         )
+
+    def test_issue_guard_retains_fresh_global_transaction_integrity(
+        self,
+    ) -> None:
+        rows = [_decision(100), _decision(103)]
+        rows[0]["issue_time_enemy_guard"] = {
+            "changes": ["velocity:0x1"],
+            "recertified": True,
+            "planned_action_before_guard": "up_fast",
+            "action_after_guard": "up_fast",
+            "transaction": {
+                "planned_action": "up_fast",
+                "selected_action": "up_fast",
+                "fresh_global_intersection": ["up_fast", "left"],
+                "selection_reason": (
+                    "preserve_planned_in_fresh_global_intersection"
+                ),
+                "global_constraint_relaxed": False,
+                "selected_outside_global_without_relaxation": False,
+            },
+        }
+        rows[1]["issue_time_enemy_guard"] = {
+            "changes": ["contact_mode:0x2"],
+            "recertified": True,
+            "planned_action_before_guard": "up_fast",
+            "action_after_guard": "down_fast",
+            "transaction": {
+                "planned_action": "up_fast",
+                "selected_action": "down_fast",
+                "fresh_global_intersection": [],
+                "selection_reason": (
+                    "relax_empty_fresh_global_intersection"
+                ),
+                "global_constraint_relaxed": True,
+                "selected_outside_global_without_relaxation": False,
+            },
+        }
+        summary = _issue_enemy_guard_summary(rows)
+        assert summary is not None
+        self.assertEqual(summary["transaction_count"], 2)
+        self.assertEqual(summary["planned_action_preserved_count"], 1)
+        self.assertEqual(summary["fresh_global_intersection_count"], 1)
+        self.assertEqual(summary["global_constraint_relaxation_count"], 1)
+        self.assertEqual(summary["silent_outside_global_count"], 0)
 
     def test_spell_phase_summary_is_not_tied_to_stage3_spell50(
         self,

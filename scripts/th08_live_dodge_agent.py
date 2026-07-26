@@ -785,6 +785,8 @@ class Decision:
     issue_certificate_timing: LocalCertificateTiming = (
         LocalCertificateTiming()
     )
+    viability_control_reserve_valid: bool = True
+    issue_recertification: IssueRecertification | None = None
 
 
 @dataclass(frozen=True)
@@ -807,6 +809,22 @@ class RobustActionCertificate:
     write_required: bool = True
     pipeline_branch_count: int = 0
     worst_pending_remaining: int | None = None
+
+
+@dataclass(frozen=True)
+class IssueRecertification:
+    """Auditable fresh/global action transaction at input issue."""
+
+    planned_action: str
+    global_allowed_actions: tuple[str, ...] | None
+    global_constraint_applicable: bool
+    fresh_safe_actions: tuple[str, ...]
+    fresh_global_intersection: tuple[str, ...]
+    selected_action: str
+    selection_reason: str
+    global_constraint_relaxed: bool
+    planned_certificate: RobustActionCertificate | None
+    selected_certificate: RobustActionCertificate
 
 
 def _local_certificate_timing_record(
@@ -864,6 +882,48 @@ def _robust_action_certificate_record(
         "pipeline_branch_count": certificate.pipeline_branch_count,
         "worst_pending_remaining": (
             certificate.worst_pending_remaining
+        ),
+    }
+
+
+def _issue_recertification_record(
+    recertification: IssueRecertification | None,
+) -> dict[str, object] | None:
+    if recertification is None:
+        return None
+    global_allowed = recertification.global_allowed_actions
+    selected_outside_global_without_relaxation = bool(
+        global_allowed is not None
+        and recertification.selected_action not in global_allowed
+        and not recertification.global_constraint_relaxed
+    )
+    return {
+        "planned_action": recertification.planned_action,
+        "global_allowed_actions": global_allowed,
+        "global_constraint_applicable": (
+            recertification.global_constraint_applicable
+        ),
+        "fresh_safe_actions": recertification.fresh_safe_actions,
+        "fresh_global_intersection": (
+            recertification.fresh_global_intersection
+        ),
+        "selected_action": recertification.selected_action,
+        "selection_reason": recertification.selection_reason,
+        "global_constraint_relaxed": (
+            recertification.global_constraint_relaxed
+        ),
+        "selected_outside_global_without_relaxation": (
+            selected_outside_global_without_relaxation
+        ),
+        "planned_certificate": (
+            _robust_action_certificate_record(
+                recertification.planned_certificate
+            )
+            if recertification.planned_certificate is not None
+            else None
+        ),
+        "selected_certificate": _robust_action_certificate_record(
+            recertification.selected_certificate
         ),
     }
 
@@ -2239,8 +2299,13 @@ def recertify_action_for_fresh_hazards(
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
     pipeline_root: LocalPipelineRoot | None = None,
+    allowed_first_actions: tuple[str, ...] | None = None,
+    viability_repair_volumes: tuple[tuple[str, int], ...] = (),
+    viability_recovery_distances: tuple[tuple[str, float], ...] = (),
+    viability_safety_actions: tuple[str, ...] = (),
+    viability_survival_actions: tuple[str, ...] = (),
 ) -> Decision:
-    """Fast issue-time safety override after the observed hazard set changes."""
+    """Intersect a fresh issue certificate with retained global authority."""
 
     timing = _LocalCertificateTimingAccumulator()
     certificates = _robust_action_certificates(
@@ -2258,32 +2323,113 @@ def recertify_action_for_fresh_hazards(
         timing_accumulator=timing,
     )
     planned = certificates.get(decision.action)
-    ranked_actions = sorted(
-        _PLANNER_ACTIONS,
-        key=lambda action: (
-            certificates[action.name].worst_collisions,
-            max(-certificates[action.name].min_clearance, 0.0),
-            certificates[action.name].cvar_risk,
-            0 if action.name == decision.action else 1,
-            action.name,
-        ),
-    )
-    selected = ranked_actions[0]
-    certificate = certificates[selected.name]
-    if planned is not None and (
-        planned.worst_collisions,
-        max(-planned.min_clearance, 0.0),
-        planned.cvar_risk,
-    ) == (
-        certificate.worst_collisions,
-        max(-certificate.min_clearance, 0.0),
-        certificate.cvar_risk,
-    ):
-        selected = next(
-            action for action in _PLANNER_ACTIONS
-            if action.name == decision.action
+    action_by_name = {
+        action.name: action for action in _PLANNER_ACTIONS
+    }
+    if allowed_first_actions is not None:
+        if not allowed_first_actions:
+            raise ValueError("allowed first actions cannot be empty")
+        if len(set(allowed_first_actions)) != len(allowed_first_actions):
+            raise ValueError("allowed first actions must be unique")
+        unknown_actions = (
+            set(allowed_first_actions) - action_by_name.keys()
         )
+        if unknown_actions:
+            raise ValueError(
+                f"unknown allowed first actions: {sorted(unknown_actions)}"
+            )
+    fresh_safe_actions = tuple(
+        action.name
+        for action in _PLANNER_ACTIONS
+        if (
+            certificates[action.name].worst_collisions == 0
+            and certificates[action.name].min_clearance >= 0.0
+        )
+    )
+    nonfresh_constraint_relaxation = bool(
+        decision.viability_constraint_relaxed
+        and not decision.viability_fresh_prefix_relaxed
+    )
+    global_constraint_applicable = bool(
+        allowed_first_actions is not None
+        and not nonfresh_constraint_relaxation
+    )
+    fresh_safe_set = set(fresh_safe_actions)
+    fresh_global_intersection = tuple(
+        action_name
+        for action_name in (allowed_first_actions or ())
+        if action_name in fresh_safe_set
+    )
+    global_constraint_relaxed = bool(
+        global_constraint_applicable
+        and not fresh_global_intersection
+    )
+    if global_constraint_applicable and fresh_global_intersection:
+        candidate_names = fresh_global_intersection
+    elif fresh_safe_actions:
+        candidate_names = fresh_safe_actions
+    else:
+        candidate_names = tuple(
+            action.name for action in _PLANNER_ACTIONS
+        )
+    planned_is_candidate_safe = bool(
+        planned is not None
+        and decision.action in candidate_names
+        and planned.worst_collisions == 0
+        and planned.min_clearance >= 0.0
+    )
+    if planned_is_candidate_safe:
+        selected = action_by_name[decision.action]
         certificate = planned
+        selection_reason = (
+            "preserve_planned_in_fresh_global_intersection"
+            if global_constraint_applicable
+            else "preserve_fresh_safe_planned"
+        )
+    else:
+        selected_name = min(
+            candidate_names,
+            key=lambda action_name: (
+                certificates[action_name].worst_collisions,
+                max(-certificates[action_name].min_clearance, 0.0),
+                certificates[action_name].cvar_risk,
+                -certificates[action_name].min_clearance,
+                0 if action_name == decision.action else 1,
+                action_name,
+            ),
+        )
+        selected = action_by_name[selected_name]
+        certificate = certificates[selected_name]
+        if global_constraint_relaxed:
+            selection_reason = (
+                "relax_empty_fresh_global_intersection"
+                if fresh_safe_actions
+                else "relax_empty_fresh_global_intersection_least_bad"
+            )
+        elif global_constraint_applicable:
+            selection_reason = "replace_unsafe_from_fresh_global_intersection"
+        elif fresh_safe_actions:
+            selection_reason = "replace_unsafe_with_fresh_safe"
+        else:
+            selection_reason = "replace_unsafe_with_least_bad"
+    selected_changed = selected.name != decision.action
+    repair_by_action = dict(viability_repair_volumes)
+    recovery_by_action = dict(viability_recovery_distances)
+    issue_recertification = IssueRecertification(
+        planned_action=decision.action,
+        global_allowed_actions=allowed_first_actions,
+        global_constraint_applicable=global_constraint_applicable,
+        fresh_safe_actions=fresh_safe_actions,
+        fresh_global_intersection=fresh_global_intersection,
+        selected_action=selected.name,
+        selection_reason=selection_reason,
+        global_constraint_relaxed=bool(
+            nonfresh_constraint_relaxation
+            or global_constraint_relaxed
+        ),
+        planned_certificate=planned,
+        selected_certificate=certificate,
+    )
     return replace(
         decision,
         mask=SHOT
@@ -2299,10 +2445,41 @@ def recertify_action_for_fresh_hazards(
         robust_min_clearance=certificate.min_clearance,
         robust_cvar_risk=certificate.cvar_risk,
         robust_worst_delay=certificate.worst_delay,
+        viability_constrained=bool(
+            global_constraint_applicable
+            and fresh_global_intersection
+        ),
+        viability_safe_action_count=len(allowed_first_actions or ()),
+        viability_repair_volume=repair_by_action.get(selected.name, 0),
+        viability_constraint_relaxed=bool(
+            nonfresh_constraint_relaxation
+            or global_constraint_relaxed
+        ),
+        viability_recovery_distance=recovery_by_action.get(selected.name),
+        viability_control_reserve_valid=bool(
+            decision.viability_control_reserve_valid
+            and not selected_changed
+        ),
+        viability_safety_value_preferred=bool(
+            viability_safety_actions
+            and selected.name in viability_safety_actions
+        ),
+        viability_fresh_prefix_filtered=bool(
+            global_constraint_applicable
+            and fresh_global_intersection
+            and len(fresh_global_intersection)
+            != len(allowed_first_actions or ())
+        ),
+        viability_fresh_prefix_relaxed=global_constraint_relaxed,
+        viability_survival_preferred=bool(
+            viability_survival_actions
+            and selected.name in viability_survival_actions
+        ),
         issue_action_certificates=tuple(
             certificates[action.name] for action in _PLANNER_ACTIONS
         ),
         issue_certificate_timing=timing.snapshot(),
+        issue_recertification=issue_recertification,
     )
 
 
@@ -7329,6 +7506,21 @@ def run(args: argparse.Namespace) -> int:
                     lasers=lasers,
                     enemy_bodies=issue_enemy_bodies,
                     snapshot_lag=player_to_hazard_lag,
+                    allowed_first_actions=(
+                        policy_guidance.allowed_first_actions
+                    ),
+                    viability_repair_volumes=(
+                        policy_guidance.repair_volumes
+                    ),
+                    viability_recovery_distances=(
+                        policy_guidance.recovery_distances
+                    ),
+                    viability_safety_actions=(
+                        policy_guidance.safety_actions
+                    ),
+                    viability_survival_actions=(
+                        policy_guidance.survival_actions
+                    ),
                 )
                 issue_enemy_recertificate_ms = (
                     time.perf_counter() - issue_recertificate_started
@@ -8091,6 +8283,9 @@ def run(args: argparse.Namespace) -> int:
                         "recertificate_ms": (
                             issue_enemy_recertificate_ms
                         ),
+                        "transaction": _issue_recertification_record(
+                            decision.issue_recertification
+                        ),
                     },
                     "spell_enemy_body_guard": (
                         {
@@ -8150,6 +8345,9 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "viability_control_reserve_deficit": (
                             decision.viability_control_reserve_deficit
+                        ),
+                        "viability_control_reserve_valid": (
+                            decision.viability_control_reserve_valid
                         ),
                         "viability_safety_value_preferred": (
                             decision.viability_safety_value_preferred

@@ -3699,3 +3699,25 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `5.103/8.215 s`; `git diff --check` passes.
 - Detailed analysis and the five review questions are in
   `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`.
+
+## 2026-07-26: CE-0127 Fresh/Global Issue Transaction Repair
+
+- **Observed defect boundary:** ordinary local planning already intersected
+  cached global actions with its fresh preflight certificates, but later
+  enemy-change recertification ranked all 17 actions without the global mask.
+- **Implemented correction:** issue recertification computes all-action fresh
+  certificates once, preserves a planned action in the fresh/global
+  intersection, restricts an unsafe replacement to that intersection, and
+  explicitly relaxes only when the intersection is empty. With no global
+  constraint it acts only as a local hard shield.
+- **Telemetry correction:** each transaction retains the planned and selected
+  certificates, complete fresh safe set, exact global intersection, selection
+  reason, and relaxation state. Repair/recovery/safety/survival fields are
+  rebound to the selected action; an old beam-endpoint control-reserve value
+  is marked invalid after an action change.
+- **Validation:** deterministic preserve/intersect/relax regressions pass;
+  the complete Linux and Windows quick suites pass `567/567` in
+  `4.996/9.072 s`; the retained Hard Stage-4A 15-case physical regression
+  corpus passes with zero deathbomb. The old `202439` trace did not retain the
+  fresh all-action tuple, so it cannot supply exact historical transaction
+  replay. A new no-audit Hard Stage-4A physical gate is required.

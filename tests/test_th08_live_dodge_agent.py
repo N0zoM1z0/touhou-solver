@@ -90,6 +90,7 @@ from th08_live_dodge_agent import (
     _frozen_auto_confirm_eligible,
     _build_packed_laser_collision_frames,
     _hazards_for_positions,
+    _issue_recertification_record,
     _pack_laser_frame,
     _semantic_clock_observation,
     _stage_corridor_solution,
@@ -113,6 +114,29 @@ from th08_live_dodge_agent import (
     serialize_laser_trace,
 )
 from touhou_control.viability import ControlAction
+
+
+def _issue_certificates(
+    overrides: dict[str, tuple[int, float, float]],
+):
+    def certificates(*, actions, delay_frames, **_kwargs):
+        result = {}
+        for action in actions:
+            collisions, clearance, cvar = overrides.get(
+                action.name,
+                (1, -100.0, 100.0),
+            )
+            result[action.name] = RobustActionCertificate(
+                action=action.name,
+                delay_frames=delay_frames,
+                worst_collisions=collisions,
+                min_clearance=clearance,
+                cvar_risk=cvar,
+                worst_delay=max(delay_frames),
+            )
+        return result
+
+    return certificates
 
 
 class LiveDodgeAgentTests(unittest.TestCase):
@@ -1161,6 +1185,188 @@ class LiveDodgeAgentTests(unittest.TestCase):
         self.assertNotEqual(corrected.action, "up_right_fast")
         self.assertTrue(corrected.robust_override)
         self.assertLess(corrected.robust_min_clearance, 0.0)
+
+    def test_ce_0127_issue_recertification_preserves_safe_planned_action(
+        self,
+    ) -> None:
+        decision = Decision(
+            SHOT | UP,
+            "up_fast",
+            10.0,
+            10.0,
+            0.0,
+            False,
+            viability_constrained=True,
+            viability_safe_action_count=2,
+        )
+        with patch(
+            "th08_live_dodge_agent._robust_action_certificates",
+            side_effect=_issue_certificates(
+                {
+                    "up_fast": (0, 1.0, 10.0),
+                    "down_fast": (0, 100.0, 0.0),
+                }
+            ),
+        ):
+            corrected = recertify_action_for_fresh_hazards(
+                decision,
+                player_x=192.0,
+                player_y=400.0,
+                previous_mask=SHOT | UP,
+                delay_frames=(2, 3),
+                action_hold_frames=4,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                allowed_first_actions=("up_fast", "down_fast"),
+            )
+        self.assertEqual(corrected.action, "up_fast")
+        self.assertTrue(corrected.viability_constrained)
+        self.assertFalse(corrected.viability_fresh_prefix_relaxed)
+        self.assertIsNotNone(corrected.issue_recertification)
+        assert corrected.issue_recertification is not None
+        self.assertEqual(
+            corrected.issue_recertification.selection_reason,
+            "preserve_planned_in_fresh_global_intersection",
+        )
+
+    def test_ce_0127_issue_recertification_uses_fresh_global_intersection(
+        self,
+    ) -> None:
+        decision = Decision(
+            SHOT | UP,
+            "up_fast",
+            10.0,
+            10.0,
+            0.0,
+            False,
+            viability_constrained=True,
+            viability_safe_action_count=3,
+            viability_repair_volume=1,
+            viability_recovery_distance=99.0,
+            viability_control_reserve_deficit=7.0,
+        )
+        with patch(
+            "th08_live_dodge_agent._robust_action_certificates",
+            side_effect=_issue_certificates(
+                {
+                    "up_fast": (1, -2.0, 100.0),
+                    "left": (0, 5.0, 0.0),
+                    "right": (0, 2.0, 0.0),
+                    "down_fast": (0, 100.0, 0.0),
+                }
+            ),
+        ):
+            corrected = recertify_action_for_fresh_hazards(
+                decision,
+                player_x=192.0,
+                player_y=400.0,
+                previous_mask=SHOT | UP,
+                delay_frames=(2, 3),
+                action_hold_frames=4,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                allowed_first_actions=("up_fast", "left", "right"),
+                viability_repair_volumes=(
+                    ("up_fast", 1),
+                    ("left", 11),
+                    ("right", 7),
+                ),
+                viability_recovery_distances=(
+                    ("up_fast", 99.0),
+                    ("left", 22.0),
+                    ("right", 33.0),
+                ),
+                viability_safety_actions=("left",),
+                viability_survival_actions=("left",),
+            )
+        self.assertEqual(corrected.action, "left")
+        self.assertTrue(corrected.viability_constrained)
+        self.assertTrue(corrected.viability_fresh_prefix_filtered)
+        self.assertFalse(corrected.viability_fresh_prefix_relaxed)
+        self.assertEqual(corrected.viability_repair_volume, 11)
+        self.assertEqual(corrected.viability_recovery_distance, 22.0)
+        self.assertTrue(corrected.viability_safety_value_preferred)
+        self.assertTrue(corrected.viability_survival_preferred)
+        self.assertFalse(corrected.viability_control_reserve_valid)
+        assert corrected.issue_recertification is not None
+        self.assertEqual(
+            corrected.issue_recertification.fresh_global_intersection,
+            ("left", "right"),
+        )
+        self.assertEqual(
+            corrected.issue_recertification.selection_reason,
+            "replace_unsafe_from_fresh_global_intersection",
+        )
+        record = _issue_recertification_record(
+            corrected.issue_recertification
+        )
+        assert record is not None
+        self.assertFalse(
+            record["selected_outside_global_without_relaxation"]
+        )
+
+    def test_ce_0127_issue_recertification_marks_empty_intersection_relaxation(
+        self,
+    ) -> None:
+        decision = Decision(
+            SHOT | UP,
+            "up_fast",
+            10.0,
+            10.0,
+            0.0,
+            False,
+            viability_constrained=True,
+            viability_safe_action_count=1,
+        )
+        with patch(
+            "th08_live_dodge_agent._robust_action_certificates",
+            side_effect=_issue_certificates(
+                {
+                    "up_fast": (1, -2.0, 100.0),
+                    "down_fast": (0, 8.0, 0.0),
+                }
+            ),
+        ):
+            corrected = recertify_action_for_fresh_hazards(
+                decision,
+                player_x=192.0,
+                player_y=400.0,
+                previous_mask=SHOT | UP,
+                delay_frames=(2, 3),
+                action_hold_frames=4,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                allowed_first_actions=("up_fast",),
+            )
+        self.assertEqual(corrected.action, "down_fast")
+        self.assertFalse(corrected.viability_constrained)
+        self.assertTrue(corrected.viability_constraint_relaxed)
+        self.assertTrue(corrected.viability_fresh_prefix_relaxed)
+        assert corrected.issue_recertification is not None
+        self.assertEqual(
+            corrected.issue_recertification.fresh_global_intersection,
+            (),
+        )
+        self.assertTrue(
+            corrected.issue_recertification.global_constraint_relaxed
+        )
+        self.assertEqual(
+            corrected.issue_recertification.selection_reason,
+            "relax_empty_fresh_global_intersection",
+        )
+        record = _issue_recertification_record(
+            corrected.issue_recertification
+        )
+        assert record is not None
+        self.assertFalse(
+            record["selected_outside_global_without_relaxation"]
+        )
 
     def test_ce_0094_latent_ring_avoids_the_frame_9813_reactivation(self) -> None:
         stale_decision = Decision(

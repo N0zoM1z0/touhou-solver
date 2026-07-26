@@ -264,8 +264,8 @@ supersede historical sequencing without erasing its counterexamples.
 
 ### S07 — Observation-Complete, Versioned Safety Transaction
 
-- **Status:** Live infrastructure with a required issue-intersection repair;
-  incomplete for future projectile births.
+- **Status:** Issue-intersection repair implemented and offline-verified;
+  physical gate pending; incomplete for future projectile births.
 - **Intent:** Treat observe-plan-act as a versioned transaction. Re-read
   lightweight native state immediately before input and recertify when
   relevant geometry changes.
@@ -281,9 +281,15 @@ supersede historical sequencing without erasing its counterexamples.
   cached global winning mask. It silently changed an in-mask plan to an
   out-of-mask action on 168 rows while still reporting the action as
   viability-constrained.
-- **Next gate:** Preserve a fresh-hard-safe planned action; otherwise use the
-  exact fresh/global intersection and explicitly mark an empty-intersection
-  relaxation. Then add packed bullet/laser/enemy issue coverage and
+- **Offline correction:** The recertifier now preserves a planned action in
+  the fresh/global intersection, chooses replacements only inside that
+  intersection, and explicitly relaxes when it is empty. It retains both
+  certificates, the fresh safe set, intersection, reason, and selected-action
+  strategy telemetry. Deterministic preserve/intersect/relax regressions and
+  the Linux/Windows quick suites pass.
+- **Next gate:** One no-audit Hard Stage-4A physical trial must show zero
+  silent outside-mask issues, hard no-Bomb, and no issue/local/policy latency
+  regression. Then add packed bullet/laser/enemy issue coverage and
   ECL/timeline `BirthWindow` coverage.
 - **Evidence:** `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`.
 

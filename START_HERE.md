@@ -62,18 +62,17 @@ Python/C++ parity for the same recurrence is not physical correctness.
   false empties, 8 primary horizon collapses, and 47 remained unresolved.
   Uniform 4-pixel full-field solve cost `1062.85/3506.43 ms` median/p95 on a
   12-root sample and is not the next live design.
-- CE-0127 is the immediate correctness gate: fresh-enemy issue
-  recertification changed an in-mask globally winning plan to an out-of-mask
-  local action on 168 rows while retaining unrelaxed constrained telemetry.
-  The canonical first-hit window changed `up_fast -> down_fast` at frame 3353
-  and became globally empty at the next decision. This is an authority
-  violation, not yet a prevented-hit claim.
+- CE-0127's issue transaction is offline-fixed: the fresh-enemy recertifier
+  now preserves a planned member of the fresh/global intersection, restricts
+  replacement to that intersection, and explicitly marks empty-intersection
+  relaxation. Planned/selected certificates and exact transaction telemetry
+  are retained. A no-audit Hard Stage-4A physical gate remains required.
 - The original-game full-route supervisor accepts
   `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
   only after accepted `route_complete`: it releases injected keys, closes the
   agent, sends no result/save choice, and leaves the identity-verified game
   process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `563/563` in `5.103/8.215 s`. The
+- Linux and Windows quick suites pass `567/567` in `4.996/9.072 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.
@@ -105,7 +104,7 @@ Expected pre-work status:
 | --- | --- | --- |
 | live | native-state sensing and TH08 trajectory/laser/enemy projection | Gameplay sensing is native; screenshots are not a sensor. |
 | live | native local implementation acceleration | Persistent pool buffers, packed bullet decode, hazard-major shared query, and quantized no-item beam reducer implement existing boundaries with Python rollback. They add no model authority. |
-| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. CE-0127 shows that fresh-enemy recertification can silently discard the global allowed mask. |
+| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. CE-0127's fresh/global issue intersection is offline-fixed with a physical gate pending. |
 | live | coarse Boolean robust viability | Current global safety authority, subject to its explicit finite model and the unresolved transition-clock boundary. |
 | shadow | native FRScreen/MSG input-clock boundary | Tri-state native probe and episode tracker identify manager-clock blocking without control-state authority. Synchronous issue-thread reads/logging are physically perturbative and total contention is unmeasured. |
 | shadow | explicit active/held/pending local certificate | Independent scalar oracle, packed finite lease, and root telemetry; old replay roots are inferred and the result cannot rank live input. |
@@ -512,22 +511,20 @@ The complete Hard route is finished. The current user-directed algorithmic
 gate is to distinguish a genuinely losing finite model from coarse or stale
 false emptiness before spending more implementation effort:
 
-1. repair CE-0127: preserve a planned action that remains fresh-hard-safe;
-   otherwise intersect the retained global allowed set with the fresh
-   all-action certificate and mark an empty-intersection relaxation;
-2. add deterministic preserve/intersection/relax regressions and accurate
-   per-action telemetry, replay retained roots, and run both quick suites;
-3. perform one no-audit Hard Stage-4A physical gate. Require zero silent
+1. the CE-0127 preserve/intersection/relax transaction and accurate
+   selected-action telemetry are implemented; deterministic tests, retained
+   15-hit regression validation, and both quick suites pass;
+2. perform one no-audit Hard Stage-4A physical gate. Require zero silent
    out-of-mask issue, unchanged hard-no-Bomb behavior, and no policy/local
    latency regression;
-4. next prioritize explicit pre-loss continuation/interior reserve strategy
+3. next prioritize explicit pre-loss continuation/interior reserve strategy
    inside the viable set, because boundary factors dominate both Hard
    workloads;
-5. add exact augmented-root partial-survival candidate witnesses as the
+4. add exact augmented-root partial-survival candidate witnesses as the
    post-loss fallback;
-6. keep 8/4-pixel work query-local and proof-backed. Full-field fine
+5. keep 8/4-pixel work query-local and proof-backed. Full-field fine
    refinement remains rejected by low rescue rate and deadline cost;
-7. use additional CPU through deterministic process-level independent-root
+6. use additional CPU through deterministic process-level independent-root
    shards. Do not raise the four-worker live same-root default without a
    delivery-contention gate.
 

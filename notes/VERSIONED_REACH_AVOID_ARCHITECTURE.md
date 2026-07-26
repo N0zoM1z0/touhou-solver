@@ -173,6 +173,35 @@ issued candidates =
 If that intersection is empty, all actions are recertified and the cached mask
 is relaxed. This path is rare and marked in telemetry.
 
+Hard Stage-4A audit `202439` found that this contract was implemented during
+ordinary local planning but not during the later enemy-change recertification.
+That recertifier ranked all 17 locally certified actions and could replace an
+in-mask global plan with an out-of-mask local action while retaining
+constrained telemetry (CE-0127).
+
+The issue transaction now computes the complete fresh safe set once and
+applies the following deterministic rule:
+
+```text
+I = cached winning actions intersect fresh prefix-safe actions
+
+if I is nonempty:
+    preserve the planned action when it belongs to I
+    otherwise choose the best fresh hard certificate inside I
+else:
+    explicitly relax the global constraint
+    preserve a fresh-safe planned action or choose the best fresh-safe escape
+    use a least-bad local action only when no fresh-safe action exists
+```
+
+The transaction retains the planned and selected certificates, complete fresh
+safe set, exact intersection, selection reason, and relaxation state.
+Repair-volume, recovery-distance, safety-value membership, and survival-best
+membership are rebound to the selected action. A beam-endpoint control-reserve
+value is marked invalid if recertification changes the action because the
+issue shield does not rerun the long beam. This is an offline-verified
+correctness repair; one no-audit Hard Stage-4A physical gate is still required.
+
 On the 30 retained Stage-4A direct contradictions, paired trace-radius replay
 changed 16 actions. The hard vector improved on 10 rows and regressed on zero;
 robust-collision decisions changed `29 -> 23`, and negative-certificate rows

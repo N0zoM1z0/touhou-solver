@@ -3213,6 +3213,8 @@ Status: observed | inferred | unknown | fixed
 
 ## CE-0127: Issue-time enemy recertification bypassed the global winning mask
 
+Status: offline-fixed; physical validation pending
+
 - **Observed implementation defect:** `recertify_action_for_fresh_hazards`
   recomputes all 17 local action certificates and ranks all 17 actions. It
   receives no retained global allowed-action set and therefore does not
@@ -3247,6 +3249,14 @@ Status: observed | inferred | unknown | fixed
   mark the relaxation explicitly. Retain the planned certificate,
   intersection, reason, selected certificate, and correct per-action strategy
   fields.
+- **Implemented correction:** The issue transaction now computes the exact
+  fresh/global intersection, preserves a planned member, restricts
+  replacement to the intersection, and explicitly marks an empty-intersection
+  relaxation. It retains planned/selected certificates and invalidates the
+  old beam-endpoint reserve field when the action changes. Deterministic
+  preserve/intersect/relax regressions pass on Linux and Windows. The defect
+  is not closed until a no-audit physical gate records zero silent
+  outside-mask selections without a latency regression.
 - **Regression/evidence:** Add a deterministic intersection/preserve-planned
   regression before physical testing. The 15-case hit corpus and 1,741
   capsule bundle are validated; detailed evidence is in

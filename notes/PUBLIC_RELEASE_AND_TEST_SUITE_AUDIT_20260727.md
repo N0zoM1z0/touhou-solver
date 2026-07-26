@@ -73,4 +73,6 @@ Added one bounded GitHub Actions workflow for Python 3.11 and 3.13. It installs
 the single declared dependency, builds the Linux C++17 backend, and runs the
 same deterministic quick suite required before local checkpoints. It does not
 run physical control, Windows injection, broad corpora, or expensive formal
-profiles.
+profiles. The first public run passed both jobs; its deprecated Node-runtime
+annotation was removed by updating the official checkout/setup actions to
+their current Node 24 major (`v7`) before final verification.

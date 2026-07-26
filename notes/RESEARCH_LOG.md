@@ -4059,7 +4059,9 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   physical-safety boundary was removed.
 - **Automation:** Added a bounded Linux GitHub Actions quick suite for Python
   3.11/3.13. It builds the native C++17 backend and never runs physical or
-  broad research workloads.
+  broad research workloads. The first public run passed both jobs; the
+  checkout/setup actions were then updated to their current Node 24 `v7`
+  major to remove deprecation annotations before final verification.
 - **Validation:** Both native targets rebuilt. Focused changed tests passed,
   and the complete quick suite passed `584/584` on Linux in `5.213 s` and
   Windows in `14.365 s`; `git diff --check` passed.

@@ -51,12 +51,18 @@ Python/C++ parity for the same recurrence is not physical correctness.
   median/p95 stayed within `11.81..14.55/20.86..26.90 ms` at up to 1,231
   bullets and 256 lasers. The next primary problem is early feasibility and
   losing-state/route strategy, not another wholesale local geometry rewrite.
+- A fixed-reservoir offline replay of 400 empty-kernel Hard pre-hit roots
+  changed 28 actions when the default-off losing-state control reserve was
+  enabled. All 400 fresh hard vectors were unchanged; 27 changed actions
+  reduced reserve deficit, one tied, and none regressed. This is a
+  proposal-only losing-state ranking result, not restored viability or
+  physical survival evidence.
 - The original-game full-route supervisor accepts
   `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
   only after accepted `route_complete`: it releases injected keys, closes the
   agent, sends no result/save choice, and leaves the identity-verified game
   process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `561/561` in `4.637/11.793 s`. The
+- Linux and Windows quick suites pass `563/563` in `4.846/7.435 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.
@@ -95,6 +101,7 @@ Expected pre-work status:
 | shadow | losing-root stationary candidate verifier | Exact universal verification of a restricted causal candidate can prove finite-model feasibility, but cannot claim unrestricted losing/optimality. |
 | shadow | exact candidate witness publication | Retains root, witness, issued-action label, all-action local certificate, version, and timing; it never changes the live mask. |
 | offline/shadow | belief lower bounds, revealed-delay upper, resumable threshold refinement | Research tools for feasibility/optimality gaps; too slow and/or too optimistic for live authority as currently integrated. |
+| proposal-only | losing-state control reserve | After Boolean exhaustion, ranks only fresh-hard-equivalent actions by delay-scaled reversal reserve. Hard replay improved reserve deficit without relabeling viability; physical effect is unmeasured. |
 | rejected | every-root candidate submission | Caused measurable live CPU/delivery contention. |
 | rejected | 50-ms repeated-manager-frame guard | CE-0121: fired on ordinary slow decisions, churned policy versions, and starved viability. |
 | rejected | first-action beam deduplication for live use | Changed only soft choices and improved no sampled hard vector; wider/partitioned variants were materially slower. |
@@ -253,6 +260,7 @@ Retain the two newest complete replay-capable bundles per workload:
 | Lunatic Route-2 Stage 4A, native local implementation | `151821`, `160712` | Complete direct-root/replay workloads for pool-buffer, hazard, and native-beam measurement. |
 | Lunatic Route-2 Stage 6B, native local implementation | `163501`, `165841` | Complete direct-root/replay workloads; `165841` contains the 210-laser geometry/contention witness. |
 | Hard Route-2 Stage 1, native local implementation | `175049` | One complete zero-hit/no-Bomb/deadline-miss focused gate. It is not yet a two-bundle workload floor. |
+| Hard Route-2 full route, feasibility diagnosis | `184942` | Complete Final-B run with 39 hits, no Bomb, replayable raw trace, compact dossier, and manual replay-save handoff. One bundle does not satisfy the two-bundle floor. |
 
 The `103856` `.session.json` says `failed` only because the original
 postprocessor rejected an explicit null enemy snapshot after the accepted
@@ -486,23 +494,29 @@ artifacts, and cleanup.
 
 ## Next Good Checkpoint
 
-The user requested one complete original-game Hard Route-2 run to validate the
-whole controller and unlock later practice stages. Before launch:
+The complete Hard route is finished. The current user-directed algorithmic
+gate is to distinguish a genuinely losing finite model from coarse or stale
+false emptiness before spending more implementation effort:
 
-1. add full-route `--difficulty hard` identity/menu support without changing
-   the existing Lunatic default;
-2. add an explicit manual replay-save handoff that stops automation at the
-   save UI, releases injected movement keys, does not select No/quit, and
-   waits for the user;
-3. preserve four normal-priority authoritative viability workers and all
-   native local defaults;
-4. run Linux and Windows quick suites, prewarm the daemon, verify executable,
-   foreground, Hard index 2, Route 2/team 5, gameplay state, and the no-life
-   decrement patch;
-5. monitor the exact supervisor, growing trace, every hit/Bomb/foreground
-   boundary, stage transitions, `terminal_unload`, and `route_complete`;
-6. at the save interface, do not exit or clean the game until the user
-   confirms replay saving; then finish compact evidence and cleanup.
+1. checkpoint the Hard full-route feasibility diagnosis and fixed-reservoir
+   losing-state reserve replay without changing live authority;
+2. capture one focused Hard Stage-4A audit-only capsule workload with the live
+   policy unchanged and all usual identity/no-Bomb/cleanup checks;
+3. replay identical roots at 16-, 8-, and 4-pixel grids, shorter horizons,
+   current delay support, and declared uncertainty ablations;
+4. classify coarse false-empty, horizon-only, uncertainty-only,
+   forecast/birth mismatch, exact losing, and unresolved roots without
+   interpreting audit-run hit count as a strategy A/B;
+5. use additional local CPU for isolated offline recomputation. Do not raise
+   the four-worker live default until a worker-count experiment shows better
+   exact-root delivery without local-plan/action-lag regression;
+6. only after this split choose among query-local refinement, a
+   route-conditioned safe tube, verified losing-root candidates, and a
+   separately scoped losing-control-reserve physical trial.
+
+The current evidence and five formal-review answers are in
+`notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`; the paired replay is
+`artifacts/benchmarks/hard_full_route_losing_control_reserve_20260726.json`.
 
 A useful next algorithmic checkpoint is the action consequence of the now
 validated semantic sensor, not another detector or threshold tweak. It should:

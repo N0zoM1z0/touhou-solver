@@ -201,7 +201,10 @@ supersede historical sequencing without erasing its counterexamples.
   modeled delay branch over the finite horizon.
 - **Observed result:** The native Boolean recurrence has NumPy/scalar parity
   and gives an explicit safe-action set instead of one waypoint. It also
-  exposes widespread kernel exhaustion before physical hits.
+  exposes widespread kernel exhaustion before physical hits. Complete Hard
+  Route-2 `184942` was empty before 38/39 contacts while published-policy age
+  remained median/p95 `2/8` frames, making feasibility/model quality a
+  stronger explanation than ordinary publication lateness for that run.
 - **Limitation:** The current 16-pixel, eight-frame lattice and instant-safe
   terminal layer are approximations. More importantly, the policy is computed
   from a forecasted snapshot that may omit later births or mode changes.
@@ -231,7 +234,9 @@ supersede historical sequencing without erasing its counterexamples.
 - **Current shadow:** A default-off `losing_control_reserve` switch applies
   delay-scaled reserve to repair/survival states only after fresh hard-vector
   equivalence. Reserve-only replay improved 13/195 measured deficits and
-  regressed zero; it has no physical authority.
+  regressed zero. On 400 fixed-reservoir Hard full-route pre-hit rows it
+  changed 28 actions, improved 27 reserve deficits, tied one, regressed none,
+  and preserved all 400 fresh hard vectors. It has no physical authority.
 - **Reactivation/upgrade gate:** Replace endpoint distance with a
   time-expanded robust survival/recovery band that has scalar-oracle parity,
   meets the delivery budget, and does not worsen hard-vector counts on

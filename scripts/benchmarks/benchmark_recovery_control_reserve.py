@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import math
+import random
 import statistics
 import time
 from pathlib import Path
@@ -224,16 +224,59 @@ def _replay_decision(
     )
 
 
-def _sample_rows(
+def _eligible_reserve_row(
+    row: dict[str, object],
+    *,
+    losing_state_reserve: bool,
+) -> bool:
+    viability = row.get("corridor", {}).get("viability", {})
+    if not (
+        isinstance(viability, dict)
+        and viability.get("support_covers_current", True)
+    ):
+        return False
+    if losing_state_reserve:
+        return (
+            not viability.get("safe_actions")
+            and bool(
+                viability.get("repair_volumes")
+                or viability.get("recovery_distances")
+            )
+        )
+    return bool(viability.get("recovery_distances"))
+
+
+def _hard_vector(decision: object) -> tuple[object, ...]:
+    return (
+        decision.robust_collisions,
+        max(-decision.robust_min_clearance, 0.0),
+        decision.terminal_threat_collisions,
+        max(-decision.terminal_threat_min_clearance, 0.0),
+        max(-decision.min_clearance, 0.0),
+    )
+
+
+def _reservoir_sample(
     rows: list[dict[str, object]],
+    *,
+    seen_count: int,
     sample_count: int,
-) -> list[dict[str, object]]:
-    if len(rows) <= sample_count:
-        return rows
-    return [
-        rows[math.floor(index * len(rows) / sample_count)]
-        for index in range(sample_count)
-    ]
+    generator: random.Random,
+    row: dict[str, object],
+) -> None:
+    if len(rows) < sample_count:
+        rows.append(row)
+        return
+    slot = generator.randrange(seen_count)
+    if slot < sample_count:
+        rows[slot] = row
+
+
+def _next_hit_frame(hit_frames: list[int], frame: int) -> int | None:
+    return next(
+        (hit_frame for hit_frame in hit_frames if hit_frame >= frame),
+        None,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -247,12 +290,19 @@ def main(argv: list[str] | None = None) -> int:
         default=0,
         help="retain only decisions this many frames before a native hit",
     )
+    parser.add_argument(
+        "--losing-state-reserve",
+        action="store_true",
+        help=(
+            "ablate the default-off reserve for empty-kernel repair states; "
+            "the default preserves the historical distant-recovery ablation"
+        ),
+    )
     args = parser.parse_args(argv)
     if args.samples <= 0 or args.prehit_window < 0:
         raise ValueError("sample count must be positive and window nonnegative")
 
     digest = hashlib.sha256()
-    decisions: list[dict[str, object]] = []
     hit_frames: list[int] = []
     with args.trace.open("rb") as source:
         for raw_line in source:
@@ -262,22 +312,33 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             if row.get("hit_started"):
                 hit_frames.append(int(row["frame"]))
-            viability = row.get("corridor", {}).get("viability", {})
-            if (
-                viability.get("recovery_distances")
-                and viability.get("support_covers_current", True)
-            ):
-                decisions.append(row)
-    if args.prehit_window:
-        decisions = [
-            row
-            for row in decisions
-            if any(
-                0 <= hit_frame - int(row["frame"]) <= args.prehit_window
+    decisions: list[dict[str, object]] = []
+    eligible_count = 0
+    generator = random.Random(0xCE0126)
+    with args.trace.open(encoding="utf-8") as source:
+        for line in source:
+            row = json.loads(line)
+            if row.get("kind") != "decision":
+                continue
+            frame = int(row["frame"])
+            if args.prehit_window and not any(
+                0 <= hit_frame - frame <= args.prehit_window
                 for hit_frame in hit_frames
+            ):
+                continue
+            if not _eligible_reserve_row(
+                row,
+                losing_state_reserve=args.losing_state_reserve,
+            ):
+                continue
+            eligible_count += 1
+            _reservoir_sample(
+                decisions,
+                seen_count=eligible_count,
+                sample_count=args.samples,
+                generator=generator,
+                row=row,
             )
-        ]
-    decisions = _sample_rows(decisions, args.samples)
     if not decisions:
         raise RuntimeError("trace contains no eligible recovery decisions")
 
@@ -289,7 +350,12 @@ def main(argv: list[str] | None = None) -> int:
             started = time.perf_counter()
             decision = _replay_decision(
                 row,
-                recovery_control_reserve=enabled,
+                recovery_control_reserve=(
+                    True if args.losing_state_reserve else enabled
+                ),
+                losing_control_reserve=(
+                    enabled if args.losing_state_reserve else False
+                ),
             )
             durations[enabled].append(
                 (time.perf_counter() - started) * 1000.0
@@ -317,7 +383,9 @@ def main(argv: list[str] | None = None) -> int:
             "selected_recovery_distance": {
                 "median": statistics.median(recovery),
                 "p95": _p95(recovery),
-            },
+            }
+            if recovery
+            else None,
             "robust_collision_count": sum(
                 decision.robust_collisions > 0
                 for decision in variants[enabled]
@@ -344,31 +412,63 @@ def main(argv: list[str] | None = None) -> int:
             },
         }
 
-    action_changes = [
-        {
-            "frame": int(row["frame"]),
-            "disabled": disabled.action,
-            "enabled": enabled.action,
-            "disabled_reserve_deficit": (
-                disabled.viability_control_reserve_deficit
-            ),
-            "enabled_reserve_deficit": (
-                enabled.viability_control_reserve_deficit
-            ),
-        }
-        for row, disabled, enabled in zip(
-            decisions,
+    action_changes = []
+    for row, disabled, enabled in zip(
+        decisions,
+        variants[False],
+        variants[True],
+    ):
+        if disabled.action == enabled.action:
+            continue
+        frame = int(row["frame"])
+        next_hit_frame = _next_hit_frame(hit_frames, frame)
+        action_changes.append(
+            {
+                "frame": int(row["frame"]),
+                "stage_route_index": int(row["stage_route_index"]),
+                "next_hit_frame": next_hit_frame,
+                "time_to_hit": (
+                    next_hit_frame - frame
+                    if next_hit_frame is not None
+                    else None
+                ),
+                "disabled": disabled.action,
+                "enabled": enabled.action,
+                "disabled_reserve_deficit": (
+                    disabled.viability_control_reserve_deficit
+                ),
+                "enabled_reserve_deficit": (
+                    enabled.viability_control_reserve_deficit
+                ),
+            }
+        )
+    hard_changes = [
+        (
+            "improved"
+            if _hard_vector(enabled) < _hard_vector(disabled)
+            else (
+                "regressed"
+                if _hard_vector(enabled) > _hard_vector(disabled)
+                else "equal"
+            )
+        )
+        for disabled, enabled in zip(
             variants[False],
             variants[True],
         )
-        if disabled.action != enabled.action
     ]
     result = {
-        "schema": "th08-recovery-control-reserve-benchmark-v1",
+        "schema": "th08-recovery-control-reserve-benchmark-v2",
         "trace": str(args.trace),
         "trace_sha256": digest.hexdigest(),
+        "eligible_count": eligible_count,
         "sample_count": len(decisions),
         "prehit_window": args.prehit_window,
+        "reserve_mode": (
+            "empty_kernel_repair_and_recovery"
+            if args.losing_state_reserve
+            else "distant_recovery_only"
+        ),
         "scope": (
             "Offline ablation over retained trace-radius hazards and exact "
             "laser lifecycle state; this is not physical survival evidence."
@@ -381,6 +481,39 @@ def main(argv: list[str] | None = None) -> int:
             "enabled": summarize(True),
         },
         "action_change_count": len(action_changes),
+        "hard_vector_change_counts": {
+            name: hard_changes.count(name)
+            for name in ("improved", "equal", "regressed")
+        },
+        "reserve_deficit_change_counts": {
+            "improved": sum(
+                float(change["enabled_reserve_deficit"])
+                < float(change["disabled_reserve_deficit"])
+                for change in action_changes
+            ),
+            "equal": sum(
+                float(change["enabled_reserve_deficit"])
+                == float(change["disabled_reserve_deficit"])
+                for change in action_changes
+            ),
+            "regressed": sum(
+                float(change["enabled_reserve_deficit"])
+                > float(change["disabled_reserve_deficit"])
+                for change in action_changes
+            ),
+        },
+        "action_change_stage_counts": {
+            str(stage): sum(
+                int(change["stage_route_index"]) == stage
+                for change in action_changes
+            )
+            for stage in sorted(
+                {
+                    int(change["stage_route_index"])
+                    for change in action_changes
+                }
+            )
+        },
         "action_changes": action_changes,
     }
     args.output.write_text(

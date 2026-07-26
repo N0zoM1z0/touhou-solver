@@ -3617,3 +3617,38 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `4.637/11.793 s`; the focused dossier and practice-dossier suites pass.
   See CE-0126 and
   `notes/runs/hard_route2_fullrun_unattended_20260726_184942.md`.
+
+## 2026-07-26: Hard Losing-State Reserve And Feasibility Audit Gate
+
+- **Observed bounded replay:** streamed the retained 1.84-GB Hard full-route
+  trace twice and kept a deterministic 400-row reservoir from 2,353 eligible
+  empty-kernel repair/recovery decisions within 240 frames of a contact.
+  This avoids treating RAM capacity as an experimental selection rule.
+- **Observed paired result:** enabling the default-off
+  `losing_control_reserve` changed 28/400 actions. All 400 fresh hard vectors
+  were equal between variants. Of the changed actions, 27 reduced
+  delay-scaled reserve deficit, one tied, and none regressed; zero-deficit
+  selections rose from 192 to 222. Robust-collision selections remained
+  38, negative robust-clearance selections remained 64, and terminal
+  collision selections remained zero.
+- **Observed timing:** interleaved replay cost changed from
+  `10.057/13.429 ms` median/p95 to `10.139/13.257 ms`. This is an offline
+  local boundary and not proof of issue-time cost or physical survival.
+- **Inference:** the reserve is a credible proposal for the 30/39
+  boundary-heavy post-loss histories because it ranks only actions that are
+  already equal under the fresh hard vector. It does not recover a viable
+  kernel, certify a bridge, or change a finite-model losing label.
+- **CPU decision:** WSL exposes 20 logical CPUs on the i9-13900H, but the
+  Hard run already observed published-policy age `2/8` frames median/p95.
+  Use spare CPU first for isolated capsule replay at 16/8/4-pixel grids,
+  horizons, delay support, and uncertainty ablations. Do not blindly expand
+  the live four-worker pool, whose per-layer thread creation and contention
+  can worsen local issue latency.
+- Added
+  `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`,
+  `artifacts/benchmarks/hard_full_route_losing_control_reserve_20260726.json`,
+  a bounded streaming reserve benchmark mode, and two focused eligibility
+  regressions. No live selection or strategy status was promoted.
+- Validation: focused reserve and live-agent suites pass `2/2` and `82/82`;
+  Linux and Windows quick suites pass `563/563` in `4.846/7.435 s`;
+  `py_compile` and `git diff --check` pass.

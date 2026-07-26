@@ -1,0 +1,656 @@
+{
+  "schema": "th08-local-beam-stability-audit-v1",
+  "generated_at": "2026-07-26",
+  "scope": "Offline shadow replay only. First-action identity is added to quantized beam deduplication; the global width remains fixed. The wide beam is a sensitivity reference, not an oracle.",
+  "evidence_labels": {
+    "observed": "same-row replay actions, hard vectors, and wall timing",
+    "inferred": "pending roots reconstructed from the previous retained write only when direct local-root fields are absent",
+    "hypothesized": "physical survival benefit or proof of beam optimality"
+  },
+  "traces": [
+    {
+      "trace": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_122014.jsonl",
+      "trace_sha256": "25a01efe87fba457051ca78b0f485a6068f7606f1f98b772b0f3372689d8122f",
+      "population": {
+        "decision_count": 8914,
+        "action_eligible_count": 8773,
+        "reconstructed_count": 8769,
+        "active_held_mismatch_count": 678,
+        "overdue_count": 14,
+        "inconsistent_or_uninitialized_count": 4,
+        "direct_root_count": 0,
+        "inferred_root_count": 8769,
+        "invalid_direct_root_count": 0
+      },
+      "sample": {
+        "count": 96,
+        "method": "bounded union of evenly spaced Boolean-losing, 240-frame pre-hit, and full action-eligible roots",
+        "wide_beam": 256
+      },
+      "differential": {
+        "first_action_labels": {
+          "action_changes": 5,
+          "hard_vector_better": 0,
+          "hard_vector_worse": 0
+        },
+        "exact_first_action": {
+          "action_changes": 5,
+          "hard_vector_better": 0,
+          "hard_vector_worse": 0
+        },
+        "baseline_vs_wide_action_changes": 38,
+        "exact_first_action_matches_wide": 57,
+        "baseline_matches_recorded_action": 74,
+        "first_action_labels_match_recorded_action": 70,
+        "baseline_hard_nonzero_count": 5,
+        "by_context": {
+          "boolean_losing": {
+            "count": 77,
+            "action_changes": 4,
+            "hard_better": 0,
+            "hard_worse": 0
+          },
+          "prehit_240f": {
+            "count": 36,
+            "action_changes": 3,
+            "hard_better": 0,
+            "hard_worse": 0
+          },
+          "pending": {
+            "count": 6,
+            "action_changes": 1,
+            "hard_better": 0,
+            "hard_worse": 0
+          }
+        }
+      },
+      "timing": {
+        "baseline_beam": {
+          "median_ms": 8.04170552873984,
+          "p95_ms": 12.581759016029537,
+          "max_ms": 18.181856023147702
+        },
+        "first_action_labels": {
+          "median_ms": 8.138611010508612,
+          "p95_ms": 13.026021944824606,
+          "max_ms": 18.565540958661586
+        },
+        "exact_first_action": {
+          "median_ms": 8.358619990758598,
+          "p95_ms": 13.40515201445669,
+          "max_ms": 18.391803023405373
+        },
+        "wide_reference": {
+          "median_ms": 21.98842348298058,
+          "p95_ms": 57.33584298286587,
+          "max_ms": 73.29562504310161
+        }
+      },
+      "examples": [
+        {
+          "frame": 12391,
+          "gameplay_epoch": 0,
+          "spell": {
+            "active": true,
+            "flags": 1,
+            "enemy_pointer": 5777088,
+            "spell_id": 57,
+            "name": "\u5922\u5883\u300c\u4e8c\u91cd\u5927\u7d50\u754c\u300d"
+          },
+          "active_bullets": 590,
+          "prehit_240f": true,
+          "boolean_losing": false,
+          "pipeline_root": {
+            "active_action": "stay",
+            "held_desired_action": "stay",
+            "pending_action": null,
+            "remaining_delay_support": []
+          },
+          "baseline": {
+            "action": "left",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 18.05293846130371,
+            "terminal_threat_min_clearance": 4.80702018737793,
+            "minimum_clearance": 16.91200065612793,
+            "score": 20681.11599389138
+          },
+          "first_action_labels": {
+            "action": "left_fast",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 18.05293846130371,
+            "terminal_threat_min_clearance": 4.708504676818848,
+            "minimum_clearance": 15.464920043945312,
+            "score": 20635.837820118086
+          },
+          "exact_first_action": {
+            "action": "left_fast",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 18.05293846130371,
+            "terminal_threat_min_clearance": 4.708504676818848,
+            "minimum_clearance": 15.464920043945312,
+            "score": 20635.837820118086
+          },
+          "wide_reference": {
+            "action": "stay",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 18.107999801635742,
+            "terminal_threat_min_clearance": 5.491488456726074,
+            "minimum_clearance": 15.178804397583008,
+            "score": 21068.370168671074
+          }
+        },
+        {
+          "frame": 38113,
+          "gameplay_epoch": 3,
+          "spell": {
+            "active": true,
+            "flags": 1,
+            "enemy_pointer": 5862912,
+            "spell_id": 69,
+            "name": "\u56de\u970a\u300c\u5922\u60f3\u5c01\u5370\u3000\u4f98\u300d"
+          },
+          "active_bullets": 607,
+          "prehit_240f": true,
+          "boolean_losing": true,
+          "pipeline_root": {
+            "active_action": "up_left_fast",
+            "held_desired_action": "up_left_fast",
+            "pending_action": null,
+            "remaining_delay_support": []
+          },
+          "baseline": {
+            "action": "up_fast",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 5.445823669433594,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 3.618044853210449,
+            "score": 97292.28727346275
+          },
+          "first_action_labels": {
+            "action": "down_left_fast",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 2.008728504180908,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 6.192795276641846,
+            "score": 105232.14952283334
+          },
+          "exact_first_action": {
+            "action": "down_left_fast",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 2.008728504180908,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 6.192795276641846,
+            "score": 105232.14952283334
+          },
+          "wide_reference": {
+            "action": "up_fast",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 5.445823669433594,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 3.618044853210449,
+            "score": 97292.28727346275
+          }
+        },
+        {
+          "frame": 39174,
+          "gameplay_epoch": 3,
+          "spell": {
+            "active": true,
+            "flags": 1,
+            "enemy_pointer": 5862912,
+            "spell_id": 69,
+            "name": "\u56de\u970a\u300c\u5922\u60f3\u5c01\u5370\u3000\u4f98\u300d"
+          },
+          "active_bullets": 688,
+          "prehit_240f": true,
+          "boolean_losing": true,
+          "pipeline_root": {
+            "active_action": "down_left",
+            "held_desired_action": "down_left",
+            "pending_action": null,
+            "remaining_delay_support": []
+          },
+          "baseline": {
+            "action": "down_left",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 7.186786651611328,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 6.034739971160889,
+            "score": 151789.73211900116
+          },
+          "first_action_labels": {
+            "action": "right",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 3.7824201583862305,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 1.514845848083496,
+            "score": 176195.96390588087
+          },
+          "exact_first_action": {
+            "action": "right",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 3.7824201583862305,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 1.514845848083496,
+            "score": 176195.96390588087
+          },
+          "wide_reference": {
+            "action": "down_fast",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 9.775495529174805,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 6.840958118438721,
+            "score": 148558.31457129196
+          }
+        }
+      ],
+      "first_action_partition": {
+        "sample_count": 5,
+        "action_changes": 0,
+        "hard_vector_better": 0,
+        "hard_vector_worse": 0,
+        "whole_partition_timing": {
+          "median_ms": 191.79499900201336,
+          "p95_ms": 267.5219109514728,
+          "max_ms": 275.54885402787477
+        },
+        "examples": [],
+        "interpretation": "Each allowed first action receives an independent width-24 continuation beam. This is a sensitivity reference, not an issue-thread implementation or optimality certificate."
+      }
+    },
+    {
+      "trace": "artifacts/runtime_reports/lunatic_route2_stage6b_unattended_20260726_011639.jsonl",
+      "trace_sha256": "d9075e4e2946d74cc3337d6e2a99a8680ee85c730f7f850b6a03e06c87a1524a",
+      "population": {
+        "decision_count": 14652,
+        "action_eligible_count": 14456,
+        "reconstructed_count": 14452,
+        "active_held_mismatch_count": 978,
+        "overdue_count": 11,
+        "inconsistent_or_uninitialized_count": 4,
+        "direct_root_count": 0,
+        "inferred_root_count": 14452,
+        "invalid_direct_root_count": 0
+      },
+      "sample": {
+        "count": 96,
+        "method": "bounded union of evenly spaced Boolean-losing, 240-frame pre-hit, and full action-eligible roots",
+        "wide_beam": 256
+      },
+      "differential": {
+        "first_action_labels": {
+          "action_changes": 4,
+          "hard_vector_better": 0,
+          "hard_vector_worse": 0
+        },
+        "exact_first_action": {
+          "action_changes": 4,
+          "hard_vector_better": 0,
+          "hard_vector_worse": 0
+        },
+        "baseline_vs_wide_action_changes": 30,
+        "exact_first_action_matches_wide": 68,
+        "baseline_matches_recorded_action": 90,
+        "first_action_labels_match_recorded_action": 86,
+        "baseline_hard_nonzero_count": 6,
+        "by_context": {
+          "boolean_losing": {
+            "count": 73,
+            "action_changes": 3,
+            "hard_better": 0,
+            "hard_worse": 0
+          },
+          "prehit_240f": {
+            "count": 33,
+            "action_changes": 3,
+            "hard_better": 0,
+            "hard_worse": 0
+          },
+          "pending": {
+            "count": 5,
+            "action_changes": 0,
+            "hard_better": 0,
+            "hard_worse": 0
+          }
+        }
+      },
+      "timing": {
+        "baseline_beam": {
+          "median_ms": 9.006863518152386,
+          "p95_ms": 12.498725031036884,
+          "max_ms": 15.654573973733932
+        },
+        "first_action_labels": {
+          "median_ms": 9.079998009838164,
+          "p95_ms": 12.534048000816256,
+          "max_ms": 17.24719302728772
+        },
+        "exact_first_action": {
+          "median_ms": 9.358156996313483,
+          "p95_ms": 13.042424980085343,
+          "max_ms": 16.057307017035782
+        },
+        "wide_reference": {
+          "median_ms": 37.621031515300274,
+          "p95_ms": 55.82559003960341,
+          "max_ms": 69.31425101356581
+        }
+      },
+      "examples": [
+        {
+          "frame": 39478,
+          "gameplay_epoch": 2,
+          "spell": {
+            "active": true,
+            "flags": 5,
+            "enemy_pointer": 5755632,
+            "spell_id": 162,
+            "name": "\u795e\u5b9d\u300c\u30b5\u30e9\u30de\u30f3\u30c0\u30fc\u30b7\u30fc\u30eb\u30c9\u300d"
+          },
+          "active_bullets": 564,
+          "prehit_240f": true,
+          "boolean_losing": true,
+          "pipeline_root": {
+            "active_action": "up",
+            "held_desired_action": "up",
+            "pending_action": null,
+            "remaining_delay_support": []
+          },
+          "baseline": {
+            "action": "stay",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 4.618632656090231,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 1.6158128400521266,
+            "score": 285656.4969651014
+          },
+          "first_action_labels": {
+            "action": "down",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 5.028271398361353,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 2.539685733144391,
+            "score": 271917.52196541714
+          },
+          "exact_first_action": {
+            "action": "down",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 5.028271398361353,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 2.539685733144391,
+            "score": 271917.52196541714
+          },
+          "wide_reference": {
+            "action": "stay",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 4.618632656090231,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 0.7874349830756788,
+            "score": 295926.08594754204
+          }
+        },
+        {
+          "frame": 36099,
+          "gameplay_epoch": 2,
+          "spell": {
+            "active": false,
+            "flags": 8,
+            "enemy_pointer": 0,
+            "spell_id": 158,
+            "name": "\u795e\u5b9d\u300c\u30d6\u30c7\u30a3\u30b9\u30c8\u30c0\u30a4\u30a2\u30e2\u30f3\u30c9\u300d"
+          },
+          "active_bullets": 729,
+          "prehit_240f": true,
+          "boolean_losing": true,
+          "pipeline_root": {
+            "active_action": "up_left_fast",
+            "held_desired_action": "up_left_fast",
+            "pending_action": null,
+            "remaining_delay_support": []
+          },
+          "baseline": {
+            "action": "up",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 12.49474811553955,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 12.49474811553955,
+            "score": 70886.4229650166
+          },
+          "first_action_labels": {
+            "action": "stay",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 12.49474811553955,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 12.49474811553955,
+            "score": 71101.8809655785
+          },
+          "exact_first_action": {
+            "action": "stay",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 12.49474811553955,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 12.49474811553955,
+            "score": 71101.8809655785
+          },
+          "wide_reference": {
+            "action": "stay",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 12.49474811553955,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 12.49474811553955,
+            "score": 71101.88090454334
+          }
+        },
+        {
+          "frame": 51455,
+          "gameplay_epoch": 2,
+          "spell": {
+            "active": true,
+            "flags": 1,
+            "enemy_pointer": 5755632,
+            "spell_id": 166,
+            "name": "\u795e\u5b9d\u300c\u30e9\u30a4\u30d5\u30b9\u30d7\u30ea\u30f3\u30b0\u30a4\u30f3\u30d5\u30a3\u30cb\u30c6\u30a3\u300d"
+          },
+          "active_bullets": 500,
+          "prehit_240f": true,
+          "boolean_losing": true,
+          "pipeline_root": {
+            "active_action": "down",
+            "held_desired_action": "down",
+            "pending_action": null,
+            "remaining_delay_support": []
+          },
+          "baseline": {
+            "action": "stay",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 6.089699599283167,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 4.495191603284834,
+            "score": 89925.0685892732
+          },
+          "first_action_labels": {
+            "action": "down_right",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 3.137119701202975,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 6.8114728927612305,
+            "score": 88981.5511492645
+          },
+          "exact_first_action": {
+            "action": "down_right",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 3.137119701202975,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 6.8114728927612305,
+            "score": 88981.5511492645
+          },
+          "wide_reference": {
+            "action": "down_right",
+            "hard_vector": [
+              0,
+              0.0,
+              0,
+              0.0,
+              0.0
+            ],
+            "robust_min_clearance": 3.137119701202975,
+            "terminal_threat_min_clearance": 9999.0,
+            "minimum_clearance": 3.151465609410245,
+            "score": 93012.6149207725
+          }
+        }
+      ],
+      "first_action_partition": {
+        "sample_count": 6,
+        "action_changes": 0,
+        "hard_vector_better": 0,
+        "hard_vector_worse": 0,
+        "whole_partition_timing": {
+          "median_ms": 275.64922397141345,
+          "p95_ms": 346.8481299933046,
+          "max_ms": 354.1526490007527
+        },
+        "examples": [],
+        "interpretation": "Each allowed first action receives an independent width-24 continuation beam. This is a sensitivity reference, not an issue-thread implementation or optimality certificate."
+      }
+    }
+  ]
+}

@@ -69,22 +69,39 @@ reset, estimator change, or policy retirement follows. CE-0120 remains open
 at the actuator boundary and the live policy has no complete authority claim
 across it.
 
+The local-certificate audit found two independent defects. Batched bullet and
+laser clearance depended on unrelated companion positions; per-position
+relevance masking is accepted as a deterministic geometry correction. The
+certificate also equated held desired input with native active input and
+sampled a new delay for a held/no-write mask. An independent scalar oracle and
+packed finite-lease implementation now model active, held, pending, older
+remaining delay, and conditional writes, but the explicit-root path remains
+shadow-only. Existing live callers retain the active-equals-held fallback.
+First-action beam labels remain default-off after changing only soft choices
+and producing no sampled hard-vector improvement. A wholesale C++ local
+planner rewrite is deferred; the packed certificate already meets the current
+offline gate, while physical root and deadline validity remain unproved.
+
 Current priority is:
 
 1. validate the semantic boundary across additional workloads and define a
    no-write movement-neutralization/pending-command/one-reset counterfactual;
-2. obtain a clean post-rollback non-Stage-6B candidate-publication shadow with
+2. collect direct local-pipeline-root shadow telemetry and measure the full
+   Windows observe/decode/project/certify/issue boundary before giving the
+   explicit-root local certificate action authority;
+3. obtain a clean post-rollback non-Stage-6B candidate-publication shadow with
    exact witness, alternate-action certificate, publication timing, and
    CPU/delivery/policy-age measurements;
-3. improve attainable lower refinement on retained Boolean-losing roots
+4. improve attainable lower refinement on retained Boolean-losing roots
    without interpreting incomplete search as losing;
-4. run selective upper work only for actions that can still beat the incumbent;
-5. improve event-complete future births/transforms and then use damage,
+5. run selective upper work only for actions that can still beat the incumbent;
+6. improve event-complete future births/transforms and then use damage,
    resources, and longer-horizon objectives only inside certified feasible
    actions.
 
-See `START_HERE.md`, CE-0120/0121,
+See `START_HERE.md`, CE-0120 through CE-0123,
 `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`,
+`notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`,
 `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`, and
 `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.
 
@@ -578,6 +595,51 @@ supersede historical sequencing without erasing its counterexamples.
 - **Evidence:**
   `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`, CE-0120/0121,
   and Stage-4A `120839`/`122014` compact reports.
+
+### S14 — Explicit Local Input-Pipeline Certificate
+
+- **Status:** Per-position batch correction accepted in the existing live
+  geometry implementation; explicit active/held/pending certification is
+  shadow infrastructure; first-action beam refinements are rejected live.
+- **Intent:** Make the issue-time local fallback independent of batch
+  composition and eventually certify the physical input prefix that can
+  actually occur while a desired command is pending.
+- **Model:** The finite root carries native active input, controller-held
+  desired input, at most one older pending command, and conditioned remaining
+  support. Holding the complete desired mask is no-write and samples no new
+  delay. A real write universally branches over older remaining and new
+  pickup delay. The fixed lease contains no recursive cadence or future
+  controller maximization.
+- **Hard constraints:** Zero collision and nonnegative robust clearance on
+  every declared local branch; hard no-Bomb; no manager-frame clock
+  assumption; no explicit-root action authority when the estimator invariant,
+  version, hazards, or issue deadline is unavailable.
+- **Smallest gate:** Independent scalar/packed parity on focused and
+  randomized roots; batch-versus-single-position invariance; retained
+  Stage-4A/Stage-6B replay differentials; Linux/Windows quick suites.
+- **Observed evidence:** The packed equivalent-root implementation had zero
+  hard-label parity failures on `155 + 156` sampled roots. Pending-aware
+  semantics changed `86/155` and `85/156` safe-action sets on deliberately
+  mismatch-heavy samples. Packed pending-aware certification measured
+  `3.134/6.372 ms` and `3.936/7.911 ms` median/p95. First-action beam
+  refinements changed five and four actions but improved no sampled hard
+  vector; independent first-action partitions also found zero improvement.
+- **Limitations:** Old roots are reconstructed rather than directly logged,
+  samples are biased toward mismatch/pre-hit states, timings are Linux replay
+  rather than Windows issue-thread WCET, and the finite lease does not solve
+  global viable-set exhaustion or CE-0120.
+- **Promotion gate:** Retain direct explicit-root telemetry, reconcile it with
+  the estimator, pass Windows full-boundary timing/staleness and focused
+  physical shadow gates, then update this ledger before passing the root into
+  live selection or recertification. A C++ boundary is reconsidered only if
+  that correct end-to-end path misses its deadline.
+- **Rejection gate:** Any scalar/packed mismatch, companion-position
+  dependence, inconsistent direct root, missed issue deadline, or clean
+  physical regression keeps or returns the path to shadow.
+- **Evidence:** CE-0122/0123,
+  `artifacts/benchmarks/local_pipeline_certificate_20260726.json`,
+  `artifacts/benchmarks/local_beam_stability_20260726.json`, and
+  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
 
 ## How To Add A Strategy
 

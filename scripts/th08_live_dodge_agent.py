@@ -116,6 +116,7 @@ from touhou_control.input_clock import (
     SemanticClockObservation,
     SemanticInputClockTracker,
 )
+from touhou_control.local_pipeline_oracle import LocalPipelineRoot
 from touhou_control.policy_guidance import assemble_local_policy_guidance
 from touhou_control.phase_progress import (
     PhaseProgressObservation,
@@ -685,7 +686,10 @@ class RobustActionCertificate:
     worst_collisions: int
     min_clearance: float
     cvar_risk: float
-    worst_delay: int
+    worst_delay: int | None
+    write_required: bool = True
+    pipeline_branch_count: int = 0
+    worst_pending_remaining: int | None = None
 
 
 @dataclass(frozen=True)
@@ -995,6 +999,10 @@ _PLANNER_ACTIONS = (
         for name, direction, unit_x, unit_y in _DIRECTION_ACTIONS
     ),
 )
+_LOCAL_PIPELINE_STATE_ACTIONS = (
+    *_PLANNER_ACTIONS,
+    PlannerAction("stay_unfocused", 0, 0.0, 0.0, False),
+)
 
 
 def _action_name_from_mask(input_mask: int) -> str:
@@ -1018,6 +1026,15 @@ def _action_name_from_mask(input_mask: int) -> str:
     else:
         return "stay"
     return name if input_mask & FOCUS else f"{name}_fast"
+
+
+def _local_pipeline_action_from_mask(input_mask: int) -> str:
+    """Injective movement/focus projection for local actuator state."""
+
+    direction = input_mask & (UP | DOWN | LEFT | RIGHT)
+    if direction == 0 and not input_mask & FOCUS:
+        return "stay_unfocused"
+    return _action_name_from_mask(input_mask)
 
 
 def _finite(values: tuple[float, ...]) -> bool:
@@ -1964,6 +1981,7 @@ def recertify_action_for_fresh_hazards(
     lasers: tuple[Laser, ...],
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
+    pipeline_root: LocalPipelineRoot | None = None,
 ) -> Decision:
     """Fast issue-time safety override after the observed hazard set changes."""
 
@@ -1978,6 +1996,7 @@ def recertify_action_for_fresh_hazards(
         lasers=lasers,
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
+        pipeline_root=pipeline_root,
     )
     planned = certificates.get(decision.action)
     ranked_actions = sorted(
@@ -2349,6 +2368,12 @@ def _hazards_for_positions(
         half_height = half_height[relevant]
         transformed = transformed[relevant]
         if bullet_x.size:
+            position_relevant = (
+                (bullet_x[None, :] >= positions_x[:, None] - margin)
+                & (bullet_x[None, :] <= positions_x[:, None] + margin)
+                & (bullet_y[None, :] >= positions_y[:, None] - margin)
+                & (bullet_y[None, :] <= positions_y[:, None] + margin)
+            )
             dx = np.abs(positions_x[:, None] - bullet_x[None, :]) - (
                 PLAYER_RADIUS + half_width[None, :]
             )
@@ -2361,11 +2386,17 @@ def _hazards_for_positions(
                 np.maximum(dx, dy),
                 np.hypot(np.maximum(dx, 0.0), np.maximum(dy, 0.0)),
             )
-            collisions += (clearance <= 0.0).sum(axis=1, dtype=np.int32)
+            collisions += (
+                (clearance <= 0.0) & position_relevant
+            ).sum(axis=1, dtype=np.int32)
             uncertainty = 0.2 * math.sqrt(step) + transformed.astype(np.float32) * min(
                 10.0, 3.0 + 0.35 * step
             )
-            robust_clearance = clearance - uncertainty[None, :]
+            robust_clearance = np.where(
+                position_relevant,
+                clearance - uncertainty[None, :],
+                np.inf,
+            )
             minimum = np.minimum(minimum, robust_clearance.min(axis=1))
             danger = np.maximum(44.0 - robust_clearance, 0.0)
             risk += np.square(danger).sum(axis=1) * time_weight
@@ -2417,6 +2448,29 @@ def _hazards_for_positions(
             segment_y = segment_y[relevant]
             collision_radius = packed_lasers.collision_radius[relevant]
             uncertainty = uncertainty[relevant]
+            occupied_radius = collision_radius + uncertainty
+            position_relevant = (
+                (
+                    np.maximum(start_x, start_x + segment_x)[None, :]
+                    + occupied_radius[None, :]
+                    >= positions_x[:, None] - margin
+                )
+                & (
+                    np.minimum(start_x, start_x + segment_x)[None, :]
+                    - occupied_radius[None, :]
+                    <= positions_x[:, None] + margin
+                )
+                & (
+                    np.maximum(start_y, start_y + segment_y)[None, :]
+                    + occupied_radius[None, :]
+                    >= positions_y[:, None] - margin
+                )
+                & (
+                    np.minimum(start_y, start_y + segment_y)[None, :]
+                    - occupied_radius[None, :]
+                    <= positions_y[:, None] + margin
+                )
+            )
             length_sq = segment_x * segment_x + segment_y * segment_y
             flat_x = positions_x[:, None]
             flat_y = positions_y[:, None]
@@ -2436,11 +2490,17 @@ def _hazards_for_positions(
                 flat_y - (start_y + projection * segment_y),
             )
             clearance = distance - collision_radius[None, :]
-            collisions += (clearance <= 0.0).sum(
+            collisions += (
+                (clearance <= 0.0) & position_relevant
+            ).sum(
                 axis=1,
                 dtype=np.int32,
             )
-            robust_clearance = clearance - uncertainty[None, :]
+            robust_clearance = np.where(
+                position_relevant,
+                clearance - uncertainty[None, :],
+                np.inf,
+            )
             minimum = np.minimum(
                 minimum,
                 robust_clearance.min(axis=1),
@@ -2544,7 +2604,7 @@ def _control_prefix_hazards(
     return risk, collisions, minimum
 
 
-def _robust_action_certificates(
+def _legacy_robust_action_certificates(
     *,
     player_x: float,
     player_y: float,
@@ -2558,7 +2618,7 @@ def _robust_action_certificates(
     snapshot_lag: int,
     laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
 ) -> dict[str, RobustActionCertificate]:
-    """Certify the emitted action until the following command can take effect."""
+    """Legacy last-desired-as-active certificate retained for differential."""
 
     if not actions or not delay_frames:
         return {}
@@ -2688,6 +2748,235 @@ def _robust_action_certificates(
     return certificates
 
 
+def _robust_action_certificates(
+    *,
+    player_x: float,
+    player_y: float,
+    previous_mask: int,
+    actions: tuple[PlannerAction, ...],
+    delay_frames: tuple[int, ...],
+    action_hold_frames: int,
+    bullets: tuple[Bullet, ...],
+    lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
+    snapshot_lag: int,
+    laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
+    pipeline_root: LocalPipelineRoot | None = None,
+) -> dict[str, RobustActionCertificate]:
+    """Certify all candidate actions over one explicit finite pipeline lease.
+
+    ``pipeline_root`` carries native active input separately from the
+    controller's held desired input. Selecting the held desired action is a
+    no-write branch and therefore does not sample a fresh pickup delay. When
+    no root is supplied, active and held both come from ``previous_mask``.
+    """
+
+    if not actions or not delay_frames:
+        return {}
+    if (
+        tuple(sorted(set(delay_frames))) != delay_frames
+        or delay_frames[0] < 0
+    ):
+        raise ValueError(
+            "certificate delay support must be sorted, unique, and "
+            "nonnegative"
+        )
+    if action_hold_frames <= 0:
+        raise ValueError("certificate action hold must be positive")
+    if pipeline_root is None:
+        active_action = _local_pipeline_action_from_mask(previous_mask)
+        pipeline_root = LocalPipelineRoot(
+            active_action=active_action,
+            held_desired_action=active_action,
+        )
+
+    action_by_name = {
+        action.name: action for action in _LOCAL_PIPELINE_STATE_ACTIONS
+    }
+    if len(action_by_name) != len(_LOCAL_PIPELINE_STATE_ACTIONS):
+        raise RuntimeError("local pipeline action names are not unique")
+    required_names = {
+        pipeline_root.active_action,
+        pipeline_root.held_desired_action,
+        *(action.name for action in actions),
+    }
+    if pipeline_root.pending_action is not None:
+        required_names.add(pipeline_root.pending_action)
+    unknown_names = required_names - set(action_by_name)
+    if unknown_names:
+        raise ValueError(
+            f"pipeline root contains unknown actions: {sorted(unknown_names)}"
+        )
+
+    maximum_step = action_hold_frames + max(delay_frames)
+    bullet_frames = _build_bullet_frames(
+        bullets,
+        horizon=maximum_step,
+        snapshot_lag=-max(0, snapshot_lag),
+    )
+    if laser_frames is None:
+        laser_frames = _build_packed_laser_collision_frames(
+            lasers,
+            horizon=maximum_step,
+        )
+    if len(laser_frames) < maximum_step:
+        raise ValueError("laser timeline does not cover robust certificates")
+
+    branch_action_indices: list[int] = []
+    branch_selected_dx: list[float] = []
+    branch_selected_dy: list[float] = []
+    branch_older_remaining: list[int] = []
+    branch_new_delay: list[int] = []
+    branch_write_required: list[bool] = []
+    branch_metadata: list[tuple[int | None, int | None]] = []
+    pending_support: tuple[int | None, ...] = (
+        tuple(pipeline_root.remaining_delay_support)
+        if pipeline_root.pending_action is not None
+        else (None,)
+    )
+    no_activation = maximum_step + max(delay_frames) + 1
+    for action_index, action in enumerate(actions):
+        write_required = (
+            action.name != pipeline_root.held_desired_action
+        )
+        new_delay_support: tuple[int | None, ...] = (
+            tuple(delay_frames) if write_required else (None,)
+        )
+        for older_remaining in pending_support:
+            for new_delay in new_delay_support:
+                branch_action_indices.append(action_index)
+                branch_selected_dx.append(action.dx)
+                branch_selected_dy.append(action.dy)
+                branch_older_remaining.append(
+                    no_activation
+                    if older_remaining is None
+                    else older_remaining
+                )
+                branch_new_delay.append(
+                    no_activation if new_delay is None else new_delay
+                )
+                branch_write_required.append(write_required)
+                branch_metadata.append((new_delay, older_remaining))
+
+    branch_count = len(branch_action_indices)
+    selected_dx = np.asarray(branch_selected_dx, dtype=np.float32)
+    selected_dy = np.asarray(branch_selected_dy, dtype=np.float32)
+    older_remaining_values = np.asarray(
+        branch_older_remaining,
+        dtype=np.int32,
+    )
+    new_delay_values = np.asarray(branch_new_delay, dtype=np.int32)
+    write_required_values = np.asarray(
+        branch_write_required,
+        dtype=np.bool_,
+    )
+    action_indices = np.asarray(branch_action_indices, dtype=np.int32)
+    active = action_by_name[pipeline_root.active_action]
+    pending = (
+        action_by_name[pipeline_root.pending_action]
+        if pipeline_root.pending_action is not None
+        else active
+    )
+    has_pending = pipeline_root.pending_action is not None
+
+    positions_x = np.full(branch_count, player_x, dtype=np.float32)
+    positions_y = np.full(branch_count, player_y, dtype=np.float32)
+    risks = np.zeros(branch_count, dtype=np.float64)
+    collisions = np.zeros(branch_count, dtype=np.int32)
+    minimum = np.full(branch_count, np.inf, dtype=np.float64)
+    for step in range(1, maximum_step + 1):
+        selected_active = write_required_values & (
+            step > new_delay_values
+        )
+        pending_active = (
+            (~selected_active)
+            & has_pending
+            & (step > older_remaining_values)
+        )
+        motion_x = np.where(
+            selected_active,
+            selected_dx,
+            np.where(pending_active, pending.dx, active.dx),
+        )
+        motion_y = np.where(
+            selected_active,
+            selected_dy,
+            np.where(pending_active, pending.dy, active.dy),
+        )
+        positions_x = np.clip(
+            positions_x + motion_x,
+            PLAYFIELD_LEFT,
+            PLAYFIELD_RIGHT,
+        ).astype(np.float32, copy=False)
+        positions_y = np.clip(
+            positions_y + motion_y,
+            PLAYFIELD_TOP,
+            PLAYFIELD_BOTTOM,
+        ).astype(np.float32, copy=False)
+        hazard_risk, hazard_collisions, hazard_clearance = (
+            _hazards_for_positions(
+                positions_x,
+                positions_y,
+                step=step,
+                bullet_frame=bullet_frames[step - 1],
+                lasers=laser_frames[step - 1],
+                enemy_bodies=enemy_bodies,
+            )
+        )
+        boundary = _boundary_risk_for_positions(
+            positions_x,
+            positions_y,
+        )
+        risks += boundary + hazard_risk
+        collisions += hazard_collisions
+        minimum = np.minimum(minimum, hazard_clearance)
+
+    certificates: dict[str, RobustActionCertificate] = {}
+    for action_index, action in enumerate(actions):
+        indices = np.flatnonzero(action_indices == action_index)
+        if not len(indices):
+            raise RuntimeError("candidate action has no pipeline branch")
+        worst_index = max(
+            (int(index) for index in indices),
+            key=lambda index: (
+                int(collisions[index]),
+                -float(minimum[index]),
+                float(risks[index]),
+            ),
+        )
+        tail_count = max(1, math.ceil(0.5 * len(indices)))
+        tail_risks = sorted(
+            (float(risks[index]) for index in indices),
+            reverse=True,
+        )[:tail_count]
+        action_minimum = min(
+            float(minimum[index]) for index in indices
+        )
+        worst_new_delay, worst_pending_remaining = branch_metadata[
+            worst_index
+        ]
+        certificates[action.name] = RobustActionCertificate(
+            action=action.name,
+            delay_frames=delay_frames,
+            worst_collisions=max(
+                int(collisions[index]) for index in indices
+            ),
+            min_clearance=(
+                9999.0
+                if math.isinf(action_minimum)
+                else action_minimum
+            ),
+            cvar_risk=sum(tail_risks) / len(tail_risks),
+            worst_delay=worst_new_delay,
+            write_required=(
+                action.name != pipeline_root.held_desired_action
+            ),
+            pipeline_branch_count=len(indices),
+            worst_pending_remaining=worst_pending_remaining,
+        )
+    return certificates
+
+
 def _item_potential(
     x: float,
     y: float,
@@ -2791,6 +3080,37 @@ def _boundary_risk(x: float, y: float) -> float:
         risk += 3.0 * (12.0 - vertical) ** 2
     if horizontal < 20.0 and vertical < 20.0:
         risk += (20.0 - horizontal) * (20.0 - vertical)
+    return risk
+
+
+def _boundary_risk_for_positions(
+    positions_x: np.ndarray,
+    positions_y: np.ndarray,
+) -> np.ndarray:
+    """Vectorized form of ``_boundary_risk`` for packed branch batches."""
+
+    horizontal = np.minimum(
+        positions_x - PLAYFIELD_LEFT,
+        PLAYFIELD_RIGHT - positions_x,
+    ).astype(np.float64, copy=False)
+    vertical = np.minimum(
+        positions_y - PLAYFIELD_TOP,
+        PLAYFIELD_BOTTOM - positions_y,
+    ).astype(np.float64, copy=False)
+    risk = np.zeros(positions_x.size, dtype=np.float64)
+    horizontal_near = horizontal < 12.0
+    vertical_near = vertical < 12.0
+    corner_near = (horizontal < 20.0) & (vertical < 20.0)
+    risk[horizontal_near] += (
+        2.0 * np.square(12.0 - horizontal[horizontal_near])
+    )
+    risk[vertical_near] += (
+        3.0 * np.square(12.0 - vertical[vertical_near])
+    )
+    risk[corner_near] += (
+        (20.0 - horizontal[corner_near])
+        * (20.0 - vertical[corner_near])
+    )
     return risk
 
 
@@ -2947,6 +3267,7 @@ def choose_action(
     power: float = 0.0,
     bombs: float = 0.0,
     previous_focus: bool = True,
+    local_pipeline_root: LocalPipelineRoot | None = None,
     snapshot_lag: int = 0,
     control_delay_frames: int = CONTROL_DELAY_FRAMES,
     control_delay_candidates: tuple[int, ...] | None = None,
@@ -2972,6 +3293,7 @@ def choose_action(
     recovery_control_reserve: bool = True,
     losing_control_reserve: bool = False,
     preserve_previous_direction_inertia: bool = True,
+    beam_dedup_mode: str = "quantized",
     relax_stale_viability_contradiction: bool = False,
     enforce_fresh_viability_intersection: bool = True,
     _force_terminal_threat: bool = False,
@@ -2979,6 +3301,12 @@ def choose_action(
 ) -> Decision:
     if horizon <= 0 or beam_width <= 0:
         raise ValueError("planner horizon and beam width must be positive")
+    if beam_dedup_mode not in {
+        "quantized",
+        "first_action",
+        "exact_first_action",
+    }:
+        raise ValueError("unknown beam deduplication mode")
     if threat_horizon is None:
         threat_horizon = horizon
     if threat_horizon < horizon:
@@ -3168,6 +3496,7 @@ def choose_action(
             enemy_bodies=enemy_bodies,
             snapshot_lag=snapshot_lag,
             laser_frames=laser_timeline[:certificate_horizon],
+            pipeline_root=local_pipeline_root,
         )
     viability_preflight_certificates = (
         {
@@ -3238,6 +3567,7 @@ def choose_action(
                 enemy_bodies=enemy_bodies,
                 snapshot_lag=snapshot_lag,
                 laser_frames=laser_timeline[:certificate_horizon],
+                pipeline_root=local_pipeline_root,
             )
             locally_safe_actions = tuple(
                 action.name
@@ -3390,7 +3720,12 @@ def choose_action(
             tuple[SearchNode, PlannerAction, float, float, float, int, float]
         ] = []
         draft_first_actions: list[PlannerAction] = []
-        candidates: dict[tuple[int, int, int, bool, int], SearchNode] = {}
+        candidates: dict[
+            tuple[int, int, int, bool, int]
+            | tuple[int, int, int, bool, int, str]
+            | tuple[float, float, int, bool, int, str],
+            SearchNode,
+        ] = {}
         for node in beam:
             actions = (
                 _PLANNER_ACTIONS
@@ -3495,6 +3830,17 @@ def choose_action(
                 action.focused,
                 collected_mask,
             )
+            if beam_dedup_mode == "first_action":
+                quantized = (*quantized, first_action.name)
+            elif beam_dedup_mode == "exact_first_action":
+                quantized = (
+                    x,
+                    y,
+                    action.direction,
+                    action.focused,
+                    collected_mask,
+                    first_action.name,
+                )
             incumbent = candidates.get(quantized)
             if incumbent is None or pruning_key(
                 candidate,
@@ -3622,6 +3968,7 @@ def choose_action(
                 enemy_bodies=enemy_bodies,
                 snapshot_lag=snapshot_lag,
                 laser_frames=laser_timeline[:certificate_horizon],
+                pipeline_root=local_pipeline_root,
             )
         nominal_certificate = robust_certificates[best.first_action.name]
         if (
@@ -3835,6 +4182,7 @@ def choose_action(
             power=power,
             bombs=bombs,
             previous_focus=previous_focus,
+            local_pipeline_root=local_pipeline_root,
             snapshot_lag=snapshot_lag,
             control_delay_frames=control_delay_frames,
             control_delay_candidates=control_delay_candidates,
@@ -3861,6 +4209,7 @@ def choose_action(
             preserve_previous_direction_inertia=(
                 preserve_previous_direction_inertia
             ),
+            beam_dedup_mode=beam_dedup_mode,
             relax_stale_viability_contradiction=(
                 relax_stale_viability_contradiction
             ),
@@ -5701,6 +6050,67 @@ def run(args: argparse.Namespace) -> int:
                 )
                 else None
             )
+            held_desired_action = _local_pipeline_action_from_mask(
+                previous_mask
+            )
+            active_supported_mask = (
+                int(state["input_current"]) & SUPPORTED_INPUT_MASK
+            )
+            held_desired_mask = previous_mask & SUPPORTED_INPUT_MASK
+            pending_supported_mask = (
+                pending_command_estimate.expected_mask
+                & SUPPORTED_INPUT_MASK
+                if pipeline_pending_command is not None
+                and pending_command_estimate is not None
+                else None
+            )
+            local_pipeline_root_record = {
+                "role": "shadow_no_action_authority",
+                "active_action": _local_pipeline_action_from_mask(
+                    active_supported_mask
+                ),
+                "active_mask": active_supported_mask,
+                "held_desired_action": held_desired_action,
+                "held_desired_mask": held_desired_mask,
+                "pending_action": (
+                    _local_pipeline_action_from_mask(
+                        int(pending_supported_mask)
+                    )
+                    if pending_supported_mask is not None
+                    else None
+                ),
+                "pending_mask": pending_supported_mask,
+                "remaining_delay_support": (
+                    pipeline_pending_command.remaining_frames
+                    if pipeline_pending_command is not None
+                    else ()
+                ),
+                "snapshot_age": (
+                    pending_command_estimate.snapshot_age
+                    if pending_command_estimate is not None
+                    else None
+                ),
+                "issue_age": (
+                    pending_command_estimate.issue_age
+                    if pending_command_estimate is not None
+                    else None
+                ),
+                "overdue": (
+                    pending_command_estimate.overdue
+                    if pending_command_estimate is not None
+                    else False
+                ),
+                "estimator_consistent": (
+                    (
+                        pipeline_pending_command is None
+                        and held_desired_mask == active_supported_mask
+                    )
+                    or (
+                        pipeline_pending_command is not None
+                        and pending_supported_mask == held_desired_mask
+                    )
+                ),
+            }
             candidate_verifier_target: (
                 CandidateVerifierTarget | None
             ) = None
@@ -6305,6 +6715,7 @@ def run(args: argparse.Namespace) -> int:
                         "current": state["input_current"],
                         "previous": state["input_previous"],
                     },
+                    "local_pipeline_root": local_pipeline_root_record,
                     "player": {
                         "x": player["x"],
                         "y": player["y"],

@@ -27,15 +27,17 @@ Python/C++ parity for the same recurrence is not physical correctness.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - Algorithmic parent:
-  `6356178 Consolidate current solver handoff`
-- The current HEAD should be the native semantic input-clock shadow checkpoint
-  immediately above that parent. If not, inspect the intervening diff before
-  trusting this file.
-- Source behavior is restored to the better `1ce5b44` controller, with exact
-  candidate publication timing and the FRScreen/MSG input-clock probe retained
-  as shadow telemetry. The latter has no input or epoch authority. No TH08
-  runtime, daemon, or unfinished experiment should be alive.
-- Linux and Windows quick suites passed `509/509` in `2.321/3.898 s`.
+  `1a74ecf Validate native input-clock shadow`
+- The current HEAD should be the local pipeline certificate/beam audit
+  checkpoint immediately above that parent. If not, inspect the intervening
+  diff before trusting this file.
+- The live local geometry now has per-position bullet/laser batch filtering
+  and a faster packed equivalent-root certificate. Explicit native-active,
+  held-desired, and pending-command roots are retained as shadow telemetry and
+  can be replayed, but are not passed into live action selection. First-action
+  beam modes are default-off and rejected for live promotion by the current
+  evidence. No TH08 runtime, daemon, or unfinished experiment should be alive.
+- Linux and Windows quick suites passed `521/521` in `3.291/7.508 s`.
 - The only expected untracked file is user-owned `image.png`. Do not stage,
   modify, delete, or clean it.
 - The connected IDA database contains the FRScreen names, partial types, and
@@ -62,14 +64,16 @@ Expected pre-work status:
 | Status | Component | Meaning |
 | --- | --- | --- |
 | live | native-state sensing and TH08 trajectory/laser/enemy projection | Gameplay sensing is native; screenshots are not a sensor. |
-| live | local exact collision certificate | Fresh issue-time hard fallback; hard no-Bomb. |
+| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. |
 | live | coarse Boolean robust viability | Current global safety authority, subject to its explicit finite model and the unresolved transition-clock boundary. |
 | shadow | native FRScreen/MSG input-clock boundary | Tri-state native probe and episode tracker identify manager-clock blocking without control-state authority. Synchronous issue-thread reads/logging are physically perturbative and total contention is unmeasured. |
+| shadow | explicit active/held/pending local certificate | Independent scalar oracle, packed finite lease, and root telemetry; old replay roots are inferred and the result cannot rank live input. |
 | shadow | losing-root stationary candidate verifier | Exact universal verification of a restricted causal candidate can prove finite-model feasibility, but cannot claim unrestricted losing/optimality. |
 | shadow | exact candidate witness publication | Retains root, witness, issued-action label, all-action local certificate, version, and timing; it never changes the live mask. |
 | offline/shadow | belief lower bounds, revealed-delay upper, resumable threshold refinement | Research tools for feasibility/optimality gaps; too slow and/or too optimistic for live authority as currently integrated. |
 | rejected | every-root candidate submission | Caused measurable live CPU/delivery contention. |
 | rejected | 50-ms repeated-manager-frame guard | CE-0121: fired on ordinary slow decisions, churned policy versions, and starved viability. |
+| rejected | first-action beam deduplication for live use | Changed only soft choices and improved no sampled hard vector; wider/partitioned variants were materially slower. |
 | rejected | inline/fused survival labels, legacy prewarm, synchronous full upper | Delivery cost or invalid cross-version assumptions outweighed their value. |
 | proposal-only | beam, greedy, learned, Monte Carlo, MCTS | May order candidates, never replace worst-case verification. |
 
@@ -115,7 +119,42 @@ measure total contention before any explicitly scoped neutralization trial.
 Do not recreate a raw wall-time threshold or promote FRScreen serial into a
 universal player clock.
 
-### P1 — candidate publication is measured, not promoted
+### P1 — explicit local pipeline roots are measured, not promoted
+
+The local audit found two correctness defects. First, a batched hazard result
+could depend on unrelated companion positions; per-position bullet/laser
+relevance masking now restores batch invariance. Second, the old local
+certificate equated held desired input with native active input and sampled a
+new full pickup delay even when holding the complete desired mask should be
+no-write.
+
+An independent scalar oracle and a packed finite-lease implementation now
+model native active input, held desired input, an optional older pending
+command, conditioned remaining support, and conditional new writes. The
+packed equivalent-root path had zero hard parity failures on the retained
+`155 + 156` sampled roots. Pending-aware semantics changed 86 and 85 sampled
+safe-action sets. These mismatch/pre-hit-heavy samples establish materiality,
+not population rates or prevented hits.
+
+The correct packed certificate measured `3.134/6.372 ms` Stage 4A and
+`3.936/7.911 ms` Stage 6B median/p95 in Linux replay, excluding JSON/object
+decode but including projection, packing, induction, and all-action
+certification. That does not prove a Windows issue deadline. Old trace roots
+are inferred; new rows retain explicit root telemetry, but live selection
+still uses active-equals-held fallback semantics.
+
+First-action beam labels changed five and four soft choices with no sampled
+hard-vector improvement. Independent first-action partitions also improved
+zero hard roots at `191.795/275.649 ms` median, so those modes remain
+default-off. A wholesale C++ rewrite is deferred until a correct explicit-root
+Windows end-to-end boundary demonstrates a deadline miss.
+
+Next collect direct-root shadow evidence, reconcile it with the estimator, and
+measure observe/decode/project/certify/issue timing and staleness before any
+live authority change. See CE-0122/0123 and
+`notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
+
+### P2 — candidate publication is measured, not promoted
 
 Clean Stage-4A shadow `100451` completed `9,222` decisions with `21` hits,
 zero Bomb, and no runtime/foreground/manual/JSON failure. Exact losing-root
@@ -138,7 +177,7 @@ non-Stage-6B workload and retain candidate witness plus alternate-action
 certificate. A candidate win proves only feasibility in its declared finite
 model.
 
-### P2 — Boolean-losing is not unrestricted losing
+### P3 — Boolean-losing is not unrestricted losing
 
 Stage-6B losing-only v2 `011639` completed `14,652` hard-no-Bomb decisions
 with `26` hits and delivered `6,192/6,618 = 93.56%` exact losing roots without
@@ -162,12 +201,13 @@ physical/information semantics pass the formal audit.
 Priority order:
 
 1. resolve CE-0120’s semantic clock boundary without live authority;
-2. obtain a clean post-rollback candidate-publication shadow gate;
-3. use retained losing roots to improve attainable lower refinement and
+2. obtain a direct-root, full-boundary local-certificate shadow gate;
+3. obtain a clean post-rollback candidate-publication shadow gate;
+4. use retained losing roots to improve attainable lower refinement and
    issue-time feasible-action coverage;
-4. refine upper/optimality work only for actions still capable of changing the
+5. refine upper/optimality work only for actions still capable of changing the
    decision;
-5. then return to local/native-read latency and broader route strategy.
+6. then return to broader route strategy.
 
 ## Current Physical Evidence
 
@@ -243,13 +283,15 @@ formalization.
   `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`
 - Frozen manager/input boundary:
   `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
+- Local active/held/pending certificate and beam audit:
+  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`
 - Earlier Boolean/losing root analysis:
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md` and
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
 
 Relevant durable counterexamples include CE-0108, CE-0109, CE-0111, CE-0118,
-CE-0120, and CE-0121. Do not infer present authority from a historical note;
-the table above and `STRATEGY.md` control current status.
+and CE-0120 through CE-0123. Do not infer present authority from a historical
+note; the table above and `STRATEGY.md` control current status.
 
 ## Environment And Build
 
@@ -288,7 +330,9 @@ Focused test:
 
 ```bash
 PYTHONPATH=scripts python3 -m unittest discover -s tests \
-  -p 'test_th08_laser_model.py'
+  -p 'test_touhou_control_local_pipeline_oracle.py'
+PYTHONPATH=scripts python3 -m unittest discover -s tests \
+  -p 'test_th08_local_pipeline_certificate.py'
 ```
 
 Quick complete suite:
@@ -312,6 +356,14 @@ Run full 128-case/unrestricted/capsule profiles only when their model or native
 recurrence changes or when retaining evidence. Benchmarks belong in
 `scripts/benchmarks/`; reports/differentials in `scripts/analysis/`; explicit
 build/probe/patch/capture commands in `scripts/tools/`.
+
+Retained local replay evidence:
+
+- `artifacts/benchmarks/local_pipeline_certificate_20260726.json`
+- `artifacts/benchmarks/local_beam_stability_20260726.json`
+
+The exact reproduction commands and timing boundaries are in
+`notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
 
 Windows UNC discovery must use this loader. Ordinary `unittest -s <UNC>`,
 `cmd.exe` UNC `cd/pushd`, and a PowerShell-only `PSDrive` do not provide an
@@ -403,6 +455,15 @@ validated semantic sensor, not another detector or threshold tweak. It should:
 7. update the formal/design note, strategy ledger, counterexamples, research
    log, focused tests, and quick Linux/Windows suites;
 8. commit one focused checkpoint.
+
+If continuing local micro-control, first collect a shadow-only trace with the
+new direct `local_pipeline_root` rows, verify every estimator-consistency
+failure, replay direct rather than reconstructed roots, and measure the full
+Windows observe/decode/project/certify/issue boundary. Do not pass the root to
+`choose_action` or `recertify_action_for_fresh_hazards` until that gate and a
+strategy-status change pass. Reconsider a compact native
+decode/project/certify boundary only if the correct end-to-end path misses its
+deadline.
 
 If instead working on candidate authority, first obtain a fresh uncontaminated
 post-rollback Stage-4A (or another non-Stage-6B) shadow run with exact witness,

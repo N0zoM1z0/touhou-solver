@@ -3396,3 +3396,82 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `122014 =
   f145a5f2631d833ce90ae2d5059948e38251ce191b9cfc16b1f6ef5ad7e98f6c`.
   Linux and Windows quick suites pass 509 tests in `2.321/3.898 s`.
+
+## 2026-07-26: Local Pipeline Certificate And Beam Audit
+
+- **Observed deterministic defect:** `_hazards_for_positions` used one global
+  bullet/laser coarse slice for a batch and then reduced every selected hazard
+  against every position. Positive clearance and soft risk could change when
+  an unrelated companion position was added. Added per-position relevance
+  masks before collision, robust-clearance, and risk reductions. The focused
+  bullet/laser batch-versus-scalar regression is CE-0122.
+- **Observed model defect:** the local certificate used the last desired mask
+  as active input and sampled a new full pickup delay for every candidate,
+  including the already-held no-write action. Added game-neutral
+  `LocalPipelineRoot`, exact causal branch enumeration, and an independent
+  scalar fixed-lease oracle for native active, held desired, one older pending
+  command, conditioned remaining support, and conditional new writes.
+  CE-0123 records the failure and authority boundary.
+- Added a packed all-action TH08 implementation. With an omitted explicit
+  root, it retains the current active-equals-held live fallback. Live
+  selection and fresh-hazard recertification do not receive the new root.
+  New trace rows retain a `shadow_no_action_authority`
+  `local_pipeline_root` record with active/held/pending masks, motion-action
+  projections, and estimator-consistency evidence. Replay prefers direct
+  roots and rejects mask/action/snapshot/prior-write disagreement.
+- Focused scalar/packed coverage includes pending/no-write ordering, the
+  older/new delay product, a pending-prefix collision, invalid one-pending
+  roots, distinct focused/unfocused zero-motion write identity, 24
+  deterministic randomized TH08 roots, vectorized boundary parity, batch
+  invariance, and legacy-equivalent hard labels.
+- Refactored reusable TH08 trace-to-bullet/laser/enemy decoding into
+  `scripts/th08_trace_replay.py` and added
+  `scripts/analysis/local_pipeline_certificate_audit.py`. Old trace roots are
+  explicitly labeled **inferred** because the schema predates direct local
+  root telemetry.
+- **Observed replay differential:** the deliberately mismatch/pre-hit-heavy
+  Stage-4A `122014` sample changed `86/155` safe action sets, 76 ranked
+  actions, and 21 recorded actions from legacy safe to pending-aware unsafe.
+  Stage-6B `011639` changed `85/156`, 73, and nine; two recorded actions changed
+  in the reverse direction. Packed equivalent-root hard parity failures were
+  zero on both samples. These are sample counts, not population rates or
+  causal prevented-hit estimates.
+- **Observed certificate timing:** from already decoded TH08 objects, with
+  projection/packing/induction/certification inside the boundary, the legacy
+  corrected-batch path measured `4.786/6.763 ms` Stage 4A and
+  `5.819/11.719 ms` Stage 6B median/p95. Packed equivalent roots measured
+  `2.265/3.487` and `2.804/6.094 ms`; packed pending-aware roots measured
+  `3.134/6.372` and `3.936/7.911 ms`.
+- Added default-off first-action and exact-first-action beam deduplication
+  modes plus `local_beam_stability_audit.py`. Across 96 roots per trace they
+  changed five Stage-4A and four Stage-6B actions but improved or worsened no
+  sampled hard vector. Independent width-24 continuation beams per first
+  action changed/improved zero of five and six hard-nonzero roots while
+  costing `191.795/275.649 ms` median. Width 256 changed 38/30 actions but
+  cost `21.988/57.336` and `37.621/55.826 ms` median/p95 and is not an oracle.
+  The beam modes are rejected for live promotion by this evidence.
+- **C++ decision:** defer a wholesale local-planner rewrite. Packed Python
+  removed about half of equivalent-root certificate median time, and the
+  correct certificate currently meets the offline gate. If direct-root
+  Windows observe/decode/project/certify/issue timing later misses its
+  deadline, the next candidate native boundary is compact raw decode,
+  projection, packing, and all-action certification checked against the
+  independent Python scalar oracle—not a wholesale port of the unproved beam.
+- Retained artifacts:
+  `artifacts/benchmarks/local_pipeline_certificate_20260726.json`
+  (`SHA-256
+  15e9d2d8b1968dedc6d2cf957506cb4ac6870a43c7e32d04ab70766d3f48ac46`)
+  and `artifacts/benchmarks/local_beam_stability_20260726.json`
+  (`SHA-256
+  747e6a39a88233f308f292a0670804992cc4c5e5d703c5da1cfd4576e7ec098f`).
+  Full interpretation and the five formal review answers are in
+  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
+- Validation: focused local-oracle, local-certificate, and live-agent suites
+  pass `5/5`, `7/7`, and `81/81`; `py_compile` and `git diff --check` pass.
+  The bounded formal audit completed all four quick profiles and retained the
+  expected legacy/no-write mismatches at seeds `20002/20003`; the quick belief
+  workspace differential completed 16 cases with zero scalar/native, upper,
+  candidate, certification, or bound failures.
+  Linux and Windows complete quick suites pass `521/521` in
+  `3.291/7.508 s`. No game, daemon, input injection, or physical trial was
+  started.

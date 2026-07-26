@@ -3047,3 +3047,65 @@ Status: observed | inferred | unknown | fixed
   recovered dossier/comparison for `103856`, raw JSONL SHA-256
   `b32c941a7def998d62fc3e2820c5c779534e1a3c10055faed69d717127fb925f`,
   and `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.
+
+## CE-0122: Batched hazard filtering changed a candidate's clearance
+
+- **Observed deterministic counterexample:** Calling
+  `_hazards_for_positions` for one position could return different positive
+  clearance and risk after an unrelated far-away position was added to the
+  same batch. The focused regression reproduces this for both a bullet and a
+  laser and compares the two-position batch with two independent
+  single-position calls.
+- **Invalid assumption:** A single global coarse hazard slice was sufficient
+  for all positions in a vectorized batch. The slice admitted every hazard
+  near *any* candidate, after which collision, minimum-clearance, and risk
+  reductions treated it as relevant to *every* candidate.
+- **Consequence:** Hard collision labels were protected only when the
+  erroneously admitted hazard remained positively separated. Soft clearance
+  and risk, and therefore beam pruning/ranking, depended on companion
+  candidates rather than only on the physical state being evaluated.
+- **Correction:** Preserve the global coarse slice, then apply a
+  per-position/per-hazard relevance mask before collision, robust-clearance,
+  and risk reductions for bullets and lasers. Unrelated entries contribute
+  zero collision/risk and infinite clearance for that position.
+- **Regression:** `test_hazard_batch_is_invariant_to_companion_positions` in
+  `tests/test_th08_local_pipeline_certificate.py`.
+- **Authority boundary:** This is a deterministic geometry correction in the
+  existing local path. Its offline correctness is observed; a causal physical
+  survival effect is not.
+- **Evidence:** `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
+
+## CE-0123: The local certificate reset a pending no-write pipeline
+
+- **Observed replay counterexample:** On the deliberately mismatch-heavy
+  Stage-4A `122014` sample, pending-aware semantics changed the locally safe
+  action set on `86/155` roots and changed the recorded action from legacy
+  safe to pipeline-unsafe on 21. Stage-6B `011639` changed `85/156` safe sets,
+  with nine legacy-safe/pipeline-unsafe and two reverse cases. These are sampled
+  model differentials, not population rates or prevented-hit claims.
+- **Concrete retained row:** At inferred Stage-4A frame `1738`, native active
+  input was `left_fast`, held/pending desired input was `up_fast`, and
+  remaining support was `1..3`. The recorded `left_fast` action changed from
+  zero modeled collisions and `+0.028` legacy clearance to five collisions
+  and `-3.953` pending-aware clearance.
+- **Invalid assumption:** The previous local certificate equated the last
+  desired mask with native active input and sampled a new full pickup delay
+  for every selected action. Selecting the already-held complete mask was
+  therefore treated as a write, the observed-active prefix was omitted, and
+  the older pending command was reset.
+- **Correction:** Make native active, held desired, optional older pending,
+  and conditioned remaining-delay support explicit. A held action is
+  no-write; a new action universally branches over older remaining and new
+  pickup delays in causal order. An independent scalar branch oracle checks
+  the packed all-action implementation.
+- **Regression:** Five focused oracle tests plus scalar/packed TH08 geometry
+  differentials, including 24 deterministic randomized roots, pass. The
+  packed equivalent-root implementation had zero hard-label parity failures
+  against the corrected-batch legacy recurrence over both retained samples.
+- **Authority boundary:** Old traces require inferred roots. New trace rows
+  retain explicit root telemetry, but live selection still supplies no
+  pending-aware root. No new input, estimator, epoch, or frozen-manager
+  authority follows from this checkpoint.
+- **Evidence:**
+  `artifacts/benchmarks/local_pipeline_certificate_20260726.json` and
+  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.

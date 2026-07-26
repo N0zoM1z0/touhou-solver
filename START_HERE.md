@@ -57,12 +57,23 @@ Python/C++ parity for the same recurrence is not physical correctness.
   reduced reserve deficit, one tied, and none regressed. This is a
   proposal-only losing-state ranking result, not restored viability or
   physical survival evidence.
+- Complete audit-only Hard Stage-4A `202439` retained 13,535 decisions and
+  1,741 validated capsules. Among 61 empty same-root queries, 6 were spatial
+  false empties, 8 primary horizon collapses, and 47 remained unresolved.
+  Uniform 4-pixel full-field solve cost `1062.85/3506.43 ms` median/p95 on a
+  12-root sample and is not the next live design.
+- CE-0127 is the immediate correctness gate: fresh-enemy issue
+  recertification changed an in-mask globally winning plan to an out-of-mask
+  local action on 168 rows while retaining unrelaxed constrained telemetry.
+  The canonical first-hit window changed `up_fast -> down_fast` at frame 3353
+  and became globally empty at the next decision. This is an authority
+  violation, not yet a prevented-hit claim.
 - The original-game full-route supervisor accepts
   `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
   only after accepted `route_complete`: it releases injected keys, closes the
   agent, sends no result/save choice, and leaves the identity-verified game
   process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `563/563` in `4.846/7.435 s`. The
+- Linux and Windows quick suites pass `563/563` in `5.103/8.215 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.
@@ -94,7 +105,7 @@ Expected pre-work status:
 | --- | --- | --- |
 | live | native-state sensing and TH08 trajectory/laser/enemy projection | Gameplay sensing is native; screenshots are not a sensor. |
 | live | native local implementation acceleration | Persistent pool buffers, packed bullet decode, hazard-major shared query, and quantized no-item beam reducer implement existing boundaries with Python rollback. They add no model authority. |
-| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. |
+| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. CE-0127 shows that fresh-enemy recertification can silently discard the global allowed mask. |
 | live | coarse Boolean robust viability | Current global safety authority, subject to its explicit finite model and the unresolved transition-clock boundary. |
 | shadow | native FRScreen/MSG input-clock boundary | Tri-state native probe and episode tracker identify manager-clock blocking without control-state authority. Synchronous issue-thread reads/logging are physically perturbative and total contention is unmeasured. |
 | shadow | explicit active/held/pending local certificate | Independent scalar oracle, packed finite lease, and root telemetry; old replay roots are inferred and the result cannot rank live input. |
@@ -261,6 +272,7 @@ Retain the two newest complete replay-capable bundles per workload:
 | Lunatic Route-2 Stage 6B, native local implementation | `163501`, `165841` | Complete direct-root/replay workloads; `165841` contains the 210-laser geometry/contention witness. |
 | Hard Route-2 Stage 1, native local implementation | `175049` | One complete zero-hit/no-Bomb/deadline-miss focused gate. It is not yet a two-bundle workload floor. |
 | Hard Route-2 full route, feasibility diagnosis | `184942` | Complete Final-B run with 39 hits, no Bomb, replayable raw trace, compact dossier, and manual replay-save handoff. One bundle does not satisfy the two-bundle floor. |
+| Hard Route-2 Stage 4A, viability audit | `202439` | Complete audit-only run with 1,741 readable capsules, exact same-root differential, and CE-0127 issue-intersection witness. One bundle does not satisfy the two-bundle floor. |
 
 The `103856` `.session.json` says `failed` only because the original
 postprocessor rejected an explicit null enemy snapshot after the accepted
@@ -336,6 +348,8 @@ formalization.
 - Earlier Boolean/losing root analysis:
   `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md` and
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
+- Current Hard same-root feasibility split and decision:
+  `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`
 
 Relevant durable counterexamples include CE-0108, CE-0109, CE-0111, CE-0118,
 and CE-0120 through CE-0125. Do not infer present authority from a historical
@@ -498,25 +512,28 @@ The complete Hard route is finished. The current user-directed algorithmic
 gate is to distinguish a genuinely losing finite model from coarse or stale
 false emptiness before spending more implementation effort:
 
-1. checkpoint the Hard full-route feasibility diagnosis and fixed-reservoir
-   losing-state reserve replay without changing live authority;
-2. capture one focused Hard Stage-4A audit-only capsule workload with the live
-   policy unchanged and all usual identity/no-Bomb/cleanup checks;
-3. replay identical roots at 16-, 8-, and 4-pixel grids, shorter horizons,
-   current delay support, and declared uncertainty ablations;
-4. classify coarse false-empty, horizon-only, uncertainty-only,
-   forecast/birth mismatch, exact losing, and unresolved roots without
-   interpreting audit-run hit count as a strategy A/B;
-5. use additional local CPU for isolated offline recomputation. Do not raise
-   the four-worker live default until a worker-count experiment shows better
-   exact-root delivery without local-plan/action-lag regression;
-6. only after this split choose among query-local refinement, a
-   route-conditioned safe tube, verified losing-root candidates, and a
-   separately scoped losing-control-reserve physical trial.
+1. repair CE-0127: preserve a planned action that remains fresh-hard-safe;
+   otherwise intersect the retained global allowed set with the fresh
+   all-action certificate and mark an empty-intersection relaxation;
+2. add deterministic preserve/intersection/relax regressions and accurate
+   per-action telemetry, replay retained roots, and run both quick suites;
+3. perform one no-audit Hard Stage-4A physical gate. Require zero silent
+   out-of-mask issue, unchanged hard-no-Bomb behavior, and no policy/local
+   latency regression;
+4. next prioritize explicit pre-loss continuation/interior reserve strategy
+   inside the viable set, because boundary factors dominate both Hard
+   workloads;
+5. add exact augmented-root partial-survival candidate witnesses as the
+   post-loss fallback;
+6. keep 8/4-pixel work query-local and proof-backed. Full-field fine
+   refinement remains rejected by low rescue rate and deadline cost;
+7. use additional CPU through deterministic process-level independent-root
+   shards. Do not raise the four-worker live same-root default without a
+   delivery-contention gate.
 
 The current evidence and five formal-review answers are in
-`notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`; the paired replay is
-`artifacts/benchmarks/hard_full_route_losing_control_reserve_20260726.json`.
+`notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md` and
+`notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`.
 
 A useful next algorithmic checkpoint is the action consequence of the now
 validated semantic sensor, not another detector or threshold tweak. It should:

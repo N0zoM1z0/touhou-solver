@@ -3652,3 +3652,50 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Validation: focused reserve and live-agent suites pass `2/2` and `82/82`;
   Linux and Windows quick suites pass `563/563` in `4.846/7.435 s`;
   `py_compile` and `git diff --check` pass.
+
+## 2026-07-26: Hard Stage-4A Same-Root Viability Differential
+
+- **Observed audit-only physical capture:** Hard Stage-4A `202439` completed
+  `route_complete` with 13,535 decisions, 15 hits, zero Bomb input, and no
+  foreground/runtime/JSON failure. Capsule I/O was enabled, so hit count is
+  provenance rather than a strategy A/B. Local plan remained
+  `12.903/22.274 ms`; global solve and first age were
+  `151.377/429.975 ms` and `2/8` frames median/p95.
+- **Observed bundle integrity:** all 1,741 capsules opened, all 1,729 trace
+  references resolved, and no capsule was unreadable. Trace SHA-256 is
+  `88f54b6a7984878b0e6cf88580fc9f217226b0d6204d29701fb15a7e0af56b41`;
+  bundle SHA-256 is
+  `89b1bd71e299a429091092a59da0cfc628a259fdf181a68c546bccb5d78592e6`.
+  The 15-case executable regression corpus passes.
+- **Observed same-root split:** 120 stratified pre-hit queries produced 61
+  empty roots: 47 modeled-losing/unresolved, 8 primary finite-horizon
+  collapses, and 6 spatial false empties. Fresh 16-pixel recomputation rescued
+  0/61; h32/h48/h64 rescued 11/3/0; exact current query delay support rescued
+  one. Seven birth-gap observations were concentrated before two hits.
+- **Observed optimistic boundary:** 9/59 comparable winning roots were
+  rejected by a later-policy terminal overlap. This can remove false wins but
+  cannot explain empty predecessors.
+- **Observed uniform-grid cost:** on 12 same-capsule empty roots,
+  16/8/4-pixel median/p95 was
+  `59.10/201.94`, `225.90/907.68`, and
+  `1062.85/3506.43 ms`. Full 4-pixel induction is about 18x the sampled
+  16-pixel median for a 6/61 rescue rate.
+- **Observed CE-0127:** the issue-time enemy recertifier ignores the global
+  allowed-action set. It silently changed an in-mask plan to an out-of-mask
+  action on 168 globally winning rows while retaining constrained telemetry.
+  At canonical frame 3353 it changed `up_fast` to `down_fast`; the next query
+  became empty before the first hit at 3419. The fresh intersection was not
+  serialized, so this is an authority/transaction counterexample, not a
+  prevented-hit claim.
+- **Decision:** repair the issue transaction before strategy promotion. Then
+  prioritize explicit pre-loss terminal/interior reserve strategy, followed
+  by exact augmented-root partial-survival witnesses after loss. Keep
+  full-field fine refinement rejected; use only proof-backed query-local
+  refinement.
+- **Report correction and validation:** the generated terminal-overlap caveat
+  now calls its rejection a conservative diagnostic rather than incorrectly
+  describing the 120-query cohort as empty-only; a focused regression guards
+  that wording. Linux and Windows quick suites pass `563/563` in
+  `5.103/8.215 s`; `git diff --check` passes.
+- Detailed analysis and the five review questions are in
+  `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`.

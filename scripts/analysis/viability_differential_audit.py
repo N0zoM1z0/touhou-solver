@@ -1046,8 +1046,8 @@ def audit(
             "terminal_phase_limitation": (
                 "The continuation query uses the containing eight-frame "
                 "layer. Exact overlap at an intra-layer terminal frame needs "
-                "residual-frame propagation; this empty-only sample has no "
-                "winning overlap cohort."
+                "residual-frame propagation. Reported overlap rejection is "
+                "a conservative diagnostic, not an exact terminal label."
             ),
             "birth_status": (
                 "Entity slot deltas are measured. Real ECL/timeline birth "
@@ -1202,7 +1202,7 @@ def _markdown(report: dict[str, object]) -> str:
             ),
             (
                 "- Exact intra-layer overlap still needs residual-frame "
-                "propagation; this empty-only sample cannot validate it."
+                "propagation; reported rejection remains diagnostic."
             ),
             "",
             "## Witnesses",

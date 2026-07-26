@@ -194,6 +194,10 @@ class ViabilityDifferentialAuditTests(unittest.TestCase):
             report["model_constraints"]["diagnostic_only_variants"],
             ["space8_time4_h80_delay_clipped"],
         )
+        self.assertNotIn(
+            "empty-only",
+            report["model_constraints"]["terminal_phase_limitation"],
+        )
 
 
 if __name__ == "__main__":

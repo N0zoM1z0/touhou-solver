@@ -3210,3 +3210,44 @@ Status: observed | inferred | unknown | fixed
   remains ignored and replay-capable. The dossier now derives case prefixes
   from physical difficulty, preventing Hard witnesses from being mislabeled
   `LUN`.
+
+## CE-0127: Issue-time enemy recertification bypassed the global winning mask
+
+- **Observed implementation defect:** `recertify_action_for_fresh_hazards`
+  recomputes all 17 local action certificates and ranks all 17 actions. It
+  receives no retained global allowed-action set and therefore does not
+  implement the documented
+  `cached winning actions ∩ fresh prefix-safe actions` transaction.
+- **Observed physical population:** Complete audit-only Hard Stage-4A run
+  `hard_route2_stage4a_unattended_20260726_202439` had 255 globally winning
+  decisions whose final action was outside the reported winning set. On 168,
+  issue recertification changed a planned action inside the set to one
+  outside it while telemetry still reported `viability_constrained=true`,
+  with neither general nor fresh-prefix relaxation. Only one of those 168
+  selected actions had a negative fresh hard vector; the defect is loss of
+  long-horizon authority, not primarily local collision acceptance.
+- **Canonical witness:** At frame 3353, before the first fresh-attempt hit at
+  3419, the global safe set was
+  `{up, up_left, up_fast, up_left_fast}` and local planning selected
+  `up_fast`. An enemy-velocity change triggered recertification and replaced
+  it with locally safe `down_fast`, outside the global set. The next decision
+  at 3356 was globally empty, and the player remained near the left/bottom
+  boundary until contact.
+- **Causal limit:** The trace did not serialize the fresh four-action
+  intersection, so it does not prove that retaining `up_fast` prevents the
+  hit. It proves that the live issue transaction silently discards or
+  misreports its global constraint.
+- **Additional inconsistency:** After replacing the action, the recertifier
+  retains repair/recovery/survival fields belonging to the old action. Trace
+  strategy telemetry can therefore describe a different action from the one
+  issued.
+- **Required correction:** Keep a planned action that remains fresh-hard-safe.
+  Otherwise intersect the retained global allowed set with the fresh
+  all-action certificate; relax only when that intersection is empty and
+  mark the relaxation explicitly. Retain the planned certificate,
+  intersection, reason, selected certificate, and correct per-action strategy
+  fields.
+- **Regression/evidence:** Add a deterministic intersection/preserve-planned
+  regression before physical testing. The 15-case hit corpus and 1,741
+  capsule bundle are validated; detailed evidence is in
+  `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`.

@@ -264,7 +264,8 @@ supersede historical sequencing without erasing its counterexamples.
 
 ### S07 — Observation-Complete, Versioned Safety Transaction
 
-- **Status:** Live infrastructure; incomplete for future projectile births.
+- **Status:** Live infrastructure with a required issue-intersection repair;
+  incomplete for future projectile births.
 - **Intent:** Treat observe-plan-act as a versioned transaction. Re-read
   lightweight native state immediately before input and recertify when
   relevant geometry changes.
@@ -275,9 +276,15 @@ supersede historical sequencing without erasing its counterexamples.
   world-position motion.
 - **Limitation:** Current issue checks do not yet cover every bullet/laser
   birth. Holding the previous action after abort is also not a proof of
-  survival.
-- **Next gate:** Packed native decode + project + all-action issue-time
-  certificate, plus ECL/timeline `BirthWindow` coverage.
+  survival. Hard Stage-4A `202439` also exposed CE-0127: the fresh-enemy
+  recertifier ranks all 17 locally certified actions without preserving the
+  cached global winning mask. It silently changed an in-mask plan to an
+  out-of-mask action on 168 rows while still reporting the action as
+  viability-constrained.
+- **Next gate:** Preserve a fresh-hard-safe planned action; otherwise use the
+  exact fresh/global intersection and explicitly mark an empty-intersection
+  relaxation. Then add packed bullet/laser/enemy issue coverage and
+  ECL/timeline `BirthWindow` coverage.
 - **Evidence:** `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`.
 
 ### S08 — Item, Power, Score, And Graze Objectives

@@ -32,11 +32,13 @@ Engineering approximations are encouraged when useful, but unknown-direction
 ones remain shadow-only.
 
 The manager frame is also not an unconditional physical input clock. Read
-`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md` and CE-0120 before
-changing phase-transition, auto-confirm, cadence, or actuator behavior.
+`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`, CE-0120, and CE-0121
+before changing phase-transition, auto-confirm, cadence, or actuator behavior.
 Post-spell dialogue can freeze `enemy_manager_frame` while a held direction
-continues to move the player; no policy/version may cross the resulting
-gameplay-epoch boundary.
+continues to move the player. The rejected 50-ms detector did not reliably
+identify that boundary, so the current live controller has no authority claim
+across it; do not recreate epoch invalidation from a short raw wall-time
+threshold.
 
 For continuation-action growth, also read
 `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`.  The active native/scalar
@@ -114,13 +116,25 @@ losing, and every-root submission is physically rejected for contention.
 - Replay review found CE-0120: directional input remained held while
   `enemy_manager_frame` froze for post-spell dialogue. `up_left_fast` moved
   434.63 pixels to the top-left boundary across six wall pulses, and
-  `left_fast` moved 343.65 pixels to the left boundary across eight. The live
-  correction now releases movement after 50 ms and creates a fresh gameplay
-  epoch; focused tests pass, but physical validation is pending. Only one
-  complete Stage-4A replay bundle is currently retained, so do not clean it;
-  the next complete run must establish the two-bundle floor.
+  `left_fast` moved 343.65 pixels to the left boundary across eight.
+- The attempted 50-ms repeated-counter correction was physically rejected by
+  complete Stage-4A run `stage4a_103856`. It fired 2,780 times in 7,925
+  decisions despite the same 72 actual wall pulses, created policy-epoch
+  churn, and reduced available viability queries from 9,073 to 691. The run
+  completed with 64 hits. RNG prevents treating `21 -> 64` as a controlled
+  effect size, but the policy-starvation mechanism is direct. Live behavior
+  has been restored to the better `1ce5b44` controller; explicit candidate
+  publication timing remains shadow-only. CE-0120 is still unresolved.
+- The two newest complete Stage-4A replay bundles are `100451` and `103856`;
+  both raw JSONL/capsule bundles and compact reports are retained. The
+  `103856` supervisor status is `failed` only because its original
+  postprocessor rejected an explicit null enemy snapshot after the accepted
+  route-complete trial. The parser is repaired and the artifacts were
+  recovered without rewriting that provenance. Its bundle audit passed all
+  checks over 10,784 records and 2,060 readable capsules, bundle SHA-256
+  `d8d6ecdf7b0ae955c58317fd27fa3735fea9c14ee1471faebe1d7fca1f5e4c29`.
 - Linux and Windows complete quick suites pass 489 tests in
-  `2.309/3.810 s`. Read
+  `2.495/4.012 s` at the rollback checkpoint. Read
   `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`,
   `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`,
   `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`,

@@ -244,11 +244,6 @@ MAX_SENSOR_EPOCH_EXTENT_FRAMES = 8
 # before input issue without mislabeling an ordinary 7..20-frame overrun as a
 # new gameplay epoch.
 MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES = 120
-# The enemy-manager counter stops during some dialogue/phase transitions even
-# though held directional input still moves the player.  Release movement
-# after three nominal render frames so hidden wall time cannot hold a planned
-# action for an unbounded physical duration.
-FROZEN_INPUT_RELEASE_SECONDS = 0.05
 # Below this active-pool density, consolidated scalar unpacking is faster
 # than allocating NumPy gather arrays. Retained synthetic sweeps place the
 # crossover between 400 and 600 records on the current host.
@@ -757,25 +752,6 @@ class AutoConfirmPulse:
     def mark_full_pulse(self, *, frame: int) -> None:
         self.released = False
         self.next_release_frame = frame + self.interval_frames
-
-
-def _frozen_input_neutralization_due(
-    *,
-    counter: int,
-    neutralized_counter: int | None,
-    now: float,
-    last_progress: float,
-) -> bool:
-    return (
-        neutralized_counter != counter
-        and now - last_progress >= FROZEN_INPUT_RELEASE_SECONDS
-    )
-
-
-def _frozen_input_safe_mask(mask: int) -> int:
-    """Keep fire held while releasing every movement/focus direction."""
-
-    return int(mask) & SHOT
 
 
 def _auto_confirm_eligible(
@@ -4180,7 +4156,6 @@ def run(args: argparse.Namespace) -> int:
     pipeline_retire_executor: ThreadPoolExecutor | None = None
     enemy_executor: ThreadPoolExecutor | None = None
     enemy_future: Future[EnemyPoolSnapshot] | None = None
-    enemy_future_epoch: int | None = None
     enemy_snapshot: EnemyPoolSnapshot | None = None
     enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
     corridor_solution: CorridorSolution | None = None
@@ -4218,7 +4193,6 @@ def run(args: argparse.Namespace) -> int:
     )
     last_frame_progress = time.perf_counter()
     last_frozen_confirm = float("-inf")
-    frozen_neutralized_counter: int | None = None
     decision_frame_deltas: deque[int] = deque(maxlen=120)
     delay_estimator = AdaptiveControlDelay(
         supported_mask=SUPPORTED_INPUT_MASK,
@@ -4357,9 +4331,6 @@ def run(args: argparse.Namespace) -> int:
                     ),
                     "maximum_action_contiguous_advance_frames": (
                         MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES
-                    ),
-                    "frozen_input_release_seconds": (
-                        FROZEN_INPUT_RELEASE_SECONDS
                     ),
                     "global_planner": (
                         "finite_horizon_robust_backward_viability"
@@ -4524,7 +4495,6 @@ def run(args: argparse.Namespace) -> int:
             capture_enemy_pool_snapshot,
             reader,
         )
-        enemy_future_epoch = gameplay_epoch
         enemy_last_submit = int(state["enemy_manager_frame"])
         deadline = time.perf_counter() + args.duration
         while time.perf_counter() < deadline:
@@ -4625,8 +4595,6 @@ def run(args: argparse.Namespace) -> int:
             if scene_decision.status == "resumed":
                 gameplay_epoch += 1
                 boss_phase_tracker.reset()
-                enemy_snapshot = None
-                enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
                 output.write(
                     json.dumps(
                         {
@@ -4682,77 +4650,6 @@ def run(args: argparse.Namespace) -> int:
                 bomb_active = reader.u32(
                     ADDR_PLAYER + PLAYER_BOMB_ACTIVE_OFFSET
                 )
-                if _frozen_input_neutralization_due(
-                    counter=counter,
-                    neutralized_counter=frozen_neutralized_counter,
-                    now=now,
-                    last_progress=last_frame_progress,
-                ):
-                    prior_mask = previous_mask
-                    safe_mask = _frozen_input_safe_mask(previous_mask)
-                    _require_foreground(api, pid)
-                    send_transitions(
-                        api,
-                        input_transitions(
-                            previous_mask,
-                            safe_mask,
-                            supported_mask=SUPPORTED_INPUT_MASK,
-                        ),
-                    )
-                    previous_mask = safe_mask
-                    previous_direction = 0
-                    frozen_neutralized_counter = counter
-                    gaps += 1
-                    gameplay_epoch += 1
-                    decision_frame_deltas.clear()
-                    delay_estimator.reset()
-                    retire_pipeline_solutions(
-                        (corridor_solution, corridor_pending_solution)
-                    )
-                    corridor_solution = None
-                    corridor_pending_solution = None
-                    corridor_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
-                    corridor_context = None
-                    corridor_commitment = CorridorCommitment()
-                    enemy_snapshot = None
-                    enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
-                    for memory in enemy_body_memories:
-                        memory.clear()
-                    boss_phase_tracker.reset()
-                    ecl_instruction_cache.clear()
-                    if (
-                        corridor_future is not None
-                        and corridor_future.cancel()
-                    ):
-                        corridor_future = None
-                    if (
-                        corridor_survival_future is not None
-                        and corridor_survival_future.cancel()
-                    ):
-                        corridor_survival_future = None
-                    if enemy_future is not None and enemy_future.cancel():
-                        enemy_future = None
-                        enemy_future_epoch = None
-                    output.write(
-                        json.dumps(
-                            {
-                                "kind": "frozen_input_neutralized",
-                                "frame": counter,
-                                "stage_route_index": state[
-                                    "stage_route_index"
-                                ],
-                                "player_phase": state["player"]["phase"],
-                                "spell": state["spell"],
-                                "frozen_seconds": now
-                                - last_frame_progress,
-                                "prior_mask": prior_mask,
-                                "safe_mask": safe_mask,
-                                "gameplay_epoch": gameplay_epoch,
-                            }
-                        )
-                        + "\n"
-                    )
-                    output.flush()
                 if auto_confirm.frozen_pulse_due(
                     now=now,
                     last_progress=last_frame_progress,
@@ -4786,7 +4683,6 @@ def run(args: argparse.Namespace) -> int:
                 time.sleep(args.poll_ms / 1000.0)
                 continue
             last_frame_progress = time.perf_counter()
-            frozen_neutralized_counter = None
             iteration_started = time.perf_counter()
             observe_started = iteration_started
             state = observe_state(reader)
@@ -4840,11 +4736,8 @@ def run(args: argparse.Namespace) -> int:
                 _require_foreground(api, pid)
             read_started = time.perf_counter()
             if enemy_future is not None and enemy_future.done():
-                completed_enemy_snapshot = enemy_future.result()
-                if enemy_future_epoch == gameplay_epoch:
-                    enemy_snapshot = completed_enemy_snapshot
+                enemy_snapshot = enemy_future.result()
                 enemy_future = None
-                enemy_future_epoch = None
             if (
                 _enemy_sensor_submit_due(
                     current_frame=counter,
@@ -4856,7 +4749,6 @@ def run(args: argparse.Namespace) -> int:
                     capture_enemy_pool_snapshot,
                     reader,
                 )
-                enemy_future_epoch = gameplay_epoch
                 enemy_last_submit = counter
             if enemy_snapshot is None:
                 enemy_bodies = ()
@@ -5110,8 +5002,6 @@ def run(args: argparse.Namespace) -> int:
                 corridor_pending_solution = None
                 corridor_context = None
                 corridor_commitment = CorridorCommitment()
-                enemy_snapshot = None
-                enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
                 for memory in enemy_body_memories:
                     memory.clear()
                 boss_phase_tracker.reset()
@@ -5707,8 +5597,6 @@ def run(args: argparse.Namespace) -> int:
                 corridor_pending_solution = None
                 corridor_context = None
                 corridor_commitment = CorridorCommitment()
-                enemy_snapshot = None
-                enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
                 for memory in enemy_body_memories:
                     memory.clear()
                 boss_phase_tracker.reset()

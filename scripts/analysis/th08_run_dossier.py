@@ -231,8 +231,9 @@ def _nearest_enemy_body(
 
     player = row["player"]
     action_frame = int(row["frame"])
-    snapshot_frame = int(
-        row.get("enemy_body_snapshot_frame", action_frame)
+    snapshot_value = row.get("enemy_body_snapshot_frame", action_frame)
+    snapshot_frame = (
+        action_frame if snapshot_value is None else int(snapshot_value)
     )
     elapsed = max(0, action_frame - snapshot_frame)
     candidates = []
@@ -339,6 +340,10 @@ def _compact_decision(
         and isinstance(corridor.get("viability"), dict)
         else {}
     )
+    enemy_body_snapshot_value = row.get(
+        "enemy_body_snapshot_frame",
+        row["frame"],
+    )
     compact = {
         "frame": int(row["frame"]),
         "gameplay_epoch": int(row.get("gameplay_epoch", 0)),
@@ -375,8 +380,10 @@ def _compact_decision(
         "enemy_body_dormant_count": int(
             row.get("enemy_body_dormant_count", 0)
         ),
-        "enemy_body_snapshot_frame": int(
-            row.get("enemy_body_snapshot_frame", row["frame"])
+        "enemy_body_snapshot_frame": (
+            int(enemy_body_snapshot_value)
+            if enemy_body_snapshot_value is not None
+            else None
         ),
         "enemy_body_pointers": [
             int(body[0])

@@ -64,18 +64,22 @@ The first non-Stage-6B shadow also exposed an actuator-clock defect outside
 the candidate algorithm: post-spell dialogue froze `enemy_manager_frame`
 while held directions continued moving the player. Two directional wall-pulse
 episodes displaced 434.63 and 343.65 pixels to a boundary. The manager-frame
-policy is therefore invalid across such a transition. A 50-ms fail-closed
-movement release and gameplay-epoch reset is implemented, but remains
-physical-validation pending; no candidate-shadow survival comparison should
-use a run whose next-phase entry was corrupted this way. See CE-0120 and
+policy is therefore invalid across such a transition. The attempted 50-ms
+fail-closed release is rejected: it mistook ordinary slow iterations for
+semantic freezes, fired 2,780 times, and starved the live Boolean policy.
+Live authority is restored to the pre-guard controller. CE-0120 remains open;
+any successor must begin as a native-phase/wall-pulse-compatible shadow
+detector with measured false positives. See CE-0120, CE-0121, and
 `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.
 
 The next architectural target is a delivery-aware solver:
 
 1. a fresh, bounded-cost issue-time shield certifies the action actually sent;
-2. a fresh non-Stage-6B physical shadow measures exact witness publication,
-   certificate compatibility, JSON cost, action lag, and contention without
-   changing the selected mask;
+2. a future non-Stage-6B physical shadow measures an evidence-bound
+   frozen-episode detector without changing the selected mask; the retained
+   `103856` run already measures exact witness publication cost but is
+   rejected as a survival comparison because the live guard corrupted policy
+   availability;
 3. the background planner publishes only versioned policies whose hazard
    coverage and service deadline are valid;
 4. event-complete ECL/timeline birth and transform forecasts make the future

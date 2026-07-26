@@ -98,15 +98,16 @@ same manager frame, cell, and desired action before a freeze are therefore not
 equivalent to histories after an unknown number of hidden wall-clock movement
 updates.
 
-The current live approximation does not add an unbounded hidden-time support
-to the recurrence. It fail-closes the actuator: after 50 ms without manager
-counter progress, it releases movement, increments the gameplay epoch,
-invalidates policy/sensor work from the old epoch, and replans from a fresh
-native snapshot after progress resumes. This is conservative after detection
-but does not prove a scheduler-independent bound on displacement before
-detection. No exact or bounded claim in this note extends across that epoch
-boundary. See
-`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md` and CE-0120.
+The attempted live approximation did not add an unbounded hidden-time support
+to the recurrence. It released movement and reset the gameplay epoch after 50
+ms without manager-counter progress. Physical run `stage4a_103856` rejected
+that observation predicate: it merged ordinary slow control iterations with
+semantic freezes, fired 2,780 times, and starved the Boolean policy. The guard
+has been removed. There is currently no live approximation with authority
+across this boundary, so no exact or bounded claim in this note extends across
+it. A successor must use semantic phase/dialogue or actual wall-pulse episode
+evidence and first pass a shadow false-positive audit. See
+`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`, CE-0120, and CE-0121.
 
 ## 3. Action, Nature, And Last-Write-Wins Transition
 

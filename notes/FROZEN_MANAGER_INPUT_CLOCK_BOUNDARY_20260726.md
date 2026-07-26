@@ -2,8 +2,9 @@
 
 Date: 2026-07-26
 
-Status: observed physical counterexample; fail-closed live correction
-implemented, focused regression passed, fresh physical validation pending.
+Status: physical clock counterexample confirmed; the 50-ms
+repeated-manager-frame guard was physically rejected and removed. The
+original post-spell directional-hold defect remains unresolved.
 
 ## Problem Contract
 
@@ -19,8 +20,7 @@ The robust planner advances a physical step `t` for every player-motion and
 hazard transition. Live orchestration had identified this step with native
 `enemy_manager_frame = m`.
 
-The Stage-4A trace disproves that identification globally. During some
-post-spell dialogue:
+Stage-4A physical evidence disproves that identification globally:
 
 ```text
 m stays constant
@@ -35,100 +35,90 @@ x = (m, wall time tau, player position q, active input a,
      held desired mask g, gameplay epoch e)
 ```
 
-The planner may still use `m` as its step clock inside a contiguous gameplay
-epoch, but it may not carry a movement action or policy across an observed
-wall-clock freeze of `m`.
+Histories with equal `(m, q, a, g)` before and after an unknown number of
+hidden player-motion updates are not control-equivalent. A policy proved only
+on the manager-frame recurrence has no authority across this boundary.
 
 ### Observations
 
 The controller observes:
 
 - `m` from native memory;
-- its own monotonic wall clock `tau`;
-- the desired mask it holds;
+- its monotonic wall clock `tau`;
+- the mask it holds;
 - native input evidence on ordinary decision iterations;
-- gameplay/foreground state and the previous native player/spell snapshot.
+- gameplay/foreground state and the previous native player/spell snapshot;
+- wall-clock auto-confirm pulse eligibility.
 
-While `m` is frozen, the normal decision path does not refresh the complete
-hazard/player snapshot. The number of hidden player-motion steps is not
-observed.
+While `m` is repeated, the current fast path does not refresh a complete
+hazard/player snapshot. More importantly, a repeated value by itself does not
+distinguish:
 
-### Actions and transition
+1. ordinary controller work that lasts longer than 50 ms;
+2. Windows scheduling delay;
+3. a semantic dialogue/phase transition in which player input physics still
+   advances.
 
-Before this correction, the repeated-counter branch only generated a fresh
-`Z` edge:
+This information ambiguity invalidates a short raw wall-time threshold as a
+semantic transition detector.
+
+### Actions and omitted transition
+
+The dialogue auto-confirm path toggles only `Z`:
 
 ```text
 release Z -> wait 40 ms -> press Z
 ```
 
-It did not release `UP/DOWN/LEFT/RIGHT`. A desired action such as
-`up_left_fast` could therefore remain physically active for every hidden
-render/update step even though its modeled manager-frame hold did not
-advance.
+It does not release `UP/DOWN/LEFT/RIGHT`. A desired action such as
+`up_left_fast` can remain physically active for hidden player updates even
+though its modeled manager-frame hold does not advance.
 
-Let `n(tau)` be the unknown number of player-motion updates during a manager
-freeze. The omitted transition was:
+Let `n(tau)` be the unknown number of player-motion updates during a genuine
+manager freeze. The omitted transition is:
 
 ```text
 q' = clamp(q + n(tau) * velocity(g))
 ```
 
-With unrestricted freeze duration, the reachable position set is not the
-single lattice successor used by the planner and can reach a playfield
-boundary.
+With unrestricted freeze duration, the reachable position support can reach
+a playfield boundary.
 
-### Uncertainty and horizon
+### Invariants and current authority boundary
 
-The live system has no proved finite upper bound on `n(tau)` under arbitrary
-Windows scheduling and dialogue duration. Expanding the normal viability
-recurrence over an unbounded hidden wall-time support is neither useful nor
-deliverable.
-
-The engineering correction restricts the actuator instead:
-
-1. when `m` has made no progress for 50 ms, release all movement/focus keys
-   and retain only `SHOT`;
-2. do this once per frozen counter value;
-3. increment the gameplay epoch and reset delay/cadence evidence;
-4. retire the current and pending Boolean policies, corridor commitment,
-   enemy-body memories, phase tracker, and ECL cache;
-5. reject background enemy snapshots whose submission epoch no longer
-   matches;
-6. continue wall-clock `Z` pulses using the now-neutral movement mask;
-7. after `m` resumes, plan only from a fresh native snapshot and new policy
-   version.
-
-This changes the post-detection hidden transition to zero commanded
-displacement. It does not claim that displacement before detection is zero.
-
-### Invariants
-
-- No directional bit remains held after the frozen-input guard fires.
-- A frozen episode creates a new gameplay epoch even if the prior action was
-  already neutral.
-- No policy or asynchronous enemy snapshot from the pre-freeze epoch has
-  action authority after the guard.
-- Wall-clock auto-confirm may toggle `Z` but may not reintroduce a direction.
-- The first post-freeze decision still requires the normal fresh local hard
-  certificate.
+- `enemy_manager_frame` is not an unconditional physical input clock.
+- No exact, lower-bound, upper-bound, delay, or viability claim crosses a
+  genuine frozen-input boundary without modeling or conservatively handling
+  its hidden player updates.
+- A raw repeated-counter duration, including 50 ms, must not reset the
+  gameplay epoch or retire live policy authority.
+- The removed guard must not be reintroduced under another threshold without
+  a semantic detector and a shadow false-positive audit.
+- The current live controller is restored to the pre-guard behavior. This is
+  the better observed controller, not a claim that CE-0120 is fixed.
+- Candidate-verifier results remain shadow-only and do not affect the mask.
 
 ### Delivery deadline and approximation direction
 
-The nominal deadline is 50 ms, or three 60-Hz render frames. At the observed
-unfocused diagonal speed, three frames are about 12 pixels of displacement.
-This is a user-space wall-clock guard, not a hard real-time proof: scheduler
-starvation can delay detection. The correction is conservative after it
-runs, but the pre-detection displacement bound is unknown under arbitrary
-scheduling. The guard therefore fixes the unbounded persistent hold without
-turning the complete transition into a mathematically exact clock model.
+There is no proved finite upper bound on `n(tau)` under arbitrary Windows
+scheduling and dialogue duration. A practical replacement may restrict the
+actuator instead of expanding unbounded hidden time, but it must bind the
+restriction to evidence of an actual transition.
 
-Fresh physical evidence must report the measured `frozen_seconds`, prior and
-safe masks, entry displacement, and whether any old policy/snapshot was
-consumed. Until then the implementation checkpoint is tested but not
-physically accepted.
+Plausible evidence sources include a native dialogue/phase state, an exact ECL
+or scene-transition signal, or the existing wall-pulse state machine. Any
+proposal must first run in shadow and report:
 
-## Physical Evidence
+- predicted transition episodes versus actual wall-pulse episode groups;
+- false positives during ordinary slow decisions;
+- detection latency and displacement before detection;
+- whether the proposed reset would retire a still-useful Boolean policy;
+- next-phase entry position and policy freshness.
+
+The expected semantic episode count is on the order of observed wall-pulse
+groups, not thousands of ordinary repeated reads.
+
+## Physical Evidence: Original Defect
 
 Run:
 
@@ -136,56 +126,103 @@ Run:
 lunatic_route2_stage4a_unattended_20260726_100451
 ```
 
-The trace contains four wall-pulse episodes. Two started from `stay` and had
-zero displacement. Two started from a direction and produced boundary-scale
-motion:
+The complete hard-no-Bomb trace contains four wall-pulse episodes. Two
+started from `stay` and had zero displacement. Two started from a direction
+and produced boundary-scale motion:
 
 | frozen `m` | held action | wall pulses | before | after | displacement |
 |---:|---|---:|---|---|---:|
 | 21467 | `up_left_fast` | 6 | `(252.69, 391.37)` | `(8.00, 32.16)` | 434.63 px |
 | 30128 | `left_fast` | 8 | `(351.65, 381.73)` | `(8.00, 381.73)` | 343.65 px |
 
-At `m=21467`, item utility was zero, predicted collections were empty, and
-the planner's center-lane target made `up_left_fast` a reasonable
-manager-frame action. The failure was not that local target by itself; it was
-allowing the action to remain active across six wall-clock dialogue pulses.
-The next attack began from the top-left edge and contact occurred at frame
-21611 near the top boundary. This temporal proximity does not by itself prove
-that neutralization would have prevented the hit.
+At `m=21467`, item utility was zero and predicted collections were empty. The
+center-lane target was reasonable inside the ordinary manager-frame model;
+the defect was the unbounded hidden wall-clock hold. The next attack began
+from the top-left edge and contact occurred at frame 21611, but temporal
+proximity alone is not a causal prevention claim.
 
-Compact evidence:
+Evidence:
 
 - `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_100451.frozen_input.json`
-- ignored raw JSONL SHA-256
+- raw JSONL SHA-256
   `b8e9428f648b6c87ee379291d896804410019469b8b7f86ef6233456e050c5a1`
+- CE-0120
+
+## Rejected Experiment: 50-ms Repeated-Counter Guard
+
+Run:
+
+```text
+lunatic_route2_stage4a_unattended_20260726_103856
+```
+
+This was the latest live Boolean/local controller plus a shadow-only
+candidate verifier. It was not an ablation with a weaker planner. The only
+new input authority was the 50-ms guard:
+
+1. release movement and retain `SHOT`;
+2. increment `gameplay_epoch`;
+3. reset delay/cadence evidence;
+4. retire current/pending corridor policies and model memory.
+
+The accepted, route-complete trace recorded:
+
+| metric | pre-guard `100451` | guard `103856` |
+|---|---:|---:|
+| decisions | 9,222 | 7,925 |
+| native hits | 21 | 64 |
+| guard firings | 0 | 2,780 |
+| actual wall pulses | 72 | 72 |
+| available viability queries | 9,073 | 691 |
+| pending-future-epoch decisions | 42 | 623 |
+| read median/p95 | 13.46/19.01 ms | 18.40/25.29 ms |
+| local plan median/p95 | 23.40/41.34 ms | 30.25/49.24 ms |
+| action lag median/p95 | 3/4 frames | 3/5 frames |
+
+The first guard fired at manager frame 91; the first hit was frame 895. Thus
+the guard had already caused repeated policy invalidation before the first
+contact. It fired on 35.08% of decisions, while both runs had only 72 actual
+wall pulses. Available global queries fell from 98.38% to 8.72% of decisions.
+
+The direct causal rejection is policy starvation: each false positive created
+a new immutable epoch and correctly invalidated the useful policy. The hit
+increase supports the physical rejection but is not treated as a controlled
+effect size because RNG, timing, and phase histories differ.
+
+Evidence:
+
+- `artifacts/viability_audit/stage4a_20260726_103856_frozen_guard_rejection.json`
+- `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_103856.dossier.json`
+- `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_103856.comparison.json`
+- raw JSONL SHA-256
+  `b32c941a7def998d62fc3e2820c5c779534e1a3c10055faed69d717127fb925f`
+- CE-0121
 
 ## Formal Review
 
-1. **State equivalence:** histories with equal manager frame, cell, and input
-   are not control-equivalent when one has spent hidden wall time moving.
-   They must be separated by an epoch boundary or modeled with another
-   physical clock.
-2. **Uncertainty and causality:** the old recurrence omitted hidden movement
-   steps entirely. The correction does not grant future information; it
-   restricts the held action once a freeze is observed.
-3. **Physical relevance:** solving the old recurrence exactly would still not
-   answer the physical transition because its time base stopped while the
-   plant continued.
-4. **Algorithm validity:** neutralization bounds future commanded
-   displacement after detection. A retained trace showing a direction still
-   held after `frozen_input_neutralized`, or an old epoch policy/snapshot
-   consumed after it, falsifies the implementation claim.
-5. **Delivery:** the guard is on the lightweight repeated-counter path and
-   precedes the slower auto-confirm pulse. Physical promotion requires the
-   measured event to arrive early enough under the live Windows scheduler.
+1. **State equivalence:** manager frame, cell, and input do not identify a
+   control-equivalent state across hidden wall-time movement.
+2. **Uncertainty and causality:** the original recurrence omits genuine hidden
+   movement. The rejected guard did not add clairvoyance, but its observation
+   predicate merged ordinary slow iterations with semantic freezes.
+3. **Physical relevance:** an exact solve of the manager-frame recurrence
+   still answers only a proxy at this boundary.
+4. **Algorithm validity:** the 50-ms predicate did enforce neutral input after
+   firing, but it did not solve the detection problem. CE-0121 falsifies its
+   required classification premise.
+5. **Delivery:** guard execution was fast enough; correctness, not compute
+   time, failed. A replacement must demonstrate semantic selectivity before
+   input authority.
 
-## Validation Gate
+## Next Validation Gate
 
-- Focused unit regression: a held `SHOT|UP|LEFT` mask becomes `SHOT` at the
-  50-ms threshold and cannot fire twice for the same frozen counter.
-- Complete Linux and Windows quick suites.
-- A fresh Stage-4A candidate-shadow trial with at least one dialogue freeze.
-- Audit every `frozen_input_neutralized` record against the next decision:
-  no direction after the event, new gameplay epoch, fresh corridor context,
-  and no boundary-scale hidden displacement.
-- Retain the run even if it disproves the 50-ms engineering deadline.
+Before another physical input-authority trial:
+
+1. implement only a shadow episode detector;
+2. compare its detections with retained wall-pulse/phase evidence;
+3. require near-zero detections during ordinary gameplay iterations;
+4. retain a counterexample for every false positive;
+5. only then test neutralization and one epoch reset per genuine episode.
+
+Until that gate passes, CE-0120 remains open and live behavior stays at the
+pre-guard checkpoint.

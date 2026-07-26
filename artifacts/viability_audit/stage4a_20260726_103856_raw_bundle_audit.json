@@ -1,0 +1,44 @@
+{
+  "schema": "th08-raw-capture-bundle-audit-v1",
+  "all_checks_pass": true,
+  "workload": {
+    "run_id": "lunatic_route2_stage4a_unattended_20260726_103856",
+    "stage": {
+      "key": "4a",
+      "label": "Stage 4A",
+      "menu_index": 3,
+      "route_index": 3
+    },
+    "hard_no_bomb": true,
+    "viability_audit": true,
+    "postpublished_survival_shadow": false,
+    "pipeline_prewarm_shadow": false,
+    "candidate_verifier_shadow": true
+  },
+  "trace": {
+    "path": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_103856.jsonl",
+    "bytes": 153962656,
+    "sha256": "b32c941a7def998d62fc3e2820c5c779534e1a3c10055faed69d717127fb925f",
+    "record_count": 10784,
+    "decision_count": 7925,
+    "first_frame": 0,
+    "last_frame": 46325,
+    "referenced_capsule_count": 559
+  },
+  "capsules": {
+    "directory": "artifacts/viability_audit/raw/lunatic_route2_stage4a_unattended_20260726_103856",
+    "count": 2060,
+    "bytes": 73970652,
+    "source_frame_min": 82,
+    "source_frame_max": 46314,
+    "missing_references": [],
+    "unreadable": [],
+    "hazard_counts": {
+      "moving_aabbs": 732807,
+      "piecewise_aabbs": 0,
+      "segment_trajectories": 0,
+      "packed_segment_samples": 0
+    }
+  },
+  "bundle_sha256": "d8d6ecdf7b0ae955c58317fd27fa3735fea9c14ee1471faebe1d7fca1f5e4c29"
+}

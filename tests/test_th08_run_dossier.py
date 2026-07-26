@@ -4,11 +4,14 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
 
 from analysis.th08_run_dossier import (
     TraceProvenance,
     _classify_death,
+    _compact_decision,
     _death_clusters,
+    _nearest_enemy_body,
     _nearest_bullet,
     _nearest_laser,
     _no_bomb_verification,
@@ -45,6 +48,37 @@ def _row(
 
 
 class Th08RunDossierTests(unittest.TestCase):
+    def test_explicit_missing_enemy_snapshot_does_not_abort_dossier(
+        self,
+    ) -> None:
+        row = {
+            "frame": 91,
+            "stage_route_index": 4,
+            "resources": {"lives": 2.0, "bombs": 3.0, "power": 128.0},
+            "player": {
+                "x": 192.0,
+                "y": 400.0,
+                "phase": 1,
+                "phase_at_action": 1,
+                "predeath_at_action": 0,
+            },
+            "enemy_body_snapshot_frame": None,
+            "enemy_bodies": [
+                [17, 192.0, 300.0, 1.0, 0.0, 8.0, 8.0, 1]
+            ],
+        }
+        compact = _compact_decision(
+            row,
+            trace_index=0,
+            trace_path=Path("physical.jsonl"),
+        )
+        nearest = _nearest_enemy_body(row)
+
+        self.assertIsNone(compact["enemy_body_snapshot_frame"])
+        self.assertIsNotNone(nearest)
+        self.assertEqual(nearest["snapshot_frame"], 91)
+        self.assertEqual(nearest["elapsed_frames"], 0)
+
     def test_no_bomb_verification_uses_input_not_stock_reset(self) -> None:
         provenance = [
             TraceProvenance(

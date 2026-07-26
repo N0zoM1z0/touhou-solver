@@ -479,7 +479,10 @@ def _enemy_sensor_summary(
         timing = row.get("timing_ms")
         if not isinstance(timing, dict) or timing.get("read_enemy_pool") is None:
             continue
-        source_frame = int(row.get("enemy_body_snapshot_frame", 0))
+        source_value = row.get("enemy_body_snapshot_frame", 0)
+        if source_value is None:
+            continue
+        source_frame = int(source_value)
         age = int(row["frame"]) - source_frame
         if source_frame <= 0 or age < 0:
             continue

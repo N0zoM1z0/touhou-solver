@@ -3233,3 +3233,41 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Formal analysis and compact evidence:
   `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md` and
   `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_100451.frozen_input.json`.
+
+## 2026-07-26: Physical Rejection And Rollback Of 50-ms Input Guard
+
+- Fresh Stage-4A physical run
+  `lunatic_route2_stage4a_unattended_20260726_103856` completed the route with
+  7,925 hard-no-Bomb decisions and 64 hits. This was the latest live
+  Boolean/local controller plus the candidate verifier in shadow-only mode,
+  not a planner ablation.
+- The 50-ms repeated-manager-frame guard fired 2,780 times, beginning at frame
+  91, despite the same 72 wall-clock auto-confirm pulses seen in the pre-guard
+  run. It created gameplay epochs through 2,782 and reduced available
+  viability queries from 9,073/9,222 decisions to 691/7,925. Queryable policy
+  decisions fell from 9,073 to 829; pending-future-epoch decisions rose from
+  42 to 623.
+- This directly rejects the detector: it classified ordinary slow iterations
+  as semantic transitions and starved live policy authority. The hit change
+  `21 -> 64` is descriptive only because RNG and timing differ.
+- Removed the guard, epoch/sensor invalidation path, constant, and focused
+  test. The live controller now matches `1ce5b44` exactly except for retained
+  shadow candidate-publication timing. CE-0120 remains open.
+- The supervisor accepted the runtime trial and terminated the game, then its
+  artifact postprocessor failed on explicit
+  `enemy_body_snapshot_frame: null`. The dossier now preserves null rather
+  than inventing a frame; projected fallback uses zero elapsed time, and
+  enemy-sensor aggregation skips absent snapshots. The focused regression is
+  `test_explicit_missing_enemy_snapshot_does_not_abort_dossier`.
+- Recovered the complete dossier, death ledger, comparison, regressions, run
+  note, and candidate-shadow audit without changing the original session
+  failure provenance. The two newest complete Stage-4A raw JSONL/capsule
+  bundles are `100451` and `103856`. The `103856` raw-bundle audit passed all
+  checks over 10,784 records and 2,060 readable capsules, bundle SHA-256
+  `d8d6ecdf7b0ae955c58317fd27fa3735fea9c14ee1471faebe1d7fca1f5e4c29`.
+- Rejection evidence:
+  `artifacts/viability_audit/stage4a_20260726_103856_frozen_guard_rejection.json`,
+  CE-0121, and
+  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.
+- Linux and Windows complete quick suites pass 489 tests in
+  `2.495/4.012 s`.

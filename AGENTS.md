@@ -165,12 +165,17 @@ These instructions apply to every file and task below this directory.
   and verify the estimator invariant used to reconstruct it.
 - Never equate `enemy_manager_frame` with an always-advancing physical input
   clock. Post-spell dialogue can freeze that counter while held movement still
-  changes player position. A sustained repeated counter must release movement
-  before wall-clock auto-confirm, create a new gameplay epoch, invalidate old
-  policy/sensor work, and replan from a fresh native snapshot after progress
-  resumes. No viability or delay proof may cross that epoch boundary merely
-  because the manager-frame value is unchanged. Read
-  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md` and CE-0120.
+  changes player position. However, a short repeated-counter wall-time
+  threshold is not a semantic freeze detector: the physically rejected 50-ms
+  guard fired 2,780 times, repeatedly invalidated useful global policy, and
+  reduced available viability queries from 9,073 to 691. Do not reset an
+  epoch or release movement merely because one manager-frame value persists
+  through a slow controller iteration. A replacement must first bind to
+  native phase/dialogue or actual wall-pulse episode evidence and pass a
+  shadow false-positive audit. No viability or delay proof may cross a
+  genuine frozen-input boundary. Read
+  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`, CE-0120, and
+  CE-0121.
 - Treat TH08 stages, spells, and retained deaths as validation workloads and
   counterexamples, not planner identities. Whenever practical, improve the
   accuracy, performance, uncertainty handling, or reachability semantics of

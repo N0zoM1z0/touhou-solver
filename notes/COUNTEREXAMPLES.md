@@ -2974,18 +2974,49 @@ Status: observed | inferred | unknown | fixed
   toggled only `Z`, so a finite planner hold acquired an unmodeled,
   dialogue-length physical duration. It also left the pre-freeze Boolean
   policy and async sensor epoch intact.
-- **Correction:** After 50 ms with no manager-counter progress, release every
-  movement/focus key and retain only `SHOT`, once per frozen counter. Create a
-  new gameplay epoch, reset delay/cadence evidence, retire the corridor
-  policy and commitment, clear phase/enemy/ECL memory, and reject background
-  enemy snapshots submitted under an older epoch. Wall-clock auto-confirm
-  may then toggle only `Z`.
-- **Approximation boundary:** The guard prevents persistent movement after
-  detection, but Windows scheduler starvation can delay the user-space
-  deadline. It does not prove zero pre-detection displacement. Fresh physical
-  validation must measure the guard event and next-phase entry state.
+- **Attempted correction, rejected:** A 50-ms repeated-counter guard released
+  movement, created a new gameplay epoch, and invalidated policy/sensor work.
+  CE-0121 shows that its predicate was not a semantic freeze detector. The
+  guard has been removed and the better pre-guard live controller restored.
+- **Current boundary:** The original defect remains unresolved. Do not infer a
+  phase transition from a short repeated manager-frame value. A replacement
+  must first bind to native phase/dialogue or actual wall-pulse episode
+  evidence and pass a shadow false-positive audit.
 - **Evidence:** compact audit
   `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_100451.frozen_input.json`,
   raw JSONL SHA-256
   `b8e9428f648b6c87ee379291d896804410019469b8b7f86ef6233456e050c5a1`,
+  and `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.
+
+## CE-0121: A 50-ms repeated-frame guard starved the live Boolean policy
+
+- **Observed physical counterexample:** Complete hard-no-Bomb Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260726_103856` used the latest live
+  Boolean/local controller, a shadow-only candidate verifier, and the 50-ms
+  guard. It reached `route_complete` with 7,925 decisions and 64 hits. The
+  guard fired 2,780 times, beginning at manager frame 91, while the trace had
+  only 72 actual `auto_confirm_wall_pulse` records.
+- **Invalid assumption:** Persisting one `enemy_manager_frame` value for 50 ms
+  identifies a dialogue/phase freeze. Ordinary pool reads, planning, logging,
+  and Windows scheduling routinely exceed that duration without a semantic
+  transition.
+- **Direct mechanism:** Every false positive incremented `gameplay_epoch` and
+  correctly retired the old corridor policy. Available viability queries fell
+  from 9,073 in `100451` to 691; pending-future-epoch decisions rose from 42
+  to 623. Thus most of the run fell back to local planning.
+- **Causal boundary:** The epoch churn and policy starvation are directly
+  observed and sufficient to reject the guard. The `21 -> 64` hit difference
+  is supporting physical evidence, not a controlled effect estimate, because
+  RNG, timing, and phase histories differ.
+- **Correction:** Remove the guard and its unit test; restore `1ce5b44`
+  live-controller behavior while retaining only shadow publication timing.
+  Keep CE-0120 open.
+- **Regression/authority gate:** Live source must contain no
+  `FROZEN_INPUT_RELEASE_SECONDS`, `_frozen_input_neutralization_due`, or
+  `frozen_input_neutralized` authority path. Any successor starts as shadow
+  episode classification.
+- **Evidence:**
+  `artifacts/viability_audit/stage4a_20260726_103856_frozen_guard_rejection.json`,
+  recovered dossier/comparison for `103856`, raw JSONL SHA-256
+  `b32c941a7def998d62fc3e2820c5c779534e1a3c10055faed69d717127fb925f`,
   and `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.

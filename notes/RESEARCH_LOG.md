@@ -3913,3 +3913,62 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   four-worker planner contention. Optional work must not age authoritative
   publication; failure or budget miss returns the historical action. A
   focused Hard shadow and physical A/B remain downstream, not yet authorized.
+
+## 2026-07-26: Direct-Root Windows Supplemental Contention Gate
+
+- **Contract fixed before measurement:** Added
+  `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`.
+  It separates retained physical game-process telemetry from already-parsed
+  JSON replay and fixes zero finite violations, p95/max compute increment,
+  global-planner p95/throughput, and stable-60-Hz hybrid deadline criteria.
+- **Implementation:** Moved the fail-closed direct active/held/pending root
+  parser into the reusable TH08 trace adapter, taught the common replay helper
+  to accept explicit roots and predecoded hazards, and added a Windows gate
+  that rotates historical/width-4 idle/four-worker variants. It measures
+  trace reconstruction, root parsing, local segments, forced same-snapshot
+  issue recertification, viability solve throughput, CPU/wall ratio, physical
+  chain telemetry, policy age, and paired deadline estimates.
+- **Population:** Hard Stage-4A `212756` contained 8,180 valid non-overdue
+  direct roots, zero invalid roots, and eight explicitly overdue exclusions.
+  Broad/pre-hit-300/stress reservoirs deduplicated to 253 roots; three rounds
+  produced 759 samples per variant and 1,518 finite comparisons.
+- **Correctness observed:** Width 4 was active on 729/759 measurements in
+  each contention class. All historical-incumbent, effective-global,
+  issue/local/terminal hard, route, continuation, Bomb, exception,
+  issue-transaction, and nonrelaxed issue-global violation counts were zero.
+  Forced recertification changed no selected action.
+- **Comparator correction:** An exploratory report incorrectly treated 30
+  fresh-global contradiction samples, on which the supplemental lane was
+  intentionally inactive, as historical/membership failures. The checker now
+  conditions those two claims on lane admissibility; a deterministic test
+  protects this information/authority distinction. Hard and issue checks
+  remain unconditional.
+- **Physical baseline observed:** Across all 8,180 valid direct-root rows,
+  `observe/read/decode/local-plan/issue/observe_to_input` p95 was
+  `0.526/7.662/1.986/20.144/7.247/33.229 ms`. Action lag p95 was two frames,
+  corridor/viability age p95 was 28/27, all rows applied worker limit four,
+  and deadline misses were zero.
+- **Planner contention observed:** Historical/supplemental four-worker solve
+  p95 was `40.135/40.060 ms`; throughput was
+  `29.439/29.873 solves/s`. Ratios `0.998x/1.015x` pass the fixed
+  `<=1.10x/>=0.90x` gate.
+- **Delivery failure observed:** Paired supplemental-minus-historical
+  direct-root compute under four-worker load was
+  `2.354/14.273/25.184 ms` median/p95/max, failing fixed
+  `<=5.0/<16.667 ms` limits. The supplemental search itself cost
+  `3.273/6.858/10.553 ms`. One of 759 hybrid deadline estimates became a new
+  miss. CE-0130's frame-37,834 witness rose from `18.551` to `43.735 ms`,
+  taking recorded `41.999 ms` observe-to-input to a `67.183 ms` estimate
+  against a `66.667 ms` support budget.
+- **Decision:** Do not enter focused Hard shadow/physical A/B and do not add a
+  live CLI. The finite selector remains proposal-only. Synchronous
+  current-issue delivery is rejected; next test a complete deadline-aware
+  native rollout/hazard-query boundary or exact-version asynchronous
+  publication, with historical fallback on every miss/cancellation/mismatch.
+- **Artifact:**
+  `artifacts/benchmarks/hard_supplemental_direct_root_contention_windows_20260726.json`,
+  SHA-256
+  `43751f0a74c6285156acf1454df0c5be85deb27c3856d6570d3667ebba466ad0`.
+- **Validation:** Linux and Windows quick suites pass `587/587` in
+  `5.283/8.008 s`; focused gate tests, Python compilation, JSON parsing, and
+  `git diff --check` pass.

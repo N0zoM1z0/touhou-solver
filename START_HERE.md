@@ -82,6 +82,17 @@ Python/C++ parity for the same recurrence is not physical correctness.
   violations. Its synchronous supplemental cost was `2.449/3.114 ms`
   broad and `2.425/3.026 ms` pre-hit median/p95. This is proposal-only
   same-root evidence, not physical survival or issue-deadline evidence.
+- The direct-root Windows/four-worker gate keeps the width-4 finite selector
+  contract-clean: 1,518 comparisons had zero historical/effective-global,
+  componentwise hard, route, continuation, Bomb, exception, or forced-issue
+  transaction violations. The four-worker planner also passed at
+  `0.998x` solve-p95 and `1.015x` throughput ratios. Synchronous current-issue
+  delivery is rejected by CE-0130: paired compute increment was
+  `2.354/14.273/25.184 ms` median/p95/max, failed fixed
+  `5.0/<16.667 ms` limits, and created one new hybrid deadline-proxy miss.
+  Do not start the focused Hard physical A/B. The next gate is a complete
+  deadline-aware native supplemental boundary or exact-version asynchronous
+  publication, followed by the same Windows contention test.
 - Six generated TH08-semantic intensive geometry workloads cover native-pool
   and beyond-pool bullets, stop/resume/reverse/redirect transforms,
   executable and degenerate lasers, bodies, tangent boundaries, and
@@ -96,7 +107,7 @@ Python/C++ parity for the same recurrence is not physical correctness.
   only after accepted `route_complete`: it releases injected keys, closes the
   agent, sends no result/save choice, and leaves the identity-verified game
   process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `583/583` in `5.158/7.979 s`. The
+- Linux and Windows quick suites pass `587/587` in `5.283/8.008 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.
@@ -457,6 +468,7 @@ Retained local replay evidence:
 - `artifacts/benchmarks/local_native_hazard_hazard_major_windows_20260726.json`
 - `artifacts/benchmarks/native_packed_bullet_decode_windows_20260726.json`
 - `artifacts/benchmarks/local_issue_contention_windows_20260726.json`
+- `artifacts/benchmarks/hard_supplemental_direct_root_contention_windows_20260726.json`
 
 The exact reproduction commands and timing boundaries are in
 `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.

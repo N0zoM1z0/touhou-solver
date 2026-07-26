@@ -5,9 +5,7 @@ import unittest
 
 import numpy as np
 
-from analysis.local_pipeline_certificate_audit import (
-    _direct_root_from_trace,
-)
+from th08_trace_replay import local_pipeline_root_from_trace
 from th08_live_dodge_agent import (
     Bullet,
     DOWN,
@@ -124,7 +122,7 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
         }
 
         root, parsed_held_mask, issue_age, overdue = (
-            _direct_root_from_trace(row)
+            local_pipeline_root_from_trace(row)
         )
 
         self.assertEqual(root.active_action, "right")
@@ -136,7 +134,7 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
 
         row["local_pipeline_root"]["active_action"] = "left"
         with self.assertRaises(ValueError):
-            _direct_root_from_trace(row)
+            local_pipeline_root_from_trace(row)
 
         aliased_stay_row = {
             "input_snapshot": {"current": SHOT},
@@ -155,7 +153,7 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             },
         }
         with self.assertRaises(ValueError):
-            _direct_root_from_trace(aliased_stay_row)
+            local_pipeline_root_from_trace(aliased_stay_row)
 
     def test_vectorized_boundary_risk_matches_scalar(self) -> None:
         positions_x = np.asarray(

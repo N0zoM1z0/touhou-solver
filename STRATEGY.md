@@ -130,6 +130,18 @@ continuation checks had zero violations. The lane itself cost
 retained candidate for the next gate. Same-root replay does not establish
 prevented hits or Windows issue-time fitness.
 
+The direct-root Windows gate now rejects synchronous current-issue delivery
+of that width-4 lane. Across 1,518 idle/four-worker finite comparisons it had
+zero historical/effective-global, hard, route, continuation, Bomb, exception,
+or forced-issue-transaction violations. The four-worker viability planner
+also retained a `0.998x` solve-p95 ratio and `1.015x` throughput ratio. But
+the supplemental-minus-historical compute increment under contention was
+`2.354/14.273/25.184 ms` median/p95/max, versus fixed `5.0/<16.667 ms`
+limits, and one hybrid stable-60-Hz issue proxy became a new miss. CE-0130
+therefore blocks the focused physical A/B. The proposal needs a complete
+deadline-aware native boundary or exact-version asynchronous publication,
+not a live CLI.
+
 Generated TH08-semantic intensive workloads also found exact collision and
 clearance-sign parity, exact companion-batch invariance, and equal
 end-to-end action/hard labels across native-pool and beyond-pool bullets,
@@ -144,13 +156,13 @@ Current priority is:
 
 1. keep CE-0120 shadow-only while its no-write/epoch counterfactual and broader
    negative workloads remain incomplete;
-2. measure the width-4 immutable supplemental lane on direct Windows roots,
-   including complete observe/decode/project/certify/issue timing and
-   four-worker publication contention. Deadline miss, exception, or stale
-   version must fall back to the historical decision;
-3. if that gate is clean, retain a side-effect-free focused Hard shadow
-   before any physical A/B. Keep both continuation selectors default-off and
-   without a live CLI until then;
+2. redesign width-4 delivery after CE-0130: fuse the complete supplemental
+   rollout/hazard-query boundary into a deadline-aware native call or publish
+   it asynchronously with exact immutable root/version matching. Every miss,
+   timeout, cancellation, or mismatch falls back to the historical action;
+3. rerun the fixed direct-root Windows/four-worker gate. Only a clean result
+   permits a side-effect-free focused Hard shadow before any physical A/B.
+   Keep both continuation selectors default-off and without a live CLI;
 4. add exact augmented-root partial-survival witnesses as the post-loss
    fallback without interpreting timeout or exhaustion as losing;
 5. replay direct local-pipeline roots and add future bullet/laser birth
@@ -770,7 +782,8 @@ supersede historical sequencing without erasing its counterexamples.
 ### S16 — Pre-Loss Continuation And Interior Reserve
 
 - **Status:** Final-only ranking and the immutable supplemental lane are
-  proposal-only and default-off. Repair-aware shared beam pruning is rejected.
+  proposal-only and default-off. Repair-aware shared beam pruning and
+  synchronous current-issue supplemental delivery are rejected.
 - **Intent:** Before the coarse Boolean kernel becomes empty, prefer a viable
   first action with more worst-delay next-layer continuation and enough
   interior room to reverse, without changing global/fresh membership.
@@ -800,16 +813,25 @@ supersede historical sequencing without erasing its counterexamples.
   not an exact unrestricted optimizer or safety proof. Same-root replay
   cannot establish prevented hits, delivery freshness, or issue deadline
   fitness.
-- **Next gate:** Direct-root Windows telemetry and four-worker planner
-  contention for width 4. Optional work must be cancellable or explicitly
-  budgeted, cannot delay authoritative publication, and falls back to the
-  historical action on any miss.
+- **Direct-root delivery result:** On 253 retained Windows roots over three
+  rounds, all 1,518 finite/issue comparisons remained contract-clean and the
+  four-worker planner stayed within its p95/throughput contention limits.
+  Synchronous width-4 compute increment nevertheless measured
+  `2.354/14.273/25.184 ms` median/p95/max, failed the fixed
+  `5.0/<16.667 ms` limits, and created one new hybrid deadline-proxy miss.
+  CE-0130 rejects this delivery boundary, not the finite selector.
+- **Next gate:** Implement a complete deadline-aware native supplemental
+  boundary or exact-version asynchronous publication, then rerun the same
+  Windows/four-worker gate. Optional work must be cooperatively cancellable,
+  cannot delay authoritative publication, and falls back to the historical
+  action on any miss.
 - **Evidence:** CE-0129,
   `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`, and the
   `hard_preloss_*_20260726.json` benchmark artifacts; successor design and
   data are in
-  `notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md` and the
-  `hard_supplemental_continuation_lane_*_20260726.json` artifacts.
+  `notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`,
+  `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`, and
+  the `hard_supplemental_*_20260726.json` artifacts.
 
 ## How To Add A Strategy
 

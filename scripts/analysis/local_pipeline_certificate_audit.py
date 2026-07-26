@@ -20,7 +20,10 @@ from th08_live_dodge_agent import (
     _local_pipeline_action_from_mask,
     _robust_action_certificates,
 )
-from th08_trace_replay import hazards_from_trace
+from th08_trace_replay import (
+    hazards_from_trace,
+    local_pipeline_root_from_trace,
+)
 from touhou_control.local_pipeline_oracle import LocalPipelineRoot
 
 
@@ -114,91 +117,7 @@ def _read_decisions(
     return rows, digest.hexdigest()
 
 
-def _direct_root_from_trace(
-    row: dict[str, object],
-) -> tuple[LocalPipelineRoot, int, int, bool]:
-    """Parse and cross-check one new-schema shadow root, failing closed."""
-
-    record = row.get("local_pipeline_root")
-    if not isinstance(record, dict):
-        raise ValueError("local pipeline root record is not an object")
-    if record.get("role") != "shadow_no_action_authority":
-        raise ValueError("local pipeline root has unexpected authority role")
-    if record.get("estimator_consistent") is not True:
-        raise ValueError("local pipeline root estimator is inconsistent")
-
-    active_action = record.get("active_action")
-    held_action = record.get("held_desired_action")
-    pending_action = record.get("pending_action")
-    active_mask = record.get("active_mask")
-    held_mask = record.get("held_desired_mask")
-    pending_mask = record.get("pending_mask")
-    if not isinstance(active_action, str) or not isinstance(held_action, str):
-        raise ValueError("local pipeline root action names are invalid")
-    if pending_action is not None and not isinstance(pending_action, str):
-        raise ValueError("local pipeline pending action is invalid")
-    if type(active_mask) is not int or type(held_mask) is not int:
-        raise ValueError("local pipeline root masks are invalid")
-    if (
-        active_mask != active_mask & SUPPORTED_INPUT_MASK
-        or held_mask != held_mask & SUPPORTED_INPUT_MASK
-    ):
-        raise ValueError("local pipeline root contains unsupported mask bits")
-    input_snapshot = row.get("input_snapshot")
-    if (
-        not isinstance(input_snapshot, dict)
-        or type(input_snapshot.get("current")) is not int
-        or (
-            int(input_snapshot["current"]) & SUPPORTED_INPUT_MASK
-            != active_mask
-        )
-    ):
-        raise ValueError("direct active mask disagrees with trace snapshot")
-    if _local_pipeline_action_from_mask(active_mask) != active_action:
-        raise ValueError("direct active mask/action disagree")
-    if _local_pipeline_action_from_mask(held_mask) != held_action:
-        raise ValueError("direct held mask/action disagree")
-
-    remaining_raw = record.get("remaining_delay_support", ())
-    if not isinstance(remaining_raw, (list, tuple)) or any(
-        type(value) is not int for value in remaining_raw
-    ):
-        raise ValueError("direct remaining-delay support is invalid")
-    remaining = tuple(int(value) for value in remaining_raw)
-    if pending_action is None:
-        if pending_mask is not None:
-            raise ValueError("direct root has a mask without pending action")
-        if active_mask != held_mask:
-            raise ValueError(
-                "direct no-pending root has different active/held masks"
-            )
-    else:
-        if (
-            type(pending_mask) is not int
-            or pending_mask != pending_mask & SUPPORTED_INPUT_MASK
-            or pending_mask != held_mask
-            or _local_pipeline_action_from_mask(pending_mask)
-            != pending_action
-        ):
-            raise ValueError("direct pending mask/action disagree")
-
-    root = LocalPipelineRoot(
-        active_action=active_action,
-        held_desired_action=held_action,
-        pending_action=pending_action,
-        remaining_delay_support=remaining,
-    )
-    issue_age_raw = record.get("issue_age")
-    if issue_age_raw is None:
-        issue_age = 0
-    elif type(issue_age_raw) is int and issue_age_raw >= 0:
-        issue_age = int(issue_age_raw)
-    else:
-        raise ValueError("direct issue age is invalid")
-    overdue = record.get("overdue", False)
-    if not isinstance(overdue, bool):
-        raise ValueError("direct overdue flag is invalid")
-    return root, held_mask, issue_age, overdue
+_direct_root_from_trace = local_pipeline_root_from_trace
 
 
 def _reconstruct_roots(

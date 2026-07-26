@@ -3323,3 +3323,42 @@ Status: aggressive beam variant rejected; final-only proposal retained
   retained paired reports are under `artifacts/benchmarks/` with
   `hard_preloss_beam_preference_rejected_*` and
   `hard_preloss_continuation_reserve_*` names.
+
+## CE-0130: Synchronous supplemental search exceeded its direct-root issue budget
+
+Status: synchronous current-issue delivery rejected; lane remains offline
+
+- **Observed Windows counterexample:** The width-4 immutable supplemental lane
+  kept zero finite-contract, hard, route, continuation, Bomb, or forced-issue
+  transaction violations across 1,518 comparisons, but failed its
+  predeclared delivery gate under the normal-priority four-worker planner.
+  The paired supplemental-minus-historical direct-root compute increment was
+  `2.354/14.273/25.184 ms` median/p95/max.  The gate required p95 at most
+  `5 ms` and maximum below `16.667 ms`.
+- **Canonical root:** Hard Stage-4A `212756`, gameplay epoch 2, frame 37,834,
+  with 640 active bullets, physical `observe_to_input=41.999 ms`,
+  support-high four, and post-capture advance two.  Historical and
+  supplemental compute cost `18.551/43.735 ms`; the hybrid estimate became
+  `67.183 ms`, above the `66.667 ms` stable-60-Hz support budget.  All three
+  historical/supplemental/recertified actions were `down_left_fast`.
+- **Invalid assumption:** A native endpoint reducer made width 4 inexpensive
+  in ordinary same-root replay, but did not bound the complete Python/native
+  rollout, hazard-query, selection, scheduler, and recertification tail while
+  four native viability workers were active.
+- **Isolation:** Global planner p95 and throughput ratios were
+  `0.998x/1.015x`, inside their fixed `1.10x/0.90x` limits.  Supplemental
+  search itself cost `3.273/6.858/10.553 ms`; trace reconstruction and root
+  parsing were sub-millisecond tails.  This is a local delivery failure, not
+  evidence that the four-worker global planner should be weakened.
+- **Correction boundary:** Keep the lane default-off with no physical CLI.
+  Either fuse the complete supplemental rollout/hazard-query boundary into a
+  deadline-aware native call or publish it asynchronously under exact
+  immutable root/version identity.  Timeout, cancellation, miss, or mismatch
+  returns the historical action.
+- **Regression/evidence:** Fixed gate thresholds and deadline semantics are
+  covered by
+  `test_benchmark_supplemental_direct_root_contention.py`.  Full evidence is
+  retained in
+  `artifacts/benchmarks/hard_supplemental_direct_root_contention_windows_20260726.json`
+  and
+  `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`.

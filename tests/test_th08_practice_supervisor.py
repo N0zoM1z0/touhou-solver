@@ -206,94 +206,62 @@ class PracticeSupervisorTests(unittest.TestCase):
             )
         self.assertIs(selected, state)
 
-    def test_pipeline_prewarm_shadow_is_explicitly_opt_in(self) -> None:
-        args = build_parser().parse_args(
-            ["--stage", "5", "--pipeline-prewarm-shadow", "--armed"]
-        )
-        self.assertTrue(args.pipeline_prewarm_shadow)
-
-    def test_candidate_verifier_shadow_is_explicitly_opt_in(self) -> None:
-        args = build_parser().parse_args(
-            [
-                "--stage",
+    def test_shadow_services_are_explicitly_opt_in(self) -> None:
+        cases = (
+            (
+                "5",
+                ("--pipeline-prewarm-shadow",),
+                "pipeline_prewarm_shadow",
+            ),
+            (
                 "6b",
-                "--candidate-verifier-shadow",
-                "--armed",
-            ]
-        )
-        self.assertTrue(args.candidate_verifier_shadow)
-
-    def test_input_clock_boundary_shadow_is_explicitly_opt_in(self) -> None:
-        args = build_parser().parse_args(
-            [
-                "--stage",
+                ("--candidate-verifier-shadow",),
+                "candidate_verifier_shadow",
+            ),
+            (
                 "4a",
-                "--input-clock-boundary-shadow",
-                "--input-clock-shadow-sample-ms",
-                "2.5",
-                "--armed",
-            ]
+                (
+                    "--input-clock-boundary-shadow",
+                    "--input-clock-shadow-sample-ms",
+                    "2.5",
+                ),
+                "input_clock_boundary_shadow",
+            ),
         )
+        for stage, options, attribute in cases:
+            with self.subTest(attribute=attribute):
+                args = build_parser().parse_args(
+                    ["--stage", stage, *options, "--armed"]
+                )
+                self.assertTrue(getattr(args, attribute))
+                if attribute == "input_clock_boundary_shadow":
+                    self.assertEqual(args.input_clock_shadow_sample_ms, 2.5)
 
-        self.assertTrue(args.input_clock_boundary_shadow)
-        self.assertEqual(args.input_clock_shadow_sample_ms, 2.5)
-
-    def test_native_local_hazard_backend_is_default_with_numpy_rollback(
-        self,
-    ) -> None:
-        default_args = build_parser().parse_args(
-            ["--stage", "4a", "--armed"]
+    def test_native_backends_default_with_explicit_rollbacks(self) -> None:
+        cases = (
+            ("local_hazard_backend", "--local-hazard-backend", "numpy"),
+            ("local_beam_reducer", "--local-beam-reducer", "python"),
+            ("bullet_decode_backend", "--bullet-decode-backend", "python"),
         )
-        rollback_args = build_parser().parse_args(
-            [
-                "--stage",
-                "4a",
-                "--local-hazard-backend",
-                "numpy",
-                "--armed",
-            ]
-        )
-
-        self.assertEqual(default_args.local_hazard_backend, "native")
-        self.assertEqual(rollback_args.local_hazard_backend, "numpy")
-
-    def test_native_local_beam_reducer_is_default_with_python_rollback(
-        self,
-    ) -> None:
-        default_args = build_parser().parse_args(
-            ["--stage", "4a", "--armed"]
-        )
-        rollback_args = build_parser().parse_args(
-            [
-                "--stage",
-                "4a",
-                "--local-beam-reducer",
-                "python",
-                "--armed",
-            ]
-        )
-
-        self.assertEqual(default_args.local_beam_reducer, "native")
-        self.assertEqual(rollback_args.local_beam_reducer, "python")
-
-    def test_native_bullet_decoder_is_default_with_python_rollback(
-        self,
-    ) -> None:
-        default_args = build_parser().parse_args(
-            ["--stage", "4a", "--armed"]
-        )
-        rollback_args = build_parser().parse_args(
-            [
-                "--stage",
-                "4a",
-                "--bullet-decode-backend",
-                "python",
-                "--armed",
-            ]
-        )
-
-        self.assertEqual(default_args.bullet_decode_backend, "native")
-        self.assertEqual(rollback_args.bullet_decode_backend, "python")
+        for attribute, option, rollback in cases:
+            with self.subTest(attribute=attribute):
+                default_args = build_parser().parse_args(
+                    ["--stage", "4a", "--armed"]
+                )
+                rollback_args = build_parser().parse_args(
+                    [
+                        "--stage",
+                        "4a",
+                        option,
+                        rollback,
+                        "--armed",
+                    ]
+                )
+                self.assertEqual(getattr(default_args, attribute), "native")
+                self.assertEqual(
+                    getattr(rollback_args, attribute),
+                    rollback,
+                )
 
     def test_tail_reader_handles_a_record_larger_than_one_block(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

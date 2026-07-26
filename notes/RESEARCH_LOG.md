@@ -4039,3 +4039,28 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Validation:** both native targets rebuilt; Linux and Windows quick suites
   pass `593/593` in `5.366/8.164 s`.  Focused live-agent, contention and
   semantic tests pass; Python compilation and `git diff --check` pass.
+
+## 2026-07-27: Public Release And Test-Suite Audit
+
+- **Scope:** Prepared the existing repository for public release as
+  `touhou-solver` without copying the workspace or rewriting history. The
+  user explicitly retained current tracked research fixtures and history;
+  ignore changes affect future untracked artifacts only.
+- **Documentation:** Replaced the private-workspace README, added MIT and
+  third-party notices, reduced `AGENTS.md` to durable rules, and reconciled
+  `START_HERE.md`/`STRATEGY.md`. Early global feasibility and certified
+  post-loss behavior are now the unambiguous primary direction; CE-0120 is a
+  parallel shadow actuator-boundary obligation; both current-issue
+  supplemental delivery designs remain rejected by CE-0131.
+- **Test audit:** Removed one pure benchmark parser/name-format test and
+  consolidated twelve repetitive entrypoint wiring methods into four
+  table-driven methods while retaining every assertion. No model,
+  counterexample, deadline, version, differential, stage/difficulty, or
+  physical-safety boundary was removed.
+- **Automation:** Added a bounded Linux GitHub Actions quick suite for Python
+  3.11/3.13. It builds the native C++17 backend and never runs physical or
+  broad research workloads.
+- **Validation:** Both native targets rebuilt. Focused changed tests passed,
+  and the complete quick suite passed `584/584` on Linux in `5.213 s` and
+  Windows in `14.365 s`; `git diff --check` passed.
+- **Design note:** `notes/PUBLIC_RELEASE_AND_TEST_SUITE_AUDIT_20260727.md`.

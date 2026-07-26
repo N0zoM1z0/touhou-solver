@@ -1,870 +1,317 @@
-# TH08 Solver Strategy Ledger
+# Touhou Solver Strategy Ledger
 
-This file records which control strategies have been tried, what they were
-trying to solve, and why they are live, shadow-only, rejected, or still only a
-hypothesis. It is an index, not a replacement for the detailed design notes,
-counterexamples, run dossiers, or `notes/RESEARCH_LOG.md`.
+Last updated: 2026-07-27.
 
-Last updated: 2026-07-26.
+This file records strategy identity and promotion status. It is not a
+chronological log. Derivations and measurements live in design notes,
+`notes/RESEARCH_LOG.md`, `notes/COUNTEREXAMPLES.md`, and run dossiers.
 
 ## Status Vocabulary
 
-- **Live:** permitted to affect physical gameplay under the stated gate.
-- **Shadow:** computed or replayed for telemetry, but cannot rank live input.
-- **Rejected live:** evidence falsified the current live form. Code may remain
-  as an offline oracle, but reactivation requires the listed new evidence.
-- **Hypothesis:** plausible and worth testing, but not yet implemented or
-  supported by causal physical evidence.
-- **Infrastructure:** necessary sensing, timing, or validation machinery; it
-  is not itself a winning gameplay strategy.
+- **Live:** may affect physical input inside its declared authority boundary.
+- **Shadow:** runs or records beside the live policy but cannot change input.
+- **Offline:** used only in replay, analysis, proof, or generated cases.
+- **Proposed:** designed or implemented but not authorized for live input.
+- **Rejected:** failed its declared model, correctness, delivery, or physical
+  gate. Retained for evidence; not silently re-enabled.
+- **Retired:** superseded as an active strategy, though its evidence remains
+  relevant.
 
-The ordering contract is unchanged:
-
-```text
-native collision avoidance
-  -> issue-time/delay certificate
-  -> finite-horizon survival viability
-  -> damage and phase completion
-  -> power/items/score/graze/position
-```
-
-Damage is important, but it is never permission to select an action outside
-the currently certified viable set. The default physical-practice policy is
-hard no-Bomb.
+An implementation optimization does not gain additional model authority.
+Promotion requires a fixed formal contract, independent oracle/counterexample
+coverage, immutable publication identity, deadline evidence, side-effect-free
+shadow evidence, focused physical validation, and an explicit edit here.
 
 ## Current Decision
 
-The live controller remains on native sensing, the fresh local hard collision
-certificate, and the verified coarse Boolean viability path. Physical
-practice is hard no-Bomb. Exact augmented belief values, stationary
-candidates, survival labels, damage objectives, and candidate witness
-publication remain offline or shadow-only.
+### Live control stack
 
-The losing-root stationary-candidate service is accepted only as a
-below-normal-priority shadow service. Stage-6B v2 delivered 93.56% of exact
-losing roots without the latency/action-lag regression caused by every-root
-submission; the every-root form is rejected. A completed exact candidate is
-an attainable finite-model lower bound. Candidate exhaustion, timeout, or
-budget exhaustion is unresolved, never unrestricted losing. Exact witness
-publication now preserves the augmented root, causal witness, issued-action
-label, all-action local certificate, immutable version, and deadline, but
-does not change the selected mask.
+The current physical policy is hard no-Bomb and consists of:
 
-Stage-4A `100451` then exposed the highest-priority defect outside the
-candidate recurrence: post-spell dialogue froze `enemy_manager_frame` while a
-held direction continued moving the player by 434.63 or 343.65 pixels to a
-boundary. The attempted 50-ms repeated-counter guard is rejected by
-Stage-4A `103856`; it fired 2,780 times for only 72 real wall pulses, churned
-policy epochs, and reduced available viability queries from 9,073 to 691.
-Live source behavior is restored to the pre-guard controller.
+1. native TH08 state sensing and hazard projection;
+2. persistent native pool-read buffers and packed bullet decode;
+3. shared native hazard queries and native local beam reduction, with Python/
+   NumPy rollback and differential oracles;
+4. a fresh issue-time local collision certificate;
+5. the CE-0127/0128 fresh/global action transaction; and
+6. coarse Boolean robust viability published by four native workers.
 
-The shipped FRScreen/MSG manager-clock predicate and a game-neutral tri-state
-episode tracker are now accepted as shadow infrastructure only. Corrected
-Stage-4A run `122014` produced five semantic episodes for five delayed
-same-frame pulse groups, with zero mismatches against that proxy, while 3,031
-ordinary observations were gate-negative. The proxy is not independent
-ground truth, only one stage was exercised, `msg_state == -2` was not
-observed, and total probe CPU was not measured. No movement release, epoch
-reset, estimator change, or policy retirement follows. CE-0120 remains open
-at the actuator boundary and the live policy has no complete authority claim
-across it.
+The local native layer accelerates existing semantics. It does not prove the
+semantics complete and does not authorize an explicit active/held/pending
+belief root for live ranking.
 
-The local-certificate audit found two independent defects. Batched bullet and
-laser clearance depended on unrelated companion positions; per-position
-relevance masking is accepted as a deterministic geometry correction. The
-certificate also equated held desired input with native active input and
-sampled a new delay for a held/no-write mask. An independent scalar oracle and
-packed finite-lease implementation now model active, held, pending, older
-remaining delay, and conditional writes, but the explicit-root path remains
-shadow-only. Existing live callers retain the active-equals-held fallback.
-First-action beam labels remain default-off after changing only soft choices
-and producing no sampled hard-vector improvement. A wholesale C++ local
-planner rewrite is deferred; the packed certificate already meets the current
-offline gate, while physical root and deadline validity remain unproved.
+### Current evidence
 
-Implementation-only native acceleration is now live for the shared local
-hazard query, quantized no-item beam reduction, and packed planning bullet
-decode at 16 or more active slots. All retain Python rollback/oracles and
-inherit the existing hard-certificate and finite-beam authority boundaries.
-Hazard-major iteration had zero action/hard-label mismatches on 128 direct
-retained roots and cut Stage-6B certificate geometry p95 from `4.903` to
-`2.304 ms`. The packed decoder had exact field/projection parity and reduced
-1,536-bullet Windows decode-plus-projection p95 from `9.263` to `0.197 ms`.
+**Observed:** Hard Stage-1 `175049` completed with zero hits, Bombs, and
+deadline misses.
 
-Planner freshness takes priority over extracting the last local geometry
-percent. Interleaved Windows contention data showed one native viability
-worker at `40.716/57.090 ms` median/p95 and four at
-`26.953/29.821 ms`; the four-worker beam-geometry p95 cost was only about
-8.5% versus one worker. The authoritative corridor solver therefore remains
-normal-priority with four native workers. Dynamic grid/BVH construction is
-deferred until a physical trace isolates geometry itself as the remaining
-bottleneck.
+**Observed:** complete Hard Route-2 `184942` reached `route_complete` with
+39 hits and zero Bombs; 38/39 hits followed global-kernel exhaustion.
+Local-plan median/p95 remained within `11.81..14.55/20.86..26.90 ms`.
 
-Hard Stage-1 `175049` was the first focused physical implementation gate:
-7,099 decisions, zero hits, zero Bomb, and zero deadline misses. It also
-produced CE-0124: immediately after an action-epoch discontinuity,
-`input_current=down_right` while held desired was reset to stay. This direct
-root confirms that explicit active/held/pending semantics cannot be promoted
-by assuming discontinuity restores active-equals-held.
+**Observed:** generated semantic differential gate/research profiles
+(256/96 cases) had zero geometry, batch, risk, or supplemental endpoint
+mismatches across densities up to 3,900 bullets and 1,387 lasers.
 
-Complete Hard Route-2 `184942` and the later Stage-4A audits move the current
-user-directed algorithmic gate to feasibility preservation before Boolean
-kernel exhaustion. The fresh/global issue transaction is now physically
-validated for the current enemy-change boundary. A repair-aware beam
-experiment is rejected by CE-0129 because 2/800 pre-hit roots regressed their
-later terminal hard vector. A final-only continuation/interior-reserve
-ranking remains proposal-only: it changed 7/800 broad and 13/800 pre-hit
-actions with zero changed-action hard regressions and no measurable ranking
-cost, but the coverage is too small to call it the main solution.
+**Observed:** current supplemental finite selection preserves the historical
+incumbent and hard nonregression contract in retained replay. Its complete
+native C++ boundary is fast in isolation, but synchronous delivery and
+same-issue exact-version asynchronous publication both failed the fixed
+Windows deadline gate. CE-0131 is the canonical final rejection witness.
 
-The successor immutable supplemental lane is now implemented and
-offline-validated, still default-off and proposal-only. It preserves the
-complete historical beam and uses an independently budgeted native/Python
-reducer. Width 4 changed 286/800 broad and 341/800 pre-hit same-root
-decisions; 273 and 323 increased exact repair volume, with another 13 and 18
-equal-repair reserve improvements. Historical action identity and exact
-effective-global, componentwise issue/local/terminal hard, route, and final
-continuation checks had zero violations. The lane itself cost
-`2.449/3.114 ms` broad and `2.425/3.026 ms` pre-hit median/p95. Widths 8 and
-12 had diminishing coverage returns and larger tails, so width 4 is the only
-retained candidate for the next gate. Same-root replay does not establish
-prevented hits or Windows issue-time fitness.
+### Priority
 
-The direct-root Windows gate rejects both synchronous and exact-version
-same-issue delivery of that width-4 lane.  The complete supplemental rollout,
-hazard queries and reduction now execute behind one persistent,
-deadline-aware native boundary.  It completed 729/729 eligible four-worker
-queries, retained all 294 reference action changes, and cost only
-`0.876/1.365/1.942 ms` median/p95/max itself, with zero Python/native or
-fallback mismatch.  End-to-end paired latency still failed at
-`1.249/7.054/53.721 ms` and one new deadline proxy miss.
+1. Preserve global feasibility earlier and create exact augmented-root
+   partial-survival witnesses for post-loss fallback.
+2. Use proof-backed query-local refinement to separate coarsening, horizon,
+   uncertainty, forecast/birth, route/tube, and unresolved losses. Do not use
+   uniform full-field 4-pixel solving.
+3. Publish the authoritative Boolean result before optional work. Use
+   additional CPU through independent-root process shards; keep the live
+   same-root worker limit at four until another contention gate passes.
+4. Keep explicit active/held/pending roots, candidate publication, survival
+   labels, final-only continuation, and width-4 supplemental search outside
+   action authority.
+5. Continue CE-0120 as a parallel shadow sensor/actuator investigation. Do
+   not let manager frame or a wall-time threshold reset policy or input.
+6. Reopen supplemental delivery only with a genuinely earlier causal
+   hazard/policy version or isolated execution resources, followed by the
+   unchanged Windows gate.
 
-The predeclared exact-version follow-up uses a dedicated below-normal,
-newest-wins worker, cooperative cancellation, complete-only publication and
-lookup-only consumption.  Its final identical gate completed 728/729,
-retained 294/294 changes, and kept every finite/issue/parity/fallback check
-clean.  Paired latency nevertheless remained
-`2.240/8.139/12.214 ms` and created one new hybrid miss.  Global planner
-p95/throughput ratios `0.990x/1.021x` still passed.  CE-0131 therefore blocks
-the focused physical A/B without weakening the authoritative four workers.
-Both delivery modes remain default-off offline/shadow infrastructure.
+## Strategy Summary
 
-The reusable TH08-semantic differential harness now generates, serializes,
-replays and shrinks twelve families across Normal, Hard, Lunatic and
-beyond-pool densities.  Its 256-case gate and 96-case research runs covered
-up to 3,900 bullets, 1,387 lasers, 62 bodies and horizon 24, with zero
-collision, clearance sign/value, risk, batch-invariance or supplemental
-endpoint mismatch.  Research NumPy/native geometry p95 was
-`121.538/40.500 ms`; Python/complete-native supplemental p95 was
-`9.931/3.337 ms`.  These generated finite semantics do not establish shipped
-ECL completeness.  The prior live-like evidence still says the current
-conservative AABB pruning is effective, and no per-decision grid/BVH is
-promoted.
+| ID | Strategy | Current status |
+| --- | --- | --- |
+| S01 | reactive local dodge with emergency deathbomb | Rejected |
+| S02 | forward corridor waypoints and gate commitment | Live macro guidance only |
+| S03 | dynamic hold and adaptive delay support | Live |
+| S04 | robust backward viability | Live coarse Boolean authority |
+| S05 | empty-kernel endpoint recovery and boundary reserve | Limited live fallback; not a certificate |
+| S06 | max-min safety value | Offline oracle; rejected live |
+| S07 | observation-complete versioned safety transaction | Partly live; hazard completeness still open |
+| S08 | item/Power/score/graze objectives | Disabled for survival acceptance |
+| S09 | full-horizon fine refinement and fused survival labels | Rejected live; offline/shadow |
+| S10 | damage-aware phase completion | Telemetry only; live alignment rejected |
+| S11 | delivery-aware hierarchical planning | Accepted direction; incomplete |
+| S12 | route/stage/phase-conditioned practiced profiles | Accepted architecture; unpromoted data |
+| S13 | native semantic manager-clock boundary | Shadow infrastructure |
+| S14 | explicit local input-pipeline certificate | Batch fix live; explicit root shadow |
+| S15 | native local implementation acceleration | Live optimization |
+| S16 | pre-loss continuation and supplemental lane | Proposed finite selector; live delivery rejected |
 
-Current priority is:
-
-1. keep CE-0120 shadow-only while its no-write/epoch counterfactual and broader
-   negative workloads remain incomplete;
-2. keep both width-four delivery forms default-off after CE-0131.  Complete
-   native recurrence speed and implementation parity are adequate; same-issue
-   optional CPU/cache/scheduler interference failed the fixed Windows gate;
-3. return primary effort to early global feasibility/route preservation.  A
-   future supplemental delivery experiment is justified only if it can
-   publish a causally valid exact hazard/policy version before issue or use
-   genuinely isolated execution resources.  It must rerun the unchanged
-   gate before any focused Hard shadow or physical A/B;
-4. add exact augmented-root partial-survival witnesses as the post-loss
-   fallback without interpreting timeout or exhaustion as losing;
-5. replay direct local-pipeline roots and add future bullet/laser birth
-   coverage before broadening issue authority;
-6. use selective refinement, damage, resources, and longer route objectives
-   only inside certified feasible actions.
-
-See `START_HERE.md`, CE-0120 through CE-0123,
-`notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`,
-`notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`,
-`notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`, and
-`notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.
-
-## Strategy History
-
-Entries below are chronological evidence, not a second current task list.
-Labels such as “next gate” record the gate at that checkpoint unless an entry
-explicitly says it remains active. `Current Decision` and `START_HERE.md`
-supersede historical sequencing without erasing its counterexamples.
+## Strategy Details
 
 ### S01 — Reactive Local Dodge With Emergency Deathbomb
 
-- **Status:** Rejected live as an acceptance strategy.
-- **Intent:** Use short-horizon native bullet/laser avoidance and spend a Bomb
-  when the native predeath/deathbomb state says collision is imminent.
-- **Observed result:** The first complete Lunatic Final-B run reached the end
-  with 91 native hits and requested a deathbomb at 62 hit edges. Patched death
-  recovery allowed repeated resource resets, so the observed 98 Bomb-unit
-  spend was not a feasible route budget.
-- **Failure mode:** Bomb invulnerability, bullet cancellation, resource
-  mutation, and respawn changed the state being diagnosed. The strategy hid
-  planning failures instead of proving survival.
-- **Replacement:** Hard no-Bomb physical practice, adopted on 2026-07-23.
-- **Reactivation gate:** Bomb may enter a future resource-aware planner only
-  when the no-Bomb viability set is empty and the finite stock is modeled
-  across the complete route. Deathbomb is not a default fallback.
-- **Evidence:** `notes/RESEARCH_LOG.md` sections “First Complete
-  Sakuya/Remilia Lunatic Final-B Run” and “THPRAC Stage Isolation And Hard
-  No-Bomb Policy”.
+- **Status:** Rejected as an acceptance strategy.
+- **Reason:** Local reaction reached late game but accumulated hits and hid
+  planning failures behind Bomb/deathbomb behavior. Survival is now hard and
+  Bomb bit `0x02` is forbidden by default.
+- **Retained value:** emergency geometry and first-hit witnesses.
+- **Evidence:** early complete-run sections in `notes/RESEARCH_LOG.md`.
 
 ### S02 — Forward Corridor Waypoints And Gate Commitment
 
-- **Status:** Live only as macro guidance; not a survival certificate.
-- **Intent:** Keep the player in a long-horizon connected corridor and commit
-  to a bottleneck component instead of greedily maximizing immediate
-  clearance.
-- **Observed result:** It fixed specific gate reversals and made asynchronous
-  macro structure queryable, but the first complete run missed a corridor
-  deadline at 74/91 hits. A lane label could also alias different path
-  branches.
-- **Failure mode:** One optimistic forward path cannot establish that future
-  escape remains controllable. A stale waypoint has no action-level safety
-  meaning.
-- **Current gate:** Corridor targets are subordinate to fresh local collision
-  and robust-prefix checks.
-- **Evidence:** `notes/ROBUST_VIABILITY.md` and the 2026-07-23 complete-run
-  sections in `notes/RESEARCH_LOG.md`.
+- **Status:** Live only as macro guidance.
+- **Reason:** Waypoints fixed specific reversals and provide route direction,
+  but a corridor target is not a collision or survival certificate.
+- **Boundary:** route preference is evaluated only within the currently
+  viable/hard-safe set.
+- **Evidence:** `notes/ROBUST_VIABILITY.md`.
 
 ### S03 — Dynamic Action Hold And Adaptive Delay Support
 
 - **Status:** Live.
-- **Intent:** Separate controller cadence from actuation pickup and certify
-  candidate actions against the observed distribution of delays rather than a
-  single guessed scalar.
-- **Observed result:** Dynamic hold reduced the Stage-3 experiment from ten to
-  eight hits and spell-50 from five to one under different RNG. A later scalar
-  delay experiment regressed to eleven hits, motivating discrete robust
-  support. The game-neutral delay estimator now records visible pickup,
-  computation, censored commands, overruns, and a guarded support.
-- **Limitation:** A delay certificate is only as sound as the hazard snapshot.
-  It cannot cover a bullet or enemy born after that snapshot. The estimator
-  now exposes one unseen desired command and remaining-delay support, but the
-  live dense viability recurrence does not yet include that state.
-- **Evidence:** `notes/RESEARCH_LOG.md` sections “Dynamic-Hold Physical Run And
-  Actuation Split”, “Scalar Delay Rejection And Adaptive Robust Control”, and
-  “Adaptive Robust Stage-3 Physical Acceptance”.
+- **Model:** Hold length and pickup-delay support adapt to observed controller
+  timing while preserving no-write semantics.
+- **Observed:** reduced physical Stage-3 hits in its promotion experiments.
+- **Limitation:** a delay certificate remains only as sound as the hazard
+  snapshot and clock boundary; CE-0120 is unresolved.
+- **Evidence:** dynamic-hold sections of `notes/RESEARCH_LOG.md`.
 
 ### S04 — Robust Backward Viability
 
 - **Status:** Live coarse Boolean baseline.
-- **Intent:** Preserve the set of states with an action that is safe for every
-  modeled delay branch over the finite horizon.
-- **Observed result:** The native Boolean recurrence has NumPy/scalar parity
-  and gives an explicit safe-action set instead of one waypoint. It also
-  exposes widespread kernel exhaustion before physical hits. Complete Hard
-  Route-2 `184942` was empty before 38/39 contacts while published-policy age
-  remained median/p95 `2/8` frames, making feasibility/model quality a
-  stronger explanation than ordinary publication lateness for that run.
-- **Limitation:** The current 16-pixel, eight-frame lattice and instant-safe
-  terminal layer are approximations. More importantly, the policy is computed
-  from a forecasted snapshot that may omit later births or mode changes.
-- **Current gate:** It may constrain live actions only while its context,
-  delay support, horizon, and version are valid; a fresh local certificate
-  still dominates it.
-- **Evidence:** `notes/ROBUST_VIABILITY.md` and
-  `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`.
+- **Model:** native backward recurrence over a 16-pixel, eight-frame,
+  80-frame finite grid and declared action/uncertainty support.
+- **Observed:** native/NumPy/scalar parity for the declared recurrence.
+- **Limitation:** current resolution, horizon, forecast/birth coverage, and
+  compressed pipeline state can make the kernel empty before the physical
+  route is necessarily lost. Hard `184942` makes this the primary problem.
+- **Next gate:** proof-backed query-local refinement and post-loss witnesses.
+- **Evidence:** `notes/ROBUST_VIABILITY.md`,
+  `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`.
 
 ### S05 — Empty-Kernel Endpoint Recovery And Boundary Reserve
 
 - **Status:** Limited live fallback; not a certificate.
-- **Intent:** When the Boolean kernel is already empty, prefer actions whose
-  delay branches end nearer a later viable set and preserve room to reverse.
-- **Observed result:** Cross-stage replay found useful recovery guidance, but
-  scalar endpoint distance does not prove a safe bridge. CE-0089 also showed
-  that letting a soft reserve enter beam pruning before hard delay
-  certificates can erase safer first actions. The 2026-07-25 Stage-5 audit
-  found the converse gap after the Boolean kernel became empty: repair-volume
-  guidance disabled boundary reserve entirely. At canonical decision 1,680,
-  the fallback chose `down_right_fast` outside the 74-frame survival-best
-  mask with a 24-pixel diagnostic reserve deficit.
-- **Failure mode:** It optimizes an endpoint without representing every
-  intermediate state. Hard-before-soft ordering is enforced at pruning and
-  selection, but the live losing-state order still lacks guaranteed survival
-  horizon and does not apply reserve to repair-neighborhood states.
-- **Current shadow:** A default-off `losing_control_reserve` switch applies
-  delay-scaled reserve to repair/survival states only after fresh hard-vector
-  equivalence. Reserve-only replay improved 13/195 measured deficits and
-  regressed zero. On 400 fixed-reservoir Hard full-route pre-hit rows it
-  changed 28 actions, improved 27 reserve deficits, tied one, regressed none,
-  and preserved all 400 fresh hard vectors. It has no physical authority.
-- **Reactivation/upgrade gate:** Replace endpoint distance with a
-  time-expanded robust survival/recovery band that has scalar-oracle parity,
-  meets the delivery budget, and does not worsen hard-vector counts on
-  retained cross-stage rows.
-- **Evidence:** `notes/ALGORITHM_REVIEW_20260724.md` and
-  `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`.
+- **Model:** after Boolean exhaustion, choose among fresh-hard-equivalent
+  actions using recovery/boundary reserve.
+- **Observed:** retained replay found useful reserve improvements.
+- **Limitation:** it cannot relabel the root viable, prove unrestricted
+  survival, or override immediate hard ordering.
+- **Evidence:** `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`.
 
 ### S06 — Max-Min Safety Value
 
-- **Status:** Rejected live; retained as an offline oracle.
-- **Intent:** Rank already-losing states by their best robust bottleneck
-  clearance while exactly preserving Boolean threshold sets.
-- **Observed result:** The native recurrence passed scalar parity, but the
-  Stage-3 live experiment recorded 15 hits, the worst of seven retained
-  complete Stage-3 attempts. It added about 50 ms to the background solve and
-  widened local/control latency tails. Paired replay did not prove that its
-  ranking itself caused collisions.
-- **Failure mode:** Correct labels inside a frozen model were promoted without
-  an end-to-end delivery budget.
-- **Reactivation gate:** A packed/query-local implementation must meet the
-  live service deadline and repeated physical A/B must separate compute
-  contention from ranking quality.
-- **Evidence:** `notes/ROBUST_VIABILITY.md` section “Threshold-Free Max-Min
-  Safety Value”.
+- **Status:** Rejected live; retained offline.
+- **Reason:** native/scalar parity did not solve delivery cost or the mismatch
+  between a scalar proxy and physical no-hit authority.
+- **Permitted use:** oracle, bound, and candidate ordering only.
+- **Evidence:** max-min sections of `notes/ROBUST_VIABILITY.md`.
 
 ### S07 — Observation-Complete, Versioned Safety Transaction
 
-- **Status:** Live and physically validated for the current enemy-change
-  issue boundary; incomplete for future projectile births.
-- **Intent:** Treat observe-plan-act as a versioned transaction. Re-read
-  lightweight native state immediately before input and recertify when
-  relevant geometry changes.
-- **Observed result:** CE-0092 found an 18-body ring born during local
-  planning. Synchronous enemy-prefix reads and issue recertification remove
-  that specific stale-snapshot authority. Separate work recovered Reisen's
-  boss slot outside the nominal enemy pool, latent contact modes, and
-  world-position motion.
-- **Limitation:** Current issue checks do not yet cover every bullet/laser
-  birth. Holding the previous action after abort is also not a proof of
-  survival. Hard Stage-4A `202439` also exposed CE-0127: the fresh-enemy
-  recertifier ranks all 17 locally certified actions without preserving the
-  cached global winning mask. It silently changed an in-mask plan to an
-  out-of-mask action on 168 rows while still reporting the action as
-  viability-constrained.
-- **Offline correction:** The recertifier now preserves a planned action in
-  the fresh/global intersection, chooses replacements only inside that
-  intersection, and explicitly relaxes when it is empty. It retains both
-  certificates, the fresh safe set, intersection, reason, and selected-action
-  strategy telemetry. Deterministic preserve/intersect/relax regressions and
-  the Linux/Windows quick suites pass.
-- **Physical correction gate:** No-audit Hard Stage-4A `211210` completed with
-  2,417 audited transactions, zero silent outside-mask issues, zero Bomb, and
-  no issue/local/policy latency regression. It preserved 2,387 planned
-  actions and changed only 30. Two explicitly relaxed rows mislabeled their
-  preservation reason; CE-0128 is fixed without an action change.
-- **Second physical gate:** Hard Stage-4A `212756` retained 2,210 transactions
-  and the independent reason-aware auditor found zero violations. It
-  preserved 2,189 planned actions, changed 21, and retained the latency
-  envelope. CE-0127/0128 are closed for this boundary.
-- **Next gate:** Add packed bullet/laser/enemy issue coverage and ECL/timeline
-  `BirthWindow` coverage while route strategy work proceeds independently.
-- **Evidence:** `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`.
+- **Status:** Live for the current fresh-enemy/global issue boundary; broader
+  observation completeness remains open.
+- **Model:** a decision is tied to an immutable observation/policy version and
+  is re-certified before issue.
+- **Observed:** CE-0127/0128 repair and runs `211210/212756` retained 4,627
+  transactions with zero silent outside-global selections.
+- **Limitation:** future bullet/laser births, transforms, bodies, and every
+  issue-snapshot discontinuity are not yet proven complete.
+- **Evidence:** `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md` and CE-0127/0128.
 
 ### S08 — Item, Power, Score, And Graze Objectives
 
 - **Status:** Disabled for current survival acceptance.
-- **Intent:** Improve route resources and score inside the viable set.
-- **Observed result:** Residual item potential helped reinforce a climb into a
-  newly active boss body, and raw item values could dominate conservative
-  position cost.
-- **Failure mode:** The hazard and viability layers are not yet reliable
-  enough to certify that a pickup is safe. Passive collection remains
-  measured but cannot prune or rank actions.
-- **Reactivation gate:** Only actions already equivalent under fresh survival
-  certificates may be separated by resource utility.
-- **Evidence:** `notes/ALGORITHM_REVIEW_20260724.md` and CE-0090.
+- **Reason:** soft collection incentives previously reinforced unsafe motion.
+- **Boundary:** these objectives may return only inside a proven viable set
+  with explicit resource state and route profile.
+- **Evidence:** CE-0090 and `notes/ALGORITHM_REVIEW_20260724.md`.
 
 ### S09 — Full-Horizon Fine Refinement And Fused Survival Labels
 
-- **Status:** Rejected live on 2026-07-24; retained shadow/offline.
-- **Intent:** Recover coarse false-empty states with an 8-pixel lattice and,
-  when no winning state exists, choose the action with the longest guaranteed
-  modeled survival horizon.
-- **Observed offline result:** Exact Stage-5 capsule replay recovered all
-  three CE-0100 coarse false-empty witnesses. Fused survival labels have
-  independent scalar parity and correct CE-0101's endpoint-ranking
-  counterexample.
-- **Observed physical result:** The Stage-4A trial
-  `lunatic_route2_stage4a_unattended_20260724_220032` recorded 40 hits versus
-  26 in the comparison run. Global solve median/p95 rose from
-  170.77/380.59 ms to 532.04/1174.21 ms; unique delivered policies fell from
-  1,728 to 630; expired decisions rose from 34 to 178. Empty queries fell, but
-  the delivered controller became substantially staler.
-- **New shadow evidence:** Exact reconstruction matched all 272 stratified
-  Stage-5 queries; 195 were base-empty. Survival-first replay changed 42/195
-  actions, increased survival-best membership from 134 to 175, and caused
-  zero fresh local hard-vector regressions. Canonical decision 1,680 changed
-  from `down_right_fast` to `stay`. On 48 exact capsules, Boolean/fused viable
-  arrays and action masks matched, but whole-solve median/p95 was
-  `76.96/197.99` versus `125.31/229.58 ms`. Producing the label inline would
-  still delay Boolean publication.
-- **Boolean-first correction:** The Boolean policy now publishes before an
-  optional labels-only recurrence. A serialized Stage-5 shadow run raised
-  expired decisions `14 -> 34`; a separate-executor, one-label-worker run
-  restored expiry to 15 with first policy age `4/10` frames and query age
-  `11/27`, matching the Boolean-only delivery envelope. Label computation
-  itself moved to `150.43/284.57 ms` median/p95 and remained non-authoritative.
-- **Pending-pipeline rejection of dense authority:** In two complete Stage-5
-  shadows, issued desired input differed from native active input on
-  `754/8077` and `805/7772` Boolean queries. Among labeled queries this changed
-  winning/losing classification nine times in each run. Two deterministic
-  16-query exact cohorts changed best-action sets 13 times each when the
-  older pending command and remaining delay were added; winning classification
-  changed 4 and 6 times.
-- **Sparse augmented prototype:** A versioned C++ reachable-tube workspace now
-  preserves exact frame/observed/pending/remaining-delay state and full root
-  action labels. It passed 512 scalar differentials and ten full TH08-size v1
-  differentials with zero failures. TH08 query median/p95 changed from
-  `819.90/986.61 ms` for independent v1 cold queries to
-  `38.76/104.46 ms` for cold/incremental workspace roots; an identical warm
-  root measured `0.103/0.128 ms`. This accepts the pruning recurrence, not
-  issue-time delivery: cold p95 remains outside the live control budget.
-- **Exact-root frontier prototype:** The issued action is now lowered into a
-  deduplicated set of next roots over command delay and an experimental
-  `(4,5,6)` next-decision support. A public root may robustly branch over that
-  cadence once while fixed-eight-frame continuation remains explicit; this is
-  not a full variable-cadence certificate. Across 512 scalar differentials
-  and 70 TH08-shaped exact roots, native results had zero failures. Three
-  phase shards reduced post-issue frontier wall time to
-  `39.61/49.35/62.50 ms` median/p95/max and lookup-only consumption to
-  `0.061/0.100/0.143 ms`. Phase seed wall remained
-  `112.51/122.02/140.69 ms`, so a seed started only at issue time is too late.
-- **Cancellable rolling prototype:** A bounded newest-version scheduler now
-  uses native cooperative cancellation/deadlines, a fresh executor per
-  immutable policy, exact continuation-memo merge, and lookup-only
-  specialization. Across 256 scheduler/scalar differentials and 25
-  TH08-shaped rolling decisions, labels had zero failures and specialization
-  added zero continuation states. Full preparation plus seed plus
-  specialization measured `59.13/228.99/295.90 ms` median/p95/max; exact
-  lookup measured `0.066/0.135/0.445 ms`. The first two decisions of every
-  fresh policy missed a four-frame budget, decision three passed 4/5, and
-  decisions four/five passed 10/10. Five stale replacements completed in
-  `5.27/5.35/6.31 ms`, and old results were never consumable.
-- **Physical prewarm rejection:** Complete Stage-5 no-shadow/full-frontier/
-  top-2-shadow runs recorded iteration medians `45.63/71.82/65.98 ms`,
-  local-plan medians `20.35/30.83/29.22 ms`, and action-lag medians
-  `2/4/3` frames. Top-2 raised exact-root hits from `4.49%` to `12.47%` but
-  did not restore the clean controller budget. RNG-distinct hit totals
-  `14/32/27` are adverse, not causal, evidence.
-- **Formal correctness rejection:** CE-0114 shows the legacy recurrence
-  mistakes hold/no-write for a newly delayed command; an isolated 128-case
-  cohort produced 30 winning errors. Corrected CE-0111 shows
-  one-transition cadence can report a full win when recursive cadence loses
-  one frame. CE-0112 shows exact hidden remaining delay can add a false best
-  action. Therefore the legacy value has unknown error direction and is not an
-  upper or lower bound.
-- **Belief-state replacement candidate:** The new scalar/native recurrence
-  implements conditional issue/no-write, branches cadence recursively, and
-  merges remaining-delay supports by next observation. Native parity passes
-  another 128 retained cases. On a
-  TH08-shaped 32-frame `(4,5,6)` workload, unrestricted 17-action continuation
-  took `1507.74 ms`; all 17 root actions with nine focused continuation
-  actions took `29.52 ms`. The latter is a conservative attainable policy
-  class, not unrestricted optimality. Wide recursive `(2..9)` cadence remains
-  outside budget.
-- **Budgeted anytime refinement:** Future fast actions may now be used at most
-  `B` decision epochs per history while every public root still evaluates all
-  17 actions. This gives proved nested attainable lower bounds
-  `L_0 <= L_1 <= ... <= V_unrestricted`; sufficiently large `B` recovers the
-  unrestricted finite model. A native revealed-delay information relaxation
-  is a proved upper bound and passes independent scalar parity. On the
-  retained structured workload `L_0` equals that upper label, so it certifies
-  the unrestricted state value for that instance. One workspace incrementally
-  solved `B=0/1/2` in `32.30/687.54/1054.42 ms`; the complete upper costs
-  `1471.15 ms`.
-- **Incumbent-seeded selective upper certification:** The native threshold
-  recurrence now asks only which optimistic root actions can strictly beat a
-  completed attainable lower label. It preserves controller/nature
-  quantifiers and revealed observation merging, and reports unresolved
-  actions rather than incomplete upper labels. Across 128 deterministic
-  finite games its unresolved mask exactly matches the independent complete
-  scalar upper. On the current retained structured workload `L_0` costs
-  `29.96 ms`, certification costs `0.047 ms`, and all 17 optimistic actions are certified
-  unable to beat `L_0`; the old complete upper cost about `1.5 s`.
-  Fresh Stage 6B capsules expose the nontrivial tail: an uncapped 32-root
-  cohort certified 31 roots but took as much as `1907.33 ms`; one root
-  retained eight unresolved actions. The 100-ms anytime contract certified
-  29 roots, retained the same eight-action gap, and conservatively returned
-  all 17 actions unresolved on two deadline roots. **Status remains
-  offline/shadow-only.**
-- **Resumable threshold service:** Exact-root threshold memo and root-action
-  proof states now survive repeated calls only for the same immutable version,
-  canonical root, and bit-identical lower target. On a deterministic hard
-  root, five repetitions completed in 21--23 5-ms slices with exact final
-  eight-action mask parity; total median was `112.92 ms` versus `109.39 ms`
-  one-shot. Fresh restarts spent the same service time but stayed at all 17
-  actions unresolved. This solves bounded service delivery for a sufficiently
-  long-lived root, not cross-version cold start, total CPU, or the remaining
-  lower/upper gap. **Status remains offline/shadow-only.** The next
-  algorithmic gate is targeted lower refinement only for unresolved actions
-  plus earlier losing-state prevention, not blind budget widening or
-  synchronous complete upper.
-- **Feasibility-first candidate synthesis:** Exact stationary continuation
-  portfolios now answer the cheaper question first: whether any causal policy
-  survives the finite horizon. On retained structured seeds 0/3 the first
-  full-horizon witness costs median `4.01/1.90 ms`. Seed 0 previously cost
-  `733.42 ms` for the nine-action lower and `4379.39 ms` for unrestricted
-  exact belief. If optimality is requested, the unresolved upper action and a
-  worst restricted path propose new action columns; every proposal is
-  re-solved exactly before it raises the lower. The three-column seed-0 class
-  reaches the exact unrestricted label in median `287.64 ms`. A
-  previous-version candidate ranking may reduce current-version cold start,
-  but every label is recomputed: one changed-clearance root improved
-  `3.980 -> 2.200 ms` median with full-portfolio order invariance.
-  Remaining-delay bucket upper bounds pass nested scalar/native parity but
-  did not reduce the hard first-upper cost. Two Stage-6B 32-root cohorts each
-  produced 20 exact-losing, 11 candidate-feasible, and one
-  refinement-feasible root at candidate medians `2.13/2.22 ms`.
-  **Status remains offline/shadow-only for values and actions.**
-- **Candidate physical delivery gate:** Every-root shadow `004142` delivered
-  only `65.50%`, accumulated 205 replacements/1,099 stale completions, raised
-  local-plan median `21.20 -> 26.46 ms`, and raised action lag `2 -> 3`
-  frames; that admission policy is rejected. Losing-only v2 `011639`
-  delivered `6192/6618 = 93.56%` exact roots with zero replacement/stale
-  completion. Iteration median was `44.88 ms`, action lag/cadence `2/3`
-  frames, and policy age `3` frames, matching the Boolean-only envelope.
-  This accepts the executor/admission architecture as an explicit shadow
-  service, not the candidate action.
-- **Stage 6B physical counterexample:** Instrumented hard-no-Bomb run
-  `lunatic_route2_stage6b_unattended_20260725_204521` completed with 31 hits
-  versus 27 in the RNG-distinct comparison. Global solve median improved
-  `266.80 -> 97.41 ms` and clearance median `118.55 -> 13.72 ms`, but
-  `7213/15149` available queries had an empty action set and every hit was
-  attributed to prior global-kernel exhaustion. Performance gains therefore
-  generalize beyond Stage 5, while survival acceptance does not.
-- **Newest Stage 6B evidence:** Losing-only shadow `011639` completed with 26
-  RNG-distinct hits and zero Bomb. All 26 contacts still followed
-  Boolean-kernel exhaustion. The candidate service had no input authority, so
-  the hit count neither accepts nor rejects candidate actions; it establishes
-  only deliverability without measurable controller contention.
-- **Failure mode:** Uniform full-field refinement was called “adaptive” even
-  though it recomputed an entire fine horizon after a coarse empty source.
-  More precise labels for a frozen hazard snapshot were allowed to control
-  after their delivery relevance had decayed. Dense labels also use a
-  source-layer state without the exact observed/pending input pipeline.
-- **Reactivation gate:** First counterfactually replay only completed winning
-  exact-key candidate witnesses at former pre-hit roots, retain the witness
-  with its root action/version/deadline, and require a fresh issue-time hard
-  certificate. Validate on another stage and multiple RNG captures before
-  any action authority. A non-winning, exhausted, budget-expired, timed-out,
-  stale, or key-mismatched result must fall back to Boolean plus the local
-  certificate. Same-recurrence parity and delivery rate alone are
-  insufficient.
-- **Evidence:** `notes/STAGE5_VIABILITY_DIFFERENTIAL_AUDIT_20260724.md`,
-  `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`,
-  `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md`,
-  `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`,
-  `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`,
-  `notes/ROLLING_PIPELINE_PREWARM_20260725.md`,
-  `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`,
-  `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
-  `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,
-  `notes/ANYTIME_DUAL_BOUND_POLICY_SYNTHESIS_20260725.md`,
-  `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`,
-  `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`,
-  `artifacts/benchmarks/augmented_pipeline_workspace_20260725.json`,
-  `artifacts/benchmarks/exact_root_frontier_20260725.json`,
-  `artifacts/benchmarks/rolling_pipeline_prewarm_20260725.json`,
-  `artifacts/benchmarks/belief_pipeline_workspace_20260725.json`,
-  `artifacts/benchmarks/budgeted_belief_refinement_20260725.json`,
-  `artifacts/benchmarks/resumable_upper_certification_20260725.json`,
-  `artifacts/benchmarks/dual_bound_policy_synthesis_20260725.json`,
-  `artifacts/benchmarks/upper_hierarchy_cross_version_20260725.json`,
-  `artifacts/viability_audit/pipeline_formal_correctness_20260725.json`,
-  `artifacts/viability_audit/stage5_20260724_201636_adaptive_replay.json`, and
-  the retained Stage-4A/Stage-5 run dossiers.
+- **Status:** Rejected live; retained offline/shadow.
+- **Observed:** exact capsule replay could recover coarse false-empty states.
+- **Rejected because:** synchronous fine refinement and fused survival work
+  delayed authoritative publication and changed the state/version it claimed.
+  Full-field 4-pixel Hard roots later measured
+  `1062.85/3506.43 ms` median/p95.
+- **Permitted successor:** cancellable query-local refinement published after
+  the authoritative Boolean result.
+- **Evidence:** rejection sections in `notes/RESEARCH_LOG.md` and
+  `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`.
 
 ### S10 — Damage-Aware Phase Completion
 
-- **Status:** Native telemetry and safe-set shadow are live infrastructure;
-  Boss-x alignment is rejected live. Exact shot-model planning remains a
-  hypothesis.
-- **Intent:** Among actions that are already survival-equivalent, maximize
-  expected player-shot damage or minimize robust time-to-phase-completion.
-  Ending a boss phase earlier can prevent exposure to its later, denser
-  pattern, so “survive the next horizon” and “survive the route” are not the
-  same objective.
-- **Observed facts supporting investigation:**
-  - The live controller already keeps Shot in normal decision masks.
-  - Its local terminal position cost prefers bottom-center or a corridor
-    waypoint; it does not use boss HP, damage rate, shot cadence, option
-    geometry, damageability, or remaining phase time.
-  - Recovered route-2 SHT data show that full-power Sakuya and Remilia fire
-    narrow upward/spread lanes. Horizontal alignment with a damageable boss
-    can therefore change realized DPS.
-  - `notes/HAZARD_ORACLE_AND_ADAPTIVE_VIABILITY.md` already identifies boss
-    HP, damage rate, shot state, and phase timers as missing phase state.
-- **Initial shadow audit:** In the two retained Stage-4A traces, Shot appears
-  in 97.38--97.78 percent of output decisions and 97.39--97.66 percent of
-  observed active input, but normal-phase horizontal owner alignment varies
-  sharply. Some phases spend under 20 percent of measured rows within 48
-  pixels. All measured spell spans are roughly 2,808--3,229 frames while
-  post-hit Power is commonly near zero. These observations motivate HP
-  telemetry but do not prove that an alignment action increases damage.
-- **Observed native experiment:** Stable registry/HP/timer telemetry was
-  physically validated on Stage 4A. For spell 57, the shadow capture recorded
-  873 stable Boss samples and the explicit alignment experiment recorded 906;
-  every sample had an open native damage gate. Live alignment changed 123
-  actions and improved normal horizontal-error median
-  `51.50 -> 25.19 px`, but observed HP rate was adverse
-  `0.47597 -> 0.37837 HP/frame` even though measured Power was higher in the
-  alignment run. The shadow capture ended manually at timer 2729/3000, while
-  the live capture reached 2996/3000, so this is not a phase-duration A/B and
-  is not a causal estimate.
-- **Decision:** Runtime live alignment authority and its CLI switch were
-  removed. Native HP/phase telemetry and the hard-safe shadow selector remain.
-  The next experiment must use the existing executable SHT/option/cadence
-  model and validate predicted damage against native HP delta.
-- **Confounders:** The no-life-decrement discovery runs still lose Power after
-  hits, use different RNG/respawn histories, and may time out phases. Aggregate
-  phase length or hit count cannot by itself prove a damage benefit.
-- **Next experiment:**
-  1. read or reconstruct native player-shot cadence and option state;
-  2. project the decoded Power-dependent SHT records through the existing
-     executable shot collision/damage model;
-  3. report predicted versus native HP delta by Power/focus/Boss motion;
-  4. shadow-rank only actions in the same fresh collision, delay, and viability
-     set;
-  5. require repeated focused A/B and a second stage before live promotion.
-- **Rejection condition:** If HP-delta prediction lacks runtime parity, if the
-  objective changes any action across a hard safety boundary, or if phase time
-  falls without a repeated survival improvement, keep it shadow-only.
-- **Artifact:** `artifacts/strategy/stage4a_attack_alignment_20260724.json`,
-  plus `stage4a_boss_phase_shadow_20260724.json` and
-  `stage4a_boss_phase_live_20260724.json`, generated by
-  `scripts/analysis/th08_attack_alignment_audit.py`.
+- **Status:** native HP/timer telemetry is infrastructure; live phase-alignment
+  authority is rejected.
+- **Reason:** stable sensing does not prove a practiced damage/timing profile
+  robust across RNG, entry resources, and route state.
+- **Boundary:** damage is an objective/resource constraint only inside the
+  viable set.
+- **Evidence:** damage-aware sections in `notes/RESEARCH_LOG.md`.
 
 ### S11 — Delivery-Aware Hierarchical Planning
 
-- **Status:** Proposed next architecture.
-- **Intent:** Optimize the policy that can be delivered before its assumptions
-  expire, not the most detailed solution of an old snapshot.
-- **Model:** A fresh issue-time shield owns immediate authority; an anytime
-  background planner supplies topology/invariant tubes and publishes only with
-  a validity certificate; event forecasts cover future births; damage and
-  other progress objectives operate inside the resulting set.
-- **Success gates:** Whole-pipeline p95, policy age/expiry, issue-time action
-  parity, cross-stage hard-vector counts, adversarial scalar parity, and
-  repeated physical focused passes. No single-stage hit-count delta is enough.
-- **Evidence:** The physical rejection of S09 and
-  `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`.
+- **Status:** Accepted direction; incomplete architecture.
+- **Model:** a fresh issue-time shield owns immediate authority; coarse global
+  policy publishes first; optional refinements are versioned, cancellable,
+  and lookup-only at consumption.
+- **Observed constraint:** S09 and S16 show that algorithmic merit is
+  irrelevant when delivery ages or misses the decision.
+- **Next gate:** isolate independent-root work and preserve newest-version
+  publication without increasing live contention.
+- **Evidence:** `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.
 
 ### S12 — Route/Stage/Phase-Conditioned Practiced Profiles
 
-- **Status:** Accepted architecture; profile data and live selection are not
-  yet implemented.
-- **Intent:** Preserve a reusable mechanics/safety engine while allowing the
-  macro strategy to be specialized to game, team, difficulty, stage, phase,
-  timer/event window, and resource state—the agent equivalent of a practiced
-  route.
-- **Model:** A profile may provide a timed reference tube, event-relative lead,
-  grid/horizon/cadence, resource floors, exact damage adapter, pickup windows,
-  and objective order. It may not alter native collision semantics or select
-  outside the fresh viable and issue-safe action set.
-- **Why this changed:** Current process-wide constants include local/global
-  horizons, lattice resolution, corridor lead/commit, boundary reserve, and
-  disabled item policy. The Boss experiment showed that one generic geometric
-  proxy can improve its own metric while worsening the native quantity it was
-  meant to represent.
-- **Tuning gate:** Fit on multiple RNG/entry-resource samples, validate on
-  held-out samples and repeated physical captures, retain adverse evidence,
-  and compare native survival, HP, Power, exit cause, and policy freshness.
-  One stage-specific profile is expected; a hidden stage conditional inside
-  the safety kernel is not.
+- **Status:** Accepted architecture; profiles are not live survival authority.
+- **Model:** explicit versioned data may provide route tubes, event-relative
+  timing, resolution/horizon, resource floors, and priorities.
+- **Boundary:** unavoidable TH08 mechanics belong in adapters/profiles;
+  universal control semantics remain game-neutral. One RNG sample cannot
+  promote a profile.
 - **Evidence:** `notes/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`.
 
 ### S13 — Native Semantic Manager-Clock Boundary
 
-- **Status:** Accepted shadow infrastructure; no live input or epoch
-  authority.
-- **Intent:** Distinguish a genuine native FRScreen/MSG manager-clock block
-  from an ordinary slow decision without using a wall-time threshold.
-- **Model:** A stable non-null FRScreen implementation with signed MSG state
-  `>= 0` or `-2` is gate-active; a stable other state is inactive; failed,
-  null, or unstable interval reads are unknown. The tracker merges identical
-  observations, censors/restarts on physical-frame change, and never mutates
-  input, delay/cadence evidence, estimator state, epoch, or policy version.
-- **Observed evidence:** Corrected Stage-4A `122014` matched five semantic
-  episodes to five delayed same-frame auto-confirm pulse groups
-  (`TP/FP/FN = 5/0/0` relative to that proxy). First-repeat classifications
-  were 3,016 inactive and five active; a hypothetical 50-ms cut classified
-  1,728 inactive repeats and five active ones. Available viability remained
-  8,759/8,914, without the rejected guard's epoch-starvation signature.
-- **Limitations:** Auto-confirm pulses are delayed proxy evidence, not
-  independent ground truth. Only Stage 4A was physically tested, `-2` was not
-  observed, total capture-call CPU was not retained, and neutral-write pickup
-  was not tested. Synchronous captures and trace flushes share the issue
-  thread, so this telemetry is physically perturbative despite having no
-  control-state authority.
-- **Promotion gate:** Define the neutral request as a real delayed write,
-  preserve pending-command support and native `input_current`, request at
-  most one immutable epoch transition per confirmed episode, fail closed on
-  unknown/terminal state, and measure pre-detection displacement, next-phase
-  position, policy retirement, and delivery contention in a separately
-  scoped physical trial.
-- **Evidence:**
-  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`, CE-0120/0121,
-  and Stage-4A `120839`/`122014` compact reports.
+- **Status:** Shadow infrastructure; no input or epoch authority.
+- **Model:** FRScreen/MSG state and native episode tracking distinguish
+  manager-clock blocking states.
+- **Observed:** the sensor matches retained Stage-4A transition episodes.
+- **Rejected action rule:** CE-0121's repeated-counter 50-ms guard fired on
+  ordinary delays and starved viability.
+- **Next gate:** exact no-write counterfactual, broader negative set, and total
+  contention before a scoped physical neutralization experiment.
+- **Evidence:** `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`,
+  CE-0120/0121.
 
 ### S14 — Explicit Local Input-Pipeline Certificate
 
-- **Status:** Per-position batch correction accepted in the existing live
-  geometry implementation; explicit active/held/pending certification is
-  shadow infrastructure; first-action beam refinements are rejected live.
-- **Intent:** Make the issue-time local fallback independent of batch
-  composition and eventually certify the physical input prefix that can
-  actually occur while a desired command is pending.
-- **Model:** The finite root carries native active input, controller-held
-  desired input, at most one older pending command, and conditioned remaining
-  support. Holding the complete desired mask is no-write and samples no new
-  delay. A real write universally branches over older remaining and new
-  pickup delay. The fixed lease contains no recursive cadence or future
-  controller maximization.
-- **Hard constraints:** Zero collision and nonnegative robust clearance on
-  every declared local branch; hard no-Bomb; no manager-frame clock
-  assumption; no explicit-root action authority when the estimator invariant,
-  version, hazards, or issue deadline is unavailable.
-- **Smallest gate:** Independent scalar/packed parity on focused and
-  randomized roots; batch-versus-single-position invariance; retained
-  Stage-4A/Stage-6B replay differentials; Linux/Windows quick suites.
-- **Observed evidence:** The packed equivalent-root implementation had zero
-  hard-label parity failures on `155 + 156` sampled roots. Pending-aware
-  semantics changed `86/155` and `85/156` safe-action sets on deliberately
-  mismatch-heavy samples. Packed pending-aware certification measured
-  `3.134/6.372 ms` and `3.936/7.911 ms` median/p95. First-action beam
-  refinements changed five and four actions but improved no sampled hard
-  vector; independent first-action partitions also found zero improvement.
-- **Limitations:** Old roots are reconstructed rather than directly logged,
-  samples are biased toward mismatch/pre-hit states, timings are Linux replay
-  rather than Windows issue-thread WCET, and the finite lease does not solve
-  global viable-set exhaustion or CE-0120.
-- **Promotion gate:** Retain direct explicit-root telemetry, reconcile it with
-  the estimator, pass Windows full-boundary timing/staleness and focused
-  physical shadow gates, then update this ledger before passing the root into
-  live selection or recertification. A C++ boundary is reconsidered only if
-  that correct end-to-end path misses its deadline.
-- **Rejection gate:** Any scalar/packed mismatch, companion-position
-  dependence, inconsistent direct root, missed issue deadline, or clean
-  physical regression keeps or returns the path to shadow.
-- **Evidence:** CE-0122/0123/0124,
-  `artifacts/benchmarks/local_pipeline_certificate_20260726.json`,
-  `artifacts/benchmarks/local_beam_stability_20260726.json`, and
+- **Status:** per-position batch correction is live; explicit
+  active/held/pending roots remain shadow.
+- **Model:** native active action, held desired action, optional pending
+  action, and remaining-delay support, including no-write transition.
+- **Observed:** packed equivalent-root induction matches the independent
+  scalar oracle. CE-0124 disproves assuming reset held desired equals the
+  first post-discontinuity native active input.
+- **Limitation:** live callers retain the active-equals-held estimator fallback
+  until direct-root coverage and authority are promoted.
+- **Evidence:** CE-0122/0123/0124 and
   `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
 
 ### S15 — Native Local Implementation Acceleration
 
-- **Status:** Live implementation optimization for shared hazard query,
-  quantized no-item beam reduction, packed planning bullet decode above the
-  measured sparse crossover, and persistent pool-read destinations. It does
-  not change model or strategy authority.
-- **Intent:** Lower observe/decode/project/certify/issue latency without
-  porting the unproved planner or changing collision, uncertainty, delay,
-  action, or no-Bomb semantics.
-- **Model:** Native SoA kernels implement the existing Python/NumPy
-  boundaries. Hazard-major iteration hoists per-hazard laser geometry and
-  performs candidate-AABB broad phase. The bullet decoder owns each snapshot.
-  The beam reducer returns exact retained indices only when quantized mode has
-  no selected items.
-- **Hard constraints:** Exact collision and clearance-sign parity; retained
-  action/hard-label parity; Python rollback; no occupancy replacement for
-  signed clearance; no promotion of beam optimality.
-- **Observed evidence:** Zero action/hard-label mismatches on 64 direct roots
-  from each of Stage 4A and Stage 6B. Stage-6B native hazard geometry is
-  `1.337/2.304 ms` and complete local planning `12.540/17.223 ms`
-  median/p95. Native beam reduced Stage-6B beam p95 from `13.528` to
-  `8.270 ms`. Packed bullet decode/project remained below `0.203 ms` p95
-  from 16 through 1,536 bullets in the final synthetic gate.
-- **Planner-first resource decision:** Keep four normal-priority viability
-  workers. They solve the representative policy at `26.953/29.821 ms`
-  median/p95, versus `40.716/57.090 ms` with one worker. The accepted local
-  beam p95 cost is about 8.5%.
-- **Limitations:** Python/native parity validates implementation only. Hard
-  Stage-1 is not Lunatic/Extra acceptance. Physical Stage-6B contention has
-  not yet been rerun after all changes. Dynamic BVH/grid and wider SIMD remain
-  hypotheses, not missing safety components.
-- **Rejection gate:** Any retained action/hard-label mismatch, sparse
-  crossover regression, diagnostic decoder loss, plan-age regression, or new
-  issue deadline miss restores the relevant Python path or blocks physical
-  use.
-- **Evidence:**
-  `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`,
-  `notes/LOCAL_NATIVE_HAZARD_QUERY_PROPOSAL_20260726.md`,
-  `notes/LOCAL_NATIVE_BEAM_REDUCTION_PROPOSAL_20260726.md`,
-  `notes/PACKED_NATIVE_BULLET_DECODE_PROPOSAL_20260726.md`, and the associated
-  artifacts under `artifacts/benchmarks/`.
+- **Status:** Live implementation optimization.
+- **Components:** persistent read buffers, packed decode, shared hazard query,
+  local reducer, and complete supplemental workspace.
+- **Observed:** direct-root and generated differential parity; local native
+  performance is adequate for current Hard workloads.
+- **Boundary:** native code implements the same finite semantics and retains
+  Python rollback/oracles. It gains no additional authority. Dense relevant
+  beyond-pool geometry can still have high tails.
+- **Decision:** retain conservative AABB pruning. Do not add viewport cropping
+  or a per-decision grid/BVH without a direct-root bottleneck and proof.
+- **Evidence:** `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`,
+  `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`.
 
 ### S16 — Pre-Loss Continuation And Interior Reserve
 
-- **Status:** Final-only ranking and the immutable supplemental lane are
-  proposal-only and default-off. Repair-aware shared beam pruning,
-  synchronous current-issue supplemental delivery and same-issue
-  exact-version asynchronous delivery are rejected.
-- **Intent:** Before the coarse Boolean kernel becomes empty, prefer a viable
-  first action with more worst-delay next-layer continuation and enough
-  interior room to reverse, without changing global/fresh membership.
-- **Hard constraints:** Historical beam candidates are unchanged. Local
-  collision/negative-clearance and complete terminal
-  collision/negative-clearance columns dominate repair and reserve. The
-  proposal activates only for a complete, nonrelaxed viable query and cannot
-  emit Bomb.
-- **Rejected form:** The first native/Python beam experiment changed 392/800
-  pre-hit actions and improved repair on 356, but CE-0129 found two terminal
-  hard regressions. Repair volume is not an admissible terminal-threat bound,
-  so the native-v2 change was removed.
-- **Retained form:** Final-only selection changed 7/800 broad and 13/800
-  pre-hit actions. All changed actions kept equal hard vectors and stayed in
-  the global set. Pre-hit reserve deficit improved on 11/13, repair improved
-  on 2/13, and neither regressed. Concurrent paired replay measured
-  `10.60/17.19` versus `10.61/17.26 ms` baseline/proposal median/p95.
-- **Supplemental form:** The complete historical beam is an immutable
-  incumbent. A separate width-4 lane changed 286/800 broad and 341/800
-  pre-hit actions, improving repair on 273 and 323 and equal-repair reserve
-  on another 13 and 18. Historical identity and effective-global,
-  componentwise issue/local/terminal hard, route, and continuation admission
-  checks had zero violations. Supplemental median/p95 was
-  `2.449/3.114 ms` broad and `2.425/3.026 ms` pre-hit. Widths 8/12 gave small
-  additional coverage for larger tails.
-- **Limitation:** The supplemental search is a bounded proposal generator,
-  not an exact unrestricted optimizer or safety proof. Same-root replay
-  cannot establish prevented hits, delivery freshness, or issue deadline
-  fitness.
-- **Direct-root delivery result:** On 253 retained Windows roots over three
-  rounds, all 1,518 finite/issue comparisons remained contract-clean and the
-  four-worker planner stayed within its p95/throughput contention limits.
-  Synchronous width-4 compute increment nevertheless measured
-  `2.354/14.273/25.184 ms` median/p95/max, failed the fixed
-  `5.0/<16.667 ms` limits, and created one new hybrid deadline-proxy miss.
-  CE-0130 rejects this delivery boundary, not the finite selector.
-- **Native and asynchronous follow-up:** The complete native boundary reduced
-  its own four-worker p95 to `1.365 ms` with full action-change retention and
-  zero parity/fallback mismatch, but end-to-end paired p95 remained
-  `7.054 ms` and maximum `53.721 ms`.  Exact-version newest-wins publication
-  then completed 728/729 queries and retained 294/294 action changes, with
-  zero finite/parity/fallback violations, but paired latency remained
-  `2.240/8.139/12.214 ms` and one hybrid deadline miss.  CE-0131 rejects
-  same-issue optional work because it still perturbs shared delivery.
-- **Next gate:** None for current-issue supplemental delivery.  Return to
-  global feasibility/route work.  Reopen only with a causally valid exact
-  version available before the issue transaction or genuinely isolated
-  execution resources; then rerun the unchanged Windows gate.  Every miss,
-  timeout, cancellation or mismatch still falls back to the historical
-  action.
-- **Evidence:** CE-0129,
-  `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`, and the
-  `hard_preloss_*_20260726.json` benchmark artifacts; successor design and
-  data are in
+- **Status:** finite selector proposed/offline; both live delivery forms
+  rejected.
+- **Model:** historical beam remains an immutable incumbent. A width-4 lane
+  may add an endpoint only after effective-global membership, componentwise
+  issue/local/terminal hard nonregression, route nonregression, and strict
+  repair/reserve improvement.
+- **Observed:** broad/pre-hit replay changed 286/341 of 800 actions with zero
+  declared finite violations. Complete native recurrence matched Python and
+  was fast in isolation.
+- **Rejected implementations:**
+  - repair-aware shared pruning: CE-0129 regressed 2/800 terminal hard vectors;
+  - synchronous current-issue native delivery: paired p95/max exceeded the
+    fixed gate and created a deadline proxy miss;
+  - exact-version same-issue async publication: CE-0131 retained one new
+    hybrid miss despite finite/parity success.
+- **Boundary:** no live CLI, no physical A/B, historical action remains
+  authoritative on every miss/cancellation/mismatch.
+- **Next gate:** none for the existing current-issue designs. Return to S04/S11
+  global feasibility and reopen only with an earlier causal version or
+  genuinely isolated resources.
+- **Evidence:**
+  `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`,
   `notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`,
-  `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`, and
-  `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`, plus the
-  `hard_supplemental_*_20260726.json` artifacts.
+  `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`,
+  `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`,
+  `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`,
+  CE-0129 through CE-0131.
 
-## How To Add A Strategy
+## Adding Or Changing A Strategy
 
-Every new entry must state:
+For every new strategy or promotion:
 
-1. what failure it is intended to solve;
-2. whether it is live, shadow, rejected, hypothesis, or infrastructure;
-3. which hard constraints dominate it;
-4. the smallest differential/offline gate;
-5. the physical acceptance workload and comparison limitations;
-6. what evidence would reject it or permit it to become live;
-7. links to counterexamples, artifacts, and detailed notes.
+1. define its physical/model contract and answer the five formal questions in
+   `AGENTS.md`;
+2. state exact live/shadow/offline authority and fail-closed fallback;
+3. identify an independent oracle and a falsifying counterexample;
+4. retain deterministic tests and the smallest failing capsule;
+5. measure computation, publication age, contention, and issue deadline on the
+   platform where the result will be consumed;
+6. run side-effect-free shadow and focused physical gates before broad routes;
+7. update this ledger, `START_HERE.md`, `notes/RESEARCH_LOG.md`, and
+   `notes/COUNTEREXAMPLES.md` in the same checkpoint.
 
-Do not rename a failed strategy and retry it with new weights. Explain which
-assumption, algorithm, model, or delivery boundary changed.
+No strategy becomes live because it is faster, agrees with another
+implementation, looks better in one replay, or completes after its decision
+deadline.

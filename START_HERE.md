@@ -1,9 +1,8 @@
-# TH08 Current Handoff
+# Touhou Solver Current Handoff
 
-This is the single current-state entrypoint for the TH08 Sakuya/Remilia
-Lunatic/Extra no-Bomb solver. It is intentionally short and volatile.
-`AGENTS.md` contains durable workspace rules; `STRATEGY.md` is the strategy
-status ledger; design notes and run notes contain derivations and history.
+This is the volatile entrypoint for the TH08 Sakuya/Remilia no-Bomb solver.
+`AGENTS.md` is the durable contract, `STRATEGY.md` is the promotion ledger,
+and design/run notes retain derivations and history.
 
 ## Read In This Order
 
@@ -11,429 +10,289 @@ status ledger; design notes and run notes contain derivations and history.
 2. this file
 3. `STRATEGY.md`
 4. `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`
-5. `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
-6. `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`
-7. `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`
-8. the lower/upper/anytime notes listed under “Formal references” below
-9. the relevant recent run note and counterexample rows before touching live
-   behavior
+5. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
+6. `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
+7. `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`
+8. `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`
+9. `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`
+10. `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`
+11. `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
+12. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
+13. the relevant recent run note and counterexample rows before live work
 
-First verify that the physical problem, formal recurrence, implementation, and
-publication deadline are still equivalent enough for the claim being made.
-Python/C++ parity for the same recurrence is not physical correctness.
+Before trusting a result, verify that the physical problem, formal
+recurrence, implementation, immutable version, and publication deadline still
+describe the same decision. Python/C++ parity is not physical correctness.
 
 ## Exact Checkpoint
 
-- Repository: `/home/pentester/coding/codex_ida/th08`
-- Branch: `main`
-- Algorithmic parent:
-  `7860a16 Fix local input-pipeline certification`
-- The current HEAD should include the native local implementation, selectable
-  full-route handoff, and complete Hard-route evidence checkpoints above that
-  parent. If not, inspect the intervening diff before trusting this file.
-- The live local implementation defaults to persistent pool-read
-  destinations, native shared hazard queries, native quantized no-item beam
-  reduction, and packed native bullet decode above 16 active slots. Python
-  implementations remain explicit rollback/oracles. Hazard-major geometry
-  and direct-root retained replays had zero action/hard-label mismatches.
-- The authoritative corridor planner remains normal-priority with four native
-  workers. One/two-worker limits are ablations; they are not the default.
-  Dynamic grid/BVH geometry is deferred because exact certificate geometry is
-  already about 1--2 ms outside contention and plan freshness has priority.
-- Complete Hard Stage-1 `175049` had 7,099 decisions, zero hits, zero Bomb,
-  and zero deadline misses. It also established CE-0124: the first
-  post-discontinuity native active input need not equal reset held desired.
-  Explicit active/held/pending roots remain shadow-only.
-- Complete original-game Hard Route-2 `184942` reached Final B
-  `route_complete` with 70,699 decisions, 39 hits, zero Bomb, and stage counts
-  `1/1/8/11/9/9`. Global viability was already empty before 38/39 hits;
-  boundary and fast-mode factors occurred on 30 and 29. Per-stage local-plan
-  median/p95 stayed within `11.81..14.55/20.86..26.90 ms` at up to 1,231
-  bullets and 256 lasers. The next primary problem is early feasibility and
-  losing-state/route strategy, not another wholesale local geometry rewrite.
-- A fixed-reservoir offline replay of 400 empty-kernel Hard pre-hit roots
-  changed 28 actions when the default-off losing-state control reserve was
-  enabled. All 400 fresh hard vectors were unchanged; 27 changed actions
-  reduced reserve deficit, one tied, and none regressed. This is a
-  proposal-only losing-state ranking result, not restored viability or
-  physical survival evidence.
-- Complete audit-only Hard Stage-4A `202439` retained 13,535 decisions and
-  1,741 validated capsules. Among 61 empty same-root queries, 6 were spatial
-  false empties, 8 primary horizon collapses, and 47 remained unresolved.
-  Uniform 4-pixel full-field solve cost `1062.85/3506.43 ms` median/p95 on a
-  12-root sample and is not the next live design.
-- CE-0127's issue transaction is offline-fixed: the fresh-enemy recertifier
-  now preserves a planned member of the fresh/global intersection, restricts
-  replacement to that intersection, and explicitly marks empty-intersection
-  relaxation. Planned/selected certificates and exact transaction telemetry
-  are retained. No-audit Hard Stage-4A gates `211210` and `212756` together
-  retained 4,627 transactions with zero silent outside-global selections,
-  zero Bomb, and no latency regression. The second reason-aware audit had
-  zero violations, closing CE-0127/0128 for this boundary.
-- Option-A pre-loss replay rejected putting repair volume into shared beam
-  pruning: 2/800 hit-window roots regressed the later terminal hard vector
-  (CE-0129). The historical beam and native reducer ABI remain unchanged. A
-  new default-off supplemental lane preserves that beam as an immutable
-  incumbent and has a separate native reducer. Width 4 changed 286/800 broad
-  and 341/800 pre-hit actions; repair improved on 273 and 323, with another
-  13 and 18 equal-repair reserve improvements. Historical action identity,
-  effective-global membership, componentwise issue/local/terminal hard
-  nonregression, route nonregression, and continuation admission all had zero
-  violations. Its synchronous supplemental cost was `2.449/3.114 ms`
-  broad and `2.425/3.026 ms` pre-hit median/p95. This is proposal-only
-  same-root evidence, not physical survival or issue-deadline evidence.
-- The complete width-4 supplemental rollout, hazard query and reduction now
-  share one persistent native C++ boundary with a 5-ms absolute deadline,
-  cooperative cancellation and complete-only publication.  Its own
-  four-worker cost is `0.876/1.365/1.942 ms` median/p95/max, with 729/729
-  completion, 294/294 action-change retention and zero native/Python or
-  fallback mismatch.  End-to-end paired p95/max remained
-  `7.054/53.721 ms`, so synchronous delivery is rejected.
-- The predeclared exact-version async follow-up is also implemented:
-  below-normal newest-wins worker, stale cancellation/discard, exact identity
-  and nonblocking lookup.  The final identical Windows gate completed
-  728/729, retained 294/294 changes and had zero finite/issue/parity/fallback
-  violations, but paired latency was `2.240/8.139/12.214 ms` and one new
-  hybrid deadline-proxy miss remained.  CE-0131 rejects same-issue optional
-  delivery.  Keep four global workers, keep both supplemental modes
-  default-off, and do not start focused Hard physical A/B.
-- A deterministic replayable/shrinkable TH08-semantic differential harness
-  now covers twelve pattern families at Normal, Hard, Lunatic and beyond-pool
-  density.  Gate/research runs used 256/96 cases; research maxima were 3,900
-  bullets, 1,387 lasers, 62 bodies and horizon 24.  Collision, clearance
-  sign/value, risk, companion-batch and supplemental endpoint mismatches were
-  all zero.  Research NumPy/native geometry p95 was
-  `121.538/40.500 ms`; Python/native supplemental p95 was
-  `9.931/3.337 ms`.  This is generated finite-semantics evidence, not shipped
-  ECL completeness.  No viewport crop or per-decision grid/BVH is promoted.
-- The original-game full-route supervisor accepts
-  `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
-  only after accepted `route_complete`: it releases injected keys, closes the
-  agent, sends no result/save choice, and leaves the identity-verified game
-  process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `593/593` in `5.366/8.164 s`. The
-  bounded formal audit retained only the expected legacy/no-write
-  counterexamples at seeds `20002/20003`; the quick belief workspace had zero
-  scalar/native, upper, candidate, certification, or bound failures.
-- No TH08 runtime, daemon, or unfinished experiment should be alive.
-- The only expected untracked file is user-owned `image.png`. Do not stage,
-  modify, delete, or clean it.
-- The connected IDA database contains the FRScreen names, partial types, and
-  input-clock boundary comments recorded in `notes/RESEARCH_LOG.md`. New
-  binary work must use IDA Pro MCP, never REA.
+- Repository branch: `main`.
+- Latest algorithmic checkpoint:
+  `d4467bd Add deadline-aware native supplemental gate`.
+- The current release-preparation commit must be a descendant of that
+  checkpoint.
+- Release verification rebuilt both native targets and passed the reduced
+  quick suite `584/584` on Linux in `5.213 s` and Windows in `14.365 s`.
+- No TH08 process, controller daemon, supervisor, or unfinished experiment is
+  expected to be alive.
+- Native build output, raw traces, screenshots, caches, and the local
+  `image.png` are ignored. A normal pre-work tree is clean.
 
 Sanity check:
 
 ```bash
-cd /home/pentester/coding/codex_ida/th08
 git status --short
 git log -5 --oneline
 PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Expected pre-work status:
+## Current Result
 
-```text
-?? image.png
-```
+### Local micro-control
 
-## Current Authority Boundary
+**Observed:** persistent pool-read destinations, packed native bullet decode,
+hazard-major shared native C++ queries, and native quantized no-item beam
+reduction match their independent Python/NumPy paths on retained direct roots
+and generated semantic cases. The live issue path still uses a fresh exact
+local collision certificate and hard no-Bomb fallback.
 
-| Status | Component | Meaning |
+**Observed:** the 256-case semantic gate and 96-case research profile had zero
+collision, clearance sign/value, risk, batch-invariance, or supplemental
+endpoint mismatches. Research maxima were 3,900 bullets, 1,387 lasers,
+62 bodies, and horizon 24. NumPy/native geometry p95 was
+`121.538/40.500 ms`; Python/native supplemental p95 was
+`9.931/3.337 ms`.
+
+**Conclusion:** local decode/geometry performance is serviceable and is not
+the dominant physical failure in current Hard evidence. This is implementation
+and sampled finite-semantics evidence, not complete shipped-game or physical
+safety proof. Keep the Python oracles and explicit rollback paths.
+
+### Physical Hard evidence
+
+**Observed:** Hard Stage-1 run `175049` completed 7,099 decisions with zero
+hits, Bombs, or deadline misses.
+
+**Observed:** complete original-game Hard Route-2 run `184942` reached Final B
+and `route_complete` with 70,699 decisions, 39 hits, zero Bombs, and stage hit
+counts `1/1/8/11/9/9`. Global viability was already empty before 38/39 hits.
+Boundary and fast-mode factors appeared on 30 and 29 hits. Per-stage
+local-plan median/p95 remained within `11.81..14.55/20.86..26.90 ms`, at up
+to 1,231 bullets and 256 lasers.
+
+**Observed:** Hard Stage-4A audit `202439` retained 1,741 validated capsules.
+Of 61 empty same-root queries, six were coarse spatial false empties, eight
+were primary horizon collapses, and 47 remained unresolved. Uniform full-field
+4-pixel solving cost `1062.85/3506.43 ms` median/p95 on 12 roots and is not a
+live design.
+
+**Conclusion:** the primary algorithmic problem is preserving global
+feasibility earlier and defining certified behavior after finite-kernel
+exhaustion, not a wholesale local geometry rewrite.
+
+### Issue transaction and supplemental search
+
+**Observed:** CE-0127/0128's fresh/global issue transaction passed no-audit
+Hard Stage-4A runs `211210` and `212756`: 4,627 transactions had zero silent
+outside-global selections, zero Bombs, and no latency regression.
+
+**Observed:** adding repair volume to shared beam pruning regressed two of 800
+pre-hit terminal hard vectors (CE-0129). The historical beam and native reducer
+ABI therefore remain unchanged. The width-4 supplemental lane preserves the
+historical endpoint and passed same-root finite nonregression checks, but is
+proposal-only.
+
+**Observed:** the complete native supplemental boundary uses a persistent C++
+workspace, 5-ms absolute deadline, cooperative cancellation, and
+complete-only results. Native rollout cost `0.876/1.365/1.942 ms`
+median/p95/max under the retained Windows workload, but end-to-end synchronous
+delivery still had `7.054/53.721 ms` paired p95/max and one new deadline proxy
+miss.
+
+**Observed:** exact-version asynchronous publication used a below-normal,
+newest-wins worker, exact identity, stale cancellation/discard, and
+nonblocking lookup. It completed 728/729 eligible roots and retained 294/294
+reference changes with zero finite/parity/fallback violations, but paired
+latency remained `2.240/8.139/12.214 ms` and created CE-0131's new hybrid
+deadline miss.
+
+**Decision:** both current-issue supplemental delivery forms are rejected.
+Keep the live four-worker global planner, keep supplemental modes default-off,
+and do not enter a focused physical A/B without a new causal publication
+design and the unchanged Windows contention gate.
+
+### Frozen manager-frame boundary
+
+**Observed:** during post-spell/dialogue transitions,
+`enemy_manager_frame` can freeze while held input continues moving the player
+(CE-0120). The 50-ms repeated-counter detector fired on ordinary slow
+decisions, churned versions, and starved viability (CE-0121).
+
+**Decision:** the native FRScreen/MSG episode sensor remains shadow-only. No
+wall-time threshold or manager counter currently has live actuator authority.
+This remains a parallel sensing/control obligation, but it is not the primary
+global-planning objective.
+
+## Authority Boundary
+
+| Status | Component | Authority |
 | --- | --- | --- |
-| live | native-state sensing and TH08 trajectory/laser/enemy projection | Gameplay sensing is native; screenshots are not a sensor. |
-| live | native local implementation acceleration | Persistent pool buffers, packed bullet decode, hazard-major shared query, and quantized no-item beam reducer implement existing boundaries with Python rollback. They add no model authority. |
-| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. CE-0127/0128's fresh/global transaction passed two physical authority/latency gates. |
-| live | coarse Boolean robust viability | Current global safety authority, subject to its explicit finite model and the unresolved transition-clock boundary. |
-| shadow | native FRScreen/MSG input-clock boundary | Tri-state native probe and episode tracker identify manager-clock blocking without control-state authority. Synchronous issue-thread reads/logging are physically perturbative and total contention is unmeasured. |
-| shadow | explicit active/held/pending local certificate | Independent scalar oracle, packed finite lease, and root telemetry; old replay roots are inferred and the result cannot rank live input. |
-| shadow | losing-root stationary candidate verifier | Exact universal verification of a restricted causal candidate can prove finite-model feasibility, but cannot claim unrestricted losing/optimality. |
-| shadow | exact candidate witness publication | Retains root, witness, issued-action label, all-action local certificate, version, and timing; it never changes the live mask. |
-| offline/shadow | belief lower bounds, revealed-delay upper, resumable threshold refinement | Research tools for feasibility/optimality gaps; too slow and/or too optimistic for live authority as currently integrated. |
-| proposal-only | losing-state control reserve | After Boolean exhaustion, ranks only fresh-hard-equivalent actions by delay-scaled reversal reserve. Hard replay improved reserve deficit without relabeling viability; physical effect is unmeasured. |
-| proposal-only | final-only pre-loss continuation/reserve | Inside a complete nonrelaxed viable set, ranks completed historical beam endpoints after hard terminal scoring. Hard replay changed few actions with zero hard regression; physical effect is unmeasured. |
-| proposal-only | immutable supplemental continuation lane | Keeps the complete historical beam as an incumbent and admits a separately budgeted endpoint only after exact effective-global, componentwise hard, route, and strict repair/reserve nonregression checks. Width 4 is the retained offline Pareto candidate; it has no live CLI or deadline authority. |
-| rejected | repair-aware shared beam pruning | CE-0129: root repair volume displaced endpoints before terminal threat was known and regressed 2/800 pre-hit terminal hard vectors. |
-| rejected | every-root candidate submission | Caused measurable live CPU/delivery contention. |
-| rejected | 50-ms repeated-manager-frame guard | CE-0121: fired on ordinary slow decisions, churned policy versions, and starved viability. |
-| rejected | first-action beam deduplication for live use | Changed only soft choices and improved no sampled hard vector; wider/partitioned variants were materially slower. |
-| rejected | inline/fused survival labels, legacy prewarm, synchronous full upper | Delivery cost or invalid cross-version assumptions outweighed their value. |
-| proposal-only | beam, greedy, learned, Monte Carlo, MCTS | May order candidates, never replace worst-case verification. |
+| live | native-state sensing and TH08 hazard projection | Gameplay state comes from native memory; screenshots are not a runtime sensor. |
+| live | native local implementation acceleration | Pool buffers, packed decode, shared hazard query, and local reducer implement existing semantics with Python rollback. They add no model authority. |
+| live | issue-time local collision certificate | Fresh hard fallback, per-position batch semantics, hard no-Bomb, and the CE-0127/0128 fresh/global transaction. Live callers still use the active-equals-held estimator fallback. |
+| live | coarse Boolean robust viability | Current global finite-model safety authority, subject to declared resolution/horizon/uncertainty and the unresolved transition-clock boundary. |
+| shadow | native FRScreen/MSG input-clock boundary | Detects episodes; cannot retire/reset policy or neutralize movement. |
+| shadow | explicit active/held/pending certificate | Has scalar/packed oracles and direct-root telemetry; cannot rank live input. |
+| shadow | restricted losing-root candidate verifier/publication | May prove a declared finite candidate and retain its witness; cannot claim unrestricted losing/optimality or change input. |
+| offline/shadow | belief lower bounds, revealed-delay upper, resumable refinement | Feasibility/optimality research; too slow or optimistic for current live authority. |
+| proposal-only | losing-state control reserve | Ranks fresh-hard-equivalent actions after Boolean exhaustion; physical effect unmeasured. |
+| proposal-only | final-only continuation and width-4 supplemental lane | Preserves hard membership and the historical incumbent in finite replay; no live CLI or delivery authority. |
+| rejected | repair-aware shared beam pruning | CE-0129 terminal-hard regressions. |
+| rejected | synchronous native supplemental delivery | End-to-end Windows latency gate failed. |
+| rejected | same-issue exact-version async supplemental delivery | CE-0131 deadline-proxy miss. |
+| rejected | repeated-manager-frame wall-time guard | CE-0121 false firing and publication starvation. |
+| rejected | every-root candidate submission / inline survival refinement | Measurable contention on the live publication path. |
+| proposal-only | greedy, learned, Monte Carlo, MCTS, unproved beam/pruning | May order proposals; cannot replace worst-case verification. |
 
-Do not quietly promote a shadow component. Promotion requires an updated
-formal review, exact authority boundary, focused regressions, clean physical
-shadow evidence, and a `STRATEGY.md` status change.
+Promotion requires an updated formal review, exact authority boundary,
+deterministic regressions, clean side-effect-free shadow evidence, delivery
+measurement, and a `STRATEGY.md` status change.
 
-## What Is Actually Open
+## Open Problems In Priority Order
 
-### P0 — CE-0120: physical input clock at frozen manager frames
+### P0 — Preserve global feasibility and define post-loss authority
 
-Observed in complete Stage-4A replay `100451`: after a spell ended,
-`enemy_manager_frame` froze during dialogue/transition while the held
-direction continued moving the player. `up_left_fast` moved `434.63 px` to
-the top-left boundary across six wall pulses; `left_fast` moved `343.65 px`
-to the left boundary across eight. Re-audit found five pulse groups, including
-one terminal right-censored group; the older report listed only four closed
-episodes.
+Current Hard failures overwhelmingly follow finite-kernel exhaustion.
+The next gate should:
 
-The attempted 50-ms detector was invalid. Complete Stage-4A run `103856`
-produced `2,780` guard firings in `7,925` decisions for only `72` real wall
-pulses. Available viability queries fell from `9,073` in `100451` to `691`,
-and the run recorded `64` hits. RNG means `21 -> 64` is not a controlled
-effect size, but the policy-starvation mechanism is direct. The guard was
-reverted.
+1. replay identical retained direct roots and split loss into spatial
+   coarsening, horizon, uncertainty, forecast/birth, route/tube, and unresolved
+   causes;
+2. introduce proof-backed query-local refinement only where a coarse state is
+   ambiguous, never uniform full-field 4-pixel solving;
+3. retain root actions unrestricted while using exact augmented-root
+   partial-survival witnesses as a post-loss lower bound;
+4. keep survival hard and route/resource objectives inside the viable set;
+5. publish the authoritative Boolean result before optional work;
+6. use extra CPU through deterministic process-level independent-root shards,
+   without increasing the live same-root worker default beyond four;
+7. validate recurrence/geometry changes with the semantic fuzzer and validate
+   delivery claims on Windows direct roots.
 
-The native semantic boundary is now identified. IDA shows
-`frscreen_blocks_enemy_clock` at `0x4358BB` blocks the manager counter exactly
-when a non-null FRScreen implementation has signed MSG state `>= 0` or `-2`.
-Player movement runs earlier and can still consume active directional input.
-Two new complete shadow-only Stage-4A runs retained this state directly.
-Corrected run `122014` produced five semantic episodes for five delayed
-same-frame pulse groups with zero false positives/negatives against that
-proxy; 3,031 ordinary observations were gate-negative, one unstable interval
-was unknown, and `-2` was not observed.
+Candidate exhaustion, timeout, or a budgeted lower bound must remain
+unresolved rather than “losing.”
 
-This resolves CE-0120 only at the sensor/classification layer. The detector
-cannot release movement, reset an epoch, retire a policy, or alter estimator
-state. Its opt-in captures and logging still consume issue-thread time, so it
-is not physically side-effect-free. Next validate a no-write action/epoch
-counterfactual, broaden negative workloads, resolve or exclude `-2`, and
-measure total contention before any explicitly scoped neutralization trial.
-Do not recreate a raw wall-time threshold or promote FRScreen serial into a
-universal player clock.
+### P1 — Complete sensing and future-hazard semantics
 
-### P1 — direct local pipeline roots exposed a discontinuity defect
+One Hard-route contact was a sensor gap, one enemy-body contact was absent
+from the action snapshot, and earlier cached-global selections were contradicted
+by fresh local prefixes. Continue birth, transform, body, and issue-snapshot
+audits with retained minimal witnesses. Do not broaden action authority from
+incomplete sensing.
 
-The local audit found two correctness defects. First, a batched hazard result
-could depend on unrelated companion positions; per-position bullet/laser
-relevance masking now restores batch invariance. Second, the old local
-certificate equated held desired input with native active input and sampled a
-new full pickup delay even when holding the complete desired mask should be
-no-write.
+### P2 — Resolve CE-0120 at the actuator boundary
 
-An independent scalar oracle and a packed finite-lease implementation now
-model native active input, held desired input, an optional older pending
-command, conditioned remaining support, and conditional new writes. The
-packed equivalent-root path had zero hard parity failures on the retained
-`155 + 156` sampled roots. Pending-aware semantics changed 86 and 85 sampled
-safe-action sets. These mismatch/pre-hit-heavy samples establish materiality,
-not population rates or prevented hits.
+Retain exact episode-entry active/held/pending roots and a no-write
+counterfactual that removes movement while preserving `SHOT`. Extend the
+negative set across pauses, unloads, dialogues, and `msg_state == -2`;
+measure probe and delivery contention. Only then consider an explicitly
+scoped physical neutralization/reset trial.
 
-The correct packed certificate measured `3.134/6.372 ms` Stage 4A and
-`3.936/7.911 ms` Stage 6B median/p95 in Linux replay, excluding JSON/object
-decode but including projection, packing, induction, and all-action
-certification. That does not prove a Windows issue deadline. Old trace roots
-are inferred; new rows retain explicit root telemetry, but live selection
-still uses active-equals-held fallback semantics.
+### P3 — Reopen supplemental delivery only with a new causal boundary
 
-First-action beam labels changed five and four soft choices with no sampled
-hard-vector improvement. Independent first-action partitions also improved
-zero hard roots at `191.795/275.649 ms` median, so those modes remain
-default-off. A wholesale C++ rewrite is deferred until a correct explicit-root
-Windows end-to-end boundary demonstrates a deadline miss.
-
-Direct roots are now retained. Hard Stage-1 CE-0124 observed
-`input_current=down_right` while held desired had been reset to stay at the
-first decision after an action-epoch discontinuity. There was no reconstructed
-pending support and the estimator correctly marked the root inconsistent.
-Therefore an epoch reset cannot initialize active input from held desired.
-
-The current checkpoint accelerates the existing fallback but does not pass the
-explicit root into live selection. Reconcile discontinuity initialization,
-unknown pending support, CE-0120, and direct-root replay before any authority
-change. See CE-0122 through CE-0124,
-`notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`, and
-`notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`.
-
-### P2 — candidate publication is measured, not promoted
-
-Clean Stage-4A shadow `100451` completed `9,222` decisions with `21` hits,
-zero Bomb, and no runtime/foreground/manual/JSON failure. Exact losing-root
-candidate delivery was `3,913/4,187 = 93.46%`; `438` delivered roots were
-candidate-winning, `223` raised the issued action from modeled loss to modeled
-feasibility, and publication integrity errors were zero.
-
-Run `103856` added explicit publication-helper timing:
-
-- publication median/p95: approximately `0.0041/0.0059 ms`;
-- lookup median/p95: approximately `0.0149/0.0208 ms`;
-- exact delivery: `267/297 = 89.9%`;
-- `32` winning hits and `17` feasibility-gain rows;
-- zero publication-integrity errors.
-
-However, `103856` was physically contaminated by the rejected frame guard.
-It validates helper cost and integrity only, not survival or clean contention.
-Before considering action authority, run a fresh post-rollback shadow on a
-non-Stage-6B workload and retain candidate witness plus alternate-action
-certificate. A candidate win proves only feasibility in its declared finite
-model.
-
-### P3 — Boolean-losing is not unrestricted losing
-
-Stage-6B losing-only v2 `011639` completed `14,652` hard-no-Bomb decisions
-with `26` hits and delivered `6,192/6,618 = 93.56%` exact losing roots without
-the contention of the rejected every-root service. All `26` contacts still
-followed Boolean-kernel exhaustion.
-
-Two RNG-distinct Stage-6B capsule cohorts each classified 32 roots as:
-
-- 20 exact losing under the tested finite recurrence;
-- 11 feasible under a verified stationary candidate;
-- 1 feasible only after targeted action-column refinement.
-
-One threshold needed `265.77 ms` before refinement found a positive 32-frame
-witness. Candidate exhaustion and a 100-ms deadline therefore remain
-unresolved, not losing. The broad research problem is still planning
-completeness under partial input-pipeline information, unrestricted
-continuation-action growth, future births/transform uncertainty, and issue-time
-delivery. Do not spend more performance effort on a recurrence until its
-physical/information semantics pass the formal audit.
-
-Priority order:
-
-1. resolve CE-0120’s semantic clock boundary without live authority;
-2. obtain a direct-root, full-boundary local-certificate shadow gate;
-3. obtain a clean post-rollback candidate-publication shadow gate;
-4. use retained losing roots to improve attainable lower refinement and
-   issue-time feasible-action coverage;
-5. refine upper/optimality work only for actions still capable of changing the
-   decision;
-6. then return to broader route strategy.
-
-## Current Physical Evidence
-
-Retain the two newest complete replay-capable bundles per workload:
-
-| Workload | Bundles | Interpretation |
-| --- | --- | --- |
-| Lunatic Route-2 Stage 6B, candidate shadow | `004142`, `011639` | `004142` every-root service rejected; `011639` losing-only service accepted shadow-only. |
-| Lunatic Route-2 Stage 4A, publication/clock replay floor | `100451`, `103856` | `100451` is the original CE-0120 witness; `103856` rejects the live guard. Both retain the prior replay-capable floor. |
-| Lunatic Route-2 Stage 4A, semantic input-clock telemetry | `120839`, `122014` | `120839` exposed tracker segmentation; corrected `122014` matched all five delayed pulse groups. Viability capsules were intentionally disabled, so these do not replace the replay floor or support planner-replay claims. |
-| Lunatic Route-2 Stage 4A, native local implementation | `151821`, `160712` | Complete direct-root/replay workloads for pool-buffer, hazard, and native-beam measurement. |
-| Lunatic Route-2 Stage 6B, native local implementation | `163501`, `165841` | Complete direct-root/replay workloads; `165841` contains the 210-laser geometry/contention witness. |
-| Hard Route-2 Stage 1, native local implementation | `175049` | One complete zero-hit/no-Bomb/deadline-miss focused gate. It is not yet a two-bundle workload floor. |
-| Hard Route-2 full route, feasibility diagnosis | `184942` | Complete Final-B run with 39 hits, no Bomb, replayable raw trace, compact dossier, and manual replay-save handoff. One bundle does not satisfy the two-bundle floor. |
-| Hard Route-2 Stage 4A, viability audit | `202439` | Complete audit-only run with 1,741 readable capsules, exact same-root differential, and CE-0127 issue-intersection witness. One bundle does not satisfy the two-bundle floor. |
-
-The `103856` `.session.json` says `failed` only because the original
-postprocessor rejected an explicit null enemy snapshot after the accepted
-route-complete trial. The parser was repaired and artifacts recovered without
-rewriting provenance. Its raw audit passed `10,784` records and `2,060`
-capsules; bundle SHA-256:
-`d8d6ecdf7b0ae955c58317fd27fa3735fea9c14ee1471faebe1d7fca1f5e4c29`.
-
-The complete `011639` audit passed `14,791` records, `14,652` decisions, and
-`2,689` capsules; bundle SHA-256:
-`9e8af717c548dc6456d471c15ac2be9777f755d7b94bc3fc6067e4b289b38a77`.
-
-The two current Stage-4A raw JSONL traces contain `10,653` and `12,122`
-records. Their SHA-256 values are
-`520d7e772464967a01d49b60a95f26b26f8a6c405e878c07d34a6ede3ceb903f`
-and
-`25a01efe87fba457051ca78b0f485a6068f7606f1f98b772b0f3372689d8122f`.
-Both reached `terminal_unload` and `route_complete`, passed hard no-Bomb
-verification, and left the semantic detector shadow-only. Older `100451` and
-`103856` remain the canonical CE-0120/0121 evidence and replay-capable floor;
-they were not deleted. The new semantic traces and compact artifacts are also
-retained locally, but `viability_audit_capsules` is null by design.
-The compact input-clock audit SHA-256 values are
-`76d052d36f9b5183fa01508f11504835400ad8fce39c92a42b28d69134b9f0cf`
-and
-`f145a5f2631d833ce90ae2d5059948e38251ce191b9cfc16b1f6ef5ad7e98f6c`.
-
-Compact evidence and interpretation live in `notes/runs/`,
-`notes/COUNTEREXAMPLES.md`, and `notes/RESEARCH_LOG.md`. Do not delete either
-raw bundle until the two-bundle rule in `AGENTS.md` is satisfied by newer
-same-workload captures.
-
-Start physical review with:
-
-- `notes/runs/lunatic_route2_stage6b_unattended_20260726_011639.md`
-- `notes/runs/lunatic_route2_stage4a_unattended_20260726_120839.md`
-- `notes/runs/lunatic_route2_stage4a_unattended_20260726_122014.md`
+The finite selector remains useful offline. Reopen it only if the exact
+hazard/policy version can exist before the issue transaction or execution
+resources are genuinely isolated. Rerun the unchanged Windows gate; do not
+weaken four global workers or reuse a merely similar root.
 
 ## Formal References
 
-Read only the subset relevant to the change, but always begin with the base
-formalization.
-
 - Base physical/information contract:
   `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`
-- Unrestricted action growth and attainable lower bounds:
-  `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
-- Correctness/performance audit:
-  `notes/BELIEF_PIPELINE_CORRECTNESS_AND_PERFORMANCE_20260725.md`
-- Incumbent/selective upper:
-  `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`
-- Resumable deadline-safe certification:
-  `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`
-- Feasibility-first anytime synthesis:
-  `notes/ANYTIME_DUAL_BOUND_POLICY_SYNTHESIS_20260725.md`
-- Exact augmented state/reachable tube:
+- Reachable tube:
   `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`
-- Rolling/cross-version prewarm:
-  `notes/ROLLING_PIPELINE_PREWARM_20260725.md` and
-  `notes/EXACT_ROOT_FRONTIER_PREWARM_20260725.md`
-- Candidate service and witness publication:
-  `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md` and
-  `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`
-- Frozen manager/input boundary:
-  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
-- Local active/held/pending certificate and beam audit:
-  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`
-- Native local geometry, decode, beam, and contention:
-  `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`,
-  `notes/LOCAL_NATIVE_HAZARD_QUERY_PROPOSAL_20260726.md`,
-  `notes/LOCAL_NATIVE_BEAM_REDUCTION_PROPOSAL_20260726.md`, and
-  `notes/PACKED_NATIVE_BULLET_DECODE_PROPOSAL_20260726.md`
-- Earlier Boolean/losing root analysis:
-  `notes/BOOLEAN_FIRST_PENDING_PIPELINE_20260725.md` and
-  `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
-- Current Hard same-root feasibility split and decision:
+- Lower/upper/anytime synthesis:
+  `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
+  `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`,
+  `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,
+  `notes/ANYTIME_DUAL_BOUND_POLICY_SYNTHESIS_20260725.md`
+- Candidate witness/publication:
+  `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`,
+  `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`
+- Local pipeline and native acceleration:
+  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`,
+  `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`
+- Hard feasibility:
+  `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`,
   `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`
-- Current pre-loss ranking and immutable supplemental-lane contracts:
-  `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md` and
-  `notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`
+- Pre-loss/supplemental:
+  `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`,
+  `notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`,
+  `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`,
+  `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`,
+  `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
+- Frozen input clock:
+  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
+- Generated differential:
+  `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 
-Relevant durable counterexamples include CE-0108, CE-0109, CE-0111, CE-0118,
-CE-0120 through CE-0125, and CE-0127 through CE-0129. Do not infer present
-authority from a historical
-note; the table above and `STRATEGY.md` control current status.
+Relevant durable failures include CE-0108, CE-0109, CE-0111, CE-0118,
+CE-0120 through CE-0125, and CE-0127 through CE-0131. Historical notes do not
+override the authority table above.
+
+## Retained Workloads
+
+| Workload | Bundle | Purpose |
+| --- | --- | --- |
+| Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor. |
+| Hard Route-2 Stage 1 | `175049` | Zero-hit native local gate; one-bundle evidence only. |
+| Hard Route-2 full route | `184942` | Complete route, 39-hit feasibility diagnosis; one-bundle evidence only. |
+| Hard Route-2 Stage 4A | `202439`, `211210`, `212756` | Capsule audit and fresh/global issue transaction; `211210/212756` form the newest compatible no-audit floor. |
+
+Compact benchmark evidence:
+
+- `artifacts/benchmarks/local_pipeline_certificate_20260726.json`
+- `artifacts/benchmarks/local_native_hazard_hazard_major_windows_20260726.json`
+- `artifacts/benchmarks/native_packed_bullet_decode_windows_20260726.json`
+- `artifacts/benchmarks/local_issue_contention_windows_20260726.json`
+- `artifacts/benchmarks/hard_supplemental_direct_root_contention_windows_20260726.json`
+- `artifacts/benchmarks/hard_supplemental_full_native_direct_root_contention_windows_20260726.json`
+- `artifacts/benchmarks/hard_supplemental_exact_async_final_direct_root_contention_windows_20260726.json`
+- `artifacts/benchmarks/th08_semantic_differential_gate_20260726.json`
+- `artifacts/benchmarks/th08_semantic_differential_research_20260726.json`
+
+Raw replay bundles remain local and ignored. Do not delete an older workload
+bundle until the two-newer-compatible-bundle rule in `AGENTS.md` is satisfied.
 
 ## Environment And Build
 
 - WSL distribution: `ubuntu`
-- Workspace:
-  `/home/pentester/coding/codex_ida/th08`
 - Windows game directory:
   `D:\Entertainment\Game\Touhou\[th08] 东方永夜抄 (日文版)`
-- WSL game directory:
-  `/mnt/d/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)`
 - Target: `th08.exe`
 - Required SHA-256:
   `330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924`
 - Launcher: `run_th08_no_life_decrement_attach.bat`
-- Patch byte: `0x0044D0FA`, expected runtime value `0x00`
+- No-life-decrement patch byte: `0x0044D0FA`, expected `0x00`
 - Windows Python:
   `%LOCALAPPDATA%\Microsoft\WindowsApps\python.exe`
 
-The external launcher must call
-`scripts\tools\th08_attach_no_life_decrement.py`. A Windows entrypoint under
-`scripts/tools/` must prepend its parent `scripts/` directory before imports.
+The external launcher calls
+`scripts\tools\th08_attach_no_life_decrement.py`. Windows tools under
+`scripts/tools/` prepend their parent `scripts/` path before imports.
 
 Rebuild ignored native libraries after C++ changes:
 
 ```bash
-PYTHONPATH=scripts python3 scripts/tools/build_native_planner.py --target linux
-PYTHONPATH=scripts python3 scripts/tools/build_native_planner.py --target windows
+python3 scripts/tools/build_native_planner.py --target linux
+python3 scripts/tools/build_native_planner.py --target windows
 ```
 
-The NumPy fallback is useful for parity but too slow for physical acceptance.
-Use `TOUHOU_DISABLE_NATIVE_PLANNER=1` only for explicit ablation.
+Use `TOUHOU_DISABLE_NATIVE_PLANNER=1` only for explicit NumPy/Python ablation.
 
-## Tests And Offline Profiles
+## Test Commands
 
-Focused test:
+Focused local pipeline:
 
 ```bash
 PYTHONPATH=scripts python3 -m unittest discover -s tests \
@@ -442,13 +301,13 @@ PYTHONPATH=scripts python3 -m unittest discover -s tests \
   -p 'test_th08_local_pipeline_certificate.py'
 ```
 
-Quick complete suite:
+Quick suite:
 
 ```bash
 PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Quick formal/performance profiles:
+Bounded formal/performance profiles:
 
 ```bash
 PYTHONPATH=scripts python3 \
@@ -459,46 +318,35 @@ PYTHONPATH=scripts python3 \
   /tmp/belief-pipeline-quick.json
 ```
 
-Run full 128-case/unrestricted/capsule profiles only when their model or native
-recurrence changes or when retaining evidence. Benchmarks belong in
-`scripts/benchmarks/`; reports/differentials in `scripts/analysis/`; explicit
-build/probe/patch/capture commands in `scripts/tools/`.
+Semantic gate:
 
-Retained local replay evidence:
+```bash
+PYTHONPATH=scripts python3 \
+  scripts/analysis/th08_semantic_differential.py \
+  --profile gate --seed 0xce0132 --count 256 \
+  --output /tmp/th08-semantic-gate.json
+```
 
-- `artifacts/benchmarks/local_pipeline_certificate_20260726.json`
-- `artifacts/benchmarks/local_beam_stability_20260726.json`
-- `artifacts/benchmarks/local_native_beam_windows_20260726.json`
-- `artifacts/benchmarks/local_native_hazard_hazard_major_windows_20260726.json`
-- `artifacts/benchmarks/native_packed_bullet_decode_windows_20260726.json`
-- `artifacts/benchmarks/local_issue_contention_windows_20260726.json`
-- `artifacts/benchmarks/hard_supplemental_direct_root_contention_windows_20260726.json`
-- `artifacts/benchmarks/hard_supplemental_full_native_direct_root_contention_windows_20260726.json`
-- `artifacts/benchmarks/hard_supplemental_exact_async_final_direct_root_contention_windows_20260726.json`
-- `artifacts/benchmarks/th08_semantic_differential_gate_20260726.json`
-- `artifacts/benchmarks/th08_semantic_differential_research_20260726.json`
+Run broad/unrestricted/capsule profiles only when their model/kernel changes
+or evidence is being retained.
 
-The exact reproduction commands and timing boundaries are in
-`notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
-
-Windows UNC discovery must use this loader. Ordinary `unittest -s <UNC>`,
-`cmd.exe` UNC `cd/pushd`, and a PowerShell-only `PSDrive` do not provide an
-importable test root:
+Windows UNC discovery must use the loader below; ordinary
+`unittest -s <UNC>`, UNC `cmd.exe` `cd/pushd`, and a PowerShell-only `PSDrive`
+do not produce an importable root:
 
 ```bash
 /mnt/c/Users/21992/AppData/Local/Microsoft/WindowsApps/python.exe -c \
   'import sys,unittest; root=r"\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08"; sys.path.insert(0,root+r"\scripts"); tests=root+r"\tests"; suite=unittest.TestLoader().discover(tests,pattern="test_*.py",top_level_dir=tests); result=unittest.TextTestRunner(verbosity=1).run(suite); raise SystemExit(0 if result.wasSuccessful() else 1)'
 ```
 
-Change only the `pattern` for a focused Windows run.
+Change only `pattern` for a focused Windows run.
 
 ## Physical Trial Commands
 
-The user has authorized unattended launch, input injection, monitoring,
-stopping, and identity-scoped cleanup. Do not start a physical run merely to
-validate this documentation checkpoint.
+Do not start a physical run merely to validate a documentation checkpoint.
+Use non-TTY WSL launch.
 
-Practice stage from WSL, always non-TTY:
+Practice:
 
 ```bash
 /mnt/c/Windows/System32/cmd.exe /d /c call \
@@ -506,8 +354,8 @@ Practice stage from WSL, always non-TTY:
   --stage 4a --status-seconds 15 --stall-timeout 120
 ```
 
-Continuous Hard Route-2, retaining the game after accepted completion so the
-replay can be saved manually:
+Continuous Hard Route-2, leaving the accepted game alive for manual replay
+save:
 
 ```bash
 /mnt/c/Windows/System32/cmd.exe /d /c call \
@@ -516,28 +364,24 @@ replay can be saved manually:
   --status-seconds 30 --stall-timeout 120
 ```
 
-Omit `--leave-game-running` for the old automatic identity-scoped process
-cleanup. The switch never sends a save/no-save selection. It cannot preserve
-a failed or incomplete attempt.
+Omit `--leave-game-running` for identity-scoped automatic cleanup. The switch
+never chooses save/no-save and cannot preserve a failed run. Route-2 practice
+stages are `1 2 3 4a 5 6b`; 4B and 6A are route-locked.
 
-Selectable Sakuya/Remilia Route-2 practice stages are
-`1 2 3 4a 5 6b`; 4B and 6A are route-locked. Do not patch the route mask to
-claim coverage.
+Operational rules:
 
-Important WSL/Windows behavior:
+- never launch the supervisor with a PTY;
+- WSL command return is not supervisor completion;
+- avoid Windows console/process probes during active gameplay;
+- stop the supervisor first and allow `finally` cleanup;
+- release all keys before any identity-scoped process termination;
+- require Final-B `terminal_unload` and later
+  `termination_reason=route_complete`;
+- record manual input, manual `Z`, foreground loss, reset tails, unexpected
+  Bombs, and auto-confirm failure;
+- never end a turn with a required game, supervisor, or daemon alive.
 
-- never launch the supervisor with a PTY; a PTY can block on a Windows console
-  cursor query before the game appears;
-- a WSL `cmd.exe`/Windows-Python call can return while the supervisor remains
-  alive under `/init`; completion requires the trace, terminal record, final
-  summary, session status, and process cleanup;
-- monitor active gameplay using low-load Linux reads; Windows consoles and
-  process probes can steal foreground and invalidate the run;
-- stop the supervisor first and allow its `finally` cleanup; release keys
-  before killing only the verified TH08 image;
-- never end a turn with a required game, supervisor, or daemon still running.
-
-Monitor a trace:
+Monitor:
 
 ```bash
 trace=$(ls -1t artifacts/runtime_reports/*unattended*.jsonl | head -n1)
@@ -545,109 +389,23 @@ PYTHONPATH=scripts python3 scripts/analysis/th08_longrun_status.py "$trace"
 tail -n 1 "$trace"
 ```
 
-Full-route success requires both Final-B `terminal_unload` and the later
-`termination_reason=route_complete`. Record foreground loss, manual input,
-manual `Z`, reset tails, unexpected Bomb, and auto-confirm failure as
-contamination.
-
-For a focused thprac loop, start a fresh prewarmed Windows hotkey daemon for
-each attempt, enter gameplay manually, then use F8 to start, F9 to stop/pause,
-and F10 to exit. The unattended supervisor remains the preferred acceptance
-path because it also validates menus, terminal unload, no-save handling,
-artifacts, and cleanup.
-
-## Next Good Checkpoint
-
-The complete Hard route and both supplemental delivery gates are finished.
-The current user-directed algorithmic gate is:
-
-1. keep four global viability workers and the historical local action
-   authoritative.  CE-0131 blocks both current-issue supplemental delivery
-   forms and the focused Hard physical A/B;
-2. return primary effort to early global feasibility and route/tube
-   preservation.  Use the new semantic fuzzer for recurrence/geometry changes
-   and retained physical roots for delivery claims;
-3. add exact augmented-root partial-survival candidate witnesses as the
-   post-loss fallback;
-4. keep 8/4-pixel work query-local and proof-backed. Full-field fine
-   refinement remains rejected by low rescue rate and deadline cost;
-5. use additional CPU through deterministic process-level independent-root
-   shards. Do not raise the four-worker live same-root default without a
-   delivery-contention gate;
-6. retain the current AABB geometry pruning. Revisit a per-frame index only
-   if direct-root telemetry isolates genuinely relevant dense geometry after
-   construction/lowering, rather than planner contention, as the deadline
-   bottleneck;
-7. reopen supplemental publication only if an exact causal hazard/policy
-   version can exist before the issue transaction or execution resources are
-   genuinely isolated.  Never reuse a merely similar root; rerun the
-   unchanged Windows gate before any live/shadow promotion.
-
-The current evidence and five formal-review answers are in
-`notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md` and
-`notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`. The current
-pre-loss contract, rejected beam counterexample, and final-only evidence are
-in `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`. The immutable
-supplemental design, replay results, intensive geometry corpus, and promotion
-boundary are in
-`notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`.  The completed
-native, async-publication and generator contracts/results are in
-`notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`,
-`notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`, and
-`notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`.
-
-A useful next algorithmic checkpoint is the action consequence of the now
-validated semantic sensor, not another detector or threshold tweak. It should:
-
-1. retain a no-write counterfactual for the exact episode-entry mask that
-   would remove movement bits, preserve `SHOT`, and request one immutable
-   epoch transition;
-2. compare prospective policy retirement, pre-detection displacement, and
-   next-phase entry state without changing live input;
-3. extend the negative set beyond Stage 4A to pauses, scene unloads, and other
-   stage/dialogue owners; resolve `msg_state == -2` or explicitly exclude it;
-4. measure total probe/capture CPU and delivery contention, not only logged
-   lookup time;
-5. retain every mismatch and keep the counterfactual shadow-only until its
-   action consequence is bounded;
-6. only then run an explicitly scoped physical neutralization/one-reset trial
-   for confirmed `msg_state >= 0` episodes;
-7. update the formal/design note, strategy ledger, counterexamples, research
-   log, focused tests, and quick Linux/Windows suites;
-8. commit one focused checkpoint.
-
-If continuing local micro-control, first collect a shadow-only trace with the
-new direct `local_pipeline_root` rows, verify every estimator-consistency
-failure, replay direct rather than reconstructed roots, and measure the full
-Windows observe/decode/project/certify/issue boundary. Do not pass the root to
-`choose_action` or `recertify_action_for_fresh_hazards` until that gate and a
-strategy-status change pass. Reconsider a compact native
-decode/project/certify boundary only if the correct end-to-end path misses its
-deadline.
-
-If instead working on candidate authority, first obtain a fresh uncontaminated
-post-rollback Stage-4A (or another non-Stage-6B) shadow run with exact witness,
-alternate-action certificate, publication timing, and measured
-CPU/delivery/policy-age contention. A physical run remains evidence, not a
-promotion by itself.
-
 ## Common Traps
 
 - Do not use REA.
-- Do not treat Python/C++ parity as problem correctness.
-- Do not treat a budgeted lower bound, exhausted candidate set, timeout, or
-  incomplete upper as unrestricted losing/optimality.
+- Do not equate implementation parity with physical correctness.
+- Do not turn timeout, candidate exhaustion, or a restricted lower bound into
+  unrestricted losing/optimality.
 - Do not let hidden delay/cadence branches choose separate future actions.
-- Do not reset pending delay when the desired mask is held/no-write.
-- Do not use `enemy_manager_frame` or a short wall-time threshold as the only
-  physical input clock.
-- Do not grant action authority to candidate/label shadow output.
-- Do not submit expensive shadow work on every root or share the live
-  publication critical path.
-- Do not reuse proof labels across immutable policy versions.
+- Do not reset pending delay on held/no-write input.
+- Do not use manager frame or a short wall-time threshold as the sole physical
+  input clock.
+- Do not grant candidate, label, continuation, or supplemental shadow output
+  live action authority.
+- Do not share optional work with the authoritative publication critical path
+  without measuring contention.
+- Do not reuse labels across immutable versions.
 - Do not tune one stage/spell into universal mechanics.
-- Do not add engineering-plumbing tests that do not protect evidence or a
-  safety contract.
+- Do not add tests that protect only formatting, help text, or schema plumbing.
 - Do not confuse compact reports with replay-capable raw evidence.
-- Do not stage `image.png`, connector-created `node_modules/`/`package*.json`,
-  raw JSONL, capsules, binaries, logs, caches, or credentials.
+- Do not stage raw traces, screenshots, native builds, caches, game
+  executables, or credentials.

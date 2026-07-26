@@ -1,6 +1,12 @@
-# Python/runtime caches
+# Python/tool caches and local environments
 __pycache__/
 *.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
 
 # Live trials are large, reproducible sensor captures. Keep compact summaries.
 artifacts/runtime_reports/*.jsonl
@@ -9,10 +15,17 @@ artifacts/runtime_reports/*.log
 artifacts/menu_audit/*.png
 artifacts/viability_audit/raw/
 
+# Raw extraction/decoding output. Existing retained fixtures remain tracked.
+artifacts/extracted/
+artifacts/decoded/
+
 # Runtime control sentinels and local editor/OS state
 *.stop
 *.tmp
+*.dmp
+*.prof
 .DS_Store
+/image.png
 
 # Rebuildable native planner kernels (Linux .so / Windows .dll)
 native/build/

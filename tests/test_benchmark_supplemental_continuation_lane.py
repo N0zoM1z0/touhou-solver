@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-import argparse
 import unittest
 
 from benchmarks.benchmark_supplemental_continuation_lane import (
     _componentwise_regression,
-    _parse_widths,
-    _variant_name,
 )
 from benchmarks.benchmark_th08_local_intensive_cases import (
     build_intensive_cases,
@@ -14,15 +11,6 @@ from benchmarks.benchmark_th08_local_intensive_cases import (
 
 
 class SupplementalContinuationBenchmarkTests(unittest.TestCase):
-    def test_width_parser_and_names_are_deterministic(self) -> None:
-        self.assertEqual(_parse_widths("4,8,12"), (4, 8, 12))
-        self.assertEqual(_variant_name(None), "historical")
-        self.assertEqual(_variant_name(0), "final_only")
-        self.assertEqual(_variant_name(8), "supplemental_8")
-        for invalid in ("", "0", "4,4", "-1,4"):
-            with self.assertRaises(argparse.ArgumentTypeError):
-                _parse_widths(invalid)
-
     def test_hard_filter_is_componentwise_not_lexicographic(self) -> None:
         incumbent = (0, 0.0, 0, 0.0, 0)
         self.assertFalse(

@@ -124,6 +124,11 @@ from touhou_control.phase_progress import (
     ProgressCandidate,
     select_progress_action,
 )
+from touhou_control.supplemental_local_beam import (
+    SupplementalAction,
+    SupplementalNode,
+    search_supplemental_local_beam,
+)
 from touhou_control.trajectory import VelocityChange
 
 
@@ -693,6 +698,7 @@ class LocalCertificateTiming:
     control_prefix_ms: float = 0.0
     planning_bullet_projection_ms: float = 0.0
     beam_search_ms: float = 0.0
+    supplemental_beam_ms: float = 0.0
     terminal_threat_ms: float = 0.0
     selection_finalize_ms: float = 0.0
 
@@ -712,6 +718,7 @@ class _LocalCertificateTimingAccumulator:
     control_prefix_ms: float = 0.0
     planning_bullet_projection_ms: float = 0.0
     beam_search_ms: float = 0.0
+    supplemental_beam_ms: float = 0.0
     terminal_threat_ms: float = 0.0
     selection_finalize_ms: float = 0.0
 
@@ -732,6 +739,7 @@ class _LocalCertificateTimingAccumulator:
                 self.planning_bullet_projection_ms
             ),
             beam_search_ms=self.beam_search_ms,
+            supplemental_beam_ms=self.supplemental_beam_ms,
             terminal_threat_ms=self.terminal_threat_ms,
             selection_finalize_ms=self.selection_finalize_ms,
         )
@@ -789,6 +797,14 @@ class Decision:
     issue_recertification: IssueRecertification | None = None
     preloss_continuation_preference_active: bool = False
     planned_route_gate_deficit: float = 0.0
+    preloss_supplemental_beam_active: bool = False
+    preloss_supplemental_beam_width: int = 0
+    preloss_historical_action: str | None = None
+    preloss_selected_from_supplemental: bool = False
+    preloss_supplemental_candidate_count: int = 0
+    preloss_historical_route_gate_deficit: float = 0.0
+    preloss_supplemental_failure: str | None = None
+    local_collisions: int = 0
 
 
 @dataclass(frozen=True)
@@ -857,6 +873,7 @@ def _local_certificate_timing_record(
             timing.planning_bullet_projection_ms
         ),
         "beam_search_ms": timing.beam_search_ms,
+        "supplemental_beam_ms": timing.supplemental_beam_ms,
         "terminal_threat_ms": timing.terminal_threat_ms,
         "selection_finalize_ms": timing.selection_finalize_ms,
         "project_and_certify_ms": (
@@ -4034,6 +4051,7 @@ def choose_action(
     recovery_control_reserve: bool = True,
     losing_control_reserve: bool = False,
     preloss_continuation_preference: bool = False,
+    preloss_supplemental_beam_width: int = 0,
     preserve_previous_direction_inertia: bool = True,
     beam_dedup_mode: str = "quantized",
     relax_stale_viability_contradiction: bool = False,
@@ -4050,6 +4068,8 @@ def choose_action(
         )
     if horizon <= 0 or beam_width <= 0:
         raise ValueError("planner horizon and beam width must be positive")
+    if preloss_supplemental_beam_width < 0:
+        raise ValueError("supplemental beam width cannot be negative")
     if beam_dedup_mode not in {
         "quantized",
         "first_action",
@@ -4357,6 +4377,11 @@ def choose_action(
         if preloss_continuation_preference_active
         else 0.0
     )
+    preloss_supplemental_beam_active = bool(
+        preloss_continuation_preference_active
+        and preloss_supplemental_beam_width > 0
+        and not selected_items
+    )
     effective_threat_horizon = potential_threat_horizon
     control_prefix_started_ns = time.perf_counter_ns()
     prefix_risk, prefix_collisions, prefix_clearance = _control_prefix_hazards(
@@ -4414,6 +4439,7 @@ def choose_action(
             0.0,
         )
     ]
+    initial_node = beam[0]
 
     def pruning_key(
         node: SearchNode,
@@ -4855,6 +4881,198 @@ def choose_action(
             key=lambda node: pruning_key(node, step=step),
         )[:beam_width]
 
+    supplemental_beam: list[SearchNode] = []
+    supplemental_failure: str | None = None
+    if preloss_supplemental_beam_active:
+        supplemental_started_ns = time.perf_counter_ns()
+        supplemental_actions = tuple(
+            SupplementalAction(
+                name=action.name,
+                direction=action.direction,
+                dx=action.dx,
+                dy=action.dy,
+                focused=action.focused,
+            )
+            for action in _PLANNER_ACTIONS
+        )
+
+        def supplemental_transition_risk(
+            node: SupplementalNode,
+            action: SupplementalAction,
+            x: float,
+            y: float,
+            step: int,
+        ) -> float:
+            last_action = supplemental_actions[node.last_action]
+            risk = _boundary_risk(x, y)
+            if action.direction != last_action.direction:
+                risk += 0.08
+            if _directions_opposed(
+                action.direction,
+                last_action.direction,
+            ):
+                risk += 24.0
+            if action.focused != last_action.focused:
+                risk += 0.12
+            if step == 1 and preserve_previous_direction_inertia:
+                if action.direction != previous_direction:
+                    risk += 0.08
+                if _directions_opposed(
+                    action.direction,
+                    previous_direction,
+                ):
+                    risk += 24.0
+                if action.focused != previous_focus:
+                    risk += 0.12
+            return risk
+
+        def supplemental_hazard_query(
+            positions_x: np.ndarray,
+            positions_y: np.ndarray,
+            absolute_step: int,
+        ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+            local_step = absolute_step - control_delay_frames
+            return _hazards_for_positions(
+                positions_x,
+                positions_y,
+                step=absolute_step,
+                bullet_frame=bullet_frames[local_step - 1],
+                lasers=laser_frames[local_step - 1],
+                enemy_bodies=enemy_bodies,
+            )
+
+        try:
+            lane_nodes = search_supplemental_local_beam(
+                initial=SupplementalNode(
+                    x=initial_node.x,
+                    y=initial_node.y,
+                    first_action=0,
+                    last_action=0,
+                    risk=initial_node.risk,
+                    collisions=initial_node.collisions,
+                    min_clearance=initial_node.min_clearance,
+                    immediate_clearance=(
+                        initial_node.immediate_clearance
+                    ),
+                ),
+                actions=supplemental_actions,
+                allowed_first_actions=frozenset(
+                    effective_allowed_first_actions or ()
+                ),
+                action_hold_frames=action_hold_frames,
+                horizon=horizon,
+                beam_width=preloss_supplemental_beam_width,
+                beam_dedup_mode=beam_dedup_mode,
+                hazard_query=supplemental_hazard_query,
+                transition_risk=supplemental_transition_risk,
+                control_delay_frames=control_delay_frames,
+                target_x=target_x,
+                target_y=target_y,
+                target_deadline=target_deadline,
+                item_safety_clearance=ITEM_SAFETY_CLEARANCE,
+                playfield_left=PLAYFIELD_LEFT,
+                playfield_right=PLAYFIELD_RIGHT,
+                playfield_top=PLAYFIELD_TOP,
+                playfield_bottom=PLAYFIELD_BOTTOM,
+                recovery_reserve_distance=recovery_reserve_distance,
+                supplemental_reserve_distance=preloss_reserve_distance,
+                diagonal_speed=UNFOCUSED_DIAGONAL_SPEED,
+                cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
+                certificate_collisions=np.fromiter(
+                    (
+                        robust_preflight_certificates[
+                            action.name
+                        ].worst_collisions
+                        if action.name
+                        in robust_preflight_certificates
+                        else 0
+                        for action in _PLANNER_ACTIONS
+                    ),
+                    dtype=np.int32,
+                    count=len(_PLANNER_ACTIONS),
+                ),
+                certificate_minimum=np.fromiter(
+                    (
+                        robust_preflight_certificates[
+                            action.name
+                        ].min_clearance
+                        if action.name
+                        in robust_preflight_certificates
+                        else 0.0
+                        for action in _PLANNER_ACTIONS
+                    ),
+                    dtype=np.float64,
+                    count=len(_PLANNER_ACTIONS),
+                ),
+                survival_preferred=np.fromiter(
+                    (
+                        not survival_actions
+                        or action.name in survival_actions
+                        for action in _PLANNER_ACTIONS
+                    ),
+                    dtype=np.uint8,
+                    count=len(_PLANNER_ACTIONS),
+                ),
+                safety_preferred=np.fromiter(
+                    (
+                        not safety_value_actions
+                        or action.name in safety_value_actions
+                        for action in _PLANNER_ACTIONS
+                    ),
+                    dtype=np.uint8,
+                    count=len(_PLANNER_ACTIONS),
+                ),
+                recovery_distance=np.fromiter(
+                    (
+                        recovery_by_action.get(
+                            action.name,
+                            math.inf,
+                        )
+                        for action in _PLANNER_ACTIONS
+                    ),
+                    dtype=np.float64,
+                    count=len(_PLANNER_ACTIONS),
+                ),
+                repair_volume=np.fromiter(
+                    (
+                        repair_by_action.get(action.name, 0)
+                        for action in _PLANNER_ACTIONS
+                    ),
+                    dtype=np.int32,
+                    count=len(_PLANNER_ACTIONS),
+                ),
+                use_native_reducer=native_beam_enabled,
+            )
+            supplemental_beam = [
+                SearchNode(
+                    x=node.x,
+                    y=node.y,
+                    first_action=_PLANNER_ACTIONS[
+                        node.first_action
+                    ],
+                    last_action=_PLANNER_ACTIONS[node.last_action],
+                    risk=node.risk,
+                    collisions=node.collisions,
+                    min_clearance=node.min_clearance,
+                    immediate_clearance=node.immediate_clearance,
+                    collected_mask=0,
+                    item_utility=0.0,
+                )
+                for node in lane_nodes
+            ]
+        except Exception as error:
+            supplemental_beam = []
+            supplemental_failure = (
+                f"{type(error).__name__}: {error}"
+            )
+        finally:
+            _certificate_timing_accumulator.supplemental_beam_ms += (
+                time.perf_counter_ns() - supplemental_started_ns
+            ) / 1_000_000.0
+    if supplemental_failure is not None:
+        preloss_continuation_preference_active = False
+        preloss_supplemental_beam_active = False
+
     if not beam:
         beam = [
             SearchNode(
@@ -4870,6 +5088,7 @@ def choose_action(
                 0.0,
             )
         ]
+    supplemental_source_ids = {id(node) for node in supplemental_beam}
     for index, node in enumerate(beam):
         if target_x is None or target_y is None:
             position_cost = (
@@ -4882,12 +5101,28 @@ def choose_action(
                 + ((node.y - target_y) / 8.0) ** 2
             )
         beam[index] = replace(node, risk=node.risk + position_cost)
+    for index, node in enumerate(supplemental_beam):
+        if target_x is None or target_y is None:
+            position_cost = (
+                ((node.x - 192.0) / 96.0) ** 2
+                + ((node.y - 400.0) / 128.0) ** 2
+            )
+        else:
+            position_cost = 0.25 * (
+                ((node.x - target_x) / 8.0) ** 2
+                + ((node.y - target_y) / 8.0) ** 2
+            )
+        replaced_node = replace(node, risk=node.risk + position_cost)
+        supplemental_source_ids.discard(id(node))
+        supplemental_source_ids.add(id(replaced_node))
+        supplemental_beam[index] = replaced_node
     _certificate_timing_accumulator.beam_search_ms += (
         time.perf_counter_ns() - beam_started_ns
     ) / 1_000_000.0
     terminal_threat_started_ns = time.perf_counter_ns()
+    endpoint_pool = [*beam, *supplemental_beam]
     terminal_threats = _terminal_threat_scores(
-        beam,
+        endpoint_pool,
         start_step=horizon,
         end_step=effective_threat_horizon,
         control_delay_frames=control_delay_frames,
@@ -4900,7 +5135,9 @@ def choose_action(
     ) / 1_000_000.0
     selection_started_ns = time.perf_counter_ns()
 
-    def selection_key(node: SearchNode) -> tuple[object, ...]:
+    def historical_selection_key(
+        node: SearchNode,
+    ) -> tuple[object, ...]:
         threat_collisions, threat_clearance = terminal_threats[node]
         return (
             node.collisions,
@@ -4915,16 +5152,8 @@ def choose_action(
                 )
                 else 1
             ),
-            (
-                -repair_by_action.get(node.first_action.name, 0)
-                if preloss_continuation_preference_active
-                else 0
-            ),
-            _boundary_control_reserve_deficit(
-                node.x,
-                node.y,
-                reserve_distance=preloss_reserve_distance,
-            ),
+            0,
+            0.0,
             max(ITEM_SAFETY_CLEARANCE - threat_clearance, 0.0),
             (
                 0
@@ -4951,72 +5180,321 @@ def choose_action(
             ),
         )
 
-    best = min(
-        beam,
-        key=selection_key,
-    )
+    def selection_key(node: SearchNode) -> tuple[object, ...]:
+        historical = historical_selection_key(node)
+        return (
+            *historical[:5],
+            (
+                -repair_by_action.get(node.first_action.name, 0)
+                if preloss_continuation_preference_active
+                else 0
+            ),
+            _boundary_control_reserve_deficit(
+                node.x,
+                node.y,
+                reserve_distance=preloss_reserve_distance,
+            ),
+            *historical[7:],
+        )
+
+    def route_gate_deficit(node: SearchNode) -> float:
+        if target_x is None or target_y is None:
+            return 0.0
+        return max(
+            _minimum_travel_frames(
+                node.x,
+                node.y,
+                target_x,
+                target_y,
+            )
+            - max((target_deadline or 0) - horizon, 0),
+            0.0,
+        )
+
     robust_certificates: dict[str, RobustActionCertificate] = {}
     nodes_by_action: dict[str, SearchNode] = {}
     robust_override = False
     robust_certificate: RobustActionCertificate | None = None
-    if control_delay_candidates is not None:
+    historical_best = min(beam, key=historical_selection_key)
+    historical_route_gate_deficit = route_gate_deficit(historical_best)
+    preloss_selected_from_supplemental = False
+    preloss_candidate_count = 0
+
+    if preloss_continuation_preference_active:
         actions_by_name: dict[str, PlannerAction] = {}
-        for node in beam:
+        for node in endpoint_pool:
             action_name = node.first_action.name
             actions_by_name[action_name] = node.first_action
-            incumbent = nodes_by_action.get(action_name)
-            if incumbent is None or selection_key(node) < selection_key(
-                incumbent
+        if control_delay_candidates is not None:
+            if actions_by_name.keys() <= robust_preflight_certificates.keys():
+                robust_certificates = {
+                    action_name: robust_preflight_certificates[action_name]
+                    for action_name in actions_by_name
+                }
+            else:
+                robust_certificates = _robust_action_certificates(
+                    player_x=observed_player_x,
+                    player_y=observed_player_y,
+                    previous_mask=delayed_mask,
+                    actions=tuple(actions_by_name.values()),
+                    delay_frames=control_delay_candidates,
+                    action_hold_frames=action_hold_frames,
+                    bullets=bullets,
+                    lasers=lasers,
+                    enemy_bodies=enemy_bodies,
+                    snapshot_lag=snapshot_lag,
+                    laser_frames=laser_timeline[:certificate_horizon],
+                    pipeline_root=local_pipeline_root,
+                    timing_accumulator=_certificate_timing_accumulator,
+                )
+
+        historical_nodes_by_action: dict[str, SearchNode] = {}
+        for node in beam:
+            action_name = node.first_action.name
+            incumbent = historical_nodes_by_action.get(action_name)
+            if (
+                incumbent is None
+                or historical_selection_key(node)
+                < historical_selection_key(incumbent)
             ):
-                nodes_by_action[action_name] = node
-        if actions_by_name.keys() <= robust_preflight_certificates.keys():
-            robust_certificates = {
-                action_name: robust_preflight_certificates[action_name]
-                for action_name in actions_by_name
-            }
-        else:
-            robust_certificates = _robust_action_certificates(
-                player_x=observed_player_x,
-                player_y=observed_player_y,
-                previous_mask=delayed_mask,
-                actions=tuple(actions_by_name.values()),
-                delay_frames=control_delay_candidates,
-                action_hold_frames=action_hold_frames,
-                bullets=bullets,
-                lasers=lasers,
-                enemy_bodies=enemy_bodies,
-                snapshot_lag=snapshot_lag,
-                laser_frames=laser_timeline[:certificate_horizon],
-                pipeline_root=local_pipeline_root,
-                timing_accumulator=_certificate_timing_accumulator,
-            )
-        nominal_certificate = robust_certificates[best.first_action.name]
-        if (
-            nominal_certificate.worst_collisions > 0
-            or nominal_certificate.min_clearance < 0.0
-        ):
-            robust_best = min(
-                nodes_by_action.values(),
-                key=lambda node: (
-                    robust_certificates[
-                        node.first_action.name
-                    ].worst_collisions,
-                    max(
+                historical_nodes_by_action[action_name] = node
+        historical_provisional = historical_best
+        if robust_certificates:
+            nominal_certificate = robust_certificates[
+                historical_best.first_action.name
+            ]
+            if (
+                nominal_certificate.worst_collisions > 0
+                or nominal_certificate.min_clearance < 0.0
+            ):
+                historical_best = min(
+                    historical_nodes_by_action.values(),
+                    key=lambda node: (
+                        robust_certificates[
+                            node.first_action.name
+                        ].worst_collisions,
+                        max(
+                            -robust_certificates[
+                                node.first_action.name
+                            ].min_clearance,
+                            0.0,
+                        ),
+                        robust_certificates[
+                            node.first_action.name
+                        ].cvar_risk,
                         -robust_certificates[
                             node.first_action.name
                         ].min_clearance,
-                        0.0,
+                        historical_selection_key(node),
                     ),
-                    robust_certificates[node.first_action.name].cvar_risk,
-                    -robust_certificates[
-                        node.first_action.name
-                    ].min_clearance,
-                    selection_key(node),
+                )
+                robust_override = (
+                    historical_best.first_action
+                    != historical_provisional.first_action
+                )
+        historical_route_gate_deficit = route_gate_deficit(
+            historical_best
+        )
+
+        def hard_components(node: SearchNode) -> tuple[int | float, ...]:
+            threat_collisions, threat_clearance = terminal_threats[node]
+            certificate = robust_certificates.get(
+                node.first_action.name
+            )
+            return (
+                (
+                    certificate.worst_collisions
+                    if certificate is not None
+                    else 0
+                ),
+                (
+                    max(-certificate.min_clearance, 0.0)
+                    if certificate is not None
+                    else 0.0
+                ),
+                node.collisions,
+                max(-node.min_clearance, 0.0),
+                threat_collisions,
+                max(-threat_clearance, 0.0),
+            )
+
+        historical_hard = hard_components(historical_best)
+        historical_survival_deficit = (
+            0
+            if (
+                not survival_actions
+                or historical_best.first_action.name in survival_actions
+            )
+            else 1
+        )
+        historical_continuation_key = (
+            -repair_by_action.get(
+                historical_best.first_action.name,
+                0,
+            ),
+            _boundary_control_reserve_deficit(
+                historical_best.x,
+                historical_best.y,
+                reserve_distance=preloss_reserve_distance,
+            ),
+        )
+        effective_set = set(effective_allowed_first_actions or ())
+        admitted: list[SearchNode] = []
+        for node in endpoint_pool:
+            node_hard = hard_components(node)
+            if not all(
+                candidate <= incumbent
+                for candidate, incumbent in zip(
+                    node_hard,
+                    historical_hard,
+                )
+            ):
+                continue
+            if (
+                route_gate_deficit(node)
+                > historical_route_gate_deficit
+            ):
+                continue
+            if (
+                effective_set
+                and node.first_action.name not in effective_set
+            ):
+                continue
+            survival_deficit = (
+                0
+                if (
+                    not survival_actions
+                    or node.first_action.name in survival_actions
+                )
+                else 1
+            )
+            if survival_deficit > historical_survival_deficit:
+                continue
+            continuation_key = (
+                -repair_by_action.get(node.first_action.name, 0),
+                _boundary_control_reserve_deficit(
+                    node.x,
+                    node.y,
+                    reserve_distance=preloss_reserve_distance,
                 ),
             )
-            robust_override = robust_best.first_action != best.first_action
-            best = robust_best
-        robust_certificate = robust_certificates[best.first_action.name]
+            if continuation_key >= historical_continuation_key:
+                continue
+            admitted.append(node)
+        preloss_candidate_count = len(admitted)
+        best = (
+            min(
+                admitted,
+                key=lambda node: (
+                    hard_components(node),
+                    (
+                        0
+                        if (
+                            not survival_actions
+                            or node.first_action.name
+                            in survival_actions
+                        )
+                        else 1
+                    ),
+                    -repair_by_action.get(
+                        node.first_action.name,
+                        0,
+                    ),
+                    _boundary_control_reserve_deficit(
+                        node.x,
+                        node.y,
+                        reserve_distance=preloss_reserve_distance,
+                    ),
+                    historical_selection_key(node),
+                ),
+            )
+            if admitted
+            else historical_best
+        )
+        preloss_selected_from_supplemental = (
+            id(best) in supplemental_source_ids
+        )
+        for node in endpoint_pool:
+            action_name = node.first_action.name
+            incumbent = nodes_by_action.get(action_name)
+            if (
+                incumbent is None
+                or selection_key(node) < selection_key(incumbent)
+            ):
+                nodes_by_action[action_name] = node
+        robust_certificate = robust_certificates.get(
+            best.first_action.name
+        )
+    else:
+        best = min(beam, key=selection_key)
+        if control_delay_candidates is not None:
+            actions_by_name: dict[str, PlannerAction] = {}
+            for node in beam:
+                action_name = node.first_action.name
+                actions_by_name[action_name] = node.first_action
+                incumbent = nodes_by_action.get(action_name)
+                if incumbent is None or selection_key(
+                    node
+                ) < selection_key(incumbent):
+                    nodes_by_action[action_name] = node
+            if actions_by_name.keys() <= (
+                robust_preflight_certificates.keys()
+            ):
+                robust_certificates = {
+                    action_name: robust_preflight_certificates[action_name]
+                    for action_name in actions_by_name
+                }
+            else:
+                robust_certificates = _robust_action_certificates(
+                    player_x=observed_player_x,
+                    player_y=observed_player_y,
+                    previous_mask=delayed_mask,
+                    actions=tuple(actions_by_name.values()),
+                    delay_frames=control_delay_candidates,
+                    action_hold_frames=action_hold_frames,
+                    bullets=bullets,
+                    lasers=lasers,
+                    enemy_bodies=enemy_bodies,
+                    snapshot_lag=snapshot_lag,
+                    laser_frames=laser_timeline[:certificate_horizon],
+                    pipeline_root=local_pipeline_root,
+                    timing_accumulator=_certificate_timing_accumulator,
+                )
+            nominal_certificate = robust_certificates[
+                best.first_action.name
+            ]
+            if (
+                nominal_certificate.worst_collisions > 0
+                or nominal_certificate.min_clearance < 0.0
+            ):
+                robust_best = min(
+                    nodes_by_action.values(),
+                    key=lambda node: (
+                        robust_certificates[
+                            node.first_action.name
+                        ].worst_collisions,
+                        max(
+                            -robust_certificates[
+                                node.first_action.name
+                            ].min_clearance,
+                            0.0,
+                        ),
+                        robust_certificates[
+                            node.first_action.name
+                        ].cvar_risk,
+                        -robust_certificates[
+                            node.first_action.name
+                        ].min_clearance,
+                        selection_key(node),
+                    ),
+                )
+                robust_override = (
+                    robust_best.first_action != best.first_action
+                )
+                best = robust_best
+            robust_certificate = robust_certificates[
+                best.first_action.name
+            ]
     damage_reason = "boss_not_damageable"
     if damageable:
         damage_reason = "boss_geometry_unavailable"
@@ -5181,20 +5659,29 @@ def choose_action(
         preloss_continuation_preference_active=(
             preloss_continuation_preference_active
         ),
-        planned_route_gate_deficit=(
-            max(
-                _minimum_travel_frames(
-                    best.x,
-                    best.y,
-                    target_x,
-                    target_y,
-                )
-                - max((target_deadline or 0) - horizon, 0),
-                0.0,
-            )
-            if target_x is not None and target_y is not None
-            else 0.0
+        planned_route_gate_deficit=route_gate_deficit(best),
+        preloss_supplemental_beam_active=(
+            preloss_supplemental_beam_active
         ),
+        preloss_supplemental_beam_width=(
+            preloss_supplemental_beam_width
+            if preloss_supplemental_beam_active
+            else 0
+        ),
+        preloss_historical_action=(
+            historical_best.first_action.name
+            if preloss_continuation_preference_active
+            else None
+        ),
+        preloss_selected_from_supplemental=(
+            preloss_selected_from_supplemental
+        ),
+        preloss_supplemental_candidate_count=preloss_candidate_count,
+        preloss_historical_route_gate_deficit=(
+            historical_route_gate_deficit
+        ),
+        preloss_supplemental_failure=supplemental_failure,
+        local_collisions=best.collisions,
     )
     _certificate_timing_accumulator.selection_finalize_ms += (
         time.perf_counter_ns() - selection_started_ns
@@ -5248,6 +5735,9 @@ def choose_action(
             losing_control_reserve=losing_control_reserve,
             preloss_continuation_preference=(
                 preloss_continuation_preference
+            ),
+            preloss_supplemental_beam_width=(
+                preloss_supplemental_beam_width
             ),
             preserve_previous_direction_inertia=(
                 preserve_previous_direction_inertia
@@ -8406,6 +8896,28 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "planned_route_gate_deficit": (
                             decision.planned_route_gate_deficit
+                        ),
+                        "local_collisions": decision.local_collisions,
+                        "preloss_supplemental_beam_active": (
+                            decision.preloss_supplemental_beam_active
+                        ),
+                        "preloss_supplemental_beam_width": (
+                            decision.preloss_supplemental_beam_width
+                        ),
+                        "preloss_historical_action": (
+                            decision.preloss_historical_action
+                        ),
+                        "preloss_selected_from_supplemental": (
+                            decision.preloss_selected_from_supplemental
+                        ),
+                        "preloss_supplemental_candidate_count": (
+                            decision.preloss_supplemental_candidate_count
+                        ),
+                        "preloss_historical_route_gate_deficit": (
+                            decision.preloss_historical_route_gate_deficit
+                        ),
+                        "preloss_supplemental_failure": (
+                            decision.preloss_supplemental_failure
                         ),
                         "viability_safety_value_preferred": (
                             decision.viability_safety_value_preferred

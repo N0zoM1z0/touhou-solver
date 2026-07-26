@@ -2407,6 +2407,157 @@ class LiveDodgeAgentTests(unittest.TestCase):
             decision.preloss_continuation_preference_active
         )
 
+    def test_supplemental_lane_recovers_candidate_without_displacing_beam(
+        self,
+    ) -> None:
+        common = {
+            "player_x": 192.0,
+            "player_y": 300.0,
+            "bullets": (),
+            "lasers": (),
+            "previous_direction": LEFT,
+            "previous_focus": True,
+            "can_bomb": False,
+            "control_delay_frames": 2,
+            "control_delay_candidates": (1, 2, 3),
+            "action_hold_frames": 4,
+            "horizon": 4,
+            "threat_horizon": 4,
+            "beam_width": 1,
+            "allowed_first_actions": ("left", "right"),
+            "viability_repair_volumes": (
+                ("left", 1),
+                ("right", 9),
+            ),
+        }
+        baseline = choose_action(**common)
+        final_only = choose_action(
+            **common,
+            preloss_continuation_preference=True,
+        )
+        supplemental = choose_action(
+            **common,
+            preloss_continuation_preference=True,
+            preloss_supplemental_beam_width=1,
+        )
+        self.assertEqual(baseline.action, "left")
+        self.assertEqual(final_only.action, baseline.action)
+        self.assertEqual(
+            supplemental.preloss_historical_action,
+            baseline.action,
+        )
+        self.assertEqual(supplemental.action, "right")
+        self.assertTrue(supplemental.preloss_supplemental_beam_active)
+        self.assertTrue(
+            supplemental.preloss_selected_from_supplemental
+        )
+        self.assertGreater(
+            supplemental.preloss_supplemental_candidate_count,
+            0,
+        )
+        self.assertIsNone(supplemental.preloss_supplemental_failure)
+        self.assertGreater(
+            supplemental.local_certificate_timing.supplemental_beam_ms,
+            0.0,
+        )
+
+    def test_supplemental_lane_rejects_route_gate_regression(
+        self,
+    ) -> None:
+        decision = choose_action(
+            player_x=192.0,
+            player_y=300.0,
+            bullets=(),
+            lasers=(),
+            previous_direction=LEFT,
+            previous_focus=True,
+            can_bomb=False,
+            control_delay_frames=2,
+            control_delay_candidates=(1, 2, 3),
+            action_hold_frames=4,
+            horizon=4,
+            threat_horizon=4,
+            beam_width=1,
+            target_x=160.0,
+            target_y=300.0,
+            target_deadline=4,
+            allowed_first_actions=("left", "right"),
+            viability_repair_volumes=(
+                ("left", 1),
+                ("right", 9),
+            ),
+            preloss_continuation_preference=True,
+            preloss_supplemental_beam_width=1,
+        )
+        self.assertEqual(decision.action, "left")
+        self.assertEqual(decision.preloss_historical_action, "left")
+        self.assertEqual(
+            decision.planned_route_gate_deficit,
+            decision.preloss_historical_route_gate_deficit,
+        )
+        self.assertEqual(
+            decision.preloss_supplemental_candidate_count,
+            0,
+        )
+
+    def test_supplemental_lane_failure_returns_historical_action(
+        self,
+    ) -> None:
+        common = {
+            "player_x": 192.0,
+            "player_y": 300.0,
+            "bullets": (),
+            "lasers": (),
+            "previous_direction": LEFT,
+            "previous_focus": True,
+            "can_bomb": False,
+            "control_delay_frames": 2,
+            "control_delay_candidates": (1, 2, 3),
+            "action_hold_frames": 4,
+            "horizon": 4,
+            "threat_horizon": 4,
+            "beam_width": 1,
+            "allowed_first_actions": ("left", "right"),
+            "viability_repair_volumes": (
+                ("left", 1),
+                ("right", 9),
+            ),
+        }
+        historical = choose_action(**common)
+        with patch(
+            "th08_live_dodge_agent.search_supplemental_local_beam",
+            side_effect=RuntimeError("synthetic failure"),
+        ):
+            decision = choose_action(
+                **common,
+                preloss_continuation_preference=True,
+                preloss_supplemental_beam_width=1,
+            )
+        self.assertEqual(decision.action, historical.action)
+        self.assertFalse(
+            decision.preloss_continuation_preference_active
+        )
+        self.assertFalse(decision.preloss_supplemental_beam_active)
+        self.assertEqual(
+            decision.preloss_supplemental_failure,
+            "RuntimeError: synthetic failure",
+        )
+
+    def test_supplemental_lane_requires_nonnegative_width(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "supplemental beam width",
+        ):
+            choose_action(
+                player_x=192.0,
+                player_y=300.0,
+                bullets=(),
+                lasers=(),
+                previous_direction=0,
+                can_bomb=False,
+                preloss_supplemental_beam_width=-1,
+            )
+
     def test_exact_local_collision_outranks_distant_kernel_recovery(
         self,
     ) -> None:

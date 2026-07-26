@@ -3845,3 +3845,71 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   incumbent and add a separately budgeted continuation-biased supplemental
   lane; final hard comparison over the union may improve coverage without
   making the baseline endpoint unavailable.
+
+## 2026-07-26: Immutable Supplemental Lane And Intensive Geometry Gate
+
+- **Problem contract:** Added
+  `notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`. CE-0129's
+  historical beam and native reducer remain immutable. The new lane is a
+  separately budgeted proposal search and cannot remove the historical
+  endpoint. Final admission requires effective-global membership,
+  componentwise issue-prefix/local/terminal hard nonregression, route
+  nonregression, and a strict exact repair-volume then boundary-reserve
+  improvement.
+- **Implementation:** Added game-neutral
+  `touhou_control.supplemental_local_beam`, a separate
+  `touhou_local_supplemental_beam_reduce_v1` native export and independent
+  Python oracle, default-off orchestration, historical fallback on failure,
+  source/candidate/failure telemetry, separate supplemental timing, and a
+  `local_collisions` hard component. The historical v1 reducer ABI and
+  historical beam loop remain unchanged. There is no live CLI switch.
+- **Reducer validation:** 128 randomized direct Python/native supplemental
+  reductions and randomized end-to-end local decisions retained identical
+  indices, actions, and hard labels. Focused regressions cover a high-repair
+  action discarded by width-1 historical pruning, route-gate rejection,
+  negative width rejection, and exception fallback.
+- **Observed broad replay:** Across 800 fixed Hard roots, final-only changed
+  8 actions. Width 4 changed 286, improved exact repair on 273, and improved
+  equal-repair reserve on 13. Widths 8/12 changed 288/296, with diminishing
+  returns. Width-4 supplemental median/p95 was `2.449/3.114 ms`; total
+  historical versus width-4 was `6.461/9.546` versus `9.115/12.156 ms`.
+- **Observed pre-hit replay:** Across 800 fixed roots within 300 frames of a
+  recorded hit, final-only changed 13 actions. Width 4 changed 341, improved
+  exact repair on 323, and improved equal-repair reserve on 18. Widths 8/12
+  changed 350/364. Width-4 supplemental median/p95 was
+  `2.425/3.026 ms`; total historical versus width-4 was `6.749/10.038`
+  versus `9.429/12.663 ms`.
+- **Contract result:** Both reservoirs had zero historical-action mismatch,
+  effective-global membership violation, issue/local/terminal hard-component
+  regression, route regression, continuation-admission violation, or
+  supplemental failure. Width 4 is the retained Pareto candidate. This is
+  same-root proposal evidence, not prevented-hit, deadline, or unrestricted
+  optimality evidence.
+- **Generated intensive cases:** Added six deterministic TH08-semantic
+  workloads with up to 4,096 piecewise transformed bullets and 2,048 lasers,
+  including stop/resume/reverse/redirect events, executable and degenerate
+  lasers, bodies, tangent boundaries, uncertainty, companion-batch
+  invariance, and end-to-end local decisions. Native/NumPy collision and
+  clearance-sign parity were exact, batch mismatches were zero, end-to-end
+  action/hard labels were equal, and maximum clearance difference was below
+  `3.32e-5`. Risk-order difference reached `0.213` and remains soft with
+  unknown error direction.
+- **Geometry decision:** Ten already-lowered off-tube queries with 4,096
+  bullets and 1,024 lasers cost only `2.211/2.408 ms` median/p95, while
+  dense genuinely crossing beyond-pool geometry cost
+  `108.711/112.989 ms`. The existing conservative AABB pruning is effective;
+  no viewport crop, velocity cone, or per-decision grid/BVH is promoted.
+- **Artifacts:** Broad replay SHA-256
+  `28072dd8589bb3abcb8aa382443f93d6bd693f59194b62b5d8d7e495210b8a84`,
+  pre-hit replay
+  `8f336702b0d4f4ed5f798bb845be3c537d9352068204d2bb7a8ae84432500c38`,
+  and intensive corpus
+  `2e654aa456bfb9bbb1abee41d565950ab7a86c63f7ab45de05f0818672409d54`.
+- **Validation:** Linux and Windows quick suites pass `583/583` in
+  `5.158/7.979 s`. Both native libraries rebuilt successfully; native build
+  output remains ignored.
+- **Next gate:** Measure width 4 on direct Windows
+  observe/decode/project/certify/supplemental/issue roots under the live
+  four-worker planner contention. Optional work must not age authoritative
+  publication; failure or budget miss returns the historical action. A
+  focused Hard shadow and physical A/B remain downstream, not yet authorized.

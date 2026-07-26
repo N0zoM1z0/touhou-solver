@@ -149,6 +149,121 @@ def _native_reduce(**values: object) -> np.ndarray:
     return result
 
 
+def _python_supplemental_reduce(
+    *,
+    repair_volume: np.ndarray,
+    supplemental_reserve_distance: float,
+    recovery_reserve_distance: float,
+    bounds: tuple[float, float, float, float],
+    **values: object,
+) -> np.ndarray:
+    draft_x = values["draft_x"]
+    draft_y = values["draft_y"]
+    first_action = values["first_action"]
+    last_direction = values["last_direction"]
+    last_focused = values["last_focused"]
+    collected_mask = values["collected_mask"]
+    risk = values["risk"]
+    collisions = values["collisions"]
+    minimum_clearance = values["minimum_clearance"]
+    certificate_collisions = values["certificate_collisions"]
+    certificate_minimum = values["certificate_minimum"]
+    survival_preferred = values["survival_preferred"]
+    safety_preferred = values["safety_preferred"]
+    recovery_distance = values["recovery_distance"]
+    target_x = values["target_x"]
+    target_y = values["target_y"]
+    target_deadline = values["target_deadline"]
+    step = int(values["step"])
+    diagonal_speed = float(values["diagonal_speed"])
+    cardinal_speed = float(values["cardinal_speed"])
+    item_safety_clearance = float(values["item_safety_clearance"])
+    keys: list[tuple[object, ...]] = []
+    for index, (x, y) in enumerate(zip(draft_x, draft_y)):
+        action = int(first_action[index])
+        gate_deficit = 0.0
+        if target_x is not None:
+            assert target_y is not None
+            assert target_deadline is not None
+            gate_deficit = max(
+                _minimum_travel_frames(
+                    float(x),
+                    float(y),
+                    float(target_x),
+                    float(target_y),
+                    diagonal_speed,
+                    cardinal_speed,
+                )
+                - max(int(target_deadline) - step, 0),
+                0.0,
+            )
+        keys.append(
+            (
+                int(collisions[index]),
+                int(certificate_collisions[action]),
+                max(-float(certificate_minimum[action]), 0.0),
+                max(-float(minimum_clearance[index]), 0.0),
+                0 if survival_preferred[action] else 1,
+                gate_deficit,
+                -int(repair_volume[action]),
+                _boundary_deficit(
+                    float(x),
+                    float(y),
+                    supplemental_reserve_distance,
+                    bounds,
+                ),
+                max(
+                    item_safety_clearance
+                    - float(minimum_clearance[index]),
+                    0.0,
+                ),
+                0 if safety_preferred[action] else 1,
+                _boundary_deficit(
+                    float(x),
+                    float(y),
+                    recovery_reserve_distance,
+                    bounds,
+                ),
+                float(recovery_distance[action]),
+                float(risk[index]),
+                -float(minimum_clearance[index]),
+            )
+        )
+    winners: dict[tuple[object, ...], int] = {}
+    for index, (x, y) in enumerate(zip(draft_x, draft_y)):
+        quantized = (
+            round(float(x) * 0.5),
+            round(float(y) * 0.5),
+            int(last_direction[index]),
+            bool(last_focused[index]),
+            int(collected_mask[index]),
+        )
+        incumbent = winners.get(quantized)
+        if incumbent is None or keys[index] < keys[incumbent]:
+            winners[quantized] = index
+    retained = sorted(
+        winners.values(),
+        key=keys.__getitem__,
+    )[: int(values["beam_width"])]
+    return np.asarray(retained, dtype=np.int32)
+
+
+def _native_supplemental_reduce(**values: object) -> np.ndarray:
+    result = native_backend.reduce_local_supplemental_beam(
+        position_quantization=0.5,
+        playfield_left=8.0,
+        playfield_right=376.0,
+        playfield_top=16.0,
+        playfield_bottom=432.0,
+        **values,
+    )
+    if result is None:
+        raise AssertionError(
+            "native supplemental beam reducer is unavailable"
+        )
+    return result
+
+
 @unittest.skipUnless(_native_available(), "native local beam reducer unavailable")
 class NativeLocalBeamTests(unittest.TestCase):
     def assert_reducer_parity(self, **values: object) -> None:
@@ -300,6 +415,124 @@ class NativeLocalBeamTests(unittest.TestCase):
                 recovery_distance=recovery,
             )
 
+    def test_supplemental_randomized_differential(self) -> None:
+        if (
+            native_backend
+            ._load_local_supplemental_beam_reduce_function()
+            is None
+        ):
+            self.skipTest("native supplemental beam reducer unavailable")
+        rng = np.random.default_rng(0xCE0130)
+        bounds = (8.0, 376.0, 16.0, 432.0)
+        for case in range(128):
+            action_count = int(rng.integers(1, 18))
+            draft_count = int(rng.integers(1, 420))
+            target_enabled = bool(case % 2)
+            minimum = rng.uniform(-12.0, 80.0, draft_count)
+            if case % 7 == 0:
+                minimum[0] = math.inf
+            recovery = rng.uniform(0.0, 100.0, action_count)
+            if case % 3 == 0:
+                recovery[0] = math.inf
+            values = {
+                "draft_x": rng.uniform(
+                    8.0,
+                    376.0,
+                    draft_count,
+                ),
+                "draft_y": rng.uniform(
+                    16.0,
+                    432.0,
+                    draft_count,
+                ),
+                "first_action": rng.integers(
+                    0,
+                    action_count,
+                    draft_count,
+                    dtype=np.int32,
+                ),
+                "last_direction": rng.integers(
+                    0,
+                    16,
+                    draft_count,
+                    dtype=np.int32,
+                ),
+                "last_focused": rng.integers(
+                    0,
+                    2,
+                    draft_count,
+                    dtype=np.uint8,
+                ),
+                "collected_mask": rng.integers(
+                    0,
+                    1 << 12,
+                    draft_count,
+                    dtype=np.uint32,
+                ),
+                "risk": rng.uniform(0.0, 10000.0, draft_count),
+                "collisions": rng.integers(
+                    0,
+                    5,
+                    draft_count,
+                    dtype=np.int32,
+                ),
+                "minimum_clearance": minimum,
+                "step": int(rng.integers(1, 33)),
+                "beam_width": int(rng.integers(1, 65)),
+                "target_x": 192.0 if target_enabled else None,
+                "target_y": 400.0 if target_enabled else None,
+                "target_deadline": 32 if target_enabled else None,
+                "item_safety_clearance": 8.0,
+                "recovery_reserve_distance": float(
+                    rng.uniform(0.0, 30.0)
+                ),
+                "supplemental_reserve_distance": float(
+                    rng.uniform(0.0, 30.0)
+                ),
+                "diagonal_speed": 3.5 / math.sqrt(2.0),
+                "cardinal_speed": 3.5,
+                "certificate_collisions": rng.integers(
+                    0,
+                    3,
+                    action_count,
+                    dtype=np.int32,
+                ),
+                "certificate_minimum": rng.uniform(
+                    -20.0,
+                    50.0,
+                    action_count,
+                ),
+                "survival_preferred": rng.integers(
+                    0,
+                    2,
+                    action_count,
+                    dtype=np.uint8,
+                ),
+                "safety_preferred": rng.integers(
+                    0,
+                    2,
+                    action_count,
+                    dtype=np.uint8,
+                ),
+                "recovery_distance": recovery,
+                "repair_volume": rng.integers(
+                    0,
+                    1000,
+                    action_count,
+                    dtype=np.int32,
+                ),
+            }
+            reference = _python_supplemental_reduce(
+                bounds=bounds,
+                **values,
+            )
+            native = _native_supplemental_reduce(**values)
+            np.testing.assert_array_equal(
+                native,
+                reference,
+                err_msg=f"case={case}",
+            )
+
     def test_choose_action_end_to_end_matches_python_reducer(self) -> None:
         rng = np.random.default_rng(0xBEA0124)
         try:
@@ -343,6 +576,9 @@ class NativeLocalBeamTests(unittest.TestCase):
                         ("right", 3 - case % 3),
                     ),
                     "preloss_continuation_preference": bool(case % 2),
+                    "preloss_supplemental_beam_width": (
+                        1 + case % 12 if case % 2 else 0
+                    ),
                 }
                 live._configure_local_beam_reducer("python")
                 reference = live.choose_action(**arguments)

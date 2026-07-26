@@ -70,20 +70,33 @@ Python/C++ parity for the same recurrence is not physical correctness.
   retained 4,627 transactions with zero silent outside-global selections,
   zero Bomb, and no latency regression. The second reason-aware audit had
   zero violations, closing CE-0127/0128 for this boundary.
-- Option-A pre-loss replay rejected putting repair volume into beam pruning:
-  2/800 hit-window roots regressed the later terminal hard vector (CE-0129),
-  so the native reducer/ABI remains unchanged. A default-off final-only
-  selector changed 7/800 broad and 13/800 pre-hit actions with zero
-  changed-action hard regressions or global-set violations. Pre-hit reserve
-  improved on 11/13 and repair on 2/13; same-root replay is not physical
-  survival evidence. The next stronger design is an immutable historical
-  beam plus a separately budgeted supplemental continuation lane.
+- Option-A pre-loss replay rejected putting repair volume into shared beam
+  pruning: 2/800 hit-window roots regressed the later terminal hard vector
+  (CE-0129). The historical beam and native reducer ABI remain unchanged. A
+  new default-off supplemental lane preserves that beam as an immutable
+  incumbent and has a separate native reducer. Width 4 changed 286/800 broad
+  and 341/800 pre-hit actions; repair improved on 273 and 323, with another
+  13 and 18 equal-repair reserve improvements. Historical action identity,
+  effective-global membership, componentwise issue/local/terminal hard
+  nonregression, route nonregression, and continuation admission all had zero
+  violations. Its synchronous supplemental cost was `2.449/3.114 ms`
+  broad and `2.425/3.026 ms` pre-hit median/p95. This is proposal-only
+  same-root evidence, not physical survival or issue-deadline evidence.
+- Six generated TH08-semantic intensive geometry workloads cover native-pool
+  and beyond-pool bullets, stop/resume/reverse/redirect transforms,
+  executable and degenerate lasers, bodies, tangent boundaries, and
+  companion-batch invariance. Collision and clearance-sign parity, batch
+  invariance, and end-to-end action/hard labels were exact. Fully off-tube
+  `4096`-bullet/`1024`-laser queries cost only `2.211/2.408 ms` for ten
+  already-lowered native queries, confirming that the current conservative
+  AABB pruning works. Dense genuinely crossing fields remain expensive; no
+  viewport crop or per-decision grid/BVH is promoted.
 - The original-game full-route supervisor accepts
   `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
   only after accepted `route_complete`: it releases injected keys, closes the
   agent, sends no result/save choice, and leaves the identity-verified game
   process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `575/575` in `4.757/7.822 s`. The
+- Linux and Windows quick suites pass `583/583` in `5.158/7.979 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.
@@ -124,6 +137,7 @@ Expected pre-work status:
 | offline/shadow | belief lower bounds, revealed-delay upper, resumable threshold refinement | Research tools for feasibility/optimality gaps; too slow and/or too optimistic for live authority as currently integrated. |
 | proposal-only | losing-state control reserve | After Boolean exhaustion, ranks only fresh-hard-equivalent actions by delay-scaled reversal reserve. Hard replay improved reserve deficit without relabeling viability; physical effect is unmeasured. |
 | proposal-only | final-only pre-loss continuation/reserve | Inside a complete nonrelaxed viable set, ranks completed historical beam endpoints after hard terminal scoring. Hard replay changed few actions with zero hard regression; physical effect is unmeasured. |
+| proposal-only | immutable supplemental continuation lane | Keeps the complete historical beam as an incumbent and admits a separately budgeted endpoint only after exact effective-global, componentwise hard, route, and strict repair/reserve nonregression checks. Width 4 is the retained offline Pareto candidate; it has no live CLI or deadline authority. |
 | rejected | repair-aware shared beam pruning | CE-0129: root repair volume displaced endpoints before terminal threat was known and regressed 2/800 pre-hit terminal hard vectors. |
 | rejected | every-root candidate submission | Caused measurable live CPU/delivery contention. |
 | rejected | 50-ms repeated-manager-frame guard | CE-0121: fired on ordinary slow decisions, churned policy versions, and starved viability. |
@@ -362,9 +376,13 @@ formalization.
   `notes/LOSING_STATE_ROOT_CAUSE_20260725.md`
 - Current Hard same-root feasibility split and decision:
   `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`
+- Current pre-loss ranking and immutable supplemental-lane contracts:
+  `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md` and
+  `notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`
 
 Relevant durable counterexamples include CE-0108, CE-0109, CE-0111, CE-0118,
-and CE-0120 through CE-0125. Do not infer present authority from a historical
+CE-0120 through CE-0125, and CE-0127 through CE-0129. Do not infer present
+authority from a historical
 note; the table above and `STRATEGY.md` control current status.
 
 ## Environment And Build
@@ -520,29 +538,37 @@ artifacts, and cleanup.
 
 ## Next Good Checkpoint
 
-The complete Hard route is finished. The current user-directed algorithmic
-gate is to distinguish a genuinely losing finite model from coarse or stale
-false emptiness before spending more implementation effort:
+The complete Hard route is finished. The immutable supplemental-lane offline
+gate is also complete. The current user-directed algorithmic gate is:
 
-1. preserve the complete historical beam as an immutable hard incumbent and
-   benchmark a bounded supplemental continuation-biased lane. The rejected
-   shared-pruning form must not return;
-2. retain final-only pre-loss continuation/interior reserve as default-off
-   proposal evidence; it is safe in replay but too low-coverage to be the
-   main fix;
+1. measure width 4 on direct Windows roots across
+   observe/decode/project/certify/supplemental/issue and under the live
+   four-worker planner contention. A miss or budget overrun must return the
+   historical decision; optional work must not age authoritative
+   publication;
+2. if delivery remains clean, run the lane as side-effect-free focused Hard
+   shadow before considering a physical A/B. Do not add a live CLI or infer
+   prevented hits from same-root replay;
 3. add exact augmented-root partial-survival candidate witnesses as the
    post-loss fallback;
 4. keep 8/4-pixel work query-local and proof-backed. Full-field fine
    refinement remains rejected by low rescue rate and deadline cost;
 5. use additional CPU through deterministic process-level independent-root
    shards. Do not raise the four-worker live same-root default without a
-   delivery-contention gate.
+   delivery-contention gate;
+6. retain the current AABB geometry pruning. Revisit a per-frame index only
+   if direct-root telemetry isolates genuinely relevant dense geometry after
+   construction/lowering, rather than planner contention, as the deadline
+   bottleneck.
 
 The current evidence and five formal-review answers are in
 `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md` and
 `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`. The current
 pre-loss contract, rejected beam counterexample, and final-only evidence are
-in `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`.
+in `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`. The immutable
+supplemental design, replay results, intensive geometry corpus, and promotion
+boundary are in
+`notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`.
 
 A useful next algorithmic checkpoint is the action consequence of the now
 validated semantic sensor, not another detector or threshold tweak. It should:

@@ -172,11 +172,47 @@ Compiler vectorization and a wider SoA/SIMD kernel remain hypotheses for the
 larger beam workload. They are lower priority than plan freshness and require
 the same hard-label and retained-root gates.
 
+## Intensive TH08-Semantic Geometry Gate
+
+**Observed:** a deterministic generated corpus now covers native-pool and
+beyond-pool bullet counts, piecewise stop/resume/reverse/redirect transforms,
+trajectory uncertainty, executable laser lifecycles, degenerate and long
+crossing segments, bodies, tangent boundaries, companion-batch invariance,
+and end-to-end local selection. Across all six workloads, native versus
+NumPy had:
+
+- exact collision parity;
+- exact clearance-sign parity;
+- zero companion-batch invariance mismatches;
+- equal end-to-end selected action and hard labels; and
+- maximum absolute clearance difference below `3.32e-5`.
+
+Risk accumulation differed by floating-point order by as much as `0.213`.
+That error has unknown direction and remains a soft score with no hard
+authority.
+
+Ten already-lowered native queries measured `27.178/27.942 ms` median/p95
+at a full-field native pool, `9.512/9.975 ms` for the same pool clustered in
+the reachable tube, `108.711/112.989 ms` for 4,096 transformed bullets and
+512 crossing lasers, `2.211/2.408 ms` for 4,096 bullets and 1,024 lasers
+fully off-tube, `13.739/15.033 ms` near tangent boundaries, and
+`66.333/85.595 ms` for 2,048 degenerate/crossing lasers.
+
+**Inference:** the off-tube result directly validates the effectiveness of
+the existing conservative hazard/position AABB pruning. Dense genuinely
+relevant crossing geometry retains a large tail, but it is not the retained
+live-like 1--2 ms issue workload. A new per-frame grid/BVH, viewport crop, or
+present-velocity cone is therefore not justified at this checkpoint. A
+future index must include its construction/lowering cost and preserve exact
+collision, clearance-sign, viable-state, and action-mask behavior.
+
 ## Retained Evidence
 
 - `artifacts/benchmarks/local_hazard_geometry_windows_before_loop_20260726.json`
 - `artifacts/benchmarks/local_hazard_geometry_windows_hazard_major_20260726.json`
 - `artifacts/benchmarks/local_native_hazard_hazard_major_windows_20260726.json`
 - `artifacts/benchmarks/local_issue_contention_windows_20260726.json`
+- `artifacts/benchmarks/th08_local_intensive_cases_20260726.json`
 - `scripts/benchmarks/local_hazard_geometry_benchmark.py`
 - `scripts/benchmarks/local_issue_contention_benchmark.py`
+- `scripts/benchmarks/benchmark_th08_local_intensive_cases.py`

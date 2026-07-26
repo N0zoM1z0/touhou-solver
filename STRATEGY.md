@@ -117,16 +117,40 @@ ranking remains proposal-only: it changed 7/800 broad and 13/800 pre-hit
 actions with zero changed-action hard regressions and no measurable ranking
 cost, but the coverage is too small to call it the main solution.
 
+The successor immutable supplemental lane is now implemented and
+offline-validated, still default-off and proposal-only. It preserves the
+complete historical beam and uses an independently budgeted native/Python
+reducer. Width 4 changed 286/800 broad and 341/800 pre-hit same-root
+decisions; 273 and 323 increased exact repair volume, with another 13 and 18
+equal-repair reserve improvements. Historical action identity and exact
+effective-global, componentwise issue/local/terminal hard, route, and final
+continuation checks had zero violations. The lane itself cost
+`2.449/3.114 ms` broad and `2.425/3.026 ms` pre-hit median/p95. Widths 8 and
+12 had diminishing coverage returns and larger tails, so width 4 is the only
+retained candidate for the next gate. Same-root replay does not establish
+prevented hits or Windows issue-time fitness.
+
+Generated TH08-semantic intensive workloads also found exact collision and
+clearance-sign parity, exact companion-batch invariance, and equal
+end-to-end action/hard labels across native-pool and beyond-pool bullets,
+piecewise transforms, tangent boundaries, bodies, and executable/degenerate
+lasers. The current conservative AABB pruning reduced a fully off-tube
+4,096-bullet/1,024-laser workload to `2.211/2.408 ms` median/p95 for ten
+already-lowered native queries. Dense crossing fields remain expensive, but
+there is no evidence yet that a per-decision grid/BVH would repay its build
+cost on the retained live-like workload.
+
 Current priority is:
 
 1. keep CE-0120 shadow-only while its no-write/epoch counterfactual and broader
    negative workloads remain incomplete;
-2. preserve the historical local beam as an immutable hard incumbent and
-   measure a bounded continuation-biased supplemental candidate lane before
-   another physical strategy trial;
-3. keep the final-only continuation/interior-reserve selector default-off and
-   use it only as a focused physical A/B candidate after the quick Windows
-   gate;
+2. measure the width-4 immutable supplemental lane on direct Windows roots,
+   including complete observe/decode/project/certify/issue timing and
+   four-worker publication contention. Deadline miss, exception, or stale
+   version must fall back to the historical decision;
+3. if that gate is clean, retain a side-effect-free focused Hard shadow
+   before any physical A/B. Keep both continuation selectors default-off and
+   without a live CLI until then;
 4. add exact augmented-root partial-survival witnesses as the post-loss
    fallback without interpreting timeout or exhaustion as losing;
 5. replay direct local-pipeline roots and add future bullet/laser birth
@@ -745,8 +769,8 @@ supersede historical sequencing without erasing its counterexamples.
 
 ### S16 — Pre-Loss Continuation And Interior Reserve
 
-- **Status:** Final-only ranking is proposal-only and default-off.
-  Repair-aware beam pruning is rejected.
+- **Status:** Final-only ranking and the immutable supplemental lane are
+  proposal-only and default-off. Repair-aware shared beam pruning is rejected.
 - **Intent:** Before the coarse Boolean kernel becomes empty, prefer a viable
   first action with more worst-delay next-layer continuation and enough
   interior room to reverse, without changing global/fresh membership.
@@ -764,16 +788,28 @@ supersede historical sequencing without erasing its counterexamples.
   the global set. Pre-hit reserve deficit improved on 11/13, repair improved
   on 2/13, and neither regressed. Concurrent paired replay measured
   `10.60/17.19` versus `10.61/17.26 ms` baseline/proposal median/p95.
-- **Limitation:** A final selector cannot recover a high-continuation action
-  already discarded by the historical beam, so its coverage is intentionally
-  small. Same-root replay cannot establish prevented hits.
-- **Next gate:** Preserve the complete historical beam as an immutable
-  incumbent, build a separately budgeted supplemental continuation lane, and
-  compare terminal-hard scores over the union. It must be cancellable and
-  must not delay authoritative publication.
+- **Supplemental form:** The complete historical beam is an immutable
+  incumbent. A separate width-4 lane changed 286/800 broad and 341/800
+  pre-hit actions, improving repair on 273 and 323 and equal-repair reserve
+  on another 13 and 18. Historical identity and effective-global,
+  componentwise issue/local/terminal hard, route, and continuation admission
+  checks had zero violations. Supplemental median/p95 was
+  `2.449/3.114 ms` broad and `2.425/3.026 ms` pre-hit. Widths 8/12 gave small
+  additional coverage for larger tails.
+- **Limitation:** The supplemental search is a bounded proposal generator,
+  not an exact unrestricted optimizer or safety proof. Same-root replay
+  cannot establish prevented hits, delivery freshness, or issue deadline
+  fitness.
+- **Next gate:** Direct-root Windows telemetry and four-worker planner
+  contention for width 4. Optional work must be cancellable or explicitly
+  budgeted, cannot delay authoritative publication, and falls back to the
+  historical action on any miss.
 - **Evidence:** CE-0129,
   `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`, and the
-  `hard_preloss_*_20260726.json` benchmark artifacts.
+  `hard_preloss_*_20260726.json` benchmark artifacts; successor design and
+  data are in
+  `notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md` and the
+  `hard_supplemental_continuation_lane_*_20260726.json` artifacts.
 
 ## How To Add A Strategy
 

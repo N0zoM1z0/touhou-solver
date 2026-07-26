@@ -157,6 +157,11 @@ def _chain_timing(rows: list[dict[str, object]]) -> dict[str, object]:
             "planning",
             "beam_search_ms",
         ),
+        "local_supplemental_beam": (
+            "local_pipeline_timing",
+            "planning",
+            "supplemental_beam_ms",
+        ),
         "local_terminal_threat": (
             "local_pipeline_timing",
             "planning",

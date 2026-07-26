@@ -309,3 +309,23 @@ historical beam as an immutable incumbent and add a bounded supplemental
 continuation lane. Final terminal-hard comparison over the union must leave
 the historical endpoint available. See
 `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`.
+
+## Option-A Supplemental Result
+
+The immutable successor is implemented default-off, without a live CLI. It
+does not share pruning capacity with the historical beam and cannot remove
+its endpoint. A separate width-4 lane changed 286/800 broad and 341/800
+pre-hit actions, improving exact repair volume on 273 and 323 and
+equal-repair reserve on another 13 and 18. Historical selected-action
+identity, effective-global membership, componentwise issue/local/terminal
+hard constraints, route deficit, and strict continuation admission had zero
+violations. Supplemental median/p95 cost was `2.449/3.114 ms` broad and
+`2.425/3.026 ms` pre-hit.
+
+This closes the offline construction gate, not the physical gate. Width 4 is
+the only retained candidate because widths 8 and 12 paid larger tails for
+small additional coverage. The next Option-A step is direct-root Windows
+observe/decode/project/certify/supplemental/issue telemetry under the
+four-worker planner workload, with historical fallback and no publication
+delay. See
+`notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`.

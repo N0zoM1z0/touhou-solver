@@ -290,3 +290,37 @@ continuation-biased supplemental lane.  Final hard comparison over the union
 can then improve candidate coverage without making a baseline hard endpoint
 unavailable.  The extra lane must be independently budgeted and must not
 delay authoritative publication.
+
+## Successor Result: Immutable Supplemental Lane
+
+**Observed:** the successor is implemented behind
+`preloss_supplemental_beam_width=0`, with no live CLI.  The historical beam
+loop and its native reducer are unchanged.  The supplemental search has a
+separate game-neutral module, width, native export, Python oracle, timing, and
+failure fallback.  Final admission is relative to the exact historical
+incumbent after issue-prefix override and requires:
+
+- effective global/fresh membership;
+- componentwise issue-prefix, local, and terminal collision and
+  negative-clearance nonregression;
+- route-gate nonregression; and
+- strict lexicographic improvement in exact repair volume and then boundary
+  reserve.
+
+On fixed 800-root broad and pre-hit-300 Hard reservoirs, width 4 changed
+`286` and `341` actions, improved repair on `273` and `323`, and improved
+equal-repair reserve on another `13` and `18`.  Historical action mismatch,
+global membership violation, every hard component violation, route
+regression, continuation-contract violation, and supplemental failure were
+all zero.  Supplemental median/p95 was `2.449/3.114 ms` broad and
+`2.425/3.026 ms` pre-hit.  Widths 8 and 12 produced only small additional
+coverage for larger tails.
+
+**Inference:** width 4 is the retained offline Pareto candidate.  This
+supersedes the recommendation to build the lane, but not the promotion gate.
+The design remains proposal-only until direct Windows root telemetry and
+four-worker publication contention show that optional synchronous work does
+not age the authoritative decision.  Same-root improvements remain neither
+a prevented-hit result nor an unrestricted-optimality result.  Full details
+and artifacts are in
+`notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`.

@@ -86,6 +86,7 @@ from th08_runtime_agent import (
     ProcessReader,
     Win32,
     _require_foreground,
+    capture_input_clock_shadow,
     observe_state,
     release_injected_keys,
     send_scan_key,
@@ -109,6 +110,11 @@ from touhou_control.epochs import (
     ActionIssueAlignment,
     FrameWindow,
     HazardEpochAlignment,
+)
+from touhou_control.input_clock import (
+    SemanticClockEvent,
+    SemanticClockObservation,
+    SemanticInputClockTracker,
 )
 from touhou_control.policy_guidance import assemble_local_policy_guidance
 from touhou_control.phase_progress import (
@@ -143,6 +149,8 @@ BULLET_STOP_REPEAT_LIMIT_OFFSET = 0x1028
 BULLET_STOP_REPEAT_COUNT_OFFSET = 0x102C
 BULLET_CALLBACK_AUX_STATE_OFFSET = 0x10B4
 ECL_CALLBACK_LOOKAHEAD_FRAMES = 256
+INPUT_CLOCK_SHADOW_ROLE = "shadow_no_input_or_epoch_authority"
+INPUT_CLOCK_SHADOW_WALL_CUT_SECONDS = 0.05
 
 LASER_POOL_BASE = 0x015B57C8
 LASER_POOL_SIZE = 256
@@ -775,6 +783,94 @@ def _frozen_auto_confirm_eligible(*, bomb_active: bool) -> bool:
     """A frozen timeline makes projectile/item state inert; only exclude Bomb."""
 
     return not bomb_active
+
+
+def _semantic_clock_observation(
+    sample: dict[str, object],
+    *,
+    fallback_frame: int,
+    context: object,
+) -> SemanticClockObservation:
+    player_after = sample.get("player_after")
+    input_after = sample.get("input_after")
+    position = None
+    active_input = None
+    if isinstance(player_after, dict):
+        x = player_after.get("x")
+        y = player_after.get("y")
+        if isinstance(x, (int, float)) and isinstance(y, (int, float)):
+            position = (float(x), float(y))
+    if isinstance(input_after, dict):
+        current = input_after.get("current")
+        if isinstance(current, int):
+            active_input = current
+    manager_frame = sample.get("manager_frame_after")
+    monotonic_ns = sample.get("monotonic_end_ns")
+    semantic_active = sample.get("native_manager_clock_blocked")
+    return SemanticClockObservation(
+        monotonic_ns=(
+            int(monotonic_ns)
+            if isinstance(monotonic_ns, int)
+            else time.perf_counter_ns()
+        ),
+        physical_frame=(
+            int(manager_frame)
+            if isinstance(manager_frame, int)
+            else fallback_frame
+        ),
+        semantic_active=(
+            semantic_active if isinstance(semantic_active, bool) else None
+        ),
+        context=context,
+        position=position,
+        active_input=active_input,
+    )
+
+
+def _serialize_semantic_clock_observation(
+    observation: SemanticClockObservation,
+) -> dict[str, object]:
+    return {
+        "monotonic_ns": observation.monotonic_ns,
+        "physical_frame": observation.physical_frame,
+        "semantic_active": observation.semantic_active,
+        "context": observation.context,
+        "position": observation.position,
+        "active_input": observation.active_input,
+    }
+
+
+def _serialize_semantic_clock_event(
+    event: SemanticClockEvent,
+) -> dict[str, object]:
+    return {
+        "kind": "input_clock_shadow_episode",
+        "role": INPUT_CLOCK_SHADOW_ROLE,
+        "status": event.kind,
+        "episode_id": event.episode_id,
+        "frame": event.start.physical_frame,
+        "current_frame": event.observation.physical_frame,
+        "reason": event.reason,
+        "pulse_count": event.pulse_count,
+        "duration_ns": event.duration_ns,
+        "displacement": event.displacement,
+        "start": _serialize_semantic_clock_observation(event.start),
+        "observation": _serialize_semantic_clock_observation(
+            event.observation
+        ),
+    }
+
+
+def _input_clock_message_key(
+    sample: dict[str, object],
+) -> tuple[object, ...]:
+    return (
+        sample.get("read_valid"),
+        sample.get("frscreen_impl_pointer_after"),
+        sample.get("msg_state_after"),
+        sample.get("native_manager_clock_blocked"),
+        sample.get("scripted_update_freeze_after"),
+    )
 
 
 @dataclass(frozen=True)
@@ -4123,6 +4219,8 @@ def run(args: argparse.Namespace) -> int:
         )
     if args.auto_confirm_every < 0 or args.auto_confirm_idle_frames < 0:
         raise ValueError("auto-confirm timing arguments cannot be negative")
+    if args.input_clock_shadow_sample_ms <= 0.0:
+        raise ValueError("input-clock shadow sample cadence must be positive")
     if (
         args.stage_transition_timeout <= 0.0
         or args.terminal_inactive_grace <= 0.0
@@ -4193,6 +4291,19 @@ def run(args: argparse.Namespace) -> int:
     )
     last_frame_progress = time.perf_counter()
     last_frozen_confirm = float("-inf")
+    input_clock_tracker = (
+        SemanticInputClockTracker()
+        if args.input_clock_boundary_shadow
+        else None
+    )
+    input_clock_repeat_frame: int | None = None
+    input_clock_repeat_polls = 0
+    input_clock_wall_cut_frame: int | None = None
+    input_clock_last_sample_ns = 0
+    input_clock_last_message_key: tuple[object, ...] | None = None
+    input_clock_delay_support: tuple[int, ...] = (
+        args.control_delay_frames,
+    )
     decision_frame_deltas: deque[int] = deque(maxlen=120)
     delay_estimator = AdaptiveControlDelay(
         supported_mask=SUPPORTED_INPUT_MASK,
@@ -4276,6 +4387,77 @@ def run(args: argparse.Namespace) -> int:
         else:
             _close_retired_pipeline_prewarms(retired)
 
+    def input_clock_policy_snapshot() -> dict[str, object]:
+        return {
+            "published_solution_present": corridor_solution is not None,
+            "pending_solution_present": corridor_pending_solution is not None,
+            "solve_future_pending": (
+                corridor_future is not None and not corridor_future.done()
+            ),
+            "survival_future_pending": (
+                corridor_survival_future is not None
+                and not corridor_survival_future.done()
+            ),
+            "would_retire_solution_count": sum(
+                solution is not None
+                for solution in (
+                    corridor_solution,
+                    corridor_pending_solution,
+                )
+            ),
+        }
+
+    def record_input_clock_sample(
+        *,
+        sample: dict[str, object],
+        observation: SemanticClockObservation,
+        events: tuple[SemanticClockEvent, ...],
+        frame: int,
+        stage_route_index: int,
+        frozen_seconds: float,
+        repeat_poll_count: int,
+        triggers: tuple[str, ...],
+    ) -> None:
+        record = {
+            "kind": "input_clock_shadow_observation",
+            "role": INPUT_CLOCK_SHADOW_ROLE,
+            "frame": frame,
+            "stage_route_index": stage_route_index,
+            "gameplay_epoch": gameplay_epoch,
+            "frozen_seconds": frozen_seconds,
+            "repeat_poll_count": repeat_poll_count,
+            "triggers": triggers,
+            "held_desired_mask": previous_mask,
+            "delay_support": input_clock_delay_support,
+            "active_episode_id": (
+                input_clock_tracker.active_episode_id
+                if input_clock_tracker is not None
+                else None
+            ),
+            "policy_retirement_hypothesis": input_clock_policy_snapshot(),
+            "observation": _serialize_semantic_clock_observation(
+                observation
+            ),
+            "sample": sample,
+        }
+        output.write(json.dumps(record) + "\n")
+        for event in events:
+            event_record = _serialize_semantic_clock_event(event)
+            event_record.update(
+                {
+                    "stage_route_index": stage_route_index,
+                    "gameplay_epoch": gameplay_epoch,
+                    "held_desired_mask": previous_mask,
+                    "delay_support": input_clock_delay_support,
+                    "policy_retirement_hypothesis": (
+                        input_clock_policy_snapshot()
+                    ),
+                    "sample": sample,
+                }
+            )
+            output.write(json.dumps(event_record) + "\n")
+        output.flush()
+
     try:
         identity = verify_target(reader)
         output.write(json.dumps({"kind": "identity", **identity}) + "\n")
@@ -4331,6 +4513,22 @@ def run(args: argparse.Namespace) -> int:
                     ),
                     "maximum_action_contiguous_advance_frames": (
                         MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES
+                    ),
+                    "input_clock_boundary_shadow": (
+                        args.input_clock_boundary_shadow
+                    ),
+                    "input_clock_shadow_role": (
+                        INPUT_CLOCK_SHADOW_ROLE
+                        if args.input_clock_boundary_shadow
+                        else "disabled"
+                    ),
+                    "input_clock_shadow_sample_ms": (
+                        args.input_clock_shadow_sample_ms
+                    ),
+                    "input_clock_shadow_predicate": (
+                        "frscreen_msg_state_ge_0_or_eq_minus_2"
+                        if args.input_clock_boundary_shadow
+                        else "disabled"
                     ),
                     "global_planner": (
                         "finite_horizon_robust_backward_viability"
@@ -4511,6 +4709,34 @@ def run(args: argparse.Namespace) -> int:
                 now=now,
             )
             if not engine_flags & 0x04:
+                if (
+                    input_clock_tracker is not None
+                    and input_clock_tracker.active_episode_id is not None
+                ):
+                    input_clock_sample = capture_input_clock_shadow(reader)
+                    input_clock_observation = _semantic_clock_observation(
+                        input_clock_sample,
+                        fallback_frame=counter,
+                        context=(gameplay_epoch, stage_route_index),
+                    )
+                    input_clock_event = input_clock_tracker.censor(
+                        input_clock_observation,
+                        reason=f"scene_inactive:{scene_decision.status}",
+                    )
+                    record_input_clock_sample(
+                        sample=input_clock_sample,
+                        observation=input_clock_observation,
+                        events=(
+                            (input_clock_event,)
+                            if input_clock_event is not None
+                            else ()
+                        ),
+                        frame=counter,
+                        stage_route_index=stage_route_index,
+                        frozen_seconds=max(0.0, now - last_frame_progress),
+                        repeat_poll_count=input_clock_repeat_polls,
+                        triggers=("scene_inactive",),
+                    )
                 if scene_decision.entered:
                     _require_foreground(api, pid)
                     transitions = input_transitions(
@@ -4647,6 +4873,82 @@ def run(args: argparse.Namespace) -> int:
                 auto_confirm.released = False
                 last_frame_progress = now
             if counter == previous_counter:
+                input_clock_sample: dict[str, object] | None = None
+                if input_clock_tracker is not None:
+                    if input_clock_repeat_frame != counter:
+                        input_clock_repeat_frame = counter
+                        input_clock_repeat_polls = 0
+                        input_clock_wall_cut_frame = None
+                    input_clock_repeat_polls += 1
+                    sample_now_ns = time.perf_counter_ns()
+                    sample_due = (
+                        input_clock_repeat_polls == 1
+                        or (
+                            sample_now_ns - input_clock_last_sample_ns
+                            >= int(
+                                args.input_clock_shadow_sample_ms
+                                * 1_000_000.0
+                            )
+                        )
+                    )
+                    if sample_due:
+                        input_clock_sample = capture_input_clock_shadow(reader)
+                        input_clock_last_sample_ns = int(
+                            input_clock_sample.get(
+                                "monotonic_end_ns",
+                                sample_now_ns,
+                            )
+                        )
+                        input_clock_observation = (
+                            _semantic_clock_observation(
+                                input_clock_sample,
+                                fallback_frame=counter,
+                                context=(gameplay_epoch, stage_route_index),
+                            )
+                        )
+                        input_clock_events = input_clock_tracker.observe(
+                            input_clock_observation
+                        )
+                        triggers: list[str] = []
+                        if input_clock_repeat_polls == 1:
+                            triggers.append("first_repeat")
+                        input_clock_message_key = (
+                            _input_clock_message_key(input_clock_sample)
+                        )
+                        if (
+                            input_clock_message_key
+                            != input_clock_last_message_key
+                        ):
+                            triggers.append("message_state_changed")
+                            input_clock_last_message_key = (
+                                input_clock_message_key
+                            )
+                        frozen_seconds = max(
+                            0.0,
+                            now - last_frame_progress,
+                        )
+                        if (
+                            frozen_seconds
+                            >= INPUT_CLOCK_SHADOW_WALL_CUT_SECONDS
+                            and input_clock_wall_cut_frame != counter
+                        ):
+                            triggers.append("wall_50ms_audit_cut")
+                            input_clock_wall_cut_frame = counter
+                        if input_clock_events:
+                            triggers.append("semantic_episode_boundary")
+                        if triggers:
+                            record_input_clock_sample(
+                                sample=input_clock_sample,
+                                observation=input_clock_observation,
+                                events=input_clock_events,
+                                frame=counter,
+                                stage_route_index=stage_route_index,
+                                frozen_seconds=frozen_seconds,
+                                repeat_poll_count=(
+                                    input_clock_repeat_polls
+                                ),
+                                triggers=tuple(triggers),
+                            )
                 bomb_active = reader.u32(
                     ADDR_PLAYER + PLAYER_BOMB_ACTIVE_OFFSET
                 )
@@ -4658,10 +4960,48 @@ def run(args: argparse.Namespace) -> int:
                         bomb_active=bool(bomb_active),
                     ),
                 ):
+                    input_clock_held_desired_mask = previous_mask
                     _require_foreground(api, pid)
                     send_scan_key(api, scan_code=0x2C, pressed=False)
                     time.sleep(0.04)
                     send_scan_key(api, scan_code=0x2C, pressed=True)
+                    input_clock_episode_id = (
+                        input_clock_tracker.mark_pulse()
+                        if input_clock_tracker is not None
+                        else None
+                    )
+                    if input_clock_tracker is not None:
+                        input_clock_sample = capture_input_clock_shadow(reader)
+                        input_clock_last_sample_ns = int(
+                            input_clock_sample.get(
+                                "monotonic_end_ns",
+                                time.perf_counter_ns(),
+                            )
+                        )
+                        input_clock_observation = (
+                            _semantic_clock_observation(
+                                input_clock_sample,
+                                fallback_frame=counter,
+                                context=(gameplay_epoch, stage_route_index),
+                            )
+                        )
+                        input_clock_events = input_clock_tracker.observe(
+                            input_clock_observation
+                        )
+                        record_input_clock_sample(
+                            sample=input_clock_sample,
+                            observation=input_clock_observation,
+                            events=input_clock_events,
+                            frame=counter,
+                            stage_route_index=stage_route_index,
+                            frozen_seconds=max(
+                                0.0,
+                                time.perf_counter()
+                                - last_frame_progress,
+                            ),
+                            repeat_poll_count=input_clock_repeat_polls,
+                            triggers=("wall_pulse_after",),
+                        )
                     previous_mask |= SHOT
                     auto_confirm.mark_full_pulse(frame=counter)
                     last_frozen_confirm = time.perf_counter()
@@ -4675,6 +5015,21 @@ def run(args: argparse.Namespace) -> int:
                                 ],
                                 "player_phase": state["player"]["phase"],
                                 "spell": state["spell"],
+                                "input_clock_shadow_role": (
+                                    INPUT_CLOCK_SHADOW_ROLE
+                                    if input_clock_tracker is not None
+                                    else None
+                                ),
+                                "held_desired_mask": (
+                                    input_clock_held_desired_mask
+                                ),
+                                "held_desired_mask_after_pulse": (
+                                    previous_mask
+                                ),
+                                "input_clock_shadow_episode_id": (
+                                    input_clock_episode_id
+                                ),
+                                "input_clock_shadow": input_clock_sample,
                             }
                         )
                         + "\n"
@@ -4683,6 +5038,9 @@ def run(args: argparse.Namespace) -> int:
                 time.sleep(args.poll_ms / 1000.0)
                 continue
             last_frame_progress = time.perf_counter()
+            input_clock_repeat_frame = None
+            input_clock_repeat_polls = 0
+            input_clock_wall_cut_frame = None
             iteration_started = time.perf_counter()
             observe_started = iteration_started
             state = observe_state(reader)
@@ -4693,6 +5051,47 @@ def run(args: argparse.Namespace) -> int:
             if state["route_id"] != 2:
                 termination_reason = "gameplay_ended"
                 break
+            if (
+                input_clock_tracker is not None
+                and input_clock_tracker.active_episode_id is not None
+            ):
+                input_clock_sample = capture_input_clock_shadow(reader)
+                input_clock_last_sample_ns = int(
+                    input_clock_sample.get(
+                        "monotonic_end_ns",
+                        time.perf_counter_ns(),
+                    )
+                )
+                input_clock_observation = _semantic_clock_observation(
+                    input_clock_sample,
+                    fallback_frame=counter,
+                    context=(gameplay_epoch, stage_route_index),
+                )
+                input_clock_events = input_clock_tracker.observe(
+                    input_clock_observation
+                )
+                input_clock_message_key = _input_clock_message_key(
+                    input_clock_sample
+                )
+                triggers = ["manager_progress"]
+                if (
+                    input_clock_message_key
+                    != input_clock_last_message_key
+                ):
+                    triggers.append("message_state_changed")
+                    input_clock_last_message_key = input_clock_message_key
+                if input_clock_events:
+                    triggers.append("semantic_episode_boundary")
+                record_input_clock_sample(
+                    sample=input_clock_sample,
+                    observation=input_clock_observation,
+                    events=input_clock_events,
+                    frame=counter,
+                    stage_route_index=stage_route_index,
+                    frozen_seconds=0.0,
+                    repeat_poll_count=0,
+                    triggers=tuple(triggers),
+                )
             delay_estimator.observe(
                 frame=int(state["enemy_manager_frame"]),
                 input_mask=int(state["input_current"]),
@@ -5098,6 +5497,7 @@ def run(args: argparse.Namespace) -> int:
                 frame=counter_after_read,
                 default=args.control_delay_frames,
             )
+            input_clock_delay_support = tuple(delay_estimate.support)
             control_delay_frames = delay_estimate.nominal
             control_origin_x, control_origin_y = _project_player_for_read_lag(
                 float(player["x"]),
@@ -6928,6 +7328,46 @@ def run(args: argparse.Namespace) -> int:
             ):
                 termination_reason = "hit_limit"
                 break
+        if (
+            input_clock_tracker is not None
+            and input_clock_tracker.active_episode_id is not None
+        ):
+            input_clock_sample = capture_input_clock_shadow(reader)
+            input_clock_frame = int(
+                input_clock_sample.get(
+                    "manager_frame_after",
+                    previous_counter
+                    if previous_counter is not None
+                    else state["enemy_manager_frame"],
+                )
+            )
+            input_clock_stage = int(state["stage_route_index"])
+            input_clock_observation = _semantic_clock_observation(
+                input_clock_sample,
+                fallback_frame=input_clock_frame,
+                context=(gameplay_epoch, input_clock_stage),
+            )
+            input_clock_event = input_clock_tracker.censor(
+                input_clock_observation,
+                reason=f"run_ended:{termination_reason}",
+            )
+            record_input_clock_sample(
+                sample=input_clock_sample,
+                observation=input_clock_observation,
+                events=(
+                    (input_clock_event,)
+                    if input_clock_event is not None
+                    else ()
+                ),
+                frame=input_clock_frame,
+                stage_route_index=input_clock_stage,
+                frozen_seconds=max(
+                    0.0,
+                    time.perf_counter() - last_frame_progress,
+                ),
+                repeat_poll_count=input_clock_repeat_polls,
+                triggers=("run_ended",),
+            )
         _write_run_summary(
             output,
             last_frame=previous_counter,
@@ -7123,6 +7563,24 @@ def build_parser() -> argparse.ArgumentParser:
             "verify a bounded attainable policy portfolio beside local "
             "planning and consume only exact-root shadow hits; never changes "
             "live actions"
+        ),
+    )
+    parser.add_argument(
+        "--input-clock-boundary-shadow",
+        action="store_true",
+        help=(
+            "record the native FRScreen enemy-clock gate, active input, and "
+            "player motion as read-only telemetry; never changes input, "
+            "epochs, estimator state, or policy publication"
+        ),
+    )
+    parser.add_argument(
+        "--input-clock-shadow-sample-ms",
+        type=float,
+        default=1.0,
+        help=(
+            "minimum repeated-frame telemetry sampling cadence; this controls "
+            "trace cost only and is never an episode classifier"
         ),
     )
     parser.add_argument(

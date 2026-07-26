@@ -43,6 +43,8 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertFalse(parsed.postpublished_survival_shadow)
         self.assertFalse(parsed.pipeline_prewarm_shadow)
         self.assertFalse(parsed.candidate_verifier_shadow)
+        self.assertFalse(parsed.input_clock_boundary_shadow)
+        self.assertEqual(parsed.input_clock_shadow_sample_ms, 1.0)
 
     def test_transform_runtime_trace_is_explicitly_opt_in(self) -> None:
         arguments = build_long_run_arguments(
@@ -138,6 +140,21 @@ class AgentHotkeyTests(unittest.TestCase):
         )
         parsed = build_parser().parse_args(arguments)
         self.assertTrue(parsed.candidate_verifier_shadow)
+
+    def test_input_clock_boundary_shadow_is_explicitly_opt_in(self) -> None:
+        arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            input_clock_boundary_shadow=True,
+            input_clock_shadow_sample_ms=2.5,
+        )
+
+        parsed = build_parser().parse_args(arguments)
+
+        self.assertTrue(parsed.input_clock_boundary_shadow)
+        self.assertEqual(parsed.input_clock_shadow_sample_ms, 2.5)
 
     def test_completed_trial_exits_before_a_second_f8_can_rearm(self) -> None:
         self.assertFalse(

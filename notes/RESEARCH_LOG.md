@@ -3302,3 +3302,97 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   reference exists, `git diff --check` passes, and the Linux quick suite passes
   489 tests in `2.235 s`. Windows duplication and a physical trial were
   intentionally omitted for a documentation-only change.
+
+## 2026-07-26: Native Semantic Input-Clock Shadow
+
+- **Observed static evidence:** IDA analysis identified
+  `frscreen_blocks_enemy_clock` at `0x4358BB`. It reads the FRScreen
+  implementation pointer at `0x0160F430` and blocks the ordinary
+  enemy-manager counter increment when signed MSG state `+0x2181C` is
+  nonnegative or `-2`. `msg_state >= 0` is active MSG execution; `-1` is
+  inactive. The producer and physical meaning of `-2` remain unknown.
+- **Observed static ordering:** priority-9 player movement consumes native
+  active input and applies position changes at `0x44BAB6` before the
+  priority-11 enemy-manager callback consults the FRScreen predicate.
+  FRScreen runs at priority 15 and normal input publication at priority 17.
+  `g_frscreen_update_serial` (`0x0160F428`) is therefore positive post-player
+  chain evidence, but its failure to advance is not proof of no movement.
+- **IDA database changes:** renamed `0x4358BB` to
+  `frscreen_blocks_enemy_clock`, `0x4338CA` to `frscreen_update`,
+  `0x43396D` to `frscreen_start_message_script`, `0x433DB3` to
+  `frscreen_step_message_script`, `0x439710` to
+  `frscreen_load_message_resource`, `0x437AD0` to `frscreen_register`, and
+  `0x43587E` to `frscreen_timeline_message_wait_active`. Renamed globals
+  `0x0160F428`, `0x0160F430`, and `0x0160F534` to
+  `g_frscreen_update_serial`, `g_frscreen_impl`, and
+  `g_ecl_scripted_global_update_freeze`; applied partial FRScreen
+  wrapper/implementation types. Added comments at `0x42C69C`, `0x44BAB6`,
+  `0x4358FE`, `0x433920`, and `0x452339` to preserve the counter, movement,
+  unresolved `-2`, serial, and publication boundaries.
+- **Inferred mechanism:** joining that ordering with CE-0120 runtime
+  displacement explains how the manager frame can freeze while held native
+  input continues moving the player. This is not a native instruction trace
+  and does not make the FRScreen serial a universal player clock.
+- Added game-neutral `SemanticInputClockTracker`, a tri-state TH08 paired
+  native probe, opt-in live/hotkey/supervisor shadow plumbing, and the
+  streaming `th08_input_clock_audit.py`. The role is explicitly
+  `shadow_no_input_or_epoch_authority`: it never writes an input, resets an
+  epoch, changes delay/cadence or estimator evidence, retires a policy, or
+  starts proof work. Desired held input and native `input_current` remain
+  distinct.
+- Fresh complete hard-no-Bomb Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260726_120839` retained 7,349
+  decisions, 26 descriptive hits, `terminal_unload`, and `route_complete`.
+  It logged 3,216 semantic observations (`false/true/unknown =
+  3134/81/1`) and five delayed pulse groups. The v1 tracker merged the
+  `4963 x 4` and `6763 x 34` groups while the gate remained active, giving
+  four episodes and one proxy false negative. This was a telemetry
+  segmentation counterexample, not a missed native gate.
+- Corrected the tracker so a physical-frame change while active censors the
+  old episode and opens a new one. Confirmatory complete hard-no-Bomb run
+  `lunatic_route2_stage4a_unattended_20260726_122014` retained 8,914
+  decisions, 17 descriptive hits, both completion markers, and 3,116
+  observations (`3031/84/1`). It produced five episodes for five delayed
+  pulse groups (`TP/FP/FN = 5/0/0` relative only to that proxy); the terminal
+  episode was right-censored. All reads were valid, one interval was
+  unstable/unknown, and `-2` was not observed.
+- Post-run review found that the censored old episode used the first
+  new-frame observation as its endpoint. Thus `122014`'s first `+76` serial
+  delta is an upper boundary sample. Future tracker output now closes the old
+  episode at its last semantically known old-frame observation before
+  beginning the new one. This is unit-tested and leaves the retained
+  five-episode classification unchanged, but was not physically rerun.
+- **Observed runtime evidence:** at frozen manager frame `20845`, native
+  active input `0x81` moved `(66.494, 399.499)` to `(376.000, 399.499)`,
+  `309.506 px` over `2.056 s`, while FRScreen serial advanced 124. At
+  `29506`, `stay` moved `0 px` over `2.629 s` while serial advanced 158.
+  The earlier `120839` directional episodes moved `282.900` and `355.904 px`
+  with serial deltas 123 and 159.
+- The `122014` gate-positive first-repeat observations occurred after
+  `32.864..68.187 ms`; gate-negative repeats overlapped them. Hypothetical
+  50-ms cuts disagreed with the native gate on 2,744 inactive repeats in
+  `120839` and 1,728 in `122014`, confirming CE-0121 without granting the
+  delayed pulse proxy ground-truth status.
+- Logged probe captures had median/p95/max
+  `0.341/0.444/12.640 ms` and `0.191/0.490/17.181 ms`. These exclude
+  unlogged calls and do not bound total CPU/delivery contention. The
+  98.19%/98.26% viability-query availability lacks the rejected guard's
+  epoch-starvation signature but is not a controlled performance A/B.
+- Review also confirmed no direct mask/epoch/estimator/policy mutation, but
+  found synchronous captures and trace flushes on the issue thread. The
+  telemetry is therefore physically perturbative; lookup timing alone cannot
+  establish a side-effect-free shadow.
+- **Authority conclusion:** accept the native gate and corrected tracker as
+  Stage-4A shadow infrastructure only. CE-0120 remains open at movement
+  neutralization, pending-command/delay support, one-reset semantics,
+  next-phase entry, `-2`, other workloads, and total delivery contention.
+- Both semantic trials intentionally disabled viability-audit capsules to
+  keep the sensor experiment isolated. Their raw and compact telemetry are
+  retained, but they are not finite-model replay bundles and do not replace
+  the `100451`/`103856` Stage-4A replay-capable floor.
+- Compact input-clock audits SHA-256:
+  `120839 =
+  76d052d36f9b5183fa01508f11504835400ad8fce39c92a42b28d69134b9f0cf`,
+  `122014 =
+  f145a5f2631d833ce90ae2d5059948e38251ce191b9cfc16b1f6ef5ad7e98f6c`.
+  Linux and Windows quick suites pass 509 tests in `2.321/3.898 s`.

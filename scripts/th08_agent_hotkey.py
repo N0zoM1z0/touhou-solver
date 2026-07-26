@@ -90,12 +90,16 @@ def build_long_run_arguments(
     postpublished_survival_shadow: bool = False,
     pipeline_prewarm_shadow: bool = False,
     candidate_verifier_shadow: bool = False,
+    input_clock_boundary_shadow: bool = False,
+    input_clock_shadow_sample_ms: float = 1.0,
     duration_seconds: float = LONG_RUN_DURATION_SECONDS,
 ) -> list[str]:
     if safety_value_horizon < 0:
         raise ValueError("safety-value horizon cannot be negative")
     if duration_seconds <= 0.0:
         raise ValueError("long-run duration must be positive")
+    if input_clock_shadow_sample_ms <= 0.0:
+        raise ValueError("input-clock shadow sample cadence must be positive")
     arguments = [
         str(output),
         "--pid",
@@ -141,6 +145,14 @@ def build_long_run_arguments(
         arguments.append("--pipeline-prewarm-shadow")
     if candidate_verifier_shadow:
         arguments.append("--candidate-verifier-shadow")
+    if input_clock_boundary_shadow:
+        arguments.extend(
+            (
+                "--input-clock-boundary-shadow",
+                "--input-clock-shadow-sample-ms",
+                str(input_clock_shadow_sample_ms),
+            )
+        )
     return arguments
 
 
@@ -156,6 +168,8 @@ class AgentHotkey:
         postpublished_survival_shadow: bool = False,
         pipeline_prewarm_shadow: bool = False,
         candidate_verifier_shadow: bool = False,
+        input_clock_boundary_shadow: bool = False,
+        input_clock_shadow_sample_ms: float = 1.0,
         duration_seconds: float = LONG_RUN_DURATION_SECONDS,
         detailed_summary: bool = True,
     ) -> None:
@@ -201,6 +215,8 @@ class AgentHotkey:
         )
         self.pipeline_prewarm_shadow = pipeline_prewarm_shadow
         self.candidate_verifier_shadow = candidate_verifier_shadow
+        self.input_clock_boundary_shadow = input_clock_boundary_shadow
+        self.input_clock_shadow_sample_ms = input_clock_shadow_sample_ms
         self.duration_seconds = duration_seconds
         self.detailed_summary = detailed_summary
         self.artifact_dir = (
@@ -321,6 +337,12 @@ class AgentHotkey:
                 pipeline_prewarm_shadow=self.pipeline_prewarm_shadow,
                 candidate_verifier_shadow=(
                     self.candidate_verifier_shadow
+                ),
+                input_clock_boundary_shadow=(
+                    self.input_clock_boundary_shadow
+                ),
+                input_clock_shadow_sample_ms=(
+                    self.input_clock_shadow_sample_ms
                 ),
                 duration_seconds=self.duration_seconds,
             )

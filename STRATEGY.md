@@ -56,14 +56,23 @@ held direction continued moving the player by 434.63 or 343.65 pixels to a
 boundary. The attempted 50-ms repeated-counter guard is rejected by
 Stage-4A `103856`; it fired 2,780 times for only 72 real wall pulses, churned
 policy epochs, and reduced available viability queries from 9,073 to 691.
-Live source behavior is restored to the pre-guard controller. CE-0120 remains
-open and the present live policy has no complete authority claim across this
-transition boundary.
+Live source behavior is restored to the pre-guard controller.
+
+The shipped FRScreen/MSG manager-clock predicate and a game-neutral tri-state
+episode tracker are now accepted as shadow infrastructure only. Corrected
+Stage-4A run `122014` produced five semantic episodes for five delayed
+same-frame pulse groups, with zero mismatches against that proxy, while 3,031
+ordinary observations were gate-negative. The proxy is not independent
+ground truth, only one stage was exercised, `msg_state == -2` was not
+observed, and total probe CPU was not measured. No movement release, epoch
+reset, estimator change, or policy retirement follows. CE-0120 remains open
+at the actuator boundary and the live policy has no complete authority claim
+across it.
 
 Current priority is:
 
-1. identify and validate a semantic native phase/dialogue/input-clock
-   boundary in shadow, with CE-0120 positives and normal-play negatives;
+1. validate the semantic boundary across additional workloads and define a
+   no-write movement-neutralization/pending-command/one-reset counterfactual;
 2. obtain a clean post-rollback non-Stage-6B candidate-publication shadow with
    exact witness, alternate-action certificate, publication timing, and
    CPU/delivery/policy-age measurements;
@@ -536,6 +545,39 @@ supersede historical sequencing without erasing its counterexamples.
   One stage-specific profile is expected; a hidden stage conditional inside
   the safety kernel is not.
 - **Evidence:** `notes/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`.
+
+### S13 — Native Semantic Manager-Clock Boundary
+
+- **Status:** Accepted shadow infrastructure; no live input or epoch
+  authority.
+- **Intent:** Distinguish a genuine native FRScreen/MSG manager-clock block
+  from an ordinary slow decision without using a wall-time threshold.
+- **Model:** A stable non-null FRScreen implementation with signed MSG state
+  `>= 0` or `-2` is gate-active; a stable other state is inactive; failed,
+  null, or unstable interval reads are unknown. The tracker merges identical
+  observations, censors/restarts on physical-frame change, and never mutates
+  input, delay/cadence evidence, estimator state, epoch, or policy version.
+- **Observed evidence:** Corrected Stage-4A `122014` matched five semantic
+  episodes to five delayed same-frame auto-confirm pulse groups
+  (`TP/FP/FN = 5/0/0` relative to that proxy). First-repeat classifications
+  were 3,016 inactive and five active; a hypothetical 50-ms cut classified
+  1,728 inactive repeats and five active ones. Available viability remained
+  8,759/8,914, without the rejected guard's epoch-starvation signature.
+- **Limitations:** Auto-confirm pulses are delayed proxy evidence, not
+  independent ground truth. Only Stage 4A was physically tested, `-2` was not
+  observed, total capture-call CPU was not retained, and neutral-write pickup
+  was not tested. Synchronous captures and trace flushes share the issue
+  thread, so this telemetry is physically perturbative despite having no
+  control-state authority.
+- **Promotion gate:** Define the neutral request as a real delayed write,
+  preserve pending-command support and native `input_current`, request at
+  most one immutable epoch transition per confirmed episode, fail closed on
+  unknown/terminal state, and measure pre-detection displacement, next-phase
+  position, policy retirement, and delivery contention in a separately
+  scoped physical trial.
+- **Evidence:**
+  `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`, CE-0120/0121,
+  and Stage-4A `120839`/`122014` compact reports.
 
 ## How To Add A Strategy
 

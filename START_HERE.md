@@ -27,18 +27,20 @@ Python/C++ parity for the same recurrence is not physical correctness.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - Algorithmic parent:
-  `e41c774 Reject repeated-frame input guard`
-- The current HEAD should be the documentation-only handoff checkpoint
+  `6356178 Consolidate current solver handoff`
+- The current HEAD should be the native semantic input-clock shadow checkpoint
   immediately above that parent. If not, inspect the intervening diff before
   trusting this file.
 - Source behavior is restored to the better `1ce5b44` controller, with exact
-  candidate publication timing retained as shadow telemetry. No TH08 runtime,
-  daemon, or unfinished experiment should be alive.
-- Linux and Windows quick suites passed `489/489` in `2.495/4.012 s`.
+  candidate publication timing and the FRScreen/MSG input-clock probe retained
+  as shadow telemetry. The latter has no input or epoch authority. No TH08
+  runtime, daemon, or unfinished experiment should be alive.
+- Linux and Windows quick suites passed `509/509` in `2.321/3.898 s`.
 - The only expected untracked file is user-owned `image.png`. Do not stage,
   modify, delete, or clean it.
-- The connected IDA database contains some transform-function names/comments
-  newer than Git notes. New binary work must use IDA Pro MCP, never REA.
+- The connected IDA database contains the FRScreen names, partial types, and
+  input-clock boundary comments recorded in `notes/RESEARCH_LOG.md`. New
+  binary work must use IDA Pro MCP, never REA.
 
 Sanity check:
 
@@ -62,6 +64,7 @@ Expected pre-work status:
 | live | native-state sensing and TH08 trajectory/laser/enemy projection | Gameplay sensing is native; screenshots are not a sensor. |
 | live | local exact collision certificate | Fresh issue-time hard fallback; hard no-Bomb. |
 | live | coarse Boolean robust viability | Current global safety authority, subject to its explicit finite model and the unresolved transition-clock boundary. |
+| shadow | native FRScreen/MSG input-clock boundary | Tri-state native probe and episode tracker identify manager-clock blocking without control-state authority. Synchronous issue-thread reads/logging are physically perturbative and total contention is unmeasured. |
 | shadow | losing-root stationary candidate verifier | Exact universal verification of a restricted causal candidate can prove finite-model feasibility, but cannot claim unrestricted losing/optimality. |
 | shadow | exact candidate witness publication | Retains root, witness, issued-action label, all-action local certificate, version, and timing; it never changes the live mask. |
 | offline/shadow | belief lower bounds, revealed-delay upper, resumable threshold refinement | Research tools for feasibility/optimality gaps; too slow and/or too optimistic for live authority as currently integrated. |
@@ -82,7 +85,9 @@ Observed in complete Stage-4A replay `100451`: after a spell ended,
 `enemy_manager_frame` froze during dialogue/transition while the held
 direction continued moving the player. `up_left_fast` moved `434.63 px` to
 the top-left boundary across six wall pulses; `left_fast` moved `343.65 px`
-to the left boundary across eight.
+to the left boundary across eight. Re-audit found five pulse groups, including
+one terminal right-censored group; the older report listed only four closed
+episodes.
 
 The attempted 50-ms detector was invalid. Complete Stage-4A run `103856`
 produced `2,780` guard firings in `7,925` decisions for only `72` real wall
@@ -91,12 +96,24 @@ and the run recorded `64` hits. RNG means `21 -> 64` is not a controlled
 effect size, but the policy-starvation mechanism is direct. The guard was
 reverted.
 
-The next valid step is semantic and shadow-first: identify the actual
-phase/dialogue/transition boundary from native state, actuator state, or
-verified timing structure; distinguish frozen simulation, ordinary slow
-decisions, pauses, and wall-pulse transitions; then replay before granting
-any release/epoch/action authority. Use IDA Pro MCP if static binary evidence
-is needed. Do not recreate a short raw wall-time threshold.
+The native semantic boundary is now identified. IDA shows
+`frscreen_blocks_enemy_clock` at `0x4358BB` blocks the manager counter exactly
+when a non-null FRScreen implementation has signed MSG state `>= 0` or `-2`.
+Player movement runs earlier and can still consume active directional input.
+Two new complete shadow-only Stage-4A runs retained this state directly.
+Corrected run `122014` produced five semantic episodes for five delayed
+same-frame pulse groups with zero false positives/negatives against that
+proxy; 3,031 ordinary observations were gate-negative, one unstable interval
+was unknown, and `-2` was not observed.
+
+This resolves CE-0120 only at the sensor/classification layer. The detector
+cannot release movement, reset an epoch, retire a policy, or alter estimator
+state. Its opt-in captures and logging still consume issue-thread time, so it
+is not physically side-effect-free. Next validate a no-write action/epoch
+counterfactual, broaden negative workloads, resolve or exclude `-2`, and
+measure total contention before any explicitly scoped neutralization trial.
+Do not recreate a raw wall-time threshold or promote FRScreen serial into a
+universal player clock.
 
 ### P1 — candidate publication is measured, not promoted
 
@@ -159,7 +176,8 @@ Retain the two newest complete replay-capable bundles per workload:
 | Workload | Bundles | Interpretation |
 | --- | --- | --- |
 | Lunatic Route-2 Stage 6B, candidate shadow | `004142`, `011639` | `004142` every-root service rejected; `011639` losing-only service accepted shadow-only. |
-| Lunatic Route-2 Stage 4A, publication/clock boundary | `100451`, `103856` | `100451` clean candidate-delivery shadow and CE-0120 witness; `103856` guard rejection plus helper timing, not a clean survival A/B. |
+| Lunatic Route-2 Stage 4A, publication/clock replay floor | `100451`, `103856` | `100451` is the original CE-0120 witness; `103856` rejects the live guard. Both retain the prior replay-capable floor. |
+| Lunatic Route-2 Stage 4A, semantic input-clock telemetry | `120839`, `122014` | `120839` exposed tracker segmentation; corrected `122014` matched all five delayed pulse groups. Viability capsules were intentionally disabled, so these do not replace the replay floor or support planner-replay claims. |
 
 The `103856` `.session.json` says `failed` only because the original
 postprocessor rejected an explicit null enemy snapshot after the accepted
@@ -172,6 +190,21 @@ The complete `011639` audit passed `14,791` records, `14,652` decisions, and
 `2,689` capsules; bundle SHA-256:
 `9e8af717c548dc6456d471c15ac2be9777f755d7b94bc3fc6067e4b289b38a77`.
 
+The two current Stage-4A raw JSONL traces contain `10,653` and `12,122`
+records. Their SHA-256 values are
+`520d7e772464967a01d49b60a95f26b26f8a6c405e878c07d34a6ede3ceb903f`
+and
+`25a01efe87fba457051ca78b0f485a6068f7606f1f98b772b0f3372689d8122f`.
+Both reached `terminal_unload` and `route_complete`, passed hard no-Bomb
+verification, and left the semantic detector shadow-only. Older `100451` and
+`103856` remain the canonical CE-0120/0121 evidence and replay-capable floor;
+they were not deleted. The new semantic traces and compact artifacts are also
+retained locally, but `viability_audit_capsules` is null by design.
+The compact input-clock audit SHA-256 values are
+`76d052d36f9b5183fa01508f11504835400ad8fce39c92a42b28d69134b9f0cf`
+and
+`f145a5f2631d833ce90ae2d5059948e38251ce191b9cfc16b1f6ef5ad7e98f6c`.
+
 Compact evidence and interpretation live in `notes/runs/`,
 `notes/COUNTEREXAMPLES.md`, and `notes/RESEARCH_LOG.md`. Do not delete either
 raw bundle until the two-bundle rule in `AGENTS.md` is satisfied by newer
@@ -180,8 +213,8 @@ same-workload captures.
 Start physical review with:
 
 - `notes/runs/lunatic_route2_stage6b_unattended_20260726_011639.md`
-- `notes/runs/lunatic_route2_stage4a_unattended_20260726_100451.md`
-- `notes/runs/lunatic_route2_stage4a_unattended_20260726_103856.md`
+- `notes/runs/lunatic_route2_stage4a_unattended_20260726_120839.md`
+- `notes/runs/lunatic_route2_stage4a_unattended_20260726_122014.md`
 
 ## Formal References
 
@@ -351,20 +384,24 @@ artifacts, and cleanup.
 
 ## Next Good Checkpoint
 
-A useful next algorithmic checkpoint is not another threshold tweak. It should:
+A useful next algorithmic checkpoint is the action consequence of the now
+validated semantic sensor, not another detector or threshold tweak. It should:
 
-1. write the semantic frozen-manager/input-clock hypothesis and observation
-   contract before code;
-2. collect or replay shadow evidence that distinguishes true transition
-   freezes from ordinary slow decisions without changing live input;
-3. use IDA Pro MCP/native probes if required to identify a stable state bit,
-   phase transition, input-poll clock, or dialogue owner;
-4. compare against CE-0120 and CE-0121 plus a normal-play negative set;
-5. keep detection shadow-only until false-positive/false-negative behavior and
-   action consequence are independently bounded;
-6. run focused tests and the quick Linux suite;
-7. update the formal/design note, `STRATEGY.md`,
-   `notes/COUNTEREXAMPLES.md`, and `notes/RESEARCH_LOG.md`;
+1. retain a no-write counterfactual for the exact episode-entry mask that
+   would remove movement bits, preserve `SHOT`, and request one immutable
+   epoch transition;
+2. compare prospective policy retirement, pre-detection displacement, and
+   next-phase entry state without changing live input;
+3. extend the negative set beyond Stage 4A to pauses, scene unloads, and other
+   stage/dialogue owners; resolve `msg_state == -2` or explicitly exclude it;
+4. measure total probe/capture CPU and delivery contention, not only logged
+   lookup time;
+5. retain every mismatch and keep the counterfactual shadow-only until its
+   action consequence is bounded;
+6. only then run an explicitly scoped physical neutralization/one-reset trial
+   for confirmed `msg_state >= 0` episodes;
+7. update the formal/design note, strategy ledger, counterexamples, research
+   log, focused tests, and quick Linux/Windows suites;
 8. commit one focused checkpoint.
 
 If instead working on candidate authority, first obtain a fresh uncontaminated

@@ -82,6 +82,7 @@ from th08_live_dodge_agent import (
     _build_packed_laser_collision_frames,
     _hazards_for_positions,
     _pack_laser_frame,
+    _semantic_clock_observation,
     _stage_corridor_solution,
     build_laser_collision_frames,
     capture_enemy_pool_prefix_contiguous,
@@ -211,6 +212,26 @@ class LiveDodgeAgentTests(unittest.TestCase):
         pulse.mark_full_pulse(frame=400)
         self.assertFalse(pulse.released)
         self.assertEqual(pulse.next_release_frame, 415)
+
+    def test_shadow_clock_observation_uses_native_active_input_evidence(
+        self,
+    ) -> None:
+        observation = _semantic_clock_observation(
+            {
+                "monotonic_end_ns": 1234,
+                "manager_frame_after": 77,
+                "native_manager_clock_blocked": True,
+                "player_after": {"x": 12.0, "y": 34.0},
+                "input_after": {"current": LEFT | SHOT},
+            },
+            fallback_frame=76,
+            context=(0, 4),
+        )
+
+        self.assertTrue(observation.semantic_active)
+        self.assertEqual(observation.physical_frame, 77)
+        self.assertEqual(observation.position, (12.0, 34.0))
+        self.assertEqual(observation.active_input, LEFT | SHOT)
 
     def test_auto_confirm_hazard_policy_does_not_gate_on_residual_items(
         self,

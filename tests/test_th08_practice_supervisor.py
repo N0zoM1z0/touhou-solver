@@ -134,6 +134,8 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertTrue(args.viability_audit)
         self.assertFalse(args.pipeline_prewarm_shadow)
         self.assertFalse(args.candidate_verifier_shadow)
+        self.assertFalse(args.input_clock_boundary_shadow)
+        self.assertEqual(args.input_clock_shadow_sample_ms, 1.0)
 
     def test_pipeline_prewarm_shadow_is_explicitly_opt_in(self) -> None:
         args = build_parser().parse_args(
@@ -151,6 +153,21 @@ class PracticeSupervisorTests(unittest.TestCase):
             ]
         )
         self.assertTrue(args.candidate_verifier_shadow)
+
+    def test_input_clock_boundary_shadow_is_explicitly_opt_in(self) -> None:
+        args = build_parser().parse_args(
+            [
+                "--stage",
+                "4a",
+                "--input-clock-boundary-shadow",
+                "--input-clock-shadow-sample-ms",
+                "2.5",
+                "--armed",
+            ]
+        )
+
+        self.assertTrue(args.input_clock_boundary_shadow)
+        self.assertEqual(args.input_clock_shadow_sample_ms, 2.5)
 
     def test_tail_reader_handles_a_record_larger_than_one_block(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

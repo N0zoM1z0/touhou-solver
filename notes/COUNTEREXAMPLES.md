@@ -2978,12 +2978,27 @@ Status: observed | inferred | unknown | fixed
   movement, created a new gameplay epoch, and invalidated policy/sensor work.
   CE-0121 shows that its predicate was not a semantic freeze detector. The
   guard has been removed and the better pre-guard live controller restored.
-- **Current boundary:** The original defect remains unresolved. Do not infer a
-  phase transition from a short repeated manager-frame value. A replacement
-  must first bind to native phase/dialogue or actual wall-pulse episode
-  evidence and pass a shadow false-positive audit.
+- **Observed native mechanism:** IDA shows `frscreen_blocks_enemy_clock`
+  (`0x4358BB`) tests a non-null FRScreen implementation and signed MSG state
+  `>= 0 || == -2`; the enemy manager consults it after the priority-9 player
+  callback has already applied movement. Shadow Stage-4A runs `120839` and
+  `122014` observed active MSG-state episodes with advancing FRScreen serial.
+  Directional episodes moved `282.90`, `355.90`, and `309.51 px`; a `stay`
+  episode moved `0 px`.
+- **Observed tracker correction:** `120839` exposed a telemetry bug that
+  merged the `4963` and `6763` pulse groups while the MSG gate remained
+  active. Censoring and reopening when the physical frame changes produced
+  five semantic episodes for five delayed pulse groups in `122014`, with no
+  mismatch against that proxy. The terminal group remained right-censored.
+- **Current boundary:** The sensor/classification boundary is answered for
+  the observed Stage-4A MSG states, but the original actuator defect remains
+  unresolved. The detector has no movement-release, pending-delay, epoch, or
+  policy-retirement authority. `msg_state == -2` was not observed and its
+  physical meaning is unknown. Do not infer a phase transition from a short
+  repeated manager-frame value.
 - **Evidence:** compact audit
   `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260726_100451.frozen_input.json`,
+  semantic audits for `120839` and `122014`,
   raw JSONL SHA-256
   `b8e9428f648b6c87ee379291d896804410019469b8b7f86ef6233456e050c5a1`,
   and `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.
@@ -3008,6 +3023,18 @@ Status: observed | inferred | unknown | fixed
   observed and sufficient to reject the guard. The `21 -> 64` hit difference
   is supporting physical evidence, not a controlled effect estimate, because
   RNG, timing, and phase histories differ.
+- **Observed semantic disagreement:** In shadow-only `120839`, a hypothetical
+  50-ms cut occurred on 2,744 gate-inactive repeats and five gate-active
+  repeats. Corrected `122014` produced 1,728/5; its first-repeat
+  inactive/active counts were 3,016/5. These are threshold/native-gate
+  disagreements, not independently labeled false positives. They show that
+  the wall-time distributions overlap and independently reproduce the
+  rejected predicate's classification failure.
+- **No starvation authority claim:** The two shadow runs retained available
+  viability queries on 7,216/7,349 and 8,759/8,914 decisions, unlike
+  `103856`'s 691/7,925. This is consistent with the absence of epoch mutation,
+  but does not prove zero CPU contention because total capture calls, RNG,
+  and host timing were not controlled.
 - **Correction:** Remove the guard and its unit test; restore `1ce5b44`
   live-controller behavior while retaining only shadow publication timing.
   Keep CE-0120 open.

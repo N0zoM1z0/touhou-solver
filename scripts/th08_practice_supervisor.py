@@ -731,6 +731,12 @@ def run_trial(
         "candidate_verifier_shadow": (
             args.candidate_verifier_shadow
         ),
+        "input_clock_boundary_shadow": (
+            args.input_clock_boundary_shadow
+        ),
+        "input_clock_shadow_sample_ms": (
+            args.input_clock_shadow_sample_ms
+        ),
         "started_at": datetime.now().astimezone().isoformat(),
     }
     batch_process: subprocess.Popen[bytes] | None = None
@@ -758,6 +764,12 @@ def run_trial(
             pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
             candidate_verifier_shadow=(
                 args.candidate_verifier_shadow
+            ),
+            input_clock_boundary_shadow=(
+                args.input_clock_boundary_shadow
+            ),
+            input_clock_shadow_sample_ms=(
+                args.input_clock_shadow_sample_ms
             ),
         )
         batch_process, batch_log = launch_patch_batch(
@@ -1038,6 +1050,23 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--input-clock-boundary-shadow",
+        action="store_true",
+        help=(
+            "record native FRScreen/input/player clock-boundary telemetry; "
+            "never changes input, epochs, estimator state, or policies"
+        ),
+    )
+    parser.add_argument(
+        "--input-clock-shadow-sample-ms",
+        type=float,
+        default=1.0,
+        help=(
+            "minimum repeated-frame telemetry sampling cadence; never used "
+            "as a semantic classifier"
+        ),
+    )
+    parser.add_argument(
         "--refuse-existing",
         action="store_false",
         dest="kill_existing",
@@ -1063,6 +1092,10 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("--repeat must be positive")
     if args.safety_value_horizon < 0:
         raise ValueError("--safety-value-horizon cannot be negative")
+    if args.input_clock_shadow_sample_ms <= 0.0:
+        raise ValueError(
+            "--input-clock-shadow-sample-ms must be positive"
+        )
     if min(
         args.cooldown,
         args.launch_timeout,

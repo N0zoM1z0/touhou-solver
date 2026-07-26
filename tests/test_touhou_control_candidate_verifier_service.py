@@ -83,6 +83,17 @@ class CandidateVerifierServiceTests(unittest.TestCase):
         assert outcome is not None
         self.assertEqual(outcome.status, "feasible")
         self.assertTrue(outcome.winning)
+        self.assertEqual(
+            {witness.root_action for witness in outcome.action_witnesses},
+            {action.name for action in self.problem.actions},
+        )
+        self.assertTrue(
+            all(
+                witness.candidate_policy
+                in outcome.completed_candidates
+                for witness in outcome.action_witnesses
+            )
+        )
         self.assertIsNone(mismatch)
         self.assertEqual(snapshot.lookup_hit_count, 1)
         self.assertEqual(snapshot.lookup_miss_count, 1)

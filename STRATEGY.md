@@ -52,16 +52,25 @@ delivery/contention gate only when admitted on available Boolean-losing
 roots: Stage-6B v2 delivered 93.56% of exact roots with zero replacement or
 stale completion and restored baseline latency/action lag. The every-root
 form is rejected. Candidate results remain shadow-only attainable lowers;
-exhaustion is not unrestricted losing.
+exhaustion is not unrestricted losing. Candidate witness publication now
+retains the causal policy witness, issued-action label, full augmented root,
+one-shot deadline, and the already-computed hard certificate for each
+proposed best action. This closes an observability gap, not the authority
+gate: the old Stage-6B trace could replay only 47/82 selected historical roots,
+and all 23 auditable action changes lacked a retained alternate-action issue
+certificate.
 
 The next architectural target is a delivery-aware solver:
 
 1. a fresh, bounded-cost issue-time shield certifies the action actually sent;
-2. the background planner publishes only versioned policies whose hazard
+2. a fresh non-Stage-6B physical shadow measures exact witness publication,
+   certificate compatibility, JSON cost, action lag, and contention without
+   changing the selected mask;
+3. the background planner publishes only versioned policies whose hazard
    coverage and service deadline are valid;
-3. event-complete ECL/timeline birth and transform forecasts make the future
+4. event-complete ECL/timeline birth and transform forecasts make the future
    model less stale;
-4. longer-horizon objectives, including boss damage, rank only actions that
+5. longer-horizon objectives, including boss damage, rank only actions that
    survive those gates.
 
 ## Strategy History

@@ -3162,3 +3162,42 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Windows complete quick suites both pass 481 tests in `2.187/3.461 s`.
 - Full design, formal boundary, physical table, limitations, and next gate:
   `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.
+
+## 2026-07-26: Exact Candidate Witness Publication Boundary
+
+- Audited every delivered winning candidate root within 120 frames of a
+  Stage-6B v2 contact. The 82 selected roots covered 17 contacts and all
+  matched the retained augmented root fields. Current exact replay reproduced
+  both historical aggregate label and best-action set for only 47 roots,
+  covering 14 contacts; 35 are now explicit
+  `historical_replay_mismatch`. A two-root current Windows/Linux probe agreed
+  exactly, so no current cross-platform split was observed.
+- Among the 47 auditable roots, candidate choice changed the issued action 23
+  times and provided a modeled 32-frame feasibility gain 21 times. All 23
+  changed actions lacked the alternate-action fresh hard certificate, so none
+  had retrospective input authority. The other 24 candidate-best issued
+  actions retained safe selected-action certificates. No delivered winning
+  candidate root was within its 32-frame horizon of contact.
+- Recorded CE-0119: aggregate label, best-action names, and completed
+  candidate names are not a content-complete attainable decision witness.
+  Trace-radius bullets cannot reconstruct the omitted full alternate-action
+  certificate.
+- `CandidateVerifierOutcome` now retains every root-action
+  `CandidateActionWitness`. Runtime JSON serializes best witnesses plus the
+  issued-action exact label. `Decision` carries the certificate vector already
+  computed by local planning; issue-time enemy recertification replaces it
+  with its fresh all-action vector.
+- Added a one-shot exact-key publication join. It is issue-eligible only for a
+  completed positive full-horizon result with matching witness, current
+  deadline, zero certificate collisions, and nonnegative clearance. It
+  records full policy/root identity and expires after the current issue. It
+  never changes the selected mask and remains shadow-only.
+- A 200,000-call synthetic helper probe measured `1.376 us/call`; it adds no
+  candidate recurrence or geometry work. Physical JSON/copy/CPU contention is
+  still unmeasured and is the next non-Stage-6B shadow gate.
+- Focused publication, candidate-service, historical-audit, and 80 live-agent
+  tests pass. Linux and Windows complete quick suites pass 487 tests in
+  `2.210/5.092 s`.
+- Formal review and evidence:
+  `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md` and
+  `artifacts/viability_audit/stage6b_20260726_011639_candidate_witness_counterfactual.json`.

@@ -336,6 +336,16 @@ These instructions apply to every file and task below this directory.
   candidates are unresolved, never unrestricted losing. The rejected
   every-root form caused measurable CPU contention; see
   `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.
+- A candidate result is not a publishable action unless the artifact retains
+  the exact root-action label and the causal candidate-policy witness that
+  attained it. A reviewable shadow publication must also carry the complete
+  policy/root key, one-shot issue deadline, and the already-computed fresh
+  hard certificate for that same proposed action. Missing historical
+  action-label/witness or alternate-action certificate data is unresolved;
+  never reconstruct it from trace-radius hazards or an aggregate best-action
+  list. Candidate publication remains shadow-only until a separate physical
+  authority gate. See
+  `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`.
 - Do not weaken a test or erase a counterexample merely to accept a new run.
   State explicitly when a model change invalidates an old expectation.
 

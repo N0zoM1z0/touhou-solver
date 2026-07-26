@@ -17,6 +17,7 @@ from typing import Hashable
 
 from .background_priority import lower_current_thread_priority
 from .policy_synthesis import (
+    CandidateActionWitness,
     CandidatePolicyPortfolioResult,
     evaluate_candidate_policy_portfolio,
     singleton_continuation_candidates,
@@ -49,6 +50,7 @@ class CandidateVerifierOutcome:
     horizon_frames: int
     state_label: SurvivalLabel | None = None
     best_actions: tuple[str, ...] = ()
+    action_witnesses: tuple[CandidateActionWitness, ...] = ()
     completed_candidates: tuple[str, ...] = ()
     timed_out_candidates: tuple[str, ...] = ()
     unvisited_candidates: tuple[str, ...] = ()
@@ -436,6 +438,11 @@ class CandidateVerifierService:
             ),
             best_actions=(
                 result.best_actions if result is not None else ()
+            ),
+            action_witnesses=(
+                portfolio.action_witnesses
+                if portfolio is not None
+                else ()
             ),
             completed_candidates=(
                 portfolio.completed_candidates

@@ -2916,3 +2916,37 @@ Status: observed | inferred | unknown | fixed
   `stage6b_20260726_011639_candidate_verifier_shadow_v2.json`; full analysis
   in
   `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`.
+
+## CE-0119: Aggregate candidate telemetry could not authorize or replay an alternate action
+
+- **Observed artifact failure:** The retained losing-only Stage-6B v2 trace
+  recorded 941 delivered full-horizon candidate wins, but kept only the
+  aggregate label, best-action names, and completed candidate names. It
+  discarded the per-action candidate witness, the issued action's exact
+  candidate label, and every alternate-action fresh hard certificate.
+- **Focused replay:** 82 candidate wins fell within 120 frames of 17 contacts.
+  Exact root fields matched all 82, but current exact replay reproduced both
+  historical state label and best set for only 47, covering 14 contacts. The
+  other 35 are `historical_replay_mismatch`; current Windows and Linux agreed
+  on two focused mismatch probes, so this is not evidence of a current
+  cross-platform kernel split.
+- **Consequence:** Of the 47 auditable roots, 23 candidate decisions changed
+  action and 21 changed the issued action from a modeled 32-frame loss to a
+  modeled win. All 23 alternate actions lacked their issue certificate.
+  Trace-radius bullets cannot conservatively reconstruct the full snapshot
+  certificate, so none receives retrospective input authority. No winning
+  candidate root occurred within 32 frames of contact.
+- **Invalid assumption:** Candidate name plus aggregate best actions was
+  treated as enough to reconstruct a public decision. It is not
+  content-complete: a lower bound is attainable only with its causal witness,
+  and local issuability is action-specific.
+- **Correction:** Retain every root-action `CandidateActionWitness` in the
+  outcome; serialize best witnesses plus the issued-action label; preserve the
+  already-computed all-action local certificate vector; and emit a one-shot
+  exact-key shadow publication that fails closed on stale keys, deadline,
+  missing certificate, collision, or negative clearance. It never changes
+  the live mask.
+- **Evidence:**
+  `artifacts/viability_audit/stage6b_20260726_011639_candidate_witness_counterfactual.json`
+  and
+  `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`.

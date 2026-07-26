@@ -658,6 +658,7 @@ class Decision:
     damage_shadow_alignment_cost: float | None = None
     damage_eligible_action_count: int = 0
     damage_reason: str = "disabled"
+    issue_action_certificates: tuple[RobustActionCertificate, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -1924,6 +1925,9 @@ def recertify_action_for_fresh_hazards(
         robust_min_clearance=certificate.min_clearance,
         robust_cvar_risk=certificate.cvar_risk,
         robust_worst_delay=certificate.worst_delay,
+        issue_action_certificates=tuple(
+            certificates[action.name] for action in _PLANNER_ACTIONS
+        ),
     )
 
 
@@ -3706,6 +3710,11 @@ def choose_action(
         damage_shadow_alignment_cost=damage_shadow_alignment_cost,
         damage_eligible_action_count=damage_eligible_action_count,
         damage_reason=damage_reason,
+        issue_action_certificates=tuple(
+            robust_preflight_certificates[action.name]
+            for action in _PLANNER_ACTIONS
+            if action.name in robust_preflight_certificates
+        ),
     )
     if (
         effective_allowed_first_actions is not None
@@ -3853,11 +3862,29 @@ def _write_run_summary(
 
 def _candidate_outcome_record(
     outcome: CandidateVerifierOutcome | None,
+    *,
+    issued_action: str | None = None,
 ) -> dict[str, object] | None:
     if outcome is None:
         return None
     label = outcome.state_label
     root = outcome.target.root
+    witnesses_by_action = {
+        witness.root_action: witness
+        for witness in outcome.action_witnesses
+    }
+
+    def witness_record(action: str) -> dict[str, object] | None:
+        witness = witnesses_by_action.get(action)
+        if witness is None:
+            return None
+        return {
+            "root_action": witness.root_action,
+            "candidate_policy": witness.candidate_policy,
+            "survival_frames": witness.label.guaranteed_frames,
+            "bottleneck_margin": witness.label.bottleneck_margin,
+        }
+
     return {
         "revision": outcome.revision,
         "policy_version": outcome.target.policy_version,
@@ -3889,6 +3916,16 @@ def _candidate_outcome_record(
             label.bottleneck_margin if label is not None else None
         ),
         "best_actions": outcome.best_actions,
+        "best_action_witnesses": tuple(
+            record
+            for action in outcome.best_actions
+            if (record := witness_record(action)) is not None
+        ),
+        "issued_action_label": (
+            witness_record(issued_action)
+            if issued_action is not None
+            else None
+        ),
         "completed_candidates": outcome.completed_candidates,
         "timed_out_candidates": outcome.timed_out_candidates,
         "unvisited_candidates": outcome.unvisited_candidates,
@@ -3900,6 +3937,124 @@ def _candidate_outcome_record(
         "stale_at_completion": outcome.stale_at_completion,
         "error": outcome.error,
     }
+
+
+def _candidate_shadow_publications(
+    outcome: CandidateVerifierOutcome | None,
+    *,
+    issue_action_certificates: tuple[RobustActionCertificate, ...],
+    issued_action: str,
+    issue_frame: int,
+    deadline_missed: bool,
+    input_override: bool = False,
+) -> tuple[dict[str, object], ...]:
+    """Publish one-shot, shadow-only candidate witnesses for audit.
+
+    This function never changes the selected input.  A publication is marked
+    issue-eligible only when the exact delivered outcome is a completed
+    full-horizon win and the already-computed local hard certificate for that
+    alternate root action is safe at this issue.
+    """
+
+    if (
+        outcome is None
+        or outcome.status != "feasible"
+        or outcome.winning is not True
+        or outcome.stale_at_completion
+    ):
+        return ()
+    root = outcome.target.root
+    certificates = {
+        certificate.action: certificate
+        for certificate in issue_action_certificates
+    }
+    publications = []
+    for witness in outcome.action_witnesses:
+        if witness.root_action not in outcome.best_actions:
+            continue
+        certificate = certificates.get(witness.root_action)
+        witness_matches_result = bool(
+            witness.label == outcome.state_label
+            and witness.candidate_policy
+            in outcome.completed_candidates
+        )
+        certificate_safe = bool(
+            certificate is not None
+            and certificate.worst_collisions == 0
+            and certificate.min_clearance >= 0.0
+        )
+        status = (
+            "witness_result_mismatch"
+            if not witness_matches_result
+            else (
+                "input_override"
+                if input_override
+                else (
+                    "deadline_missed"
+                    if deadline_missed
+                    else (
+                        "issue_certificate_missing"
+                        if certificate is None
+                        else (
+                            "issue_eligible"
+                            if certificate_safe
+                            else "issue_certificate_unsafe"
+                        )
+                    )
+                )
+            )
+        )
+        publications.append(
+            {
+                "role": "shadow_no_action_authority",
+                "status": status,
+                "issue_eligible": status == "issue_eligible",
+                "revision": outcome.revision,
+                "policy_version": outcome.target.policy_version,
+                "root": {
+                    "frame": root.frame,
+                    "row": root.row,
+                    "column": root.column,
+                    "observed_action": root.observed_action,
+                    "pending_action": (
+                        root.pending_command.action
+                        if root.pending_command is not None
+                        else None
+                    ),
+                    "pending_remaining_frames": (
+                        root.pending_command.remaining_frames
+                        if root.pending_command is not None
+                        else ()
+                    ),
+                },
+                "root_action": witness.root_action,
+                "candidate_policy": witness.candidate_policy,
+                "survival_frames": witness.label.guaranteed_frames,
+                "bottleneck_margin": witness.label.bottleneck_margin,
+                "horizon_frames": outcome.horizon_frames,
+                "issued_action": issued_action,
+                "would_change_action": witness.root_action != issued_action,
+                "valid_for_issue_frame": issue_frame,
+                "expires_after_issue_frame": issue_frame,
+                "deadline_missed": deadline_missed,
+                "input_override": input_override,
+                "witness_matches_result": witness_matches_result,
+                "issue_certificate": (
+                    {
+                        "delay_frames": certificate.delay_frames,
+                        "worst_collisions": (
+                            certificate.worst_collisions
+                        ),
+                        "min_clearance": certificate.min_clearance,
+                        "cvar_risk": certificate.cvar_risk,
+                        "worst_delay": certificate.worst_delay,
+                    }
+                    if certificate is not None
+                    else None
+                ),
+            }
+        )
+    return tuple(publications)
 
 
 def _candidate_snapshot_record(
@@ -5549,6 +5704,9 @@ def run(args: argparse.Namespace) -> int:
             ) = None
             candidate_verifier_lookup_ms = 0.0
             candidate_verifier_lookup_error: str | None = None
+            candidate_shadow_publications: tuple[
+                dict[str, object], ...
+            ] = ()
             if candidate_verifier is not None:
                 candidate_lookup_started = time.perf_counter()
                 try:
@@ -5568,6 +5726,23 @@ def run(args: argparse.Namespace) -> int:
                 candidate_verifier_lookup_ms = (
                     time.perf_counter() - candidate_lookup_started
                 ) * 1000.0
+                candidate_shadow_publications = (
+                    _candidate_shadow_publications(
+                        candidate_verifier_outcome,
+                        issue_action_certificates=(
+                            decision.issue_action_certificates
+                        ),
+                        issued_action=_action_name_from_mask(
+                            decision.mask
+                        ),
+                        issue_frame=counter_at_action,
+                        deadline_missed=action_deadline_missed,
+                        input_override=bool(
+                            can_deathbomb
+                            or auto_confirm_event is not None
+                        ),
+                    )
+                )
             transitions = input_transitions(
                 previous_mask,
                 decision.mask,
@@ -6152,7 +6327,12 @@ def run(args: argparse.Namespace) -> int:
                             {
                                 **(
                                     _candidate_outcome_record(
-                                        candidate_verifier_outcome
+                                        candidate_verifier_outcome,
+                                        issued_action=(
+                                            _action_name_from_mask(
+                                                decision.mask
+                                            )
+                                        ),
                                     )
                                     or {}
                                 ),
@@ -6167,6 +6347,9 @@ def run(args: argparse.Namespace) -> int:
                         ),
                         "service": _candidate_snapshot_record(
                             candidate_verifier_snapshot
+                        ),
+                        "publications": (
+                            candidate_shadow_publications
                         ),
                     }
                 if hit_contact_observation is not None:

@@ -61,12 +61,11 @@ losing, and every-root submission is physically rejected for contention.
 - Repository: `/home/pentester/coding/codex_ida/th08`
 - Branch: `main`
 - The current checkpoint builds on
-  `4c4b480 Synthesize verified anytime belief policies`. It adds a
-  bounded stationary-candidate verifier, aggregate between-candidate budget,
-  newest-target exact-key service, below-normal worker priority, losing-only
-  admission, raw-bundle read/hash audit, and physical contention/delivery
-  analysis. The service remains explicit shadow telemetry and never changes
-  the live mask.
+  `c4dd71d Validate losing-root candidate verification`. It retains the exact
+  root-action/candidate witness and issued-action label, preserves the
+  already-computed all-action hard certificate vector, and joins them into a
+  one-shot exact-key publication. The publication remains explicit shadow
+  telemetry and never changes the live mask.
 - Two RNG-distinct Stage-6B capsule cohorts each classified 32 roots as 20
   exact losing, 11 stationary-candidate feasible, and one feasible only after
   targeted action-column refinement. Candidate median/p95 was
@@ -91,8 +90,17 @@ losing, and every-root submission is physically rejected for contention.
   references, bundle SHA-256
   `9e8af717c548dc6456d471c15ac2be9777f755d7b94bc3fc6067e4b289b38a77`.
   The two locally retained complete replay bundles are `004142` and `011639`.
-- Linux and Windows complete quick suites pass 481 tests in
-  `2.187/3.461 s`. Read
+- A focused 120-frame pre-hit counterfactual selected 82 historical candidate
+  wins. All exact root fields matched, but current exact replay reproduced
+  both the historical label and best-action set for only 47; the other 35 are
+  now fail-closed historical replay mismatches. Among the 47 auditable roots,
+  23 candidates changed action and 21 raised the issued action from a modeled
+  32-frame loss to a modeled win. Every changed action lacked a retained
+  alternate-action certificate, so none had retrospective input authority.
+  No candidate win was within 32 frames of contact.
+- Linux and Windows complete quick suites pass 487 tests in
+  `2.210/5.092 s`. Read
+  `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`,
   `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`,
   `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`,
   `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,

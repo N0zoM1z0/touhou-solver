@@ -3761,3 +3761,33 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `329407bbc0aac733cfd2b7722b653e0aa2c0b38abefe1df624ff53fc1e7b2fd3`.
   The compact first-gate audit is
   `artifacts/viability_audit/hard_stage4a_20260726_211210_issue_transaction.json`.
+
+## 2026-07-26: CE-0128 Confirmation And Transaction Closure
+
+- **Observed complete second gate:** no-audit Hard Stage-4A `212756`
+  completed `route_complete` over 13,438 decisions and frames `1..43052`,
+  with six hits, zero Bomb, accepted terminal unload/no-save cleanup, and no
+  surviving process.
+- **Observed exact transaction audit:** all 2,210 recertifications retained a
+  transaction. The shield preserved 2,189 planned actions and changed 21;
+  1,034 applicable intersections were nonempty, three empty intersections
+  explicitly relaxed, and 30 earlier planner relaxations were inherited.
+  The independent auditor found zero intersection, reason, constraint,
+  certificate, selected-strategy, control-reserve-validity, no-Bomb, or
+  silent outside-global violations.
+- **Observed delivery:** recertification median/p95 was
+  `2.027/4.433 ms`, local planning `11.686/20.830 ms`, global solving
+  `148.298/420.866 ms`, and first policy age `2/8` frames. These remain inside
+  the pre-repair envelope.
+- **Physical outcome limit:** six hits is another RNG-distinct sample, not a
+  causal survival estimate. Five contacts followed global-kernel exhaustion;
+  one remained an unresolved sensor/model failure. The first fresh-attempt
+  hit was delayed to frame 10,590 but still occurred after global loss.
+- **Decision:** close CE-0127 and CE-0128 for the current enemy-change issue
+  boundary. Begin the explicit pre-loss continuation/interior-reserve
+  strategy gate; keep future bullet/laser birth completion a separate S07
+  obligation.
+- Raw trace SHA-256:
+  `cea41e2914c32d7157082cefca81e60a8d83e6d891886d294fdffcdf5f6c79a2`.
+  Compact transaction audit:
+  `artifacts/viability_audit/hard_stage4a_20260726_212756_issue_transaction.json`.

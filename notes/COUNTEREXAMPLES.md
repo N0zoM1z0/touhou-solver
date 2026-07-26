@@ -3213,7 +3213,7 @@ Status: observed | inferred | unknown | fixed
 
 ## CE-0127: Issue-time enemy recertification bypassed the global winning mask
 
-Status: offline-fixed; physical validation pending
+Status: fixed and physically validated
 
 - **Observed implementation defect:** `recertify_action_for_fresh_hazards`
   recomputes all 17 local action certificates and ranks all 17 actions. It
@@ -3254,9 +3254,9 @@ Status: offline-fixed; physical validation pending
   replacement to the intersection, and explicitly marks an empty-intersection
   relaxation. It retains planned/selected certificates and invalidates the
   old beam-endpoint reserve field when the action changes. Deterministic
-  preserve/intersect/relax regressions pass on Linux and Windows. The defect
-  is not closed until a no-audit physical gate records zero silent
-  outside-mask selections without a latency regression.
+  preserve/intersect/relax regressions pass on Linux and Windows. Two
+  complete no-audit Hard Stage-4A gates recorded 4,627 transactions, zero
+  silent outside-mask selections, zero Bomb, and no latency regression.
 - **Regression/evidence:** Add a deterministic intersection/preserve-planned
   regression before physical testing. The 15-case hit corpus and 1,741
   capsule bundle are validated; detailed evidence is in
@@ -3264,7 +3264,7 @@ Status: offline-fixed; physical validation pending
 
 ## CE-0128: Empty fresh/global intersection used the wrong preservation reason
 
-Status: fixed; second physical telemetry gate pending
+Status: fixed and physically validated
 
 - **Observed physical telemetry defect:** Complete no-audit Hard Stage-4A run
   `hard_route2_stage4a_unattended_20260726_211210` retained 2,417 issue
@@ -3284,4 +3284,5 @@ Status: fixed; second physical telemetry gate pending
 - **Correction:** Empty-intersection preservation now emits
   `relax_empty_fresh_global_intersection_preserve_planned`. The independent
   trace auditor checks reason/state consistency and a deterministic
-  regression covers this branch.
+  regression covers this branch. Complete second gate `212756` retained 2,210
+  reason-aware transactions with zero violations.

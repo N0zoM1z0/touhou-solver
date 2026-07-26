@@ -273,3 +273,13 @@ Execute the required transaction repair first. Then pursue Option A as the
 primary route-survival improvement and Option B as the bounded losing-state
 fallback. Keep Option C as selective supporting machinery, not the main
 planner rewrite.
+
+## Post-Decision Result
+
+The transaction repair passed two complete no-audit Hard Stage-4A physical
+gates. Runs `211210` and `212756` retained 4,627 issue transactions with zero
+silent outside-global actions and zero Bomb. The second reason-aware audit had
+zero intersection, constraint, certificate, selected-strategy, or reason
+violations. Local, recertification, and global-solve latency did not regress.
+CE-0127/0128 are closed for the current enemy-change issue boundary, so
+Option A is now the active design target.

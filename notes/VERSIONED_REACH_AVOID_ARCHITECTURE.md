@@ -210,6 +210,14 @@ Two empty-intersection rows used the wrong preservation reason while still
 explicitly relaxed and unconstrained (CE-0128); the reason was corrected
 without changing the selected action.
 
+Second no-audit gate `212756` retained 2,210 reason-aware transactions with
+zero intersection, constraint, certificate, selected-strategy, no-Bomb, or
+reason violations. It preserved 2,189 planned actions and changed 21.
+Recertification/local/global-solve p95 was
+`4.433/20.830/420.866 ms`. CE-0127 and CE-0128 are closed for the current
+enemy-change issue boundary; future bullet/laser births remain outside this
+specific validation.
+
 On the 30 retained Stage-4A direct contradictions, paired trace-radius replay
 changed 16 actions. The hard vector improved on 10 rows and regressed on zero;
 robust-collision decisions changed `29 -> 23`, and negative-certificate rows

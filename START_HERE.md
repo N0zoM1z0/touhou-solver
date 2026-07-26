@@ -66,10 +66,10 @@ Python/C++ parity for the same recurrence is not physical correctness.
   now preserves a planned member of the fresh/global intersection, restricts
   replacement to that intersection, and explicitly marks empty-intersection
   relaxation. Planned/selected certificates and exact transaction telemetry
-  are retained. No-audit Hard Stage-4A `211210` physically recorded zero
-  silent outside-global selections and no latency regression. CE-0128 fixed
-  two incorrect empty-intersection reason strings without changing actions;
-  one telemetry confirmation gate remains.
+  are retained. No-audit Hard Stage-4A gates `211210` and `212756` together
+  retained 4,627 transactions with zero silent outside-global selections,
+  zero Bomb, and no latency regression. The second reason-aware audit had
+  zero violations, closing CE-0127/0128 for this boundary.
 - The original-game full-route supervisor accepts
   `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
   only after accepted `route_complete`: it releases injected keys, closes the
@@ -107,7 +107,7 @@ Expected pre-work status:
 | --- | --- | --- |
 | live | native-state sensing and TH08 trajectory/laser/enemy projection | Gameplay sensing is native; screenshots are not a sensor. |
 | live | native local implementation acceleration | Persistent pool buffers, packed bullet decode, hazard-major shared query, and quantized no-item beam reducer implement existing boundaries with Python rollback. They add no model authority. |
-| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. CE-0127's fresh/global issue intersection passed one physical authority/latency gate; CE-0128 reason telemetry awaits confirmation. |
+| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. CE-0127/0128's fresh/global transaction passed two physical authority/latency gates. |
 | live | coarse Boolean robust viability | Current global safety authority, subject to its explicit finite model and the unresolved transition-clock boundary. |
 | shadow | native FRScreen/MSG input-clock boundary | Tri-state native probe and episode tracker identify manager-clock blocking without control-state authority. Synchronous issue-thread reads/logging are physically perturbative and total contention is unmeasured. |
 | shadow | explicit active/held/pending local certificate | Independent scalar oracle, packed finite lease, and root telemetry; old replay roots are inferred and the result cannot rank live input. |
@@ -514,17 +514,14 @@ The complete Hard route is finished. The current user-directed algorithmic
 gate is to distinguish a genuinely losing finite model from coarse or stale
 false emptiness before spending more implementation effort:
 
-1. CE-0127 passed its no-audit Hard Stage-4A authority/latency gate with zero
-   silent outside-global selections. Confirm CE-0128's corrected
-   empty-intersection reason on one clean physical run;
-2. next prioritize explicit pre-loss continuation/interior reserve strategy
+1. prioritize explicit pre-loss continuation/interior reserve strategy
    inside the viable set, because boundary factors dominate both Hard
    workloads;
-3. add exact augmented-root partial-survival candidate witnesses as the
+2. add exact augmented-root partial-survival candidate witnesses as the
    post-loss fallback;
-4. keep 8/4-pixel work query-local and proof-backed. Full-field fine
+3. keep 8/4-pixel work query-local and proof-backed. Full-field fine
    refinement remains rejected by low rescue rate and deadline cost;
-5. use additional CPU through deterministic process-level independent-root
+4. use additional CPU through deterministic process-level independent-root
    shards. Do not raise the four-worker live same-root default without a
    delivery-contention gate.
 

@@ -224,6 +224,7 @@ class Th08PracticeDossierTests(unittest.TestCase):
             "transaction": {
                 "planned_action": "up_fast",
                 "selected_action": "up_fast",
+                "global_constraint_applicable": True,
                 "fresh_global_intersection": ["up_fast", "left"],
                 "selection_reason": (
                     "preserve_planned_in_fresh_global_intersection"
@@ -240,6 +241,7 @@ class Th08PracticeDossierTests(unittest.TestCase):
             "transaction": {
                 "planned_action": "up_fast",
                 "selected_action": "down_fast",
+                "global_constraint_applicable": True,
                 "fresh_global_intersection": [],
                 "selection_reason": (
                     "relax_empty_fresh_global_intersection"
@@ -254,6 +256,14 @@ class Th08PracticeDossierTests(unittest.TestCase):
         self.assertEqual(summary["planned_action_preserved_count"], 1)
         self.assertEqual(summary["fresh_global_intersection_count"], 1)
         self.assertEqual(summary["global_constraint_relaxation_count"], 1)
+        self.assertEqual(
+            summary["fresh_global_empty_relaxation_count"],
+            1,
+        )
+        self.assertEqual(
+            summary["inherited_constraint_relaxation_count"],
+            0,
+        )
         self.assertEqual(summary["silent_outside_global_count"], 0)
 
     def test_spell_phase_summary_is_not_tied_to_stage3_spell50(

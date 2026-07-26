@@ -1,0 +1,42 @@
+{
+  "schema": "th08-issue-transaction-audit-v1",
+  "decision_count": 12726,
+  "recertified_count": 2417,
+  "transaction_count": 2417,
+  "planned_action_preserved_count": 2387,
+  "action_changed_count": 30,
+  "global_constraint_applicable_count": 934,
+  "fresh_intersection_nonempty_count": 924,
+  "fresh_empty_intersection_relaxation_count": 10,
+  "inherited_constraint_relaxation_count": 18,
+  "selected_outside_global_count": 19,
+  "silent_outside_global_count": 0,
+  "no_bomb_violation_count": 0,
+  "selection_reason_counts": {
+    "preserve_planned_in_fresh_global_intersection": 926,
+    "preserve_fresh_safe_planned": 1420,
+    "replace_unsafe_with_least_bad": 60,
+    "replace_unsafe_with_fresh_safe": 3,
+    "relax_empty_fresh_global_intersection_least_bad": 8
+  },
+  "violation_count": 2,
+  "violations": [
+    {
+      "frame": 32515,
+      "code": "empty_intersection_selection_reason_mismatch",
+      "detail": {
+        "reported": "preserve_planned_in_fresh_global_intersection",
+        "expected": "relax_empty_fresh_global_intersection_preserve_planned"
+      }
+    },
+    {
+      "frame": 40699,
+      "code": "empty_intersection_selection_reason_mismatch",
+      "detail": {
+        "reported": "preserve_planned_in_fresh_global_intersection",
+        "expected": "relax_empty_fresh_global_intersection_preserve_planned"
+      }
+    }
+  ],
+  "trace": "artifacts/runtime_reports/hard_route2_stage4a_unattended_20260726_211210.jsonl"
+}

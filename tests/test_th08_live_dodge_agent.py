@@ -1368,6 +1368,50 @@ class LiveDodgeAgentTests(unittest.TestCase):
             record["selected_outside_global_without_relaxation"]
         )
 
+    def test_empty_intersection_can_preserve_safe_plan_with_relaxation(
+        self,
+    ) -> None:
+        decision = Decision(
+            SHOT | UP,
+            "up_fast",
+            10.0,
+            10.0,
+            0.0,
+            False,
+            viability_constrained=True,
+            viability_safe_action_count=1,
+        )
+        with patch(
+            "th08_live_dodge_agent._robust_action_certificates",
+            side_effect=_issue_certificates(
+                {
+                    "up_fast": (0, 2.0, 0.0),
+                    "left": (1, -3.0, 100.0),
+                }
+            ),
+        ):
+            corrected = recertify_action_for_fresh_hazards(
+                decision,
+                player_x=192.0,
+                player_y=400.0,
+                previous_mask=SHOT | UP,
+                delay_frames=(2, 3),
+                action_hold_frames=4,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                allowed_first_actions=("left",),
+            )
+        self.assertEqual(corrected.action, "up_fast")
+        self.assertFalse(corrected.viability_constrained)
+        self.assertTrue(corrected.viability_fresh_prefix_relaxed)
+        assert corrected.issue_recertification is not None
+        self.assertEqual(
+            corrected.issue_recertification.selection_reason,
+            "relax_empty_fresh_global_intersection_preserve_planned",
+        )
+
     def test_ce_0094_latent_ring_avoids_the_frame_9813_reactivation(self) -> None:
         stale_decision = Decision(
             SHOT | UP | RIGHT,

@@ -2381,11 +2381,16 @@ def recertify_action_for_fresh_hazards(
     if planned_is_candidate_safe:
         selected = action_by_name[decision.action]
         certificate = planned
-        selection_reason = (
-            "preserve_planned_in_fresh_global_intersection"
-            if global_constraint_applicable
-            else "preserve_fresh_safe_planned"
-        )
+        if global_constraint_relaxed:
+            selection_reason = (
+                "relax_empty_fresh_global_intersection_preserve_planned"
+            )
+        elif global_constraint_applicable:
+            selection_reason = (
+                "preserve_planned_in_fresh_global_intersection"
+            )
+        else:
+            selection_reason = "preserve_fresh_safe_planned"
     else:
         selected_name = min(
             candidate_names,

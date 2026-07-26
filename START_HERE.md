@@ -66,13 +66,16 @@ Python/C++ parity for the same recurrence is not physical correctness.
   now preserves a planned member of the fresh/global intersection, restricts
   replacement to that intersection, and explicitly marks empty-intersection
   relaxation. Planned/selected certificates and exact transaction telemetry
-  are retained. A no-audit Hard Stage-4A physical gate remains required.
+  are retained. No-audit Hard Stage-4A `211210` physically recorded zero
+  silent outside-global selections and no latency regression. CE-0128 fixed
+  two incorrect empty-intersection reason strings without changing actions;
+  one telemetry confirmation gate remains.
 - The original-game full-route supervisor accepts
   `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
   only after accepted `route_complete`: it releases injected keys, closes the
   agent, sends no result/save choice, and leaves the identity-verified game
   process running for a manual replay save. Failures still clean up.
-- Linux and Windows quick suites pass `567/567` in `4.996/9.072 s`. The
+- Linux and Windows quick suites pass `571/571` in `4.792/7.298 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.
@@ -104,7 +107,7 @@ Expected pre-work status:
 | --- | --- | --- |
 | live | native-state sensing and TH08 trajectory/laser/enemy projection | Gameplay sensing is native; screenshots are not a sensor. |
 | live | native local implementation acceleration | Persistent pool buffers, packed bullet decode, hazard-major shared query, and quantized no-item beam reducer implement existing boundaries with Python rollback. They add no model authority. |
-| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. CE-0127's fresh/global issue intersection is offline-fixed with a physical gate pending. |
+| live | local exact collision certificate | Fresh issue-time hard fallback with per-position batch semantics and packed equivalent-root induction; hard no-Bomb. Live callers still use the active-equals-held fallback. CE-0127's fresh/global issue intersection passed one physical authority/latency gate; CE-0128 reason telemetry awaits confirmation. |
 | live | coarse Boolean robust viability | Current global safety authority, subject to its explicit finite model and the unresolved transition-clock boundary. |
 | shadow | native FRScreen/MSG input-clock boundary | Tri-state native probe and episode tracker identify manager-clock blocking without control-state authority. Synchronous issue-thread reads/logging are physically perturbative and total contention is unmeasured. |
 | shadow | explicit active/held/pending local certificate | Independent scalar oracle, packed finite lease, and root telemetry; old replay roots are inferred and the result cannot rank live input. |
@@ -511,20 +514,17 @@ The complete Hard route is finished. The current user-directed algorithmic
 gate is to distinguish a genuinely losing finite model from coarse or stale
 false emptiness before spending more implementation effort:
 
-1. the CE-0127 preserve/intersection/relax transaction and accurate
-   selected-action telemetry are implemented; deterministic tests, retained
-   15-hit regression validation, and both quick suites pass;
-2. perform one no-audit Hard Stage-4A physical gate. Require zero silent
-   out-of-mask issue, unchanged hard-no-Bomb behavior, and no policy/local
-   latency regression;
-3. next prioritize explicit pre-loss continuation/interior reserve strategy
+1. CE-0127 passed its no-audit Hard Stage-4A authority/latency gate with zero
+   silent outside-global selections. Confirm CE-0128's corrected
+   empty-intersection reason on one clean physical run;
+2. next prioritize explicit pre-loss continuation/interior reserve strategy
    inside the viable set, because boundary factors dominate both Hard
    workloads;
-4. add exact augmented-root partial-survival candidate witnesses as the
+3. add exact augmented-root partial-survival candidate witnesses as the
    post-loss fallback;
-5. keep 8/4-pixel work query-local and proof-backed. Full-field fine
+4. keep 8/4-pixel work query-local and proof-backed. Full-field fine
    refinement remains rejected by low rescue rate and deadline cost;
-6. use additional CPU through deterministic process-level independent-root
+5. use additional CPU through deterministic process-level independent-root
    shards. Do not raise the four-worker live same-root default without a
    delivery-contention gate.
 

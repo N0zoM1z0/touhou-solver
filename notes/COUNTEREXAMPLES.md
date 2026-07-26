@@ -3261,3 +3261,27 @@ Status: offline-fixed; physical validation pending
   regression before physical testing. The 15-case hit corpus and 1,741
   capsule bundle are validated; detailed evidence is in
   `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`.
+
+## CE-0128: Empty fresh/global intersection used the wrong preservation reason
+
+Status: fixed; second physical telemetry gate pending
+
+- **Observed physical telemetry defect:** Complete no-audit Hard Stage-4A run
+  `hard_route2_stage4a_unattended_20260726_211210` retained 2,417 issue
+  transactions. Frames 32,515 and 40,699 had an empty fresh/global
+  intersection, explicitly set `global_constraint_relaxed=true`, and safely
+  preserved the planned action outside the old global set. The record
+  incorrectly labeled those rows
+  `preserve_planned_in_fresh_global_intersection`.
+- **Authority impact:** None observed. Both rows explicitly relaxed the old
+  global constraint, `viability_constrained=false`, and retained the exact
+  fresh safe set and selected certificate. The independent audit found zero
+  silent outside-global actions and zero certificate/strategy mismatches.
+  This is a reason/provenance defect, not another CE-0127 action violation.
+- **Cause:** The preserve-planned branch selected its reason from
+  `global_constraint_applicable` without first testing the already-computed
+  empty-intersection relaxation.
+- **Correction:** Empty-intersection preservation now emits
+  `relax_empty_fresh_global_intersection_preserve_planned`. The independent
+  trace auditor checks reason/state consistency and a deterministic
+  regression covers this branch.

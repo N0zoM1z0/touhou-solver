@@ -3721,3 +3721,43 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   corpus passes with zero deathbomb. The old `202439` trace did not retain the
   fresh all-action tuple, so it cannot supply exact historical transaction
   replay. A new no-audit Hard Stage-4A physical gate is required.
+
+## 2026-07-26: CE-0127 Hard Stage-4A Physical Gate And CE-0128
+
+- **Observed complete physical gate:** no-audit Hard Stage-4A `211210`
+  completed `route_complete` over 12,726 decisions and frames `3..42059`.
+  It recorded seven hits, zero Bomb, no foreground/runtime failure, safe
+  no-save cleanup, and no surviving game/supervisor process. Hit count is one
+  RNG-distinct sample, not a causal A/B against the 15-hit audit capture.
+- **Observed transaction authority:** all 2,417 enemy-change recertifications
+  retained a transaction. The shield preserved 2,387 planned actions and
+  changed 30. Independent recomputation found 924 nonempty applicable
+  fresh/global intersections, ten explicit empty-intersection relaxations,
+  18 inherited planner relaxations, 19 selected actions outside the advisory
+  global set, and zero outside-global actions without an explicit relaxation.
+  Certificate, selected-strategy, flag, no-Bomb, and intersection checks had
+  zero authority violations.
+- **Observed stability and latency:** action overrides fell from
+  `1435/2672` in audit `202439` to `30/2417`. Local plan median/p95 changed
+  `12.903/22.274 -> 12.155/21.486 ms`; issue recertification
+  `2.316/4.842 -> 2.172/4.704 ms`; global solve
+  `151.377/429.975 -> 145.076/421.706 ms`. Capture modes and RNG differ, so
+  the timings establish no regression rather than a causal speedup.
+- **Observed remaining planner failure:** global viability was empty before
+  all seven contacts. The first hit at frame 3,296 occurred at the
+  right/bottom boundary with a modeled committed-prefix collision. Boundary
+  and fast-mode factors occurred on four and five hits. The transaction fix
+  prevents authority loss but does not solve early feasible-set exhaustion.
+- **CE-0128:** frames 32,515 and 40,699 explicitly relaxed an empty
+  fresh/global intersection and safely preserved the planned action, but
+  mislabeled the reason as preservation inside the intersection. No action or
+  constraint flag was wrong. The reason selector and independent auditor were
+  corrected and covered by a deterministic regression; one clean telemetry
+  confirmation remains.
+- **Post-correction validation:** Linux and Windows quick suites pass
+  `571/571` in `4.792/7.298 s`; the seven-case physical regression corpus
+  passes; JSON parsing, `py_compile`, and `git diff --check` pass.
+- Raw trace SHA-256:
+  `329407bbc0aac733cfd2b7722b653e0aa2c0b38abefe1df624ff53fc1e7b2fd3`.
+  The compact first-gate audit is
+  `artifacts/viability_audit/hard_stage4a_20260726_211210_issue_transaction.json`.

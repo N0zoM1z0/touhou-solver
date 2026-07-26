@@ -202,6 +202,14 @@ value is marked invalid if recertification changes the action because the
 issue shield does not rerun the long beam. This is an offline-verified
 correctness repair; one no-audit Hard Stage-4A physical gate is still required.
 
+The first no-audit gate `211210` recorded 2,417 transactions, preserved 2,387
+planned actions, changed 30, and had zero silent outside-global selections.
+Local, recertification, and global-solve p95 were
+`21.486/4.704/421.706 ms`, none worse than audit capture `202439`.
+Two empty-intersection rows used the wrong preservation reason while still
+explicitly relaxed and unconstrained (CE-0128); the reason was corrected
+without changing the selected action.
+
 On the 30 retained Stage-4A direct contradictions, paired trace-radius replay
 changed 16 actions. The hard vector improved on 10 rows and regressed on zero;
 robust-collision decisions changed `29 -> 23`, and negative-certificate rows

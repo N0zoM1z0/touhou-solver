@@ -634,11 +634,22 @@ def _issue_enemy_guard_summary(
             for transaction in transactions
         ),
         "fresh_global_intersection_count": sum(
-            bool(transaction.get("fresh_global_intersection"))
+            bool(transaction.get("global_constraint_applicable"))
+            and bool(transaction.get("fresh_global_intersection"))
             for transaction in transactions
         ),
         "global_constraint_relaxation_count": sum(
             bool(transaction.get("global_constraint_relaxed"))
+            for transaction in transactions
+        ),
+        "fresh_global_empty_relaxation_count": sum(
+            bool(transaction.get("global_constraint_applicable"))
+            and bool(transaction.get("global_constraint_relaxed"))
+            for transaction in transactions
+        ),
+        "inherited_constraint_relaxation_count": sum(
+            not bool(transaction.get("global_constraint_applicable"))
+            and bool(transaction.get("global_constraint_relaxed"))
             for transaction in transactions
         ),
         "silent_outside_global_count": sum(
@@ -1915,8 +1926,11 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"Fresh/global transactions preserved "
                 f"{issue_enemy_guard['planned_action_preserved_count']}/"
                 f"{issue_enemy_guard['transaction_count']} planned actions, "
-                f"explicitly relaxed "
-                f"{issue_enemy_guard['global_constraint_relaxation_count']}, "
+                "relaxed "
+                f"{issue_enemy_guard['fresh_global_empty_relaxation_count']} "
+                "fresh/global empty intersections, inherited "
+                f"{issue_enemy_guard['inherited_constraint_relaxation_count']} "
+                "earlier planner relaxations, "
                 "and recorded "
                 f"{issue_enemy_guard['silent_outside_global_count']} silent "
                 "outside-global selections."

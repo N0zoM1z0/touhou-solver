@@ -264,8 +264,9 @@ supersede historical sequencing without erasing its counterexamples.
 
 ### S07 — Observation-Complete, Versioned Safety Transaction
 
-- **Status:** Issue-intersection repair implemented and offline-verified;
-  physical gate pending; incomplete for future projectile births.
+- **Status:** Issue-intersection authority physically validated once; a
+  telemetry-reason follow-up gate is pending; incomplete for future
+  projectile births.
 - **Intent:** Treat observe-plan-act as a versioned transaction. Re-read
   lightweight native state immediately before input and recertify when
   relevant geometry changes.
@@ -287,10 +288,14 @@ supersede historical sequencing without erasing its counterexamples.
   certificates, the fresh safe set, intersection, reason, and selected-action
   strategy telemetry. Deterministic preserve/intersect/relax regressions and
   the Linux/Windows quick suites pass.
-- **Next gate:** One no-audit Hard Stage-4A physical trial must show zero
-  silent outside-mask issues, hard no-Bomb, and no issue/local/policy latency
-  regression. Then add packed bullet/laser/enemy issue coverage and
-  ECL/timeline `BirthWindow` coverage.
+- **Physical correction gate:** No-audit Hard Stage-4A `211210` completed with
+  2,417 audited transactions, zero silent outside-mask issues, zero Bomb, and
+  no issue/local/policy latency regression. It preserved 2,387 planned
+  actions and changed only 30. Two explicitly relaxed rows mislabeled their
+  preservation reason; CE-0128 is fixed without an action change.
+- **Next gate:** Confirm the corrected reason telemetry in one clean run,
+  then add packed bullet/laser/enemy issue coverage and ECL/timeline
+  `BirthWindow` coverage.
 - **Evidence:** `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md`.
 
 ### S08 — Item, Power, Score, And Graze Objectives

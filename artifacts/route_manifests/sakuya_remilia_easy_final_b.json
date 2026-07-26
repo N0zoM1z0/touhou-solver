@@ -1,0 +1,5254 @@
+{
+  "active_difficulty_mask": 1,
+  "branch_note": "Original Game Start Easy route 2 ending at Final B.",
+  "candidate_spell_occurrence_count": 33,
+  "candidate_unique_spell_ids": [
+    2,
+    6,
+    13,
+    17,
+    21,
+    25,
+    32,
+    39,
+    43,
+    44,
+    45,
+    46,
+    47,
+    54,
+    58,
+    62,
+    66,
+    70,
+    100,
+    104,
+    108,
+    112,
+    147,
+    151,
+    155,
+    159,
+    163,
+    167,
+    171,
+    175,
+    179,
+    183,
+    187
+  ],
+  "difficulty": "Easy",
+  "difficulty_index": 0,
+  "player": {
+    "bomb_gate_reset_value": 10,
+    "focused_cardinal_speed": 2.299999952316284,
+    "focused_diagonal_axis_speed": 1.6263456344604492,
+    "primary_sht": "ply02a.sht",
+    "primary_sht_sha256": "4765744ab5bbf797746469d5a6afc6ec7d4b0371422b5aa5a2e54ae668c48885",
+    "secondary_sht": "ply02as.sht",
+    "secondary_sht_sha256": "f7554b3a32e16da01de9432e22609482a1c98a33212eb904ad47789079abebd3",
+    "unfocused_cardinal_speed": 4.0,
+    "unfocused_diagonal_axis_speed": 2.8284270763397217
+  },
+  "profile": "sakuya_remilia_easy_final_b",
+  "reachable_callback_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    12,
+    13,
+    14,
+    15,
+    18
+  ],
+  "reachable_spell_occurrence_count": 30,
+  "reachable_unique_spell_ids": [
+    2,
+    6,
+    13,
+    17,
+    21,
+    25,
+    32,
+    39,
+    43,
+    47,
+    54,
+    58,
+    62,
+    66,
+    70,
+    100,
+    104,
+    108,
+    112,
+    147,
+    151,
+    155,
+    159,
+    163,
+    167,
+    171,
+    175,
+    179,
+    183,
+    187
+  ],
+  "route_id": 2,
+  "stage_count": 6,
+  "stages": [
+    {
+      "candidate_spell_occurrence_count": 2,
+      "candidate_unique_spell_ids": [
+        2,
+        6
+      ],
+      "conservative_branch_count": 6,
+      "ecl_file": "ecldata1.ecl",
+      "ecl_sha256": "6b44a0ea36648edcdeae522a2ac16d1f09bf2097d3ddaa1a61c8c1703bad68ea",
+      "flow_edge_count": 72,
+      "folded_branch_count": 2,
+      "internal_stage_index": 0,
+      "label": "Stage 1",
+      "reachable_callback_indices": [],
+      "reachable_callback_occurrences": [],
+      "reachable_spell_occurrence_count": 2,
+      "reachable_spell_occurrences": [
+        {
+          "base_score": 10000000,
+          "component_edges": [
+            {
+              "kind": "call",
+              "source_offset": 24336,
+              "source_subroutine": 38,
+              "target_subroutine": 39
+            },
+            {
+              "kind": "call",
+              "source_offset": 24452,
+              "source_subroutine": 38,
+              "target_subroutine": 39
+            },
+            {
+              "kind": "call",
+              "source_offset": 24568,
+              "source_subroutine": 38,
+              "target_subroutine": 39
+            },
+            {
+              "kind": "call",
+              "source_offset": 24684,
+              "source_subroutine": 38,
+              "target_subroutine": 39
+            },
+            {
+              "kind": "call",
+              "source_offset": 24700,
+              "source_subroutine": 38,
+              "target_subroutine": 40
+            },
+            {
+              "kind": "call",
+              "source_offset": 24896,
+              "source_subroutine": 38,
+              "target_subroutine": 39
+            },
+            {
+              "kind": "call",
+              "source_offset": 25012,
+              "source_subroutine": 38,
+              "target_subroutine": 39
+            },
+            {
+              "kind": "call",
+              "source_offset": 25128,
+              "source_subroutine": 38,
+              "target_subroutine": 39
+            },
+            {
+              "kind": "call",
+              "source_offset": 25244,
+              "source_subroutine": 38,
+              "target_subroutine": 39
+            },
+            {
+              "kind": "call",
+              "source_offset": 25260,
+              "source_subroutine": 38,
+              "target_subroutine": 41
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 25440,
+              "source_subroutine": 39,
+              "target_subroutine": 43
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 28024,
+              "source_subroutine": 43,
+              "target_subroutine": 42
+            }
+          ],
+          "component_subroutines": [
+            38,
+            39,
+            40,
+            41,
+            42,
+            43
+          ],
+          "description_1": "蛍の発光現象",
+          "description_2": " ",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 7,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 6
+          },
+          "field_00": 0,
+          "name": "灯符「ファイヤフライフェノメノン」",
+          "offset": 23140,
+          "owner": "リグル・ナイトバグ",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 23044,
+              "source_subroutine": 38,
+              "target_subroutine": 33
+            },
+            {
+              "kind": "enemy_end",
+              "source_offset": 24164,
+              "source_subroutine": 38,
+              "target_subroutine": 33
+            }
+          ],
+          "spell_id": 2,
+          "subroutine": 38,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 75,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 38
+            },
+            {
+              "eligible_instruction_count": 6,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 39
+            },
+            {
+              "eligible_instruction_count": 15,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 3
+              },
+              "subroutine": 40
+            },
+            {
+              "eligible_instruction_count": 15,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 3
+              },
+              "subroutine": 41
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 3,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 42
+            },
+            {
+              "eligible_instruction_count": 12,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 43
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 10000000,
+          "component_edges": [
+            {
+              "kind": "call",
+              "source_offset": 29432,
+              "source_subroutine": 44,
+              "target_subroutine": 47
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 29568,
+              "source_subroutine": 44,
+              "target_subroutine": 46
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 30420,
+              "source_subroutine": 46,
+              "target_subroutine": 45
+            }
+          ],
+          "component_subroutines": [
+            44,
+            45,
+            46,
+            47
+          ],
+          "description_1": "小さな蟲",
+          "description_2": "キモイです。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 7,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 27
+          },
+          "field_00": 0,
+          "name": "蠢符「リトルバグ」",
+          "offset": 28248,
+          "owner": "リグル・ナイトバグ",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 28152,
+              "source_subroutine": 44,
+              "target_subroutine": 33
+            }
+          ],
+          "spell_id": 6,
+          "subroutine": 44,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 34,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 44
+            },
+            {
+              "eligible_instruction_count": 11,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 45
+            },
+            {
+              "eligible_instruction_count": 17,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 46
+            },
+            {
+              "eligible_instruction_count": 59,
+              "feature_counts": {
+                "bullet_emit": 6,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 27
+              },
+              "subroutine": 47
+            }
+          ],
+          "time": 0
+        }
+      ],
+      "reachable_subroutine_count": 41,
+      "reachable_subroutines": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        50
+      ],
+      "reachable_unique_spell_ids": [
+        2,
+        6
+      ],
+      "subroutine_count": 53,
+      "timeline_count": 2,
+      "timeline_root_subroutines": [
+        0,
+        1,
+        3,
+        5,
+        11,
+        13,
+        14,
+        15,
+        25
+      ],
+      "unresolved_dynamic_subroutine_edges": []
+    },
+    {
+      "candidate_spell_occurrence_count": 4,
+      "candidate_unique_spell_ids": [
+        13,
+        17,
+        21,
+        25
+      ],
+      "conservative_branch_count": 9,
+      "ecl_file": "ecldata2.ecl",
+      "ecl_sha256": "a1b183c4e1c9d939290192f84e50ac551e31a5abe91ac396e5b056a813051a10",
+      "flow_edge_count": 115,
+      "folded_branch_count": 0,
+      "internal_stage_index": 1,
+      "label": "Stage 2",
+      "reachable_callback_indices": [
+        0,
+        1
+      ],
+      "reachable_callback_occurrences": [
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4338640,
+          "callback_confidence": "observed",
+          "callback_index": 1,
+          "callback_index_dynamic": false,
+          "callback_name": "spawn_screen_effect_type_1",
+          "offset": 27392,
+          "opcode": 136,
+          "subroutine": 44,
+          "time": 120
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4338576,
+          "callback_confidence": "observed",
+          "callback_index": 0,
+          "callback_index_dynamic": false,
+          "callback_name": "publish_enemy_object_fields_24_56",
+          "offset": 29740,
+          "opcode": 136,
+          "subroutine": 50,
+          "time": 0
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4338576,
+          "callback_confidence": "observed",
+          "callback_index": 0,
+          "callback_index_dynamic": false,
+          "callback_name": "publish_enemy_object_fields_24_56",
+          "offset": 29804,
+          "opcode": 136,
+          "subroutine": 50,
+          "time": 1
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4338640,
+          "callback_confidence": "observed",
+          "callback_index": 1,
+          "callback_index_dynamic": false,
+          "callback_name": "spawn_screen_effect_type_1",
+          "offset": 31744,
+          "opcode": 136,
+          "subroutine": 52,
+          "time": 180
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4338576,
+          "callback_confidence": "observed",
+          "callback_index": 0,
+          "callback_index_dynamic": false,
+          "callback_name": "publish_enemy_object_fields_24_56",
+          "offset": 33632,
+          "opcode": 136,
+          "subroutine": 56,
+          "time": 0
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4338576,
+          "callback_confidence": "observed",
+          "callback_index": 0,
+          "callback_index_dynamic": false,
+          "callback_name": "publish_enemy_object_fields_24_56",
+          "offset": 33872,
+          "opcode": 136,
+          "subroutine": 56,
+          "time": 1
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4338576,
+          "callback_confidence": "observed",
+          "callback_index": 0,
+          "callback_index_dynamic": false,
+          "callback_name": "publish_enemy_object_fields_24_56",
+          "offset": 34024,
+          "opcode": 136,
+          "subroutine": 57,
+          "time": 0
+        }
+      ],
+      "reachable_spell_occurrence_count": 4,
+      "reachable_spell_occurrences": [
+        {
+          "base_score": 15000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 11644,
+              "source_subroutine": 23,
+              "target_subroutine": 24
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 11720,
+              "source_subroutine": 23,
+              "target_subroutine": 24
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 11796,
+              "source_subroutine": 23,
+              "target_subroutine": 24
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 11896,
+              "source_subroutine": 23,
+              "target_subroutine": 24
+            }
+          ],
+          "component_subroutines": [
+            23,
+            24
+          ],
+          "description_1": "何処からか聴こえる梟（フクロウ）の鳴き声。",
+          "description_2": "フクロウの眼は怖い。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 2,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 7
+          },
+          "field_00": 0,
+          "name": "声符「梟の夜鳴声」",
+          "offset": 10496,
+          "owner": "ミスティア・ローレライ",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 10400,
+              "source_subroutine": 23,
+              "target_subroutine": 29
+            }
+          ],
+          "spell_id": 13,
+          "subroutine": 23,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 35,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 23
+            },
+            {
+              "eligible_instruction_count": 24,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 7
+              },
+              "subroutine": 24
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 15000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 20304,
+              "source_subroutine": 33,
+              "target_subroutine": 35
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 20360,
+              "source_subroutine": 33,
+              "target_subroutine": 34
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 20428,
+              "source_subroutine": 33,
+              "target_subroutine": 34
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 20496,
+              "source_subroutine": 33,
+              "target_subroutine": 34
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 20540,
+              "source_subroutine": 33,
+              "target_subroutine": 34
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 20584,
+              "source_subroutine": 33,
+              "target_subroutine": 34
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 21192,
+              "source_subroutine": 35,
+              "target_subroutine": 37
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 21380,
+              "source_subroutine": 35,
+              "target_subroutine": 37
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 22364,
+              "source_subroutine": 37,
+              "target_subroutine": 36
+            }
+          ],
+          "component_subroutines": [
+            33,
+            34,
+            35,
+            36,
+            37
+          ],
+          "description_1": "天蛾（スズメガ）が飛んで鱗粉を落とす姿。",
+          "description_2": " ",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 6
+          },
+          "field_00": 0,
+          "name": "蛾符「天蛾の蠱道」",
+          "offset": 19264,
+          "owner": "ミスティア・ローレライ",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 19168,
+              "source_subroutine": 33,
+              "target_subroutine": 29
+            },
+            {
+              "kind": "enemy_end",
+              "source_offset": 20288,
+              "source_subroutine": 33,
+              "target_subroutine": 29
+            }
+          ],
+          "spell_id": 17,
+          "subroutine": 33,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 31,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 33
+            },
+            {
+              "eligible_instruction_count": 14,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 2
+              },
+              "subroutine": 34
+            },
+            {
+              "eligible_instruction_count": 17,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 35
+            },
+            {
+              "eligible_instruction_count": 17,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 4
+              },
+              "subroutine": 36
+            },
+            {
+              "eligible_instruction_count": 17,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 37
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 15000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 26904,
+              "source_subroutine": 44,
+              "target_subroutine": 45
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 26996,
+              "source_subroutine": 44,
+              "target_subroutine": 47
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 27052,
+              "source_subroutine": 44,
+              "target_subroutine": 47
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 27184,
+              "source_subroutine": 44,
+              "target_subroutine": 47
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 27240,
+              "source_subroutine": 44,
+              "target_subroutine": 47
+            },
+            {
+              "kind": "call",
+              "source_offset": 27376,
+              "source_subroutine": 44,
+              "target_subroutine": 53
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 27428,
+              "source_subroutine": 44,
+              "target_subroutine": 50
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 27652,
+              "source_subroutine": 44,
+              "target_subroutine": 49
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 27708,
+              "source_subroutine": 44,
+              "target_subroutine": 49
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 27764,
+              "source_subroutine": 44,
+              "target_subroutine": 49
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 27820,
+              "source_subroutine": 44,
+              "target_subroutine": 49
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 27876,
+              "source_subroutine": 44,
+              "target_subroutine": 49
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 28608,
+              "source_subroutine": 47,
+              "target_subroutine": 46
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 29284,
+              "source_subroutine": 49,
+              "target_subroutine": 46
+            }
+          ],
+          "component_subroutines": [
+            44,
+            45,
+            46,
+            47,
+            49,
+            50,
+            53
+          ],
+          "description_1": "鷹の襲撃",
+          "description_2": "……にしては速度は遅い。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 3,
+            "laser_spawn": 0,
+            "transform_define": 4
+          },
+          "field_00": 0,
+          "name": "鷹符「イルスタードダイブ」",
+          "offset": 25812,
+          "owner": "ミスティア・ローレライ",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 25616,
+              "source_subroutine": 44,
+              "target_subroutine": 51
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 25716,
+              "source_subroutine": 44,
+              "target_subroutine": 29
+            }
+          ],
+          "spell_id": 21,
+          "subroutine": 44,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 58,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 1,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 44
+            },
+            {
+              "eligible_instruction_count": 3,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 45
+            },
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 4
+              },
+              "subroutine": 46
+            },
+            {
+              "eligible_instruction_count": 17,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 47
+            },
+            {
+              "eligible_instruction_count": 17,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 49
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 2,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 50
+            },
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 53
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 15000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 29284,
+              "source_subroutine": 49,
+              "target_subroutine": 46
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 31348,
+              "source_subroutine": 52,
+              "target_subroutine": 49
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 31560,
+              "source_subroutine": 52,
+              "target_subroutine": 49
+            },
+            {
+              "kind": "call",
+              "source_offset": 31728,
+              "source_subroutine": 52,
+              "target_subroutine": 53
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 31780,
+              "source_subroutine": 52,
+              "target_subroutine": 56
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 31872,
+              "source_subroutine": 52,
+              "target_subroutine": 55
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 32084,
+              "source_subroutine": 52,
+              "target_subroutine": 55
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 33160,
+              "source_subroutine": 55,
+              "target_subroutine": 54
+            }
+          ],
+          "component_subroutines": [
+            46,
+            49,
+            52,
+            53,
+            54,
+            55,
+            56
+          ],
+          "description_1": "夜雀たるミスティアの得意技。",
+          "description_2": " ",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 6,
+            "callback_install": 0,
+            "callback_invoke": 3,
+            "laser_spawn": 0,
+            "transform_define": 9
+          },
+          "field_00": 0,
+          "name": "夜盲「夜雀の歌」",
+          "offset": 30196,
+          "owner": "ミスティア・ローレライ",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 30100,
+              "source_subroutine": 52,
+              "target_subroutine": 29
+            }
+          ],
+          "spell_id": 25,
+          "subroutine": 52,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 4
+              },
+              "subroutine": 46
+            },
+            {
+              "eligible_instruction_count": 17,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 49
+            },
+            {
+              "eligible_instruction_count": 58,
+              "feature_counts": {
+                "bullet_emit": 4,
+                "callback_install": 0,
+                "callback_invoke": 1,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 52
+            },
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 53
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 5
+              },
+              "subroutine": 54
+            },
+            {
+              "eligible_instruction_count": 17,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 55
+            },
+            {
+              "eligible_instruction_count": 10,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 2,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 56
+            }
+          ],
+          "time": 0
+        }
+      ],
+      "reachable_subroutine_count": 50,
+      "reachable_subroutines": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        33,
+        34,
+        35,
+        36,
+        37,
+        44,
+        45,
+        46,
+        47,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        62
+      ],
+      "reachable_unique_spell_ids": [
+        13,
+        17,
+        21,
+        25
+      ],
+      "subroutine_count": 65,
+      "timeline_count": 2,
+      "timeline_root_subroutines": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        11,
+        13,
+        14,
+        16,
+        17
+      ],
+      "unresolved_dynamic_subroutine_edges": []
+    },
+    {
+      "candidate_spell_occurrence_count": 7,
+      "candidate_unique_spell_ids": [
+        32,
+        39,
+        43,
+        44,
+        45,
+        46,
+        47
+      ],
+      "conservative_branch_count": 7,
+      "ecl_file": "ecldata3.ecl",
+      "ecl_sha256": "113e52b73dfdd94408b99dd7646ac973554cef76f1b7bd6686a773da6e974ce8",
+      "flow_edge_count": 120,
+      "folded_branch_count": 4,
+      "internal_stage_index": 2,
+      "label": "Stage 3",
+      "reachable_callback_indices": [],
+      "reachable_callback_occurrences": [],
+      "reachable_spell_occurrence_count": 4,
+      "reachable_spell_occurrences": [
+        {
+          "base_score": 20000000,
+          "component_edges": [
+            {
+              "kind": "child_spawn",
+              "source_offset": 13652,
+              "source_subroutine": 30,
+              "target_subroutine": 33
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 13708,
+              "source_subroutine": 30,
+              "target_subroutine": 33
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 13764,
+              "source_subroutine": 30,
+              "target_subroutine": 33
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 14508,
+              "source_subroutine": 30,
+              "target_subroutine": 31
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 15248,
+              "source_subroutine": 33,
+              "target_subroutine": 32
+            }
+          ],
+          "component_subroutines": [
+            30,
+            31,
+            32,
+            33
+          ],
+          "description_1": "世界最古のピラミッドパワー。",
+          "description_2": " ",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 0
+          },
+          "field_00": 0,
+          "name": "産霊「ファーストピラミッド」",
+          "offset": 12488,
+          "owner": "上白沢慧音",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 12292,
+              "source_subroutine": 30,
+              "target_subroutine": 26
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 12392,
+              "source_subroutine": 30,
+              "target_subroutine": 26
+            }
+          ],
+          "spell_id": 32,
+          "subroutine": 30,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 34,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 30
+            },
+            {
+              "eligible_instruction_count": 3,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 31
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 32
+            },
+            {
+              "eligible_instruction_count": 15,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 33
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 20000000,
+          "component_edges": [
+            {
+              "kind": "child_spawn",
+              "source_offset": 26436,
+              "source_subroutine": 47,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 26492,
+              "source_subroutine": 47,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 26548,
+              "source_subroutine": 47,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 26644,
+              "source_subroutine": 47,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 26700,
+              "source_subroutine": 47,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 26756,
+              "source_subroutine": 47,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 27520,
+              "source_subroutine": 48,
+              "target_subroutine": 49
+            }
+          ],
+          "component_subroutines": [
+            47,
+            48,
+            49
+          ],
+          "description_1": "とても人の名前とは思えない。",
+          "description_2": "誰だかは内緒、なの？",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 2
+          },
+          "field_00": 0,
+          "name": "野符「武烈クライシス」",
+          "offset": 25272,
+          "owner": "上白沢慧音",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 25076,
+              "source_subroutine": 47,
+              "target_subroutine": 38
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 25176,
+              "source_subroutine": 47,
+              "target_subroutine": 38
+            }
+          ],
+          "spell_id": 39,
+          "subroutine": 47,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 41,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 47
+            },
+            {
+              "eligible_instruction_count": 14,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 48
+            },
+            {
+              "eligible_instruction_count": 14,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 2
+              },
+              "subroutine": 49
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 20000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 29132,
+              "source_subroutine": 50,
+              "target_subroutine": 51
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 29284,
+              "source_subroutine": 50,
+              "target_subroutine": 52
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 29528,
+              "source_subroutine": 50,
+              "target_subroutine": 52
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 30028,
+              "source_subroutine": 52,
+              "target_subroutine": 53
+            }
+          ],
+          "component_subroutines": [
+            50,
+            51,
+            52,
+            53
+          ],
+          "description_1": "三種の神器の一つ。神話時代のアイテムがあるだけで凄いが、",
+          "description_2": "草刈鎌と大差ない使われ方。",
+          "difficulty_mask": 255,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 0
+          },
+          "field_00": 0,
+          "name": "国符「三種の神器　剣」",
+          "offset": 28752,
+          "owner": "上白沢慧音",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 28556,
+              "source_subroutine": 50,
+              "target_subroutine": 66
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 28656,
+              "source_subroutine": 50,
+              "target_subroutine": 38
+            }
+          ],
+          "spell_id": 43,
+          "subroutine": 50,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 46,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 50
+            },
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 51
+            },
+            {
+              "eligible_instruction_count": 12,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 52
+            },
+            {
+              "eligible_instruction_count": 6,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 53
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 20000000,
+          "component_edges": [
+            {
+              "kind": "child_spawn",
+              "source_offset": 37628,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 37684,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 37740,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 37836,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 37892,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 37948,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 38044,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 38100,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 38176,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 38232,
+              "source_subroutine": 67,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 38268,
+              "source_subroutine": 67,
+              "target_subroutine": 68
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 39020,
+              "source_subroutine": 69,
+              "target_subroutine": 70
+            }
+          ],
+          "component_subroutines": [
+            67,
+            68,
+            69,
+            70
+          ],
+          "description_1": "神々しい光の洪水。",
+          "description_2": "この位の威厳が欲しいところ。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 1,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 1,
+            "transform_define": 0
+          },
+          "field_00": 0,
+          "name": "終符「幻想天皇」",
+          "offset": 36548,
+          "owner": "上白沢慧音",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 36352,
+              "source_subroutine": 67,
+              "target_subroutine": 75
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 36452,
+              "source_subroutine": 67,
+              "target_subroutine": 38
+            }
+          ],
+          "spell_id": 47,
+          "subroutine": 67,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 46,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 67
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 68
+            },
+            {
+              "eligible_instruction_count": 14,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 69
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 1,
+                "transform_define": 0
+              },
+              "subroutine": 70
+            }
+          ],
+          "time": 0
+        }
+      ],
+      "reachable_subroutine_count": 57,
+      "reachable_subroutines": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        66,
+        67,
+        68,
+        69,
+        70,
+        75
+      ],
+      "reachable_unique_spell_ids": [
+        32,
+        39,
+        43,
+        47
+      ],
+      "subroutine_count": 78,
+      "timeline_count": 4,
+      "timeline_root_subroutines": [
+        0,
+        2,
+        4,
+        7,
+        10,
+        12,
+        13,
+        14,
+        17,
+        18,
+        19,
+        20,
+        34
+      ],
+      "unresolved_dynamic_subroutine_edges": []
+    },
+    {
+      "candidate_spell_occurrence_count": 5,
+      "candidate_unique_spell_ids": [
+        54,
+        58,
+        62,
+        66,
+        70
+      ],
+      "conservative_branch_count": 18,
+      "ecl_file": "ecldata4a.ecl",
+      "ecl_sha256": "797c83391c77d386abd264249224821be3d878fcf73b2bd71189dbfd3776f6cf",
+      "flow_edge_count": 95,
+      "folded_branch_count": 1,
+      "internal_stage_index": 3,
+      "label": "Stage 4A / Reimu",
+      "reachable_callback_indices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reachable_callback_occurrences": [
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4342064,
+          "callback_confidence": "observed",
+          "callback_index": 5,
+          "callback_index_dynamic": false,
+          "callback_name": "disable_barrier_effect_pair",
+          "offset": 5940,
+          "opcode": 136,
+          "subroutine": 17,
+          "time": 0
+        },
+        {
+          "action": "install_per_frame",
+          "argument_1": 0,
+          "callback_address": 4338688,
+          "callback_confidence": "observed",
+          "callback_index": 2,
+          "callback_index_dynamic": false,
+          "callback_name": "enemy_reflect_at_playfield_bounds",
+          "offset": 8480,
+          "opcode": 137,
+          "subroutine": 18,
+          "time": 1
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4342064,
+          "callback_confidence": "observed",
+          "callback_index": 5,
+          "callback_index_dynamic": false,
+          "callback_name": "disable_barrier_effect_pair",
+          "offset": 8568,
+          "opcode": 136,
+          "subroutine": 19,
+          "time": 0
+        },
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 8588,
+          "opcode": 137,
+          "subroutine": 19,
+          "time": 0
+        },
+        {
+          "action": "install_per_frame",
+          "argument_1": 0,
+          "callback_address": 4338688,
+          "callback_confidence": "observed",
+          "callback_index": 2,
+          "callback_index_dynamic": false,
+          "callback_name": "enemy_reflect_at_playfield_bounds",
+          "offset": 11032,
+          "opcode": 137,
+          "subroutine": 20,
+          "time": 1
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4342064,
+          "callback_confidence": "observed",
+          "callback_index": 5,
+          "callback_index_dynamic": false,
+          "callback_name": "disable_barrier_effect_pair",
+          "offset": 11884,
+          "opcode": 136,
+          "subroutine": 25,
+          "time": 0
+        },
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 11904,
+          "opcode": 137,
+          "subroutine": 25,
+          "time": 0
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4342064,
+          "callback_confidence": "observed",
+          "callback_index": 5,
+          "callback_index_dynamic": false,
+          "callback_name": "disable_barrier_effect_pair",
+          "offset": 14084,
+          "opcode": 136,
+          "subroutine": 26,
+          "time": 0
+        },
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 14104,
+          "opcode": 137,
+          "subroutine": 26,
+          "time": 0
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4338992,
+          "callback_confidence": "unknown",
+          "callback_index": 3,
+          "callback_index_dynamic": false,
+          "callback_name": "callback_03_unmodeled",
+          "offset": 18212,
+          "opcode": 136,
+          "subroutine": 28,
+          "time": 90
+        },
+        {
+          "action": "install_per_frame",
+          "argument_1": 0,
+          "callback_address": 4340320,
+          "callback_confidence": "unknown",
+          "callback_index": 4,
+          "callback_index_dynamic": false,
+          "callback_name": "callback_04_unmodeled",
+          "offset": 18232,
+          "opcode": 137,
+          "subroutine": 28,
+          "time": 90
+        },
+        {
+          "action": "install_per_frame",
+          "argument_1": 0,
+          "callback_address": 4338688,
+          "callback_confidence": "observed",
+          "callback_index": 2,
+          "callback_index_dynamic": false,
+          "callback_name": "enemy_reflect_at_playfield_bounds",
+          "offset": 27740,
+          "opcode": 137,
+          "subroutine": 38,
+          "time": 1
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4342128,
+          "callback_confidence": "observed",
+          "callback_index": 6,
+          "callback_index_dynamic": false,
+          "callback_name": "spawn_barrier_effect_pair_type_58",
+          "offset": 33244,
+          "opcode": 136,
+          "subroutine": 46,
+          "time": 90
+        },
+        {
+          "action": "install_per_frame",
+          "argument_1": 0,
+          "callback_address": 4342240,
+          "callback_confidence": "observed",
+          "callback_index": 7,
+          "callback_index_dynamic": false,
+          "callback_name": "update_barrier_portal_center_y_224",
+          "offset": 33264,
+          "opcode": 137,
+          "subroutine": 46,
+          "time": 90
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4342064,
+          "callback_confidence": "observed",
+          "callback_index": 5,
+          "callback_index_dynamic": false,
+          "callback_name": "disable_barrier_effect_pair",
+          "offset": 35840,
+          "opcode": 136,
+          "subroutine": 53,
+          "time": 0
+        },
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 35860,
+          "opcode": 137,
+          "subroutine": 53,
+          "time": 0
+        }
+      ],
+      "reachable_spell_occurrence_count": 5,
+      "reachable_spell_occurrences": [
+        {
+          "base_score": 22000000,
+          "component_edges": [],
+          "component_subroutines": [
+            28
+          ],
+          "description_1": "結界は意識の力。",
+          "description_2": "弾幕自体はまっすぐ飛んでいる。騙されるな。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 2,
+            "callback_install": 1,
+            "callback_invoke": 1,
+            "laser_spawn": 0,
+            "transform_define": 0
+          },
+          "field_00": 0,
+          "name": "夢符「二重結界」",
+          "offset": 17204,
+          "owner": "博麗霊夢",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 17008,
+              "source_subroutine": 28,
+              "target_subroutine": 19
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 17108,
+              "source_subroutine": 28,
+              "target_subroutine": 19
+            }
+          ],
+          "spell_id": 54,
+          "subroutine": 28,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 39,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 1,
+                "callback_invoke": 1,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 28
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 22000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 20584,
+              "source_subroutine": 30,
+              "target_subroutine": 21
+            },
+            {
+              "kind": "call",
+              "source_offset": 20796,
+              "source_subroutine": 30,
+              "target_subroutine": 31
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 21112,
+              "source_subroutine": 30,
+              "target_subroutine": 32
+            }
+          ],
+          "component_subroutines": [
+            21,
+            30,
+            31,
+            32
+          ],
+          "description_1": "この上なく直球勝負。",
+          "description_2": "素直にも程がある。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 0
+          },
+          "field_00": 0,
+          "name": "霊符「夢想封印　散」",
+          "offset": 19556,
+          "owner": "博麗霊夢",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 19360,
+              "source_subroutine": 30,
+              "target_subroutine": 22
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 19460,
+              "source_subroutine": 30,
+              "target_subroutine": 22
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 20564,
+              "source_subroutine": 30,
+              "target_subroutine": 23
+            }
+          ],
+          "spell_id": 58,
+          "subroutine": 30,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 10,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 21
+            },
+            {
+              "eligible_instruction_count": 41,
+              "feature_counts": {
+                "bullet_emit": 3,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 30
+            },
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 31
+            },
+            {
+              "eligible_instruction_count": 6,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 32
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 22000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 22904,
+              "source_subroutine": 33,
+              "target_subroutine": 21
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 23016,
+              "source_subroutine": 33,
+              "target_subroutine": 36
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 23120,
+              "source_subroutine": 33,
+              "target_subroutine": 38
+            },
+            {
+              "kind": "call",
+              "source_offset": 23636,
+              "source_subroutine": 33,
+              "target_subroutine": 37
+            },
+            {
+              "kind": "call",
+              "source_offset": 25972,
+              "source_subroutine": 36,
+              "target_subroutine": 34
+            },
+            {
+              "kind": "call",
+              "source_offset": 26144,
+              "source_subroutine": 36,
+              "target_subroutine": 34
+            },
+            {
+              "kind": "call",
+              "source_offset": 26352,
+              "source_subroutine": 36,
+              "target_subroutine": 34
+            },
+            {
+              "kind": "call",
+              "source_offset": 26560,
+              "source_subroutine": 36,
+              "target_subroutine": 34
+            }
+          ],
+          "component_subroutines": [
+            21,
+            33,
+            34,
+            36,
+            37,
+            38
+          ],
+          "description_1": "呪いのかかったお札で行動を封じる術。",
+          "description_2": " ",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 7,
+            "callback_install": 1,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 27
+          },
+          "field_00": 0,
+          "name": "夢符「封魔陣」",
+          "offset": 21896,
+          "owner": "博麗霊夢",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 21700,
+              "source_subroutine": 33,
+              "target_subroutine": 26
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 21800,
+              "source_subroutine": 33,
+              "target_subroutine": 26
+            }
+          ],
+          "spell_id": 62,
+          "subroutine": 33,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 10,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 21
+            },
+            {
+              "eligible_instruction_count": 49,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 33
+            },
+            {
+              "eligible_instruction_count": 27,
+              "feature_counts": {
+                "bullet_emit": 5,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 21
+              },
+              "subroutine": 34
+            },
+            {
+              "eligible_instruction_count": 28,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 36
+            },
+            {
+              "eligible_instruction_count": 28,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 6
+              },
+              "subroutine": 37
+            },
+            {
+              "eligible_instruction_count": 10,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 1,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 38
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 22000000,
+          "component_edges": [
+            {
+              "kind": "child_spawn",
+              "source_offset": 29516,
+              "source_subroutine": 41,
+              "target_subroutine": 42
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 29692,
+              "source_subroutine": 41,
+              "target_subroutine": 42
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 29788,
+              "source_subroutine": 41,
+              "target_subroutine": 42
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 29884,
+              "source_subroutine": 41,
+              "target_subroutine": 42
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 29980,
+              "source_subroutine": 41,
+              "target_subroutine": 42
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 30076,
+              "source_subroutine": 41,
+              "target_subroutine": 42
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 30172,
+              "source_subroutine": 41,
+              "target_subroutine": 42
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 30268,
+              "source_subroutine": 41,
+              "target_subroutine": 42
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 30628,
+              "source_subroutine": 42,
+              "target_subroutine": 43
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 30648,
+              "source_subroutine": 42,
+              "target_subroutine": 44
+            }
+          ],
+          "component_subroutines": [
+            41,
+            42,
+            43,
+            44
+          ],
+          "description_1": "プレイヤー側の同名のスペルカードと大きく異なる技の一つ。",
+          "description_2": "次第に寄って来る嫌らしい御札に注意。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 1,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 17
+          },
+          "field_00": 0,
+          "name": "霊符「夢想封印　集」",
+          "offset": 28420,
+          "owner": "博麗霊夢",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 28224,
+              "source_subroutine": 41,
+              "target_subroutine": 45
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 28324,
+              "source_subroutine": 41,
+              "target_subroutine": 45
+            }
+          ],
+          "spell_id": 66,
+          "subroutine": 41,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 53,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 41
+            },
+            {
+              "eligible_instruction_count": 10,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 42
+            },
+            {
+              "eligible_instruction_count": 7,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 43
+            },
+            {
+              "eligible_instruction_count": 25,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 17
+              },
+              "subroutine": 44
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 25000000,
+          "component_edges": [
+            {
+              "kind": "child_spawn",
+              "source_offset": 33400,
+              "source_subroutine": 46,
+              "target_subroutine": 47
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 33476,
+              "source_subroutine": 46,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 33552,
+              "source_subroutine": 46,
+              "target_subroutine": 47
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 33628,
+              "source_subroutine": 46,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 33704,
+              "source_subroutine": 46,
+              "target_subroutine": 47
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 33780,
+              "source_subroutine": 46,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 33856,
+              "source_subroutine": 46,
+              "target_subroutine": 47
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 33932,
+              "source_subroutine": 46,
+              "target_subroutine": 48
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 34296,
+              "source_subroutine": 47,
+              "target_subroutine": 49
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 34340,
+              "source_subroutine": 47,
+              "target_subroutine": 52
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 34520,
+              "source_subroutine": 48,
+              "target_subroutine": 50
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 34564,
+              "source_subroutine": 48,
+              "target_subroutine": 51
+            }
+          ],
+          "component_subroutines": [
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52
+          ],
+          "description_1": "結界を利用しないと避けられない攻撃。",
+          "description_2": "相手の力を逆に利用するのだ。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 1,
+            "callback_invoke": 1,
+            "laser_spawn": 0,
+            "transform_define": 4
+          },
+          "field_00": 0,
+          "name": "境界「二重弾幕結界」",
+          "offset": 32236,
+          "owner": "博麗霊夢",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 32140,
+              "source_subroutine": 46,
+              "target_subroutine": 53
+            }
+          ],
+          "spell_id": 70,
+          "subroutine": 46,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 51,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 1,
+                "callback_invoke": 1,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 46
+            },
+            {
+              "eligible_instruction_count": 12,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 47
+            },
+            {
+              "eligible_instruction_count": 11,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 48
+            },
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 1
+              },
+              "subroutine": 49
+            },
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 1
+              },
+              "subroutine": 50
+            },
+            {
+              "eligible_instruction_count": 5,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 1
+              },
+              "subroutine": 51
+            },
+            {
+              "eligible_instruction_count": 5,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 1
+              },
+              "subroutine": 52
+            }
+          ],
+          "time": 0
+        }
+      ],
+      "reachable_subroutine_count": 52,
+      "reachable_subroutines": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        28,
+        30,
+        31,
+        32,
+        33,
+        34,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        58
+      ],
+      "reachable_unique_spell_ids": [
+        54,
+        58,
+        62,
+        66,
+        70
+      ],
+      "subroutine_count": 61,
+      "timeline_count": 2,
+      "timeline_root_subroutines": [
+        0,
+        3,
+        5,
+        7,
+        12,
+        14,
+        15,
+        16,
+        24
+      ],
+      "unresolved_dynamic_subroutine_edges": []
+    },
+    {
+      "candidate_spell_occurrence_count": 4,
+      "candidate_unique_spell_ids": [
+        100,
+        104,
+        108,
+        112
+      ],
+      "conservative_branch_count": 30,
+      "ecl_file": "ecldata5.ecl",
+      "ecl_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      "flow_edge_count": 148,
+      "folded_branch_count": 1,
+      "internal_stage_index": 5,
+      "label": "Stage 5",
+      "reachable_callback_indices": [
+        12,
+        13,
+        14
+      ],
+      "reachable_callback_occurrences": [
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 20912,
+          "opcode": 137,
+          "subroutine": 53,
+          "time": 0
+        },
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 22240,
+          "opcode": 137,
+          "subroutine": 56,
+          "time": 0
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 25992,
+          "opcode": 136,
+          "subroutine": 62,
+          "time": 140
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 26052,
+          "opcode": 136,
+          "subroutine": 62,
+          "time": 140
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 26112,
+          "opcode": 136,
+          "subroutine": 62,
+          "time": 240
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 26152,
+          "opcode": 136,
+          "subroutine": 62,
+          "time": 240
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 28528,
+          "opcode": 136,
+          "subroutine": 63,
+          "time": 350
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 28588,
+          "opcode": 136,
+          "subroutine": 63,
+          "time": 450
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 30628,
+          "opcode": 136,
+          "subroutine": 66,
+          "time": 340
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 30688,
+          "opcode": 136,
+          "subroutine": 66,
+          "time": 340
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 30768,
+          "opcode": 136,
+          "subroutine": 66,
+          "time": 440
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344352,
+          "callback_confidence": "observed",
+          "callback_index": 12,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_two_state",
+          "offset": 30808,
+          "opcode": 136,
+          "subroutine": 66,
+          "time": 440
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344896,
+          "callback_confidence": "observed",
+          "callback_index": 14,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_three_state",
+          "offset": 34012,
+          "opcode": 136,
+          "subroutine": 75,
+          "time": 140
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344896,
+          "callback_confidence": "observed",
+          "callback_index": 14,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_three_state",
+          "offset": 34072,
+          "opcode": 136,
+          "subroutine": 75,
+          "time": 140
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344896,
+          "callback_confidence": "observed",
+          "callback_index": 14,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_three_state",
+          "offset": 34112,
+          "opcode": 136,
+          "subroutine": 75,
+          "time": 220
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344896,
+          "callback_confidence": "observed",
+          "callback_index": 14,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_three_state",
+          "offset": 34152,
+          "opcode": 136,
+          "subroutine": 75,
+          "time": 220
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344896,
+          "callback_confidence": "observed",
+          "callback_index": 14,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_three_state",
+          "offset": 34212,
+          "opcode": 136,
+          "subroutine": 75,
+          "time": 240
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4344896,
+          "callback_confidence": "observed",
+          "callback_index": 14,
+          "callback_index_dynamic": false,
+          "callback_name": "toggle_tagged_bullet_phase_three_state",
+          "offset": 34252,
+          "opcode": 136,
+          "subroutine": 75,
+          "time": 240
+        },
+        {
+          "action": "install_per_frame",
+          "argument_1": 0,
+          "callback_address": 4345344,
+          "callback_confidence": "observed",
+          "callback_index": 13,
+          "callback_index_dynamic": false,
+          "callback_name": "tint_enemy_object_argb_ffc03030",
+          "offset": 39072,
+          "opcode": 137,
+          "subroutine": 85,
+          "time": 0
+        },
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 39156,
+          "opcode": 137,
+          "subroutine": 85,
+          "time": 52
+        }
+      ],
+      "reachable_spell_occurrence_count": 4,
+      "reachable_spell_occurrences": [
+        {
+          "base_score": 26000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 25832,
+              "source_subroutine": 62,
+              "target_subroutine": 85
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 39092,
+              "source_subroutine": 85,
+              "target_subroutine": 86
+            }
+          ],
+          "component_subroutines": [
+            62,
+            85,
+            86
+          ],
+          "description_1": "抗い難い、狂気の赤い瞳。",
+          "description_2": "全ては幻視だ。幻視に惑わされるな。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 6,
+            "callback_install": 2,
+            "callback_invoke": 4,
+            "laser_spawn": 0,
+            "transform_define": 0
+          },
+          "field_00": 0,
+          "name": "波符「赤眼催眠(マインドシェイカー)」",
+          "offset": 24624,
+          "owner": "鈴仙・Ｕ・イナバ",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 24428,
+              "source_subroutine": 62,
+              "target_subroutine": 53
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 24528,
+              "source_subroutine": 62,
+              "target_subroutine": 53
+            }
+          ],
+          "spell_id": 100,
+          "subroutine": 62,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 47,
+              "feature_counts": {
+                "bullet_emit": 6,
+                "callback_install": 0,
+                "callback_invoke": 4,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 62
+            },
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 2,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 85
+            },
+            {
+              "eligible_instruction_count": 3,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 86
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 26000000,
+          "component_edges": [
+            {
+              "kind": "child_spawn",
+              "source_offset": 27900,
+              "source_subroutine": 63,
+              "target_subroutine": 64
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 28028,
+              "source_subroutine": 63,
+              "target_subroutine": 64
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 28156,
+              "source_subroutine": 63,
+              "target_subroutine": 64
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 28284,
+              "source_subroutine": 63,
+              "target_subroutine": 64
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 28428,
+              "source_subroutine": 63,
+              "target_subroutine": 85
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 28820,
+              "source_subroutine": 64,
+              "target_subroutine": 65
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 39092,
+              "source_subroutine": 85,
+              "target_subroutine": 86
+            }
+          ],
+          "component_subroutines": [
+            63,
+            64,
+            65,
+            85,
+            86
+          ],
+          "description_1": "普通の人間に感知出来ない位の長い波長。",
+          "description_2": "幻視は止まってみえる。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 2,
+            "callback_install": 2,
+            "callback_invoke": 2,
+            "laser_spawn": 0,
+            "transform_define": 0
+          },
+          "field_00": 0,
+          "name": "懶符「生神停止(アイドリングウェーブ」",
+          "offset": 26752,
+          "owner": "鈴仙・Ｕ・イナバ",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 26556,
+              "source_subroutine": 63,
+              "target_subroutine": 74
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 26656,
+              "source_subroutine": 63,
+              "target_subroutine": 87
+            }
+          ],
+          "spell_id": 108,
+          "subroutine": 63,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 43,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 2,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 63
+            },
+            {
+              "eligible_instruction_count": 10,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 64
+            },
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 65
+            },
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 2,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 85
+            },
+            {
+              "eligible_instruction_count": 3,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 86
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 26000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 30416,
+              "source_subroutine": 66,
+              "target_subroutine": 67
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 30528,
+              "source_subroutine": 66,
+              "target_subroutine": 85
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 30728,
+              "source_subroutine": 66,
+              "target_subroutine": 67
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 31112,
+              "source_subroutine": 67,
+              "target_subroutine": 68
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 31312,
+              "source_subroutine": 67,
+              "target_subroutine": 71
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 31536,
+              "source_subroutine": 68,
+              "target_subroutine": 69
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 32008,
+              "source_subroutine": 71,
+              "target_subroutine": 72
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 39092,
+              "source_subroutine": 85,
+              "target_subroutine": 86
+            }
+          ],
+          "component_subroutines": [
+            66,
+            67,
+            68,
+            69,
+            71,
+            72,
+            85,
+            86
+          ],
+          "description_1": "人間と妖怪の波長合わせ。",
+          "description_2": "ああ、このカード名のカッコは読み仮名だから。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 2,
+            "callback_install": 2,
+            "callback_invoke": 4,
+            "laser_spawn": 0,
+            "transform_define": 2
+          },
+          "field_00": 0,
+          "name": "狂符「幻視調律(ビジョナリチューニング)」",
+          "offset": 29408,
+          "owner": "鈴仙・Ｕ・イナバ",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 29212,
+              "source_subroutine": 66,
+              "target_subroutine": 56
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 29312,
+              "source_subroutine": 66,
+              "target_subroutine": 56
+            }
+          ],
+          "spell_id": 104,
+          "subroutine": 66,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 38,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 4,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 66
+            },
+            {
+              "eligible_instruction_count": 20,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 67
+            },
+            {
+              "eligible_instruction_count": 11,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 68
+            },
+            {
+              "eligible_instruction_count": 3,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 1
+              },
+              "subroutine": 69
+            },
+            {
+              "eligible_instruction_count": 12,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 71
+            },
+            {
+              "eligible_instruction_count": 3,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 1
+              },
+              "subroutine": 72
+            },
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 2,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 85
+            },
+            {
+              "eligible_instruction_count": 3,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 86
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 26000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 33912,
+              "source_subroutine": 75,
+              "target_subroutine": 85
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 39092,
+              "source_subroutine": 85,
+              "target_subroutine": 86
+            }
+          ],
+          "component_subroutines": [
+            75,
+            85,
+            86
+          ],
+          "description_1": "完全に狂うと常人には見えなくなる、本当の月はいつも狂気なのだ。",
+          "description_2": " ",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 5,
+            "callback_install": 2,
+            "callback_invoke": 6,
+            "laser_spawn": 0,
+            "transform_define": 0
+          },
+          "field_00": 0,
+          "name": "散符「真実の月(インビジブルフルムーン)」",
+          "offset": 32688,
+          "owner": "鈴仙・Ｕ・イナバ",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 32492,
+              "source_subroutine": 75,
+              "target_subroutine": 87
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 32592,
+              "source_subroutine": 75,
+              "target_subroutine": 53
+            }
+          ],
+          "spell_id": 112,
+          "subroutine": 75,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 56,
+              "feature_counts": {
+                "bullet_emit": 5,
+                "callback_install": 0,
+                "callback_invoke": 6,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 75
+            },
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 2,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 85
+            },
+            {
+              "eligible_instruction_count": 3,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 86
+            }
+          ],
+          "time": 0
+        }
+      ],
+      "reachable_subroutine_count": 73,
+      "reachable_subroutines": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        71,
+        72,
+        74,
+        75,
+        85,
+        86,
+        87
+      ],
+      "reachable_unique_spell_ids": [
+        100,
+        104,
+        108,
+        112
+      ],
+      "subroutine_count": 90,
+      "timeline_count": 1,
+      "timeline_root_subroutines": [
+        0,
+        2,
+        9,
+        10,
+        15,
+        22,
+        29,
+        31,
+        33,
+        34,
+        36,
+        38,
+        48,
+        49
+      ],
+      "unresolved_dynamic_subroutine_edges": []
+    },
+    {
+      "candidate_spell_occurrence_count": 11,
+      "candidate_unique_spell_ids": [
+        147,
+        151,
+        155,
+        159,
+        163,
+        167,
+        171,
+        175,
+        179,
+        183,
+        187
+      ],
+      "conservative_branch_count": 24,
+      "ecl_file": "ecldata7.ecl",
+      "ecl_sha256": "20b35dca3820438f0b90ae44e3362a7af27d2fc1ac7ae5888c477dc1c89a3734",
+      "flow_edge_count": 127,
+      "folded_branch_count": 0,
+      "internal_stage_index": 7,
+      "label": "Final B / Kaguya",
+      "reachable_callback_indices": [
+        15,
+        18
+      ],
+      "reachable_callback_occurrences": [
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 17148,
+          "opcode": 137,
+          "subroutine": 31,
+          "time": 0
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4345376,
+          "callback_confidence": "observed",
+          "callback_index": 15,
+          "callback_index_dynamic": false,
+          "callback_name": "spawn_screen_effect_type_20",
+          "offset": 17460,
+          "opcode": 136,
+          "subroutine": 31,
+          "time": 160
+        },
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 19324,
+          "opcode": 137,
+          "subroutine": 34,
+          "time": 0
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4345376,
+          "callback_confidence": "observed",
+          "callback_index": 15,
+          "callback_index_dynamic": false,
+          "callback_name": "spawn_screen_effect_type_20",
+          "offset": 19708,
+          "opcode": 136,
+          "subroutine": 34,
+          "time": 160
+        },
+        {
+          "action": "clear_per_frame",
+          "argument_1": 0,
+          "callback_index": -1,
+          "callback_index_dynamic": false,
+          "offset": 21700,
+          "opcode": 137,
+          "subroutine": 38,
+          "time": 0
+        },
+        {
+          "action": "invoke",
+          "argument_1": 0,
+          "callback_address": 4345376,
+          "callback_confidence": "observed",
+          "callback_index": 15,
+          "callback_index_dynamic": false,
+          "callback_name": "spawn_screen_effect_type_20",
+          "offset": 22068,
+          "opcode": 136,
+          "subroutine": 38,
+          "time": 160
+        },
+        {
+          "action": "invoke",
+          "argument_1": 4,
+          "callback_address": 4345744,
+          "callback_confidence": "observed",
+          "callback_index": 18,
+          "callback_index_dynamic": false,
+          "callback_name": "set_global_time_scale_reciprocal",
+          "offset": 23620,
+          "opcode": 136,
+          "subroutine": 44,
+          "time": 0
+        },
+        {
+          "action": "invoke",
+          "argument_1": 1,
+          "callback_address": 4345744,
+          "callback_confidence": "observed",
+          "callback_index": 18,
+          "callback_index_dynamic": false,
+          "callback_name": "set_global_time_scale_reciprocal",
+          "offset": 24600,
+          "opcode": 136,
+          "subroutine": 44,
+          "time": 70
+        }
+      ],
+      "reachable_spell_occurrence_count": 11,
+      "reachable_spell_occurrences": [
+        {
+          "base_score": 30000000,
+          "component_edges": [
+            {
+              "kind": "child_spawn",
+              "source_offset": 11028,
+              "source_subroutine": 19,
+              "target_subroutine": 23
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 12412,
+              "source_subroutine": 23,
+              "target_subroutine": 22
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 12432,
+              "source_subroutine": 23,
+              "target_subroutine": 20
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 12452,
+              "source_subroutine": 23,
+              "target_subroutine": 21
+            }
+          ],
+          "component_subroutines": [
+            19,
+            20,
+            21,
+            22,
+            23
+          ],
+          "description_1": "天地よりさらに規模を広げて。",
+          "description_2": "まぁ壺の中だけど。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 4,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 0
+          },
+          "field_00": 0,
+          "name": "薬符「壺中の大銀河」",
+          "offset": 9416,
+          "owner": "八意永琳",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 9184,
+              "source_subroutine": 19,
+              "target_subroutine": 24
+            },
+            {
+              "kind": "enemy_end",
+              "source_offset": 9220,
+              "source_subroutine": 19,
+              "target_subroutine": 24
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 9320,
+              "source_subroutine": 19,
+              "target_subroutine": 24
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 10424,
+              "source_subroutine": 19,
+              "target_subroutine": 24
+            },
+            {
+              "kind": "enemy_end",
+              "source_offset": 10460,
+              "source_subroutine": 19,
+              "target_subroutine": 25
+            }
+          ],
+          "spell_id": 147,
+          "subroutine": 19,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 57,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 19
+            },
+            {
+              "eligible_instruction_count": 11,
+              "feature_counts": {
+                "bullet_emit": 3,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 20
+            },
+            {
+              "eligible_instruction_count": 8,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 21
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 22
+            },
+            {
+              "eligible_instruction_count": 26,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 23
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 30000000,
+          "component_edges": [
+            {
+              "kind": "child_spawn",
+              "source_offset": 28708,
+              "source_subroutine": 50,
+              "target_subroutine": 51
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 28848,
+              "source_subroutine": 50,
+              "target_subroutine": 51
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 29500,
+              "source_subroutine": 51,
+              "target_subroutine": 52
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 29520,
+              "source_subroutine": 51,
+              "target_subroutine": 53
+            }
+          ],
+          "component_subroutines": [
+            50,
+            51,
+            52,
+            53
+          ],
+          "description_1": "輝夜が出した難題の一つ。",
+          "description_2": "玉の前に龍は居たんですかねぇ。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 5,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 5,
+            "transform_define": 1
+          },
+          "field_00": 0,
+          "name": "難題「龍の頸の玉  -五色の弾丸-」",
+          "offset": 27580,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 27384,
+              "source_subroutine": 50,
+              "target_subroutine": 31
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 27484,
+              "source_subroutine": 50,
+              "target_subroutine": 31
+            }
+          ],
+          "spell_id": 151,
+          "subroutine": 50,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 29,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 50
+            },
+            {
+              "eligible_instruction_count": 14,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 51
+            },
+            {
+              "eligible_instruction_count": 41,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 5,
+                "transform_define": 0
+              },
+              "subroutine": 52
+            },
+            {
+              "eligible_instruction_count": 43,
+              "feature_counts": {
+                "bullet_emit": 5,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 1
+              },
+              "subroutine": 53
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 30000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 33332,
+              "source_subroutine": 55,
+              "target_subroutine": 58
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 33352,
+              "source_subroutine": 55,
+              "target_subroutine": 59
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 33372,
+              "source_subroutine": 55,
+              "target_subroutine": 60
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 33392,
+              "source_subroutine": 55,
+              "target_subroutine": 56
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 33548,
+              "source_subroutine": 55,
+              "target_subroutine": 56
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 33984,
+              "source_subroutine": 56,
+              "target_subroutine": 57
+            }
+          ],
+          "component_subroutines": [
+            55,
+            56,
+            57,
+            58,
+            59,
+            60
+          ],
+          "description_1": "輝夜が出した難題の一つ。",
+          "description_2": "最も地味なお宝だ……。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 2,
+            "transform_define": 4
+          },
+          "field_00": 0,
+          "name": "難題「仏の御石の鉢  -砕けぬ意思-」",
+          "offset": 32264,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 32068,
+              "source_subroutine": 55,
+              "target_subroutine": 34
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 32168,
+              "source_subroutine": 55,
+              "target_subroutine": 34
+            }
+          ],
+          "spell_id": 155,
+          "subroutine": 55,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 34,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 55
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 56
+            },
+            {
+              "eligible_instruction_count": 10,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 2,
+                "transform_define": 0
+              },
+              "subroutine": 57
+            },
+            {
+              "eligible_instruction_count": 38,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 4
+              },
+              "subroutine": 58
+            },
+            {
+              "eligible_instruction_count": 5,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 59
+            },
+            {
+              "eligible_instruction_count": 2,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 60
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 30000000,
+          "component_edges": [
+            {
+              "kind": "aux_vm",
+              "source_offset": 37556,
+              "source_subroutine": 61,
+              "target_subroutine": 62
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 37576,
+              "source_subroutine": 61,
+              "target_subroutine": 63
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 37636,
+              "source_subroutine": 61,
+              "target_subroutine": 64
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 37712,
+              "source_subroutine": 61,
+              "target_subroutine": 64
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 37788,
+              "source_subroutine": 61,
+              "target_subroutine": 64
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 37864,
+              "source_subroutine": 61,
+              "target_subroutine": 64
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 39608,
+              "source_subroutine": 64,
+              "target_subroutine": 65
+            }
+          ],
+          "component_subroutines": [
+            61,
+            62,
+            63,
+            64,
+            65
+          ],
+          "description_1": "輝夜が出した難題の一つ。",
+          "description_2": "皮衣自体は燃えてないんですよね。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 4,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 1,
+            "transform_define": 8
+          },
+          "field_00": 0,
+          "name": "難題「火鼠の皮衣  -焦れぬ心-」",
+          "offset": 36528,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 36332,
+              "source_subroutine": 61,
+              "target_subroutine": 38
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 36432,
+              "source_subroutine": 61,
+              "target_subroutine": 38
+            }
+          ],
+          "spell_id": 159,
+          "subroutine": 61,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 31,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 61
+            },
+            {
+              "eligible_instruction_count": 20,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 4
+              },
+              "subroutine": 62
+            },
+            {
+              "eligible_instruction_count": 20,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 4
+              },
+              "subroutine": 63
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 64
+            },
+            {
+              "eligible_instruction_count": 6,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 1,
+                "transform_define": 0
+              },
+              "subroutine": 65
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 30000000,
+          "component_edges": [
+            {
+              "kind": "call",
+              "source_offset": 41456,
+              "source_subroutine": 67,
+              "target_subroutine": 43
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 41484,
+              "source_subroutine": 67,
+              "target_subroutine": 68
+            },
+            {
+              "kind": "call",
+              "source_offset": 41944,
+              "source_subroutine": 68,
+              "target_subroutine": 69
+            }
+          ],
+          "component_subroutines": [
+            43,
+            67,
+            68,
+            69
+          ],
+          "description_1": "輝夜が出した難題の一つ。",
+          "description_2": "一番地味で現実的な問題に見える。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 2,
+            "transform_define": 2
+          },
+          "field_00": 0,
+          "name": "難題「燕の子安貝  -永命線-」",
+          "offset": 40436,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 40144,
+              "source_subroutine": 67,
+              "target_subroutine": 11
+            },
+            {
+              "kind": "enemy_end",
+              "source_offset": 40240,
+              "source_subroutine": 67,
+              "target_subroutine": 70
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 40340,
+              "source_subroutine": 67,
+              "target_subroutine": 70
+            }
+          ],
+          "spell_id": 163,
+          "subroutine": 67,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 43
+            },
+            {
+              "eligible_instruction_count": 28,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 67
+            },
+            {
+              "eligible_instruction_count": 24,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 2
+              },
+              "subroutine": 68
+            },
+            {
+              "eligible_instruction_count": 29,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 2,
+                "transform_define": 0
+              },
+              "subroutine": 69
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 30000000,
+          "component_edges": [
+            {
+              "kind": "call",
+              "source_offset": 44688,
+              "source_subroutine": 71,
+              "target_subroutine": 43
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 44972,
+              "source_subroutine": 71,
+              "target_subroutine": 72
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 45240,
+              "source_subroutine": 71,
+              "target_subroutine": 72
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 45508,
+              "source_subroutine": 71,
+              "target_subroutine": 72
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 45776,
+              "source_subroutine": 71,
+              "target_subroutine": 72
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 46044,
+              "source_subroutine": 71,
+              "target_subroutine": 72
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 46312,
+              "source_subroutine": 71,
+              "target_subroutine": 72
+            },
+            {
+              "kind": "child_spawn",
+              "source_offset": 46600,
+              "source_subroutine": 71,
+              "target_subroutine": 72
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 46656,
+              "source_subroutine": 71,
+              "target_subroutine": 74
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 47508,
+              "source_subroutine": 72,
+              "target_subroutine": 75
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 47528,
+              "source_subroutine": 72,
+              "target_subroutine": 76
+            }
+          ],
+          "component_subroutines": [
+            43,
+            71,
+            72,
+            74,
+            75,
+            76
+          ],
+          "description_1": "輝夜が出した難題の一つ？",
+          "description_2": "輝夜さん、それは間違ってますよ。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 26,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 3
+          },
+          "field_00": 0,
+          "name": "難題「蓬莱の弾の枝  -虹色の弾幕-」",
+          "offset": 43652,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "enemy_end",
+              "source_offset": 43456,
+              "source_subroutine": 71,
+              "target_subroutine": 11
+            },
+            {
+              "kind": "timeout_phase",
+              "source_offset": 43556,
+              "source_subroutine": 71,
+              "target_subroutine": 31
+            }
+          ],
+          "spell_id": 167,
+          "subroutine": 71,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 43
+            },
+            {
+              "eligible_instruction_count": 113,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 71
+            },
+            {
+              "eligible_instruction_count": 35,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 3
+              },
+              "subroutine": 72
+            },
+            {
+              "eligible_instruction_count": 84,
+              "feature_counts": {
+                "bullet_emit": 21,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 74
+            },
+            {
+              "eligible_instruction_count": 25,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 75
+            },
+            {
+              "eligible_instruction_count": 26,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 76
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 33000000,
+          "component_edges": [
+            {
+              "kind": "call",
+              "source_offset": 56292,
+              "source_subroutine": 77,
+              "target_subroutine": 43
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 56308,
+              "source_subroutine": 77,
+              "target_subroutine": 78
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 56328,
+              "source_subroutine": 77,
+              "target_subroutine": 79
+            }
+          ],
+          "component_subroutines": [
+            43,
+            77,
+            78,
+            79
+          ],
+          "description_1": "永遠を操る輝夜に対し、永夜の術は危険すぎた。",
+          "description_2": " ",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 1
+          },
+          "field_00": 0,
+          "name": "「永夜返し  -初月-」",
+          "offset": 55272,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 55176,
+              "source_subroutine": 77,
+              "target_subroutine": 12
+            }
+          ],
+          "spell_id": 171,
+          "subroutine": 77,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 43
+            },
+            {
+              "eligible_instruction_count": 19,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 77
+            },
+            {
+              "eligible_instruction_count": 6,
+              "feature_counts": {
+                "bullet_emit": 1,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 78
+            },
+            {
+              "eligible_instruction_count": 9,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 1
+              },
+              "subroutine": 79
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 33000000,
+          "component_edges": [
+            {
+              "kind": "call",
+              "source_offset": 58120,
+              "source_subroutine": 80,
+              "target_subroutine": 43
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 58136,
+              "source_subroutine": 80,
+              "target_subroutine": 81
+            }
+          ],
+          "component_subroutines": [
+            43,
+            80,
+            81
+          ],
+          "description_1": "輝夜の夜は始まったばかり。",
+          "description_2": "今宵は短い夜になりそうだ。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 3,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 2
+          },
+          "field_00": 0,
+          "name": "「永夜返し  -子の刻-」",
+          "offset": 57100,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 57004,
+              "source_subroutine": 80,
+              "target_subroutine": 12
+            }
+          ],
+          "spell_id": 175,
+          "subroutine": 80,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 43
+            },
+            {
+              "eligible_instruction_count": 18,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 80
+            },
+            {
+              "eligible_instruction_count": 15,
+              "feature_counts": {
+                "bullet_emit": 3,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 2
+              },
+              "subroutine": 81
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 33000000,
+          "component_edges": [
+            {
+              "kind": "call",
+              "source_offset": 60056,
+              "source_subroutine": 82,
+              "target_subroutine": 43
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 60072,
+              "source_subroutine": 82,
+              "target_subroutine": 83
+            }
+          ],
+          "component_subroutines": [
+            43,
+            82,
+            83
+          ],
+          "description_1": "草木も眠る何とやら。",
+          "description_2": "そろそろ眠らせて欲しい。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 2,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 2
+          },
+          "field_00": 0,
+          "name": "「永夜返し  -丑の刻-」",
+          "offset": 59036,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 58940,
+              "source_subroutine": 82,
+              "target_subroutine": 12
+            }
+          ],
+          "spell_id": 179,
+          "subroutine": 82,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 43
+            },
+            {
+              "eligible_instruction_count": 18,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 82
+            },
+            {
+              "eligible_instruction_count": 16,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 2
+              },
+              "subroutine": 83
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 33000000,
+          "component_edges": [
+            {
+              "kind": "call",
+              "source_offset": 61872,
+              "source_subroutine": 84,
+              "target_subroutine": 43
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 61888,
+              "source_subroutine": 84,
+              "target_subroutine": 85
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 61908,
+              "source_subroutine": 84,
+              "target_subroutine": 86
+            }
+          ],
+          "component_subroutines": [
+            43,
+            84,
+            85,
+            86
+          ],
+          "description_1": "３時過ぎ、そろそろ寝ないと次の日の仕事に響く時間。",
+          "description_2": " ",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 4,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 4
+          },
+          "field_00": 0,
+          "name": "「永夜返し  -寅の刻-」",
+          "offset": 60852,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 60756,
+              "source_subroutine": 84,
+              "target_subroutine": 12
+            }
+          ],
+          "spell_id": 183,
+          "subroutine": 84,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 43
+            },
+            {
+              "eligible_instruction_count": 19,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 84
+            },
+            {
+              "eligible_instruction_count": 16,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 2
+              },
+              "subroutine": 85
+            },
+            {
+              "eligible_instruction_count": 10,
+              "feature_counts": {
+                "bullet_emit": 2,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 2
+              },
+              "subroutine": 86
+            }
+          ],
+          "time": 0
+        },
+        {
+          "base_score": 33000000,
+          "component_edges": [
+            {
+              "kind": "call",
+              "source_offset": 64068,
+              "source_subroutine": 87,
+              "target_subroutine": 43
+            },
+            {
+              "kind": "aux_vm",
+              "source_offset": 64084,
+              "source_subroutine": 87,
+              "target_subroutine": 88
+            }
+          ],
+          "component_subroutines": [
+            43,
+            87,
+            88
+          ],
+          "description_1": "輝夜の夜はあっという間に明け、朝になった。",
+          "description_2": "すごいよ、輝夜さん。",
+          "difficulty_mask": 241,
+          "feature_counts": {
+            "bullet_emit": 12,
+            "callback_install": 0,
+            "callback_invoke": 0,
+            "laser_spawn": 0,
+            "transform_define": 5
+          },
+          "field_00": 0,
+          "name": "「永夜返し  -朝靄-」",
+          "offset": 63048,
+          "owner": "蓬莱山輝夜",
+          "phase_transition_edges": [
+            {
+              "kind": "timeout_phase",
+              "source_offset": 62952,
+              "source_subroutine": 87,
+              "target_subroutine": 12
+            }
+          ],
+          "spell_id": 187,
+          "subroutine": 87,
+          "subroutine_features": [
+            {
+              "eligible_instruction_count": 4,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 43
+            },
+            {
+              "eligible_instruction_count": 18,
+              "feature_counts": {
+                "bullet_emit": 0,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 0
+              },
+              "subroutine": 87
+            },
+            {
+              "eligible_instruction_count": 46,
+              "feature_counts": {
+                "bullet_emit": 12,
+                "callback_install": 0,
+                "callback_invoke": 0,
+                "laser_spawn": 0,
+                "transform_define": 5
+              },
+              "subroutine": 88
+            }
+          ],
+          "time": 0
+        }
+      ],
+      "reachable_subroutine_count": 84,
+      "reachable_subroutines": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88
+      ],
+      "reachable_unique_spell_ids": [
+        147,
+        151,
+        155,
+        159,
+        163,
+        167,
+        171,
+        175,
+        179,
+        183,
+        187
+      ],
+      "subroutine_count": 89,
+      "timeline_count": 1,
+      "timeline_root_subroutines": [
+        0,
+        7,
+        14,
+        26,
+        42,
+        46,
+        47,
+        48,
+        49
+      ],
+      "unresolved_dynamic_subroutine_edges": []
+    }
+  ],
+  "status": "analysis_target_not_yet_solved",
+  "team": "Sakuya/Remilia"
+}

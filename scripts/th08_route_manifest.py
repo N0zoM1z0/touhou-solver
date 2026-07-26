@@ -91,6 +91,30 @@ PROFILES = (
         stages=(StageTarget(8, "Extra / Mokou", "ecldata8.ecl"),),
         branch_note="Extra uses its dedicated ECL; its spell records carry mask 0xFF.",
     ),
+    RouteProfile(
+        name="sakuya_remilia_easy_final_b",
+        difficulty="Easy",
+        difficulty_index=0,
+        active_difficulty_mask=0x01,
+        stages=COMMON_STAGES + (StageTarget(7, "Final B / Kaguya", "ecldata7.ecl"),),
+        branch_note="Original Game Start Easy route 2 ending at Final B.",
+    ),
+    RouteProfile(
+        name="sakuya_remilia_normal_final_b",
+        difficulty="Normal",
+        difficulty_index=1,
+        active_difficulty_mask=0x02,
+        stages=COMMON_STAGES + (StageTarget(7, "Final B / Kaguya", "ecldata7.ecl"),),
+        branch_note="Original Game Start Normal route 2 ending at Final B.",
+    ),
+    RouteProfile(
+        name="sakuya_remilia_hard_final_b",
+        difficulty="Hard",
+        difficulty_index=2,
+        active_difficulty_mask=0x04,
+        stages=COMMON_STAGES + (StageTarget(7, "Final B / Kaguya", "ecldata7.ecl"),),
+        branch_note="Original Game Start Hard route 2 ending at Final B.",
+    ),
 )
 
 

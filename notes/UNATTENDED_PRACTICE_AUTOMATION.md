@@ -66,6 +66,14 @@ Continuous same-build regression:
 releases every injected gameplay key, and terminates only the verified TH08
 image. `--leave-game-running` disables the final game termination.
 
+The separate `run_th08_full_route_agent.bat` accepts
+`--difficulty easy|normal|hard|lunatic`. Its stricter
+`--leave-game-running` handoff is honored only after an accepted
+`route_complete`: it releases all injected keys, closes the agent, sends no
+result/save-menu input, and leaves the verified game process available for a
+manual replay save. Failure, timeout, or incomplete-route cleanup still
+terminates the verified target.
+
 The wrapper uses the Windows Store Python alias under `%LOCALAPPDATA%`, whose
 installed environment contains `numpy`. The IDA 9.3 Python used by the patch
 BAT does not contain the planner dependencies and is intentionally limited to

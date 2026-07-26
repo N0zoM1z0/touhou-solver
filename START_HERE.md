@@ -29,8 +29,9 @@ Python/C++ parity for the same recurrence is not physical correctness.
 - Algorithmic parent:
   `7860a16 Fix local input-pipeline certification`
 - The current HEAD should be the native local implementation/Hard Stage-1
-  checkpoint immediately above that parent. If not, inspect the intervening
-  diff before trusting this file.
+  checkpoint plus the selectable full-route handoff checkpoint immediately
+  above that parent. If not, inspect the intervening diff before trusting
+  this file.
 - The live local implementation defaults to persistent pool-read
   destinations, native shared hazard queries, native quantized no-item beam
   reduction, and packed native bullet decode above 16 active slots. Python
@@ -44,7 +45,12 @@ Python/C++ parity for the same recurrence is not physical correctness.
   and zero deadline misses. It also established CE-0124: the first
   post-discontinuity native active input need not equal reset held desired.
   Explicit active/held/pending roots remain shadow-only.
-- Linux and Windows quick suites pass `556/556` in `4.764/6.993 s`. The
+- The original-game full-route supervisor accepts
+  `--difficulty easy|normal|hard|lunatic`. `--leave-game-running` applies
+  only after accepted `route_complete`: it releases injected keys, closes the
+  agent, sends no result/save choice, and leaves the identity-verified game
+  process running for a manual replay save. Failures still clean up.
+- Linux and Windows quick suites pass `560/560` in `4.840/7.848 s`. The
   bounded formal audit retained only the expected legacy/no-write
   counterexamples at seeds `20002/20003`; the quick belief workspace had zero
   scalar/native, upper, candidate, certification, or bound failures.
@@ -422,13 +428,19 @@ Practice stage from WSL, always non-TTY:
   --stage 4a --status-seconds 15 --stall-timeout 120
 ```
 
-Continuous Lunatic Route-2:
+Continuous Hard Route-2, retaining the game after accepted completion so the
+replay can be saved manually:
 
 ```bash
 /mnt/c/Windows/System32/cmd.exe /d /c call \
   '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_full_route_agent.bat' \
+  --difficulty hard --leave-game-running \
   --status-seconds 30 --stall-timeout 120
 ```
+
+Omit `--leave-game-running` for the old automatic identity-scoped process
+cleanup. The switch never sends a save/no-save selection. It cannot preserve
+a failed or incomplete attempt.
 
 Selectable Sakuya/Remilia Route-2 practice stages are
 `1 2 3 4a 5 6b`; 4B and 6A are route-locked. Do not patch the route mask to

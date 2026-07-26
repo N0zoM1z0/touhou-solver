@@ -3555,3 +3555,26 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   retained only expected legacy/no-write mismatches at seeds `20002/20003`.
   The quick belief workspace completed 16 cases with zero scalar/native,
   upper, candidate, certification, or bound failures.
+
+## 2026-07-26: Selectable Full Route And Manual Replay-Save Handoff
+
+- Added Easy, Normal, and Hard Sakuya/Remilia Route-2 Final-B manifests with
+  explicit ECL difficulty masks `0x01`, `0x02`, and `0x04`. The retained
+  reachable spell counts are `30`, `36`, and `37`; the existing Lunatic
+  manifest remains `37`.
+- Generalized the full-route supervisor from a fixed Lunatic cursor/index to
+  `--difficulty easy|normal|hard|lunatic`. Native title cursor validation and
+  the live agent independently validate the selected menu difficulty and the
+  later gameplay difficulty index.
+- Replaced the falsely Lunatic-specific new dossier output with
+  `th08-route-run-dossier-v3`. Difficulty label/index, mask, spell inventory,
+  Markdown title, and comparison baseline now come from the selected route
+  manifest. Historical Lunatic v2 dossiers remain accepted as baselines.
+- Added `--leave-game-running`. **Observed in tests, not yet physically
+  exercised:** only accepted `route_complete` plus explicit opt-in retains the
+  game. That branch releases injected keys, closes the hotkey agent, records
+  the handoff, and sends no result/save choice. Failure, timeout, and
+  incomplete-route paths retain identity-scoped cleanup.
+- Focused full-route, route-manifest, and dossier suites pass `4/4`, `5/5`,
+  and `19/19`. Linux and Windows complete quick suites pass `560/560` in
+  `4.840/7.848 s`. No physical full-route run had started at this checkpoint.

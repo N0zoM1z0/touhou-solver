@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Launch and retain one continuous original-TH08 Lunatic Route-2 run."""
+"""Launch and retain one continuous original-TH08 Route-2 run."""
 
 from __future__ import annotations
 
@@ -17,7 +17,11 @@ from pathlib import Path
 from analysis.th08_fullrun_regression import load_and_validate
 from analysis.th08_run_dossier import main as build_run_dossier
 from th08_agent_hotkey import AgentHotkey
-from th08_automation.practice_menu import MenuTap
+from th08_automation.practice_menu import (
+    MenuTap,
+    PracticeDifficulty,
+    parse_practice_difficulty,
+)
 from th08_practice_supervisor import (
     DEFAULT_GAME_DIR,
     DEFAULT_LAUNCH_BAT,
@@ -98,21 +102,37 @@ def confirm_title_mode(
     return tap
 
 
-def validate_team_selection(api: Win32, pid: int) -> dict[str, int]:
+def validate_team_selection(
+    api: Win32,
+    pid: int,
+    *,
+    difficulty: PracticeDifficulty,
+) -> dict[str, int]:
     state = _read_title_menu_state(api, pid)
     if (
         state["mode"] != TITLE_MODE_GAME_TEAM
         or state["substate"] != 1
         or state["cursor"] != 2
-        or state["difficulty_cursor"] != 3
+        or state["difficulty_cursor"] != difficulty.menu_index
     ):
         raise RuntimeError(
             "native full-route selection mismatch before final confirm: "
             f"mode={state['mode']} substate={state['substate']} "
             f"cursor={state['cursor']} "
-            f"difficulty_cursor={state['difficulty_cursor']}"
+            f"difficulty_cursor={state['difficulty_cursor']} "
+            f"expected_difficulty_cursor={difficulty.menu_index}"
         )
     return state
+
+
+def retain_game_after_trial(
+    *,
+    accepted: bool,
+    leave_game_running: bool,
+) -> bool:
+    """Only an explicitly requested accepted route may survive cleanup."""
+
+    return accepted and leave_game_running
 
 
 def _terminal_scene_record(trace: Path) -> dict[str, object]:
@@ -304,9 +324,14 @@ def compare_full_dossiers(
     }
 
 
-def _previous_full_dossier(current: Path) -> Path | None:
+def _previous_full_dossier(
+    current: Path,
+    difficulty_key: str = "lunatic",
+) -> Path | None:
     candidates = sorted(
-        RUNTIME_REPORT_DIR.glob("lunatic_route2_fullrun*.dossier.json"),
+        RUNTIME_REPORT_DIR.glob(
+            f"{difficulty_key}_route2_fullrun*.dossier.json"
+        ),
         key=lambda path: path.stat().st_mtime_ns,
         reverse=True,
     )
@@ -320,7 +345,11 @@ def _previous_full_dossier(current: Path) -> Path | None:
         except (OSError, KeyError, IndexError, json.JSONDecodeError):
             continue
         if (
-            dossier.get("schema") == "th08-lunatic-run-dossier-v2"
+            dossier.get("schema")
+            in {
+                "th08-lunatic-run-dossier-v2",
+                "th08-route-run-dossier-v3",
+            }
             and verification.get("passed")
             and summary
             and summary.get("termination_reason") == "route_complete"
@@ -377,6 +406,8 @@ def materialize_artifacts(
     run_id: str,
     trace: Path,
     completion: dict[str, object],
+    difficulty_key: str = "lunatic",
+    difficulty_index: int = 3,
 ) -> dict[str, object]:
     prefix = RUNTIME_REPORT_DIR / run_id
     dossier_json = prefix.with_suffix(".dossier.json")
@@ -390,6 +421,13 @@ def materialize_artifacts(
             run_id,
             "--trace",
             str(trace),
+            "--manifest",
+            str(
+                ROOT
+                / "artifacts"
+                / "route_manifests"
+                / f"sakuya_remilia_{difficulty_key}_final_b.json"
+            ),
             "--json-output",
             str(dossier_json),
             "--markdown-output",
@@ -405,6 +443,17 @@ def materialize_artifacts(
         ]
     )
     dossier = json.loads(dossier_json.read_text(encoding="utf-8"))
+    acceptance_target = dossier["acceptance_target"]
+    if (
+        int(acceptance_target["difficulty_index"]) != difficulty_index
+        or str(acceptance_target["difficulty"]).lower() != difficulty_key
+    ):
+        raise RuntimeError(
+            "full-route dossier difficulty mismatch: "
+            f"expected={difficulty_key}/{difficulty_index} "
+            f"observed={acceptance_target['difficulty']}/"
+            f"{acceptance_target['difficulty_index']}"
+        )
     observed_stages = tuple(
         int(stage["stage_route_index"]) for stage in dossier["stages"]
     )
@@ -423,7 +472,7 @@ def materialize_artifacts(
     write_compact_full_route_summary(path=summary_json, dossier=dossier)
     regression_summary = asdict(load_and_validate(regressions_json))
 
-    baseline = _previous_full_dossier(dossier_json)
+    baseline = _previous_full_dossier(dossier_json, difficulty_key)
     if baseline is not None:
         comparison_json.write_text(
             json.dumps(
@@ -477,7 +526,10 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         raise RuntimeError("verified TH08 is already running")
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_id = f"lunatic_route2_fullrun_unattended_{timestamp}"
+    difficulty = args.difficulty
+    run_id = (
+        f"{difficulty.key}_route2_fullrun_unattended_{timestamp}"
+    )
     trace = RUNTIME_REPORT_DIR / f"{run_id}.jsonl"
     session_path = RUNTIME_REPORT_DIR / f"{run_id}.session.json"
     launch_log = RUNTIME_REPORT_DIR / f"{run_id}.launch.log"
@@ -486,8 +538,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "run_id": run_id,
         "game_dir": str(game_dir),
         "launch_bat": str(launch_bat),
-        "difficulty": "Lunatic",
-        "difficulty_index": 3,
+        "difficulty": difficulty.label,
+        "difficulty_key": difficulty.key,
+        "difficulty_index": difficulty.menu_index,
         "team": "Sakuya/Remilia",
         "route_id": 2,
         "expected_stage_sequence": list(EXPECTED_ROUTE_STAGES),
@@ -496,6 +549,7 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "trace_transform_runtime": False,
         "viability_audit": False,
         "agent_duration_seconds": args.agent_duration,
+        "leave_game_running": args.leave_game_running,
         "started_at": datetime.now().astimezone().isoformat(),
     }
     batch_process: subprocess.Popen[bytes] | None = None
@@ -505,6 +559,7 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
     try:
         session["caps_lock_changed"] = ensure_caps_lock_enabled(api)
         agent = AgentHotkey(
+            expected_difficulty=difficulty.menu_index,
             expected_stage=0,
             terminal_stage=None,
             safety_value_horizon=0,
@@ -571,20 +626,20 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             api,
             pid,
             mode=TITLE_MODE_GAME_DIFFICULTY,
-            target=3,
+            target=difficulty.menu_index,
             option_count=4,
-            purpose="select Lunatic",
+            purpose=f"select {difficulty.label}",
             hold_ms=args.tap_hold_ms,
             tap_gap_ms=args.tap_gap_ms,
             timeout_seconds=transition_timeout,
         )
         retain(taps)
-        capture("lunatic_selected")
+        capture(f"{difficulty.key}_selected")
         tap = confirm_title_mode(
             api,
             pid,
             next_mode=TITLE_MODE_GAME_TEAM,
-            purpose="accept native-verified Lunatic",
+            purpose=f"accept native-verified {difficulty.label}",
             hold_ms=args.tap_hold_ms,
             screen_settle_ms=args.screen_settle_ms,
             timeout_seconds=transition_timeout,
@@ -605,7 +660,11 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         )
         retain(taps)
         capture("team_selected")
-        session["menu_native_state"] = validate_team_selection(api, pid)
+        session["menu_native_state"] = validate_team_selection(
+            api,
+            pid,
+            difficulty=difficulty,
+        )
 
         agent.arm(output_path=trace)
         session["agent_armed_at"] = datetime.now().astimezone().isoformat()
@@ -630,10 +689,27 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             )
         completion = _terminal_scene_record(trace)
         session["completion_scene"] = completion
-        session["game_terminated_after_trial"] = terminate_exact_target(
-            api,
-            expected_exe,
-        )
+        if retain_game_after_trial(
+            accepted=accepted,
+            leave_game_running=args.leave_game_running,
+        ):
+            release_injected_keys(api)
+            agent.close()
+            agent = None
+            session["game_terminated_after_trial"] = False
+            session["game_left_running_after_trial"] = True
+            session["input_released_before_handoff"] = True
+            print(
+                "GAME LEFT RUNNING: automation stopped and all injected "
+                "keys were released; no post-route save choice or process "
+                "termination was issued.",
+                flush=True,
+            )
+        else:
+            session["game_terminated_after_trial"] = (
+                terminate_exact_target(api, expected_exe)
+            )
+            session["game_left_running_after_trial"] = False
         session["status"] = "completed_pending_artifacts"
         session["finished_at"] = datetime.now().astimezone().isoformat()
         _write_session(session_path, session)
@@ -641,6 +717,8 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             run_id=run_id,
             trace=trace,
             completion=completion,
+            difficulty_key=difficulty.key,
+            difficulty_index=difficulty.menu_index,
         )
         session["status"] = "completed"
         session["finished_at"] = datetime.now().astimezone().isoformat()
@@ -669,7 +747,11 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             release_injected_keys(api)
         except OSError:
             pass
-        terminate_exact_target(api, expected_exe)
+        if not retain_game_after_trial(
+            accepted=accepted,
+            leave_game_running=args.leave_game_running,
+        ):
+            terminate_exact_target(api, expected_exe)
         _stop_batch_process(batch_process)
         if batch_log is not None:
             batch_log.close()
@@ -701,6 +783,21 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--stall-timeout", type=float, default=120.0)
     parser.add_argument("--status-seconds", type=float, default=30.0)
+    parser.add_argument(
+        "--difficulty",
+        type=parse_practice_difficulty,
+        default=parse_practice_difficulty("lunatic"),
+        metavar="{easy,normal,hard,lunatic}",
+        help="original Game Start difficulty; defaults to lunatic",
+    )
+    parser.add_argument(
+        "--leave-game-running",
+        action="store_true",
+        help=(
+            "after accepted route completion, release injected keys but do "
+            "not choose a save option or terminate the verified game"
+        ),
+    )
     parser.add_argument(
         "--refuse-existing",
         action="store_false",

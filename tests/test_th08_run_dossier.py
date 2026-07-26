@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -20,6 +21,7 @@ from analysis.th08_run_dossier import (
     _robust_viability_summary,
     _spell_attribution,
     _viability_action_set_empty,
+    render_markdown,
 )
 
 
@@ -48,6 +50,24 @@ def _row(
 
 
 class Th08RunDossierTests(unittest.TestCase):
+    def test_full_run_markdown_uses_manifest_difficulty(self) -> None:
+        path = (
+            Path(__file__).resolve().parents[1]
+            / "artifacts"
+            / "runtime_reports"
+            / "lunatic_route2_fullrun_unattended_20260725_083917.dossier.json"
+        )
+        dossier = json.loads(path.read_text(encoding="utf-8"))
+        dossier["acceptance_target"]["difficulty"] = "Hard"
+        dossier["acceptance_target"]["difficulty_index"] = 2
+
+        rendered = render_markdown(dossier)
+
+        self.assertIn("# TH08 Hard Full-Run Review:", rendered)
+        self.assertIn("Sakuya/Remilia, Hard, Final B", rendered)
+        self.assertIn("reachable Hard route inventory", rendered)
+        self.assertNotIn("Lunatic", rendered)
+
     def test_explicit_missing_enemy_snapshot_does_not_abort_dossier(
         self,
     ) -> None:

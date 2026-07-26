@@ -19,7 +19,6 @@ from analysis.th08_trial_report import STAGE_ROUTE_LABELS
 
 
 ROOT = Path(__file__).resolve().parents[2]
-ACTIVE_DIFFICULTY_MASK = 0x08
 PHASE_COUNTER_JUMP_MIN = 1750
 PHASE_COUNTER_JUMP_MAX = 1850
 DEATH_WINDOW_FRAMES = 240
@@ -1521,6 +1520,7 @@ def _spell_inventory(
     *,
     spell_schema_complete: bool,
 ) -> dict[int, dict[str, object]]:
+    active_difficulty_mask = int(manifest["active_difficulty_mask"])
     attributed_hits = Counter(
         (
             int(death["stage_route_index"]),
@@ -1543,7 +1543,7 @@ def _spell_inventory(
                 if (
                     instruction.opcode == 0x94
                     and instruction.difficulty_mask
-                    & ACTIVE_DIFFICULTY_MASK
+                    & active_difficulty_mask
                 ):
                     expected_phase_markers.append(
                         {
@@ -1610,6 +1610,8 @@ def build_dossier(
 ) -> dict[str, object]:
     if not decisions:
         raise ValueError("run contains no decisions")
+    difficulty = str(manifest["difficulty"])
+    difficulty_index = int(manifest["difficulty_index"])
     deaths = _death_ledger(decisions)
     phase_markers = _phase_markers(decisions)
     spell_schema_complete = all(
@@ -1746,15 +1748,21 @@ def build_dossier(
         for factor in death["contributing_factors"]
     )
     return {
-        "schema": "th08-lunatic-run-dossier-v2",
+        "schema": "th08-route-run-dossier-v3",
         "run_id": run_id,
         "acceptance_target": {
-            "difficulty": "Lunatic",
-            "difficulty_index": 3,
+            "difficulty": difficulty,
+            "difficulty_index": difficulty_index,
             "route_id": 2,
             "team": "Sakuya/Remilia",
             "ending_branch": "Final B / Kaguya",
             "combat_completion": True,
+        },
+        "route_manifest": {
+            "profile": manifest["profile"],
+            "active_difficulty_mask": int(
+                manifest["active_difficulty_mask"]
+            ),
         },
         "integrity": {
             "raw_trace_bytes": sum(item.size_bytes for item in provenance),
@@ -1850,12 +1858,13 @@ def render_markdown(dossier: dict[str, object]) -> str:
     spell_attribution_resolved = (
         integrity["spell_attribution"] == "resolved_live_spell_state"
     )
+    difficulty = str(dossier["acceptance_target"]["difficulty"])
     lines = [
-        f"# TH08 Lunatic Full-Run Review: {dossier['run_id']}",
+        f"# TH08 {difficulty} Full-Run Review: {dossier['run_id']}",
         "",
         "## Result",
         "",
-        "- Route: Sakuya/Remilia, Lunatic, Final B / Kaguya.",
+        f"- Route: Sakuya/Remilia, {difficulty}, Final B / Kaguya.",
         "- Combat completion: yes; gameplay scene unloaded at frame "
         f"{dossier['completion_probe']['enemy_manager_frame']}.",
         "- Native phase-2 hit edges, including Last-Spell-saveable edges: "
@@ -1883,7 +1892,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
         "",
         "The run is valid for stage-, death-, resource-, projectile-, latency-, "
         "and route-level analysis. Spell names below are the statically "
-        "reachable Lunatic route inventory; unavailable runtime hit counts "
+        f"reachable {difficulty} route inventory; unavailable runtime hit counts "
         "remain explicitly unresolved instead of guessed. The no-life patch "
         "allows post-hit resource resets to repeat, so resource-stock changes "
         "must not be interpreted as Bomb commands.",
@@ -2087,7 +2096,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
         [
             "## Spell Inventory And Runtime Coverage",
             "",
-            "Every spell below is statically reachable for route 2 Lunatic "
+            f"Every spell below is statically reachable for route 2 {difficulty} "
             "Final B. `unresolved` means this run did not persist the live "
             "spell ID; it does not mean the spell was absent.",
             "",
@@ -2195,7 +2204,7 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "the integrated executor and preserve one regression per concrete "
             "failure.",
             "3. Re-run focused Stage 4A and Final B practices before another "
-            "full Lunatic route; compare hit frames, policy age, action-set "
+            f"full {difficulty} route; compare hit frames, policy age, action-set "
             "exhaustion, and cluster recurrence.",
             "4. Add item/Power state and finite Bomb resources only after the "
             "no-Bomb movement policy has passed physical validation.",

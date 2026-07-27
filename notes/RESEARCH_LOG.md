@@ -4106,3 +4106,26 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   quick suite passes `584/584` in `5.395 s`; and `git diff --check` passes.
 - **Design note:**
   `notes/review/CONSOLIDATED_RESEARCH_AND_REFACTOR_ROADMAP_20260727.md`.
+
+## 2026-07-27: Corridor Refactor R0 Characterization Baseline
+
+- **Scope:** Started the behavior-preserving structure track before moving
+  code out of `scripts/corridor_planner.py`. Added a package seam at
+  `scripts/touhou_control/corridor/` without routing production calls through
+  it yet.
+- **Observed behavior baseline:** The deterministic characterization retains
+  float32 clearance samples/sign counts and an array digest; the legacy
+  forward path/gate/reason; robust viable-state and safe-action-mask shapes,
+  counts, and digests; root/path repair labels; fused survival labels; and
+  the twelve imported compatibility names. Wall timings and backend identity
+  are deliberately excluded.
+- **Native ABI baseline:** Added the sorted 43-symbol
+  `native/abi_symbols_v1.txt` manifest. The ABI regression compares every
+  locally available Linux and Windows build/export-tool pair against it.
+- **Authority:** This checkpoint changes no production import, model,
+  recurrence, mask, route ranking, live action, strategy status, native
+  implementation, or C ABI. It adds only characterization, fixtures, and the
+  empty target package seam.
+- **Validation:** The new characterization and ABI tests pass; existing
+  corridor tests pass `26/26`; Python compilation and `git diff --check`
+  pass; and the complete Linux quick suite passes `586/586` in `5.492 s`.

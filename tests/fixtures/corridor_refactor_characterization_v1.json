@@ -1,0 +1,546 @@
+{
+  "canonical_sha256": "2a7b707e9c4e23f225a598e39fb4c050c4e17415fbe905608236994adc29051f",
+  "clearance": {
+    "array_sha256": "6d91c0f082e1b9431ee0e1a06e897149802b85d3d79e14ab85808477d8b476dd",
+    "dtype": "<f4",
+    "selected_samples": [
+      {
+        "clearance": {
+          "float32_bits": "40b66d96",
+          "value": 5.7008771896362305
+        },
+        "column": 0,
+        "frame": 0,
+        "row": 0
+      },
+      {
+        "clearance": {
+          "float32_bits": "c0600000",
+          "value": -3.5
+        },
+        "column": 1,
+        "frame": 0,
+        "row": 1
+      },
+      {
+        "clearance": {
+          "float32_bits": "c0400000",
+          "value": -3.0
+        },
+        "column": 2,
+        "frame": 2,
+        "row": 2
+      },
+      {
+        "clearance": {
+          "float32_bits": "be800000",
+          "value": -0.25
+        },
+        "column": 2,
+        "frame": 4,
+        "row": 3
+      },
+      {
+        "clearance": {
+          "float32_bits": "40200000",
+          "value": 2.5
+        },
+        "column": 3,
+        "frame": 8,
+        "row": 3
+      },
+      {
+        "clearance": {
+          "float32_bits": "4131166a",
+          "value": 11.067972183227539
+        },
+        "column": 4,
+        "frame": 8,
+        "row": 4
+      }
+    ],
+    "shape": [
+      9,
+      5,
+      5
+    ],
+    "sign_counts_by_frame": [
+      {
+        "negative": 5,
+        "positive": 20,
+        "zero": 0
+      },
+      {
+        "negative": 5,
+        "positive": 20,
+        "zero": 0
+      },
+      {
+        "negative": 4,
+        "positive": 21,
+        "zero": 0
+      },
+      {
+        "negative": 5,
+        "positive": 20,
+        "zero": 0
+      },
+      {
+        "negative": 6,
+        "positive": 19,
+        "zero": 0
+      },
+      {
+        "negative": 5,
+        "positive": 20,
+        "zero": 0
+      },
+      {
+        "negative": 4,
+        "positive": 21,
+        "zero": 0
+      },
+      {
+        "negative": 4,
+        "positive": 21,
+        "zero": 0
+      },
+      {
+        "negative": 4,
+        "positive": 21,
+        "zero": 0
+      }
+    ]
+  },
+  "legacy_plan": {
+    "bottleneck_clearance": {
+      "float32_bits": "41100000",
+      "value": 9.0
+    },
+    "gate": {
+      "clearance": {
+        "float32_bits": "41100000",
+        "value": 9.0
+      },
+      "frame": 16,
+      "x": {
+        "float32_bits": "41800000",
+        "value": 16.0
+      },
+      "y": {
+        "float32_bits": "42600000",
+        "value": 56.0
+      }
+    },
+    "initial_repair_volume": 0,
+    "initial_safe_action_count": 0,
+    "lane": "left",
+    "path": [
+      {
+        "clearance": {
+          "float32_bits": "7f800000",
+          "value": "inf"
+        },
+        "frame": 0,
+        "x": {
+          "float32_bits": "42400000",
+          "value": 48.0
+        },
+        "y": {
+          "float32_bits": "42b00000",
+          "value": 88.0
+        }
+      },
+      {
+        "clearance": {
+          "float32_bits": "41c00000",
+          "value": 24.0
+        },
+        "frame": 4,
+        "x": {
+          "float32_bits": "42400000",
+          "value": 48.0
+        },
+        "y": {
+          "float32_bits": "42900000",
+          "value": 72.0
+        }
+      },
+      {
+        "clearance": {
+          "float32_bits": "41b80000",
+          "value": 23.0
+        },
+        "frame": 8,
+        "x": {
+          "float32_bits": "42000000",
+          "value": 32.0
+        },
+        "y": {
+          "float32_bits": "42900000",
+          "value": 72.0
+        }
+      },
+      {
+        "clearance": {
+          "float32_bits": "41800000",
+          "value": 16.0
+        },
+        "frame": 12,
+        "x": {
+          "float32_bits": "41800000",
+          "value": 16.0
+        },
+        "y": {
+          "float32_bits": "42900000",
+          "value": 72.0
+        }
+      },
+      {
+        "clearance": {
+          "float32_bits": "41100000",
+          "value": 9.0
+        },
+        "frame": 16,
+        "x": {
+          "float32_bits": "41800000",
+          "value": 16.0
+        },
+        "y": {
+          "float32_bits": "42600000",
+          "value": 56.0
+        }
+      },
+      {
+        "clearance": {
+          "float32_bits": "417cfb72",
+          "value": 15.81138801574707
+        },
+        "frame": 20,
+        "x": {
+          "float32_bits": "41800000",
+          "value": 16.0
+        },
+        "y": {
+          "float32_bits": "42200000",
+          "value": 40.0
+        }
+      },
+      {
+        "clearance": {
+          "float32_bits": "41c00000",
+          "value": 24.0
+        },
+        "frame": 24,
+        "x": {
+          "float32_bits": "41c00000",
+          "value": 24.0
+        },
+        "y": {
+          "float32_bits": "42000000",
+          "value": 32.0
+        }
+      },
+      {
+        "clearance": {
+          "float32_bits": "42000000",
+          "value": 32.0
+        },
+        "frame": 28,
+        "x": {
+          "float32_bits": "42200000",
+          "value": 40.0
+        },
+        "y": {
+          "float32_bits": "42000000",
+          "value": 32.0
+        }
+      },
+      {
+        "clearance": {
+          "float32_bits": "42000000",
+          "value": 32.0
+        },
+        "frame": 32,
+        "x": {
+          "float32_bits": "42600000",
+          "value": 56.0
+        },
+        "y": {
+          "float32_bits": "42000000",
+          "value": 32.0
+        }
+      }
+    ],
+    "planning_mode": "forward_reachability",
+    "reachable": true,
+    "reason": "collision-free corridor found",
+    "terminal_clearance": {
+      "float32_bits": "42000000",
+      "value": 32.0
+    },
+    "viability_grid_step": null
+  },
+  "public_compatibility_names": [
+    "AabbHazard",
+    "AabbTrajectoryHazard",
+    "CorridorBounds",
+    "CorridorConfig",
+    "CorridorPlan",
+    "CorridorPoint",
+    "MovingAabbHazard",
+    "PiecewiseAabbHazard",
+    "RobustControlSpec",
+    "SegmentHazard",
+    "SegmentTrajectoryHazard",
+    "plan_corridor"
+  ],
+  "robust": {
+    "path_query": {
+      "active_action": "stay",
+      "available": true,
+      "column": 2,
+      "layer": 1,
+      "position_error": {
+        "float32_bits": "00000000",
+        "value": 0.0
+      },
+      "reason": "robust viable actions found",
+      "recovery_distances": [],
+      "repair_volumes": [
+        [
+          "stay",
+          42
+        ],
+        [
+          "left",
+          30
+        ],
+        [
+          "right",
+          36
+        ],
+        [
+          "up",
+          24
+        ],
+        [
+          "down",
+          28
+        ]
+      ],
+      "row": 7,
+      "safe_actions": [
+        "stay",
+        "left",
+        "right",
+        "up",
+        "down"
+      ],
+      "state_viable": true,
+      "survival_best_actions": [
+        "stay",
+        "left",
+        "down"
+      ],
+      "survival_bottleneck_margin": {
+        "float32_bits": "40dedaae",
+        "value": 6.964194297790527
+      },
+      "survival_frames": 6
+    },
+    "plan": {
+      "bottleneck_clearance": {
+        "float32_bits": "40800000",
+        "value": 4.0
+      },
+      "gate": {
+        "clearance": {
+          "float32_bits": "40800000",
+          "value": 4.0
+        },
+        "frame": 2,
+        "x": {
+          "float32_bits": "41000000",
+          "value": 8.0
+        },
+        "y": {
+          "float32_bits": "41e00000",
+          "value": 28.0
+        }
+      },
+      "initial_repair_volume": 42,
+      "initial_safe_action_count": 5,
+      "lane": "left",
+      "path": [
+        {
+          "clearance": {
+            "float32_bits": "7f800000",
+            "value": "inf"
+          },
+          "frame": 0,
+          "x": {
+            "float32_bits": "41000000",
+            "value": 8.0
+          },
+          "y": {
+            "float32_bits": "41e00000",
+            "value": 28.0
+          }
+        },
+        {
+          "clearance": {
+            "float32_bits": "40800000",
+            "value": 4.0
+          },
+          "frame": 2,
+          "x": {
+            "float32_bits": "41000000",
+            "value": 8.0
+          },
+          "y": {
+            "float32_bits": "41e00000",
+            "value": 28.0
+          }
+        },
+        {
+          "clearance": {
+            "float32_bits": "40800000",
+            "value": 4.0
+          },
+          "frame": 4,
+          "x": {
+            "float32_bits": "41000000",
+            "value": 8.0
+          },
+          "y": {
+            "float32_bits": "41e00000",
+            "value": 28.0
+          }
+        },
+        {
+          "clearance": {
+            "float32_bits": "40800000",
+            "value": 4.0
+          },
+          "frame": 6,
+          "x": {
+            "float32_bits": "41000000",
+            "value": 8.0
+          },
+          "y": {
+            "float32_bits": "41e00000",
+            "value": 28.0
+          }
+        },
+        {
+          "clearance": {
+            "float32_bits": "40800000",
+            "value": 4.0
+          },
+          "frame": 8,
+          "x": {
+            "float32_bits": "41000000",
+            "value": 8.0
+          },
+          "y": {
+            "float32_bits": "41e00000",
+            "value": 28.0
+          }
+        }
+      ],
+      "planning_mode": "robust_viability",
+      "reachable": true,
+      "reason": "delay-robust viable corridor found",
+      "terminal_clearance": {
+        "float32_bits": "40800000",
+        "value": 4.0
+      },
+      "viability_grid_step": {
+        "float32_bits": "40800000",
+        "value": 4.0
+      }
+    },
+    "root_query": {
+      "active_action": "stay",
+      "available": true,
+      "column": 2,
+      "layer": 0,
+      "position_error": {
+        "float32_bits": "00000000",
+        "value": 0.0
+      },
+      "reason": "robust viable actions found",
+      "recovery_distances": [],
+      "repair_volumes": [
+        [
+          "stay",
+          42
+        ],
+        [
+          "left",
+          30
+        ],
+        [
+          "right",
+          36
+        ],
+        [
+          "up",
+          24
+        ],
+        [
+          "down",
+          28
+        ]
+      ],
+      "row": 7,
+      "safe_actions": [
+        "stay",
+        "left",
+        "right",
+        "up",
+        "down"
+      ],
+      "state_viable": true,
+      "survival_best_actions": [
+        "stay",
+        "left",
+        "down"
+      ],
+      "survival_bottleneck_margin": {
+        "float32_bits": "40dedaae",
+        "value": 6.964194297790527
+      },
+      "survival_frames": 8
+    },
+    "safe_action_bits_by_layer": [
+      1556,
+      1556,
+      1556,
+      1624
+    ],
+    "safe_action_masks_sha256": "fbf7edd8a36f6c538662390262e05671eaa42ae1b0259a8f275d58335b7626d6",
+    "safe_action_masks_shape": [
+      4,
+      5,
+      9,
+      9
+    ],
+    "viable_sha256": "a62cd6c6871e522b5f97971de38d4e3ef2340e201e966530d84b83b9fb269ace",
+    "viable_shape": [
+      5,
+      5,
+      9,
+      9
+    ],
+    "viable_states_by_layer": [
+      348,
+      348,
+      348,
+      348,
+      360
+    ]
+  },
+  "schema": "touhou-corridor-refactor-characterization-v1"
+}

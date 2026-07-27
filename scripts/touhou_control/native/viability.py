@@ -6,23 +6,18 @@ import ctypes
 
 import numpy as np
 
-from .library import load_library as _load_library
-
-
-_VIABILITY_WORKER_LIMIT_FUNCTION = None
-_VIABILITY_FUNCTION = None
-_TERMINAL_VIABILITY_FUNCTION = None
-_SAFETY_VALUE_FUNCTION = None
-_SAFETY_POLICY_FUNCTION = None
-_SURVIVAL_VIABILITY_FUNCTION = None
-_QUERY_LOCAL_SURVIVAL_FUNCTION = None
-_LOSING_SURVIVAL_LABELS_FUNCTION = None
+from .arrays import as_contiguous_array
+from .library import (
+    cache_function,
+    cached_function,
+    load_library as _load_library,
+)
 
 
 def _load_viability_function():
-    global _VIABILITY_FUNCTION
-    if _VIABILITY_FUNCTION is not None:
-        return _VIABILITY_FUNCTION
+    cached = cached_function("touhou_robust_viability_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -48,14 +43,15 @@ def _load_viability_function():
         ctypes.POINTER(ctypes.c_uint32),
     ]
     function.restype = ctypes.c_int
-    _VIABILITY_FUNCTION = function
-    return function
+    return cache_function("touhou_robust_viability_v1", function)
 
 
 def _load_viability_worker_limit_function():
-    global _VIABILITY_WORKER_LIMIT_FUNCTION
-    if _VIABILITY_WORKER_LIMIT_FUNCTION is not None:
-        return _VIABILITY_WORKER_LIMIT_FUNCTION
+    cached = cached_function(
+        "touhou_set_current_thread_viability_worker_limit_v1"
+    )
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -68,8 +64,10 @@ def _load_viability_worker_limit_function():
         return None
     function.argtypes = [ctypes.c_int]
     function.restype = ctypes.c_int
-    _VIABILITY_WORKER_LIMIT_FUNCTION = function
-    return function
+    return cache_function(
+        "touhou_set_current_thread_viability_worker_limit_v1",
+        function,
+    )
 
 
 def set_current_thread_viability_worker_limit(
@@ -91,9 +89,9 @@ def set_current_thread_viability_worker_limit(
 
 
 def _load_terminal_viability_function():
-    global _TERMINAL_VIABILITY_FUNCTION
-    if _TERMINAL_VIABILITY_FUNCTION is not None:
-        return _TERMINAL_VIABILITY_FUNCTION
+    cached = cached_function("touhou_robust_viability_terminal_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -123,14 +121,16 @@ def _load_terminal_viability_function():
         ctypes.POINTER(ctypes.c_uint32),
     ]
     function.restype = ctypes.c_int
-    _TERMINAL_VIABILITY_FUNCTION = function
-    return function
+    return cache_function(
+        "touhou_robust_viability_terminal_v1",
+        function,
+    )
 
 
 def _load_safety_value_function():
-    global _SAFETY_VALUE_FUNCTION
-    if _SAFETY_VALUE_FUNCTION is not None:
-        return _SAFETY_VALUE_FUNCTION
+    cached = cached_function("touhou_robust_safety_value_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -158,14 +158,13 @@ def _load_safety_value_function():
         ctypes.POINTER(ctypes.c_float),
     ]
     function.restype = ctypes.c_int
-    _SAFETY_VALUE_FUNCTION = function
-    return function
+    return cache_function("touhou_robust_safety_value_v1", function)
 
 
 def _load_safety_policy_function():
-    global _SAFETY_POLICY_FUNCTION
-    if _SAFETY_POLICY_FUNCTION is not None:
-        return _SAFETY_POLICY_FUNCTION
+    cached = cached_function("touhou_robust_safety_policy_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -193,14 +192,13 @@ def _load_safety_policy_function():
         ctypes.POINTER(ctypes.c_uint32),
     ]
     function.restype = ctypes.c_int
-    _SAFETY_POLICY_FUNCTION = function
-    return function
+    return cache_function("touhou_robust_safety_policy_v1", function)
 
 
 def _load_survival_viability_function():
-    global _SURVIVAL_VIABILITY_FUNCTION
-    if _SURVIVAL_VIABILITY_FUNCTION is not None:
-        return _SURVIVAL_VIABILITY_FUNCTION
+    cached = cached_function("touhou_robust_survival_viability_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -232,14 +230,16 @@ def _load_survival_viability_function():
         ctypes.POINTER(ctypes.c_uint32),
     ]
     function.restype = ctypes.c_int
-    _SURVIVAL_VIABILITY_FUNCTION = function
-    return function
+    return cache_function(
+        "touhou_robust_survival_viability_v1",
+        function,
+    )
 
 
 def _load_query_local_survival_function():
-    global _QUERY_LOCAL_SURVIVAL_FUNCTION
-    if _QUERY_LOCAL_SURVIVAL_FUNCTION is not None:
-        return _QUERY_LOCAL_SURVIVAL_FUNCTION
+    cached = cached_function("touhou_query_local_survival_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -279,14 +279,13 @@ def _load_query_local_survival_function():
         ctypes.POINTER(ctypes.c_uint64),
     ]
     function.restype = ctypes.c_int
-    _QUERY_LOCAL_SURVIVAL_FUNCTION = function
-    return function
+    return cache_function("touhou_query_local_survival_v1", function)
 
 
 def _load_losing_survival_labels_function():
-    global _LOSING_SURVIVAL_LABELS_FUNCTION
-    if _LOSING_SURVIVAL_LABELS_FUNCTION is not None:
-        return _LOSING_SURVIVAL_LABELS_FUNCTION
+    cached = cached_function("touhou_losing_survival_labels_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -319,8 +318,7 @@ def _load_losing_survival_labels_function():
         ctypes.POINTER(ctypes.c_uint32),
     ]
     function.restype = ctypes.c_int
-    _LOSING_SURVIVAL_LABELS_FUNCTION = function
-    return function
+    return cache_function("touhou_losing_survival_labels_v1", function)
 
 
 def build_viability_arrays(
@@ -343,19 +341,19 @@ def build_viability_arrays(
     )
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
-    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
-    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
-    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    clearance = as_contiguous_array(clearance_volume, dtype=np.float32)
+    velocity_x = as_contiguous_array(velocity_x, dtype=np.float64)
+    velocity_y = as_contiguous_array(velocity_y, dtype=np.float64)
+    delays = as_contiguous_array(delay_frames, dtype=np.int32)
     layer_count = (clearance.shape[0] - 1) // frames_per_layer
     action_count = len(velocity_x)
     rows = len(y_axis)
     columns = len(x_axis)
     terminal = None
     if terminal_viable is not None:
-        terminal = np.ascontiguousarray(terminal_viable, dtype=np.bool_)
+        terminal = as_contiguous_array(terminal_viable, dtype=np.bool_)
         expected_shape = (action_count, rows, columns)
         if terminal.shape != expected_shape:
             raise ValueError(
@@ -418,12 +416,12 @@ def build_safety_value_arrays(
     function = _load_safety_value_function()
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
-    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
-    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
-    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    clearance = as_contiguous_array(clearance_volume, dtype=np.float32)
+    velocity_x = as_contiguous_array(velocity_x, dtype=np.float64)
+    velocity_y = as_contiguous_array(velocity_y, dtype=np.float64)
+    delays = as_contiguous_array(delay_frames, dtype=np.int32)
     layer_count = (clearance.shape[0] - 1) // frames_per_layer
     action_count = len(velocity_x)
     rows = len(y_axis)
@@ -482,12 +480,12 @@ def build_safety_policy_arrays(
     function = _load_safety_policy_function()
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
-    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
-    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
-    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    clearance = as_contiguous_array(clearance_volume, dtype=np.float32)
+    velocity_x = as_contiguous_array(velocity_x, dtype=np.float64)
+    velocity_y = as_contiguous_array(velocity_y, dtype=np.float64)
+    delays = as_contiguous_array(delay_frames, dtype=np.int32)
     layer_count = (clearance.shape[0] - 1) // frames_per_layer
     action_count = len(velocity_x)
     rows = len(y_axis)
@@ -549,12 +547,12 @@ def build_survival_viability_arrays(
     function = _load_survival_viability_function()
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
-    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
-    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
-    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    clearance = as_contiguous_array(clearance_volume, dtype=np.float32)
+    velocity_x = as_contiguous_array(velocity_x, dtype=np.float64)
+    velocity_y = as_contiguous_array(velocity_y, dtype=np.float64)
+    delays = as_contiguous_array(delay_frames, dtype=np.int32)
     layer_count = (clearance.shape[0] - 1) // frames_per_layer
     action_count = len(velocity_x)
     rows = len(y_axis)
@@ -643,13 +641,13 @@ def query_local_survival_arrays(
     function = _load_query_local_survival_function()
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
-    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
-    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
-    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
-    pending = np.ascontiguousarray(
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    clearance = as_contiguous_array(clearance_volume, dtype=np.float32)
+    velocity_x = as_contiguous_array(velocity_x, dtype=np.float64)
+    velocity_y = as_contiguous_array(velocity_y, dtype=np.float64)
+    delays = as_contiguous_array(delay_frames, dtype=np.int32)
+    pending = as_contiguous_array(
         (
             np.empty(0, dtype=np.int32)
             if pending_remaining_frames is None
@@ -733,14 +731,14 @@ def build_losing_survival_label_arrays(
     function = _load_losing_survival_labels_function()
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-    clearance = np.ascontiguousarray(clearance_volume, dtype=np.float32)
-    velocity_x = np.ascontiguousarray(velocity_x, dtype=np.float64)
-    velocity_y = np.ascontiguousarray(velocity_y, dtype=np.float64)
-    delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
-    viable = np.ascontiguousarray(viable, dtype=np.bool_)
-    masks = np.ascontiguousarray(safe_action_masks, dtype=np.uint32)
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    clearance = as_contiguous_array(clearance_volume, dtype=np.float32)
+    velocity_x = as_contiguous_array(velocity_x, dtype=np.float64)
+    velocity_y = as_contiguous_array(velocity_y, dtype=np.float64)
+    delays = as_contiguous_array(delay_frames, dtype=np.int32)
+    viable = as_contiguous_array(viable, dtype=np.bool_)
+    masks = as_contiguous_array(safe_action_masks, dtype=np.uint32)
     survival_frames = np.empty(viable.shape, dtype=np.uint16)
     bottleneck_margins = np.empty(viable.shape, dtype=np.float32)
     best_action_masks = np.empty(masks.shape, dtype=np.uint32)

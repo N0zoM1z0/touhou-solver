@@ -6,10 +6,35 @@ from types import SimpleNamespace
 import unittest
 from unittest import mock
 
+import numpy as np
+
+from touhou_control.native import arrays
 from touhou_control.native import library
 
 
 class NativeLibraryTests(unittest.TestCase):
+    def test_contiguous_helper_preserves_numpy_copy_behavior(self) -> None:
+        contiguous = np.arange(8, dtype=np.float32)
+        self.assertIs(
+            arrays.as_contiguous_array(contiguous, dtype=np.float32),
+            contiguous,
+        )
+
+        noncontiguous = contiguous[::2]
+        converted = arrays.as_contiguous_array(
+            noncontiguous,
+            dtype=np.float64,
+        )
+        expected = np.ascontiguousarray(noncontiguous, dtype=np.float64)
+        np.testing.assert_array_equal(converted, expected)
+        self.assertEqual(converted.dtype, expected.dtype)
+        self.assertEqual(converted.flags.c_contiguous, expected.flags.c_contiguous)
+        self.assertFalse(np.shares_memory(converted, noncontiguous))
+
+        default_dtype = arrays.as_contiguous_array(noncontiguous)
+        self.assertEqual(default_dtype.dtype, noncontiguous.dtype)
+        self.assertTrue(default_dtype.flags.c_contiguous)
+
     def test_library_path_stays_inside_repository_native_build(self) -> None:
         expected_name = (
             "touhou_viability.dll"

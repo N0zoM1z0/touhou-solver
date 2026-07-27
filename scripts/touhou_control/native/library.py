@@ -59,6 +59,35 @@ def available() -> bool:
     return load_library() is not None
 
 
+def cached_function(key: str):
+    """Return one configured function previously stored under ``key``."""
+
+    return _FUNCTION_CACHE.get(key)
+
+
+def cache_function(key: str, function):
+    """Store and return one successfully configured function."""
+
+    _FUNCTION_CACHE[key] = function
+    return function
+
+
+def cached_function_group(key: str) -> tuple[Any, ...] | None:
+    """Return one atomically configured function group."""
+
+    return _FUNCTION_GROUP_CACHE.get(key)
+
+
+def cache_function_group(
+    key: str,
+    functions: tuple[Any, ...],
+) -> tuple[Any, ...]:
+    """Store and return one complete configured function group."""
+
+    _FUNCTION_GROUP_CACHE[key] = functions
+    return functions
+
+
 def load_function(
     symbol: str,
     *,

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import dataclasses
+from types import SimpleNamespace
 import unittest
+from unittest import mock
 
 from touhou_control import native_backend
 from touhou_control.native import belief, geometry, library, local, pipeline, viability
@@ -146,6 +148,64 @@ class NativeBackendFacadeTests(unittest.TestCase):
         self.assertTrue(
             local.LocalSupplementalNativeResult.__dataclass_params__.frozen
         )
+
+    def test_domain_loader_uses_shared_cache_without_caching_miss(self) -> None:
+        fake_library = SimpleNamespace()
+
+        def function() -> None:
+            pass
+
+        with (
+            mock.patch.object(geometry, "_load_library", return_value=fake_library),
+            mock.patch.object(library, "_FUNCTION_CACHE", {}),
+        ):
+            self.assertIsNone(
+                geometry._load_trajectory_clearance_function()
+            )
+            fake_library.touhou_segment_trajectory_clearance_v1 = function
+            self.assertIs(
+                geometry._load_trajectory_clearance_function(),
+                function,
+            )
+            del fake_library.touhou_segment_trajectory_clearance_v1
+            self.assertIs(
+                geometry._load_trajectory_clearance_function(),
+                function,
+            )
+
+    def test_domain_function_group_is_cached_only_when_complete(self) -> None:
+        symbols = (
+            "touhou_local_supplemental_workspace_create_v1",
+            "touhou_local_supplemental_workspace_query_v1",
+            "touhou_local_supplemental_workspace_cancel_v1",
+            "touhou_local_supplemental_workspace_active_v1",
+            "touhou_local_supplemental_workspace_destroy_v1",
+        )
+        functions = []
+        for _symbol in symbols:
+            def function() -> None:
+                pass
+
+            functions.append(function)
+        fake_library = SimpleNamespace(
+            **dict(zip(symbols[:-1], functions[:-1], strict=True))
+        )
+        with (
+            mock.patch.object(local, "_load_library", return_value=fake_library),
+            mock.patch.object(library, "_FUNCTION_GROUP_CACHE", {}),
+        ):
+            self.assertIsNone(
+                local._load_local_supplemental_workspace_functions()
+            )
+            setattr(fake_library, symbols[-1], functions[-1])
+            loaded = local._load_local_supplemental_workspace_functions()
+            self.assertEqual(loaded, tuple(functions))
+            for symbol in symbols:
+                delattr(fake_library, symbol)
+            self.assertIs(
+                local._load_local_supplemental_workspace_functions(),
+                loaded,
+            )
 
 
 if __name__ == "__main__":

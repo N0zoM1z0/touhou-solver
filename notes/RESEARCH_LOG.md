@@ -4330,3 +4330,27 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   viability, and query-survival focused suites pass. The complete quick suite
   passes `602/602` on Linux in `5.678 s` and on Windows in `8.207 s` with one
   existing skip. Python compilation, Ruff, and `git diff --check` pass.
+
+## 2026-07-27: Python Native Binding Cache And Coercion Completion
+
+- **Scope:** Completed roadmap R2 by removing every per-domain ctypes function
+  slot. Successfully configured functions and all-or-nothing function groups
+  now live only in `native.library`; domain modules retain their exact
+  signature declarations. All wrapper `np.ascontiguousarray` sites now call
+  the typed `native.arrays.as_contiguous_array` boundary.
+- **Observed compatibility:** Missing optional symbols/groups are not cached
+  and remain retryable. A function/group becomes shared only after its full
+  historical signature configuration succeeds. Tests exercise a real domain
+  optional miss followed by success and cache reuse, plus an incomplete
+  workspace group followed by atomic success. The coercion helper is a direct
+  NumPy delegation; tests guard identity reuse for an already compatible
+  contiguous array and copy/dtype/contiguity behavior for a strided array.
+- **Authority:** This changes cache and coercion call ownership only. It makes
+  no copy-elimination attempt and changes no dtype argument, coercion site,
+  shape check, output allocation, pointer, return code, exception, fallback,
+  recurrence, worker behavior, action, strategy status, native implementation,
+  or C ABI. It adds no runtime or physical evidence.
+- **Validation:** Eleven focused façade/library/cache/coercion tests pass. The
+  complete quick suite passes `605/605` on Linux in `5.415 s` and on Windows
+  in `8.100 s` with one existing skip. Python compilation, Ruff, and
+  `git diff --check` pass.

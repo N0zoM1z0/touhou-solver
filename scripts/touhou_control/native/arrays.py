@@ -3,6 +3,16 @@
 from __future__ import annotations
 
 import numpy as np
+from numpy.typing import ArrayLike, DTypeLike
+
+
+def as_contiguous_array(
+    values: ArrayLike,
+    dtype: DTypeLike | None = None,
+) -> np.ndarray:
+    """Apply NumPy's existing contiguous/dtype coercion without extra policy."""
+
+    return np.ascontiguousarray(values, dtype=dtype)
 
 
 def attribute_array(
@@ -29,4 +39,3 @@ def attribute_array64(
         dtype=np.float64,
         count=len(items),
     )
-

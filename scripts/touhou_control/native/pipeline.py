@@ -6,49 +6,22 @@ import ctypes
 
 import numpy as np
 
+from .arrays import as_contiguous_array
 from .library import (
     PipelineNativeCancelledError as PipelineNativeCancelledError,
     PipelineNativeDeadlineError as PipelineNativeDeadlineError,
+    cache_function_group,
+    cached_function_group,
     load_library as _load_library,
     raise_pipeline_result as _raise_pipeline_result,
 )
 
 
-_PIPELINE_WORKSPACE_CREATE_FUNCTION = None
-_PIPELINE_WORKSPACE_QUERY_FUNCTION = None
-_PIPELINE_WORKSPACE_CONTAINS_FUNCTION = None
-_PIPELINE_WORKSPACE_PREWARM_FUNCTION = None
-_PIPELINE_WORKSPACE_MERGE_FUNCTION = None
-_PIPELINE_WORKSPACE_CANCEL_FUNCTION = None
-_PIPELINE_WORKSPACE_DESTROY_FUNCTION = None
-
-
 def _load_pipeline_workspace_functions():
-    global _PIPELINE_WORKSPACE_CREATE_FUNCTION
-    global _PIPELINE_WORKSPACE_QUERY_FUNCTION
-    global _PIPELINE_WORKSPACE_CONTAINS_FUNCTION
-    global _PIPELINE_WORKSPACE_PREWARM_FUNCTION
-    global _PIPELINE_WORKSPACE_MERGE_FUNCTION
-    global _PIPELINE_WORKSPACE_CANCEL_FUNCTION
-    global _PIPELINE_WORKSPACE_DESTROY_FUNCTION
-    if (
-        _PIPELINE_WORKSPACE_CREATE_FUNCTION is not None
-        and _PIPELINE_WORKSPACE_QUERY_FUNCTION is not None
-        and _PIPELINE_WORKSPACE_CONTAINS_FUNCTION is not None
-        and _PIPELINE_WORKSPACE_PREWARM_FUNCTION is not None
-        and _PIPELINE_WORKSPACE_MERGE_FUNCTION is not None
-        and _PIPELINE_WORKSPACE_CANCEL_FUNCTION is not None
-        and _PIPELINE_WORKSPACE_DESTROY_FUNCTION is not None
-    ):
-        return (
-            _PIPELINE_WORKSPACE_CREATE_FUNCTION,
-            _PIPELINE_WORKSPACE_QUERY_FUNCTION,
-            _PIPELINE_WORKSPACE_CONTAINS_FUNCTION,
-            _PIPELINE_WORKSPACE_PREWARM_FUNCTION,
-            _PIPELINE_WORKSPACE_MERGE_FUNCTION,
-            _PIPELINE_WORKSPACE_CANCEL_FUNCTION,
-            _PIPELINE_WORKSPACE_DESTROY_FUNCTION,
-        )
+    key = "pipeline_survival_workspace_v2"
+    cached = cached_function_group(key)
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -146,14 +119,10 @@ def _load_pipeline_workspace_functions():
     cancel.restype = ctypes.c_int
     destroy.argtypes = [ctypes.c_void_p]
     destroy.restype = None
-    _PIPELINE_WORKSPACE_CREATE_FUNCTION = create
-    _PIPELINE_WORKSPACE_QUERY_FUNCTION = query
-    _PIPELINE_WORKSPACE_CONTAINS_FUNCTION = contains
-    _PIPELINE_WORKSPACE_PREWARM_FUNCTION = prewarm
-    _PIPELINE_WORKSPACE_MERGE_FUNCTION = merge
-    _PIPELINE_WORKSPACE_CANCEL_FUNCTION = cancel
-    _PIPELINE_WORKSPACE_DESTROY_FUNCTION = destroy
-    return create, query, contains, prewarm, merge, cancel, destroy
+    return cache_function_group(
+        key,
+        (create, query, contains, prewarm, merge, cancel, destroy),
+    )
 
 
 class PipelineSurvivalNativeWorkspace:
@@ -180,22 +149,22 @@ class PipelineSurvivalNativeWorkspace:
         required_clearance: float,
         clamp_to_bounds: bool,
     ) -> None:
-        self._x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-        self._y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-        self._clearance = np.ascontiguousarray(
+        self._x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+        self._y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+        self._clearance = as_contiguous_array(
             clearance_volume,
             dtype=np.float32,
         )
-        self._velocity_x = np.ascontiguousarray(
+        self._velocity_x = as_contiguous_array(
             velocity_x,
             dtype=np.float64,
         )
-        self._velocity_y = np.ascontiguousarray(
+        self._velocity_y = as_contiguous_array(
             velocity_y,
             dtype=np.float64,
         )
-        self._delays = np.ascontiguousarray(delay_frames, dtype=np.int32)
-        self._decision_frames = np.ascontiguousarray(
+        self._delays = as_contiguous_array(delay_frames, dtype=np.int32)
+        self._decision_frames = as_contiguous_array(
             decision_frame_support,
             dtype=np.int32,
         )
@@ -284,7 +253,7 @@ class PipelineSurvivalNativeWorkspace:
     ]:
         if self.closed:
             raise RuntimeError("native pipeline workspace is closed")
-        pending = np.ascontiguousarray(
+        pending = as_contiguous_array(
             (
                 np.empty(0, dtype=np.int32)
                 if pending_remaining_frames is None
@@ -349,7 +318,7 @@ class PipelineSurvivalNativeWorkspace:
 
         if self.closed:
             raise RuntimeError("native pipeline workspace is closed")
-        pending = np.ascontiguousarray(
+        pending = as_contiguous_array(
             (
                 np.empty(0, dtype=np.int32)
                 if pending_remaining_frames is None
@@ -394,7 +363,7 @@ class PipelineSurvivalNativeWorkspace:
 
         if self.closed:
             raise RuntimeError("native pipeline workspace is closed")
-        pending = np.ascontiguousarray(
+        pending = as_contiguous_array(
             (
                 np.empty(0, dtype=np.int32)
                 if pending_remaining_frames is None

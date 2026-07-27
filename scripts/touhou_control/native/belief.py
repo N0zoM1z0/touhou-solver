@@ -6,41 +6,20 @@ import ctypes
 
 import numpy as np
 
-from .library import load_library as _load_library
-from .library import raise_pipeline_result as _raise_pipeline_result
-
-
-_BELIEF_PIPELINE_CREATE_FUNCTION = None
-_BELIEF_PIPELINE_QUERY_FUNCTION = None
-_BELIEF_PIPELINE_CERTIFY_FUNCTION = None
-_BELIEF_PIPELINE_RECOMMEND_FUNCTION = None
-_BELIEF_PIPELINE_CANCEL_FUNCTION = None
-_BELIEF_PIPELINE_DESTROY_FUNCTION = None
+from .arrays import as_contiguous_array
+from .library import (
+    cache_function_group,
+    cached_function_group,
+    load_library as _load_library,
+    raise_pipeline_result as _raise_pipeline_result,
+)
 
 
 def _load_belief_pipeline_workspace_functions():
-    global _BELIEF_PIPELINE_CREATE_FUNCTION
-    global _BELIEF_PIPELINE_QUERY_FUNCTION
-    global _BELIEF_PIPELINE_CERTIFY_FUNCTION
-    global _BELIEF_PIPELINE_RECOMMEND_FUNCTION
-    global _BELIEF_PIPELINE_CANCEL_FUNCTION
-    global _BELIEF_PIPELINE_DESTROY_FUNCTION
-    if (
-        _BELIEF_PIPELINE_CREATE_FUNCTION is not None
-        and _BELIEF_PIPELINE_QUERY_FUNCTION is not None
-        and _BELIEF_PIPELINE_CERTIFY_FUNCTION is not None
-        and _BELIEF_PIPELINE_RECOMMEND_FUNCTION is not None
-        and _BELIEF_PIPELINE_CANCEL_FUNCTION is not None
-        and _BELIEF_PIPELINE_DESTROY_FUNCTION is not None
-    ):
-        return (
-            _BELIEF_PIPELINE_CREATE_FUNCTION,
-            _BELIEF_PIPELINE_QUERY_FUNCTION,
-            _BELIEF_PIPELINE_CERTIFY_FUNCTION,
-            _BELIEF_PIPELINE_RECOMMEND_FUNCTION,
-            _BELIEF_PIPELINE_CANCEL_FUNCTION,
-            _BELIEF_PIPELINE_DESTROY_FUNCTION,
-        )
+    key = "belief_pipeline_workspace_v6"
+    cached = cached_function_group(key)
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -152,13 +131,10 @@ def _load_belief_pipeline_workspace_functions():
     cancel.restype = ctypes.c_int
     destroy.argtypes = [ctypes.c_void_p]
     destroy.restype = None
-    _BELIEF_PIPELINE_CREATE_FUNCTION = create
-    _BELIEF_PIPELINE_QUERY_FUNCTION = query
-    _BELIEF_PIPELINE_CERTIFY_FUNCTION = certify
-    _BELIEF_PIPELINE_RECOMMEND_FUNCTION = recommend
-    _BELIEF_PIPELINE_CANCEL_FUNCTION = cancel
-    _BELIEF_PIPELINE_DESTROY_FUNCTION = destroy
-    return create, query, certify, recommend, cancel, destroy
+    return cache_function_group(
+        key,
+        (create, query, certify, recommend, cancel, destroy),
+    )
 
 
 class BeliefPipelineNativeWorkspace:
@@ -188,25 +164,25 @@ class BeliefPipelineNativeWorkspace:
         required_clearance: float,
         clamp_to_bounds: bool,
     ) -> None:
-        self._x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-        self._y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-        self._clearance = np.ascontiguousarray(
+        self._x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+        self._y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+        self._clearance = as_contiguous_array(
             clearance_volume,
             dtype=np.float32,
         )
-        self._velocity_x = np.ascontiguousarray(
+        self._velocity_x = as_contiguous_array(
             velocity_x,
             dtype=np.float64,
         )
-        self._velocity_y = np.ascontiguousarray(
+        self._velocity_y = as_contiguous_array(
             velocity_y,
             dtype=np.float64,
         )
-        self._delays = np.ascontiguousarray(
+        self._delays = as_contiguous_array(
             delay_frames,
             dtype=np.int32,
         )
-        self._decision_frames = np.ascontiguousarray(
+        self._decision_frames = as_contiguous_array(
             decision_frame_support,
             dtype=np.int32,
         )
@@ -301,7 +277,7 @@ class BeliefPipelineNativeWorkspace:
     ]:
         if self.closed:
             raise RuntimeError("belief pipeline workspace is closed")
-        pending = np.ascontiguousarray(
+        pending = as_contiguous_array(
             (
                 np.empty(0, dtype=np.int32)
                 if pending_remaining_frames is None
@@ -382,7 +358,7 @@ class BeliefPipelineNativeWorkspace:
 
         if self.closed:
             raise RuntimeError("belief pipeline workspace is closed")
-        pending = np.ascontiguousarray(
+        pending = as_contiguous_array(
             (
                 np.empty(0, dtype=np.int32)
                 if pending_remaining_frames is None
@@ -450,7 +426,7 @@ class BeliefPipelineNativeWorkspace:
 
         if self.closed:
             raise RuntimeError("belief pipeline workspace is closed")
-        pending = np.ascontiguousarray(
+        pending = as_contiguous_array(
             (
                 np.empty(0, dtype=np.int32)
                 if pending_remaining_frames is None

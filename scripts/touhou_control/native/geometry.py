@@ -8,22 +8,21 @@ import numpy as np
 
 from ..packed_hazards import PackedSegmentFrames
 from .arrays import (
+    as_contiguous_array,
     attribute_array as _attribute_array,
     attribute_array64 as _attribute_array64,
 )
-from .library import load_library as _load_library
-
-
-_CLEARANCE_FUNCTION = None
-_AABB_TRAJECTORY_CLEARANCE_FUNCTION = None
-_PIECEWISE_AABB_CLEARANCE_FUNCTION = None
-_TRAJECTORY_CLEARANCE_FUNCTION = None
+from .library import (
+    cache_function,
+    cached_function,
+    load_library as _load_library,
+)
 
 
 def _load_clearance_function():
-    global _CLEARANCE_FUNCTION
-    if _CLEARANCE_FUNCTION is not None:
-        return _CLEARANCE_FUNCTION
+    cached = cached_function("touhou_clearance_volume_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -60,14 +59,13 @@ def _load_clearance_function():
         float_pointer,
     ]
     function.restype = ctypes.c_int
-    _CLEARANCE_FUNCTION = function
-    return function
+    return cache_function("touhou_clearance_volume_v1", function)
 
 
 def _load_trajectory_clearance_function():
-    global _TRAJECTORY_CLEARANCE_FUNCTION
-    if _TRAJECTORY_CLEARANCE_FUNCTION is not None:
-        return _TRAJECTORY_CLEARANCE_FUNCTION
+    cached = cached_function("touhou_segment_trajectory_clearance_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -98,14 +96,16 @@ def _load_trajectory_clearance_function():
         float_pointer,
     ]
     function.restype = ctypes.c_int
-    _TRAJECTORY_CLEARANCE_FUNCTION = function
-    return function
+    return cache_function(
+        "touhou_segment_trajectory_clearance_v1",
+        function,
+    )
 
 
 def _load_aabb_trajectory_clearance_function():
-    global _AABB_TRAJECTORY_CLEARANCE_FUNCTION
-    if _AABB_TRAJECTORY_CLEARANCE_FUNCTION is not None:
-        return _AABB_TRAJECTORY_CLEARANCE_FUNCTION
+    cached = cached_function("touhou_aabb_trajectory_clearance_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -134,14 +134,16 @@ def _load_aabb_trajectory_clearance_function():
         float_pointer,
     ]
     function.restype = ctypes.c_int
-    _AABB_TRAJECTORY_CLEARANCE_FUNCTION = function
-    return function
+    return cache_function(
+        "touhou_aabb_trajectory_clearance_v1",
+        function,
+    )
 
 
 def _load_piecewise_aabb_clearance_function():
-    global _PIECEWISE_AABB_CLEARANCE_FUNCTION
-    if _PIECEWISE_AABB_CLEARANCE_FUNCTION is not None:
-        return _PIECEWISE_AABB_CLEARANCE_FUNCTION
+    cached = cached_function("touhou_piecewise_aabb_clearance_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -177,8 +179,10 @@ def _load_piecewise_aabb_clearance_function():
         float_pointer,
     ]
     function.restype = ctypes.c_int
-    _PIECEWISE_AABB_CLEARANCE_FUNCTION = function
-    return function
+    return cache_function(
+        "touhou_piecewise_aabb_clearance_v1",
+        function,
+    )
 
 
 def build_clearance_volume(
@@ -194,8 +198,8 @@ def build_clearance_volume(
     function = _load_clearance_function()
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
     aabb_fields = tuple(
         _attribute_array(aabbs, name)
         for name in (
@@ -292,9 +296,9 @@ def apply_packed_segment_clearance(
     function = _load_trajectory_clearance_function()
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-    output = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    output = as_contiguous_array(clearance_volume, dtype=np.float32)
     frame_count = output.shape[0]
     if output.shape[1:] != (len(y_axis), len(x_axis)):
         raise ValueError("clearance volume does not match the supplied axes")
@@ -352,9 +356,9 @@ def apply_aabb_trajectory_clearance(
     function = _load_aabb_trajectory_clearance_function()
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-    output = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    output = as_contiguous_array(clearance_volume, dtype=np.float32)
     frame_count = output.shape[0]
     if output.shape[1:] != (len(y_axis), len(x_axis)):
         raise ValueError("clearance volume does not match the supplied axes")
@@ -419,9 +423,9 @@ def apply_piecewise_aabb_clearance(
     function = _load_piecewise_aabb_clearance_function()
     if function is None:
         return None
-    x_axis = np.ascontiguousarray(x_axis, dtype=np.float32)
-    y_axis = np.ascontiguousarray(y_axis, dtype=np.float32)
-    output = np.ascontiguousarray(clearance_volume, dtype=np.float32)
+    x_axis = as_contiguous_array(x_axis, dtype=np.float32)
+    y_axis = as_contiguous_array(y_axis, dtype=np.float32)
+    output = as_contiguous_array(clearance_volume, dtype=np.float32)
     if output.shape[1:] != (len(y_axis), len(x_axis)):
         raise ValueError("clearance volume does not match the supplied axes")
 

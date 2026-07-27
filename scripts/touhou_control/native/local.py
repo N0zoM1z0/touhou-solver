@@ -8,14 +8,14 @@ import time
 
 import numpy as np
 
-from .library import load_library as _load_library
-
-
-_BULLET_POOL_DECODE_FUNCTION = None
-_LOCAL_HAZARDS_FUNCTION = None
-_LOCAL_BEAM_REDUCE_FUNCTION = None
-_LOCAL_SUPPLEMENTAL_BEAM_REDUCE_FUNCTION = None
-_LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS = None
+from .arrays import as_contiguous_array
+from .library import (
+    cache_function,
+    cache_function_group,
+    cached_function,
+    cached_function_group,
+    load_library as _load_library,
+)
 
 _C_FLOAT_POINTER = ctypes.POINTER(ctypes.c_float)
 _C_DOUBLE_POINTER = ctypes.POINTER(ctypes.c_double)
@@ -156,9 +156,9 @@ class _LocalSupplementalOutputV1(ctypes.Structure):
 
 
 def _load_local_hazards_function():
-    global _LOCAL_HAZARDS_FUNCTION
-    if _LOCAL_HAZARDS_FUNCTION is not None:
-        return _LOCAL_HAZARDS_FUNCTION
+    cached = cached_function("touhou_local_hazards_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -197,14 +197,13 @@ def _load_local_hazards_function():
         ctypes.POINTER(ctypes.c_double),
     ]
     function.restype = ctypes.c_int
-    _LOCAL_HAZARDS_FUNCTION = function
-    return function
+    return cache_function("touhou_local_hazards_v1", function)
 
 
 def _load_bullet_pool_decode_function():
-    global _BULLET_POOL_DECODE_FUNCTION
-    if _BULLET_POOL_DECODE_FUNCTION is not None:
-        return _BULLET_POOL_DECODE_FUNCTION
+    cached = cached_function("touhou_decode_bullet_pool_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -246,14 +245,13 @@ def _load_bullet_pool_decode_function():
         ctypes.POINTER(ctypes.c_int32),
     ]
     function.restype = ctypes.c_int
-    _BULLET_POOL_DECODE_FUNCTION = function
-    return function
+    return cache_function("touhou_decode_bullet_pool_v1", function)
 
 
 def _load_local_beam_reduce_function():
-    global _LOCAL_BEAM_REDUCE_FUNCTION
-    if _LOCAL_BEAM_REDUCE_FUNCTION is not None:
-        return _LOCAL_BEAM_REDUCE_FUNCTION
+    cached = cached_function("touhou_local_beam_reduce_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -300,14 +298,13 @@ def _load_local_beam_reduce_function():
         int32_pointer,
     ]
     function.restype = ctypes.c_int
-    _LOCAL_BEAM_REDUCE_FUNCTION = function
-    return function
+    return cache_function("touhou_local_beam_reduce_v1", function)
 
 
 def _load_local_supplemental_beam_reduce_function():
-    global _LOCAL_SUPPLEMENTAL_BEAM_REDUCE_FUNCTION
-    if _LOCAL_SUPPLEMENTAL_BEAM_REDUCE_FUNCTION is not None:
-        return _LOCAL_SUPPLEMENTAL_BEAM_REDUCE_FUNCTION
+    cached = cached_function("touhou_local_supplemental_beam_reduce_v1")
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -356,14 +353,17 @@ def _load_local_supplemental_beam_reduce_function():
         int32_pointer,
     ]
     function.restype = ctypes.c_int
-    _LOCAL_SUPPLEMENTAL_BEAM_REDUCE_FUNCTION = function
-    return function
+    return cache_function(
+        "touhou_local_supplemental_beam_reduce_v1",
+        function,
+    )
 
 
 def _load_local_supplemental_workspace_functions():
-    global _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS
-    if _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS is not None:
-        return _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS
+    key = "local_supplemental_workspace_v1"
+    cached = cached_function_group(key)
+    if cached is not None:
+        return cached
     library = _load_library()
     if library is None:
         return None
@@ -389,14 +389,13 @@ def _load_local_supplemental_workspace_functions():
     active.restype = ctypes.c_int
     destroy.argtypes = [ctypes.c_void_p]
     destroy.restype = ctypes.c_int
-    _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS = (
+    return cache_function_group(key, (
         create,
         query,
         cancel,
         active,
         destroy,
-    )
-    return _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS
+    ))
 
 
 def query_local_hazards(
@@ -427,8 +426,8 @@ def query_local_hazards(
     function = _load_local_hazards_function()
     if function is None:
         return None
-    positions_x = np.ascontiguousarray(positions_x, dtype=np.float32)
-    positions_y = np.ascontiguousarray(positions_y, dtype=np.float32)
+    positions_x = as_contiguous_array(positions_x, dtype=np.float32)
+    positions_y = as_contiguous_array(positions_y, dtype=np.float32)
     if (
         positions_x.ndim != 1
         or positions_y.shape != positions_x.shape
@@ -436,7 +435,7 @@ def query_local_hazards(
     ):
         raise ValueError("local hazard positions must be nonempty 1D peers")
     bullet_fields = tuple(
-        np.ascontiguousarray(values, dtype=np.float32)
+        as_contiguous_array(values, dtype=np.float32)
         for values in (
             bullet_x,
             bullet_y,
@@ -444,12 +443,12 @@ def query_local_hazards(
             bullet_half_height,
         )
     )
-    bullet_transformed = np.ascontiguousarray(bullet_transformed)
+    bullet_transformed = as_contiguous_array(bullet_transformed)
     if bullet_transformed.dtype not in {
         np.dtype(np.bool_),
         np.dtype(np.uint8),
     }:
-        bullet_transformed = np.ascontiguousarray(
+        bullet_transformed = as_contiguous_array(
             bullet_transformed,
             dtype=np.uint8,
         )
@@ -460,7 +459,7 @@ def query_local_hazards(
     ):
         raise ValueError("local bullet hazard fields must be 1D peers")
     laser_fields = tuple(
-        np.ascontiguousarray(values, dtype=np.float32)
+        as_contiguous_array(values, dtype=np.float32)
         for values in (
             laser_start_x,
             laser_start_y,
@@ -478,7 +477,7 @@ def query_local_hazards(
     ):
         raise ValueError("local laser hazard fields must be 1D peers")
     body_fields = tuple(
-        np.ascontiguousarray(values, dtype=np.float32)
+        as_contiguous_array(values, dtype=np.float32)
         for values in (
             body_x,
             body_y,
@@ -678,15 +677,15 @@ def reduce_local_beam(
     if function is None:
         return None
     draft_fields = (
-        np.ascontiguousarray(draft_x, dtype=np.float64),
-        np.ascontiguousarray(draft_y, dtype=np.float64),
-        np.ascontiguousarray(first_action, dtype=np.int32),
-        np.ascontiguousarray(last_direction, dtype=np.int32),
-        np.ascontiguousarray(last_focused, dtype=np.uint8),
-        np.ascontiguousarray(collected_mask, dtype=np.uint32),
-        np.ascontiguousarray(risk, dtype=np.float64),
-        np.ascontiguousarray(collisions, dtype=np.int32),
-        np.ascontiguousarray(minimum_clearance, dtype=np.float64),
+        as_contiguous_array(draft_x, dtype=np.float64),
+        as_contiguous_array(draft_y, dtype=np.float64),
+        as_contiguous_array(first_action, dtype=np.int32),
+        as_contiguous_array(last_direction, dtype=np.int32),
+        as_contiguous_array(last_focused, dtype=np.uint8),
+        as_contiguous_array(collected_mask, dtype=np.uint32),
+        as_contiguous_array(risk, dtype=np.float64),
+        as_contiguous_array(collisions, dtype=np.int32),
+        as_contiguous_array(minimum_clearance, dtype=np.float64),
     )
     draft_count = len(draft_fields[0])
     if (
@@ -695,11 +694,11 @@ def reduce_local_beam(
     ):
         raise ValueError("local beam draft fields must be nonempty 1D peers")
     action_fields = (
-        np.ascontiguousarray(certificate_collisions, dtype=np.int32),
-        np.ascontiguousarray(certificate_minimum, dtype=np.float64),
-        np.ascontiguousarray(survival_preferred, dtype=np.uint8),
-        np.ascontiguousarray(safety_preferred, dtype=np.uint8),
-        np.ascontiguousarray(recovery_distance, dtype=np.float64),
+        as_contiguous_array(certificate_collisions, dtype=np.int32),
+        as_contiguous_array(certificate_minimum, dtype=np.float64),
+        as_contiguous_array(survival_preferred, dtype=np.uint8),
+        as_contiguous_array(safety_preferred, dtype=np.uint8),
+        as_contiguous_array(recovery_distance, dtype=np.float64),
     )
     action_count = len(action_fields[0])
     if (
@@ -802,15 +801,15 @@ def reduce_local_supplemental_beam(
     if function is None:
         return None
     draft_fields = (
-        np.ascontiguousarray(draft_x, dtype=np.float64),
-        np.ascontiguousarray(draft_y, dtype=np.float64),
-        np.ascontiguousarray(first_action, dtype=np.int32),
-        np.ascontiguousarray(last_direction, dtype=np.int32),
-        np.ascontiguousarray(last_focused, dtype=np.uint8),
-        np.ascontiguousarray(collected_mask, dtype=np.uint32),
-        np.ascontiguousarray(risk, dtype=np.float64),
-        np.ascontiguousarray(collisions, dtype=np.int32),
-        np.ascontiguousarray(minimum_clearance, dtype=np.float64),
+        as_contiguous_array(draft_x, dtype=np.float64),
+        as_contiguous_array(draft_y, dtype=np.float64),
+        as_contiguous_array(first_action, dtype=np.int32),
+        as_contiguous_array(last_direction, dtype=np.int32),
+        as_contiguous_array(last_focused, dtype=np.uint8),
+        as_contiguous_array(collected_mask, dtype=np.uint32),
+        as_contiguous_array(risk, dtype=np.float64),
+        as_contiguous_array(collisions, dtype=np.int32),
+        as_contiguous_array(minimum_clearance, dtype=np.float64),
     )
     draft_count = len(draft_fields[0])
     if (
@@ -824,12 +823,12 @@ def reduce_local_supplemental_beam(
             "supplemental beam draft fields must be nonempty 1D peers"
         )
     action_fields = (
-        np.ascontiguousarray(certificate_collisions, dtype=np.int32),
-        np.ascontiguousarray(certificate_minimum, dtype=np.float64),
-        np.ascontiguousarray(survival_preferred, dtype=np.uint8),
-        np.ascontiguousarray(safety_preferred, dtype=np.uint8),
-        np.ascontiguousarray(recovery_distance, dtype=np.float64),
-        np.ascontiguousarray(repair_volume, dtype=np.int32),
+        as_contiguous_array(certificate_collisions, dtype=np.int32),
+        as_contiguous_array(certificate_minimum, dtype=np.float64),
+        as_contiguous_array(survival_preferred, dtype=np.uint8),
+        as_contiguous_array(safety_preferred, dtype=np.uint8),
+        as_contiguous_array(recovery_distance, dtype=np.float64),
+        as_contiguous_array(repair_volume, dtype=np.int32),
     )
     action_count = len(action_fields[0])
     if (
@@ -930,7 +929,7 @@ def _frame_major_fields(
         if len(frame) != field_count:
             raise ValueError("frame-major field count mismatch")
         converted = tuple(
-            np.ascontiguousarray(values, dtype=dtypes[field])
+            as_contiguous_array(values, dtype=dtypes[field])
             for field, values in enumerate(frame)
         )
         count = len(converted[0])
@@ -1091,20 +1090,20 @@ class LocalSupplementalNativeWorkspace:
                 "supplemental hazard frame count must equal horizon"
             )
         action_fields = (
-            np.ascontiguousarray(action_direction, dtype=np.int32),
-            np.ascontiguousarray(action_dx, dtype=np.float64),
-            np.ascontiguousarray(action_dy, dtype=np.float64),
-            np.ascontiguousarray(action_focused, dtype=np.uint8),
-            np.ascontiguousarray(action_allowed, dtype=np.uint8),
-            np.ascontiguousarray(
+            as_contiguous_array(action_direction, dtype=np.int32),
+            as_contiguous_array(action_dx, dtype=np.float64),
+            as_contiguous_array(action_dy, dtype=np.float64),
+            as_contiguous_array(action_focused, dtype=np.uint8),
+            as_contiguous_array(action_allowed, dtype=np.uint8),
+            as_contiguous_array(
                 certificate_collisions,
                 dtype=np.int32,
             ),
-            np.ascontiguousarray(certificate_minimum, dtype=np.float64),
-            np.ascontiguousarray(survival_preferred, dtype=np.uint8),
-            np.ascontiguousarray(safety_preferred, dtype=np.uint8),
-            np.ascontiguousarray(recovery_distance, dtype=np.float64),
-            np.ascontiguousarray(repair_volume, dtype=np.int32),
+            as_contiguous_array(certificate_minimum, dtype=np.float64),
+            as_contiguous_array(survival_preferred, dtype=np.uint8),
+            as_contiguous_array(safety_preferred, dtype=np.uint8),
+            as_contiguous_array(recovery_distance, dtype=np.float64),
+            as_contiguous_array(repair_volume, dtype=np.int32),
         )
         action_count = len(action_fields[0])
         if (
@@ -1134,7 +1133,7 @@ class LocalSupplementalNativeWorkspace:
             dtypes=(np.dtype(np.float32),) * 7,
         )
         body_fields = tuple(
-            np.ascontiguousarray(values, dtype=np.float32)
+            as_contiguous_array(values, dtype=np.float32)
             for values in (
                 body_base_x,
                 body_base_y,

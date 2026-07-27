@@ -5313,3 +5313,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   quick suite passes `699/699` in `8.810 s`.
 - **Authority:** Structural value ownership only. Boolean feasibility,
   continuous margins, native parity, and live authority are unchanged.
+
+### 2026-07-27 — Viability transition-batch extraction
+
+- **Observed structural change:** Moved uniform-axis validation,
+  nearest-lattice projection arrays, complete transition-batch construction,
+  and its four-entry immutable cache into
+  `touhou_control.viability_transitions`. The main module is now 1,152 lines.
+- **Boundary:** Builders still select declared delay columns from the cached
+  complete support and construct the same local transition-batch values.
+  Sample rows/columns, Euclidean sample error, inside masks, terminal cells,
+  clamping, and cache key inputs are unchanged.
+- **Validation:** The focused viability suite passes `20/20`; Ruff, byte
+  compilation, and `git diff --check` pass. The Linux quick suite passes
+  `699/699` in `9.032 s`.
+- **Authority:** Structural transition ownership only. Signed-clearance
+  correction, Boolean/safety-value recurrence, native parity, and live
+  authority are unchanged.

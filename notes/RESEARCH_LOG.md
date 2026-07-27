@@ -5088,3 +5088,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural type ownership only. Planner mathematics,
   uncertainty, selection, issue behavior, fallback, and strategy are
   unchanged.
+
+### 2026-07-27 — Planner baseline stage extraction
+
+- **Observed structural change:** Added
+  `th08_live.planner_pass_baseline` with explicit preparation/result records.
+  It owns native-reducer arrays and the complete `BaselineBeamContext`
+  execution; the planner orchestrator is 1,503 lines.
+- **Causal-order boundary:** Native metadata is prepared once, supplemental
+  async work is still submitted before baseline execution, and baseline
+  returns its original timing start so the later aggregate timing boundary is
+  retained.
+- **Validation:** The five complete decision digests are unchanged; Ruff,
+  byte compilation, and `git diff --check` pass; quick suites pass `699/699`
+  on Linux in `8.837 s` and Windows in `13.130 s` with three platform skips.
+- **Authority:** Structural baseline ownership only. Beam state, pruning key,
+  reducer, hazard query, ranks, uncertainty, fallback, action authority, and
+  strategy are unchanged.

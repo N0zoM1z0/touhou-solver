@@ -10,7 +10,6 @@ from dataclasses import replace
 import numpy as np
 
 from th08_local_planner import (
-    BaselineBeamContext,
     CompletedSupplementalLookup,
     DamageDecisionFields,
     Decision,
@@ -31,6 +30,10 @@ from touhou_control.supplemental_local_beam import (
     SupplementalAction,
     SupplementalNode,
 )
+from th08_live.planner_pass_baseline import (
+    prepare_baseline_stage,
+    run_baseline_stage,
+)
 from th08_live.planner_pass_types import (
     LocalCertificateTimingAccumulator,
     PlannerModeTransition,
@@ -49,12 +52,10 @@ def _run_local_planner_pass(
 ) -> Decision | PlannerModeTransition:
     _PlannerModeTransition = PlannerModeTransition
     _PLANNER_ACTIONS = dependencies.planner_actions
-    _LOCAL_BEAM_REDUCER = dependencies.local_beam_reducer
     _LOCAL_SUPPLEMENTAL_BACKEND = dependencies.local_supplemental_backend
     BOMB = dependencies.bomb_mask
     FOCUS = dependencies.focus_mask
     SHOT = dependencies.shot_mask
-    COLLECTION_HALF_WIDTH = dependencies.collection_half_width
     ITEM_SAFETY_CLEARANCE = dependencies.item_safety_clearance
     PLAYER_RADIUS = dependencies.player_radius
     PLAYFIELD_LEFT = dependencies.playfield_left
@@ -73,7 +74,6 @@ def _run_local_planner_pass(
     _hazards_for_positions = dependencies.hazards_for_positions
     _minimum_travel_frames = dependencies.minimum_travel_frames
     _node_key = dependencies.node_key
-    _project_item = dependencies.project_item
     _project_player_for_read_lag = (
         dependencies.project_player_for_read_lag
     )
@@ -83,7 +83,6 @@ def _run_local_planner_pass(
     lookup_completed_supplemental = (
         dependencies.lookup_completed_supplemental
     )
-    run_baseline_beam = dependencies.run_baseline_beam
     select_progress_action = dependencies.select_progress_action
     search_supplemental_local_beam = (
         dependencies.search_supplemental_local_beam
@@ -125,7 +124,6 @@ def _run_local_planner_pass(
     viability_survival_actions = guidance.viability_survival_actions
 
     horizon = config.horizon
-    beam_width = config.beam_width
     preloss_continuation_preference = (
         config.preloss_continuation_preference
     )
@@ -345,71 +343,19 @@ def _run_local_planner_pass(
                 _certificate_timing_accumulator.snapshot()
             ),
         )
-    native_beam_enabled = (
-        _LOCAL_BEAM_REDUCER == "native"
-        and beam_dedup_mode == "quantized"
-        and not selected_items
+    baseline_stage = prepare_baseline_stage(
+        request=request,
+        planner_preparation=preparation,
+        dependencies=dependencies,
     )
-    planner_action_indices: dict[str, int] = {}
-    native_certificate_collisions = np.empty(0, dtype=np.int32)
-    native_certificate_minimum = np.empty(0, dtype=np.float64)
-    native_survival_preferred = np.empty(0, dtype=np.uint8)
-    native_safety_preferred = np.empty(0, dtype=np.uint8)
-    native_recovery_distance = np.empty(0, dtype=np.float64)
-    if native_beam_enabled:
-        planner_action_indices = {
-            action.name: index
-            for index, action in enumerate(_PLANNER_ACTIONS)
-        }
-        native_certificate_collisions = np.fromiter(
-            (
-                robust_preflight_certificates[
-                    action.name
-                ].worst_collisions
-                if action.name in robust_preflight_certificates
-                else 0
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.int32,
-            count=len(_PLANNER_ACTIONS),
-        )
-        native_certificate_minimum = np.fromiter(
-            (
-                robust_preflight_certificates[
-                    action.name
-                ].min_clearance
-                if action.name in robust_preflight_certificates
-                else 0.0
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.float64,
-            count=len(_PLANNER_ACTIONS),
-        )
-        native_survival_preferred = np.fromiter(
-            (
-                not survival_actions or action.name in survival_actions
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.uint8,
-            count=len(_PLANNER_ACTIONS),
-        )
-        native_safety_preferred = np.fromiter(
-            (
-                not safety_value_actions
-                or action.name in safety_value_actions
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.uint8,
-            count=len(_PLANNER_ACTIONS),
-        )
-        native_recovery_distance = np.fromiter(
-            (
-                recovery_by_action.get(action.name, math.inf)
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.float64,
-            count=len(_PLANNER_ACTIONS),
-        )
+    native_beam_enabled = baseline_stage.native_beam_enabled
+    native_certificate_collisions = (
+        baseline_stage.native_certificate_collisions
+    )
+    native_certificate_minimum = baseline_stage.native_certificate_minimum
+    native_survival_preferred = baseline_stage.native_survival_preferred
+    native_safety_preferred = baseline_stage.native_safety_preferred
+    native_recovery_distance = baseline_stage.native_recovery_distance
     presubmitted_async_identity: tuple[object, ...] | None = None
     if (
         preloss_supplemental_beam_active
@@ -565,57 +511,15 @@ def _run_local_planner_pass(
         _certificate_timing_accumulator.supplemental_beam_ms += (
             time.perf_counter_ns() - async_submit_started_ns
         ) / 1_000_000.0
-    beam_started_ns = time.perf_counter_ns()
-    beam = run_baseline_beam(
-        BaselineBeamContext(
-            initial_beam=tuple(beam),
-            actions=_PLANNER_ACTIONS,
-            action_hold_frames=action_hold_frames,
-            horizon=horizon,
-            effective_allowed_first_actions=(
-                effective_allowed_first_actions
-            ),
-            preserve_previous_direction_inertia=(
-                preserve_previous_direction_inertia
-            ),
-            previous_direction=previous_direction,
-            previous_focus=previous_focus,
-            selected_items=selected_items,
-            control_delay_frames=control_delay_frames,
-            bullet_frames=bullet_frames,
-            laser_frames=laser_frames,
-            enemy_bodies=enemy_bodies,
-            native_beam_enabled=native_beam_enabled,
-            planner_action_indices=planner_action_indices,
-            native_certificate_collisions=(
-                native_certificate_collisions
-            ),
-            native_certificate_minimum=native_certificate_minimum,
-            native_survival_preferred=native_survival_preferred,
-            native_safety_preferred=native_safety_preferred,
-            native_recovery_distance=native_recovery_distance,
-            beam_width=beam_width,
-            beam_dedup_mode=beam_dedup_mode,
-            target_x=target_x,
-            target_y=target_y,
-            target_deadline=target_deadline,
-            item_safety_clearance=ITEM_SAFETY_CLEARANCE,
-            collection_half_width=COLLECTION_HALF_WIDTH,
-            playfield_left=PLAYFIELD_LEFT,
-            playfield_right=PLAYFIELD_RIGHT,
-            playfield_top=PLAYFIELD_TOP,
-            playfield_bottom=PLAYFIELD_BOTTOM,
-            recovery_reserve_distance=recovery_reserve_distance,
-            diagonal_speed=UNFOCUSED_DIAGONAL_SPEED,
-            cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
-        ),
-        boundary_risk=_boundary_risk,
-        directions_opposed=_directions_opposed,
-        project_item=_project_item,
-        hazard_query=_hazards_for_positions,
+    baseline_result = run_baseline_stage(
+        baseline_stage,
+        initial_beam=beam,
+        bullet_frames=bullet_frames,
+        laser_frames=laser_frames,
         pruning_key=pruning_key,
-        native_reducer=native_backend.reduce_local_beam,
     )
+    beam_started_ns = baseline_result.started_ns
+    beam = list(baseline_result.beam)
 
     supplemental_beam: list[SearchNode] = []
     supplemental_failure: str | None = None

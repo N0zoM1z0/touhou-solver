@@ -26,7 +26,9 @@ from corridor_planner import (
     _hazard_clearance_volume,
     _segment_clearance_field,
     plan_corridor,
+    plan_prepared_corridor,
 )
+from touhou_control.corridor import prepare_corridor_problem
 from touhou_control.native_backend import available as native_available
 from touhou_control.packed_hazards import PackedSegmentFrames
 from touhou_control.trajectory import PiecewiseLinearTrajectory, VelocityChange
@@ -45,6 +47,87 @@ CONFIG = CorridorConfig(
 
 
 class CorridorPlannerTests(unittest.TestCase):
+    def test_prepared_problem_is_callback_free_and_solve_equivalent(
+        self,
+    ) -> None:
+        callbacks: list[str] = []
+        bounds = CorridorBounds(0.0, 24.0, 0.0, 24.0)
+        config = CorridorConfig(
+            grid_step=8.0,
+            frames_per_layer=4,
+            horizon_frames=8,
+        )
+        control = RobustControlSpec(
+            actions=(
+                ControlAction("stay", 0.0, 0.0),
+                ControlAction("right", 2.0, 0.0),
+            ),
+            delay_frames=(1, 2),
+            nominal_delay=1,
+            active_action="stay",
+            retain_query_survival_problem=True,
+            pre_viability_problem_hook=lambda problem: callbacks.append(
+                "unexpected"
+            ),
+        )
+        prepared = prepare_corridor_problem(
+            bounds=bounds,
+            config=config,
+            robust_control=control,
+        )
+
+        self.assertEqual(callbacks, [])
+        self.assertIsNone(
+            prepared.robust_control.pre_viability_problem_hook
+        )
+        self.assertIsNotNone(prepared.survival_query_problem)
+        self.assertEqual(prepared.clearance_volume.shape, (9, 4, 4))
+        self.assertGreaterEqual(prepared.clearance_ms, 0.0)
+        self.assertGreaterEqual(prepared.query_problem_ms, 0.0)
+        self.assertGreaterEqual(
+            prepared.preparation_ms,
+            prepared.clearance_ms,
+        )
+
+        split = plan_prepared_corridor(
+            start_x=8.0,
+            start_y=8.0,
+            prepared_problem=prepared,
+            preferred_x=16.0,
+        )
+        direct = plan_corridor(
+            start_x=8.0,
+            start_y=8.0,
+            bounds=bounds,
+            config=config,
+            preferred_x=16.0,
+            robust_control=RobustControlSpec(
+                actions=control.actions,
+                delay_frames=control.delay_frames,
+                nominal_delay=control.nominal_delay,
+                active_action=control.active_action,
+                retain_query_survival_problem=True,
+            ),
+        )
+
+        self.assertEqual(callbacks, [])
+        self.assertEqual(split.reachable, direct.reachable)
+        self.assertEqual(split.path, direct.path)
+        self.assertEqual(split.lane, direct.lane)
+        self.assertEqual(split.reason, direct.reason)
+        self.assertEqual(
+            split.initial_safe_action_count,
+            direct.initial_safe_action_count,
+        )
+        self.assertEqual(
+            split.initial_repair_volume,
+            direct.initial_repair_volume,
+        )
+        self.assertEqual(
+            tuple(name for name, _ in split.solver_timing_ms),
+            tuple(name for name, _ in direct.solver_timing_ms),
+        )
+
     def test_retained_query_hook_runs_after_clearance_before_viability(
         self,
     ) -> None:

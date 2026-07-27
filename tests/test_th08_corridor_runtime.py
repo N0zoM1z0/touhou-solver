@@ -8,6 +8,7 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
+import th08_corridor_runtime as corridor_runtime_module
 
 from corridor_planner import CorridorPlan
 from th08_corridor_runtime import (
@@ -197,6 +198,73 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
             "native_augmented_pipeline_workspace",
         )
         workspace_solution.pipeline_survival_workspace.close()
+
+    def test_pipeline_prewarm_starts_from_prepared_problem_before_solve(
+        self,
+    ) -> None:
+        events: list[str] = []
+        service = object()
+        original_prepare = (
+            corridor_runtime_module.prepare_lowered_th08_corridor
+        )
+        original_solve = (
+            corridor_runtime_module.plan_prepared_lowered_th08_corridor
+        )
+
+        def checked_prepare(**kwargs):
+            prepared = original_prepare(**kwargs)
+            events.append("prepare")
+            return prepared
+
+        def checked_service(**kwargs):
+            self.assertEqual(events, ["prepare"])
+            self.assertEqual(kwargs["problem"].horizon_frames, 80)
+            events.append("prewarm")
+            return service
+
+        def checked_solve(**kwargs):
+            self.assertEqual(events, ["prepare", "prewarm"])
+            prepared_problem = kwargs["prepared_problem"]
+            self.assertIsNotNone(
+                prepared_problem.survival_query_problem
+            )
+            events.append("solve")
+            return original_solve(**kwargs)
+
+        with (
+            patch(
+                "th08_corridor_runtime.prepare_lowered_th08_corridor",
+                side_effect=checked_prepare,
+            ),
+            patch(
+                "th08_corridor_runtime.PipelinePrewarmService",
+                side_effect=checked_service,
+            ),
+            patch(
+                "th08_corridor_runtime."
+                "plan_prepared_lowered_th08_corridor",
+                side_effect=checked_solve,
+            ),
+        ):
+            solution = solve_corridor(
+                source_frame=100,
+                snapshot_frame=90,
+                forecast_lead_frames=10,
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                control_delay_candidates=(1, 2),
+                nominal_control_delay=1,
+                active_action="stay",
+                pipeline_prewarm_shadow=True,
+            )
+
+        self.assertEqual(events, ["prepare", "prewarm", "solve"])
+        self.assertIs(solution.pipeline_prewarm_service, service)
+        self.assertIsNone(solution.pipeline_prewarm_start_error)
 
     def test_background_resource_controls_are_applied_and_reported(self) -> None:
         with (

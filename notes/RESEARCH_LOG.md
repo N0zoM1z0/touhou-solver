@@ -4176,3 +4176,39 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   complete quick suite passes `586/586` on Linux in `5.469 s` and on Windows
   in `7.966 s` with one existing skip; Python compilation and
   `git diff --check` pass.
+
+## 2026-07-27: Corridor Prepared-Problem Separation
+
+- **Scope:** Added the callback-free `PreparedCorridorProblem` value and
+  separated robust grid/clearance/query-problem preparation from Boolean
+  induction. `plan_prepared_corridor()` is now the explicit pure solve entry;
+  the historical `plan_corridor()` and TH08 adapter signatures remain
+  compatible façades.
+- **Observed ownership boundary:** The prepared value retains axes, signed
+  clearance, viability configuration, neutral hazards, optional retained
+  query problem, and preparation timing, but no executor, future, service, or
+  callback. `th08_corridor_runtime.solve_corridor()` now performs
+  `lower -> prepare -> optional prewarm start -> solve` explicitly. A retained
+  ordering test observes that the prewarm service receives the prepared query
+  problem before Boolean induction starts.
+- **Compatibility:** The old pre-viability callback is invoked only by the
+  compatibility façades and is stripped before constructing the prepared
+  value. Its historical timing key remains present; clearance,
+  query-problem construction, and explicit pre-solve orchestration remain
+  separately measured before being reported under the existing timing names.
+- **Observed structure:** `corridor_planner.py` is 751 lines after adding the
+  public prepared-solve façade. Preparation now lives in
+  `touhou_control.corridor.prepared`; the remaining planner responsibilities
+  are robust induction/refinement/representative rollout, legacy forward
+  planning, and compatibility dispatch.
+- **Authority:** This is a structure and lifecycle-ownership change only. It
+  changes no physical model, uncertainty branch, recurrence, terminal set,
+  float32 clearance operation, action mask, ranking, live/shadow setting,
+  strategy status, native implementation, or C ABI. It adds no physical
+  evidence and changes no counterexample status.
+- **Validation:** The R0 characterization report remains fixture-identical;
+  prepared/direct result and callback-free ownership tests pass; corridor
+  tests pass `27/27`; TH08 adapter/runtime tests pass `20/20`; the complete
+  quick suite passes `588/588` on Linux in `5.222 s` and on Windows in
+  `8.055 s` with one existing skip; Python compilation and
+  `git diff --check` pass.

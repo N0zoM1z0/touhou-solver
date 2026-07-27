@@ -43,6 +43,10 @@ from touhou_control.corridor.model import (
     SegmentHazard,
     SegmentTrajectoryHazard,
 )
+from touhou_control.corridor.prepared import (
+    PreparedCorridorProblem,
+    prepare_corridor_problem,
+)
 from touhou_control.packed_hazards import PackedSegmentFrames
 from touhou_control.query_survival import SurvivalQueryProblem
 from touhou_control.viability import (
@@ -104,63 +108,26 @@ def _plan_robust_corridor(
     *,
     start_x: float,
     start_y: float,
-    bounds: CorridorBounds,
-    aabbs: tuple[MovingAabbHazard, ...],
-    aabb_trajectories: tuple[AabbTrajectoryHazard, ...],
-    piecewise_aabbs: tuple[PiecewiseAabbHazard, ...],
-    segments: tuple[SegmentHazard, ...],
-    segment_trajectories: tuple[SegmentTrajectoryHazard, ...],
-    packed_segments: PackedSegmentFrames | None,
+    prepared_problem: PreparedCorridorProblem,
     preferred_x: float | None,
     preferred_y: float | None,
     required_gate_lane: str | None,
-    config: CorridorConfig,
-    robust_control: RobustControlSpec,
+    pre_viability_elapsed_ms: float = 0.0,
 ) -> CorridorPlan:
-    solve_started = time.perf_counter()
-    x_axis = _axis(bounds.left, bounds.right, config.grid_step)
-    y_axis = _axis(bounds.top, bounds.bottom, config.grid_step)
-    grid_x, grid_y = np.meshgrid(x_axis, y_axis)
-    clearance_volume = _hazard_clearance_volume(
-        grid_x,
-        grid_y,
-        aabbs=aabbs,
-        aabb_trajectories=aabb_trajectories,
-        piecewise_aabbs=piecewise_aabbs,
-        segments=segments,
-        segment_trajectories=segment_trajectories,
-        packed_segments=packed_segments,
-        config=config,
-    )
-    clearance_finished = time.perf_counter()
-    survival_query_problem = (
-        SurvivalQueryProblem(
-            x_axis=x_axis,
-            y_axis=y_axis,
-            clearance_volume=clearance_volume,
-            actions=robust_control.actions,
-            delay_frames=robust_control.delay_frames,
-            nominal_delay=robust_control.nominal_delay,
-            config=ViabilityConfig(
-                frames_per_layer=config.frames_per_layer,
-                required_clearance=config.required_clearance,
-                clamp_to_bounds=True,
-                repair_radius_cells=1,
-            ),
-        )
-        if (
-            robust_control.retain_query_survival_problem
-            and robust_control.terminal_viable is None
-            and not robust_control.refinement_grid_steps
-        )
-        else None
-    )
-    if robust_control.pre_viability_problem_hook is not None:
-        assert survival_query_problem is not None
-        robust_control.pre_viability_problem_hook(
-            survival_query_problem
-        )
-    problem_hook_finished = time.perf_counter()
+    bounds = prepared_problem.bounds
+    config = prepared_problem.config
+    robust_control = prepared_problem.robust_control
+    x_axis = prepared_problem.x_axis
+    y_axis = prepared_problem.y_axis
+    clearance_volume = prepared_problem.clearance_volume
+    survival_query_problem = prepared_problem.survival_query_problem
+    aabbs = prepared_problem.aabbs
+    aabb_trajectories = prepared_problem.aabb_trajectories
+    piecewise_aabbs = prepared_problem.piecewise_aabbs
+    segments = prepared_problem.segments
+    segment_trajectories = prepared_problem.segment_trajectories
+    packed_segments = prepared_problem.packed_segments
+    viability_started = time.perf_counter()
     policy = build_robust_viability_policy(
         x_axis=x_axis,
         y_axis=y_axis,
@@ -168,12 +135,7 @@ def _plan_robust_corridor(
         actions=robust_control.actions,
         delay_frames=robust_control.delay_frames,
         nominal_delay=robust_control.nominal_delay,
-        config=ViabilityConfig(
-            frames_per_layer=config.frames_per_layer,
-            required_clearance=config.required_clearance,
-            clamp_to_bounds=True,
-            repair_radius_cells=1,
-        ),
+        config=prepared_problem.viability_config,
         terminal_viable=robust_control.terminal_viable,
         survival_labels=robust_control.survival_labels,
     )
@@ -312,15 +274,16 @@ def _plan_robust_corridor(
     base_timing = (
         (
             "clearance",
-            (clearance_finished - solve_started) * 1000.0,
+            prepared_problem.clearance_ms,
         ),
         (
             "viability",
-            (viability_finished - problem_hook_finished) * 1000.0,
+            (viability_finished - viability_started) * 1000.0,
         ),
         (
             "pre_viability_hook",
-            (problem_hook_finished - clearance_finished) * 1000.0,
+            prepared_problem.query_problem_ms
+            + pre_viability_elapsed_ms,
         ),
         (
             "safety_value",
@@ -532,6 +495,48 @@ def _plan_robust_corridor(
     )
 
 
+def plan_prepared_corridor(
+    *,
+    start_x: float,
+    start_y: float,
+    prepared_problem: PreparedCorridorProblem,
+    preferred_x: float | None = None,
+    preferred_y: float | None = None,
+    required_gate_lane: str | None = None,
+    pre_viability_elapsed_ms: float = 0.0,
+) -> CorridorPlan:
+    """Solve one explicitly prepared robust corridor problem.
+
+    Runtime services may be started before this call.  The solver itself owns
+    no callback or service lifecycle.
+    """
+
+    if required_gate_lane not in (None, "left", "center", "right"):
+        raise ValueError("required gate lane must be left, center, or right")
+    bounds = prepared_problem.bounds
+    if not (
+        bounds.left <= start_x <= bounds.right
+        and bounds.top <= start_y <= bounds.bottom
+    ):
+        raise ValueError("corridor start is outside bounds")
+    if (
+        not math.isfinite(pre_viability_elapsed_ms)
+        or pre_viability_elapsed_ms < 0.0
+    ):
+        raise ValueError(
+            "pre-viability elapsed time must be finite and nonnegative"
+        )
+    return _plan_robust_corridor(
+        start_x=start_x,
+        start_y=start_y,
+        prepared_problem=prepared_problem,
+        preferred_x=preferred_x,
+        preferred_y=preferred_y,
+        required_gate_lane=required_gate_lane,
+        pre_viability_elapsed_ms=pre_viability_elapsed_ms,
+    )
+
+
 def plan_corridor(
     *,
     start_x: float,
@@ -559,21 +564,34 @@ def plan_corridor(
     ):
         raise ValueError("corridor start is outside bounds")
     if robust_control is not None:
-        return _plan_robust_corridor(
-            start_x=start_x,
-            start_y=start_y,
+        hook = robust_control.pre_viability_problem_hook
+        prepared_problem = prepare_corridor_problem(
             bounds=bounds,
+            config=config,
+            robust_control=robust_control,
             aabbs=aabbs,
             aabb_trajectories=aabb_trajectories,
             piecewise_aabbs=piecewise_aabbs,
             segments=segments,
             segment_trajectories=segment_trajectories,
             packed_segments=packed_segments,
+        )
+        hook_elapsed_ms = 0.0
+        if hook is not None:
+            assert prepared_problem.survival_query_problem is not None
+            hook_started = time.perf_counter()
+            hook(prepared_problem.survival_query_problem)
+            hook_elapsed_ms = (
+                time.perf_counter() - hook_started
+            ) * 1000.0
+        return plan_prepared_corridor(
+            start_x=start_x,
+            start_y=start_y,
+            prepared_problem=prepared_problem,
             preferred_x=preferred_x,
             preferred_y=preferred_y,
             required_gate_lane=required_gate_lane,
-            config=config,
-            robust_control=robust_control,
+            pre_viability_elapsed_ms=hook_elapsed_ms,
         )
     x_axis = _axis(bounds.left, bounds.right, config.grid_step)
     y_axis = _axis(bounds.top, bounds.bottom, config.grid_step)

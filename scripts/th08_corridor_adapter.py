@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import math
+import time
 from dataclasses import dataclass
 from typing import Callable, Protocol
 
@@ -19,12 +20,17 @@ from corridor_planner import (
     SegmentHazard,
     SegmentTrajectoryHazard,
     plan_corridor,
+    plan_prepared_corridor,
 )
 from th08_laser_model import (
     LaserState,
     laser_collision_geometry_frames,
 )
 from th08_movement_model import ROUTE2_MOVEMENT_PROFILE
+from touhou_control.corridor import (
+    PreparedCorridorProblem,
+    prepare_corridor_problem,
+)
 from touhou_control.packed_hazards import PackedSegmentFrames
 from touhou_control.query_survival import SurvivalQueryProblem
 from touhou_control.viability import ControlAction
@@ -444,6 +450,106 @@ def lower_th08_corridor_hazards(
     )
 
 
+def _th08_robust_control_spec(
+    *,
+    control_delay_candidates: tuple[int, ...],
+    nominal_control_delay: int,
+    active_action: str,
+    safety_value_horizon_frames: int,
+    terminal_viable: np.ndarray | None,
+    survival_labels: bool,
+    retain_query_survival_problem: bool,
+    refinement_grid_steps: tuple[float, ...],
+    pre_viability_problem_hook: (
+        Callable[[SurvivalQueryProblem], None] | None
+    ) = None,
+) -> RobustControlSpec:
+    return RobustControlSpec(
+        actions=TH08_VIABILITY_ACTIONS,
+        delay_frames=control_delay_candidates,
+        nominal_delay=nominal_control_delay,
+        active_action=active_action,
+        safety_value_horizon_frames=safety_value_horizon_frames,
+        terminal_viable=terminal_viable,
+        survival_labels=survival_labels,
+        retain_query_survival_problem=retain_query_survival_problem,
+        refinement_grid_steps=refinement_grid_steps,
+        pre_viability_problem_hook=pre_viability_problem_hook,
+    )
+
+
+def _prepare_lowered_th08_corridor_with_control(
+    *,
+    hazards: LoweredCorridorHazards,
+    config: CorridorConfig,
+    robust_control: RobustControlSpec,
+) -> PreparedCorridorProblem:
+    return prepare_corridor_problem(
+        bounds=TH08_PLAYFIELD,
+        config=config,
+        robust_control=robust_control,
+        aabbs=hazards.aabbs,
+        piecewise_aabbs=hazards.piecewise_aabbs,
+        segment_trajectories=hazards.segment_trajectories,
+        packed_segments=hazards.packed_segments,
+    )
+
+
+def prepare_lowered_th08_corridor(
+    *,
+    hazards: LoweredCorridorHazards,
+    config: CorridorConfig = TH08_CORRIDOR_CONFIG,
+    control_delay_candidates: tuple[int, ...],
+    nominal_control_delay: int,
+    active_action: str = "stay",
+    safety_value_horizon_frames: int = 0,
+    terminal_viable: np.ndarray | None = None,
+    survival_labels: bool = False,
+    retain_query_survival_problem: bool = False,
+    refinement_grid_steps: tuple[float, ...] = (),
+) -> PreparedCorridorProblem:
+    """Prepare one TH08 robust problem without starting runtime services."""
+
+    robust_control = _th08_robust_control_spec(
+        control_delay_candidates=control_delay_candidates,
+        nominal_control_delay=nominal_control_delay,
+        active_action=active_action,
+        safety_value_horizon_frames=safety_value_horizon_frames,
+        terminal_viable=terminal_viable,
+        survival_labels=survival_labels,
+        retain_query_survival_problem=retain_query_survival_problem,
+        refinement_grid_steps=refinement_grid_steps,
+    )
+    return _prepare_lowered_th08_corridor_with_control(
+        hazards=hazards,
+        config=config,
+        robust_control=robust_control,
+    )
+
+
+def plan_prepared_lowered_th08_corridor(
+    *,
+    player_x: float,
+    player_y: float,
+    prepared_problem: PreparedCorridorProblem,
+    preferred_x: float = 192.0,
+    preferred_y: float = 368.0,
+    required_gate_lane: str | None = None,
+    pre_viability_elapsed_ms: float = 0.0,
+) -> CorridorPlan:
+    """Solve an explicitly prepared TH08 robust corridor problem."""
+
+    return plan_prepared_corridor(
+        start_x=player_x,
+        start_y=player_y,
+        prepared_problem=prepared_problem,
+        preferred_x=preferred_x,
+        preferred_y=preferred_y,
+        required_gate_lane=required_gate_lane,
+        pre_viability_elapsed_ms=pre_viability_elapsed_ms,
+    )
+
+
 def plan_lowered_th08_corridor(
     *,
     player_x: float,
@@ -467,37 +573,58 @@ def plan_lowered_th08_corridor(
 ) -> CorridorPlan:
     """Plan from retained neutral hazards at any compatible resolution."""
 
-    robust_control = None
-    if control_delay_candidates is not None:
-        if nominal_control_delay is None:
-            raise ValueError(
-                "nominal control delay is required for robust viability"
-            )
-        robust_control = RobustControlSpec(
-            actions=TH08_VIABILITY_ACTIONS,
-            delay_frames=control_delay_candidates,
-            nominal_delay=nominal_control_delay,
-            active_action=active_action,
-            safety_value_horizon_frames=safety_value_horizon_frames,
-            terminal_viable=terminal_viable,
-            survival_labels=survival_labels,
-            retain_query_survival_problem=retain_query_survival_problem,
-            refinement_grid_steps=refinement_grid_steps,
-            pre_viability_problem_hook=pre_viability_problem_hook,
+    if control_delay_candidates is None:
+        return plan_corridor(
+            start_x=player_x,
+            start_y=player_y,
+            bounds=TH08_PLAYFIELD,
+            aabbs=hazards.aabbs,
+            piecewise_aabbs=hazards.piecewise_aabbs,
+            segment_trajectories=hazards.segment_trajectories,
+            packed_segments=hazards.packed_segments,
+            preferred_x=preferred_x,
+            preferred_y=preferred_y,
+            required_gate_lane=required_gate_lane,
+            config=config,
         )
-    return plan_corridor(
-        start_x=player_x,
-        start_y=player_y,
-        bounds=TH08_PLAYFIELD,
-        aabbs=hazards.aabbs,
-        piecewise_aabbs=hazards.piecewise_aabbs,
-        segment_trajectories=hazards.segment_trajectories,
-        packed_segments=hazards.packed_segments,
+    if nominal_control_delay is None:
+        raise ValueError(
+            "nominal control delay is required for robust viability"
+        )
+    robust_control = _th08_robust_control_spec(
+        control_delay_candidates=control_delay_candidates,
+        nominal_control_delay=nominal_control_delay,
+        active_action=active_action,
+        safety_value_horizon_frames=safety_value_horizon_frames,
+        terminal_viable=terminal_viable,
+        survival_labels=survival_labels,
+        retain_query_survival_problem=retain_query_survival_problem,
+        refinement_grid_steps=refinement_grid_steps,
+        pre_viability_problem_hook=pre_viability_problem_hook,
+    )
+    prepared_problem = _prepare_lowered_th08_corridor_with_control(
+        hazards=hazards,
+        config=config,
+        robust_control=robust_control,
+    )
+    hook_elapsed_ms = 0.0
+    if pre_viability_problem_hook is not None:
+        assert prepared_problem.survival_query_problem is not None
+        hook_started = time.perf_counter()
+        pre_viability_problem_hook(
+            prepared_problem.survival_query_problem
+        )
+        hook_elapsed_ms = (
+            time.perf_counter() - hook_started
+        ) * 1000.0
+    return plan_prepared_lowered_th08_corridor(
+        player_x=player_x,
+        player_y=player_y,
+        prepared_problem=prepared_problem,
         preferred_x=preferred_x,
         preferred_y=preferred_y,
         required_gate_lane=required_gate_lane,
-        config=config,
-        robust_control=robust_control,
+        pre_viability_elapsed_ms=hook_elapsed_ms,
     )
 
 

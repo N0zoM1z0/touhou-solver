@@ -23,6 +23,7 @@ from .model import (
     SegmentHazard,
     SegmentTrajectoryHazard,
 )
+from .prepared import PreparedCorridorProblem, prepare_corridor_problem
 
 __all__ = [
     "AabbHazard",
@@ -33,6 +34,7 @@ __all__ = [
     "CorridorPoint",
     "MovingAabbHazard",
     "PiecewiseAabbHazard",
+    "PreparedCorridorProblem",
     "RobustControlSpec",
     "SegmentHazard",
     "SegmentTrajectoryHazard",
@@ -44,6 +46,7 @@ __all__ = [
     "hazard_clearance_volume",
     "movement_offsets",
     "packed_segment_clearance_field",
+    "prepare_corridor_problem",
     "segment_clearance_field",
     "shift_from_source",
 ]

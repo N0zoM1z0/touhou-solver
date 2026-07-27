@@ -19,7 +19,8 @@ from th08_corridor_adapter import (
     LoweredCorridorHazards,
     TH08_CORRIDOR_CONFIG,
     lower_th08_corridor_hazards,
-    plan_lowered_th08_corridor,
+    plan_prepared_lowered_th08_corridor,
+    prepare_lowered_th08_corridor,
 )
 from touhou_control import native_backend
 from touhou_control.background_priority import (
@@ -292,11 +293,8 @@ def solve_corridor(
             )
 
     try:
-        plan = plan_lowered_th08_corridor(
-            player_x=player_x,
-            player_y=player_y,
+        prepared_problem = prepare_lowered_th08_corridor(
             hazards=hazards,
-            required_gate_lane=required_gate_lane,
             control_delay_candidates=control_delay_candidates,
             nominal_control_delay=nominal_control_delay,
             active_action=active_action,
@@ -304,11 +302,23 @@ def solve_corridor(
             survival_labels=LIVE_SURVIVAL_LABELS,
             retain_query_survival_problem=True,
             refinement_grid_steps=LIVE_REFINEMENT_GRID_STEPS,
-            pre_viability_problem_hook=(
-                start_pipeline_prewarm
-                if pipeline_prewarm_shadow
-                else None
-            ),
+        )
+        prewarm_elapsed_ms = 0.0
+        if pipeline_prewarm_shadow:
+            assert prepared_problem.survival_query_problem is not None
+            prewarm_started = time.perf_counter()
+            start_pipeline_prewarm(
+                prepared_problem.survival_query_problem
+            )
+            prewarm_elapsed_ms = (
+                time.perf_counter() - prewarm_started
+            ) * 1000.0
+        plan = plan_prepared_lowered_th08_corridor(
+            player_x=player_x,
+            player_y=player_y,
+            prepared_problem=prepared_problem,
+            required_gate_lane=required_gate_lane,
+            pre_viability_elapsed_ms=prewarm_elapsed_ms,
         )
     except BaseException:
         if prewarm_service is not None:

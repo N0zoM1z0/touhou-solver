@@ -2,11 +2,11 @@
 
 Date: 2026-07-28
 
-Status: B4/B5 failed three times with retained evidence. The schema-v3
-physical repeat validates columnar evidence and closes CE-0146's capture
-loss, but CE-0143 physical performance, CE-0145 source coverage, and
-CE-0147 callback-horizon coverage remain open. No future-hazard or physical
-action authority is granted.
+Status: B4/B5 failed four times with retained evidence. The schema-v4
+physical repeat validates bounded durability and materially reduces
+birth-record emission latency, but CE-0143 physical performance, CE-0145
+source coverage, and CE-0147 callback-horizon coverage remain open. No
+future-hazard or physical action authority is granted.
 
 ## Outcome
 
@@ -72,6 +72,28 @@ data path but still fails B4:
   rows, scanning 322,816 instructions with zero reported events and without
   horizon coverage. Empty events are therefore not a complete no-callback
   certificate.
+
+The schema-v4 repeat
+`lunatic_route2_stage4a_unattended_20260728_050305` validates the flush
+correction but again fails B4:
+
+- previous birth-record emit p95 falls from `1.1783` to `0.1708 ms`;
+  after 1..8 and 9..32 evidence rows it falls from `1.3307/1.3777` to
+  `0.1009/0.1839 ms`;
+- the remaining synchronous columnar JSON encode/write is still
+  output-linear: the 321+ bucket has only 12 samples but p95/max is
+  `5.3563 ms`;
+- observer wall p95/p99/max improves to
+  `0.2997/0.5772/10.2234 ms`, still above the unchanged
+  `0.20/0.40/2.00 ms` limits;
+- current-thread CPU samples are quantized at 15.625 ms on this Windows
+  runtime, so they cannot separate sub-millisecond execution from scheduler
+  delay and cannot substitute for the wall gate;
+- all 6,008 active-spell rows classify. There are 2,114 timed sightings,
+  103 deduplicated events, and 6,023 unique temporal supports over 95,532
+  activation edges (6.3047%);
+- every one of 1,330 spell-57 rows again reaches the 256-instruction callback
+  cap without horizon coverage, independently reproducing CE-0147.
 
 ## Physical Scope And Provenance
 
@@ -142,6 +164,26 @@ process. The raw 492,656,459-byte trace remains local and ignored; its SHA-256
 is `c8d25c8b638794db93c1490a07829658d42bc707d1b65f8c674ec499458dec83`.
 The canonical fresh-attempt hit is frame 2,608, classified as an observed
 bullet overlap after global viability exhaustion.
+
+The schema-v4 repeat report is:
+
+- `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_050305.birth_audit.json`
+- SHA-256
+  `bcd153b041c046ca1047181b62becdc8f144fc95a42076c94610576bbf23105e`;
+- two generations from the same raw trace are byte-identical;
+- `passed = false`;
+- validation gate: pass;
+- observer budget gate: fail;
+- timed-intent-available gate: pass.
+
+The run completed frames `2..44273` over 14,394 decisions with accepted
+route completion, 12 hits at
+`1743, 4261, 11456, 12075, 12924, 19000, 21350, 22433, 30479, 36975,
+38631, 43525`, hard no-Bomb, supervisor completion, and no residual
+game/controller process. The ignored 488,428,485-byte raw trace SHA-256 is
+`cf5161cf34209fd44be85c177ddaf89c5cee7c3bb73be6103f95296a8c834a9f`.
+The canonical fresh-attempt contact at frame 1,743 is an observed bullet
+overlap after global viability exhaustion.
 
 ## Corrections After The Failed Run
 
@@ -258,30 +300,21 @@ The following remain unchanged:
 - Bomb remains forbidden;
 - no B6 conservative birth envelope may be proposed.
 
-The third run completed frames `1..45742`, 15,009 decisions, 20 hits,
-accepted route completion, hard no-Bomb, supervisor completion, and cleanup.
-The deterministic report SHA-256 is
-`9652ba603c76bb9f43e98944f569cc93495f52039e670324bbb122980c97c49c`;
-the ignored 486,792,655-byte raw trace SHA-256 is
-`8f465c054781696b37dd1a3ef4818c4f7ba373b85d09a01a8d4131921447467f`.
+The fourth run is a valid physical correction gate, not a controlled survival
+comparison. Its 12 hits versus the preceding 20 are RNG-, density-, phase-,
+resource-, and trajectory-distinct. Nine contacts are observed bullet
+overlaps and three are modeled committed-prefix collisions; every contact
+followed global viability exhaustion. Decision cadence remains 2 frames
+median and 3 frames p95, and next-observation input visibility is 0.9388.
 
-Schema v4 removes the redundant per-evidence flush while retaining immediate
-error flush and forcing a same-iteration decision record/flush whenever birth
-tracing is enabled. Session close remains the terminal fallback. It also
-records observer thread-CPU beside wall time, so the next physical report can
-separate executed extraction cost from scheduler preemption without changing
-the wall-time gate.
+The bounded flush change is retained. Thread CPU timing is rejected as a
+useful Windows sub-millisecond diagnostic, and the wall gate remains failed.
+The next performance gate should remove the duplicate post-issue sparse pool
+traversal through a parity-gated native extractor or reuse an exact active-slot
+capture without changing observation semantics. It must retain the independent
+Python scalar oracle, exact ordered columns, fixed wall limits, same-iteration
+durability, no added RPM, and default-off/no-action authority.
 
-The small-candidate path uses four scalar native-struct reads per slot up to
-32 candidates instead of seven NumPy gather calls. Fixed Linux/Windows p95
-for 1/8/32 candidates is respectively
-`0.0578/0.0627/0.1038 ms` and `0.0495/0.0790/0.0963 ms`; 592-candidate p95
-remains `0.1417/0.1480 ms`. Interleaved decode ratios are `0.981/0.963`.
-Complete Linux/Windows quick suites pass `787/787` in `8.920/15.147 s`, with
-three Windows skips.
-
-The next physical gate is therefore schema v4 under unchanged
-timing/cadence/no-Bomb limits. In parallel, callback lookahead must expose an
-explicit incomplete coverage result; an instruction-limit row cannot
-authorize an empty future event set. Stage 5 or 6 follows only after Stage-4A
-semantics and performance pass.
+In parallel, callback lookahead must expose an explicit incomplete result; an
+instruction-limit row cannot authorize an empty future event set. Stage 5 or
+6 follows only after Stage-4A semantics and performance pass.

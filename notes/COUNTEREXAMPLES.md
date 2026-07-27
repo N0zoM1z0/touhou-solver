@@ -3960,8 +3960,9 @@ no physical action authority
 
 ## CE-0143: Birth observation passed synthetic timing but failed the physical issue boundary
 
-Status: observed physical delivery failure; post-issue isolation, scratch
-reuse, and columnar representation complete; physical recheck pending
+Status: observed physical delivery failure after four retained gates;
+post-issue isolation, columnar representation, and bounded flush complete;
+native or exact active-slot extraction gate open
 
 - **Observed symptom:** Default-off Lunatic Stage-4A trial
   `20260728_031127` completed 14,411 birth-audit decisions with zero observer
@@ -4031,6 +4032,23 @@ reuse, and columnar representation complete; physical recheck pending
   brings fixed Linux/Windows 1/8/32-candidate p95 to
   `0.0578/0.0627/0.1038` and `0.0495/0.0790/0.0963 ms`. Physical scheduler
   tails remain open.
+- **Schema-v4 physical recheck:** Run `20260728_050305` reduced overall
+  previous birth-record emit p95 from `1.1783` to `0.1708 ms`, proving that
+  the redundant flush was real. Observer wall p95/p99/max nevertheless
+  remained `0.2997/0.5772/10.2234 ms`, so the unchanged gate failed again.
+  Windows current-thread CPU samples were quantized at 15.625-ms increments
+  and cannot explain sub-millisecond wall samples or weaken the gate.
+  Synchronous JSON encode/write remains output-linear: the 321+ evidence
+  bucket has p95/max `5.3563 ms`. Raw SHA-256 is
+  `cf5161cf34209fd44be85c177ddaf89c5cee7c3bb73be6103f95296a8c834a9f`;
+  deterministic report SHA-256 is
+  `bcd153b041c046ca1047181b62becdc8f144fc95a42076c94610576bbf23105e`.
+- **Next correction gate:** Compare a parity-gated native extractor with an
+  exact active-slot handoff from the existing decode path. Either path must
+  preserve all transition/status/state/age/geometry columns, ordering,
+  independent Python scalar parity, no extra RPM, and fixed wall limits.
+  Optional asynchronous serialization may be measured separately, but it
+  cannot hide extraction or weaken same-iteration durability.
 
 ## CE-0144: Unknown deferred-fire state erased every physical timed intent
 

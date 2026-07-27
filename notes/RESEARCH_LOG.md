@@ -6606,3 +6606,51 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** this is a performance/durability correction only. B4 remains
   failed until a schema-v4 physical run; CE-0147 and all future coverage
   authority remain unchanged.
+
+## 2026-07-28 — Retained the schema-v4 G5 physical recheck
+
+- **Observed physical scope:** Run
+  `lunatic_route2_stage4a_unattended_20260728_050305` completed Lunatic
+  Stage 4A over frames `2..44273` and 14,394 decisions with accepted route
+  completion, 12 hits, hard no-Bomb over every decision, zero parse errors,
+  supervisor completion, released input, and no residual game process.
+- **Observed durability improvement:** Removing the redundant evidence-row
+  flush reduced previous birth-record emit p95 from `1.1783` to
+  `0.1708 ms`. The 1..8 and 9..32 evidence buckets improved from
+  `1.3307/1.3777` to `0.1009/0.1839 ms`. The retained same-iteration decision
+  flush therefore bounds ordinary-row durability without the extra flush.
+- **Observed remaining serialization cost:** Birth JSON encode/write is still
+  synchronous and output-linear. The 321+ evidence bucket contains 12
+  samples and has emit p95/max `5.3563 ms`; this is separate from observer
+  extraction and remains optional trace overhead.
+- **Observed B4 failure:** Observer wall p95/p99/max improved from
+  `0.3413/0.6625/10.6158` to `0.2997/0.5772/10.2234 ms`, but still fails the
+  fixed `0.20/0.40/2.00 ms` gate. Windows current-thread CPU accounting
+  advanced in 15.625-ms quanta, so it is not a valid sub-millisecond
+  attribution signal and does not replace wall time.
+- **Observed B5 residual:** All 6,008 active-spell main-VM rows classify.
+  There are 2,114 timed sightings in 103 deduplicated events and 6,023 unique
+  temporal supports over 95,532 activation edges (6.3047%). All 1,330
+  spell-57 rows again stop at the 256-instruction callback cap without
+  horizon coverage, independently reproducing CE-0147.
+- **Observed survival dossier:** Hits occurred at
+  `1743, 4261, 11456, 12075, 12924, 19000, 21350, 22433, 30479, 36975,
+  38631, 43525`. Nine are observed bullet overlaps and three are modeled
+  committed-prefix collisions; all follow global viability exhaustion. The
+  canonical fresh-attempt hit is the frame-1,743 observed bullet overlap.
+  The 12-hit total is RNG-distinct from earlier runs and does not establish a
+  survival improvement.
+- The deterministic report is byte-identical across two generations,
+  SHA-256
+  `bcd153b041c046ca1047181b62becdc8f144fc95a42076c94610576bbf23105e`.
+  The ignored 488,428,485-byte raw trace SHA-256 is
+  `cf5161cf34209fd44be85c177ddaf89c5cee7c3bb73be6103f95296a8c834a9f`.
+  Compact artifacts are retained under `artifacts/runtime_reports/` and
+  `notes/runs/`.
+- Focused birth tests pass `21/21`. Complete Linux/Windows quick suites pass
+  `787/787` in `9.050/15.147 s`, with three existing Windows skips.
+- **Next gate:** Keep the bounded flush correction, reject thread CPU as the
+  diagnostic, and compare parity-gated native extraction with exact
+  active-slot reuse. Preserve the independent Python scalar oracle, ordered
+  complete evidence, no extra RPM, fixed wall limits, and trace-only
+  authority. Stage 5/6 remains closed while B4 and CE-0147 fail.

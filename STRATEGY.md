@@ -163,13 +163,17 @@ CE-0147 shows spell 57 exhausting 256 callback instructions on all 1,261 rows
 without horizon coverage while the live path consumes the empty event tuple.
 This is unknown-direction future-transform coverage, not hard safety.
 
-**Proposed physical recheck:** Schema v4 removes redundant evidence-row
-flush, forces the same-iteration decision flush, records observer CPU/wall
-separately, and uses a scalar candidate gather through 32 births. Fixed
-Linux/Windows 1/8/32-candidate p95 is
-`0.0578/0.0627/0.1038` and `0.0495/0.0790/0.0963 ms`; 592-candidate p95 is
-`0.1417/0.1480 ms`. This remains unpromoted until Stage-4A wall timing,
-cadence, hard no-Bomb, and durability evidence pass.
+**Observed physical recheck:** Schema-v4 run `20260728_050305` completed
+Stage 4A over frames `2..44273` with 12 hits, hard no-Bomb, accepted
+artifacts, supervisor completion, and cleanup. The bounded durability change
+reduced previous birth-record emit p95 from `1.1783` to `0.1708 ms`;
+observer wall p95/p99 also improved from `0.3413/0.6625` to
+`0.2997/0.5772 ms`, but maximum remained `10.2234 ms` and the unchanged B4
+gate still failed. Windows current-thread CPU accounting advanced in
+15.625-ms quanta and is unusable for sub-millisecond attribution; it does not
+weaken the wall gate. The run retained 6,023 unique temporal supports over
+95,532 activation edges and repeated CE-0147 on all 1,330 spell-57 rows.
+No future-event or action authority follows.
 
 ### Priority
 
@@ -181,10 +185,12 @@ cadence, hard no-Bomb, and durability evidence pass.
    columnar trace, independent scalar/v2-v3 parity, per-phase diagnostics, and
    header-only ECL capture correction pass and are physically retained. B4
    still fails wall timing and callback instruction exhaustion remains
-   incomplete. Remove redundant evidence flush, distinguish CPU from
-   scheduler wall cost, make incomplete callback coverage fail closed, and
-   repeat Stage 4A before trying Stage 5/6. It does not narrow `UNKNOWN`
-   coverage or add action authority.
+   incomplete. Schema v4 physically validates bounded flush latency but
+   rejects thread CPU as a useful sub-millisecond diagnostic. Next evaluate
+   a parity-gated native or active-slot-handoff extraction data plane, make
+   incomplete callback coverage explicit and fail closed, and repeat Stage
+   4A before trying Stage 5/6. It does not narrow `UNKNOWN` coverage or add
+   action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

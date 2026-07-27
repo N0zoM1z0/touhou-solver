@@ -1017,8 +1017,14 @@ parity 當成每個 nature tie field 的逐 bit equality。
 - schema v4 已把 evidence immediate flush 改為 error-immediate 加
   same-iteration decision flush，並同時記錄 thread CPU/wall；1/8/32
   candidate Linux/Windows p95 已降至 `0.0578/0.0627/0.1038` 與
-  `0.0495/0.0790/0.0963 ms`。這只是下一次 B4 的 proposed correction，
-  wall-time gate 不變；
+  `0.0495/0.0790/0.0963 ms`。實機 `20260728_050305` 完成 Stage 4A、
+  12 hits、hard no-Bomb 與 cleanup；previous emit p95
+  `1.1783 -> 0.1708 ms`，但 observer wall p95/p99/max 仍為
+  `0.2997/0.5772/10.2234 ms`，B4 不通過。Windows thread CPU 以
+  15.625-ms 量化，不能替代 wall gate；下一個 performance experiment
+  應比較 parity-gated native extraction 與 exact active-slot handoff，
+  移除重複 sparse pool traversal，同時保留 Python scalar oracle、完整
+  ordered evidence、no extra RPM 與 fixed wall limits；
 - CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成

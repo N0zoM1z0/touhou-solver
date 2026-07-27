@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `e48cd65 Bound bullet birth trace flush latency`,
   `4eecd4a Retain schema-v3 Stage 4 birth gate`,
   `70077e2 Compact birth evidence and preserve ECL capture`,
   `449e01f Retain failed bullet birth physical gate`, and
@@ -73,8 +74,17 @@ describe the same decision. Python/C++ parity is not physical correctness.
   error-immediate/same-iteration-decision bounded flush, records CPU/wall
   extraction separately, and uses a scalar gather up to 32 candidates.
   Fixed Linux/Windows 1/8/32-candidate p95 is
-  `0.0578/0.0627/0.1038` and `0.0495/0.0790/0.0963 ms`. Repeat Stage 4A and
-  fail closed on incomplete callback coverage before Stage 5/6.
+  `0.0578/0.0627/0.1038` and `0.0495/0.0790/0.0963 ms`. Schema-v4 physical
+  run `20260728_050305` completed frames `2..44273`, 14,394 decisions,
+  12 hits, hard no-Bomb, accepted artifacts, and cleanup. Removing the
+  redundant flush reduced previous birth-record emit p95
+  `1.1783 -> 0.1708 ms`, but observer wall p95/p99/max was still
+  `0.2997/0.5772/10.2234 ms`, so B4 remains failed. Windows thread CPU
+  samples were quantized in 15.625-ms steps and cannot replace the wall
+  gate. The next performance experiment should remove the duplicate
+  post-issue sparse pool traversal through a parity-gated native or
+  active-slot-handoff data plane; callback incompleteness must also fail
+  closed before Stage 5/6.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   CE-0143/0144/0145/0146/0147.
 - Preceding G5 observation checkpoint:

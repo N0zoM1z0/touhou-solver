@@ -190,8 +190,8 @@ from th08_live.movement import (
     BOMB,
     DOWN,
     FOCUS,
-    FOCUSED_CARDINAL_SPEED,
-    FOCUSED_DIAGONAL_SPEED,
+    FOCUSED_CARDINAL_SPEED,  # noqa: F401 - compatibility export
+    FOCUSED_DIAGONAL_SPEED,  # noqa: F401 - compatibility export
     LEFT,
     LOCAL_PIPELINE_STATE_ACTIONS as _LOCAL_PIPELINE_STATE_ACTIONS,
     PLANNER_ACTIONS as _PLANNER_ACTIONS,
@@ -206,7 +206,13 @@ from th08_live.movement import (
     UNFOCUSED_DIAGONAL_SPEED,
     UP,
     action_name_from_mask as _action_name_from_mask,
+    boundary_control_reserve_deficit as _boundary_control_reserve_deficit,
+    boundary_risk as _boundary_risk,
+    boundary_risk_for_positions as _boundary_risk_for_positions,
+    directions_opposed as _directions_opposed,
     local_pipeline_action_from_mask as _local_pipeline_action_from_mask,
+    minimum_travel_frames as _minimum_travel_frames,
+    project_player_for_read_lag as _project_player_for_read_lag,
 )
 from th08_live.sensing_trace import (
     SensingTraceInput,
@@ -1360,98 +1366,6 @@ def _node_key(
     )
 
 
-def _minimum_travel_frames(
-    x: float,
-    y: float,
-    target_x: float,
-    target_y: float,
-    *,
-    tolerance: float = 6.0,
-) -> float:
-    horizontal = max(abs(x - target_x) - tolerance, 0.0)
-    vertical = max(abs(y - target_y) - tolerance, 0.0)
-    diagonal = min(horizontal, vertical)
-    straight = max(horizontal, vertical) - diagonal
-    return (
-        diagonal / UNFOCUSED_DIAGONAL_SPEED
-        + straight / UNFOCUSED_CARDINAL_SPEED
-    )
-
-
-def _boundary_risk(x: float, y: float) -> float:
-    horizontal = min(x - PLAYFIELD_LEFT, PLAYFIELD_RIGHT - x)
-    vertical = min(y - PLAYFIELD_TOP, PLAYFIELD_BOTTOM - y)
-    risk = 0.0
-    if horizontal < 12.0:
-        risk += 2.0 * (12.0 - horizontal) ** 2
-    if vertical < 12.0:
-        risk += 3.0 * (12.0 - vertical) ** 2
-    if horizontal < 20.0 and vertical < 20.0:
-        risk += (20.0 - horizontal) * (20.0 - vertical)
-    return risk
-
-
-def _boundary_risk_for_positions(
-    positions_x: np.ndarray,
-    positions_y: np.ndarray,
-) -> np.ndarray:
-    """Vectorized form of ``_boundary_risk`` for packed branch batches."""
-
-    horizontal = np.minimum(
-        positions_x - PLAYFIELD_LEFT,
-        PLAYFIELD_RIGHT - positions_x,
-    ).astype(np.float64, copy=False)
-    vertical = np.minimum(
-        positions_y - PLAYFIELD_TOP,
-        PLAYFIELD_BOTTOM - positions_y,
-    ).astype(np.float64, copy=False)
-    risk = np.zeros(positions_x.size, dtype=np.float64)
-    horizontal_near = horizontal < 12.0
-    vertical_near = vertical < 12.0
-    corner_near = (horizontal < 20.0) & (vertical < 20.0)
-    risk[horizontal_near] += (
-        2.0 * np.square(12.0 - horizontal[horizontal_near])
-    )
-    risk[vertical_near] += (
-        3.0 * np.square(12.0 - vertical[vertical_near])
-    )
-    risk[corner_near] += (
-        (20.0 - horizontal[corner_near])
-        * (20.0 - vertical[corner_near])
-    )
-    return risk
-
-
-def _boundary_control_reserve_deficit(
-    x: float,
-    y: float,
-    *,
-    reserve_distance: float,
-) -> float:
-    """Measure lost axis-wise control range near clamped boundaries."""
-
-    if reserve_distance <= 0.0:
-        return 0.0
-    return sum(
-        (
-            max(reserve_distance - (x - PLAYFIELD_LEFT), 0.0),
-            max(reserve_distance - (PLAYFIELD_RIGHT - x), 0.0),
-            max(reserve_distance - (y - PLAYFIELD_TOP), 0.0),
-            max(reserve_distance - (PLAYFIELD_BOTTOM - y), 0.0),
-        )
-    )
-
-
-def _directions_opposed(left: int, right: int) -> bool:
-    horizontal = bool(left & LEFT and right & RIGHT) or bool(
-        left & RIGHT and right & LEFT
-    )
-    vertical = bool(left & UP and right & DOWN) or bool(
-        left & DOWN and right & UP
-    )
-    return horizontal or vertical
-
-
 def _estimate_live_action_hold(frame_deltas: tuple[int, ...]) -> int:
     operational = sorted(delta for delta in frame_deltas if 0 < delta < 120)
     if not operational:
@@ -1854,28 +1768,6 @@ def choose_action(
                 supplemental_version=preloss_supplemental_version,
             ),
         )
-    )
-
-
-def _project_player_for_read_lag(
-    x: float, y: float, input_mask: int, frames: int
-) -> tuple[float, float]:
-    direction = input_mask & (UP | DOWN | LEFT | RIGHT)
-    if not direction or frames <= 0:
-        return x, y
-    horizontal = (-1 if direction & LEFT else 0) + (1 if direction & RIGHT else 0)
-    vertical = (-1 if direction & UP else 0) + (1 if direction & DOWN else 0)
-    if horizontal == 0 and vertical == 0:
-        return x, y
-    focused = bool(input_mask & FOCUS)
-    diagonal = horizontal != 0 and vertical != 0
-    if focused:
-        speed = FOCUSED_DIAGONAL_SPEED if diagonal else FOCUSED_CARDINAL_SPEED
-    else:
-        speed = UNFOCUSED_DIAGONAL_SPEED if diagonal else UNFOCUSED_CARDINAL_SPEED
-    return (
-        min(PLAYFIELD_RIGHT, max(PLAYFIELD_LEFT, x + horizontal * speed * frames)),
-        min(PLAYFIELD_BOTTOM, max(PLAYFIELD_TOP, y + vertical * speed * frames)),
     )
 
 

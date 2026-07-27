@@ -5483,3 +5483,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural hazard-projection ownership only. Projection
   equations, uncertainty inflation, collision thresholds, signed clearance,
   native ABI, fallback selection, and live action authority are unchanged.
+
+### 2026-07-27 — Live movement geometry extraction
+
+- **Observed structural change:** Moved held-input player projection,
+  diagonal/straight minimum travel time, scalar and vectorized boundary risk,
+  boundary control-reserve deficit, and opposed-direction detection into
+  `th08_live.movement`. These functions now share one playfield and speed
+  constant owner with the action table.
+- **Boundary:** Controller aliases preserve the historical private function
+  surface. Equations, clipping order, float types, thresholds, and action-mask
+  interpretation moved unchanged.
+- **Validation:** Live-controller and local-certificate suites pass `92/92`
+  and `8/8`; Ruff, byte compilation, and `git diff --check` pass. The Linux
+  quick suite passes `699/699` in `9.281 s`.
+- **Authority:** Structural movement-geometry ownership only. Physical
+  dynamics, hazard recurrence, certificate quantifiers, issue timing, and
+  live action authority are unchanged.

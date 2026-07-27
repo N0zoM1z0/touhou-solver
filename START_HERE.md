@@ -330,6 +330,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   their semantics. `controller.py` is 4,812 lines. Hazard, bullet-decoder,
   certificate, live-controller, and semantic differential focused suites
   pass; the Linux quick suite passes `699/699` in `9.006 s`.
+- Held-input player projection, travel-time lower estimates, scalar/vector
+  boundary risk, boundary reserve deficit, and opposed-direction detection
+  now join masks/speeds/actions in `th08_live.movement`. Controller aliases
+  preserve the historical surface. Local certificate and live-controller
+  focused suites pass; the Linux quick suite passes `699/699` in `9.281 s`.
+  All equations and float operations moved unchanged.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

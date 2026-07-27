@@ -4015,6 +4015,14 @@ reuse, and columnar representation complete; physical recheck pending
   160,077 to 32,956 bytes. The independent scalar transition oracle and v2/v3
   analyzer semantics pass. Scheduler, file-write, and physical contention
   tails remain open until B4 repeats.
+- **Schema-v3 physical recheck:** Run `20260728_043724` improves observer
+  p95/p99 from `0.4496/0.9314 ms` to `0.3413/0.6625 ms`, but maximum remains
+  `10.6158 ms`; the fixed gate still fails. Zero-evidence p95 is
+  `0.1960 ms`. Non-empty evidence buckets retain `0.3987..0.4626 ms` p95,
+  so isolated columnar cost did not bound scheduler/cold-buffer tails.
+  Prior-record emission p95 is `0.0724 ms` after zero evidence but
+  `1.3307..1.9791 ms` after non-empty rows, exposing the redundant
+  per-evidence flush as a separate next-cadence cost.
 
 ## CE-0144: Unknown deferred-fire state erased every physical timed intent
 
@@ -4088,8 +4096,8 @@ corrected offline, ownership diagnosis and physical recheck open
 
 ## CE-0146: Header-only ECL instructions erased a valid main-VM snapshot
 
-Status: parser and capture coupling corrected; physical hazard/coverage
-recheck pending
+Status: parser and capture coupling physically corrected; downstream
+callback-horizon coverage remains open
 
 - **Observed physical residual:** The enhanced schema-v2 source report found
   2,386 decision rows whose callback lookahead failed with
@@ -4115,3 +4123,39 @@ recheck pending
   residuals.
 - **Authority:** no new future-hazard coverage or action authority follows
   until the physical recheck.
+- **Physical recheck:** Schema-v3 run `20260728_043724` has no callback read
+  error and retains a birth-classifier result on all 6,101 active-main-VM
+  rows. Spell 61 contributes 434 timed sightings and 3,054 temporal matches.
+  This closes the zero-read/snapshot-erasure defect only; it does not validate
+  empty callback results or omitted birth sources.
+
+## CE-0147: Instruction-limit callback lookahead was consumed as an empty event list
+
+Status: observed incomplete model result; fail-closed coverage and bounded
+algorithm open
+
+- **Observed physical workload:** On all 1,261 spell-57 rows in schema-v3 run
+  `20260728_043724`, callback lookahead scanned the maximum 256 instructions,
+  returned `stop_reason=instruction_limit`, reported no callback events, and
+  did not cover the 80-frame horizon. It scanned 322,816 instructions in that
+  phase; read/lookahead p50/p95/max was `0.2761/0.5387/3.1771 ms`.
+- **Invalid model use:** The live lowering consumes
+  `ecl_lookahead.events` even when `horizon_covered` is false. An empty tuple
+  after instruction exhaustion is therefore treated like no future velocity
+  callback, although the algorithm only established that none occurred in
+  the visited prefix. This is optimistic/unknown-direction omission.
+- **Additional scope:** Spell 73 stopped at an exact repeated state on 968
+  rows. A repeated-state proof may eventually certify a periodic no-event
+  suffix, but the current result does not label that proof or propagate a
+  coverage certificate. Spells 61/65/69 reached horizon or terminate and are
+  separate cases.
+- **Correction gate:** represent callback coverage as complete/incomplete
+  over an exact frame support. Incomplete results must leave affected future
+  transform geometry `UNKNOWN` and cannot hard-authorize the current
+  trajectory. Improve canonical control-flow traversal, caching, or a
+  separately bounded native data plane without reducing the instruction cap
+  or silently dropping branches. Retain a minimal spell-57 instruction/VM
+  fixture and compare it with runtime callback/transform evidence.
+- **Authority:** this counterexample does not prove that a missing callback
+  caused a hit. It proves that the current empty event list is not a complete
+  physical-hazard answer.

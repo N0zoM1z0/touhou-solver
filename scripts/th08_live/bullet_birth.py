@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import struct
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -184,13 +185,11 @@ class BulletBirthEvidenceBatch(Sequence[BulletBirthEvidence]):
             raise ValueError("previous birth columns differ in length")
         if geometry.shape != (count, 6):
             raise ValueError("bullet birth geometry must have six columns")
-        unknown_codes = set(int(value) for value in np.unique(codes)) - set(
-            _CODE_TO_KIND_STATUS
-        )
-        if unknown_codes:
-            raise ValueError(
-                f"unknown bullet birth evidence codes {sorted(unknown_codes)}"
-            )
+        if count and (
+            int(codes.min()) < min(_CODE_TO_KIND_STATUS)
+            or int(codes.max()) > max(_CODE_TO_KIND_STATUS)
+        ):
+            raise ValueError("unknown bullet birth evidence code")
         for array in (
             slots,
             codes,
@@ -398,6 +397,39 @@ def _candidate_geometry(
     slots: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Gather candidate-only geometry into compact contiguous arrays."""
+
+    if len(slots) <= 32:
+        rows: list[tuple[float, ...]] = []
+        flags: list[int] = []
+        for slot in slots:
+            base = int(slot) * BULLET_STRIDE
+            position = struct.unpack_from(
+                "<2f",
+                blob,
+                base + BULLET_POSITION_OFFSET,
+            )
+            velocity = struct.unpack_from(
+                "<2f",
+                blob,
+                base + BULLET_VELOCITY_OFFSET,
+            )
+            size = struct.unpack_from(
+                "<2f",
+                blob,
+                base + BULLET_GEOMETRY_OFFSET,
+            )
+            rows.append(position + velocity + size)
+            flags.append(
+                struct.unpack_from(
+                    "<I",
+                    blob,
+                    base + BULLET_TRANSFORM_FLAGS_OFFSET,
+                )[0]
+            )
+        values = np.asarray(rows, dtype=np.float32)
+        transform_flags = np.asarray(flags, dtype=np.uint32)
+        geometry_finite = np.isfinite(values).all(axis=1)
+        return values, transform_flags, geometry_finite
 
     values = np.empty((len(slots), 6), dtype=np.float32)
     for column, offset in enumerate(

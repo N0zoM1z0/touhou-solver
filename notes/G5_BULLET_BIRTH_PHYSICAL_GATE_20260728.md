@@ -2,10 +2,11 @@
 
 Date: 2026-07-28
 
-Status: B4/B5 failed twice with retained evidence. The schema-v2 physical
-repeat validates the deferred-fire state correction and exposes timed intent,
-but CE-0143 physical performance and CE-0145 source coverage remain open. No
-future-hazard or physical action authority is granted.
+Status: B4/B5 failed three times with retained evidence. The schema-v3
+physical repeat validates columnar evidence and closes CE-0146's capture
+loss, but CE-0143 physical performance, CE-0145 source coverage, and
+CE-0147 callback-horizon coverage remain open. No future-hazard or physical
+action authority is granted.
 
 ## Outcome
 
@@ -49,6 +50,28 @@ This is observed source-coverage and performance evidence. The 3.2621%
 unique temporal match fraction is not birth prediction accuracy because
 template geometry, origin, minimum-distance, player aim, pool capacity,
 transform state, and omitted-source competition remain unresolved.
+
+The schema-v3 repeat
+`lunatic_route2_stage4a_unattended_20260728_043724` validates the corrected
+data path but still fails B4:
+
+- all 6,101 active-spell main-VM rows produced a classifier result; the old
+  2,386 zero-byte-read callback errors are absent;
+- 2,148 timed intent sightings form 97 deduplicated events; unique temporal
+  support matches increase to 5,989/99,937 activation edges (5.9928%),
+  including 3,054 matches in spell 61 and 2,935 in spell 69;
+- observer p95/p99/max improves again to
+  `0.3413/0.6625/10.6158 ms`, but the unchanged gate remains
+  `0.20/0.40/2.00 ms`;
+- zero-evidence observer p95 is `0.1960 ms`, while non-empty buckets have
+  p95 `0.3987..0.4626 ms`; scheduler/cold-buffer cost remains material;
+- prior-record emit p95 is only `0.0724 ms` after a zero-evidence row but
+  `1.3307..1.9791 ms` for non-empty rows because the controller immediately
+  flushes every evidence record before the same-iteration decision flush;
+- spell 57 reaches the 256-instruction callback-lookahead cap on all 1,261
+  rows, scanning 322,816 instructions with zero reported events and without
+  horizon coverage. Empty events are therefore not a complete no-callback
+  certificate.
 
 ## Physical Scope And Provenance
 
@@ -218,6 +241,12 @@ reader fixture rejects every non-positive read. This may restore callback
 hazard events as well as diagnostic coverage, so physical geometry/action
 effects remain unpromoted until the next Stage-4A run.
 
+The schema-v3 run physically validates that correction: spells 57/61/65/69/73
+retain `1261/1307/1051/1389/1093` classifier rows with no callback read error.
+Spell 61 now contributes 434 timed sightings and 3,054 temporal birth
+matches. This closes the specific snapshot-loss defect, not the omitted
+source, geometry, or callback-horizon problem.
+
 ## Authority And Next Gate
 
 The following remain unchanged:
@@ -229,12 +258,18 @@ The following remain unchanged:
 - Bomb remains forbidden;
 - no B6 conservative birth envelope may be proposed.
 
-The columnar implementation, per-phase diagnostics, and ECL capture/parser
-corrections pass 786/786 Linux and Windows quick tests in 8.841/15.258 seconds,
-with three Windows skips. The next gate is a third focused Stage-4A physical
-report. Require schema-v3 parsing, exact evidence counts, callback/birth
-classifier outcomes by phase, deterministic residual output, no new action
-deadline or cadence regression, hard no-Bomb, accepted completion, and the
-unchanged physical extraction limits. Do not call an unmatched edge a
-classifier error until source ownership is observed. Stage 5 or 6 follows
-only after the Stage-4A semantic and performance gates pass.
+The third run completed frames `1..45742`, 15,009 decisions, 20 hits,
+accepted route completion, hard no-Bomb, supervisor completion, and cleanup.
+The deterministic report SHA-256 is
+`9652ba603c76bb9f43e98944f569cc93495f52039e670324bbb122980c97c49c`;
+the ignored 486,792,655-byte raw trace SHA-256 is
+`8f465c054781696b37dd1a3ef4818c4f7ba373b85d09a01a8d4131921447467f`.
+
+The next implementation gate removes the redundant per-evidence flush while
+retaining an error-immediate and same-decision bounded durability boundary,
+adds observer thread-CPU versus wall timing, and profiles the small-candidate
+gather. In parallel, callback lookahead must expose an explicit incomplete
+coverage result; an instruction-limit row cannot authorize an empty future
+event set. Repeat Stage 4A under unchanged timing/cadence/no-Bomb gates after
+those corrections. Stage 5 or 6 follows only after Stage-4A semantics and
+performance pass.

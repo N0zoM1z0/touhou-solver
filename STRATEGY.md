@@ -154,6 +154,15 @@ capture/classification are now separated with strict tests. Complete
 Linux/Windows quick suites pass `786/786`; physical callback geometry,
 cadence, and B4 remain unpromoted.
 
+**Observed physical recheck:** Schema-v3 run `20260728_043724` completed
+Stage 4A with 20 hits, hard no-Bomb, accepted artifacts, and cleanup. All
+6,101 active-spell rows now classify without callback-read error, and unique
+temporal birth matches increase to 5,989/99,937, including 3,054 in spell 61.
+Observer p95/p99/max remains `0.3413/0.6625/10.6158 ms`, so B4 still fails.
+CE-0147 shows spell 57 exhausting 256 callback instructions on all 1,261 rows
+without horizon coverage while the live path consumes the empty event tuple.
+This is unknown-direction future-transform coverage, not hard safety.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
@@ -162,9 +171,12 @@ cadence, and B4 remain unpromoted.
    implemented. The schema-v2 B4/B5 repeat validates deferred-state semantics
    but still fails physical timing and source coverage. The equivalent
    columnar trace, independent scalar/v2-v3 parity, per-phase diagnostics, and
-   header-only ECL capture correction now pass offline. Repeat Stage 4A with
-   schema v3 and unchanged timing/cadence/no-Bomb gates before trying Stage
-   5/6. It does not narrow `UNKNOWN` coverage or add action authority.
+   header-only ECL capture correction pass and are physically retained. B4
+   still fails wall timing and callback instruction exhaustion remains
+   incomplete. Remove redundant evidence flush, distinguish CPU from
+   scheduler wall cost, make incomplete callback coverage fail closed, and
+   repeat Stage 4A before trying Stage 5/6. It does not narrow `UNKNOWN`
+   coverage or add action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

@@ -1000,6 +1000,24 @@ parity 當成每個 nature tie field 的逐 bit equality。
   `2.2671/2.7465 ms`；下一次 B4 會新增 build/pre-emit timing，不能把
   output-linear serialization 或 physical contention 隱藏在 timing
   boundary 外；
+- schema v2 實機 `20260728_040144` 已驗證 deferred-state 修復並產生
+  timed intent，但 observer p95/p99 `0.4496/0.9314 ms` 仍失敗，且
+  temporal match 只在 spell 69；schema v3 改用完整 columnar evidence，
+  592-birth Linux/Windows observer p95 降到 `0.1704/0.1528 ms`，JSON
+  payload `160077 -> 32956` bytes，保留 scalar 與 v2/v3 parity；
+- per-phase residual 找到合法 12-byte header-only ECL instruction 被錯誤
+  轉成 zero-byte RPM，且 broad exception 同時丟失已讀 VM snapshot；
+  parser 與 modular `th08_live.ecl_capture` 已修，schema-v3 實機
+  `20260728_043724` 的 6,101 active-spell rows 全部恢復 classification，
+  spell 61 新增 3,054 temporal matches；
+- schema-v3 B4 仍以 observer p95/p99/max
+  `0.3413/0.6625/10.6158 ms` 失敗；evidence row immediate flush 另造成
+  `1.3307..1.9791 ms` emit p95。下一步是 bounded durability flush、
+  CPU/wall 分離及 small-candidate gather，不弱化原 gate；
+- CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
+  instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
+  list。這是 unknown-direction future-transform approximation；必須改成
+  explicit incomplete/`UNKNOWN`，不能用降低 instruction cap 假裝解決；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

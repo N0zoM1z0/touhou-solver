@@ -6539,3 +6539,41 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   physically open. Correct header-only parsing may change callback hazard
   geometry and actions; no future coverage or live promotion follows before
   another accepted hard-no-Bomb Stage-4A trial.
+
+## 2026-07-28 — Retained the schema-v3 G5 physical recheck
+
+- **Observed physical scope:** Run
+  `lunatic_route2_stage4a_unattended_20260728_043724` completed Lunatic
+  Stage 4A over frames `1..45742` and 15,009 decisions with accepted route
+  completion, 20 hits, hard no-Bomb, supervisor completion, no residual
+  process, and no parse error. The fresh-attempt frame-918 contact is a
+  sensor-gap/unmodeled-hazard case after global viability exhaustion; the run
+  is not route acceptance.
+- **Observed CE-0146 closure:** All 6,101 active-spell main-VM rows produced
+  birth-classifier results and no callback-read error. Timed sightings rise to
+  2,148 in 97 deduplicated events. Spell 61 contributes 434 sightings and
+  3,054 temporal matches; total unique temporal support is 5,989/99,937
+  activation edges (5.9928%). Geometry/source dependencies remain unresolved.
+- **Observed B4 failure:** Observer p95/p99/max is
+  `0.3413/0.6625/10.6158 ms`; B4 still fails `0.20/0.40/2.00 ms`.
+  Zero-evidence rows have `0.1960 ms` p95, while non-empty buckets have
+  `0.3987..0.4626 ms`. Emission p95 is `0.0724 ms` after zero evidence and
+  `1.3307..1.9791 ms` after non-empty rows, isolating redundant immediate
+  flush cost from extraction.
+- **Observed CE-0147:** Every one of 1,261 spell-57 callback lookaheads stops
+  at the 256-instruction limit without horizon coverage or events. The live
+  path still consumes the empty event tuple. This is an incomplete,
+  unknown-direction future-transform model result, not a no-callback
+  certificate.
+- Deterministic residual report SHA-256 is
+  `9652ba603c76bb9f43e98944f569cc93495f52039e670324bbb122980c97c49c`.
+  The ignored 486,792,655-byte raw trace SHA-256 is
+  `8f465c054781696b37dd1a3ef4818c4f7ba373b85d09a01a8d4131921447467f`.
+  Compact artifacts are retained under `artifacts/runtime_reports/` and
+  `notes/runs/`.
+- **Comparison boundary:** This RNG-distinct run has 20 hits versus
+  11/17 in the two preceding G5 traces. Spell hit counts are one on 57, zero
+  on 61, two on 65, three on 69, one on 73, and 13 nonspell. One sample cannot
+  establish a survival regression or improvement.
+- **Authority:** B4/B5 remain failed. Stage 5/6 remains closed; live policy,
+  Bomb, and future-hazard authority do not change.

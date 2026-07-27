@@ -85,6 +85,9 @@ def _decision_scope(line: str) -> tuple[tuple[int, int], dict[str, object]]:
         raw_name = spell.get("name")
         spell_name = raw_name if isinstance(raw_name, str) else None
     lookahead_error: str | None = None
+    lookahead_stop_reason: str | None = None
+    lookahead_event_count = 0
+    lookahead_instructions_scanned = 0
     lookahead_marker = '"bullet_velocity_lookahead": '
     lookahead_start = line.find(lookahead_marker)
     if lookahead_start >= 0:
@@ -97,12 +100,43 @@ def _decision_scope(line: str) -> tuple[tuple[int, int], dict[str, object]]:
             lookahead_error = (
                 raw_error if isinstance(raw_error, str) else None
             )
+            raw_stop = lookahead.get("stop_reason")
+            lookahead_stop_reason = (
+                raw_stop if isinstance(raw_stop, str) else None
+            )
+            raw_events = lookahead.get("events")
+            if isinstance(raw_events, list):
+                lookahead_event_count = len(raw_events)
+            raw_scanned = lookahead.get("instructions_scanned")
+            if type(raw_scanned) is int and raw_scanned >= 0:
+                lookahead_instructions_scanned = raw_scanned
+    lookahead_read_ms: float | None = None
+    timing_marker = '"timing_ms": '
+    timing_start = line.find(timing_marker)
+    if timing_start >= 0:
+        timing, _timing_end = _JSON_DECODER.raw_decode(
+            line,
+            timing_start + len(timing_marker),
+        )
+        if isinstance(timing, dict):
+            raw_read_ms = timing.get("read_ecl_lookahead")
+            if (
+                isinstance(raw_read_ms, (int, float))
+                and math.isfinite(raw_read_ms)
+            ):
+                lookahead_read_ms = float(raw_read_ms)
     scope = {
         "stage_route_index": values["stage_route_index"],
         "spell_id": spell_id,
         "spell_name": spell_name,
         "phase": _phase_key(values["stage_route_index"], spell_id),
         "velocity_lookahead_error": lookahead_error,
+        "velocity_lookahead_stop_reason": lookahead_stop_reason,
+        "velocity_lookahead_event_count": lookahead_event_count,
+        "velocity_lookahead_instructions_scanned": (
+            lookahead_instructions_scanned
+        ),
+        "velocity_lookahead_read_ms": lookahead_read_ms,
     }
     return (values["gameplay_epoch"], values["frame"]), scope
 
@@ -131,6 +165,20 @@ def _counter(counter: Counter[object]) -> dict[str, int]:
         str(key): int(counter[key])
         for key in sorted(counter, key=lambda item: str(item))
     }
+
+
+def _evidence_count_bucket(count: int) -> str:
+    if count == 0:
+        return "0"
+    if count <= 8:
+        return "1_8"
+    if count <= 32:
+        return "9_32"
+    if count <= 64:
+        return "33_64"
+    if count <= 320:
+        return "65_320"
+    return "321_plus"
 
 
 def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
@@ -357,6 +405,7 @@ def _intent_events(
     Counter[str],
     int,
     dict[str, Counter[str]],
+    dict[str, list[float]],
 ]:
     sightings: defaultdict[tuple[object, ...], list[dict[str, Any]]] = (
         defaultdict(list)
@@ -366,6 +415,7 @@ def _intent_events(
     dependency_counts: Counter[str] = Counter()
     untimed_signatures: set[tuple[object, ...]] = set()
     by_phase: defaultdict[str, Counter[str]] = defaultdict(Counter)
+    read_ms_by_phase: defaultdict[str, list[float]] = defaultdict(list)
 
     for audit in audits:
         scope = _scope_for(audit, decisions)
@@ -381,6 +431,23 @@ def _intent_events(
             by_phase[phase][
                 f"velocity_lookahead_error:{velocity_error}"
             ] += 1
+        velocity_stop = scope.get("velocity_lookahead_stop_reason")
+        if isinstance(velocity_stop, str):
+            by_phase[phase][f"velocity_lookahead_stop:{velocity_stop}"] += 1
+        velocity_events = scope.get("velocity_lookahead_event_count")
+        if type(velocity_events) is int and velocity_events:
+            by_phase[phase]["velocity_event_rows"] += 1
+            by_phase[phase]["velocity_events"] += velocity_events
+        velocity_scanned = scope.get(
+            "velocity_lookahead_instructions_scanned"
+        )
+        if type(velocity_scanned) is int:
+            by_phase[phase]["velocity_instructions_scanned"] += (
+                velocity_scanned
+            )
+        velocity_read_ms = scope.get("velocity_lookahead_read_ms")
+        if isinstance(velocity_read_ms, float):
+            read_ms_by_phase[phase].append(velocity_read_ms)
         intent_result = audit.get("intent")
         if not isinstance(intent_result, dict):
             by_phase[phase]["intent_result_absent"] += 1
@@ -537,6 +604,7 @@ def _intent_events(
         dependency_counts,
         len(untimed_signatures),
         dict(by_phase),
+        dict(read_ms_by_phase),
     )
 
 
@@ -549,6 +617,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         intent_dependencies,
         untimed_intent_signatures,
         intent_by_phase,
+        velocity_read_ms_by_phase,
     ) = _intent_events(audits, decisions)
 
     event_by_epoch: defaultdict[int, list[dict[str, Any]]] = defaultdict(list)
@@ -577,6 +646,13 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     trace_schema_versions: Counter[int] = Counter()
     deferred_state_statuses: Counter[str] = Counter()
     deferred_state_values: Counter[str] = Counter()
+    observation_by_evidence: defaultdict[str, list[float]] = defaultdict(list)
+    build_by_evidence: defaultdict[str, list[float]] = defaultdict(list)
+    pre_emit_by_evidence: defaultdict[str, list[float]] = defaultdict(list)
+    emit_by_previous_evidence: defaultdict[str, list[float]] = defaultdict(
+        list
+    )
+    previous_evidence_count: int | None = None
 
     for audit in audits:
         trace_schema_versions[int(audit["schema_version"])] += 1
@@ -614,6 +690,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         if audit.get("intent_error") is not None:
             intent_errors += 1
         timing = audit.get("timing_ms")
+        row_timing: dict[str, float] = {}
         if isinstance(timing, dict):
             for field, target in (
                 ("observation", observation_ms),
@@ -624,7 +701,9 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             ):
                 value = timing.get(field)
                 if isinstance(value, (int, float)) and math.isfinite(value):
-                    target.append(float(value))
+                    numeric = float(value)
+                    target.append(numeric)
+                    row_timing[field] = numeric
         observation = audit.get("observation")
         if not isinstance(observation, dict):
             continue
@@ -632,7 +711,23 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         if type(capture_span) is int:
             capture_spans[capture_span] += 1
         evidence = _evidence_items(observation)
-        evidence_per_row.append(float(len(evidence)))
+        evidence_count = len(evidence)
+        evidence_per_row.append(float(evidence_count))
+        bucket = _evidence_count_bucket(evidence_count)
+        for field, target in (
+            ("observation", observation_by_evidence),
+            ("build", build_by_evidence),
+            ("pre_emit_total", pre_emit_by_evidence),
+        ):
+            value = row_timing.get(field)
+            if value is not None:
+                target[bucket].append(value)
+        previous_emit = row_timing.get("previous_emit")
+        if previous_emit is not None and previous_evidence_count is not None:
+            emit_by_previous_evidence[
+                _evidence_count_bucket(previous_evidence_count)
+            ].append(previous_emit)
+        previous_evidence_count = evidence_count
         for item in evidence:
             kind = str(item.get("kind"))
             status = str(item.get("observation_status"))
@@ -814,12 +909,46 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             phase: _counter(counts)
             for phase, counts in sorted(intent_by_phase.items())
         },
+        "velocity_lookahead_read_ms_by_phase": {
+            phase: _distribution(values)
+            for phase, values in sorted(velocity_read_ms_by_phase.items())
+        },
         "timing_ms": {
             "observation": observation_timing,
             "intent": _distribution(intent_ms),
             "build": _distribution(build_ms),
             "pre_emit_total": _distribution(pre_emit_total_ms),
             "previous_emit": _distribution(emit_ms),
+        },
+        "timing_by_evidence_count": {
+            "semantics": {
+                "observation_build_pre_emit": (
+                    "bucketed by the current audit evidence count"
+                ),
+                "previous_emit": (
+                    "bucketed by the preceding audit evidence count"
+                ),
+            },
+            "observation": {
+                bucket: _distribution(values)
+                for bucket, values in sorted(
+                    observation_by_evidence.items()
+                )
+            },
+            "build": {
+                bucket: _distribution(values)
+                for bucket, values in sorted(build_by_evidence.items())
+            },
+            "pre_emit_total": {
+                bucket: _distribution(values)
+                for bucket, values in sorted(pre_emit_by_evidence.items())
+            },
+            "previous_emit": {
+                bucket: _distribution(values)
+                for bucket, values in sorted(
+                    emit_by_previous_evidence.items()
+                )
+            },
         },
         "scope": {
             "intent_source": "active_spell_enemy_main_vm_only",

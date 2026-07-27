@@ -61,9 +61,18 @@ describe the same decision. Python/C++ parity is not physical correctness.
   with classification. Zero payload is now local `b""`, and modular
   `th08_live.ecl_capture` preserves the snapshot while keeping callback
   events fail-closed. Linux/Windows quick suites pass `786/786` in
-  `8.841/15.258 s`, with three Windows skips. Repeat Stage 4A before Stage 5/6.
+  `8.841/15.258 s`, with three Windows skips. Schema-v3 physical repeat
+  `20260728_043724` completed frames `1..45742`, 15,009 decisions, 20 hits,
+  hard no-Bomb, and cleanup. All 6,101 active-spell rows now classify and
+  spell 61 adds 3,054 temporal matches; CE-0146 is physically closed.
+  Observer p95/p99/max is still `0.3413/0.6625/10.6158 ms`, so B4 fails.
+  CE-0147 also shows every spell-57 callback lookahead exhausting 256
+  instructions without horizon coverage while its empty event list remains
+  consumable. Remove redundant evidence flush, separate CPU/wall timing, and
+  fail closed on incomplete callback coverage before another Stage 4A;
+  Stage 5/6 remains closed.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
-  CE-0143/0144/0145/0146.
+  CE-0143/0144/0145/0146/0147.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and
@@ -887,8 +896,10 @@ incomplete sensing. The schema-v2 birth trace now exposes timed intent, but
 84,740/87,673 Stage-4A activation edges remain temporally unmatched and the
 observer still fails its retained physical timing gate. The columnar
 implementation passes isolated extraction and per-phase diagnostics exposed
-the header-only ECL capture bug; repeat the unchanged Stage-4A physical gate
-before adding source topology or proposing a future-hazard envelope.
+the header-only ECL capture bug. The schema-v3 repeat closes that capture loss
+but still fails timing and exposes incomplete instruction-limit callback
+coverage. Fix those boundaries and repeat the unchanged Stage-4A gate before
+adding source topology or proposing a future-hazard envelope.
 
 ### P2 — Resolve CE-0120 at the actuator boundary
 

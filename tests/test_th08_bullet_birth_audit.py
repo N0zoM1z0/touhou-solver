@@ -256,6 +256,18 @@ class BulletBirthAuditTests(unittest.TestCase):
             1,
         )
         self.assertEqual(
+            report["timing_by_evidence_count"]["observation"]["1_8"][
+                "count"
+            ],
+            4,
+        )
+        self.assertEqual(
+            report["timing_by_evidence_count"]["previous_emit"]["1_8"][
+                "count"
+            ],
+            3,
+        )
+        self.assertEqual(
             report["scope"]["physical_action_authority"],
             "none",
         )
@@ -324,7 +336,9 @@ class BulletBirthAuditTests(unittest.TestCase):
             "join",
             "by_phase_at_capture",
             "by_phase_at_intent",
+            "velocity_lookahead_read_ms_by_phase",
             "timing_ms",
+            "timing_by_evidence_count",
             "scope",
         ):
             self.assertEqual(v2[field], v3[field])

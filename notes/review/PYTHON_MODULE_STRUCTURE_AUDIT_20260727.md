@@ -139,7 +139,7 @@ implementation module where module-level patch identity matters.
 | Module | Lines | Decision | Reason |
 | --- | ---: | --- | --- |
 | `th08_live/controller.py` | 5,377 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, and outer composition; immutable handoff records plus pure corridor/candidate/control/sensing/timing/optional-hazard trace builders are live. |
-| `th08_live/planner_pass.py` | 1,685 | split next | The dependency boundary retained Linux/Windows suites and Stage 1/4A/5 workloads. Split prepare, baseline, supplemental, and finalization while preserving the five complete local-planner decision parity contract. |
+| `th08_live/planner_pass.py` | 1,599 | split in progress | Shared dependency, transition, and timing contracts now live in `planner_pass_types.py`. Split prepare, baseline, supplemental, and finalization while preserving the five complete local-planner decision parity contract. |
 | `analysis/th08_run_dossier.py` | 2,451 | split after live iteration contract | Offline reader, attribution, aggregation, validation, and rendering are separable and low authority-risk. |
 | `analysis/th08_practice_dossier.py` | 2,307 | split with shared dossier primitives | It duplicates trace reading, statistics, schema construction, and rendering responsibilities. |
 | `th08_automation/practice_supervisor.py` | 683 | retain orchestration | Resource/process/menu/monitor/artifact logic is already behind narrow modules; the remaining file is composition and lifecycle flow. |

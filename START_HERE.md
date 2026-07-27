@@ -235,6 +235,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
   multi-delay certification, hard viability constraint, and supplemental
   recovery. The pre-split quick suite passes `699/699` on Linux in `8.633 s`
   and Windows in `13.137 s` with three platform skips.
+- Planner-pass contracts now live in `th08_live.planner_pass_types`:
+  controller-owned dependencies, mode transition, and timing accumulator.
+  The behavior implementation is 1,599 lines and the Linux quick suite
+  retains `699/699` in `8.982 s`; the five-decision digest is unchanged.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

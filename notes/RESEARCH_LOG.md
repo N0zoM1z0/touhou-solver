@@ -5072,3 +5072,19 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Characterization only. Planner mathematics, dependencies,
   state mapping, hazard recurrence, selection, fallback, action authority,
   and strategy remain unchanged.
+
+### 2026-07-27 — Planner-pass shared contracts
+
+- **Observed structural change:** Moved `PlannerPassDependencies`,
+  `PlannerModeTransition`, and `LocalCertificateTimingAccumulator` into
+  `th08_live.planner_pass_types`. The planner implementation remains the
+  compatibility export owner and is 1,599 lines.
+- **Boundary:** The dependency object still binds controller globals once per
+  pass, so historical monkey-patch seams resolve current values. No callback,
+  constant, request, transition, or timing field changed.
+- **Validation:** The five complete decision digests are unchanged; Ruff,
+  byte compilation, and `git diff --check` pass; the Linux quick suite passes
+  `699/699` in `8.982 s`.
+- **Authority:** Structural type ownership only. Planner mathematics,
+  uncertainty, selection, issue behavior, fallback, and strategy are
+  unchanged.

@@ -5297,3 +5297,19 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural immutable-problem ownership only. Clearance
   arrays, projection, recurrence, native ABI, proof/publication boundary,
   live authority, and strategy are unchanged.
+
+### 2026-07-27 — Viability public-contract extraction
+
+- **Observed structural change:** Moved `ControlAction`, `ViabilityConfig`,
+  `ViabilityQuery`, and `SafetyValueQuery` into
+  `touhou_control.viability_types`. The original `viability` module re-exports
+  the same class objects and is now 1,282 lines.
+- **Boundary:** Action/config validation, repair/recovery accessors, and the
+  continuous signed-clearance certification threshold moved verbatim. The
+  private transition batch, policy query implementation, signed sampling
+  error, and builders did not move.
+- **Validation:** The focused viability suite passes `20/20`; Ruff, byte
+  compilation, class-identity smoke, and `git diff --check` pass. The Linux
+  quick suite passes `699/699` in `8.810 s`.
+- **Authority:** Structural value ownership only. Boolean feasibility,
+  continuous margins, native parity, and live authority are unchanged.

@@ -108,23 +108,26 @@ parity to independently validated labels plus complete structural replay.
 This evidence permits review of a separate default-off trace-only shadow; it
 does not promote or implement one.
 
-**Observed:** checkpoint `4260113` implements only the first G5 bullet-birth
-observation seam. It reuses the persistent pool blob, decodes candidate native
-age at bullet `+0x0D94`, retains activation and timer-regression evidence, and
-does not mutate planner bullets or add RPM. Fixed 5,000-iteration
-Linux/Windows gates pass with full-pool observer p95 `0.0318/0.0339 ms`,
-p99 `0.0540/0.0453 ms`, max `0.3199/0.1005 ms`, and interleaved decode p95
-ratio `0.998/1.007`. ECL intent, runtime update-order correlation, source
-completeness, and conservative future geometry remain open, so coverage and
-action authority do not change.
+**Observed:** checkpoints `4260113`, `c3c5a83`, `52d0864`, and `98db592`
+complete the default-off G5 bullet-birth observation, deterministic
+update-order, fail-closed active-spell main-VM intent, and live trace seams.
+The observer reuses the persistent pool blob and adds no RPM; fixed
+Linux/Windows p95 is `0.0318/0.0339 ms`, with interleaved decode ratio
+`0.998/1.007`. The ECL classifier stops on unsupported control/source/emission
+state and retains aimed, RNG, dynamic, deferred, current-pattern, template,
+origin, and pool dependencies rather than inventing geometry. Linux/Windows
+quick suites pass `773/773` in `8.691/15.243 s`, with three Windows skips.
+Physical runtime correlation, omitted-source residuals, and conservative
+future geometry remain open, so coverage and action authority do not change.
 
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
    passes; continue G5 future-event coverage one event class at a time,
-   beginning with bullet birth. The observation-only birth contract now fixes
-   the native-age/ECL-intent/update-order evidence gate; it does not narrow
-   `UNKNOWN` coverage or add action authority. The stationary-witness
+   beginning with bullet birth. B1–B3 and the default-off trace seam are
+   implemented; run B4 Stage-4A physical correlation and B5 deterministic
+   residual reporting next. They do not narrow `UNKNOWN` coverage or add
+   action authority. The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,
    earlier-version trace-only shadow with real completion-age evidence; do

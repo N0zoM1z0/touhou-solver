@@ -38,20 +38,21 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation checkpoint:
-  `c3c5a83 Strengthen bullet birth update-order fixtures`, building on
-  `4260113 Add trace-only bullet birth observer`. The default-off observer
-  reads active state and candidate native age at bullet `+0x0D94` from the
-  existing persistent pool blob, retains activation edges, timer regressions,
-  capture support, and compact geometry, and does not mutate planner
-  `Bullet`, issue, or coverage state. Fixed 5,000-iteration Linux/Windows
-  gates pass: full-pool observer p95 is `0.0318/0.0339 ms`, p99 is
-  `0.0540/0.0453 ms`, max is `0.3199/0.1005 ms`, and interleaved planning
-  decode p95 ratio is `0.998/1.007`. The independent base-state oracle now
-  also fixes full-pool drop-before-release, next-pass cursor reuse, same-frame
-  move/contact, collision suppression, graze age, native scan order, and
-  bullet-before-laser behavior. Linux/Windows quick suites pass `755/755` in
-  `9.421/15.004 s`, with three Windows skips. Shipped-runtime correlation
-  remains open.
+  `98db592 Integrate trace-only bullet birth audit`, building on
+  `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and
+  `4260113`. `--trace-bullet-births` now constructs the pool-blob observer,
+  reuses the active-spell boss main-VM snapshot and immutable instruction
+  cache for an 80-frame intent classification, emits compact post-issue audit
+  rows, and resets on every scene/sensor/action epoch boundary. It adds no
+  RPM, planner field, Bomb, issue, coverage, or action authority. Direct-fire
+  literals, dynamic parameters, aimed/RNG/deferred/current-pattern intents,
+  pool/template/origin dependencies, and fail-closed control/source/emission
+  boundaries have 15 focused tests; trace authority/alignment/error records
+  have three. Linux/Windows quick suites pass `773/773` in `8.691/15.243 s`,
+  with three Windows skips. The retained B1 performance remains p95
+  `0.0318/0.0339 ms` and interleaved decode ratio `0.998/1.007`.
+  Shipped-runtime B4 correlation and deterministic B5 residual reporting are
+  next.
 - Latest committed algorithmic checkpoint:
   `f8621bd Add cancellable stationary witness delivery benchmark`. A separate
   research-only DLL and modular newest-wins service now measure complete
@@ -86,10 +87,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`.
   B1 now reuses the persistent hostile-bullet pool capture to retain candidate
   native age, activation edges, timer regressions, capture support, and
-  compact geometry with no additional RPM. Earlier ECL intent and physical
-  same-frame update-order joins remain B2–B5. This is default-off trace-only,
-  adds no planner `Bullet` field, and cannot narrow the current
-  first-successor `UNKNOWN` coverage slab.
+  compact geometry with no additional RPM. B2's independent update-order
+  fixture and B3's fail-closed active-spell main-VM intent classifier are
+  complete; the default-off live trace seam is integrated. B4 physical
+  correlation and B5 residual classification remain open. None of this can
+  narrow the current first-successor `UNKNOWN` coverage slab.
 - The preceding algorithmic checkpoint
   `d5866c4 Align hazard coverage with canonical query roots`. Physical Gate-5
   auditing found CE-0141: 1,613 of 14,599 available-query rows mixed a

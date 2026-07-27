@@ -6335,8 +6335,9 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   (Windows).
 - Complete Linux/Windows quick suites pass `752/752` in `9.227/14.904 s`,
   with three existing Windows skips.
-- **Authority:** the observer is not constructed by the controller yet and
-  remains retrospective trace-only evidence. ECL intent, shipped-runtime
+- **Authority at checkpoint `4260113`:** the observer was not constructed by
+  the controller and remained retrospective trace-only evidence. ECL intent,
+  shipped-runtime
   update order, residual source coverage, future geometry, and physical
   repetition remain open. Hazard coverage and physical action authority do
   not change.
@@ -6358,3 +6359,35 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Boundary:** this is an IDA-supported deterministic oracle, not an observed
   shipped-runtime birth/contact join. Physical update-order correlation,
   ECL intent coverage, and future-geometry authority remain open.
+
+## 2026-07-28 — Added fail-closed ECL birth intent and live audit seams
+
+- Checkpoint `52d0864` adds the independent `th08_ecl_birth` classifier.
+  It follows only an eligible literal active-spell main-VM path for a bounded
+  horizon and stops fail-closed on unsupported control flow, source topology,
+  auxiliary/callback behavior, timer reset, emission-state mutation, and
+  unknown opcodes.
+- **Inferred from IDA and covered by executable fixtures:** direct-fire
+  opcodes `0x60..0x68` consume the exact 32-byte payload following the
+  12-byte instruction header. The classifier retains signed low-word count
+  behavior and distinguishes literal, dynamic, aimed, RNG, deferred, and
+  current-pattern intent.
+- **Boundary:** spell/rank, route/filter, minimum distance, pool capacity,
+  template geometry, emission origin, transform program, deferred state, and
+  omitted source VMs remain explicit dependencies. No intent is converted to
+  a spatial envelope or coverage slab.
+- Checkpoint `98db592` adds the compact `th08_live.birth_trace` record and
+  connects B1/B3 only under `--trace-bullet-births`. It reuses the existing
+  pool blob, main-VM snapshot, and instruction cache; adds no RPM; resets the
+  observer on scene, sensor, and action epoch boundaries; catches observation
+  and classifier failures independently; and emits only after the current
+  action transaction.
+- Every row is `trace_only_no_action_authority`, names the incomplete
+  active-spell main-VM source scope, and leaves intent-to-slot joining for B5.
+  The disabled path constructs neither observer nor audit record.
+- **Observed validation:** classifier `15/15`, birth/trace `14/14`, Python
+  compilation, and ruff pass. Complete Linux/Windows quick suites pass
+  `773/773` in `8.691/15.243 s`, with three existing Windows skips.
+- B4 shipped-runtime correlation and B5 deterministic residual reporting are
+  next. Hazard coverage, strategy status, and physical action authority do
+  not change.

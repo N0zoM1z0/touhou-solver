@@ -975,12 +975,21 @@ parity 當成每個 nature tie field 的逐 bit equality。
 - B1 checkpoint `4260113` 已加入獨立 pool-blob age observer；5,000 次
   Linux/Windows full-pool gate 的 p95 為 `0.0318/0.0339 ms`、p99
   `0.0540/0.0453 ms`、max `0.3199/0.1005 ms`，與 planning decode
-  交錯的 p95 ratio 為 `0.998/1.007`。尚未接入 controller，ECL intent、
-  update-order physical join 與 source completeness 仍是 open；
+  交錯的 p95 ratio 為 `0.998/1.007`；B1 當時尚未接入 controller，
+  後續 B3/integration checkpoint 見下；
 - B2 checkpoint `c3c5a83` 補齊獨立 base-state oracle 的 full-pool
   drop-before-release、next-pass cursor reuse、same-frame move/contact 與
   collision-suppressed birth。這是 IDA-supported executable fixture，不是
   shipped-runtime birth/contact 證據；
+- B3 checkpoint `52d0864` 已加入 fail-closed active-spell main-VM
+  classifier；只沿 literal path，對 control/source/emission-state 邊界
+  停止，並保留 aimed、RNG、dynamic、deferred、pool、template、origin
+  等 residual dependencies，不產生未證明的 future geometry；
+- checkpoint `98db592` 已用 `--trace-bullet-births` 將 B1/B3 接成
+  default-off post-issue audit。它復用既有 pool blob、VM snapshot 與
+  instruction cache，epoch reset 完整，Linux/Windows quick suite
+  `773/773` 通過；下一步是 B4 Stage-4A physical trace 與 B5
+  deterministic residual report；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

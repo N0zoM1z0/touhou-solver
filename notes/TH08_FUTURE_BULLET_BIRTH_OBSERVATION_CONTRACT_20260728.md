@@ -294,8 +294,8 @@ native-age observation seam without integrating it into the live controller:
   non-finite geometry, release/reuse, and deterministic serialization are
   covered by ten focused tests;
 - existing planning decode is byte/object unchanged; and
-- the module is not constructed by the controller yet, so disabled-path cost
-  and action behavior are exactly unchanged.
+- at checkpoint `4260113` the module was not constructed by the controller,
+  so disabled-path cost and action behavior were exactly unchanged.
 
 The fixed 5,000-iteration retained gates pass:
 
@@ -314,9 +314,11 @@ Reports:
   `4bb018a6c84839d93bbcb3b0da21cc50cacbff259208ce91d248eee9a428d56c`.
 
 Complete Linux/Windows quick suites pass `752/752` in `9.227/14.904 s`, with
-three existing Windows skips. B1 establishes cheap retrospective evidence
-only. The deterministic B2 fixture is recorded below; B3–B5 and the first
-physical trace remain open.
+three existing Windows skips. Checkpoint `98db592` now constructs this
+observer only under `--trace-bullet-births` and resets it on every
+scene/sensor/action epoch boundary. B1 remains retrospective evidence only.
+The deterministic B2 fixture is recorded below; B4–B5 and the first physical
+trace remain open.
 
 ## B2 Result
 
@@ -339,6 +341,36 @@ The focused file passes `10/10`; complete Linux/Windows quick suites pass
 executable adversarial fixtures supported by the IDA update order. B2 is not
 physical runtime proof; B4 must still join observed native ages and contacts.
 
+## B3 Result
+
+Checkpoint `52d0864 Add fail-closed ECL birth intent classifier` adds the
+independent `th08_ecl_birth` scanner:
+
+- it follows only the literal main-VM path within an 80-frame bounded horizon
+  and stops on unsupported branches, loops, calls, returns, timer reset,
+  source topology, callbacks/interrupts, unknown opcodes, and emission-state
+  mutation;
+- direct-fire opcodes `0x60..0x68` decode the exact 32-byte payload following
+  the instruction header and preserve signed low-word count semantics;
+- dynamic parameters, player aim, RNG, deferred/current-pattern emission,
+  rank/spell/filter/minimum-distance, pool capacity, template geometry,
+  emission origin, and transform dependencies remain explicit residuals; and
+- it makes no spatial-envelope or coverage claim.
+
+Checkpoint `98db592 Integrate trace-only bullet birth audit` connects the B1
+observer and B3 classifier only behind `--trace-bullet-births`. It reuses the
+existing pool blob, boss main-VM snapshot, and immutable instruction cache,
+records observation and classifier cost separately, emits only after the
+current action transaction, and labels every row
+`trace_only_no_action_authority`. Errors yield missing evidence plus an exact
+error string; they never reach planning or issue.
+
+The classifier passes `15/15` focused tests and the compact trace builder
+passes `3/3`. Complete Linux/Windows quick suites pass `773/773` in
+`8.691/15.243 s`, with three existing Windows skips. B3 is an implementation
+and regression result, not shipped-runtime source completeness. B4 and B5
+remain open.
+
 ## Ordered Gates
 
 ### B0 — Contract and static evidence
@@ -349,8 +381,8 @@ physical runtime proof; B4 must still join observed native ages and contacts.
 
 ### B1 — Native-age observation
 
-- **Implemented and offline-gated by checkpoint `4260113`; physical
-  integration remains open.**
+- **Implemented and offline-gated by checkpoint `4260113`; default-off live
+  integration completed by `98db592`, while physical evidence remains open.**
 - Add a narrow TH08 pool-blob observer, independent of planner `Bullet`.
 - Test empty/full pools, malformed blobs, inactive stale timers, age zero,
   capture spans, slot release/reuse ambiguity, and deterministic output.
@@ -368,6 +400,8 @@ physical runtime proof; B4 must still join observed native ages and contacts.
 
 ### B3 — ECL intent classification
 
+- **Fail-closed classifier completed by `52d0864` and trace-only integration
+  completed by `98db592`; physical source residuals remain open.**
 - Add a separate main-VM birth scanner with explicit stop reasons.
 - Cover direct, deferred, current-pattern, child/aux-VM, callback, aimed, RNG,
   rank, dynamic-parameter, pool-full, and transform residual classes.

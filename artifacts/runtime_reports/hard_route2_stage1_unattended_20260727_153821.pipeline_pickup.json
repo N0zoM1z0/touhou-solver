@@ -1,0 +1,51 @@
+{
+  "counts": {
+    "canonical_identity_valid": 7574,
+    "context_boundary_pairs": 0,
+    "continuity_pairs": 7573,
+    "estimator_consistent_roots": 7574,
+    "estimator_inconsistent_roots": 0,
+    "last_write_wins_replacements": 173,
+    "model_unknown_roots": 7574,
+    "multikey_held_roots": 1395,
+    "multikey_transactions": 1513,
+    "no_writes": 4468,
+    "observed_pickups": 2900,
+    "overdue_roots": 13,
+    "pending_no_write_carries": 92,
+    "pending_projected_action_reissues": 1,
+    "preexisting_target_matches": 33,
+    "press_edges": 2602,
+    "projected_action_reissues": 135,
+    "release_edges": 2600,
+    "settled_no_write_carries": 4375,
+    "unobserved_write_carries": 265,
+    "writes": 3106
+  },
+  "decision_rows": 7574,
+  "evidence": "observed_trace_plus_deterministic_replay",
+  "failure_count": 0,
+  "failures": [],
+  "failures_truncated": 0,
+  "interpretation": {
+    "model_unknown": "unseen future hazard events truncate coverage and are not interpreted as free space",
+    "observed_pickups": "native active mask changed to a previously non-active held/pending target",
+    "preexisting_target_matches": "target already matched native active input, so the write cannot prove a new physical pickup",
+    "projected_action_reissues": "complete masks differ and cause a physical write even though their movement/focus projection is identical"
+  },
+  "live_pipeline_promotion_ready": false,
+  "passed": true,
+  "promotion_blockers": [
+    "complete_mask_write_collapses_to_held_movement_action",
+    "future_hazard_coverage_is_model_unknown",
+    "ce0120_physical_clock_boundary_is_open"
+  ],
+  "role": "offline_audit_no_action_authority",
+  "schema": "th08-pipeline-pickup-audit-v1",
+  "skipped_nondecision_rows": 43,
+  "source": {
+    "path": "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_153821.jsonl",
+    "sha256": "1cc423641141a6c884907754eed8742865f472ae40a1f1c77d47f4b916ab931e"
+  },
+  "supported_mask": 247
+}

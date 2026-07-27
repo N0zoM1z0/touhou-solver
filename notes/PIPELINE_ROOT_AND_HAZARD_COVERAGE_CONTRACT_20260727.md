@@ -2,7 +2,8 @@
 
 Date: 2026-07-27
 
-Status: active G1 offline/shadow specification. This note adds no live action,
+Status: implemented and physically audited G1 offline/shadow specification;
+full pipeline promotion remains blocked. This note adds no live action,
 epoch-reset, clock, or publication authority. It refines
 `AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md` and preserves the
 boundary in `FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`.
@@ -246,3 +247,86 @@ not change current cadence, sensor reads, or actuator behavior.
 
 Only after all gates pass may a separate proposal discuss full pipeline live
 authority. Passing G1 does not itself promote one.
+
+## Observed G1 Shadow Result
+
+Commits `ff1af3c` and `e4d994f` implemented the canonical identity,
+fail-closed slab contract, TH08 trace adapter, exact issue-transaction
+telemetry, and independent chronological audit.
+
+Automated evidence:
+
+- the new identity/coverage/adapter/audit tests add 18 deterministic cases;
+- the complete quick suite passes `653/653` on Linux in `5.628 s`;
+- the same `653/653` pass on Windows in `8.784 s` with three existing
+  platform skips;
+- the independent scalar variable-cadence suite passes all eight tests;
+- the quick belief workspace profile has 16 scalar/native differential cases
+  with zero lower, upper, candidate, or certification failure; and
+- the bounded formal audit retains its known legacy/no-write counterexamples
+  without a new causal-recurrence failure.
+
+Physical shadow:
+
+```text
+hard_route2_stage1_unattended_20260727_153821
+```
+
+The accepted Hard Stage-1 run completed 7,574 decisions through
+`route_complete`, hard no-Bomb verification, supervisor cleanup, and no
+residual game/controller process. The same raw trace was independently
+audited by Linux and Windows Python with identical results:
+
+| Measurement | Count |
+| --- | ---: |
+| valid canonical identities | 7,574 |
+| continuity pairs | 7,573 |
+| trace/identity/continuity failures | 0 |
+| complete-mask writes / no-writes | 3,106 / 4,468 |
+| multikey transactions | 1,513 |
+| last-write-wins replacements | 173 |
+| pending no-write carries | 92 |
+| native-observed pickups | 2,900 |
+| target already active, not pickup proof | 33 |
+| roots with fail-closed future-event `model_unknown` | 7,574 |
+
+This validates trace identity, issue ordering, estimator continuity, native
+pickup observation, and unknown-coverage handling for this physical
+workload. It does not validate physical survival: the attempt took one hit at
+frame 2,651 after kernel exhaustion and is appended to CE-0132.
+
+### Newly observed promotion blocker
+
+The audit also found 135 real complete-mask writes whose movement/focus
+projection did not change. One occurred while a different native movement
+was active and a command was pending:
+
+```text
+frame 13133
+active       = 0x05  (stay + Focus + Shot)
+held/pending = 0x85  (right + Focus + Shot)
+selected     = 0x84  (right + Focus, Shot released)
+```
+
+The physical dispatch released the Shot key and called
+`delay_estimator.issued`. The current scalar/native movement recurrence sees
+only `selected_action == held_desired_action == right` and therefore calls it
+no-write. The immediate movement can happen to remain equivalent because the
+older and newer desired movement are both right, but the complete observed
+mask, pending identity, remaining support, and later issue semantics are not
+the same finite state.
+
+This is CE-0134. Its approximation direction is unknown for a recursive
+policy. Full pipeline live authority remains blocked until either:
+
+1. complete desired masks (or an equivalent issue token) participate in
+   action, observation, pending, and memo identity throughout the scalar and
+   native recurrences; or
+2. a physically verified actuator invariant forbids every movement-equivalent
+   complete-mask reissue while a command is pending.
+
+The first option is the preferred model correction. Until it is implemented,
+scalar/native parity proves only the movement-action recurrence. In addition,
+all physical roots remain coverage-truncated by unseen future hazards and
+CE-0120 remains open. The G1 instrumentation/validation checkpoint is
+complete; its live-promotion result is explicitly **not ready**.

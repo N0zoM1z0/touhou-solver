@@ -19,7 +19,7 @@ class _Solution:
 
 
 def _action(mask: int) -> str:
-    return f"mask_{mask:02x}"
+    return f"movement_{mask & 0xF4:02x}"
 
 
 def _transitions(previous: int, target: int) -> list[list[object]]:
@@ -71,6 +71,7 @@ def _row(
         "gameplay_epoch": 1,
         "stage_route_index": 0,
         "spell": {"active": False, "spell_id": 0},
+        "action": _action(target),
         "mask": target,
         "control_delay_candidates": list(delay_support),
         "local_pipeline_root": root,
@@ -135,6 +136,42 @@ class PipelinePickupAuditTests(unittest.TestCase):
         self.assertEqual(counts["observed_pickups"], 1)
         self.assertEqual(counts["model_unknown_roots"], 4)
         self.assertEqual(counts["canonical_identity_valid"], 4)
+        self.assertEqual(counts["pending_projected_action_reissues"], 0)
+        self.assertFalse(report["live_pipeline_promotion_ready"])
+        self.assertIn(
+            "future_hazard_coverage_is_model_unknown",
+            report["promotion_blockers"],
+        )
+
+    def test_pending_same_movement_complete_mask_write_blocks_promotion(
+        self,
+    ) -> None:
+        row = _row(
+            frame=10,
+            active=0x05,
+            held=0x85,
+            target=0x84,
+            pending=PendingCommandEstimate(
+                expected_mask=0x85,
+                remaining_frames=(1, 2, 3),
+                snapshot_age=2,
+                issue_age=1,
+                overdue=False,
+            ),
+        )
+
+        report = audit_rows([row], supported_mask=SUPPORTED)
+
+        self.assertTrue(report["passed"], report["failures"])
+        self.assertEqual(
+            report["counts"]["pending_projected_action_reissues"],
+            1,
+        )
+        self.assertFalse(report["live_pipeline_promotion_ready"])
+        self.assertIn(
+            "complete_mask_write_collapses_to_held_movement_action",
+            report["promotion_blockers"],
+        )
 
     def test_missing_unknown_coverage_fails_closed(self) -> None:
         row = _row(

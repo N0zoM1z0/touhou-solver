@@ -242,15 +242,24 @@ Windows deadline gate. CE-0131 is the canonical final rejection witness.
 
 - **Status:** per-position batch correction is live; explicit
   active/held/pending roots remain shadow.
-- **Model:** native active action, held desired action, optional pending
-  action, and remaining-delay support, including no-write transition.
+- **Model:** canonical shadow identity now retains complete native
+  active/held/pending masks, remaining-delay support, exact observation, and
+  immutable hazard/policy/model/clock versions. The scalar/native recurrence
+  still projects those masks to movement actions.
 - **Observed:** packed equivalent-root induction matches the independent
-  scalar oracle. CE-0124 disproves assuming reset held desired equals the
-  first post-discontinuity native active input.
-- **Limitation:** live callers retain the active-equals-held estimator fallback
-  until direct-root coverage and authority are promoted.
-- **Evidence:** CE-0122/0123/0124 and
-  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`.
+  scalar oracle. Hard Stage-1 `153821` retained 7,574 valid identities, 1,513
+  multikey transactions, 173 last-write-wins replacements, 92 pending
+  no-write carries, and 2,900 observed pickups with zero continuity failure.
+- **Limitation:** CE-0134 observes a pending complete-mask Shot reissue whose
+  selected and held movement actions are equal. The physical actuator writes,
+  while the movement-only recurrence calls it no-write. All physical G1 roots
+  also remain future-event `model_unknown`, and CE-0120 remains open.
+- **Boundary:** explicit pipeline ranking remains shadow. Live callers retain
+  the active-equals-held fallback until the recurrence carries complete issue
+  identity and hazard/clock coverage passes.
+- **Evidence:** CE-0122/0123/0124/0134,
+  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`, and
+  `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`.
 
 ### S15 — Native Local Implementation Acceleration
 

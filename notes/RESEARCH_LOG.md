@@ -4580,3 +4580,60 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   count, and strategy ledger remain unchanged. G1 now starts with the 47
   unresolved roots, future-birth/clock/pending-command coverage, and
   query-local refinement only for the six spatially ambiguous roots.
+
+## 2026-07-27: G1 Canonical Pipeline And Hazard Coverage Gate
+
+- **Problem contract:** Added
+  `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`. One
+  content-addressed query identity now joins exact float32 position/context,
+  complete active/held/pending input masks, remaining-delay support, and
+  immutable observation, hazard, policy, model, and clock versions. The
+  manager-frame version explicitly retains CE-0120 as open and has no reset
+  authority.
+- **Coverage semantics:** Added game-neutral `DETERMINISTIC`,
+  `FINITE_SUPPORT`, `BOUNDED_ENVELOPE`, and `UNKNOWN` frame-slab contracts.
+  Missing coverage and `UNKNOWN` truncate at the first root-reachable
+  transition and cannot become free space. Current TH08 unseen future events
+  honestly make every physical root `model_unknown` from the next frame.
+- **Trace and audit:** The TH08 adapter replaces the former inline root-record
+  block and adds zero-authority canonical identity/coverage telemetry. The
+  physical issue boundary now records ordered complete-mask key transitions.
+  An independent chronological audit checks content digests, complete-mask
+  invariants, multikey ordering, no-write carry, last-write-wins replacement,
+  remaining support, native-observed pickup, clock no-reset authority, and
+  fail-closed coverage.
+- **Automated validation:** The final G1 checkpoint passed `653/653` tests
+  on Linux in `5.628 s` and Windows in `8.784 s` with three platform skips.
+  The eight-test independent scalar cadence suite passed. The quick 16-case
+  belief workspace profile reported zero scalar/native, upper, candidate,
+  bound, or certification failure. CE-0134's promotion-blocker regression is
+  included.
+- **Observed physical integration gate:** Windows Hard Stage-1 run
+  `hard_route2_stage1_unattended_20260727_153821` completed 7,574 decisions,
+  terminal unload, `route_complete`, hard no-Bomb verification, supervisor
+  cleanup, and no residual process. Linux and Windows audit produced
+  identical counts: 7,574 valid identities, 7,573 continuity pairs, 3,106
+  writes, 4,468 no-writes, 1,513 multikey transactions, 173 last-write-wins
+  replacements, 92 pending no-write carries, 2,900 native-observed pickups,
+  33 pre-existing target matches, and zero integrity failure. All roots
+  retained future-event `model_unknown`.
+- **Observed survival failure:** The fresh attempt took one hit at frame
+  2,651 after global-kernel exhaustion, with signed pipeline clearance
+  `-19.248` and an eight-frame robust warning lead. This extends CE-0132 and
+  prevents calling the run a clean survival pass; it does not show a G1
+  telemetry effect.
+- **New counterexample CE-0134:** At frame 13,133, native active input was
+  `0x05` (stay/Focus/Shot), held and pending desired input was `0x85`
+  (right/Focus/Shot), and selected input was `0x84` (right/Focus). Releasing
+  Shot caused a real write and estimator issue, but the movement-only
+  recurrence sees selected right equal held right and calls it no-write. The
+  trace contains 135 movement-equivalent complete-mask writes and one such
+  pending/different-active witness.
+- **Decision and authority:** G1 identity, coverage, trace, and physical
+  validation infrastructure is complete. Its live-promotion result is
+  explicitly rejected/not-ready: add complete desired mask or an equivalent
+  issue token throughout scalar/native action, observation, pending, and memo
+  identity; eliminate future-event unknown coverage; and resolve CE-0120
+  before revisiting authority. G2 may proceed offline/query-local but cannot
+  bypass these blockers. No live action, worker, cadence, reset, or strategy
+  status changed.

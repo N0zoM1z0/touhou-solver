@@ -709,6 +709,10 @@ fixed 240-frame window. See
 
 ### G1 — Model coverage、pipeline root 與 clock boundary
 
+Status: G1 shadow instrumentation and physical validation complete at
+`ff1af3c` / `e4d994f`; full pipeline promotion is blocked by CE-0134,
+fail-closed future-event `model_unknown`, and open CE-0120.
+
 這是 live promotion 的 correctness gate，與 offline solver 工作可平行：
 
 1. 將 active/held/pending/remaining-support root 進入 canonical identity。
@@ -724,6 +728,24 @@ fixed 240-frame window. See
 退出條件：independent scalar belief oracle、packed/native parity、Windows
 pickup trace 與 focused physical gate 全過，才可討論完整 pipeline live
 authority。
+
+Observed closure:
+
+- canonical identity now joins exact float32 observation, complete
+  active/held/pending masks, remaining support, and observation/hazard/policy/
+  model/clock versions under SHA-256;
+- missing or unknown hazard slabs truncate on the first reachable transition;
+- Linux/Windows quick suites pass `653/653`, and the scalar/native bounded
+  pipeline gates remain green;
+- Hard Stage-1 `153821` retained 7,574 valid identities, 3,106 writes, 4,468
+  no-writes, 1,513 multikey transactions, 173 last-write-wins replacements,
+  92 pending no-write carries, 2,900 native-observed pickups, and zero audit
+  failure;
+- all 7,574 roots correctly remain future-event `model_unknown`;
+- CE-0134 found one pending `right+SHOT -> right` complete-mask write that the
+  movement-only recurrence calls no-write. Therefore the evidence gate
+  completed by rejecting promotion, not by granting it. G2 remains
+  offline/query-local and must not bypass this root-model blocker.
 
 ### G2 — Dual-bound query-local refinement
 

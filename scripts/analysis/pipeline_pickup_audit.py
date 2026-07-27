@@ -385,6 +385,25 @@ def _audit_dispatch(
             raise ValueError("dispatch write/estimator flags are inconsistent")
         counts["writes" if write_required else "no_writes"] += 1
         counts["multikey_transactions"] += int(len(expected) > 1)
+        movement_mask = supported_mask & 0x00F4
+        projected_reissue = (
+            write_required
+            and previous & movement_mask == target & movement_mask
+        )
+        counts["projected_action_reissues"] += int(projected_reissue)
+        counts["pending_projected_action_reissues"] += int(
+            projected_reissue
+            and decision.root.get("pending_mask") is not None
+            and (
+                _mask(
+                    decision.root.get("active_mask"),
+                    name="root active mask",
+                    supported_mask=supported_mask,
+                )
+                & movement_mask
+                != previous & movement_mask
+            )
+        )
         counts["release_edges"] += sum(
             1 for _bit, pressed in expected if not pressed
         )
@@ -586,8 +605,10 @@ def audit_rows(
         "observed_pickups",
         "overdue_roots",
         "pending_no_write_carries",
+        "pending_projected_action_reissues",
         "preexisting_target_matches",
         "press_edges",
+        "projected_action_reissues",
         "release_edges",
         "settled_no_write_carries",
         "unobserved_write_carries",
@@ -630,6 +651,15 @@ def audit_rows(
             failures=failures,
         )
 
+    integrity_passed = bool(decisions) and not failures
+    promotion_blockers: list[str] = []
+    if counts["pending_projected_action_reissues"]:
+        promotion_blockers.append(
+            "complete_mask_write_collapses_to_held_movement_action"
+        )
+    if counts["model_unknown_roots"]:
+        promotion_blockers.append("future_hazard_coverage_is_model_unknown")
+    promotion_blockers.append("ce0120_physical_clock_boundary_is_open")
     return {
         "schema": SCHEMA,
         "role": "offline_audit_no_action_authority",
@@ -641,7 +671,11 @@ def audit_rows(
         "failure_count": len(failures),
         "failures": failures[:100],
         "failures_truncated": max(0, len(failures) - 100),
-        "passed": bool(decisions) and not failures,
+        "passed": integrity_passed,
+        "live_pipeline_promotion_ready": (
+            integrity_passed and not promotion_blockers
+        ),
+        "promotion_blockers": promotion_blockers,
         "interpretation": {
             "observed_pickups": (
                 "native active mask changed to a previously non-active "
@@ -654,6 +688,10 @@ def audit_rows(
             "model_unknown": (
                 "unseen future hazard events truncate coverage and are not "
                 "interpreted as free space"
+            ),
+            "projected_action_reissues": (
+                "complete masks differ and cause a physical write even though "
+                "their movement/focus projection is identical"
             ),
         },
     }

@@ -38,6 +38,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   matched 549 finite variants and 122 pipeline variants with zero query-field,
   digest, or completion mismatch. This is offline finite-model evidence and
   changes no live authority.
+- Latest G1 shadow correctness checkpoints:
+  `ff1af3c Define canonical pipeline and hazard coverage contracts` and
+  `e4d994f Add the shadow pipeline pickup audit`. Complete-mask roots now join
+  exact observation and immutable observation/hazard/policy/model/clock
+  versions under SHA-256; missing/unknown hazard slabs fail closed. Physical
+  audit `153821` passed trace/continuity checks but found CE-0134, so full
+  pipeline authority remains blocked.
 - Latest structural checkpoint:
   `02d0e32 Extract the live local planner pass`, with compact evidence and the
   structural audit retained by
@@ -67,6 +74,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Windows with three Windows platform skips. The exact-root package is split
   into source, result-semantics, dossier, and replay modules; the legacy
   differential audit remains its compatible evidence source.
+- The final G1 checkpoint passes `653/653` on Linux in `5.628 s` and Windows
+  in `8.784 s` with three platform skips, including CE-0134's explicit
+  promotion-blocker regression.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one
@@ -78,6 +88,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
   terminal unload, artifact materialization, supervisor cleanup, and no
   residual game/controller process. It is an implementation-retention gate,
   not route-strategy promotion.
+- G1 physical shadow
+  `hard_route2_stage1_unattended_20260727_153821` completed 7,574 decisions
+  through Hard Stage 1, `route_complete`, zero Bomb input, supervisor cleanup,
+  and no residual process. Linux and Windows replay agreed on 7,574 valid
+  identities, 3,106 writes, 4,468 no-writes, 1,513 multikey transactions, 173
+  last-write-wins replacements, 92 pending no-write carries, 2,900 observed
+  pickups, and zero audit failure. It took one hit at frame 2,651 after
+  kernel exhaustion, so it is not a clean survival pass.
+- The same audit found 135 complete-mask writes with unchanged movement/focus
+  projection. At frame 13,133, `right+SHOT -> right` was a real write while
+  right was pending and stay was active; the movement-only recurrence calls
+  it no-write. CE-0134 blocks full pipeline promotion until complete issue
+  identity participates in the scalar/native recurrence.
 - No TH08 process, controller daemon, supervisor, or unfinished experiment is
   expected to be alive.
 - Native build output, raw traces, screenshots, caches, and the local
@@ -211,7 +234,7 @@ global-planning objective.
 | live | issue-time local collision certificate | Fresh hard fallback, per-position batch semantics, hard no-Bomb, and the CE-0127/0128 fresh/global transaction. Live callers still use the active-equals-held estimator fallback. |
 | live | coarse Boolean robust viability | Current global finite-model safety authority, subject to declared resolution/horizon/uncertainty and the unresolved transition-clock boundary. |
 | shadow | native FRScreen/MSG input-clock boundary | Detects episodes; cannot retire/reset policy or neutralize movement. |
-| shadow | explicit active/held/pending certificate | Has scalar/packed oracles and direct-root telemetry; cannot rank live input. |
+| shadow | explicit complete-mask active/held/pending certificate | Canonical trace identity and scalar/packed movement oracles exist. CE-0134, future-event unknown coverage, and CE-0120 block live ranking. |
 | shadow | restricted losing-root candidate verifier/publication | May prove a declared finite candidate and retain its witness; cannot claim unrestricted losing/optimality or change input. |
 | offline/shadow | belief lower bounds, revealed-delay upper, resumable refinement | Feasibility/optimality research; too slow or optimistic for current live authority. |
 | proposal-only | losing-state control reserve | Ranks fresh-hard-equivalent actions after Boolean exhaustion; physical effect unmeasured. |
@@ -232,12 +255,16 @@ measurement, and a `STRATEGY.md` status change.
 ### P0 — Preserve global feasibility and define post-loss authority
 
 Current Hard failures overwhelmingly follow finite-kernel exhaustion.
-G0 exact-root classification is complete. G1 should:
+G0 exact-root classification and the G1 shadow identity/coverage audit are
+complete. G1 rejected live promotion because CE-0134 collapses a real
+complete-mask write to movement-action no-write, every physical root remains
+future-event `model_unknown`, and CE-0120 is open. Next work should:
 
 1. work first on the 47 same-root unresolved cases while preserving exact
    root/pipeline identity, explicit completion status, transition episode,
    and observation-compatible delay information;
-2. complete future-birth, transform, body, pending-command, and clock coverage
+2. add complete issue identity to the scalar/native recurrence, then complete
+   future-birth, transform, body, pending-command, and clock coverage
    without treating missing hazards as false-empty rescue evidence;
 3. introduce proof-backed query-local refinement only where a coarse state is
    ambiguous, never uniform full-field 4-pixel solving;
@@ -305,11 +332,13 @@ weaken four global workers or reuse a merely similar root.
   `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
 - Frozen input clock:
   `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
+- Canonical pipeline root and hazard coverage:
+  `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`
 - Generated differential:
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 
 Relevant durable failures include CE-0108, CE-0109, CE-0111, CE-0118,
-CE-0120 through CE-0125, and CE-0127 through CE-0133. Historical notes do not
+CE-0120 through CE-0125, and CE-0127 through CE-0134. Historical notes do not
 override the authority table above.
 
 ## Retained Workloads
@@ -317,7 +346,7 @@ override the authority table above.
 | Workload | Bundle | Purpose |
 | --- | --- | --- |
 | Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor. |
-| Hard Route-2 Stage 1 | `175049` | Zero-hit native local gate; one-bundle evidence only. |
+| Hard Route-2 Stage 1 | `175049`, `144128`, `153821` | Zero-hit native/local and refactor gates; G1 trace/pickup gate with one survival failure. |
 | Hard Route-2 full route | `184942` | Complete route, 39-hit feasibility diagnosis; one-bundle evidence only. |
 | Hard Route-2 Stage 4A | `202439`, `211210`, `212756` | Capsule audit and fresh/global issue transaction; `211210/212756` form the newest compatible no-audit floor. |
 

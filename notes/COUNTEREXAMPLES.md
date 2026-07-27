@@ -3455,6 +3455,14 @@ Status: observed physical survival failure; R5 lifecycle smoke completed
   matching summary, dossier, comparison, regression, death, and session
   artifacts under `artifacts/runtime_reports/`. The 137 MiB raw JSONL remains
   local and ignored.
+- **Additional observed instance:** G1 shadow run
+  `hard_route2_stage1_unattended_20260727_153821` completed Hard Stage 1 and
+  cleanup with zero Bomb input but took one fresh-attempt hit at frame 2,651.
+  The player was near the top at `(124.965,19.253)`, active input was
+  `right_fast`, signed pipeline clearance was `-19.248`, the finite kernel
+  was already exhausted, and the robust warning lead was eight frames. This
+  is a second stochastic instance of the same broad post-exhaustion failure,
+  not evidence that G1 shadow telemetry caused the hit.
 
 ## CE-0133: A fixed 240-frame pre-hit window missed four exhaustion boundaries
 
@@ -3476,3 +3484,43 @@ Status: observed audit-coverage failure; corrected in the G0 dossier
 - **Evidence:** `notes/EXACT_ROOT_LOSS_DOSSIER_20260727.md` and
   `artifacts/viability_audit/hard_stage4a_20260726_202439_exact_root_dossier.json`.
 - **Regression:** `test_transition_window_expands_past_240_frames`.
+
+## CE-0134: A complete-mask write collapsed to movement-action no-write
+
+Status: observed physical pipeline-model counterexample; live authority
+already excluded
+
+- **Observed Windows counterexample:** In Hard Stage-1 shadow run
+  `hard_route2_stage1_unattended_20260727_153821`, decision frame `13133`
+  observed native active mask `0x05` (`stay + Focus + Shot`) while the held
+  and pending desired mask was `0x85` (`right + Focus + Shot`) with remaining
+  support `[1,2,3]`. The newly selected mask was `0x84`
+  (`right + Focus`).
+- **Physical issue:** `0x85 != 0x84`, so dispatch released the Shot key and
+  the estimator recorded a new issue. The movement projection of both masks
+  is `right`, so the current movement-action recurrence evaluates
+  `selected_action == held_desired_action` and calls the same decision
+  no-write.
+- **Why it matters:** The immediate movement trace may coincide because the
+  older and newer desired movement are equal. The complete active
+  observation, pending command identity, remaining-delay support, and later
+  write/no-write transition do not. A recursive value keyed only by movement
+  action can therefore merge physically different information states. The
+  error direction is unknown.
+- **Scope:** The full trace contains 135 movement-equivalent complete-mask
+  writes and one with both a pending command and a different active movement.
+  This is not evidence that all 135 change movement values; the one pending
+  witness is sufficient to reject a general complete-pipeline equivalence.
+- **Correction boundary:** Keep the canonical complete-mask root and all
+  explicit pipeline ranking shadow-only. Add complete desired mask or an
+  equivalent issue token to controller action, observation, pending, and
+  scalar/native memo identity. Alternatively prove an actuator invariant
+  that forbids such reissues; no such invariant currently exists.
+- **Evidence:** Raw trace SHA-256
+  `1cc423641141a6c884907754eed8742865f472ae40a1f1c77d47f4b916ab931e`;
+  compact report
+  `artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_153821.pipeline_pickup.json`;
+  problem note
+  `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`.
+- **Regression:**
+  `test_pending_same_movement_complete_mask_write_blocks_promotion`.

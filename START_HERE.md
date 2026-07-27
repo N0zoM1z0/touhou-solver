@@ -682,25 +682,33 @@ G0 exact-root classification and the G1 shadow identity/coverage audit are
 complete. G1 rejected live promotion after CE-0134 exposed a real
 complete-mask write collapsed to movement no-write. That alias is corrected
 offline, but every physical root remains future-event `model_unknown`,
-CE-0120 is open, and no complete-mask publication/consumer gate exists. Next
-work should:
+CE-0120 is open, and no complete-mask publication/consumer gate exists. G2
+now provides a branch-preserving query-local lower/reference/upper semantic
+gate for six retained spatial roots, but its multi-second Python patch/dense
+solve fails delivery. The next useful algorithm checkpoint is G3 exact
+augmented-root partial-survival lower witnesses, with G5 future-event coverage
+in parallel. Work should:
 
-1. work first on the 47 same-root unresolved cases while preserving exact
-   root/pipeline identity, explicit completion status, transition episode,
-   and observation-compatible delay information;
-2. add complete issue identity to the scalar/native recurrence, then complete
+1. build G3 witnesses first on retained first-loss roots, keeping root actions
+   unrestricted and each continuation causal, observation-compatible,
+   budget-complete, and tied to the exact immutable augmented-root version;
+2. publish guaranteed frames, bottleneck margin, worst branch, policy digest,
+   and explicit completion status; unresolved/timeout actions remain
+   unresolved rather than losing;
+3. use completed restricted witnesses only as attainable post-loss lower
+   bounds and intersect any later consumer with a fresh local hard set;
+4. add complete issue identity to the scalar/native recurrence, then complete
    future-birth, transform, body, pending-command, and clock coverage
    without treating missing hazards as false-empty rescue evidence;
-3. introduce proof-backed query-local refinement only where a coarse state is
-   ambiguous, using the retained cell-intersection/union and branch-preserving
-   tube contract; never use uniform full-field 4-pixel solving;
-4. retain root actions unrestricted while using exact augmented-root
-   partial-survival witnesses as a post-loss lower bound;
-5. keep survival hard and route/resource objectives inside the viable set;
-6. publish the authoritative Boolean result before optional work;
-7. use extra CPU through deterministic process-level independent-root shards,
+5. move only G2's sparse data plane toward native/cancellable execution while
+   preserving its retained cell-intersection/union, dependency-closure, and
+   branch-preserving tube contract; never use uniform full-field 4-pixel
+   solving;
+6. keep survival hard and route/resource objectives inside the viable set;
+7. publish the authoritative Boolean result before optional work;
+8. use extra CPU through deterministic process-level independent-root shards,
    without increasing the live same-root worker default beyond four;
-8. validate recurrence/geometry changes with the semantic fuzzer and validate
+9. validate recurrence/geometry changes with the semantic fuzzer and validate
    delivery claims on Windows direct roots.
 
 Candidate exhaustion, timeout, or a budgeted lower bound must remain

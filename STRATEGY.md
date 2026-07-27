@@ -59,6 +59,14 @@ native C++ boundary is fast in isolation, but synchronous delivery and
 same-issue exact-version asynchronous publication both failed the fixed
 Windows deadline gate. CE-0131 is the canonical final rejection witness.
 
+**Observed:** post-refactor Lunatic practice gates completed Stage 4A, Stage
+5, and Stage 6B with 7, 13, and 16 hits, hard no-Bomb, accepted artifacts,
+and cleanup. These are below the respective accepted historical medians of
+22, 20.5, and 26, but are RNG-, phase-, density-, and resource-distinct rather
+than controlled A/B trials. Every contact followed global-kernel exhaustion.
+This is workload-level progress and structural retention, not survival
+acceptance or strategy promotion.
+
 ### Priority
 
 1. Preserve global feasibility earlier and create exact augmented-root

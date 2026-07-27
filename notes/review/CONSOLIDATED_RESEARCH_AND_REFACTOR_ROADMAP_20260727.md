@@ -656,10 +656,14 @@ symbol fallback 完全相同。
 Status: lifecycle/resource/sensor/policy/scene/issue/trace modules and the
 22-line entry facade are complete. The live loop now consumes immutable
 capture, service-update, publication-guidance, and fresh-issue stage records.
-The Windows Hard Stage-1 retention gate `20260727_173735` passes with zero
-hits/Bombs and full cleanup. Trace construction and the remaining stage
-functions are still inside `_run_live_session`; R5 decomposition therefore
-continues without changing live strategy.
+Corridor, candidate, decision-control, sensing, timing, and optional-hazard
+trace construction is outside the issue path. Fresh enemy-prefix
+recertification and ordered deadline/deathbomb/auto-confirm/no-Bomb overrides
+also have focused owners. Lunatic Stage-4A/5/6B retention gates completed
+with hard no-Bomb, accepted artifacts, and full cleanup; their hits remain
+CE-0136/0137/0138/0139 model/recovery evidence. Action alignment, physical
+send/no-write, actuator mutation, and outer scene composition remain inside
+`_run_live_session`; R5 therefore continues without changing live strategy.
 
 1. 抽 `LiveSession` context manager，只負責資源 acquire/release。
 2. 抽 `Sensor`, `PolicyCoordinator`, `SceneClockCoordinator`,

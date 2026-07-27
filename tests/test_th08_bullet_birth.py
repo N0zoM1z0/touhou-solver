@@ -81,6 +81,155 @@ def _set_slot(
 
 
 class BulletBirthTrackerTests(unittest.TestCase):
+    def test_compact_double_buffer_matches_independent_scalar_transitions(
+        self,
+    ) -> None:
+        blob = _pool()
+        tracker = BulletBirthTracker(maximum_bootstrap_age=3)
+        previous_states: list[int] | None = None
+        previous_ages: list[int] | None = None
+        previous_frame_before: int | None = None
+
+        for generation in range(16):
+            for slot in range(48):
+                state = int((generation * 7 + slot * 3) % 5 != 0)
+                age = (
+                    -1
+                    if state and (generation * 11 + slot) % 37 == 0
+                    else (generation * 3 + slot * 5) % 17
+                )
+                _set_slot(
+                    blob,
+                    slot,
+                    state=state,
+                    age=age,
+                    x=(
+                        math.nan
+                        if (generation + slot) % 41 == 0
+                        else generation + slot * 0.25
+                    ),
+                    y=slot * 0.5,
+                    velocity_x=generation * -0.125,
+                    velocity_y=slot * 0.0625,
+                    width=6.0 + (slot % 3),
+                    height=8.0 + (generation % 2),
+                    transform_flags=(generation << 8) | slot,
+                )
+
+            frame_before = generation * 2
+            frame_after = frame_before + int(generation % 4 == 0)
+            observation = tracker.observe(
+                blob,
+                frame_before=frame_before,
+                frame_after=frame_after,
+            )
+            states = [
+                struct.unpack_from(
+                    "<H",
+                    blob,
+                    slot * BULLET_STRIDE + BULLET_STATE_OFFSET,
+                )[0]
+                for slot in range(BULLET_POOL_SIZE)
+            ]
+            ages = [
+                struct.unpack_from(
+                    "<i",
+                    blob,
+                    slot * BULLET_STRIDE + BULLET_TIMER_CURRENT_OFFSET,
+                )[0]
+                for slot in range(BULLET_POOL_SIZE)
+            ]
+            expected: list[
+                tuple[int, str, str, int | None, int | None, int | None]
+            ] = []
+            for slot, (state, age) in enumerate(zip(states, ages)):
+                if state and age < 0:
+                    expected.append(
+                        (
+                            slot,
+                            BIRTH_KIND_INVALID_TIMER,
+                            OBSERVATION_INVALID_TIMER,
+                            (
+                                previous_states[slot]
+                                if previous_states is not None
+                                else None
+                            ),
+                            (
+                                previous_ages[slot]
+                                if previous_ages is not None
+                                else None
+                            ),
+                            None,
+                        )
+                    )
+                elif state and previous_states is None and age <= 3:
+                    expected.append(
+                        (
+                            slot,
+                            BIRTH_KIND_BOOTSTRAP_RECENT,
+                            OBSERVATION_CAPTURE_SPANNED,
+                            None,
+                            None,
+                            None,
+                        )
+                    )
+                elif (
+                    state
+                    and previous_states is not None
+                    and previous_ages is not None
+                    and not previous_states[slot]
+                ):
+                    expected.append(
+                        (
+                            slot,
+                            BIRTH_KIND_ACTIVATION_EDGE,
+                            OBSERVATION_CAPTURE_SPANNED,
+                            previous_states[slot],
+                            previous_ages[slot],
+                            previous_frame_before,
+                        )
+                    )
+                elif (
+                    state
+                    and previous_states is not None
+                    and previous_ages is not None
+                    and previous_states[slot]
+                    and age < previous_ages[slot]
+                ):
+                    expected.append(
+                        (
+                            slot,
+                            BIRTH_KIND_TIMER_REGRESSION,
+                            OBSERVATION_SLOT_REUSE_AMBIGUOUS,
+                            previous_states[slot],
+                            previous_ages[slot],
+                            previous_frame_before,
+                        )
+                    )
+            actual = [
+                (
+                    item.slot,
+                    item.kind,
+                    item.observation_status,
+                    item.previous_state,
+                    item.previous_age,
+                    item.activation_support_start,
+                )
+                for item in observation.evidence
+            ]
+            self.assertEqual(actual, expected)
+            self.assertEqual(
+                observation.active_count,
+                sum(state != 0 for state in states),
+            )
+            self.assertEqual(
+                [item.slot for item in observation.evidence],
+                sorted(item.slot for item in observation.evidence),
+            )
+            previous_states = states
+            previous_ages = ages
+            previous_frame_before = frame_before
+
     def test_rejects_short_pool_blob(self) -> None:
         with self.assertRaisesRegex(ValueError, "bullet pool requires"):
             BulletBirthTracker().observe(

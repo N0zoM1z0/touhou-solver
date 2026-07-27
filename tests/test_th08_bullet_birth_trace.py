@@ -144,6 +144,8 @@ class BulletBirthTraceTests(unittest.TestCase):
             record["timing_ms"]["boundary"],
             "post_issue_before_trace_flush",
         )
+        self.assertIsNone(record["timing_ms"]["build"])
+        self.assertIsNone(record["timing_ms"]["pre_emit_total"])
         self.assertEqual(record["timing_ms"]["previous_emit"], 0.012)
 
     def test_scope_and_join_remain_explicitly_incomplete(self) -> None:

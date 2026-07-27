@@ -990,6 +990,16 @@ parity 當成每個 nature tie field 的逐 bit equality。
   instruction cache，epoch reset 完整，Linux/Windows quick suite
   `773/773` 通過；下一步是 B4 Stage-4A physical trace 與 B5
   deterministic residual report；
+- B4 首次實機 `20260728_031127` 暴露 CE-0143/0144：observer 在實機
+  爭用下 p95 `1.7795 ms`，而 integration 丟失既有 enemy
+  `+0x3324` deferred-fire bit，導致 1,641 intents 全部 untimed。
+  schema v2 已以 exact capture alignment 傳遞該 bit，所有 optional
+  工作移到 current dispatch 後，cold ECL cache miss 直接 fail closed；
+- observer scratch-reuse 已把 Linux/Windows steady full-pool p95 降到
+  `0.0171/0.0242 ms`，但 592-birth burst p95 仍為
+  `2.2671/2.7465 ms`；下一次 B4 會新增 build/pre-emit timing，不能把
+  output-linear serialization 或 physical contention 隱藏在 timing
+  boundary 外；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

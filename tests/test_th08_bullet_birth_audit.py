@@ -146,6 +146,8 @@ def _audit(
         "timing_ms": {
             "observation": 0.03,
             "intent": 0.04,
+            "build": 0.02,
+            "pre_emit_total": 0.09,
             "previous_emit": 0.01,
         },
         "join": {

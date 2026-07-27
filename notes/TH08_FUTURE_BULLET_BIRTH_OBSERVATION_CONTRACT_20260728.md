@@ -323,6 +323,22 @@ Reports:
   SHA-256
   `4bb018a6c84839d93bbcb3b0da21cc50cacbff259208ce91d248eee9a428d56c`.
 
+CE-0143 then showed that the steady isolated corpus omitted output-linear
+birth bursts and physical contention. The scratch-reuse implementation copies
+the sparse state and age fields once into compact double buffers, performs
+all comparisons in fixed contiguous scratch, and gathers geometry only for
+candidate slots. The v2 benchmark retains steady and 33/592-birth profiles:
+
+| Platform | Full p95 | Decode ratio | 33-birth p95 | 592-birth p95 |
+| --- | ---: | ---: | ---: | ---: |
+| Linux | 0.0171 ms | 0.922 | 0.2051 ms | 2.2671 ms |
+| Windows | 0.0242 ms | 0.969 | 0.2226 ms | 2.7465 ms |
+
+The steady fixed gate passes, but the 592-birth path and physical contention
+remain open. The next physical trace separately records observation, intent,
+record build, pre-emit total, and previous emit; no unmeasured serialization
+gap may be used to claim delivery.
+
 Complete Linux/Windows quick suites pass `752/752` in `9.227/14.904 s`, with
 three existing Windows skips. Checkpoint `98db592` now constructs this
 observer only under `--trace-bullet-births` and resets it on every

@@ -429,6 +429,14 @@
     "trace_sha256": "7788114afb988536c9152fe0c9473379d28c59864e86cac4c3ee9b2a829922e5"
   },
   "timing_ms": {
+    "build": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
     "intent": {
       "count": 14411,
       "max": 0.4702,
@@ -444,6 +452,14 @@
       "p95": 1.7795,
       "p99": 2.7495,
       "p99_9": 6.4567
+    },
+    "pre_emit_total": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
     },
     "previous_emit": {
       "count": 14410,

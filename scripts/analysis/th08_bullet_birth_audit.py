@@ -381,6 +381,8 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     by_phase: defaultdict[str, Counter[str]] = defaultdict(Counter)
     observation_ms: list[float] = []
     intent_ms: list[float] = []
+    build_ms: list[float] = []
+    pre_emit_total_ms: list[float] = []
     emit_ms: list[float] = []
     ages: list[float] = []
     evidence_per_row: list[float] = []
@@ -434,6 +436,8 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             for field, target in (
                 ("observation", observation_ms),
                 ("intent", intent_ms),
+                ("build", build_ms),
+                ("pre_emit_total", pre_emit_total_ms),
                 ("previous_emit", emit_ms),
             ):
                 value = timing.get(field)
@@ -631,6 +635,8 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         "timing_ms": {
             "observation": observation_timing,
             "intent": _distribution(intent_ms),
+            "build": _distribution(build_ms),
+            "pre_emit_total": _distribution(pre_emit_total_ms),
             "previous_emit": _distribution(emit_ms),
         },
         "scope": {

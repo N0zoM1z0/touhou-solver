@@ -108,6 +108,8 @@ def run_benchmark(
     densities: tuple[int, ...],
     iterations: int,
     decode_iterations: int,
+    burst_sizes: tuple[int, ...],
+    burst_iterations: int,
     warmup: int,
 ) -> dict[str, object]:
     density_rows: list[dict[str, object]] = []
@@ -130,6 +132,46 @@ def run_benchmark(
             {
                 "density": density,
                 "observer": _summary(observer_samples),
+            }
+        )
+
+    inactive_blob = _pool(0)
+    burst_rows: list[dict[str, object]] = []
+    for burst_size in burst_sizes:
+        if not 0 < burst_size <= BULLET_POOL_SIZE:
+            raise ValueError("burst size is outside the hostile-bullet pool")
+        active_blob = _pool(burst_size)
+        tracker = BulletBirthTracker(maximum_bootstrap_age=0)
+        frame = 1
+        tracker.observe(
+            inactive_blob,
+            frame_before=frame,
+            frame_after=frame,
+        )
+        samples: list[float] = []
+        for _ in range(burst_iterations):
+            frame += 1
+            started = time.perf_counter_ns()
+            observation = tracker.observe(
+                active_blob,
+                frame_before=frame,
+                frame_after=frame,
+            )
+            samples.append(
+                (time.perf_counter_ns() - started) / 1_000_000.0
+            )
+            if len(observation.evidence) != burst_size:
+                raise AssertionError("birth burst lost evidence")
+            frame += 1
+            tracker.observe(
+                inactive_blob,
+                frame_before=frame,
+                frame_after=frame,
+            )
+        burst_rows.append(
+            {
+                "births_per_observation": burst_size,
+                "observer": _summary(samples),
             }
         )
 
@@ -179,11 +221,13 @@ def run_benchmark(
     }
     gate["passed"] = gate["observer_pass"] and gate["interleaved_pass"]
     return {
-        "schema": "th08-bullet-birth-observer-benchmark-v1",
+        "schema": "th08-bullet-birth-observer-benchmark-v2",
         "pool_size": BULLET_POOL_SIZE,
         "iterations": iterations,
         "decode_iterations": decode_iterations,
+        "burst_iterations": burst_iterations,
         "density_results": density_rows,
+        "burst_results": burst_rows,
         "decode_baseline": baseline,
         "decode_interleaved": interleaved,
         "interleaved_p95_ratio": ratio,
@@ -201,10 +245,22 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--iterations", type=int, default=2_000)
     parser.add_argument("--decode-iterations", type=int, default=100)
+    parser.add_argument(
+        "--burst-sizes",
+        type=int,
+        nargs="+",
+        default=(33, 592),
+    )
+    parser.add_argument("--burst-iterations", type=int, default=200)
     parser.add_argument("--warmup", type=int, default=50)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
-    if args.iterations <= 0 or args.decode_iterations <= 0 or args.warmup < 0:
+    if (
+        args.iterations <= 0
+        or args.decode_iterations <= 0
+        or args.burst_iterations <= 0
+        or args.warmup < 0
+    ):
         parser.error("iterations must be positive and warmup non-negative")
     if BULLET_POOL_SIZE not in args.densities:
         parser.error("densities must include the full 1,536-slot gate")
@@ -213,6 +269,8 @@ def main(argv: list[str] | None = None) -> int:
         densities=tuple(args.densities),
         iterations=args.iterations,
         decode_iterations=args.decode_iterations,
+        burst_sizes=tuple(args.burst_sizes),
+        burst_iterations=args.burst_iterations,
         warmup=args.warmup,
     )
     rendered = json.dumps(report, indent=2, sort_keys=True) + "\n"

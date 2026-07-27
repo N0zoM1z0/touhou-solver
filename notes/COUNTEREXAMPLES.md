@@ -3985,13 +3985,17 @@ observer optimization open
   keep the captured pool blob and VM snapshot immutable until then. Retain
   separate extraction and prior-emit tails. Post-issue ECL classification is
   lookup-only against the already warmed immutable instruction cache, so it
-  cannot start cold RPM. Optimize the strided/burst path before repeating B4;
-  a budget failure remains trace failure and cannot gain coverage or action
-  authority.
+  cannot start cold RPM. Compact double-buffer scratch now limits state/age
+  to one strided copy each and performs comparisons contiguously. Linux/
+  Windows full-pool p95 improved to `0.0171/0.0242 ms`, but 592-birth burst
+  p95 remains `2.2671/2.7465 ms`; physical contention and output-linear burst
+  cost remain open. The next B4 reports trace-build and pre-emit timing in
+  addition to extraction and prior emit. A budget failure remains trace
+  failure and cannot gain coverage or action authority.
 - **Evidence:** raw trace SHA-256
   `7788114afb988536c9152fe0c9473379d28c59864e86cac4c3ee9b2a829922e5`;
   first deterministic compact report SHA-256
-  `cefef6fffe817c4f2d222b77d6503a87dc66b0c438eaa9373a8ad4d5fe45455d`.
+  `65ff30f5363a13ed77df676fe8f829ed8a55948f987191b92915de23c6da2c34`.
 
 ## CE-0144: Unknown deferred-fire state erased every physical timed intent
 

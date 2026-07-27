@@ -6417,3 +6417,31 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `8.781/15.338 s`, with three Windows skips. The physical performance
   failure CE-0143 and repeated B4/B5 gate remain open; no future geometry,
   hazard coverage, or action authority changed.
+
+## 2026-07-28 — Reduced G5 observer strided scans and exposed burst cost
+
+- **Observed pre-optimization profiles:** steady full-pool Linux p95 was
+  `0.0284 ms`; alternating 33/592-birth p95 was `0.2315/2.6668 ms`.
+  Physical B4 had already shown `1.7795 ms` observer p95 under planner
+  contention and up to 592 evidence rows.
+- `BulletBirthTracker` now copies state and age from the 6.3-MiB pool exactly
+  once per field into reusable compact double buffers. Active, invalid,
+  activation, and timer-regression masks use fixed contiguous scratch and one
+  ordered candidate scan. Candidate geometry is gathered in batches; no
+  planner field, pool read, evidence status, or trace authority changed.
+- An independent scalar transition test covers 16 generations across all
+  1,536 slots and matches activation, bootstrap, invalid timer, timer
+  regression, previous-state/age, support, ordering, and active counts.
+- **Observed post-optimization fixed profiles:** Linux/Windows full-pool p95
+  is `0.0171/0.0242 ms`, with interleaved planning-decode ratios
+  `0.922/0.969`. A 33-birth p95 is `0.2051/0.2226 ms`; a 592-birth p95 remains
+  `2.2671/2.7465 ms`. Retained report SHA-256 values are
+  `281a3ec9e62805ce1e0db73afa1586cebf221fdef1e2131e306ec88a0c248977`
+  (Linux) and
+  `1e1a0791668022185106708b25ddf59683ac65482c00c1988c16d093ba3adfca`
+  (Windows).
+- The trace now measures record construction and pre-emit total separately;
+  the previous physical report did not include that serialization boundary.
+  Complete Linux/Windows quick suites pass `782/782` in `8.989/15.375 s`,
+  with three Windows skips. Physical CE-0143 remains open until B4 repeats;
+  future geometry and action authority remain unchanged.

@@ -1,0 +1,78 @@
+{
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 33,
+      "observer": {
+        "max_ms": 0.341256,
+        "p50_ms": 0.163805,
+        "p95_ms": 0.20506449999999996,
+        "p99_ms": 0.22931312999999987
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "observer": {
+        "max_ms": 2.645905,
+        "p50_ms": 1.9526265,
+        "p95_ms": 2.267141949999999,
+        "p99_ms": 2.4565074599999996
+      }
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 11.387108,
+    "p50_ms": 6.678520499999999,
+    "p95_ms": 7.71848365,
+    "p99_ms": 8.3436988
+  },
+  "decode_interleaved": {
+    "max_ms": 8.84871,
+    "p50_ms": 6.329788,
+    "p95_ms": 7.11491665,
+    "p99_ms": 7.430774479999999
+  },
+  "decode_iterations": 1000,
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 0.089495,
+        "p50_ms": 0.0155065,
+        "p95_ms": 0.018634050000000006,
+        "p99_ms": 0.034463490000000034
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.275183,
+        "p50_ms": 0.014878,
+        "p95_ms": 0.01884065000000001,
+        "p99_ms": 0.030558640000000012
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.075854,
+        "p50_ms": 0.014615,
+        "p95_ms": 0.01714525,
+        "p99_ms": 0.03051536000000003
+      }
+    }
+  ],
+  "gate": {
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": true,
+    "max_limit_ms": 2.0,
+    "observer_pass": true,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": true
+  },
+  "interleaved_p95_ratio": 0.9218023866643806,
+  "iterations": 5000,
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v2"
+}

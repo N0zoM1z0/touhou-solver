@@ -3613,9 +3613,9 @@ def _run_live_session(
                     ecl_birth_intent_ms = (
                         time.perf_counter() - ecl_birth_intent_started
                     ) * 1000.0
-                bullet_birth_trace_record = (
-                    build_bullet_birth_trace_record(
-                        BulletBirthTraceInput(
+                birth_trace_build_started = time.perf_counter()
+                bullet_birth_trace_record = build_bullet_birth_trace_record(
+                    BulletBirthTraceInput(
                             frame=counter_at_action,
                             snapshot_frame=int(
                                 state["enemy_manager_frame"]
@@ -3647,8 +3647,18 @@ def _run_live_session(
                             previous_emit_ms=(
                                 previous_birth_trace_emit_ms
                             ),
-                        )
                     )
+                )
+                birth_trace_build_ms = (
+                    time.perf_counter() - birth_trace_build_started
+                ) * 1000.0
+                birth_trace_timing = bullet_birth_trace_record["timing_ms"]
+                assert isinstance(birth_trace_timing, dict)
+                birth_trace_timing["build"] = birth_trace_build_ms
+                birth_trace_timing["pre_emit_total"] = (
+                    bullet_birth_observation_ms
+                    + ecl_birth_intent_ms
+                    + birth_trace_build_ms
                 )
                 previous_birth_trace_emit_ms = trace_sink.emit(
                     bullet_birth_trace_record,

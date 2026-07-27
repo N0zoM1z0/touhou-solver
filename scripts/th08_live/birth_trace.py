@@ -97,6 +97,8 @@ def build_bullet_birth_trace_record(
             "boundary": "post_issue_before_trace_flush",
             "observation": trace_input.observation_ms,
             "intent": trace_input.intent_ms,
+            "build": None,
+            "pre_emit_total": None,
             "previous_emit": trace_input.previous_emit_ms,
         },
         "join": {

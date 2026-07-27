@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-import struct
 from dataclasses import dataclass
 
 import numpy as np
@@ -155,63 +154,39 @@ def _validate_pool_blob(blob: bytes | bytearray | memoryview) -> None:
         raise ValueError(f"bullet pool requires {required_size} bytes")
 
 
-def _slot_evidence(
+def _candidate_geometry(
     blob: bytes | bytearray | memoryview,
     *,
-    slot: int,
-    kind: str,
-    observation_status: str,
-    state: int,
-    age: int,
-    previous_state: int | None,
-    previous_age: int | None,
-    activation_support_start: int | None,
-    activation_support_end: int,
-) -> BulletBirthEvidence:
-    base = slot * BULLET_STRIDE
-    width, height = struct.unpack_from(
-        "<ff",
-        blob,
-        base + BULLET_GEOMETRY_OFFSET,
+    slots: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Gather candidate-only geometry into compact contiguous arrays."""
+
+    values = np.empty((len(slots), 6), dtype=np.float32)
+    for column, offset in enumerate(
+        (
+            BULLET_POSITION_OFFSET,
+            BULLET_POSITION_OFFSET + 4,
+            BULLET_VELOCITY_OFFSET,
+            BULLET_VELOCITY_OFFSET + 4,
+            BULLET_GEOMETRY_OFFSET,
+            BULLET_GEOMETRY_OFFSET + 4,
+        )
+    ):
+        np.take(
+            _pool_field(blob, offset=offset, dtype="<f4"),
+            slots,
+            out=values[:, column],
+        )
+    transform_flags = np.take(
+        _pool_field(
+            blob,
+            offset=BULLET_TRANSFORM_FLAGS_OFFSET,
+            dtype="<u4",
+        ),
+        slots,
     )
-    x, y = struct.unpack_from(
-        "<ff",
-        blob,
-        base + BULLET_POSITION_OFFSET,
-    )
-    velocity_x, velocity_y = struct.unpack_from(
-        "<ff",
-        blob,
-        base + BULLET_VELOCITY_OFFSET,
-    )
-    transform_flags = struct.unpack_from(
-        "<I",
-        blob,
-        base + BULLET_TRANSFORM_FLAGS_OFFSET,
-    )[0]
-    geometry_finite = all(
-        math.isfinite(value)
-        for value in (x, y, velocity_x, velocity_y, width, height)
-    )
-    return BulletBirthEvidence(
-        slot=slot,
-        kind=kind,
-        observation_status=observation_status,
-        state=state,
-        age=age,
-        previous_state=previous_state,
-        previous_age=previous_age,
-        activation_support_start=activation_support_start,
-        activation_support_end=activation_support_end,
-        x=x,
-        y=y,
-        velocity_x=velocity_x,
-        velocity_y=velocity_y,
-        width=width,
-        height=height,
-        transform_flags=transform_flags,
-        geometry_finite=geometry_finite,
-    )
+    geometry_finite = np.isfinite(values).all(axis=1)
+    return values, transform_flags, geometry_finite
 
 
 class BulletBirthTracker:
@@ -221,14 +196,21 @@ class BulletBirthTracker:
         if type(maximum_bootstrap_age) is not int or maximum_bootstrap_age < 0:
             raise ValueError("maximum bootstrap age must be a non-negative int")
         self._maximum_bootstrap_age = maximum_bootstrap_age
-        self._previous_states: np.ndarray | None = None
-        self._previous_ages: np.ndarray | None = None
+        self._current_states = np.empty(BULLET_POOL_SIZE, dtype=np.uint16)
+        self._current_ages = np.empty(BULLET_POOL_SIZE, dtype=np.int32)
+        self._previous_states = np.empty(BULLET_POOL_SIZE, dtype=np.uint16)
+        self._previous_ages = np.empty(BULLET_POOL_SIZE, dtype=np.int32)
+        self._active = np.empty(BULLET_POOL_SIZE, dtype=np.bool_)
+        self._valid_active = np.empty(BULLET_POOL_SIZE, dtype=np.bool_)
+        self._work = np.empty(BULLET_POOL_SIZE, dtype=np.bool_)
+        self._previous_active = np.empty(BULLET_POOL_SIZE, dtype=np.bool_)
+        self._candidate_kind = np.empty(BULLET_POOL_SIZE, dtype=np.uint8)
+        self._has_previous = False
         self._previous_frame_before: int | None = None
         self._previous_frame_after: int | None = None
 
     def reset(self) -> None:
-        self._previous_states = None
-        self._previous_ages = None
+        self._has_previous = False
         self._previous_frame_before = None
         self._previous_frame_after = None
 
@@ -263,123 +245,128 @@ class BulletBirthTracker:
             offset=BULLET_TIMER_CURRENT_OFFSET,
             dtype="<i4",
         )
-        active = states_view != 0
-        invalid_timer = active & (ages_view < 0)
-        valid_active = active & ~invalid_timer
+        # Copy each sparse 6.3-MiB pool field once. All comparisons below use
+        # compact contiguous double buffers and fixed scratch arrays.
+        np.copyto(self._current_states, states_view)
+        np.copyto(self._current_ages, ages_view)
+        states = self._current_states
+        ages = self._current_ages
+        active = self._active
+        valid_active = self._valid_active
+        work = self._work
+        candidate_kind = self._candidate_kind
+        np.not_equal(states, 0, out=active)
+        np.less(ages, 0, out=work)
+        np.logical_not(work, out=valid_active)
+        np.logical_and(active, valid_active, out=valid_active)
+        candidate_kind.fill(0)
+        np.logical_and(active, work, out=work)
+        candidate_kind[work] = 1
 
-        previous_states = self._previous_states
-        previous_ages = self._previous_ages
-        evidence_specs: list[
-            tuple[int, str, str, int | None, int | None, int | None]
-        ] = []
-
-        for slot in np.flatnonzero(invalid_timer):
-            index = int(slot)
-            evidence_specs.append(
-                (
-                    index,
-                    BIRTH_KIND_INVALID_TIMER,
-                    OBSERVATION_INVALID_TIMER,
-                    (
-                        int(previous_states[index])
-                        if previous_states is not None
-                        else None
-                    ),
-                    (
-                        int(previous_ages[index])
-                        if previous_ages is not None
-                        else None
-                    ),
-                    None,
-                )
+        previous_states = self._previous_states if self._has_previous else None
+        previous_ages = self._previous_ages if self._has_previous else None
+        if not self._has_previous:
+            np.less_equal(
+                ages,
+                self._maximum_bootstrap_age,
+                out=work,
             )
-
-        if previous_states is None or previous_ages is None:
-            bootstrap = (
-                valid_active
-                & (ages_view <= self._maximum_bootstrap_age)
-            )
-            for slot in np.flatnonzero(bootstrap):
-                evidence_specs.append(
-                    (
-                        int(slot),
-                        BIRTH_KIND_BOOTSTRAP_RECENT,
-                        OBSERVATION_CAPTURE_SPANNED,
-                        None,
-                        None,
-                        None,
-                    )
-                )
+            np.logical_and(valid_active, work, out=work)
+            candidate_kind[work] = 2
         else:
-            previous_active = previous_states != 0
-            activated = valid_active & ~previous_active
-            regressed = (
-                valid_active
-                & previous_active
-                & (ages_view < previous_ages)
+            previous_active = self._previous_active
+            np.not_equal(previous_states, 0, out=previous_active)
+            np.logical_not(previous_active, out=work)
+            np.logical_and(valid_active, work, out=work)
+            candidate_kind[work] = 3
+            np.less(ages, previous_ages, out=work)
+            np.logical_and(work, previous_active, out=work)
+            np.logical_and(work, valid_active, out=work)
+            candidate_kind[work] = 4
+
+        candidate_slots = np.flatnonzero(candidate_kind)
+        evidence: list[BulletBirthEvidence] = []
+        if candidate_slots.size:
+            geometry, transform_flags, geometry_finite = _candidate_geometry(
+                blob,
+                slots=candidate_slots,
             )
             support_start = self._previous_frame_before
-            for slot in np.flatnonzero(activated):
+            for evidence_index, slot in enumerate(candidate_slots):
                 index = int(slot)
-                evidence_specs.append(
-                    (
-                        index,
-                        BIRTH_KIND_ACTIVATION_EDGE,
-                        OBSERVATION_CAPTURE_SPANNED,
-                        int(previous_states[index]),
-                        int(previous_ages[index]),
-                        support_start,
+                code = int(candidate_kind[index])
+                if code == 1:
+                    kind = BIRTH_KIND_INVALID_TIMER
+                    status = OBSERVATION_INVALID_TIMER
+                    candidate_support_start = None
+                elif code == 2:
+                    kind = BIRTH_KIND_BOOTSTRAP_RECENT
+                    status = OBSERVATION_CAPTURE_SPANNED
+                    candidate_support_start = None
+                elif code == 3:
+                    kind = BIRTH_KIND_ACTIVATION_EDGE
+                    status = OBSERVATION_CAPTURE_SPANNED
+                    candidate_support_start = support_start
+                elif code == 4:
+                    kind = BIRTH_KIND_TIMER_REGRESSION
+                    status = OBSERVATION_SLOT_REUSE_AMBIGUOUS
+                    candidate_support_start = support_start
+                else:
+                    raise AssertionError(
+                        f"unknown birth candidate code {code}"
+                    )
+                values = geometry[evidence_index]
+                evidence.append(
+                    BulletBirthEvidence(
+                        slot=index,
+                        kind=kind,
+                        observation_status=status,
+                        state=int(states[index]),
+                        age=int(ages[index]),
+                        previous_state=(
+                            int(previous_states[index])
+                            if previous_states is not None
+                            else None
+                        ),
+                        previous_age=(
+                            int(previous_ages[index])
+                            if previous_ages is not None
+                            else None
+                        ),
+                        activation_support_start=candidate_support_start,
+                        activation_support_end=frame_after,
+                        x=float(values[0]),
+                        y=float(values[1]),
+                        velocity_x=float(values[2]),
+                        velocity_y=float(values[3]),
+                        width=float(values[4]),
+                        height=float(values[5]),
+                        transform_flags=int(
+                            transform_flags[evidence_index]
+                        ),
+                        geometry_finite=bool(
+                            geometry_finite[evidence_index]
+                        ),
                     )
                 )
-            for slot in np.flatnonzero(regressed):
-                index = int(slot)
-                evidence_specs.append(
-                    (
-                        index,
-                        BIRTH_KIND_TIMER_REGRESSION,
-                        OBSERVATION_SLOT_REUSE_AMBIGUOUS,
-                        int(previous_states[index]),
-                        int(previous_ages[index]),
-                        support_start,
-                    )
-                )
-
-        evidence_specs.sort(key=lambda item: (item[0], item[1]))
-        evidence = tuple(
-            _slot_evidence(
-                blob,
-                slot=slot,
-                kind=kind,
-                observation_status=status,
-                state=int(states_view[slot]),
-                age=int(ages_view[slot]),
-                previous_state=previous_state,
-                previous_age=previous_age,
-                activation_support_start=support_start,
-                activation_support_end=frame_after,
-            )
-            for (
-                slot,
-                kind,
-                status,
-                previous_state,
-                previous_age,
-                support_start,
-            ) in evidence_specs
-        )
         result = BulletBirthObservation(
             frame_before=frame_before,
             frame_after=frame_after,
             previous_frame_before=self._previous_frame_before,
             previous_frame_after=self._previous_frame_after,
             active_count=int(np.count_nonzero(active)),
-            evidence=evidence,
+            evidence=tuple(evidence),
         )
 
-        # Copy only two compact strided fields. The 6.3 MiB pool destination
-        # remains sensor-owned and is overwritten by the next RPM capture.
-        self._previous_states = states_view.copy()
-        self._previous_ages = ages_view.copy()
+        self._previous_states, self._current_states = (
+            self._current_states,
+            self._previous_states,
+        )
+        self._previous_ages, self._current_ages = (
+            self._current_ages,
+            self._previous_ages,
+        )
+        self._has_previous = True
         self._previous_frame_before = frame_before
         self._previous_frame_after = frame_after
         return result

@@ -4915,3 +4915,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 163,696,837-byte raw JSONL SHA-256
   `0dcf0130c3a31be57d2df643a4ca7a12048084cc02afd1f19ac258244aecbc80`.
+
+### 2026-07-27 — Decision-control trace characterization seam
+
+- **Observed structural change:** Added immutable
+  `DecisionControlTraceInput` and a pure builder for deadline, adaptive-delay,
+  dispatch, local-certificate, planner objective/guidance, player projection,
+  damage shadow, robust-control, terminal-threat, and outcome trace fields.
+- **Observed parity boundary:** The live loop still constructs every
+  historical inline field, builds the extracted field set from the
+  `FreshIssueResult` and already observed values, compares every key, and only
+  then updates the record.
+- **Authority:** Pure post-issue serialization. No sensing, certification,
+  planning, worker mutation, dispatch, delay-estimator mutation, or input
+  authority moved.
+- **Validation:** Decision-control test passes `1/1`; live-focused tests pass
+  `108/108`; Ruff and `git diff --check` pass; Linux quick suite passes
+  `695/695` in `9.067 s`; Windows quick suite passes `695/695` in `13.266 s`
+  with three platform skips.

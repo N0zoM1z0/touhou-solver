@@ -226,7 +226,9 @@ The structural sequence and current status are:
    checkpoint compared the full historical inline record with the pure
    builder; the next removed the inline path. Candidate-verifier trace
    followed the same characterization/removal sequence and is now consumed.
-   Hazard-detail and outer decision records remain controller-owned.
+   Decision-control fields now have an immutable input contract and pure
+   old/new parity builder. Hazard-detail, sensing, and outer record composition
+   remain controller-owned.
 
 The bounded iteration then becomes:
 

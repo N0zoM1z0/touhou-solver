@@ -128,6 +128,10 @@ from th08_live.candidate_trace import (
     candidate_snapshot_record as _candidate_snapshot_record,  # noqa: F401
 )
 from th08_live.corridor_trace import build_corridor_trace_record
+from th08_live.decision_control_trace import (
+    DecisionControlTraceInput,
+    build_decision_control_trace_fields,
+)
 from th08_live.hazard_decode import (  # noqa: F401
     ITEM_ACTIVE_OFFSET,
     ITEM_FULL_VALUE_OFFSET,
@@ -5326,6 +5330,58 @@ def _run_live_session(
                     "auto_confirm": auto_confirm_event,
                     "enemy_bodies": _serialized_enemy_bodies(enemy_bodies),
                 }
+                control_trace_fields = build_decision_control_trace_fields(
+                    DecisionControlTraceInput(
+                        issue=fresh_issue_result,
+                        delay_estimate=delay_estimate,
+                        control_delay_frames=control_delay_frames,
+                        action_hold_frames=action_hold_frames,
+                        input_state=state,
+                        local_pipeline_root_record=(
+                            local_pipeline_root_record
+                        ),
+                        local_pipeline_certificate_shadow=(
+                            local_pipeline_certificate_shadow
+                        ),
+                        corridor_target=corridor_target,
+                        damage_target_x=damage_target_x,
+                        damage_target_half_width=(
+                            damage_target_half_width
+                        ),
+                        damageable=damageable,
+                        active_item_count=len(items),
+                        item_objectives_enabled=ITEM_OBJECTIVES_ENABLED,
+                        corridor_context_changed=(
+                            corridor_context_changed
+                        ),
+                        policy_guidance=policy_guidance,
+                        player=player,
+                        projected_player_x=projected_player_x,
+                        projected_player_y=projected_player_y,
+                        control_origin_x=control_origin_x,
+                        control_origin_y=control_origin_y,
+                        phase_at_action=phase_now,
+                        predeath_at_action=predeath_now,
+                        local_horizon=args.horizon,
+                        serialized_enemy_bodies=(
+                            _serialized_enemy_bodies(enemy_bodies)
+                        ),
+                        hit_started=hit_started,
+                        hit_count=hit_count,
+                        auto_confirm_event=auto_confirm_event,
+                    ),
+                    local_certificate_timing_record=(
+                        _local_certificate_timing_record
+                    ),
+                )
+                if any(
+                    record[key] != value
+                    for key, value in control_trace_fields.items()
+                ):
+                    raise RuntimeError(
+                        "extracted decision control trace changed schema"
+                    )
+                record.update(control_trace_fields)
                 candidate_record = build_candidate_verifier_trace_record(
                     enabled=candidate_verifier is not None,
                     target=candidate_verifier_target,

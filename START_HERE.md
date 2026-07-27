@@ -102,10 +102,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
   sensing, query expansion, worker mutation, or dispatch.
 - Candidate-trace characterization checkpoint `77418c0` adds pure outcome,
   snapshot, publication, and complete shadow-service record builders under
-  `th08_live.candidate_trace`. The current uncommitted checkpoint removes the
+  `th08_live.candidate_trace`. Structural checkpoint
+  `fab3d51 Extract candidate verifier trace serialization` removes the
   characterized controller helpers and inline record. Historical private
   imports resolve aliases to the focused module; candidate verification
   remains shadow-only.
+- The pending decision-control trace characterization adds an immutable
+  `DecisionControlTraceInput` and a pure builder for deadline, delay,
+  dispatch, local-certificate, objective/guidance, player, damage shadow,
+  robust-control, and terminal-threat fields. The historical inline fields
+  remain for one checkpoint and are compared key-for-key before update.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -175,6 +181,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   the physical run retains surrounding live-loop and lifecycle behavior. It
   took one native hit at frame 2,043 after global-kernel exhaustion and is not
   a clean survival pass.
+- Decision-control trace characterization passes `695/695` quick tests on
+  Linux in `9.067 s` and Windows in `13.266 s` with three Windows platform
+  skips. Live-focused tests pass `108/108`.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

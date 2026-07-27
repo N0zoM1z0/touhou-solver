@@ -430,6 +430,53 @@ int touhou_native_impl_belief_pipeline_workspace_recommend_action_column_v1(
     std::uint64_t* output_stats
 );
 
+struct BeliefStationaryWitnessStepV1 {
+    int frame;
+    int row;
+    int column;
+    int active_action;
+    int pending_action;
+    std::uint64_t remaining_delay_mask;
+    int selected_action;
+    int hidden_remaining_before;
+    int pickup_delay;
+    int cadence;
+    float prefix_bottleneck_margin;
+    std::uint16_t state_frames;
+    float state_margin;
+    int failed;
+    int successor_frame;
+    int successor_row;
+    int successor_column;
+    int successor_active_action;
+    int successor_pending_action;
+    std::uint64_t successor_remaining_delay_mask;
+    std::uint16_t successor_frames;
+    float successor_margin;
+    std::uint64_t merged_hidden_branch_count;
+};
+
+// Internal-only exact stationary witness extraction. This declaration is
+// intentionally absent from include/touhou_native/abi.h and exports.map.
+int touhou_native_impl_belief_pipeline_workspace_stationary_witness_v1(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int root_action,
+    int timeout_ms,
+    BeliefStationaryWitnessStepV1* output_steps,
+    int step_capacity,
+    int* output_step_count,
+    std::uint16_t* output_frames,
+    float* output_margin,
+    std::uint64_t* output_evaluated_state_count
+);
+
 int touhou_native_impl_belief_pipeline_workspace_cancel_v1(
     void* workspace
 );

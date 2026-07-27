@@ -29,6 +29,7 @@ SOURCES = (
     NATIVE_ROOT / "src" / "local" / "supplemental_workspace.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "direct_workspace.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "direct_compat.cpp",
+    NATIVE_ROOT / "src" / "pipeline" / "belief_stationary_witness.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "belief_workspace.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "belief_compat.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "query_local.cpp",

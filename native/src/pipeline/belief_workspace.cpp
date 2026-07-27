@@ -19,6 +19,7 @@
 #include "include/touhou_native/status.hpp"
 #include "include/touhou_native/survival_label.hpp"
 #include "robust_transition_table.hpp"
+#include "src/pipeline/belief_stationary_witness.hpp"
 
 // Recursive variable-cadence belief workspace over the shared lattice
 // helpers. This workspace solves the recursively variable-cadence
@@ -35,133 +36,14 @@
 namespace {
 
 using namespace touhou_native;
+using BeliefPipelineGroup = belief_pipeline::Group;
+using BeliefPipelineObservation = belief_pipeline::Observation;
+using BeliefPipelineObservationHash = belief_pipeline::ObservationHash;
+using BeliefPipelineState = belief_pipeline::State;
+using BeliefPipelineStateHash = belief_pipeline::StateHash;
+using BeliefPipelineTransition = belief_pipeline::Transition;
 
 constexpr int BELIEF_PIPELINE_MAX_REMAINING = 62;
-
-struct BeliefPipelineState {
-    int frame;
-    int row;
-    int column;
-    int active;
-    int pending;
-    int continuation_budget;
-    std::uint64_t remaining_mask;
-
-    bool operator==(const BeliefPipelineState& other) const {
-        return (
-            frame == other.frame
-            && row == other.row
-            && column == other.column
-            && active == other.active
-            && pending == other.pending
-            && continuation_budget == other.continuation_budget
-            && remaining_mask == other.remaining_mask
-        );
-    }
-};
-
-struct BeliefPipelineStateHash {
-    std::size_t operator()(const BeliefPipelineState& state) const {
-        std::uint64_t first = (
-            static_cast<std::uint64_t>(state.frame)
-            | (static_cast<std::uint64_t>(state.row) << 16)
-            | (static_cast<std::uint64_t>(state.column) << 26)
-            | (static_cast<std::uint64_t>(state.active) << 36)
-            | (
-                static_cast<std::uint64_t>(state.pending + 1)
-                << 41
-            )
-            | (
-                static_cast<std::uint64_t>(state.continuation_budget)
-                << 47
-            )
-        );
-        first += 0x9e3779b97f4a7c15ULL;
-        first = (
-            (first ^ (first >> 30))
-            * 0xbf58476d1ce4e5b9ULL
-        );
-        first = (
-            (first ^ (first >> 27))
-            * 0x94d049bb133111ebULL
-        );
-        first ^= first >> 31;
-        std::uint64_t second = (
-            state.remaining_mask + 0x9e3779b97f4a7c15ULL
-        );
-        second = (
-            (second ^ (second >> 30))
-            * 0xbf58476d1ce4e5b9ULL
-        );
-        second = (
-            (second ^ (second >> 27))
-            * 0x94d049bb133111ebULL
-        );
-        second ^= second >> 31;
-        return static_cast<std::size_t>(
-            first ^ (
-                second
-                + 0x9e3779b97f4a7c15ULL
-                + (first << 6)
-                + (first >> 2)
-            )
-        );
-    }
-};
-
-struct BeliefPipelineObservation {
-    int frame;
-    int row;
-    int column;
-    int active;
-    int pending;
-    int continuation_budget;
-    std::uint64_t revealed_remaining_mask;
-
-    bool operator==(const BeliefPipelineObservation& other) const {
-        return (
-            frame == other.frame
-            && row == other.row
-            && column == other.column
-            && active == other.active
-            && pending == other.pending
-            && continuation_budget == other.continuation_budget
-            && revealed_remaining_mask
-                == other.revealed_remaining_mask
-        );
-    }
-};
-
-struct BeliefPipelineObservationHash {
-    std::size_t operator()(
-        const BeliefPipelineObservation& observation
-    ) const {
-        return BeliefPipelineStateHash{}(
-            BeliefPipelineState{
-                observation.frame,
-                observation.row,
-                observation.column,
-                observation.active,
-                observation.pending,
-                observation.continuation_budget,
-                observation.revealed_remaining_mask,
-            }
-        );
-    }
-};
-
-struct BeliefPipelineTransition {
-    int step_count;
-    float bottleneck_margin;
-    PipelineLabel failed_label;
-    BeliefPipelineState successor;
-    bool failed;
-};
-
-struct BeliefPipelineGroup {
-    std::uint64_t remaining_mask = 0;
-    float prefix_margin = std::numeric_limits<float>::infinity();
-};
 
 class BeliefPipelineSurvivalWorkspace {
 private:
@@ -877,6 +759,194 @@ public:
         return 0;
     }
 
+    int stationary_witness(
+        int start_frame,
+        int start_row,
+        int start_column,
+        int observed_action,
+        int pending_action,
+        const int* pending_remaining_frames,
+        int pending_remaining_count,
+        int root_action,
+        int timeout_ms,
+        BeliefStationaryWitnessStepV1* output_steps,
+        int step_capacity,
+        int* output_step_count,
+        std::uint16_t* output_frames,
+        float* output_margin,
+        std::uint64_t* output_evaluated_state_count
+    ) {
+        const bool singleton_base = (
+            base_action_mask_ != 0
+            && (
+                base_action_mask_ & (base_action_mask_ - 1)
+            ) == 0
+        );
+        if (
+            !singleton_base
+            || budgeted_action_mask_ != 0
+            || continuation_budget_ != 0
+            || remaining_delay_bucket_size_ != 0
+            || continuation_policy_mode_ != 0
+            || start_frame < 0 || start_frame >= frame_count_
+            || start_row < 0 || start_row >= row_count_
+            || start_column < 0 || start_column >= column_count_
+            || observed_action < 0 || observed_action >= action_count_
+            || pending_action < -1 || pending_action >= action_count_
+            || root_action < 0 || root_action >= action_count_
+            || pending_remaining_count < 0
+            || pending_remaining_count > BELIEF_PIPELINE_MAX_REMAINING
+            || timeout_ms < 0
+            || step_capacity < frame_count_
+            || (
+                pending_action < 0
+                && pending_remaining_count != 0
+            )
+            || (
+                pending_action >= 0
+                && (
+                    pending_remaining_frames == nullptr
+                    || pending_remaining_count == 0
+                )
+            )
+        ) {
+            return 1;
+        }
+
+        std::uint64_t remaining_mask = std::uint64_t{1};
+        if (pending_action >= 0) {
+            remaining_mask = 0;
+            for (int index = 0; index < pending_remaining_count; ++index) {
+                const int remaining = pending_remaining_frames[index];
+                if (
+                    remaining <= 0
+                    || remaining > BELIEF_PIPELINE_MAX_REMAINING
+                    || (
+                        index > 0
+                        && pending_remaining_frames[index - 1]
+                            >= remaining
+                    )
+                ) {
+                    return 1;
+                }
+                remaining_mask |= std::uint64_t{1} << remaining;
+            }
+        }
+
+        int continuation_action = 0;
+        while (
+            (
+                base_action_mask_
+                & (std::uint64_t{1} << continuation_action)
+            ) == 0
+        ) {
+            ++continuation_action;
+        }
+
+        std::lock_guard<std::mutex> guard(mutex_);
+        QueryScope scope(this, timeout_ms);
+        check_abort(true);
+        const std::size_t memo_before = memo_.size();
+        const belief_pipeline::WitnessPath path =
+            belief_pipeline::extract_stationary_witness_path(
+                BeliefPipelineState{
+                    start_frame,
+                    start_row,
+                    start_column,
+                    observed_action,
+                    pending_action,
+                    0,
+                    remaining_mask,
+                },
+                root_action,
+                continuation_action,
+                frame_count_ - 1,
+                [&](const BeliefPipelineState& state) {
+                    return current_margin(state);
+                },
+                [&](BeliefPipelineState state) {
+                    return canonicalize(state);
+                },
+                [&](
+                    const BeliefPipelineState& state,
+                    int selected,
+                    bool public_root
+                ) {
+                    check_abort();
+                    PreparedAction prepared = prepare_action(
+                        state,
+                        selected,
+                        public_root
+                    );
+                    const PipelineLabel label = (
+                        public_root
+                        ? evaluate_action(state, prepared, nullptr)
+                        : solve(state)
+                    );
+                    return belief_pipeline::ActionExpansion{
+                        label,
+                        std::move(prepared.transitions),
+                    };
+                },
+                [&](const BeliefPipelineState& successor) {
+                    check_abort();
+                    return solve(successor);
+                }
+            );
+        if (!path.label_consistent) {
+            return 2;
+        }
+
+        std::vector<BeliefStationaryWitnessStepV1> steps;
+        steps.reserve(path.steps.size());
+        for (const belief_pipeline::WitnessPathStep& path_step :
+             path.steps) {
+            const BeliefPipelineState& state = path_step.state;
+            const belief_pipeline::WorstBranch& worst = path_step.worst;
+            steps.push_back(
+                BeliefStationaryWitnessStepV1{
+                    state.frame,
+                    state.row,
+                    state.column,
+                    state.active,
+                    state.pending,
+                    state.remaining_mask,
+                    path_step.selected_action,
+                    worst.nature.hidden_remaining,
+                    worst.nature.pickup_delay,
+                    worst.nature.cadence,
+                    worst.prefix_margin,
+                    worst.label.frames,
+                    worst.label.margin,
+                    worst.failed ? 1 : 0,
+                    worst.failed ? -1 : worst.successor.frame,
+                    worst.failed ? -1 : worst.successor.row,
+                    worst.failed ? -1 : worst.successor.column,
+                    worst.failed ? -1 : worst.successor.active,
+                    worst.failed ? -1 : worst.successor.pending,
+                    worst.failed ? 0 : worst.successor.remaining_mask,
+                    worst.failed
+                        ? std::uint16_t{0}
+                        : worst.successor_label.frames,
+                    worst.failed ? 0.0F : worst.successor_label.margin,
+                    worst.hidden_branch_count,
+                }
+            );
+        }
+
+        if (steps.size() > static_cast<std::size_t>(step_capacity)) {
+            return 3;
+        }
+        std::copy(steps.begin(), steps.end(), output_steps);
+        *output_step_count = static_cast<int>(steps.size());
+        *output_frames = path.label.frames;
+        *output_margin = path.label.margin;
+        *output_evaluated_state_count = static_cast<std::uint64_t>(
+            memo_.size() - memo_before + 1
+        );
+        return 0;
+    }
+
     void request_cancel() {
         cancel_requested_.store(true, std::memory_order_release);
     }
@@ -941,6 +1011,11 @@ private:
     ) {
         check_abort();
         ++counters_.hidden_simulations;
+        const belief_pipeline::NatureInput nature{
+            older_remaining,
+            cadence,
+            issued ? delay : -1,
+        };
         const int horizon = frame_count_ - 1;
         const int step_count = std::min(
             cadence,
@@ -986,6 +1061,7 @@ private:
                     failed.margin,
                     failed,
                     state,
+                    nature,
                     true,
                 };
             }
@@ -1011,6 +1087,7 @@ private:
                     bottleneck,
                     failed,
                     state,
+                    nature,
                     true,
                 };
             }
@@ -1056,6 +1133,7 @@ private:
             bottleneck,
             PipelineLabel{0, 0.0F},
             successor,
+            nature,
             false,
         };
     }
@@ -2142,6 +2220,63 @@ int touhou_native_impl_belief_pipeline_workspace_recommend_action_column_v1(
             output_recommended_margin,
             output_depth,
             output_stats
+        );
+    } catch (const PipelineCancelledSignal&) {
+        return PIPELINE_RESULT_CANCELLED;
+    } catch (const PipelineDeadlineSignal&) {
+        return PIPELINE_RESULT_DEADLINE;
+    } catch (...) {
+        return 2;
+    }
+}
+
+int touhou_native_impl_belief_pipeline_workspace_stationary_witness_v1(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int root_action,
+    int timeout_ms,
+    BeliefStationaryWitnessStepV1* output_steps,
+    int step_capacity,
+    int* output_step_count,
+    std::uint16_t* output_frames,
+    float* output_margin,
+    std::uint64_t* output_evaluated_state_count
+) {
+    if (
+        workspace == nullptr
+        || output_steps == nullptr
+        || output_step_count == nullptr
+        || output_frames == nullptr
+        || output_margin == nullptr
+        || output_evaluated_state_count == nullptr
+    ) {
+        return 1;
+    }
+    try {
+        return static_cast<BeliefPipelineSurvivalWorkspace*>(
+            workspace
+        )->stationary_witness(
+            start_frame,
+            start_row,
+            start_column,
+            observed_action,
+            pending_action,
+            pending_remaining_frames,
+            pending_remaining_count,
+            root_action,
+            timeout_ms,
+            output_steps,
+            step_capacity,
+            output_step_count,
+            output_frames,
+            output_margin,
+            output_evaluated_state_count
         );
     } catch (const PipelineCancelledSignal&) {
         return PIPELINE_RESULT_CANCELLED;

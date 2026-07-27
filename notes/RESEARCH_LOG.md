@@ -5330,3 +5330,22 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural transition ownership only. Signed-clearance
   correction, Boolean/safety-value recurrence, native parity, and live
   authority are unchanged.
+
+### 2026-07-27 — Viability policy-object extraction
+
+- **Observed structural change:** Moved `RobustViabilityPolicy` and
+  `RobustSafetyValuePolicy` into `touhou_control.viability_policy`. Boolean
+  query/repair/recovery behavior, survival labels, threshold reconstruction,
+  continuous projection, and signed-value queries remain grouped with the
+  arrays they interpret. The builder module is now 551 lines.
+- **Boundary:** Both policy classes moved verbatim. Their projection
+  distances, safe-action masks, repair volumes, recovery distances,
+  threshold strictness, and finite-horizon rejection reasons are unchanged.
+  The `viability` facade re-exports the same class objects.
+- **Validation:** Viability and query-survival suites pass `20/20` and
+  `17/17`; Ruff, byte compilation, class-identity smoke, and
+  `git diff --check` pass. The Linux quick suite passes `699/699` in
+  `9.096 s`.
+- **Authority:** Structural policy-query ownership only. Builder recurrence,
+  signed-clearance certificate meaning, native parity, and live authority
+  are unchanged.

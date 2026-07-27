@@ -5445,3 +5445,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   array packing, monotonic deadline, cancellation, output validation,
   supplemental proposal status, live fallback, and action authority are
   unchanged.
+
+### 2026-07-27 — Live movement contract extraction
+
+- **Observed structural change:** Moved TH08 input masks, playfield bounds,
+  player radius, measured focused/unfocused speeds, planner action
+  construction, and movement/focus action naming into
+  `th08_live.movement`. The live controller imports and re-exports the
+  historical names and uses the same immutable planner-action tuples.
+- **Boundary:** Every integer mask, float value, action name, direction,
+  ordering, and focused-state distinction moved unchanged. Hard no-Bomb
+  enforcement and issue-time recertification remain in the controller.
+- **Validation:** Live-controller, local-pipeline certificate, and planner-pass
+  suites pass `92/92`, `8/8`, and `1/1`; Ruff, byte compilation, and
+  `git diff --check` pass. The Linux quick suite passes `699/699` in
+  `9.671 s`.
+- **Authority:** Structural movement-contract ownership only. Physical
+  dynamics, complete-mask issue semantics, planner recurrence, live action
+  authority, and strategy are unchanged.

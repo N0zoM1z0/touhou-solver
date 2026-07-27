@@ -316,6 +316,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   and `6/6`; bullet-runtime decoding passes `12/12`; the Linux quick suite
   passes `699/699` in `9.290 s`; Windows passes `699/699` in `13.974 s` with
   three skips.
+- TH08 input masks, playfield geometry, measured movement speeds, planner
+  action construction, and complete local actuator-state naming now have one
+  owner in `th08_live.movement`. `controller.py` re-exports the historical
+  names and consumes the same immutable action tuples. Live-focused tests
+  pass `101/101`; the Linux quick suite passes `699/699` in `9.671 s`.
+  This is a structural ownership change only; masks, float values, ordering,
+  no-Bomb behavior, and action authority are unchanged.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

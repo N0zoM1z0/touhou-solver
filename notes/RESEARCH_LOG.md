@@ -5387,3 +5387,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural Python ABI ownership only. ctypes field order,
   native symbols, return codes, array ownership, cancellation/deadline
   semantics, planner authority, and strategy are unchanged.
+
+### 2026-07-27 — Native-local sensing extraction
+
+- **Observed structural change:** Moved local hazard loader/query and bullet
+  pool loader/decode into `touhou_control.native.local_sensing`. The domain
+  keeps loader and caller globals together; `native.local` is now 843 lines
+  and explicitly re-exports the historical names.
+- **Boundary:** Position/hazard peer-array validation, dtype lowering,
+  transformed flags, risk/collision/minimum outputs, raw stride/offset
+  validation, decoded prefix ownership, and optional-native `None` behavior
+  moved verbatim.
+- **Validation:** Native-facade, local-hazard, and bullet-runtime decoder
+  suites pass `4/4`, `5/5`, and `12/12`. Ruff, byte compilation, and
+  `git diff --check` pass. The Linux quick suite passes `699/699` in
+  `9.274 s`.
+- **Authority:** Structural sensing-binding ownership only. Runtime native
+  sensing, geometry interpretation, decoder fields, fallback behavior, and
+  live authority are unchanged.

@@ -303,10 +303,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `9.451 s` and Windows in `12.965 s` with three skips.
 - Native-local immutable decoded/rollout results, supplemental exceptions,
   pointer aliases, and ctypes query/output layouts now live in
-  `touhou_control.native.local_abi`; the original `native.local` and
-  `native_backend` exports retain object identity. Native facade,
+  `touhou_control.native.local_abi`; hazard queries and raw bullet-pool
+  decoding, together with their loaders, now live in
+  `native.local_sensing`. The original `native.local` and `native_backend`
+  exports retain object identity. Native facade,
   hazard/beam, and semantic differential suites pass `4/4`, `5/5`, `5/5`,
-  and `6/6`; the Linux quick suite passes `699/699` in `8.864 s`.
+  and `6/6`; bullet-runtime decoding passes `12/12`; the Linux quick suite
+  passes `699/699` in `9.274 s`.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

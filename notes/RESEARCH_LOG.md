@@ -5542,3 +5542,24 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural objective ownership only. Survival-first ordering,
   viability constraints, certificate authority, item disablement, live
   action authority, and strategy are unchanged.
+
+### 2026-07-27 — Native local-kernel translation-unit split
+
+- **Observed structural change:** Replaced the 1,134-line mixed
+  `native/src/local/kernels.cpp` with explicit hazard, packed bullet-decoder,
+  and baseline/supplemental beam-reducer translation units of 399, 196, and
+  573 lines. Shared beam quantization/order helpers remain private to the beam
+  TU. `build_native_planner.py` lists each source explicitly.
+- **Build boundary:** Both Linux and Windows release libraries rebuild. The
+  Linux exported-symbol list exactly matches the checked-in 46-symbol
+  manifest; no C ABI declaration, symbol, or export map changed.
+- **Validation:** Native hazard, beam, bullet decoder, ABI-manifest, and
+  semantic differential suites pass `5/5`, `5/5`, `12/12`, `5/5`, and
+  `6/6`. The first full Linux run hit the already-recorded 1-ms cold prewarm
+  deadline flake; the focused file passed `5/5` and a fresh unmodified full
+  run passed `699/699` in `8.927 s`. Windows passes `699/699` in `13.102 s`
+  with three platform skips. No test was weakened.
+- **Authority:** Structural native ownership only. Hazard arithmetic,
+  transformed-bullet decode, quantization, lexicographic beam ordering,
+  cancellation/status codes, ABI, Python fallback, planner authority, and
+  strategy are unchanged.

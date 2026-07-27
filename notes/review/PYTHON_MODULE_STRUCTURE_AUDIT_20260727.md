@@ -212,7 +212,9 @@ implementation units are:
 | `pipeline/belief_workspace.cpp` | 2,648 | state identity / recurrence / certificates / workspace |
 | `pipeline/direct_workspace.cpp` | 1,447 | transition build / solve / resume |
 | `viability/kernels.cpp` | 1,211 | Boolean / value / survival kernels |
-| `local/kernels.cpp` | 1,134 | geometry / certificate / beam reduction |
+| `local/hazards.cpp` | 399 | cohesive local bullet/laser/body hazard query |
+| `local/bullet_decode.cpp` | 196 | cohesive packed native-pool decoder |
+| `local/beam_reduce.cpp` | 573 | baseline/supplemental quantized beam reduction |
 | `geometry/clearance.cpp` | 982 | primitive clearance / trajectory / volume orchestration |
 | `abi/pipeline_abi.cpp` | 934 | direct / belief / query-local exported families |
 | `internal/abi_impl.hpp` | 864 | replace shared implementation header with narrow internal headers |

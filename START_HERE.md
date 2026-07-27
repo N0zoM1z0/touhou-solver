@@ -349,6 +349,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   hazard dispatcher only into the warning rollout, preserving backend and
   fault-injection behavior. The Linux quick suite passes `699/699` in
   `9.106 s`; item objectives remain disabled in live acceptance.
+- The former 1,134-line native `local/kernels.cpp` is now three explicit
+  translation units: `local/hazards.cpp` (399 lines),
+  `local/bullet_decode.cpp` (196), and `local/beam_reduce.cpp` (573).
+  The checked-in build source list names all three. Linux and Windows release
+  libraries rebuild with the unchanged 46-symbol manifest; focused
+  hazard/beam/decode/semantic gates pass. Quick suites pass `699/699` on
+  Linux in `8.927 s` and Windows in `13.102 s` with three skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

@@ -53,6 +53,12 @@ def load_library():
     return _LIBRARY
 
 
+def available() -> bool:
+    """Return whether the optional native planner library can be loaded."""
+
+    return load_library() is not None
+
+
 def load_function(
     symbol: str,
     *,
@@ -138,4 +144,3 @@ def raise_pipeline_result(operation: str, result: int) -> None:
     raise RuntimeError(
         f"native pipeline workspace {operation} returned {result}"
     )
-

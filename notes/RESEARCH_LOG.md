@@ -4302,3 +4302,31 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   43-symbol ABI manifest pass. The complete quick suite passes `600/600` on
   Linux in `5.420 s` and on Windows in `8.223 s` with one existing skip.
   Python compilation, Ruff, and `git diff --check` pass.
+
+## 2026-07-27: Python Native Binding Domain Separation
+
+- **Scope:** Split the 3,625-line post-loader `native_backend.py` into
+  `native.geometry`, `native.local`, `native.viability`, `native.pipeline`,
+  and `native.belief`. Shared typed object-attribute array construction lives
+  in `native.arrays`; `native_backend.py` is now a 73-line compatibility
+  façade.
+- **Observed boundaries:** Geometry owns signed-clearance construction and
+  trajectory lowering; local owns bullet decode, hazard queries, beam
+  reducers, and the persistent supplemental workspace; viability owns Boolean,
+  safety-value, survival, query-local, and losing-label kernels; pipeline and
+  belief own their separate persistent workspace lifecycles. No domain imports
+  another domain.
+- **Compatibility:** A façade characterization test checks every historical
+  public wrapper/type and the private loader seams used by existing tests and
+  benchmarks for exact object identity. It also guards the two result records
+  as frozen dataclasses. Existing imports through `native_backend` remain
+  unchanged.
+- **Authority:** Definitions were moved by syntax node without changing their
+  ctypes signatures, array coercion/copy sites, shape checks, output
+  allocation, return-code handling, optional-symbol fallback, workspace
+  lifecycle, native call order, recurrence, action, strategy status, or C ABI.
+  It adds no runtime or physical evidence.
+- **Validation:** The façade and 43-symbol ABI tests pass; local native,
+  viability, and query-survival focused suites pass. The complete quick suite
+  passes `602/602` on Linux in `5.678 s` and on Windows in `8.207 s` with one
+  existing skip. Python compilation, Ruff, and `git diff --check` pass.

@@ -32,21 +32,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Repository branch: `main`.
 - Latest algorithmic checkpoint:
   `d4467bd Add deadline-aware native supplemental gate`.
-- Latest structural checkpoint: native-binding R2 shared-library boundary.
-  `touhou_control.native.library` owns platform path/load state, reusable
-  symbol caches, atomic optional function groups, and pipeline status
-  conversion. `native_backend` still owns every ctypes declaration and
-  wrapper pending the domain split, while compatibility names and exact
-  loader/status behavior are retained. Corridor R1 remains complete with its
-  169-line façade and split runtime ownership. The R0 behavior and 43-symbol
-  ABI baselines remain unchanged. No model, recurrence, action, strategy, or
-  C ABI changed.
+- Latest structural checkpoint: native-binding R2 domain split.
+  Geometry, local sensing/rollout, viability, pipeline, and belief ctypes
+  declarations and wrappers live in `touhou_control.native`; shared library
+  and status handling remain centralized. `native_backend` is now a 73-line
+  compatibility façade with exact historical symbol identities. Corridor R1
+  remains complete with its 169-line façade and split runtime ownership. The
+  R0 behavior and 43-symbol ABI baselines remain unchanged. No model,
+  recurrence, action, strategy, or C ABI changed.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
   quick suite `584/584` on Linux in `5.213 s` and Windows in `14.365 s`.
-- The native-library checkpoint passes the expanded quick suite `600/600`
-  on Linux in `5.420 s` and Windows in `8.223 s` with one existing skip.
+- The native-domain checkpoint passes the expanded quick suite `602/602`
+  on Linux in `5.678 s` and Windows in `8.207 s` with one existing skip.
 - No TH08 process, controller daemon, supervisor, or unfinished experiment is
   expected to be alive.
 - Native build output, raw traces, screenshots, caches, and the local

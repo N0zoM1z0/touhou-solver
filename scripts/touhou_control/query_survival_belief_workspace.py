@@ -19,7 +19,7 @@ from .query_survival_workspace import StalePipelineWorkspaceError
 from .reachability_oracle import SurvivalLabel
 
 if TYPE_CHECKING:
-    from .query_survival import SurvivalQueryProblem
+    from .query_survival_problem import SurvivalQueryProblem
 
 
 class BeliefPipelineSurvivalWorkspace:

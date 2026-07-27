@@ -5277,3 +5277,23 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural dispatch ownership only. Backend selection,
   recurrence, independent-oracle status, native ABI, live authority, and
   strategy are unchanged.
+
+### 2026-07-27 — Immutable survival-query problem extraction
+
+- **Observed structural change:** Moved `SurvivalQueryProblem`, lattice
+  projection, dense/post-published policy construction, and direct/belief
+  workspace factories into `touhou_control.query_survival_problem`.
+  `query_survival.py` is now an 80-line compatibility facade over narrow
+  problem, scalar, dispatch, root, value, and workspace modules.
+- **Dependency boundary:** Both workspace modules now refer to the problem
+  module only under `TYPE_CHECKING`; the problem owns the runtime workspace
+  imports. A direct identity smoke confirms the facade and defining module
+  export the same class object.
+- **Validation:** Query-survival, complete-mask belief, pipeline-prewarm, and
+  variable-cadence oracle suites pass `17/17`, `3/3`, `5/5`, and `8/8`.
+  Ruff, byte compilation, import/identity smoke, and `git diff --check` pass.
+  Quick suites pass `699/699` on Linux in `9.179 s` and Windows in `13.095 s`
+  with three platform skips.
+- **Authority:** Structural immutable-problem ownership only. Clearance
+  arrays, projection, recurrence, native ABI, proof/publication boundary,
+  live authority, and strategy are unchanged.

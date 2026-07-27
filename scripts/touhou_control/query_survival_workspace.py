@@ -16,7 +16,7 @@ from .query_survival_types import (
 from .reachability_oracle import SurvivalLabel
 
 if TYPE_CHECKING:
-    from .query_survival import SurvivalQueryProblem
+    from .query_survival_problem import SurvivalQueryProblem
 
 
 PipelineWorkspaceCancelledError = (

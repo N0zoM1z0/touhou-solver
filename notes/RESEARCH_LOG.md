@@ -6503,7 +6503,8 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 
 ## 2026-07-28 — Replaced per-birth objects and decoupled ECL capture
 
-- Schema-v3 birth evidence remains complete but columnar: ordered slot,
+- Checkpoint `70077e2` keeps schema-v3 birth evidence complete but columnar:
+  ordered slot,
   transition/status code, current/previous state and age, geometry, transform,
   and finite columns are read-only. Scalar witness objects are lazy review
   views and are not constructed on the production observation path.

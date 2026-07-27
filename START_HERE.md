@@ -38,7 +38,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
-  `449e01f Retain failed bullet birth physical gate` and
+  `70077e2 Compact birth evidence and preserve ECL capture`,
+  `449e01f Retain failed bullet birth physical gate`, and
   `35f3502 Reuse compact bullet birth observer scratch`, building on
   `9f5b37c Align deferred bullet emission state` and
   `360c79b Add deterministic bullet birth residual audit`. The schema-v2

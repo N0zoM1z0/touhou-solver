@@ -170,7 +170,8 @@ between extraction and trace emission.
 
 ### Columnar trace representation
 
-The schema-v3 observer retains candidate slots, transition/status codes,
+Checkpoint `70077e2` makes the schema-v3 observer retain candidate slots,
+transition/status codes,
 current/previous state and age, six geometry values, transform flags, and
 finite flags in read-only columns. Scalar `BulletBirthEvidence` objects are
 materialized only when a test or reviewer indexes one witness. Trace

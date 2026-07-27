@@ -22,7 +22,6 @@ from pathlib import Path
 
 import numpy as np
 
-from runtime_agent import input_transitions
 from th08_bullet_transform_model import (
     BulletTransformRuntime,
     TransformRecord,
@@ -76,7 +75,18 @@ from th08_laser_runtime import (
     pack_laser_frame as _pack_laser_frame,
     serialize_laser_trace,
 )
-from th08_live import LiveServiceResources, LiveSession
+from th08_live import (
+    BULLET_POOL_SIZE,
+    BULLET_STRIDE,
+    ITEM_POOL_SIZE,
+    ITEM_STRIDE,
+    LASER_POOL_SIZE,
+    LASER_STRIDE,
+    IssueController,
+    LiveServiceResources,
+    LiveSession,
+    Sensor,
+)
 from th08_local_planner import (
     ActuatorPipeline,
     BaselineBeamContext,
@@ -123,7 +133,6 @@ from th08_runtime_agent import (
     capture_input_clock_shadow,
     observe_state,
     send_scan_key,
-    send_transitions,
     verify_target,
 )
 from touhou_control import native_backend
@@ -166,9 +175,6 @@ from touhou_control.supplemental_local_beam import (
 from touhou_control.trajectory import VelocityChange
 
 
-BULLET_POOL_BASE = 0x00F6F710
-BULLET_POOL_SIZE = 1536
-BULLET_STRIDE = 0x10B8
 BULLET_GEOMETRY_OFFSET = 0x0D34
 BULLET_CALLBACK_PHASE_STATE_OFFSET = 0x01FC
 BULLET_POSITION_OFFSET = 0x0D44
@@ -192,9 +198,6 @@ ECL_CALLBACK_LOOKAHEAD_FRAMES = 256
 INPUT_CLOCK_SHADOW_ROLE = "shadow_no_input_or_epoch_authority"
 INPUT_CLOCK_SHADOW_WALL_CUT_SECONDS = 0.05
 
-LASER_POOL_BASE = 0x015B57C8
-LASER_POOL_SIZE = 256
-LASER_STRIDE = 0x059C
 LASER_ORIGIN_OFFSET = 0x0548
 LASER_ANGLE_OFFSET = 0x0554
 LASER_TAIL_OFFSET = 0x0558
@@ -215,9 +218,6 @@ LASER_FLAGS_OFFSET = 0x0594
 LASER_PHASE_OFFSET = 0x0598
 LASER_COLLISION_FLAG_OFFSET = 0x0599
 
-ITEM_MANAGER_BASE = 0x01653648
-ITEM_POOL_SIZE = 2096
-ITEM_STRIDE = 0x02E4
 ITEM_POSITION_OFFSET = 0x02A4
 ITEM_VELOCITY_OFFSET = 0x02B0
 ITEM_TYPE_OFFSET = 0x02D4
@@ -6072,6 +6072,12 @@ def _run_live_session(
     candidate_verifier = service_resources.candidate_verifier
     audit_executor = service_resources.audit_executor
     enemy_executor = service_resources.enemy_executor
+    issue_controller = IssueController(
+        api=api,
+        pid=pid,
+        supported_mask=SUPPORTED_INPUT_MASK,
+        forbidden_mask=BOMB if args.no_bomb else 0,
+    )
 
     def retire_pipeline_solutions(
         candidates: tuple[CorridorSolution | None, ...],
@@ -6420,18 +6426,7 @@ def _run_live_session(
             reader,
         )
         enemy_last_submit = int(state["enemy_manager_frame"])
-        bullet_pool_buffer = reader.allocate_buffer(
-            BULLET_POOL_SIZE * BULLET_STRIDE
-        )
-        bullet_blob = memoryview(bullet_pool_buffer).cast("B")
-        laser_pool_buffer = reader.allocate_buffer(
-            LASER_POOL_SIZE * LASER_STRIDE
-        )
-        laser_blob = memoryview(laser_pool_buffer).cast("B")
-        item_pool_buffer = reader.allocate_buffer(
-            ITEM_POOL_SIZE * ITEM_STRIDE
-        )
-        item_blob = memoryview(item_pool_buffer).cast("B")
+        sensor = Sensor(reader)
         deadline = time.perf_counter() + args.duration
         while time.perf_counter() < deadline:
             if args.stop_file is not None and args.stop_file.exists():
@@ -6476,13 +6471,11 @@ def _run_live_session(
                         triggers=("scene_inactive",),
                     )
                 if scene_decision.entered:
-                    _require_foreground(api, pid)
-                    transitions = input_transitions(
+                    issue_controller.dispatch(
                         previous_mask,
                         0,
-                        supported_mask=SUPPORTED_INPUT_MASK,
+                        require_foreground=True,
                     )
-                    send_transitions(api, transitions)
                     previous_mask = 0
                     previous_direction = 0
                     retire_pipeline_solutions(
@@ -6945,26 +6938,15 @@ def _run_live_session(
             enemy_prefix_merge_ms = (
                 time.perf_counter() - enemy_prefix_merge_started
             ) * 1000.0
-            bullet_frame_before = reader.u32(0x0164D30C)
-            bullet_pool_read_started = time.perf_counter()
-            reader.read_into(
-                BULLET_POOL_BASE,
-                bullet_pool_buffer,
-            )
-            bullet_pool_read_ms = (
-                time.perf_counter() - bullet_pool_read_started
-            ) * 1000.0
-            bullet_frame_after = reader.u32(0x0164D30C)
-            laser_pool_read_started = time.perf_counter()
-            reader.read_into(LASER_POOL_BASE, laser_pool_buffer)
-            laser_pool_read_ms = (
-                time.perf_counter() - laser_pool_read_started
-            ) * 1000.0
-            item_pool_read_started = time.perf_counter()
-            reader.read_into(ITEM_MANAGER_BASE, item_pool_buffer)
-            item_pool_read_ms = (
-                time.perf_counter() - item_pool_read_started
-            ) * 1000.0
+            raw_pools = sensor.capture_raw_pools()
+            bullet_blob = raw_pools.bullet_blob
+            laser_blob = raw_pools.laser_blob
+            item_blob = raw_pools.item_blob
+            bullet_frame_before = raw_pools.bullet_frame_before
+            bullet_frame_after = raw_pools.bullet_frame_after
+            bullet_pool_read_ms = raw_pools.bullet_pool_read_ms
+            laser_pool_read_ms = raw_pools.laser_pool_read_ms
+            item_pool_read_ms = raw_pools.item_pool_read_ms
             ecl_vm_snapshot: EclVmSnapshot | None = None
             ecl_lookahead: EclLookaheadResult | None = None
             tagged_velocity_toggles: tuple[TaggedVelocityToggle, ...] = ()
@@ -7161,14 +7143,10 @@ def _run_live_session(
                 gaps += 1
                 gameplay_epoch += 1
                 safe_mask = previous_mask & SHOT
-                _require_foreground(api, pid)
-                send_transitions(
-                    api,
-                    input_transitions(
-                        previous_mask,
-                        safe_mask,
-                        supported_mask=SUPPORTED_INPUT_MASK,
-                    ),
+                issue_controller.dispatch(
+                    previous_mask,
+                    safe_mask,
+                    require_foreground=True,
                 )
                 previous_mask = safe_mask
                 previous_direction = 0
@@ -7919,14 +7897,10 @@ def _run_live_session(
                 gaps += 1
                 gameplay_epoch += 1
                 safe_mask = previous_mask & SHOT
-                _require_foreground(api, pid)
-                send_transitions(
-                    api,
-                    input_transitions(
-                        previous_mask,
-                        safe_mask,
-                        supported_mask=SUPPORTED_INPUT_MASK,
-                    ),
+                issue_controller.dispatch(
+                    previous_mask,
+                    safe_mask,
+                    require_foreground=True,
                 )
                 previous_mask = safe_mask
                 previous_direction = 0
@@ -8090,14 +8064,12 @@ def _run_live_session(
                 candidate_publication_ms = (
                     time.perf_counter() - candidate_publication_started
                 ) * 1000.0
-            transitions = input_transitions(
+            input_dispatch = issue_controller.dispatch(
                 previous_mask,
                 decision.mask,
-                supported_mask=SUPPORTED_INPUT_MASK,
             )
-            input_started = time.perf_counter()
-            send_transitions(api, transitions)
-            input_ms = (time.perf_counter() - input_started) * 1000.0
+            transitions = input_dispatch.transitions
+            input_ms = input_dispatch.input_ms
             issue_path_ms = (
                 time.perf_counter() - issue_path_started
             ) * 1000.0

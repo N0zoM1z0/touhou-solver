@@ -5260,3 +5260,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural belief-workspace ownership only. Formal
   recurrence, independent scalar oracle, native ABI, proof authority,
   publication, live action authority, and strategy are unchanged.
+
+### 2026-07-27 — One-shot survival-query dispatch extraction
+
+- **Observed structural change:** Moved native one-shot argument lowering,
+  result decoding, backend selection, and scalar fallback into
+  `touhou_control.query_survival_dispatch`. The public facade is now 283
+  lines and retains the same `query_local_survival` import.
+- **Boundary:** `backend=scalar` still bypasses native work, `backend=native`
+  still fails if the native backend is unavailable, and `backend=auto` still
+  falls back to the independent scalar module. No scalar implementation was
+  duplicated into the dispatcher.
+- **Validation:** Query-survival tests pass `17/17`; Ruff, byte compilation,
+  and `git diff --check` pass. Quick suites pass `699/699` on Linux in
+  `9.230 s` and Windows in `13.386 s` with three platform skips.
+- **Authority:** Structural dispatch ownership only. Backend selection,
+  recurrence, independent-oracle status, native ABI, live authority, and
+  strategy are unchanged.

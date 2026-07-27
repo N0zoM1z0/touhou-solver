@@ -282,10 +282,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   consumer now live in `query_survival_workspace`. The non-clairvoyant
   belief workspace, attainable-budget queries, admissible upper
   certification, and action-column recommendation now live together in
-  `query_survival_belief_workspace`. The facade is 402 lines. Focused
+  `query_survival_belief_workspace`. One-shot native dispatch and the
+  independent scalar fallback boundary now live in
+  `query_survival_dispatch`. The facade is 283 lines. Focused
   query-survival/complete-mask/variable-cadence/policy-synthesis tests pass
   `17/17`, `3/3`, `8/8`, and `4/4`; quick suites pass `699/699` on Linux in
-  `9.407 s` and Windows in `13.189 s` with three skips.
+  `9.230 s` and Windows in `13.386 s` with three skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

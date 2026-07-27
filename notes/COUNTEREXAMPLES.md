@@ -3678,7 +3678,7 @@ completed
   `8ea4b761969e978a821ef362163d2be96aa6bfc43be8549eff65d92d0b955a20`
   for the Lunatic run.
 
-## CE-0138: Hard Stage 6B concentrated contact at boundaries after kernel exhaustion
+## CE-0138: Stage 6B concentrated contact at boundaries after kernel exhaustion
 
 Status: observed physical survival failure; staged planner-refactor gate
 completed
@@ -3715,9 +3715,31 @@ completed
   attractive under high control-reserve deficit, and keep bullet, laser, and
   committed-prefix causes separate. Compare phase-specific warning lead and
   position, not aggregate hit counts across RNG samples.
-- **Evidence:** Matching compact run and dossier artifacts; ignored raw JSONL
-  SHA-256
-  `d746c1bcbe3604a32f44ecfbb5f95f22052c8a8de555dbd9906e58872621e29b`.
+- **Observed Lunatic corroboration:** Post-native-split run
+  `lunatic_route2_stage6b_unattended_20260727_213748` completed Final B over
+  frames `2..73670`, 22,430 decisions, maximum 1,536 bullets and 245 lasers,
+  hard no-Bomb, accepted artifacts, and cleanup. It took 16 hits at
+  `[12366,12814,13527,18671,19899,29441,30536,36602,47253,47813,49726,53203,53809,54974,55508,69563]`;
+  every hit followed global-kernel exhaustion.
+- **Observed cause separation:** The Lunatic contacts classify as seven
+  bullet overlaps, six modeled committed-prefix collisions, two laser
+  overlaps, and one simultaneous multi-hazard overlap. Spells 154 and 162
+  completed active-laser phases without hits. Exact laser contacts were
+  retained at frames 30,536 in spell 158 and 47,813 in spell 166; frame
+  49,726 in spell 166 overlapped multiple hazards. This rejects treating
+  laser presence alone as the cause or globally inflating all laser geometry
+  without a phase-specific counterexample gate.
+- **Observed boundary signature:** Thirteen of 16 contacts involved a
+  playfield boundary, ten used fast movement, and pre-hit bottom-eight-pixel
+  occupancy was `0.421` versus `0.157` outside those windows. Mean pre-hit
+  control-reserve deficit was `10.868` versus `4.203`. These remain
+  correlations, not a causal proof of the recovery mechanism.
+- **Evidence:** Matching compact run and dossier artifacts. Ignored raw JSONL
+  SHA-256 values are
+  `d746c1bcbe3604a32f44ecfbb5f95f22052c8a8de555dbd9906e58872621e29b`
+  for the Hard run and
+  `5952e485bb26d75493e4b4ff5223e043d1b88de87addd0dd3b45694731306e54`
+  for the Lunatic run.
 
 ## CE-0139: Lunatic Stage 4A contacted a bullet from a declared unknown future slab
 

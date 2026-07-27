@@ -294,6 +294,17 @@ describe the same decision. Python/C++ parity is not physical correctness.
   frames. This extends CE-0137: global loss is an early causal warning, not
   an imminent-collision label, and current distant recovery does not provide
   a completed viable continuation.
+- Post-refactor Lunatic Stage-6B retention
+  `lunatic_route2_stage6b_unattended_20260727_213748` completed Final B over
+  frames `2..73670` with 22,430 decisions, maximum 1,536 bullets and 245
+  lasers, zero Bomb input, accepted terminal unload, compact artifacts,
+  supervisor completion, and no residual process. It took 16 hits, all after
+  global-kernel exhaustion: seven bullet overlaps, six modeled
+  committed-prefix collisions, two laser overlaps, and one simultaneous
+  multi-hazard overlap. Spells 154 and 162 completed their laser phases
+  without hits, while spells 158 and 166 retain exact laser contacts. This
+  extends CE-0138 and keeps laser-specific correction separate from the
+  broader boundary/recovery failure.
 - Query-local public value contracts now live in
   `touhou_control.query_survival_types`: pending command, reachable root,
   scalar/belief stats, upper certification, action recommendation, and query

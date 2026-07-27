@@ -68,6 +68,14 @@ coupling, and the order for later structural work.
   The eight CE-0137 hits remain model/recovery failures; the completed native
   backends and lifecycle provide structural retention under a second
   high-pressure workload.
+- **Observed:** post-native-split Lunatic Stage-6B retention
+  `lunatic_route2_stage6b_unattended_20260727_213748` completed 22,430
+  decisions over frames `2..73670`, reached 1,536 bullets and 245 lasers,
+  passed hard no-Bomb, materialized accepted artifacts, and left no residual
+  process. The long mixed-hazard workload retained native geometry/local/
+  viability/pipeline execution and phase transitions. Sixteen CE-0138 hits,
+  including two exact laser overlaps and one multi-hazard overlap, remain
+  physical-model/recovery evidence rather than structural acceptance.
 - **Workload decision:** Stage 1 remains sufficient for lifecycle, cleanup,
   and trace-schema changes. Subsequent planner, recurrence, clearance, or
   native compute checkpoints use Hard Stage 4A as the primary focused

@@ -5727,3 +5727,40 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 516,650,499-byte raw JSONL SHA-256
   `8ea4b761969e978a821ef362163d2be96aa6bfc43be8549eff65d92d0b955a20`.
+
+### 2026-07-27 — Lunatic Stage-6B post-refactor retention
+
+- **Observed physical gate:** Supervised Windows run
+  `lunatic_route2_stage6b_unattended_20260727_213748` completed Final B over
+  frames `2..73670` with 22,430 decisions, maximum 1,536 bullets and 245
+  lasers, native decode/hazard/beam execution, hard no-Bomb, accepted
+  terminal unload, compact artifacts, supervisor completion, and no residual
+  game/controller process.
+- **Observed survival failure:** Native hits occurred at
+  `[12366,12814,13527,18671,19899,29441,30536,36602,47253,47813,49726,53203,53809,54974,55508,69563]`.
+  All 16 followed global-kernel exhaustion. Retained causes are seven bullet
+  overlaps, six modeled committed-prefix collisions, two laser overlaps, and
+  one simultaneous multi-hazard overlap. Thirteen contacts involved a
+  playfield boundary. This extends CE-0138 and is not route acceptance.
+- **Observed laser discrimination:** Spells 154 and 162 completed active-
+  laser phases without contact. Exact laser overlaps occurred at frame
+  30,536 in spell 158 and frame 47,813 in spell 166; frame 49,726 in spell
+  166 overlapped multiple hazard classes. The evidence constrains later
+  geometry work to the retained causal windows and rejects equating active
+  laser count with failure.
+- **Observed delivery and timing:** Local planning median/p95 was
+  `9.761/18.842 ms`; native rolling-policy solve median/p95 was
+  `79.974/315.171 ms`; 22,050 policy queries were available and none used
+  delay support outside the cached policy. Nevertheless 10,685 queried
+  action sets were empty. Implementation delivery remained operational while
+  finite viability and post-loss recovery remained the survival blockers.
+- **Comparison boundary:** Against RNG-distinct Lunatic Stage-6B baseline
+  `20260726_165841`, deaths changed from 20 to 16, next-observation input
+  visibility from `0.844` to `0.924`, and rolling solve median/p95 from
+  `93.948/435.366 ms` to `79.974/315.171 ms`. This is timing/retention
+  evidence, not a controlled survival improvement.
+- **Authority:** Structural physical retention and counterexample evidence
+  only. Model, recurrence, live authority, and strategy are unchanged.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 729,382,239-byte raw JSONL SHA-256
+  `5952e485bb26d75493e4b4ff5223e043d1b88de87addd0dd3b45694731306e54`.

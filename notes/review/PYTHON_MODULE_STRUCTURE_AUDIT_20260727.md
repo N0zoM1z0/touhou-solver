@@ -61,6 +61,13 @@ coupling, and the order for later structural work.
   hits are CE-0139 physical-model evidence, not a structural gate failure:
   the native decomposition remained operational, while the canonical contact
   occurred inside a hazard slab already declared unknown.
+- **Observed:** post-native-split Lunatic Stage-5 retention
+  `lunatic_route2_stage5_unattended_20260727_212624` completed 12,770
+  decisions over frames `2..41508`, reached 1,533 bullets, passed hard
+  no-Bomb, materialized accepted artifacts, and left no residual process.
+  The eight CE-0137 hits remain model/recovery failures; the completed native
+  backends and lifecycle provide structural retention under a second
+  high-pressure workload.
 - **Workload decision:** Stage 1 remains sufficient for lifecycle, cleanup,
   and trace-schema changes. Subsequent planner, recurrence, clearance, or
   native compute checkpoints use Hard Stage 4A as the primary focused

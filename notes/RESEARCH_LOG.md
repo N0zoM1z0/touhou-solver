@@ -5695,3 +5695,35 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 457,557,329-byte raw JSONL SHA-256
   `3ac5d31aa4b51359f6352e66bdaf36e3ae629e356f1a25499e404f6beaa8d521`.
+
+### 2026-07-27 — Lunatic Stage-5 post-refactor retention
+
+- **Observed physical gate:** Supervised Windows run
+  `lunatic_route2_stage5_unattended_20260727_212624` completed frames
+  `2..41508` with 12,770 decisions, maximum 1,533 bullets, native
+  decode/hazard/beam execution, hard no-Bomb, accepted terminal unload,
+  compact artifacts, supervisor completion, and no residual game/controller
+  process.
+- **Observed survival failure:** Native hits occurred at
+  `[11504,11936,12952,13466,24394,30393,31143,41238]`. All eight followed
+  global-kernel exhaustion; five were modeled committed-prefix collisions and
+  three were observed-bullet overlaps. Seven contacts involved a playfield
+  boundary, all eight used fast movement, and four exceeded 1,000 bullets.
+  This extends CE-0137 and is not route acceptance.
+- **Observed causal separation:** The canonical fresh hit at frame 11,504
+  followed global viability loss at frame 11,274, robust action-set
+  exhaustion at frame 11,495, and the last-alive negative pipeline
+  certificate at frame 11,502. Global loss therefore supplied 230 frames of
+  warning, while the short certificate supplied two. Treating global loss,
+  robust action-set exhaustion, and imminent local contact as one signal
+  would discard the intervention window.
+- **Comparison boundary:** Against RNG-distinct Lunatic Stage-5 baseline
+  `20260725_175339`, deaths changed from 27 to 8 and rolling-policy solve
+  median/p95 improved from `135.050/423.956 ms` to
+  `90.243/304.327 ms`. These retain implementation and timing behavior but
+  do not establish a survival improvement from one uncontrolled RNG sample.
+- **Authority:** Structural physical retention and counterexample evidence
+  only. Model, recurrence, recovery authority, and strategy are unchanged.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 516,650,499-byte raw JSONL SHA-256
+  `8ea4b761969e978a821ef362163d2be96aa6bfc43be8549eff65d92d0b955a20`.

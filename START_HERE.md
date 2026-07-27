@@ -284,6 +284,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
   the contacting slot first appears in the retained nearby set at the hit.
   This is CE-0139 future-event coverage evidence and native/live structural
   retention, not survival or model-validity acceptance.
+- Post-refactor Lunatic Stage-5 retention
+  `lunatic_route2_stage5_unattended_20260727_212624` completed frames
+  `2..41508` with 12,770 decisions, maximum 1,533 bullets, zero Bomb input,
+  accepted terminal unload, compact artifacts, supervisor completion, and no
+  residual process. It took eight hits, all after global-kernel exhaustion.
+  The fresh hit followed global loss by 230 frames, robust action-set
+  exhaustion by nine frames, and negative short-pipeline clearance by two
+  frames. This extends CE-0137: global loss is an early causal warning, not
+  an imminent-collision label, and current distant recovery does not provide
+  a completed viable continuation.
 - Query-local public value contracts now live in
   `touhou_control.query_survival_types`: pending command, reachable root,
   scalar/belief stats, upper certification, action recommendation, and query

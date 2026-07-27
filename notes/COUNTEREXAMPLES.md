@@ -3623,7 +3623,7 @@ completed
   SHA-256
   `f22dae779704b0e0189a9cf3129ce77db1aeec83245c82a7264edd579ef4fea8`.
 
-## CE-0137: Hard Stage 5 exhausted every global kernel before contact
+## CE-0137: Stage 5 exhausted every global kernel before contact
 
 Status: observed physical survival failure; timing/optional-hazard trace gate
 completed
@@ -3658,9 +3658,25 @@ completed
   before the former hit windows and compare phase-specific position and
   warning lead; do not infer improvement from aggregate hits across different
   RNG samples.
-- **Evidence:** Matching compact run and dossier artifacts; ignored raw JSONL
-  SHA-256
-  `14bb67c3f6448a232e338d5067047def7a380814b90fae4ffb2577e49047e1f3`.
+- **Observed Lunatic corroboration:** Post-native-split run
+  `lunatic_route2_stage5_unattended_20260727_212624` completed frames
+  `2..41508`, 12,770 decisions, maximum 1,533 bullets, hard no-Bomb,
+  accepted artifacts, and cleanup. It took eight hits at
+  `[11504,11936,12952,13466,24394,30393,31143,41238]`; five were modeled
+  committed-prefix collisions and three were observed-bullet overlaps.
+  Every contact again followed global-kernel exhaustion.
+- **Observed separated warnings:** The fresh frame-11,504 hit followed global
+  loss by 230 frames, robust action-set exhaustion by nine frames, and
+  negative short-pipeline clearance by two frames. The policy therefore
+  exposed a long causal intervention window, but its post-loss distant
+  recovery did not construct a viable continuation. Seven of eight contacts
+  involved the playfield boundary and all eight used fast movement.
+- **Evidence:** Matching compact run and dossier artifacts. Ignored raw JSONL
+  SHA-256 values are
+  `14bb67c3f6448a232e338d5067047def7a380814b90fae4ffb2577e49047e1f3`
+  for the Hard run and
+  `8ea4b761969e978a821ef362163d2be96aa6bfc43be8549eff65d92d0b955a20`
+  for the Lunatic run.
 
 ## CE-0138: Hard Stage 6B concentrated contact at boundaries after kernel exhaustion
 

@@ -203,6 +203,7 @@ def run_trial(
         "menu_plan": [asdict(tap) for tap in menu_plan],
         "hard_no_bomb": True,
         "trace_transform_runtime": args.trace_transform_runtime,
+        "trace_bullet_births": args.trace_bullet_births,
         "viability_audit": args.viability_audit,
         "postpublished_survival_shadow": (
             args.postpublished_survival_shadow
@@ -235,6 +236,7 @@ def run_trial(
             expected_stage=stage.route_index,
             terminal_stage=stage.route_index,
             trace_transform_runtime=args.trace_transform_runtime,
+            trace_bullet_births=args.trace_bullet_births,
             safety_value_horizon=args.safety_value_horizon,
             viability_audit_dir=(
                 ROOT
@@ -509,6 +511,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--trace-transform-runtime",
         action="store_true",
         help="retain transform-relevant bullets from the complete native pool",
+    )
+    parser.add_argument(
+        "--trace-bullet-births",
+        action="store_true",
+        help=(
+            "record default-off hostile-bullet activation and active-spell "
+            "main-VM intent telemetry; trace only"
+        ),
     )
     parser.add_argument(
         "--safety-value-horizon",

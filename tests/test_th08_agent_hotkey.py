@@ -38,6 +38,7 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.expected_stage, 2)
         self.assertEqual(parsed.terminal_stage, 2)
         self.assertFalse(parsed.trace_transform_runtime)
+        self.assertFalse(parsed.trace_bullet_births)
         self.assertEqual(parsed.safety_value_horizon, 0)
         self.assertIsNone(parsed.viability_audit_dir)
         self.assertFalse(parsed.postpublished_survival_shadow)
@@ -56,6 +57,17 @@ class AgentHotkeyTests(unittest.TestCase):
         )
         parsed = build_parser().parse_args(arguments)
         self.assertTrue(parsed.trace_transform_runtime)
+
+    def test_bullet_birth_trace_is_explicitly_opt_in(self) -> None:
+        arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_bullet_births=True,
+        )
+        parsed = build_parser().parse_args(arguments)
+        self.assertTrue(parsed.trace_bullet_births)
 
     def test_full_route_can_extend_the_worker_deadline(self) -> None:
         arguments = build_long_run_arguments(

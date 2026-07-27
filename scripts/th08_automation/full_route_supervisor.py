@@ -192,6 +192,7 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "hard_no_bomb": True,
         "safety_value_horizon": 0,
         "trace_transform_runtime": False,
+        "trace_bullet_births": args.trace_bullet_births,
         "viability_audit": False,
         "agent_duration_seconds": args.agent_duration,
         "leave_game_running": args.leave_game_running,
@@ -207,6 +208,7 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             expected_difficulty=difficulty.menu_index,
             expected_stage=0,
             terminal_stage=None,
+            trace_bullet_births=args.trace_bullet_births,
             safety_value_horizon=0,
             duration_seconds=args.agent_duration,
             detailed_summary=False,
@@ -428,6 +430,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--stall-timeout", type=float, default=120.0)
     parser.add_argument("--status-seconds", type=float, default=30.0)
+    parser.add_argument(
+        "--trace-bullet-births",
+        action="store_true",
+        help=(
+            "record default-off hostile-bullet activation and active-spell "
+            "main-VM intent telemetry; trace only"
+        ),
+    )
     parser.add_argument(
         "--difficulty",
         type=parse_practice_difficulty,

@@ -54,6 +54,7 @@ def build_long_run_arguments(
     expected_stage: int | None = None,
     terminal_stage: int | None = None,
     trace_transform_runtime: bool = False,
+    trace_bullet_births: bool = False,
     safety_value_horizon: int = 0,
     viability_audit_dir: Path | None = None,
     postpublished_survival_shadow: bool = False,
@@ -114,6 +115,8 @@ def build_long_run_arguments(
         arguments.extend(("--terminal-stage", str(terminal_stage)))
     if trace_transform_runtime:
         arguments.append("--trace-transform-runtime")
+    if trace_bullet_births:
+        arguments.append("--trace-bullet-births")
     if safety_value_horizon:
         arguments.extend(
             ("--safety-value-horizon", str(safety_value_horizon))

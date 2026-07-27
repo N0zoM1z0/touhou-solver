@@ -62,6 +62,7 @@ class AgentHotkey:
         expected_stage: int | None = None,
         terminal_stage: int | None = None,
         trace_transform_runtime: bool = False,
+        trace_bullet_births: bool = False,
         safety_value_horizon: int = 0,
         viability_audit_dir: Path | None = None,
         postpublished_survival_shadow: bool = False,
@@ -121,6 +122,7 @@ class AgentHotkey:
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
         self.trace_transform_runtime = trace_transform_runtime
+        self.trace_bullet_births = trace_bullet_births
         self.safety_value_horizon = safety_value_horizon
         self.viability_audit_dir = viability_audit_dir
         self.postpublished_survival_shadow = (
@@ -260,6 +262,7 @@ class AgentHotkey:
                 expected_stage=self.expected_stage,
                 terminal_stage=self.terminal_stage,
                 trace_transform_runtime=self.trace_transform_runtime,
+                trace_bullet_births=self.trace_bullet_births,
                 safety_value_horizon=self.safety_value_horizon,
                 viability_audit_dir=self.viability_audit_dir,
                 postpublished_survival_shadow=(

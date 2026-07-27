@@ -76,6 +76,7 @@ from th08_laser_runtime import (
     pack_laser_frame as _pack_laser_frame,
     serialize_laser_trace,
 )
+from th08_live import LiveSession
 from th08_local_planner import (
     ActuatorPipeline,
     BaselineBeamContext,
@@ -118,11 +119,9 @@ from th08_runtime_agent import (
     SUPPORTED_INPUT_MASK,
     TARGET_EXE,
     ProcessReader,
-    Win32,
     _require_foreground,
     capture_input_clock_shadow,
     observe_state,
-    release_injected_keys,
     send_scan_key,
     send_transitions,
     verify_target,
@@ -5904,7 +5903,7 @@ def _candidate_snapshot_record(
     }
 
 
-def run(args: argparse.Namespace) -> int:
+def _prepare_live_run(args: argparse.Namespace) -> None:
     if not args.armed:
         raise RuntimeError("live control requires the explicit --armed flag")
     if min(
@@ -5953,11 +5952,26 @@ def run(args: argparse.Namespace) -> int:
         or args.terminal_inactive_grace <= 0.0
     ):
         raise ValueError("scene transition timing arguments must be positive")
-    api = Win32()
-    pid = args.pid if args.pid is not None else api.find_pid(TARGET_EXE)
-    reader = ProcessReader(api, pid)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    output = args.output.open("w", encoding="utf-8", newline="\n")
+
+
+def run(args: argparse.Namespace) -> int:
+    _prepare_live_run(args)
+    with LiveSession(
+        output_path=args.output,
+        requested_pid=args.pid,
+        target_exe=TARGET_EXE,
+    ) as session:
+        return _run_live_session(args, session)
+
+
+def _run_live_session(
+    args: argparse.Namespace,
+    session: LiveSession,
+) -> int:
+    api = session.api
+    pid = session.pid
+    reader = session.reader
+    output = session.output
     previous_mask = 0
     previous_direction = 0
     previous_counter: int | None = None
@@ -9626,7 +9640,7 @@ def run(args: argparse.Namespace) -> int:
         raise
     finally:
         try:
-            release_injected_keys(api)
+            session.release_keys()
         finally:
             try:
                 should_pause = False
@@ -9684,8 +9698,7 @@ def run(args: argparse.Namespace) -> int:
                 if enemy_executor is not None:
                     enemy_executor.shutdown(wait=True, cancel_futures=True)
             finally:
-                output.close()
-                reader.close()
+                session.close()
 
 
 def build_parser() -> argparse.ArgumentParser:

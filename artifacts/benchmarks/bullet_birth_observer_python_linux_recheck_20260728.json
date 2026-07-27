@@ -1,0 +1,160 @@
+{
+  "backend": "python",
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 1,
+      "compact_json_bytes": 400,
+      "observer": {
+        "max_ms": 0.15454,
+        "p50_ms": 0.041047,
+        "p95_ms": 0.056195599999999984,
+        "p99_9_ms": 0.1396396760000012,
+        "p99_ms": 0.07549411999999997
+      },
+      "record_json": {
+        "max_ms": 0.022307,
+        "p50_ms": 0.0092575,
+        "p95_ms": 0.010991049999999999,
+        "p99_9_ms": 0.02193546700000003,
+        "p99_ms": 0.019855899999999996
+      }
+    },
+    {
+      "births_per_observation": 8,
+      "compact_json_bytes": 750,
+      "observer": {
+        "max_ms": 0.110943,
+        "p50_ms": 0.050435,
+        "p95_ms": 0.06683594999999999,
+        "p99_9_ms": 0.1084097300000002,
+        "p99_ms": 0.08440942999999987
+      },
+      "record_json": {
+        "max_ms": 0.034031,
+        "p50_ms": 0.0174485,
+        "p95_ms": 0.01869675,
+        "p99_9_ms": 0.033354400000000055,
+        "p99_ms": 0.027068979999999968
+      }
+    },
+    {
+      "births_per_observation": 32,
+      "compact_json_bytes": 2018,
+      "observer": {
+        "max_ms": 0.16387,
+        "p50_ms": 0.07324800000000001,
+        "p95_ms": 0.096845,
+        "p99_9_ms": 0.1599938780000003,
+        "p99_ms": 0.13728874999999993
+      },
+      "record_json": {
+        "max_ms": 0.118918,
+        "p50_ms": 0.052745,
+        "p95_ms": 0.06236594999999998,
+        "p99_9_ms": 0.11834945700000005,
+        "p99_ms": 0.1053204899999999
+      }
+    },
+    {
+      "births_per_observation": 33,
+      "compact_json_bytes": 2071,
+      "observer": {
+        "max_ms": 0.197617,
+        "p50_ms": 0.0811355,
+        "p95_ms": 0.12352435,
+        "p99_9_ms": 0.19166690000000047,
+        "p99_ms": 0.14784571999999982
+      },
+      "record_json": {
+        "max_ms": 0.085682,
+        "p50_ms": 0.046236,
+        "p95_ms": 0.06215919999999999,
+        "p99_9_ms": 0.08442690700000009,
+        "p99_ms": 0.07448142999999996
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "compact_json_bytes": 32956,
+      "observer": {
+        "max_ms": 0.204636,
+        "p50_ms": 0.090184,
+        "p95_ms": 0.11853999999999998,
+        "p99_9_ms": 0.19300285800000094,
+        "p99_ms": 0.14159033999999995
+      },
+      "record_json": {
+        "max_ms": 0.772393,
+        "p50_ms": 0.6858005,
+        "p95_ms": 0.7340209999999999,
+        "p99_9_ms": 0.77237907,
+        "p99_ms": 0.7717884
+      }
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 7.390939,
+    "p50_ms": 6.5968205,
+    "p95_ms": 6.8746163000000005,
+    "p99_9_ms": 7.357333549000004,
+    "p99_ms": 7.054884490000002
+  },
+  "decode_interleaved": {
+    "max_ms": 7.971616,
+    "p50_ms": 6.643743000000001,
+    "p95_ms": 7.5400897,
+    "p99_9_ms": 7.948989946000003,
+    "p99_ms": 7.745355460000002
+  },
+  "decode_iterations": 100,
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 0.083744,
+        "p50_ms": 0.0137105,
+        "p95_ms": 0.01603025,
+        "p99_9_ms": 0.06705041600000049,
+        "p99_ms": 0.026103189999999995
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.073161,
+        "p50_ms": 0.0149825,
+        "p95_ms": 0.017739400000000002,
+        "p99_9_ms": 0.04692970300000136,
+        "p99_ms": 0.02846512
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.089864,
+        "p50_ms": 0.014096,
+        "p95_ms": 0.015312049999999999,
+        "p99_9_ms": 0.04475002500000673,
+        "p99_ms": 0.026668719999999996
+      }
+    }
+  ],
+  "gate": {
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": false,
+    "max_limit_ms": 2.0,
+    "observer_failures": [],
+    "observer_pass": true,
+    "observer_profiles_checked": 8,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": false
+  },
+  "interleaved_p95_ratio": 1.0968015334906764,
+  "iterations": 2000,
+  "native_library": null,
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v4",
+  "thread_affinity_cpu": null
+}

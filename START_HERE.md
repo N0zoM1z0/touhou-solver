@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `efac80f Retain schema-v4 Stage 4 birth gate`,
   `e48cd65 Bound bullet birth trace flush latency`,
   `4eecd4a Retain schema-v3 Stage 4 birth gate`,
   `70077e2 Compact birth evidence and preserve ECL capture`,
@@ -81,12 +82,24 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `1.1783 -> 0.1708 ms`, but observer wall p95/p99/max was still
   `0.2997/0.5772/10.2234 ms`, so B4 remains failed. Windows thread CPU
   samples were quantized in 15.625-ms steps and cannot replace the wall
-  gate. The next performance experiment should remove the duplicate
-  post-issue sparse pool traversal through a parity-gated native or
-  active-slot-handoff data plane; callback incompleteness must also fail
-  closed before Stage 5/6.
+  gate. A separate trace-only native library now performs one slot-order
+  scan without changing the 46-symbol production ABI. Four Linux/Windows
+  native tests cover 16 randomized full-pool generations, boundary/nonfinite
+  cases, reset/validation, canonical record parity, and atomic capacity
+  failure. CE-0148 records a rejected wrapper whose per-call ctypes
+  allocations triggered a repeatable 5.409-ms cyclic-GC tail; caching the
+  persistent blob view, pointers, and count storage removes it with GC still
+  enabled. Final unpinned Linux/Windows full-density p95 is
+  `0.0120/0.0109 ms`, 592-birth p95 is `0.0570/0.0452 ms`, all eight profile
+  maxima are at most `0.4289/0.1433 ms`, and interleaved ratios are
+  `0.931/0.930`. Trace schema v5 records the explicit `python`/`native`
+  backend and residual-audit v3 rejects missing provenance. Complete
+  Linux/Windows suites pass `792/792` in `8.826/15.449 s`, with three
+  Windows skips. This qualifies only an explicit native Stage-4A B4 repeat;
+  callback incompleteness must still fail closed before Stage 5/6.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
-  CE-0143/0144/0145/0146/0147.
+  `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
+  CE-0143/0144/0145/0146/0147/0148.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and
@@ -1015,6 +1028,7 @@ Rebuild ignored native libraries after C++ changes:
 ```bash
 python3 scripts/tools/build_native_planner.py --target linux
 python3 scripts/tools/build_native_planner.py --target windows
+python3 scripts/tools/build_native_bullet_birth_trace.py --target all
 ```
 
 Use `TOUHOU_DISABLE_NATIVE_PLANNER=1` only for explicit NumPy/Python ablation.
@@ -1082,6 +1096,15 @@ Practice:
   '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
   --stage 4a --status-seconds 15 --stall-timeout 120
 ```
+
+The current explicit trace-only native birth-observer gate adds:
+
+```bash
+  --trace-bullet-births --bullet-birth-backend native
+```
+
+Do not infer this backend from library availability; schema-v5 provenance and
+the physical gate require the explicit selector.
 
 Continuous Hard Route-2, leaving the accepted game alive for manual replay
 save:

@@ -1,0 +1,160 @@
+{
+  "backend": "python",
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 1,
+      "compact_json_bytes": 400,
+      "observer": {
+        "max_ms": 0.1315,
+        "p50_ms": 0.049,
+        "p95_ms": 0.057804999999999995,
+        "p99_9_ms": 0.12419670000000059,
+        "p99_ms": 0.08796899999999994
+      },
+      "record_json": {
+        "max_ms": 0.0172,
+        "p50_ms": 0.0118,
+        "p95_ms": 0.013204999999999998,
+        "p99_9_ms": 0.016543300000000052,
+        "p99_ms": 0.013701999999999999
+      }
+    },
+    {
+      "births_per_observation": 8,
+      "compact_json_bytes": 750,
+      "observer": {
+        "max_ms": 0.2191,
+        "p50_ms": 0.062,
+        "p95_ms": 0.07842999999999994,
+        "p99_9_ms": 0.2053690000000011,
+        "p99_ms": 0.08951199999999945
+      },
+      "record_json": {
+        "max_ms": 0.0206,
+        "p50_ms": 0.0192,
+        "p95_ms": 0.0198,
+        "p99_9_ms": 0.020560200000000004,
+        "p99_ms": 0.020300999999999996
+      }
+    },
+    {
+      "births_per_observation": 32,
+      "compact_json_bytes": 2018,
+      "observer": {
+        "max_ms": 0.1569,
+        "p50_ms": 0.09095,
+        "p95_ms": 0.09910999999999999,
+        "p99_9_ms": 0.15477070000000018,
+        "p99_ms": 0.1360029999999999
+      },
+      "record_json": {
+        "max_ms": 0.1054,
+        "p50_ms": 0.0634,
+        "p95_ms": 0.065105,
+        "p99_9_ms": 0.10120110000000034,
+        "p99_ms": 0.07964699999999997
+      }
+    },
+    {
+      "births_per_observation": 33,
+      "compact_json_bytes": 2071,
+      "observer": {
+        "max_ms": 0.1697,
+        "p50_ms": 0.0784,
+        "p95_ms": 0.08911999999999999,
+        "p99_9_ms": 0.16201860000000062,
+        "p99_ms": 0.11129999999999982
+      },
+      "record_json": {
+        "max_ms": 0.089,
+        "p50_ms": 0.0652,
+        "p95_ms": 0.073005,
+        "p99_9_ms": 0.08639310000000021,
+        "p99_ms": 0.07342499999999999
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "compact_json_bytes": 32956,
+      "observer": {
+        "max_ms": 0.2277,
+        "p50_ms": 0.108,
+        "p95_ms": 0.129525,
+        "p99_9_ms": 0.21462570000000109,
+        "p99_ms": 0.14388299999999982
+      },
+      "record_json": {
+        "max_ms": 1.1156,
+        "p50_ms": 0.8691,
+        "p95_ms": 0.91955,
+        "p99_9_ms": 1.0820884000000026,
+        "p99_ms": 0.9425469999999999
+      }
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 12.4551,
+    "p50_ms": 7.71335,
+    "p95_ms": 8.320170000000001,
+    "p99_9_ms": 12.420440100000004,
+    "p99_ms": 12.108501000000002
+  },
+  "decode_interleaved": {
+    "max_ms": 13.086,
+    "p50_ms": 8.117799999999999,
+    "p95_ms": 8.694589999999998,
+    "p99_9_ms": 12.88284210000002,
+    "p99_ms": 11.05442100000001
+  },
+  "decode_iterations": 100,
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 0.1251,
+        "p50_ms": 0.0275,
+        "p95_ms": 0.06680499999999999,
+        "p99_9_ms": 0.11450170000000034,
+        "p99_ms": 0.07480200000000001
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.0729,
+        "p50_ms": 0.0207,
+        "p95_ms": 0.022,
+        "p99_9_ms": 0.050106700000001364,
+        "p99_ms": 0.041204
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.0494,
+        "p50_ms": 0.0213,
+        "p95_ms": 0.0222,
+        "p99_9_ms": 0.04150090000000019,
+        "p99_ms": 0.028200999999999997
+      }
+    }
+  ],
+  "gate": {
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": true,
+    "max_limit_ms": 2.0,
+    "observer_failures": [],
+    "observer_pass": true,
+    "observer_profiles_checked": 8,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": true
+  },
+  "interleaved_p95_ratio": 1.0450014843446704,
+  "iterations": 2000,
+  "native_library": null,
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v4",
+  "thread_affinity_cpu": null
+}

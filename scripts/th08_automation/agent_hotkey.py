@@ -63,6 +63,7 @@ class AgentHotkey:
         terminal_stage: int | None = None,
         trace_transform_runtime: bool = False,
         trace_bullet_births: bool = False,
+        bullet_birth_backend: str = "python",
         safety_value_horizon: int = 0,
         viability_audit_dir: Path | None = None,
         postpublished_survival_shadow: bool = False,
@@ -118,11 +119,14 @@ class AgentHotkey:
             )
         if bullet_decode_backend not in {"python", "native"}:
             raise ValueError("unknown bullet decode backend")
+        if bullet_birth_backend not in {"python", "native"}:
+            raise ValueError("unknown bullet birth backend")
         self.expected_difficulty = expected_difficulty
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
         self.trace_transform_runtime = trace_transform_runtime
         self.trace_bullet_births = trace_bullet_births
+        self.bullet_birth_backend = bullet_birth_backend
         self.safety_value_horizon = safety_value_horizon
         self.viability_audit_dir = viability_audit_dir
         self.postpublished_survival_shadow = (
@@ -263,6 +267,7 @@ class AgentHotkey:
                 terminal_stage=self.terminal_stage,
                 trace_transform_runtime=self.trace_transform_runtime,
                 trace_bullet_births=self.trace_bullet_births,
+                bullet_birth_backend=self.bullet_birth_backend,
                 safety_value_horizon=self.safety_value_horizon,
                 viability_audit_dir=self.viability_audit_dir,
                 postpublished_survival_shadow=(

@@ -1,0 +1,167 @@
+{
+  "backend": "native",
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 1,
+      "compact_json_bytes": 400,
+      "observer": {
+        "max_ms": 0.1487,
+        "p50_ms": 0.04475,
+        "p95_ms": 0.054549999999999946,
+        "p99_9_ms": 0.1438444000000004,
+        "p99_ms": 0.11499399999999992
+      },
+      "record_json": {
+        "max_ms": 0.0127,
+        "p50_ms": 0.0115,
+        "p95_ms": 0.012104999999999998,
+        "p99_9_ms": 0.012660200000000003,
+        "p99_ms": 0.0125
+      }
+    },
+    {
+      "births_per_observation": 8,
+      "compact_json_bytes": 750,
+      "observer": {
+        "max_ms": 0.1387,
+        "p50_ms": 0.0467,
+        "p95_ms": 0.06150999999999997,
+        "p99_9_ms": 0.13651100000000016,
+        "p99_ms": 0.11374099999999988
+      },
+      "record_json": {
+        "max_ms": 0.0346,
+        "p50_ms": 0.0218,
+        "p95_ms": 0.0234,
+        "p99_9_ms": 0.03286870000000014,
+        "p99_ms": 0.02382099999999998
+      }
+    },
+    {
+      "births_per_observation": 32,
+      "compact_json_bytes": 2018,
+      "observer": {
+        "max_ms": 0.1293,
+        "p50_ms": 0.0451,
+        "p95_ms": 0.05513999999999999,
+        "p99_9_ms": 0.12611600000000026,
+        "p99_ms": 0.11082499999999998
+      },
+      "record_json": {
+        "max_ms": 0.1275,
+        "p50_ms": 0.06475,
+        "p95_ms": 0.107005,
+        "p99_9_ms": 0.1263259000000001,
+        "p99_ms": 0.1111059999999999
+      }
+    },
+    {
+      "births_per_observation": 33,
+      "compact_json_bytes": 2071,
+      "observer": {
+        "max_ms": 0.1208,
+        "p50_ms": 0.045,
+        "p95_ms": 0.0551949999999999,
+        "p99_9_ms": 0.11783490000000024,
+        "p99_ms": 0.10540499999999998
+      },
+      "record_json": {
+        "max_ms": 0.0816,
+        "p50_ms": 0.0626,
+        "p95_ms": 0.0673,
+        "p99_9_ms": 0.08074430000000007,
+        "p99_ms": 0.06829099999999991
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "compact_json_bytes": 32956,
+      "observer": {
+        "max_ms": 0.132,
+        "p50_ms": 0.0503,
+        "p95_ms": 0.06534499999999999,
+        "p99_9_ms": 0.12913440000000023,
+        "p99_ms": 0.11720399999999999
+      },
+      "record_json": {
+        "max_ms": 0.9159,
+        "p50_ms": 0.84605,
+        "p95_ms": 0.89332,
+        "p99_9_ms": 0.9156015000000001,
+        "p99_ms": 0.9048959999999999
+      }
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 12.9508,
+    "p50_ms": 7.45475,
+    "p95_ms": 8.177420000000001,
+    "p99_9_ms": 12.828059800000013,
+    "p99_ms": 11.723398000000007
+  },
+  "decode_interleaved": {
+    "max_ms": 12.1772,
+    "p50_ms": 7.4722,
+    "p95_ms": 8.197659999999999,
+    "p99_9_ms": 11.860261400000033,
+    "p99_ms": 9.007814000000016
+  },
+  "decode_iterations": 100,
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 4.8275,
+        "p50_ms": 0.0303,
+        "p95_ms": 0.0419,
+        "p99_9_ms": 0.1499744000000355,
+        "p99_ms": 0.11052099999999998
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.1305,
+        "p50_ms": 0.0298,
+        "p95_ms": 0.03730999999999999,
+        "p99_9_ms": 0.12000090000000017,
+        "p99_ms": 0.102901
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.275,
+        "p50_ms": 0.0287,
+        "p95_ms": 0.0349,
+        "p99_9_ms": 0.11500630000000128,
+        "p99_ms": 0.09660300000000001
+      }
+    }
+  ],
+  "gate": {
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": true,
+    "max_limit_ms": 2.0,
+    "observer_failures": [
+      {
+        "max_ms": 4.8275,
+        "p95_ms": 0.0419,
+        "p99_ms": 0.11052099999999998,
+        "profile": "density:0"
+      }
+    ],
+    "observer_pass": false,
+    "observer_profiles_checked": 8,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": false
+  },
+  "interleaved_p95_ratio": 1.0024751082859873,
+  "iterations": 2000,
+  "native_library": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\native\\build\\windows-x86_64\\touhou_bullet_birth_trace.dll",
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v4",
+  "thread_affinity_cpu": 11
+}

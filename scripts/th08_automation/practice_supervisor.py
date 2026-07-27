@@ -204,6 +204,7 @@ def run_trial(
         "hard_no_bomb": True,
         "trace_transform_runtime": args.trace_transform_runtime,
         "trace_bullet_births": args.trace_bullet_births,
+        "bullet_birth_backend": args.bullet_birth_backend,
         "viability_audit": args.viability_audit,
         "postpublished_survival_shadow": (
             args.postpublished_survival_shadow
@@ -237,6 +238,7 @@ def run_trial(
             terminal_stage=stage.route_index,
             trace_transform_runtime=args.trace_transform_runtime,
             trace_bullet_births=args.trace_bullet_births,
+            bullet_birth_backend=args.bullet_birth_backend,
             safety_value_horizon=args.safety_value_horizon,
             viability_audit_dir=(
                 ROOT
@@ -519,6 +521,12 @@ def build_parser() -> argparse.ArgumentParser:
             "record default-off hostile-bullet activation and active-spell "
             "main-VM intent telemetry; trace only"
         ),
+    )
+    parser.add_argument(
+        "--bullet-birth-backend",
+        choices=("python", "native"),
+        default="python",
+        help="explicit trace-only hostile-bullet birth observer backend",
     )
     parser.add_argument(
         "--safety-value-horizon",

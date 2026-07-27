@@ -21,6 +21,11 @@ from th08_live.bullet_birth import (  # noqa: E402
     BULLET_TIMER_CURRENT_OFFSET,
     BulletBirthTracker,
 )
+from th08_live.bullet_birth_native import (  # noqa: E402
+    NativeBulletBirthTracker,
+    native_bullet_birth_available,
+    native_bullet_birth_library_path,
+)
 from th08_live.bullet_decode import (  # noqa: E402
     BULLET_GEOMETRY_OFFSET,
     BULLET_POSITION_OFFSET,
@@ -29,6 +34,10 @@ from th08_live.bullet_decode import (  # noqa: E402
     decode_planning_bullets,
 )
 from th08_live.sensor import BULLET_POOL_SIZE, BULLET_STRIDE  # noqa: E402
+from touhou_control.background_priority import (  # noqa: E402
+    pin_current_thread_to_cpu,
+    preferred_performance_cpu,
+)
 
 
 P95_LIMIT_MS = 0.20
@@ -99,12 +108,15 @@ def _summary(samples: list[float]) -> dict[str, float]:
         "p50_ms": statistics.median(samples),
         "p95_ms": _percentile(samples, 95.0),
         "p99_ms": _percentile(samples, 99.0),
+        "p99_9_ms": _percentile(samples, 99.9),
         "max_ms": max(samples),
     }
 
 
 def run_benchmark(
     *,
+    backend: str,
+    thread_affinity_cpu: int | None,
     densities: tuple[int, ...],
     iterations: int,
     decode_iterations: int,
@@ -112,10 +124,18 @@ def run_benchmark(
     burst_iterations: int,
     warmup: int,
 ) -> dict[str, object]:
+    if backend == "python":
+        tracker_type = BulletBirthTracker
+    elif backend == "native":
+        if not native_bullet_birth_available():
+            raise RuntimeError("native bullet-birth trace library is unavailable")
+        tracker_type = NativeBulletBirthTracker
+    else:
+        raise ValueError(f"unknown bullet-birth backend {backend!r}")
     density_rows: list[dict[str, object]] = []
     for density in densities:
         blob = _pool(density)
-        tracker = BulletBirthTracker(maximum_bootstrap_age=0)
+        tracker = tracker_type(maximum_bootstrap_age=0)
         frame = 1
 
         def observe() -> None:
@@ -141,7 +161,7 @@ def run_benchmark(
         if not 0 < burst_size <= BULLET_POOL_SIZE:
             raise ValueError("burst size is outside the hostile-bullet pool")
         active_blob = _pool(burst_size)
-        tracker = BulletBirthTracker(maximum_bootstrap_age=0)
+        tracker = tracker_type(maximum_bootstrap_age=0)
         frame = 1
         tracker.observe(
             inactive_blob,
@@ -168,7 +188,7 @@ def run_benchmark(
                 frame_before=frame,
                 frame_after=frame,
             )
-        serialization_tracker = BulletBirthTracker(
+        serialization_tracker = tracker_type(
             maximum_bootstrap_age=0,
         )
         serialization_tracker.observe(
@@ -207,7 +227,7 @@ def run_benchmark(
         iterations=decode_iterations,
         warmup=max(2, warmup // 4),
     )
-    tracker = BulletBirthTracker(maximum_bootstrap_age=0)
+    tracker = tracker_type(maximum_bootstrap_age=0)
     frame = 1
 
     def interleaved() -> None:
@@ -228,26 +248,53 @@ def run_benchmark(
     baseline = _summary(baseline_samples)
     interleaved = _summary(interleaved_samples)
     ratio = interleaved["p95_ms"] / max(baseline["p95_ms"], 1e-12)
-    full_row = next(
-        row for row in density_rows if row["density"] == BULLET_POOL_SIZE
-    )
-    observer = full_row["observer"]
-    assert isinstance(observer, dict)
+    observer_profiles = [
+        (
+            f"density:{row['density']}",
+            row["observer"],
+        )
+        for row in density_rows
+    ] + [
+        (
+            f"burst:{row['births_per_observation']}",
+            row["observer"],
+        )
+        for row in burst_rows
+    ]
+    observer_failures = [
+        {
+            "profile": profile,
+            "p95_ms": summary["p95_ms"],
+            "p99_ms": summary["p99_ms"],
+            "max_ms": summary["max_ms"],
+        }
+        for profile, summary in observer_profiles
+        if (
+            summary["p95_ms"] > P95_LIMIT_MS
+            or summary["p99_ms"] > P99_LIMIT_MS
+            or summary["max_ms"] > MAX_LIMIT_MS
+        )
+    ]
     gate = {
         "p95_limit_ms": P95_LIMIT_MS,
         "p99_limit_ms": P99_LIMIT_MS,
         "max_limit_ms": MAX_LIMIT_MS,
         "interleaved_p95_ratio_limit": INTERLEAVED_P95_RATIO_LIMIT,
-        "observer_pass": (
-            observer["p95_ms"] <= P95_LIMIT_MS
-            and observer["p99_ms"] <= P99_LIMIT_MS
-            and observer["max_ms"] <= MAX_LIMIT_MS
-        ),
+        "observer_profiles_checked": len(observer_profiles),
+        "observer_failures": observer_failures,
+        "observer_pass": not observer_failures,
         "interleaved_pass": ratio <= INTERLEAVED_P95_RATIO_LIMIT,
     }
     gate["passed"] = gate["observer_pass"] and gate["interleaved_pass"]
     return {
-        "schema": "th08-bullet-birth-observer-benchmark-v3",
+        "schema": "th08-bullet-birth-observer-benchmark-v4",
+        "backend": backend,
+        "thread_affinity_cpu": thread_affinity_cpu,
+        "native_library": (
+            str(native_bullet_birth_library_path())
+            if backend == "native"
+            else None
+        ),
         "pool_size": BULLET_POOL_SIZE,
         "iterations": iterations,
         "decode_iterations": decode_iterations,
@@ -263,6 +310,15 @@ def run_benchmark(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--backend",
+        choices=("python", "native"),
+        default="python",
+    )
+    parser.add_argument(
+        "--thread-affinity-cpu",
+        help="pin this benchmark thread to one CPU index or 'preferred'",
+    )
     parser.add_argument(
         "--densities",
         type=int,
@@ -290,8 +346,23 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("iterations must be positive and warmup non-negative")
     if BULLET_POOL_SIZE not in args.densities:
         parser.error("densities must include the full 1,536-slot gate")
+    affinity_cpu: int | None = None
+    if args.thread_affinity_cpu is not None:
+        if args.thread_affinity_cpu == "preferred":
+            affinity_cpu = preferred_performance_cpu()
+            if affinity_cpu is None:
+                parser.error("no preferred performance CPU is available")
+        else:
+            try:
+                affinity_cpu = int(args.thread_affinity_cpu)
+            except ValueError:
+                parser.error("thread affinity CPU must be an integer or 'preferred'")
+        if not pin_current_thread_to_cpu(affinity_cpu):
+            parser.error(f"could not pin benchmark thread to CPU {affinity_cpu}")
 
     report = run_benchmark(
+        backend=args.backend,
+        thread_affinity_cpu=affinity_cpu,
         densities=tuple(args.densities),
         iterations=args.iterations,
         decode_iterations=args.decode_iterations,

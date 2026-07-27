@@ -148,6 +148,7 @@ class BulletBirthTraceTests(unittest.TestCase):
             BULLET_BIRTH_TRACE_SCHEMA_VERSION,
         )
         self.assertEqual(record["role"], BULLET_BIRTH_TRACE_ROLE)
+        self.assertEqual(record["observation_backend"], "python")
         self.assertEqual(record["counts"]["observed_evidence"], 1)
         self.assertEqual(record["counts"]["visible_intents"], 1)
         self.assertEqual(

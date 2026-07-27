@@ -102,6 +102,10 @@ from th08_live.bullet_birth import (
     BulletBirthObservation,
     BulletBirthTracker,
 )
+from th08_live.bullet_birth_native import (
+    NativeBulletBirthTracker,
+    native_bullet_birth_available,
+)
 from th08_live.ecl_capture import capture_main_ecl
 from th08_live.bullet_decode import (  # noqa: F401
     BULLET_ANGLE_OFFSET,
@@ -1347,6 +1351,15 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
     _configure_local_beam_reducer(args.local_beam_reducer)
     _configure_local_bullet_decoder(args.bullet_decode_backend)
     if (
+        getattr(args, "trace_bullet_births", False)
+        and getattr(args, "bullet_birth_backend", "python") == "native"
+        and not native_bullet_birth_available()
+    ):
+        raise RuntimeError(
+            "native bullet-birth backend was selected but its trace "
+            "library is unavailable"
+        )
+    if (
         args.stage_transition_timeout <= 0.0
         or args.terminal_inactive_grace <= 0.0
     ):
@@ -1453,8 +1466,19 @@ def _run_live_session(
     trace_bullet_births = bool(
         getattr(args, "trace_bullet_births", False)
     )
+    bullet_birth_backend = getattr(
+        args,
+        "bullet_birth_backend",
+        "python",
+    )
     bullet_birth_tracker = (
-        BulletBirthTracker() if trace_bullet_births else None
+        (
+            NativeBulletBirthTracker()
+            if bullet_birth_backend == "native"
+            else BulletBirthTracker()
+        )
+        if trace_bullet_births
+        else None
     )
     previous_birth_trace_emit_ms: float | None = None
     previous_iteration_ms: float | None = None
@@ -3642,6 +3666,7 @@ def _run_live_session(
                             previous_emit_ms=(
                                 previous_birth_trace_emit_ms
                             ),
+                            observation_backend=bullet_birth_backend,
                     )
                 )
                 birth_trace_build_ms = (
@@ -4294,6 +4319,15 @@ def build_parser() -> argparse.ArgumentParser:
             "record default-off hostile-bullet activation evidence and "
             "fail-closed active-spell main-VM fire intent; diagnostic trace "
             "only, never changes live actions"
+        ),
+    )
+    parser.add_argument(
+        "--bullet-birth-backend",
+        choices=("python", "native"),
+        default="python",
+        help=(
+            "select the explicit retrospective birth observer backend; "
+            "used only with --trace-bullet-births"
         ),
     )
     bomb_group = parser.add_mutually_exclusive_group()

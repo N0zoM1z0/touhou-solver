@@ -55,6 +55,7 @@ def build_long_run_arguments(
     terminal_stage: int | None = None,
     trace_transform_runtime: bool = False,
     trace_bullet_births: bool = False,
+    bullet_birth_backend: str = "python",
     safety_value_horizon: int = 0,
     viability_audit_dir: Path | None = None,
     postpublished_survival_shadow: bool = False,
@@ -84,6 +85,8 @@ def build_long_run_arguments(
         raise ValueError("unknown local beam reducer")
     if bullet_decode_backend not in {"python", "native"}:
         raise ValueError("unknown bullet decode backend")
+    if bullet_birth_backend not in {"python", "native"}:
+        raise ValueError("unknown bullet birth backend")
     arguments = [
         str(output),
         "--pid",
@@ -116,7 +119,13 @@ def build_long_run_arguments(
     if trace_transform_runtime:
         arguments.append("--trace-transform-runtime")
     if trace_bullet_births:
-        arguments.append("--trace-bullet-births")
+        arguments.extend(
+            (
+                "--trace-bullet-births",
+                "--bullet-birth-backend",
+                bullet_birth_backend,
+            )
+        )
     if safety_value_horizon:
         arguments.extend(
             ("--safety-value-horizon", str(safety_value_horizon))

@@ -4185,3 +4185,37 @@ algorithm open
 - **Authority:** this counterexample does not prove that a missing callback
   caused a hit. It proves that the current empty event list is not a complete
   physical-hazard answer.
+
+## CE-0148: Per-call ctypes allocation created a periodic native-observer GC tail
+
+Status: observed isolated performance failure; pointer/view reuse corrected
+offline, physical recheck pending
+
+- **Observed symptom:** The first one-pass native birth extractor had
+  full-density p95 near `0.03 ms`, but repeated Windows fixed profiles failed
+  the unchanged `2.00 ms` maximum. A 5,000-call zero-density probe placed a
+  `5.4094 ms` outlier at call 1,741. The pre-fix all-profile benchmark
+  reported `5.4165 ms`.
+- **Rejected diagnosis:** Pinning the benchmark thread to preferred CPU 11
+  still produced a `4.8275 ms` maximum. The tail was not evidence that the
+  C++ slot scan needed more affinity or a weaker deadline.
+- **Observed cause separation:** Running the same probe with cyclic GC
+  disabled reduced maximum to `0.2859 ms`. The wrapper created a NumPy blob
+  view, ctypes pointers, two count scalars, and byref objects on every call;
+  the accumulated tracked allocations triggered a collection inside the
+  observer timing boundary. Disabling GC was rejected because it could move
+  unbounded cleanup or cyclic retention elsewhere in a long controller run.
+- **Correction:** `NativeBulletBirthTracker` now owns and reuses the exact
+  persistent blob view/pointer, all array pointers, and result-count storage.
+  With GC enabled, the same 5,000-call probe has maximum `0.0988 ms`.
+  Linux/Windows full-density p95 is `0.0120/0.0109 ms`; 592-birth p95 is
+  `0.0570/0.0452 ms`; every density/burst profile passes
+  `0.20/0.40/2.00 ms` without affinity.
+- **Evidence:** The rejected CPU-11 report SHA-256 is
+  `0fe659c65a22d850c7b4db0f98e9419a620344702c496bba5a7c500ca04c05f3`.
+  Final Linux/Windows report SHA-256 values are
+  `bfb106b6970f98610c2537cd40113a81d1cd6ef0a7ac1b751ec9c943b71dc667`
+  and
+  `1f73455491c8ccb83d1a53ab7a8c2c0f1792ebf2844f91faa4920de5adebcd63`.
+- **Authority:** This closes the isolated wrapper tail only. It does not
+  establish physical B4, future-event coverage, or action authority.

@@ -12,7 +12,7 @@ from th08_ecl_birth import (
 from .bullet_birth import BulletBirthObservation
 
 
-BULLET_BIRTH_TRACE_SCHEMA_VERSION = 4
+BULLET_BIRTH_TRACE_SCHEMA_VERSION = 5
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
 BULLET_BIRTH_POOL_SCOPE = "all_1536_hostile_bullet_slots"
@@ -40,6 +40,7 @@ class BulletBirthTraceInput:
     observation_cpu_ms: float
     intent_ms: float
     previous_emit_ms: float | None
+    observation_backend: str = "python"
 
 
 def birth_trace_requires_immediate_flush(
@@ -71,6 +72,7 @@ def build_bullet_birth_trace_record(
         "kind": "bullet_birth_audit",
         "schema_version": BULLET_BIRTH_TRACE_SCHEMA_VERSION,
         "role": BULLET_BIRTH_TRACE_ROLE,
+        "observation_backend": trace_input.observation_backend,
         "frame": trace_input.frame,
         "snapshot_frame": trace_input.snapshot_frame,
         "gameplay_epoch": trace_input.gameplay_epoch,

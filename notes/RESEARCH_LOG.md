@@ -6654,3 +6654,57 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   active-slot reuse. Preserve the independent Python scalar oracle, ordered
   complete evidence, no extra RPM, fixed wall limits, and trace-only
   authority. Stage 5/6 remains closed while B4 and CE-0147 fail.
+
+## 2026-07-28 — Passed the isolated native birth-extraction gate
+
+- Fixed
+  `G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md` before
+  implementation. The physical question is exact retrospective extraction
+  from the already captured pool, not birth prediction or action authority.
+- A separate `touhou_bullet_birth_trace` library performs one native
+  ascending-slot scan and updates compact previous state/age only after all
+  validation and capacity checks. It does not alter the 46-symbol production
+  planner ABI, read process memory, or issue input.
+- The Python wrapper constructs the existing read-only columnar evidence and
+  observation contract. Native selection is explicit; a missing library is
+  an error rather than a silent Python fallback. Trace schema v5 records the
+  backend, and residual-audit schema v3 rejects missing/unknown provenance.
+- **Observed exactness:** Four Linux and four Windows focused tests pass.
+  Sixteen deterministic randomized generations cover all 1,536 slots and
+  match the independent Python observer. Boundary tests retain bootstrap,
+  activation, release/reactivation, timer regression, uint16 state, int32
+  age, transform flags, NaN/Inf geometry, float32 values, capture/reset
+  behavior, canonical records, and atomic capacity failure.
+- **Observed CE-0148 failure:** The first wrapper's per-call NumPy/ctypes
+  allocations caused a repeatable `5.4094 ms` cyclic-GC tail at call 1,741.
+  CPU-11 affinity still failed at `4.8275 ms`. Disabling GC reduced maximum
+  to `0.2859 ms` but was rejected as the correction.
+- **Correction:** Reusing the persistent blob view/pointer, every output
+  pointer, and result-count storage reduces the same GC-enabled 5,000-call
+  probe maximum to `0.0988 ms`.
+- **Observed final profiles:** Linux/Windows full-density p95/p99/max is
+  `0.0120/0.0202/0.3080` and `0.0109/0.0124/0.0250 ms`; 592-birth
+  p95/p99/max is `0.0570/0.0904/0.1344` and
+  `0.0452/0.0639/0.1433 ms`. All eight profiles pass the fixed limits;
+  decode interleaving ratios are `0.931/0.930`.
+- Retained final benchmark SHA-256 values are
+  `bfb106b6970f98610c2537cd40113a81d1cd6ef0a7ac1b751ec9c943b71dc667`
+  (Linux) and
+  `1f73455491c8ccb83d1a53ab7a8c2c0f1792ebf2844f91faa4920de5adebcd63`
+  (Windows). The rejected CPU-11 report is
+  `0fe659c65a22d850c7b4db0f98e9419a620344702c496bba5a7c500ca04c05f3`.
+- Same-version Python reference reports are retained at SHA-256
+  `343e623c03db8a7fb43f0db4388c52ee472d0d7906551e805b60ecc0bc3c228a`
+  (Linux) and
+  `fb27dfde363a4581b94f3cfe01b27611fe4f4ec6b31a264bee97d58a249224df`
+  (Windows). Full-density p95 is `0.0153/0.0222 ms`; 592-birth p95 is
+  `0.1185/0.1295 ms`. The Linux reference passes all observer limits but
+  fails only the noisy combined decode-interleaving ratio at `1.097`;
+  Windows passes at `1.045`.
+- C++ `-Wall -Wextra -Werror`, Python compilation, ruff, and complete
+  Linux/Windows quick suites pass; the suites run `792/792` in
+  `8.826/15.449 s`, with three existing Windows skips.
+- **Authority:** This passes isolated eligibility only. B4 remains physically
+  failed until an accepted hard-no-Bomb Stage-4A run explicitly selects the
+  native backend and passes wall timing, cadence, durability, supervisor
+  completion, and cleanup. CE-0147 and Stage 5/6 remain open.

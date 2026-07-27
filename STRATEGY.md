@@ -175,6 +175,20 @@ weaken the wall gate. The run retained 6,023 unique temporal supports over
 95,532 activation edges and repeated CE-0147 on all 1,330 spell-57 rows.
 No future-event or action authority follows.
 
+**Observed offline correction:** A separate trace-only native library now
+implements the exact retrospective birth recurrence in one ascending-slot
+scan and leaves the production planner ABI unchanged. Linux/Windows
+differentials cover 16 randomized generations over all 1,536 slots plus
+bootstrap, release/reactivation, timer regression, uint16 state, int32 age,
+nonfinite geometry, reset, validation, and atomic error behavior. A first
+wrapper failed with a repeatable 5.409-ms cyclic-GC tail at call 1,741;
+thread affinity did not fix it. Reusing the persistent blob view, ctypes
+pointers, and result storage removes the tail with GC enabled. Final
+Linux/Windows full-density p95 is `0.0120/0.0109 ms`, 592-birth p95 is
+`0.0570/0.0452 ms`, and every isolated profile passes the unchanged limits.
+Schema v5 records explicit backend provenance. This permits only an explicit
+native Stage-4A trace proposal; B4 remains physically failed.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
@@ -187,10 +201,12 @@ No future-event or action authority follows.
    still fails wall timing and callback instruction exhaustion remains
    incomplete. Schema v4 physically validates bounded flush latency but
    rejects thread CPU as a useful sub-millisecond diagnostic. Next evaluate
-   a parity-gated native or active-slot-handoff extraction data plane, make
-   incomplete callback coverage explicit and fail closed, and repeat Stage
-   4A before trying Stage 5/6. It does not narrow `UNKNOWN` coverage or add
-   action authority.
+   a parity-gated native extraction data plane now passes isolated
+   Linux/Windows gates and preserves the production ABI. Repeat Stage 4A
+   only with explicit native provenance and unchanged wall/cadence/no-Bomb
+   limits. In parallel, make incomplete callback coverage explicit and fail
+   closed before trying Stage 5/6. It does not narrow `UNKNOWN` coverage or
+   add action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

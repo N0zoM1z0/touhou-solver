@@ -13,10 +13,10 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA = "th08-bullet-birth-residual-audit-v2"
+SCHEMA = "th08-bullet-birth-residual-audit-v3"
 TRACE_KIND = "bullet_birth_audit"
 TRACE_ROLE = "trace_only_no_action_authority"
-TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4))
+TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5))
 MAX_SAMPLES = 20
 OBSERVER_P95_LIMIT_MS = 0.20
 OBSERVER_P99_LIMIT_MS = 0.40
@@ -193,6 +193,13 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
     if record.get("role") != TRACE_ROLE:
         raise BulletBirthAuditError(
             f"line {line_number}: audit role is not trace-only"
+        )
+    if (
+        record.get("schema_version") == 5
+        and record.get("observation_backend") not in {"python", "native"}
+    ):
+        raise BulletBirthAuditError(
+            f"line {line_number}: audit omits a valid observation backend"
         )
     for field in ("frame", "snapshot_frame", "gameplay_epoch"):
         if type(record.get(field)) is not int:
@@ -645,6 +652,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     active_spell_scope_rows = 0
     omitted_sources: set[str] = set()
     trace_schema_versions: Counter[int] = Counter()
+    observation_backends: Counter[str] = Counter()
     deferred_state_statuses: Counter[str] = Counter()
     deferred_state_values: Counter[str] = Counter()
     observation_by_evidence: defaultdict[str, list[float]] = defaultdict(list)
@@ -660,6 +668,14 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
 
     for audit in audits:
         trace_schema_versions[int(audit["schema_version"])] += 1
+        observation_backends[
+            str(
+                audit.get(
+                    "observation_backend",
+                    "schema_v1_v4_unrecorded",
+                )
+            )
+        ] += 1
         scope = _scope_for(audit, decisions)
         phase = str(scope["phase"])
         pointer = audit.get("spell_enemy_pointer")
@@ -865,6 +881,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             "observation_errors": observation_errors,
             "intent_errors": intent_errors,
             "trace_schema_versions": _counter(trace_schema_versions),
+            "observation_backends": _counter(observation_backends),
             "deferred_fire_state_statuses": _counter(
                 deferred_state_statuses
             ),

@@ -309,11 +309,18 @@ median and 3 frames p95, and next-observation input visibility is 0.9388.
 
 The bounded flush change is retained. Thread CPU timing is rejected as a
 useful Windows sub-millisecond diagnostic, and the wall gate remains failed.
-The next performance gate should remove the duplicate post-issue sparse pool
-traversal through a parity-gated native extractor or reuse an exact active-slot
-capture without changing observation semantics. It must retain the independent
-Python scalar oracle, exact ordered columns, fixed wall limits, same-iteration
-durability, no added RPM, and default-off/no-action authority.
+The next performance gate now has an eligible offline implementation: a
+separate native trace library performs one ascending-slot scan without
+changing the production planner ABI. Exact Python/native differential,
+atomic error behavior, fixed Linux/Windows profiles, and complete quick
+suites pass. Trace schema v5 makes backend provenance mandatory. CE-0148
+retains and closes a 5.409-ms ctypes-allocation/cyclic-GC tail without
+disabling GC or pinning the controller.
+
+The next physical command must explicitly select the native backend and keep
+the independent Python scalar oracle, exact ordered columns, fixed wall
+limits, same-iteration durability, no added RPM, and default-off/no-action
+authority. B4 remains failed until that run completes and passes.
 
 In parallel, callback lookahead must expose an explicit incomplete result; an
 instruction-limit row cannot authorize an empty future event set. Stage 5 or

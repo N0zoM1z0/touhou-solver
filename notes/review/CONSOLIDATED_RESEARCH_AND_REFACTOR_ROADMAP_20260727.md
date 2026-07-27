@@ -1025,6 +1025,15 @@ parity 當成每個 nature tie field 的逐 bit equality。
   應比較 parity-gated native extraction 與 exact active-slot handoff，
   移除重複 sparse pool traversal，同時保留 Python scalar oracle、完整
   ordered evidence、no extra RPM 與 fixed wall limits；
+- separate trace-only native extractor 已完成，production planner ABI
+  不變；16-generation/full-1,536-slot Linux/Windows differential、nonfinite
+  geometry、reset/validation 與 atomic error 均通過。第一版 ctypes wrapper
+  在 call 1,741 觸發 5.409-ms cyclic-GC tail，CPU-11 affinity 仍失敗；
+  persistent blob view/pointers/count storage reuse 在 GC 開啟下將同一
+  5,000-call max 降到 0.0988 ms。最終 full-density p95
+  `0.0120/0.0109 ms`、592-birth p95 `0.0570/0.0452 ms`，8 profiles
+  全過 fixed gate。schema v5 強制 backend provenance；這只允許顯式
+  native Stage-4A recheck，尚未通過 physical B4；
 - CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成

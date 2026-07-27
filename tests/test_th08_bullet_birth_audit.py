@@ -9,6 +9,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from analysis.th08_bullet_birth_audit import (
+    BulletBirthAuditError,
     analyze_trace,
     canonical_report_bytes,
     main,
@@ -25,7 +26,7 @@ def _decision(frame: int, spell_id: int | None) -> dict[str, object]:
         if spell_id is not None
         else {"active": False}
     )
-    return {
+    record = {
         "kind": "decision",
         "frame": frame,
         "gameplay_epoch": 0,
@@ -33,6 +34,7 @@ def _decision(frame: int, spell_id: int | None) -> dict[str, object]:
         "spell": spell,
         "boss_phase": None,
     }
+    return record
 
 
 def _intent(
@@ -40,7 +42,7 @@ def _intent(
     address: int,
     relative_frame: int,
 ) -> dict[str, object]:
-    return {
+    record = {
         "instruction_frame": relative_frame,
         "activation_frame_support": [relative_frame, relative_frame],
         "instruction_address": address,
@@ -54,6 +56,7 @@ def _intent(
         "dependencies": ["pool_capacity"],
         "coverage_authority": "trace_only",
     }
+    return record
 
 
 def _audit(
@@ -102,7 +105,7 @@ def _audit(
             "transform_flags": [0],
             "geometry_finite": [True],
         }
-    return {
+    record = {
         "kind": "bullet_birth_audit",
         "schema_version": schema_version,
         "role": "trace_only_no_action_authority",
@@ -175,6 +178,9 @@ def _audit(
             "coverage_authority": "none",
         },
     }
+    if schema_version >= 5:
+        record["observation_backend"] = "native"
+    return record
 
 
 class BulletBirthAuditTests(unittest.TestCase):
@@ -349,6 +355,29 @@ class BulletBirthAuditTests(unittest.TestCase):
             "scope",
         ):
             self.assertEqual(v2[field], v3[field])
+
+    def test_schema_v5_requires_and_reports_explicit_backend(self) -> None:
+        with TemporaryDirectory() as directory:
+            trace = self._trace(directory, schema_version=5)
+            report = analyze_trace(trace)
+            self.assertEqual(
+                report["input"]["observation_backends"],
+                {"native": 4},
+            )
+            records = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            records[0].pop("observation_backend")
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "observation backend",
+            ):
+                analyze_trace(trace)
 
     def test_failed_schema_v1_trace_remains_auditable(self) -> None:
         with TemporaryDirectory() as directory:

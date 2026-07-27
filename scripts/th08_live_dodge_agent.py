@@ -41,13 +41,10 @@ from th08_corridor_runtime import (
     SHADOW_SURVIVAL_LABELS,
     corridor_candidate_verifier_target as _corridor_candidate_verifier_target,
     corridor_policy_status as _corridor_policy_status,
-    corridor_pipeline_prewarm_query as _corridor_pipeline_prewarm_query,
     corridor_pipeline_prewarm_retarget as _corridor_pipeline_prewarm_retarget,
-    corridor_postpublished_survival_query as _corridor_postpublished_survival_query,
-    corridor_safety_value_query as _corridor_safety_value_query,
     corridor_submit_due as _corridor_submit_due,
-    corridor_target as _corridor_target,
-    corridor_viability_query as _corridor_viability_query,
+    corridor_target as _corridor_target,  # noqa: F401 - compatibility export
+    corridor_viability_query as _corridor_viability_query,  # noqa: F401
     solve_corridor as _solve_corridor,
     solve_postpublished_survival as _solve_postpublished_survival,
     stage_corridor_solution as _stage_corridor_solution,
@@ -76,8 +73,11 @@ from th08_laser_runtime import (
     serialize_laser_trace,
 )
 from th08_live import (
+    AutoConfirmPulse,  # noqa: F401 - compatibility export
     BULLET_POOL_SIZE,
     BULLET_STRIDE,
+    GameplaySceneGuard,  # noqa: F401 - compatibility export
+    INPUT_CLOCK_SHADOW_ROLE,
     ITEM_POOL_SIZE,
     ITEM_STRIDE,
     LASER_POOL_SIZE,
@@ -85,7 +85,16 @@ from th08_live import (
     IssueController,
     LiveServiceResources,
     LiveSession,
+    PolicyCoordinator,
+    PolicyQueryRequest,
+    SceneClockCoordinator,
     Sensor,
+    auto_confirm_eligible as _auto_confirm_eligible,
+    frozen_auto_confirm_eligible as _frozen_auto_confirm_eligible,
+    input_clock_message_key as _input_clock_message_key,
+    semantic_clock_observation as _semantic_clock_observation,
+    serialize_semantic_clock_event as _serialize_semantic_clock_event,
+    serialize_semantic_clock_observation as _serialize_semantic_clock_observation,
 )
 from th08_local_planner import (
     ActuatorPipeline,
@@ -155,10 +164,8 @@ from touhou_control.epochs import (
 from touhou_control.input_clock import (
     SemanticClockEvent,
     SemanticClockObservation,
-    SemanticInputClockTracker,
 )
 from touhou_control.local_pipeline_oracle import LocalPipelineRoot
-from touhou_control.policy_guidance import assemble_local_policy_guidance
 from touhou_control.phase_progress import (
     PhaseProgressObservation,
     PhaseProgressTracker,
@@ -195,7 +202,6 @@ BULLET_STOP_REPEAT_LIMIT_OFFSET = 0x1028
 BULLET_STOP_REPEAT_COUNT_OFFSET = 0x102C
 BULLET_CALLBACK_AUX_STATE_OFFSET = 0x10B4
 ECL_CALLBACK_LOOKAHEAD_FRAMES = 256
-INPUT_CLOCK_SHADOW_ROLE = "shadow_no_input_or_epoch_authority"
 INPUT_CLOCK_SHADOW_WALL_CUT_SECONDS = 0.05
 
 LASER_ORIGIN_OFFSET = 0x0548
@@ -864,261 +870,6 @@ def _issue_recertification_record(
             recertification.selected_certificate
         ),
     }
-
-
-@dataclass
-class AutoConfirmPulse:
-    """Create fresh Z edges after a sustained projectile-free interval."""
-
-    interval_frames: int
-    idle_frames: int
-    eligible_since: int | None = None
-    next_release_frame: int = 0
-    released: bool = False
-
-    def apply(
-        self,
-        *,
-        frame: int,
-        eligible: bool,
-        mask: int,
-    ) -> tuple[int, str | None]:
-        if self.released:
-            self.released = False
-            self.next_release_frame = frame + self.interval_frames
-            if not eligible:
-                self.eligible_since = None
-            return mask | SHOT, "press"
-        if self.interval_frames <= 0:
-            return mask, None
-        if not eligible:
-            self.eligible_since = None
-            return mask, None
-        if self.eligible_since is None:
-            self.eligible_since = frame
-        if (
-            frame - self.eligible_since < self.idle_frames
-            or frame < self.next_release_frame
-        ):
-            return mask, None
-        self.released = True
-        return mask & ~SHOT, "release"
-
-    def frozen_pulse_due(
-        self,
-        *,
-        now: float,
-        last_progress: float,
-        last_pulse: float,
-        eligible: bool,
-    ) -> bool:
-        if self.interval_frames <= 0 or not eligible:
-            return False
-        frame_seconds = 1.0 / 60.0
-        return (
-            now - last_progress >= self.idle_frames * frame_seconds
-            and now - last_pulse
-            >= max(0.05, self.interval_frames * frame_seconds)
-        )
-
-    def mark_full_pulse(self, *, frame: int) -> None:
-        self.released = False
-        self.next_release_frame = frame + self.interval_frames
-
-
-def _auto_confirm_eligible(
-    *,
-    player_phase: int,
-    bomb_active: bool,
-    active_bullets: int,
-    active_lasers: int,
-) -> bool:
-    """Allow residual collectible items; only live hazards make a Z edge unsafe."""
-
-    return (
-        player_phase in (0, 3)
-        and not bomb_active
-        and active_bullets == 0
-        and active_lasers == 0
-    )
-
-
-def _frozen_auto_confirm_eligible(*, bomb_active: bool) -> bool:
-    """A frozen timeline makes projectile/item state inert; only exclude Bomb."""
-
-    return not bomb_active
-
-
-def _semantic_clock_observation(
-    sample: dict[str, object],
-    *,
-    fallback_frame: int,
-    context: object,
-) -> SemanticClockObservation:
-    player_after = sample.get("player_after")
-    input_after = sample.get("input_after")
-    position = None
-    active_input = None
-    if isinstance(player_after, dict):
-        x = player_after.get("x")
-        y = player_after.get("y")
-        if isinstance(x, (int, float)) and isinstance(y, (int, float)):
-            position = (float(x), float(y))
-    if isinstance(input_after, dict):
-        current = input_after.get("current")
-        if isinstance(current, int):
-            active_input = current
-    manager_frame = sample.get("manager_frame_after")
-    monotonic_ns = sample.get("monotonic_end_ns")
-    semantic_active = sample.get("native_manager_clock_blocked")
-    return SemanticClockObservation(
-        monotonic_ns=(
-            int(monotonic_ns)
-            if isinstance(monotonic_ns, int)
-            else time.perf_counter_ns()
-        ),
-        physical_frame=(
-            int(manager_frame)
-            if isinstance(manager_frame, int)
-            else fallback_frame
-        ),
-        semantic_active=(
-            semantic_active if isinstance(semantic_active, bool) else None
-        ),
-        context=context,
-        position=position,
-        active_input=active_input,
-    )
-
-
-def _serialize_semantic_clock_observation(
-    observation: SemanticClockObservation,
-) -> dict[str, object]:
-    return {
-        "monotonic_ns": observation.monotonic_ns,
-        "physical_frame": observation.physical_frame,
-        "semantic_active": observation.semantic_active,
-        "context": observation.context,
-        "position": observation.position,
-        "active_input": observation.active_input,
-    }
-
-
-def _serialize_semantic_clock_event(
-    event: SemanticClockEvent,
-) -> dict[str, object]:
-    return {
-        "kind": "input_clock_shadow_episode",
-        "role": INPUT_CLOCK_SHADOW_ROLE,
-        "status": event.kind,
-        "episode_id": event.episode_id,
-        "frame": event.start.physical_frame,
-        "current_frame": event.observation.physical_frame,
-        "reason": event.reason,
-        "pulse_count": event.pulse_count,
-        "duration_ns": event.duration_ns,
-        "displacement": event.displacement,
-        "start": _serialize_semantic_clock_observation(event.start),
-        "observation": _serialize_semantic_clock_observation(
-            event.observation
-        ),
-    }
-
-
-def _input_clock_message_key(
-    sample: dict[str, object],
-) -> tuple[object, ...]:
-    return (
-        sample.get("read_valid"),
-        sample.get("frscreen_impl_pointer_after"),
-        sample.get("msg_state_after"),
-        sample.get("native_manager_clock_blocked"),
-        sample.get("scripted_update_freeze_after"),
-    )
-
-
-@dataclass(frozen=True)
-class SceneGuardDecision:
-    status: str
-    current_stage: int
-    transition_from_stage: int | None
-    expected_stage: int | None
-    inactive_seconds: float
-    entered: bool = False
-
-
-@dataclass
-class GameplaySceneGuard:
-    """Distinguish a stage-resource transition from the final scene unload."""
-
-    stage_successors: dict[int, int]
-    transition_timeout_seconds: float
-    terminal_grace_seconds: float
-    last_active_stage: int | None = None
-    inactive_since: float | None = None
-    transition_from_stage: int | None = None
-
-    def observe(
-        self,
-        *,
-        gameplay_active: bool,
-        current_stage: int,
-        now: float,
-    ) -> SceneGuardDecision:
-        if gameplay_active:
-            was_inactive = self.inactive_since is not None
-            inactive_seconds = (
-                now - self.inactive_since if self.inactive_since is not None else 0.0
-            )
-            transition_from = self.transition_from_stage
-            expected_stage = self.stage_successors.get(transition_from)
-            # TH08 writes the next stage index before clearing the gameplay
-            # bit. Commit a new identity only at initial arm or after the
-            # inactive interval has completed.
-            if self.last_active_stage is None or was_inactive:
-                self.last_active_stage = current_stage
-            self.inactive_since = None
-            self.transition_from_stage = None
-            return SceneGuardDecision(
-                status="resumed" if was_inactive else "active",
-                current_stage=current_stage,
-                transition_from_stage=transition_from,
-                expected_stage=expected_stage,
-                inactive_seconds=inactive_seconds,
-            )
-
-        entered = self.inactive_since is None
-        if entered:
-            self.inactive_since = now
-            self.transition_from_stage = (
-                self.last_active_stage
-                if self.last_active_stage is not None
-                else current_stage
-            )
-        assert self.inactive_since is not None
-        transition_from = self.transition_from_stage
-        expected_stage = self.stage_successors.get(transition_from)
-        inactive_seconds = now - self.inactive_since
-        if expected_stage is not None:
-            status = (
-                "stage_transition_timeout"
-                if inactive_seconds >= self.transition_timeout_seconds
-                else "stage_transition"
-            )
-        else:
-            status = (
-                "route_complete"
-                if inactive_seconds >= self.terminal_grace_seconds
-                else "terminal_unload"
-            )
-        return SceneGuardDecision(
-            status=status,
-            current_stage=current_stage,
-            transition_from_stage=transition_from,
-            expected_stage=expected_stage,
-            inactive_seconds=inactive_seconds,
-            entered=entered,
-        )
 
 
 def _action(
@@ -6011,25 +5762,22 @@ def _run_live_session(
     )
     boss_phase_tracker = PhaseProgressTracker()
     gameplay_epoch = 0
-    auto_confirm = AutoConfirmPulse(
-        interval_frames=args.auto_confirm_every,
-        idle_frames=args.auto_confirm_idle_frames,
-    )
     stage_successors = dict(ROUTE2_STAGE_SUCCESSORS)
     if args.terminal_stage is not None:
         stage_successors.pop(args.terminal_stage, None)
-    scene_guard = GameplaySceneGuard(
+    scene_clock = SceneClockCoordinator.create(
+        auto_confirm_interval_frames=args.auto_confirm_every,
+        auto_confirm_idle_frames=args.auto_confirm_idle_frames,
         stage_successors=stage_successors,
         transition_timeout_seconds=args.stage_transition_timeout,
         terminal_grace_seconds=args.terminal_inactive_grace,
+        input_clock_shadow=args.input_clock_boundary_shadow,
     )
+    auto_confirm = scene_clock.auto_confirm
+    scene_guard = scene_clock.scene_guard
+    input_clock_tracker = scene_clock.input_clock_tracker
     last_frame_progress = time.perf_counter()
     last_frozen_confirm = float("-inf")
-    input_clock_tracker = (
-        SemanticInputClockTracker()
-        if args.input_clock_boundary_shadow
-        else None
-    )
     input_clock_repeat_frame: int | None = None
     input_clock_repeat_polls = 0
     input_clock_wall_cut_frame: int | None = None
@@ -6078,6 +5826,7 @@ def _run_live_session(
         supported_mask=SUPPORTED_INPUT_MASK,
         forbidden_mask=BOMB if args.no_bomb else 0,
     )
+    policy_coordinator = PolicyCoordinator()
 
     def retire_pipeline_solutions(
         candidates: tuple[CorridorSolution | None, ...],
@@ -7449,23 +7198,6 @@ def _run_live_session(
                         _solve_postpublished_survival,
                         survival_candidate,
                     )
-            corridor_target = _corridor_target(
-                corridor_solution,
-                current_frame=(
-                    int(state["enemy_manager_frame"])
-                    + control_delay_frames
-                ),
-                lookahead_frames=args.corridor_lookahead,
-                max_age_frames=args.corridor_max_age,
-            )
-            viability_query = _corridor_viability_query(
-                corridor_solution,
-                current_frame=counter_after_read,
-                player_x=projected_player_x,
-                player_y=projected_player_y,
-                active_action=_action_name_from_mask(previous_mask),
-                max_age_frames=args.corridor_max_age,
-            )
             observed_input_action = _action_name_from_mask(
                 int(state["input_current"])
             )
@@ -7485,6 +7217,28 @@ def _run_live_session(
                 )
                 else None
             )
+            policy_query_request = PolicyQueryRequest(
+                solution=corridor_solution,
+                target_frame=(
+                    int(state["enemy_manager_frame"])
+                    + control_delay_frames
+                ),
+                query_frame=counter_after_read,
+                player_x=projected_player_x,
+                player_y=projected_player_y,
+                active_action=_action_name_from_mask(previous_mask),
+                observed_action=observed_input_action,
+                pending_command=pipeline_pending_command,
+                lookahead_frames=args.corridor_lookahead,
+                max_age_frames=args.corridor_max_age,
+                current_delay_frames=delay_estimate.support,
+                pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
+            )
+            primary_policy_query = policy_coordinator.query_primary(
+                policy_query_request
+            )
+            corridor_target = primary_policy_query.target
+            viability_query = primary_policy_query.viability_query
             held_desired_action = _local_pipeline_action_from_mask(
                 previous_mask
             )
@@ -7642,52 +7396,18 @@ def _run_live_session(
                 candidate_verifier_submit_ms = (
                     time.perf_counter() - candidate_submit_started
                 ) * 1000.0
+            policy_queries = policy_coordinator.complete_query(
+                policy_query_request,
+                primary_policy_query,
+            )
             pipeline_prewarm_query = (
-                _corridor_pipeline_prewarm_query(
-                    corridor_solution,
-                    current_frame=counter_after_read,
-                    player_x=projected_player_x,
-                    player_y=projected_player_y,
-                    observed_action=observed_input_action,
-                    pending_command=pipeline_pending_command,
-                    max_age_frames=args.corridor_max_age,
-                )
-                if args.pipeline_prewarm_shadow
-                else None
+                policy_queries.pipeline_prewarm_query
             )
             postpublished_survival_query = (
-                _corridor_postpublished_survival_query(
-                    corridor_solution,
-                    current_frame=counter_after_read,
-                    player_x=projected_player_x,
-                    player_y=projected_player_y,
-                    observed_action=observed_input_action,
-                    max_age_frames=args.corridor_max_age,
-                )
+                policy_queries.postpublished_survival_query
             )
-            safety_value_query = _corridor_safety_value_query(
-                corridor_solution,
-                current_frame=counter_after_read,
-                player_x=projected_player_x,
-                player_y=projected_player_y,
-                active_action=_action_name_from_mask(previous_mask),
-                max_age_frames=args.corridor_max_age,
-            )
-            viability_policy = (
-                corridor_solution.plan.viability_policy
-                if corridor_solution is not None
-                else None
-            )
-            policy_guidance = assemble_local_policy_guidance(
-                viability_query=viability_query,
-                safety_value_query=safety_value_query,
-                policy_delay_frames=(
-                    viability_policy.delay_frames
-                    if viability_policy is not None
-                    else None
-                ),
-                current_delay_frames=delay_estimate.support,
-            )
+            safety_value_query = policy_queries.safety_value_query
+            policy_guidance = policy_queries.guidance
             corridor_overhead_ms = (
                 time.perf_counter() - corridor_started
             ) * 1000.0

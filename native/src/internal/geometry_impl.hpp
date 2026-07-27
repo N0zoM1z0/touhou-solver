@@ -1,0 +1,102 @@
+#pragma once
+
+#include <cstdint>
+
+int touhou_native_impl_clearance_volume_v1(
+    float x_start,
+    float x_step,
+    int column_count,
+    float y_start,
+    float y_step,
+    int row_count,
+    int frame_count,
+    float player_radius,
+    float clearance_cap,
+    const float* aabb_x,
+    const float* aabb_y,
+    const float* aabb_velocity_x,
+    const float* aabb_velocity_y,
+    const float* aabb_half_width,
+    const float* aabb_half_height,
+    const float* aabb_base_uncertainty,
+    const float* aabb_uncertainty_per_frame,
+    int aabb_count,
+    const float* segment_origin_x,
+    const float* segment_origin_y,
+    const float* segment_angle,
+    const float* segment_tail,
+    const float* segment_head,
+    const float* segment_half_width,
+    const float* segment_base_uncertainty,
+    const float* segment_uncertainty_per_frame,
+    int segment_count,
+    float* output
+);
+
+int touhou_native_impl_segment_trajectory_clearance_v1(
+    float x_start,
+    float x_step,
+    int column_count,
+    float y_start,
+    float y_step,
+    int row_count,
+    int frame_count,
+    float player_radius,
+    const std::int32_t* frame_offsets,
+    const float* segment_origin_x,
+    const float* segment_origin_y,
+    const float* segment_angle,
+    const float* segment_tail,
+    const float* segment_head,
+    const float* segment_half_width,
+    const float* segment_base_uncertainty,
+    const float* segment_uncertainty_per_frame,
+    int segment_sample_count,
+    float* inout
+);
+
+int touhou_native_impl_aabb_trajectory_clearance_v1(
+    float x_start,
+    float x_step,
+    int column_count,
+    float y_start,
+    float y_step,
+    int row_count,
+    int frame_count,
+    float player_radius,
+    const std::int32_t* frame_offsets,
+    const float* aabb_x,
+    const float* aabb_y,
+    const float* aabb_half_width,
+    const float* aabb_half_height,
+    const float* aabb_base_uncertainty,
+    const float* aabb_uncertainty_per_frame,
+    int aabb_sample_count,
+    float* inout
+);
+
+int touhou_native_impl_piecewise_aabb_clearance_v1(
+    float x_start,
+    float x_step,
+    int column_count,
+    float y_start,
+    float y_step,
+    int row_count,
+    int frame_count,
+    float player_radius,
+    const double* aabb_x,
+    const double* aabb_y,
+    const double* aabb_velocity_x,
+    const double* aabb_velocity_y,
+    const float* aabb_half_width,
+    const float* aabb_half_height,
+    const float* aabb_base_uncertainty,
+    const float* aabb_uncertainty_per_frame,
+    int aabb_count,
+    const std::int32_t* event_offsets,
+    const std::int32_t* event_frames,
+    const double* event_velocity_x,
+    const double* event_velocity_y,
+    int event_count,
+    float* inout
+);

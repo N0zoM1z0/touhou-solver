@@ -226,7 +226,11 @@ implementation units are:
 | `abi/direct_pipeline_abi.cpp` | 242 | direct workspace exported family |
 | `abi/belief_pipeline_abi.cpp` | 633 | belief workspace exported family |
 | `abi/query_local_abi.cpp` | 69 | one-shot query-local export |
-| `internal/abi_impl.hpp` | 864 | replace shared implementation header with narrow internal headers |
+| `internal/abi_impl.hpp` | 6 | compatibility include facade |
+| `internal/geometry_impl.hpp` | 102 | geometry implementation declarations |
+| `internal/local_impl.hpp` | 165 | local sensing/beam/workspace declarations |
+| `internal/pipeline_impl.hpp` | 467 | direct/belief/query-local declarations |
+| `internal/viability_impl.hpp` | 139 | viability/value/survival declarations |
 | `local/supplemental_workspace.cpp` | 804 | workspace lifecycle / search / result packing |
 
 Native splits must keep the checked-in explicit source list, exact exported

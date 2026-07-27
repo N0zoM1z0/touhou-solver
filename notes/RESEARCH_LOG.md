@@ -5641,3 +5641,19 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural export ownership only. Public signatures,
   implementation dispatch, status propagation, 32/64-bit masks, cancellation
   and deadlines, recurrence, live authority, and strategy are unchanged.
+
+### 2026-07-27 — Native internal ABI declaration split
+
+- **Observed structural change:** Replaced the shared 864-line
+  `src/internal/abi_impl.hpp` declaration monolith with geometry, local,
+  pipeline, and viability headers of 102, 165, 467, and 139 lines. The
+  historical header is now a 6-line include facade, so existing sources keep
+  their dependency path while domain-specific sources can narrow includes
+  later.
+- **Build and validation:** Linux and Windows release libraries rebuild.
+  ABI tests and direct symbol comparison retain the exact 46-symbol manifest;
+  `git diff --check` passes. Quick suites pass `699/699` on Linux in
+  `8.930 s` and Windows in `12.846 s` with three platform skips.
+- **Authority:** Declaration ownership only. Types, signatures, linkage,
+  exports, status behavior, recurrence, live authority, and strategy are
+  unchanged.

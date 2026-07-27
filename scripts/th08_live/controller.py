@@ -44,6 +44,10 @@ from th08_corridor_runtime import (
     close_retired_pipeline_prewarms as _close_retired_pipeline_prewarms,
 )
 from th08_corridor_adapter import TH08_CORRIDOR_CONFIG
+from th08_ecl_birth import (
+    EclBirthLookaheadResult,
+    analyze_ecl_birth_intents,
+)
 from th08_ecl_runtime import (
     EclLookaheadResult,
     EclInstructionCache,
@@ -89,6 +93,14 @@ from th08_live import (
     serialize_bullet_trace,
     serialize_semantic_clock_event as _serialize_semantic_clock_event,
     serialize_semantic_clock_observation as _serialize_semantic_clock_observation,
+)
+from th08_live.birth_trace import (
+    BulletBirthTraceInput,
+    build_bullet_birth_trace_record,
+)
+from th08_live.bullet_birth import (
+    BulletBirthObservation,
+    BulletBirthTracker,
 )
 from th08_live.bullet_decode import (  # noqa: F401
     BULLET_ANGLE_OFFSET,
@@ -371,6 +383,7 @@ from touhou_control.supplemental_local_beam import (  # noqa: F401
     search_supplemental_local_beam_native,
 )
 ECL_CALLBACK_LOOKAHEAD_FRAMES = 256
+ECL_BIRTH_LOOKAHEAD_FRAMES = 80
 INPUT_CLOCK_SHADOW_WALL_CUT_SECONDS = 0.05
 
 PLANNER_HORIZON = 10
@@ -1436,6 +1449,13 @@ def _run_live_session(
         minimum_frames=CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES,
     )
     ecl_instruction_cache = EclInstructionCache()
+    trace_bullet_births = bool(
+        getattr(args, "trace_bullet_births", False)
+    )
+    bullet_birth_tracker = (
+        BulletBirthTracker() if trace_bullet_births else None
+    )
+    previous_birth_trace_emit_ms: float | None = None
     previous_iteration_ms: float | None = None
     previous_trace_ms: float | None = None
     service_resources = LiveServiceResources(
@@ -1864,6 +1884,8 @@ def _run_live_session(
                     corridor_pending_solution = None
                     for memory in enemy_body_memories:
                         memory.clear()
+                    if bullet_birth_tracker is not None:
+                        bullet_birth_tracker.reset()
                     if corridor_future is not None and corridor_future.cancel():
                         corridor_future = None
                     if (
@@ -1952,6 +1974,7 @@ def _run_live_session(
                 delay_estimator.reset()
                 previous_iteration_ms = None
                 previous_trace_ms = None
+                previous_birth_trace_emit_ms = None
                 retire_pipeline_solutions(
                     (corridor_solution, corridor_pending_solution)
                 )
@@ -1963,6 +1986,8 @@ def _run_live_session(
                 for memory in enemy_body_memories:
                     memory.clear()
                 ecl_instruction_cache.clear()
+                if bullet_birth_tracker is not None:
+                    bullet_birth_tracker.reset()
                 if corridor_future is not None and corridor_future.cancel():
                     corridor_future = None
                 if (
@@ -2314,10 +2339,37 @@ def _run_live_session(
             bullet_pool_read_ms = raw_pools.bullet_pool_read_ms
             laser_pool_read_ms = raw_pools.laser_pool_read_ms
             item_pool_read_ms = raw_pools.item_pool_read_ms
+            bullet_birth_observation: BulletBirthObservation | None = None
+            bullet_birth_observation_error: str | None = None
+            bullet_birth_observation_ms = 0.0
+            if bullet_birth_tracker is not None:
+                bullet_birth_observation_started = time.perf_counter()
+                try:
+                    bullet_birth_observation = bullet_birth_tracker.observe(
+                        bullet_blob,
+                        frame_before=bullet_frame_before,
+                        frame_after=bullet_frame_after,
+                    )
+                except (
+                    RuntimeError,
+                    TypeError,
+                    ValueError,
+                    struct.error,
+                ) as error:
+                    bullet_birth_tracker.reset()
+                    bullet_birth_observation_error = (
+                        f"{type(error).__name__}: {error}"
+                    )
+                bullet_birth_observation_ms = (
+                    time.perf_counter() - bullet_birth_observation_started
+                ) * 1000.0
             ecl_vm_snapshot: EclVmSnapshot | None = None
             ecl_lookahead: EclLookaheadResult | None = None
             tagged_velocity_toggles: tuple[TaggedVelocityToggle, ...] = ()
             ecl_lookahead_error: str | None = None
+            ecl_birth_intent: EclBirthLookaheadResult | None = None
+            ecl_birth_intent_error: str | None = None
+            ecl_birth_intent_ms = 0.0
             ecl_frame_before: int | None = None
             ecl_frame_after: int | None = None
             spell_enemy_body_guard: SpellEnemyBodyGuard | None = None
@@ -2407,6 +2459,42 @@ def _run_live_session(
                 ecl_lookahead_read_ms = (
                     time.perf_counter() - ecl_lookahead_read_started
                 ) * 1000.0
+                if trace_bullet_births and ecl_vm_snapshot is not None:
+                    ecl_birth_intent_started = time.perf_counter()
+                    try:
+                        ecl_birth_intent = analyze_ecl_birth_intents(
+                            ecl_vm_snapshot,
+                            instruction_at=lambda address: (
+                                ecl_instruction_cache.instruction(
+                                    reader.read,
+                                    address,
+                                )
+                            ),
+                            horizon_frames=ECL_BIRTH_LOOKAHEAD_FRAMES,
+                            active_difficulty_mask=(
+                                1 << int(state["difficulty_index"])
+                            ),
+                            deferred_fire_active=None,
+                            spell_active=True,
+                            minimum_fire_distance_clear=None,
+                            fire_filter_clear=None,
+                            available_slots=None,
+                            template_geometry_resolved=False,
+                            emission_origin_resolved=False,
+                        )
+                    except (
+                        OSError,
+                        RuntimeError,
+                        TypeError,
+                        ValueError,
+                        struct.error,
+                    ) as error:
+                        ecl_birth_intent_error = (
+                            f"{type(error).__name__}: {error}"
+                        )
+                    ecl_birth_intent_ms = (
+                        time.perf_counter() - ecl_birth_intent_started
+                    ) * 1000.0
             hazard_read_bookkeeping_started = time.perf_counter()
             if (
                 spell_enemy_body_guard is not None
@@ -2530,6 +2618,8 @@ def _run_live_session(
                     memory.clear()
                 boss_phase_tracker.reset()
                 ecl_instruction_cache.clear()
+                if bullet_birth_tracker is not None:
+                    bullet_birth_tracker.reset()
                 if corridor_future is not None:
                     corridor_future.cancel()
                 if corridor_survival_future is not None:
@@ -3247,6 +3337,8 @@ def _run_live_session(
                     memory.clear()
                 boss_phase_tracker.reset()
                 ecl_instruction_cache.clear()
+                if bullet_birth_tracker is not None:
+                    bullet_birth_tracker.reset()
                 if corridor_future is not None:
                     corridor_future.cancel()
                 if corridor_survival_future is not None:
@@ -3500,6 +3592,55 @@ def _run_live_session(
             current_phase = int(player["phase"])
             current_bombs = resources["bombs"]
             current_power = resources["power"]
+            if trace_bullet_births:
+                bullet_birth_trace_record = (
+                    build_bullet_birth_trace_record(
+                        BulletBirthTraceInput(
+                            frame=counter_at_action,
+                            snapshot_frame=int(
+                                state["enemy_manager_frame"]
+                            ),
+                            gameplay_epoch=gameplay_epoch,
+                            stage_route_index=int(
+                                state["stage_route_index"]
+                            ),
+                            observation=bullet_birth_observation,
+                            observation_error=(
+                                bullet_birth_observation_error
+                            ),
+                            intent=ecl_birth_intent,
+                            intent_error=ecl_birth_intent_error,
+                            spell_enemy_pointer=spell_enemy_pointer,
+                            ecl_frame_before=ecl_frame_before,
+                            ecl_frame_after=ecl_frame_after,
+                            ecl_event_frame_offset=(
+                                ecl_event_frame_offset
+                            ),
+                            ecl_event_frame_uncertainty=(
+                                ecl_event_frame_uncertainty
+                            ),
+                            observation_ms=(
+                                bullet_birth_observation_ms
+                            ),
+                            intent_ms=ecl_birth_intent_ms,
+                            previous_emit_ms=(
+                                previous_birth_trace_emit_ms
+                            ),
+                        )
+                    )
+                )
+                previous_birth_trace_emit_ms = trace_sink.emit(
+                    bullet_birth_trace_record,
+                    flush=bool(
+                        bullet_birth_observation_error
+                        or ecl_birth_intent_error
+                        or (
+                            bullet_birth_observation is not None
+                            and bullet_birth_observation.evidence
+                        )
+                    ),
+                    measure=True,
+                )
             trace_ms = 0.0
             if (
                 iterations % args.log_every == 0
@@ -4120,6 +4261,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--trace-transform-runtime",
         action="store_true",
         help="include transform-relevant bullets from the full native pool",
+    )
+    parser.add_argument(
+        "--trace-bullet-births",
+        action="store_true",
+        help=(
+            "record default-off hostile-bullet activation evidence and "
+            "fail-closed active-spell main-VM fire intent; diagnostic trace "
+            "only, never changes live actions"
+        ),
     )
     bomb_group = parser.add_mutually_exclusive_group()
     bomb_group.add_argument(

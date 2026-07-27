@@ -6391,3 +6391,29 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - B4 shipped-runtime correlation and B5 deterministic residual reporting are
   next. Hazard coverage, strategy status, and physical action authority do
   not change.
+
+## 2026-07-28 — Corrected the G5 deferred-fire observation boundary
+
+- **Observed failure:** Lunatic Stage-4A run `20260728_031127` retained
+  1,641 visible main-VM fire intents, but all were untimed because live
+  integration always supplied `deferred_fire_active=None`. All 86,396
+  activation edges therefore remained unmatched. CE-0144 records this as a
+  failed B5 gate, not coverage.
+- **Inferred from connected IDA:** at VM dispatch `0x41B4FF`, direct-fire
+  opcodes `0x60..0x68` stage the 44-byte descriptor instead of emitting when
+  enemy flags `+0x3324` bit `0x20000` is set. `0x6B` at `0x41B878` sets the
+  bit, `0x6C` at `0x41B895` clears it, and `0x6D` at `0x41B8E7` emits the
+  current descriptor. Comments were added at all four addresses in the
+  connected IDA database.
+- **Implementation correction:** the existing boss-body guard already reads
+  enemy `+0x3324`, so trace schema v2 propagates the observed bit without
+  another RPM only when pointer and guard/ECL manager-frame endpoints match
+  exactly. Every span, missing capture, or pointer mismatch remains unknown.
+- All optional birth observation and classification now runs after current
+  input dispatch. Post-issue ECL traversal is lookup-only against the warm
+  immutable instruction cache; a cold miss drops the trace intent.
+- Focused ECL runtime/birth/trace/audit suites pass `6/6`, `17/17`, `3/3`,
+  and `4/4`. Complete Linux/Windows quick suites pass `781/781` in
+  `8.781/15.338 s`, with three Windows skips. The physical performance
+  failure CE-0143 and repeated B4/B5 gate remain open; no future geometry,
+  hazard coverage, or action authority changed.

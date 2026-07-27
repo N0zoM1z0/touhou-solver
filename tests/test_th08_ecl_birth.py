@@ -5,6 +5,7 @@ import struct
 import unittest
 
 from th08_ecl_birth import (
+    ENEMY_DEFERRED_FIRE_FLAG,
     INTENT_CURRENT_PATTERN,
     INTENT_DEFERRED,
     INTENT_DYNAMIC_PARAMETER,
@@ -12,6 +13,7 @@ from th08_ecl_birth import (
     INTENT_PLAYER_AIM,
     INTENT_RNG,
     analyze_ecl_birth_intents,
+    observe_deferred_fire_state,
 )
 from th08_ecl_runtime import EclVmSnapshot, RuntimeEclInstruction
 
@@ -105,6 +107,48 @@ def _analyze(
 
 
 class EclBirthIntentTests(unittest.TestCase):
+    def test_native_deferred_flag_requires_exact_ecl_capture_alignment(self) -> None:
+        aligned = observe_deferred_fire_state(
+            spell_enemy_pointer=0x500000,
+            observed_enemy_pointer=0x500000,
+            enemy_flags=ENEMY_DEFERRED_FIRE_FLAG | 1,
+            frame_before=100,
+            frame_after=100,
+            ecl_frame_before=100,
+            ecl_frame_after=100,
+        )
+        self.assertEqual(aligned.status, "aligned_complete")
+        self.assertTrue(aligned.active)
+        self.assertEqual(
+            aligned.record()["deferred_fire_flag_mask"],
+            ENEMY_DEFERRED_FIRE_FLAG,
+        )
+
+        misaligned = observe_deferred_fire_state(
+            spell_enemy_pointer=0x500000,
+            observed_enemy_pointer=0x500000,
+            enemy_flags=0,
+            frame_before=100,
+            frame_after=100,
+            ecl_frame_before=101,
+            ecl_frame_after=101,
+        )
+        self.assertEqual(misaligned.status, "capture_misaligned")
+        self.assertIsNone(misaligned.active)
+
+    def test_native_deferred_flag_rejects_wrong_enemy_pointer(self) -> None:
+        observation = observe_deferred_fire_state(
+            spell_enemy_pointer=0x500000,
+            observed_enemy_pointer=0x600000,
+            enemy_flags=0,
+            frame_before=100,
+            frame_after=100,
+            ecl_frame_before=100,
+            ecl_frame_after=100,
+        )
+        self.assertEqual(observation.status, "enemy_pointer_mismatch")
+        self.assertIsNone(observation.active)
+
     def test_literal_absolute_fire_decodes_payload_and_schedule(self) -> None:
         fire = _instruction(
             BASE,

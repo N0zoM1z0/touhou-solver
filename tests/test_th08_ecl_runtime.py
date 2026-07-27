@@ -62,6 +62,17 @@ class _Memory:
 
 
 class EclRuntimeTests(unittest.TestCase):
+    def test_cached_instruction_never_performs_a_cold_read(self) -> None:
+        address = 0x410000
+        memory = _Memory(
+            {address: _instruction(0, ECL_OP_TERMINATE)}
+        )
+        cache = EclInstructionCache()
+        with self.assertRaisesRegex(RuntimeError, "absent from the warm cache"):
+            cache.cached_instruction(address)
+        decoded = cache.instruction(memory.read, address)
+        self.assertIs(cache.cached_instruction(address), decoded)
+
     def test_reads_native_main_vm_timer_at_plus_04_08_0c(self) -> None:
         enemy = 0x580000
         vm = bytearray(ECL_VM_SNAPSHOT_SIZE)

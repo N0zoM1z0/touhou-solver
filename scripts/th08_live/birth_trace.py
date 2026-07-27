@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from th08_ecl_birth import EclBirthLookaheadResult
+from th08_ecl_birth import (
+    DeferredFireStateObservation,
+    EclBirthLookaheadResult,
+)
 
 from .bullet_birth import BulletBirthObservation
 
 
-BULLET_BIRTH_TRACE_SCHEMA_VERSION = 1
+BULLET_BIRTH_TRACE_SCHEMA_VERSION = 2
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
 BULLET_BIRTH_POOL_SCOPE = "all_1536_hostile_bullet_slots"
@@ -27,6 +30,7 @@ class BulletBirthTraceInput:
     observation_error: str | None
     intent: EclBirthLookaheadResult | None
     intent_error: str | None
+    deferred_fire_state: DeferredFireStateObservation
     spell_enemy_pointer: int
     ecl_frame_before: int | None
     ecl_frame_after: int | None
@@ -44,6 +48,14 @@ def build_bullet_birth_trace_record(
 
     observation = trace_input.observation
     intent = trace_input.intent
+    omitted_sources = [
+        "non_spell_enemy_main_vm",
+        "child_enemy_or_auxiliary_vm",
+        "callback_or_interrupt_source",
+        "non_ecl_native_source",
+    ]
+    if trace_input.deferred_fire_state.active is None:
+        omitted_sources.append("deferred_emission_runtime_state")
     return {
         "kind": "bullet_birth_audit",
         "schema_version": BULLET_BIRTH_TRACE_SCHEMA_VERSION,
@@ -55,13 +67,7 @@ def build_bullet_birth_trace_record(
         "scope": {
             "pool": BULLET_BIRTH_POOL_SCOPE,
             "intent": BULLET_BIRTH_INTENT_SCOPE,
-            "omitted_sources": [
-                "non_spell_enemy_main_vm",
-                "child_enemy_or_auxiliary_vm",
-                "callback_or_interrupt_source",
-                "deferred_emission_runtime_state",
-                "non_ecl_native_source",
-            ],
+            "omitted_sources": omitted_sources,
         },
         "alignment": {
             "ecl_frame_before": trace_input.ecl_frame_before,
@@ -72,6 +78,7 @@ def build_bullet_birth_trace_record(
             ),
         },
         "spell_enemy_pointer": trace_input.spell_enemy_pointer,
+        "deferred_fire_state": trace_input.deferred_fire_state.record(),
         "observation": (
             observation.record() if observation is not None else None
         ),
@@ -87,6 +94,7 @@ def build_bullet_birth_trace_record(
             "visible_intents": len(intent.intents) if intent is not None else 0,
         },
         "timing_ms": {
+            "boundary": "post_issue_before_trace_flush",
             "observation": trace_input.observation_ms,
             "intent": trace_input.intent_ms,
             "previous_emit": trace_input.previous_emit_ms,

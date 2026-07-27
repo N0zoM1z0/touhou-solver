@@ -41,6 +41,7 @@ ECL_OP_INVOKE_CALLBACK = 0x88
 ECL_OP_SET_CALLBACK = 0x89
 
 DIRECT_FIRE_ARGUMENT_SIZE = 32
+ENEMY_DEFERRED_FIRE_FLAG = 0x00020000
 DIRECT_FIRE_PARAMETER_NAMES = (
     (0x01, "type"),
     (0x02, "color"),
@@ -60,6 +61,93 @@ INTENT_PLAYER_AIM = "player_aim"
 INTENT_RNG = "rng"
 INTENT_DEFERRED = "deferred"
 INTENT_CURRENT_PATTERN = "current_pattern"
+
+
+@dataclass(frozen=True)
+class DeferredFireStateObservation:
+    """Capture-aligned enemy state controlling direct-fire dispatch."""
+
+    spell_enemy_pointer: int
+    observed_enemy_pointer: int | None
+    enemy_flags: int | None
+    frame_before: int | None
+    frame_after: int | None
+    ecl_frame_before: int | None
+    ecl_frame_after: int | None
+    status: str
+    active: bool | None
+
+    def record(self) -> dict[str, object]:
+        return {
+            "spell_enemy_pointer": self.spell_enemy_pointer,
+            "observed_enemy_pointer": self.observed_enemy_pointer,
+            "enemy_flags": self.enemy_flags,
+            "deferred_fire_flag_mask": ENEMY_DEFERRED_FIRE_FLAG,
+            "frame_before": self.frame_before,
+            "frame_after": self.frame_after,
+            "ecl_frame_before": self.ecl_frame_before,
+            "ecl_frame_after": self.ecl_frame_after,
+            "status": self.status,
+            "active": self.active,
+            "evidence_label": "observed_native_enemy_flags",
+            "coverage_authority": "trace_only",
+        }
+
+
+def observe_deferred_fire_state(
+    *,
+    spell_enemy_pointer: int,
+    observed_enemy_pointer: int | None,
+    enemy_flags: int | None,
+    frame_before: int | None,
+    frame_after: int | None,
+    ecl_frame_before: int | None,
+    ecl_frame_after: int | None,
+) -> DeferredFireStateObservation:
+    """Use enemy +0x3324 only when it is aligned to the ECL VM capture."""
+
+    status = "aligned_complete"
+    active: bool | None = None
+    if (
+        observed_enemy_pointer is None
+        or enemy_flags is None
+    ):
+        status = "enemy_flags_unavailable"
+    elif (
+        spell_enemy_pointer <= 0
+        or observed_enemy_pointer != spell_enemy_pointer
+    ):
+        status = "enemy_pointer_mismatch"
+    elif any(
+        value is None
+        for value in (
+            frame_before,
+            frame_after,
+            ecl_frame_before,
+            ecl_frame_after,
+        )
+    ):
+        status = "capture_frames_unavailable"
+    elif not (
+        frame_before
+        == frame_after
+        == ecl_frame_before
+        == ecl_frame_after
+    ):
+        status = "capture_misaligned"
+    else:
+        active = bool(enemy_flags & ENEMY_DEFERRED_FIRE_FLAG)
+    return DeferredFireStateObservation(
+        spell_enemy_pointer=spell_enemy_pointer,
+        observed_enemy_pointer=observed_enemy_pointer,
+        enemy_flags=enemy_flags,
+        frame_before=frame_before,
+        frame_after=frame_after,
+        ecl_frame_before=ecl_frame_before,
+        ecl_frame_after=ecl_frame_after,
+        status=status,
+        active=active,
+    )
 
 
 @dataclass(frozen=True)

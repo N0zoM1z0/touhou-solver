@@ -9,6 +9,7 @@ from th08_ecl_birth import (
     EclBirthIntent,
     EclBirthLookaheadResult,
     INTENT_LITERAL_SCHEDULE,
+    observe_deferred_fire_state,
 )
 from th08_live.birth_trace import (
     BULLET_BIRTH_INTENT_SCOPE,
@@ -42,11 +43,20 @@ def _trace_input(
         observation_error=observation_error,
         intent=intent,
         intent_error=intent_error,
+        deferred_fire_state=observe_deferred_fire_state(
+            spell_enemy_pointer=0x4B5A30,
+            observed_enemy_pointer=0x4B5A30,
+            enemy_flags=0,
+            frame_before=118,
+            frame_after=118,
+            ecl_frame_before=118,
+            ecl_frame_after=118,
+        ),
         spell_enemy_pointer=0x4B5A30,
         ecl_frame_before=118,
-        ecl_frame_after=119,
+        ecl_frame_after=118,
         ecl_event_frame_offset=2,
-        ecl_event_frame_uncertainty=1,
+        ecl_event_frame_uncertainty=0,
         observation_ms=0.031,
         intent_ms=0.044,
         previous_emit_ms=0.012,
@@ -121,6 +131,19 @@ class BulletBirthTraceTests(unittest.TestCase):
         self.assertEqual(record["observation"]["evidence"][0]["slot"], 7)
         self.assertEqual(record["intent"]["intents"][0]["opcode"], 0x60)
         self.assertEqual(record["alignment"]["ecl_frame_before"], 118)
+        self.assertEqual(
+            record["deferred_fire_state"]["status"],
+            "aligned_complete",
+        )
+        self.assertFalse(record["deferred_fire_state"]["active"])
+        self.assertNotIn(
+            "deferred_emission_runtime_state",
+            record["scope"]["omitted_sources"],
+        )
+        self.assertEqual(
+            record["timing_ms"]["boundary"],
+            "post_issue_before_trace_flush",
+        )
         self.assertEqual(record["timing_ms"]["previous_emit"], 0.012)
 
     def test_scope_and_join_remain_explicitly_incomplete(self) -> None:

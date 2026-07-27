@@ -3957,3 +3957,71 @@ no physical action authority
   retained P-core affinity reports.
 - **Status boundary:** fixed for delivery validation. This does not prove
   physical hazard completeness or add action authority.
+
+## CE-0143: Birth observation passed synthetic timing but failed the physical issue boundary
+
+Status: observed physical delivery failure; post-issue isolation complete,
+observer optimization open
+
+- **Observed symptom:** Default-off Lunatic Stage-4A trial
+  `20260728_031127` completed 14,411 birth-audit decisions with zero observer
+  error, but physical observer extraction p95/p99/max was
+  `1.7795/2.7495/10.9700 ms`. The fixed gate is
+  `0.20/0.40/2.00 ms`. Previous-record JSON emission p95/max was
+  `1.2511/13.7303 ms`.
+- **Observed workload:** the trace retained 86,396 inactive-to-active edges,
+  23 bootstrap candidates, 99 timer regressions, and 17 invalid active
+  timers. Bursts reached 592 evidence rows in one decision, but even
+  zero-evidence decisions had roughly `1.75 ms` p95 under physical planner
+  contention. The earlier isolated 1,536-active benchmark measured only
+  `0.0339 ms` p95 and therefore did not represent the issue-thread workload.
+- **Invalid assumption:** isolated full-pool scan cost plus interleaved decode
+  parity bounded the live cost of repeated NumPy strided scans, Python
+  evidence construction, scheduling contention, and JSON publication.
+  Worse, the first integration ran the optional observer and classifier
+  before the current input dispatch, contradicting the fixed fallback
+  boundary.
+- **Correction:** move all B1/B3 work after the current input transaction;
+  keep the captured pool blob and VM snapshot immutable until then. Retain
+  separate extraction and prior-emit tails. Post-issue ECL classification is
+  lookup-only against the already warmed immutable instruction cache, so it
+  cannot start cold RPM. Optimize the strided/burst path before repeating B4;
+  a budget failure remains trace failure and cannot gain coverage or action
+  authority.
+- **Evidence:** raw trace SHA-256
+  `7788114afb988536c9152fe0c9473379d28c59864e86cac4c3ee9b2a829922e5`;
+  first deterministic compact report SHA-256
+  `cefef6fffe817c4f2d222b77d6503a87dc66b0c438eaa9373a8ad4d5fe45455d`.
+
+## CE-0144: Unknown deferred-fire state erased every physical timed intent
+
+Status: observed B5 live-integration omission corrected offline; physical
+recheck pending and no timed birth authority
+
+- **Observed symptom:** Across the same Stage-4A trace, the active-spell
+  main-VM scanner produced 1,641 fire-intent sightings but zero timed events.
+  Every visible intent was classified `deferred` because
+  `deferred_fire_active=None`; the one deduplicated untimed signature retained
+  player aim, dynamic angle, transform, template, origin, minimum-distance,
+  pool, and deferred-state dependencies.
+- **Observed residual:** all 86,396 activation edges were unmatched. 36,870
+  occurred with no active spell main-VM source, while 49,526 occurred inside
+  that scope without a timed overlapping intent. Classifier stop rows were
+  2,099 unsupported-control-flow and 1,209 horizon.
+- **Invalid assumption:** the live integration treated the current deferred
+  state as unavailable even though the existing boss-body guard already reads
+  enemy flags at `+0x3324`. The classifier correctly refused to distinguish
+  immediate fire from descriptor staging; the integration discarded observed
+  state it already owned.
+- **Inferred static correction:** connected IDA decompilation shows `0x6B`
+  sets enemy-flags bit `0x20000`, `0x6C` clears it, direct-fire opcodes
+  `0x60..0x68` stage the descriptor while set and otherwise call
+  `enemy_ecl_emit_bullets`, and `0x6D` emits the staged descriptor.
+- **Correction boundary:** trace schema v2 passes that existing native flag
+  only when the boss-guard pointer and all guard/ECL manager-frame endpoints
+  are identical. Missing, spanned, or mismatched captures remain unknown.
+  This adds no RPM and does not infer state from desired opcode history.
+  Child/auxiliary/callback/non-spell sources remain separate residual classes.
+- **Authority:** the B5 report is a valid failure report, not event coverage.
+  Future geometry, hazard coverage, strategy, and physical action authority
+  remain unchanged.

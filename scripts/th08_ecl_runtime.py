@@ -105,6 +105,16 @@ class EclInstructionCache:
     def clear(self) -> None:
         self._instructions.clear()
 
+    def cached_instruction(self, address: int) -> RuntimeEclInstruction:
+        """Return an immutable instruction without performing process I/O."""
+
+        cached = self._instructions.get(address)
+        if cached is None:
+            raise RuntimeError(
+                f"ECL instruction {address:#x} is absent from the warm cache"
+            )
+        return cached
+
     def instruction(
         self,
         read_memory: Callable[[int, int], bytes],

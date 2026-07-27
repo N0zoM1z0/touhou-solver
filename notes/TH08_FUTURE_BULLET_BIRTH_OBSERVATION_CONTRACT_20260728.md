@@ -46,6 +46,14 @@ and all same-frame transitions.
   parameter mask, applies minimum-distance and rank-dependent changes, and
   calls the emitter. `bullet_emitter_spawn_pattern` (`0x430E10`) expands the
   descriptor into individual spawn calls.
+- **Inferred from the connected IDA database:** VM dispatch at `0x41B4FF`
+  checks enemy flags `+0x3324` bit `0x20000`: direct-fire opcodes
+  `0x60..0x68` stage their 44-byte descriptor at enemy `+0x3034` while the
+  bit is set and call `enemy_ecl_emit_bullets` otherwise. Opcodes `0x6B`
+  (`0x41B878`) and `0x6C` (`0x41B895`) set and clear the bit; `0x6D`
+  (`0x41B8E7`) emits the current descriptor. These addresses now carry IDA
+  comments. Static semantics remain inferred pending the corrected physical
+  join.
 - **Inferred from the connected IDA database:**
   `bullet_spawn_from_emission_descriptor` (`0x42F5F0`) allocates the first
   free slot from a wrapping 1,536-slot cursor, initializes the bullet timer
@@ -67,8 +75,9 @@ and all same-frame transitions.
   gate.
 
 Static conclusions above remain inferred until the native runtime trace
-confirms them. No IDA database rename or type change was required because the
-three functions already have strong local names and comments.
+confirms them. No IDA database rename or type change was required. The three
+functions already had strong local names; the four dispatch sites above now
+retain the direct/staged emission comments.
 
 ## Problem Contract
 
@@ -90,6 +99,7 @@ One birth-audit observation is tied to an immutable capture identity:
   bullet capture [frame_before, frame_after],
   ECL capture [frame_before, frame_after],
   exact enemy slot/pointer and main-VM snapshot identity,
+  capture-aligned enemy +0x3324 flags controlling direct-fire dispatch,
   bullet-pool layout version,
   ECL/opcode model version
 )
@@ -365,6 +375,18 @@ current action transaction, and labels every row
 `trace_only_no_action_authority`. Errors yield missing evidence plus an exact
 error string; they never reach planning or issue.
 
+The first physical B4 attempt exposed CE-0144: live integration supplied
+`deferred_fire_active=None` for every row even though the existing boss-body
+guard already captured enemy `+0x3324`. Trace schema v2 now records that
+native flags value, pointer, guard interval, ECL interval, bit mask, and
+alignment status. The classifier consumes the bit only when the expected
+spell-owner pointer and all four manager-frame endpoints are identical.
+Post-issue scanning uses lookup-only warm-cache access; a cache miss omits the
+intent instead of starting cold process-memory reads. This implementation
+correction passes the complete Linux/Windows quick suites `781/781` in
+`8.781/15.338 s`, with three Windows skips, and awaits a repeated B4/B5
+physical gate.
+
 The classifier passes `15/15` focused tests and the compact trace builder
 passes `3/3`. Complete Linux/Windows quick suites pass `773/773` in
 `8.691/15.243 s`, with three existing Windows skips. B3 is an implementation
@@ -401,7 +423,8 @@ remain open.
 ### B3 — ECL intent classification
 
 - **Fail-closed classifier completed by `52d0864` and trace-only integration
-  completed by `98db592`; physical source residuals remain open.**
+  completed by `98db592`; schema-v2 native deferred-state propagation is
+  implemented and awaits physical recheck.**
 - Add a separate main-VM birth scanner with explicit stop reasons.
 - Cover direct, deferred, current-pattern, child/aux-VM, callback, aimed, RNG,
   rank, dynamic-parameter, pool-full, and transform residual classes.

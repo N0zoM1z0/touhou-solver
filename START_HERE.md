@@ -343,6 +343,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   backend selection and historical monkey-patch fault injection remain live.
   Quick suites pass `699/699` on Linux in `9.140 s` and Windows in
   `13.505 s` with three platform skips.
+- Survival-first item tie-breakers, endpoint ranking, terminal continuation
+  warnings, and clamped-boundary degeneracy detection now live in
+  `th08_live.local_objectives`. The 4,190-line controller injects its current
+  hazard dispatcher only into the warning rollout, preserving backend and
+  fault-injection behavior. The Linux quick suite passes `699/699` in
+  `9.106 s`; item objectives remain disabled in live acceptance.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

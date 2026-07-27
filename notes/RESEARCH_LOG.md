@@ -5523,3 +5523,22 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   quantifiers, observation-compatible branch construction, CVaR ordering,
   collision and signed-clearance thresholds, issue-time freshness, hard
   no-Bomb fallback, and live action authority are unchanged.
+
+### 2026-07-27 — Local objective extraction
+
+- **Observed structural change:** Moved survival-gated item potential,
+  endpoint ranking, cheap terminal continuation warnings, and clamped-policy
+  degeneracy detection into `th08_live.local_objectives`. Objective constants
+  now live with those functions; `controller.py` is 4,190 lines.
+- **Compatibility boundary:** Historical controller constants and private
+  helper names remain aliases. The terminal warning wrapper injects the
+  controller's current hazard dispatcher, so backend switches and fault
+  injection retain their prior effect. The warning remains explicitly
+  non-certifying and item objectives remain disabled.
+- **Validation:** Live-controller, local-certificate, and planner-pass suites
+  pass `92/92`, `8/8`, and `1/1`; Ruff, byte compilation, and
+  `git diff --check` pass. The Linux quick suite passes `699/699` in
+  `9.106 s`.
+- **Authority:** Structural objective ownership only. Survival-first ordering,
+  viability constraints, certificate authority, item disablement, live
+  action authority, and strategy are unchanged.

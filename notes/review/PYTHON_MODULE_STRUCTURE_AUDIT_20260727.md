@@ -219,7 +219,10 @@ implementation units are:
 | `local/hazards.cpp` | 399 | cohesive local bullet/laser/body hazard query |
 | `local/bullet_decode.cpp` | 196 | cohesive packed native-pool decoder |
 | `local/beam_reduce.cpp` | 573 | baseline/supplemental quantized beam reduction |
-| `geometry/clearance.cpp` | 982 | primitive clearance / trajectory / volume orchestration |
+| `geometry/clearance_volume.cpp` | 314 | full bullet/segment clearance volume |
+| `geometry/segment_trajectory.cpp` | 225 | segment trajectory in-place lowering |
+| `geometry/aabb_trajectory.cpp` | 182 | AABB trajectory in-place lowering |
+| `geometry/piecewise_aabb.cpp` | 233 | piecewise-event AABB lowering |
 | `abi/pipeline_abi.cpp` | 934 | direct / belief / query-local exported families |
 | `internal/abi_impl.hpp` | 864 | replace shared implementation header with narrow internal headers |
 | `local/supplemental_workspace.cpp` | 804 | workspace lifecycle / search / result packing |

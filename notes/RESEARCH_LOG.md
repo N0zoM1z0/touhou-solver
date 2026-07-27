@@ -5606,3 +5606,22 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   semantics, 32/64-bit narrowing guards, recurrence, upper quantifiers,
   cancellation/deadline/status behavior, C ABI, live authority, and strategy
   are unchanged.
+
+### 2026-07-27 — Native clearance-family translation-unit split
+
+- **Observed structural change:** Replaced the mixed 982-line
+  `native/src/geometry/clearance.cpp` with dedicated clearance-volume,
+  segment-trajectory, AABB-trajectory, and piecewise-AABB TUs of 314, 225,
+  182, and 233 lines. Their only shared implementation is an 89-line inline
+  header for segment construction, clearance, and squared distance. The
+  explicit build list names all four sources.
+- **Build boundary:** Linux and Windows release libraries rebuild. The Linux
+  exports exactly match the checked-in 46-symbol ABI manifest.
+- **Validation:** Corridor-planner, native-facade, and ABI-manifest suites pass
+  `27/27`, `4/4`, and `5/5`; `git diff --check` and direct symbol comparison
+  pass. Quick suites pass `699/699` on Linux in `9.099 s` and Windows in
+  `13.393 s` with three platform skips.
+- **Authority:** Structural geometry ownership only. All clearance equations,
+  float operation order, uncertainty inflation, in-place minimum behavior,
+  backend dispatch/fallback, ABI, planner authority, and strategy are
+  unchanged.

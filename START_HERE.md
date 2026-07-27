@@ -369,6 +369,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   (2,264). Both release builds retain the exact 46-symbol ABI. Quick suites
   pass `699/699` on Linux in `8.836 s` and Windows in `12.961 s` with three
   skips.
+- The former 982-line native `geometry/clearance.cpp` is now four explicit
+  ABI-family TUs: clearance volume (314), segment trajectory (225), AABB
+  trajectory (182), and piecewise AABB (233), sharing only an 89-line inline
+  segment-primitive header. Both release builds retain the 46-symbol ABI;
+  corridor/native-facade/ABI gates pass. Quick suites pass `699/699` on Linux
+  in `9.099 s` and Windows in `13.393 s` with three skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

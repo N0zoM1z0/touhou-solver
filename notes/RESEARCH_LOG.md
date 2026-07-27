@@ -6209,3 +6209,44 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   recheck. Future events remain unknown. Native cancellation/completion-age
   and unchanged Windows contention gates precede any complete-only shadow
   lookup experiment.
+
+### 2026-07-28 — Stationary witness Windows delivery and isolation gate
+
+- **Observed implementation:** Checkpoint `f8621bd` adds a separate
+  research-only same-process DLL plus modular
+  `workload/native/service/runner/metrics/gate/abi` benchmark components.
+  The production ABI remains exactly 46 symbols. One below-normal service
+  owns one private workspace, publishes complete newest exact identities
+  only, cancels active superseded work, and releases all workspaces on close.
+- **Observed fixed physical scope:** The SHA-verified Stage-4A trace supplied
+  18 deterministic roots: first eight accepted Boolean-empty roots plus the
+  last accepted Boolean-empty root before each of ten hits. Every root
+  completed all 36 no-Bomb actions against an independently replayed Python
+  stationary portfolio at horizon 32 and cadence support `(4,5,6)`.
+- **Observed CE-0142:** At query frame 611, native pickup delay 2 and scalar
+  delay 4 were equal-label hidden ties reaching the same successor. A
+  one-float32-ULP margin difference invalidated exact physical tie-field
+  equality, not the recurrence. Validation now requires exact frames,
+  `1e-5` margins, declared uncertainty/action membership, state links, and
+  complete nested-label replay while separately counting tie divergence.
+- **Observed performance repair:** Numeric immutable path records removed
+  Python keyword-object decode overhead; native extraction writes directly
+  to the caller buffer without a second step-vector allocation/copy. An
+  unpinned repeat still exposed authoritative scheduler tails. Pinning to
+  logical CPU 19 was rejected because Windows identified it as an E-core and
+  publication p95 rose to `12.156 ms`.
+- **Observed accepted isolation:** Windows CPU sets identify CPUs 0–11 as
+  efficiency class 1 and 12–19 as class 0. Pinning only the optional worker
+  to CPU 11 produced two consecutive full passes. Publication p95/max were
+  `6.913/11.358` and `6.203/7.977 ms`; viability p95 ratios were `1.034/0.938`
+  and throughput ratios `0.929/0.961`. Cancellation ack p95 was
+  `0.164/0.168 ms`; stale and partial publication remained zero. All
+  162/162 contention jobs completed in both runs.
+- **Observed validation:** Linux/Windows quick suites pass `740/740` in
+  `8.926/14.797 s`, with three Windows skips. Both production binaries match
+  the checked-in sorted 46-symbol manifest exactly.
+- **Authority:** The offline delivery gate passed. This permits only a
+  separately reviewed default-off trace-only shadow experiment. CE-0141
+  physical recheck, first-successor `UNKNOWN` future coverage, CE-0120,
+  earlier immutable completion age, and fresh local issue-time intersection
+  still block any action authority.

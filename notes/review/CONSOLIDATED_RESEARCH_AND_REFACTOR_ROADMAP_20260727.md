@@ -913,6 +913,25 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
 - production 46-symbol ABI 不變；
 - 任何 pass 只允許後續 default-off trace-only shadow，不允許 action。
 
+同日實作 checkpoint `f8621bd` 完成同 process research DLL、模組化
+newest-wins service、36-action immutable publication、active cancellation 與
+exact lookup。初始 decode、unpinned repeat、CPU19 E-core 三個變體均保留為
+失敗證據。只 pin below-normal proposal worker 到 Windows maximum
+efficiency class 的最高 logical CPU（本機 CPU11）後，兩次固定 gate 連續
+通過：
+
+- publication p95 `6.913/6.203 ms`，max `11.358/7.977 ms`；
+- authoritative viability p95 ratio `1.034/0.938`；
+- throughput ratio `0.929/0.961`；
+- cancellation ack p95 `0.164/0.168 ms`；
+- stale/partial publication `0/0`，production ABI 仍精確 46 symbols。
+
+這只把 G4 delivery 推進到「可另行 review default-off trace-only shadow」；
+CE-0141 physical recheck、future-event coverage、CE-0120、earlier immutable
+completion age 與 fresh local intersection 仍阻止 action authority。CE-0142
+另記錄 physical float32 equal-label hidden tie，不再錯把 tolerant label
+parity 當成每個 nature tie field 的逐 bit equality。
+
 不重啟已被 CE-0131 拒絕的 current-issue supplemental lane。新的方案必須在
 較早 causal version 中完成：
 

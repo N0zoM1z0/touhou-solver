@@ -1,6 +1,6 @@
 # Touhou Solver Strategy Ledger
 
-Last updated: 2026-07-27.
+Last updated: 2026-07-28.
 
 This file records strategy identity and promotion status. It is not a
 chronological log. Derivations and measurements live in design notes,
@@ -89,17 +89,32 @@ complete-mask stationary witness with zero native mismatch. Coverage is
 same audit found CE-0141 mixed query/coverage roots in 1,613 of 14,599 rows;
 `d5866c4` corrects future trace construction offline. This remains restricted
 finite-model evidence only; CE-0141 physical recheck, future-event coverage,
-delivery, and physical validation remain open.
+and physical validation remain open.
+
+**Observed:** checkpoint `f8621bd` completes the offline stationary-witness
+Windows delivery implementation without adding a production symbol or
+consumer. Numeric immutable decoding and direct native output writes reduce
+complete 36-action publication p95 below 8 ms. An unpinned repeat exposed
+authoritative viability tails and a CPU-19 E-core pin made publication too
+slow; both failures are retained. Pinning only the below-normal proposal
+worker to CPU 11, the highest logical CPU in Windows' maximum efficiency
+class, passes the unchanged gate twice: publication p95 `6.913/6.203 ms`,
+viability p95 ratio `1.034/0.938`, throughput ratio `0.929/0.961`, bounded
+cancellation, zero stale/partial publication, and exact 46-symbol ABI.
+CE-0142 records an equal-label physical hidden-delay tie and narrows path
+parity to independently validated labels plus complete structural replay.
+This evidence permits review of a separate default-off trace-only shadow; it
+does not promote or implement one.
 
 ### Priority
 
 1. Preserve global feasibility earlier. Recheck CE-0141 on a small physical
-   trace. The stationary-witness Windows gate is now fixed before
-   measurement: complete all-36-action publication p95 must be at most 8 ms,
-   maximum below one frame, stale/partial publication zero, cancellation
-   bounded, and authoritative four-worker throughput/p95 retained. Continue
-   G5 future-event coverage in parallel. Extend partial-survival witnesses
-   only through completed causal policy classes.
+   trace and continue G5 future-event coverage. The stationary-witness
+   Windows delivery gate passes twice only under the fixed P-core isolation
+   boundary. The next optional step is a separately reviewed, default-off,
+   earlier-version trace-only shadow with real completion-age evidence; do
+   not consume it or start cold issue-thread work. Extend partial-survival
+   witnesses only through completed causal policy classes.
 2. Use proof-backed query-local refinement to separate coarsening, horizon,
    uncertainty, forecast/birth, route/tube, and unresolved losses. Do not use
    uniform full-field 4-pixel solving. The offline G2 semantic gate passes all
@@ -139,6 +154,7 @@ delivery, and physical validation remain open.
 | S14 | explicit local input-pipeline certificate | Batch fix live; explicit root shadow |
 | S15 | native local implementation acceleration | Live optimization |
 | S16 | pre-loss continuation and supplemental lane | Proposed finite selector; live delivery rejected |
+| S17 | exact stationary complete-mask witness delivery | Offline gate passed; trace-only shadow review proposed |
 
 ## Strategy Details
 
@@ -359,6 +375,31 @@ delivery, and physical validation remain open.
   `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`,
   `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`,
   CE-0129 through CE-0131.
+
+### S17 — Exact Stationary Complete-Mask Witness Delivery
+
+- **Status:** offline delivery gate passed; no consumer; a separately
+  reviewed default-off trace-only shadow is proposed.
+- **Model:** all 36 no-Bomb root actions remain unrestricted. Later decisions
+  use only the exact held desired mask as a singleton stationary causal
+  continuation under exact active/pending belief, pickup delay, and recursive
+  cadence.
+- **Observed:** two consecutive fixed Windows gates pass with one
+  below-normal proposal worker pinned to P-core logical CPU 11. Complete
+  publication p95 is `6.913/6.203 ms`; authoritative viability p95 and
+  throughput remain inside the unchanged gate; cancellation is bounded and
+  stale/partial publication is zero.
+- **Rejected variants:** initial keyword-object decode missed 8 ms; an
+  unpinned optimized repeat exposed authoritative p95 tails; an E-core
+  affinity variant missed publication at `12.156 ms`.
+- **Boundary:** first-successor future coverage remains `UNKNOWN`; CE-0141
+  needs physical recheck and CE-0120 remains open. No lookup consumer, live
+  worker, action ranking, or physical issue path exists.
+- **Next gate:** review an earlier immutable-version, default-off trace-only
+  service with exact completion age and no shared live publication path.
+- **Evidence:**
+  `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`,
+  `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`, CE-0142.
 
 ## Adding Or Changing A Strategy
 

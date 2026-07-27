@@ -25,7 +25,9 @@ and design/run notes retain derivations and history.
 15. `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`
 16. `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 17. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
-18. the relevant recent run note and counterexample rows before live work
+18. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`
+19. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`
+20. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -35,6 +37,26 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest committed algorithmic checkpoint:
+  `f8621bd Add cancellable stationary witness delivery benchmark`. A separate
+  research-only DLL and modular newest-wins service now measure complete
+  36-action internal stationary publications in the same Windows process.
+  Numeric immutable path records and direct native output-buffer writes
+  remove delivery overhead without changing the recurrence or production
+  ABI. The one below-normal proposal worker can be pinned without changing
+  process or authoritative-worker affinity. Linux/Windows quick suites pass
+  `740/740` in `8.926/14.797 s`, with three Windows skips.
+- Two consecutive fixed Windows gates pass with the proposal worker pinned to
+  logical CPU 11, the highest logical CPU in Windows' maximum efficiency
+  class. Complete-publication p95/max are `6.913/11.358` and
+  `6.203/7.977 ms`; authoritative viability p95 ratios are `1.034/0.938` and
+  throughput ratios are `0.929/0.961`. Cancellation ack p95 is
+  `0.164/0.168 ms`; stale/partial publication is zero; Linux/Windows
+  production exports remain exactly 46 symbols. The rejected unpinned-repeat
+  and E-core variants remain retained. This permits only a separately
+  reviewed default-off trace-only shadow; no consumer or action authority
+  exists. See
+  `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`.
+- The preceding algorithmic checkpoint
   `d5866c4 Align hazard coverage with canonical query roots`. Physical Gate-5
   auditing found CE-0141: 1,613 of 14,599 available-query rows mixed a
   canonical `query_frame` root with coverage built from an earlier
@@ -56,12 +78,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   brings Linux/Windows quick suites to `733/733` in `8.581/14.794 s`, with
   three Windows skips. See
   `notes/G5_PHYSICAL_COMPLETE_MASK_CAPSULE_GATE_20260728.md`.
-- The next performance gate is fixed before measurement in
-  `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`. It measures
-  complete 36-action publication, exact label/path validation, rapid
-  newest-wins cancellation, exact lookup, and normal-priority four-worker
-  viability contention on retained physical roots. It adds no production ABI
-  or consumer.
+- The stationary-witness performance gate and its post-failure resource
+  isolation variants are fixed in
+  `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`. CE-0142
+  records a physical float32 equal-label nature tie: native and Python may
+  choose different hidden pickup delays while both complete paths replay and
+  root labels remain inside the declared tolerance.
 - The preceding audit implementation checkpoint
   `48f7e56 Add exact complete-mask capsule audit`. The offline Gate-5 audit
   now reconstructs and digest-checks a physical 36-token complete-mask

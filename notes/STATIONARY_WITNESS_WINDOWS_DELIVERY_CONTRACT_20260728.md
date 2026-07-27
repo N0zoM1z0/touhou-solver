@@ -179,6 +179,41 @@ Before action authority, the system still requires:
 A failed gate keeps the extractor internal/offline. Timeout and cancellation
 remain unresolved delivery outcomes, never finite-model losing results.
 
+## Post-Failure Resource-Isolation Variant
+
+The first optimized Windows run passed complete publication and throughput,
+but an exact repeat exposed two authoritative viability tail solves and
+failed the unchanged p95-ratio condition. Before another measurement, the
+next variant is fixed as follows:
+
+- the one optional below-normal stationary worker is pinned to the highest
+  logical CPU visible to the process;
+- the authoritative viability caller and all four native workers retain
+  normal priority, their existing affinity, and the same workload;
+- process affinity, the game, sensor, issue thread, action set, recurrence,
+  deadlines, and all gate thresholds remain unchanged; and
+- the report must prove that thread-only affinity was applied. Failure to
+  apply it fails this variant.
+
+This is resource isolation for a proposal worker, not a reduction of
+authoritative work. It was specified after observing the repeat failure and
+before measuring the affinity variant.
+
+**Observed after that measurement:** logical CPU 19 was an efficiency-class
+`0` E-core and the variant failed complete-publication p95 at `12.156 ms`,
+despite stabilizing authoritative viability. That exact variant is rejected.
+
+Before measuring a second affinity variant, the selection rule is fixed to
+the highest logical CPU in the maximum efficiency class returned by
+`GetSystemCpuSetInformation`. On this machine that is logical CPU 11,
+efficiency class `1`; CPUs 0–11 are the six SMT P-cores and CPUs 12–19 are
+single-threaded efficiency-class `0` cores. All other boundaries and
+thresholds above remain unchanged.
+
+**Observed result:** the CPU-11 P-core variant passed twice. Full details,
+rejected variants, report digests, CE-0142, and remaining authority gaps are
+retained in `STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`.
+
 ## Five Formal Review Questions
 
 1. **Which histories merge?** Only the histories already merged by the exact

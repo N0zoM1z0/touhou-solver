@@ -3913,3 +3913,38 @@ physical recheck pending
   `artifacts/viability_audit/g5_complete_mask_stage4a_20260728.json`.
 - **Live verification:** pending a post-fix physical trace with zero
   coverage/query-root mismatches.
+
+## CE-0142: Physical float32 tie paths need not choose the same hidden delay
+
+Status: observed finite-model implementation tie; label/path contract fixed;
+no physical action authority
+
+- **Observed symptom:** Physical decision/query/source `612/611/598` from
+  Stage-4A run `20260728_005108`, identity
+  `8eb661e12d6ab81709ac91bca1a58c3dbf293227828b49ecfd1412af0ffef5cc`,
+  root action `th08_mask_54`, produced the same exact successor and guaranteed
+  frames but different hidden pickup-delay witnesses at path step 1. Native
+  chose delay 2; the Python scalar witness chose delay 4.
+- **Invalid assumption:** Margin parity within `1e-5` implied exact equality
+  of every deterministic nature tie field on physical coordinates.
+- **Evidence:** Native/scalar prefix margins were respectively
+  `0x1.3cd5220000000p+4` and `0x1.3cd522339908fp+4`; root bottleneck margins
+  differed by one float32 ULP. Both branches use cadence 6 and reach the same
+  merged successor. The final Windows delivery reports count two such action
+  ties whenever this root occurs.
+- **Correction:** Keep exact guaranteed-frame and tolerant margin parity,
+  but replay each native path on its own terms: stationary policy choice,
+  declared delay/cadence membership, no-write semantics, state links,
+  nested-label recurrence, and complete termination. Record deterministic
+  scalar/native tie divergence separately instead of rejecting a valid
+  equal-label path or silently treating it as exact equality.
+- **Regression tests:** Same-process binding tests retain exact randomized
+  path parity where no physical precision tie exists. The 18-root Windows
+  gate fails any malformed path, unknown action, undeclared uncertainty,
+  label mismatch, incomplete action set, stale version, or partial
+  publication.
+- **Evidence files:**
+  `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md` and the two
+  retained P-core affinity reports.
+- **Status boundary:** fixed for delivery validation. This does not prove
+  physical hazard completeness or add action authority.

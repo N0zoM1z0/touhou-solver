@@ -1,0 +1,922 @@
+# Touhou Solver：綜合研究、重構與交付路線
+
+日期：2026-07-27
+
+審閱基線：`52f746f744760a059c70fd3731b4952f1ecae6f3`
+
+文件性質：已定下來的執行路線；不改變 `STRATEGY.md` 的 live/shadow/proposed/rejected
+狀態，也不替代既有 formal contracts。
+
+## 1. 結論先行
+
+接下來的核心任務不是「再做一個更快的躲彈 heuristic」，也不是把整個 agent
+改寫成 C++。真正要解決的是：
+
+> 在每次實際 issue 前，從同一個物理觀測、同一個 input-pipeline root、同一個
+> hazard/model version，及時交付一個因果、非 clairvoyant、可重放的 robust
+> action；並在完整 horizon witness 不存在或來不及完成時，明確區分 finite-model
+> empty、模型未覆蓋、計算未完成、publication 過期與真正可用的 partial-survival
+> lower witness。
+
+目前 39 次 Hard full-route contact 中有 38 次發生在 global kernel 已經 empty
+之後。這不等於「global empty 已被證明是每次命中的唯一原因」，但足以確定：
+
+1. 局部 decode/geometry 再快一點不是當前第一主因；
+2. 必須更早保存可恢復空間，並正確處理 coarse/finite-horizon empty；
+3. post-empty fallback 不能再是沒有 formal label 的一般 heuristic；
+4. 維護性已經是 correctness 問題：現在數個關鍵函式太長、資料契約混雜，
+   每次新增 model、refinement 或 delivery lane 都容易跨越 authority 邊界。
+
+因此採用兩條互相解鎖、但分開驗證的主線：
+
+- **結構線：** 先用純重構 checkpoint 把 corridor、native binding/kernel、
+  local planner、issue transaction 和 live session 拆成窄介面；每一步保持
+  exact behavior、ABI 與 hard-mask parity。
+- **研究線：** 先建立 exact-root causal dossier 和正交狀態分類，再依序做
+  model-covered lower/upper、query-local refinement、exact augmented-root
+  partial survival，以及由較早 global version 產生的 pre-loss continuation
+  reserve。
+
+禁止 big-bang rewrite。任何「搬檔 + 改 recurrence + 做效能優化」的混合提交都
+應拆開。
+
+## 2. 審閱材料與證據邊界
+
+本次綜合了兩個外部審閱包：
+
+| 包 | SHA-256 | 範圍 |
+| --- | --- | --- |
+| `audits/7.27/touhou_solver_deep_review_20260727.zip` | `7fa79e025dade5a0eafcf595a8df5d35031755e695b63eed9e25fd3d0ab7263e` | 架構、演算法、systems、code scan、介面草案 |
+| `audits/7.27/touhou_solver_deep_analysis_2026-07-27.zip` | `0e84318eb6278e5cd33c8731b506e6173dc7438ff2e7db99e795c3b4b3a93c62` | 固定 commit 分析、演算法細案、schemas、推薦矩陣 |
+
+兩包都已在 `audits/7.27/` 原位解壓，並通過各自的 `SHA256SUMS.txt`。
+
+證據邊界：
+
+- **Observed（已觀察）：** 第二包指向 exact commit；兩包對 repository
+  文件、程式與 retained reports 的摘錄大致準確。
+- **Observed（已觀察）：** 第一包主要是 remote/static review；兩包都沒有
+  產生新的 shipped-game runtime、Windows contention 或 physical survival
+  證據。
+- **Inferred（推論）：** 它們能提供架構與演算法候選，不能提升任何策略的
+  authority。最終優先級仍以 repository code、retained artifacts、
+  counterexamples 和 formal contracts 為準。
+
+本次工作也重新檢查了 current source，並在 Linux 重新通過 quick suite
+`584/584`。以下是決策使用的主要 retained evidence：
+
+| 證據 | 結果 | 決策含義 |
+| --- | ---: | --- |
+| Hard Stage 1 | 7,099 decisions，0 hit，0 Bomb | local/live 基線在聚焦 workload 可用 |
+| Hard full route | 70,699 decisions，39 hits，0 Bomb | 尚未達 acceptance |
+| contact after global empty | 38/39 | P0 指向 early feasibility 與 degraded fallback |
+| Stage4A empty roots | 61；6 spatial、8 primary short-horizon、47 unresolved | `empty` 不能是單一 label |
+| full-field 4 px | median/p95 約 1.06/3.51 s | 不進 live 設計 |
+| fresh/global transaction gate | 4,627 transactions，0 silent outside-global | 歷史 authority bug 已修，應固化而非假設仍未修 |
+| supplemental sync/async | finite parity 成功，但各產生 delivery miss | CE-0131 繼續阻擋 current-issue supplemental |
+| semantic fuzzer | retained gate zero hard mismatch | 可作重構與 native parity gate |
+
+## 3. 對外部建議的最終裁決
+
+### 3.1 直接採納
+
+1. **lower 用於 action authority，upper 只決定還要算哪裡。**
+2. **query-local 16→8→4 refinement，拒絕 uniform full-field 4 px。**
+3. **exact augmented-root partial-survival witness。**
+4. **端到端 age ledger；看 p99/p99.9/max，不只看 solve median/p95。**
+5. **Python control plane + C++ data plane + independent Python oracle。**
+6. **Boolean first、complete-only、exact-version、newest-target-wins。**
+7. **future birth/transform 的 model confidence 必須顯式存在。**
+8. **bitset、rolling repair、SIMD、process isolation 都只能在語義穩定後
+   逐項 gate。**
+
+### 3.2 修正後採納
+
+#### 「Global tri-state」
+
+單一 `VIABLE / PROVED_LOSING / UNRESOLVED` 仍然會混淆不同層次。採用第 6 節
+的正交狀態，而不是一個 overloaded enum。裸字串 `PROVED_LOSING` 禁止進
+telemetry；至少要說清楚是 declared finite model empty，還是 physical model
+也有完整 coverage。
+
+#### 「Issue transaction 是 P0 新功能」
+
+CE-0127/CE-0128 的 fresh/global intersection 已修復並通過 physical gate。
+下一步不是重做同一功能，而是：
+
+- 把現有行為抽成 immutable transaction type；
+- 消除 `Decision` 內 action-specific stale metadata 的結構性風險；
+- 加 commit-time identity/lease checks；
+- 用歷史反例和 property tests 固化。
+
+重構 checkpoint 不應偷偷改 fallback 行為。
+
+#### 「Terminal continuation 會救回 empty」
+
+更嚴格的 terminal lower set 只會縮小當下 finite kernel；它不能直接救回已
+empty 的 root。它的價值是更早拒絕 horizon cliff，或在 hard-winning action
+之間保存未來 option value，從而可能讓後續 rolling roots 更晚耗盡。
+
+因此 terminal/option 工作是 **upstream strategy experiment**，不是 spatial
+false-empty 修復，也不能只以「當前 viable root 變多」驗收。
+
+#### 「Partial survival 只可在 upper 也 empty 時使用」
+
+只有 upper 也 empty 時，才可聲稱 declared-model loss 已被排除所有 action。
+但是一個完整、可重放的 restricted causal partial-survival policy，本身是可達
+lower witness；在 full-horizon status 仍 unresolved 時也可以作 degraded
+proposal，只是 mode 必須叫 `PARTIAL_SURVIVAL_WITNESS_ON_UNRESOLVED`，不能叫
+`POST_LOSS` 或 `SAFE`。
+
+#### 「Process isolation 立即進 P1」
+
+先做 record-only age ledger、immutable data contract 和 ETW/WPA attribution。
+只有證據顯示同進程 executor/native fan-out 造成 issue tail，才移 planner 或
+shadow service。否則 IPC、crash recovery 和 snapshot copy 可能增加另一種 tail。
+
+### 3.3 延後
+
+- full main-beam one-call native；
+- persistent native worker team；
+- bitset recurrence；
+- dirty-cone incremental repair；
+- AVX2/PGO/LTO；
+- density-adaptive full/sparse RPM；
+- shared-memory multi-process publication。
+
+這些都有潛力，但目前不能先於模型、狀態與可維護邊界。
+
+### 3.4 拒絕或保持 shadow-only
+
+- **整個 agent 改寫成 C++：** 不解決 model/causality/state explosion。
+- **同步 full-field 4 px：** 已有秒級 p95 反證。
+- **增加 same-root worker >4：** 現有 contention evidence 不支持。
+- **learned/MCTS/RL 直接擁有 hard authority：** 量詞不符。
+- **立即把 swept continuous collision 當 physical truth：** TH08 的實際
+  collision/update order 可能是離散 native update。連續 sweep 在未驗證前會
+  引入未知方向的 conservative error。先以 IDA/native probe/retained trace
+  證明同一 update interval 的物理碰撞語義，再決定它是 hard rule、diagnostic
+  或不需要。
+- **GPU 進 current issue path：** 啟動、同步及 driver tail 不合目前 workload。
+
+## 4. 目前真正要解的四個核心問題
+
+### 4.1 物理根是否正確
+
+完整控制根不是 `(frame, x, y, desired_action)`，而至少是：
+
+```text
+(
+  physical_time_interval,
+  position_interval,
+  active_action,
+  held_desired_action,
+  pending_action?,
+  remaining_delay_support,
+  observation/clock_epoch,
+  immutable model/version
+)
+```
+
+no-write 必須保留 pending countdown；相同 observation 的 hidden branches
+必須先 merge，再讓 controller maximization。當前 formal/oracle/shadow 已涵蓋
+這些語義，但 live caller 仍有 active-equals-held estimator fallback。這是
+correctness promotion gate，不是一般效能工作。
+
+### 4.2 Finite model 為何 empty
+
+要分開：
+
+- spatial cell conservatism；
+- horizon 真正只活不到 80 frames；
+- upstream action 把 root 帶進低-option region；
+- uncertainty inflation；
+- future birth/transform/model coverage；
+- wrong root/clock/version；
+- timeout/cancel/unvisited work；
+- declared finite model 的完整 empty。
+
+這些因素可以重疊。不得強迫每個 root 只有一個「唯一原因」；應保存 factorial
+ablation 和最小 sufficient rescue set。
+
+### 4.3 有效答案能否在 issue 前送達
+
+solver kernel 完成時間不是 delivery time。真正的 budget 是：
+
+```text
+capture/read/decode
+  + queue wait
+  + solve
+  + publication
+  + consumer pickup
+  + fresh certificate
+  + commit/send guard
+```
+
+CE-0131 已證明 isolated kernel 很快不代表 current-issue hybrid 可交付。
+
+### 4.4 程式能否安全擴展與 debug
+
+當 model、planner、service、trace 和 fallback 在同一個 2,000–4,000 行函式中，
+一個「小修改」很難被分類為純重構、策略變更或 authority 變更。模組化的目的
+不是追求漂亮目錄，而是讓每次差分只跨越一個 formal boundary。
+
+## 5. 問題契約
+
+後續 major planner/model change 必須保持下列 contract：
+
+- **Physical objective：** Sakuya/Remilia，Lunatic 與 Extra 的 no-Bomb
+  survival；Hard 是 workload，不是 acceptance target。
+- **Observation：** native game state、capture interval、player/pools/ECL
+  semantic state、active input evidence；screenshot 不作 runtime authority。
+- **Action：** 完整 input mask；持有相同 desired mask 是 no-write；Bomb bit
+  `0x02` 預設禁止。
+- **Uncertainty：** capture span、input pickup、recursive cadence、
+  hidden remaining-delay information set、geometry/model/numeric error、
+  future-event support。
+- **Transition：** non-clairvoyant；相同 observation 先 merge hidden branches。
+- **Horizon/resources：** finite horizon、compute budget、lives/Bombs/Power/
+  phase constraints分開記錄。
+- **Safety：** survival hard；route、damage、Power、items、graze、score 只在
+  hard-admissible set 內排序。
+- **Deadline：** exact immutable version 在 issue lease 內 complete-only
+  publication；miss 使用已聲明 fallback。
+- **Fallback：** ordinary live Boolean + fresh local hard certificate；
+  partial-survival 只有在 exact witness 完整、版本新鮮時才可取得 degraded
+  authority。
+
+## 6. 不再使用 overloaded `empty`：正交結果模型
+
+每次 global/root query 至少輸出五個正交欄位：
+
+```text
+ComputationStatus:
+  COMPLETE | INCOMPLETE | CANCELLED | DEADLINE
+
+FiniteModelStatus:
+  NONEMPTY | EMPTY | NOT_DETERMINED
+
+CoverageStatus:
+  COVERED | SENSOR_INCOMPLETE | FORECAST_UNKNOWN
+  | CLOCK_INVALID | MODEL_MISMATCH
+
+DeliveryStatus:
+  FRESH | STALE | LATE | WRONG_ROOT | WRONG_EPOCH | NOT_PUBLISHED
+
+AuthorityStatus:
+  LIVE_LOWER_MASK | DEGRADED_PARTIAL_WITNESS | TELEMETRY_ONLY | NONE
+```
+
+另附可多選的 `DiagnosisTag`：
+
+```text
+SPATIAL_AMBIGUITY
+SHORT_HORIZON_ONLY
+UNCERTAINTY_SENSITIVE
+FUTURE_BIRTH_GAP
+ROUTE_OR_TUBE_COLLAPSE
+TERMINAL_CONTRACT_SENSITIVE
+PUBLICATION_MISMATCH
+UNRESOLVED_ACTIONS
+```
+
+規則：
+
+1. `lower_mask != 0` 才能提供 ordinary lower authority。
+2. `lower_mask == 0` 且 `upper_mask != 0` 是 unresolved。
+3. `lower_mask == upper_mask == 0` 只在 upper 本身 sound、complete 時說
+   `EMPTY`；仍需另看 `CoverageStatus` 才能談 physical meaning。
+4. timeout、candidate exhaustion、unvisited actions 永遠不是 empty proof。
+5. `COARSE_FALSE_EMPTY` 是跨模型 offline diagnosis，不是單次 live result。
+
+## 7. Current code audit
+
+行數只是 signal；以下問題來自責任與生命週期混合。
+
+| 檔案/符號 | 當前規模 | 實際混合的責任 | 決定 |
+| --- | ---: | --- | --- |
+| `scripts/corridor_planner.py` | 1,699 行 | hazard types、scalar/native clearance、legacy forward DP、robust build、uniform refinement、rollout、timing | 搬入 game-neutral package；根檔保留薄 facade |
+| `_plan_robust_corridor()` | 430 行 / 14 參數 | grid/clearance、query problem、hook side effect、viability、refinement、safety value、rollout、result | 拆成 prepare/solve/refine/rollout |
+| `_hazard_clearance_volume()` | 196 行 | backend dispatch、四種 geometry、native fallback | 獨立 clearance builder/backend |
+| `scripts/th08_corridor_runtime.py` | 897 行 | solve、audit write、prewarm service、publication query、retirement、commitment | artifact、resource owner、publication 分開 |
+| `CorridorSolution` | process-local mutable aggregate | plan、Future、workspace、service、audit、worker settings | 禁止作 IPC/publication；拆 immutable payload 與 closeable handles |
+| `scripts/th08_live_dodge_agent.py` | 10,579 行 | address/layout、decode、sensing、local planner、issue、services、scene/clock、trace、CLI | 只保留 CLI/orchestration facade |
+| `choose_action()` | 2,225 行 / 48 參數 | validation、projection、certificate、beam、supplemental、selection、damage、retry、Decision build | `LocalPlanRequest -> LocalProposal` staged pipeline |
+| `run()` | 3,748 行 | resource ownership、wait/scene、capture、services、plan、issue、trace、cleanup | session context + bounded `step()` stages |
+| `Decision` | 約 50 個欄位 | proposal、hard cert、global guidance、issue result、shadow diagnostics、timing | proposal/issued/telemetry 分型 |
+| `scripts/touhou_control/native_backend.py` | 3,656 行 | loader、ctypes ABI、array coercion、geometry/local/viability/pipeline/belief wrappers | domain bindings + compatibility facade |
+| `native/robust_viability_kernel.cpp` | 4,108 行 | geometry、decode、local hazards、beam、global DP、query survival、C ABI | proper multi-translation-unit library |
+| native implementation headers | 873/1,477/2,453 行 | class implementation與 exported ABI 混在 header，依賴 include 順序 | self-contained internal headers + `.cpp` |
+| giant tests | 1,270/3,180 行 | 多個 domain 的 fixtures/patch paths | 隨 canonical module 拆分；保留 facade smoke |
+
+### 7.1 `corridor_planner.py` 的具體設計問題
+
+1. `RobustControlSpec.pre_viability_problem_hook` 讓純 planner 在 solve 中途啟動
+   runtime service；這是 inverted control。
+2. `CorridorPlan(frozen=True)` 仍持有 mutable NumPy policy/problem objects；
+   nominal immutability 不等於 publication immutability。
+3. `_plan_robust_corridor()` 在 coarse empty 後做 full-field refinement；這條
+   legacy shadow path 與未來 query-local AMR 不應共用一個模糊開關。
+4. legacy forward corridor 與 authority-bearing robust viability 由同一
+   `plan_corridor()` 以 `robust_control is None` 分派，讓兩種 claim 很容易混淆。
+5. analysis/tests 直接 import `_axis`、`_hazard_clearance_volume`，以及 patch
+   `corridor_planner.build_robust_viability_policy`；搬檔會被 implementation-path
+   coupling 阻擋。
+
+### 7.2 Live agent 的具體設計問題
+
+1. `choose_action()` 同時是 request validator、hazard preparer、hard
+   certifier、beam engine、optional service client、selector 和 result serializer。
+2. recursive `_viability_retry` 以再次呼叫 48-argument function 實作 mode
+   change，讓 timing、authority 與 metadata binding 難追蹤。
+3. `Decision` 在 proposal 和 issue recertification 之間用 `replace()` 演化；
+   雖然目前 recertifier 已修，type 本身仍允許舊 action 的 repair/recovery/
+   survival fields 留下。
+4. backend mode 是 module-level mutable state，測試和多服務容易產生隱藏依賴。
+5. `run()` 直接組裝巨大 JSON dict；trace schema 修改會接觸 issue loop。
+6. 多個 executor、Future、workspace 的 close/cancel/retire 邏輯集中在
+   `finally`，難以單獨測 crash 與 partial initialization。
+
+### 7.3 Native 的具體設計問題
+
+1. `robust_viability_kernel.cpp` 是 unity translation unit；在檔案中段 include
+   `robust_transition_table.hpp`，尾段再 include supplemental/pipeline/belief
+   implementation headers。
+2. headers 依賴先前已定義的 `Sample`、`PipelineLabel`、`TOUHOU_EXPORT` 和
+   status constants，並非 self-contained。
+3. 同一 binary 暴露 43 個 `touhou_*` symbols，但沒有一個 checked-in
+   authoritative ABI header/manifest。
+4. C wrappers、legacy v1-v6 adapters、workspace implementation 和 recurrence
+   在同檔，任何整理都可能同時改 ABI 與 algorithm。
+5. `thread_local viability_worker_limit` 是隱藏 solve input；setter 必須在真正
+   native call 的同一 OS thread 執行。
+
+## 8. 目標目錄與模組邊界
+
+這是目標形狀，不要求一個 commit 全部建立：
+
+```text
+scripts/
+  corridor_planner.py                 # temporary compatibility facade
+  th08_live_dodge_agent.py            # CLI + composition root only
+
+  touhou_control/
+    corridor/
+      model.py                        # bounds, hazards, configs, result types
+      grid.py                         # lattice and conservative transfer helpers
+      clearance.py                    # scalar oracle and volume protocol
+      prepared.py                     # PreparedCorridorProblem
+      robust.py                       # robust finite-model solve
+      refinement.py                   # explicit strategy interface
+      rollout.py                      # representative path only
+      forward_legacy.py               # non-authoritative legacy planner
+      api.py
+
+    local_planner/
+      model.py                        # request/proposal/node types
+      projection.py
+      certificate.py
+      beam.py
+      ranking.py
+      planner.py
+
+    native/
+      library.py                      # DLL/SO load and status
+      arrays.py                       # dtype/contiguity/capacity validation
+      geometry.py
+      local.py
+      viability.py
+      pipeline.py
+      belief.py
+
+    authority/
+      identity.py
+      status.py
+      issue_transaction.py
+
+  th08_control/
+    layout.py                         # TH08 addresses, strides, masks
+    model.py
+    sensing/
+      snapshot.py
+      bullet_pool.py
+      laser_pool.py
+      enemy_pool.py
+      item_pool.py
+    projection.py
+    local_adapter.py
+    corridor_adapter.py
+    policy_runtime.py
+    scene_clock.py
+    trace.py
+    session.py
+```
+
+Native 目標：
+
+```text
+native/
+  include/touhou_native/
+    export.hpp
+    status.hpp
+    abi.h
+    lattice.hpp
+    survival_label.hpp
+
+  src/
+    geometry/
+      clearance_volume.cpp
+      trajectory_clearance.cpp
+      local_hazards.cpp
+    decode/
+      bullet_pool.cpp
+    local/
+      beam_reduce.cpp
+      supplemental_workspace.cpp
+    viability/
+      transition_table.cpp
+      boolean.cpp
+      safety_value.cpp
+      survival.cpp
+      losing_labels.cpp
+    pipeline/
+      direct_workspace.cpp
+      belief_workspace.cpp
+      query_local.cpp
+    abi/
+      geometry_abi.cpp
+      local_abi.cpp
+      viability_abi.cpp
+      pipeline_abi.cpp
+```
+
+`scripts/tools/build_native_planner.py` 改用 checked-in explicit `SOURCES`，不用
+glob。`robust_viability_kernel.cpp` 最終刪除或只留不含 implementation 的
+compatibility entry；不能再是 unity include aggregator。
+
+## 9. 必須建立的窄資料契約
+
+### 9.1 `PreparedCorridorProblem`
+
+```text
+PreparedCorridorProblem {
+  immutable identity/model/terminal digests
+  x_axis, y_axis
+  clearance lower volume
+  optional upper/ambiguity volume
+  action and transition model
+  exact root enclosure
+  preparation timing
+}
+```
+
+流程改成：
+
+```text
+request
+  -> prepare_corridor_problem()
+  -> optional background prewarm starts from explicit prepared object
+  -> solve_prepared_boolean()
+  -> optional refinement/metadata
+```
+
+這會移除 `pre_viability_problem_hook`，也讓 coarse、AMR、partial survival 和
+benchmark 共用同一 immutable input。
+
+### 9.2 Planner artifact、runtime handles、publication 分離
+
+```text
+CorridorSolveArtifact      # process-local arrays/policies/diagnostics
+CorridorRuntimeHandles     # Future/workspace/service; explicit close()
+PolicyPublication          # small immutable consumer payload
+```
+
+publication 不得持有 Future、executor、workspace pointer 或 mutable NumPy view。
+
+### 9.3 Local proposal 與 issued decision 分離
+
+```text
+LocalPlanRequest
+  -> LocalProposal
+  -> fresh capture + all-action certificate
+  -> IssueTransaction.commit()
+  -> IssuedDecision
+```
+
+`LocalProposal` 可以含 ranking/shadow diagnostics，但沒有 issue authority。
+`IssuedDecision` 的 selected-action metadata 必須從該 action 的 certificate row
+重新建構，不可從舊 proposal `replace()`。
+
+### 9.4 Identity
+
+至少包含：
+
+```text
+gameplay/clock epoch
+source and target physical-frame interval
+hazard/model/uncertainty/terminal digests
+grid/action/delay/cadence IDs
+exact augmented root
+absolute deadline and lease
+```
+
+identity 應是 value object；cache、publication、trace、candidate witness 使用
+同一 canonical encoding。
+
+## 10. 結構線：逐 checkpoint 重構順序
+
+### R0 — Characterization baseline
+
+在搬檔前建立真正保護語義的 baseline：
+
+1. 固定 corridor deterministic fixtures，記錄：
+   - clearance sign/selected samples；
+   - viable states 和 safe-action masks；
+   - path/gate/reason；
+   - query-local labels；
+   - 排除 wall-time fields 的 canonical digest。
+2. 固定 local `LocalProposal/Decision` 的 action、hard components、certificate
+   rows 和 issue transaction record。
+3. 保存 Linux/Windows native export manifest；目前 Linux 有 43 個
+   `touhou_*` exports。
+4. 保存 public import compatibility 清單。
+5. characterization tests 不測檔案行數、CLI help 或純 schema plumbing。
+
+退出條件：現有 quick suite 和 retained semantic roots 全過；baseline 能在搬檔
+後逐位/逐欄位比較。
+
+### R1 — Corridor package
+
+按四個小 checkpoint：
+
+1. **Types/grid/geometry move：**
+   - 搬 hazard/config/result types；
+   - 搬 scalar grid/clearance helpers；
+   - `corridor_planner.py` re-export 舊 public names。
+2. **Prepared problem：**
+   - 引入 `PreparedCorridorProblem`；
+   - prepare 與 Boolean solve 分離；
+   - 移除 callback side effect。
+3. **Algorithm split：**
+   - robust、representative rollout、legacy forward、uniform full-field
+     refinement 分檔；
+   - 現有 uniform refinement 明確命名 `LegacyFullFieldRefinement`，保持
+     shadow-only。
+4. **Runtime ownership split：**
+   - `CorridorSolution` 拆 artifact/handles/publication；
+   - audit writer 和 prewarm lifecycle 離開 solver。
+
+每個 checkpoint 都先保持結果 exact parity；不得順手改 terminal、grid、
+ranking 或 timing policy。
+
+### R2 — Python native bindings
+
+1. 把 library load、function cache、status conversion 移入
+   `touhou_control.native.library`。
+2. 依 geometry/local/viability/pipeline/belief 拆 ctypes signature 與 wrapper。
+3. `native_backend.py` 暫時只做 compatibility re-export。
+4. array coercion 統一走 typed helpers，但第一輪必須保持現有 copy/
+   `ascontiguousarray` 行為；copy elimination 是另一個 performance checkpoint。
+
+退出條件：每個 wrapper 的 dtype、shape、return code、exception 和 optional
+symbol fallback 完全相同。
+
+### R3 — Native C++ proper translation units
+
+順序：
+
+1. 先抽 self-contained `export/status/lattice/survival_label` headers；
+2. 再把 C ABI wrappers 與 implementation 分開；
+3. 依 domain 搬到多個 `.cpp`；
+4. legacy v1-v6 wrappers 只適配到 canonical newest internal params；
+5. 更新 explicit build source list；
+6. 最後移除 unity include order。
+
+本 checkpoint 禁止同時：
+
+- 改 recurrence；
+- 改 float comparison；
+- 改 worker count/thread pool；
+- 做 squared-math/SIMD；
+- 改 C ABI。
+
+退出條件：
+
+- 43-symbol export manifest 相同；
+- Linux/Windows 都能 rebuild/load；
+- scalar/native/semantic parity zero mismatch；
+- ASan/UBSan 的 explicit research build 通過；
+- quick suite Linux/Windows 通過。
+
+### R4 — Local planner 與 issue transaction
+
+1. 先建立 nested request types，取代 48 個平坦參數：
+   - physical/hazard snapshot；
+   - actuator pipeline；
+   - global guidance；
+   - planner config；
+   - objective context；
+   - optional completed-service results。
+2. 拆 `choose_action()`：
+   - request validation；
+   - hazard preparation；
+   - hard preflight；
+   - baseline beam；
+   - completed supplemental lookup；
+   - ranking；
+   - proposal assembly。
+3. 把 recursive retry 改成顯式 mode/state transition，不重新進入整個 planner。
+4. 把 `recertify_action_for_fresh_hazards()` 變成
+   `IssueTransaction.commit()`。
+5. 分開 `LocalProposal`、`ActionCertificateSet`、`IssuedDecision`、
+   `DecisionTelemetry`。
+6. root `choose_action()` 暫作 compatibility wrapper，直到所有 tests/
+   benchmarks 遷移。
+
+退出條件：
+
+- fresh/global intersection 歷史反例 0 violation；
+- action change 後 metadata 逐欄位重綁；
+- no-Bomb invariant；
+- planner action/hard vector/canonical telemetry parity；
+- local timing不因純重構顯著回歸。
+
+### R5 — Live session
+
+1. 抽 `LiveSession` context manager，只負責資源 acquire/release。
+2. 抽 `Sensor`, `PolicyCoordinator`, `SceneClockCoordinator`,
+   `IssueController`, `TraceSink`。
+3. 一次 iteration 變成有界 stages：
+
+   ```text
+   capture
+   -> update epoch/services
+   -> query immutable publication
+   -> local proposal
+   -> fresh issue transaction
+   -> send
+   -> enqueue trace
+   ```
+
+4. root `th08_live_dodge_agent.py` 只保留 parser、composition root 和 `main`。
+5. 所有 executor/workspace 有單一 owner；close/cancel idempotent。
+6. trace record builder 離開 issue path；第一輪仍可同步寫，binary ring 是後續
+   performance experiment。
+
+退出條件：
+
+- identity/foreground/route/scene guards unchanged；
+- 所有 exception/stop path 都 release keys；
+- exact trace fields 和 supervisor behavior parity；
+- Windows focused physical no-strategy-change smoke gate。
+
+## 11. 研究線：演算法與 authority 路線
+
+### G0 — Exact-root loss dossier
+
+先擴充現有 61-root audit，而不是先寫新 planner：
+
+1. 保存每個 hit 前首次 kernel exhaustion root，以及之前至少 240 frames 的
+   nonempty→empty transition。
+2. 對同一 immutable root 做：
+   - 16/8/4 px；
+   - H=32/48/64/80；
+   - uncertainty factor ablation；
+   - delay/cadence support；
+   - terminal contract；
+   - future-birth coverage；
+   - exact root/pipeline variant；
+   - complete/incomplete solve。
+3. 因素可重疊；報告 minimal sufficient rescue combinations。
+4. 七個 source capsule 缺少 later contact projectile 的案例單列
+   `FUTURE_BIRTH_GAP`，不可和 false-empty 混合。
+
+退出條件：
+
+- 61 roots 可 deterministic replay；
+- 已知 6 spatial 和 8 short-horizon observations 可重現；
+- timeout/unvisited 沒有被標 empty；
+- 每個結論帶 observed/inferred/hypothesized label。
+
+### G1 — Model coverage、pipeline root 與 clock boundary
+
+這是 live promotion 的 correctness gate，與 offline solver 工作可平行：
+
+1. 將 active/held/pending/remaining-support root 進入 canonical identity。
+2. 驗證 multikey transition、no-write carry、one-pending last-write-wins、
+   observed pickup 和 estimator continuity。
+3. clock sensor 保持 shadow；CE-0120 沒有物理證據前，manager frame freeze 或
+   repeated wall threshold 都不能自動 reset authority。
+4. 每個 hazard slab 提供 `DETERMINISTIC / FINITE_SUPPORT /
+   BOUNDED_ENVELOPE / UNKNOWN` coverage。
+5. unknown future event 進入 root-reachable tube 時，截斷 coverage 或標
+   model unknown；不能當 free space。
+
+退出條件：independent scalar belief oracle、packed/native parity、Windows
+pickup trace 與 focused physical gate 全過，才可討論完整 pipeline live
+authority。
+
+### G2 — Dual-bound query-local refinement
+
+在 `PreparedCorridorProblem` 上實作：
+
+1. 先定義 16 px lower/upper cell 和 transition 量詞；
+2. exact root forward tube 與 terminal co-reachable tube；
+3. 只細化 `L=0,U=1` 且可影響 root action 的 8 px patch；
+4. 必要時 4 px，帶 conservative halo；
+5. timeout 只發布已完成 lower mask；
+6. root-action mask 一旦足以 issue 即停止，不追求全場完成。
+
+hard gate：
+
+```text
+L_mixed ⊆ exhaustive_fine_reference ⊆ U_mixed
+```
+
+並逐 root action、pipeline plane 和 hidden branch 比較；不能只比較
+`state_viable`。
+
+退出條件：
+
+- zero false-safe；
+- 六個 known spatial cases 被 sound lower 解釋；
+- policy age/delivery 過 Windows gate；
+- uniform full-field 4 px 仍不進 live。
+
+### G3 — Exact partial-survival lower witness
+
+延用 formal belief recurrence：
+
+```text
+J(s) = 0                                      if current state unsafe
+J(s) = 1 + max_action min_hidden J(successor) otherwise
+```
+
+要求：
+
+1. exact augmented root；
+2. root actions 不受 proposal pruning；
+3. continuation policy causal、observation-compatible；
+4. 所有要發布的 root action complete；
+5. witness 含 worst branch、guaranteed frames、bottleneck、policy digest；
+6. exact version/newest-target/complete-only；
+7. issue 前仍與 fresh local hard set 交集。
+
+兩個不同 mode：
+
+- `POST_FINITE_MODEL_EMPTY_PARTIAL_WITNESS`
+- `PARTIAL_WITNESS_ON_UNRESOLVED`
+
+第二個只表示「目前至少有這個可達 lower bound」，不表示完整 horizon 已證明
+無解。
+
+### G4 — 更早保存 feasibility
+
+不重啟已被 CE-0131 拒絕的 current-issue supplemental lane。新的方案必須在
+較早 causal version 中完成：
+
+1. 在 global solve 內或獨立較早 snapshot 計算 continuation/repair metadata；
+2. authoritative Boolean mask 先發布；
+3. metadata 只有 exact same version 且已完成時才能參與 hard-winning actions
+   之間的排序；
+4. terminal reserve 先 shadow，因為它可能縮小當前 kernel；
+5. 評估 first exhaustion frame、pre-hit lower volume、min branch、
+   boundary depth，而不是只看當前 action change；
+6. 若需要 process isolation，先由 age ledger/ETW 證明資源 contention。
+
+這是「避免走進後來的 empty」，不是「把已 empty root 說成 viable」。
+
+### G5 — Future hazard event coverage
+
+逐事件類做，不建立一個未驗證的萬能 ECL simulator：
+
+1. birth；
+2. stop/resume；
+3. redirect/reversal；
+4. laser width/length/phase；
+5. player-aim dependency；
+6. enemy-body contact enable/disable；
+7. unknown callback。
+
+每類都要有 IDA/static conclusion、native runtime trace、update-order fixture、
+semantic fuzzer 和 retained residual report。靜態分析結論標 inferred，runtime
+trace 才是 observed。
+
+## 12. Performance 路線
+
+### 現在就做
+
+- 在 trace module 抽出後加 record-only QPC age ledger；
+- 報 p50/p95/p99/p99.9/max、deadline slack、cancelled work；
+- 分 capture/read/decode/queue/solve/publish/pickup/cert/commit/send；
+- 保留 persistent RPM destination buffer；
+- 記錄 actual worker count 和 executor/native oversubscription。
+
+### 只有 profile 觸發才做
+
+- prepared main-beam native workspace；
+- hard/soft geometry split；
+- scratch reuse；
+- persistent worker team；
+- process/shared-memory isolation；
+- CPU affinity；
+- adaptive full/sparse reads；
+- SIMD/PGO/LTO。
+
+### recurrence 穩定後才做
+
+- bitset Boolean predecessor；
+- dirty-cone rolling repair；
+- occupancy/EDT；
+- event-aligned time layers。
+
+每個 optimization 必須單獨提交。只要 hard mask 變化，就按 algorithm change
+審查，不得叫「純效能 patch」。
+
+## 13. 最先執行的六個 code checkpoints
+
+1. **Corridor characterization + package skeleton。**
+   不改結果，建立 canonical digests 和 compatibility facade。
+2. **Corridor types/grid/clearance extraction。**
+   將 game-neutral code 移入 `touhou_control.corridor`。
+3. **Prepared problem + solve/runtime split。**
+   移除 `pre_viability_problem_hook`，分開 artifact/handles/publication。
+4. **G0 loss dossier v2。**
+   用新的 prepared seam 重放 61 roots 和 first-exhaustion windows。
+5. **Python native binding split，再做 C++ multi-TU split。**
+   先 bindings、後 binary；兩個獨立 checkpoints。
+6. **LocalPlanRequest/LocalProposal/IssuedDecision extraction。**
+   然後才拆 live `run()`。
+
+G2/G3 的 algorithm implementation 在第 3–4 步的資料契約穩定後開始；不必
+等待整個 live agent 重構完成。R5 完成前，任何新 live authority promotion
+仍需額外審查。
+
+## 14. 驗證矩陣
+
+| 變更 | 最小 gate | 完整 gate |
+| --- | --- | --- |
+| Python 純搬檔 | focused owner tests、canonical digest、`git diff --check` | Linux quick suite |
+| corridor API split | corridor/runtime/adapter tests、61-root replay sample | full quick suite |
+| Python native bindings | wrapper tests、native load、semantic differential | Linux + Windows quick |
+| C++ multi-TU | build、43 exports、focused native/oracle | ASan/UBSan research + Linux/Windows quick |
+| local planner split | local/certificate/beam/issue property tests | semantic gate + Windows direct roots |
+| issue transaction | historical outside-mask/metadata counterexamples | focused physical transaction gate |
+| algorithm mask change | independent oracle、adversarial corpus | retained roots + Windows delivery + focused physical |
+| process/IPC | torn-read/crash/latest-wins tests | ETW paired Windows gate |
+
+結構 checkpoint 不需要 full physical route；策略、model、authority 或 delivery
+行為一旦改變，才進 focused physical gate，再決定是否 full route。
+
+## 15. Stop rules
+
+遇到以下任一情況立即停止 promotion並縮小 counterexample：
+
+1. hard safe-action mask、clearance sign、transition endpoint 或 root label mismatch；
+2. action 換了但 metadata 仍來自舊 action；
+3. lower/upper containment 失敗；
+4. timeout/cancel/unvisited 被標為 empty；
+5. exact version/root/epoch/lease 不一致；
+6. p99 改善但 policy age、deadline miss 或 game contention 惡化；
+7. model confidence 不足卻擴大 horizon authority；
+8. process crash/torn publication 可被 issue consumer 接受；
+9. 新的 native hit、Bomb、missed transition 或 clock counterexample。
+
+不要為了讓重構通過而弱化測試，也不要用舊 trace 的有限欄位推導未保留的
+alternate-action hard safety。
+
+## 16. 明確不做的事
+
+- 不做整倉 C++ rewrite。
+- 不在重構 commit 中改策略排序。
+- 不把 `corridor_planner.py` 直接刪掉而一次改完所有 import。
+- 不用行數測試代替 behavior tests。
+- 不讓 analysis/benchmark import canonical module 的 private underscore
+  helpers；需要的能力升格成明確 research API。
+- 不讓 `CorridorSolution`、Future 或 native workspace 穿過 process
+  publication boundary。
+- 不把 terminal heuristic、upper set、learned score 或 SIPP proposal 當
+  live lower authority。
+- 不重啟 CE-0131 已拒絕的 current-issue supplemental 實作。
+
+## 17. 最終路線摘要
+
+最終採用的路線是：
+
+1. 先把可重放行為與 ABI 鎖住；
+2. 先拆 corridor，建立 prepared immutable problem；
+3. 再拆 Python native binding 與 C++ translation units；
+4. 再把 local proposal、fresh certificate、issue transaction 分型；
+5. 最後把 live loop 縮成清楚的 session stages；
+6. 演算法先做 exact-root loss dossier 和正交狀態；
+7. 再做 sound lower/upper query-local refinement；
+8. 同時建立 exact partial-survival lower witness；
+9. pre-loss reserve 只從較早 global causal version 回來，不走 current-issue
+   supplemental；
+10. model coverage、clock/pipeline correctness 和 Windows delivery gate
+    決定能否 promotion；
+11. bitset、incremental、SIMD、process isolation 都是後續加速器，不是當前
+    核心答案。
+
+這條路線既直接針對 38/39 post-empty contacts，也降低下一輪研究把 model、
+algorithm、delivery 與 code movement 混為一談的風險。

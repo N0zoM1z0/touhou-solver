@@ -4064,3 +4064,45 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   and the complete quick suite passed `584/584` on Linux in `5.213 s` and
   Windows in `14.365 s`; `git diff --check` passed.
 - **Design note:** `notes/PUBLIC_RELEASE_AND_TEST_SUITE_AUDIT_20260727.md`.
+
+## 2026-07-27: Consolidated Research And Refactor Roadmap
+
+- **Scope:** Reviewed the repository at baseline
+  `52f746f744760a059c70fd3731b4952f1ecae6f3`, including the live handoff,
+  strategy ledger, formal contracts, retained Hard evidence, planner/runtime
+  call boundaries, native ABI/build boundary, and the two external review
+  packages supplied under `audits/7.27/`.
+- **External-package provenance:** Verified and unpacked
+  `touhou_solver_deep_review_20260727.zip` at SHA-256
+  `7fa79e025dade5a0eafcf595a8df5d35031755e695b63eed9e25fd3d0ab7263e`
+  and `touhou_solver_deep_analysis_2026-07-27.zip` at SHA-256
+  `0e84318eb6278e5cd33c8731b506e6173dc7438ff2e7db99e795c3b4b3a93c62`.
+  Both internal `SHA256SUMS.txt` manifests pass. These packages provide
+  static review and proposals, not new runtime or physical evidence.
+- **Observed maintenance boundary:** `corridor_planner.py` is 1,699 lines,
+  with a 430-line robust solve path; `th08_live_dodge_agent.py` is 10,579
+  lines, with 2,225-line `choose_action()` and 3,748-line `run()` paths;
+  `native_backend.py` is 3,656 lines; and the 4,108-line native unity
+  translation unit includes three implementation headers of 1,477, 2,453,
+  and 873 lines. The current Linux library exposes 43 `touhou_*` symbols.
+- **Decision:** Use two separately gated tracks. The structure track first
+  characterizes behavior/ABI, then splits corridor preparation/solve/runtime,
+  Python native bindings, C++ translation units, local proposal/issue
+  transaction types, and live session stages. The research track first builds
+  an exact-root loss dossier and orthogonal computation/model/coverage/
+  delivery/authority statuses, then implements sound dual-bound query-local
+  refinement, exact partial-survival lower witnesses, and pre-loss reserve
+  from an earlier causal global version.
+- **Corrections to proposals:** A stricter terminal set cannot rescue an
+  already empty root; one overloaded tri-state is insufficient; complete
+  partial-survival witnesses remain attainable lower bounds on unresolved
+  roots under a distinct label; process isolation follows age-ledger/ETW
+  attribution; and current-issue supplemental delivery remains rejected by
+  CE-0131.
+- **Authority:** This checkpoint changes no recurrence, model, live action,
+  strategy promotion, C ABI, or counterexample status. The unpacked external
+  audits remain local review inputs and are not repository artifacts.
+- **Validation:** Both unpacked-package manifests pass; the complete Linux
+  quick suite passes `584/584` in `5.395 s`; and `git diff --check` passes.
+- **Design note:**
+  `notes/review/CONSOLIDATED_RESEARCH_AND_REFACTOR_ROADMAP_20260727.md`.

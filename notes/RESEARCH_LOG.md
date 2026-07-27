@@ -5238,3 +5238,25 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural native-memo ownership only. This remains the
   documented legacy always-issue shadow/offline workspace; recurrence, ABI,
   exact-version consumption, live authority, and strategy are unchanged.
+
+### 2026-07-27 — Belief pipeline-workspace extraction
+
+- **Observed structural change:** Moved the complete
+  `BeliefPipelineSurvivalWorkspace` into
+  `touhou_control.query_survival_belief_workspace`. The module owns native
+  construction, no-write belief queries, budgeted attainable continuation,
+  admissible upper certification, and action-column recommendation. The
+  public facade is now 402 lines.
+- **Boundary:** The class moved atomically and continues to use the shared
+  stale-version error. Native ABI calls, action masks, unresolved sets,
+  continuation policy, delay buckets, policy version, and result decoding are
+  unchanged. Its problem dependency is type-only, avoiding a runtime import
+  cycle.
+- **Validation:** Query-survival, complete-mask belief, variable-cadence
+  oracle, and policy-synthesis suites pass `17/17`, `3/3`, `8/8`, and `4/4`.
+  Ruff, byte compilation, and `git diff --check` pass. Quick suites pass
+  `699/699` on Linux in `9.407 s` and Windows in `13.189 s` with three
+  platform skips.
+- **Authority:** Structural belief-workspace ownership only. Formal
+  recurrence, independent scalar oracle, native ABI, proof authority,
+  publication, live action authority, and strategy are unchanged.

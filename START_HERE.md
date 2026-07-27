@@ -279,11 +279,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   context; the facade preserves both the public enumerator and historical
   private prewarm import. The legacy versioned native memo, cancellation and
   deadline aliases, stale-version error, prewarm/merge, and lookup-only
-  consumer now live in `query_survival_workspace`. The facade is 898 lines.
-  Focused
-  query-survival/prewarm tests pass `17/17`, `5/5`, and `2/2`; quick suites
-  pass `699/699` on Linux in `9.182 s` and Windows in `13.093 s` with three
-  skips.
+  consumer now live in `query_survival_workspace`. The non-clairvoyant
+  belief workspace, attainable-budget queries, admissible upper
+  certification, and action-column recommendation now live together in
+  `query_survival_belief_workspace`. The facade is 402 lines. Focused
+  query-survival/complete-mask/variable-cadence/policy-synthesis tests pass
+  `17/17`, `3/3`, `8/8`, and `4/4`; quick suites pass `699/699` on Linux in
+  `9.407 s` and Windows in `13.189 s` with three skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

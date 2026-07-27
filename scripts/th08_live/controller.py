@@ -180,6 +180,10 @@ from th08_live.iteration import (
     PublishedGuidance,
     ServiceUpdate,
 )
+from th08_live.issue_overrides import (
+    apply_deadline_hold,
+    apply_post_hit_input_overrides,
+)
 from th08_live.local_certificates import (
     control_prefix_hazards as _control_prefix_hazards_impl,
     legacy_robust_action_certificates as _legacy_robust_action_certificates_impl,
@@ -3275,21 +3279,13 @@ def _run_live_session(
             planned_action = decision.action
             planned_mask = decision.mask
             action_deadline_missed = action_alignment.deadline_missed
-            if action_deadline_missed:
-                # Do not inject a newly selected direction after its robust
-                # delay certificate has expired. Holding the last actuator
-                # command avoids adding a second unmodeled transition; the
-                # next iteration replans from a fresh native snapshot.
-                decision = replace(
-                    decision,
-                    mask=previous_mask,
-                    action=(
-                        f"{_action_name_from_mask(previous_mask)}"
-                        "+deadline_hold"
-                    ),
-                    bomb=False,
-                    planned_focus=bool(previous_mask & FOCUS),
-                )
+            decision = apply_deadline_hold(
+                decision,
+                deadline_missed=action_deadline_missed,
+                previous_mask=previous_mask,
+                focus_bit=FOCUS,
+                action_name_from_mask=_action_name_from_mask,
+            )
             hit_started = phase_now == 2 and previous_action_phase != 2
             hit_contact_observation = None
             if hit_started:
@@ -3305,36 +3301,27 @@ def _run_live_session(
                     and stop_after_frame is None
                 ):
                     stop_after_frame = counter_at_action + args.post_hit_frames
-            can_deathbomb = (
-                not args.no_bomb
-                and phase_now == 2
-                and predeath_now > 0
-                and resources["bombs"] > 0
-                and counter_at_action - last_bomb_counter > 30
-            )
-            if can_deathbomb:
-                decision = replace(
-                    decision,
-                    mask=decision.mask | BOMB,
-                    action=f"{decision.action}+deathbomb",
-                    bomb=True,
-                )
-            if decision.bomb:
-                last_bomb_counter = counter_at_action
-            auto_confirm_mask, auto_confirm_event = auto_confirm.apply(
-                frame=counter_at_action,
-                eligible=_auto_confirm_eligible(
+            issue_overrides = apply_post_hit_input_overrides(
+                decision,
+                no_bomb=args.no_bomb,
+                phase_now=phase_now,
+                predeath_now=predeath_now,
+                bomb_stock=float(resources["bombs"]),
+                counter_at_action=counter_at_action,
+                last_bomb_counter=last_bomb_counter,
+                bomb_bit=BOMB,
+                auto_confirm_eligible=_auto_confirm_eligible(
                     player_phase=phase_now,
                     bomb_active=bool(player["bomb_active"]),
                     active_bullets=len(bullets),
                     active_lasers=len(lasers),
                 ),
-                mask=decision.mask,
+                auto_confirm_apply=auto_confirm.apply,
             )
-            if auto_confirm_event is not None:
-                decision = replace(decision, mask=auto_confirm_mask)
-            if args.no_bomb and decision.mask & BOMB:
-                raise RuntimeError("no-bomb policy produced a Bomb input")
+            decision = issue_overrides.decision
+            can_deathbomb = issue_overrides.can_deathbomb
+            auto_confirm_event = issue_overrides.auto_confirm_event
+            last_bomb_counter = issue_overrides.last_bomb_counter
             candidate_verifier_outcome: (
                 CandidateVerifierOutcome | None
             ) = None

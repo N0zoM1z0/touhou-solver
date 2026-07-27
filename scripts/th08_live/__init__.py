@@ -6,6 +6,11 @@ from .fresh_issue import (
     recertify_fresh_enemy_prefix,
 )
 from .issue_controller import InputDispatch, IssueController
+from .issue_overrides import (
+    IssueInputOverrideResult,
+    apply_deadline_hold,
+    apply_post_hit_input_overrides,
+)
 from .iteration import (
     CapturedIteration,
     FreshIssueResult,
@@ -81,6 +86,7 @@ __all__ = [
     "ITEM_STRIDE",
     "InputDispatch",
     "IssueController",
+    "IssueInputOverrideResult",
     "Item",
     "LASER_POOL_BASE",
     "LASER_POOL_SIZE",
@@ -100,6 +106,8 @@ __all__ = [
     "ServiceUpdate",
     "SpellEnemyBodyGuard",
     "TraceSink",
+    "apply_deadline_hold",
+    "apply_post_hit_input_overrides",
     "auto_confirm_eligible",
     "frozen_auto_confirm_eligible",
     "input_clock_message_key",

@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Tests for sensing and hazard-alignment trace fields."""
+
+from __future__ import annotations
+
+import unittest
+from types import SimpleNamespace
+
+from th08_live.sensing_trace import (
+    SensingTraceInput,
+    build_sensing_trace_fields,
+)
+
+
+class SensingTraceTests(unittest.TestCase):
+    def test_fields_preserve_captured_and_issue_guard_state(self) -> None:
+        active_body = SimpleNamespace(pointer=1, contact=True)
+        dormant_body = SimpleNamespace(pointer=2, contact=False)
+        enemy_prefix = SimpleNamespace(
+            frame_before=100,
+            frame_after=101,
+            bodies=(active_body,),
+            attempts=1,
+        )
+        issue_prefix = SimpleNamespace(
+            frame_before=102,
+            frame_after=103,
+            bodies=(active_body, dormant_body),
+            attempts=2,
+            stable=True,
+        )
+        bullet = SimpleNamespace(
+            original_transform_flags=0x10,
+            transform_runtime=None,
+            velocity_changes=((2, 1.0, 0.0),),
+            callback_phase_state=0,
+            callback_aux_state=1,
+        )
+        issue = SimpleNamespace(
+            pre_issue_action="stay",
+            pre_issue_mask=0x01,
+            post_guard_action="right",
+            post_guard_mask=0x81,
+            decision=SimpleNamespace(issue_recertification="transaction"),
+        )
+        progress = SimpleNamespace(
+            status="active",
+            frame_delta=2,
+            health_delta=-4.0,
+            damage_per_frame=2.0,
+            state=SimpleNamespace(damageable=True),
+        )
+        ecl_snapshot = SimpleNamespace(
+            instruction_pointer=0x5000,
+            timer_fraction=0.5,
+            timer_elapsed=20,
+            time_scale=1.0,
+            tag_mask=0x10,
+        )
+        ecl_lookahead = SimpleNamespace(
+            instructions_scanned=4,
+            stop_reason="horizon",
+            horizon_covered=True,
+        )
+        toggle = SimpleNamespace(
+            frame=5,
+            callback_index=12,
+            tag_mask=0x10,
+            alternate_velocity_x=1.0,
+            alternate_velocity_y=2.0,
+        )
+        guard = SimpleNamespace(body=active_body, contact_enabled=True)
+        trace_input = SensingTraceInput(
+            resources={"bombs": 3.0},
+            stage_route_index=1,
+            spell=4,
+            boss_phase_snapshot=SimpleNamespace(frame=10),
+            boss_phase_error=None,
+            boss_phase_progress=progress,
+            ecl_vm_snapshot=ecl_snapshot,
+            ecl_lookahead=ecl_lookahead,
+            tagged_velocity_toggles=(toggle,),
+            bullets=(bullet,),
+            ecl_event_frame_offset=1,
+            ecl_event_frame_uncertainty=(0, 1),
+            ecl_lookahead_error=None,
+            lasers=(),
+            items=(object(),),
+            enemy_bodies=(active_body, dormant_body),
+            dormant_enemy_body_pointers={2},
+            bullet_frame_before=100,
+            bullet_frame_after=101,
+            enemy_prefix_snapshot=enemy_prefix,
+            enemy_prefix_bodies=(active_body, dormant_body),
+            bullet_capture_span=1,
+            hazard_snapshot_age=2,
+            player_to_hazard_lag=3,
+            ecl_frame_before=100,
+            ecl_frame_after=101,
+            boss_guard_frame_before=100,
+            boss_guard_frame_after=101,
+            enemy_body_snapshot_frame=99,
+            query_frame=103,
+            issue_enemy_prefix_snapshot=issue_prefix,
+            issue_enemy_prefix_bodies=(active_body, dormant_body),
+            issue_dormant_enemy_body_pointers={2},
+            issue_enemy_changes=(("added", 2),),
+            issue_enemy_read_ms=1.25,
+            issue_enemy_recertificate_ms=2.5,
+            issue=issue,
+            spell_enemy_body_guard=guard,
+            spell_enemy_body_guard_error=None,
+        )
+
+        fields = build_sensing_trace_fields(
+            trace_input,
+            serialize_boss_phase_snapshot=lambda _snapshot: {"frame": 10},
+            serialize_enemy_bodies=lambda bodies: [
+                {"pointer": body.pointer} for body in bodies
+            ],
+            enemy_body_contact_enabled=lambda body: body.contact,
+            enemy_pointer_in_scanned_pool=lambda pointer: pointer == 1,
+            issue_recertification_record=lambda value: {"value": value},
+        )
+
+        self.assertEqual(fields["boss_phase"]["frame"], 10)
+        self.assertEqual(
+            fields["boss_phase_progress"]["damage_per_second_60hz"],
+            120.0,
+        )
+        self.assertEqual(
+            fields["bullet_velocity_lookahead"]["tagged_bullets"],
+            1,
+        )
+        self.assertEqual(fields["enemy_body_contact_enabled_count"], 1)
+        self.assertEqual(fields["enemy_body_dormant_count"], 1)
+        self.assertEqual(fields["enemy_body_snapshot_age"], 4)
+        self.assertEqual(
+            fields["issue_time_enemy_guard"]["action_after_guard"],
+            "right",
+        )
+        self.assertEqual(
+            fields["issue_time_enemy_guard"]["transaction"],
+            {"value": "transaction"},
+        )
+        self.assertTrue(
+            fields["spell_enemy_body_guard"]["covered_by_async_pool"]
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

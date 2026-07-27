@@ -171,6 +171,10 @@ from th08_live.iteration import (
     PublishedGuidance,
     ServiceUpdate,
 )
+from th08_live.sensing_trace import (
+    SensingTraceInput,
+    build_sensing_trace_fields,
+)
 from th08_live.enemy_sensor import (  # noqa: F401
     ENEMY_ACTIVE_FLAG,
     ENEMY_BODY_READ_OFFSET,
@@ -5058,6 +5062,88 @@ def _run_live_session(
                         )
                     ),
                 }
+                sensing_trace_fields = build_sensing_trace_fields(
+                    SensingTraceInput(
+                        resources=resources,
+                        stage_route_index=state["stage_route_index"],
+                        spell=state["spell"],
+                        boss_phase_snapshot=boss_phase_snapshot,
+                        boss_phase_error=boss_phase_error,
+                        boss_phase_progress=boss_phase_progress,
+                        ecl_vm_snapshot=ecl_vm_snapshot,
+                        ecl_lookahead=ecl_lookahead,
+                        tagged_velocity_toggles=(
+                            tagged_velocity_toggles
+                        ),
+                        bullets=bullets,
+                        ecl_event_frame_offset=ecl_event_frame_offset,
+                        ecl_event_frame_uncertainty=(
+                            ecl_event_frame_uncertainty
+                        ),
+                        ecl_lookahead_error=ecl_lookahead_error,
+                        lasers=lasers,
+                        items=items,
+                        enemy_bodies=enemy_bodies,
+                        dormant_enemy_body_pointers=(
+                            dormant_enemy_body_pointers
+                        ),
+                        bullet_frame_before=bullet_frame_before,
+                        bullet_frame_after=bullet_frame_after,
+                        enemy_prefix_snapshot=enemy_prefix_snapshot,
+                        enemy_prefix_bodies=enemy_prefix_bodies,
+                        bullet_capture_span=bullet_capture_span,
+                        hazard_snapshot_age=hazard_snapshot_age,
+                        player_to_hazard_lag=player_to_hazard_lag,
+                        ecl_frame_before=ecl_frame_before,
+                        ecl_frame_after=ecl_frame_after,
+                        boss_guard_frame_before=boss_guard_frame_before,
+                        boss_guard_frame_after=boss_guard_frame_after,
+                        enemy_body_snapshot_frame=(
+                            enemy_body_snapshot_frame
+                        ),
+                        query_frame=counter_after_read,
+                        issue_enemy_prefix_snapshot=(
+                            issue_enemy_prefix_snapshot
+                        ),
+                        issue_enemy_prefix_bodies=(
+                            issue_enemy_prefix_bodies
+                        ),
+                        issue_dormant_enemy_body_pointers=(
+                            issue_dormant_enemy_body_pointers
+                        ),
+                        issue_enemy_changes=issue_enemy_changes,
+                        issue_enemy_read_ms=issue_enemy_read_ms,
+                        issue_enemy_recertificate_ms=(
+                            issue_enemy_recertificate_ms
+                        ),
+                        issue=fresh_issue_result,
+                        spell_enemy_body_guard=spell_enemy_body_guard,
+                        spell_enemy_body_guard_error=(
+                            spell_enemy_body_guard_error
+                        ),
+                    ),
+                    serialize_boss_phase_snapshot=(
+                        serialize_boss_phase_snapshot
+                    ),
+                    serialize_enemy_bodies=_serialized_enemy_bodies,
+                    enemy_body_contact_enabled=(
+                        enemy_body_contact_enabled
+                    ),
+                    enemy_pointer_in_scanned_pool=(
+                        enemy_pointer_in_scanned_pool
+                    ),
+                    issue_recertification_record=(
+                        _issue_recertification_record
+                    ),
+                )
+                if any(
+                    record[key] != value
+                    for key, value in sensing_trace_fields.items()
+                ):
+                    raise RuntimeError(
+                        "extracted sensing trace changed schema"
+                    )
+                record.update(sensing_trace_fields)
                 control_trace_fields = build_decision_control_trace_fields(
                     DecisionControlTraceInput(
                         issue=fresh_issue_result,

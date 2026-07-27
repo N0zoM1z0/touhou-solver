@@ -111,9 +111,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   immutable `DecisionControlTraceInput` and a pure builder for deadline,
   delay, dispatch, local-certificate, objective/guidance, player, damage
   shadow, robust-control, and terminal-threat fields. The historical inline
-  fields were compared key-for-key before update. The current uncommitted
-  checkpoint removes those inline fields and consumes the extracted field
-  set.
+  fields were compared key-for-key before update. Structural checkpoint
+  `40daa6c Extract decision control trace fields` removes those inline fields
+  and consumes the extracted field set.
+- The pending sensing-trace characterization adds an immutable
+  `SensingTraceInput` and pure boss/ECL/hazard/alignment/issue-guard record
+  builder. Historical inline fields remain for one checkpoint and are
+  compared key-for-key before update.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -193,6 +197,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   frames `2..20663` with 7,557 decisions, zero hits, zero Bomb input, accepted
   route completion, artifacts, and no residual process. All 7,557 decision
   records retained the required control-field groups.
+- Sensing-trace characterization passes `696/696` quick tests on Linux in
+  `8.767 s` and Windows in `13.385 s` with three Windows platform skips.
+  Live-focused tests pass `109/109`.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

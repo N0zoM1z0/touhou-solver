@@ -4964,3 +4964,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 157,724,274-byte raw JSONL SHA-256
   `afd1fcf83f37188853bebf07129c381cb343462d6f8f772f93d3f7d394a0e89c`.
+
+### 2026-07-27 — Sensing trace characterization seam
+
+- **Observed structural change:** Added immutable `SensingTraceInput` and a
+  pure serializer for resources, boss phase/progress, ECL velocity lookahead,
+  active hazard counts, capture alignment, issue-time enemy guard, and
+  synchronous spell-owner guard.
+- **Observed parity boundary:** The live loop retains the historical inline
+  fields, independently builds the extracted field set from already captured
+  and issued values, compares every key, and only then updates the record.
+- **Authority:** Pure post-issue serialization. The builder performs no
+  memory read, hazard prediction, sensor update, recertification, dispatch, or
+  action selection.
+- **Validation:** Sensing-trace test passes `1/1`; live-focused tests pass
+  `109/109`; Ruff and `git diff --check` pass; Linux quick suite passes
+  `696/696` in `8.767 s`; Windows quick suite passes `696/696` in `13.385 s`
+  with three platform skips.

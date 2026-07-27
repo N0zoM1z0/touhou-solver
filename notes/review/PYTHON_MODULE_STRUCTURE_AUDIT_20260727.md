@@ -240,7 +240,9 @@ The structural sequence and current status are:
    followed the same characterization/removal sequence and is now consumed.
    Decision-control fields now have an immutable input contract and pure
    old/new parity builder, and the live record consumes them. Hazard-detail,
-   sensing, and outer record composition remain controller-owned.
+   sensing, and outer record composition remain controller-owned. Sensing
+   fields now have their own immutable input and old/new parity builder; the
+   inline path is pending removal.
 
 The bounded iteration then becomes:
 

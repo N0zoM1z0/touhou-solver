@@ -5369,3 +5369,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   continuation, Boolean and signed-value recurrences, native fallback,
   sampling-error subtraction, compact mode, and live authority are
   unchanged.
+
+### 2026-07-27 — Native-local ABI contract extraction
+
+- **Observed structural change:** Moved decoded-bullet and supplemental
+  result dataclasses, supplemental cancellation/deadline exceptions, ctypes
+  pointer aliases, and v1 supplemental query/output structures into
+  `touhou_control.native.local_abi`. `native.local` is now 1,168 lines.
+- **Compatibility boundary:** Loaders and operational functions remain in
+  `native.local`, so historical `_load_library` fault injection still targets
+  the globals used by those loaders. `native.local` and `native_backend`
+  re-export the exact same class and structure objects.
+- **Validation:** Native-facade, local-hazard, local-beam, and semantic
+  differential suites pass `4/4`, `5/5`, `5/5`, and `6/6`. Ruff, byte
+  compilation, and `git diff --check` pass. The Linux quick suite passes
+  `699/699` in `8.864 s`.
+- **Authority:** Structural Python ABI ownership only. ctypes field order,
+  native symbols, return codes, array ownership, cancellation/deadline
+  semantics, planner authority, and strategy are unchanged.

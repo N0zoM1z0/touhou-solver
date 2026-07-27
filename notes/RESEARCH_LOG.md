@@ -4499,3 +4499,43 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   no-Bomb rule, worker policy, publication identity, live authority, or
   strategy status. The next algorithmic work remains the roadmap G0 exact-
   root dossier before any G1/G2 model or refinement change.
+
+## 2026-07-27: Extended Python Decomposition And Clean R5 Retention Gate
+
+- **Scope:** Continued the structural line after the initial R5 checkpoint.
+  Commits `eed4b6d`, `10426e4`, and `02d0e32` separated laser/item decoding,
+  enemy sensing, and the complete local-planner pass from the live controller.
+  Commits `153c840`, `ac88e67`, `ce2e1bc`, and `657e1f3` separated runtime,
+  practice, full-route, and hotkey process/lifecycle boundaries. Commits
+  `c9bbb52` and `e8af5a1` separated replayable semantic cases and ECL
+  parsing/decoding/reporting.
+- **Compatibility evidence:** Historical facade imports resolve to the same
+  implementation module wherever callers patch module globals. Focused tests
+  found and preserved the native title-state and supplemental-search patch
+  seams. Old/new comparisons matched 144 semantic payloads plus deterministic
+  shrinking, seven hotkey launch contracts, full-route parser and retention
+  behavior, all 23 public ECL symbols, and five complete local decisions after
+  excluding timing measurements.
+- **Observed automated gate:** The complete quick suite passes `628/628` on
+  Linux and `628/628` on Windows with three existing platform skips after the
+  final planner-pass extraction. Compilation, Ruff, and `git diff --check`
+  also pass for each extracted boundary.
+- **Observed physical retention gate:** Windows run
+  `hard_route2_stage1_unattended_20260727_144128` completed Hard Stage 1 with
+  7,502 decisions over frames `1..20768`, zero hits, zero Bomb input, the
+  accepted terminal unload, compact artifact materialization, post-stage
+  no-save, supervisor completion, and no residual game/controller process.
+  This is a clean R5 implementation-retention smoke, not a route-strategy
+  promotion or an independent proof of model validity.
+- **Remaining structure:** `th08_live/controller.py` is reduced to 6,566
+  lines, but `_run_live_session` remains a 3,559-line mixed iteration. The
+  next safe split requires explicit capture, service-update, publication,
+  proposal, fresh-issue, and trace-stage contracts; moving the function
+  wholesale would only relocate the coupling. The complete decision and
+  follow-up order are recorded in
+  `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`.
+- **Authority:** These changes alter source ownership and import topology
+  only. No recurrence, uncertainty branch, signed-clearance comparison,
+  action mask/order, cadence, deadline, worker policy, trace schema, no-Bomb
+  rule, live authority, or strategy status was intentionally changed. G0
+  exact-root loss classification remains the next algorithmic checkpoint.

@@ -94,12 +94,17 @@ describe the same decision. Python/C++ parity is not physical correctness.
   record before publishing the latter. This deliberately duplicates work for
   one checkpoint so deletion of the inline path has an
   executable schema-parity gate; no action decision or issue ordering moved.
-- The current uncommitted structural checkpoint removes the characterized
-  inline path. `controller.py` now delegates corridor trace construction to
-  the pure builder and is 6,126 lines, down from 6,614 at the iteration-stage
-  checkpoint. The builder consumes only completed publications and
-  lookup-only values after issue; it performs no sensing, query expansion,
-  worker mutation, or dispatch.
+- Structural checkpoint `3606656 Extract corridor trace serialization`
+  removes the characterized inline path. `controller.py` now delegates
+  corridor trace construction to the pure builder and is 6,126 lines, down
+  from 6,614 at the iteration-stage checkpoint. The builder consumes only
+  completed publications and lookup-only values after issue; it performs no
+  sensing, query expansion, worker mutation, or dispatch.
+- The pending candidate-trace characterization checkpoint adds pure outcome,
+  snapshot, publication, and complete shadow-service record builders under
+  `th08_live.candidate_trace`. The live loop still constructs its historical
+  candidate record and asserts exact equality with the extracted result
+  before publishing it. Candidate verification remains shadow-only.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -154,6 +159,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
   no residual process. It took one native hit at frame 6,385 after global
   viability-kernel exhaustion, so this is structural/trace retention
   evidence, not a clean survival pass.
+- Candidate-trace characterization passes `694/694` quick tests on Linux in
+  `8.468 s` and Windows in `13.079 s` with three Windows platform skips.
+  Thirteen focused tests cover witness-publication authority, status
+  precedence, disabled service behavior, and completed-result serialization.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

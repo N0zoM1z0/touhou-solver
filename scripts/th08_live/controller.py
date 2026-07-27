@@ -121,6 +121,7 @@ from th08_live.bullet_decode import (  # noqa: F401
     native_bullet_half_extents as _native_bullet_half_extents,
     planning_bullet_active_slots as _planning_bullet_active_slots,
 )
+from th08_live.candidate_trace import build_candidate_verifier_trace_record
 from th08_live.corridor_trace import build_corridor_trace_record
 from th08_live.hazard_decode import (  # noqa: F401
     ITEM_ACTIVE_OFFSET,
@@ -5653,6 +5654,35 @@ def _run_live_session(
                             candidate_shadow_publications
                         ),
                     }
+                extracted_candidate_record = (
+                    build_candidate_verifier_trace_record(
+                        enabled=candidate_verifier is not None,
+                        target=candidate_verifier_target,
+                        eligibility=candidate_verifier_eligibility,
+                        submit_revision=candidate_verifier_revision,
+                        submit_ms=candidate_verifier_submit_ms,
+                        lookup_ms=candidate_verifier_lookup_ms,
+                        publication_ms=candidate_publication_ms,
+                        submit_error=candidate_verifier_submit_error,
+                        lookup_error=candidate_verifier_lookup_error,
+                        outcome=candidate_verifier_outcome,
+                        snapshot=candidate_verifier_snapshot,
+                        publications=candidate_shadow_publications,
+                        issued_mask=decision.mask,
+                        action_name_from_mask=_action_name_from_mask,
+                    )
+                )
+                if extracted_candidate_record is not None:
+                    if (
+                        extracted_candidate_record
+                        != record["candidate_verifier_shadow"]
+                    ):
+                        raise RuntimeError(
+                            "extracted candidate trace record changed schema"
+                        )
+                    record["candidate_verifier_shadow"] = (
+                        extracted_candidate_record
+                    )
                 if hit_contact_observation is not None:
                     record["hit_contact_observation"] = (
                         hit_contact_observation

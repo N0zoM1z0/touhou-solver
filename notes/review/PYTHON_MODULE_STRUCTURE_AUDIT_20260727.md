@@ -216,8 +216,9 @@ The structural sequence and current status are:
 6. Build trace records from those immutable stage outputs after the issue
    transaction: **corridor subrecord implemented and consumed**. One
    checkpoint compared the full historical inline record with the pure
-   builder; the next removed the inline path. Hazard-detail and outer decision
-   records remain controller-owned and are the next trace seams.
+   builder; the next removed the inline path. Candidate-verifier trace
+   extraction is now in its old/new equality-characterization checkpoint.
+   Hazard-detail and outer decision records remain controller-owned.
 
 The bounded iteration then becomes:
 

@@ -4869,3 +4869,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 151,586,776-byte raw JSONL SHA-256
   `3e0f5f89abd533b0d8f6d2420c71eca3f869fd4f6f4b371dad686b71f1cea83d`.
+
+### 2026-07-27 — Candidate-verifier trace characterization seam
+
+- **Observed structural change:** Added pure candidate outcome, service
+  snapshot, one-shot witness publication, and complete shadow-service record
+  builders in `th08_live.candidate_trace`.
+- **Observed parity boundary:** The live loop still constructs the historical
+  inline candidate record, independently builds the extracted record from the
+  same lookup-only values, asserts complete dictionary equality, and
+  publishes the extracted result.
+- **Authority:** Candidate verification and every extracted record remain
+  `shadow_no_action_authority`. This checkpoint performs no new query,
+  service mutation, certificate computation, issue, or input override.
+- **Validation:** Candidate-focused tests pass `13/13`; Ruff and
+  `git diff --check` pass; Linux quick suite passes `694/694` in `8.468 s`;
+  Windows quick suite passes `694/694` in `13.079 s` with three platform
+  skips.

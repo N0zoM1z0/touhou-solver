@@ -5055,3 +5055,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 455,424,978-byte raw JSONL SHA-256
   `14bb67c3f6448a232e338d5067047def7a380814b90fae4ffb2577e49047e1f3`.
+
+### 2026-07-27 — Planner-pass split characterization
+
+- **Observed contract:** Added a deterministic gate over five complete local
+  planner decisions: open-field early return, incoming-bullet baseline,
+  multi-delay certification, hard viability constraint, and synchronous
+  supplemental recovery.
+- **Parity boundary:** The gate hashes every `Decision` field, nested
+  certificate, and issue-timing default except
+  `local_certificate_timing`, whose values are physical measurements. It
+  fixes actions `stay`, `down_fast`, `down_fast`, `left`, and `right`.
+- **Validation:** The focused gate passes `1/1`; the pre-split quick suite
+  passes `699/699` on Linux in `8.633 s` and Windows in `13.137 s` with three
+  platform skips.
+- **Authority:** Characterization only. Planner mathematics, dependencies,
+  state mapping, hazard recurrence, selection, fallback, action authority,
+  and strategy remain unchanged.

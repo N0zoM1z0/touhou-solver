@@ -230,6 +230,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   timing fields and enabled optional-hazard records. The run took eight hits,
   all after global-kernel exhaustion, so it is structural retention plus
   CE-0137 survival-failure evidence rather than route acceptance.
+- Planner-pass split characterization freezes five complete decisions after
+  excluding physical timing measurements: open field, incoming bullet,
+  multi-delay certification, hard viability constraint, and supplemental
+  recovery. The pre-split quick suite passes `699/699` on Linux in `8.633 s`
+  and Windows in `13.137 s` with three platform skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

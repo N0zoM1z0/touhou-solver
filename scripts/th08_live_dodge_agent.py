@@ -16,7 +16,7 @@ import math
 import struct
 import time
 from collections import deque
-from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import Future
 from dataclasses import dataclass, replace
 from pathlib import Path
 
@@ -76,7 +76,7 @@ from th08_laser_runtime import (
     pack_laser_frame as _pack_laser_frame,
     serialize_laser_trace,
 )
-from th08_live import LiveSession
+from th08_live import LiveServiceResources, LiveSession
 from th08_local_planner import (
     ActuatorPipeline,
     BaselineBeamContext,
@@ -135,7 +135,6 @@ from touhou_control.delay import AdaptiveControlDelay
 from touhou_control.query_survival import PendingCommand
 from touhou_control.candidate_verifier_service import (
     CandidateVerifierOutcome,
-    CandidateVerifierService,
     CandidateVerifierSnapshot,
     CandidateVerifierTarget,
 )
@@ -5986,14 +5985,8 @@ def _run_live_session(
     stop_after_frame: int | None = None
     gameplay_armed = False
     termination_reason = "duration"
-    corridor_executor: ThreadPoolExecutor | None = None
     corridor_future: Future[CorridorSolution] | None = None
-    survival_executor: ThreadPoolExecutor | None = None
     corridor_survival_future: Future[CorridorSolution] | None = None
-    candidate_verifier: CandidateVerifierService | None = None
-    audit_executor: ThreadPoolExecutor | None = None
-    pipeline_retire_executor: ThreadPoolExecutor | None = None
-    enemy_executor: ThreadPoolExecutor | None = None
     enemy_future: Future[EnemyPoolSnapshot] | None = None
     enemy_snapshot: EnemyPoolSnapshot | None = None
     enemy_last_submit = CORRIDOR_INITIAL_SUBMIT_FRAME
@@ -6061,72 +6054,33 @@ def _run_live_session(
     ecl_instruction_cache = EclInstructionCache()
     previous_iteration_ms: float | None = None
     previous_trace_ms: float | None = None
-    if not args.local_only:
-        corridor_executor = ThreadPoolExecutor(
-            max_workers=1,
-            thread_name_prefix="th08-corridor",
-        )
-        if args.postpublished_survival_shadow:
-            survival_executor = ThreadPoolExecutor(
-                max_workers=1,
-                thread_name_prefix="th08-survival-shadow",
-            )
-        if args.pipeline_prewarm_shadow:
-            pipeline_retire_executor = ThreadPoolExecutor(
-                max_workers=1,
-                thread_name_prefix="th08-pipeline-retire",
-            )
-        if args.candidate_verifier_shadow:
-            candidate_verifier = CandidateVerifierService(
-                horizon_frames=CANDIDATE_VERIFIER_HORIZON_FRAMES,
-                decision_frame_support=(
-                    CANDIDATE_VERIFIER_DECISION_FRAMES
-                ),
-                timeout_ms_per_candidate=(
-                    CANDIDATE_VERIFIER_TIMEOUT_MS
-                ),
-            )
-    if args.viability_audit_dir is not None:
-        audit_executor = ThreadPoolExecutor(
-            max_workers=1,
-            thread_name_prefix="th08-viability-audit",
-        )
-    enemy_executor = ThreadPoolExecutor(
-        max_workers=1,
-        thread_name_prefix="th08-enemy-sensor",
+    service_resources = LiveServiceResources(
+        local_only=args.local_only,
+        postpublished_survival_shadow=(
+            args.postpublished_survival_shadow
+        ),
+        pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
+        candidate_verifier_shadow=args.candidate_verifier_shadow,
+        viability_audit_enabled=args.viability_audit_dir is not None,
+        candidate_horizon_frames=CANDIDATE_VERIFIER_HORIZON_FRAMES,
+        candidate_decision_frames=CANDIDATE_VERIFIER_DECISION_FRAMES,
+        candidate_timeout_ms=CANDIDATE_VERIFIER_TIMEOUT_MS,
+        close_pipeline_prewarms=_close_retired_pipeline_prewarms,
     )
+    corridor_executor = service_resources.corridor_executor
+    survival_executor = service_resources.survival_executor
+    candidate_verifier = service_resources.candidate_verifier
+    audit_executor = service_resources.audit_executor
+    enemy_executor = service_resources.enemy_executor
 
     def retire_pipeline_solutions(
         candidates: tuple[CorridorSolution | None, ...],
         retained: tuple[CorridorSolution | None, ...] = (),
     ) -> None:
-        retained_services = {
-            id(solution.pipeline_prewarm_service)
-            for solution in retained
-            if (
-                solution is not None
-                and solution.pipeline_prewarm_service is not None
-            )
-        }
-        retired = tuple(
-            solution
-            for solution in candidates
-            if (
-                solution is not None
-                and solution.pipeline_prewarm_service is not None
-                and id(solution.pipeline_prewarm_service)
-                not in retained_services
-            )
+        service_resources.retire_pipeline_solutions(
+            candidates,
+            retained=retained,
         )
-        if not retired:
-            return
-        if pipeline_retire_executor is not None:
-            pipeline_retire_executor.submit(
-                _close_retired_pipeline_prewarms,
-                retired,
-            )
-        else:
-            _close_retired_pipeline_prewarms(retired)
 
     def input_clock_policy_snapshot() -> dict[str, object]:
         return {
@@ -9662,41 +9616,11 @@ def _run_live_session(
                 retire_pipeline_solutions(
                     (corridor_solution, corridor_pending_solution)
                 )
-                if corridor_future is not None:
-                    corridor_future.cancel()
-                if corridor_survival_future is not None:
-                    corridor_survival_future.cancel()
-                if survival_executor is not None:
-                    survival_executor.shutdown(
-                        wait=True,
-                        cancel_futures=True,
-                    )
-                if candidate_verifier is not None:
-                    candidate_verifier.close()
-                if corridor_executor is not None:
-                    corridor_executor.shutdown(wait=True, cancel_futures=True)
-                if (
-                    corridor_future is not None
-                    and corridor_future.done()
-                    and not corridor_future.cancelled()
-                ):
-                    try:
-                        retire_pipeline_solutions(
-                            (corridor_future.result(),)
-                        )
-                    except Exception:
-                        pass
-                if pipeline_retire_executor is not None:
-                    pipeline_retire_executor.shutdown(
-                        wait=True,
-                        cancel_futures=False,
-                    )
-                if audit_executor is not None:
-                    audit_executor.shutdown(wait=True)
-                if enemy_future is not None:
-                    enemy_future.cancel()
-                if enemy_executor is not None:
-                    enemy_executor.shutdown(wait=True, cancel_futures=True)
+                service_resources.close(
+                    corridor_future=corridor_future,
+                    survival_future=corridor_survival_future,
+                    enemy_future=enemy_future,
+                )
             finally:
                 session.close()
 

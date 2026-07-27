@@ -88,6 +88,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   now consumes the captured contract and actuator state is updated from the
   fresh-issue contract. The surrounding controller remains the composition
   owner; this is a staged extraction, not a wholesale move.
+- The pending corridor-trace characterization checkpoint adds a pure
+  `th08_live.corridor_trace` record builder. The live loop still constructs
+  the historical inline record and asserts exact equality with the extracted
+  record before publishing the latter. This deliberately duplicates work for
+  one checkpoint so the subsequent deletion of the inline path has an
+  executable schema-parity gate; no action decision or issue ordering moved.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -128,6 +134,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   frames `1..20950` with 7,680 decisions, zero hits, zero Bomb input,
   accepted terminal unload, route completion, artifact materialization, and
   no residual game/controller/supervisor process.
+- The corridor-trace characterization checkpoint passes `691/691` quick
+  tests on Linux in `8.593 s` and Windows in `13.001 s` with three Windows
+  platform skips. Two focused tests cover absence and representative
+  publication serialization; the live loop additionally compares the
+  complete old and extracted records at runtime before enqueuing.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

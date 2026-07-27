@@ -10,9 +10,9 @@ This audit records the Python decomposition performed after
 `CONSOLIDATED_RESEARCH_AND_REFACTOR_ROADMAP_20260727.md`, the remaining
 coupling, and the order for later structural work.
 
-- **Observed:** the changes through the current live iteration-contract
-  checkpoint preserve the quick-suite result: `689/689` on Linux and Windows
-  with three existing Windows platform skips.
+- **Observed:** the changes through the current corridor-trace
+  characterization checkpoint preserve the quick-suite result: `691/691` on
+  Linux and Windows with three existing Windows platform skips.
 - **Observed:** deterministic old/new comparisons preserved:
   144 semantic-case payloads plus one shrink result, seven hotkey launch
   contracts, full-route parser/retention behavior, all 23 public ECL symbols,
@@ -207,7 +207,10 @@ The structural sequence and current status are:
    fresh enemy prefix, recertification, selected action, send/no-write result,
    issue frame, and deadline status.
 6. Build trace records from those immutable stage outputs after the issue
-   transaction: **next checkpoint**.
+   transaction: **in progress**. The corridor subrecord now has a pure builder
+   and the live loop asserts complete equality between its historical inline
+   record and the extracted result before publishing the extracted result.
+   Removing the characterized inline path is the next checkpoint.
 
 The bounded iteration then becomes:
 

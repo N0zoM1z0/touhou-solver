@@ -4817,3 +4817,23 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** `notes/runs/hard_route2_stage1_unattended_20260727_173735.md`
   and matching compact artifacts under `artifacts/runtime_reports/`. The
   150 MiB raw JSONL remains local and ignored.
+
+### 2026-07-27 — Corridor trace characterization seam
+
+- **Observed structural change:** Added the pure
+  `th08_live.corridor_trace.build_corridor_trace_record` builder for the
+  post-issue corridor publication, viability, survival-shadow,
+  pipeline-prewarm, pending-command, safety, gate, and target trace fields.
+- **Observed parity boundary:** The live loop still computes the historical
+  inline record, independently invokes the extracted builder from the same
+  completed/lookup-only values, asserts complete dictionary equality, and
+  publishes the extracted result. It performs no new sensing, query
+  expansion, worker mutation, or input dispatch.
+- **Authority:** This is a temporary characterization seam. It intentionally
+  duplicates pure serialization work and does not change action selection,
+  issue/no-write semantics, frame identity, trace schema, worker policy,
+  deadline, fallback, recurrence, model, or strategy status.
+- **Validation:** Corridor-trace tests pass `2/2`; live-focused tests pass
+  `104/104`; Ruff and `git diff --check` pass; Linux quick suite passes
+  `691/691` in `8.593 s`; Windows quick suite passes `691/691` in `13.001 s`
+  with three platform skips.

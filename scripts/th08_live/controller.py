@@ -121,6 +121,7 @@ from th08_live.bullet_decode import (  # noqa: F401
     native_bullet_half_extents as _native_bullet_half_extents,
     planning_bullet_active_slots as _planning_bullet_active_slots,
 )
+from th08_live.corridor_trace import build_corridor_trace_record
 from th08_live.hazard_decode import (  # noqa: F401
     ITEM_ACTIVE_OFFSET,
     ITEM_FULL_VALUE_OFFSET,
@@ -6177,7 +6178,42 @@ def _run_live_session(
                             "travel_frames": travel_frames,
                             "slack": corridor_target[2] - travel_frames,
                         }
-                    record["corridor"] = corridor_record
+                    extracted_corridor_record = build_corridor_trace_record(
+                        active_solution=corridor_solution,
+                        pending_solution=corridor_pending_solution,
+                        issue_frame=counter_at_action,
+                        query_frame=counter_after_read,
+                        max_age_frames=args.corridor_max_age,
+                        viability_query=viability_query,
+                        postpublished_survival_query=(
+                            postpublished_survival_query
+                        ),
+                        pipeline_prewarm_query=pipeline_prewarm_query,
+                        pipeline_prewarm_retarget=(
+                            pipeline_prewarm_retarget
+                        ),
+                        safety_value_query=safety_value_query,
+                        policy_lead=corridor_policy_lead,
+                        commitment=corridor_commitment,
+                        context_key=corridor_context,
+                        observed_input_action=observed_input_action,
+                        decision=decision,
+                        delay_support=delay_estimate.support,
+                        guidance=policy_guidance,
+                        pending_command_estimate=(
+                            pending_command_estimate
+                        ),
+                        target=corridor_target,
+                        control_origin_x=control_origin_x,
+                        control_origin_y=control_origin_y,
+                        action_name_from_mask=_action_name_from_mask,
+                        minimum_travel_frames=_minimum_travel_frames,
+                    )
+                    if extracted_corridor_record != corridor_record:
+                        raise RuntimeError(
+                            "extracted corridor trace record changed schema"
+                        )
+                    record["corridor"] = extracted_corridor_record
                 if args.trace_radius > 0.0:
                     radius = args.trace_radius
                     record["nearby_bullets"] = [

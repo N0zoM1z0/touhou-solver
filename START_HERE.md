@@ -37,7 +37,24 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
-- Latest G5 observation checkpoint:
+- Latest G5 observation/performance checkpoints:
+  `35f3502 Reuse compact bullet birth observer scratch`, building on
+  `9f5b37c Align deferred bullet emission state` and
+  `360c79b Add deterministic bullet birth residual audit`. Failed physical
+  run `20260728_031127` completed Lunatic Stage 4A over frames `1..43931`,
+  14,411 decisions, 11 hits, hard no-Bomb, accepted artifacts, and cleanup.
+  It retained 86,396 activation edges but zero timed intents because schema
+  v1 omitted the already observed enemy `+0x3324` deferred-fire bit. Observer
+  p95/p99/max `1.7795/2.7495/10.9700 ms` also failed the physical gate.
+  Schema v2 now consumes that bit only under exact boss-guard/ECL pointer and
+  manager-frame alignment, performs all optional work after current dispatch,
+  and forbids cold post-issue ECL reads. Compact double-buffer scratch reduces
+  isolated Linux/Windows full-pool p95 to `0.0171/0.0242 ms`, but 592-birth
+  p95 remains `2.2671/2.7465 ms`; the next Stage-4A B4/B5 repeat must report
+  observation/build/pre-emit/emit tails. Linux/Windows quick suites pass
+  `782/782` in `8.989/15.375 s`, with three Windows skips. See
+  `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and CE-0143/0144.
+- Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and
   `4260113`. `--trace-bullet-births` now constructs the pool-blob observer,
@@ -51,8 +68,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
   have three. Linux/Windows quick suites pass `773/773` in `8.691/15.243 s`,
   with three Windows skips. The retained B1 performance remains p95
   `0.0318/0.0339 ms` and interleaved decode ratio `0.998/1.007`.
-  Shipped-runtime B4 correlation and deterministic B5 residual reporting are
-  next.
+  The first shipped-runtime B4/B5 attempt is now retained as a failed gate
+  above.
 - Latest committed algorithmic checkpoint:
   `f8621bd Add cancellable stationary witness delivery benchmark`. A separate
   research-only DLL and modular newest-wins service now measure complete

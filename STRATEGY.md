@@ -120,14 +120,28 @@ quick suites pass `773/773` in `8.691/15.243 s`, with three Windows skips.
 Physical runtime correlation, omitted-source residuals, and conservative
 future geometry remain open, so coverage and action authority do not change.
 
+**Observed:** the first physical B4/B5 trial `20260728_031127` completed
+Lunatic Stage 4A with 11 hits, hard no-Bomb, accepted artifacts, and cleanup,
+but failed both gates. Observer p95/p99/max was
+`1.7795/2.7495/10.9700 ms`; all 1,641 visible intents were untimed and all
+86,396 activation edges unmatched because schema v1 discarded the existing
+enemy `+0x3324` deferred-fire flag. Checkpoints `360c79b`, `9f5b37c`, and
+`35f3502` retain the deterministic residual report, align that native flag
+fail-closed without another RPM, move all optional work after current
+dispatch, prevent cold post-issue ECL reads, and reduce isolated Linux/
+Windows steady full-pool p95 to `0.0171/0.0242 ms`. A 592-birth p95 remains
+`2.2671/2.7465 ms`, so CE-0143 and physical correlation remain open. No
+future-geometry or action authority follows.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
    passes; continue G5 future-event coverage one event class at a time,
    beginning with bullet birth. B1–B3 and the default-off trace seam are
-   implemented; run B4 Stage-4A physical correlation and B5 deterministic
-   residual reporting next. They do not narrow `UNKNOWN` coverage or add
-   action authority. The stationary-witness
+   implemented. The first B4/B5 run failed and is corrected offline; repeat
+   Stage 4A with schema v2 and the complete timing boundary before trying
+   Stage 5/6. It does not narrow `UNKNOWN` coverage or add action authority.
+   The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,
    earlier-version trace-only shadow with real completion-age evidence; do

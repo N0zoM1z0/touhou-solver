@@ -6108,3 +6108,28 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   future events; Stage-4A `103856` is physically contaminated by the rejected
   repeated-counter guard. Native extraction, delivery, issue certificates,
   and physical consumption remain open.
+
+### 2026-07-28 — G3 internal native stationary-witness extraction
+
+- **Observed implementation:** Checkpoint `25d5f68` adds an internal-only
+  stationary witness entry and separates belief records, deterministic
+  nature ordering, observation-compatible branch merging, tie-breaking, and
+  path extraction into `native/src/pipeline/belief_stationary_witness.*`.
+  Native transitions now retain hidden remaining delay, recursive cadence,
+  and pickup delay or no-write.
+- **Observed differential:** Linux and Windows probes match the independent
+  Python witness for the complete path, not only the root label. The corpus
+  covers all root actions in four randomized volumes, recursively variable
+  cadence, merged remaining support, pending same-desired no-write, and an
+  unsafe empty path. Every discrete field and float32 label/margin field
+  matches.
+- **Observed ABI and validation:** The test probe links the internal
+  implementation separately. The production header and Linux/Windows
+  libraries remain exactly equal to the checked-in 46-symbol manifest; no
+  witness symbol is exported. The Linux sanitizer profile builds. Complete
+  quick suites pass `726/726` in `9.635/14.362 s`, with three existing
+  Windows platform skips.
+- **Authority:** Offline implementation parity for the declared singleton
+  stationary causal class only. Exact complete-mask capsule roots,
+  future-event coverage, delivery/contention, issue-time certificates, and
+  physical consumption remain open.

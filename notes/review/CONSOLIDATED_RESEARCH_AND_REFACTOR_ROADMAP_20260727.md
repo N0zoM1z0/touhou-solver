@@ -878,9 +878,15 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
 - 44-line analysis entry point 已拆至
   `analysis/partial_witness_capsule/` 的 selection/validation、
   serialization、workload owners；報告兩次生成 byte-identical；
+- `25d5f68` 已完成 internal native worst-path extraction：belief state／
+  observation types、deterministic hidden-branch merge/tie-break 與 path
+  extraction 拆至 `native/src/pipeline/belief_stationary_witness.*`；Linux／
+  Windows 對 randomized all-root-action、pending no-write、merged support、
+  unsafe root 的完整 path 都與 independent Python witness 一致，公開 ABI
+  仍精確維持 46 symbols；
 - 目前仍是 historical 17-movement-action capsule model 的 offline
-  restricted attainable lower witness。CE-0134 complete-mask roots、native
-  witness extraction、background delivery/contention 與任何 physical
+  restricted attainable lower witness。CE-0134 complete-mask capsule roots、
+  future-event coverage、background delivery/contention 與任何 physical
   consumer 均未完成。
 
 ### G4 — 更早保存 feasibility

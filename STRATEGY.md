@@ -75,14 +75,18 @@ workspace, including pending no-write and recursive cadence. Retained
 Stage-4A/6B capsules now add CE-0140: Boolean-empty roots contain full
 32-frame stationary witnesses, positive 17/12-frame partial witnesses, and
 zero-prefix stationary roots while unrestricted status remains unresolved.
-This is restricted historical 17-action finite-model evidence only; native
-extraction, complete-mask roots, delivery, and physical validation remain
-open.
+Internal native extraction now also matches the independent Python complete
+worst path on Linux and Windows for randomized all-root-action, pending
+no-write, merged-support, and unsafe-root cases without changing the public
+46-symbol ABI. This is restricted finite-model implementation evidence only;
+complete-mask roots, future-event coverage, delivery, and physical validation
+remain open.
 
 ### Priority
 
-1. Preserve global feasibility earlier. Continue G3 with native witness
-   extraction and exact complete-mask roots, then extend partial-survival
+1. Preserve global feasibility earlier. Continue G3/G5 with exact
+   complete-mask roots, future-event coverage, and cancellable delivery after
+   the internal native witness gate, then extend partial-survival
    witnesses only through completed causal policy classes.
 2. Use proof-backed query-local refinement to separate coarsening, horizon,
    uncertainty, forecast/birth, route/tube, and unresolved losses. Do not use

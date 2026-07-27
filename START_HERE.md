@@ -35,8 +35,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest committed algorithmic checkpoint:
-  `ba4e66f Retain G3 stationary capsule witnesses`. The first five eligible
-  Boolean-empty exact roots in both retained Lunatic Stage 4A and Stage 6B
+  `25d5f68 Add internal native stationary witness extraction`. Internal
+  native extraction now retains the deterministic stationary worst path,
+  including hidden remaining delay, recursive cadence, pickup/no-write,
+  merged successor support, prefix bottleneck, nested labels, and failure or
+  successor identity. Four randomized all-root-action cases plus pending
+  no-write and unsafe-root cases match the independent Python witness on
+  Linux and Windows. The production ABI remains exactly the checked-in 46
+  symbols. Quick suites pass `726/726` on Linux in `9.635 s` and Windows in
+  `14.362 s` with three platform skips. This remains internal/offline; see
+  `notes/G3_NATIVE_STATIONARY_WITNESS_GATE_20260728.md`.
+- The preceding retained-capsule checkpoint
+  `ba4e66f Retain G3 stationary capsule witnesses` found that the first five
+  eligible Boolean-empty exact roots in both retained Lunatic Stage 4A and Stage 6B
   contain all three restricted outcomes: full 32-frame feasibility, positive
   17/12-frame partial witnesses on unresolved roots, and no-positive
   stationary witnesses. Every portfolio completed all 17 root actions over
@@ -707,12 +718,13 @@ fails delivery. G3 now has an exact stationary scalar witness and complete
 all-root-action portfolio, small-case scalar/native parity, and a retained
 Stage-4A/Stage-6B capsule report. CE-0140 proves that old Boolean-empty roots
 can still contain full stationary witnesses; stationary zero-prefix roots
-remain unrestricted-unresolved. The next useful G3 checkpoint is native
-worst-branch extraction behind the current ABI, while G5 builds exact
-complete-mask roots with future-event coverage. Work should:
+remain unrestricted-unresolved. Internal native worst-branch extraction now
+passes full-path Linux/Windows parity without changing the public ABI. The
+next useful gate builds exact complete-mask roots with future-event coverage,
+then measures cancellable delivery and Windows contention. Work should:
 
-1. add native G3 worst-branch/policy-witness extraction without changing the
-   checked-in 46-symbol ABI until a separately reviewed checkpoint;
+1. keep the native G3 extractor internal until exact complete-mask,
+   coverage, delivery, and separately reviewed ABI/publication gates pass;
 2. extend beyond stationary continuations only through a declared causal,
    observation-compatible, budget-complete class; unresolved/timeout actions
    remain unresolved rather than losing;

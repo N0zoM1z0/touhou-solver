@@ -2,9 +2,9 @@
 
 Date: 2026-07-27
 
-Status: G3 stationary scalar/oracle parity and retained-capsule gates
-implemented; native extraction and delivery gates remain open; no live or
-shadow action authority
+Status: G3 stationary scalar/oracle parity, retained-capsule, and internal
+native-extraction gates implemented; delivery remains open; no live or shadow
+action authority
 
 ## Question
 
@@ -196,6 +196,8 @@ intersection. A lookup miss must not start cold work on the issue thread.
    `ba4e66f`; CE-0134 complete-mask roots remain a later model gate.**
 4. Add native worst-branch/policy-witness extraction without changing the
    existing 46-symbol ABI until a separately reviewed ABI checkpoint.
+   **Complete internally in `25d5f68`; full-path Python/native differentials
+   pass and the production export manifest remains exactly 46 symbols.**
 5. Measure cancellable background delivery and Windows contention before any
    shadow publication experiment.
 
@@ -234,7 +236,15 @@ both Lunatic Stage 4A and Stage 6B contain full 32-frame feasibility, positive
 roots. All root-action portfolios complete; selected witnesses replay and
 match native guaranteed frames with margin error below `1e-5`. CE-0140 records
 the resulting rejection of Boolean-empty or stationary exhaustion as
-unrestricted exact losing. Complete-mask roots, native extraction, delivery,
-and physical consumption remain open; Gate 4 is next. Retained evidence and
-the exact reproduction command are in
-`G3_STATIONARY_PARTIAL_SURVIVAL_CAPSULE_GATE_20260727.md`.
+unrestricted exact losing. Complete-mask roots, delivery, and physical
+consumption remain open. Retained evidence and the exact reproduction command
+are in `G3_STATIONARY_PARTIAL_SURVIVAL_CAPSULE_GATE_20260727.md`.
+
+Checkpoint `25d5f68` completes Gate 4 behind the existing public ABI. The
+native transition records hidden remaining delay, recursive cadence, and
+pickup/no-write; a separate deterministic module merges
+observation-compatible branches and extracts the complete worst path. Linux
+and Windows probes match the independent Python path on randomized
+all-root-action, pending no-write, merged-support, and unsafe-root cases.
+Delivery/contention remains Gate 5; details are in
+`G3_NATIVE_STATIONARY_WITNESS_GATE_20260728.md`.

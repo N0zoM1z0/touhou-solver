@@ -53,8 +53,10 @@ and all same-frame transitions.
 - **Inferred from the connected IDA database:** `bullet_manager_update`
   (`0x431240`) runs after enemy emission at priority 14, scans slot 0 and then
   slots 1,535 down to 1, moves and collision-tests a newly active bullet in
-  the same update, and advances its timer at the end. The candidate current
-  timer field begins at bullet offset `0x0D8C`.
+  the same update, and advances its timer at the end. It passes bullet
+  `+0x0D8C` to `timer_current` (`0x40D3B0`), whose accessor returns the signed
+  integer at timer `+0x08`; the candidate native age is therefore bullet
+  `+0x0D94`.
 - **Observed in the executable base-state oracle:** new
   `spawns_before_update` participate in the same later bullet-pool pass and
   can collide immediately. This is a deterministic implementation fixture,
@@ -328,4 +330,3 @@ finite support for a narrowly declared event subset. The proposal must still
 show that uncovered sources cannot enter the reachable tube, pass the
 semantic differential/fuzzer and physical repetition gates, meet delivery,
 and leave all other event classes `UNKNOWN`.
-

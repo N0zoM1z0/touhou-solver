@@ -139,8 +139,9 @@ implementation module where module-level patch identity matters.
 | Module | Lines | Decision | Reason |
 | --- | ---: | --- | --- |
 | `th08_live/controller.py` | 5,377 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, and outer composition; immutable handoff records plus pure corridor/candidate/control/sensing/timing/optional-hazard trace builders are live. |
-| `th08_live/planner_pass.py` | 852 | split in progress | Shared contracts, baseline, and supplemental lifecycle now have dedicated modules. Split final selection/assembly and then reassess whether the cohesive 755-line supplemental stage needs native/search submodules. |
+| `th08_live/planner_pass.py` | 320 | staged split complete | Prepare/orchestration only; shared contracts, baseline, supplemental lifecycle, and final selection/assembly have dedicated modules. |
 | `th08_live/planner_pass_supplemental.py` | 755 | retain through finalization gate | Cohesive pre-submit/search/exact-version lookup/fallback/terminal-label lifecycle; split native job construction from search only if later work makes either responsibility change independently. |
+| `th08_live/planner_pass_finalize.py` | 587 | retain | One selection/assembly responsibility: endpoint rank, robust override, pre-loss admission, damage shadow, decision assembly, and relaxed retry. |
 | `analysis/th08_run_dossier.py` | 2,451 | split after live iteration contract | Offline reader, attribution, aggregation, validation, and rendering are separable and low authority-risk. |
 | `analysis/th08_practice_dossier.py` | 2,307 | split with shared dossier primitives | It duplicates trace reading, statistics, schema construction, and rendering responsibilities. |
 | `th08_automation/practice_supervisor.py` | 683 | retain orchestration | Resource/process/menu/monitor/artifact logic is already behind narrow modules; the remaining file is composition and lifecycle flow. |

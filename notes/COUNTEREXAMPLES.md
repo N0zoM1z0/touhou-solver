@@ -3661,3 +3661,44 @@ completed
 - **Evidence:** Matching compact run and dossier artifacts; ignored raw JSONL
   SHA-256
   `14bb67c3f6448a232e338d5067047def7a380814b90fae4ffb2577e49047e1f3`.
+
+## CE-0138: Hard Stage 6B concentrated contact at boundaries after kernel exhaustion
+
+Status: observed physical survival failure; staged planner-refactor gate
+completed
+
+- **Observed high-pressure run:** Supervised no-Bomb run
+  `hard_route2_stage6b_unattended_20260727_193155` completed frames
+  `1..72862`, 22,140 decisions, route completion, artifact materialization,
+  and cleanup. It reached 1,454 active bullets and 256 active lasers and took
+  13 native hits at
+  `[873,10927,11586,11965,12556,30872,46053,54532,55522,56570,60052,62672,68786]`.
+- **Canonical first hit:** Frame 873 was a nonspell observed-bullet overlap
+  at player `(376.000,417.100)` with active `up_fast`, 275 bullets, zero
+  lasers, and signed pipeline clearance `-2.886`. The global viability kernel
+  was exhausted with a nine-frame robust warning.
+- **Later discovery evidence:** Ten contacts were observed-bullet overlaps,
+  two were modeled committed-prefix collisions, and frame 46,053 was an
+  observed-laser overlap during spell 165. Every hit followed global
+  viability-kernel exhaustion, with warning leads
+  `[9,6,5,14,10,9,7,4,11,5,14,2,6]` frames. Spell 149 contributed four hits
+  and spell 169 three; later contacts are pattern/planner evidence rather
+  than independent fresh trials.
+- **Boundary signature:** Eleven contacts involved a playfield boundary,
+  seven used fast movement, and one exceeded 1,000 bullets. Bottom-eight-pixel
+  occupancy was 0.237 in the 60-frame pre-hit windows versus 0.151 elsewhere;
+  mean selected control-reserve deficit was 9.754 versus 3.659. These are
+  correlations, not causal acceptance claims.
+- **Structural boundary:** All 22,140 decisions retained the required planner
+  groups, zero supplemental failures were serialized, hard no-Bomb passed,
+  and all processes cleaned up. This retains the prepare/baseline/
+  supplemental/finalize refactor under long mixed-hazard and transition
+  pressure but does not rescue physical survival.
+- **Correction boundary:** Preserve a non-empty global action kernel before
+  the former hit windows, investigate why boundary occupancy remains
+  attractive under high control-reserve deficit, and keep bullet, laser, and
+  committed-prefix causes separate. Compare phase-specific warning lead and
+  position, not aggregate hit counts across RNG samples.
+- **Evidence:** Matching compact run and dossier artifacts; ignored raw JSONL
+  SHA-256
+  `d746c1bcbe3604a32f44ecfbb5f95f22052c8a8de555dbd9906e58872621e29b`.

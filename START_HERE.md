@@ -253,6 +253,21 @@ describe the same decision. Python/C++ parity is not physical correctness.
   also exposed an unresolved 1-ms wall-deadline test flake: the pipeline
   prewarm deadline gate failed twice in full-suite order, passed focused, and
   passed the final fresh full run. No test was weakened.
+- Endpoint ranking, robust override, pre-loss admission, damage shadow,
+  decision assembly, and relaxed-viability transition now live in
+  `th08_live.planner_pass_finalize`. The pass entry point is a 320-line
+  prepare/orchestration layer; baseline/finalize/supplemental/contracts are
+  209/587/755/109 lines. Five complete decision digests remain unchanged;
+  quick suites pass `699/699` on Linux in `8.862 s` and Windows in `13.247 s`
+  with three skips.
+- High-pressure retention
+  `hard_route2_stage6b_unattended_20260727_193155` completed Hard Stage 6B
+  over frames `1..72862` with 22,140 decisions, maximum 1,454 active bullets,
+  maximum 256 active lasers, zero Bomb input, accepted route completion,
+  compact artifacts, supervisor completion, and no residual process. Every
+  decision retained the required planner groups with zero supplemental
+  failures. The run took 13 hits, all after global-kernel exhaustion, so it
+  is CE-0138 survival-failure evidence rather than route acceptance.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

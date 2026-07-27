@@ -5131,3 +5131,34 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural supplemental ownership only. State, uncertainty,
   search, ranking, publication, fallback, action authority, and strategy are
   unchanged.
+
+### 2026-07-27 — Planner finalization extraction and Stage-6B retention
+
+- **Observed structural change:** Added
+  `th08_live.planner_pass_finalize` for endpoint ranking, robust override,
+  pre-loss admission, damage shadow, decision assembly, and the historical
+  relaxed-viability transition. The pass entry point is a 320-line
+  prepare/orchestration layer; baseline/finalize/supplemental/contracts are
+  209/587/755/109 lines.
+- **Observed automated gate:** The five complete decision digests are
+  unchanged; Ruff, byte compilation, and `git diff --check` pass; quick
+  suites pass `699/699` on Linux in `8.862 s` and Windows in `13.247 s` with
+  three platform skips.
+- **Observed high-pressure retention:** Supervised Windows run
+  `hard_route2_stage6b_unattended_20260727_193155` completed Hard Stage 6B
+  over frames `1..72862`, 22,140 decisions, maximum 1,454 active bullets,
+  maximum 256 active lasers, zero Bomb input, accepted route completion,
+  compact artifacts, supervisor completion, and no residual process.
+  Streaming validation found zero missing planner groups and zero
+  supplemental failures.
+- **Observed survival failure:** Native hits occurred at
+  `[873,10927,11586,11965,12556,30872,46053,54532,55522,56570,60052,62672,68786]`.
+  All 13 followed global viability-kernel exhaustion; retained contacts
+  classify as ten bullet overlaps, two modeled committed-prefix collisions,
+  and one laser overlap. This is CE-0138 evidence, not survival acceptance.
+- **Authority:** Structure and implementation retention only. Model,
+  recurrence, uncertainty, ranking, publication, fallback, action authority,
+  and strategy remain unchanged.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 674,484,607-byte raw JSONL SHA-256
+  `d746c1bcbe3604a32f44ecfbb5f95f22052c8a8de555dbd9906e58872621e29b`.

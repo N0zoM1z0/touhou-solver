@@ -87,9 +87,11 @@ first eligible root is Boolean-empty but retains a 32-frame exact
 complete-mask stationary witness with zero native mismatch. Coverage is
 `UNKNOWN` from the first successor, so no physical authority follows. The
 same audit found CE-0141 mixed query/coverage roots in 1,613 of 14,599 rows;
-`d5866c4` corrects future trace construction offline. This remains restricted
-finite-model evidence only; CE-0141 physical recheck, future-event coverage,
-and physical validation remain open.
+`d5866c4` corrects future trace construction. Post-fix physical run
+`20260728_020910` then accepted all 15,069 canonical joins with zero mixed
+roots, validation failures, or missing capsules, closing CE-0141's trace
+construction gate. This remains restricted finite-model evidence only;
+future-event coverage and physical action validation remain open.
 
 **Observed:** checkpoint `f8621bd` completes the offline stationary-witness
 Windows delivery implementation without adding a production symbol or
@@ -108,8 +110,9 @@ does not promote or implement one.
 
 ### Priority
 
-1. Preserve global feasibility earlier. Recheck CE-0141 on a small physical
-   trace and continue G5 future-event coverage. The stationary-witness
+1. Preserve global feasibility earlier. CE-0141's physical recheck now
+   passes; continue G5 future-event coverage one event class at a time,
+   beginning with bullet birth. The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,
    earlier-version trace-only shadow with real completion-age evidence; do

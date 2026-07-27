@@ -894,8 +894,11 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
   exact joins，第一個 eligible Boolean-empty root 完成全部 36 root
   actions 並有 full 32-frame stationary witness；
 - 同一 audit 拒絕 1,613 個 query/coverage mixed roots，形成 CE-0141。
-  `d5866c4` 已把 future coverage root 對齊 canonical `query_frame`，但
-  post-fix physical recheck 尚未完成；
+  `d5866c4` 已把 future coverage root 對齊 canonical `query_frame`；
+- post-fix physical run `20260728_020910` 接受 15,069 個 exact joins，
+  root validation failure、mixed root 和 missing capsule 均為零，因此
+  CE-0141 的 trace construction 已物理關閉；retained contract 與
+  Linux／Windows quick suites 通過 `741/741`；
 - future-event coverage、background delivery/contention 與任何 physical
   consumer 仍未完成。
 
@@ -927,8 +930,8 @@ efficiency class 的最高 logical CPU（本機 CPU11）後，兩次固定 gate 
 - stale/partial publication `0/0`，production ABI 仍精確 46 symbols。
 
 這只把 G4 delivery 推進到「可另行 review default-off trace-only shadow」；
-CE-0141 physical recheck、future-event coverage、CE-0120、earlier immutable
-completion age 與 fresh local intersection 仍阻止 action authority。CE-0142
+future-event coverage、CE-0120、earlier immutable completion age 與 fresh
+local intersection 仍阻止 action authority。CE-0142
 另記錄 physical float32 equal-label hidden tie，不再錯把 tolerant label
 parity 當成每個 nature tie field 的逐 bit equality。
 
@@ -960,8 +963,9 @@ parity 當成每個 nature tie field 的逐 bit equality。
 - 該 run 接受 12,986 joins、零 missing capsules；保留的 root 完成 36
   actions、32-frame witness、native zero mismatch，但 coverage 從第一個
   successor 即為 `UNKNOWN`；
-- CE-0141 的 1,613 mixed-root rows 已 offline 修正，仍需小型 physical
-  trace recheck；
+- CE-0141 的 1,613 mixed-root rows 已 offline 修正；post-fix physical
+  trace `20260728_020910` 的 15,069 joins 全部通過且 zero mixed roots，
+  trace construction gate 已關閉；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

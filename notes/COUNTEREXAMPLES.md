@@ -3881,8 +3881,8 @@ retained-capsule gate complete
 
 ## CE-0141: Hazard coverage and canonical observation used different roots
 
-Status: observed physical trace-contract failure; construction fixed offline;
-physical recheck pending
+Status: observed physical trace-contract failure; construction and physical
+recheck fixed; retained pre-fix failure remains authoritative history
 
 - **Observed symptom:** The exact same-session G5 audit rejected 1,613 of
   14,599 available-policy decisions in Lunatic Stage-4A run
@@ -3911,8 +3911,17 @@ physical recheck pending
   `93037d9febe609accd44eb150150088c29610443783a4434328478409fee41b0`;
   compact audit
   `artifacts/viability_audit/g5_complete_mask_stage4a_20260728.json`.
-- **Live verification:** pending a post-fix physical trace with zero
-  coverage/query-root mismatches.
+- **Physical verification:** Post-fix Lunatic Stage-4A run
+  `20260728_020910` completed 15,260 hard-no-Bomb decisions and accepted
+  15,069 canonical root/capsule joins with zero root validation failures,
+  zero missing capsules, and zero coverage/query-root mismatches. The raw
+  trace SHA-256 is
+  `6473e6706f8378b62dc02e870beffaf026716f98c0f6ea424e7de1c39cd82cd8`;
+  the compact passing audit is
+  `artifacts/viability_audit/g5_complete_mask_stage4a_postfix_20260728.json`.
+  Coverage remains correctly fail-closed `UNKNOWN` from each first
+  successor; this closes only the trace construction defect and adds no
+  action authority.
 
 ## CE-0142: Physical float32 tie paths need not choose the same hidden delay
 

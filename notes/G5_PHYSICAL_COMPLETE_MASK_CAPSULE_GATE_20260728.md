@@ -3,7 +3,7 @@
 Date: 2026-07-28
 
 Status: same-session physical join complete; finite-model witness retained;
-future-event coverage, CE-0141 physical recheck, delivery, and action authority
+CE-0141 physical recheck passed; future-event coverage and action authority
 remain open
 
 ## Physical Workload
@@ -132,10 +132,12 @@ and `4/4`. After adding the retained-artifact contract, complete
 Linux/Windows quick suites pass `733/733` in `8.581/14.794 s`, with three
 existing Windows skips.
 
-**Physical verification still required:** this retained run predates the
-one-line trace correction. A later physical run must show zero
-coverage/query-root mismatches before the canonical trace contract is marked
-physically fixed.
+**Physical verification complete:** post-fix Lunatic Stage-4A run
+`20260728_020910` accepted all 15,069 canonical root/capsule joins with zero
+coverage/query-root mismatches, validation failures, or missing capsules.
+CE-0141's trace construction defect is physically fixed; see
+`notes/G5_CE0141_PHYSICAL_RECHECK_20260728.md`. This does not change the
+first-successor `UNKNOWN` coverage or action authority.
 
 ## Diagnostic Performance
 
@@ -158,10 +160,10 @@ Windows direct-root contention gate.
 
 ## Next Gate
 
-1. Retain a small physical CE-0141 recheck with zero root-frame mismatches.
-2. Measure native stationary extraction cancellation, completion age, and
-   Windows contention without adding a public consumer.
-3. Keep future-event coverage `UNKNOWN`; model event classes individually.
+1. Keep future-event coverage `UNKNOWN`; model event classes individually,
+   beginning with bullet birth.
+2. Retain the passing CE-0141 physical report beside the pre-fix failure.
+3. Measure earlier immutable completion age without adding a public consumer.
 4. Only consider complete-only exact-version shadow lookup after delivery
    passes, with a fresh issue-time local hard intersection and lookup-miss
    fallback.

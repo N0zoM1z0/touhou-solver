@@ -6250,3 +6250,36 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   physical recheck, first-successor `UNKNOWN` future coverage, CE-0120,
   earlier immutable completion age, and fresh local issue-time intersection
   still block any action authority.
+
+### 2026-07-28 — CE-0141 post-fix physical recheck
+
+- **Observed physical scope:** Supervised Lunatic Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260728_020910` completed frames
+  `2..45659`, 15,260 decisions, `route_complete`, accepted artifact
+  materialization, post-stage no-save selection, supervisor exit zero, and
+  identity-scoped cleanup. All 15,260 issued masks kept Bomb bit `0x02`
+  clear. The first of 14 hit edges occurred at frame 1,099.
+- **Observed bundle integrity:** The 471,113,243-byte trace has SHA-256
+  `6473e6706f8378b62dc02e870beffaf026716f98c0f6ea424e7de1c39cd82cd8`.
+  All 1,954 retained capsules are readable, zero of 1,943 referenced names
+  are missing, and the compact bundle audit passes.
+- **Observed CE-0141 closure:** The post-fix exact G5 audit accepted all
+  15,069 canonical root/capsule joins with zero validation failures, zero
+  mixed query/coverage roots, and zero missing capsules. Two generations
+  were byte-identical. Report digest is
+  `e1853759053784ff1e35c3a1996ff5d730f969529e0bc1e318a07a432045f651`;
+  file SHA-256 is
+  `dc0d10a4cbc762f6bb608e9e6a83cad4fa30b8aa357a33b8f0eb303f271c4c8f`.
+- **Observed restricted witness:** Decision/query/source `596/595/595`
+  completes all 36 no-Bomb root actions under the exact held-mask
+  stationary continuation. Its best label is 32 frames with margin
+  `0x1.32e07a0000000p+4`; all 36 native witnesses have zero scalar label and
+  margin mismatch.
+- **Observed validation:** The retained post-fix contract passes, and complete
+  Linux/Windows quick suites pass `741/741` in `8.850/14.854 s`, with three
+  existing Windows skips.
+- **Authority:** CE-0141's trace construction defect is physically fixed.
+  Unseen future events remain `UNKNOWN` from frame 596, so the finite result
+  remains an exact restricted lower witness with
+  `physical_action_authority = none`. The 14-hit diagnostic run is not a
+  strategy A/B against the ten-hit pre-fix run.

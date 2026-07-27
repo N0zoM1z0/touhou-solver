@@ -39,6 +39,12 @@ RETAINED_REPORT = (
     / "viability_audit"
     / "g5_complete_mask_stage4a_20260728.json"
 )
+POSTFIX_RETAINED_REPORT = (
+    ROOT
+    / "artifacts"
+    / "viability_audit"
+    / "g5_complete_mask_stage4a_postfix_20260728.json"
+)
 
 
 def _version(namespace: str, **components: object) -> VersionIdentity:
@@ -308,6 +314,42 @@ class CompleteMaskCapsuleAuditTests(unittest.TestCase):
             "45dd68322f8d68887c36bdaf1bbec1e6",
         )
         self.assertFalse(observation["trace"]["trace_boolean_state_viable"])
+        self.assertEqual(observation["state_label"]["guaranteed_frames"], 32)
+        self.assertEqual(len(observation["complete_root_actions"]), 36)
+        self.assertEqual(len(observation["action_witnesses"]), 36)
+        self.assertEqual(observation["native_parity"]["mismatch_count"], 0)
+        self.assertEqual(observation["physical_model_status"], "model_unknown")
+        self.assertEqual(observation["physical_action_authority"], "none")
+
+    def test_retained_postfix_trace_has_no_mixed_roots(self) -> None:
+        report = json.loads(
+            POSTFIX_RETAINED_REPORT.read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            file_sha256(POSTFIX_RETAINED_REPORT),
+            "dc0d10a4cbc762f6bb608e9e6a83cad4"
+            "fa30b8aa357a33b8f0eb303f271c4c8f",
+        )
+        self.assertEqual(
+            report["report_digest"],
+            "e1853759053784ff1e35c3a1996ff5d7"
+            "30f969529e0bc1e318a07a432045f651",
+        )
+        workload = report["workloads"][0]
+        self.assertEqual(workload["read_joined_root_count"], 15_069)
+        self.assertEqual(workload["root_validation_failure_count"], 0)
+        self.assertEqual(workload["root_validation_failure_counts"], {})
+        self.assertEqual(workload["missing_capsule_count"], 0)
+        self.assertEqual(
+            workload["eligible_boolean_empty_root_count"],
+            7_466,
+        )
+        observation = workload["observations"][0]
+        identity = observation["root_identity"]["observation"]
+        coverage = observation["hazard_coverage"]
+        self.assertEqual(identity["query_frame"], 595)
+        self.assertEqual(coverage["root_frame"], 595)
+        self.assertEqual(coverage["unknown_from_frame"], 596)
         self.assertEqual(observation["state_label"]["guaranteed_frames"], 32)
         self.assertEqual(len(observation["complete_root_actions"]), 36)
         self.assertEqual(len(observation["action_witnesses"]), 36)

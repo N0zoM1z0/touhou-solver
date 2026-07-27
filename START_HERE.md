@@ -56,6 +56,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
   reviewed default-off trace-only shadow; no consumer or action authority
   exists. See
   `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`.
+- Post-fix physical CE-0141 gate
+  `lunatic_route2_stage4a_unattended_20260728_020910` completed Lunatic Stage
+  4A over frames `2..45659`, 15,260 decisions, 14 hits, hard no-Bomb,
+  accepted artifacts, supervisor exit, and cleanup. All 15,069 canonical
+  root/capsule joins passed with zero mixed roots, validation failures, or
+  missing capsules. This physically closes the trace construction bug;
+  future-event coverage remains `UNKNOWN` from the first successor and
+  physical action authority remains none. Linux/Windows quick suites pass
+  `741/741` in `8.850/14.854 s`, with three Windows skips. See
+  `notes/G5_CE0141_PHYSICAL_RECHECK_20260728.md`.
 - The preceding algorithmic checkpoint
   `d5866c4 Align hazard coverage with canonical query roots`. Physical Gate-5
   auditing found CE-0141: 1,613 of 14,599 available-query rows mixed a
@@ -64,7 +74,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
   query frame. The G5 report retains exact failure counts with bounded
   samples instead of thousands of duplicate strings. No planner, issue, or
   action authority changed. Linux/Windows quick suites pass `732/732` in
-  `8.757/14.621 s`, with three Windows skips; physical recheck remains open.
+  `8.757/14.621 s`, with three Windows skips; the later physical recheck
+  passes.
 - Physical Gate-5 workload
   `lunatic_route2_stage4a_unattended_20260728_005108` completed Lunatic Stage
   4A over frames `2..44411`, 14,804 decisions, ten hits, hard no-Bomb,
@@ -783,11 +794,11 @@ Stage-4A/Stage-6B capsule report. CE-0140 proves that old Boolean-empty roots
 can still contain full stationary witnesses; stationary zero-prefix roots
 remain unrestricted-unresolved. Internal native worst-branch extraction now
 passes full-path Linux/Windows parity without changing the public ABI. The
-exact complete-mask capsule audit now retains a joined Stage-4A workload. It
-also found and rejected CE-0141 mixed root frames; construction is corrected
-offline and needs a small physical trace recheck. The next useful gate keeps
-unknown future events fail closed while measuring cancellable delivery and
-Windows contention. Work should:
+  exact complete-mask capsule audit now retains a joined Stage-4A workload.
+  It found and rejected CE-0141 mixed root frames; construction and its
+  physical recheck are now complete. The next useful gate keeps unknown
+  future events fail closed while adding event coverage one class at a time.
+  Work should:
 
 1. keep the native G3 extractor internal until exact complete-mask,
    coverage, delivery, and separately reviewed ABI/publication gates pass;

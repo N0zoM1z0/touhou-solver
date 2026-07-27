@@ -4837,3 +4837,35 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `104/104`; Ruff and `git diff --check` pass; Linux quick suite passes
   `691/691` in `8.593 s`; Windows quick suite passes `691/691` in `13.001 s`
   with three platform skips.
+
+### 2026-07-27 — Corridor trace extraction and physical retention
+
+- **Observed structural change:** Removed the characterized 556-line inline
+  corridor serialization path from `_run_live_session`. The controller now
+  delegates the corridor subrecord to
+  `build_corridor_trace_record` after the issue transaction.
+  `controller.py` is 6,126 lines, down from 6,614 at the iteration-contract
+  checkpoint.
+- **Observed automated gate:** Live-focused tests pass `104/104`; Ruff and
+  `git diff --check` pass; Linux quick suite passes `691/691` in `8.417 s`;
+  Windows quick suite passes `691/691` in `12.730 s` with three platform
+  skips.
+- **Observed physical retention:** Supervised Windows run
+  `hard_route2_stage1_unattended_20260727_175715` completed Hard Stage 1 with
+  7,305 decisions, zero Bomb input, accepted route completion, compact
+  artifact materialization, supervisor completion, and no residual process.
+  Streaming validation found 7,263 corridor records and zero omissions of the
+  required source/snapshot/age/timing/status/commitment/pending fields.
+- **Observed survival failure:** The fresh attempt took one native hit at
+  frame 6,385 after global viability-kernel exhaustion. This is retained as
+  another CE-0132 instance and prevents calling the run a clean survival
+  pass; it does not indicate a trace construction exception or malformed
+  record.
+- **Authority:** Source ownership and implementation-retention evidence only.
+  The builder consumes already completed or lookup-only values and performs
+  no sensing, query expansion, service mutation, input dispatch, or strategy
+  selection. No model, recurrence, deadline, fallback, worker policy, trace
+  schema, or live action authority intentionally changed.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 151,586,776-byte raw JSONL SHA-256
+  `3e0f5f89abd533b0d8f6d2420c71eca3f869fd4f6f4b371dad686b71f1cea83d`.

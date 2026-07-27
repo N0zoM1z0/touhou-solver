@@ -88,12 +88,18 @@ describe the same decision. Python/C++ parity is not physical correctness.
   now consumes the captured contract and actuator state is updated from the
   fresh-issue contract. The surrounding controller remains the composition
   owner; this is a staged extraction, not a wholesale move.
-- The pending corridor-trace characterization checkpoint adds a pure
+- Corridor-trace characterization checkpoint `6a75a6a` adds a pure
   `th08_live.corridor_trace` record builder. The live loop still constructs
   the historical inline record and asserts exact equality with the extracted
   record before publishing the latter. This deliberately duplicates work for
-  one checkpoint so the subsequent deletion of the inline path has an
+  one checkpoint so deletion of the inline path has an
   executable schema-parity gate; no action decision or issue ordering moved.
+- The current uncommitted structural checkpoint removes the characterized
+  inline path. `controller.py` now delegates corridor trace construction to
+  the pure builder and is 6,126 lines, down from 6,614 at the iteration-stage
+  checkpoint. The builder consumes only completed publications and
+  lookup-only values after issue; it performs no sensing, query expansion,
+  worker mutation, or dispatch.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -139,6 +145,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
   platform skips. Two focused tests cover absence and representative
   publication serialization; the live loop additionally compares the
   complete old and extracted records at runtime before enqueuing.
+- After deleting the inline corridor serializer, the same `691/691` quick
+  tests pass on Linux in `8.417 s` and Windows in `12.730 s` with three
+  Windows platform skips. Supervised physical retention
+  `hard_route2_stage1_unattended_20260727_175715` completed Hard Stage 1 with
+  7,305 decisions, 7,263 corridor records, zero required-field omissions,
+  zero Bomb input, accepted route completion, artifact materialization, and
+  no residual process. It took one native hit at frame 6,385 after global
+  viability-kernel exhaustion, so this is structural/trace retention
+  evidence, not a clean survival pass.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

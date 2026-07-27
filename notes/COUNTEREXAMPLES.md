@@ -3463,6 +3463,18 @@ Status: observed physical survival failure; R5 lifecycle smoke completed
   was already exhausted, and the robust warning lead was eight frames. This
   is a second stochastic instance of the same broad post-exhaustion failure,
   not evidence that G1 shadow telemetry caused the hit.
+- **Additional observed instance:** Post-corridor-trace-extraction run
+  `hard_route2_stage1_unattended_20260727_175715` completed Hard Stage 1,
+  artifact materialization, and cleanup with zero Bomb input but took one
+  fresh-attempt hit at frame 6,385. The player was at
+  `(337.911,40.561)` during a nonspell with active `down_left_fast`, 118
+  bullets, zero lasers, and signed pipeline clearance `-2.787`. The global
+  kernel had exhausted six frames before contact. The 7,263 emitted corridor
+  records had zero required-field omissions, so this is another stochastic
+  post-exhaustion survival failure, not evidence of trace-schema failure.
+  Compact evidence is retained under the matching run name in `notes/runs/`
+  and `artifacts/runtime_reports/`; raw JSONL SHA-256 is
+  `3e0f5f89abd533b0d8f6d2420c71eca3f869fd4f6f4b371dad686b71f1cea83d`.
 
 ## CE-0133: A fixed 240-frame pre-hit window missed four exhaustion boundaries
 

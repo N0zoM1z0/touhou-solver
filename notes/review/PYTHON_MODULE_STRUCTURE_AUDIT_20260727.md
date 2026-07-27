@@ -167,6 +167,26 @@ trace, and lifecycle ownership remains in the controller.
   `th08_ecl_tool/` separates binary model/parser, semantic decoding/listing,
   catalogs/reports, and CLI composition.
 
+### Offline dossier ingestion
+
+- `analysis/dossier/trace_reader.py` owns whole-file SHA-256 provenance,
+  streaming JSONL parse-error handling, run-trace compaction, and practice
+  epoch/scope selection.
+- `analysis/dossier/schema.py` owns the shared compact-decision schema
+  lowering.
+- `analysis/dossier/statistics.py` owns the historical floor-indexed p95 and
+  resource-range conventions.
+- `analysis/th08_run_dossier.py` and
+  `analysis/th08_practice_dossier.py` retain compatibility aliases for their
+  former private reader/schema/statistics imports. Attribution, aggregation,
+  validation, rendering, and CLI composition remain in the entry modules for
+  later behavior-preserving checkpoints.
+
+Checkpoint `aa9358e` reduced the entry modules from 2,451/2,307 lines to
+2,134/2,058 lines. A Windows/UNC regeneration from the retained 421,171,745-
+byte Stage-4A trace matched the existing JSON, Markdown, deaths CSV, and
+regression JSON byte for byte.
+
 All compatibility facades preserve the historical import surface. The
 runtime, practice, full-route, hotkey, ECL, and live facades alias the
 implementation module where module-level patch identity matters.
@@ -179,8 +199,8 @@ implementation module where module-level patch identity matters.
 | `th08_live/planner_pass.py` | 320 | staged split complete | Prepare/orchestration only; shared contracts, baseline, supplemental lifecycle, and final selection/assembly have dedicated modules. |
 | `th08_live/planner_pass_supplemental.py` | 755 | retain through finalization gate | Cohesive pre-submit/search/exact-version lookup/fallback/terminal-label lifecycle; split native job construction from search only if later work makes either responsibility change independently. |
 | `th08_live/planner_pass_finalize.py` | 587 | retain | One selection/assembly responsibility: endpoint rank, robust override, pre-loss admission, damage shadow, decision assembly, and relaxed retry. |
-| `analysis/th08_run_dossier.py` | 2,451 | split after live iteration contract | Offline reader, attribution, aggregation, validation, and rendering are separable and low authority-risk. |
-| `analysis/th08_practice_dossier.py` | 2,307 | split with shared dossier primitives | It duplicates trace reading, statistics, schema construction, and rendering responsibilities. |
+| `analysis/th08_run_dossier.py` | 2,134 | continue shared attribution/render checkpoints | Reader, compact schema, and stable statistics are extracted; attribution, aggregation, validation, rendering, and CLI composition remain separable and low authority-risk. |
+| `analysis/th08_practice_dossier.py` | 2,058 | continue with shared dossier primitives | Shared ingestion is complete; death attribution, common summaries, and rendering still overlap the run dossier. |
 | `th08_automation/practice_supervisor.py` | 683 | retain orchestration | Resource/process/menu/monitor/artifact logic is already behind narrow modules; the remaining file is composition and lifecycle flow. |
 | `th08_corridor_adapter.py` | 691 | retain; watch growth | This is the TH08-specific hazard-lowering and control-spec adapter required by the workspace boundary. Its dependencies point inward to game-neutral control code. |
 | `th08_corridor_runtime.py` | 643 | retain; watch growth | It is a cohesive publication/query lifecycle for corridor artifacts. A split is warranted only if candidate-verifier and prewarm lifecycles diverge further. |
@@ -231,10 +251,13 @@ Their heavy implementations are the modules listed above.
 
 ### Offline analysis
 
-`analysis/th08_run_dossier.py` (2,451) and
-`analysis/th08_practice_dossier.py` (2,307) are the highest-value low-authority
-split after the issue loop. Other analysis/benchmark programs above roughly
-800 lines should move shared readers/statistics/renderers into
+`analysis/th08_run_dossier.py` (2,134) and
+`analysis/th08_practice_dossier.py` (2,058) remain the highest-value
+low-authority split. Shared reader, provenance, scope, compact schema, and
+stable statistics ownership is complete. Next extract attribution only after
+characterizing the complete death/cause objects, then extract renderers
+without changing ordering or formatting. Other analysis/benchmark programs
+above roughly 800 lines should move shared readers/statistics/renderers into
 `analysis/dossier/` or benchmark helpers, while their executable files remain
 thin explicit entry points.
 
@@ -341,15 +364,20 @@ exit gate retained.
 
 ## Dossier Tool Follow-Up
 
-After the live iteration contract is stable, create shared offline modules
-under `scripts/analysis/dossier/`:
+Shared offline modules under `scripts/analysis/dossier/` now have this status:
 
-- `trace_reader.py`: bounded JSONL iteration, parse errors, and scope epochs;
-- `statistics.py`: percentiles, histograms, and timing summaries;
-- `attribution.py`: stage/spell/death/cause classification;
-- `schema.py`: compact report objects and validation;
-- `render.py`: Markdown/CSV/JSON rendering;
-- thin practice and full-route entry points.
+- `trace_reader.py`: **implemented** for bounded JSONL iteration, parse errors,
+  provenance, scope epochs, and both current reader contracts;
+- `statistics.py`: **partially implemented** for exact historical
+  percentiles and resource ranges; move histograms/timing summaries only when
+  a second caller is characterized;
+- `schema.py`: **partially implemented** for compact decision objects;
+- `attribution.py`: pending characterization of stage/spell/death/cause
+  classification;
+- `render.py`: pending exact ordering/format characterization for
+  Markdown/CSV/JSON;
+- thin practice and full-route entry points: pending the attribution/render
+  checkpoints.
 
 These tools remain offline. Their refactor must compare complete generated
 JSON/Markdown/CSV outputs against retained fixtures; schema or attribution

@@ -5816,3 +5816,33 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 421,171,745-byte raw JSONL SHA-256
   `7a283ce85264a778e2fc24e01ad65efa0d3235161b733ed7105f8b9434264bcf`.
+
+### 2026-07-27 — Shared offline dossier ingestion extraction
+
+- **Observed structural change:** Checkpoint `aa9358e` adds
+  `analysis/dossier/trace_reader.py`, `schema.py`, and `statistics.py`.
+  Whole-file JSONL hashing and parse-error handling, run/practice reader
+  contracts, practice epoch/scope selection, compact-decision lowering, and
+  the historical percentile/resource conventions now have shared owners.
+  Compatibility aliases preserve the former private imports from both CLI
+  modules.
+- **Observed size result:** `th08_run_dossier.py` changed from 2,451 to 2,134
+  lines and `th08_practice_dossier.py` from 2,307 to 2,058 lines. Attribution,
+  aggregation, validation, rendering, and entry-point composition remain
+  deliberately in place for later independently gated checkpoints.
+- **Observed exact-output gate:** The Windows interpreter regenerated the
+  complete practice dossier from retained raw trace
+  `lunatic_route2_stage4a_unattended_20260727_220330` through the same UNC
+  path used by the original report. Generated JSON, Markdown, deaths CSV, and
+  regression JSON each matched the retained file byte for byte. The raw input
+  was 421,171,745 bytes with SHA-256
+  `7a283ce85264a778e2fc24e01ad65efa0d3235161b733ed7105f8b9434264bcf`.
+- **Validation:** New focused tests cover shared hash/size/parse-error
+  semantics, run/practice reader agreement, scope publication, and the
+  floor-indexed p95 convention. Dossier tests pass `2/2`, practice dossier
+  tests `18/18`, and run dossier tests `20/20`. Quick suites pass `704/704`
+  on Linux in `9.003 s` and Windows in `12.834 s` with three platform skips;
+  Ruff, byte compilation, and `git diff --check` pass.
+- **Authority:** Offline source ownership only. Trace inputs, compact report
+  schema, attribution, ordering, formatting, live sensing, recurrence,
+  physical issue behavior, action authority, and strategy are unchanged.

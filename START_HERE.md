@@ -61,10 +61,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
   blocked by live integration, hazard coverage, clock, publication, and
   performance gates.
 - Latest structural checkpoint:
-  `ef306ce Split native internal ABI declarations`, following the focused
-  live movement/hazard/certificate/objective extractions and native
-  local/viability/geometry/pipeline translation-unit splits recorded in
-  `notes/RESEARCH_LOG.md`.
+  `aa9358e Extract shared dossier ingestion modules`. The retained run and
+  practice dossier CLIs now share bounded JSONL scanning/provenance, epoch and
+  scope selection, compact-decision schema lowering, and stable percentile/
+  resource statistics under `scripts/analysis/dossier/`. The original private
+  imports remain compatibility aliases. The latest native structural
+  checkpoint remains `ef306ce Split native internal ABI declarations`,
+  following the focused live movement/hazard/certificate/objective
+  extractions and native local/viability/geometry/pipeline translation-unit
+  splits recorded in `notes/RESEARCH_LOG.md`.
   `th08_live_dodge_agent.py`, runtime, practice/full-route supervisors,
   hotkey daemon, semantic cases, and ECL tool are compatibility/composition
   entry points over narrow packages. The live package now owns session and
@@ -77,9 +82,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Historical imports and monkeypatch seams still resolve current
   implementation globals. R2/R3/R4 remain complete. The remaining structural
   target is the staged iteration contract inside `_run_live_session`, recorded
-  in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`. No model,
-  recurrence, float comparison, worker policy, action authority, or strategy
-  changed.
+  in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`, plus the
+  attribution/aggregation/rendering seams remaining in the two offline
+  dossier entry points. No model, recurrence, float comparison, worker policy,
+  action authority, report schema, attribution, or strategy changed.
 - Structural checkpoint `6dbcc8b Split dual refinement into focused modules`
   splits the G2 implementation behind stable
   compatibility facades. Spatial cells, transitions, root scope, patch

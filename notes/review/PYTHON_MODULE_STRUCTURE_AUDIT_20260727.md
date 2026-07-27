@@ -84,6 +84,15 @@ coupling, and the order for later structural work.
   recertifications, with 39 overrides and zero silent outside-global
   selections. Seven CE-0136 hits remain survival evidence, not a structural
   regression.
+- **Observed:** after extracting issue-time deadline and post-hit input
+  overrides, Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260727_224146` completed 13,953
+  decisions over frames `1..43371`, reached 1,529 bullets, passed hard
+  no-Bomb, materialized accepted artifacts, and left no residual process.
+  Its 2,419 changed issue observations produced exactly 2,419
+  recertifications, 58 overrides, and zero silent outside-global selections.
+  The 13 CE-0137 hits all followed global-kernel exhaustion and remain
+  survival evidence rather than a structural regression.
 - **Workload decision:** Stage 1 remains sufficient for lifecycle, cleanup,
   and trace-schema changes. Subsequent planner, recurrence, clearance, or
   native compute checkpoints use Hard Stage 4A as the primary focused
@@ -125,9 +134,10 @@ controller to 5,411 lines; extracting timing and optional-hazard trace fields
 reduced it to 5,377 lines. Movement contracts/geometry, local hazard
 projection, pipeline certificates, and local objective extraction reduce the
 controller to 4,190 lines. Extracting the fresh enemy-prefix issue stage
-reduces the current controller to 4,181 lines while replacing an inline
+reduces the controller to 4,181 lines while replacing an inline
 sensor/recertification transaction with a typed, independently tested
-boundary. The dominant block remains
+boundary. Extracting the ordered deadline and post-hit input overrides reduces
+the current controller to 4,168 lines. The dominant block remains
 `_run_live_session`.
 
 `scripts/th08_live/iteration.py` now defines and the live loop consumes:
@@ -195,7 +205,7 @@ implementation module where module-level patch identity matters.
 
 | Module | Lines | Decision | Reason |
 | --- | ---: | --- | --- |
-| `th08_live/controller.py` | 4,181 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, deadline/override/dispatch, and outer composition; immutable handoffs plus pure trace, movement, hazard, certificate, objective, and fresh-enemy issue modules are live. |
+| `th08_live/controller.py` | 4,168 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, action alignment/dispatch, and outer composition; immutable handoffs plus pure trace, movement, hazard, certificate, objective, fresh-enemy issue, and input-override modules are live. |
 | `th08_live/planner_pass.py` | 320 | staged split complete | Prepare/orchestration only; shared contracts, baseline, supplemental lifecycle, and final selection/assembly have dedicated modules. |
 | `th08_live/planner_pass_supplemental.py` | 755 | retain through finalization gate | Cohesive pre-submit/search/exact-version lookup/fallback/terminal-label lifecycle; split native job construction from search only if later work makes either responsibility change independently. |
 | `th08_live/planner_pass_finalize.py` | 587 | retain | One selection/assembly responsibility: endpoint rank, robust override, pre-loss admission, damage shadow, decision assembly, and relaxed retry. |
@@ -222,7 +232,7 @@ decomposed.
 | Module | Lines | Decision |
 | --- | ---: | --- |
 | `th08_live_dodge_agent.py` | 22 | keep facade |
-| `th08_live/controller.py` | 4,181 | P0 staged extraction through iteration contracts |
+| `th08_live/controller.py` | 4,168 | P0 staged extraction through iteration contracts |
 | `th08_live/planner_pass.py` | 320 | staged split complete |
 | `touhou_control/query_survival.py` | 80 | compatibility facade; focused scalar/root/workspace/dispatch/problem modules complete |
 | `touhou_control/query_survival_types.py` | 140 | retain public contracts |
@@ -328,8 +338,10 @@ The structural sequence and current status are:
 5. Add `FreshIssueResult` around `IssueTransaction`: **implemented and
    consumed at the outer physical dispatch boundary**. Fresh enemy-prefix
    capture, aligned change detection, and conditional recertification now
-   live behind `th08_live.fresh_issue`; deadline/override/dispatch remains the
-   next bounded extraction.
+   live behind `th08_live.fresh_issue`; deadline and post-hit mask overrides
+   now live behind `th08_live.issue_overrides`. Action alignment, physical
+   send/no-write, and actuator-state mutation remain the next bounded
+   extraction.
    fresh enemy prefix, recertification, selected action, send/no-write result,
    issue frame, and deadline status.
 6. Build trace records from those immutable stage outputs after the issue

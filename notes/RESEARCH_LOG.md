@@ -5872,3 +5872,47 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   canonicalization, transition branches, controller/nature quantifiers,
   memoization, continuation budget, threshold certificates, resume/cancel,
   status mapping, public ABI, and live action authority are unchanged.
+
+### 2026-07-27 — Issue-time input override extraction and Stage-5 retention
+
+- **Observed structural change:** Checkpoint `a388a1d` adds
+  `th08_live.issue_overrides`. Pure typed functions now own the historical
+  deadline hold and the ordered deathbomb, Bomb-counter, auto-confirm, and
+  final hard no-Bomb mask checks. The controller retains foreground
+  verification, candidate lookup, physical send/no-write, actuator-state
+  mutation, trace publication, and lifecycle ownership.
+- **Compatibility boundary:** The extraction preserves the original
+  deadline-before-hit-override order, complete held mask and focus state,
+  deathbomb eligibility predicate, Bomb counter update, auto-confirm callback
+  invocation, and final no-Bomb exception. Four focused tests cover pass
+  through, deadline hold, deathbomb plus confirmation, and the final no-Bomb
+  rejection. Live-controller and issue-transaction focused suites pass
+  `92/92` and `2/2`; quick suites pass `709/709` on Linux in `9.395 s` and
+  Windows in `12.929 s` with three platform skips.
+- **Observed physical gate:** Supervised run
+  `lunatic_route2_stage5_unattended_20260727_224146` completed frames
+  `1..43371` with 13,953 decisions, maximum 1,529 bullets, native backends,
+  hard no-Bomb, accepted terminal unload, compact artifacts, supervisor
+  completion, and no residual game/controller process. There were zero Bomb
+  mask, flag, or action-name violations; auto-confirm altered 245 decision
+  records. No deadline hold occurred in this RNG-distinct run.
+- **Observed issue-stage integrity:** All 13,953 decisions retained the issue
+  guard. It detected 2,419 during-plan geometry changes, performed exactly
+  2,419 recertifications and transactions, overrode 58 actions, preserved
+  2,361 planned actions, and recorded zero silent outside-global selections.
+  Issue read median/p95 was `1.722/3.492 ms`; recertification median/p95 was
+  `2.242/5.707 ms`.
+- **Observed survival boundary:** Thirteen hits occurred; ten were modeled
+  committed-prefix collisions and three were observed-bullet overlaps. Every
+  hit followed global-kernel exhaustion. The count is below the 20.5 median
+  of previously accepted Lunatic Stage-5 runs but above the previous run's
+  eight. Differing RNG, phase exposure, density, and post-respawn resources
+  forbid a causal refactor-improvement claim. This extends CE-0137: finite
+  viability preservation and completed post-loss recovery remain the core
+  blockers after the structural issue path remained operational.
+- **Evidence and authority:** Matching compact artifacts are retained under
+  `notes/runs/` and `artifacts/runtime_reports/`. The ignored
+  548,614,220-byte raw JSONL has SHA-256
+  `f6b01748e01eeaceb07aff7f54f703b9dd9e4cf4d184883f23c61d89519e4da6`.
+  This is physical structural retention and counterexample evidence only;
+  recurrence, model, live action authority, and strategy are unchanged.

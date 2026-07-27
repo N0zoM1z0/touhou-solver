@@ -61,8 +61,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   blocked by live integration, hazard coverage, clock, publication, and
   performance gates.
 - Latest structural checkpoint:
-  `a0a7afb Separate native pipeline compatibility adapters`. Direct-pipeline
-  v1 create/query adapters now live in `pipeline/direct_compat.cpp`; belief
+  `a388a1d Extract issue-time input overrides`. Deadline-hold construction and
+  the ordered deathbomb/counter/auto-confirm/final hard-no-Bomb checks now
+  live in `th08_live.issue_overrides`; physical dispatch, actuator mutation,
+  and scene lifecycle remain controller-owned. The preceding native
+  checkpoint `a0a7afb Separate native pipeline compatibility adapters` moved
+  direct-pipeline v1 create/query adapters into `pipeline/direct_compat.cpp`;
+  belief
   32-bit v2 query/upper adapters join the older create/query/upper adapters in
   `pipeline/belief_compat.cpp`. Current direct/belief workspace files retain
   the recurrence, memo, resume/cancel, and current query implementations. The
@@ -105,9 +110,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
   dormant-body merge, aligned change detection, and conditional hard
   recertification result. The controller injects its current capture/change/
   merge/commit callbacks on every iteration, preserving historical
-  monkeypatch and backend dispatch seams. Deadline handling, Bomb policy,
-  candidate lookup, physical dispatch, actuator updates, and trace
-  publication remain controller-owned.
+  monkeypatch and backend dispatch seams. Deadline handling, Bomb policy, and
+  auto-confirm mask selection now delegate to the pure
+  `th08_live.issue_overrides` boundary. Candidate lookup, physical dispatch,
+  actuator updates, and trace publication remain controller-owned.
 - Post-extraction physical retention
   `lunatic_route2_stage4a_unattended_20260727_220330` completed Stage 4A over
   frames `2..41645` with 13,295 decisions, maximum 1,362 bullets, zero Bomb
@@ -117,6 +123,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
   overrides, and zero silent outside-global selections. Seven hits all
   followed global-kernel exhaustion, extending CE-0136 rather than indicating
   a structural regression.
+- Post-override-extraction retention
+  `lunatic_route2_stage5_unattended_20260727_224146` completed Stage 5 over
+  frames `1..43371` with 13,953 decisions, maximum 1,529 bullets, zero Bomb
+  input, accepted terminal unload, compact artifacts, supervisor completion,
+  and cleanup. All 13,953 decisions retained the issue guard; 2,419 geometry
+  changes produced exactly 2,419 recertifications, 58 overrides, and zero
+  silent outside-global selections. It took 13 hits, all after global-kernel
+  exhaustion. This retains the structural input-override path and extends
+  CE-0137; it is not route acceptance or controlled evidence that the
+  refactor changed survival.
 - Corridor-trace characterization checkpoint `6a75a6a` adds a pure
   `th08_live.corridor_trace` record builder. The live loop still constructs
   the historical inline record and asserts exact equality with the extracted

@@ -3687,12 +3687,35 @@ completed
   exposed a long causal intervention window, but its post-loss distant
   recovery did not construct a viable continuation. Seven of eight contacts
   involved the playfield boundary and all eight used fast movement.
+- **Observed issue-override corroboration:** After extracting the ordered
+  deadline/deathbomb/auto-confirm/final no-Bomb override boundary, supervised
+  Lunatic run `lunatic_route2_stage5_unattended_20260727_224146` completed
+  frames `1..43371` with 13,953 decisions, maximum 1,529 bullets, accepted
+  artifacts, and cleanup. It took 13 hits at
+  `[1564,2586,3997,10708,23857,29721,30098,30989,35245,35763,37079,38412,39854]`;
+  ten were modeled committed-prefix collisions and three were observed-bullet
+  overlaps. Every contact again followed global-kernel exhaustion.
+- **Observed issue-path integrity:** Every decision retained an issue
+  observation. The 2,419 changed observations produced exactly 2,419
+  recertifications and fresh/global transactions, 58 action overrides, 2,361
+  preserved planned actions, and zero silent outside-global selections.
+  All 13,953 masks, Bomb flags, and action names passed hard no-Bomb.
+  Auto-confirm altered 245 decision records. This run exercised no deadline
+  hold, whose behavior remains covered by the focused deterministic tests.
+- **Comparison boundary:** The 13 contacts are below the 20.5 median of
+  previously accepted Lunatic Stage-5 runs, but above the immediately
+  preceding run's eight. RNG, phase exposure, density, and post-respawn
+  resources differ, so this is observed workload-level progress relative to
+  early baselines, not a causal A/B survival improvement from the structural
+  extraction.
 - **Evidence:** Matching compact run and dossier artifacts. Ignored raw JSONL
   SHA-256 values are
   `14bb67c3f6448a232e338d5067047def7a380814b90fae4ffb2577e49047e1f3`
   for the Hard run and
   `8ea4b761969e978a821ef362163d2be96aa6bfc43be8549eff65d92d0b955a20`
-  for the Lunatic run.
+  for the first Lunatic run. The 548,614,220-byte post-override trace has
+  SHA-256
+  `f6b01748e01eeaceb07aff7f54f703b9dd9e4cf4d184883f23c61d89519e4da6`.
 
 ## CE-0138: Stage 6B concentrated contact at boundaries after kernel exhaustion
 

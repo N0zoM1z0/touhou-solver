@@ -1063,7 +1063,15 @@ parity 當成每個 nature tie field 的逐 bit equality。
   `1.0166/1.0293`；Windows 為 `0.0118/0.0098 ms`、
   `0.0465/0.0452 ms`、`1.0382/1.0181`，全部不綁核通過。下一步是第一個
   explicit `gil-held` Stage-4A diagnostic；需要連續兩個完整 physical
-  pass 才能關閉 B4；
+  pass 才能關閉 B4；第一個 held run `20260728_065316` 已在 13,896
+  observations 上以 p50/p95/p99/p99.9/max
+  `0.0659/0.1475/0.2021/0.4001/1.0595 ms` 通過，native-call max 從
+  released physical 的 `8.2585` 降到 `0.5008 ms`，zero >2-ms samples、
+  zero completed GC；cadence 仍為 2/3 frames，local-plan p50/p95
+  `9.764/17.910 ms`。CE-0151 修正 audit-v5 只 validate schema v7 卻在
+  aggregation 用 `==6` 丟掉 diagnostics 的 report-only bug；同一 raw
+  已 deterministic 重建。這是 pass 1/2，不是 B4 close 或 survival
+  promotion；
 - CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成

@@ -7,8 +7,9 @@ physical repeat passes observer p95 and p99 but its 8.3514-ms maximum still
 fails B4. It physically attributes every over-budget sample to the
 native-call wall interval with no overlapping cyclic GC. CE-0143 physical
 performance, CE-0145 source coverage, and CE-0147 callback-horizon coverage
-remain open; CE-0149 attribution is resolved but its correction is not. No
-future-hazard or physical action authority is granted.
+remain open; CE-0149 attribution is resolved and the first `gil-held`
+correction run is candidate pass 1 of 2. No future-hazard or physical action
+authority is granted.
 
 ## Outcome
 
@@ -432,6 +433,15 @@ fixed Linux/Windows observer profiles, ABBA decode ratios, and complete
 `801/801` suites pass. This authorizes one first explicit `gil-held`
 Stage-4A diagnostic. A single pass is not sufficient: two consecutive
 complete passes under the unchanged physical gate are required to close B4.
+
+The first held run `20260728_065316` passes all B4 limits over 13,896
+observations: p50/p95/p99/p99.9/max is
+`0.0659/0.1475/0.2021/0.4001/1.0595 ms`; native-call maximum is
+`0.5008 ms`, no observation exceeds 2 ms, and no completed GC overlaps a
+phase. The run completed frames `2..43253`, 9 hits, hard no-Bomb, accepted
+artifacts, and cleanup. CE-0151 fixed a report-only schema-v7 aggregation
+omission before publication. This is candidate pass 1 of 2, not a closed B4
+or survival comparison.
 
 In parallel, callback lookahead must expose an explicit incomplete result; an
 instruction-limit row cannot authorize an empty future event set. Stage 5 or

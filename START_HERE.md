@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `62e2248 Test native birth calls with the GIL held`,
   `7333cc8 Retain native-call Stage 4 tail attribution`,
   `200c259 Attribute native bullet birth wall tails`,
   `e892863 Retain native Stage 4 birth tail failure`,
@@ -140,12 +141,23 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `0.0118/0.0098 ms`, `0.0465/0.0452 ms`, and `1.0382/1.0181`.
   Complete Linux/Windows suites pass `801/801` in `8.900/15.699 s`.
   One explicit `gil-held` Stage-4A diagnostic is eligible; two consecutive
-  complete physical passes are required to close B4. B4 and action authority
+  complete physical passes are required to close B4. The first held run
+  `20260728_065316` is now one candidate pass: 13,896 schema-v7 held
+  observations have p50/p95/p99/p99.9/max
+  `0.0659/0.1475/0.2021/0.4001/1.0595 ms`; native-call maximum fell from the
+  released run's `8.2585` to `0.5008 ms`, with no over-budget sample and no
+  completed GC. It completed frames `2..43253`, 9 hits, hard no-Bomb,
+  accepted artifacts, and cleanup. CE-0151 records an audit-v5 aggregation
+  guard that initially validated schema v7 but omitted its diagnostics from
+  the report; the raw fields were intact, `{6, 7}` aggregation and a
+  fail-loud test now pass, the deterministic report was rebuilt, and complete
+  Linux/Windows suites pass `801/801` in `9.202/15.761 s`. One second
+  consecutive held Stage-4A pass is still required. B4 and action authority
   remain unchanged.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and
-  CE-0143/0144/0145/0146/0147/0148/0149/0150.
+  CE-0143/0144/0145/0146/0147/0148/0149/0150/0151.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and

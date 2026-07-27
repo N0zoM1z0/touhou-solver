@@ -2,9 +2,9 @@
 
 Date: 2026-07-28
 
-Status: offline implementation and Linux/Windows gates complete. One first
-explicit `gil-held` Stage-4A diagnostic is eligible; no physical pass is
-assumed.
+Status: offline implementation and Linux/Windows gates complete. The first
+explicit `gil-held` Stage-4A diagnostic passes; one identical consecutive
+pass remains required before B4 can close.
 
 This contract follows the schema-v6 physical attribution retained in
 `G5_NATIVE_BIRTH_TAIL_ATTRIBUTION_CONTRACT_20260728.md`. Run
@@ -195,3 +195,52 @@ with three existing Windows skips. The first unpinned, GC-enabled,
 explicit-`gil-held` Stage-4A diagnostic is eligible. B4, CE-0147,
 future-event coverage, hit-reduction claims, and physical action authority
 remain unchanged.
+
+## First Physical Gate Result
+
+Run `lunatic_route2_stage4a_unattended_20260728_065316` completed Lunatic
+Stage 4A over frames `2..43253` with 13,896 decisions, 9 hits, hard no-Bomb,
+accepted artifacts, supervisor completion, and no residual game/controller
+process. All rows use trace schema v7, the native backend, and explicit
+`gil-held` provenance. Validation and timed-intent gates pass.
+
+| Interval | p50 ms | p95 ms | p99 ms | p99.9 ms | max ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| total observation | `0.0659` | `0.1475` | `0.2021` | `0.4001` | `1.0595` |
+| prepare | `0.0021` | `0.0035` | `0.0044` | `0.0094` | `0.0696` |
+| native call | `0.0366` | `0.0580` | `0.0756` | `0.2210` | `0.5008` |
+| materialize | `0.0069` | `0.0788` | `0.1097` | `0.2363` | `1.0112` |
+| controller residual | `0.0137` | `0.0223` | `0.0291` | `0.0593` | `0.1288` |
+
+**Observed:** all fixed observer limits pass and there is no sample above
+`2.00 ms`. The held native-call maximum is `0.5008 ms`, compared with the
+preceding released physical maximum of `8.2585 ms`. Completed GC counts are
+zero in all nine phase/generation buckets. Pre-emit total maximum is
+`1.1333 ms`; previous-record emission remains separate post-issue work and
+has p95/p99/max `0.1741/1.1452/5.2775 ms`.
+
+Cadence remains 2/3 frames median/p95. Local-plan p50/p95 is
+`9.764/17.910 ms`, and 6,535/6,988 unambiguous transitions (0.935) are
+visible in the next snapshot. These do not show a contention regression.
+Nine versus the released run's 17 hits is not a controlled survival
+comparison; all nine contacts follow global viability exhaustion.
+
+The audit retains 2,118 timed sightings, 82 deduplicated events, and 5,958
+unique temporal supports over 87,857 activation edges. All 1,302 spell-57
+rows still exhaust the 256-instruction callback lookahead, so CE-0147 remains
+open.
+
+During first report generation, residual-audit v5 validated every schema-v7
+diagnostic but aggregated native segments only for `schema_version == 6`.
+CE-0151 records this report-only omission. The raw trace retained all fields;
+aggregation now accepts `{6, 7}`, a schema-v7 native-row assertion fails loud,
+and the report was deterministically rebuilt.
+
+The ignored raw trace is 483,745,822 bytes with SHA-256
+`65e71da8369fb54007dda7ea8a4b93f1f0ecff76033120268e98a6879fa2fce9`.
+Two corrected report generations are byte-identical at canonical LF SHA-256
+`8f77c0afeaa8b7a31730f9ca799cd6c369f45edc695187e79a1c6ad31001b737`.
+
+This is candidate pass 1 of 2. One identical, complete, unpinned,
+GC-enabled, explicit-`gil-held` Stage-4A pass remains required before B4 can
+close. No future-event or physical action authority follows.

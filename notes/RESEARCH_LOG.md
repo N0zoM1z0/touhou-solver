@@ -6866,3 +6866,38 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   diagnostic is eligible. Two consecutive complete physical passes are
   required to close B4. CE-0147, future-event coverage, hit reduction, and
   action authority remain unchanged.
+
+## 2026-07-28 — Retained the first physical GIL-held Stage-4A pass
+
+- At code checkpoint `62e2248`, run
+  `lunatic_route2_stage4a_unattended_20260728_065316` completed frames
+  `2..43253` over 13,896 decisions with 9 hits, hard no-Bomb, accepted
+  artifacts, supervisor completion, and cleanup.
+- All rows retain schema-v7/native/`gil-held` provenance. Validation,
+  timed-intent, and observer gates pass. Observation
+  p50/p95/p99/p99.9/max is `0.0659/0.1475/0.2021/0.4001/1.0595 ms`.
+- Native-call p50/p95/p99/p99.9/max is
+  `0.0366/0.0580/0.0756/0.2210/0.5008 ms`, versus the preceding
+  `gil-released` physical maximum `8.2585 ms`. No sample exceeds 2 ms and no
+  completed cyclic-GC collection overlaps any phase.
+- Cadence remains 2/3 frames median/p95; local plan p50/p95 is
+  `9.764/17.910 ms`; next-observation input visibility is 0.935. Nine versus
+  17 hits is RNG/trajectory/resource-distinct and does not establish survival
+  improvement. Every contact follows global viability exhaustion.
+- **Observed CE-0151:** Residual-audit v5 validated schema-v7 diagnostics but
+  its aggregation guard remained `schema_version == 6`, producing an empty
+  native-diagnostics report. Raw fields were intact. Aggregation now uses
+  `{6, 7}` and the schema-v7 test requires the expected diagnostic row count.
+  Ruff and complete Linux/Windows suites pass `801/801` in
+  `9.202/15.761 s`, with three existing Windows skips.
+- The audit retains 2,118 timed sightings, 82 deduplicated events, and 5,958
+  unique temporal supports over 87,857 activation edges. All 1,302 spell-57
+  rows still hit the callback instruction limit.
+- Raw trace is 483,745,822 bytes with SHA-256
+  `65e71da8369fb54007dda7ea8a4b93f1f0ecff76033120268e98a6879fa2fce9`.
+  Two corrected audit generations are byte-identical at canonical LF
+  SHA-256
+  `8f77c0afeaa8b7a31730f9ca799cd6c369f45edc695187e79a1c6ad31001b737`.
+- **Authority:** candidate B4 pass 1 of 2. One identical consecutive held run
+  remains required. CE-0147, future-event coverage, hit-reduction claims, and
+  physical action authority remain unchanged.

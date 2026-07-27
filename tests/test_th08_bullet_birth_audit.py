@@ -456,6 +456,7 @@ class BulletBirthAuditTests(unittest.TestCase):
                 report["input"]["native_call_modes"],
                 {"gil-held": 4},
             )
+            self.assertEqual(report["native_diagnostics"]["rows"], 4)
 
             records = [
                 json.loads(line)

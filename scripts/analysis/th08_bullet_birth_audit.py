@@ -864,7 +864,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         bucket = _evidence_count_bucket(evidence_count)
         diagnostics = audit.get("observation_diagnostics")
         if (
-            audit["schema_version"] == 6
+            audit["schema_version"] in {6, 7}
             and isinstance(diagnostics, dict)
         ):
             segments = diagnostics["native_segments_ms"]

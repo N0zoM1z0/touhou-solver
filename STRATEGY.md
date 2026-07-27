@@ -238,6 +238,19 @@ All profiles and `801/801` Linux/Windows quick suites pass. This permits one
 explicit `gil-held` Stage-4A diagnostic; two consecutive complete physical
 passes are required to close B4.
 
+**Observed first physical GIL-held gate:** Run `20260728_065316` completed
+Stage 4A over frames `2..43253` with 13,896 decisions, 9 hits, hard no-Bomb,
+accepted artifacts, and cleanup. All rows have schema-v7 native
+`gil-held` provenance. Observer p50/p95/p99/p99.9/max is
+`0.0659/0.1475/0.2021/0.4001/1.0595 ms`; every B4 limit passes. Native-call
+p50/p95/p99/p99.9/max is `0.0366/0.0580/0.0756/0.2210/0.5008 ms`, versus
+the released physical maximum `8.2585 ms`. No observation exceeds 2 ms and
+no completed GC overlaps a phase. Cadence remains 2/3 frames median/p95,
+local-plan p50/p95 is `9.764/17.910 ms`, and next-observation input
+visibility is 0.935. This is pass 1 of 2, not a closed B4 or survival result.
+CE-0151 fixed an audit-v5 `{6}` aggregation guard that initially omitted
+schema-v7 diagnostics from the report despite validating the raw fields.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
@@ -256,7 +269,8 @@ passes are required to close B4.
    interval with no overlapping GC. The explicit GIL-held/released
    call-boundary correction passes offline and should receive its first
    unpinned, GC-enabled `gil-held` Stage-4A diagnostic. Require two
-   consecutive physical passes before closing B4. In parallel, make
+   consecutive physical passes before closing B4; the first pass now
+   succeeds, so run one identical second gate. In parallel, make
    incomplete callback coverage explicit and fail closed before trying Stage
    5/6. None of this narrows `UNKNOWN` coverage or adds action authority.
    The stationary-witness

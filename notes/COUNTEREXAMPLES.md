@@ -4308,3 +4308,29 @@ measurement design offline
   `8563fe93ba758a8aed2354ba7dacda979a8286d763c2076d15834b9b7b8d49e8`.
 - **Authority:** This repairs isolated measurement pairing only. It does not
   close CE-0149 or grant physical action authority.
+
+## CE-0151: Residual-audit v5 validated schema v7 but omitted its native diagnostics
+
+Status: observed report aggregation failure; corrected and regression-tested
+
+- **Observed symptom:** The first `gil-held` physical audit returned
+  `passed=true` and correctly reported 13,896 schema-v7/native/held rows, but
+  `native_diagnostics.rows` was zero with empty segment distributions.
+- **Cause:** `_validated_audit` correctly accepted and reconciled diagnostics
+  for schemas 6 and 7. The later aggregation loop still used
+  `schema_version == 6`, silently excluding every valid schema-v7 diagnostic
+  from the compact report.
+- **Preserved evidence:** The 483,745,822-byte raw trace contains all
+  per-row segments and GC counters. No physical rerun or inferred replacement
+  data was needed.
+- **Correction:** Aggregation now uses `{6, 7}`. The schema-v7 audit test
+  requires four native diagnostic rows in addition to valid held-mode
+  provenance, so a future validation/aggregation split fails loud.
+- **Verification:** The focused audit suite passes 9/9; complete
+  Linux/Windows suites pass 801/801 in `9.202/15.761 s`, with three existing
+  Windows skips. Two corrected generations from the same raw trace are
+  byte-identical at canonical LF SHA-256
+  `8f77c0afeaa8b7a31730f9ca799cd6c369f45edc695187e79a1c6ad31001b737`.
+- **Authority:** The corrected report supports one candidate B4 pass. It does
+  not erase the two-pass requirement, close CE-0147, or grant action
+  authority.

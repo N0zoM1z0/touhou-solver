@@ -13,12 +13,15 @@ from .requests import (
 from .issue import IssueAdapter, IssueRequest, IssueTransaction
 from .models import (
     ActionCertificateSet,
+    Decision,
     DecisionTelemetry,
     IssueRecertification,
     IssuedDecision,
     LocalCertificateTiming,
     LocalProposal,
+    PlannerAction,
     RobustActionCertificate,
+    SearchNode,
 )
 from .validation import (
     ValidatedPlannerRequest,
@@ -30,12 +33,29 @@ from .stages import (
     prepare_local_hazards,
     run_hard_preflight,
 )
+from .ranking import EndpointRanker
+from .assembly import (
+    DamageDecisionFields,
+    ProposalAssemblyContext,
+    SupplementalDecisionFields,
+    assemble_local_decision,
+)
+from .beam import BaselineBeamContext, run_baseline_beam
+from .supplemental import (
+    CompletedSupplementalLookup,
+    lookup_completed_supplemental,
+)
 
 __all__ = [
     "ActionCertificateSet",
+    "BaselineBeamContext",
     "ActuatorPipeline",
     "CompletedServiceResults",
+    "CompletedSupplementalLookup",
+    "Decision",
     "DecisionTelemetry",
+    "DamageDecisionFields",
+    "EndpointRanker",
     "GlobalGuidance",
     "HardPreflightResult",
     "IssueAdapter",
@@ -49,11 +69,18 @@ __all__ = [
     "ObjectiveContext",
     "PhysicalHazardSnapshot",
     "PlannerConfig",
+    "PlannerAction",
     "PlannerMode",
+    "ProposalAssemblyContext",
     "PreparedLocalHazards",
     "RobustActionCertificate",
+    "SearchNode",
+    "SupplementalDecisionFields",
     "ValidatedPlannerRequest",
     "prepare_local_hazards",
     "run_hard_preflight",
+    "lookup_completed_supplemental",
+    "run_baseline_beam",
+    "assemble_local_decision",
     "validate_local_planner_request",
 ]

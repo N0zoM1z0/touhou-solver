@@ -79,8 +79,13 @@ from th08_laser_runtime import (
 from th08_local_planner import (
     ActionCertificateSet,
     ActuatorPipeline,
+    BaselineBeamContext,
     CompletedServiceResults,
+    CompletedSupplementalLookup,
+    DamageDecisionFields,
+    Decision,
     DecisionTelemetry,
+    EndpointRanker,
     GlobalGuidance,
     IssueAdapter,
     IssueRecertification,
@@ -92,11 +97,18 @@ from th08_local_planner import (
     LocalProposal,
     ObjectiveContext,
     PhysicalHazardSnapshot,
+    PlannerAction,
     PlannerConfig,
     PlannerMode,
+    ProposalAssemblyContext,
     RobustActionCertificate,
+    SearchNode,
+    SupplementalDecisionFields,
+    assemble_local_decision,
     prepare_local_hazards,
     run_hard_preflight,
+    run_baseline_beam,
+    lookup_completed_supplemental,
     validate_local_planner_request,
 )
 from th08_runtime_agent import (
@@ -750,86 +762,10 @@ class _LocalCertificateTimingAccumulator:
 
 
 @dataclass(frozen=True)
-class Decision:
-    mask: int
-    action: str
-    min_clearance: float
-    immediate_clearance: float
-    score: float
-    bomb: bool
-    item_utility: float = 0.0
-    planned_focus: bool = True
-    predicted_collections: tuple[int, ...] = ()
-    pipeline_clearance: float = 9999.0
-    robust_delay_frames: tuple[int, ...] = ()
-    robust_override: bool = False
-    robust_collisions: int = 0
-    robust_min_clearance: float = 9999.0
-    robust_cvar_risk: float = 0.0
-    robust_worst_delay: int | None = None
-    viability_constrained: bool = False
-    viability_safe_action_count: int = 0
-    viability_repair_volume: int = 0
-    viability_constraint_relaxed: bool = False
-    terminal_threat_horizon: int = 0
-    terminal_threat_collisions: int = 0
-    terminal_threat_min_clearance: float = 9999.0
-    viability_recovery_distance: float | None = None
-    viability_control_reserve_deficit: float = 0.0
-    viability_safety_value_preferred: bool = False
-    viability_safety_state_value: float | None = None
-    viability_fresh_prefix_filtered: bool = False
-    viability_fresh_prefix_relaxed: bool = False
-    viability_survival_preferred: bool = False
-    viability_survival_frames: int | None = None
-    viability_survival_bottleneck_margin: float | None = None
-    damage_objective_available: bool = False
-    damage_baseline_action: str | None = None
-    damage_shadow_action: str | None = None
-    damage_current_alignment_cost: float | None = None
-    damage_shadow_alignment_cost: float | None = None
-    damage_eligible_action_count: int = 0
-    damage_reason: str = "disabled"
-    issue_action_certificates: tuple[RobustActionCertificate, ...] = ()
-    local_certificate_timing: LocalCertificateTiming = (
-        LocalCertificateTiming()
-    )
-    issue_certificate_timing: LocalCertificateTiming = (
-        LocalCertificateTiming()
-    )
-    viability_control_reserve_valid: bool = True
-    issue_recertification: IssueRecertification | None = None
-    preloss_continuation_preference_active: bool = False
-    planned_route_gate_deficit: float = 0.0
-    preloss_supplemental_beam_active: bool = False
-    preloss_supplemental_beam_width: int = 0
-    preloss_historical_action: str | None = None
-    preloss_selected_from_supplemental: bool = False
-    preloss_supplemental_candidate_count: int = 0
-    preloss_historical_route_gate_deficit: float = 0.0
-    preloss_supplemental_failure: str | None = None
-    preloss_supplemental_backend: str = "python"
-    preloss_supplemental_status: str = "disabled"
-    preloss_supplemental_completed: bool = False
-    preloss_supplemental_historical_fallback: bool = False
-    preloss_supplemental_background_compute_ms: float | None = None
-    local_collisions: int = 0
-
-
-@dataclass(frozen=True)
 class _PlannerModeTransition:
     current_decision: Decision
     next_request: LocalPlannerRequest
     original_allowed_action_count: int
-
-
-@dataclass(frozen=True)
-class PlannerAction:
-    name: str
-    direction: int
-    dx: float
-    dy: float
-    focused: bool
 
 
 def _local_certificate_timing_record(
@@ -932,20 +868,6 @@ def _issue_recertification_record(
             recertification.selected_certificate
         ),
     }
-
-
-@dataclass(frozen=True)
-class SearchNode:
-    x: float
-    y: float
-    first_action: PlannerAction
-    last_action: PlannerAction
-    risk: float
-    collisions: int
-    min_clearance: float
-    immediate_clearance: float
-    collected_mask: int
-    item_utility: float
 
 
 @dataclass
@@ -4471,299 +4393,56 @@ def _choose_action_request_once(
             time.perf_counter_ns() - async_submit_started_ns
         ) / 1_000_000.0
     beam_started_ns = time.perf_counter_ns()
-    for step in range(1, horizon + 1):
-        drafts: list[
-            tuple[SearchNode, PlannerAction, float, float, float, int, float]
-        ] = []
-        draft_first_actions: list[PlannerAction] = []
-        candidates: dict[
-            tuple[int, int, int, bool, int]
-            | tuple[int, int, int, bool, int, str]
-            | tuple[float, float, int, bool, int, str],
-            SearchNode,
-        ] = {}
-        for node in beam:
-            actions = (
-                _PLANNER_ACTIONS
-                if (step - 1) % action_hold_frames == 0
-                else (node.last_action,)
-            )
-            if step == 1 and effective_allowed_first_actions is not None:
-                allowed = set(effective_allowed_first_actions)
-                actions = tuple(
-                    action for action in actions if action.name in allowed
-                )
-            for action in actions:
-                x = min(
-                    PLAYFIELD_RIGHT,
-                    max(PLAYFIELD_LEFT, node.x + action.dx),
-                )
-                y = min(
-                    PLAYFIELD_BOTTOM,
-                    max(PLAYFIELD_TOP, node.y + action.dy),
-                )
-                transition_risk = 0.0
-                transition_risk += _boundary_risk(x, y)
-                if action.direction != node.last_action.direction:
-                    transition_risk += 0.08
-                if _directions_opposed(action.direction, node.last_action.direction):
-                    transition_risk += 24.0
-                if action.focused != node.last_action.focused:
-                    transition_risk += 0.12
-                if step == 1 and preserve_previous_direction_inertia:
-                    if action.direction != previous_direction:
-                        transition_risk += 0.08
-                    if _directions_opposed(action.direction, previous_direction):
-                        transition_risk += 24.0
-                    if action.focused != previous_focus:
-                        transition_risk += 0.12
-                collected_mask = node.collected_mask
-                item_utility = node.item_utility
-                for index, (item, value) in enumerate(selected_items):
-                    bit = 1 << index
-                    if collected_mask & bit:
-                        continue
-                    item_x, item_y, confidence = _project_item(item, step)
-                    collection_allowed = item.motion_state != 3 and not (
-                        item.motion_state == 5 and item.vy <= 0.0
-                    )
-                    if (
-                        collection_allowed
-                        and abs(x - item_x) <= COLLECTION_HALF_WIDTH
-                        and abs(y - item_y) <= COLLECTION_HALF_WIDTH
-                    ):
-                        collected_mask |= bit
-                        item_utility += value * confidence
-                first_action = action if step == 1 else node.first_action
-                drafts.append(
-                    (
-                        node,
-                        action,
-                        x,
-                        y,
-                        transition_risk,
-                        collected_mask,
-                        item_utility,
-                    )
-                )
-                draft_first_actions.append(first_action)
-        if not drafts:
-            break
-        positions_x = np.fromiter((draft[2] for draft in drafts), dtype=np.float32)
-        positions_y = np.fromiter((draft[3] for draft in drafts), dtype=np.float32)
-        hazard_risk, hazard_collisions, hazard_clearance = _hazards_for_positions(
-            positions_x,
-            positions_y,
-            step=control_delay_frames + step,
-            bullet_frame=bullet_frames[step - 1],
-            lasers=laser_frames[step - 1],
+    beam = run_baseline_beam(
+        BaselineBeamContext(
+            initial_beam=tuple(beam),
+            actions=_PLANNER_ACTIONS,
+            action_hold_frames=action_hold_frames,
+            horizon=horizon,
+            effective_allowed_first_actions=(
+                effective_allowed_first_actions
+            ),
+            preserve_previous_direction_inertia=(
+                preserve_previous_direction_inertia
+            ),
+            previous_direction=previous_direction,
+            previous_focus=previous_focus,
+            selected_items=selected_items,
+            control_delay_frames=control_delay_frames,
+            bullet_frames=bullet_frames,
+            laser_frames=laser_frames,
             enemy_bodies=enemy_bodies,
-        )
-        retained_indices: np.ndarray | None = None
-        if native_beam_enabled:
-            candidate_risk = np.fromiter(
-                (
-                    draft[0].risk
-                    + draft[4]
-                    + float(hazard_risk[index])
-                    for index, draft in enumerate(drafts)
-                ),
-                dtype=np.float64,
-                count=len(drafts),
-            )
-            candidate_collisions = np.fromiter(
-                (
-                    draft[0].collisions
-                    + int(hazard_collisions[index])
-                    for index, draft in enumerate(drafts)
-                ),
-                dtype=np.int32,
-                count=len(drafts),
-            )
-            candidate_minimum = np.fromiter(
-                (
-                    min(
-                        draft[0].min_clearance,
-                        float(hazard_clearance[index]),
-                    )
-                    for index, draft in enumerate(drafts)
-                ),
-                dtype=np.float64,
-                count=len(drafts),
-            )
-            retained_indices = native_backend.reduce_local_beam(
-                draft_x=np.fromiter(
-                    (draft[2] for draft in drafts),
-                    dtype=np.float64,
-                    count=len(drafts),
-                ),
-                draft_y=np.fromiter(
-                    (draft[3] for draft in drafts),
-                    dtype=np.float64,
-                    count=len(drafts),
-                ),
-                first_action=np.fromiter(
-                    (
-                        planner_action_indices[action.name]
-                        for action in draft_first_actions
-                    ),
-                    dtype=np.int32,
-                    count=len(drafts),
-                ),
-                last_direction=np.fromiter(
-                    (draft[1].direction for draft in drafts),
-                    dtype=np.int32,
-                    count=len(drafts),
-                ),
-                last_focused=np.fromiter(
-                    (draft[1].focused for draft in drafts),
-                    dtype=np.uint8,
-                    count=len(drafts),
-                ),
-                collected_mask=np.fromiter(
-                    (draft[5] for draft in drafts),
-                    dtype=np.uint32,
-                    count=len(drafts),
-                ),
-                risk=candidate_risk,
-                collisions=candidate_collisions,
-                minimum_clearance=candidate_minimum,
-                step=step,
-                beam_width=beam_width,
-                position_quantization=0.5,
-                target_x=target_x,
-                target_y=target_y,
-                target_deadline=target_deadline,
-                item_safety_clearance=ITEM_SAFETY_CLEARANCE,
-                playfield_left=PLAYFIELD_LEFT,
-                playfield_right=PLAYFIELD_RIGHT,
-                playfield_top=PLAYFIELD_TOP,
-                playfield_bottom=PLAYFIELD_BOTTOM,
-                reserve_distance=recovery_reserve_distance,
-                diagonal_speed=UNFOCUSED_DIAGONAL_SPEED,
-                cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
-                certificate_collisions=(
-                    native_certificate_collisions
-                ),
-                certificate_minimum=native_certificate_minimum,
-                survival_preferred=native_survival_preferred,
-                safety_preferred=native_safety_preferred,
-                recovery_distance=native_recovery_distance,
-            )
-            if retained_indices is not None:
-                retained_beam: list[SearchNode] = []
-                for retained_index in retained_indices:
-                    draft_index = int(retained_index)
-                    (
-                        node,
-                        action,
-                        x,
-                        y,
-                        _transition_risk,
-                        collected_mask,
-                        item_utility,
-                    ) = drafts[draft_index]
-                    clearance = float(
-                        hazard_clearance[draft_index]
-                    )
-                    retained_beam.append(
-                        SearchNode(
-                            x=x,
-                            y=y,
-                            first_action=(
-                                draft_first_actions[draft_index]
-                            ),
-                            last_action=action,
-                            risk=float(candidate_risk[draft_index]),
-                            collisions=int(
-                                candidate_collisions[draft_index]
-                            ),
-                            min_clearance=float(
-                                candidate_minimum[draft_index]
-                            ),
-                            immediate_clearance=(
-                                min(
-                                    node.immediate_clearance,
-                                    clearance,
-                                )
-                                if step == 1
-                                else node.immediate_clearance
-                            ),
-                            collected_mask=collected_mask,
-                            item_utility=item_utility,
-                        )
-                    )
-                beam = retained_beam
-                continue
-
-        for draft_index, draft in enumerate(drafts):
-            (
-                node,
-                action,
-                x,
-                y,
-                transition_risk,
-                collected_mask,
-                item_utility,
-            ) = draft
-            clearance = float(hazard_clearance[draft_index])
-            first_action = draft_first_actions[draft_index]
-            candidate = SearchNode(
-                x=x,
-                y=y,
-                first_action=first_action,
-                last_action=action,
-                risk=(
-                    node.risk
-                    + transition_risk
-                    + float(hazard_risk[draft_index])
-                ),
-                collisions=(
-                    node.collisions
-                    + int(hazard_collisions[draft_index])
-                ),
-                min_clearance=min(
-                    node.min_clearance,
-                    clearance,
-                ),
-                immediate_clearance=(
-                    min(node.immediate_clearance, clearance)
-                    if step == 1
-                    else node.immediate_clearance
-                ),
-                collected_mask=collected_mask,
-                item_utility=item_utility,
-            )
-            quantized = (
-                int(round(x * 0.5)),
-                int(round(y * 0.5)),
-                action.direction,
-                action.focused,
-                collected_mask,
-            )
-            if beam_dedup_mode == "first_action":
-                quantized = (*quantized, first_action.name)
-            elif beam_dedup_mode == "exact_first_action":
-                quantized = (
-                    x,
-                    y,
-                    action.direction,
-                    action.focused,
-                    collected_mask,
-                    first_action.name,
-                )
-            incumbent = candidates.get(quantized)
-            if incumbent is None or pruning_key(
-                candidate,
-                step=step,
-            ) < pruning_key(incumbent, step=step):
-                candidates[quantized] = candidate
-        if not candidates:
-            break
-        beam = sorted(
-            candidates.values(),
-            key=lambda node: pruning_key(node, step=step),
-        )[:beam_width]
+            native_beam_enabled=native_beam_enabled,
+            planner_action_indices=planner_action_indices,
+            native_certificate_collisions=(
+                native_certificate_collisions
+            ),
+            native_certificate_minimum=native_certificate_minimum,
+            native_survival_preferred=native_survival_preferred,
+            native_safety_preferred=native_safety_preferred,
+            native_recovery_distance=native_recovery_distance,
+            beam_width=beam_width,
+            beam_dedup_mode=beam_dedup_mode,
+            target_x=target_x,
+            target_y=target_y,
+            target_deadline=target_deadline,
+            item_safety_clearance=ITEM_SAFETY_CLEARANCE,
+            collection_half_width=COLLECTION_HALF_WIDTH,
+            playfield_left=PLAYFIELD_LEFT,
+            playfield_right=PLAYFIELD_RIGHT,
+            playfield_top=PLAYFIELD_TOP,
+            playfield_bottom=PLAYFIELD_BOTTOM,
+            recovery_reserve_distance=recovery_reserve_distance,
+            diagonal_speed=UNFOCUSED_DIAGONAL_SPEED,
+            cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
+        ),
+        boundary_risk=_boundary_risk,
+        directions_opposed=_directions_opposed,
+        project_item=_project_item,
+        hazard_query=_hazards_for_positions,
+        pruning_key=pruning_key,
+        native_reducer=native_backend.reduce_local_beam,
+    )
 
     supplemental_beam: list[SearchNode] = []
     supplemental_failure: str | None = None
@@ -5169,36 +4848,25 @@ def _choose_action_request_once(
                 enemy_bodies=enemy_bodies,
             )
         )
-        publication = preloss_supplemental_async_service.lookup(
-            supplemental_async_identity
-        )
-        if publication is None:
-            supplemental_status = "async_miss"
-            supplemental_historical_fallback = True
-            supplemental_beam = []
-        else:
-            supplemental_status = "async_hit"
-            supplemental_completed = True
-            supplemental_historical_fallback = False
-            supplemental_background_compute_ms = publication.compute_ms
-            supplemental_published_terminal_labels = (
-                publication.terminal_threats
+        completed_lookup: CompletedSupplementalLookup = (
+            lookup_completed_supplemental(
+                service=preloss_supplemental_async_service,
+                identity=supplemental_async_identity,
+                actions=_PLANNER_ACTIONS,
             )
-            supplemental_beam = [
-                SearchNode(
-                    x=node.x,
-                    y=node.y,
-                    first_action=_PLANNER_ACTIONS[node.first_action],
-                    last_action=_PLANNER_ACTIONS[node.last_action],
-                    risk=node.risk,
-                    collisions=node.collisions,
-                    min_clearance=node.min_clearance,
-                    immediate_clearance=node.immediate_clearance,
-                    collected_mask=0,
-                    item_utility=0.0,
-                )
-                for node in publication.nodes
-            ]
+        )
+        supplemental_status = completed_lookup.status
+        supplemental_completed = completed_lookup.completed
+        supplemental_historical_fallback = (
+            completed_lookup.historical_fallback
+        )
+        supplemental_background_compute_ms = (
+            completed_lookup.background_compute_ms
+        )
+        supplemental_published_terminal_labels = (
+            completed_lookup.terminal_labels
+        )
+        supplemental_beam = list(completed_lookup.beam)
     for index, node in enumerate(supplemental_beam):
         if target_x is None or target_y is None:
             position_cost = (
@@ -5272,82 +4940,32 @@ def _choose_action_request_once(
         time.perf_counter_ns() - terminal_threat_started_ns
     ) / 1_000_000.0
     selection_started_ns = time.perf_counter_ns()
-
-    def historical_selection_key(
-        node: SearchNode,
-    ) -> tuple[object, ...]:
-        threat_collisions, threat_clearance = terminal_threats[node]
-        return (
-            node.collisions,
-            max(-node.min_clearance, 0.0),
-            threat_collisions,
-            max(-threat_clearance, 0.0),
-            (
-                0
-                if (
-                    not survival_actions
-                    or node.first_action.name in survival_actions
-                )
-                else 1
-            ),
-            0,
-            0.0,
-            max(ITEM_SAFETY_CLEARANCE - threat_clearance, 0.0),
-            (
-                0
-                if (
-                    not safety_value_actions
-                    or node.first_action.name in safety_value_actions
-                )
-                else 1
-            ),
-            _boundary_control_reserve_deficit(
-                node.x,
-                node.y,
-                reserve_distance=recovery_reserve_distance,
-            ),
-            recovery_by_action.get(node.first_action.name, math.inf),
-            -repair_by_action.get(node.first_action.name, 0),
-            _node_key(
-                node,
-                step=horizon,
-                selected_items=selected_items,
-                target_x=target_x,
-                target_y=target_y,
-                target_deadline=target_deadline,
-            ),
-        )
-
-    def selection_key(node: SearchNode) -> tuple[object, ...]:
-        historical = historical_selection_key(node)
-        return (
-            *historical[:5],
-            (
-                -repair_by_action.get(node.first_action.name, 0)
-                if preloss_continuation_preference_active
-                else 0
-            ),
-            _boundary_control_reserve_deficit(
-                node.x,
-                node.y,
-                reserve_distance=preloss_reserve_distance,
-            ),
-            *historical[7:],
-        )
-
-    def route_gate_deficit(node: SearchNode) -> float:
-        if target_x is None or target_y is None:
-            return 0.0
-        return max(
-            _minimum_travel_frames(
-                node.x,
-                node.y,
-                target_x,
-                target_y,
-            )
-            - max((target_deadline or 0) - horizon, 0),
-            0.0,
-        )
+    endpoint_ranker = EndpointRanker(
+        terminal_threats=terminal_threats,
+        survival_actions=survival_actions,
+        safety_value_actions=safety_value_actions,
+        recovery_by_action=recovery_by_action,
+        repair_by_action=repair_by_action,
+        recovery_reserve_distance=recovery_reserve_distance,
+        preloss_reserve_distance=preloss_reserve_distance,
+        preloss_continuation_preference_active=(
+            preloss_continuation_preference_active
+        ),
+        item_safety_clearance=ITEM_SAFETY_CLEARANCE,
+        horizon=horizon,
+        selected_items=selected_items,
+        target_x=target_x,
+        target_y=target_y,
+        target_deadline=target_deadline,
+        boundary_control_reserve_deficit=(
+            _boundary_control_reserve_deficit
+        ),
+        node_key=_node_key,
+        minimum_travel_frames=_minimum_travel_frames,
+    )
+    historical_selection_key = endpoint_ranker.historical_key
+    selection_key = endpoint_ranker.selection_key
+    route_gate_deficit = endpoint_ranker.route_gate_deficit
 
     robust_certificates: dict[str, RobustActionCertificate] = {}
     nodes_by_action: dict[str, SearchNode] = {}
@@ -5700,139 +5318,66 @@ def _choose_action_request_once(
                 0.0,
             )
             damage_shadow_alignment_cost = damage_candidate.progress_cost
-    minimum = 9999.0 if math.isinf(best.min_clearance) else best.min_clearance
-    immediate = (
-        9999.0 if math.isinf(best.immediate_clearance) else best.immediate_clearance
-    )
-    action = best.first_action
-    use_bomb = can_bomb and (
-        immediate <= 0.0
-        or (
-            robust_certificate is not None
-            and robust_certificate.worst_collisions > 0
-        )
-    )
-    direction_mask = action.direction
-    focus_mask = FOCUS if action.focused else 0
     threat_collisions, threat_clearance = terminal_threats[best]
-    predicted_collections = tuple(
-        selected_items[index][0].slot
-        for index in range(len(selected_items))
-        if best.collected_mask & (1 << index)
-    )
-    pipeline_clearance = (
-        9999.0 if math.isinf(prefix_clearance) else prefix_clearance
-    )
-    decision = Decision(
-        SHOT | focus_mask | direction_mask | (BOMB if use_bomb else 0),
-        action.name,
-        minimum,
-        immediate,
-        best.risk,
-        use_bomb,
-        best.item_utility,
-        action.focused,
-        predicted_collections,
-        pipeline_clearance,
-        control_delay_candidates or (),
-        robust_override,
-        (
-            robust_certificate.worst_collisions
-            if robust_certificate is not None
-            else 0
+    decision = assemble_local_decision(
+        ProposalAssemblyContext(
+            request=request,
+            validated=validated,
+            prepared=prepared,
+            preflight=preflight,
+            best=best,
+            robust_certificate=robust_certificate,
+            robust_override=robust_override,
+            terminal_threat=(threat_collisions, threat_clearance),
+            prefix_clearance=prefix_clearance,
+            damage=DamageDecisionFields(
+                available=damage_objective_available,
+                baseline_action=damage_baseline_action,
+                shadow_action=damage_shadow_action,
+                current_alignment_cost=damage_current_alignment_cost,
+                shadow_alignment_cost=damage_shadow_alignment_cost,
+                eligible_action_count=damage_eligible_action_count,
+                reason=damage_reason,
+            ),
+            supplemental=SupplementalDecisionFields(
+                active=preloss_supplemental_beam_active,
+                selected_from_supplemental=(
+                    preloss_selected_from_supplemental
+                ),
+                candidate_count=preloss_candidate_count,
+                failure=supplemental_failure,
+                backend=(
+                    "exact_async_native"
+                    if preloss_supplemental_async_service is not None
+                    else _LOCAL_SUPPLEMENTAL_BACKEND
+                ),
+                status=supplemental_status,
+                completed=supplemental_completed,
+                historical_fallback=(
+                    supplemental_historical_fallback
+                ),
+                background_compute_ms=(
+                    supplemental_background_compute_ms
+                ),
+                historical_action=(
+                    historical_best.first_action.name
+                    if preloss_continuation_preference_active
+                    else None
+                ),
+                historical_route_gate_deficit=(
+                    historical_route_gate_deficit
+                ),
+            ),
+            route_gate_deficit=route_gate_deficit(best),
+            local_collisions=best.collisions,
         ),
-        (
-            robust_certificate.min_clearance
-            if robust_certificate is not None
-            else 9999.0
+        actions=_PLANNER_ACTIONS,
+        shot_mask=SHOT,
+        focus_mask=FOCUS,
+        bomb_mask=BOMB,
+        boundary_control_reserve_deficit=(
+            _boundary_control_reserve_deficit
         ),
-        (
-            robust_certificate.cvar_risk
-            if robust_certificate is not None
-            else 0.0
-        ),
-        (
-            robust_certificate.worst_delay
-            if robust_certificate is not None
-            else None
-        ),
-        (
-            effective_allowed_first_actions is not None
-            and not viability_fresh_prefix_relaxed
-        ),
-        len(allowed_first_actions or ()),
-        repair_by_action.get(action.name, 0),
-        viability_constraint_relaxed,
-        effective_threat_horizon,
-        threat_collisions,
-        9999.0 if math.isinf(threat_clearance) else threat_clearance,
-        recovery_by_action.get(action.name),
-        _boundary_control_reserve_deficit(
-            best.x,
-            best.y,
-            reserve_distance=diagnostic_losing_reserve_distance,
-        ),
-        bool(
-            safety_value_actions
-            and action.name in safety_value_actions
-        ),
-        viability_safety_state_value,
-        viability_fresh_prefix_filtered,
-        viability_fresh_prefix_relaxed,
-        bool(survival_actions and action.name in survival_actions),
-        viability_survival_frames,
-        viability_survival_bottleneck_margin,
-        damage_objective_available=damage_objective_available,
-        damage_baseline_action=damage_baseline_action,
-        damage_shadow_action=damage_shadow_action,
-        damage_current_alignment_cost=damage_current_alignment_cost,
-        damage_shadow_alignment_cost=damage_shadow_alignment_cost,
-        damage_eligible_action_count=damage_eligible_action_count,
-        damage_reason=damage_reason,
-        issue_action_certificates=tuple(
-            robust_preflight_certificates[action.name]
-            for action in _PLANNER_ACTIONS
-            if action.name in robust_preflight_certificates
-        ),
-        preloss_continuation_preference_active=(
-            preloss_continuation_preference_active
-        ),
-        planned_route_gate_deficit=route_gate_deficit(best),
-        preloss_supplemental_beam_active=(
-            preloss_supplemental_beam_active
-        ),
-        preloss_supplemental_beam_width=(
-            preloss_supplemental_beam_width
-            if preloss_supplemental_beam_active
-            else 0
-        ),
-        preloss_historical_action=(
-            historical_best.first_action.name
-            if preloss_continuation_preference_active
-            else None
-        ),
-        preloss_selected_from_supplemental=(
-            preloss_selected_from_supplemental
-        ),
-        preloss_supplemental_candidate_count=preloss_candidate_count,
-        preloss_historical_route_gate_deficit=(
-            historical_route_gate_deficit
-        ),
-        preloss_supplemental_failure=supplemental_failure,
-        preloss_supplemental_backend=(
-            "exact_async_native"
-            if preloss_supplemental_async_service is not None
-            else _LOCAL_SUPPLEMENTAL_BACKEND
-        ),
-        preloss_supplemental_status=supplemental_status,
-        preloss_supplemental_completed=supplemental_completed,
-        preloss_supplemental_historical_fallback=(
-            supplemental_historical_fallback
-        ),
-        preloss_supplemental_background_compute_ms=(
-            supplemental_background_compute_ms
-        ),
-        local_collisions=best.collisions,
     )
     _certificate_timing_accumulator.selection_finalize_ms += (
         time.perf_counter_ns() - selection_started_ns

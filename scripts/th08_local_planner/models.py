@@ -40,6 +40,29 @@ class RobustActionCertificate:
 
 
 @dataclass(frozen=True)
+class PlannerAction:
+    name: str
+    direction: int
+    dx: float
+    dy: float
+    focused: bool
+
+
+@dataclass(frozen=True)
+class SearchNode:
+    x: float
+    y: float
+    first_action: PlannerAction
+    last_action: PlannerAction
+    risk: float
+    collisions: int
+    min_clearance: float
+    immediate_clearance: float
+    collected_mask: int
+    item_utility: float
+
+
+@dataclass(frozen=True)
 class ActionCertificateSet:
     certificates: tuple[RobustActionCertificate, ...] = ()
 
@@ -79,6 +102,75 @@ class IssueRecertification:
     global_constraint_relaxed: bool
     planned_certificate: RobustActionCertificate | None
     selected_certificate: RobustActionCertificate
+
+
+@dataclass(frozen=True)
+class Decision:
+    """Flat compatibility view retained while consumers migrate."""
+
+    mask: int
+    action: str
+    min_clearance: float
+    immediate_clearance: float
+    score: float
+    bomb: bool
+    item_utility: float = 0.0
+    planned_focus: bool = True
+    predicted_collections: tuple[int, ...] = ()
+    pipeline_clearance: float = 9999.0
+    robust_delay_frames: tuple[int, ...] = ()
+    robust_override: bool = False
+    robust_collisions: int = 0
+    robust_min_clearance: float = 9999.0
+    robust_cvar_risk: float = 0.0
+    robust_worst_delay: int | None = None
+    viability_constrained: bool = False
+    viability_safe_action_count: int = 0
+    viability_repair_volume: int = 0
+    viability_constraint_relaxed: bool = False
+    terminal_threat_horizon: int = 0
+    terminal_threat_collisions: int = 0
+    terminal_threat_min_clearance: float = 9999.0
+    viability_recovery_distance: float | None = None
+    viability_control_reserve_deficit: float = 0.0
+    viability_safety_value_preferred: bool = False
+    viability_safety_state_value: float | None = None
+    viability_fresh_prefix_filtered: bool = False
+    viability_fresh_prefix_relaxed: bool = False
+    viability_survival_preferred: bool = False
+    viability_survival_frames: int | None = None
+    viability_survival_bottleneck_margin: float | None = None
+    damage_objective_available: bool = False
+    damage_baseline_action: str | None = None
+    damage_shadow_action: str | None = None
+    damage_current_alignment_cost: float | None = None
+    damage_shadow_alignment_cost: float | None = None
+    damage_eligible_action_count: int = 0
+    damage_reason: str = "disabled"
+    issue_action_certificates: tuple[RobustActionCertificate, ...] = ()
+    local_certificate_timing: LocalCertificateTiming = (
+        LocalCertificateTiming()
+    )
+    issue_certificate_timing: LocalCertificateTiming = (
+        LocalCertificateTiming()
+    )
+    viability_control_reserve_valid: bool = True
+    issue_recertification: IssueRecertification | None = None
+    preloss_continuation_preference_active: bool = False
+    planned_route_gate_deficit: float = 0.0
+    preloss_supplemental_beam_active: bool = False
+    preloss_supplemental_beam_width: int = 0
+    preloss_historical_action: str | None = None
+    preloss_selected_from_supplemental: bool = False
+    preloss_supplemental_candidate_count: int = 0
+    preloss_historical_route_gate_deficit: float = 0.0
+    preloss_supplemental_failure: str | None = None
+    preloss_supplemental_backend: str = "python"
+    preloss_supplemental_status: str = "disabled"
+    preloss_supplemental_completed: bool = False
+    preloss_supplemental_historical_fallback: bool = False
+    preloss_supplemental_background_compute_ms: float | None = None
+    local_collisions: int = 0
 
 
 @dataclass(frozen=True)

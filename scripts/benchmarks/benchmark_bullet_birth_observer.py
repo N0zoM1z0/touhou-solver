@@ -168,10 +168,36 @@ def run_benchmark(
                 frame_before=frame,
                 frame_after=frame,
             )
+        serialization_tracker = BulletBirthTracker(
+            maximum_bootstrap_age=0,
+        )
+        serialization_tracker.observe(
+            inactive_blob,
+            frame_before=1,
+            frame_after=1,
+        )
+        serialized_observation = serialization_tracker.observe(
+            active_blob,
+            frame_before=2,
+            frame_after=2,
+        )
+        serialization_samples = _samples(
+            lambda: json.dumps(serialized_observation.record()),
+            iterations=burst_iterations,
+            warmup=warmup,
+        )
+        serialized_bytes = len(
+            json.dumps(
+                serialized_observation.record(),
+                separators=(",", ":"),
+            ).encode("utf-8")
+        )
         burst_rows.append(
             {
                 "births_per_observation": burst_size,
                 "observer": _summary(samples),
+                "record_json": _summary(serialization_samples),
+                "compact_json_bytes": serialized_bytes,
             }
         )
 
@@ -221,7 +247,7 @@ def run_benchmark(
     }
     gate["passed"] = gate["observer_pass"] and gate["interleaved_pass"]
     return {
-        "schema": "th08-bullet-birth-observer-benchmark-v2",
+        "schema": "th08-bullet-birth-observer-benchmark-v3",
         "pool_size": BULLET_POOL_SIZE,
         "iterations": iterations,
         "decode_iterations": decode_iterations,

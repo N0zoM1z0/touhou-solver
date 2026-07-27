@@ -6484,3 +6484,19 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `UNKNOWN` from the first successor; live policy, Bomb, and action authority
   are unchanged. Stage 5/6 physical expansion remains behind the Stage-4A
   semantic and performance gate.
+
+## 2026-07-28 — Fixed the pre-columnar birth-record cost baseline
+
+- Benchmark schema v3 separately measures observation and deterministic
+  `record()` plus JSON serialization for 33- and 592-birth rows. It does not
+  include file write or flush.
+- **Observed object-schema baseline:** Linux 33/592-birth record-plus-JSON
+  p95 is `0.1335/2.3496 ms` at `9,007/160,077` compact JSON bytes. Windows p95
+  is `0.1192/2.3570 ms` for the same payload sizes. Observer p95 in the same
+  runs is `0.2270/2.4100 ms` on Linux and `0.2300/2.5376 ms` on Windows.
+- Retained report SHA-256 values are
+  `2641aefdf502c27cae56b4f90b4de5806e467fd70252b90208cea7773464663a`
+  (Linux) and
+  `4ee56b3d5d9111e09a28aa9ea501164e85526017b69323ad53c54da74e2792fb`
+  (Windows). These are performance baselines only; they add no evidence or
+  action authority.

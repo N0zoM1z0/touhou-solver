@@ -1,0 +1,92 @@
+{
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 33,
+      "compact_json_bytes": 9007,
+      "observer": {
+        "max_ms": 0.3178,
+        "p50_ms": 0.20685,
+        "p95_ms": 0.22999499999999995,
+        "p99_ms": 0.26364899999999986
+      },
+      "record_json": {
+        "max_ms": 0.1486,
+        "p50_ms": 0.11565,
+        "p95_ms": 0.119205,
+        "p99_ms": 0.140901
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "compact_json_bytes": 160077,
+      "observer": {
+        "max_ms": 2.8277,
+        "p50_ms": 2.39435,
+        "p95_ms": 2.53759,
+        "p99_ms": 2.668923999999999
+      },
+      "record_json": {
+        "max_ms": 7.861,
+        "p50_ms": 1.98655,
+        "p95_ms": 2.3570149999999996,
+        "p99_ms": 6.855888999999995
+      }
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 14.7574,
+    "p50_ms": 8.32125,
+    "p95_ms": 9.238014999999999,
+    "p99_ms": 14.717305000000001
+  },
+  "decode_interleaved": {
+    "max_ms": 13.5267,
+    "p50_ms": 7.50275,
+    "p95_ms": 7.982405,
+    "p99_ms": 8.737476000000024
+  },
+  "decode_iterations": 100,
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 0.064,
+        "p50_ms": 0.0274,
+        "p95_ms": 0.0383,
+        "p99_ms": 0.047305999999999994
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.0417,
+        "p50_ms": 0.021,
+        "p95_ms": 0.0222,
+        "p99_ms": 0.03210899999999999
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.0675,
+        "p50_ms": 0.0216,
+        "p95_ms": 0.022904999999999995,
+        "p99_ms": 0.038
+      }
+    }
+  ],
+  "gate": {
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": true,
+    "max_limit_ms": 2.0,
+    "observer_pass": true,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": true
+  },
+  "interleaved_p95_ratio": 0.8640822730857225,
+  "iterations": 2000,
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v3"
+}

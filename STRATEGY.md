@@ -112,7 +112,9 @@ does not promote or implement one.
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
    passes; continue G5 future-event coverage one event class at a time,
-   beginning with bullet birth. The stationary-witness
+   beginning with bullet birth. The observation-only birth contract now fixes
+   the native-age/ECL-intent/update-order evidence gate; it does not narrow
+   `UNKNOWN` coverage or add action authority. The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,
    earlier-version trace-only shadow with real completion-age evidence; do

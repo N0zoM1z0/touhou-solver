@@ -6283,3 +6283,27 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   remains an exact restricted lower witness with
   `physical_action_authority = none`. The 14-hit diagnostic run is not a
   strategy A/B against the ten-hit pre-fix run.
+## 2026-07-28 — Fixed the G5 bullet-birth observation boundary
+
+- **Observed:** the live sensor already captures all 1,536 hostile-bullet
+  slots into a persistent destination buffer between manager-frame reads.
+  The first birth observer can therefore inspect native state/timer evidence
+  without another process-memory read or a planner `Bullet` schema change.
+- **Inferred from the connected IDA database:** the emission path is
+  `enemy_ecl_emit_bullets` (`0x422720`) through
+  `bullet_emitter_spawn_pattern` (`0x430E10`) to
+  `bullet_spawn_from_emission_descriptor` (`0x42F5F0`). Allocation wraps over
+  the first free slot in the 1,536-slot pool. `bullet_manager_update`
+  (`0x431240`) later moves and collision-tests a newly active bullet in the
+  same update and advances the timer whose candidate base is bullet
+  `+0x0D8C`.
+- **Observed:** current physical G5 coverage remains `UNKNOWN` from the first
+  successor. Existing ECL lookahead reads only one boss main VM and supports a
+  limited literal callback path; it is not exhaustive birth coverage.
+- Fixed
+  `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md` before
+  implementation. The ordered gate is native-age observation, update-order
+  adversaries, fail-closed ECL intent classification, focused Lunatic
+  Stage-4A trace, and deterministic residual reporting.
+- The new boundary is default-off and trace-only. It adds no RPM, Bomb,
+  planner, coverage, clock, publication, issue, or physical action authority.

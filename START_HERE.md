@@ -27,7 +27,8 @@ and design/run notes retain derivations and history.
 17. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
 18. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`
 19. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`
-20. the relevant recent run note and counterexample rows before live work
+20. `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`
+21. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -66,6 +67,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   physical action authority remains none. Linux/Windows quick suites pass
   `741/741` in `8.850/14.854 s`, with three Windows skips. See
   `notes/G5_CE0141_PHYSICAL_RECHECK_20260728.md`.
+- G5 bullet-birth work is now fixed by
+  `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`.
+  Its first gate reuses the persistent hostile-bullet pool capture to join a
+  candidate native age with earlier ECL intent and same-frame update order.
+  It is default-off trace-only, adds no RPM or planner `Bullet` field, and
+  cannot narrow the current first-successor `UNKNOWN` coverage slab.
 - The preceding algorithmic checkpoint
   `d5866c4 Align hazard coverage with canonical query roots`. Physical Gate-5
   auditing found CE-0141: 1,613 of 14,599 available-query rows mixed a

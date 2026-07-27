@@ -966,6 +966,12 @@ parity 當成每個 nature tie field 的逐 bit equality。
 - CE-0141 的 1,613 mixed-root rows 已 offline 修正；post-fix physical
   trace `20260728_020910` 的 15,069 joins 全部通過且 zero mixed roots，
   trace construction gate 已關閉；
+- bullet-birth 第一個 gate 已由
+  `TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md` 固定：
+  先用既有 persistent pool blob 的 native age 做 retrospective birth
+  observation，再與較早 ECL intent 及 same-frame update order 對齊；預設
+  關閉、trace-only、不新增 RPM、不改 planner `Bullet`，也不縮小
+  first-successor `UNKNOWN`；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

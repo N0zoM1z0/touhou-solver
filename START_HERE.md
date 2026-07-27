@@ -336,6 +336,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   preserve the historical surface. Local certificate and live-controller
   focused suites pass; the Linux quick suite passes `699/699` in `9.281 s`.
   All equations and float operations moved unchanged.
+- Control-prefix evaluation, retained legacy last-desired differential
+  certificates, and explicit active/held/pending pipeline certificates now
+  live in `th08_live.local_certificates`. The 4,344-line controller keeps
+  exact-signature wrappers which inject its current hazard dispatcher, so
+  backend selection and historical monkey-patch fault injection remain live.
+  Quick suites pass `699/699` on Linux in `9.140 s` and Windows in
+  `13.505 s` with three platform skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

@@ -5500,3 +5500,26 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural movement-geometry ownership only. Physical
   dynamics, hazard recurrence, certificate quantifiers, issue timing, and
   live action authority are unchanged.
+
+### 2026-07-27 — Local pipeline certificate extraction
+
+- **Observed structural change:** Moved committed control-prefix evaluation,
+  the retained legacy last-desired-as-active differential certificate, and
+  the explicit active/held/pending actuator-pipeline certificate into
+  `th08_live.local_certificates`. `controller.py` is now 4,344 lines.
+- **Compatibility boundary:** Controller wrappers preserve every historical
+  call signature and inject the controller's current hazard dispatcher on
+  each call. NumPy/native backend switches and tests or benchmarks that patch
+  `_hazards_for_positions` therefore still affect certificate execution.
+  Late direct-root shadow serialization remains controller-owned.
+- **Validation:** Local-certificate, issue-transaction, live-controller, and
+  semantic differential suites pass `8/8`, `2/2`, `92/92`, and `6/6`. Ruff,
+  byte compilation, and `git diff --check` pass. Quick suites pass `699/699`
+  on Linux in `9.140 s` and Windows in `13.505 s` with three platform skips.
+  A first Windows invocation over-escaped the documented UNC root and did not
+  start discovery; the unmodified verified loader produced the reported
+  result.
+- **Authority:** Structural certificate-engine ownership only. Delay/no-write
+  quantifiers, observation-compatible branch construction, CVaR ordering,
+  collision and signed-clearance thresholds, issue-time freshness, hard
+  no-Bomb fallback, and live action authority are unchanged.

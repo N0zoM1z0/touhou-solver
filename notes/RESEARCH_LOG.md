@@ -4381,3 +4381,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   ASan/UBSan build passes 58 focused local/semantic/viability/query-survival
   tests with halt-on-error enabled. The 43-symbol ABI test, Python compilation,
   Ruff, and `git diff --check` pass.
+
+## 2026-07-27: Native ABI And Implementation Separation
+
+- **Scope:** Completed roadmap R3 by renaming all 43 domain definitions to
+  hidden C++ implementation entry points and adding four narrow public
+  geometry/local/pipeline/viability ABI translation units. The build now has
+  twelve explicit sources and no implementation include aggregation.
+- **Authoritative ABI:** `include/touhou_native/abi.h` declares all 43
+  functions and owns both local-supplemental structure layouts. It compiles
+  independently as C11 and C++17. A Linux linker map plus hidden visibility
+  restricts the dynamic surface to exactly the retained manifest; MinGW
+  continues to use explicit `dllexport`. Tests compare the header names,
+  Linux dynamic exports, and both built libraries to the same manifest.
+- **Legacy boundary:** Direct pipeline v1 adapts to v2. Belief create v1-v5
+  now each adapt directly to canonical v6 parameters rather than chaining
+  through intermediate public ABI versions; query/certify v1 adapt directly
+  to v2. Default masks, budgets, remaining-delay bucket, policy mode, and
+  Boolean normalization are unchanged.
+- **Authority:** Public wrappers only forward their exact arguments. This
+  changes no structure field order, C signature, status code, validation,
+  recurrence, branch order, float operation/comparison, thread-local worker
+  behavior, SIMD, action, or strategy status. It adds no physical evidence.
+- **Validation:** Fresh Linux/Windows release builds pass the exact 43-symbol
+  ABI checks. The 256-case semantic gate again reports zero geometry,
+  clearance, risk, batch, or supplemental mismatch. The complete quick suite
+  passes `608/608` on Linux in `5.398 s` and on Windows in `8.478 s` with
+  three platform skips. A fresh loaded ASan/UBSan build passes 58 focused
+  tests with halt-on-error enabled. Python compilation, Ruff, C/C++ header
+  compilation, and `git diff --check` pass.

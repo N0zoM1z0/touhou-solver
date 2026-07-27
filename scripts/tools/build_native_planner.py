@@ -13,6 +13,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 NATIVE_ROOT = ROOT / "native"
 SOURCES = (
+    NATIVE_ROOT / "src" / "abi" / "geometry_abi.cpp",
+    NATIVE_ROOT / "src" / "abi" / "local_abi.cpp",
+    NATIVE_ROOT / "src" / "abi" / "pipeline_abi.cpp",
+    NATIVE_ROOT / "src" / "abi" / "viability_abi.cpp",
     NATIVE_ROOT / "src" / "geometry" / "clearance.cpp",
     NATIVE_ROOT / "src" / "local" / "kernels.cpp",
     NATIVE_ROOT / "src" / "local" / "supplemental_workspace.cpp",
@@ -54,6 +58,14 @@ def _build(
     if windows:
         command.extend(("-static", "-static-libgcc", "-static-libstdc++"))
     else:
+        command[2:2] = (
+            "-fvisibility=hidden",
+            "-fvisibility-inlines-hidden",
+        )
+        command.insert(
+            -2,
+            f"-Wl,--version-script={NATIVE_ROOT / 'exports.map'}",
+        )
         command.insert(-2, "-fPIC")
     subprocess.run(command, check=True)
 

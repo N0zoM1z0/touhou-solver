@@ -8,79 +8,12 @@
 #include <mutex>
 #include <vector>
 
-#include "include/touhou_native/export.hpp"
+#include "include/touhou_native/abi.h"
+#include "src/internal/abi_impl.hpp"
 #include "include/touhou_native/local_hazard_stop.hpp"
 
 using touhou_native::ScopedLocalHazardStopContext;
 using touhou_native::local_hazard_stop_status;
-
-extern "C" int touhou_local_hazards_v1(
-    const float* positions_x,
-    const float* positions_y,
-    int position_count,
-    int step,
-    float player_radius,
-    const float* bullet_x,
-    const float* bullet_y,
-    const float* bullet_half_width,
-    const float* bullet_half_height,
-    const std::uint8_t* bullet_transformed,
-    int bullet_count,
-    const float* laser_start_x,
-    const float* laser_start_y,
-    const float* laser_segment_x,
-    const float* laser_segment_y,
-    const float* laser_collision_radius,
-    const float* laser_base_uncertainty,
-    const float* laser_uncertainty_per_frame,
-    int laser_count,
-    const float* body_x,
-    const float* body_y,
-    const float* body_half_width,
-    const float* body_half_height,
-    int body_count,
-    double* output_risk,
-    std::int32_t* output_collisions,
-    double* output_minimum
-);
-
-extern "C" int touhou_local_supplemental_beam_reduce_v1(
-    const double* draft_x,
-    const double* draft_y,
-    const std::int32_t* first_action,
-    const std::int32_t* last_direction,
-    const std::uint8_t* last_focused,
-    const std::uint32_t* collected_mask,
-    const double* risk,
-    const std::int32_t* collisions,
-    const double* minimum_clearance,
-    int draft_count,
-    int step,
-    int beam_width,
-    double position_quantization,
-    int target_enabled,
-    double target_x,
-    double target_y,
-    int target_deadline,
-    double item_safety_clearance,
-    double playfield_left,
-    double playfield_right,
-    double playfield_top,
-    double playfield_bottom,
-    double recovery_reserve_distance,
-    double supplemental_reserve_distance,
-    double diagonal_speed,
-    double cardinal_speed,
-    const std::int32_t* certificate_collisions,
-    const double* certificate_minimum,
-    const std::uint8_t* survival_preferred,
-    const std::uint8_t* safety_preferred,
-    const double* recovery_distance,
-    const std::int32_t* repair_volume,
-    int action_count,
-    std::int32_t* output_indices,
-    std::int32_t* output_count
-);
 
 namespace {
 
@@ -210,88 +143,7 @@ inline const Value* local_supplemental_offset_pointer(
 
 }  // namespace
 
-struct TouhouLocalSupplementalQueryV1 {
-    std::uint32_t struct_size;
-    int horizon;
-    int action_hold_frames;
-    int beam_width;
-    int control_delay_frames;
-    int action_count;
-    double initial_x;
-    double initial_y;
-    std::int32_t initial_first_action;
-    std::int32_t initial_last_action;
-    double initial_risk;
-    std::int32_t initial_collisions;
-    double initial_minimum_clearance;
-    double initial_immediate_clearance;
-    const std::int32_t* action_direction;
-    const double* action_dx;
-    const double* action_dy;
-    const std::uint8_t* action_focused;
-    const std::uint8_t* action_allowed;
-    const std::int32_t* certificate_collisions;
-    const double* certificate_minimum;
-    const std::uint8_t* survival_preferred;
-    const std::uint8_t* safety_preferred;
-    const double* recovery_distance;
-    const std::int32_t* repair_volume;
-    const std::int32_t* bullet_offsets;
-    const float* bullet_x;
-    const float* bullet_y;
-    const float* bullet_half_width;
-    const float* bullet_half_height;
-    const std::uint8_t* bullet_transformed;
-    const std::int32_t* laser_offsets;
-    const float* laser_start_x;
-    const float* laser_start_y;
-    const float* laser_segment_x;
-    const float* laser_segment_y;
-    const float* laser_collision_radius;
-    const float* laser_base_uncertainty;
-    const float* laser_uncertainty_per_frame;
-    int body_count;
-    const float* body_base_x;
-    const float* body_base_y;
-    const float* body_velocity_x;
-    const float* body_velocity_y;
-    const float* body_half_width;
-    const float* body_half_height;
-    float player_radius;
-    int preserve_previous_direction_inertia;
-    std::int32_t previous_direction;
-    std::uint8_t previous_focused;
-    int target_enabled;
-    double target_x;
-    double target_y;
-    int target_deadline;
-    double item_safety_clearance;
-    double playfield_left;
-    double playfield_right;
-    double playfield_top;
-    double playfield_bottom;
-    double recovery_reserve_distance;
-    double supplemental_reserve_distance;
-    double diagonal_speed;
-    double cardinal_speed;
-    std::uint64_t timeout_nanoseconds;
-};
-
-struct TouhouLocalSupplementalOutputV1 {
-    std::uint32_t struct_size;
-    int capacity;
-    double* x;
-    double* y;
-    std::int32_t* first_action;
-    std::int32_t* last_action;
-    double* risk;
-    std::int32_t* collisions;
-    double* minimum_clearance;
-    double* immediate_clearance;
-    std::int32_t* count;
-};
-
-TOUHOU_EXPORT int touhou_local_supplemental_workspace_create_v1(
+int touhou_native_impl_local_supplemental_workspace_create_v1(
     void** output_workspace
 ) {
     if (output_workspace == nullptr) {
@@ -306,7 +158,7 @@ TOUHOU_EXPORT int touhou_local_supplemental_workspace_create_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_local_supplemental_workspace_cancel_v1(
+int touhou_native_impl_local_supplemental_workspace_cancel_v1(
     void* workspace_pointer
 ) {
     if (workspace_pointer == nullptr) {
@@ -319,7 +171,7 @@ TOUHOU_EXPORT int touhou_local_supplemental_workspace_cancel_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_local_supplemental_workspace_active_v1(
+int touhou_native_impl_local_supplemental_workspace_active_v1(
     void* workspace_pointer,
     int* output_active
 ) {
@@ -335,7 +187,7 @@ TOUHOU_EXPORT int touhou_local_supplemental_workspace_active_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_local_supplemental_workspace_destroy_v1(
+int touhou_native_impl_local_supplemental_workspace_destroy_v1(
     void* workspace_pointer
 ) {
     if (workspace_pointer == nullptr) {
@@ -350,7 +202,7 @@ TOUHOU_EXPORT int touhou_local_supplemental_workspace_destroy_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_local_supplemental_workspace_query_v1(
+int touhou_native_impl_local_supplemental_workspace_query_v1(
     void* workspace_pointer,
     const TouhouLocalSupplementalQueryV1* query,
     TouhouLocalSupplementalOutputV1* output
@@ -715,7 +567,7 @@ TOUHOU_EXPORT int touhou_local_supplemental_workspace_query_v1(
             const int laser_count = (
                 query->laser_offsets[step] - laser_begin
             );
-            const int hazard_result = touhou_local_hazards_v1(
+            const int hazard_result = touhou_native_impl_local_hazards_v1(
                 workspace->positions_x.data(),
                 workspace->positions_y.data(),
                 static_cast<int>(draft_count),
@@ -850,7 +702,7 @@ TOUHOU_EXPORT int touhou_local_supplemental_workspace_query_v1(
             );
             std::int32_t retained_count = 0;
             const int reduce_result = (
-                touhou_local_supplemental_beam_reduce_v1(
+                touhou_native_impl_local_supplemental_beam_reduce_v1(
                     workspace->candidate_x.data(),
                     workspace->candidate_y.data(),
                     workspace->first_action.data(),

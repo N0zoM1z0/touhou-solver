@@ -14,14 +14,14 @@
 #include <utility>
 #include <vector>
 
-#include "include/touhou_native/export.hpp"
+#include "src/internal/abi_impl.hpp"
 #include "include/touhou_native/lattice.hpp"
 #include "include/touhou_native/status.hpp"
 #include "include/touhou_native/survival_label.hpp"
 #include "robust_transition_table.hpp"
 
-// Included after pipeline_survival_workspace.hpp and the shared lattice
-// helpers.  This workspace solves the recursively variable-cadence
+// Recursive variable-cadence belief workspace over the shared lattice
+// helpers. This workspace solves the recursively variable-cadence
 // information-set game with physical hold/no-write semantics.  The held
 // desired action is pending when pending >= 0, otherwise active.  Selecting
 // that action sends no new command and carries the old pending countdown.
@@ -1827,7 +1827,7 @@ private:
 
 }  // namespace
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v6(
+int touhou_native_impl_belief_pipeline_workspace_create_v6(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -1945,7 +1945,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v6(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v5(
+int touhou_native_impl_belief_pipeline_workspace_create_v5(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -1970,7 +1970,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v5(
     int clamp_to_bounds,
     void** output_workspace
 ) {
-    return touhou_belief_pipeline_workspace_create_v6(
+    return touhou_native_impl_belief_pipeline_workspace_create_v6(
         clearance,
         frame_count,
         row_count,
@@ -1997,7 +1997,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v5(
     );
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v4(
+int touhou_native_impl_belief_pipeline_workspace_create_v4(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -2021,7 +2021,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v4(
     int clamp_to_bounds,
     void** output_workspace
 ) {
-    return touhou_belief_pipeline_workspace_create_v5(
+    return touhou_native_impl_belief_pipeline_workspace_create_v6(
         clearance,
         frame_count,
         row_count,
@@ -2036,7 +2036,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v4(
         base_action_mask,
         budgeted_action_mask,
         continuation_budget,
-        reveal_remaining_delay,
+        reveal_remaining_delay != 0 ? 1 : 0,
         0,
         delay_frames,
         delay_count,
@@ -2048,7 +2048,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v4(
     );
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v3(
+int touhou_native_impl_belief_pipeline_workspace_create_v3(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -2071,7 +2071,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v3(
     int clamp_to_bounds,
     void** output_workspace
 ) {
-    return touhou_belief_pipeline_workspace_create_v4(
+    return touhou_native_impl_belief_pipeline_workspace_create_v6(
         clearance,
         frame_count,
         row_count,
@@ -2087,6 +2087,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v3(
         budgeted_action_mask,
         continuation_budget,
         0,
+        0,
         delay_frames,
         delay_count,
         cadence_frames,
@@ -2097,7 +2098,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v3(
     );
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
+int touhou_native_impl_belief_pipeline_workspace_create_v2(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -2118,7 +2119,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
     int clamp_to_bounds,
     void** output_workspace
 ) {
-    return touhou_belief_pipeline_workspace_create_v3(
+    return touhou_native_impl_belief_pipeline_workspace_create_v6(
         clearance,
         frame_count,
         row_count,
@@ -2133,6 +2134,8 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
         continuation_action_mask,
         0,
         0,
+        0,
+        0,
         delay_frames,
         delay_count,
         cadence_frames,
@@ -2143,7 +2146,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v2(
     );
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v1(
+int touhou_native_impl_belief_pipeline_workspace_create_v1(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -2171,7 +2174,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v1(
             - std::uint32_t{1}
         )
     );
-    return touhou_belief_pipeline_workspace_create_v2(
+    return touhou_native_impl_belief_pipeline_workspace_create_v6(
         clearance,
         frame_count,
         row_count,
@@ -2184,6 +2187,10 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v1(
         velocity_y,
         action_count,
         every_action_mask,
+        0,
+        0,
+        0,
+        0,
         delay_frames,
         delay_count,
         cadence_frames,
@@ -2194,7 +2201,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_create_v1(
     );
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v2(
+int touhou_native_impl_belief_pipeline_workspace_query_v2(
     void* workspace,
     int start_frame,
     int start_row,
@@ -2250,7 +2257,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v2(
     }
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
+int touhou_native_impl_belief_pipeline_workspace_query_v1(
     void* workspace,
     int start_frame,
     int start_row,
@@ -2267,7 +2274,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
     std::uint32_t* output_best_action_mask,
     std::uint64_t* output_stats
 ) {
-    return touhou_belief_pipeline_workspace_query_v2(
+    return touhou_native_impl_belief_pipeline_workspace_query_v2(
         workspace,
         start_frame,
         start_row,
@@ -2287,7 +2294,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_query_v1(
     );
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v2(
+int touhou_native_impl_belief_pipeline_workspace_certify_upper_v2(
     void* workspace,
     int start_frame,
     int start_row,
@@ -2340,7 +2347,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v2(
     }
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v1(
+int touhou_native_impl_belief_pipeline_workspace_certify_upper_v1(
     void* workspace,
     int start_frame,
     int start_row,
@@ -2357,7 +2364,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v1(
     std::uint64_t* output_stats
 ) {
     int deadline_expired = 0;
-    return touhou_belief_pipeline_workspace_certify_upper_v2(
+    return touhou_native_impl_belief_pipeline_workspace_certify_upper_v2(
         workspace,
         start_frame,
         start_row,
@@ -2376,8 +2383,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_certify_upper_v1(
     );
 }
 
-TOUHOU_EXPORT int
-touhou_belief_pipeline_workspace_recommend_action_column_v1(
+int touhou_native_impl_belief_pipeline_workspace_recommend_action_column_v1(
     void* workspace,
     int start_frame,
     int start_row,
@@ -2456,7 +2462,7 @@ touhou_belief_pipeline_workspace_recommend_action_column_v1(
     }
 }
 
-TOUHOU_EXPORT int touhou_belief_pipeline_workspace_cancel_v1(
+int touhou_native_impl_belief_pipeline_workspace_cancel_v1(
     void* workspace
 ) {
     if (workspace == nullptr) {
@@ -2468,7 +2474,7 @@ TOUHOU_EXPORT int touhou_belief_pipeline_workspace_cancel_v1(
     return 0;
 }
 
-TOUHOU_EXPORT void touhou_belief_pipeline_workspace_destroy_v1(
+void touhou_native_impl_belief_pipeline_workspace_destroy_v1(
     void* workspace
 ) {
     delete static_cast<BeliefPipelineSurvivalWorkspace*>(workspace);

@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-#include "include/touhou_native/export.hpp"
+#include "src/internal/abi_impl.hpp"
 #include "include/touhou_native/lattice.hpp"
 #include "include/touhou_native/status.hpp"
 #include "include/touhou_native/survival_label.hpp"
@@ -1081,7 +1081,7 @@ private:
 
 }  // namespace
 
-TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v2(
+int touhou_native_impl_pipeline_survival_workspace_create_v2(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -1175,7 +1175,7 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v2(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
+int touhou_native_impl_pipeline_survival_workspace_create_v1(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -1194,7 +1194,7 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
     int clamp_to_bounds,
     void** output_workspace
 ) {
-    return touhou_pipeline_survival_workspace_create_v2(
+    return touhou_native_impl_pipeline_survival_workspace_create_v2(
         clearance,
         frame_count,
         row_count,
@@ -1217,7 +1217,7 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_create_v1(
     );
 }
 
-TOUHOU_EXPORT int touhou_pipeline_survival_workspace_query_v1(
+int touhou_native_impl_pipeline_survival_workspace_query_v1(
     void* workspace,
     int start_frame,
     int start_row,
@@ -1270,7 +1270,7 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_query_v1(
     }
 }
 
-TOUHOU_EXPORT int touhou_pipeline_survival_workspace_contains_root_v1(
+int touhou_native_impl_pipeline_survival_workspace_contains_root_v1(
     void* workspace,
     int start_frame,
     int start_row,
@@ -1302,7 +1302,7 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_contains_root_v1(
     }
 }
 
-TOUHOU_EXPORT int touhou_pipeline_survival_workspace_query_v2(
+int touhou_native_impl_pipeline_survival_workspace_query_v2(
     void* workspace,
     int start_frame,
     int start_row,
@@ -1356,8 +1356,7 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_query_v2(
     }
 }
 
-TOUHOU_EXPORT int
-touhou_pipeline_survival_workspace_prewarm_continuation_v1(
+int touhou_native_impl_pipeline_survival_workspace_prewarm_continuation_v1(
     void* workspace,
     int start_frame,
     int start_row,
@@ -1402,8 +1401,7 @@ touhou_pipeline_survival_workspace_prewarm_continuation_v1(
     }
 }
 
-TOUHOU_EXPORT int
-touhou_pipeline_survival_workspace_merge_continuation_v1(
+int touhou_native_impl_pipeline_survival_workspace_merge_continuation_v1(
     void* destination_workspace,
     void* source_workspace,
     std::uint64_t* output_added_states
@@ -1432,7 +1430,7 @@ touhou_pipeline_survival_workspace_merge_continuation_v1(
     }
 }
 
-TOUHOU_EXPORT int touhou_pipeline_survival_workspace_cancel_v1(
+int touhou_native_impl_pipeline_survival_workspace_cancel_v1(
     void* workspace
 ) {
     if (workspace == nullptr) {
@@ -1442,7 +1440,7 @@ TOUHOU_EXPORT int touhou_pipeline_survival_workspace_cancel_v1(
     return 0;
 }
 
-TOUHOU_EXPORT void touhou_pipeline_survival_workspace_destroy_v1(
+void touhou_native_impl_pipeline_survival_workspace_destroy_v1(
     void* workspace
 ) {
     delete static_cast<PipelineSurvivalWorkspace*>(workspace);

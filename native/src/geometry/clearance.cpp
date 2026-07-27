@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "include/touhou_native/export.hpp"
+#include "src/internal/abi_impl.hpp"
 #include "include/touhou_native/lattice.hpp"
 
 using touhou_native::clearance_index;
@@ -107,7 +107,7 @@ inline float segment_distance_squared(
 
 }  // namespace
 
-TOUHOU_EXPORT int touhou_clearance_volume_v1(
+int touhou_native_impl_clearance_volume_v1(
     float x_start,
     float x_step,
     int column_count,
@@ -401,7 +401,7 @@ TOUHOU_EXPORT int touhou_clearance_volume_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_segment_trajectory_clearance_v1(
+int touhou_native_impl_segment_trajectory_clearance_v1(
     float x_start,
     float x_step,
     int column_count,
@@ -606,7 +606,7 @@ TOUHOU_EXPORT int touhou_segment_trajectory_clearance_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_aabb_trajectory_clearance_v1(
+int touhou_native_impl_aabb_trajectory_clearance_v1(
     float x_start,
     float x_step,
     int column_count,
@@ -768,7 +768,7 @@ TOUHOU_EXPORT int touhou_aabb_trajectory_clearance_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_piecewise_aabb_clearance_v1(
+int touhou_native_impl_piecewise_aabb_clearance_v1(
     float x_start,
     float x_step,
     int column_count,

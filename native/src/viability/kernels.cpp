@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "include/touhou_native/export.hpp"
+#include "src/internal/abi_impl.hpp"
 
 #include "include/touhou_native/lattice.hpp"
 #include "robust_transition_table.hpp"
@@ -284,7 +284,7 @@ static int robust_viability(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_set_current_thread_viability_worker_limit_v1(
+int touhou_native_impl_set_current_thread_viability_worker_limit_v1(
     int worker_limit
 ) {
     if (worker_limit < 1 || worker_limit > 4) {
@@ -294,7 +294,7 @@ TOUHOU_EXPORT int touhou_set_current_thread_viability_worker_limit_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_robust_viability_v1(
+int touhou_native_impl_robust_viability_v1(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -337,7 +337,7 @@ TOUHOU_EXPORT int touhou_robust_viability_v1(
     );
 }
 
-TOUHOU_EXPORT int touhou_robust_viability_terminal_v1(
+int touhou_native_impl_robust_viability_terminal_v1(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -384,7 +384,7 @@ TOUHOU_EXPORT int touhou_robust_viability_terminal_v1(
     );
 }
 
-TOUHOU_EXPORT int touhou_robust_safety_value_v1(
+int touhou_native_impl_robust_safety_value_v1(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -604,7 +604,7 @@ TOUHOU_EXPORT int touhou_robust_safety_value_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_robust_safety_policy_v1(
+int touhou_native_impl_robust_safety_policy_v1(
     const float* clearance,
     int frame_count,
     int row_count,
@@ -870,7 +870,7 @@ TOUHOU_EXPORT int touhou_robust_safety_policy_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_robust_survival_viability_v1(
+int touhou_native_impl_robust_survival_viability_v1(
     const float* clearance,
     int frame_count,
     int row_count,

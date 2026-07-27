@@ -13,12 +13,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "include/touhou_native/export.hpp"
+#include "src/internal/abi_impl.hpp"
 #include "include/touhou_native/local_hazard_stop.hpp"
 
 using touhou_native::local_hazard_stop_status;
 
-TOUHOU_EXPORT int touhou_local_hazards_v1(
+int touhou_native_impl_local_hazards_v1(
     const float* positions_x,
     const float* positions_y,
     int position_count,
@@ -474,7 +474,7 @@ inline bool local_beam_key_less(
 
 }  // namespace
 
-TOUHOU_EXPORT int touhou_decode_bullet_pool_v1(
+int touhou_native_impl_decode_bullet_pool_v1(
     const std::uint8_t* blob,
     std::uint64_t blob_size,
     int record_count,
@@ -653,7 +653,7 @@ TOUHOU_EXPORT int touhou_decode_bullet_pool_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_local_beam_reduce_v1(
+int touhou_native_impl_local_beam_reduce_v1(
     const double* draft_x,
     const double* draft_y,
     const std::int32_t* first_action,
@@ -890,7 +890,7 @@ TOUHOU_EXPORT int touhou_local_beam_reduce_v1(
     return 0;
 }
 
-TOUHOU_EXPORT int touhou_local_supplemental_beam_reduce_v1(
+int touhou_native_impl_local_supplemental_beam_reduce_v1(
     const double* draft_x,
     const double* draft_y,
     const std::int32_t* first_action,

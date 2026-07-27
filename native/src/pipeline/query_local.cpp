@@ -13,14 +13,14 @@
 #include <unordered_map>
 #include <vector>
 
-#include "include/touhou_native/export.hpp"
+#include "src/internal/abi_impl.hpp"
 
 #include "include/touhou_native/lattice.hpp"
 #include "robust_transition_table.hpp"
 
 using namespace touhou_native;
 
-TOUHOU_EXPORT int touhou_query_local_survival_v1(
+int touhou_native_impl_query_local_survival_v1(
     const float* clearance,
     int frame_count,
     int row_count,

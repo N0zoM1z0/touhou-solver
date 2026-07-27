@@ -1,0 +1,324 @@
+#include <cstdint>
+
+#include "include/touhou_native/abi.h"
+#include "include/touhou_native/export.hpp"
+#include "src/internal/abi_impl.hpp"
+
+
+TOUHOU_EXPORT int touhou_local_hazards_v1(
+    const float* positions_x,
+    const float* positions_y,
+    int position_count,
+    int step,
+    float player_radius,
+    const float* bullet_x,
+    const float* bullet_y,
+    const float* bullet_half_width,
+    const float* bullet_half_height,
+    const std::uint8_t* bullet_transformed,
+    int bullet_count,
+    const float* laser_start_x,
+    const float* laser_start_y,
+    const float* laser_segment_x,
+    const float* laser_segment_y,
+    const float* laser_collision_radius,
+    const float* laser_base_uncertainty,
+    const float* laser_uncertainty_per_frame,
+    int laser_count,
+    const float* body_x,
+    const float* body_y,
+    const float* body_half_width,
+    const float* body_half_height,
+    int body_count,
+    double* output_risk,
+    std::int32_t* output_collisions,
+    double* output_minimum
+) {
+    return touhou_native_impl_local_hazards_v1(
+        positions_x,
+        positions_y,
+        position_count,
+        step,
+        player_radius,
+        bullet_x,
+        bullet_y,
+        bullet_half_width,
+        bullet_half_height,
+        bullet_transformed,
+        bullet_count,
+        laser_start_x,
+        laser_start_y,
+        laser_segment_x,
+        laser_segment_y,
+        laser_collision_radius,
+        laser_base_uncertainty,
+        laser_uncertainty_per_frame,
+        laser_count,
+        body_x,
+        body_y,
+        body_half_width,
+        body_half_height,
+        body_count,
+        output_risk,
+        output_collisions,
+        output_minimum
+    );
+}
+
+TOUHOU_EXPORT int touhou_decode_bullet_pool_v1(
+    const std::uint8_t* blob,
+    std::uint64_t blob_size,
+    int record_count,
+    int stride,
+    int state_offset,
+    int geometry_offset,
+    int position_offset,
+    int velocity_offset,
+    int speed_offset,
+    int angle_offset,
+    int transform_flags_offset,
+    int original_transform_flags_offset,
+    int callback_phase_offset,
+    int callback_aux_offset,
+    float* output_x,
+    float* output_y,
+    float* output_velocity_x,
+    float* output_velocity_y,
+    float* output_half_width,
+    float* output_half_height,
+    std::uint32_t* output_transform_flags,
+    std::int32_t* output_slots,
+    float* output_speed,
+    float* output_angle,
+    std::int16_t* output_callback_phase,
+    std::uint8_t* output_callback_aux,
+    std::uint32_t* output_original_transform_flags,
+    int output_capacity,
+    std::int32_t* output_count
+) {
+    return touhou_native_impl_decode_bullet_pool_v1(
+        blob,
+        blob_size,
+        record_count,
+        stride,
+        state_offset,
+        geometry_offset,
+        position_offset,
+        velocity_offset,
+        speed_offset,
+        angle_offset,
+        transform_flags_offset,
+        original_transform_flags_offset,
+        callback_phase_offset,
+        callback_aux_offset,
+        output_x,
+        output_y,
+        output_velocity_x,
+        output_velocity_y,
+        output_half_width,
+        output_half_height,
+        output_transform_flags,
+        output_slots,
+        output_speed,
+        output_angle,
+        output_callback_phase,
+        output_callback_aux,
+        output_original_transform_flags,
+        output_capacity,
+        output_count
+    );
+}
+
+TOUHOU_EXPORT int touhou_local_beam_reduce_v1(
+    const double* draft_x,
+    const double* draft_y,
+    const std::int32_t* first_action,
+    const std::int32_t* last_direction,
+    const std::uint8_t* last_focused,
+    const std::uint32_t* collected_mask,
+    const double* risk,
+    const std::int32_t* collisions,
+    const double* minimum_clearance,
+    int draft_count,
+    int step,
+    int beam_width,
+    double position_quantization,
+    int target_enabled,
+    double target_x,
+    double target_y,
+    int target_deadline,
+    double item_safety_clearance,
+    double playfield_left,
+    double playfield_right,
+    double playfield_top,
+    double playfield_bottom,
+    double reserve_distance,
+    double diagonal_speed,
+    double cardinal_speed,
+    const std::int32_t* certificate_collisions,
+    const double* certificate_minimum,
+    const std::uint8_t* survival_preferred,
+    const std::uint8_t* safety_preferred,
+    const double* recovery_distance,
+    int action_count,
+    std::int32_t* output_indices,
+    std::int32_t* output_count
+) {
+    return touhou_native_impl_local_beam_reduce_v1(
+        draft_x,
+        draft_y,
+        first_action,
+        last_direction,
+        last_focused,
+        collected_mask,
+        risk,
+        collisions,
+        minimum_clearance,
+        draft_count,
+        step,
+        beam_width,
+        position_quantization,
+        target_enabled,
+        target_x,
+        target_y,
+        target_deadline,
+        item_safety_clearance,
+        playfield_left,
+        playfield_right,
+        playfield_top,
+        playfield_bottom,
+        reserve_distance,
+        diagonal_speed,
+        cardinal_speed,
+        certificate_collisions,
+        certificate_minimum,
+        survival_preferred,
+        safety_preferred,
+        recovery_distance,
+        action_count,
+        output_indices,
+        output_count
+    );
+}
+
+TOUHOU_EXPORT int touhou_local_supplemental_beam_reduce_v1(
+    const double* draft_x,
+    const double* draft_y,
+    const std::int32_t* first_action,
+    const std::int32_t* last_direction,
+    const std::uint8_t* last_focused,
+    const std::uint32_t* collected_mask,
+    const double* risk,
+    const std::int32_t* collisions,
+    const double* minimum_clearance,
+    int draft_count,
+    int step,
+    int beam_width,
+    double position_quantization,
+    int target_enabled,
+    double target_x,
+    double target_y,
+    int target_deadline,
+    double item_safety_clearance,
+    double playfield_left,
+    double playfield_right,
+    double playfield_top,
+    double playfield_bottom,
+    double recovery_reserve_distance,
+    double supplemental_reserve_distance,
+    double diagonal_speed,
+    double cardinal_speed,
+    const std::int32_t* certificate_collisions,
+    const double* certificate_minimum,
+    const std::uint8_t* survival_preferred,
+    const std::uint8_t* safety_preferred,
+    const double* recovery_distance,
+    const std::int32_t* repair_volume,
+    int action_count,
+    std::int32_t* output_indices,
+    std::int32_t* output_count
+) {
+    return touhou_native_impl_local_supplemental_beam_reduce_v1(
+        draft_x,
+        draft_y,
+        first_action,
+        last_direction,
+        last_focused,
+        collected_mask,
+        risk,
+        collisions,
+        minimum_clearance,
+        draft_count,
+        step,
+        beam_width,
+        position_quantization,
+        target_enabled,
+        target_x,
+        target_y,
+        target_deadline,
+        item_safety_clearance,
+        playfield_left,
+        playfield_right,
+        playfield_top,
+        playfield_bottom,
+        recovery_reserve_distance,
+        supplemental_reserve_distance,
+        diagonal_speed,
+        cardinal_speed,
+        certificate_collisions,
+        certificate_minimum,
+        survival_preferred,
+        safety_preferred,
+        recovery_distance,
+        repair_volume,
+        action_count,
+        output_indices,
+        output_count
+    );
+}
+
+TOUHOU_EXPORT int touhou_local_supplemental_workspace_create_v1(
+    void** output_workspace
+) {
+    return touhou_native_impl_local_supplemental_workspace_create_v1(
+        output_workspace
+    );
+}
+
+TOUHOU_EXPORT int touhou_local_supplemental_workspace_cancel_v1(
+    void* workspace_pointer
+) {
+    return touhou_native_impl_local_supplemental_workspace_cancel_v1(
+        workspace_pointer
+    );
+}
+
+TOUHOU_EXPORT int touhou_local_supplemental_workspace_active_v1(
+    void* workspace_pointer,
+    int* output_active
+) {
+    return touhou_native_impl_local_supplemental_workspace_active_v1(
+        workspace_pointer,
+        output_active
+    );
+}
+
+TOUHOU_EXPORT int touhou_local_supplemental_workspace_destroy_v1(
+    void* workspace_pointer
+) {
+    return touhou_native_impl_local_supplemental_workspace_destroy_v1(
+        workspace_pointer
+    );
+}
+
+TOUHOU_EXPORT int touhou_local_supplemental_workspace_query_v1(
+    void* workspace_pointer,
+    const TouhouLocalSupplementalQueryV1* query,
+    TouhouLocalSupplementalOutputV1* output
+) {
+    return touhou_native_impl_local_supplemental_workspace_query_v1(
+        workspace_pointer,
+        query,
+        output
+    );
+}

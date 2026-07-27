@@ -167,7 +167,8 @@ decomposed.
 | `th08_live_dodge_agent.py` | 22 | keep facade |
 | `th08_live/controller.py` | 5,411 | P0 staged extraction through iteration contracts |
 | `th08_live/planner_pass.py` | 1,685 | P1 after session stages; split prepare/baseline/supplemental/finalize |
-| `touhou_control/query_survival.py` | 1,913 | P1 split identity/query/certification/native workspace |
+| `touhou_control/query_survival.py` | 1,800 | P1 split in progress; public value contracts extracted, next isolate the independent scalar oracle |
+| `touhou_control/query_survival_types.py` | 140 | retain public contracts |
 | `touhou_control/viability.py` | 1,400 | P1 split model/transition/numpy/native dispatch/public policy |
 | `touhou_control/native/local.py` | 1,288 | P1 split ABI types/workspaces/calls/results |
 | `touhou_control/native/viability.py` | 779 | P2 split only with matching C ABI ownership |

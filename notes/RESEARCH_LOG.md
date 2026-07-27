@@ -5162,3 +5162,19 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 674,484,607-byte raw JSONL SHA-256
   `d746c1bcbe3604a32f44ecfbb5f95f22052c8a8de555dbd9906e58872621e29b`.
+
+### 2026-07-27 — Query-local survival contracts
+
+- **Observed structural change:** Moved pending-command, reachable-root,
+  scalar/belief statistics, upper-certification, action-recommendation, and
+  complete query-result values into
+  `touhou_control.query_survival_types`. The solver module is 1,800 lines.
+- **Boundary:** Public imports remain re-exported from
+  `touhou_control.query_survival`. No recurrence, memo key, policy version,
+  lattice projection, scalar oracle, native workspace, C ABI, or dispatch
+  moved.
+- **Validation:** Query-survival tests pass `17/17`; Ruff, byte compilation,
+  and `git diff --check` pass; the Linux quick suite passes `699/699` in
+  `8.904 s`.
+- **Authority:** Structural value ownership only. Formal and native solver
+  authority are unchanged.

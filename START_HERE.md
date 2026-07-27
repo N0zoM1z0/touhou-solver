@@ -268,6 +268,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   decision retained the required planner groups with zero supplemental
   failures. The run took 13 hits, all after global-kernel exhaustion, so it
   is CE-0138 survival-failure evidence rather than route acceptance.
+- Query-local public value contracts now live in
+  `touhou_control.query_survival_types`: pending command, reachable root,
+  scalar/belief stats, upper certification, action recommendation, and query
+  result. The solver module is 1,800 lines; focused query-survival tests pass
+  `17/17` and the Linux quick suite retains `699/699` in `8.904 s`.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

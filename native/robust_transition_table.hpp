@@ -1,7 +1,16 @@
 #pragma once
 
-// Included inside the kernel's anonymous namespace.  The surrounding
-// translation unit supplies Sample and the standard-library headers.
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <mutex>
+#include <vector>
+
+#include "include/touhou_native/lattice.hpp"
+
+namespace touhou_native {
 
 struct TransitionTable {
     double x_start;
@@ -325,3 +334,5 @@ inline std::shared_ptr<const TransitionTable> transition_table(
     cached = table;
     return cached;
 }
+
+}  // namespace touhou_native

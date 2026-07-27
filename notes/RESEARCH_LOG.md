@@ -4354,3 +4354,30 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   complete quick suite passes `605/605` on Linux in `5.415 s` and on Windows
   in `8.100 s` with one existing skip. Python compilation, Ruff, and
   `git diff --check` pass.
+
+## 2026-07-27: Native Multi-Translation-Unit Boundary
+
+- **Scope:** Began roadmap R3 by extracting self-contained `export.hpp`,
+  `lattice.hpp`, `status.hpp`, `survival_label.hpp`, and
+  `local_hazard_stop.hpp`. The former implementation headers now compile as
+  local supplemental, direct pipeline, and belief pipeline sources. The
+  remaining unity body was moved without algorithm edits into geometry,
+  local-kernel, query-local, viability, and losing-label sources.
+- **Build boundary:** `build_native_planner.py` has one checked-in explicit
+  eight-source list for Linux and MinGW. `robust_viability_kernel.cpp` is now
+  a two-line compatibility path and is not compiled. The build tool also has
+  an explicit Linux `sanitize` research profile producing a separate ignored
+  library with ASan/UBSan and frame pointers.
+- **Observed compatibility:** Fresh release builds succeed on Linux and
+  Windows and both expose the exact retained 43-symbol manifest. The 256-case
+  semantic gate passed with zero collision, clearance-sign, clearance-value,
+  risk, batch-invariance, or supplemental mismatches.
+- **Authority:** This is a source/include/linkage move. It changes no
+  recurrence, branch order, float operation/comparison, worker count,
+  thread-local worker setter semantics, SIMD, C signature, status code,
+  fallback, action, or strategy status. It adds no physical evidence.
+- **Validation:** The complete quick suite passes `605/605` on Linux in
+  `5.554 s` and on Windows in `8.170 s` with one existing skip. A loaded
+  ASan/UBSan build passes 58 focused local/semantic/viability/query-survival
+  tests with halt-on-error enabled. The 43-symbol ABI test, Python compilation,
+  Ruff, and `git diff --check` pass.

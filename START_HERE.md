@@ -32,21 +32,21 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Repository branch: `main`.
 - Latest algorithmic checkpoint:
   `d4467bd Add deadline-aware native supplemental gate`.
-- Latest structural checkpoint: native-binding R2 complete.
-  Geometry, local sensing/rollout, viability, pipeline, and belief ctypes
-  declarations and wrappers live in `touhou_control.native`; shared library
-  loading, function/group caches, and status handling are centralized.
-  Wrapper coercions use one typed helper that delegates exactly to the former
-  `np.ascontiguousarray` behavior. `native_backend` is now a 73-line
-  compatibility façade with exact historical symbol identities. Corridor R1
-  remains complete. The R0 behavior and 43-symbol ABI baselines remain
-  unchanged. No model, recurrence, action, strategy, or C ABI changed.
+- Latest structural checkpoint: native C++ R3 multi-translation-unit split.
+  Eight explicitly listed geometry/local/viability/pipeline `.cpp` sources
+  replace the unity build; `robust_viability_kernel.cpp` is a two-line
+  compatibility path. Shared export, lattice, status, survival-label, and
+  local-stop headers are self-contained. R2 remains complete with a 73-line
+  Python compatibility façade. The R0 behavior and 43-symbol ABI baselines
+  remain unchanged. C ABI wrapper/implementation separation remains the next
+  R3 structure checkpoint. No model, recurrence, float comparison, worker
+  policy, action, or strategy changed.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
   quick suite `584/584` on Linux in `5.213 s` and Windows in `14.365 s`.
-- The completed R2 checkpoint passes the expanded quick suite `605/605`
-  on Linux in `5.415 s` and Windows in `8.100 s` with one existing skip.
+- The R3 multi-TU checkpoint passes the expanded quick suite `605/605`
+  on Linux in `5.554 s` and Windows in `8.170 s` with one existing skip.
 - No TH08 process, controller daemon, supervisor, or unfinished experiment is
   expected to be alive.
 - Native build output, raw traces, screenshots, caches, and the local

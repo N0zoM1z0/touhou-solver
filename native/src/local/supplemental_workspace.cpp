@@ -1,7 +1,86 @@
-#pragma once
+#include <algorithm>
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <limits>
+#include <mutex>
+#include <vector>
 
-// Included at the end of robust_viability_kernel.cpp after the local hazard
-// and supplemental reducer ABI definitions.
+#include "include/touhou_native/export.hpp"
+#include "include/touhou_native/local_hazard_stop.hpp"
+
+using touhou_native::ScopedLocalHazardStopContext;
+using touhou_native::local_hazard_stop_status;
+
+extern "C" int touhou_local_hazards_v1(
+    const float* positions_x,
+    const float* positions_y,
+    int position_count,
+    int step,
+    float player_radius,
+    const float* bullet_x,
+    const float* bullet_y,
+    const float* bullet_half_width,
+    const float* bullet_half_height,
+    const std::uint8_t* bullet_transformed,
+    int bullet_count,
+    const float* laser_start_x,
+    const float* laser_start_y,
+    const float* laser_segment_x,
+    const float* laser_segment_y,
+    const float* laser_collision_radius,
+    const float* laser_base_uncertainty,
+    const float* laser_uncertainty_per_frame,
+    int laser_count,
+    const float* body_x,
+    const float* body_y,
+    const float* body_half_width,
+    const float* body_half_height,
+    int body_count,
+    double* output_risk,
+    std::int32_t* output_collisions,
+    double* output_minimum
+);
+
+extern "C" int touhou_local_supplemental_beam_reduce_v1(
+    const double* draft_x,
+    const double* draft_y,
+    const std::int32_t* first_action,
+    const std::int32_t* last_direction,
+    const std::uint8_t* last_focused,
+    const std::uint32_t* collected_mask,
+    const double* risk,
+    const std::int32_t* collisions,
+    const double* minimum_clearance,
+    int draft_count,
+    int step,
+    int beam_width,
+    double position_quantization,
+    int target_enabled,
+    double target_x,
+    double target_y,
+    int target_deadline,
+    double item_safety_clearance,
+    double playfield_left,
+    double playfield_right,
+    double playfield_top,
+    double playfield_bottom,
+    double recovery_reserve_distance,
+    double supplemental_reserve_distance,
+    double diagonal_speed,
+    double cardinal_speed,
+    const std::int32_t* certificate_collisions,
+    const double* certificate_minimum,
+    const std::uint8_t* survival_preferred,
+    const std::uint8_t* safety_preferred,
+    const double* recovery_distance,
+    const std::int32_t* repair_volume,
+    int action_count,
+    std::int32_t* output_indices,
+    std::int32_t* output_count
+);
 
 namespace {
 

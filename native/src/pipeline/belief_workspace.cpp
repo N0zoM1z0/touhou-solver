@@ -1,4 +1,24 @@
-#pragma once
+// Exact recursive belief-pipeline workspace implementation and C ABI.
+
+#include <algorithm>
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <memory>
+#include <mutex>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include "include/touhou_native/export.hpp"
+#include "include/touhou_native/lattice.hpp"
+#include "include/touhou_native/status.hpp"
+#include "include/touhou_native/survival_label.hpp"
+#include "robust_transition_table.hpp"
 
 // Included after pipeline_survival_workspace.hpp and the shared lattice
 // helpers.  This workspace solves the recursively variable-cadence
@@ -13,6 +33,8 @@
 // It is separate from the older always-issue/one-transition workspace so
 // experiments cannot silently change either contract.
 namespace {
+
+using namespace touhou_native;
 
 constexpr int BELIEF_PIPELINE_MAX_REMAINING = 62;
 

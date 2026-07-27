@@ -11,7 +11,17 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "native" / "robust_viability_kernel.cpp"
+NATIVE_ROOT = ROOT / "native"
+SOURCES = (
+    NATIVE_ROOT / "src" / "geometry" / "clearance.cpp",
+    NATIVE_ROOT / "src" / "local" / "kernels.cpp",
+    NATIVE_ROOT / "src" / "local" / "supplemental_workspace.cpp",
+    NATIVE_ROOT / "src" / "pipeline" / "direct_workspace.cpp",
+    NATIVE_ROOT / "src" / "pipeline" / "belief_workspace.cpp",
+    NATIVE_ROOT / "src" / "pipeline" / "query_local.cpp",
+    NATIVE_ROOT / "src" / "viability" / "kernels.cpp",
+    NATIVE_ROOT / "src" / "viability" / "losing_labels.cpp",
+)
 
 
 def _build(
@@ -19,18 +29,28 @@ def _build(
     compiler: str,
     output: Path,
     windows: bool,
+    profile: str,
 ) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     command = [
         compiler,
         "-std=c++17",
-        "-O3",
-        "-DNDEBUG",
         "-shared",
-        str(SOURCE),
+        "-I",
+        str(NATIVE_ROOT),
+        *(str(source) for source in SOURCES),
         "-o",
         str(output),
     ]
+    if profile == "release":
+        command[2:2] = ("-O3", "-DNDEBUG")
+    else:
+        command[2:2] = (
+            "-O1",
+            "-g",
+            "-fsanitize=address,undefined",
+            "-fno-omit-frame-pointer",
+        )
     if windows:
         command.extend(("-static", "-static-libgcc", "-static-libstdc++"))
     else:
@@ -45,7 +65,14 @@ def main(argv: list[str] | None = None) -> int:
         choices=("linux", "windows", "all"),
         default="linux",
     )
+    parser.add_argument(
+        "--profile",
+        choices=("release", "sanitize"),
+        default="release",
+    )
     args = parser.parse_args(argv)
+    if args.profile == "sanitize" and args.target != "linux":
+        parser.error("the sanitizer research profile is Linux-only")
 
     if args.target in ("linux", "all"):
         compiler = os.environ.get("CXX") or shutil.which("g++")
@@ -58,9 +85,14 @@ def main(argv: list[str] | None = None) -> int:
                 / "native"
                 / "build"
                 / "linux-x86_64"
-                / "libtouhou_viability.so"
+                / (
+                    "libtouhou_viability.so"
+                    if args.profile == "release"
+                    else "libtouhou_viability_sanitize.so"
+                )
             ),
             windows=False,
+            profile=args.profile,
         )
     if args.target in ("windows", "all"):
         compiler = (
@@ -81,6 +113,7 @@ def main(argv: list[str] | None = None) -> int:
                 / "touhou_viability.dll"
             ),
             windows=True,
+            profile=args.profile,
         )
     return 0
 

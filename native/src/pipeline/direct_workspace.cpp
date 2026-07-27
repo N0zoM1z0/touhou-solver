@@ -1,55 +1,27 @@
-#pragma once
+// Exact direct pipeline-survival workspace implementation and C ABI.
 
-// Included after the shared lattice-sampling helpers.
+#include <algorithm>
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <limits>
+#include <memory>
+#include <mutex>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include "include/touhou_native/export.hpp"
+#include "include/touhou_native/lattice.hpp"
+#include "include/touhou_native/status.hpp"
+#include "include/touhou_native/survival_label.hpp"
+#include "robust_transition_table.hpp"
+
 namespace {
 
-constexpr int PIPELINE_MAX_ACTIONS = 32;
-constexpr int PIPELINE_MAX_DELAYS = 64;
-constexpr int PIPELINE_MAX_DECISION_FRAMES = 16;
-constexpr int PIPELINE_MAX_BRANCHES =
-    PIPELINE_MAX_DELAYS * PIPELINE_MAX_DECISION_FRAMES;
-constexpr int PIPELINE_RESULT_CANCELLED = 5;
-constexpr int PIPELINE_RESULT_DEADLINE = 6;
-constexpr std::uint64_t PIPELINE_EMPTY_KEY =
-    std::numeric_limits<std::uint64_t>::max();
-
-struct PipelineCancelledSignal {};
-struct PipelineDeadlineSignal {};
-
-struct PipelineLabel {
-    std::uint16_t frames;
-    float margin;
-};
-
-inline bool pipeline_label_less(
-    const PipelineLabel& left,
-    const PipelineLabel& right
-) {
-    return (
-        left.frames < right.frames
-        || (
-            left.frames == right.frames
-            && left.margin < right.margin
-        )
-    );
-}
-
-inline bool pipeline_label_equal(
-    const PipelineLabel& left,
-    const PipelineLabel& right
-) {
-    return left.frames == right.frames && left.margin == right.margin;
-}
-
-inline bool pipeline_label_less_equal(
-    const PipelineLabel& left,
-    const PipelineLabel& right
-) {
-    return (
-        pipeline_label_less(left, right)
-        || pipeline_label_equal(left, right)
-    );
-}
+using namespace touhou_native;
 
 struct PipelineState {
     int frame;

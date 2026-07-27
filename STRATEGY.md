@@ -189,6 +189,17 @@ Linux/Windows full-density p95 is `0.0120/0.0109 ms`, 592-birth p95 is
 Schema v5 records explicit backend provenance. This permits only an explicit
 native Stage-4A trace proposal; B4 remains physically failed.
 
+**Observed physical recheck:** Explicit-native schema-v5 run
+`20260728_055104` completed Stage 4A over frames `2..45092`, 14,643
+decisions, 13 hits, hard no-Bomb, accepted artifacts, and cleanup. All audit
+rows have native provenance and zero observation errors. Observer
+p50/p95/p99 improves to `0.0545/0.1393/0.2111 ms`, but p99.9/max is
+`2.3779/9.0498 ms`, so B4 still fails. Ten of sixteen samples above 2 ms
+contain no evidence; none is a large birth burst. CE-0149 keeps
+native-call/materialization/GC/scheduler attribution open. The run does not
+support a survival improvement: it has 13 hits versus 12 in the RNG-distinct
+schema-v4 run, and every hit follows global viability exhaustion.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
@@ -200,13 +211,14 @@ native Stage-4A trace proposal; B4 remains physically failed.
    header-only ECL capture correction pass and are physically retained. B4
    still fails wall timing and callback instruction exhaustion remains
    incomplete. Schema v4 physically validates bounded flush latency but
-   rejects thread CPU as a useful sub-millisecond diagnostic. Next evaluate
-   a parity-gated native extraction data plane now passes isolated
-   Linux/Windows gates and preserves the production ABI. Repeat Stage 4A
-   only with explicit native provenance and unchanged wall/cadence/no-Bomb
-   limits. In parallel, make incomplete callback coverage explicit and fail
-   closed before trying Stage 5/6. It does not narrow `UNKNOWN` coverage or
-   add action authority.
+   rejects thread CPU as a useful sub-millisecond diagnostic. The
+   parity-gated native data plane passes isolated gates and physical
+   percentiles, but CE-0149 retains a 9.0498-ms maximum. Next split native
+   call from Python materialization and record observation-overlapping GC
+   without disabling GC, pinning the controller, or weakening the wall
+   limit. In parallel, make incomplete callback coverage explicit and fail
+   closed before trying Stage 5/6. None of this narrows `UNKNOWN` coverage or
+   adds action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

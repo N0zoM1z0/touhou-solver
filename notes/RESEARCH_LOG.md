@@ -6708,3 +6708,47 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   failed until an accepted hard-no-Bomb Stage-4A run explicitly selects the
   native backend and passes wall timing, cadence, durability, supervisor
   completion, and cleanup. CE-0147 and Stage 5/6 remain open.
+
+## 2026-07-28 — Native birth extraction passed physical percentiles, not maximum
+
+- Ran
+  `lunatic_route2_stage4a_unattended_20260728_055104` from checkpoint
+  `bc57168` with explicit `--trace-bullet-births
+  --bullet-birth-backend native`.
+- **Observed acceptance:** The Lunatic Stage-4A workload completed frames
+  `2..45092` over 14,643 decisions, one epoch, `route_complete`, accepted
+  supervisor artifacts, hard no-Bomb, and process/key cleanup. All 14,643
+  schema-v5 audit rows record native provenance; observation and intent
+  errors are zero.
+- **Observed physical B4:** wall p50/p95/p99/p99.9/max is
+  `0.0545/0.1393/0.2111/2.3779/9.0498 ms`. The native data plane passes p95
+  and p99 for the first time, but 16 samples exceed the fixed 2-ms maximum,
+  so the deterministic audit correctly returns false.
+- Ten tail samples contain zero evidence; the other six contain 4, 6, or 20
+  rows. Large output-linear bursts do not explain the remaining maximum.
+  Windows thread CPU reads zero on all tail samples under its 15.625-ms
+  quantum. Native call, Python materialization/GC, and scheduler preemption
+  remain unresolved alternatives.
+- Previous-record emit p95/p99/max is
+  `0.1723/1.1804/3.5352 ms`. Same-iteration durability remains intact, while
+  record serialization remains a separate post-issue performance problem.
+- **Observed semantics:** validation and timed-intent gates pass. There are
+  1,980 timed sightings, 62 deduplicated events, and 5,944 unique temporal
+  supports over 95,410 activation edges. Every one of 1,339 spell-57 rows
+  again reaches the callback instruction limit without horizon coverage.
+- **Observed survival:** 13 hits occur at
+  `1487, 2360, 4491, 8991, 10451, 11611, 12215, 12803, 13822, 21964,
+  22714, 27323, 31202`. The canonical frame-1,487 hit is a modeled
+  committed-prefix collision. Six contacts are observed bullet overlaps,
+  five are modeled committed-prefix collisions, and two are observed
+  enemy-body overlaps; all follow global viability exhaustion. Thirteen
+  versus the schema-v4 sample's twelve is not a controlled survival result.
+- Decision cadence remains 2/3 frames median/p95. Next-observation input
+  visibility is 0.9311 versus 0.9388 in schema v4.
+- Raw trace is 510,433,900 bytes with SHA-256
+  `ed4fbbb932e12ac7ef7f3e4b560fad1fa7dc8b0428c712edc5a02ec1c09b7a79`.
+  Two residual report generations are byte-identical at canonical SHA-256
+  `1689bf8468b9129b16aaf1aeacee7b569975a4302a92ab7860ef77c4665a84ec`.
+- **Authority:** B4 and CE-0149 remain open. The next gate is trace-only
+  attribution of native-call, materialization, and overlapping GC time under
+  the unchanged wall limit. No future-event or action authority follows.

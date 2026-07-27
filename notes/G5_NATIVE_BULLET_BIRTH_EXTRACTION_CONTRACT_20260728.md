@@ -2,11 +2,12 @@
 
 Date: 2026-07-28
 
-Status: offline implementation and Linux/Windows gates complete; an
-explicitly selected Stage-4A trace gate is proposed. This contract authorizes
-a separate native extraction library, binding, differential oracle,
-benchmark, and that focused physical repeat. It adds no planner field,
-future-hazard coverage, Bomb, issue, strategy, or physical action authority.
+Status: offline implementation and Linux/Windows gates complete; the
+explicitly selected Stage-4A trace gate completed but failed the physical
+maximum. This contract authorizes a separate native extraction library,
+binding, differential oracle, benchmark, and that focused physical repeat.
+It adds no planner field, future-hazard coverage, Bomb, issue, strategy, or
+physical action authority.
 
 This contract refines the B4 performance boundary in
 `TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md` after four failed
@@ -259,3 +260,20 @@ This is isolated eligibility only. B4 remains physically failed until an
 accepted Stage-4A run uses `--trace-bullet-births
 --bullet-birth-backend native` and passes wall time, cadence, hard no-Bomb,
 durability, supervisor completion, and cleanup.
+
+## Physical Gate Result
+
+The explicit native run
+`lunatic_route2_stage4a_unattended_20260728_055104` completed frames
+`2..45092`, 14,643 decisions, hard no-Bomb, route completion, and cleanup.
+All 14,643 schema-v5 rows report the native backend with zero observation
+errors. Observer wall p50/p95/p99/p99.9/max is
+`0.0545/0.1393/0.2111/2.3779/9.0498 ms`: p95 and p99 pass, maximum fails.
+
+Sixteen samples exceed `2.00 ms`; ten contain zero evidence and the other six
+contain only 4, 6, or 20 rows. The remaining physical tail is therefore not
+explained by the 592-row output path. Windows thread CPU is zero on all
+sixteen samples under its 15.625-ms accounting quantum, so the current trace
+cannot distinguish native-call delay, Python materialization/GC, or
+scheduler preemption. B4 remains failed, and the next gate is attribution,
+not a weaker deadline.

@@ -2,11 +2,12 @@
 
 Date: 2026-07-28
 
-Status: B4/B5 failed four times with retained evidence. The schema-v4
-physical repeat validates bounded durability and materially reduces
-birth-record emission latency, but CE-0143 physical performance, CE-0145
-source coverage, and CE-0147 callback-horizon coverage remain open. No
-future-hazard or physical action authority is granted.
+Status: B4/B5 failed five times with retained evidence. The schema-v5 native
+physical repeat passes the observer p95 and p99 limits for the first time,
+but its 9.0498-ms maximum still fails B4. CE-0143 physical performance,
+CE-0145 source coverage, CE-0147 callback-horizon coverage, and CE-0149 tail
+attribution remain open. No future-hazard or physical action authority is
+granted.
 
 ## Outcome
 
@@ -94,6 +95,31 @@ correction but again fails B4:
   activation edges (6.3047%);
 - every one of 1,330 spell-57 rows again reaches the 256-instruction callback
   cap without horizon coverage, independently reproducing CE-0147.
+
+The explicit native schema-v5 repeat
+`lunatic_route2_stage4a_unattended_20260728_055104` materially improves the
+physical distribution but still fails B4:
+
+- all 14,643 audit rows record `observation_backend=native`, with zero
+  observation or intent errors;
+- observer wall p50/p95/p99/p99.9/max is
+  `0.0545/0.1393/0.2111/2.3779/9.0498 ms`; p95 and p99 pass the unchanged
+  limits for the first time, but maximum remains above `2.00 ms`;
+- 16 observations exceed `2.00 ms`; ten have zero evidence and the other six
+  have only 4, 6, or 20 rows. This rejects 592-birth output-linear copying as
+  an explanation for the remaining tail;
+- all 16 tail samples report zero current-thread CPU because the same
+  15.625-ms accounting quantum remains unresolved. The trace cannot yet
+  distinguish a native call stall, Python materialization/GC, or scheduler
+  preemption;
+- previous birth-record emission p95/p99/max is
+  `0.1723/1.1804/3.5352 ms`; same-iteration durability remains intact, but
+  large-record serialization is still separate post-issue work;
+- validation and timed-intent gates pass. There are 1,980 timed sightings,
+  62 deduplicated events, and 5,944 unique temporal supports over 95,410
+  activation edges (6.2300%);
+- all 1,339 spell-57 rows again stop at the 256-instruction callback limit
+  without horizon coverage.
 
 ## Physical Scope And Provenance
 
@@ -184,6 +210,30 @@ game/controller process. The ignored 488,428,485-byte raw trace SHA-256 is
 `cf5161cf34209fd44be85c177ddaf89c5cee7c3bb73be6103f95296a8c834a9f`.
 The canonical fresh-attempt contact at frame 1,743 is an observed bullet
 overlap after global viability exhaustion.
+
+The schema-v5 native repeat report is:
+
+- `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_055104.birth_audit.json`
+- canonical LF SHA-256
+  `1689bf8468b9129b16aaf1aeacee7b569975a4302a92ab7860ef77c4665a84ec`;
+- two generations from the same raw trace are byte-identical;
+- `passed = false`;
+- validation gate: pass;
+- observer budget gate: fail on maximum only;
+- timed-intent-available gate: pass.
+
+The exact command added `--bullet-birth-backend native` to the retained
+Stage-4A trace invocation at code checkpoint `bc57168`. The run completed
+frames `2..45092` over 14,643 decisions with accepted route completion, 13
+hits at
+`1487, 2360, 4491, 8991, 10451, 11611, 12215, 12803, 13822, 21964,
+22714, 27323, 31202`, hard no-Bomb, supervisor completion, and no residual
+game/controller process. The ignored 510,433,900-byte raw trace SHA-256 is
+`ed4fbbb932e12ac7ef7f3e4b560fad1fa7dc8b0428c712edc5a02ec1c09b7a79`.
+The canonical first hit at frame 1,487 is a modeled committed-prefix
+collision after global viability exhaustion. Across the run, six hits are
+observed bullet overlaps, five are modeled committed-prefix collisions, and
+two are observed enemy-body overlaps.
 
 ## Corrections After The Failed Run
 
@@ -300,27 +350,27 @@ The following remain unchanged:
 - Bomb remains forbidden;
 - no B6 conservative birth envelope may be proposed.
 
-The fourth run is a valid physical correction gate, not a controlled survival
-comparison. Its 12 hits versus the preceding 20 are RNG-, density-, phase-,
-resource-, and trajectory-distinct. Nine contacts are observed bullet
-overlaps and three are modeled committed-prefix collisions; every contact
-followed global viability exhaustion. Decision cadence remains 2 frames
-median and 3 frames p95, and next-observation input visibility is 0.9388.
+The fourth and fifth runs are valid physical correction gates, not controlled
+survival comparisons. Their 12 and 13 hits are RNG-, density-, phase-,
+resource-, and trajectory-distinct. The schema-v5 run is one hit worse than
+schema v4 and does not support a survival-improvement claim. Every contact in
+both runs followed global viability exhaustion. Schema-v5 decision cadence
+remains 2 frames median and 3 frames p95, while next-observation input
+visibility is 0.9311 versus 0.9388 in schema v4.
 
-The bounded flush change is retained. Thread CPU timing is rejected as a
-useful Windows sub-millisecond diagnostic, and the wall gate remains failed.
-The next performance gate now has an eligible offline implementation: a
-separate native trace library performs one ascending-slot scan without
-changing the production planner ABI. Exact Python/native differential,
-atomic error behavior, fixed Linux/Windows profiles, and complete quick
-suites pass. Trace schema v5 makes backend provenance mandatory. CE-0148
-retains and closes a 5.409-ms ctypes-allocation/cyclic-GC tail without
-disabling GC or pinning the controller.
+The bounded flush and native extraction changes are retained. Native
+extraction closes the steady and percentile cost, but not the physical
+maximum. Thread CPU timing remains rejected as a useful Windows
+sub-millisecond diagnostic, and the wall gate remains failed.
 
-The next physical command must explicitly select the native backend and keep
-the independent Python scalar oracle, exact ordered columns, fixed wall
-limits, same-iteration durability, no added RPM, and default-off/no-action
-authority. B4 remains failed until that run completes and passes.
+The next diagnostic gate must preserve the explicit native backend,
+independent Python scalar oracle, exact ordered columns, fixed wall limits,
+same-iteration durability, no added RPM, and default-off/no-action authority.
+It must separately time the native call and Python materialization and record
+whether a cyclic-GC collection overlaps the observation. It may not disable
+GC, move collection outside the measured boundary, pin the controller, or
+weaken the maximum. Only observed attribution may justify the next
+correction.
 
 In parallel, callback lookahead must expose an explicit incomplete result; an
 instruction-limit row cannot authorize an empty future event set. Stage 5 or

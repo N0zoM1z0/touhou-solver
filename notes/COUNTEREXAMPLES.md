@@ -4219,3 +4219,37 @@ offline, physical recheck pending
   `1f73455491c8ccb83d1a53ab7a8c2c0f1792ebf2844f91faa4920de5adebcd63`.
 - **Authority:** This closes the isolated wrapper tail only. It does not
   establish physical B4, future-event coverage, or action authority.
+
+## CE-0149: Native extraction passed physical percentiles but retained a 9-ms wall tail
+
+Status: observed physical performance failure; attribution open
+
+- **Observed symptom:** Explicit-native schema-v5 run
+  `lunatic_route2_stage4a_unattended_20260728_055104` completed an accepted
+  hard-no-Bomb Stage-4A route, but observer wall maximum was `9.0498 ms`
+  against the unchanged `2.00 ms` limit. The deterministic audit therefore
+  returns `passed=false`.
+- **Observed improvement:** p50/p95/p99 fell to
+  `0.0545/0.1393/0.2111 ms` from schema-v4
+  `0.1284/0.2997/0.5772 ms`. This is the first physical run to pass both
+  percentile limits and validates that the native data plane fixes the
+  steady cost.
+- **Rejected explanation:** Sixteen observations exceed `2.00 ms`. Ten have
+  zero evidence; the remaining six have only 4, 6, or 20 rows. No tail
+  sample is a 592-row burst, so output-linear evidence copying is not a
+  sufficient cause.
+- **Unresolved attribution:** Windows current-thread CPU is zero on every
+  tail sample because accounting advances in 15.625-ms quanta. Existing
+  telemetry cannot distinguish time in the native call, Python
+  materialization or cyclic GC, and scheduler preemption. Any such diagnosis
+  remains hypothesized.
+- **Required falsifier:** A trace-only diagnostic must time native call and
+  materialization separately and record observation-overlapping GC
+  collections. It must keep GC enabled, remain unpinned, preserve the fixed
+  wall gate, and add no process read or action authority.
+- **Evidence:** Raw trace is 510,433,900 bytes with SHA-256
+  `ed4fbbb932e12ac7ef7f3e4b560fad1fa7dc8b0428c712edc5a02ec1c09b7a79`.
+  Canonical deterministic report SHA-256 is
+  `1689bf8468b9129b16aaf1aeacee7b569975a4302a92ab7860ef77c4665a84ec`.
+- **Authority:** B4 remains failed. No future-hazard or physical action
+  authority follows.

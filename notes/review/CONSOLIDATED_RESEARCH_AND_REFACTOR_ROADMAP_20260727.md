@@ -1033,7 +1033,12 @@ parity 當成每個 nature tie field 的逐 bit equality。
   5,000-call max 降到 0.0988 ms。最終 full-density p95
   `0.0120/0.0109 ms`、592-birth p95 `0.0570/0.0452 ms`，8 profiles
   全過 fixed gate。schema v5 強制 backend provenance；這只允許顯式
-  native Stage-4A recheck，尚未通過 physical B4；
+  native Stage-4A recheck。實機 `20260728_055104` 將
+  p50/p95/p99 降到 `0.0545/0.1393/0.2111 ms`，但 p99.9/max 仍為
+  `2.3779/9.0498 ms`；16 個超過 2 ms 的樣本中 10 個是 zero evidence，
+  其餘只有 4/6/20 rows，因此不是大 burst output-linear 問題。下一步
+  必須分離 native call/materialization 並記錄 overlapping GC，在不關
+  GC、不 pin controller、不放寬 max 的條件下定位 CE-0149；
 - CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成

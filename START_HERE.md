@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `bc57168 Add exact native bullet birth extraction`,
   `efac80f Retain schema-v4 Stage 4 birth gate`,
   `e48cd65 Bound bullet birth trace flush latency`,
   `4eecd4a Retain schema-v3 Stage 4 birth gate`,
@@ -95,11 +96,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `0.931/0.930`. Trace schema v5 records the explicit `python`/`native`
   backend and residual-audit v3 rejects missing provenance. Complete
   Linux/Windows suites pass `792/792` in `8.826/15.449 s`, with three
-  Windows skips. This qualifies only an explicit native Stage-4A B4 repeat;
-  callback incompleteness must still fail closed before Stage 5/6.
+  Windows skips. Explicit-native schema-v5 run `20260728_055104` then
+  completed frames `2..45092`, 14,643 decisions, 13 hits, hard no-Bomb,
+  accepted artifacts, and cleanup. All rows record native provenance with
+  zero observation errors. Wall p50/p95/p99 improves to
+  `0.0545/0.1393/0.2111 ms`, but p99.9/max is
+  `2.3779/9.0498 ms`, so B4 still fails. Ten of sixteen samples above 2 ms
+  have zero evidence and none is a large burst; CE-0149 requires separate
+  native-call/materialization timing and overlapping-GC evidence without
+  disabling GC, pinning the controller, or weakening the maximum. Callback
+  incompleteness must also fail closed before Stage 5/6.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
-  CE-0143/0144/0145/0146/0147/0148.
+  CE-0143/0144/0145/0146/0147/0148/0149.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and

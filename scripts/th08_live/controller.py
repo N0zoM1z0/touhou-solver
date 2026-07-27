@@ -95,6 +95,7 @@ from th08_live import (
 )
 from th08_live.birth_trace import (
     BulletBirthTraceInput,
+    birth_trace_requires_immediate_flush,
     build_bullet_birth_trace_record,
 )
 from th08_live.bullet_birth import (
@@ -2342,6 +2343,7 @@ def _run_live_session(
             bullet_birth_observation: BulletBirthObservation | None = None
             bullet_birth_observation_error: str | None = None
             bullet_birth_observation_ms = 0.0
+            bullet_birth_observation_cpu_ms = 0.0
             ecl_vm_snapshot: EclVmSnapshot | None = None
             ecl_lookahead: EclLookaheadResult | None = None
             tagged_velocity_toggles: tuple[TaggedVelocityToggle, ...] = ()
@@ -3541,6 +3543,7 @@ def _run_live_session(
                 )
                 if bullet_birth_tracker is not None:
                     bullet_birth_observation_started = time.perf_counter()
+                    bullet_birth_observation_cpu_started = time.thread_time()
                     try:
                         bullet_birth_observation = (
                             bullet_birth_tracker.observe(
@@ -3562,6 +3565,10 @@ def _run_live_session(
                     bullet_birth_observation_ms = (
                         time.perf_counter()
                         - bullet_birth_observation_started
+                    ) * 1000.0
+                    bullet_birth_observation_cpu_ms = (
+                        time.thread_time()
+                        - bullet_birth_observation_cpu_started
                     ) * 1000.0
                 if ecl_vm_snapshot is not None:
                     ecl_birth_intent_started = time.perf_counter()
@@ -3628,6 +3635,9 @@ def _run_live_session(
                             observation_ms=(
                                 bullet_birth_observation_ms
                             ),
+                            observation_cpu_ms=(
+                                bullet_birth_observation_cpu_ms
+                            ),
                             intent_ms=ecl_birth_intent_ms,
                             previous_emit_ms=(
                                 previous_birth_trace_emit_ms
@@ -3647,19 +3657,18 @@ def _run_live_session(
                 )
                 previous_birth_trace_emit_ms = trace_sink.emit(
                     bullet_birth_trace_record,
-                    flush=bool(
-                        bullet_birth_observation_error
-                        or ecl_birth_intent_error
-                        or (
-                            bullet_birth_observation is not None
-                            and bullet_birth_observation.evidence
-                        )
+                    flush=birth_trace_requires_immediate_flush(
+                        observation_error=(
+                            bullet_birth_observation_error
+                        ),
+                        intent_error=ecl_birth_intent_error,
                     ),
                     measure=True,
                 )
             trace_ms = 0.0
             if (
-                iterations % args.log_every == 0
+                trace_bullet_births
+                or iterations % args.log_every == 0
                 or decision.bomb
                 or current_phase != previous_phase
                 or current_bombs != previous_bombs

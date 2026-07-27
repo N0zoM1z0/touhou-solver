@@ -1014,6 +1014,11 @@ parity 當成每個 nature tie field 的逐 bit equality。
   `0.3413/0.6625/10.6158 ms` 失敗；evidence row immediate flush 另造成
   `1.3307..1.9791 ms` emit p95。下一步是 bounded durability flush、
   CPU/wall 分離及 small-candidate gather，不弱化原 gate；
+- schema v4 已把 evidence immediate flush 改為 error-immediate 加
+  same-iteration decision flush，並同時記錄 thread CPU/wall；1/8/32
+  candidate Linux/Windows p95 已降至 `0.0578/0.0627/0.1038` 與
+  `0.0495/0.0790/0.0963 ms`。這只是下一次 B4 的 proposed correction，
+  wall-time gate 不變；
 - CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成

@@ -17,6 +17,7 @@ from th08_live.birth_trace import (
     BULLET_BIRTH_TRACE_ROLE,
     BULLET_BIRTH_TRACE_SCHEMA_VERSION,
     BulletBirthTraceInput,
+    birth_trace_requires_immediate_flush,
     build_bullet_birth_trace_record,
 )
 from th08_live.bullet_birth import (
@@ -58,6 +59,7 @@ def _trace_input(
         ecl_event_frame_offset=2,
         ecl_event_frame_uncertainty=0,
         observation_ms=0.031,
+        observation_cpu_ms=0.021,
         intent_ms=0.044,
         previous_emit_ms=0.012,
     )
@@ -116,6 +118,26 @@ def _intent() -> EclBirthLookaheadResult:
 
 
 class BulletBirthTraceTests(unittest.TestCase):
+    def test_only_errors_require_a_predecision_flush(self) -> None:
+        self.assertFalse(
+            birth_trace_requires_immediate_flush(
+                observation_error=None,
+                intent_error=None,
+            )
+        )
+        self.assertTrue(
+            birth_trace_requires_immediate_flush(
+                observation_error="ValueError: failed",
+                intent_error=None,
+            )
+        )
+        self.assertTrue(
+            birth_trace_requires_immediate_flush(
+                observation_error=None,
+                intent_error="RuntimeError: failed",
+            )
+        )
+
     def test_record_retains_observation_intent_and_alignment(self) -> None:
         record = build_bullet_birth_trace_record(
             _trace_input(observation=_observation(), intent=_intent())
@@ -147,7 +169,12 @@ class BulletBirthTraceTests(unittest.TestCase):
         )
         self.assertEqual(
             record["timing_ms"]["boundary"],
-            "post_issue_before_trace_flush",
+            "post_issue_before_same_iteration_decision_flush",
+        )
+        self.assertEqual(record["timing_ms"]["observation_cpu"], 0.021)
+        self.assertEqual(
+            record["flush_policy"],
+            "errors_immediate_otherwise_same_iteration_decision_flush",
         )
         self.assertIsNone(record["timing_ms"]["build"])
         self.assertIsNone(record["timing_ms"]["pre_emit_total"])

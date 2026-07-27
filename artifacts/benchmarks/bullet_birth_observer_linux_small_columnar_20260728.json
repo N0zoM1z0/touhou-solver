@@ -1,0 +1,140 @@
+{
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 1,
+      "compact_json_bytes": 400,
+      "observer": {
+        "max_ms": 0.134641,
+        "p50_ms": 0.0402915,
+        "p95_ms": 0.057800349999999986,
+        "p99_ms": 0.07927716999999969
+      },
+      "record_json": {
+        "max_ms": 0.018441,
+        "p50_ms": 0.0091865,
+        "p95_ms": 0.01069225,
+        "p99_ms": 0.016822239999999992
+      }
+    },
+    {
+      "births_per_observation": 8,
+      "compact_json_bytes": 750,
+      "observer": {
+        "max_ms": 0.128704,
+        "p50_ms": 0.046684,
+        "p95_ms": 0.06270999999999997,
+        "p99_ms": 0.07528073999999964
+      },
+      "record_json": {
+        "max_ms": 0.032978,
+        "p50_ms": 0.0165475,
+        "p95_ms": 0.02179814999999998,
+        "p99_ms": 0.028827039999999998
+      }
+    },
+    {
+      "births_per_observation": 32,
+      "compact_json_bytes": 2018,
+      "observer": {
+        "max_ms": 0.199855,
+        "p50_ms": 0.07993149999999999,
+        "p95_ms": 0.10375739999999987,
+        "p99_ms": 0.14256248999999993
+      },
+      "record_json": {
+        "max_ms": 0.069171,
+        "p50_ms": 0.043933,
+        "p95_ms": 0.049174699999999995,
+        "p99_ms": 0.057148839999999985
+      }
+    },
+    {
+      "births_per_observation": 33,
+      "compact_json_bytes": 2071,
+      "observer": {
+        "max_ms": 0.15307,
+        "p50_ms": 0.06600049999999999,
+        "p95_ms": 0.09266699999999999,
+        "p99_ms": 0.11620277999999998
+      },
+      "record_json": {
+        "max_ms": 0.125755,
+        "p50_ms": 0.0682295,
+        "p95_ms": 0.08461024999999998,
+        "p99_ms": 0.09713517999999992
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "compact_json_bytes": 32956,
+      "observer": {
+        "max_ms": 0.24048,
+        "p50_ms": 0.096092,
+        "p95_ms": 0.14167669999999993,
+        "p99_ms": 0.22754425999999997
+      },
+      "record_json": {
+        "max_ms": 0.794607,
+        "p50_ms": 0.682644,
+        "p95_ms": 0.74719655,
+        "p99_ms": 0.7718535799999998
+      }
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 8.906242,
+    "p50_ms": 6.4793245,
+    "p95_ms": 7.554137949999999,
+    "p99_ms": 7.945912389999999
+  },
+  "decode_interleaved": {
+    "max_ms": 10.185895,
+    "p50_ms": 6.6228645,
+    "p95_ms": 7.4071631,
+    "p99_ms": 7.77768963
+  },
+  "decode_iterations": 500,
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 0.110436,
+        "p50_ms": 0.0159135,
+        "p95_ms": 0.017756849999999998,
+        "p99_ms": 0.03207285999999999
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.287502,
+        "p50_ms": 0.0141345,
+        "p95_ms": 0.015289,
+        "p99_ms": 0.027769169999999992
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.090533,
+        "p50_ms": 0.013965499999999999,
+        "p95_ms": 0.0156111,
+        "p99_ms": 0.030553619999999997
+      }
+    }
+  ],
+  "gate": {
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": true,
+    "max_limit_ms": 2.0,
+    "observer_pass": true,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": true
+  },
+  "interleaved_p95_ratio": 0.9805437958675352,
+  "iterations": 2000,
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v3"
+}

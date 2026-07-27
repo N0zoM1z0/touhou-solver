@@ -6577,3 +6577,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   establish a survival regression or improvement.
 - **Authority:** B4/B5 remain failed. Stage 5/6 remains closed; live policy,
   Bomb, and future-hazard authority do not change.
+
+## 2026-07-28 — Bounded birth flushes and profiled small candidate rows
+
+- **Observed physical cause separation:** In schema-v3 Stage 4A, prior emit
+  p95 was `0.0724 ms` after zero evidence and `1.3307..1.9791 ms` after
+  non-empty rows. Every evidence row requested an immediate Python stream
+  flush even though the same loop emitted and flushed its decision record.
+- Schema v4 now flushes a birth record immediately only on observation or
+  intent error. Birth tracing itself forces a same-iteration decision record,
+  preserving a bounded flush/durability boundary; summary/session close
+  remains terminal fallback. A focused policy test fixes this distinction.
+- Observer trace timing now retains both wall and current-thread CPU time.
+  The unchanged B4 gate uses wall time; CPU timing is diagnostic evidence for
+  scheduler versus executed extraction only.
+- Candidate-only geometry uses scalar `struct.unpack_from` for at most 32
+  candidates. Fixed Linux p95 for 1/8/32/33/592 candidates is
+  `0.0578/0.0627/0.1038/0.0927/0.1417 ms`; Windows is
+  `0.0495/0.0790/0.0963/0.1016/0.1480 ms`. Interleaved ratios pass at
+  `0.981/0.963`.
+- Retained report SHA-256 values are
+  `33a24c1467e3470f229d076ee7263ffd63ab1a7411355b2e024d0ae1182d6551`
+  (Linux) and
+  `74d64dd869764df880f373f472a6820523005fe6f654ae438b85b55811640245`
+  (Windows).
+- Complete Linux/Windows quick suites pass `787/787` in `8.920/15.147 s`,
+  with three Windows skips.
+- **Authority:** this is a performance/durability correction only. B4 remains
+  failed until a schema-v4 physical run; CE-0147 and all future coverage
+  authority remain unchanged.

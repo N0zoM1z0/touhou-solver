@@ -16,7 +16,7 @@ from typing import Any
 SCHEMA = "th08-bullet-birth-residual-audit-v2"
 TRACE_KIND = "bullet_birth_audit"
 TRACE_ROLE = "trace_only_no_action_authority"
-TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3))
+TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4))
 MAX_SAMPLES = 20
 OBSERVER_P95_LIMIT_MS = 0.20
 OBSERVER_P99_LIMIT_MS = 0.40
@@ -631,6 +631,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     capture_spans: Counter[int] = Counter()
     by_phase: defaultdict[str, Counter[str]] = defaultdict(Counter)
     observation_ms: list[float] = []
+    observation_cpu_ms: list[float] = []
     intent_ms: list[float] = []
     build_ms: list[float] = []
     pre_emit_total_ms: list[float] = []
@@ -647,6 +648,9 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     deferred_state_statuses: Counter[str] = Counter()
     deferred_state_values: Counter[str] = Counter()
     observation_by_evidence: defaultdict[str, list[float]] = defaultdict(list)
+    observation_cpu_by_evidence: defaultdict[str, list[float]] = defaultdict(
+        list
+    )
     build_by_evidence: defaultdict[str, list[float]] = defaultdict(list)
     pre_emit_by_evidence: defaultdict[str, list[float]] = defaultdict(list)
     emit_by_previous_evidence: defaultdict[str, list[float]] = defaultdict(
@@ -694,6 +698,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         if isinstance(timing, dict):
             for field, target in (
                 ("observation", observation_ms),
+                ("observation_cpu", observation_cpu_ms),
                 ("intent", intent_ms),
                 ("build", build_ms),
                 ("pre_emit_total", pre_emit_total_ms),
@@ -716,6 +721,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         bucket = _evidence_count_bucket(evidence_count)
         for field, target in (
             ("observation", observation_by_evidence),
+            ("observation_cpu", observation_cpu_by_evidence),
             ("build", build_by_evidence),
             ("pre_emit_total", pre_emit_by_evidence),
         ):
@@ -915,6 +921,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         },
         "timing_ms": {
             "observation": observation_timing,
+            "observation_cpu": _distribution(observation_cpu_ms),
             "intent": _distribution(intent_ms),
             "build": _distribution(build_ms),
             "pre_emit_total": _distribution(pre_emit_total_ms),
@@ -933,6 +940,12 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
                 bucket: _distribution(values)
                 for bucket, values in sorted(
                     observation_by_evidence.items()
+                )
+            },
+            "observation_cpu": {
+                bucket: _distribution(values)
+                for bucket, values in sorted(
+                    observation_cpu_by_evidence.items()
                 )
             },
             "build": {

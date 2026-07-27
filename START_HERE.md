@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `4eecd4a Retain schema-v3 Stage 4 birth gate`,
   `70077e2 Compact birth evidence and preserve ECL capture`,
   `449e01f Retain failed bullet birth physical gate`, and
   `35f3502 Reuse compact bullet birth observer scratch`, building on
@@ -68,9 +69,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Observer p95/p99/max is still `0.3413/0.6625/10.6158 ms`, so B4 fails.
   CE-0147 also shows every spell-57 callback lookahead exhausting 256
   instructions without horizon coverage while its empty event list remains
-  consumable. Remove redundant evidence flush, separate CPU/wall timing, and
-  fail closed on incomplete callback coverage before another Stage 4A;
-  Stage 5/6 remains closed.
+  consumable. Schema v4 now replaces redundant per-evidence flush with
+  error-immediate/same-iteration-decision bounded flush, records CPU/wall
+  extraction separately, and uses a scalar gather up to 32 candidates.
+  Fixed Linux/Windows 1/8/32-candidate p95 is
+  `0.0578/0.0627/0.1038` and `0.0495/0.0790/0.0963 ms`. Repeat Stage 4A and
+  fail closed on incomplete callback coverage before Stage 5/6.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   CE-0143/0144/0145/0146/0147.
 - Preceding G5 observation checkpoint:

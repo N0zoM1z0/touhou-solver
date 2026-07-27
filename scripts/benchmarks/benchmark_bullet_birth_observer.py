@@ -275,7 +275,7 @@ def main(argv: list[str] | None = None) -> int:
         "--burst-sizes",
         type=int,
         nargs="+",
-        default=(33, 592),
+        default=(1, 8, 32, 33, 592),
     )
     parser.add_argument("--burst-iterations", type=int, default=200)
     parser.add_argument("--warmup", type=int, default=50)

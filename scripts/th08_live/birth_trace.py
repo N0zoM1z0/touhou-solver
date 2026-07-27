@@ -12,7 +12,7 @@ from th08_ecl_birth import (
 from .bullet_birth import BulletBirthObservation
 
 
-BULLET_BIRTH_TRACE_SCHEMA_VERSION = 3
+BULLET_BIRTH_TRACE_SCHEMA_VERSION = 4
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
 BULLET_BIRTH_POOL_SCOPE = "all_1536_hostile_bullet_slots"
@@ -37,8 +37,19 @@ class BulletBirthTraceInput:
     ecl_event_frame_offset: int | None
     ecl_event_frame_uncertainty: int | None
     observation_ms: float
+    observation_cpu_ms: float
     intent_ms: float
     previous_emit_ms: float | None
+
+
+def birth_trace_requires_immediate_flush(
+    *,
+    observation_error: str | None,
+    intent_error: str | None,
+) -> bool:
+    """Flush failures now; ordinary rows flush with the decision this loop."""
+
+    return bool(observation_error or intent_error)
 
 
 def build_bullet_birth_trace_record(
@@ -94,13 +105,17 @@ def build_bullet_birth_trace_record(
             "visible_intents": len(intent.intents) if intent is not None else 0,
         },
         "timing_ms": {
-            "boundary": "post_issue_before_trace_flush",
+            "boundary": "post_issue_before_same_iteration_decision_flush",
             "observation": trace_input.observation_ms,
+            "observation_cpu": trace_input.observation_cpu_ms,
             "intent": trace_input.intent_ms,
             "build": None,
             "pre_emit_total": None,
             "previous_emit": trace_input.previous_emit_ms,
         },
+        "flush_policy": (
+            "errors_immediate_otherwise_same_iteration_decision_flush"
+        ),
         "join": {
             "status": "unresolved_offline_join_required",
             "coverage_authority": "none",
@@ -114,5 +129,6 @@ __all__ = [
     "BULLET_BIRTH_TRACE_ROLE",
     "BULLET_BIRTH_TRACE_SCHEMA_VERSION",
     "BulletBirthTraceInput",
+    "birth_trace_requires_immediate_flush",
     "build_bullet_birth_trace_record",
 ]

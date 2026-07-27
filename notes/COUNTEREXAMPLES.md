@@ -4023,6 +4023,14 @@ reuse, and columnar representation complete; physical recheck pending
   Prior-record emission p95 is `0.0724 ms` after zero evidence but
   `1.3307..1.9791 ms` after non-empty rows, exposing the redundant
   per-evidence flush as a separate next-cadence cost.
+- **Schema-v4 correction:** Ordinary birth rows no longer flush independently;
+  enabling birth trace forces the same-iteration decision record, whose
+  existing flush bounds durability. Observation/intent errors still flush
+  immediately. Thread-CPU and wall extraction are recorded separately, but
+  only wall time remains the acceptance gate. A scalar small-candidate gather
+  brings fixed Linux/Windows 1/8/32-candidate p95 to
+  `0.0578/0.0627/0.1038` and `0.0495/0.0790/0.0963 ms`. Physical scheduler
+  tails remain open.
 
 ## CE-0144: Unknown deferred-fire state erased every physical timed intent
 

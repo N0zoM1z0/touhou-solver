@@ -163,6 +163,14 @@ CE-0147 shows spell 57 exhausting 256 callback instructions on all 1,261 rows
 without horizon coverage while the live path consumes the empty event tuple.
 This is unknown-direction future-transform coverage, not hard safety.
 
+**Proposed physical recheck:** Schema v4 removes redundant evidence-row
+flush, forces the same-iteration decision flush, records observer CPU/wall
+separately, and uses a scalar candidate gather through 32 births. Fixed
+Linux/Windows 1/8/32-candidate p95 is
+`0.0578/0.0627/0.1038` and `0.0495/0.0790/0.0963 ms`; 592-candidate p95 is
+`0.1417/0.1480 ms`. This remains unpromoted until Stage-4A wall timing,
+cadence, hard no-Bomb, and durability evidence pass.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now

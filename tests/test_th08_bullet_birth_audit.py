@@ -164,6 +164,7 @@ def _audit(
         },
         "timing_ms": {
             "observation": 0.03,
+            "observation_cpu": 0.02,
             "intent": 0.04,
             "build": 0.02,
             "pre_emit_total": 0.09,
@@ -260,6 +261,12 @@ class BulletBirthAuditTests(unittest.TestCase):
                 "count"
             ],
             4,
+        )
+        self.assertEqual(
+            report["timing_by_evidence_count"]["observation_cpu"]["1_8"][
+                "p95"
+            ],
+            0.02,
         )
         self.assertEqual(
             report["timing_by_evidence_count"]["previous_emit"]["1_8"][

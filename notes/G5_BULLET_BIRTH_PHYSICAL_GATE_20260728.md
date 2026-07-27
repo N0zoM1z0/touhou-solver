@@ -265,11 +265,23 @@ The deterministic report SHA-256 is
 the ignored 486,792,655-byte raw trace SHA-256 is
 `8f465c054781696b37dd1a3ef4818c4f7ba373b85d09a01a8d4131921447467f`.
 
-The next implementation gate removes the redundant per-evidence flush while
-retaining an error-immediate and same-decision bounded durability boundary,
-adds observer thread-CPU versus wall timing, and profiles the small-candidate
-gather. In parallel, callback lookahead must expose an explicit incomplete
-coverage result; an instruction-limit row cannot authorize an empty future
-event set. Repeat Stage 4A under unchanged timing/cadence/no-Bomb gates after
-those corrections. Stage 5 or 6 follows only after Stage-4A semantics and
-performance pass.
+Schema v4 removes the redundant per-evidence flush while retaining immediate
+error flush and forcing a same-iteration decision record/flush whenever birth
+tracing is enabled. Session close remains the terminal fallback. It also
+records observer thread-CPU beside wall time, so the next physical report can
+separate executed extraction cost from scheduler preemption without changing
+the wall-time gate.
+
+The small-candidate path uses four scalar native-struct reads per slot up to
+32 candidates instead of seven NumPy gather calls. Fixed Linux/Windows p95
+for 1/8/32 candidates is respectively
+`0.0578/0.0627/0.1038 ms` and `0.0495/0.0790/0.0963 ms`; 592-candidate p95
+remains `0.1417/0.1480 ms`. Interleaved decode ratios are `0.981/0.963`.
+Complete Linux/Windows quick suites pass `787/787` in `8.920/15.147 s`, with
+three Windows skips.
+
+The next physical gate is therefore schema v4 under unchanged
+timing/cadence/no-Bomb limits. In parallel, callback lookahead must expose an
+explicit incomplete coverage result; an instruction-limit row cannot
+authorize an empty future event set. Stage 5 or 6 follows only after Stage-4A
+semantics and performance pass.

@@ -11,6 +11,12 @@ This contract refines
 event class in G5. The augmented input-pipeline recurrence and the open
 CE-0120 clock boundary remain unchanged.
 
+CE-0147's distinction between a visited callback/intention prefix and a
+complete horizon result is fixed separately in
+`G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`. An instruction
+limit or unproved repeated state is `UNKNOWN`, not an empty-event
+certificate.
+
 ## Outcome
 
 The first bullet-birth checkpoint will establish a causal, reviewable join

@@ -1043,6 +1043,8 @@ weaken four global workers or reuse a merely similar root.
   `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
 - Canonical pipeline root and hazard coverage:
   `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`
+- Callback and birth-intent lookahead completeness:
+  `notes/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
 - Generated differential:
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 

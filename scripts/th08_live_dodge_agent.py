@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import functools
-import json
 import math
 import struct
 import time
@@ -89,6 +88,7 @@ from th08_live import (
     PolicyQueryRequest,
     SceneClockCoordinator,
     Sensor,
+    TraceSink,
     auto_confirm_eligible as _auto_confirm_eligible,
     frozen_auto_confirm_eligible as _frozen_auto_confirm_eligible,
     input_clock_message_key as _input_clock_message_key,
@@ -5403,26 +5403,19 @@ def _enemy_sensor_submit_due(
 
 
 def _write_run_summary(
-    output,
+    trace_sink: TraceSink,
     *,
     last_frame: int | None,
     counter_gaps: int,
     hit_count: int,
     termination_reason: str,
 ) -> None:
-    output.write(
-        json.dumps(
-            {
-                "kind": "summary",
-                "last_frame": last_frame,
-                "counter_gaps": counter_gaps,
-                "hit_count": hit_count,
-                "termination_reason": termination_reason,
-            }
-        )
-        + "\n"
+    trace_sink.summary(
+        last_frame=last_frame,
+        counter_gaps=counter_gaps,
+        hit_count=hit_count,
+        termination_reason=termination_reason,
     )
-    output.flush()
 
 
 def _candidate_outcome_record(
@@ -5722,6 +5715,7 @@ def _run_live_session(
     pid = session.pid
     reader = session.reader
     output = session.output
+    trace_sink = TraceSink(output)
     previous_mask = 0
     previous_direction = 0
     previous_counter: int | None = None
@@ -5890,7 +5884,7 @@ def _run_live_session(
             ),
             "sample": sample,
         }
-        output.write(json.dumps(record) + "\n")
+        records = [record]
         for event in events:
             event_record = _serialize_semantic_clock_event(event)
             event_record.update(
@@ -5905,15 +5899,14 @@ def _run_live_session(
                     "sample": sample,
                 }
             )
-            output.write(json.dumps(event_record) + "\n")
-        output.flush()
+            records.append(event_record)
+        trace_sink.emit_many(records, flush=True)
 
     try:
         identity = verify_target(reader)
-        output.write(json.dumps({"kind": "identity", **identity}) + "\n")
-        output.write(
-            json.dumps(
-                {
+        trace_sink.emit({"kind": "identity", **identity})
+        trace_sink.emit(
+            {
                     "kind": "controller_config",
                     "bomb_policy": (
                         "disabled"
@@ -6094,23 +6087,18 @@ def _run_live_session(
                         if args.viability_audit_dir is not None
                         else None
                     ),
-                }
-            )
-            + "\n"
+            },
+            flush=True,
         )
-        output.flush()
         state = observe_state(reader)
         if args.wait_gameplay:
-            output.write(
-                json.dumps(
-                    {
-                        "kind": "wait_ready",
-                        "frame": state["enemy_manager_frame"],
-                    }
-                )
-                + "\n"
+            trace_sink.emit(
+                {
+                    "kind": "wait_ready",
+                    "frame": state["enemy_manager_frame"],
+                },
+                flush=True,
             )
-            output.flush()
             wait_deadline = time.perf_counter() + args.wait_timeout
             while True:
                 if state["gameplay_active"]:
@@ -6241,9 +6229,8 @@ def _run_live_session(
                         and corridor_survival_future.cancel()
                     ):
                         corridor_survival_future = None
-                    output.write(
-                        json.dumps(
-                            {
+                    trace_sink.emit(
+                        {
                                 "kind": "scene_inactive",
                                 "frame": counter,
                                 "engine_flags": engine_flags,
@@ -6253,11 +6240,9 @@ def _run_live_session(
                                 ),
                                 "expected_stage": scene_decision.expected_stage,
                                 "status": scene_decision.status,
-                            }
-                        )
-                        + "\n"
+                        },
+                        flush=True,
                     )
-                    output.flush()
                 if scene_decision.status in (
                     "stage_transition_timeout",
                     "route_complete",
@@ -6278,9 +6263,8 @@ def _run_live_session(
                     previous_mask = SHOT
                     auto_confirm.mark_full_pulse(frame=counter)
                     last_frozen_confirm = time.perf_counter()
-                    output.write(
-                        json.dumps(
-                            {
+                    trace_sink.emit(
+                        {
                                 "kind": "auto_confirm_transition_pulse",
                                 "frame": counter,
                                 "stage_route_index": stage_route_index,
@@ -6291,19 +6275,16 @@ def _run_live_session(
                                 "inactive_seconds": (
                                     scene_decision.inactive_seconds
                                 ),
-                            }
-                        )
-                        + "\n"
+                        },
+                        flush=True,
                     )
-                    output.flush()
                 time.sleep(args.poll_ms / 1000.0)
                 continue
             if scene_decision.status == "resumed":
                 gameplay_epoch += 1
                 boss_phase_tracker.reset()
-                output.write(
-                    json.dumps(
-                        {
+                trace_sink.emit(
+                    {
                             "kind": "scene_resumed",
                             "frame": counter,
                             "engine_flags": engine_flags,
@@ -6319,11 +6300,9 @@ def _run_live_session(
                                 == stage_route_index
                             ),
                             "gameplay_epoch": gameplay_epoch,
-                        }
-                    )
-                    + "\n"
+                    },
+                    flush=True,
                 )
-                output.flush()
                 previous_counter = None
                 previous_phase = None
                 previous_action_phase = None
@@ -6485,9 +6464,8 @@ def _run_live_session(
                     previous_mask |= SHOT
                     auto_confirm.mark_full_pulse(frame=counter)
                     last_frozen_confirm = time.perf_counter()
-                    output.write(
-                        json.dumps(
-                            {
+                    trace_sink.emit(
+                        {
                                 "kind": "auto_confirm_wall_pulse",
                                 "frame": counter,
                                 "stage_route_index": state[
@@ -6510,11 +6488,9 @@ def _run_live_session(
                                     input_clock_episode_id
                                 ),
                                 "input_clock_shadow": input_clock_sample,
-                            }
-                        )
-                        + "\n"
+                        },
+                        flush=True,
                     )
-                    output.flush()
                 time.sleep(args.poll_ms / 1000.0)
                 continue
             last_frame_progress = time.perf_counter()
@@ -6916,9 +6892,8 @@ def _run_live_session(
                     corridor_future.cancel()
                 if corridor_survival_future is not None:
                     corridor_survival_future.cancel()
-                output.write(
-                    json.dumps(
-                        {
+                trace_sink.emit(
+                    {
                             "kind": "sensor_epoch_discontinuity",
                             "frame": counter_after_read,
                             "source_frame": state["enemy_manager_frame"],
@@ -6943,11 +6918,9 @@ def _run_live_session(
                             ),
                             "spell": state["spell"],
                             "released_to_mask": safe_mask,
-                        }
-                    )
-                    + "\n"
+                    },
+                    flush=True,
                 )
-                output.flush()
                 continue
             player_to_hazard_lag = (
                 hazard_alignment.source_to_hazard_lag
@@ -7641,9 +7614,8 @@ def _run_live_session(
                     corridor_future.cancel()
                 if corridor_survival_future is not None:
                     corridor_survival_future.cancel()
-                output.write(
-                    json.dumps(
-                        {
+                trace_sink.emit(
+                    {
                             "kind": "action_epoch_discontinuity",
                             "frame": counter_at_action,
                             "source_frame": state["enemy_manager_frame"],
@@ -7663,11 +7635,9 @@ def _run_live_session(
                             "planned_mask": decision.mask,
                             "spell": state["spell"],
                             "released_to_mask": safe_mask,
-                        }
-                    )
-                    + "\n"
+                    },
+                    flush=True,
                 )
-                output.flush()
                 continue
             planned_action = decision.action
             planned_mask = decision.mask
@@ -9169,10 +9139,11 @@ def _run_live_session(
                         for bullet in bullets
                         if bullet.transform_runtime is not None
                     ]
-                trace_started = time.perf_counter()
-                output.write(json.dumps(record) + "\n")
-                output.flush()
-                trace_ms = (time.perf_counter() - trace_started) * 1000.0
+                trace_ms = trace_sink.emit(
+                    record,
+                    flush=True,
+                    measure=True,
+                )
             if previous_counter is not None:
                 decision_delta = counter_at_action - previous_counter
                 if 0 < decision_delta < 120:
@@ -9235,7 +9206,7 @@ def _run_live_session(
                 triggers=("run_ended",),
             )
         _write_run_summary(
-            output,
+            trace_sink,
             last_frame=previous_counter,
             counter_gaps=gaps,
             hit_count=hit_count,
@@ -9244,19 +9215,9 @@ def _run_live_session(
         return 0
     except OSError as exc:
         termination_reason = "process_unreadable"
-        output.write(
-            json.dumps(
-                {
-                    "kind": "runtime_error",
-                    "error_type": type(exc).__name__,
-                    "error": str(exc),
-                    "last_frame": previous_counter,
-                }
-            )
-            + "\n"
-        )
+        trace_sink.runtime_error(exc, last_frame=previous_counter)
         _write_run_summary(
-            output,
+            trace_sink,
             last_frame=previous_counter,
             counter_gaps=gaps,
             hit_count=hit_count,
@@ -9265,19 +9226,9 @@ def _run_live_session(
         return 0
     except Exception as exc:
         termination_reason = "agent_error"
-        output.write(
-            json.dumps(
-                {
-                    "kind": "runtime_error",
-                    "error_type": type(exc).__name__,
-                    "error": str(exc),
-                    "last_frame": previous_counter,
-                }
-            )
-            + "\n"
-        )
+        trace_sink.runtime_error(exc, last_frame=previous_counter)
         _write_run_summary(
-            output,
+            trace_sink,
             last_frame=previous_counter,
             counter_gaps=gaps,
             hit_count=hit_count,

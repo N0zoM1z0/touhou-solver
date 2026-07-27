@@ -35,6 +35,7 @@ from .sensor import (
     Sensor,
 )
 from .session import LiveSession
+from .trace import TraceSink
 
 __all__ = [
     "BULLET_POOL_BASE",
@@ -61,6 +62,7 @@ __all__ = [
     "SceneClockCoordinator",
     "SceneGuardDecision",
     "Sensor",
+    "TraceSink",
     "auto_confirm_eligible",
     "frozen_auto_confirm_eligible",
     "input_clock_message_key",

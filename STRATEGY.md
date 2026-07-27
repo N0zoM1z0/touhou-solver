@@ -108,6 +108,16 @@ parity to independently validated labels plus complete structural replay.
 This evidence permits review of a separate default-off trace-only shadow; it
 does not promote or implement one.
 
+**Observed:** checkpoint `4260113` implements only the first G5 bullet-birth
+observation seam. It reuses the persistent pool blob, decodes candidate native
+age at bullet `+0x0D94`, retains activation and timer-regression evidence, and
+does not mutate planner bullets or add RPM. Fixed 5,000-iteration
+Linux/Windows gates pass with full-pool observer p95 `0.0318/0.0339 ms`,
+p99 `0.0540/0.0453 ms`, max `0.3199/0.1005 ms`, and interleaved decode p95
+ratio `0.998/1.007`. ECL intent, runtime update-order correlation, source
+completeness, and conservative future geometry remain open, so coverage and
+action authority do not change.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now

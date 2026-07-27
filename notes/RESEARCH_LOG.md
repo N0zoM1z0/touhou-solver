@@ -6307,3 +6307,36 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Stage-4A trace, and deterministic residual reporting.
 - The new boundary is default-off and trace-only. It adds no RPM, Bomb,
   planner, coverage, clock, publication, issue, or physical action authority.
+
+## 2026-07-28 — Added and gated the trace-only native-age observer
+
+- **Inferred from IDA and now executable in the adapter:** `timer_current`
+  (`0x40D3B0`) returns signed integer timer-base `+0x08`; because
+  `bullet_manager_update` passes bullet `+0x0D8C`, the candidate native age is
+  bullet `+0x0D94`.
+- Checkpoint `4260113` adds `th08_live.bullet_birth`. It reads the existing
+  persistent pool blob, retains activation edges, first-capture recent
+  candidates, timer regressions, invalid timers, capture support, compact
+  geometry, and transform flags, and copies only the state/age vectors between
+  captures. It adds no RPM and does not mutate planner `Bullet`.
+- **Observed focused validation:** ten observer tests cover malformed blobs,
+  invalid/regressing capture intervals, bootstrap candidates, activation,
+  release/reuse, timer regression, invalid timer, non-finite geometry,
+  deterministic records, and exact planning-decode non-mutation.
+- **Observed performance:** fixed 5,000-iteration Linux/Windows full-pool
+  observer p95 is `0.0318/0.0339 ms`, p99 is `0.0540/0.0453 ms`, and max is
+  `0.3199/0.1005 ms`. Interleaved observer-plus-planning-decode p95 ratio is
+  `0.998/1.007`; both reports pass the fixed `0.20/0.40/2.00 ms` and `1.05`
+  ratio limits.
+- Retained report SHA-256 values are
+  `b77ed72fd9e779f4b903d9caeaae7af1436e235885df4c9df96993f1dc4c2e18`
+  (Linux) and
+  `933d90b9bd0f8b4e3903a74506a8f4eb829888cc04ef456dd4ad4726f0d572b4`
+  (Windows).
+- Complete Linux/Windows quick suites pass `752/752` in `9.227/14.904 s`,
+  with three existing Windows skips.
+- **Authority:** the observer is not constructed by the controller yet and
+  remains retrospective trace-only evidence. ECL intent, shipped-runtime
+  update order, residual source coverage, future geometry, and physical
+  repetition remain open. Hazard coverage and physical action authority do
+  not change.

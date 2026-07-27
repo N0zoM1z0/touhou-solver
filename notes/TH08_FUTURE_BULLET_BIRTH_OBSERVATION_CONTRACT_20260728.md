@@ -278,6 +278,45 @@ contained.
    coverage version, background completion, lookup-only exact-version
    delivery, a fresh local intersection, and explicit strategy promotion.
 
+## B1 Result
+
+Checkpoint `4260113 Add trace-only bullet birth observer` implements the
+native-age observation seam without integrating it into the live controller:
+
+- a focused `th08_live.bullet_birth` module reads state and signed timer
+  current at bullet `+0x0D94` from the existing persistent pool blob;
+- a compact tracker retains first-capture recent candidates, inactive-to-active
+  edges, active-slot timer regressions, invalid timers, capture support,
+  geometry, velocity, and transform flags;
+- the tracker copies only the 1,536 state and age fields between captures and
+  neither retains another 6.3-MiB pool blob nor mutates it;
+- malformed pools, invalid capture intervals, negative active timers,
+  non-finite geometry, release/reuse, and deterministic serialization are
+  covered by ten focused tests;
+- existing planning decode is byte/object unchanged; and
+- the module is not constructed by the controller yet, so disabled-path cost
+  and action behavior are exactly unchanged.
+
+The fixed 5,000-iteration retained gates pass:
+
+| Platform | Full-pool p95 | p99 | max | decode+observer/decode p95 |
+| --- | ---: | ---: | ---: | ---: |
+| Linux | 0.0318 ms | 0.0540 ms | 0.3199 ms | 0.998 |
+| Windows | 0.0339 ms | 0.0453 ms | 0.1005 ms | 1.007 |
+
+Reports:
+
+- `artifacts/benchmarks/bullet_birth_observer_linux_20260728.json`,
+  SHA-256
+  `b77ed72fd9e779f4b903d9caeaae7af1436e235885df4c9df96993f1dc4c2e18`;
+- `artifacts/benchmarks/bullet_birth_observer_windows_20260728.json`,
+  SHA-256
+  `933d90b9bd0f8b4e3903a74506a8f4eb829888cc04ef456dd4ad4726f0d572b4`.
+
+Complete Linux/Windows quick suites pass `752/752` in `9.227/14.904 s`, with
+three existing Windows skips. B1 establishes cheap retrospective evidence
+only. B2–B5 and the first physical trace remain open.
+
 ## Ordered Gates
 
 ### B0 — Contract and static evidence
@@ -288,6 +327,8 @@ contained.
 
 ### B1 — Native-age observation
 
+- **Implemented and offline-gated by checkpoint `4260113`; physical
+  integration remains open.**
 - Add a narrow TH08 pool-blob observer, independent of planner `Bullet`.
 - Test empty/full pools, malformed blobs, inactive stale timers, age zero,
   capture spans, slot release/reuse ambiguity, and deterministic output.

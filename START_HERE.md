@@ -37,6 +37,17 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
+- Latest G5 observation checkpoint:
+  `4260113 Add trace-only bullet birth observer`. The default-off observer
+  reads active state and candidate native age at bullet `+0x0D94` from the
+  existing persistent pool blob, retains activation edges, timer regressions,
+  capture support, and compact geometry, and does not mutate planner
+  `Bullet`, issue, or coverage state. Fixed 5,000-iteration Linux/Windows
+  gates pass: full-pool observer p95 is `0.0318/0.0339 ms`, p99 is
+  `0.0540/0.0453 ms`, max is `0.3199/0.1005 ms`, and interleaved planning
+  decode p95 ratio is `0.998/1.007`. Retained-report validation brings the
+  Linux/Windows quick suites to `752/752` in `9.227/14.904 s`, with three
+  Windows skips.
 - Latest committed algorithmic checkpoint:
   `f8621bd Add cancellable stationary witness delivery benchmark`. A separate
   research-only DLL and modular newest-wins service now measure complete
@@ -69,10 +80,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `notes/G5_CE0141_PHYSICAL_RECHECK_20260728.md`.
 - G5 bullet-birth work is now fixed by
   `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`.
-  Its first gate reuses the persistent hostile-bullet pool capture to join a
-  candidate native age with earlier ECL intent and same-frame update order.
-  It is default-off trace-only, adds no RPM or planner `Bullet` field, and
-  cannot narrow the current first-successor `UNKNOWN` coverage slab.
+  B1 now reuses the persistent hostile-bullet pool capture to retain candidate
+  native age, activation edges, timer regressions, capture support, and
+  compact geometry with no additional RPM. Earlier ECL intent and physical
+  same-frame update-order joins remain B2–B5. This is default-off trace-only,
+  adds no planner `Bullet` field, and cannot narrow the current
+  first-successor `UNKNOWN` coverage slab.
 - The preceding algorithmic checkpoint
   `d5866c4 Align hazard coverage with canonical query roots`. Physical Gate-5
   auditing found CE-0141: 1,613 of 14,599 available-query rows mixed a

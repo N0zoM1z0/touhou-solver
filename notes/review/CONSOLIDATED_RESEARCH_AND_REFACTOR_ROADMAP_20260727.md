@@ -972,6 +972,11 @@ parity 當成每個 nature tie field 的逐 bit equality。
   observation，再與較早 ECL intent 及 same-frame update order 對齊；預設
   關閉、trace-only、不新增 RPM、不改 planner `Bullet`，也不縮小
   first-successor `UNKNOWN`；
+- B1 checkpoint `4260113` 已加入獨立 pool-blob age observer；5,000 次
+  Linux/Windows full-pool gate 的 p95 為 `0.0318/0.0339 ms`、p99
+  `0.0540/0.0453 ms`、max `0.3199/0.1005 ms`，與 planning decode
+  交錯的 p95 ratio 為 `0.998/1.007`。尚未接入 controller，ECL intent、
+  update-order physical join 與 source completeness 仍是 open；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

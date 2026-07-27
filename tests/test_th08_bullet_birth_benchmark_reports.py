@@ -12,7 +12,7 @@ REPORTS = {
         "b77ed72fd9e779f4b903d9caeaae7af1436e235885df4c9df96993f1dc4c2e18"
     ),
     "bullet_birth_observer_windows_20260728.json": (
-        "933d90b9bd0f8b4e3903a74506a8f4eb829888cc04ef456dd4ad4726f0d572b4"
+        "4bb018a6c84839d93bbcb3b0da21cc50cacbff259208ce91d248eee9a428d56c"
     ),
 }
 

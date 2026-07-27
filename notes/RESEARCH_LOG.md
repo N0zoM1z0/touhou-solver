@@ -6331,7 +6331,7 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Retained report SHA-256 values are
   `b77ed72fd9e779f4b903d9caeaae7af1436e235885df4c9df96993f1dc4c2e18`
   (Linux) and
-  `933d90b9bd0f8b4e3903a74506a8f4eb829888cc04ef456dd4ad4726f0d572b4`
+  `4bb018a6c84839d93bbcb3b0da21cc50cacbff259208ce91d248eee9a428d56c`
   (Windows).
 - Complete Linux/Windows quick suites pass `752/752` in `9.227/14.904 s`,
   with three existing Windows skips.

@@ -311,7 +311,7 @@ Reports:
   `b77ed72fd9e779f4b903d9caeaae7af1436e235885df4c9df96993f1dc4c2e18`;
 - `artifacts/benchmarks/bullet_birth_observer_windows_20260728.json`,
   SHA-256
-  `933d90b9bd0f8b4e3903a74506a8f4eb829888cc04ef456dd4ad4726f0d572b4`.
+  `4bb018a6c84839d93bbcb3b0da21cc50cacbff259208ce91d248eee9a428d56c`.
 
 Complete Linux/Windows quick suites pass `752/752` in `9.227/14.904 s`, with
 three existing Windows skips. B1 establishes cheap retrospective evidence

@@ -4212,3 +4212,35 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   quick suite passes `588/588` on Linux in `5.222 s` and on Windows in
   `8.055 s` with one existing skip; Python compilation and
   `git diff --check` pass.
+
+## 2026-07-27: Corridor Algorithm Separation
+
+- **Scope:** Split the remaining robust and legacy algorithms out of
+  `corridor_planner.py`. The package now has independent
+  `legacy_forward.py`, `robust.py`, `rollout.py`, and `refinement.py` modules;
+  the historical entry module is a compatibility/validation dispatcher.
+- **Observed boundaries:** Robust induction produces a typed
+  `RobustCorridorInduction` before representative path selection. Legacy
+  forward reachability no longer shares a function body with the
+  authority-bearing robust path. The old uniform whole-field false-empty
+  recovery is explicitly named `LegacyFullFieldRefinement`; its algorithm and
+  shadow-only live setting are unchanged.
+- **Compatibility and tests:** `corridor_planner` remains the owner of the old
+  public constructor/import façade and clearance/grid aliases. Tests that
+  intentionally replace the robust builder now patch the canonical
+  `touhou_control.corridor.robust` seam. The R0 fixture continues to cover
+  legacy path/gate/reason and robust masks, labels, root queries, and rollout.
+- **Observed structure:** `corridor_planner.py` decreased from 751 to 169
+  lines. Algorithm modules contain no TH08 address, mask, ECL, pool, process,
+  executor, future, or service ownership.
+- **Authority:** This is a code-move and dependency-boundary checkpoint. It
+  changes no physical state abstraction, uncertainty support, recurrence,
+  terminal mask, signed-clearance arithmetic, policy mask, refinement
+  resolution, representative ranking/tie order, live setting, strategy
+  status, native implementation, or C ABI. It adds no physical evidence and
+  changes no counterexample status.
+- **Validation:** The R0 characterization report remains fixture-identical;
+  corridor tests pass `27/27`; TH08 adapter/runtime tests pass `20/20`; the
+  complete quick suite passes `588/588` on Linux in `5.327 s` and on Windows
+  in `8.037 s` with one existing skip; Python compilation, Ruff, and
+  `git diff --check` pass.

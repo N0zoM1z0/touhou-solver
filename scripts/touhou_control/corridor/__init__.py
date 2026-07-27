@@ -9,7 +9,8 @@ from .clearance import (
     packed_segment_clearance_field,
     segment_clearance_field,
 )
-from .grid import axis, movement_offsets, shift_from_source
+from .grid import axis, lane, movement_offsets, shift_from_source
+from .legacy_forward import plan_legacy_forward_corridor
 from .model import (
     AabbHazard,
     AabbTrajectoryHazard,
@@ -24,6 +25,12 @@ from .model import (
     SegmentTrajectoryHazard,
 )
 from .prepared import PreparedCorridorProblem, prepare_corridor_problem
+from .refinement import LegacyFullFieldRefinement
+from .robust import (
+    RobustCorridorInduction,
+    build_robust_corridor_induction,
+)
+from .rollout import rollout_robust_corridor
 
 __all__ = [
     "AabbHazard",
@@ -35,6 +42,8 @@ __all__ = [
     "MovingAabbHazard",
     "PiecewiseAabbHazard",
     "PreparedCorridorProblem",
+    "LegacyFullFieldRefinement",
+    "RobustCorridorInduction",
     "RobustControlSpec",
     "SegmentHazard",
     "SegmentTrajectoryHazard",
@@ -44,9 +53,13 @@ __all__ = [
     "axis",
     "clearance_field",
     "hazard_clearance_volume",
+    "lane",
     "movement_offsets",
     "packed_segment_clearance_field",
     "prepare_corridor_problem",
+    "plan_legacy_forward_corridor",
+    "build_robust_corridor_induction",
+    "rollout_robust_corridor",
     "segment_clearance_field",
     "shift_from_source",
 ]

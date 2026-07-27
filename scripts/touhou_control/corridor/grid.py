@@ -6,7 +6,7 @@ import math
 
 import numpy as np
 
-from .model import CorridorConfig
+from .model import CorridorBounds, CorridorConfig
 
 
 def axis(start: float, end: float, step: float) -> np.ndarray:
@@ -14,6 +14,15 @@ def axis(start: float, end: float, step: float) -> np.ndarray:
     if not math.isclose(start + count * step, end, abs_tol=1e-5):
         raise ValueError("bounds must be an integer number of grid steps")
     return np.linspace(start, end, count + 1, dtype=np.float32)
+
+
+def lane(x: float, bounds: CorridorBounds) -> str:
+    third = (bounds.right - bounds.left) / 3.0
+    if x < bounds.left + third:
+        return "left"
+    if x > bounds.right - third:
+        return "right"
+    return "center"
 
 
 def movement_offsets(
@@ -77,4 +86,4 @@ def shift_from_source(
     return shifted
 
 
-__all__ = ["axis", "movement_offsets", "shift_from_source"]
+__all__ = ["axis", "lane", "movement_offsets", "shift_from_source"]

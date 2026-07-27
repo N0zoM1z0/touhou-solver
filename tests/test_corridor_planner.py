@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import numpy as np
-import corridor_planner as corridor_planner_module
+import touhou_control.corridor.robust as robust_corridor_module
 
 from corridor_planner import (
     AabbHazard,
@@ -133,7 +133,7 @@ class CorridorPlannerTests(unittest.TestCase):
     ) -> None:
         events: list[str] = []
         original_builder = (
-            corridor_planner_module.build_robust_viability_policy
+            robust_corridor_module.build_robust_viability_policy
         )
 
         def hook(problem) -> None:
@@ -146,7 +146,8 @@ class CorridorPlannerTests(unittest.TestCase):
             return original_builder(*args, **kwargs)
 
         with patch(
-            "corridor_planner.build_robust_viability_policy",
+            "touhou_control.corridor.robust."
+            "build_robust_viability_policy",
             side_effect=checked_builder,
         ):
             plan = plan_corridor(
@@ -1338,7 +1339,8 @@ class CorridorPlannerTests(unittest.TestCase):
         policy.backend = "test"
         policy.layer_count = 1
         with patch(
-            "corridor_planner.build_robust_viability_policy",
+            "touhou_control.corridor.robust."
+            "build_robust_viability_policy",
             return_value=policy,
         ):
             plan = plan_corridor(

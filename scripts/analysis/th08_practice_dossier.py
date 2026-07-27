@@ -10,6 +10,11 @@ import statistics
 from collections import Counter
 from pathlib import Path
 
+from analysis.dossier.attribution import (
+    build_death_ledger as _death_ledger,
+    case_prefix_for_difficulty as _case_prefix_for_difficulty,
+    cluster_deaths as _death_clusters,
+)
 from analysis.dossier.statistics import (
     percentiles as _percentiles,
     resource_range as _resource_range,
@@ -20,12 +25,7 @@ from analysis.dossier.trace_reader import (
     read_practice_trace,
     select_frame_epoch,
 )
-from analysis.th08_run_dossier import (
-    _case_prefix_for_difficulty,
-    _death_clusters,
-    _death_ledger,
-    _planner_consistency_summary,
-)
+from analysis.th08_run_dossier import _planner_consistency_summary
 from analysis.th08_trial_report import STAGE_ROUTE_LABELS
 
 

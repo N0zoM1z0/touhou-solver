@@ -1,0 +1,935 @@
+{
+  "by_phase_at_capture": {
+    "stage_3:nonspell": {
+      "activation_edges": 37767,
+      "all_evidence": 37795,
+      "evidence_kind:bootstrap_recent": 21,
+      "evidence_kind:invalid_timer": 5,
+      "evidence_kind:timer_regression": 2,
+      "unmatched": 37767
+    },
+    "stage_3:spell_57": {
+      "activation_edges": 8437,
+      "all_evidence": 8438,
+      "evidence_kind:invalid_timer": 1,
+      "unmatched": 8437
+    },
+    "stage_3:spell_61": {
+      "activation_edges": 6623,
+      "all_evidence": 6626,
+      "evidence_kind:invalid_timer": 2,
+      "evidence_kind:timer_regression": 1,
+      "unmatched": 6623
+    },
+    "stage_3:spell_65": {
+      "activation_edges": 17810,
+      "all_evidence": 17882,
+      "evidence_kind:invalid_timer": 2,
+      "evidence_kind:timer_regression": 70,
+      "unmatched": 17810
+    },
+    "stage_3:spell_69": {
+      "activation_edges": 5956,
+      "all_evidence": 5960,
+      "ambiguous": 73,
+      "evidence_kind:invalid_timer": 4,
+      "support": 2860,
+      "unmatched": 3023
+    },
+    "stage_3:spell_73": {
+      "activation_edges": 11080,
+      "all_evidence": 11086,
+      "evidence_kind:invalid_timer": 3,
+      "evidence_kind:timer_regression": 3,
+      "unmatched": 11080
+    }
+  },
+  "gates": {
+    "observer_budget_passed": false,
+    "observer_limits_ms": {
+      "max": 2.0,
+      "p95": 0.2,
+      "p99": 0.4
+    },
+    "timed_intent_available": true,
+    "validation_passed": true
+  },
+  "input": {
+    "active_spell_main_vm_rows": 5780,
+    "audit_rows": 14642,
+    "decision_scopes": 14642,
+    "deferred_fire_state_statuses": {
+      "aligned_complete": 5723,
+      "capture_misaligned": 57,
+      "enemy_flags_unavailable": 3396,
+      "enemy_pointer_mismatch": 5466
+    },
+    "deferred_fire_state_values": {
+      "disabled": 5723,
+      "unknown": 8919
+    },
+    "intent_errors": 0,
+    "observation_errors": 0,
+    "trace_schema_versions": {
+      "2": 14642
+    }
+  },
+  "intent": {
+    "deduplicated_timed_events": 58,
+    "dependency_sightings": {
+      "bullet_template_geometry": 1650,
+      "deferred_state": 8,
+      "emission_origin": 1650,
+      "minimum_fire_distance": 1650,
+      "player_aim_at_emission": 1650,
+      "pool_capacity": 1650,
+      "transform_program": 1650,
+      "vm_parameter:angle1": 1650
+    },
+    "status_sightings": {
+      "deferred": 8,
+      "dynamic_parameter": 1642
+    },
+    "stop_reasons": {
+      "horizon": 1230,
+      "unsupported_control_flow": 2164
+    },
+    "timed_event_sightings": 1642,
+    "untimed_intent_signatures": 1
+  },
+  "join": {
+    "activation_edges": 87673,
+    "ambiguous_samples": [
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 962
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 963
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 964
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 965
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 966
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 967
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 968
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 969
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 970
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 971
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 972
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 973
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 974
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 975
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 976
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 977
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 978
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 979
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 980
+      },
+      {
+        "activation_support": [
+          37983,
+          37985
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37983,
+            37983
+          ],
+          [
+            37984,
+            37984
+          ]
+        ],
+        "frame": 37986,
+        "gameplay_epoch": 1,
+        "phase": "stage_3:spell_69",
+        "slot": 981
+      }
+    ],
+    "any_temporal_matches": 2933,
+    "classification": {
+      "ambiguous": 73,
+      "support": 2860,
+      "unmatched": 84740
+    },
+    "residual_reasons": {
+      "active_spell_main_vm_absent": 37767,
+      "evidence_kind:bootstrap_recent": 21,
+      "evidence_kind:invalid_timer": 17,
+      "evidence_kind:timer_regression": 76,
+      "intent_dependency:bullet_template_geometry": 2860,
+      "intent_dependency:emission_origin": 2860,
+      "intent_dependency:minimum_fire_distance": 2860,
+      "intent_dependency:player_aim_at_emission": 2860,
+      "intent_dependency:pool_capacity": 2860,
+      "intent_dependency:transform_program": 2860,
+      "intent_dependency:vm_parameter:angle1": 2860,
+      "multiple_temporal_intents": 73,
+      "no_temporally_overlapping_timed_intent": 46973,
+      "observation_status:capture_spanned": 87673,
+      "omitted_source_competition": 2860,
+      "temporal_support_not_point": 2860
+    },
+    "semantics": {
+      "ambiguous": "multiple intent intervals overlap",
+      "causal_authority": "none",
+      "exact": "one point intent equals one point observation",
+      "support": "one intent interval overlaps the observation",
+      "unmatched": "no timed main-VM intent interval overlaps"
+    },
+    "unique_temporal_fraction": 0.032621,
+    "unique_temporal_matches": 2860,
+    "unmatched_samples": [
+      {
+        "activation_support": [
+          399,
+          401
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 402,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 0
+      },
+      {
+        "activation_support": [
+          399,
+          401
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 402,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 1
+      },
+      {
+        "activation_support": [
+          399,
+          401
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 402,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 2
+      },
+      {
+        "activation_support": [
+          399,
+          401
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 402,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 3
+      },
+      {
+        "activation_support": [
+          409,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 4
+      },
+      {
+        "activation_support": [
+          409,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 5
+      },
+      {
+        "activation_support": [
+          409,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 6
+      },
+      {
+        "activation_support": [
+          409,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 7
+      },
+      {
+        "activation_support": [
+          409,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 8
+      },
+      {
+        "activation_support": [
+          409,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 9
+      },
+      {
+        "activation_support": [
+          409,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 10
+      },
+      {
+        "activation_support": [
+          409,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 11
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 12
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 13
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 14
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 15
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 16
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 17
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 18
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 19
+      }
+    ]
+  },
+  "observation": {
+    "age": {
+      "count": 87787,
+      "max": 8.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "p99_9": 0.0
+    },
+    "capture_spans": {
+      "0": 14055,
+      "1": 587
+    },
+    "evidence_kinds": {
+      "activation_edge": 87673,
+      "bootstrap_recent": 21,
+      "invalid_timer": 17,
+      "timer_regression": 76
+    },
+    "evidence_per_row": {
+      "count": 14642,
+      "max": 592.0,
+      "p50": 0.0,
+      "p95": 33.0,
+      "p99": 60.0,
+      "p99_9": 320.0
+    },
+    "observation_statuses": {
+      "capture_spanned": 87694,
+      "invalid_timer": 17,
+      "slot_reuse_ambiguous": 76
+    }
+  },
+  "passed": false,
+  "schema": "th08-bullet-birth-residual-audit-v1",
+  "scope": {
+    "future_geometry_authority": "none",
+    "hazard_coverage_authority": "none",
+    "intent_source": "active_spell_enemy_main_vm_only",
+    "omitted_sources": [
+      "callback_or_interrupt_source",
+      "child_enemy_or_auxiliary_vm",
+      "deferred_emission_runtime_state",
+      "non_ecl_native_source",
+      "non_spell_enemy_main_vm"
+    ],
+    "physical_action_authority": "none"
+  },
+  "source": {
+    "trace_bytes": 492656459,
+    "trace_name": "lunatic_route2_stage4a_unattended_20260728_040144.jsonl",
+    "trace_sha256": "c8d25c8b638794db93c1490a07829658d42bc707d1b65f8c674ec499458dec83"
+  },
+  "timing_ms": {
+    "build": {
+      "count": 14642,
+      "max": 0.8988,
+      "p50": 0.0242,
+      "p95": 0.0537,
+      "p99": 0.1246,
+      "p99_9": 0.4145
+    },
+    "intent": {
+      "count": 14642,
+      "max": 0.3947,
+      "p50": 0.0,
+      "p95": 0.0649,
+      "p99": 0.1006,
+      "p99_9": 0.1638
+    },
+    "observation": {
+      "count": 14642,
+      "max": 10.2189,
+      "p50": 0.126,
+      "p95": 0.4496,
+      "p99": 0.9314,
+      "p99_9": 6.735
+    },
+    "pre_emit_total": {
+      "count": 14642,
+      "max": 10.2418,
+      "p50": 0.1648,
+      "p95": 0.5201,
+      "p99": 1.0603,
+      "p99_9": 6.773
+    },
+    "previous_emit": {
+      "count": 14641,
+      "max": 12.8322,
+      "p50": 0.0465,
+      "p95": 1.2484,
+      "p99": 1.679,
+      "p99_9": 5.5832
+    }
+  }
+}

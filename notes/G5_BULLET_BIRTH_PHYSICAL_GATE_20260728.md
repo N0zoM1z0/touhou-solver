@@ -2,10 +2,10 @@
 
 Date: 2026-07-28
 
-Status: B4/B5 failed with retained evidence. The current issue transaction is
-now isolated and the omitted deferred-fire source state is corrected offline,
-but CE-0143 physical performance and a schema-v2 runtime join still require a
-focused repeat. No future-hazard or physical action authority is granted.
+Status: B4/B5 failed twice with retained evidence. The schema-v2 physical
+repeat validates the deferred-fire state correction and exposes timed intent,
+but CE-0143 physical performance and CE-0145 source coverage remain open. No
+future-hazard or physical action authority is granted.
 
 ## Outcome
 
@@ -27,6 +27,28 @@ The run did successfully establish the shipped-runtime native-age workload:
 86,396 inactive-to-active edges, 23 recent bootstrap candidates, 99 timer
 regressions, 17 invalid active timers, capture spans 0/1 on 13,822/589 audit
 rows, and native age p50/p95/p99/p99.9/max `0/0/0/0/8`.
+
+The schema-v2 repeat
+`lunatic_route2_stage4a_unattended_20260728_040144` confirms that the semantic
+correction works, but it still fails the gate:
+
+- 5,723/5,780 active-spell main-VM rows had exactly aligned, observed
+  deferred-fire state; the other 57 were capture-spanned and remained
+  unknown.
+- The classifier produced 1,642 timed sightings in 58 deduplicated events.
+  Temporal support uniquely matched 2,860 activation edges and ambiguously
+  matched 73. Every match occurred during spell 69.
+- 84,740/87,673 activation edges remained unmatched. Of those, 37,767 had no
+  active-spell main VM and 46,973 had no overlapping timed main-VM intent.
+- Physical observer p95/p99/max improved to
+  `0.4496/0.9314/10.2189 ms`, but still failed the fixed
+  `0.20/0.40/2.00 ms` extraction budget. Record emission p95/max was
+  `1.2484/12.8322 ms`.
+
+This is observed source-coverage and performance evidence. The 3.2621%
+unique temporal match fraction is not birth prediction accuracy because
+template geometry, origin, minimum-distance, player aim, pool capacity,
+transform state, and omitted-source competition remain unresolved.
 
 ## Physical Scope And Provenance
 
@@ -79,6 +101,24 @@ Activation edges by capture phase were 36,870 nonspell; 8,437 spell 57;
 9,982 spell 61; 14,067 spell 65; 5,956 spell 69; and 11,084 spell 73.
 Residual unmatched reasons were 36,870 rows without an active-spell main-VM
 source and 49,526 rows without a temporally overlapping timed intent.
+
+The schema-v2 repeat report is:
+
+- `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_040144.birth_audit.json`
+- SHA-256
+  `9ce122552d0b35e4379a4accad712ba5960671e2fac6d345a6687b0826a4890c`
+- two generations from the same raw trace are byte-identical;
+- `passed = false`;
+- validation gate: pass;
+- observer budget gate: fail;
+- timed-intent-available gate: pass.
+
+The repeat completed frames `1..44215` over 14,642 decisions with accepted
+route completion, 17 hits, hard no-Bomb, and no residual game/controller
+process. The raw 492,656,459-byte trace remains local and ignored; its SHA-256
+is `c8d25c8b638794db93c1490a07829658d42bc707d1b65f8c674ec499458dec83`.
+The canonical fresh-attempt hit is frame 2,608, classified as an observed
+bullet overlap after global viability exhaustion.
 
 ## Corrections After The Failed Run
 
@@ -139,8 +179,13 @@ The following remain unchanged:
 - Bomb remains forbidden;
 - no B6 conservative birth envelope may be proposed.
 
-Repeat Lunatic Stage 4A from checkpoint `35f3502` or later with schema v2.
-Require accepted completion, hard no-Bomb, exact deferred-state status counts,
-timed intent sightings, deterministic B5 output, observation/build/emit tails,
-and explicit unmatched residuals. Stage 5 or 6 follows only after this
-Stage-4A semantic gate passes.
+The next implementation gate is an equivalent compact/columnar observation
+record that removes per-birth Python object and repeated-key construction
+without omitting any slot evidence. It must retain an independent scalar
+transition oracle, deterministic old/new schema analyzer parity, isolated
+Linux/Windows burst benchmarks, complete quick suites, and a third focused
+Stage-4A physical report. In parallel, extend the diagnostic report so
+main-VM control-flow stops and timed-intent coverage are attributed per phase;
+do not call an unmatched edge a classifier error until source ownership is
+observed. Stage 5 or 6 follows only after the Stage-4A semantic and performance
+gates pass.

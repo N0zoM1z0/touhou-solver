@@ -6445,3 +6445,42 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Complete Linux/Windows quick suites pass `782/782` in `8.989/15.375 s`,
   with three Windows skips. Physical CE-0143 remains open until B4 repeats;
   future geometry and action authority remain unchanged.
+
+## 2026-07-28 — Retained the schema-v2 G5 Stage-4A physical recheck
+
+- **Observed physical scope:** Run
+  `lunatic_route2_stage4a_unattended_20260728_040144` completed Lunatic
+  Stage 4A over frames `1..44215` and 14,642 decisions with accepted route
+  completion, 17 hits, hard no-Bomb across every decision, zero parse errors,
+  supervisor completion, and no residual game/controller process. The
+  canonical fresh-attempt contact was an observed bullet overlap at frame
+  2,608 after global viability exhaustion.
+- **Observed semantic correction:** 5,723/5,780 active-spell main-VM rows
+  carried exactly aligned deferred-fire state; the 57 capture-spanned rows
+  remained unknown. The scanner produced 1,642 timed intent sightings in 58
+  deduplicated events. This physically closes CE-0144's discarded-state
+  integration omission without claiming geometry or birth authority.
+- **Observed residual:** The pool observer retained 87,673 activation edges.
+  One temporal intent uniquely overlapped 2,860 edges and multiple intents
+  overlapped 73; every match occurred during spell 69. The remaining 84,740
+  edges were unmatched, including 37,767 nonspell edges and 46,973
+  active-spell edges without a timed main-VM overlap. CE-0145 records this as
+  an omitted-source/control-flow diagnosis, not proof of a classifier bug.
+- **Observed performance:** Physical observer p95/p99/max improved from
+  `1.7795/2.7495/10.9700 ms` to `0.4496/0.9314/10.2189 ms`, but still failed
+  the fixed `0.20/0.40/2.00 ms` gate. Evidence-per-row
+  p95/p99.9/max was `33/320/592`; record emission p95/max was
+  `1.2484/12.8322 ms`. Scratch reuse is therefore insufficient; the next gate
+  removes per-birth Python object and repeated-key JSON construction while
+  preserving every slot witness and old/new analyzer parity.
+- The deterministic report is byte-identical across two generations,
+  SHA-256
+  `9ce122552d0b35e4379a4accad712ba5960671e2fac6d345a6687b0826a4890c`.
+  The ignored 492,656,459-byte raw trace SHA-256 is
+  `c8d25c8b638794db93c1490a07829658d42bc707d1b65f8c674ec499458dec83`.
+  Compact artifacts are retained under `artifacts/runtime_reports/` and
+  `notes/runs/`.
+- **Authority:** B4/B5 remain failed. Every future-event coverage slab stays
+  `UNKNOWN` from the first successor; live policy, Bomb, and action authority
+  are unchanged. Stage 5/6 physical expansion remains behind the Stage-4A
+  semantic and performance gate.

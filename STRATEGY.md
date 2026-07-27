@@ -133,14 +133,27 @@ Windows steady full-pool p95 to `0.0171/0.0242 ms`. A 592-birth p95 remains
 `2.2671/2.7465 ms`, so CE-0143 and physical correlation remain open. No
 future-geometry or action authority follows.
 
+**Observed:** schema-v2 physical recheck `20260728_040144` completed Lunatic
+Stage 4A with 17 hits, hard no-Bomb, accepted artifacts, and cleanup. Exact
+deferred-state alignment held on 5,723/5,780 active-spell rows and produced
+1,642 timed sightings, physically closing CE-0144's integration omission.
+Only 2,860/87,673 activation edges had one temporal main-VM match and all
+occurred in spell 69; CE-0145 retains omitted source/control-flow coverage.
+Observer p95/p99/max improved to `0.4496/0.9314/10.2189 ms`, but the fixed
+gate still failed; emission p95/max was `1.2484/12.8322 ms`. B4/B5 therefore
+remain failed and no future-geometry or action authority follows.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
    passes; continue G5 future-event coverage one event class at a time,
    beginning with bullet birth. B1–B3 and the default-off trace seam are
-   implemented. The first B4/B5 run failed and is corrected offline; repeat
-   Stage 4A with schema v2 and the complete timing boundary before trying
-   Stage 5/6. It does not narrow `UNKNOWN` coverage or add action authority.
+   implemented. The schema-v2 B4/B5 repeat validates deferred-state semantics
+   but still fails physical timing and source coverage. Replace output-linear
+   per-birth object/repeated-key construction with an equivalent columnar
+   trace, preserve independent scalar and old/new analyzer parity, then repeat
+   Stage 4A before trying Stage 5/6. It does not narrow `UNKNOWN` coverage or
+   add action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

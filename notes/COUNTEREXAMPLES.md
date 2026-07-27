@@ -3960,8 +3960,8 @@ no physical action authority
 
 ## CE-0143: Birth observation passed synthetic timing but failed the physical issue boundary
 
-Status: observed physical delivery failure; post-issue isolation complete,
-observer optimization open
+Status: observed physical delivery failure; post-issue isolation and scratch
+reuse complete, output-linear representation optimization open
 
 - **Observed symptom:** Default-off Lunatic Stage-4A trial
   `20260728_031127` completed 14,411 birth-audit decisions with zero observer
@@ -3996,11 +3996,22 @@ observer optimization open
   `7788114afb988536c9152fe0c9473379d28c59864e86cac4c3ee9b2a829922e5`;
   first deterministic compact report SHA-256
   `65ff30f5363a13ed77df676fe8f829ed8a55948f987191b92915de23c6da2c34`.
+- **Physical recheck:** Schema-v2 run `20260728_040144` improved observer
+  p95/p99 to `0.4496/0.9314 ms` but retained a `10.2189 ms` maximum and
+  therefore still failed the same fixed gate. Evidence per row had
+  p95/p99.9/max `33/320/592`; prior-record emission p95/max was
+  `1.2484/12.8322 ms`. This rejects treating compact scratch alone as the
+  physical fix. Per-birth dataclass construction and repeated-key JSON remain
+  output-linear work, while even zero/small-birth rows retain scheduler
+  tails. Raw SHA-256
+  `c8d25c8b638794db93c1490a07829658d42bc707d1b65f8c674ec499458dec83`;
+  deterministic report SHA-256
+  `9ce122552d0b35e4379a4accad712ba5960671e2fac6d345a6687b0826a4890c`.
 
 ## CE-0144: Unknown deferred-fire state erased every physical timed intent
 
-Status: observed B5 live-integration omission corrected offline; physical
-recheck pending and no timed birth authority
+Status: observed B5 live-integration omission physically corrected; no timed
+birth or geometry authority
 
 - **Observed symptom:** Across the same Stage-4A trace, the active-spell
   main-VM scanner produced 1,641 fire-intent sightings but zero timed events.
@@ -4029,3 +4040,40 @@ recheck pending and no timed birth authority
 - **Authority:** the B5 report is a valid failure report, not event coverage.
   Future geometry, hazard coverage, strategy, and physical action authority
   remain unchanged.
+- **Physical recheck:** In schema-v2 run `20260728_040144`, 5,723/5,780
+  active-spell main-VM rows had exactly aligned observed state and 57
+  capture-spanned rows remained unknown. The classifier produced 1,642 timed
+  sightings in 58 deduplicated events, so the discarded-state omission is
+  physically closed. Only temporal support was established; every match
+  retained unresolved template/origin/aim/pool/transform dependencies.
+
+## CE-0145: Main-VM lookahead explained births in only one Stage-4A spell
+
+Status: observed source-coverage failure; ownership diagnosis and
+control-flow extension open
+
+- **Observed symptom:** Schema-v2 run `20260728_040144` retained 87,673
+  activation edges. Only 2,860 had one temporal main-VM intent match and 73
+  had multiple matches; all matched edges occurred during spell 69. The
+  remaining 84,740 edges were unmatched: 37,767 during nonspell capture and
+  46,973 inside an active-spell scope without an overlapping timed main-VM
+  intent.
+- **Observed classifier boundary:** Across the run, lookahead stopped at the
+  horizon 1,230 times and at unsupported control flow 2,164 times. The
+  current trace intentionally scans only the active spell owner's main VM
+  and omits child enemies, auxiliary VMs, callbacks, nonspell sources, and
+  dynamic source topology.
+- **Invalid inference:** unmatched temporal edges do not prove that the
+  main-VM classifier missed a visible direct-fire instruction. They can be
+  produced by an omitted source or lie beyond a deliberately fail-closed
+  branch/loop boundary. Conversely, the 3.2621% unique temporal fraction is
+  not a prediction-success rate because every match still has unresolved
+  geometry and source competition.
+- **Correction gate:** attribute intent sightings and stop reasons by phase,
+  retain instruction/control-flow witnesses around each stop, and establish
+  source ownership before extending the interpreter. Any loop/call support
+  must model the observable VM stack/register state causally; it may not
+  guess hidden branches. All-enemy or auxiliary-source scanning requires a
+  separate capture, delivery, and contention contract.
+- **Authority:** future-event coverage remains `UNKNOWN` from the first
+  successor. This counterexample authorizes diagnostics only.

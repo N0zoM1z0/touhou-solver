@@ -61,10 +61,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
   blocked by live integration, hazard coverage, clock, publication, and
   performance gates.
 - Latest structural checkpoint:
-  `a388a1d Extract issue-time input overrides`. Deadline-hold construction and
-  the ordered deathbomb/counter/auto-confirm/final hard-no-Bomb checks now
-  live in `th08_live.issue_overrides`; physical dispatch, actuator mutation,
-  and scene lifecycle remain controller-owned. The preceding native
+  `8149262 Extract shared dossier death attribution`. Physical contact
+  witnesses, cause classification, warning leads, death-ledger construction,
+  and clustering now live in `analysis/dossier/attribution.py`; both practice
+  and full-run entry points consume that owner, while original full-run
+  private imports remain exact compatibility aliases. The full-run entry
+  point is 1,305 lines, down from 2,134. A complete 548,614,220-byte Stage-5
+  replay produced byte-identical JSON, Markdown, death CSV, and regression
+  JSON before and after extraction; quick suites pass `711/711` on Linux in
+  `8.795 s` and Windows in `12.688 s` with three platform skips.
+  The preceding live checkpoint `a388a1d Extract issue-time input overrides`
+  moved deadline-hold construction and the ordered
+  deathbomb/counter/auto-confirm/final hard-no-Bomb checks into
+  `th08_live.issue_overrides`; physical dispatch, actuator mutation, and
+  scene lifecycle remain controller-owned. The preceding native
   checkpoint `a0a7afb Separate native pipeline compatibility adapters` moved
   direct-pipeline v1 create/query adapters into `pipeline/direct_compat.cpp`;
   belief
@@ -89,9 +99,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   implementation globals. R2/R3/R4 remain complete. The remaining structural
   target is the staged iteration contract inside `_run_live_session`, recorded
   in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`, plus the
-  attribution/aggregation/rendering seams remaining in the two offline
-  dossier entry points. No model, recurrence, float comparison, worker policy,
-  action authority, report schema, attribution, or strategy changed.
+  aggregation/rendering seams remaining in the two offline dossier entry
+  points. No model, recurrence, float comparison, worker policy, action
+  authority, report schema, attribution semantics, or strategy changed.
 - Structural checkpoint `6dbcc8b Split dual refinement into focused modules`
   splits the G2 implementation behind stable
   compatibility facades. Spatial cells, transitions, root scope, patch

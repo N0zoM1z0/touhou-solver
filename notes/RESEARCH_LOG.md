@@ -5916,3 +5916,35 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `f6b01748e01eeaceb07aff7f54f703b9dd9e4cf4d184883f23c61d89519e4da6`.
   This is physical structural retention and counterexample evidence only;
   recurrence, model, live action authority, and strategy are unchanged.
+
+### 2026-07-27 — Shared dossier death-attribution ownership
+
+- **Observed structural change:** Checkpoint `8149262` adds
+  `analysis/dossier/attribution.py`. Bullet, laser, and same-epoch enemy-body
+  witnesses; spell attribution; issue-lag and robust/global warning
+  predicates; primary/contributing cause classification; the complete death
+  ledger; and cross-hit clustering now have one offline owner. Practice and
+  full-run dossiers call the shared owner directly. Historical private
+  imports from `analysis.th08_run_dossier` remain exact aliases for tests and
+  downstream callers.
+- **Observed size result:** `th08_run_dossier.py` changed from 2,134 to 1,305
+  lines. `th08_practice_dossier.py` remains 2,058 lines but no longer imports
+  death semantics from the full-run CLI. The focused attribution owner is
+  882 lines because one cohesive ledger entry deliberately retains contact
+  witness, causal last-alive state, warning leads, resource transition, and
+  compatibility fields together.
+- **Observed exact-output gate:** Before and after the extraction, Linux
+  regenerated the complete Stage-5 dossier from the retained
+  548,614,220-byte trace
+  `lunatic_route2_stage5_unattended_20260727_224146`. JSON, Markdown, deaths
+  CSV, and regression JSON matched byte for byte. The dossier JSON SHA-256 is
+  `9de228fb4cb9fdfef6fc25e0d6bec26b70a5a0faca381e525024aae95b12c0aa`;
+  the Markdown SHA-256 is
+  `7ed815638ba18c1b1246afe3a30ed1946a7ae37635d1c178c813e617f4831f1f`.
+- **Validation:** New ownership tests pass `2/2`; full-run and practice
+  dossier suites pass `20/20` and `18/18`; Ruff, byte compilation, and
+  `git diff --check` pass. Quick suites pass `711/711` on Linux in `8.795 s`
+  and Windows in `12.688 s` with three platform skips.
+- **Authority:** Offline source ownership only. Contact geometry, causal
+  attribution, warning predicates, report fields and ordering, recurrence,
+  live sensing, issue behavior, action authority, and strategy are unchanged.

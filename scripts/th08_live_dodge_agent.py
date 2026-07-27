@@ -77,14 +77,27 @@ from th08_laser_runtime import (
     serialize_laser_trace,
 )
 from th08_local_planner import (
+    ActionCertificateSet,
     ActuatorPipeline,
     CompletedServiceResults,
+    DecisionTelemetry,
     GlobalGuidance,
+    IssueAdapter,
+    IssueRecertification,
+    IssueRequest,
+    IssueTransaction,
+    IssuedDecision,
+    LocalCertificateTiming,
     LocalPlannerRequest,
+    LocalProposal,
     ObjectiveContext,
     PhysicalHazardSnapshot,
     PlannerConfig,
     PlannerMode,
+    RobustActionCertificate,
+    prepare_local_hazards,
+    run_hard_preflight,
+    validate_local_planner_request,
 )
 from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
@@ -694,28 +707,6 @@ class Item:
     full_value: bool
 
 
-@dataclass(frozen=True)
-class LocalCertificateTiming:
-    """Low-overhead wall-time decomposition for local hard certificates."""
-
-    calls: int = 0
-    explicit_root_calls: int = 0
-    maximum_branch_count: int = 0
-    shared_laser_projection_ms: float = 0.0
-    validation_ms: float = 0.0
-    hazard_projection_ms: float = 0.0
-    branch_setup_ms: float = 0.0
-    geometry_kernel_ms: float = 0.0
-    reduction_ms: float = 0.0
-    certificate_total_ms: float = 0.0
-    control_prefix_ms: float = 0.0
-    planning_bullet_projection_ms: float = 0.0
-    beam_search_ms: float = 0.0
-    supplemental_beam_ms: float = 0.0
-    terminal_threat_ms: float = 0.0
-    selection_finalize_ms: float = 0.0
-
-
 @dataclass
 class _LocalCertificateTimingAccumulator:
     calls: int = 0
@@ -839,35 +830,6 @@ class PlannerAction:
     dx: float
     dy: float
     focused: bool
-
-
-@dataclass(frozen=True)
-class RobustActionCertificate:
-    action: str
-    delay_frames: tuple[int, ...]
-    worst_collisions: int
-    min_clearance: float
-    cvar_risk: float
-    worst_delay: int | None
-    write_required: bool = True
-    pipeline_branch_count: int = 0
-    worst_pending_remaining: int | None = None
-
-
-@dataclass(frozen=True)
-class IssueRecertification:
-    """Auditable fresh/global action transaction at input issue."""
-
-    planned_action: str
-    global_allowed_actions: tuple[str, ...] | None
-    global_constraint_applicable: bool
-    fresh_safe_actions: tuple[str, ...]
-    fresh_global_intersection: tuple[str, ...]
-    selected_action: str
-    selection_reason: str
-    global_constraint_relaxed: bool
-    planned_certificate: RobustActionCertificate | None
-    selected_certificate: RobustActionCertificate
 
 
 def _local_certificate_timing_record(
@@ -2330,6 +2292,100 @@ def issue_enemy_snapshot_changes(
     )
 
 
+def commit_local_proposal_for_fresh_hazards(
+    proposal: LocalProposal,
+    *,
+    player_x: float,
+    player_y: float,
+    previous_mask: int,
+    delay_frames: tuple[int, ...],
+    action_hold_frames: int,
+    bullets: tuple[Bullet, ...],
+    lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
+    snapshot_lag: int,
+    pipeline_root: LocalPipelineRoot | None = None,
+    allowed_first_actions: tuple[str, ...] | None = None,
+    viability_repair_volumes: tuple[tuple[str, int], ...] = (),
+    viability_recovery_distances: tuple[tuple[str, float], ...] = (),
+    viability_safety_actions: tuple[str, ...] = (),
+    viability_survival_actions: tuple[str, ...] = (),
+) -> IssuedDecision:
+    """Commit a proposal against fresh hazards and retained global authority."""
+
+    return IssueTransaction(
+        proposal,
+        IssueRequest(
+            player_x=player_x,
+            player_y=player_y,
+            previous_mask=previous_mask,
+            delay_frames=delay_frames,
+            action_hold_frames=action_hold_frames,
+            bullets=bullets,
+            lasers=lasers,
+            enemy_bodies=enemy_bodies,
+            snapshot_lag=snapshot_lag,
+            pipeline_root=pipeline_root,
+            allowed_first_actions=allowed_first_actions,
+            viability_repair_volumes=viability_repair_volumes,
+            viability_recovery_distances=(
+                viability_recovery_distances
+            ),
+            viability_safety_actions=viability_safety_actions,
+            viability_survival_actions=viability_survival_actions,
+        ),
+        IssueAdapter(
+            actions=_PLANNER_ACTIONS,
+            certificate_provider=_robust_action_certificates,
+            timing_factory=_LocalCertificateTimingAccumulator,
+            shot_mask=SHOT,
+            focus_mask=FOCUS,
+            bomb_mask=BOMB,
+        ),
+    ).commit()
+
+
+def issue_transaction_for_fresh_hazards(
+    decision: Decision,
+    *,
+    player_x: float,
+    player_y: float,
+    previous_mask: int,
+    delay_frames: tuple[int, ...],
+    action_hold_frames: int,
+    bullets: tuple[Bullet, ...],
+    lasers: tuple[Laser, ...],
+    enemy_bodies: tuple[EnemyBody, ...],
+    snapshot_lag: int,
+    pipeline_root: LocalPipelineRoot | None = None,
+    allowed_first_actions: tuple[str, ...] | None = None,
+    viability_repair_volumes: tuple[tuple[str, int], ...] = (),
+    viability_recovery_distances: tuple[tuple[str, float], ...] = (),
+    viability_safety_actions: tuple[str, ...] = (),
+    viability_survival_actions: tuple[str, ...] = (),
+) -> IssuedDecision:
+    """Compatibility adapter from a flat decision to a proposal."""
+
+    return commit_local_proposal_for_fresh_hazards(
+        LocalProposal.from_decision(decision),
+        player_x=player_x,
+        player_y=player_y,
+        previous_mask=previous_mask,
+        delay_frames=delay_frames,
+        action_hold_frames=action_hold_frames,
+        bullets=bullets,
+        lasers=lasers,
+        enemy_bodies=enemy_bodies,
+        snapshot_lag=snapshot_lag,
+        pipeline_root=pipeline_root,
+        allowed_first_actions=allowed_first_actions,
+        viability_repair_volumes=viability_repair_volumes,
+        viability_recovery_distances=viability_recovery_distances,
+        viability_safety_actions=viability_safety_actions,
+        viability_survival_actions=viability_survival_actions,
+    )
+
+
 def recertify_action_for_fresh_hazards(
     decision: Decision,
     *,
@@ -2349,14 +2405,13 @@ def recertify_action_for_fresh_hazards(
     viability_safety_actions: tuple[str, ...] = (),
     viability_survival_actions: tuple[str, ...] = (),
 ) -> Decision:
-    """Intersect a fresh issue certificate with retained global authority."""
+    """Compatibility wrapper for the explicit issue transaction."""
 
-    timing = _LocalCertificateTimingAccumulator()
-    certificates = _robust_action_certificates(
+    return issue_transaction_for_fresh_hazards(
+        decision,
         player_x=player_x,
         player_y=player_y,
         previous_mask=previous_mask,
-        actions=_PLANNER_ACTIONS,
         delay_frames=delay_frames,
         action_hold_frames=action_hold_frames,
         bullets=bullets,
@@ -2364,172 +2419,12 @@ def recertify_action_for_fresh_hazards(
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         pipeline_root=pipeline_root,
-        timing_accumulator=timing,
-    )
-    planned = certificates.get(decision.action)
-    action_by_name = {
-        action.name: action for action in _PLANNER_ACTIONS
-    }
-    if allowed_first_actions is not None:
-        if not allowed_first_actions:
-            raise ValueError("allowed first actions cannot be empty")
-        if len(set(allowed_first_actions)) != len(allowed_first_actions):
-            raise ValueError("allowed first actions must be unique")
-        unknown_actions = (
-            set(allowed_first_actions) - action_by_name.keys()
-        )
-        if unknown_actions:
-            raise ValueError(
-                f"unknown allowed first actions: {sorted(unknown_actions)}"
-            )
-    fresh_safe_actions = tuple(
-        action.name
-        for action in _PLANNER_ACTIONS
-        if (
-            certificates[action.name].worst_collisions == 0
-            and certificates[action.name].min_clearance >= 0.0
-        )
-    )
-    nonfresh_constraint_relaxation = bool(
-        decision.viability_constraint_relaxed
-        and not decision.viability_fresh_prefix_relaxed
-    )
-    global_constraint_applicable = bool(
-        allowed_first_actions is not None
-        and not nonfresh_constraint_relaxation
-    )
-    fresh_safe_set = set(fresh_safe_actions)
-    fresh_global_intersection = tuple(
-        action_name
-        for action_name in (allowed_first_actions or ())
-        if action_name in fresh_safe_set
-    )
-    global_constraint_relaxed = bool(
-        global_constraint_applicable
-        and not fresh_global_intersection
-    )
-    if global_constraint_applicable and fresh_global_intersection:
-        candidate_names = fresh_global_intersection
-    elif fresh_safe_actions:
-        candidate_names = fresh_safe_actions
-    else:
-        candidate_names = tuple(
-            action.name for action in _PLANNER_ACTIONS
-        )
-    planned_is_candidate_safe = bool(
-        planned is not None
-        and decision.action in candidate_names
-        and planned.worst_collisions == 0
-        and planned.min_clearance >= 0.0
-    )
-    if planned_is_candidate_safe:
-        selected = action_by_name[decision.action]
-        certificate = planned
-        if global_constraint_relaxed:
-            selection_reason = (
-                "relax_empty_fresh_global_intersection_preserve_planned"
-            )
-        elif global_constraint_applicable:
-            selection_reason = (
-                "preserve_planned_in_fresh_global_intersection"
-            )
-        else:
-            selection_reason = "preserve_fresh_safe_planned"
-    else:
-        selected_name = min(
-            candidate_names,
-            key=lambda action_name: (
-                certificates[action_name].worst_collisions,
-                max(-certificates[action_name].min_clearance, 0.0),
-                certificates[action_name].cvar_risk,
-                -certificates[action_name].min_clearance,
-                0 if action_name == decision.action else 1,
-                action_name,
-            ),
-        )
-        selected = action_by_name[selected_name]
-        certificate = certificates[selected_name]
-        if global_constraint_relaxed:
-            selection_reason = (
-                "relax_empty_fresh_global_intersection"
-                if fresh_safe_actions
-                else "relax_empty_fresh_global_intersection_least_bad"
-            )
-        elif global_constraint_applicable:
-            selection_reason = "replace_unsafe_from_fresh_global_intersection"
-        elif fresh_safe_actions:
-            selection_reason = "replace_unsafe_with_fresh_safe"
-        else:
-            selection_reason = "replace_unsafe_with_least_bad"
-    selected_changed = selected.name != decision.action
-    repair_by_action = dict(viability_repair_volumes)
-    recovery_by_action = dict(viability_recovery_distances)
-    issue_recertification = IssueRecertification(
-        planned_action=decision.action,
-        global_allowed_actions=allowed_first_actions,
-        global_constraint_applicable=global_constraint_applicable,
-        fresh_safe_actions=fresh_safe_actions,
-        fresh_global_intersection=fresh_global_intersection,
-        selected_action=selected.name,
-        selection_reason=selection_reason,
-        global_constraint_relaxed=bool(
-            nonfresh_constraint_relaxation
-            or global_constraint_relaxed
-        ),
-        planned_certificate=planned,
-        selected_certificate=certificate,
-    )
-    return replace(
-        decision,
-        mask=SHOT
-        | (FOCUS if selected.focused else 0)
-        | selected.direction,
-        action=selected.name,
-        bomb=False,
-        planned_focus=selected.focused,
-        robust_override=(
-            decision.robust_override or selected.name != decision.action
-        ),
-        robust_collisions=certificate.worst_collisions,
-        robust_min_clearance=certificate.min_clearance,
-        robust_cvar_risk=certificate.cvar_risk,
-        robust_worst_delay=certificate.worst_delay,
-        viability_constrained=bool(
-            global_constraint_applicable
-            and fresh_global_intersection
-        ),
-        viability_safe_action_count=len(allowed_first_actions or ()),
-        viability_repair_volume=repair_by_action.get(selected.name, 0),
-        viability_constraint_relaxed=bool(
-            nonfresh_constraint_relaxation
-            or global_constraint_relaxed
-        ),
-        viability_recovery_distance=recovery_by_action.get(selected.name),
-        viability_control_reserve_valid=bool(
-            decision.viability_control_reserve_valid
-            and not selected_changed
-        ),
-        viability_safety_value_preferred=bool(
-            viability_safety_actions
-            and selected.name in viability_safety_actions
-        ),
-        viability_fresh_prefix_filtered=bool(
-            global_constraint_applicable
-            and fresh_global_intersection
-            and len(fresh_global_intersection)
-            != len(allowed_first_actions or ())
-        ),
-        viability_fresh_prefix_relaxed=global_constraint_relaxed,
-        viability_survival_preferred=bool(
-            viability_survival_actions
-            and selected.name in viability_survival_actions
-        ),
-        issue_action_certificates=tuple(
-            certificates[action.name] for action in _PLANNER_ACTIONS
-        ),
-        issue_certificate_timing=timing.snapshot(),
-        issue_recertification=issue_recertification,
-    )
+        allowed_first_actions=allowed_first_actions,
+        viability_repair_volumes=viability_repair_volumes,
+        viability_recovery_distances=viability_recovery_distances,
+        viability_safety_actions=viability_safety_actions,
+        viability_survival_actions=viability_survival_actions,
+    ).decision
 
 
 def read_spell_enemy_bodies(
@@ -4105,8 +4000,6 @@ def _choose_action_request_once(
     horizon = config.horizon
     threat_horizon = config.threat_horizon
     beam_width = config.beam_width
-    recovery_control_reserve = config.recovery_control_reserve
-    losing_control_reserve = config.losing_control_reserve
     preloss_continuation_preference = (
         config.preloss_continuation_preference
     )
@@ -4119,9 +4012,6 @@ def _choose_action_request_once(
     beam_dedup_mode = config.beam_dedup_mode
     relax_stale_viability_contradiction = (
         config.relax_stale_viability_contradiction
-    )
-    enforce_fresh_viability_intersection = (
-        config.enforce_fresh_viability_intersection
     )
 
     power = objective.power
@@ -4137,329 +4027,71 @@ def _choose_action_request_once(
         completed.supplemental_async_service
     )
     preloss_supplemental_version = completed.supplemental_version
-    _force_terminal_threat = (
+    _viability_retry = (
         request.mode is PlannerMode.RELAXED_VIABILITY
     )
-    _viability_retry = _force_terminal_threat
 
     if _certificate_timing_accumulator is None:
         _certificate_timing_accumulator = (
             _LocalCertificateTimingAccumulator()
         )
-    if horizon <= 0 or beam_width <= 0:
-        raise ValueError("planner horizon and beam width must be positive")
-    if preloss_supplemental_beam_width < 0:
-        raise ValueError("supplemental beam width cannot be negative")
-    if (
-        preloss_supplemental_deadline_ms is not None
-        and (
-            not math.isfinite(preloss_supplemental_deadline_ms)
-            or preloss_supplemental_deadline_ms <= 0.0
-        )
-    ):
-        raise ValueError(
-            "supplemental deadline must be a positive finite value"
-        )
-    if (
-        preloss_supplemental_async_service is not None
-        and preloss_supplemental_version is None
-    ):
-        raise ValueError(
-            "async supplemental publication requires an exact version"
-        )
-    if beam_dedup_mode not in {
-        "quantized",
-        "first_action",
-        "exact_first_action",
-    }:
-        raise ValueError("unknown beam deduplication mode")
-    if threat_horizon is None:
-        threat_horizon = horizon
-    if threat_horizon < horizon:
-        raise ValueError("threat horizon cannot be shorter than planner horizon")
-    if control_delay_frames < 0:
-        raise ValueError("control delay cannot be negative")
-    if control_delay_candidates is not None:
-        if (
-            not control_delay_candidates
-            or any(delay < 0 for delay in control_delay_candidates)
-            or tuple(sorted(set(control_delay_candidates)))
-            != control_delay_candidates
-        ):
-            raise ValueError(
-                "control delay candidates must be sorted unique nonnegative frames"
-            )
-        if control_delay_frames not in control_delay_candidates:
-            raise ValueError("nominal control delay must belong to its candidates")
-    if action_hold_frames <= 0:
-        raise ValueError("action hold must be positive")
-    if (
-        not math.isfinite(viability_position_error)
-        or viability_position_error < 0.0
-    ):
-        raise ValueError("viability position error must be finite and nonnegative")
-    if damage_target_x is not None and not math.isfinite(damage_target_x):
-        raise ValueError("damage target x must be finite")
-    if (
-        not math.isfinite(damage_target_half_width)
-        or damage_target_half_width < 0.0
-    ):
-        raise ValueError("damage target half-width must be finite and nonnegative")
-    planner_action_names = {action.name for action in _PLANNER_ACTIONS}
-    if allowed_first_actions is not None:
-        if not allowed_first_actions:
-            raise ValueError("allowed first actions cannot be empty")
-        if len(set(allowed_first_actions)) != len(allowed_first_actions):
-            raise ValueError("allowed first actions must be unique")
-        unknown_actions = set(allowed_first_actions) - planner_action_names
-        if unknown_actions:
-            raise ValueError(
-                f"unknown allowed first actions: {sorted(unknown_actions)}"
-            )
-    viability_degeneracy = (
-        _terminal_threat_degeneracy(
-            player_x=player_x,
-            player_y=player_y,
-            action_hold_frames=action_hold_frames,
-            allowed_first_actions=allowed_first_actions,
-            viability_position_error=viability_position_error,
-        )
-        if threat_horizon > horizon
-        else None
+    validated = validate_local_planner_request(
+        request,
+        planner_action_names=frozenset(
+            action.name for action in _PLANNER_ACTIONS
+        ),
+        terminal_threat_degeneracy=_terminal_threat_degeneracy,
     )
-    viability_relaxation_candidate = viability_degeneracy is not None
-    repair_by_action = dict(viability_repair_volumes)
-    if len(repair_by_action) != len(viability_repair_volumes):
-        raise ValueError("viability repair action names must be unique")
-    if set(repair_by_action) - planner_action_names:
-        raise ValueError("viability repair contains unknown action")
-    if any(volume < 0 for volume in repair_by_action.values()):
-        raise ValueError("viability repair volume cannot be negative")
-    recovery_by_action = dict(viability_recovery_distances)
-    if len(recovery_by_action) != len(viability_recovery_distances):
-        raise ValueError("viability recovery action names must be unique")
-    if set(recovery_by_action) - planner_action_names:
-        raise ValueError("viability recovery contains unknown action")
-    if any(
-        not math.isfinite(distance) or distance < 0.0
-        for distance in recovery_by_action.values()
-    ):
-        raise ValueError(
-            "viability recovery distance must be finite and nonnegative"
-        )
-    if len(set(viability_safety_actions)) != len(
-        viability_safety_actions
-    ):
-        raise ValueError("safety-value actions must be unique")
-    if set(viability_safety_actions) - planner_action_names:
-        raise ValueError("safety value contains unknown action")
-    safety_value_actions = set(viability_safety_actions)
-    if len(set(viability_survival_actions)) != len(
-        viability_survival_actions
-    ):
-        raise ValueError("survival-label actions must be unique")
-    if set(viability_survival_actions) - planner_action_names:
-        raise ValueError("survival label contains unknown action")
-    if viability_survival_frames is not None and (
-        viability_survival_frames < 0
-        or viability_survival_frames > 0xFFFF
-    ):
-        raise ValueError("survival frames must fit an unsigned 16-bit label")
-    if (
-        viability_survival_bottleneck_margin is not None
-        and not math.isfinite(viability_survival_bottleneck_margin)
-    ):
-        raise ValueError("survival bottleneck margin must be finite")
-    survival_actions = set(viability_survival_actions)
-    if (target_x is None) != (target_y is None):
-        raise ValueError("target_x and target_y must be supplied together")
-    if target_x is not None:
-        if target_deadline is None:
-            target_deadline = horizon
-        if target_deadline < 0:
-            raise ValueError("target deadline cannot be negative")
+    threat_horizon = validated.threat_horizon
+    target_deadline = validated.target_deadline
+    repair_by_action = validated.repair_by_action
+    recovery_by_action = validated.recovery_by_action
+    safety_value_actions = validated.safety_value_actions
+    survival_actions = validated.survival_actions
     observed_player_x = player_x
     observed_player_y = player_y
-    selected_items = (
-        _select_items(items, power=power, bombs=bombs)
-        if ITEM_OBJECTIVES_ENABLED
-        else ()
+    prepared = prepare_local_hazards(
+        request,
+        validated,
+        item_objectives_enabled=ITEM_OBJECTIVES_ENABLED,
+        select_items=_select_items,
+        focus_mask=FOCUS,
+        unfocused_cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
+        build_laser_timeline=_build_packed_laser_collision_frames,
+        timing_accumulator=_certificate_timing_accumulator,
     )
-    delayed_mask = previous_direction | (FOCUS if previous_focus else 0)
-    main_laser_offset = max(
-        0,
-        control_delay_frames - max(0, snapshot_lag),
-    )
-    certificate_delay_frames = (
-        control_delay_candidates
-        if control_delay_candidates is not None
-        else (control_delay_frames,)
-    )
+    selected_items = prepared.selected_items
+    delayed_mask = prepared.delayed_mask
+    main_laser_offset = prepared.main_laser_offset
+    certificate_delay_frames = prepared.certificate_delay_frames
     diagnostic_losing_reserve_distance = (
-        UNFOCUSED_CARDINAL_SPEED * max(certificate_delay_frames)
-        if recovery_by_action or repair_by_action or survival_actions
-        else 0.0
+        prepared.diagnostic_losing_reserve_distance
     )
-    recovery_reserve_distance = (
-        diagnostic_losing_reserve_distance
-        if (
-            (recovery_control_reserve and recovery_by_action)
-            or (
-                losing_control_reserve
-                and (repair_by_action or survival_actions)
-            )
-        )
-        else 0.0
+    recovery_reserve_distance = prepared.recovery_reserve_distance
+    certificate_horizon = prepared.certificate_horizon
+    potential_threat_horizon = prepared.potential_threat_horizon
+    laser_timeline = prepared.laser_timeline
+    preflight = run_hard_preflight(
+        request,
+        validated,
+        prepared,
+        actions=_PLANNER_ACTIONS,
+        certificate_provider=_robust_action_certificates,
+        timing_accumulator=_certificate_timing_accumulator,
     )
-    certificate_horizon = (
-        action_hold_frames + max(certificate_delay_frames)
-        if control_delay_candidates is not None or viability_relaxation_candidate
-        else 0
-    )
-    potential_threat_horizon = (
-        threat_horizon
-        if viability_relaxation_candidate or _force_terminal_threat
-        else horizon
-    )
-    laser_timeline_horizon = max(
-        control_delay_frames,
-        main_laser_offset + potential_threat_horizon,
-        certificate_horizon,
-    )
-    laser_projection_started_ns = time.perf_counter_ns()
-    laser_timeline = _build_packed_laser_collision_frames(
-        lasers,
-        horizon=laser_timeline_horizon,
-    )
-    _certificate_timing_accumulator.shared_laser_projection_ms += (
-        time.perf_counter_ns() - laser_projection_started_ns
-    ) / 1_000_000.0
-    robust_preflight_certificates: dict[
-        str, RobustActionCertificate
-    ] = {}
-    if (
-        control_delay_candidates is not None
-        or viability_degeneracy == "off_grid_singleton"
-    ):
-        preflight_names = (
-            set(allowed_first_actions)
-            if (
-                allowed_first_actions is not None
-                and viability_degeneracy is None
-            )
-            else None
-        )
-        preflight_actions = tuple(
-            action
-            for action in _PLANNER_ACTIONS
-            if preflight_names is None or action.name in preflight_names
-        )
-        robust_preflight_certificates = _robust_action_certificates(
-            player_x=observed_player_x,
-            player_y=observed_player_y,
-            previous_mask=delayed_mask,
-            actions=preflight_actions,
-            delay_frames=certificate_delay_frames,
-            action_hold_frames=action_hold_frames,
-            bullets=bullets,
-            lasers=lasers,
-            enemy_bodies=enemy_bodies,
-            snapshot_lag=snapshot_lag,
-            laser_frames=laser_timeline[:certificate_horizon],
-            pipeline_root=local_pipeline_root,
-            timing_accumulator=_certificate_timing_accumulator,
-        )
-    viability_preflight_certificates = (
-        {
-            name: robust_preflight_certificates[name]
-            for name in allowed_first_actions
-            if name in robust_preflight_certificates
-        }
-        if (
-            viability_degeneracy == "off_grid_singleton"
-            and allowed_first_actions is not None
-        )
-        else {}
-    )
+    robust_preflight_certificates = preflight.certificates
     viability_constraint_relaxed = (
-        viability_degeneracy == "complete_clamped_alias"
-        or (
-            viability_degeneracy == "off_grid_singleton"
-            and not any(
-                certificate.worst_collisions == 0
-                and certificate.min_clearance >= 0.0
-                and repair_by_action.get(action_name, 0) > 1
-                for action_name, certificate
-                in viability_preflight_certificates.items()
-            )
-        )
+        preflight.viability_constraint_relaxed
     )
     effective_allowed_first_actions = (
-        None if viability_constraint_relaxed else allowed_first_actions
+        preflight.effective_allowed_first_actions
     )
-    viability_fresh_prefix_filtered = False
-    viability_fresh_prefix_relaxed = False
-    if (
-        enforce_fresh_viability_intersection
-        and effective_allowed_first_actions is not None
-        and robust_preflight_certificates
-    ):
-        locally_safe_global_actions = tuple(
-            action_name
-            for action_name in effective_allowed_first_actions
-            if (
-                robust_preflight_certificates[action_name].worst_collisions
-                == 0
-                and robust_preflight_certificates[action_name].min_clearance
-                >= 0.0
-            )
-        )
-        if locally_safe_global_actions:
-            viability_fresh_prefix_filtered = (
-                len(locally_safe_global_actions)
-                != len(effective_allowed_first_actions)
-            )
-            effective_allowed_first_actions = locally_safe_global_actions
-        else:
-            # A cached long-horizon mask cannot force an action that a fresher
-            # short-horizon tube check already proves unsafe.  Evaluate every
-            # action only on this rare contradiction path, then let the local
-            # hard ordering choose either a prefix-safe escape or its
-            # least-bad unavoidable-contact fallback.
-            robust_preflight_certificates = _robust_action_certificates(
-                player_x=observed_player_x,
-                player_y=observed_player_y,
-                previous_mask=delayed_mask,
-                actions=_PLANNER_ACTIONS,
-                delay_frames=certificate_delay_frames,
-                action_hold_frames=action_hold_frames,
-                bullets=bullets,
-                lasers=lasers,
-                enemy_bodies=enemy_bodies,
-                snapshot_lag=snapshot_lag,
-                laser_frames=laser_timeline[:certificate_horizon],
-                pipeline_root=local_pipeline_root,
-                timing_accumulator=_certificate_timing_accumulator,
-            )
-            locally_safe_actions = tuple(
-                action.name
-                for action in _PLANNER_ACTIONS
-                if (
-                    robust_preflight_certificates[
-                        action.name
-                    ].worst_collisions
-                    == 0
-                    and robust_preflight_certificates[
-                        action.name
-                    ].min_clearance
-                    >= 0.0
-                )
-            )
-            effective_allowed_first_actions = (
-                locally_safe_actions or None
-            )
-            viability_constraint_relaxed = True
-            viability_fresh_prefix_relaxed = True
+    viability_fresh_prefix_filtered = (
+        preflight.viability_fresh_prefix_filtered
+    )
+    viability_fresh_prefix_relaxed = (
+        preflight.viability_fresh_prefix_relaxed
+    )
     effective_action_names = set(effective_allowed_first_actions or ())
     preloss_continuation_preference_active = bool(
         preloss_continuation_preference
@@ -6261,8 +5893,10 @@ def _contradiction_key(candidate: Decision) -> tuple[object, ...]:
     )
 
 
-def choose_action_request(request: LocalPlannerRequest) -> Decision:
-    """Plan from the grouped immutable request contract."""
+def _choose_action_decision_request(
+    request: LocalPlannerRequest,
+) -> Decision:
+    """Execute planner passes and return the compatibility decision."""
 
     timing = _LocalCertificateTimingAccumulator()
     result = _choose_action_request_once(
@@ -6293,6 +5927,22 @@ def choose_action_request(request: LocalPlannerRequest) -> Decision:
             local_certificate_timing=timing.snapshot(),
         )
     return result
+
+
+def choose_local_proposal_request(
+    request: LocalPlannerRequest,
+) -> LocalProposal:
+    """Build a proposal that has not yet crossed the issue boundary."""
+
+    return LocalProposal.from_decision(
+        _choose_action_decision_request(request)
+    )
+
+
+def choose_action_request(request: LocalPlannerRequest) -> Decision:
+    """Compatibility view of a grouped local proposal."""
+
+    return choose_local_proposal_request(request).decision
 
 
 def choose_action(
@@ -8583,7 +8233,7 @@ def run(args: argparse.Namespace) -> int:
             )
                 damageable = boss_phase_progress.state.damageable
             plan_started = time.perf_counter()
-            decision = choose_action_request(
+            local_proposal = choose_local_proposal_request(
                 LocalPlannerRequest(
                     physical=PhysicalHazardSnapshot(
                         player_x=float(player["x"]),
@@ -8665,6 +8315,7 @@ def run(args: argparse.Namespace) -> int:
                     ),
                 )
             )
+            decision = local_proposal.decision
             plan_ms = (time.perf_counter() - plan_started) * 1000.0
             pre_issue_action = decision.action
             pre_issue_mask = decision.mask
@@ -8711,8 +8362,8 @@ def run(args: argparse.Namespace) -> int:
                 )
                 issue_enemy_bodies_for_shadow = issue_enemy_bodies
                 issue_recertificate_started = time.perf_counter()
-                decision = recertify_action_for_fresh_hazards(
-                    decision,
+                issued_decision = commit_local_proposal_for_fresh_hazards(
+                    local_proposal,
                     player_x=float(player["x"]),
                     player_y=float(player["y"]),
                     previous_mask=previous_mask,
@@ -8738,6 +8389,7 @@ def run(args: argparse.Namespace) -> int:
                         policy_guidance.survival_actions
                     ),
                 )
+                decision = issued_decision.decision
                 issue_enemy_recertificate_ms = (
                     time.perf_counter() - issue_recertificate_started
                 ) * 1000.0

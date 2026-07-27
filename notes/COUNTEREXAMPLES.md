@@ -3702,3 +3702,52 @@ completed
 - **Evidence:** Matching compact run and dossier artifacts; ignored raw JSONL
   SHA-256
   `d746c1bcbe3604a32f44ecfbb5f95f22052c8a8de555dbd9906e58872621e29b`.
+
+## CE-0139: Lunatic Stage 4A contacted a bullet from a declared unknown future slab
+
+Status: observed physical hazard-coverage and survival failure; post-native-
+split structural gate completed
+
+- **Observed high-pressure run:** Supervised no-Bomb run
+  `lunatic_route2_stage4a_unattended_20260727_210928` completed frames
+  `2..45549`, 15,110 decisions, accepted route completion, compact artifact
+  materialization, supervisor completion, and cleanup. It reached 1,528
+  active bullets and took 22 native hits at
+  `[1174,1553,4081,4492,8984,9506,11484,11899,12648,13429,20747,22408,22882,30100,30586,31340,31754,32519,36073,38423,39649,40468]`.
+- **Canonical fresh-attempt hit:** Frame 1,174 was an observed-bullet overlap
+  at player `(365.919,415.075)` with active `right_fast`, 332 bullets, and
+  zero lasers. Slot 1,376 had AABB clearance `-1.134` in the same retained
+  hit observation. The global kernel had become empty at frame 1,112, giving
+  62 frames of viability warning, while the short pipeline certificate
+  remained positive and provided no collision warning.
+- **Observed causal coverage gap:** The last alive decision at frame 1,172
+  used snapshot frame 1,171. Its immutable pipeline root explicitly marked
+  frames `1172..1203` as `UNKNOWN` with reason
+  `th08_unseen_future_hazard_events`. Contacting slot 1,376 was absent from
+  that decision's nearby-bullet set and appears in the retained frame-1,174
+  set. This is runtime evidence that the declared unknown future-event slab
+  can contain a physically fatal event; it is not evidence that the local
+  projection or finite recurrence safely covers births.
+- **Later discovery evidence:** Ten contacts were modeled committed-prefix
+  collisions, nine were observed-bullet overlaps, two were exact same-epoch
+  enemy-body overlaps, and one remained sensor-gap/unmodeled-hazard. Every
+  hit followed global-kernel exhaustion. Fifteen contacts involved a
+  playfield boundary, fifteen used fast movement, and five exceeded 1,000
+  bullets. Later contacts are geometry/planner discovery samples after
+  respawn, not independent fresh-route survival trials.
+- **Structural boundary:** The run exercised the refactored native decoder,
+  local hazard kernel, beam reducer, viability families, geometry families,
+  pipeline ABI families, compatibility adapter, and internal declarations.
+  Hard no-Bomb passed across all 15,110 decisions and the game/controller
+  cleaned up. This retains implementation and lifecycle behavior only; it
+  does not validate the physical model.
+- **Correction boundary:** Unknown future-event slabs remain outside hard
+  action authority. Add a causal event/birth coverage model or a conservative
+  fail-closed bound that is consumable before issue, then independently
+  replay the frame-1,172 root and require a non-empty globally viable
+  continuation through the former contact. Do not promote positive
+  projected clearance or Python/C++ parity as coverage of an explicitly
+  unknown slab.
+- **Evidence:** Matching compact run, comparison, and dossier artifacts;
+  ignored 457,557,329-byte raw JSONL SHA-256
+  `3ac5d31aa4b51359f6352e66bdaf36e3ae629e356f1a25499e404f6beaa8d521`.

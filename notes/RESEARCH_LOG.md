@@ -5657,3 +5657,41 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Declaration ownership only. Types, signatures, linkage,
   exports, status behavior, recurrence, live authority, and strategy are
   unchanged.
+
+### 2026-07-27 — Lunatic Stage-4A post-refactor retention
+
+- **Observed physical gate:** Supervised Windows run
+  `lunatic_route2_stage4a_unattended_20260727_210928` completed Stage 4A over
+  frames `2..45549` with 15,110 decisions, native bullet decode/local
+  hazards/beam reduction, maximum 1,528 bullets, accepted terminal unload,
+  route completion, compact artifacts, supervisor completion, and no
+  residual game/controller process. Hard no-Bomb passed across every
+  decision.
+- **Observed survival failure:** The run took 22 hits. All followed global
+  viability-kernel exhaustion; retained causes are ten modeled
+  committed-prefix collisions, nine observed-bullet overlaps, two exact
+  same-epoch enemy-body overlaps, and one sensor-gap/unmodeled-hazard case.
+  Fifteen contacts used fast movement and fifteen involved a playfield
+  boundary. This is CE-0139 evidence, not route acceptance.
+- **Observed canonical causal window:** The fresh-attempt contact at frame
+  1,174 was bullet slot 1,376 at AABB clearance `-1.134`. The last alive
+  decision used snapshot frame 1,171 and its immutable pipeline coverage
+  contract explicitly marked frames `1172..1203` unknown for unseen future
+  hazard events. Slot 1,376 was absent from the frame-1,172 nearby set and
+  present at contact. The global kernel had exhausted 62 frames before the
+  hit, while the local projected pipeline clearance stayed positive.
+- **Comparison boundary:** Against RNG-distinct Lunatic Stage-4A baseline
+  `20260726_160712`, native rolling-policy solve median/p95 improved from
+  `130.441/436.686 ms` to `111.218/314.367 ms`, and next-observation input
+  visibility rose from `0.856` to `0.924`. Deaths increased from 13 to 22.
+  These measurements retain post-split performance and delivery behavior;
+  they do not establish a survival regression or improvement across RNG
+  samples.
+- **Authority:** Structural physical retention only. The run confirms that
+  the native and Python decomposition remains executable under Lunatic
+  pressure. It also physically confirms that a slab already declared
+  `UNKNOWN` cannot authorize hard safety; model, recurrence, live authority,
+  and strategy remain unchanged.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 457,557,329-byte raw JSONL SHA-256
+  `3ac5d31aa4b51359f6352e66bdaf36e3ae629e356f1a25499e404f6beaa8d521`.

@@ -61,14 +61,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
   blocked by live integration, hazard coverage, clock, publication, and
   performance gates.
 - Latest structural checkpoint:
-  `02d0e32 Extract the live local planner pass`, with compact evidence and the
-  structural audit retained by
-  `2ea877b Record the extended structural retention gate`.
+  `ef306ce Split native internal ABI declarations`, following the focused
+  live movement/hazard/certificate/objective extractions and native
+  local/viability/geometry/pipeline translation-unit splits recorded in
+  `notes/RESEARCH_LOG.md`.
   `th08_live_dodge_agent.py`, runtime, practice/full-route supervisors,
   hotkey daemon, semantic cases, and ECL tool are compatibility/composition
   entry points over narrow packages. The live package now owns session and
   resource lifecycle, sensing/input, policy/scene clock, trace publication,
-  sensing models, hazard decoders, and the complete local-planner pass.
+  sensing models, movement contracts, hazard projection, local certificates,
+  objectives, and the complete local-planner pass. Native exports remain the
+  checked-in 46-symbol ABI while geometry, local kernels, viability families,
+  pipeline exports, compatibility adapters, and declaration headers have
+  dedicated owners.
   Historical imports and monkeypatch seams still resolve current
   implementation globals. R2/R3/R4 remain complete. The remaining structural
   target is the staged iteration contract inside `_run_live_session`, recorded
@@ -268,6 +273,17 @@ describe the same decision. Python/C++ parity is not physical correctness.
   decision retained the required planner groups with zero supplemental
   failures. The run took 13 hits, all after global-kernel exhaustion, so it
   is CE-0138 survival-failure evidence rather than route acceptance.
+- Post-refactor Lunatic retention
+  `lunatic_route2_stage4a_unattended_20260727_210928` completed Stage 4A over
+  frames `2..45549` with 15,110 decisions, maximum 1,528 active bullets,
+  native decode/hazard/beam backends, zero Bomb input, accepted terminal
+  unload, artifact materialization, supervisor completion, and no residual
+  game/controller process. It took 22 hits, all after global-kernel
+  exhaustion. The fresh-attempt frame-1,174 bullet overlap followed a
+  last-alive root whose hazard contract already marked the next slab unknown;
+  the contacting slot first appears in the retained nearby set at the hit.
+  This is CE-0139 future-event coverage evidence and native/live structural
+  retention, not survival or model-validity acceptance.
 - Query-local public value contracts now live in
   `touhou_control.query_survival_types`: pending command, reachable root,
   scalar/belief stats, upper certification, action recommendation, and query
@@ -499,8 +515,11 @@ frames before contact. CE-0133 rejects assuming a fixed pre-hit window
 contains the exhaustion boundary.
 
 **Conclusion:** the primary algorithmic problem is preserving global
-feasibility earlier and defining certified behavior after finite-kernel
-exhaustion, not a wholesale local geometry rewrite.
+feasibility earlier, conservatively covering future hazard events before
+issue, and defining certified behavior after finite-kernel exhaustion, not a
+wholesale local geometry rewrite. CE-0139 physically demonstrates that
+implementation parity cannot close a hazard slab the model itself declares
+unknown.
 
 ### Issue transaction and supplemental search
 

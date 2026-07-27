@@ -53,6 +53,14 @@ coupling, and the order for later structural work.
   residual process. All 18 required sensing field groups were present on
   every decision. Eight native hits make this survival-failure evidence, not
   a clean pass.
+- **Observed:** post-native-split Lunatic Stage-4A retention
+  `lunatic_route2_stage4a_unattended_20260727_210928` completed 15,110
+  decisions over frames `2..45549`, reached 1,528 bullets, retained native
+  decode/hazard/beam execution, passed hard no-Bomb, materialized accepted
+  compact artifacts, and left no residual game/controller process. Its 22
+  hits are CE-0139 physical-model evidence, not a structural gate failure:
+  the native decomposition remained operational, while the canonical contact
+  occurred inside a hazard slab already declared unknown.
 - **Workload decision:** Stage 1 remains sufficient for lifecycle, cleanup,
   and trace-schema changes. Subsequent planner, recurrence, clearance, or
   native compute checkpoints use Hard Stage 4A as the primary focused
@@ -91,7 +99,10 @@ the controller to 6,126 lines; extracting candidate-verifier trace ownership
 reduces it to 5,817 lines, and extracting decision-control trace fields
 reduces it to 5,594 lines. Extracting sensing trace fields reduces the current
 controller to 5,411 lines; extracting timing and optional-hazard trace fields
-reduces it to 5,377 lines. The dominant block remains `_run_live_session`.
+reduced it to 5,377 lines. Movement contracts/geometry, local hazard
+projection, pipeline certificates, and local objective extraction reduce the
+current controller to 4,190 lines. The dominant block remains
+`_run_live_session`.
 
 `scripts/th08_live/iteration.py` now defines and the live loop consumes:
 
@@ -138,7 +149,7 @@ implementation module where module-level patch identity matters.
 
 | Module | Lines | Decision | Reason |
 | --- | ---: | --- | --- |
-| `th08_live/controller.py` | 5,377 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, and outer composition; immutable handoff records plus pure corridor/candidate/control/sensing/timing/optional-hazard trace builders are live. |
+| `th08_live/controller.py` | 4,190 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, and outer composition; immutable handoff records plus pure trace builders, movement, hazard, certificate, and objective modules are live. |
 | `th08_live/planner_pass.py` | 320 | staged split complete | Prepare/orchestration only; shared contracts, baseline, supplemental lifecycle, and final selection/assembly have dedicated modules. |
 | `th08_live/planner_pass_supplemental.py` | 755 | retain through finalization gate | Cohesive pre-submit/search/exact-version lookup/fallback/terminal-label lifecycle; split native job construction from search only if later work makes either responsibility change independently. |
 | `th08_live/planner_pass_finalize.py` | 587 | retain | One selection/assembly responsibility: endpoint rank, robust override, pre-loss admission, damage shadow, decision assembly, and relaxed retry. |
@@ -165,12 +176,12 @@ decomposed.
 | Module | Lines | Decision |
 | --- | ---: | --- |
 | `th08_live_dodge_agent.py` | 22 | keep facade |
-| `th08_live/controller.py` | 5,411 | P0 staged extraction through iteration contracts |
-| `th08_live/planner_pass.py` | 1,685 | P1 after session stages; split prepare/baseline/supplemental/finalize |
-| `touhou_control/query_survival.py` | 1,800 | P1 split in progress; public value contracts extracted, next isolate the independent scalar oracle |
+| `th08_live/controller.py` | 4,190 | P0 staged extraction through iteration contracts |
+| `th08_live/planner_pass.py` | 320 | staged split complete |
+| `touhou_control/query_survival.py` | 80 | compatibility facade; focused scalar/root/workspace/dispatch/problem modules complete |
 | `touhou_control/query_survival_types.py` | 140 | retain public contracts |
-| `touhou_control/viability.py` | 1,400 | P1 split model/transition/numpy/native dispatch/public policy |
-| `touhou_control/native/local.py` | 1,288 | P1 split ABI types/workspaces/calls/results |
+| `touhou_control/viability.py` | 29 | compatibility facade; builders/policy/transitions/types own implementation |
+| `touhou_control/native/local.py` | 54 | compatibility facade; ABI/sensing/reducers/supplemental modules own implementation |
 | `touhou_control/native/viability.py` | 779 | P2 split only with matching C ABI ownership |
 | `touhou_control/native/belief.py` | 549 | P2 split only with matching C ABI ownership |
 | `touhou_control/native/pipeline.py` | 464 | retain for now |

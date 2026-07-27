@@ -120,6 +120,10 @@ void touhou_native_impl_pipeline_survival_workspace_destroy_v1(
     void* workspace
 );
 
+bool belief_pipeline_workspace_supports_u32_masks(
+    void* workspace
+) noexcept;
+
 int touhou_native_impl_belief_pipeline_workspace_create_v7(
     const float* clearance,
     int frame_count,

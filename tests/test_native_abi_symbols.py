@@ -43,6 +43,112 @@ def _binary_symbols(*, tool: str, library: Path) -> tuple[str, ...]:
 
 
 class NativeAbiSymbolTests(unittest.TestCase):
+    def test_legacy_direct_v1_adapters_remain_callable(self) -> None:
+        library = load_library()
+        if library is None:
+            self.skipTest("native library is unavailable")
+        create = library.touhou_pipeline_survival_workspace_create_v1
+        query = library.touhou_pipeline_survival_workspace_query_v1
+        destroy = library.touhou_pipeline_survival_workspace_destroy_v1
+        create.argtypes = [
+            ctypes.POINTER(ctypes.c_float),
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_double,
+            ctypes.c_double,
+            ctypes.c_double,
+            ctypes.c_double,
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.c_int,
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_float,
+            ctypes.c_int,
+            ctypes.POINTER(ctypes.c_void_p),
+        ]
+        create.restype = ctypes.c_int
+        query.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.c_int,
+            ctypes.POINTER(ctypes.c_uint16),
+            ctypes.POINTER(ctypes.c_float),
+            ctypes.POINTER(ctypes.c_uint16),
+            ctypes.POINTER(ctypes.c_float),
+            ctypes.POINTER(ctypes.c_uint32),
+            ctypes.POINTER(ctypes.c_uint64),
+        ]
+        query.restype = ctypes.c_int
+        destroy.argtypes = [ctypes.c_void_p]
+        destroy.restype = None
+
+        clearance = (ctypes.c_float * 8)(*[1.0] * 8)
+        velocity_x = (ctypes.c_double * 2)(0.0, 1.0)
+        velocity_y = (ctypes.c_double * 2)(0.0, 0.0)
+        delays = (ctypes.c_int * 1)(0)
+        handle = ctypes.c_void_p()
+        self.assertEqual(
+            create(
+                clearance,
+                2,
+                2,
+                2,
+                0.0,
+                1.0,
+                0.0,
+                1.0,
+                velocity_x,
+                velocity_y,
+                2,
+                delays,
+                1,
+                1,
+                0.0,
+                1,
+                ctypes.byref(handle),
+            ),
+            0,
+        )
+        self.assertTrue(handle.value)
+        try:
+            state_frames = ctypes.c_uint16()
+            state_margin = ctypes.c_float()
+            action_frames = (ctypes.c_uint16 * 2)()
+            action_margins = (ctypes.c_float * 2)()
+            best_mask = ctypes.c_uint32()
+            stats = (ctypes.c_uint64 * 8)()
+            self.assertEqual(
+                query(
+                    handle,
+                    0,
+                    0,
+                    0,
+                    0,
+                    -1,
+                    None,
+                    0,
+                    ctypes.byref(state_frames),
+                    ctypes.byref(state_margin),
+                    action_frames,
+                    action_margins,
+                    ctypes.byref(best_mask),
+                    stats,
+                ),
+                0,
+            )
+            self.assertEqual(state_frames.value, 1)
+            self.assertEqual(best_mask.value, 0x03)
+        finally:
+            destroy(handle)
+
     def test_legacy_belief_v6_query_v2_remains_callable(self) -> None:
         library = load_library()
         if library is None:

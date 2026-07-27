@@ -1831,6 +1831,17 @@ private:
 
 }  // namespace
 
+bool belief_pipeline_workspace_supports_u32_masks(
+    void* workspace
+) noexcept {
+    return (
+        workspace != nullptr
+        && static_cast<BeliefPipelineSurvivalWorkspace*>(
+            workspace
+        )->action_count() <= PIPELINE_MAX_ACTIONS
+    );
+}
+
 int touhou_native_impl_belief_pipeline_workspace_create_v7(
     const float* clearance,
     int frame_count,
@@ -2157,108 +2168,4 @@ void touhou_native_impl_belief_pipeline_workspace_destroy_v1(
     void* workspace
 ) {
     delete static_cast<BeliefPipelineSurvivalWorkspace*>(workspace);
-}
-
-int touhou_native_impl_belief_pipeline_workspace_query_v2(
-    void* workspace,
-    int start_frame,
-    int start_row,
-    int start_column,
-    int observed_action,
-    int pending_action,
-    const int* pending_remaining_frames,
-    int pending_remaining_count,
-    int continuation_action_budget,
-    int timeout_ms,
-    std::uint16_t* output_state_frames,
-    float* output_state_margin,
-    std::uint16_t* output_action_frames,
-    float* output_action_margins,
-    std::uint32_t* output_best_action_mask,
-    std::uint64_t* output_stats
-) {
-    if (
-        workspace == nullptr || output_best_action_mask == nullptr
-        || static_cast<BeliefPipelineSurvivalWorkspace*>(
-            workspace
-        )->action_count() > PIPELINE_MAX_ACTIONS
-    ) {
-        return 1;
-    }
-    std::uint64_t best_action_mask = 0;
-    const int result =
-        touhou_native_impl_belief_pipeline_workspace_query_v3(
-            workspace,
-            start_frame,
-            start_row,
-            start_column,
-            observed_action,
-            pending_action,
-            pending_remaining_frames,
-            pending_remaining_count,
-            continuation_action_budget,
-            timeout_ms,
-            output_state_frames,
-            output_state_margin,
-            output_action_frames,
-            output_action_margins,
-            &best_action_mask,
-            output_stats
-        );
-    if (result == 0) {
-        *output_best_action_mask =
-            static_cast<std::uint32_t>(best_action_mask);
-    }
-    return result;
-}
-
-int touhou_native_impl_belief_pipeline_workspace_certify_upper_v2(
-    void* workspace,
-    int start_frame,
-    int start_row,
-    int start_column,
-    int observed_action,
-    int pending_action,
-    const int* pending_remaining_frames,
-    int pending_remaining_count,
-    int continuation_action_budget,
-    std::uint16_t lower_frames,
-    float lower_margin,
-    int timeout_ms,
-    std::uint32_t* output_unresolved_action_mask,
-    int* output_deadline_expired,
-    std::uint64_t* output_stats
-) {
-    if (
-        workspace == nullptr || output_unresolved_action_mask == nullptr
-        || static_cast<BeliefPipelineSurvivalWorkspace*>(
-            workspace
-        )->action_count() > PIPELINE_MAX_ACTIONS
-    ) {
-        return 1;
-    }
-    std::uint64_t unresolved_action_mask = 0;
-    const int result =
-        touhou_native_impl_belief_pipeline_workspace_certify_upper_v3(
-            workspace,
-            start_frame,
-            start_row,
-            start_column,
-            observed_action,
-            pending_action,
-            pending_remaining_frames,
-            pending_remaining_count,
-            continuation_action_budget,
-            lower_frames,
-            lower_margin,
-            timeout_ms,
-            &unresolved_action_mask,
-            output_deadline_expired,
-            output_stats
-        );
-    if (result == 0) {
-        *output_unresolved_action_mask =
-            static_cast<std::uint32_t>(unresolved_action_mask);
-    }
-    return result;
 }

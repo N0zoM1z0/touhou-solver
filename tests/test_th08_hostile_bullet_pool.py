@@ -70,6 +70,77 @@ class HostileBulletPoolTests(unittest.TestCase):
         self.assertEqual([slot.index for slot in result.state.slots], [0, 1535])
         self.assertTrue(all(slot.bullet.age == 1 for slot in result.state.slots))
 
+    def test_new_bullet_moves_before_same_frame_contact(self) -> None:
+        moving = HostileBulletState(
+            90.0,
+            100.0,
+            10.0,
+            0.0,
+            8.0,
+            8.0,
+        )
+        result = _step(
+            HostileBulletPoolState(),
+            spawns_before_update=(HostileBulletSpawnRequest(moving),),
+        )
+        self.assertEqual(result.spawned_slots, (0,))
+        self.assertEqual(
+            [(contact.slot_index, contact.kind) for contact in result.contacts],
+            [(0, "hit")],
+        )
+        self.assertEqual(result.released_slots, (0,))
+
+    def test_full_pool_cannot_reuse_slots_released_later_in_same_pass(self) -> None:
+        state = HostileBulletPoolState(
+            tuple(
+                HostileBulletSlot(slot, _bullet(x=-100.0))
+                for slot in range(BULLET_POOL_SIZE)
+            ),
+            allocation_cursor=700,
+        )
+        full = _step(
+            state,
+            spawns_before_update=(
+                HostileBulletSpawnRequest(_bullet(x=10.0, y=10.0)),
+            ),
+            player_state=2,
+        )
+        self.assertTrue(full.pool_exhausted)
+        self.assertEqual(full.spawned_slots, ())
+        self.assertEqual(len(full.released_slots), BULLET_POOL_SIZE)
+        self.assertEqual(full.state.slots, ())
+        self.assertEqual(full.state.allocation_cursor, 700)
+
+        next_pass = _step(
+            full.state,
+            spawns_before_update=(
+                HostileBulletSpawnRequest(_bullet(x=10.0, y=10.0)),
+            ),
+            player_state=2,
+        )
+        self.assertFalse(next_pass.pool_exhausted)
+        self.assertEqual(next_pass.spawned_slots, (700,))
+        self.assertEqual(next_pass.state.allocation_cursor, 701)
+
+    def test_collision_suppressed_birth_still_moves_and_ages(self) -> None:
+        suppressed = HostileBulletState(
+            90.0,
+            100.0,
+            10.0,
+            0.0,
+            8.0,
+            8.0,
+            collision_suppressed=True,
+        )
+        result = _step(
+            HostileBulletPoolState(),
+            spawns_before_update=(HostileBulletSpawnRequest(suppressed),),
+        )
+        self.assertEqual(result.contacts, ())
+        self.assertEqual(len(result.state.slots), 1)
+        bullet = result.state.slots[0].bullet
+        self.assertEqual((bullet.x, bullet.y, bullet.age), (100.0, 100.0, 1))
+
     def test_exact_contact_hits_before_graze_age_and_releases_bullet(self) -> None:
         state = HostileBulletPoolState((HostileBulletSlot(4, _bullet()),))
         result = _step(state)

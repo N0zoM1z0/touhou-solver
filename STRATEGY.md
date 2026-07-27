@@ -244,8 +244,9 @@ Windows deadline gate. CE-0131 is the canonical final rejection witness.
   active/held/pending roots remain shadow.
 - **Model:** canonical shadow identity now retains complete native
   active/held/pending masks, remaining-delay support, exact observation, and
-  immutable hazard/policy/model/clock versions. The scalar/native recurrence
-  still projects those masks to movement actions.
+  immutable hazard/policy/model/clock versions. A tested 36-token no-Bomb
+  complete-mask alphabet now supplies unique equal-velocity issue identities;
+  the scalar/native production recurrence is not yet switched to it.
 - **Observed:** packed equivalent-root induction matches the independent
   scalar oracle. Hard Stage-1 `153821` retained 7,574 valid identities, 1,513
   multikey transactions, 173 last-write-wins replacements, 92 pending
@@ -259,7 +260,8 @@ Windows deadline gate. CE-0131 is the canonical final rejection witness.
   identity and hazard/clock coverage passes.
 - **Evidence:** CE-0122/0123/0124/0134,
   `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`, and
-  `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`.
+  `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`,
+  `notes/COMPLETE_MASK_ISSUE_ACTION_CONTRACT_20260727.md`.
 
 ### S15 — Native Local Implementation Acceleration
 

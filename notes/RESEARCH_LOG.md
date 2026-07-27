@@ -4637,3 +4637,28 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   before revisiting authority. G2 may proceed offline/query-local but cannot
   bypass these blockers. No live action, worker, cadence, reset, or strategy
   status changed.
+
+## 2026-07-27: CE-0134 Complete-Mask Action Contract
+
+- **Formal correction:** Added
+  `notes/COMPLETE_MASK_ISSUE_ACTION_CONTRACT_20260727.md`. The physical
+  no-write predicate compares the selected complete desired mask with the
+  held complete desired mask. Equal velocity is not action identity.
+- **Finite alphabet:** Added a game-neutral injective complete-mask action
+  space and a TH08 adapter containing 36 canonical no-Bomb tokens: nine
+  directions including neutral, two Focus states, and two Shot states.
+  Contradictory directions and Bomb fail closed.
+- **Compatibility:** Every existing 17-action TH08 viability movement
+  projection retains its name and exact velocity. Focused/unfocused neutral
+  and Shot variants remain separate issue identities even when their
+  velocities agree.
+- **CE-0134 regression:** `0x05` active, `0x85` held/pending, and selected
+  `0x84` map to three distinct tokens. The latter two have equal velocity but
+  `0x85 -> 0x84` is correctly classified as a real write.
+- **Capacity finding:** The native belief workspace is still limited to 32
+  actions and `uint32_t` subset masks. A backward-compatible 64-bit belief
+  ABI plus 36-action scalar/native differential gate is required before the
+  corrected alphabet can be used by the native recurrence.
+- **Authority:** This checkpoint is offline contract and test infrastructure.
+  It does not change the live action set, recurrence, publication, workers,
+  cadence, fallback, or strategy status.

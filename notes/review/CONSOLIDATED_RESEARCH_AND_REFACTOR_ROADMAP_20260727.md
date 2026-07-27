@@ -746,6 +746,12 @@ Observed closure:
   movement-only recurrence calls no-write. Therefore the evidence gate
   completed by rejecting promotion, not by granting it. G2 remains
   offline/query-local and must not bypass this root-model blocker.
+- The first correction checkpoint now defines an injective 36-token TH08
+  no-Bomb complete-mask alphabet. Equal-velocity Shot/Focus writes remain
+  distinct, unsupported/opposed masks fail closed, and all old 17 movement
+  projections are preserved. The native belief workspace's 32-action
+  `uint32_t` limit is the next explicit implementation gate; the codec alone
+  changes no live or solver authority.
 
 ### G2 — Dual-bound query-local refinement
 

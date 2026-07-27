@@ -13,15 +13,17 @@ and design/run notes retain derivations and history.
    for the agreed implementation order; the formal notes below remain
    authoritative
 5. `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`
-6. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
-7. `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
-8. `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`
-9. `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`
-10. `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`
-11. `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`
-12. `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
-13. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
-14. the relevant recent run note and counterexample rows before live work
+6. `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`
+7. `notes/COMPLETE_MASK_ISSUE_ACTION_CONTRACT_20260727.md`
+8. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
+9. `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
+10. `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`
+11. `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`
+12. `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`
+13. `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`
+14. `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
+15. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
+16. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -101,6 +103,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   right was pending and stay was active; the movement-only recurrence calls
   it no-write. CE-0134 blocks full pipeline promotion until complete issue
   identity participates in the scalar/native recurrence.
+- The first CE-0134 correction checkpoint defines a game-neutral injective
+  complete-mask alphabet and a 36-token TH08 no-Bomb adapter. It preserves the
+  old 17 movement projections while distinguishing equal-velocity Shot/Focus
+  writes. This is offline contract/test infrastructure only: the current
+  native belief workspace still has a 32-action/`uint32_t` capacity blocker.
 - No TH08 process, controller daemon, supervisor, or unfinished experiment is
   expected to be alive.
 - Native build output, raw traces, screenshots, caches, and the local

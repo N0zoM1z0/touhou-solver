@@ -107,11 +107,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   characterized controller helpers and inline record. Historical private
   imports resolve aliases to the focused module; candidate verification
   remains shadow-only.
-- The pending decision-control trace characterization adds an immutable
-  `DecisionControlTraceInput` and a pure builder for deadline, delay,
-  dispatch, local-certificate, objective/guidance, player, damage shadow,
-  robust-control, and terminal-threat fields. The historical inline fields
-  remain for one checkpoint and are compared key-for-key before update.
+- Decision-control trace characterization checkpoint `0b7aa85` adds an
+  immutable `DecisionControlTraceInput` and a pure builder for deadline,
+  delay, dispatch, local-certificate, objective/guidance, player, damage
+  shadow, robust-control, and terminal-threat fields. The historical inline
+  fields were compared key-for-key before update. The current uncommitted
+  checkpoint removes those inline fields and consumes the extracted field
+  set.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -184,6 +186,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Decision-control trace characterization passes `695/695` quick tests on
   Linux in `9.067 s` and Windows in `13.266 s` with three Windows platform
   skips. Live-focused tests pass `108/108`.
+- After deleting the inline decision-control fields, `controller.py` is 5,594
+  lines and `695/695` quick tests pass on Linux in `8.936 s` and Windows in
+  `13.006 s` with three Windows platform skips. Supervised physical retention
+  `hard_route2_stage1_unattended_20260727_182434` completed Hard Stage 1 over
+  frames `2..20663` with 7,557 decisions, zero hits, zero Bomb input, accepted
+  route completion, artifacts, and no residual process. All 7,557 decision
+  records retained the required control-field groups.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

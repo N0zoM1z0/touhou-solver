@@ -4933,3 +4933,34 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `108/108`; Ruff and `git diff --check` pass; Linux quick suite passes
   `695/695` in `9.067 s`; Windows quick suite passes `695/695` in `13.266 s`
   with three platform skips.
+
+### 2026-07-27 — Decision-control trace extraction and physical retention
+
+- **Observed structural change:** Removed the characterized inline deadline,
+  delay, dispatch, local-certificate, objective/guidance, player, damage
+  shadow, robust-control, terminal-threat, and decision-result fields.
+  `_run_live_session` now composes the pure field set after issue;
+  `controller.py` is 5,594 lines.
+- **Observed automated gate:** Live-focused tests pass `108/108`; Ruff and
+  `git diff --check` pass; Linux quick suite passes `695/695` in `8.936 s`;
+  Windows quick suite passes `695/695` in `13.006 s` with three platform
+  skips.
+- **Observed physical retention:** Supervised Windows run
+  `hard_route2_stage1_unattended_20260727_182434` completed Hard Stage 1 over
+  frames `2..20663` with 7,557 decisions, zero hits, zero Bomb input, accepted
+  route completion, compact artifacts, supervisor completion, and no residual
+  process. Streaming validation found zero omissions across the 16 required
+  decision-control field groups in all 7,557 decision records.
+- **Authority:** Structure and implementation retention only. The immutable
+  input is constructed after physical dispatch and the pure builder performs
+  no sensing, planning, certification, delay mutation, issue, or write.
+  Model, recurrence, deadline, fallback, worker, strategy, and action
+  authority remain unchanged.
+- **Workload decision:** Stage 1 remains a cheap lifecycle/trace gate.
+  Subsequent planner, clearance, recurrence, or native compute checkpoints
+  use Hard Stage 4A as their primary focused physical workload; Stage 6B or a
+  full route is used when the claim concerns late resources, frozen clocks,
+  or transitions.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 157,724,274-byte raw JSONL SHA-256
+  `afd1fcf83f37188853bebf07129c381cb343462d6f8f772f93d3f7d394a0e89c`.

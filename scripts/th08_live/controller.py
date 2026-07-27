@@ -4742,36 +4742,6 @@ def _run_live_session(
                     "snapshot_frame": state["enemy_manager_frame"],
                     "snapshot_lag": snapshot_lag,
                     "action_lag": counter_at_action - int(state["enemy_manager_frame"]),
-                    "deadline_guard": {
-                        "missed": action_deadline_missed,
-                        "support_high": action_alignment.support_high,
-                        "post_capture_advance": (
-                            action_alignment.post_capture_advance
-                        ),
-                        "input_suppressed": action_deadline_missed,
-                        "planned_action": planned_action,
-                        "planned_mask": planned_mask,
-                        "issued_action": decision.action,
-                        "issued_mask": decision.mask,
-                    },
-                    "control_delay_frames": control_delay_frames,
-                    "control_delay_candidates": delay_estimate.support,
-                    "control_delay_sample_count": (
-                        delay_estimate.end_to_end_samples
-                    ),
-                    "control_delay_estimator": {
-                        "computation_samples": (
-                            delay_estimate.computation_samples
-                        ),
-                        "pickup_samples": delay_estimate.pickup_samples,
-                        "end_to_end_samples": (
-                            delay_estimate.end_to_end_samples
-                        ),
-                        "guard_active": delay_estimate.guard_active,
-                        "overruns": delay_estimate.overruns,
-                        "censored": delay_estimate.censored,
-                    },
-                    "action_hold_frames": action_hold_frames,
                     "read_ms": read_ms,
                     "plan_ms": plan_ms,
                     "timing_ms": {
@@ -4847,101 +4817,6 @@ def _run_live_session(
                         "previous_trace": previous_trace_ms,
                         "previous_iteration": previous_iteration_ms,
                     },
-                    "input_snapshot": {
-                        "raw": state["input_raw"],
-                        "current": state["input_current"],
-                        "previous": state["input_previous"],
-                    },
-                    "input_dispatch": {
-                        "role": "observed_issue_transaction",
-                        "previous_mask": input_dispatch.previous_mask,
-                        "target_mask": input_dispatch.target_mask,
-                        "write_required": bool(transitions),
-                        "transition_count": len(transitions),
-                        "transitions": [
-                            [transition.bit, transition.pressed]
-                            for transition in transitions
-                        ],
-                        "estimator_issued": bool(transitions),
-                    },
-                    "local_pipeline_root": local_pipeline_root_record,
-                    "local_pipeline_timing": {
-                        "planning": _local_certificate_timing_record(
-                            decision.local_certificate_timing
-                        ),
-                        "issue_recertificate": (
-                            _local_certificate_timing_record(
-                                decision.issue_certificate_timing
-                            )
-                        ),
-                    },
-                    "local_pipeline_certificate_shadow": (
-                        local_pipeline_certificate_shadow
-                    ),
-                    "planner_objective": {
-                        "corridor_target": (
-                            {
-                                "x": corridor_target[0],
-                                "y": corridor_target[1],
-                                "deadline": corridor_target[2],
-                            }
-                            if corridor_target is not None
-                            else None
-                        ),
-                        "damage_target_x": damage_target_x,
-                        "damage_target_half_width": (
-                            damage_target_half_width
-                        ),
-                        "damageable": damageable,
-                        "active_items": len(items),
-                        "item_objectives_enabled": (
-                            ITEM_OBJECTIVES_ENABLED
-                        ),
-                        "damage_action_authority": False,
-                        "preserve_previous_direction_inertia": (
-                            not corridor_context_changed
-                        ),
-                        "corridor_context_changed": (
-                            corridor_context_changed
-                        ),
-                    },
-                    "planner_guidance": {
-                        "support_covers_current": (
-                            policy_guidance.support_covers_current
-                        ),
-                        "allowed_first_actions": (
-                            policy_guidance.allowed_first_actions
-                        ),
-                        "repair_volumes": dict(
-                            policy_guidance.repair_volumes
-                        ),
-                        "recovery_distances": dict(
-                            policy_guidance.recovery_distances
-                        ),
-                        "safety_actions": policy_guidance.safety_actions,
-                        "safety_state_value": (
-                            policy_guidance.safety_state_value
-                        ),
-                        "survival_actions": (
-                            policy_guidance.survival_actions
-                        ),
-                        "survival_frames": policy_guidance.survival_frames,
-                        "survival_bottleneck_margin": (
-                            policy_guidance.survival_bottleneck_margin
-                        ),
-                        "position_error": policy_guidance.position_error,
-                    },
-                    "player": {
-                        "x": player["x"],
-                        "y": player["y"],
-                        "projected_x": projected_player_x,
-                        "projected_y": projected_player_y,
-                        "control_origin_x": control_origin_x,
-                        "control_origin_y": control_origin_y,
-                        "phase": player["phase"],
-                        "phase_at_action": phase_now,
-                        "predeath_at_action": predeath_now,
-                    },
                     "resources": resources,
                     "stage_route_index": state["stage_route_index"],
                     "spell": state["spell"],
@@ -4984,28 +4859,6 @@ def _run_live_session(
                         if boss_phase_progress is not None
                         else None
                     ),
-                    "damage_objective": {
-                        "role": (
-                            "shadow"
-                        ),
-                        "available": decision.damage_objective_available,
-                        "reason": decision.damage_reason,
-                        "target_x": damage_target_x,
-                        "target_half_width": damage_target_half_width,
-                        "baseline_action": decision.damage_baseline_action,
-                        "shadow_action": decision.damage_shadow_action,
-                        "issued_action": decision.action,
-                        "live_selected": False,
-                        "current_alignment_cost": (
-                            decision.damage_current_alignment_cost
-                        ),
-                        "shadow_alignment_cost": (
-                            decision.damage_shadow_alignment_cost
-                        ),
-                        "eligible_action_count": (
-                            decision.damage_eligible_action_count
-                        ),
-                    },
                     "bullet_velocity_lookahead": (
                         {
                             "instruction_pointer": (
@@ -5204,131 +5057,6 @@ def _run_live_session(
                             else None
                         )
                     ),
-                    "action": decision.action,
-                    "mask": decision.mask,
-                    "focused": decision.planned_focus,
-                    "minimum_clearance": decision.min_clearance,
-                    "immediate_clearance": decision.immediate_clearance,
-                    "pipeline_clearance": decision.pipeline_clearance,
-                    "robust_control": {
-                        "delay_frames": decision.robust_delay_frames,
-                        "override": decision.robust_override,
-                        "worst_collisions": decision.robust_collisions,
-                        "min_clearance": decision.robust_min_clearance,
-                        "cvar_risk": decision.robust_cvar_risk,
-                        "worst_delay": decision.robust_worst_delay,
-                        "viability_constrained": (
-                            decision.viability_constrained
-                        ),
-                        "viability_safe_action_count": (
-                            decision.viability_safe_action_count
-                        ),
-                        "viability_repair_volume": (
-                            decision.viability_repair_volume
-                        ),
-                        "viability_constraint_relaxed": (
-                            decision.viability_constraint_relaxed
-                        ),
-                        "viability_recovery_distance": (
-                            decision.viability_recovery_distance
-                        ),
-                        "viability_control_reserve_deficit": (
-                            decision.viability_control_reserve_deficit
-                        ),
-                        "viability_control_reserve_valid": (
-                            decision.viability_control_reserve_valid
-                        ),
-                        "preloss_continuation_preference_active": (
-                            decision.preloss_continuation_preference_active
-                        ),
-                        "planned_route_gate_deficit": (
-                            decision.planned_route_gate_deficit
-                        ),
-                        "local_collisions": decision.local_collisions,
-                        "preloss_supplemental_beam_active": (
-                            decision.preloss_supplemental_beam_active
-                        ),
-                        "preloss_supplemental_beam_width": (
-                            decision.preloss_supplemental_beam_width
-                        ),
-                        "preloss_historical_action": (
-                            decision.preloss_historical_action
-                        ),
-                        "preloss_selected_from_supplemental": (
-                            decision.preloss_selected_from_supplemental
-                        ),
-                        "preloss_supplemental_candidate_count": (
-                            decision.preloss_supplemental_candidate_count
-                        ),
-                        "preloss_historical_route_gate_deficit": (
-                            decision.preloss_historical_route_gate_deficit
-                        ),
-                        "preloss_supplemental_failure": (
-                            decision.preloss_supplemental_failure
-                        ),
-                        "preloss_supplemental_backend": (
-                            decision.preloss_supplemental_backend
-                        ),
-                        "preloss_supplemental_status": (
-                            decision.preloss_supplemental_status
-                        ),
-                        "preloss_supplemental_completed": (
-                            decision.preloss_supplemental_completed
-                        ),
-                        "preloss_supplemental_historical_fallback": (
-                            decision
-                            .preloss_supplemental_historical_fallback
-                        ),
-                        "preloss_supplemental_background_compute_ms": (
-                            decision
-                            .preloss_supplemental_background_compute_ms
-                        ),
-                        "viability_safety_value_preferred": (
-                            decision.viability_safety_value_preferred
-                        ),
-                        "viability_safety_state_value": (
-                            decision.viability_safety_state_value
-                        ),
-                        "viability_fresh_prefix_filtered": (
-                            decision.viability_fresh_prefix_filtered
-                        ),
-                        "viability_fresh_prefix_relaxed": (
-                            decision.viability_fresh_prefix_relaxed
-                        ),
-                        "viability_survival_preferred": (
-                            decision.viability_survival_preferred
-                        ),
-                        "viability_survival_frames": (
-                            decision.viability_survival_frames
-                        ),
-                        "viability_survival_bottleneck_margin": (
-                            decision.viability_survival_bottleneck_margin
-                        ),
-                    },
-                    "terminal_threat": {
-                        "mode": (
-                            "constant_terminal_action_heuristic"
-                            if decision.terminal_threat_horizon > args.horizon
-                            else "disabled_no_degenerate_boundary"
-                        ),
-                        "horizon_frames": (
-                            decision.terminal_threat_horizon
-                        ),
-                        "collisions": (
-                            decision.terminal_threat_collisions
-                        ),
-                        "min_clearance": (
-                            decision.terminal_threat_min_clearance
-                        ),
-                    },
-                    "score": decision.score,
-                    "item_utility": decision.item_utility,
-                    "predicted_collections": decision.predicted_collections,
-                    "bomb": decision.bomb,
-                    "hit_started": hit_started,
-                    "hit_count": hit_count,
-                    "auto_confirm": auto_confirm_event,
-                    "enemy_bodies": _serialized_enemy_bodies(enemy_bodies),
                 }
                 control_trace_fields = build_decision_control_trace_fields(
                     DecisionControlTraceInput(
@@ -5374,13 +5102,6 @@ def _run_live_session(
                         _local_certificate_timing_record
                     ),
                 )
-                if any(
-                    record[key] != value
-                    for key, value in control_trace_fields.items()
-                ):
-                    raise RuntimeError(
-                        "extracted decision control trace changed schema"
-                    )
                 record.update(control_trace_fields)
                 candidate_record = build_candidate_verifier_trace_record(
                     enabled=candidate_verifier is not None,

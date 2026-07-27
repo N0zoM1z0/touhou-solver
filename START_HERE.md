@@ -274,10 +274,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   result. The retained legacy always-issue scalar recurrence now lives in the
   independent `touhou_control.query_survival_scalar` module and shares only
   cadence/lattice validation from `query_survival_lattice`; it does not call
-  the native implementation it audits. The facade is 1,505 lines and
-  preserves its public imports. Focused query-survival tests pass `17/17`;
-  quick suites pass `699/699` on Linux in `9.184 s` and Windows in `13.309 s`
-  with three skips.
+  the native implementation it audits. Exact kinematic next-root enumeration
+  now lives in `query_survival_roots`, including its reusable prepared
+  context; the facade preserves both the public enumerator and historical
+  private prewarm import. The facade is 1,208 lines. Focused
+  query-survival/prewarm tests pass `17/17`, `5/5`, and `2/2`; quick suites
+  pass `699/699` on Linux in `9.390 s` and Windows in `13.306 s` with three
+  skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

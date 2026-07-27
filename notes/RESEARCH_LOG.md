@@ -5199,3 +5199,22 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural oracle ownership only. The historical
   always-issue recurrence retains its documented unknown physical bound
   direction; no formal, native, live, or strategy authority changed.
+
+### 2026-07-27 — Exact pipeline-root enumeration extraction
+
+- **Observed structural change:** Moved the prepared lattice/action context
+  and exact next-decision root enumerator into
+  `touhou_control.query_survival_roots`. The `query_survival` facade is now
+  1,208 lines and preserves its public enumerator plus the historical private
+  context import consumed by `pipeline_prewarm`.
+- **Boundary:** The extracted module performs kinematic reachability and
+  observation-compatible pending-delay grouping only. It still does not
+  certify collision safety, and physical-anchor/issue-offset inputs remain
+  scheduling evidence rather than changes to the lattice recurrence.
+- **Validation:** Query-survival tests pass `17/17`; pipeline-prewarm and
+  prewarm-service suites pass `5/5` and `2/2`. Ruff, byte compilation, import
+  smoke, and `git diff --check` pass. Quick suites pass `699/699` on Linux in
+  `9.390 s` and Windows in `13.306 s` with three platform skips.
+- **Authority:** Structural reachability ownership only. Root semantics,
+  uncertainty, collision certification, publication, live authority, and
+  strategy are unchanged.

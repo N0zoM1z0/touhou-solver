@@ -5405,3 +5405,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural sensing-binding ownership only. Runtime native
   sensing, geometry interpretation, decoder fields, fallback behavior, and
   live authority are unchanged.
+
+### 2026-07-27 — Native-local beam-reducer extraction
+
+- **Observed structural change:** Moved baseline and supplemental beam
+  reducer loaders and calls into
+  `touhou_control.native.local_reducers`. `native.local` is now 468 lines and
+  explicitly re-exports both historical reducers and loader names.
+- **Boundary:** The baseline and supplemental reducers remain separate:
+  their draft/action peer arrays, target enablement, position quantization,
+  playfield/reserve inputs, lexicographic columns, output capacity checks,
+  and error codes moved verbatim.
+- **Validation:** Native beam differential tests pass `5/5`; native facade
+  and semantic differential suites pass `4/4` and `6/6`. Ruff, byte
+  compilation, and `git diff --check` pass. The Linux quick suite passes
+  `699/699` in `9.396 s`.
+- **Authority:** Structural reducer-binding ownership only. Beam
+  approximation status, ordering, native ABI, live fallback, and action
+  authority are unchanged.

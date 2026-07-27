@@ -5583,3 +5583,26 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   survival recurrences, terminal handling, sampling-error correction,
   worker-limit semantics, exact masks/labels, Python-oracle independence,
   live authority, and strategy are unchanged.
+
+### 2026-07-27 — Native belief compatibility-adapter extraction
+
+- **Observed structural change:** Moved legacy belief-pipeline create
+  adapters v1-v6, query v1, and upper-certification v1 into the dedicated
+  398-line `pipeline/belief_compat.cpp`. The 2,264-line workspace TU retains
+  the current v7/v3 implementations, recurrence, class-dependent 32-bit mask
+  guards, recommendation, cancellation, and destruction.
+- **Boundary correction:** The first build showed query v2 and upper v2 inspect
+  the concrete workspace action count before narrowing 64-bit masks. Those
+  adapters were returned to the workspace TU rather than exposing the private
+  class or dropping the guard. Create adapters retain the original
+  `PIPELINE_MAX_ACTIONS` validation and numeric-limit behavior through narrow
+  includes.
+- **Build and validation:** Linux and Windows release libraries rebuild and
+  retain the exact 46-symbol manifest. Complete-mask belief,
+  query-survival, and pipeline-identity suites pass `3/3`, `17/17`, and
+  `6/6`; `git diff --check` passes. Quick suites pass `699/699` on Linux in
+  `8.836 s` and Windows in `12.961 s` with three platform skips.
+- **Authority:** Structural compatibility ownership only. Complete-mask
+  semantics, 32/64-bit narrowing guards, recurrence, upper quantifiers,
+  cancellation/deadline/status behavior, C ABI, live authority, and strategy
+  are unchanged.

@@ -209,7 +209,8 @@ implementation units are:
 
 | Module | Lines | Next seam |
 | --- | ---: | --- |
-| `pipeline/belief_workspace.cpp` | 2,648 | state identity / recurrence / certificates / workspace |
+| `pipeline/belief_workspace.cpp` | 2,264 | state identity / recurrence / certificates / current workspace ABI |
+| `pipeline/belief_compat.cpp` | 398 | legacy create/query/upper implementation adapters |
 | `pipeline/direct_workspace.cpp` | 1,447 | transition build / solve / resume |
 | `viability/boolean.cpp` | 354 | Boolean/terminal viability induction |
 | `viability/value.cpp` | 508 | signed safety value and best-action policy |

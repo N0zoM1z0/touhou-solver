@@ -362,6 +362,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   worker header. Linux/Windows release builds retain the exact 46-symbol ABI;
   viability/query-survival/differential gates pass. Quick suites pass
   `699/699` on Linux in `8.942 s` and Windows in `13.284 s` with three skips.
+- Legacy belief-pipeline create/query/upper implementation adapters now live
+  in `pipeline/belief_compat.cpp` (398 lines); the current 64-action
+  workspace, recurrence, class-dependent 32-bit guards, certificates,
+  recommendation, cancel, and destroy stay in `belief_workspace.cpp`
+  (2,264). Both release builds retain the exact 46-symbol ABI. Quick suites
+  pass `699/699` on Linux in `8.836 s` and Windows in `12.961 s` with three
+  skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

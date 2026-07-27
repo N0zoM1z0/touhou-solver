@@ -5105,3 +5105,29 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural baseline ownership only. Beam state, pruning key,
   reducer, hazard query, ranks, uncertainty, fallback, action authority, and
   strategy are unchanged.
+
+### 2026-07-27 — Planner supplemental stage extraction
+
+- **Observed structural change:** Added
+  `th08_live.planner_pass_supplemental` for native pre-submit, direct
+  supplemental search, deadline/cancel/error handling, exact-version
+  lookup-only publication, historical fallback, position cost, and terminal
+  labels. The planner orchestrator is 852 lines.
+- **Causal-order boundary:** Eligible native work is still submitted before
+  baseline execution. Consumers still perform an exact-identity lookup
+  without waiting, and unfinished/error/cancelled work retains the historical
+  baseline. Published terminal-label count mismatch remains fail-closed.
+- **Validation:** The five complete decision digests and six semantic
+  differential tests are unchanged; Ruff, byte compilation, and
+  `git diff --check` pass. A fresh Linux quick suite passes `699/699` in
+  `8.878 s`; Windows passes `699/699` in `12.977 s` with three platform
+  skips.
+- **Timing-test observation:** During Linux full-suite validation,
+  `test_native_deadline_aborts_cold_expansion` twice completed inside its
+  one-millisecond wall deadline instead of raising. The focused five-test
+  file passed, as did the final fresh full suite. No test or deadline was
+  changed; this remains an unresolved timing flake rather than planner
+  acceptance evidence.
+- **Authority:** Structural supplemental ownership only. State, uncertainty,
+  search, ranking, publication, fallback, action authority, and strategy are
+  unchanged.

@@ -244,6 +244,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
   1,503 lines. The supplemental async job is still submitted before baseline
   execution. Five complete decisions are unchanged; quick suites pass
   `699/699` on Linux in `8.837 s` and Windows in `13.130 s` with three skips.
+- Supplemental pre-submit, direct/native search, exact-version lookup,
+  deadline/cancel/error fallback, position cost, and terminal labeling now
+  live in `th08_live.planner_pass_supplemental`; the orchestrator is 852
+  lines. Five complete decisions and six semantic differential gates are
+  unchanged; a fresh Linux quick suite passes `699/699` in `8.878 s` and
+  Windows passes `699/699` in `12.977 s` with three skips. The Linux suite
+  also exposed an unresolved 1-ms wall-deadline test flake: the pipeline
+  prewarm deadline gate failed twice in full-suite order, passed focused, and
+  passed the final fresh full run. No test was weakened.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

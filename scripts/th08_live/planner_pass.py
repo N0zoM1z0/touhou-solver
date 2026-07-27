@@ -2,15 +2,11 @@
 
 from __future__ import annotations
 
-import functools
 import math
 import time
 from dataclasses import replace
 
-import numpy as np
-
 from th08_local_planner import (
-    CompletedSupplementalLookup,
     DamageDecisionFields,
     Decision,
     EndpointRanker,
@@ -24,21 +20,20 @@ from th08_local_planner import (
     SearchNode,
     SupplementalDecisionFields,
 )
-from touhou_control import native_backend
-from touhou_control.phase_progress import ProgressCandidate
-from touhou_control.supplemental_local_beam import (
-    SupplementalAction,
-    SupplementalNode,
-)
 from th08_live.planner_pass_baseline import (
     prepare_baseline_stage,
     run_baseline_stage,
+)
+from th08_live.planner_pass_supplemental import (
+    presubmit_supplemental_stage,
+    run_supplemental_stage,
 )
 from th08_live.planner_pass_types import (
     LocalCertificateTimingAccumulator,
     PlannerModeTransition,
     PlannerPassDependencies,
 )
+from touhou_control.phase_progress import ProgressCandidate
 
 
 def _run_local_planner_pass(
@@ -52,18 +47,10 @@ def _run_local_planner_pass(
 ) -> Decision | PlannerModeTransition:
     _PlannerModeTransition = PlannerModeTransition
     _PLANNER_ACTIONS = dependencies.planner_actions
-    _LOCAL_SUPPLEMENTAL_BACKEND = dependencies.local_supplemental_backend
     BOMB = dependencies.bomb_mask
     FOCUS = dependencies.focus_mask
     SHOT = dependencies.shot_mask
     ITEM_SAFETY_CLEARANCE = dependencies.item_safety_clearance
-    PLAYER_RADIUS = dependencies.player_radius
-    PLAYFIELD_LEFT = dependencies.playfield_left
-    PLAYFIELD_RIGHT = dependencies.playfield_right
-    PLAYFIELD_TOP = dependencies.playfield_top
-    PLAYFIELD_BOTTOM = dependencies.playfield_bottom
-    UNFOCUSED_CARDINAL_SPEED = dependencies.unfocused_cardinal_speed
-    UNFOCUSED_DIAGONAL_SPEED = dependencies.unfocused_diagonal_speed
     _boundary_control_reserve_deficit = (
         dependencies.boundary_control_reserve_deficit
     )
@@ -80,16 +67,7 @@ def _run_local_planner_pass(
     _robust_action_certificates = dependencies.robust_action_certificates
     _terminal_threat_scores = dependencies.terminal_threat_scores
     assemble_local_decision = dependencies.assemble_local_decision
-    lookup_completed_supplemental = (
-        dependencies.lookup_completed_supplemental
-    )
     select_progress_action = dependencies.select_progress_action
-    search_supplemental_local_beam = (
-        dependencies.search_supplemental_local_beam
-    )
-    search_supplemental_local_beam_native = (
-        dependencies.search_supplemental_local_beam_native
-    )
 
     physical = request.physical
     actuator = request.actuator
@@ -105,8 +83,6 @@ def _run_local_planner_pass(
     enemy_bodies = physical.enemy_bodies
     snapshot_lag = physical.snapshot_lag
 
-    previous_direction = actuator.previous_direction
-    previous_focus = actuator.previous_focus
     local_pipeline_root = actuator.local_pipeline_root
     control_delay_frames = actuator.control_delay_frames
     control_delay_candidates = actuator.control_delay_candidates
@@ -116,12 +92,6 @@ def _run_local_planner_pass(
     target_y = guidance.target_y
     target_deadline = guidance.target_deadline
     allowed_first_actions = guidance.allowed_first_actions
-    viability_repair_volumes = guidance.viability_repair_volumes
-    viability_recovery_distances = (
-        guidance.viability_recovery_distances
-    )
-    viability_safety_actions = guidance.viability_safety_actions
-    viability_survival_actions = guidance.viability_survival_actions
 
     horizon = config.horizon
     preloss_continuation_preference = (
@@ -130,10 +100,6 @@ def _run_local_planner_pass(
     preloss_supplemental_beam_width = (
         config.preloss_supplemental_beam_width
     )
-    preserve_previous_direction_inertia = (
-        config.preserve_previous_direction_inertia
-    )
-    beam_dedup_mode = config.beam_dedup_mode
     relax_stale_viability_contradiction = (
         config.relax_stale_viability_contradiction
     )
@@ -144,13 +110,9 @@ def _run_local_planner_pass(
     damage_target_half_width = objective.damage_target_half_width
     damageable = objective.damageable
 
-    preloss_supplemental_deadline_ms = (
-        completed.supplemental_deadline_ms
-    )
     preloss_supplemental_async_service = (
         completed.supplemental_async_service
     )
-    preloss_supplemental_version = completed.supplemental_version
     _viability_retry = (
         request.mode is PlannerMode.RELAXED_VIABILITY
     )
@@ -348,169 +310,15 @@ def _run_local_planner_pass(
         planner_preparation=preparation,
         dependencies=dependencies,
     )
-    native_beam_enabled = baseline_stage.native_beam_enabled
-    native_certificate_collisions = (
-        baseline_stage.native_certificate_collisions
+    supplemental_submission = presubmit_supplemental_stage(
+        baseline_stage,
+        active=preloss_supplemental_beam_active,
+        initial_node=initial_node,
+        bullet_frames=bullet_frames,
+        laser_frames=laser_frames,
+        supplemental_reserve_distance=preloss_reserve_distance,
+        timing=_certificate_timing_accumulator,
     )
-    native_certificate_minimum = baseline_stage.native_certificate_minimum
-    native_survival_preferred = baseline_stage.native_survival_preferred
-    native_safety_preferred = baseline_stage.native_safety_preferred
-    native_recovery_distance = baseline_stage.native_recovery_distance
-    presubmitted_async_identity: tuple[object, ...] | None = None
-    if (
-        preloss_supplemental_beam_active
-        and preloss_supplemental_async_service is not None
-        and _LOCAL_SUPPLEMENTAL_BACKEND == "native"
-        and native_beam_enabled
-    ):
-        async_submit_started_ns = time.perf_counter_ns()
-        async_actions = tuple(
-            SupplementalAction(
-                name=action.name,
-                direction=action.direction,
-                dx=action.dx,
-                dy=action.dy,
-                focused=action.focused,
-            )
-            for action in _PLANNER_ACTIONS
-        )
-        async_repair_volume = np.fromiter(
-            (
-                repair_by_action.get(action.name, 0)
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.int32,
-            count=len(_PLANNER_ACTIONS),
-        )
-        body_base_x = np.fromiter(
-            (body.x for body in enemy_bodies),
-            dtype=np.float32,
-            count=len(enemy_bodies),
-        )
-        body_base_y = np.fromiter(
-            (body.y for body in enemy_bodies),
-            dtype=np.float32,
-            count=len(enemy_bodies),
-        )
-        body_velocity_x = np.fromiter(
-            (body.vx for body in enemy_bodies),
-            dtype=np.float32,
-            count=len(enemy_bodies),
-        )
-        body_velocity_y = np.fromiter(
-            (body.vy for body in enemy_bodies),
-            dtype=np.float32,
-            count=len(enemy_bodies),
-        )
-        body_half_width = np.fromiter(
-            (
-                body.half_width + body.uncertainty
-                for body in enemy_bodies
-            ),
-            dtype=np.float32,
-            count=len(enemy_bodies),
-        )
-        body_half_height = np.fromiter(
-            (
-                body.half_height + body.uncertainty
-                for body in enemy_bodies
-            ),
-            dtype=np.float32,
-            count=len(enemy_bodies),
-        )
-        async_absolute_deadline_ns = (
-            None
-            if preloss_supplemental_deadline_ms is None
-            else async_submit_started_ns
-            + int(preloss_supplemental_deadline_ms * 1_000_000.0)
-        )
-        async_native_job = functools.partial(
-            search_supplemental_local_beam_native,
-            initial=SupplementalNode(
-                x=initial_node.x,
-                y=initial_node.y,
-                first_action=0,
-                last_action=0,
-                risk=initial_node.risk,
-                collisions=initial_node.collisions,
-                min_clearance=initial_node.min_clearance,
-                immediate_clearance=initial_node.immediate_clearance,
-            ),
-            actions=async_actions,
-            allowed_first_actions=frozenset(
-                effective_allowed_first_actions or ()
-            ),
-            action_hold_frames=action_hold_frames,
-            horizon=horizon,
-            beam_width=preloss_supplemental_beam_width,
-            bullet_frames=bullet_frames[:horizon],
-            laser_frames=tuple(
-                frame.fields_for_native()
-                for frame in laser_frames[:horizon]
-            ),
-            body_base_x=body_base_x,
-            body_base_y=body_base_y,
-            body_velocity_x=body_velocity_x,
-            body_velocity_y=body_velocity_y,
-            body_half_width=body_half_width,
-            body_half_height=body_half_height,
-            player_radius=PLAYER_RADIUS,
-            control_delay_frames=control_delay_frames,
-            previous_direction=previous_direction,
-            previous_focused=previous_focus,
-            preserve_previous_direction_inertia=(
-                preserve_previous_direction_inertia
-            ),
-            target_x=target_x,
-            target_y=target_y,
-            target_deadline=target_deadline,
-            item_safety_clearance=ITEM_SAFETY_CLEARANCE,
-            playfield_left=PLAYFIELD_LEFT,
-            playfield_right=PLAYFIELD_RIGHT,
-            playfield_top=PLAYFIELD_TOP,
-            playfield_bottom=PLAYFIELD_BOTTOM,
-            recovery_reserve_distance=recovery_reserve_distance,
-            supplemental_reserve_distance=preloss_reserve_distance,
-            diagonal_speed=UNFOCUSED_DIAGONAL_SPEED,
-            cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
-            certificate_collisions=native_certificate_collisions,
-            certificate_minimum=native_certificate_minimum,
-            survival_preferred=native_survival_preferred,
-            safety_preferred=native_safety_preferred,
-            recovery_distance=native_recovery_distance,
-            repair_volume=async_repair_volume,
-            absolute_deadline_ns=async_absolute_deadline_ns,
-        )
-        presubmitted_async_identity = (
-            preloss_supplemental_version,
-            local_pipeline_root,
-            float(player_x).hex(),
-            float(player_y).hex(),
-            previous_direction,
-            previous_focus,
-            control_delay_frames,
-            control_delay_candidates,
-            action_hold_frames,
-            horizon,
-            preloss_supplemental_beam_width,
-            beam_dedup_mode,
-            target_x,
-            target_y,
-            target_deadline,
-            tuple(effective_allowed_first_actions or ()),
-            tuple(viability_repair_volumes),
-            tuple(viability_recovery_distances),
-            tuple(viability_safety_actions),
-            tuple(viability_survival_actions),
-        )
-        preloss_supplemental_async_service.submit(
-            presubmitted_async_identity,
-            lambda workspace: async_native_job(workspace=workspace),
-        )
-        time.sleep(0)
-        _certificate_timing_accumulator.supplemental_beam_ms += (
-            time.perf_counter_ns() - async_submit_started_ns
-        ) / 1_000_000.0
     baseline_result = run_baseline_stage(
         baseline_stage,
         initial_beam=beam,
@@ -521,501 +329,42 @@ def _run_local_planner_pass(
     beam_started_ns = baseline_result.started_ns
     beam = list(baseline_result.beam)
 
-    supplemental_beam: list[SearchNode] = []
-    supplemental_failure: str | None = None
-    supplemental_status = (
-        "not_eligible"
-        if not preloss_supplemental_beam_active
-        else "pending"
+    supplemental_result = run_supplemental_stage(
+        baseline_stage,
+        submission=supplemental_submission,
+        baseline_beam=beam,
+        initial_node=initial_node,
+        bullet_frames=bullet_frames,
+        laser_frames=laser_frames,
+        beam_started_ns=beam_started_ns,
+        continuation_preference_active=(
+            preloss_continuation_preference_active
+        ),
+        supplemental_beam_active=preloss_supplemental_beam_active,
+        supplemental_reserve_distance=preloss_reserve_distance,
+        effective_threat_horizon=effective_threat_horizon,
+        timing=_certificate_timing_accumulator,
     )
-    supplemental_completed = False
-    supplemental_historical_fallback = False
-    supplemental_async_identity = presubmitted_async_identity
-    supplemental_background_compute_ms: float | None = None
-    supplemental_published_terminal_labels: (
-        tuple[tuple[int, float], ...] | None
-    ) = None
-    if (
-        preloss_supplemental_beam_active
-        and presubmitted_async_identity is not None
-    ):
-        supplemental_status = "async_submitted"
-        supplemental_historical_fallback = True
-    elif preloss_supplemental_beam_active:
-        supplemental_started_ns = time.perf_counter_ns()
-        supplemental_actions = tuple(
-            SupplementalAction(
-                name=action.name,
-                direction=action.direction,
-                dx=action.dx,
-                dy=action.dy,
-                focused=action.focused,
-            )
-            for action in _PLANNER_ACTIONS
-        )
-
-        def supplemental_transition_risk(
-            node: SupplementalNode,
-            action: SupplementalAction,
-            x: float,
-            y: float,
-            step: int,
-        ) -> float:
-            last_action = supplemental_actions[node.last_action]
-            risk = _boundary_risk(x, y)
-            if action.direction != last_action.direction:
-                risk += 0.08
-            if _directions_opposed(
-                action.direction,
-                last_action.direction,
-            ):
-                risk += 24.0
-            if action.focused != last_action.focused:
-                risk += 0.12
-            if step == 1 and preserve_previous_direction_inertia:
-                if action.direction != previous_direction:
-                    risk += 0.08
-                if _directions_opposed(
-                    action.direction,
-                    previous_direction,
-                ):
-                    risk += 24.0
-                if action.focused != previous_focus:
-                    risk += 0.12
-            return risk
-
-        def supplemental_hazard_query(
-            positions_x: np.ndarray,
-            positions_y: np.ndarray,
-            absolute_step: int,
-        ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-            local_step = absolute_step - control_delay_frames
-            return _hazards_for_positions(
-                positions_x,
-                positions_y,
-                step=absolute_step,
-                bullet_frame=bullet_frames[local_step - 1],
-                lasers=laser_frames[local_step - 1],
-                enemy_bodies=enemy_bodies,
-            )
-
-        initial_supplemental = SupplementalNode(
-            x=initial_node.x,
-            y=initial_node.y,
-            first_action=0,
-            last_action=0,
-            risk=initial_node.risk,
-            collisions=initial_node.collisions,
-            min_clearance=initial_node.min_clearance,
-            immediate_clearance=initial_node.immediate_clearance,
-        )
-        certificate_collisions = np.fromiter(
-            (
-                robust_preflight_certificates[
-                    action.name
-                ].worst_collisions
-                if action.name in robust_preflight_certificates
-                else 0
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.int32,
-            count=len(_PLANNER_ACTIONS),
-        )
-        certificate_minimum = np.fromiter(
-            (
-                robust_preflight_certificates[
-                    action.name
-                ].min_clearance
-                if action.name in robust_preflight_certificates
-                else 0.0
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.float64,
-            count=len(_PLANNER_ACTIONS),
-        )
-        survival_preferred = np.fromiter(
-            (
-                not survival_actions
-                or action.name in survival_actions
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.uint8,
-            count=len(_PLANNER_ACTIONS),
-        )
-        safety_preferred = np.fromiter(
-            (
-                not safety_value_actions
-                or action.name in safety_value_actions
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.uint8,
-            count=len(_PLANNER_ACTIONS),
-        )
-        recovery_distance = np.fromiter(
-            (
-                recovery_by_action.get(action.name, math.inf)
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.float64,
-            count=len(_PLANNER_ACTIONS),
-        )
-        repair_volume = np.fromiter(
-            (
-                repair_by_action.get(action.name, 0)
-                for action in _PLANNER_ACTIONS
-            ),
-            dtype=np.int32,
-            count=len(_PLANNER_ACTIONS),
-        )
-        absolute_supplemental_deadline_ns = (
-            None
-            if preloss_supplemental_deadline_ms is None
-            else supplemental_started_ns
-            + int(preloss_supplemental_deadline_ms * 1_000_000.0)
-        )
-        try:
-            if (
-                _LOCAL_SUPPLEMENTAL_BACKEND == "native"
-                and beam_dedup_mode == "quantized"
-            ):
-                native_job = functools.partial(
-                    search_supplemental_local_beam_native,
-                    initial=initial_supplemental,
-                    actions=supplemental_actions,
-                    allowed_first_actions=frozenset(
-                        effective_allowed_first_actions or ()
-                    ),
-                    action_hold_frames=action_hold_frames,
-                    horizon=horizon,
-                    beam_width=preloss_supplemental_beam_width,
-                    bullet_frames=bullet_frames[:horizon],
-                    laser_frames=tuple(
-                        frame.fields_for_native()
-                        for frame in laser_frames[:horizon]
-                    ),
-                    body_base_x=np.fromiter(
-                        (body.x for body in enemy_bodies),
-                        dtype=np.float32,
-                        count=len(enemy_bodies),
-                    ),
-                    body_base_y=np.fromiter(
-                        (body.y for body in enemy_bodies),
-                        dtype=np.float32,
-                        count=len(enemy_bodies),
-                    ),
-                    body_velocity_x=np.fromiter(
-                        (body.vx for body in enemy_bodies),
-                        dtype=np.float32,
-                        count=len(enemy_bodies),
-                    ),
-                    body_velocity_y=np.fromiter(
-                        (body.vy for body in enemy_bodies),
-                        dtype=np.float32,
-                        count=len(enemy_bodies),
-                    ),
-                    body_half_width=np.fromiter(
-                        (
-                            body.half_width + body.uncertainty
-                            for body in enemy_bodies
-                        ),
-                        dtype=np.float32,
-                        count=len(enemy_bodies),
-                    ),
-                    body_half_height=np.fromiter(
-                        (
-                            body.half_height + body.uncertainty
-                            for body in enemy_bodies
-                        ),
-                        dtype=np.float32,
-                        count=len(enemy_bodies),
-                    ),
-                    player_radius=PLAYER_RADIUS,
-                    control_delay_frames=control_delay_frames,
-                    previous_direction=previous_direction,
-                    previous_focused=previous_focus,
-                    preserve_previous_direction_inertia=(
-                        preserve_previous_direction_inertia
-                    ),
-                    target_x=target_x,
-                    target_y=target_y,
-                    target_deadline=target_deadline,
-                    item_safety_clearance=ITEM_SAFETY_CLEARANCE,
-                    playfield_left=PLAYFIELD_LEFT,
-                    playfield_right=PLAYFIELD_RIGHT,
-                    playfield_top=PLAYFIELD_TOP,
-                    playfield_bottom=PLAYFIELD_BOTTOM,
-                    recovery_reserve_distance=(
-                        recovery_reserve_distance
-                    ),
-                    supplemental_reserve_distance=(
-                        preloss_reserve_distance
-                    ),
-                    diagonal_speed=UNFOCUSED_DIAGONAL_SPEED,
-                    cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
-                    certificate_collisions=certificate_collisions,
-                    certificate_minimum=certificate_minimum,
-                    survival_preferred=survival_preferred,
-                    safety_preferred=safety_preferred,
-                    recovery_distance=recovery_distance,
-                    repair_volume=repair_volume,
-                    absolute_deadline_ns=(
-                        absolute_supplemental_deadline_ns
-                    ),
-                )
-                if preloss_supplemental_async_service is not None:
-                    supplemental_async_identity = (
-                        preloss_supplemental_version,
-                        local_pipeline_root,
-                        float(player_x).hex(),
-                        float(player_y).hex(),
-                        previous_direction,
-                        previous_focus,
-                        control_delay_frames,
-                        control_delay_candidates,
-                        action_hold_frames,
-                        horizon,
-                        preloss_supplemental_beam_width,
-                        beam_dedup_mode,
-                        target_x,
-                        target_y,
-                        target_deadline,
-                        tuple(effective_allowed_first_actions or ()),
-                        tuple(viability_repair_volumes),
-                        tuple(viability_recovery_distances),
-                        tuple(viability_safety_actions),
-                        tuple(viability_survival_actions),
-                    )
-                    preloss_supplemental_async_service.submit(
-                        supplemental_async_identity,
-                        lambda workspace: native_job(
-                            workspace=workspace
-                        ),
-                    )
-                    # Give the dedicated newest-wins worker one scheduling
-                    # opportunity; the consumer still performs lookup-only
-                    # publication with no completion wait.
-                    time.sleep(0)
-                    lane_nodes = []
-                    supplemental_status = "async_submitted"
-                    supplemental_historical_fallback = True
-                else:
-                    lane_nodes = native_job()
-            else:
-                lane_nodes = search_supplemental_local_beam(
-                    initial=initial_supplemental,
-                    actions=supplemental_actions,
-                    allowed_first_actions=frozenset(
-                        effective_allowed_first_actions or ()
-                    ),
-                    action_hold_frames=action_hold_frames,
-                    horizon=horizon,
-                    beam_width=preloss_supplemental_beam_width,
-                    beam_dedup_mode=beam_dedup_mode,
-                    hazard_query=supplemental_hazard_query,
-                    transition_risk=supplemental_transition_risk,
-                    control_delay_frames=control_delay_frames,
-                    target_x=target_x,
-                    target_y=target_y,
-                    target_deadline=target_deadline,
-                    item_safety_clearance=ITEM_SAFETY_CLEARANCE,
-                    playfield_left=PLAYFIELD_LEFT,
-                    playfield_right=PLAYFIELD_RIGHT,
-                    playfield_top=PLAYFIELD_TOP,
-                    playfield_bottom=PLAYFIELD_BOTTOM,
-                    recovery_reserve_distance=(
-                        recovery_reserve_distance
-                    ),
-                    supplemental_reserve_distance=(
-                        preloss_reserve_distance
-                    ),
-                    diagonal_speed=UNFOCUSED_DIAGONAL_SPEED,
-                    cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
-                    certificate_collisions=certificate_collisions,
-                    certificate_minimum=certificate_minimum,
-                    survival_preferred=survival_preferred,
-                    safety_preferred=safety_preferred,
-                    recovery_distance=recovery_distance,
-                    repair_volume=repair_volume,
-                    use_native_reducer=native_beam_enabled,
-                )
-            if supplemental_status != "async_submitted":
-                supplemental_status = "completed"
-                supplemental_completed = True
-            supplemental_beam = [
-                SearchNode(
-                    x=node.x,
-                    y=node.y,
-                    first_action=_PLANNER_ACTIONS[
-                        node.first_action
-                    ],
-                    last_action=_PLANNER_ACTIONS[node.last_action],
-                    risk=node.risk,
-                    collisions=node.collisions,
-                    min_clearance=node.min_clearance,
-                    immediate_clearance=node.immediate_clearance,
-                    collected_mask=0,
-                    item_utility=0.0,
-                )
-                for node in lane_nodes
-            ]
-        except native_backend.LocalSupplementalNativeDeadlineError:
-            supplemental_beam = []
-            supplemental_status = "deadline"
-            supplemental_historical_fallback = True
-        except native_backend.LocalSupplementalNativeCancelledError:
-            supplemental_beam = []
-            supplemental_status = "cancelled"
-            supplemental_historical_fallback = True
-        except Exception as error:
-            supplemental_beam = []
-            supplemental_status = "error"
-            supplemental_historical_fallback = True
-            supplemental_failure = (
-                f"{type(error).__name__}: {error}"
-            )
-        finally:
-            _certificate_timing_accumulator.supplemental_beam_ms += (
-                time.perf_counter_ns() - supplemental_started_ns
-            ) / 1_000_000.0
-    if supplemental_failure is not None:
-        preloss_continuation_preference_active = False
-        preloss_supplemental_beam_active = False
-
-    if not beam:
-        beam = [
-            SearchNode(
-                player_x,
-                player_y,
-                neutral,
-                neutral,
-                1e12,
-                1,
-                -9999.0,
-                -9999.0,
-                0,
-                0.0,
-            )
-        ]
-    supplemental_source_ids = {id(node) for node in supplemental_beam}
-    for index, node in enumerate(beam):
-        if target_x is None or target_y is None:
-            position_cost = (
-                ((node.x - 192.0) / 96.0) ** 2
-                + ((node.y - 400.0) / 128.0) ** 2
-            )
-        else:
-            position_cost = 0.25 * (
-                ((node.x - target_x) / 8.0) ** 2
-                + ((node.y - target_y) / 8.0) ** 2
-            )
-        beam[index] = replace(node, risk=node.risk + position_cost)
-    async_terminal_started_ns: int | None = None
-    terminal_threats: dict[SearchNode, tuple[int, float]] = {}
-    if supplemental_async_identity is not None:
-        assert preloss_supplemental_async_service is not None
-        async_terminal_started_ns = time.perf_counter_ns()
-        terminal_threats.update(
-            _terminal_threat_scores(
-                beam,
-                start_step=horizon,
-                end_step=effective_threat_horizon,
-                control_delay_frames=control_delay_frames,
-                bullet_frames=bullet_frames,
-                laser_frames=laser_frames,
-                enemy_bodies=enemy_bodies,
-            )
-        )
-        completed_lookup: CompletedSupplementalLookup = (
-            lookup_completed_supplemental(
-                service=preloss_supplemental_async_service,
-                identity=supplemental_async_identity,
-                actions=_PLANNER_ACTIONS,
-            )
-        )
-        supplemental_status = completed_lookup.status
-        supplemental_completed = completed_lookup.completed
-        supplemental_historical_fallback = (
-            completed_lookup.historical_fallback
-        )
-        supplemental_background_compute_ms = (
-            completed_lookup.background_compute_ms
-        )
-        supplemental_published_terminal_labels = (
-            completed_lookup.terminal_labels
-        )
-        supplemental_beam = list(completed_lookup.beam)
-    for index, node in enumerate(supplemental_beam):
-        if target_x is None or target_y is None:
-            position_cost = (
-                ((node.x - 192.0) / 96.0) ** 2
-                + ((node.y - 400.0) / 128.0) ** 2
-            )
-        else:
-            position_cost = 0.25 * (
-                ((node.x - target_x) / 8.0) ** 2
-                + ((node.y - target_y) / 8.0) ** 2
-            )
-        replaced_node = replace(node, risk=node.risk + position_cost)
-        supplemental_source_ids.discard(id(node))
-        supplemental_source_ids.add(id(replaced_node))
-        supplemental_beam[index] = replaced_node
-    if supplemental_published_terminal_labels is not None:
-        if (
-            len(supplemental_published_terminal_labels)
-            != len(supplemental_beam)
-        ):
-            supplemental_failure = (
-                "RuntimeError: async terminal publication count mismatch"
-            )
-            supplemental_status = "error"
-            supplemental_completed = False
-            supplemental_historical_fallback = True
-            supplemental_beam = []
-            supplemental_source_ids.clear()
-        else:
-            terminal_threats.update(
-                zip(
-                    supplemental_beam,
-                    supplemental_published_terminal_labels,
-                )
-            )
-    _certificate_timing_accumulator.beam_search_ms += (
-        time.perf_counter_ns() - beam_started_ns
-    ) / 1_000_000.0
-    terminal_threat_started_ns = (
-        async_terminal_started_ns
-        if async_terminal_started_ns is not None
-        else time.perf_counter_ns()
+    beam = list(supplemental_result.baseline_beam)
+    supplemental_beam = list(supplemental_result.supplemental_beam)
+    terminal_threats = supplemental_result.terminal_threats
+    supplemental_source_ids = supplemental_result.supplemental_source_ids
+    preloss_continuation_preference_active = (
+        supplemental_result.continuation_preference_active
+    )
+    preloss_supplemental_beam_active = (
+        supplemental_result.supplemental_beam_active
+    )
+    supplemental_failure = supplemental_result.failure
+    supplemental_status = supplemental_result.status
+    supplemental_completed = supplemental_result.completed
+    supplemental_historical_fallback = (
+        supplemental_result.historical_fallback
+    )
+    supplemental_background_compute_ms = (
+        supplemental_result.background_compute_ms
     )
     endpoint_pool = [*beam, *supplemental_beam]
-    if async_terminal_started_ns is None:
-        terminal_threats = _terminal_threat_scores(
-            endpoint_pool,
-            start_step=horizon,
-            end_step=effective_threat_horizon,
-            control_delay_frames=control_delay_frames,
-            bullet_frames=bullet_frames,
-            laser_frames=laser_frames,
-            enemy_bodies=enemy_bodies,
-        )
-    elif (
-        supplemental_beam
-        and supplemental_published_terminal_labels is None
-    ):
-        terminal_threats.update(
-            _terminal_threat_scores(
-                supplemental_beam,
-                start_step=horizon,
-                end_step=effective_threat_horizon,
-                control_delay_frames=control_delay_frames,
-                bullet_frames=bullet_frames,
-                laser_frames=laser_frames,
-                enemy_bodies=enemy_bodies,
-            )
-        )
-    _certificate_timing_accumulator.terminal_threat_ms += (
-        time.perf_counter_ns() - terminal_threat_started_ns
-    ) / 1_000_000.0
     selection_started_ns = time.perf_counter_ns()
     endpoint_ranker = EndpointRanker(
         terminal_threats=terminal_threats,
@@ -1426,7 +775,7 @@ def _run_local_planner_pass(
                 backend=(
                     "exact_async_native"
                     if preloss_supplemental_async_service is not None
-                    else _LOCAL_SUPPLEMENTAL_BACKEND
+                    else dependencies.local_supplemental_backend
                 ),
                 status=supplemental_status,
                 completed=supplemental_completed,

@@ -3828,3 +3828,38 @@ split structural gate completed
 - **Evidence:** Matching compact run, comparison, and dossier artifacts;
   ignored 457,557,329-byte raw JSONL SHA-256
   `3ac5d31aa4b51359f6352e66bdaf36e3ae629e356f1a25499e404f6beaa8d521`.
+
+## CE-0140: Boolean empty is not stationary or unrestricted exact losing
+
+Status: observed offline finite-model classification counterexample; G3
+retained-capsule gate complete
+
+- **Observed Stage-4A counterexample:** Historical Lunatic root
+  decision/query/source `761/757/756` in `policy_738_756.npz` was
+  trace-Boolean-empty. Exact recursive-cadence belief replay over all 17 root
+  actions and all 17 singleton stationary continuations nevertheless retained
+  a 32-frame positive witness with margin
+  `0x1.eaf6800000000p-3`.
+- **Observed Stage-6B counterexample:** Root `410/408/390` in
+  `policy_368_390.npz` was also trace-Boolean-empty, yet the same completed
+  stationary class retained a 32-frame positive witness with margin
+  `0x1.7e38d83ad07c0p-2`.
+- **Mode separation:** The first five eligible empty roots in each workload
+  also contained a 17/12-frame positive partial witness and an already-unsafe
+  zero-prefix root. All six portfolios completed every root action. Selected
+  witnesses matched native guaranteed frames with margins inside the existing
+  `1e-5` scalar/native tolerance.
+- **Rejected inference:** A coarse Boolean-empty label does not certify exact
+  augmented-belief loss. Conversely, zero survival in the stationary class
+  does not certify unrestricted loss. Without a separate completed
+  unrestricted certificate, these roots remain `unresolved`; timeout,
+  unvisited candidates, and candidate exhaustion remain unresolved as well.
+- **Physical boundary:** This counterexample is exact only for the historical
+  17-movement-action capsule model. It omits CE-0134 complete-mask issue
+  distinctions and unknown future-event coverage. Stage-4A `103856` also used
+  the rejected repeated-counter guard. No live or physical authority follows.
+- **Evidence:**
+  `notes/G3_STATIONARY_PARTIAL_SURVIVAL_CAPSULE_GATE_20260727.md` and
+  `artifacts/viability_audit/g3_stationary_partial_witness_capsule_audit_20260727.json`
+  (content digest
+  `82ae76afac47f556d01865cba4a0342db6c5b1da44e537e6af7b7a9f28d881f8`).

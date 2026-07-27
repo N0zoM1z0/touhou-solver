@@ -71,15 +71,18 @@ acceptance or strategy promotion.
 all-root-action attainable lower-witness portfolio for declared stationary
 causal continuations. Four small randomized/adversarial cases agree per root
 action with both the independent scalar belief oracle and native belief
-workspace, including pending no-write and recursive cadence. This is
-restricted finite-model implementation evidence only; retained Stage-4A/6B
-capsules, native witness extraction, delivery, and physical validation remain
+workspace, including pending no-write and recursive cadence. Retained
+Stage-4A/6B capsules now add CE-0140: Boolean-empty roots contain full
+32-frame stationary witnesses, positive 17/12-frame partial witnesses, and
+zero-prefix stationary roots while unrestricted status remains unresolved.
+This is restricted historical 17-action finite-model evidence only; native
+extraction, complete-mask roots, delivery, and physical validation remain
 open.
 
 ### Priority
 
-1. Preserve global feasibility earlier. Apply the completed stationary G3
-   oracle to exact retained first-loss roots, then extend partial-survival
+1. Preserve global feasibility earlier. Continue G3 with native witness
+   extraction and exact complete-mask roots, then extend partial-survival
    witnesses only through completed causal policy classes.
 2. Use proof-backed query-local refinement to separate coarsening, horizon,
    uncertainty, forecast/birth, route/tube, and unresolved losses. Do not use

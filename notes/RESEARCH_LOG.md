@@ -6068,3 +6068,43 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   optimality, delivery, or permission to issue an action. The next G3 gate is
   a compact exact-root report on retained Stage-4A and Stage-6B capsules;
   native extraction and background delivery remain later gates.
+
+### 2026-07-27 — G3 stationary retained-capsule gate
+
+- **Observed retained workloads:** Checkpoint `ba4e66f` scans exact roots from
+  the retained 153,962,656-byte Lunatic Stage-4A `103856` trace and
+  384,027,287-byte Lunatic Stage-6B `011639` trace, then reconstructs their
+  exact 32-frame clearance capsules. Stage 4A supplied 691 roots/297 eligible
+  trace-Boolean-empty roots; Stage 6B supplied 14,279/6,618. The first five
+  eligible roots in each workload contain all three target modes.
+- **Observed mode separation:** Stage-4A Boolean-empty roots retain a
+  32-frame positive witness at decision 761, a 17-frame partial witness on an
+  unrestricted-unresolved root at 1,835, and a zero-prefix stationary result
+  at 902. Stage-6B roots retain the corresponding 32/12/0-frame results at
+  decisions 410/439/450. Every portfolio completes all 17 root actions over
+  all 17 singleton stationary continuation candidates.
+- **Observed counterexample:** CE-0140 records the full-horizon roots as direct
+  counterexamples to treating the historical Boolean-empty label as exact
+  augmented-belief loss. The zero-prefix roots separately reject treating
+  stationary-candidate exhaustion as unrestricted loss. All roots retain
+  `unrestricted_status = unresolved`; no post-finite-model-empty mode is
+  inferred without a completed unrestricted certificate.
+- **Observed independent checks:** Every selected witness path replays its
+  policy, root/successor links, recurrence labels, and digests. Native belief
+  queries match every selected witness's guaranteed frames; margin
+  differences remain below the pre-existing `1e-5` parity tolerance. Two
+  report generations are byte-identical. Content digest is
+  `82ae76afac47f556d01865cba4a0342db6c5b1da44e537e6af7b7a9f28d881f8`;
+  file SHA-256 is
+  `3e9c9beb562f33aa66ce2af92c8ef16a7147ab828b1d990612ca4f6edad794ff`.
+- **Observed architecture and validation:** The 44-line report entry point
+  delegates to 287/89/64-line audit, serialization, and workload owners.
+  Three retained-artifact contract tests fix the digest, authority, three
+  modes, complete action sets, and native parity. Ruff and diff checks pass;
+  Linux/Windows quick suites pass `723/723` in `9.182/13.135 s`, with three
+  Windows platform skips.
+- **Authority:** Exact only for the historical 17-movement-action capsule
+  model. The capsules omit CE-0134 complete-mask distinctions and unknown
+  future events; Stage-4A `103856` is physically contaminated by the rejected
+  repeated-counter guard. Native extraction, delivery, issue certificates,
+  and physical consumption remain open.

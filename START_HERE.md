@@ -35,19 +35,24 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest committed algorithmic checkpoint:
-  `5e48f3d Add exact stationary partial survival witnesses`. The first G3
-  checkpoint exhaustively evaluates every root action against declared
-  stationary causal continuations, merges hidden remaining-delay histories
-  before continuation, applies cadence recursively, preserves pending
-  no-write semantics, and retains exact problem/policy/witness digests plus a
-  deterministic worst observation-compatible branch. Four randomized and
-  adversarial tests match the existing independent scalar labels and native
-  belief workspace. The focused control suite passes `167/167`; complete
-  quick suites pass `720/720` on Linux in `9.678 s` and Windows in `13.093 s`
-  with three platform skips. The 31-line compatibility facade owns no
-  recurrence; digest, portfolio, replay, recurrence, and immutable records
-  live under `touhou_control/partial_witness/`. This is offline attainable
-  lower-witness authority only.
+  `ba4e66f Retain G3 stationary capsule witnesses`. The first five eligible
+  Boolean-empty exact roots in both retained Lunatic Stage 4A and Stage 6B
+  contain all three restricted outcomes: full 32-frame feasibility, positive
+  17/12-frame partial witnesses on unresolved roots, and no-positive
+  stationary witnesses. Every portfolio completed all 17 root actions over
+  all 17 singleton stationary continuations. Worst branches replay; selected
+  witnesses match native guaranteed frames with margins inside `1e-5`; two
+  report generations are byte-identical. CE-0140 rejects equating Boolean
+  empty or stationary exhaustion with unrestricted exact losing. The
+  44-line report entry point delegates to focused selection/validation,
+  serialization, and workload modules. Quick suites pass `723/723` on Linux
+  in `9.182 s` and Windows in `13.135 s` with three platform skips. This is
+  exact only for the historical 17-movement-action capsule model and remains
+  offline.
+- The preceding G3 implementation checkpoint `5e48f3d Add exact stationary
+  partial survival witnesses` owns the complete-root-action recurrence,
+  immutable digests, deterministic worst path, and small-case scalar/native
+  parity under `touhou_control/partial_witness/`.
 - The preceding G2 checkpoint `c38665b Define dual-bound refinement
   quantifiers` adds conservative patch dependency closure, candidate-guided
   8/4-pixel refinement, an independent scalar oracle, and a retained
@@ -699,13 +704,15 @@ CE-0120 is open, and no complete-mask publication/consumer gate exists. G2
 provides a branch-preserving query-local lower/reference/upper semantic gate
 for six retained spatial roots, but its multi-second Python patch/dense solve
 fails delivery. G3 now has an exact stationary scalar witness and complete
-all-root-action portfolio with small-case scalar/native parity. The next
-useful checkpoint is the retained Stage-4A/Stage-6B exact-root witness report,
-with G5 future-event coverage in parallel. Work should:
+all-root-action portfolio, small-case scalar/native parity, and a retained
+Stage-4A/Stage-6B capsule report. CE-0140 proves that old Boolean-empty roots
+can still contain full stationary witnesses; stationary zero-prefix roots
+remain unrestricted-unresolved. The next useful G3 checkpoint is native
+worst-branch extraction behind the current ABI, while G5 builds exact
+complete-mask roots with future-event coverage. Work should:
 
-1. run the G3 witness on retained first-loss roots and publish guaranteed
-   frames, bottleneck margin, worst branch, policy digest, exact immutable
-   root identity, and explicit completion status;
+1. add native G3 worst-branch/policy-witness extraction without changing the
+   checked-in 46-symbol ABI until a separately reviewed checkpoint;
 2. extend beyond stationary continuations only through a declared causal,
    observation-compatible, budget-complete class; unresolved/timeout actions
    remain unresolved rather than losing;

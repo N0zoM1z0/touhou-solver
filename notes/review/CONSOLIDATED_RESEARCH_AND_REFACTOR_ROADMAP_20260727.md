@@ -870,9 +870,18 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
 - 實作已拆為 31-line facade 與 `partial_witness/` 下的
   digest/portfolio/replay/stationary/types owners，沒有新增另一個巨型
   entry point；
-- 目前仍是 offline restricted attainable lower witness。Stage-4A/6B
-  retained capsule report、native witness extraction、background
-  delivery/contention 與任何 physical consumer 均未完成。
+- `ba4e66f` 已保留 Stage-4A/6B exact capsule report。兩個 workload 的
+  前五個 eligible Boolean-empty roots 都同時提供 full 32-frame、
+  17/12-frame partial-on-unresolved 和 zero-prefix stationary 三種
+  counterexample；CE-0140 因此拒絕把 Boolean empty 或 stationary
+  exhaustion 稱為 unrestricted losing；
+- 44-line analysis entry point 已拆至
+  `analysis/partial_witness_capsule/` 的 selection/validation、
+  serialization、workload owners；報告兩次生成 byte-identical；
+- 目前仍是 historical 17-movement-action capsule model 的 offline
+  restricted attainable lower witness。CE-0134 complete-mask roots、native
+  witness extraction、background delivery/contention 與任何 physical
+  consumer 均未完成。
 
 ### G4 — 更早保存 feasibility
 

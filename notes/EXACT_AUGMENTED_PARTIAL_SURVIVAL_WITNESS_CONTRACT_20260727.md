@@ -2,9 +2,9 @@
 
 Date: 2026-07-27
 
-Status: G3 stationary scalar/oracle parity checkpoint implemented; retained
-capsule and native extraction gates remain open; no live or shadow action
-authority
+Status: G3 stationary scalar/oracle parity and retained-capsule gates
+implemented; native extraction and delivery gates remain open; no live or
+shadow action authority
 
 ## Question
 
@@ -192,7 +192,8 @@ intersection. A lookup miss must not start cold work on the issue thread.
    unsafe-current, tie/mode, and tamper cases.**
 3. Retain a compact G3 report on exact Stage-4A and Stage-6B capsules,
    separating full-horizon feasibility from partial lower witnesses and
-   unresolved roots.
+   unresolved roots. **Complete for the historical 17-action capsule model in
+   `ba4e66f`; CE-0134 complete-mask roots remain a later model gate.**
 4. Add native worst-branch/policy-witness extraction without changing the
    existing 46-symbol ABI until a separately reviewed ABI checkpoint.
 5. Measure cancellable background delivery and Windows contention before any
@@ -224,4 +225,16 @@ with three pre-existing platform skips.
 **Inferred:** these checks establish implementation parity and an attainable
 lower bound for the declared stationary class. They do not establish physical
 hazard completeness, unrestricted optimality, issue-time delivery, or live
-action authority. Gate 3 is the next G3 checkpoint.
+action authority.
+
+Checkpoint `ba4e66f` completes Gate 3 for exact retained historical
+17-movement-action capsules. The first five eligible Boolean-empty roots in
+both Lunatic Stage 4A and Stage 6B contain full 32-frame feasibility, positive
+12/17-frame partial witnesses on unresolved roots, and no-positive stationary
+roots. All root-action portfolios complete; selected witnesses replay and
+match native guaranteed frames with margin error below `1e-5`. CE-0140 records
+the resulting rejection of Boolean-empty or stationary exhaustion as
+unrestricted exact losing. Complete-mask roots, native extraction, delivery,
+and physical consumption remain open; Gate 4 is next. Retained evidence and
+the exact reproduction command are in
+`G3_STATIONARY_PARTIAL_SURVIVAL_CAPSULE_GATE_20260727.md`.

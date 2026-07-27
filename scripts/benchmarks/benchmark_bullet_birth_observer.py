@@ -113,6 +113,42 @@ def _summary(samples: list[float]) -> dict[str, float]:
     }
 
 
+def _abba_samples(
+    baseline_callback,
+    interleaved_callback,
+    *,
+    iterations: int,
+    warmup: int,
+) -> tuple[list[float], list[float]]:
+    """Pair decode paths as ABBA means to cancel first-order block drift."""
+
+    for _ in range(warmup):
+        baseline_callback()
+        interleaved_callback()
+        interleaved_callback()
+        baseline_callback()
+
+    def timed(callback) -> float:
+        started = time.perf_counter_ns()
+        callback()
+        return (time.perf_counter_ns() - started) / 1_000_000.0
+
+    baseline_samples: list[float] = []
+    interleaved_samples: list[float] = []
+    for _ in range(iterations):
+        baseline_before = timed(baseline_callback)
+        interleaved_before = timed(interleaved_callback)
+        interleaved_after = timed(interleaved_callback)
+        baseline_after = timed(baseline_callback)
+        baseline_samples.append(
+            (baseline_before + baseline_after) / 2.0
+        )
+        interleaved_samples.append(
+            (interleaved_before + interleaved_after) / 2.0
+        )
+    return baseline_samples, interleaved_samples
+
+
 def run_benchmark(
     *,
     backend: str,
@@ -222,11 +258,6 @@ def run_benchmark(
         )
 
     full_blob = _pool(BULLET_POOL_SIZE)
-    baseline_samples = _samples(
-        lambda: decode_planning_bullets(full_blob),
-        iterations=decode_iterations,
-        warmup=max(2, warmup // 4),
-    )
     tracker = tracker_type(maximum_bootstrap_age=0)
     frame = 1
 
@@ -240,7 +271,8 @@ def run_benchmark(
         decode_planning_bullets(full_blob)
         frame += 1
 
-    interleaved_samples = _samples(
+    baseline_samples, interleaved_samples = _abba_samples(
+        lambda: decode_planning_bullets(full_blob),
         interleaved,
         iterations=decode_iterations,
         warmup=max(2, warmup // 4),
@@ -287,7 +319,7 @@ def run_benchmark(
     }
     gate["passed"] = gate["observer_pass"] and gate["interleaved_pass"]
     return {
-        "schema": "th08-bullet-birth-observer-benchmark-v4",
+        "schema": "th08-bullet-birth-observer-benchmark-v5",
         "backend": backend,
         "thread_affinity_cpu": thread_affinity_cpu,
         "native_library": (
@@ -298,6 +330,7 @@ def run_benchmark(
         "pool_size": BULLET_POOL_SIZE,
         "iterations": iterations,
         "decode_iterations": decode_iterations,
+        "decode_pairing": "abba_mean_per_iteration",
         "burst_iterations": burst_iterations,
         "density_results": density_rows,
         "burst_results": burst_rows,

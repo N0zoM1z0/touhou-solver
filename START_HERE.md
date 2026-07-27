@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `e892863 Retain native Stage 4 birth tail failure`,
   `bc57168 Add exact native bullet birth extraction`,
   `efac80f Retain schema-v4 Stage 4 birth gate`,
   `e48cd65 Bound bullet birth trace flush latency`,
@@ -106,9 +107,18 @@ describe the same decision. Python/C++ parity is not physical correctness.
   native-call/materialization timing and overlapping-GC evidence without
   disabling GC, pinning the controller, or weakening the maximum. Callback
   incompleteness must also fail closed before Stage 5/6.
+  Schema v6 now implements that attribution under
+  `notes/G5_NATIVE_BIRTH_TAIL_ATTRIBUTION_CONTRACT_20260728.md`;
+  residual-audit v4 validates reconciled segments and phase/generation GC
+  counts. CE-0150 rejects the old block-ordered decode ratio after identical
+  Windows runs flipped `1.077 -> 0.940`; ABBA-paired Linux and two adjacent
+  Windows runs pass unpinned at `1.012/1.016/1.025`. All observer profiles
+  and Linux/Windows `797/797` quick suites pass in `9.134/15.767 s`, with
+  three Windows skips. One explicit-native Stage-4A attribution run is the
+  next gate; B4 and action authority remain unchanged.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
-  CE-0143/0144/0145/0146/0147/0148/0149.
+  CE-0143/0144/0145/0146/0147/0148/0149/0150.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and

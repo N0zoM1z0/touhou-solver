@@ -103,6 +103,7 @@ from th08_live.bullet_birth import (
     BulletBirthTracker,
 )
 from th08_live.bullet_birth_native import (
+    NativeBulletBirthDiagnostics,
     NativeBulletBirthTracker,
     native_bullet_birth_available,
 )
@@ -2366,6 +2367,9 @@ def _run_live_session(
             item_pool_read_ms = raw_pools.item_pool_read_ms
             bullet_birth_observation: BulletBirthObservation | None = None
             bullet_birth_observation_error: str | None = None
+            bullet_birth_native_diagnostics: (
+                NativeBulletBirthDiagnostics | None
+            ) = None
             bullet_birth_observation_ms = 0.0
             bullet_birth_observation_cpu_ms = 0.0
             ecl_vm_snapshot: EclVmSnapshot | None = None
@@ -3576,6 +3580,13 @@ def _run_live_session(
                                 frame_after=bullet_frame_after,
                             )
                         )
+                        if isinstance(
+                            bullet_birth_tracker,
+                            NativeBulletBirthTracker,
+                        ):
+                            bullet_birth_native_diagnostics = (
+                                bullet_birth_tracker.diagnostics()
+                            )
                     except (
                         RuntimeError,
                         TypeError,
@@ -3667,6 +3678,16 @@ def _run_live_session(
                                 previous_birth_trace_emit_ms
                             ),
                             observation_backend=bullet_birth_backend,
+                            observation_diagnostics=(
+                                bullet_birth_native_diagnostics.record(
+                                    observation_ms=(
+                                        bullet_birth_observation_ms
+                                    )
+                                )
+                                if bullet_birth_native_diagnostics
+                                is not None
+                                else None
+                            ),
                     )
                 )
                 birth_trace_build_ms = (

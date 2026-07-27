@@ -12,7 +12,7 @@ from th08_ecl_birth import (
 from .bullet_birth import BulletBirthObservation
 
 
-BULLET_BIRTH_TRACE_SCHEMA_VERSION = 5
+BULLET_BIRTH_TRACE_SCHEMA_VERSION = 6
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
 BULLET_BIRTH_POOL_SCOPE = "all_1536_hostile_bullet_slots"
@@ -41,6 +41,7 @@ class BulletBirthTraceInput:
     intent_ms: float
     previous_emit_ms: float | None
     observation_backend: str = "python"
+    observation_diagnostics: dict[str, object] | None = None
 
 
 def birth_trace_requires_immediate_flush(
@@ -60,6 +61,24 @@ def build_bullet_birth_trace_record(
 
     observation = trace_input.observation
     intent = trace_input.intent
+    if trace_input.observation_backend not in {"python", "native"}:
+        raise ValueError("unknown bullet-birth observation backend")
+    if (
+        trace_input.observation_backend == "native"
+        and observation is not None
+        and trace_input.observation_error is None
+        and trace_input.observation_diagnostics is None
+    ):
+        raise ValueError(
+            "successful native observation requires diagnostics"
+        )
+    if (
+        trace_input.observation_backend == "python"
+        and trace_input.observation_diagnostics is not None
+    ):
+        raise ValueError(
+            "Python observation may not publish native diagnostics"
+        )
     omitted_sources = [
         "non_spell_enemy_main_vm",
         "child_enemy_or_auxiliary_vm",
@@ -73,6 +92,7 @@ def build_bullet_birth_trace_record(
         "schema_version": BULLET_BIRTH_TRACE_SCHEMA_VERSION,
         "role": BULLET_BIRTH_TRACE_ROLE,
         "observation_backend": trace_input.observation_backend,
+        "observation_diagnostics": trace_input.observation_diagnostics,
         "frame": trace_input.frame,
         "snapshot_frame": trace_input.snapshot_frame,
         "gameplay_epoch": trace_input.gameplay_epoch,

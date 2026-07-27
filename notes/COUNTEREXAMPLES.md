@@ -4253,3 +4253,39 @@ Status: observed physical performance failure; attribution open
   `1689bf8468b9129b16aaf1aeacee7b569975a4302a92ab7860ef77c4665a84ec`.
 - **Authority:** B4 remains failed. No future-hazard or physical action
   authority follows.
+
+## CE-0150: Block-ordered decode ratio flipped across identical adjacent runs
+
+Status: observed isolated benchmark failure; ABBA pairing corrects the
+measurement design offline
+
+- **Observed symptom:** After adding schema-v6 attribution telemetry, the
+  first unpinned Windows benchmark passed all eight observer profiles but
+  failed the combined gate because decode p95 was measured as two separate
+  blocks: baseline `8.0259 ms`, later interleaved `8.6458 ms`, ratio `1.0772`.
+- **Adjacent contradiction:** An immediately repeated identical command also
+  passed all observer profiles, but the block ratio flipped to `0.9398`
+  (baseline `8.9540 ms`, interleaved `8.4152 ms`). The telemetry did not
+  alternately speed up and slow down the decoder; block drift dominated the
+  ratio.
+- **Rejected practice:** Repeating the command until one block ratio passes
+  and retaining only that run is not a nonregression gate.
+- **Correction:** Benchmark schema v5 uses an ABBA pair inside every
+  iteration: baseline, interleaved, interleaved, baseline. Each distribution
+  receives the mean of its two adjacent measurements before the unchanged
+  p95 ratio and `1.05` limit are applied.
+- **Observed correction:** Linux paired ratio is `1.0123`. Two adjacent
+  Windows paired ratios are `1.0156` and `1.0248`; all observer and combined
+  gates pass without affinity. This corrects first-order block drift, not
+  arbitrary scheduler noise.
+- **Evidence:** Rejected Windows report SHA-256 values are
+  `99fca1972e9ea7f9cd5fd39baafefae7838965de08467aa985794a42baeaa66e`
+  and
+  `64ead5b3a69f7f59468204daf58caff70549ecca419d6b6e7d74e3161b2949b4`.
+  Paired Linux/Windows/Windows-repeat SHA-256 values are
+  `e4a08ff7d7b2fa3b5f753dc800786040613b298363dc2d4d7c79b0668f2df8f6`,
+  `713a6bff6fd4181802f52f30308c513624923244b335fafaf67f94be7e0a731e`,
+  and
+  `8563fe93ba758a8aed2354ba7dacda979a8286d763c2076d15834b9b7b8d49e8`.
+- **Authority:** This repairs isolated measurement pairing only. It does not
+  close CE-0149 or grant physical action authority.

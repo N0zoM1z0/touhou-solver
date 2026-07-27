@@ -1,0 +1,160 @@
+{
+  "backend": "native",
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 1,
+      "compact_json_bytes": 400,
+      "observer": {
+        "max_ms": 0.1201,
+        "p50_ms": 0.03,
+        "p95_ms": 0.035905,
+        "p99_9_ms": 0.11564240000000035,
+        "p99_ms": 0.07077199999999975
+      },
+      "record_json": {
+        "max_ms": 0.0124,
+        "p50_ms": 0.01075,
+        "p95_ms": 0.011404999999999998,
+        "p99_9_ms": 0.012260700000000012,
+        "p99_ms": 0.0117
+      }
+    },
+    {
+      "births_per_observation": 8,
+      "compact_json_bytes": 750,
+      "observer": {
+        "max_ms": 0.1206,
+        "p50_ms": 0.0294,
+        "p95_ms": 0.03253499999999999,
+        "p99_9_ms": 0.11283900000000063,
+        "p99_ms": 0.04229699999999964
+      },
+      "record_json": {
+        "max_ms": 0.0247,
+        "p50_ms": 0.02205,
+        "p95_ms": 0.024,
+        "p99_9_ms": 0.024660200000000004,
+        "p99_ms": 0.0245
+      }
+    },
+    {
+      "births_per_observation": 32,
+      "compact_json_bytes": 2018,
+      "observer": {
+        "max_ms": 0.1286,
+        "p50_ms": 0.0328,
+        "p95_ms": 0.038144999999999984,
+        "p99_9_ms": 0.12191360000000054,
+        "p99_ms": 0.060943999999999686
+      },
+      "record_json": {
+        "max_ms": 0.0707,
+        "p50_ms": 0.0544,
+        "p95_ms": 0.061,
+        "p99_9_ms": 0.06892890000000014,
+        "p99_ms": 0.061305
+      }
+    },
+    {
+      "births_per_observation": 33,
+      "compact_json_bytes": 2071,
+      "observer": {
+        "max_ms": 0.129,
+        "p50_ms": 0.0313,
+        "p95_ms": 0.036309999999999995,
+        "p99_9_ms": 0.11881120000000082,
+        "p99_ms": 0.077206
+      },
+      "record_json": {
+        "max_ms": 0.0874,
+        "p50_ms": 0.0668,
+        "p95_ms": 0.072505,
+        "p99_9_ms": 0.08660400000000007,
+        "p99_ms": 0.07864799999999995
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "compact_json_bytes": 32956,
+      "observer": {
+        "max_ms": 0.1311,
+        "p50_ms": 0.03635,
+        "p95_ms": 0.0454,
+        "p99_9_ms": 0.1285329000000002,
+        "p99_ms": 0.10077599999999984
+      },
+      "record_json": {
+        "max_ms": 0.9605,
+        "p50_ms": 0.865,
+        "p95_ms": 0.914385,
+        "p99_9_ms": 0.9541917000000005,
+        "p99_ms": 0.92682
+      }
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 13.5426,
+    "p50_ms": 8.42935,
+    "p95_ms": 8.953965,
+    "p99_9_ms": 13.380378600000018,
+    "p99_ms": 11.920386000000008
+  },
+  "decode_interleaved": {
+    "max_ms": 11.7758,
+    "p50_ms": 7.3933,
+    "p95_ms": 8.41523,
+    "p99_9_ms": 11.506361600000028,
+    "p99_ms": 9.081416000000013
+  },
+  "decode_iterations": 100,
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 0.1267,
+        "p50_ms": 0.0091,
+        "p95_ms": 0.0167,
+        "p99_9_ms": 0.03212480000000505,
+        "p99_ms": 0.018
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.0371,
+        "p50_ms": 0.0101,
+        "p95_ms": 0.012,
+        "p99_9_ms": 0.0213010000000002,
+        "p99_ms": 0.014801
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.0357,
+        "p50_ms": 0.0107,
+        "p95_ms": 0.0118,
+        "p99_9_ms": 0.026402100000000428,
+        "p99_ms": 0.0145
+      }
+    }
+  ],
+  "gate": {
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": true,
+    "max_limit_ms": 2.0,
+    "observer_failures": [],
+    "observer_pass": true,
+    "observer_profiles_checked": 8,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": true
+  },
+  "interleaved_p95_ratio": 0.9398328003292395,
+  "iterations": 2000,
+  "native_library": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\native\\build\\windows-x86_64\\touhou_bullet_birth_trace.dll",
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v4",
+  "thread_affinity_cpu": null
+}

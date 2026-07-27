@@ -13,10 +13,10 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA = "th08-bullet-birth-residual-audit-v3"
+SCHEMA = "th08-bullet-birth-residual-audit-v4"
 TRACE_KIND = "bullet_birth_audit"
 TRACE_ROLE = "trace_only_no_action_authority"
-TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5))
+TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5, 6))
 MAX_SAMPLES = 20
 OBSERVER_P95_LIMIT_MS = 0.20
 OBSERVER_P99_LIMIT_MS = 0.40
@@ -195,18 +195,113 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             f"line {line_number}: audit role is not trace-only"
         )
     if (
-        record.get("schema_version") == 5
+        record.get("schema_version") in {5, 6}
         and record.get("observation_backend") not in {"python", "native"}
     ):
         raise BulletBirthAuditError(
             f"line {line_number}: audit omits a valid observation backend"
         )
+    if record.get("schema_version") == 6:
+        backend = record.get("observation_backend")
+        diagnostics = record.get("observation_diagnostics")
+        if backend == "python":
+            if diagnostics is not None:
+                raise BulletBirthAuditError(
+                    f"line {line_number}: Python audit fabricates "
+                    "native diagnostics"
+                )
+        elif record.get("observation_error") is None:
+            if not isinstance(record.get("observation"), dict):
+                raise BulletBirthAuditError(
+                    f"line {line_number}: successful native audit "
+                    "omits its observation"
+                )
+            _validate_native_diagnostics(
+                diagnostics,
+                timing=record.get("timing_ms"),
+                line_number=line_number,
+            )
+        elif diagnostics is not None:
+            raise BulletBirthAuditError(
+                f"line {line_number}: failed native audit publishes "
+                "diagnostics"
+            )
     for field in ("frame", "snapshot_frame", "gameplay_epoch"):
         if type(record.get(field)) is not int:
             raise BulletBirthAuditError(
                 f"line {line_number}: audit omits integer {field}"
             )
     return record
+
+
+def _validate_native_diagnostics(
+    diagnostics: Any,
+    *,
+    timing: Any,
+    line_number: int,
+) -> None:
+    if not isinstance(diagnostics, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: successful native audit omits diagnostics"
+        )
+    segments = diagnostics.get("native_segments_ms")
+    if not isinstance(segments, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: native diagnostics omit segments"
+        )
+    segment_total = 0.0
+    for field in (
+        "prepare",
+        "native_call",
+        "materialize",
+        "controller_residual",
+    ):
+        value = segments.get(field)
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or value < 0.0
+        ):
+            raise BulletBirthAuditError(
+                f"line {line_number}: invalid native segment {field}"
+            )
+        segment_total += float(value)
+    if not isinstance(timing, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: native diagnostics omit total timing"
+        )
+    observation_ms = timing.get("observation")
+    if (
+        isinstance(observation_ms, bool)
+        or not isinstance(observation_ms, (int, float))
+        or not math.isfinite(observation_ms)
+        or observation_ms < 0.0
+        or not math.isclose(
+            segment_total,
+            float(observation_ms),
+            rel_tol=1e-9,
+            abs_tol=1e-6,
+        )
+    ):
+        raise BulletBirthAuditError(
+            f"line {line_number}: native segments do not reconcile"
+        )
+    completed = diagnostics.get("gc_completed")
+    if not isinstance(completed, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: native diagnostics omit GC counts"
+        )
+    for phase in ("prepare", "native_call", "materialize"):
+        counts = completed.get(phase)
+        if (
+            not isinstance(counts, list)
+            or len(counts) != 3
+            or any(type(value) is not int or value < 0 for value in counts)
+        ):
+            raise BulletBirthAuditError(
+                f"line {line_number}: invalid {phase} GC counts"
+            )
 
 
 def _read_trace(
@@ -664,6 +759,14 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     emit_by_previous_evidence: defaultdict[str, list[float]] = defaultdict(
         list
     )
+    native_segment_ms: defaultdict[str, list[float]] = defaultdict(list)
+    native_gc_completed: Counter[str] = Counter()
+    native_rows_with_gc = 0
+    native_observation_by_gc: defaultdict[str, list[float]] = defaultdict(
+        list
+    )
+    native_over_budget_dominant_segments: Counter[str] = Counter()
+    native_over_budget_samples: list[dict[str, object]] = []
     previous_evidence_count: int | None = None
 
     for audit in audits:
@@ -735,6 +838,64 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         evidence_count = len(evidence)
         evidence_per_row.append(float(evidence_count))
         bucket = _evidence_count_bucket(evidence_count)
+        diagnostics = audit.get("observation_diagnostics")
+        if (
+            audit["schema_version"] == 6
+            and isinstance(diagnostics, dict)
+        ):
+            segments = diagnostics["native_segments_ms"]
+            completed = diagnostics["gc_completed"]
+            assert isinstance(segments, dict)
+            assert isinstance(completed, dict)
+            numeric_segments = {
+                field: float(segments[field])
+                for field in (
+                    "prepare",
+                    "native_call",
+                    "materialize",
+                    "controller_residual",
+                )
+            }
+            for field, value in numeric_segments.items():
+                native_segment_ms[field].append(value)
+            gc_total = 0
+            for gc_phase in (
+                "prepare",
+                "native_call",
+                "materialize",
+            ):
+                counts = completed[gc_phase]
+                assert isinstance(counts, list)
+                for generation, count in enumerate(counts):
+                    numeric_count = int(count)
+                    gc_total += numeric_count
+                    native_gc_completed[
+                        f"{gc_phase}:generation_{generation}"
+                    ] += numeric_count
+            gc_bucket = "with_gc" if gc_total else "without_gc"
+            if gc_total:
+                native_rows_with_gc += 1
+            observation_value = row_timing.get("observation")
+            if observation_value is not None:
+                native_observation_by_gc[gc_bucket].append(
+                    observation_value
+                )
+                if observation_value > OBSERVER_MAX_LIMIT_MS:
+                    dominant = max(
+                        numeric_segments,
+                        key=numeric_segments.__getitem__,
+                    )
+                    native_over_budget_dominant_segments[dominant] += 1
+                    if len(native_over_budget_samples) < MAX_SAMPLES:
+                        native_over_budget_samples.append(
+                            {
+                                "frame": audit["frame"],
+                                "evidence_count": evidence_count,
+                                "observation_ms": observation_value,
+                                "segments_ms": numeric_segments,
+                                "gc_completed": completed,
+                            }
+                        )
         for field, target in (
             ("observation", observation_by_evidence),
             ("observation_cpu", observation_cpu_by_evidence),
@@ -979,6 +1140,25 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
                     emit_by_previous_evidence.items()
                 )
             },
+        },
+        "native_diagnostics": {
+            "rows": len(native_segment_ms.get("native_call", ())),
+            "segments_ms": {
+                field: _distribution(values)
+                for field, values in sorted(native_segment_ms.items())
+            },
+            "gc_completed": _counter(native_gc_completed),
+            "rows_with_gc": native_rows_with_gc,
+            "observation_ms_by_gc_overlap": {
+                status: _distribution(values)
+                for status, values in sorted(
+                    native_observation_by_gc.items()
+                )
+            },
+            "over_budget_dominant_segments": _counter(
+                native_over_budget_dominant_segments
+            ),
+            "over_budget_samples": native_over_budget_samples,
         },
         "scope": {
             "intent_source": "active_spell_enemy_main_vm_only",

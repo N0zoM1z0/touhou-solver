@@ -6752,3 +6752,48 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** B4 and CE-0149 remain open. The next gate is trace-only
   attribution of native-call, materialization, and overlapping GC time under
   the unchanged wall limit. No future-event or action authority follows.
+
+## 2026-07-28 — Implemented native birth-tail and GC attribution
+
+- Fixed
+  `G5_NATIVE_BIRTH_TAIL_ATTRIBUTION_CONTRACT_20260728.md` before
+  implementation. The physical question is which retrospective observer
+  segment owns CE-0149's tail, not a new control model.
+- Schema v6 records contiguous prepare, native-call, materialization, and
+  controller-residual wall intervals. A process-global callback counts
+  completed cyclic-GC collections by phase and generation only while one
+  explicit native observation is active. GC remains enabled and the
+  controller remains unpinned.
+- Residual-audit schema v4 requires successful native rows to contain finite,
+  non-negative, reconciled segments and exactly three non-negative integer
+  generation counts per phase. Python rows cannot fabricate diagnostics.
+  Reports separate segment distributions, GC/no-GC total walls, dominant
+  over-budget segments, and bounded exact tail witnesses.
+- Five Linux and five Windows native tests pass. A forced generation-0
+  collection is attributed to the native-call phase, and an inactive
+  collection does not contaminate the next observation. Trace/audit
+  validation and schemas v1-v5 compatibility pass.
+- **Observed CE-0150:** The first Windows fixed report passed every observer
+  profile but failed its block-ordered decode ratio at `1.0772`. An
+  immediately identical repeat flipped to `0.9398`. Selecting only the pass
+  was rejected.
+- Benchmark schema v5 now forms ABBA pairs inside each iteration and applies
+  the unchanged p95 ratio to paired means. Linux ratio is `1.0123`; two
+  adjacent Windows ratios are `1.0156/1.0248`. All observer and combined
+  gates pass without affinity. Full-density p95 is
+  `0.0118/0.0116/0.0127 ms`; 592-birth p95 is
+  `0.0614/0.0466/0.0425 ms`.
+- Retained rejected Windows SHA-256 values are
+  `99fca1972e9ea7f9cd5fd39baafefae7838965de08467aa985794a42baeaa66e`
+  and
+  `64ead5b3a69f7f59468204daf58caff70549ecca419d6b6e7d74e3161b2949b4`.
+  Paired Linux/Windows/Windows-repeat values are
+  `e4a08ff7d7b2fa3b5f753dc800786040613b298363dc2d4d7c79b0668f2df8f6`,
+  `713a6bff6fd4181802f52f30308c513624923244b335fafaf67f94be7e0a731e`,
+  and
+  `8563fe93ba758a8aed2354ba7dacda979a8286d763c2076d15834b9b7b8d49e8`.
+- Ruff, focused tests, and complete Linux/Windows quick suites pass
+  `797/797` in `9.134/15.767 s`, with three existing Windows skips.
+- **Authority:** One explicit-native Stage-4A attribution run is eligible.
+  B4, CE-0149, future-event coverage, and physical action authority remain
+  unchanged.

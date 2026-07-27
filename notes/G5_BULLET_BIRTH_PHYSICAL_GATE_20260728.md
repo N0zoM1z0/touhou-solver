@@ -372,6 +372,14 @@ GC, move collection outside the measured boundary, pin the controller, or
 weaken the maximum. Only observed attribution may justify the next
 correction.
 
+That diagnostic is now implemented under
+`G5_NATIVE_BIRTH_TAIL_ATTRIBUTION_CONTRACT_20260728.md`. Schema v6 and
+residual-audit v4 pass focused validation and complete Linux/Windows suites.
+CE-0150 rejects the old block-ordered decode ratio; ABBA-paired Linux and two
+adjacent Windows runs pass at `1.0123/1.0156/1.0248` while all isolated
+observer profiles remain inside the fixed limits. This authorizes only the
+explicit-native Stage-4A attribution repeat.
+
 In parallel, callback lookahead must expose an explicit incomplete result; an
 instruction-limit row cannot authorize an empty future event set. Stage 5 or
 6 follows only after Stage-4A semantics and performance pass.

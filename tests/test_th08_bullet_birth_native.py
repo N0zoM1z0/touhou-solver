@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import gc
 import math
 import random
 import struct
+import time
 import unittest
 
 import numpy as np
@@ -154,6 +156,10 @@ class NativeBulletBirthTrackerTests(unittest.TestCase):
             python.observe(blob, frame_before=10, frame_after=11),
             native.observe(blob, frame_before=10, frame_after=11),
         )
+        diagnostics = native.diagnostics()
+        self.assertGreaterEqual(diagnostics.prepare_ms, 0.0)
+        self.assertGreaterEqual(diagnostics.native_call_ms, 0.0)
+        self.assertGreaterEqual(diagnostics.materialize_ms, 0.0)
 
         _set_slot(
             blob,
@@ -290,6 +296,43 @@ class NativeBulletBirthTrackerTests(unittest.TestCase):
         np.testing.assert_array_equal(
             tracker._previous_ages,
             before_ages,
+        )
+
+    def test_diagnostics_reconcile_and_count_native_phase_gc(self) -> None:
+        blob = _pool()
+        tracker = NativeBulletBirthTracker()
+        original_invoke = tracker._invoke
+
+        def invoke_with_collection(*args, **kwargs):
+            result = original_invoke(*args, **kwargs)
+            gc.collect(0)
+            return result
+
+        tracker._invoke = invoke_with_collection
+        started = time.perf_counter()
+        tracker.observe(blob, frame_before=0, frame_after=0)
+        observation_ms = (time.perf_counter() - started) * 1000.0
+        diagnostics = tracker.diagnostics()
+        record = diagnostics.record(observation_ms=observation_ms)
+        segments = record["native_segments_ms"]
+        completed = record["gc_completed"]
+        self.assertIsInstance(segments, dict)
+        self.assertIsInstance(completed, dict)
+        self.assertAlmostEqual(
+            sum(segments.values()),
+            observation_ms,
+            places=6,
+        )
+        self.assertEqual(completed["prepare"], [0, 0, 0])
+        self.assertEqual(completed["native_call"], [1, 0, 0])
+        self.assertEqual(completed["materialize"], [0, 0, 0])
+
+        gc.collect(0)
+        tracker._invoke = original_invoke
+        tracker.observe(blob, frame_before=1, frame_after=1)
+        self.assertEqual(
+            tracker.diagnostics().gc_completed,
+            ((0, 0, 0), (0, 0, 0), (0, 0, 0)),
         )
 
 

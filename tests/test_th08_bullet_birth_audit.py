@@ -180,6 +180,20 @@ def _audit(
     }
     if schema_version >= 5:
         record["observation_backend"] = "native"
+    if schema_version >= 6:
+        record["observation_diagnostics"] = {
+            "native_segments_ms": {
+                "prepare": 0.002,
+                "native_call": 0.010,
+                "materialize": 0.015,
+                "controller_residual": 0.003,
+            },
+            "gc_completed": {
+                "prepare": [0, 0, 0],
+                "native_call": [0, 0, 0],
+                "materialize": [0, 0, 0],
+            },
+        }
     return record
 
 
@@ -376,6 +390,59 @@ class BulletBirthAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 BulletBirthAuditError,
                 "observation backend",
+            ):
+                analyze_trace(trace)
+
+    def test_schema_v6_validates_and_reports_native_diagnostics(self) -> None:
+        with TemporaryDirectory() as directory:
+            trace = self._trace(directory, schema_version=6)
+            report = analyze_trace(trace)
+            diagnostics = report["native_diagnostics"]
+            self.assertEqual(diagnostics["rows"], 4)
+            self.assertEqual(diagnostics["rows_with_gc"], 0)
+            self.assertEqual(
+                diagnostics["segments_ms"]["native_call"]["p95"],
+                0.01,
+            )
+            self.assertEqual(
+                diagnostics["observation_ms_by_gc_overlap"][
+                    "without_gc"
+                ]["count"],
+                4,
+            )
+
+            records = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            records[0]["observation_diagnostics"][
+                "native_segments_ms"
+            ]["controller_residual"] = -0.001
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "invalid native segment",
+            ):
+                analyze_trace(trace)
+
+    def test_schema_v6_rejects_fabricated_python_diagnostics(self) -> None:
+        with TemporaryDirectory() as directory:
+            trace = self._trace(directory, schema_version=6)
+            records = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            records[0]["observation_backend"] = "python"
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "fabricates native diagnostics",
             ):
                 analyze_trace(trace)
 

@@ -200,6 +200,17 @@ native-call/materialization/GC/scheduler attribution open. The run does not
 support a survival improvement: it has 13 hits versus 12 in the RNG-distinct
 schema-v4 run, and every hit follows global viability exhaustion.
 
+**Observed offline attribution gate:** Schema v6 now splits prepare,
+native-call, materialization, and controller residual and records completed
+GC collections by phase/generation. Forced generation-0 collection is
+attributed exactly; inactive collection does not contaminate the next row.
+Residual-audit v4 rejects missing, negative, unreconciled, or fabricated
+diagnostics. CE-0150 also rejects the old block-ordered decode ratio after
+identical Windows runs flipped `1.077 -> 0.940`; ABBA-paired Linux and two
+Windows runs pass unpinned at `1.012/1.016/1.025`. All observer profiles and
+`797/797` Linux/Windows quick suites pass. This permits one trace-only
+Stage-4A attribution repeat; B4 and action authority remain unchanged.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
@@ -213,12 +224,13 @@ schema-v4 run, and every hit follows global viability exhaustion.
    incomplete. Schema v4 physically validates bounded flush latency but
    rejects thread CPU as a useful sub-millisecond diagnostic. The
    parity-gated native data plane passes isolated gates and physical
-   percentiles, but CE-0149 retains a 9.0498-ms maximum. Next split native
-   call from Python materialization and record observation-overlapping GC
-   without disabling GC, pinning the controller, or weakening the wall
-   limit. In parallel, make incomplete callback coverage explicit and fail
-   closed before trying Stage 5/6. None of this narrows `UNKNOWN` coverage or
-   adds action authority.
+   percentiles, but CE-0149 retains a 9.0498-ms maximum. The schema-v6
+   split/GC diagnostic now passes offline and should receive one explicit
+   native Stage-4A attribution run without disabling GC, pinning the
+   controller, or weakening the wall limit. Use its observed dominant tail
+   segment to choose the correction. In parallel, make incomplete callback
+   coverage explicit and fail closed before trying Stage 5/6. None of this
+   narrows `UNKNOWN` coverage or adds action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

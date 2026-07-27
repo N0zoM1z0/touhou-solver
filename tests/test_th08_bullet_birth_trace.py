@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 import unittest
 
 from th08_ecl_birth import (
@@ -149,6 +150,7 @@ class BulletBirthTraceTests(unittest.TestCase):
         )
         self.assertEqual(record["role"], BULLET_BIRTH_TRACE_ROLE)
         self.assertEqual(record["observation_backend"], "python")
+        self.assertIsNone(record["observation_diagnostics"])
         self.assertEqual(record["counts"]["observed_evidence"], 1)
         self.assertEqual(record["counts"]["visible_intents"], 1)
         self.assertEqual(
@@ -180,6 +182,45 @@ class BulletBirthTraceTests(unittest.TestCase):
         self.assertIsNone(record["timing_ms"]["build"])
         self.assertIsNone(record["timing_ms"]["pre_emit_total"])
         self.assertEqual(record["timing_ms"]["previous_emit"], 0.012)
+
+    def test_native_schema_requires_explicit_reconciled_diagnostics(self) -> None:
+        observation = _observation()
+        diagnostics = {
+            "native_segments_ms": {
+                "prepare": 0.001,
+                "native_call": 0.010,
+                "materialize": 0.015,
+                "controller_residual": 0.005,
+            },
+            "gc_completed": {
+                "prepare": [0, 0, 0],
+                "native_call": [1, 0, 0],
+                "materialize": [0, 0, 0],
+            },
+        }
+        trace_input = replace(
+            _trace_input(observation=observation),
+            observation_backend="native",
+            observation_diagnostics=diagnostics,
+        )
+        record = build_bullet_birth_trace_record(trace_input)
+        self.assertEqual(record["schema_version"], 6)
+        self.assertEqual(record["observation_diagnostics"], diagnostics)
+
+        with self.assertRaisesRegex(ValueError, "requires diagnostics"):
+            build_bullet_birth_trace_record(
+                replace(
+                    trace_input,
+                    observation_diagnostics=None,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "may not publish"):
+            build_bullet_birth_trace_record(
+                replace(
+                    trace_input,
+                    observation_backend="python",
+                )
+            )
 
     def test_scope_and_join_remain_explicitly_incomplete(self) -> None:
         record = build_bullet_birth_trace_record(_trace_input())

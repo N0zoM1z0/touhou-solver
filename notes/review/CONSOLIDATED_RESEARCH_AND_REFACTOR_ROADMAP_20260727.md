@@ -1038,7 +1038,14 @@ parity 當成每個 nature tie field 的逐 bit equality。
   `2.3779/9.0498 ms`；16 個超過 2 ms 的樣本中 10 個是 zero evidence，
   其餘只有 4/6/20 rows，因此不是大 burst output-linear 問題。下一步
   必須分離 native call/materialization 並記錄 overlapping GC，在不關
-  GC、不 pin controller、不放寬 max 的條件下定位 CE-0149；
+  GC、不 pin controller、不放寬 max 的條件下定位 CE-0149。schema v6
+  已完成這個 split/GC telemetry；forced gen-0 collection attribution、
+  fail-closed audit 與 Linux/Windows `797/797` 通過。另發現舊 decode
+  ratio 用前後兩個 blocks，Windows identical adjacent runs 會
+  `1.077 fail -> 0.940 pass`；CE-0150 改為 iteration 內 ABBA paired
+  means 後 Linux/Windows/Windows-repeat 為
+  `1.012/1.016/1.025`，均在原 `1.05` gate 內。下一步是 schema-v6
+  Stage-4A attribution physical run；
 - CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成

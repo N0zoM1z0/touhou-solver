@@ -35,12 +35,24 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest committed algorithmic checkpoint:
-  `c38665b Define dual-bound refinement quantifiers`. The current G2
-  implementation adds conservative patch dependency closure, candidate-guided
+  `5e48f3d Add exact stationary partial survival witnesses`. The first G3
+  checkpoint exhaustively evaluates every root action against declared
+  stationary causal continuations, merges hidden remaining-delay histories
+  before continuation, applies cadence recursively, preserves pending
+  no-write semantics, and retains exact problem/policy/witness digests plus a
+  deterministic worst observation-compatible branch. Four randomized and
+  adversarial tests match the existing independent scalar labels and native
+  belief workspace. The focused control suite passes `167/167`; complete
+  quick suites pass `720/720` on Linux in `9.678 s` and Windows in `13.093 s`
+  with three platform skips. The 31-line compatibility facade owns no
+  recurrence; digest, portfolio, replay, recurrence, and immutable records
+  live under `touhou_control/partial_witness/`. This is offline attainable
+  lower-witness authority only.
+- The preceding G2 checkpoint `c38665b Define dual-bound refinement
+  quantifiers` adds conservative patch dependency closure, candidate-guided
   8/4-pixel refinement, an independent scalar oracle, and a retained
-  vectorized rectangle gate. The six-root semantic gate passes, but the
-  multi-second patch/solve timings fail delivery. This is offline authority
-  only and is the pending checkpoint described below.
+  vectorized rectangle gate. Its six-root semantic gate passes, but the
+  multi-second patch/solve timings fail delivery.
 - Latest live algorithmic checkpoint remains
   `d4467bd Add deadline-aware native supplemental gate`; no live action
   authority changed in the complete-mask correction.
@@ -684,18 +696,19 @@ complete. G1 rejected live promotion after CE-0134 exposed a real
 complete-mask write collapsed to movement no-write. That alias is corrected
 offline, but every physical root remains future-event `model_unknown`,
 CE-0120 is open, and no complete-mask publication/consumer gate exists. G2
-now provides a branch-preserving query-local lower/reference/upper semantic
-gate for six retained spatial roots, but its multi-second Python patch/dense
-solve fails delivery. The next useful algorithm checkpoint is G3 exact
-augmented-root partial-survival lower witnesses, with G5 future-event coverage
-in parallel. Work should:
+provides a branch-preserving query-local lower/reference/upper semantic gate
+for six retained spatial roots, but its multi-second Python patch/dense solve
+fails delivery. G3 now has an exact stationary scalar witness and complete
+all-root-action portfolio with small-case scalar/native parity. The next
+useful checkpoint is the retained Stage-4A/Stage-6B exact-root witness report,
+with G5 future-event coverage in parallel. Work should:
 
-1. build G3 witnesses first on retained first-loss roots, keeping root actions
-   unrestricted and each continuation causal, observation-compatible,
-   budget-complete, and tied to the exact immutable augmented-root version;
-2. publish guaranteed frames, bottleneck margin, worst branch, policy digest,
-   and explicit completion status; unresolved/timeout actions remain
-   unresolved rather than losing;
+1. run the G3 witness on retained first-loss roots and publish guaranteed
+   frames, bottleneck margin, worst branch, policy digest, exact immutable
+   root identity, and explicit completion status;
+2. extend beyond stationary continuations only through a declared causal,
+   observation-compatible, budget-complete class; unresolved/timeout actions
+   remain unresolved rather than losing;
 3. use completed restricted witnesses only as attainable post-loss lower
    bounds and intersect any later consumer with a fresh local hard set;
 4. add complete issue identity to the scalar/native recurrence, then complete

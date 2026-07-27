@@ -2,7 +2,8 @@
 
 Date: 2026-07-27
 
-Status: proposed G3 offline oracle checkpoint; no live or shadow action
+Status: G3 stationary scalar/oracle parity checkpoint implemented; retained
+capsule and native extraction gates remain open; no live or shadow action
 authority
 
 ## Question
@@ -184,9 +185,11 @@ intersection. A lookup miss must not start cold work on the issue thread.
 ## Staged Gates
 
 1. Implement the independent stationary scalar witness and complete
-   all-root-action portfolio.
+   all-root-action portfolio. **Complete in `5e48f3d`.**
 2. Prove label parity against the existing scalar result and native belief
-   workspace on deterministic and randomized small cases.
+   workspace on deterministic and randomized small cases. **Complete for four
+   deterministic/randomized seeds plus pending/no-write, cadence, digest,
+   unsafe-current, tie/mode, and tamper cases.**
 3. Retain a compact G3 report on exact Stage-4A and Stage-6B capsules,
    separating full-horizon feasibility from partial lower witnesses and
    unresolved roots.
@@ -197,3 +200,28 @@ intersection. A lookup miss must not start cold work on the issue thread.
 
 No step in this contract promotes S09, S16, candidate witnesses, survival
 labels, or partial witnesses into live action authority.
+
+## Implemented Stationary Checkpoint
+
+Checkpoint `5e48f3d` keeps the public import in the 31-line
+`touhou_control.partial_survival_witness` facade and separates immutable
+records/canonical payloads, problem digesting, recurrence, replay, and
+portfolio construction under `touhou_control.partial_witness`.
+
+**Observed:** the new witness labels match both the existing scalar belief
+oracle and the native belief workspace for every root action in four
+small randomized clearance volumes. Focused adversarial cases retain
+same-desired pending no-write, recursive cadence, complete ordered root
+actions, stationary-candidate maximization, mode separation, exact float32
+problem identity, deterministic content digests, unsafe-current failure, and
+tamper rejection. Worst-path replay checks policy choices, root identity,
+successor links, nested labels, and policy/witness digests.
+
+**Observed:** the focused `touhou_control` suite passes `167/167`. Complete
+quick suites pass `720/720` on Linux in `9.678 s` and Windows in `13.093 s`
+with three pre-existing platform skips.
+
+**Inferred:** these checks establish implementation parity and an attainable
+lower bound for the declared stationary class. They do not establish physical
+hazard completeness, unrestricted optimality, issue-time delivery, or live
+action authority. Gate 3 is the next G3 checkpoint.

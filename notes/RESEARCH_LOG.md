@@ -6028,3 +6028,43 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   scalar label and native belief workspace.
 - **Authority:** Contract only. No recurrence, solver, publication, live
   action, or strategy status changed.
+
+### 2026-07-27 — Exact stationary partial-survival witness gate
+
+- **Observed implementation:** Checkpoint `5e48f3d` implements the first G3
+  restricted attainable lower-witness class. Every public root action is
+  evaluated without proposal pruning; later public observations use one
+  declared stationary action. Nature still selects every hidden
+  remaining-delay member, new pickup delay after a real desired transition,
+  and admitted cadence recursively. Observation-equivalent successors merge
+  their remaining-delay support before continuation, while selecting the
+  already-held desired action remains no-write.
+- **Observed witness identity:** Each result retains the exact augmented root,
+  float32 problem digest, root/stationary policy digest, survival label,
+  deterministic worst observation-compatible branch, evaluated scalar state
+  count, and complete witness digest. The all-root-action portfolio reports
+  finite feasibility, post-finite-model-empty partial witness,
+  unresolved-root partial witness, and no-positive-attainable modes
+  separately.
+- **Observed architecture:** The public compatibility facade is 31 lines.
+  Problem digesting, portfolio construction, structural replay, the scalar
+  recurrence, and immutable records/canonical payloads are separate
+  `touhou_control.partial_witness` owners of 74/132/101/367/199 lines.
+- **Observed differential gate:** Four small deterministic/randomized volumes
+  match the existing independent scalar belief result and native belief
+  workspace for every root action. Adversarial tests cover pending-command
+  no-write, recursive cadence support, candidate maximization and ties,
+  complete ordered root actions, unsafe current state, exact float32/cadence
+  digest changes, deterministic output, and tamper rejection. Direct
+  worst-path replay verifies policy choices, root and successor links, nested
+  recurrence labels, and policy/witness digests.
+- **Validation:** Focused witness tests pass `4/4`; the focused
+  `touhou_control` suite passes `167/167`. Ruff and staged diff checks pass.
+  Complete suites pass `720/720` on Linux in `9.678 s` and Windows in
+  `13.093 s` with three platform skips.
+- **Authority and next gate:** This proves implementation parity and an
+  attainable lower bound only for the declared stationary continuation
+  class. It does not prove physical-model validity, unrestricted losing or
+  optimality, delivery, or permission to issue an action. The next G3 gate is
+  a compact exact-root report on retained Stage-4A and Stage-6B capsules;
+  native extraction and background delivery remain later gates.

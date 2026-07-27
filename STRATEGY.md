@@ -67,10 +67,20 @@ than controlled A/B trials. Every contact followed global-kernel exhaustion.
 This is workload-level progress and structural retention, not survival
 acceptance or strategy promotion.
 
+**Observed:** the first G3 offline checkpoint now produces a complete
+all-root-action attainable lower-witness portfolio for declared stationary
+causal continuations. Four small randomized/adversarial cases agree per root
+action with both the independent scalar belief oracle and native belief
+workspace, including pending no-write and recursive cadence. This is
+restricted finite-model implementation evidence only; retained Stage-4A/6B
+capsules, native witness extraction, delivery, and physical validation remain
+open.
+
 ### Priority
 
-1. Preserve global feasibility earlier and create exact augmented-root
-   partial-survival witnesses for post-loss fallback.
+1. Preserve global feasibility earlier. Apply the completed stationary G3
+   oracle to exact retained first-loss roots, then extend partial-survival
+   witnesses only through completed causal policy classes.
 2. Use proof-backed query-local refinement to separate coarsening, horizon,
    uncertainty, forecast/birth, route/tube, and unresolved losses. Do not use
    uniform full-field 4-pixel solving. The offline G2 semantic gate passes all

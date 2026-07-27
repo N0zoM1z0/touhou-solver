@@ -858,6 +858,22 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
 第二個只表示「目前至少有這個可達 lower bound」，不表示完整 horizon 已證明
 無解。
 
+進度（2026-07-27，`5e48f3d`）：
+
+- stationary continuation 的 exact scalar recurrence、complete
+  all-root-action portfolio、problem/policy/witness digest 和 deterministic
+  worst observation-compatible branch 已完成；
+- 四組 deterministic/randomized small volumes 逐 root action 與既有
+  independent scalar oracle、native belief workspace 完全一致；
+- pending no-write、recursive cadence、unsafe-current、mode/tie、digest
+  tamper 均有 focused regression；
+- 實作已拆為 31-line facade 與 `partial_witness/` 下的
+  digest/portfolio/replay/stationary/types owners，沒有新增另一個巨型
+  entry point；
+- 目前仍是 offline restricted attainable lower witness。Stage-4A/6B
+  retained capsule report、native witness extraction、background
+  delivery/contention 與任何 physical consumer 均未完成。
+
 ### G4 — 更早保存 feasibility
 
 不重啟已被 CE-0131 拒絕的 current-issue supplemental lane。新的方案必須在

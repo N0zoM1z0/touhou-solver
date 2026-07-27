@@ -15,7 +15,9 @@ NATIVE_ROOT = ROOT / "native"
 SOURCES = (
     NATIVE_ROOT / "src" / "abi" / "geometry_abi.cpp",
     NATIVE_ROOT / "src" / "abi" / "local_abi.cpp",
-    NATIVE_ROOT / "src" / "abi" / "pipeline_abi.cpp",
+    NATIVE_ROOT / "src" / "abi" / "direct_pipeline_abi.cpp",
+    NATIVE_ROOT / "src" / "abi" / "belief_pipeline_abi.cpp",
+    NATIVE_ROOT / "src" / "abi" / "query_local_abi.cpp",
     NATIVE_ROOT / "src" / "abi" / "viability_abi.cpp",
     NATIVE_ROOT / "src" / "geometry" / "clearance_volume.cpp",
     NATIVE_ROOT / "src" / "geometry" / "segment_trajectory.cpp",

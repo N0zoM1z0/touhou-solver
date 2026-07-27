@@ -375,6 +375,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   segment-primitive header. Both release builds retain the 46-symbol ABI;
   corridor/native-facade/ABI gates pass. Quick suites pass `699/699` on Linux
   in `9.099 s` and Windows in `13.393 s` with three skips.
+- The former 934-line native `abi/pipeline_abi.cpp` is now direct-pipeline
+  (242), belief-pipeline (633), and query-local (69) export-family TUs. This
+  changes no exported declaration or implementation target. Both release
+  builds retain the exact 46-symbol manifest; quick suites pass `699/699` on
+  Linux in `9.006 s` and Windows in `13.099 s` with three skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

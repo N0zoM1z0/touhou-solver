@@ -5625,3 +5625,19 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   float operation order, uncertainty inflation, in-place minimum behavior,
   backend dispatch/fallback, ABI, planner authority, and strategy are
   unchanged.
+
+### 2026-07-27 — Native pipeline export-family split
+
+- **Observed structural change:** Replaced the 934-line mixed
+  `native/src/abi/pipeline_abi.cpp` with direct-pipeline, belief-pipeline, and
+  query-local export-family TUs of 242, 633, and 69 lines. Each remains a thin
+  exported-to-implementation forwarding boundary, and the explicit build list
+  names all three.
+- **Build and validation:** Linux and Windows release libraries rebuild. ABI
+  tests and direct `nm` comparison match the checked-in 46-symbol manifest.
+  Complete-mask belief and query-survival suites pass `3/3` and `17/17`;
+  `git diff --check` passes. Quick suites pass `699/699` on Linux in
+  `9.006 s` and Windows in `13.099 s` with three platform skips.
+- **Authority:** Structural export ownership only. Public signatures,
+  implementation dispatch, status propagation, 32/64-bit masks, cancellation
+  and deadlines, recurrence, live authority, and strategy are unchanged.

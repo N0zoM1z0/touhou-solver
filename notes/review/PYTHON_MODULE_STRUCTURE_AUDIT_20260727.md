@@ -223,7 +223,9 @@ implementation units are:
 | `geometry/segment_trajectory.cpp` | 225 | segment trajectory in-place lowering |
 | `geometry/aabb_trajectory.cpp` | 182 | AABB trajectory in-place lowering |
 | `geometry/piecewise_aabb.cpp` | 233 | piecewise-event AABB lowering |
-| `abi/pipeline_abi.cpp` | 934 | direct / belief / query-local exported families |
+| `abi/direct_pipeline_abi.cpp` | 242 | direct workspace exported family |
+| `abi/belief_pipeline_abi.cpp` | 633 | belief workspace exported family |
+| `abi/query_local_abi.cpp` | 69 | one-shot query-local export |
 | `internal/abi_impl.hpp` | 864 | replace shared implementation header with narrow internal headers |
 | `local/supplemental_workspace.cpp` | 804 | workspace lifecycle / search / result packing |
 

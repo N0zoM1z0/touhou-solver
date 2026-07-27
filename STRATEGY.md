@@ -94,8 +94,11 @@ delivery, and physical validation remain open.
 ### Priority
 
 1. Preserve global feasibility earlier. Recheck CE-0141 on a small physical
-   trace, then measure cancellable native witness delivery/Windows contention
-   and continue G5 future-event coverage. Extend partial-survival witnesses
+   trace. The stationary-witness Windows gate is now fixed before
+   measurement: complete all-36-action publication p95 must be at most 8 ms,
+   maximum below one frame, stale/partial publication zero, cancellation
+   bounded, and authoritative four-worker throughput/p95 retained. Continue
+   G5 future-event coverage in parallel. Extend partial-survival witnesses
    only through completed causal policy classes.
 2. Use proof-backed query-local refinement to separate coarsening, horizon,
    uncertainty, forecast/birth, route/tube, and unresolved losses. Do not use

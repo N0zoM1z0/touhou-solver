@@ -901,6 +901,18 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
 
 ### G4 — 更早保存 feasibility
 
+2026-07-28 delivery gate 已在量測前固定於
+`STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`：
+
+- physical Stage-4A exact-root/capsule reservoir；
+- workspace create 到 36 root actions complete publication 的 Windows
+  latency；
+- normal-priority four-worker viability contention；
+- 64 組 rapid newest-wins replacement、active cancellation、zero stale／
+  partial publication；
+- production 46-symbol ABI 不變；
+- 任何 pass 只允許後續 default-off trace-only shadow，不允許 action。
+
 不重啟已被 CE-0131 拒絕的 current-issue supplemental lane。新的方案必須在
 較早 causal version 中完成：
 

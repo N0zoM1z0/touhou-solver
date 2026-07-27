@@ -56,6 +56,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   brings Linux/Windows quick suites to `733/733` in `8.581/14.794 s`, with
   three Windows skips. See
   `notes/G5_PHYSICAL_COMPLETE_MASK_CAPSULE_GATE_20260728.md`.
+- The next performance gate is fixed before measurement in
+  `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`. It measures
+  complete 36-action publication, exact label/path validation, rapid
+  newest-wins cancellation, exact lookup, and normal-priority four-worker
+  viability contention on retained physical roots. It adds no production ABI
+  or consumer.
 - The preceding audit implementation checkpoint
   `48f7e56 Add exact complete-mask capsule audit`. The offline Gate-5 audit
   now reconstructs and digest-checks a physical 36-token complete-mask

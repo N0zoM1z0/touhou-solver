@@ -23,7 +23,6 @@ import numpy as np
 
 from th08_bullet_transform_model import (
     BulletTransformRuntime,
-    TransformRecord,
     parse_next_transform_record,
 )
 from th08_boss_phase import (
@@ -73,8 +72,13 @@ from th08_laser_runtime import (
 )
 from th08_live import (
     AutoConfirmPulse,  # noqa: F401 - compatibility export
+    Bullet,
     BULLET_POOL_SIZE,
     BULLET_STRIDE,
+    ENEMY_MAX_OBSERVED_WORLD_SPEED,
+    EnemyBody,
+    EnemyBodyModeMemory,
+    EnemyPoolSnapshot,
     GameplaySceneGuard,  # noqa: F401 - compatibility export
     INPUT_CLOCK_SHADOW_ROLE,
     ITEM_POOL_SIZE,
@@ -82,17 +86,21 @@ from th08_live import (
     LASER_POOL_SIZE,
     LASER_STRIDE,
     IssueController,
+    Item,
     LiveServiceResources,
     LiveSession,
     PolicyCoordinator,
     PolicyQueryRequest,
+    PackedBulletSnapshot,
     SceneClockCoordinator,
     Sensor,
+    SpellEnemyBodyGuard,
     TraceSink,
     auto_confirm_eligible as _auto_confirm_eligible,
     frozen_auto_confirm_eligible as _frozen_auto_confirm_eligible,
     input_clock_message_key as _input_clock_message_key,
     semantic_clock_observation as _semantic_clock_observation,
+    serialize_bullet_trace,
     serialize_semantic_clock_event as _serialize_semantic_clock_event,
     serialize_semantic_clock_observation as _serialize_semantic_clock_observation,
 )
@@ -179,9 +187,6 @@ from touhou_control.supplemental_local_beam import (
     search_supplemental_local_beam,
     search_supplemental_local_beam_native,
 )
-from touhou_control.trajectory import VelocityChange
-
-
 BULLET_GEOMETRY_OFFSET = 0x0D34
 BULLET_CALLBACK_PHASE_STATE_OFFSET = 0x01FC
 BULLET_POSITION_OFFSET = 0x0D44
@@ -340,7 +345,6 @@ CORRIDOR_POLICY_MINIMUM_LEAD_FRAMES = max(
 # continues and later re-enable inside the current robust-policy horizon.
 # Retain the last observed mode envelope for exactly that modeled horizon.
 ENEMY_DORMANT_MEMORY_FRAMES = TH08_CORRIDOR_CONFIG.horizon_frames
-ENEMY_MAX_OBSERVED_WORLD_SPEED = 32.0
 CORRIDOR_MIN_COMMIT_FRAMES = 32
 CORRIDOR_INITIAL_SUBMIT_FRAME = -1_000_000
 CANDIDATE_VERIFIER_HORIZON_FRAMES = 32
@@ -359,366 +363,6 @@ ROUTE2_STAGE_SUCCESSORS = {
     4: 5,
     5: 7,
 }
-
-
-@dataclass(frozen=True)
-class Bullet:
-    x: float
-    y: float
-    vx: float
-    vy: float
-    half_width: float
-    half_height: float
-    transform_flags: int = 0
-    slot: int = -1
-    speed: float | None = None
-    angle: float | None = None
-    transform_runtime: BulletTransformRuntime | None = None
-    callback_phase_state: int = 0
-    callback_aux_state: int = 0
-    velocity_changes: tuple[VelocityChange, ...] = ()
-    trajectory_uncertainty_x: float = 0.0
-    trajectory_uncertainty_y: float = 0.0
-    original_transform_flags: int = 0
-
-
-@dataclass(frozen=True)
-class PackedBulletSnapshot:
-    """Owned planning fields with lazy compatibility materialization."""
-
-    x: np.ndarray
-    y: np.ndarray
-    velocity_x: np.ndarray
-    velocity_y: np.ndarray
-    half_width: np.ndarray
-    half_height: np.ndarray
-    transform_flags: np.ndarray
-    slots: np.ndarray
-    speed: np.ndarray
-    angle: np.ndarray
-    callback_phase: np.ndarray
-    callback_aux: np.ndarray
-    original_transform_flags: np.ndarray
-
-    def __len__(self) -> int:
-        return len(self.x)
-
-    def materialize(self, index: int) -> Bullet:
-        speed = float(self.speed[index])
-        angle = float(self.angle[index])
-        return Bullet(
-            x=float(self.x[index]),
-            y=float(self.y[index]),
-            vx=float(self.velocity_x[index]),
-            vy=float(self.velocity_y[index]),
-            half_width=float(self.half_width[index]),
-            half_height=float(self.half_height[index]),
-            transform_flags=int(self.transform_flags[index]),
-            slot=int(self.slots[index]),
-            speed=speed if math.isfinite(speed) else None,
-            angle=angle if math.isfinite(angle) else None,
-            callback_phase_state=int(self.callback_phase[index]),
-            callback_aux_state=int(self.callback_aux[index]),
-            original_transform_flags=int(
-                self.original_transform_flags[index]
-            ),
-        )
-
-    def __iter__(self):
-        return (
-            self.materialize(index)
-            for index in range(len(self))
-        )
-
-
-def _serialize_transform_record(
-    record: TransformRecord | None,
-) -> list[float | int] | None:
-    if record is None:
-        return None
-    return [
-        record.index,
-        record.kind,
-        int(record.allow_while_active),
-        float(record.float_0),
-        float(record.float_1),
-        record.int_0,
-        record.int_1,
-    ]
-
-
-def serialize_bullet_trace(
-    bullet: Bullet,
-) -> list[object]:
-    """Retain legacy geometry plus optional diagnostic/gameplay state.
-
-    Fields 0..7 are the stable historical trace contract. Field 8 is either
-    null or a compact transform payload:
-
-    ``[speed, angle, original_flags, queue_cursor, next_record,
-    timer_fraction, timer_elapsed, duration, resume_speed, angle_operand,
-    repeat_limit, repeat_count, callback_phase_state, callback_aux_state,
-    velocity_changes, trajectory_uncertainty_x,
-    trajectory_uncertainty_y]``.
-
-    When diagnostic runtime was not requested, field 8 remains null and an
-    optional field 9 retains only gameplay projection state:
-
-    ``[speed, angle, original_flags, callback_phase_state,
-    callback_aux_state, velocity_changes, trajectory_uncertainty_x,
-    trajectory_uncertainty_y]``.
-    """
-
-    legacy: list[object] = [
-        bullet.slot,
-        bullet.x,
-        bullet.y,
-        bullet.vx,
-        bullet.vy,
-        bullet.half_width,
-        bullet.half_height,
-        bullet.transform_flags,
-    ]
-    runtime = bullet.transform_runtime
-    if runtime is None:
-        if (
-            bullet.original_transform_flags
-            or bullet.velocity_changes
-            or bullet.trajectory_uncertainty_x
-            or bullet.trajectory_uncertainty_y
-        ):
-            return [
-                *legacy,
-                None,
-                [
-                    bullet.speed,
-                    bullet.angle,
-                    bullet.original_transform_flags,
-                    bullet.callback_phase_state,
-                    bullet.callback_aux_state,
-                    [
-                        [
-                            change.frame,
-                            change.velocity_x,
-                            change.velocity_y,
-                        ]
-                        for change in bullet.velocity_changes
-                    ],
-                    bullet.trajectory_uncertainty_x,
-                    bullet.trajectory_uncertainty_y,
-                ],
-            ]
-        return [*legacy, None]
-    return [
-        *legacy,
-        [
-            bullet.speed,
-            bullet.angle,
-            runtime.original_flags,
-            runtime.queue_cursor,
-            _serialize_transform_record(runtime.next_record),
-            runtime.timer_fraction,
-            runtime.timer_elapsed,
-            runtime.duration,
-            runtime.resume_speed,
-            runtime.angle_operand,
-            runtime.repeat_limit,
-            runtime.repeat_count,
-            bullet.callback_phase_state,
-            bullet.callback_aux_state,
-            [
-                [
-                    change.frame,
-                    change.velocity_x,
-                    change.velocity_y,
-                ]
-                for change in bullet.velocity_changes
-            ],
-            bullet.trajectory_uncertainty_x,
-            bullet.trajectory_uncertainty_y,
-        ],
-    ]
-
-
-@dataclass(frozen=True)
-class EnemyBody:
-    pointer: int
-    x: float
-    y: float
-    vx: float
-    vy: float
-    half_width: float
-    half_height: float
-    flags: int
-    uncertainty: float = 0.0
-    internal_vx: float | None = None
-    internal_vy: float | None = None
-
-
-@dataclass(frozen=True)
-class SpellEnemyBodyGuard:
-    """Current spell-owner geometry under an uncertain contact mode."""
-
-    body: EnemyBody
-    contact_enabled: bool
-
-
-@dataclass(frozen=True)
-class EnemyPoolSnapshot:
-    frame_before: int
-    frame_after: int
-    bodies: tuple[EnemyBody, ...]
-    read_ms: float
-    attempts: int = 1
-
-    @property
-    def stable(self) -> bool:
-        return self.frame_before == self.frame_after
-
-
-class EnemyBodyModeMemory:
-    """Estimate world motion and retain bodies hidden by native mode switches.
-
-    Native +0x2D4C advances only one internal motion component.  The lethal
-    +0x2D88 position can also contain scripted or relative motion, so its
-    derivative must be estimated from consecutive world-position samples.
-    Implausible secants are treated as hybrid jumps and preserve the last
-    validated velocity.  Exact current-position measurements are not widened
-    to pretend that an unobserved future mode has become known.
-    """
-
-    def __init__(
-        self,
-        *,
-        maximum_age_frames: int,
-        maximum_world_speed: float = ENEMY_MAX_OBSERVED_WORLD_SPEED,
-    ) -> None:
-        if maximum_age_frames <= 0:
-            raise ValueError("enemy body memory age must be positive")
-        if maximum_world_speed <= 0.0:
-            raise ValueError("enemy world speed limit must be positive")
-        self.maximum_age_frames = maximum_age_frames
-        self.maximum_world_speed = maximum_world_speed
-        self._context: object = None
-        self._samples: dict[int, tuple[int, EnemyBody, bool]] = {}
-
-    def set_context(self, context: object) -> bool:
-        if context == self._context:
-            return False
-        self._context = context
-        self._samples.clear()
-        return True
-
-    def clear(self) -> None:
-        self._samples.clear()
-
-    def merge_snapshot(
-        self,
-        snapshot: EnemyPoolSnapshot,
-        *,
-        frame: int,
-    ) -> tuple[tuple[EnemyBody, ...], frozenset[int]]:
-        """Merge current bodies with bounded projections of absent slots."""
-
-        observed_pointers = {body.pointer for body in snapshot.bodies}
-        for body in snapshot.bodies:
-            previous = self._samples.get(body.pointer)
-            velocity_known = body.internal_vx is None
-            velocity_x = body.vx if velocity_known else 0.0
-            velocity_y = body.vy if velocity_known else 0.0
-            uncertainty = body.uncertainty
-            if previous is not None:
-                previous_frame, previous_body, previous_known = previous
-                elapsed = snapshot.frame_after - previous_frame
-                if elapsed > 0:
-                    measured_x = (body.x - previous_body.x) / elapsed
-                    measured_y = (body.y - previous_body.y) / elapsed
-                    if (
-                        abs(measured_x) <= self.maximum_world_speed
-                        and abs(measured_y) <= self.maximum_world_speed
-                    ):
-                        velocity_x = measured_x
-                        velocity_y = measured_y
-                        velocity_known = True
-                        uncertainty = body.uncertainty
-                    else:
-                        velocity_x = (
-                            previous_body.vx if previous_known else 0.0
-                        )
-                        velocity_y = (
-                            previous_body.vy if previous_known else 0.0
-                        )
-                        velocity_known = previous_known
-                        uncertainty = body.uncertainty
-                elif elapsed == 0:
-                    velocity_x = previous_body.vx
-                    velocity_y = previous_body.vy
-                    velocity_known = previous_known
-                    uncertainty = max(
-                        body.uncertainty,
-                        previous_body.uncertainty,
-                    )
-                else:
-                    continue
-            tracked = replace(
-                body,
-                vx=velocity_x,
-                vy=velocity_y,
-                uncertainty=uncertainty,
-            )
-            self._samples[body.pointer] = (
-                snapshot.frame_after,
-                tracked,
-                velocity_known,
-            )
-        expired = [
-            pointer
-            for pointer, (
-                sample_frame,
-                _body,
-                _velocity_known,
-            ) in self._samples.items()
-            if snapshot.frame_after - sample_frame > self.maximum_age_frames
-        ]
-        for pointer in expired:
-            del self._samples[pointer]
-
-        bodies = []
-        dormant = set()
-        for pointer, (
-            sample_frame,
-            body,
-            _velocity_known,
-        ) in sorted(self._samples.items()):
-            age = frame - sample_frame
-            if pointer not in observed_pointers:
-                if age < 0 or age > self.maximum_age_frames:
-                    continue
-                dormant.add(pointer)
-            bodies.append(
-                replace(
-                    body,
-                    x=body.x + body.vx * age,
-                    y=body.y + body.vy * age,
-                    uncertainty=(
-                        body.uncertainty
-                        + min(16.0, 0.75 * abs(age))
-                    ),
-                )
-            )
-        return tuple(bodies), frozenset(dormant)
-
-
-@dataclass(frozen=True)
-class Item:
-    slot: int
-    x: float
-    y: float
-    vx: float
-    vy: float
-    item_type: int
-    motion_state: int
-    full_value: bool
 
 
 @dataclass

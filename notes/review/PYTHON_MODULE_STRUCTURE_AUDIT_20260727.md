@@ -90,7 +90,8 @@ to 6,614 lines. Extracting the characterized corridor trace builder reduces
 the controller to 6,126 lines; extracting candidate-verifier trace ownership
 reduces it to 5,817 lines, and extracting decision-control trace fields
 reduces it to 5,594 lines. Extracting sensing trace fields reduces the current
-controller to 5,411 lines. The dominant block remains `_run_live_session`.
+controller to 5,411 lines; extracting timing and optional-hazard trace fields
+reduces it to 5,377 lines. The dominant block remains `_run_live_session`.
 
 `scripts/th08_live/iteration.py` now defines and the live loop consumes:
 
@@ -137,8 +138,8 @@ implementation module where module-level patch identity matters.
 
 | Module | Lines | Decision | Reason |
 | --- | ---: | --- | --- |
-| `th08_live/controller.py` | 5,411 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, timing/optional-hazard trace, and outer composition; immutable handoff records plus pure corridor/candidate/control/sensing trace builders are live. |
-| `th08_live/planner_pass.py` | 1,685 | retain for now | Large but now one causal planner pass. Split baseline, supplemental, and finalization only after the dependency boundary has retained workload evidence. |
+| `th08_live/controller.py` | 5,377 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, and outer composition; immutable handoff records plus pure corridor/candidate/control/sensing/timing/optional-hazard trace builders are live. |
+| `th08_live/planner_pass.py` | 1,685 | split next | The dependency boundary retained Linux/Windows suites and Stage 1/4A/5 workloads. Split prepare, baseline, supplemental, and finalization while preserving the five complete local-planner decision parity contract. |
 | `analysis/th08_run_dossier.py` | 2,451 | split after live iteration contract | Offline reader, attribution, aggregation, validation, and rendering are separable and low authority-risk. |
 | `analysis/th08_practice_dossier.py` | 2,307 | split with shared dossier primitives | It duplicates trace reading, statistics, schema construction, and rendering responsibilities. |
 | `th08_automation/practice_supervisor.py` | 683 | retain orchestration | Resource/process/menu/monitor/artifact logic is already behind narrow modules; the remaining file is composition and lifecycle flow. |
@@ -245,12 +246,10 @@ The structural sequence and current status are:
    checkpoint compared the full historical inline record with the pure
    builder; the next removed the inline path. Candidate-verifier trace
    followed the same characterization/removal sequence and is now consumed.
-   Decision-control fields now have an immutable input contract and pure
-   old/new parity builder, and the live record consumes them. Hazard-detail,
-   timing, and outer record composition remain controller-owned. Sensing
-   fields completed the same characterization/removal sequence and are now
-   consumed. Timing and optional detailed-hazard fields now have pure
-   old/new parity builders; their inline paths are pending removal.
+   Decision-control and sensing fields completed the same
+   characterization/removal sequence and are now consumed. Timing and
+   optional detailed-hazard fields also completed that sequence and are
+   consumed after issue. Outer record composition remains controller-owned.
 
 The bounded iteration then becomes:
 
@@ -278,7 +277,9 @@ Each extraction checkpoint must preserve:
 
 After each issue-path extraction, run focused Linux tests, the full Linux and
 Windows quick suites, deterministic retained-case parity, and a supervised
-Windows Stage-1 no-strategy-change physical smoke before declaring the R5
+Windows physical retention workload proportional to the changed authority.
+Stage 1 remains a cheap lifecycle smoke; planner, hazard, viability, and
+native checkpoints use Stage 4A, Stage 5, or Stage 6B before declaring the R5
 exit gate retained.
 
 ## Dossier Tool Follow-Up

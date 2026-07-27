@@ -1,0 +1,5260 @@
+{
+  "schema": "th08-practice-dossier-v1",
+  "run_id": "hard_route2_stage5_unattended_20260727_185422",
+  "practice_scope": {
+    "stage_route_index": 5,
+    "stage_label": "Stage 5",
+    "first_frame": 2,
+    "last_frame": 40448,
+    "observed_frame_span": 40446,
+    "decision_count": 12602,
+    "selected_frame_epoch_index": 0,
+    "frame_epoch_count": 1,
+    "end_event": {
+      "reason": "raw_trace_end",
+      "last_frame": 40448,
+      "stage_route_index": 5
+    },
+    "pre_scope_decision_count_excluded": 0,
+    "post_scope_decision_count_excluded": 0,
+    "scene_events": [
+      {
+        "kind": "scene_inactive",
+        "frame": 40448,
+        "engine_flags": 100865,
+        "stage_route_index": 5,
+        "transition_from_stage": 5,
+        "expected_stage": null,
+        "status": "terminal_unload"
+      }
+    ],
+    "raw_summary_is_scope_valid": true,
+    "accepted_completion": true
+  },
+  "provenance": {
+    "path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+    "sha256": "14bb67c3f6448a232e338d5067047def7a380814b90fae4ffb2577e49047e1f3",
+    "size_bytes": 455424978,
+    "parse_errors": 0,
+    "identity": {
+      "kind": "identity",
+      "pid": 55644,
+      "image_path": "D:\\Entertainment\\Game\\Touhou\\[th08] 东方永夜抄 (日文版)\\th08.exe",
+      "sha256": "330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924",
+      "runtime_patch": {
+        "address": 4509946,
+        "byte": 0,
+        "no_life_decrement": true
+      }
+    },
+    "controller_configs": [
+      {
+        "kind": "controller_config",
+        "bomb_policy": "disabled",
+        "item_policy": "survival_only_passive_collection",
+        "boss_phase_sensor": "native_registry_health_timer_and_damage_gate",
+        "damage_objective": "shadow_lexicographic_inside_fresh_safe_set",
+        "enemy_body_sensor": "synchronous_latent_contact_prefix_plus_async_enabled_tail_with_observed_world_motion",
+        "enemy_body_synchronous_prefix_slots": 64,
+        "enemy_body_dormant_memory_frames": 80,
+        "enemy_body_max_observed_world_speed": 32.0,
+        "control_delay_policy": "adaptive_end_to_end_distribution_robust_mpc",
+        "control_delay_default": 2,
+        "control_delay_min": 1,
+        "control_delay_max": 6,
+        "control_delay_window": 120,
+        "control_delay_guard_frames": 600,
+        "maximum_sensor_epoch_extent_frames": 8,
+        "maximum_action_contiguous_advance_frames": 120,
+        "input_clock_boundary_shadow": false,
+        "input_clock_shadow_role": "disabled",
+        "input_clock_shadow_sample_ms": 1.0,
+        "input_clock_shadow_predicate": "disabled",
+        "local_hazard_backend": "native",
+        "local_hazard_backend_authority": "parity_gated_native_default_exact_implementation",
+        "local_beam_reducer": "native",
+        "local_beam_reducer_authority": "parity_gated_native_quantized_reduction",
+        "bullet_decode_backend": "native",
+        "bullet_decode_backend_authority": "parity_gated_native_packed_with_sparse_python_crossover",
+        "pool_read_buffers": "persistent_ctypes_destination_unsigned_byte_view",
+        "global_planner": "finite_horizon_robust_backward_viability",
+        "viability_grid_step": 16.0,
+        "viability_refinement_grid_steps": [],
+        "viability_shadow_refinement_grid_steps": [
+          8.0
+        ],
+        "viability_refinement_trigger": "shadow_only_after_stage4a_latency_rejection",
+        "viability_survival_labels": {
+          "live": false,
+          "shadow": true,
+          "postpublished_compute": false,
+          "pipeline_prepublication_shadow": false,
+          "candidate_verifier_shadow": false,
+          "reason": "shadow_isolated_after_serialized_delivery_rejection"
+        },
+        "viability_frames_per_layer": 8,
+        "viability_horizon_frames": 80,
+        "corridor_background_low_priority": false,
+        "corridor_native_viability_workers": 4,
+        "local_planner_horizon_frames": 10,
+        "local_terminal_threat_horizon_frames": 32,
+        "viability_max_query_age_frames": 79,
+        "async_policy_epoch": "forecasted_solve_completion",
+        "async_policy_context": "gameplay_epoch_stage_spell",
+        "async_policy_initial_lead_frames": 80,
+        "async_policy_overlap_frames": 8,
+        "async_policy_minimum_lead_frames": 16,
+        "async_policy_delay_support_padding": 5,
+        "async_policy_submit_interval_frames": 8,
+        "safety_value_horizon_frames": 0,
+        "safety_value_role": "disabled",
+        "native_planner_backend": true,
+        "viability_quantifiers": "exists_action_forall_delay",
+        "viability_audit_capsules": null
+      }
+    ],
+    "raw_kind_counts": {
+      "identity": 1,
+      "controller_config": 1,
+      "wait_ready": 1,
+      "decision": 12602,
+      "auto_confirm_wall_pulse": 85,
+      "action_epoch_discontinuity": 1,
+      "scene_inactive": 1,
+      "summary": 1
+    },
+    "raw_summary": {
+      "kind": "summary",
+      "last_frame": 40448,
+      "counter_gaps": 367,
+      "hit_count": 8,
+      "termination_reason": "route_complete"
+    }
+  },
+  "control_policy": {
+    "practice_rule": "hard no-Bomb",
+    "verification": {
+      "passed": true,
+      "bomb_input_bit": 2,
+      "controller_policy_disabled": true,
+      "decision_count_checked": 12602,
+      "mask_violation_frames": [],
+      "bomb_flag_violation_frames": [],
+      "bomb_action_violation_frames": [],
+      "resource_note": "Bomb stock changes after a hit are thprac respawn-state changes, not Bomb input; the mask, decision flag, and action are the controller evidence."
+    }
+  },
+  "interpretation_policy": {
+    "canonical_sample": "Only the first hit of a fresh practice attempt preserves the initial position, bullets, power, and respawn history.",
+    "later_samples": "Later hits remain useful discovery evidence, but death and thprac respawn mutate position, projectile state, Bomb stock, and Power."
+  },
+  "totals": {
+    "death_count": 8,
+    "death_frames": [
+      11557,
+      14457,
+      22900,
+      24323,
+      29045,
+      29503,
+      32734,
+      35477
+    ],
+    "primary_cause_counts": {
+      "modeled_committed_prefix_collision": 7,
+      "observed_bullet_overlap": 1
+    },
+    "planner_failure_counts": {
+      "global_viability_kernel_exhausted_before_hit": 8
+    },
+    "contributing_factor_counts": {
+      "playfield_boundary": 6,
+      "fast_mode": 5,
+      "pool_density_over_1000": 2
+    },
+    "spell_hit_counts": {
+      "nonspell": 3,
+      "102": 2,
+      "106": 2,
+      "110": 1
+    },
+    "max_active_bullets": 1190,
+    "max_active_lasers": 0,
+    "hit_contact_epoch": {
+      "stable_capture_count": 7,
+      "stable_capture_with_enemy_body_count": 0,
+      "exact_enemy_body_overlap_count": 0
+    },
+    "resources": {
+      "lives": {
+        "start": 8.0,
+        "end": 8.0,
+        "min": 8.0,
+        "max": 8.0
+      },
+      "bombs": {
+        "start": 3.0,
+        "end": 3.0,
+        "min": 3.0,
+        "max": 6.0
+      },
+      "power": {
+        "start": 128.0,
+        "end": 52.0,
+        "min": 46.0,
+        "max": 128.0
+      }
+    },
+    "latency_ms": {
+      "read": {
+        "median": 3.726099996129051,
+        "p95": 6.816499982960522,
+        "max": 18.429199990350753
+      },
+      "plan": {
+        "median": 10.436150012537837,
+        "p95": 19.64760001283139,
+        "max": 42.61679999763146
+      },
+      "corridor_solver": {
+        "all": {
+          "unique_solution_count": 1625,
+          "solve_ms": {
+            "median": 99.60490005323663,
+            "p95": 310.12820004252717,
+            "max": 440.5681000207551
+          },
+          "age_frames": {
+            "median": 2.0,
+            "p95": 5.0,
+            "max": 1802.0
+          },
+          "stale_solution_count": 5
+        },
+        "active_spell_50": {
+          "unique_solution_count": 0,
+          "solve_ms": null,
+          "age_frames": null,
+          "stale_solution_count": 0
+        }
+      }
+    },
+    "decision_cadence_frames": {
+      "median": 2.0,
+      "p95": 3.0,
+      "max": 6.0,
+      "mean": 2.2100206447514688,
+      "sample_count": 12594
+    },
+    "action_hold_frames": {
+      "all": {
+        "median": 3.0,
+        "p95": 3.0,
+        "max": 5.0,
+        "counts": {
+          "2": 2088,
+          "3": 10163,
+          "4": 287,
+          "5": 64
+        }
+      },
+      "active_spell_50": {
+        "median": null,
+        "p95": null,
+        "max": null,
+        "counts": {}
+      }
+    },
+    "control_delay_frames": {
+      "median": 2.0,
+      "p95": 3.0,
+      "max": 4.0,
+      "counts": {
+        "2": 6882,
+        "3": 5430,
+        "4": 290
+      }
+    },
+    "adaptive_control_delay": {
+      "support_counts": {
+        "1,2": 29,
+        "1,2,3": 117,
+        "1,2,3,4": 209,
+        "1,2,3,4,5": 59,
+        "2,3": 2074,
+        "2,3,4": 7161,
+        "2,3,4,5": 1459,
+        "2,3,4,5,6": 1244,
+        "3,4": 4,
+        "3,4,5,6": 246
+      },
+      "robust_certificate_count": 12602,
+      "robust_override_count": 61,
+      "robust_collision_prediction_count": 287,
+      "robust_negative_clearance_count": 539,
+      "fresh_prefix_filtered_count": 61,
+      "fresh_prefix_relaxed_count": 12,
+      "robust_min_clearance": {
+        "median": 10.595844268798828,
+        "p95": 261.7611389160156,
+        "max": 9999.0
+      },
+      "guard_active_decision_count": 10319,
+      "learned_end_to_end_sample_max": 120,
+      "overrun_max": 48,
+      "censored_max": 330
+    },
+    "robust_viability": {
+      "planning_mode_counts": {
+        "robust_viability": 12519
+      },
+      "policy_phase_frame_counts": {
+        "0": 1993,
+        "1": 1545,
+        "2": 1338,
+        "3": 1497,
+        "4": 1483,
+        "5": 1526,
+        "6": 1568,
+        "7": 1466
+      },
+      "policy_decision_count": 12519,
+      "decision_without_query_count": 103,
+      "unique_solution_count": 1625,
+      "solve_ms": {
+        "median": 99.60490005323663,
+        "p95": 310.12820004252717,
+        "max": 440.5681000207551
+      },
+      "first_observed_age_frames": {
+        "median": 2.0,
+        "p95": 5.0,
+        "max": 1802.0
+      },
+      "forecast_lead_frames": {
+        "median": 16.0,
+        "p95": 16.0,
+        "max": 80.0
+      },
+      "backend_counts": {
+        "native": 1625
+      },
+      "solver_phase_ms": {
+        "clearance": {
+          "median": 9.920099982991815,
+          "p95": 38.77769998507574,
+          "max": 70.81840001046658
+        },
+        "pre_viability_hook": {
+          "median": 0.04279997665435076,
+          "p95": 0.07100001676008105,
+          "max": 0.311399984639138
+        },
+        "refinement_clearance": {
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "refinement_viability": {
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "rollout": {
+          "median": 0.0,
+          "p95": 7.6225000084377825,
+          "max": 14.302499999757856
+        },
+        "safety_value": {
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "viability": {
+          "median": 75.43430000077933,
+          "p95": 299.9386000446975,
+          "max": 431.66719999862835
+        }
+      },
+      "serial_coverage_margin_frames": {
+        "median": 64.0,
+        "p95": 64.0,
+        "max": 64.0
+      },
+      "serial_worker_serviceable_count": 12371,
+      "policy_status_counts": {
+        "pending_future_epoch": 66,
+        "queryable": 12419,
+        "expired": 34
+      },
+      "reported_stale_solution_count": 5,
+      "query_count": 12416,
+      "available_query_count": 12416,
+      "unavailable_reason_counts": {},
+      "support_covered_query_count": 12416,
+      "support_uncovered_query_count": 0,
+      "viable_query_count": 4341,
+      "empty_action_set_count": 8075,
+      "recovery_guided_query_count": 1220,
+      "recovery_selected_count": 531,
+      "distant_recovery_guided_query_count": 6010,
+      "distant_recovery_selected_count": 5812,
+      "constrained_decision_count": 4239,
+      "constrained_decision_fraction": 0.3363751785430884,
+      "safe_action_count": {
+        "median": 0.0,
+        "p95": 17.0,
+        "max": 17.0
+      },
+      "selected_repair_volume": {
+        "median": 0.0,
+        "p95": 153.0,
+        "max": 153.0
+      },
+      "selected_recovery_distance": {
+        "median": 116.48175822848829,
+        "p95": 334.0898082851376,
+        "max": 465.1021393199563
+      },
+      "selected_control_reserve_deficit": {
+        "median": 0.0,
+        "p95": 17.494617462158203,
+        "max": 40.94372248649597
+      },
+      "policy_age_frames": {
+        "median": 9.0,
+        "p95": 16.0,
+        "max": 79.0
+      }
+    },
+    "planner_consistency": {
+      "comparable_decision_count": 9356,
+      "global_winning_local_prefix_safe_count": 3142,
+      "global_winning_local_prefix_unsafe_count": 1,
+      "global_losing_local_prefix_safe_count": 6014,
+      "global_losing_local_prefix_unsafe_count": 199,
+      "selected_certified_action_local_prefix_unsafe_count": 1,
+      "selected_certified_action_local_prefix_unsafe_fraction": 0.00010688328345446772,
+      "selected_action_outside_global_winning_set_count": 36,
+      "excluded_hazard_version_change_count": 1942,
+      "excluded_deadline_hold_count": 0,
+      "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. After excluding observed issue-time invalidations, a selected cached-policy action that the fresh local prefix finds unsafe is a forecast/version contradiction; future births can still make the cached hazard set older than the local one. Deadline holds are excluded because their final input is not governed by that policy query."
+    },
+    "input_visibility": {
+      "interpretation": "Heuristic SendInput-to-observation evidence. Output transitions already equal to the current game input are excluded as ambiguous; visibility means the next decision snapshot reports the newly sent mask.",
+      "unambiguous_transition_count": 6443,
+      "visible_on_next_observation_count": 5851,
+      "visible_on_next_observation_fraction": 0.9081173366444203,
+      "visible_snapshot_delta_frames": {
+        "median": 1.0,
+        "p95": 1.0,
+        "max": 2.0
+      },
+      "visible_observation_delta_frames": {
+        "median": 2.0,
+        "p95": 3.0,
+        "max": 6.0
+      }
+    },
+    "runtime_timing_ms": {
+      "observe": {
+        "median": 0.20020001102238894,
+        "p95": 0.4668000037781894,
+        "max": 8.149900007992983
+      },
+      "read_pools": {
+        "median": 3.726099996129051,
+        "p95": 6.816499982960522,
+        "max": 18.429199990350753
+      },
+      "read_enemy_prefix": {
+        "median": 1.5915999829303473,
+        "p95": 3.3050000201910734,
+        "max": 15.55980002740398
+      },
+      "read_enemy_issue_prefix": {
+        "median": 1.763049978762865,
+        "p95": 3.541400015819818,
+        "max": 15.650700021069497
+      },
+      "decode_pools": {
+        "median": 0.45629998203366995,
+        "p95": 5.9294000384397805,
+        "max": 36.9522999972105
+      },
+      "corridor_bookkeeping": {
+        "median": 1.457549980841577,
+        "p95": 6.55459996778518,
+        "max": 20.612500025890768
+      },
+      "local_plan": {
+        "median": 10.436150012537837,
+        "p95": 19.64760001283139,
+        "max": 42.61679999763146
+      },
+      "local_plan_initial": {
+        "median": 10.082450025947765,
+        "p95": 18.307099991943687,
+        "max": 40.037999977357686
+      },
+      "issue_enemy_recertificate": {
+        "median": 0.0,
+        "p95": 2.9066000133752823,
+        "max": 11.811000003945082
+      },
+      "input": {
+        "median": 0.4091000009793788,
+        "p95": 4.479900002479553,
+        "max": 18.23569997213781
+      },
+      "before_trace": {
+        "median": 21.419149998109788,
+        "p95": 36.35149996262044,
+        "max": 80.41659998707473
+      },
+      "previous_trace": {
+        "median": 1.5959999873302877,
+        "p95": 3.290999971795827,
+        "max": 9.289200010243803
+      },
+      "previous_iteration": {
+        "median": 25.032699981238693,
+        "p95": 41.0610000253655,
+        "max": 86.07589994790033
+      }
+    },
+    "enemy_sensor": {
+      "decision_count_with_snapshot": 12602,
+      "snapshot_count": 6234,
+      "snapshot_age_frames": {
+        "median": 4.0,
+        "p95": 6.0,
+        "max": 12.0
+      },
+      "snapshot_age_discontinuity_count": 7,
+      "snapshot_interval_frames": {
+        "median": 4.0,
+        "p95": 6.0,
+        "max": 9.0
+      },
+      "capture_read_ms": {
+        "median": 5.364800017559901,
+        "p95": 22.153400001116097,
+        "max": 44.330400007311255
+      },
+      "decision_count_with_active_bodies": 11955,
+      "max_active_bodies": 42,
+      "decision_count_with_contact_enabled_bodies": 8932,
+      "max_contact_enabled_bodies": 37,
+      "decision_count_with_anticipatory_bodies": 4969,
+      "max_anticipatory_bodies": 41,
+      "decision_count_with_dormant_bodies": 6533,
+      "max_dormant_bodies": 41,
+      "observed_world_motion_sample_count": 137,
+      "observed_world_speed": {
+        "median": 0.600006103515625,
+        "p95": 4.35321044921875,
+        "max": 5.220672607421875
+      },
+      "internal_component_speed": {
+        "median": 0.6000000238418579,
+        "p95": 4.35321044921875,
+        "max": 4.697332382202148
+      },
+      "world_internal_motion_disagreement": {
+        "median": 0.0,
+        "p95": 0.6000070571899414,
+        "max": 0.6000137329101562
+      },
+      "world_internal_motion_disagreement_over_1px_count": 0
+    },
+    "issue_enemy_guard": {
+      "observation_count": 12602,
+      "changed_observation_count": 2202,
+      "recertified_count": 2202,
+      "action_override_count": 33,
+      "transaction_count": 2202,
+      "selection_reason_counts": {
+        "preserve_planned_in_fresh_global_intersection": 611,
+        "preserve_fresh_safe_planned": 1344,
+        "replace_unsafe_with_least_bad": 236,
+        "replace_unsafe_with_fresh_safe": 1,
+        "relax_empty_fresh_global_intersection_least_bad": 10
+      },
+      "planned_action_preserved_count": 2169,
+      "fresh_global_intersection_count": 611,
+      "global_constraint_relaxation_count": 34,
+      "fresh_global_empty_relaxation_count": 10,
+      "inherited_constraint_relaxation_count": 24,
+      "silent_outside_global_count": 0,
+      "observation_count_with_anticipatory_bodies": 4927,
+      "max_anticipatory_bodies": 41,
+      "observation_count_with_dormant_bodies": 6541,
+      "max_dormant_bodies": 41,
+      "change_kind_counts": {
+        "velocity": 5220,
+        "removed": 2420,
+        "added": 1371,
+        "trajectory": 337
+      },
+      "read_ms": {
+        "median": 1.763049978762865,
+        "p95": 3.541400015819818,
+        "max": 15.650700021069497
+      },
+      "recertificate_ms": {
+        "median": 2.1615499863401055,
+        "p95": 5.31739997677505,
+        "max": 11.811000003945082
+      }
+    },
+    "spell_owner_guard": {
+      "row_count": 8961,
+      "observation_count": 8961,
+      "error_count": 0,
+      "contact_enabled_count": 8932,
+      "anticipatory_count": 29,
+      "outside_async_pool_count": 8961,
+      "pointer_counts": {
+        "0x0057D2F0": 8961
+      },
+      "per_spell": {
+        "0": {
+          "anticipatory_count": 2,
+          "contact_enabled_count": 2705,
+          "observation_count": 2707
+        },
+        "102": {
+          "anticipatory_count": 0,
+          "contact_enabled_count": 1721,
+          "observation_count": 1721
+        },
+        "106": {
+          "anticipatory_count": 0,
+          "contact_enabled_count": 1770,
+          "observation_count": 1770
+        },
+        "110": {
+          "anticipatory_count": 0,
+          "contact_enabled_count": 1336,
+          "observation_count": 1336
+        },
+        "114": {
+          "anticipatory_count": 27,
+          "contact_enabled_count": 1400,
+          "observation_count": 1427
+        }
+      }
+    },
+    "terminal_threat": {
+      "decision_count": 12602,
+      "mode_counts": {
+        "constant_terminal_action_heuristic": 413,
+        "disabled_no_degenerate_boundary": 12189
+      },
+      "horizon_counts": {
+        "0": 72,
+        "10": 12117,
+        "32": 413
+      },
+      "collision_warning_count": 2,
+      "constraint_relaxed_count": 102,
+      "clearance_below_item_safety_count": 90,
+      "minimum_clearance": {
+        "median": 11.554581642150879,
+        "p95": 34.904178619384766,
+        "max": 183.80819702148438
+      }
+    },
+    "behavior_context": {
+      "alive_all": {
+        "sample_count": 11358,
+        "fast_fraction": 0.24599401303046312,
+        "focused_fraction": 0.7540059869695369,
+        "bottom_8px_fraction": 0.19853847508364147,
+        "nonpositive_pipeline_fraction": 0.013822856136643776,
+        "negative_corridor_slack_fraction": 0.0542314335060449,
+        "action_lag_over_model_fraction": 0.0010565240359218173,
+        "recovery_guided_fraction": 0.09693608029582673,
+        "recovery_selected_fraction": 0.040147913365029056,
+        "distant_recovery_guided_fraction": 0.5005282620179609,
+        "distant_recovery_selected_fraction": 0.48635323120267654,
+        "control_reserve_deficit_mean": 3.4098905028749424,
+        "positive_control_reserve_deficit_fraction": 0.3345659447085755
+      },
+      "alive_preceding_hit_60f": {
+        "sample_count": 195,
+        "fast_fraction": 0.2205128205128205,
+        "focused_fraction": 0.7794871794871795,
+        "bottom_8px_fraction": 0.5282051282051282,
+        "nonpositive_pipeline_fraction": 0.13333333333333333,
+        "negative_corridor_slack_fraction": 0.0,
+        "action_lag_over_model_fraction": 0.005128205128205128,
+        "recovery_guided_fraction": 0.08717948717948718,
+        "recovery_selected_fraction": 0.0,
+        "distant_recovery_guided_fraction": 0.8615384615384616,
+        "distant_recovery_selected_fraction": 0.8,
+        "control_reserve_deficit_mean": 10.223473400947375,
+        "positive_control_reserve_deficit_fraction": 0.6358974358974359
+      },
+      "alive_outside_preceding_hit_60f": {
+        "sample_count": 11163,
+        "fast_fraction": 0.24643912926632625,
+        "focused_fraction": 0.7535608707336737,
+        "bottom_8px_fraction": 0.19277971871360744,
+        "nonpositive_pipeline_fraction": 0.011735196631729821,
+        "negative_corridor_slack_fraction": 0.05425017277125086,
+        "action_lag_over_model_fraction": 0.0009853981904505958,
+        "recovery_guided_fraction": 0.09710651258622234,
+        "recovery_selected_fraction": 0.04084923407686106,
+        "distant_recovery_guided_fraction": 0.4942219833378124,
+        "distant_recovery_selected_fraction": 0.4808743169398907,
+        "control_reserve_deficit_mean": 3.2908679582969502,
+        "positive_control_reserve_deficit_fraction": 0.32930215891785364
+      },
+      "spell_50_alive_all": {
+        "sample_count": 0
+      },
+      "spell_50_alive_preceding_hit_60f": {
+        "sample_count": 0
+      },
+      "spell_50_alive_other": {
+        "sample_count": 0
+      }
+    },
+    "per_spell": [
+      {
+        "phase_key": "nonspell",
+        "spell_id": null,
+        "spell_name": null,
+        "decision_count": 8244,
+        "alive_decision_count": 7658,
+        "hit_count": 3,
+        "hit_frames": [
+          11557,
+          14457,
+          32734
+        ],
+        "max_active_bullets": 1009,
+        "max_active_lasers": 0,
+        "behavior_alive": {
+          "sample_count": 7658,
+          "fast_fraction": 0.2760511882998172,
+          "focused_fraction": 0.7239488117001828,
+          "bottom_8px_fraction": 0.1439018020370854,
+          "nonpositive_pipeline_fraction": 0.00901018542700444,
+          "negative_corridor_slack_fraction": 0.07482629609834313,
+          "action_lag_over_model_fraction": 0.0007834943849569079,
+          "recovery_guided_fraction": 0.0951945677722643,
+          "recovery_selected_fraction": 0.03891355445285975,
+          "distant_recovery_guided_fraction": 0.5758683729433273,
+          "distant_recovery_selected_fraction": 0.5680334290937582,
+          "control_reserve_deficit_mean": 3.480858901238809,
+          "positive_control_reserve_deficit_fraction": 0.3692870201096892
+        },
+        "decision_cadence_frames": {
+          "median": 2.0,
+          "p95": 3.0,
+          "max": 4.0,
+          "mean": 2.131649259169298,
+          "sample_count": 8234
+        },
+        "runtime_timing_ms": {
+          "observe": {
+            "median": 0.2012000186368823,
+            "p95": 0.4735999973490834,
+            "max": 7.902699988335371
+          },
+          "read_pools": {
+            "median": 3.644999989774078,
+            "p95": 6.789399951230735,
+            "max": 18.429199990350753
+          },
+          "read_enemy_prefix": {
+            "median": 1.6016500303521752,
+            "p95": 3.4026000066660345,
+            "max": 15.55980002740398
+          },
+          "read_enemy_issue_prefix": {
+            "median": 1.7606999608688056,
+            "p95": 3.532300004735589,
+            "max": 15.650700021069497
+          },
+          "decode_pools": {
+            "median": 0.43009998626075685,
+            "p95": 1.7254999838769436,
+            "max": 10.891499987337738
+          },
+          "corridor_bookkeeping": {
+            "median": 1.6789000073913485,
+            "p95": 6.380999984685332,
+            "max": 19.65489995200187
+          },
+          "local_plan": {
+            "median": 10.123200016096234,
+            "p95": 17.238200001884252,
+            "max": 30.83210001932457
+          },
+          "local_plan_initial": {
+            "median": 9.928999992553145,
+            "p95": 16.94070000667125,
+            "max": 30.83210001932457
+          },
+          "issue_enemy_recertificate": {
+            "median": 0.0,
+            "p95": 1.78390002110973,
+            "max": 11.093200009781867
+          },
+          "input": {
+            "median": 0.47199998516589403,
+            "p95": 4.803500021807849,
+            "max": 18.23569997213781
+          },
+          "before_trace": {
+            "median": 20.766249974258244,
+            "p95": 31.263100041542202,
+            "max": 50.40540004847571
+          },
+          "previous_trace": {
+            "median": 1.5287999995052814,
+            "p95": 2.616700017824769,
+            "max": 8.94739996874705
+          },
+          "previous_iteration": {
+            "median": 24.147499992977828,
+            "p95": 35.43579997494817,
+            "max": 59.04089997056872
+          }
+        },
+        "robust_viability": {
+          "planning_mode_counts": {
+            "robust_viability": 8207
+          },
+          "policy_phase_frame_counts": {
+            "0": 1306,
+            "1": 1001,
+            "2": 871,
+            "3": 997,
+            "4": 967,
+            "5": 996,
+            "6": 1016,
+            "7": 952
+          },
+          "policy_decision_count": 8207,
+          "decision_without_query_count": 101,
+          "unique_solution_count": 1023,
+          "solve_ms": {
+            "median": 126.353100000415,
+            "p95": 317.5040999776684,
+            "max": 440.5681000207551
+          },
+          "first_observed_age_frames": {
+            "median": 2.0,
+            "p95": 5.0,
+            "max": 1802.0
+          },
+          "forecast_lead_frames": {
+            "median": 16.0,
+            "p95": 16.0,
+            "max": 80.0
+          },
+          "backend_counts": {
+            "native": 1023
+          },
+          "solver_phase_ms": {
+            "clearance": {
+              "median": 7.4210999882780015,
+              "p95": 18.192199990153313,
+              "max": 35.25029995944351
+            },
+            "pre_viability_hook": {
+              "median": 0.041499966755509377,
+              "p95": 0.0716999638825655,
+              "max": 0.311399984639138
+            },
+            "refinement_clearance": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "refinement_viability": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "rollout": {
+              "median": 0.0,
+              "p95": 7.40060000680387,
+              "max": 14.302499999757856
+            },
+            "safety_value": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "viability": {
+              "median": 107.72779997205362,
+              "p95": 307.0527999661863,
+              "max": 431.66719999862835
+            }
+          },
+          "serial_coverage_margin_frames": {
+            "median": 64.0,
+            "p95": 64.0,
+            "max": 64.0
+          },
+          "serial_worker_serviceable_count": 8059,
+          "policy_status_counts": {
+            "pending_future_epoch": 65,
+            "queryable": 8108,
+            "expired": 34
+          },
+          "reported_stale_solution_count": 5,
+          "query_count": 8106,
+          "available_query_count": 8106,
+          "unavailable_reason_counts": {},
+          "support_covered_query_count": 8106,
+          "support_uncovered_query_count": 0,
+          "viable_query_count": 2725,
+          "empty_action_set_count": 5381,
+          "recovery_guided_query_count": 812,
+          "recovery_selected_count": 347,
+          "distant_recovery_guided_query_count": 4531,
+          "distant_recovery_selected_count": 4467,
+          "constrained_decision_count": 2670,
+          "constrained_decision_fraction": 0.32387190684133915,
+          "safe_action_count": {
+            "median": 0.0,
+            "p95": 17.0,
+            "max": 17.0
+          },
+          "selected_repair_volume": {
+            "median": 0.0,
+            "p95": 153.0,
+            "max": 153.0
+          },
+          "selected_recovery_distance": {
+            "median": 128.0,
+            "p95": 350.90739519138094,
+            "max": 465.1021393199563
+          },
+          "selected_control_reserve_deficit": {
+            "median": 0.0,
+            "p95": 16.0,
+            "max": 40.94372248649597
+          },
+          "policy_age_frames": {
+            "median": 9.0,
+            "p95": 17.0,
+            "max": 79.0
+          }
+        },
+        "planner_consistency": {
+          "comparable_decision_count": 6940,
+          "global_winning_local_prefix_safe_count": 2193,
+          "global_winning_local_prefix_unsafe_count": 0,
+          "global_losing_local_prefix_safe_count": 4630,
+          "global_losing_local_prefix_unsafe_count": 117,
+          "selected_certified_action_local_prefix_unsafe_count": 0,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.0,
+          "selected_action_outside_global_winning_set_count": 24,
+          "excluded_hazard_version_change_count": 680,
+          "excluded_deadline_hold_count": 0,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. After excluding observed issue-time invalidations, a selected cached-policy action that the fresh local prefix finds unsafe is a forecast/version contradiction; future births can still make the cached hazard set older than the local one. Deadline holds are excluded because their final input is not governed by that policy query."
+        }
+      },
+      {
+        "phase_key": "102",
+        "spell_id": 102,
+        "spell_name": "幻波「赤眼催眠(マインドブローイング)」",
+        "decision_count": 988,
+        "alive_decision_count": 717,
+        "hit_count": 2,
+        "hit_frames": [
+          22900,
+          24323
+        ],
+        "max_active_bullets": 1190,
+        "max_active_lasers": 0,
+        "behavior_alive": {
+          "sample_count": 717,
+          "fast_fraction": 0.20641562064156208,
+          "focused_fraction": 0.793584379358438,
+          "bottom_8px_fraction": 0.40585774058577406,
+          "nonpositive_pipeline_fraction": 0.00697350069735007,
+          "negative_corridor_slack_fraction": 0.031088082901554404,
+          "action_lag_over_model_fraction": 0.002789400278940028,
+          "recovery_guided_fraction": 0.12133891213389121,
+          "recovery_selected_fraction": 0.03765690376569038,
+          "distant_recovery_guided_fraction": 0.5299860529986054,
+          "distant_recovery_selected_fraction": 0.48535564853556484,
+          "control_reserve_deficit_mean": 6.447284969159583,
+          "positive_control_reserve_deficit_fraction": 0.5843793584379359
+        },
+        "decision_cadence_frames": {
+          "median": 2.0,
+          "p95": 3.0,
+          "max": 5.0,
+          "mean": 2.2087132725430596,
+          "sample_count": 987
+        },
+        "runtime_timing_ms": {
+          "observe": {
+            "median": 0.20304997451603413,
+            "p95": 0.46259997179731727,
+            "max": 8.149900007992983
+          },
+          "read_pools": {
+            "median": 3.979300003265962,
+            "p95": 7.306299987249076,
+            "max": 16.877199988812208
+          },
+          "read_enemy_prefix": {
+            "median": 1.603499986231327,
+            "p95": 3.108800039626658,
+            "max": 11.08680001925677
+          },
+          "read_enemy_issue_prefix": {
+            "median": 1.7872000171337277,
+            "p95": 3.570200002286583,
+            "max": 10.080400039441884
+          },
+          "decode_pools": {
+            "median": 0.43184999958612025,
+            "p95": 1.4686000067740679,
+            "max": 8.863900031428784
+          },
+          "corridor_bookkeeping": {
+            "median": 1.0199000244028866,
+            "p95": 8.248500002082437,
+            "max": 16.566100006457418
+          },
+          "local_plan": {
+            "median": 10.728649969678372,
+            "p95": 20.15719999326393,
+            "max": 42.61679999763146
+          },
+          "local_plan_initial": {
+            "median": 9.820250008488074,
+            "p95": 18.68009997997433,
+            "max": 40.037999977357686
+          },
+          "issue_enemy_recertificate": {
+            "median": 0.0,
+            "p95": 2.751599997282028,
+            "max": 8.450700028333813
+          },
+          "input": {
+            "median": 0.0010999792721122503,
+            "p95": 3.9815999916754663,
+            "max": 8.99500004015863
+          },
+          "before_trace": {
+            "median": 21.17264998378232,
+            "p95": 33.86670001782477,
+            "max": 64.3934000399895
+          },
+          "previous_trace": {
+            "median": 1.5497999847866595,
+            "p95": 2.5089000118896365,
+            "max": 8.99169995682314
+          },
+          "previous_iteration": {
+            "median": 25.65004999632947,
+            "p95": 39.09920004662126,
+            "max": 68.89350002165884
+          }
+        },
+        "robust_viability": {
+          "planning_mode_counts": {
+            "robust_viability": 978
+          },
+          "policy_phase_frame_counts": {
+            "0": 162,
+            "1": 109,
+            "2": 109,
+            "3": 113,
+            "4": 134,
+            "5": 102,
+            "6": 144,
+            "7": 103
+          },
+          "policy_decision_count": 978,
+          "decision_without_query_count": 2,
+          "unique_solution_count": 128,
+          "solve_ms": {
+            "median": 108.50390000268817,
+            "p95": 301.89750000135973,
+            "max": 357.3684000293724
+          },
+          "first_observed_age_frames": {
+            "median": 2.0,
+            "p95": 4.0,
+            "max": 8.0
+          },
+          "forecast_lead_frames": {
+            "median": 16.0,
+            "p95": 16.0,
+            "max": 16.0
+          },
+          "backend_counts": {
+            "native": 128
+          },
+          "solver_phase_ms": {
+            "clearance": {
+              "median": 26.230899966321886,
+              "p95": 41.24350001802668,
+              "max": 55.52169994916767
+            },
+            "pre_viability_hook": {
+              "median": 0.04210002953186631,
+              "p95": 0.05749997217208147,
+              "max": 0.07970002479851246
+            },
+            "refinement_clearance": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "refinement_viability": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "rollout": {
+              "median": 0.0,
+              "p95": 8.24950000969693,
+              "max": 11.096599977463484
+            },
+            "safety_value": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "viability": {
+              "median": 63.59095001243986,
+              "p95": 292.5054999650456,
+              "max": 346.9604999991134
+            }
+          },
+          "serial_coverage_margin_frames": {
+            "median": 64.0,
+            "p95": 64.0,
+            "max": 64.0
+          },
+          "serial_worker_serviceable_count": 978,
+          "policy_status_counts": {
+            "pending_future_epoch": 1,
+            "queryable": 977
+          },
+          "reported_stale_solution_count": 0,
+          "query_count": 976,
+          "available_query_count": 976,
+          "unavailable_reason_counts": {},
+          "support_covered_query_count": 976,
+          "support_uncovered_query_count": 0,
+          "viable_query_count": 434,
+          "empty_action_set_count": 542,
+          "recovery_guided_query_count": 121,
+          "recovery_selected_count": 52,
+          "distant_recovery_guided_query_count": 421,
+          "distant_recovery_selected_count": 382,
+          "constrained_decision_count": 419,
+          "constrained_decision_fraction": 0.4240890688259109,
+          "safe_action_count": {
+            "median": 0.0,
+            "p95": 17.0,
+            "max": 17.0
+          },
+          "selected_repair_volume": {
+            "median": 0.0,
+            "p95": 153.0,
+            "max": 153.0
+          },
+          "selected_recovery_distance": {
+            "median": 80.0,
+            "p95": 170.0823330037544,
+            "max": 336.3807366660582
+          },
+          "selected_control_reserve_deficit": {
+            "median": 4.510564804077148,
+            "p95": 20.0,
+            "max": 31.120963096618652
+          },
+          "policy_age_frames": {
+            "median": 9.0,
+            "p95": 16.0,
+            "max": 26.0
+          }
+        },
+        "planner_consistency": {
+          "comparable_decision_count": 456,
+          "global_winning_local_prefix_safe_count": 172,
+          "global_winning_local_prefix_unsafe_count": 0,
+          "global_losing_local_prefix_safe_count": 278,
+          "global_losing_local_prefix_unsafe_count": 6,
+          "selected_certified_action_local_prefix_unsafe_count": 0,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.0,
+          "selected_action_outside_global_winning_set_count": 3,
+          "excluded_hazard_version_change_count": 259,
+          "excluded_deadline_hold_count": 0,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. After excluding observed issue-time invalidations, a selected cached-policy action that the fresh local prefix finds unsafe is a forecast/version contradiction; future births can still make the cached hazard set older than the local one. Deadline holds are excluded because their final input is not governed by that policy query."
+        }
+      },
+      {
+        "phase_key": "106",
+        "spell_id": 106,
+        "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+        "decision_count": 646,
+        "alive_decision_count": 454,
+        "hit_count": 2,
+        "hit_frames": [
+          29045,
+          29503
+        ],
+        "max_active_bullets": 1032,
+        "max_active_lasers": 0,
+        "behavior_alive": {
+          "sample_count": 454,
+          "fast_fraction": 0.07268722466960352,
+          "focused_fraction": 0.9273127753303965,
+          "bottom_8px_fraction": 0.32158590308370044,
+          "nonpositive_pipeline_fraction": 0.11013215859030837,
+          "negative_corridor_slack_fraction": 0.0,
+          "action_lag_over_model_fraction": 0.006607929515418502,
+          "recovery_guided_fraction": 0.006607929515418502,
+          "recovery_selected_fraction": 0.004405286343612335,
+          "distant_recovery_guided_fraction": 0.4933920704845815,
+          "distant_recovery_selected_fraction": 0.46255506607929514,
+          "control_reserve_deficit_mean": 5.293384646529143,
+          "positive_control_reserve_deficit_fraction": 0.36784140969163
+        },
+        "decision_cadence_frames": {
+          "median": 3.0,
+          "p95": 4.0,
+          "max": 6.0,
+          "mean": 3.108527131782946,
+          "sample_count": 645
+        },
+        "runtime_timing_ms": {
+          "observe": {
+            "median": 0.1894999877549708,
+            "p95": 0.45250001130625606,
+            "max": 5.051699990872294
+          },
+          "read_pools": {
+            "median": 4.052549978950992,
+            "p95": 6.843200011644512,
+            "max": 13.29589996021241
+          },
+          "read_enemy_prefix": {
+            "median": 1.5264999819919467,
+            "p95": 3.3425000146962702,
+            "max": 10.033000027760863
+          },
+          "read_enemy_issue_prefix": {
+            "median": 1.7610499635338783,
+            "p95": 3.4733000211417675,
+            "max": 5.835199961438775
+          },
+          "decode_pools": {
+            "median": 11.234400008106604,
+            "p95": 19.193899992387742,
+            "max": 36.9522999972105
+          },
+          "corridor_bookkeeping": {
+            "median": 1.8253000162076205,
+            "p95": 10.171899979468435,
+            "max": 20.612500025890768
+          },
+          "local_plan": {
+            "median": 18.705799971939996,
+            "p95": 28.38899998459965,
+            "max": 37.34120004810393
+          },
+          "local_plan_initial": {
+            "median": 15.731299994513392,
+            "p95": 23.724700033199042,
+            "max": 33.69289997499436
+          },
+          "issue_enemy_recertificate": {
+            "median": 0.0,
+            "p95": 6.019400025252253,
+            "max": 11.121700052171946
+          },
+          "input": {
+            "median": 0.000800006091594696,
+            "p95": 3.0341999954544008,
+            "max": 8.046299975831062
+          },
+          "before_trace": {
+            "median": 40.66870003589429,
+            "p95": 59.95429999893531,
+            "max": 80.41659998707473
+          },
+          "previous_trace": {
+            "median": 3.672599996207282,
+            "p95": 5.956200009677559,
+            "max": 9.289200010243803
+          },
+          "previous_iteration": {
+            "median": 45.346900005824864,
+            "p95": 66.36860000435263,
+            "max": 86.07589994790033
+          }
+        },
+        "robust_viability": {
+          "planning_mode_counts": {
+            "robust_viability": 637
+          },
+          "policy_phase_frame_counts": {
+            "0": 110,
+            "1": 79,
+            "2": 91,
+            "3": 61,
+            "4": 63,
+            "5": 85,
+            "6": 81,
+            "7": 67
+          },
+          "policy_decision_count": 637,
+          "decision_without_query_count": 0,
+          "unique_solution_count": 115,
+          "solve_ms": {
+            "median": 79.21200001146644,
+            "p95": 245.50070002442226,
+            "max": 341.93080000113696
+          },
+          "first_observed_age_frames": {
+            "median": 4.0,
+            "p95": 6.0,
+            "max": 7.0
+          },
+          "forecast_lead_frames": {
+            "median": 16.0,
+            "p95": 16.0,
+            "max": 16.0
+          },
+          "backend_counts": {
+            "native": 115
+          },
+          "solver_phase_ms": {
+            "clearance": {
+              "median": 38.987500010989606,
+              "p95": 55.409799970220774,
+              "max": 70.81840001046658
+            },
+            "pre_viability_hook": {
+              "median": 0.04610000178217888,
+              "p95": 0.07050001295283437,
+              "max": 0.1039999770000577
+            },
+            "refinement_clearance": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "refinement_viability": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "rollout": {
+              "median": 0.0,
+              "p95": 7.617700030095875,
+              "max": 8.604400034528226
+            },
+            "safety_value": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "viability": {
+              "median": 27.63649995904416,
+              "p95": 233.1197999883443,
+              "max": 330.98140003858134
+            }
+          },
+          "serial_coverage_margin_frames": {
+            "median": 64.0,
+            "p95": 64.0,
+            "max": 64.0
+          },
+          "serial_worker_serviceable_count": 637,
+          "policy_status_counts": {
+            "queryable": 637
+          },
+          "reported_stale_solution_count": 0,
+          "query_count": 637,
+          "available_query_count": 637,
+          "unavailable_reason_counts": {},
+          "support_covered_query_count": 637,
+          "support_uncovered_query_count": 0,
+          "viable_query_count": 239,
+          "empty_action_set_count": 398,
+          "recovery_guided_query_count": 3,
+          "recovery_selected_count": 2,
+          "distant_recovery_guided_query_count": 370,
+          "distant_recovery_selected_count": 333,
+          "constrained_decision_count": 239,
+          "constrained_decision_fraction": 0.369969040247678,
+          "safe_action_count": {
+            "median": 0.0,
+            "p95": 17.0,
+            "max": 17.0
+          },
+          "selected_repair_volume": {
+            "median": 0.0,
+            "p95": 153.0,
+            "max": 153.0
+          },
+          "selected_recovery_distance": {
+            "median": 173.0664612222715,
+            "p95": 275.27440854536405,
+            "max": 452.831094338717
+          },
+          "selected_control_reserve_deficit": {
+            "median": 0.0,
+            "p95": 24.0,
+            "max": 24.0
+          },
+          "policy_age_frames": {
+            "median": 9.0,
+            "p95": 17.0,
+            "max": 25.0
+          }
+        },
+        "planner_consistency": {
+          "comparable_decision_count": 243,
+          "global_winning_local_prefix_safe_count": 166,
+          "global_winning_local_prefix_unsafe_count": 0,
+          "global_losing_local_prefix_safe_count": 53,
+          "global_losing_local_prefix_unsafe_count": 24,
+          "selected_certified_action_local_prefix_unsafe_count": 0,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.0,
+          "selected_action_outside_global_winning_set_count": 0,
+          "excluded_hazard_version_change_count": 209,
+          "excluded_deadline_hold_count": 0,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. After excluding observed issue-time invalidations, a selected cached-policy action that the fresh local prefix finds unsafe is a forecast/version contradiction; future births can still make the cached hazard set older than the local one. Deadline holds are excluded because their final input is not governed by that policy query."
+        }
+      },
+      {
+        "phase_key": "110",
+        "spell_id": 110,
+        "spell_name": "懶惰「生神停止(マインドストッパー)」",
+        "decision_count": 1297,
+        "alive_decision_count": 1129,
+        "hit_count": 1,
+        "hit_frames": [
+          35477
+        ],
+        "max_active_bullets": 843,
+        "max_active_lasers": 0,
+        "behavior_alive": {
+          "sample_count": 1129,
+          "fast_fraction": 0.21700620017714792,
+          "focused_fraction": 0.7829937998228521,
+          "bottom_8px_fraction": 0.0,
+          "nonpositive_pipeline_fraction": 0.015943312666076175,
+          "negative_corridor_slack_fraction": 0.02619047619047619,
+          "action_lag_over_model_fraction": 0.0,
+          "recovery_guided_fraction": 0.1550044286979628,
+          "recovery_selected_fraction": 0.07528786536758193,
+          "distant_recovery_guided_fraction": 0.41186891054030117,
+          "distant_recovery_selected_fraction": 0.41186891054030117,
+          "control_reserve_deficit_mean": 0.8179735998013465,
+          "positive_control_reserve_deficit_fraction": 0.07528786536758193
+        },
+        "decision_cadence_frames": {
+          "median": 2.0,
+          "p95": 3.0,
+          "max": 4.0,
+          "mean": 2.3333333333333335,
+          "sample_count": 1296
+        },
+        "runtime_timing_ms": {
+          "observe": {
+            "median": 0.2050000475719571,
+            "p95": 0.4579999949783087,
+            "max": 1.366299984510988
+          },
+          "read_pools": {
+            "median": 3.8312000106088817,
+            "p95": 6.531399965751916,
+            "max": 13.370600005146116
+          },
+          "read_enemy_prefix": {
+            "median": 1.5813999925740063,
+            "p95": 2.9003999661654234,
+            "max": 9.888799977488816
+          },
+          "read_enemy_issue_prefix": {
+            "median": 1.789500005543232,
+            "p95": 3.5499000223353505,
+            "max": 11.228299990762025
+          },
+          "decode_pools": {
+            "median": 3.4528999822214246,
+            "p95": 8.27470002695918,
+            "max": 21.880899963434786
+          },
+          "corridor_bookkeeping": {
+            "median": 0.9193000150844455,
+            "p95": 4.158899944741279,
+            "max": 10.59199997689575
+          },
+          "local_plan": {
+            "median": 12.084199988748878,
+            "p95": 21.301699976902455,
+            "max": 30.059200013056397
+          },
+          "local_plan_initial": {
+            "median": 11.417899979278445,
+            "p95": 19.637699995655566,
+            "max": 30.059200013056397
+          },
+          "issue_enemy_recertificate": {
+            "median": 0.0,
+            "p95": 3.916400019079447,
+            "max": 11.811000003945082
+          },
+          "input": {
+            "median": 0.000800006091594696,
+            "p95": 3.417500003706664,
+            "max": 14.320200018119067
+          },
+          "before_trace": {
+            "median": 24.928400001954287,
+            "p95": 38.427499996032566,
+            "max": 51.96260003140196
+          },
+          "previous_trace": {
+            "median": 2.1049000206403434,
+            "p95": 3.5721000167541206,
+            "max": 8.60080000711605
+          },
+          "previous_iteration": {
+            "median": 27.59769995464012,
+            "p95": 42.05049999291077,
+            "max": 54.48340001748875
+          }
+        },
+        "robust_viability": {
+          "planning_mode_counts": {
+            "robust_viability": 1287
+          },
+          "policy_phase_frame_counts": {
+            "0": 191,
+            "1": 164,
+            "2": 142,
+            "3": 160,
+            "4": 147,
+            "5": 163,
+            "6": 156,
+            "7": 164
+          },
+          "policy_decision_count": 1287,
+          "decision_without_query_count": 0,
+          "unique_solution_count": 178,
+          "solve_ms": {
+            "median": 90.66779998829588,
+            "p95": 311.12120003672317,
+            "max": 353.9658999652602
+          },
+          "first_observed_age_frames": {
+            "median": 2.0,
+            "p95": 4.0,
+            "max": 8.0
+          },
+          "forecast_lead_frames": {
+            "median": 16.0,
+            "p95": 16.0,
+            "max": 16.0
+          },
+          "backend_counts": {
+            "native": 178
+          },
+          "solver_phase_ms": {
+            "clearance": {
+              "median": 15.68055001553148,
+              "p95": 27.627900009974837,
+              "max": 34.95219995966181
+            },
+            "pre_viability_hook": {
+              "median": 0.047250010538846254,
+              "p95": 0.07509998977184296,
+              "max": 0.22119999630376697
+            },
+            "refinement_clearance": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "refinement_viability": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "rollout": {
+              "median": 0.0,
+              "p95": 7.616800023242831,
+              "max": 13.00410000840202
+            },
+            "safety_value": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "viability": {
+              "median": 65.37169998046011,
+              "p95": 300.5765999550931,
+              "max": 342.7508000168018
+            }
+          },
+          "serial_coverage_margin_frames": {
+            "median": 64.0,
+            "p95": 64.0,
+            "max": 64.0
+          },
+          "serial_worker_serviceable_count": 1287,
+          "policy_status_counts": {
+            "queryable": 1287
+          },
+          "reported_stale_solution_count": 0,
+          "query_count": 1287,
+          "available_query_count": 1287,
+          "unavailable_reason_counts": {},
+          "support_covered_query_count": 1287,
+          "support_uncovered_query_count": 0,
+          "viable_query_count": 636,
+          "empty_action_set_count": 651,
+          "recovery_guided_query_count": 175,
+          "recovery_selected_count": 85,
+          "distant_recovery_guided_query_count": 476,
+          "distant_recovery_selected_count": 476,
+          "constrained_decision_count": 620,
+          "constrained_decision_fraction": 0.4780262143407864,
+          "safe_action_count": {
+            "median": 0.0,
+            "p95": 17.0,
+            "max": 17.0
+          },
+          "selected_repair_volume": {
+            "median": 7.0,
+            "p95": 153.0,
+            "max": 153.0
+          },
+          "selected_recovery_distance": {
+            "median": 83.8734745658183,
+            "p95": 143.10835055998655,
+            "max": 197.9090700296477
+          },
+          "selected_control_reserve_deficit": {
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 19.482377290725708
+          },
+          "policy_age_frames": {
+            "median": 9.0,
+            "p95": 16.0,
+            "max": 25.0
+          }
+        },
+        "planner_consistency": {
+          "comparable_decision_count": 864,
+          "global_winning_local_prefix_safe_count": 425,
+          "global_winning_local_prefix_unsafe_count": 1,
+          "global_losing_local_prefix_safe_count": 405,
+          "global_losing_local_prefix_unsafe_count": 33,
+          "selected_certified_action_local_prefix_unsafe_count": 1,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.0011574074074074073,
+          "selected_action_outside_global_winning_set_count": 4,
+          "excluded_hazard_version_change_count": 264,
+          "excluded_deadline_hold_count": 0,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. After excluding observed issue-time invalidations, a selected cached-policy action that the fresh local prefix finds unsafe is a forecast/version contradiction; future births can still make the cached hazard set older than the local one. Deadline holds are excluded because their final input is not governed by that policy query."
+        }
+      },
+      {
+        "phase_key": "114",
+        "spell_id": 114,
+        "spell_name": null,
+        "decision_count": 1427,
+        "alive_decision_count": 1400,
+        "hit_count": 0,
+        "hit_frames": [],
+        "max_active_bullets": 1165,
+        "max_active_lasers": 0,
+        "behavior_alive": {
+          "sample_count": 1400,
+          "fast_fraction": 0.18142857142857144,
+          "focused_fraction": 0.8185714285714286,
+          "bottom_8px_fraction": 0.5114285714285715,
+          "nonpositive_pipeline_fraction": 0.010714285714285714,
+          "negative_corridor_slack_fraction": 0.0,
+          "action_lag_over_model_fraction": 0.0007142857142857143,
+          "recovery_guided_fraction": 0.07642857142857143,
+          "recovery_selected_fraction": 0.03142857142857143,
+          "distant_recovery_guided_fraction": 0.14714285714285713,
+          "distant_recovery_selected_fraction": 0.10785714285714286,
+          "control_reserve_deficit_mean": 2.945519085271018,
+          "positive_control_reserve_deficit_fraction": 0.215
+        },
+        "decision_cadence_frames": {
+          "median": 2.0,
+          "p95": 3.0,
+          "max": 4.0,
+          "mean": 2.1451612903225805,
+          "sample_count": 1426
+        },
+        "runtime_timing_ms": {
+          "observe": {
+            "median": 0.19210000755265355,
+            "p95": 0.3732999903149903,
+            "max": 1.130299991928041
+          },
+          "read_pools": {
+            "median": 3.8127999869175255,
+            "p95": 6.763999990653247,
+            "max": 15.016600023955107
+          },
+          "read_enemy_prefix": {
+            "median": 1.5575999859720469,
+            "p95": 3.187199996318668,
+            "max": 6.905200018081814
+          },
+          "read_enemy_issue_prefix": {
+            "median": 1.7284000059589744,
+            "p95": 3.5494999610818923,
+            "max": 11.1816999851726
+          },
+          "decode_pools": {
+            "median": 0.4301000153645873,
+            "p95": 1.5404000296257436,
+            "max": 7.268599991220981
+          },
+          "corridor_bookkeeping": {
+            "median": 0.8237999863922596,
+            "p95": 10.504799953196198,
+            "max": 17.120199976488948
+          },
+          "local_plan": {
+            "median": 10.07650000974536,
+            "p95": 18.38949997909367,
+            "max": 39.61509995860979
+          },
+          "local_plan_initial": {
+            "median": 9.242100000847131,
+            "p95": 17.089699977077544,
+            "max": 37.99429995706305
+          },
+          "issue_enemy_recertificate": {
+            "median": 0.0,
+            "p95": 2.857699990272522,
+            "max": 10.927900031674653
+          },
+          "input": {
+            "median": 0.004400033503770828,
+            "p95": 4.011599987279624,
+            "max": 8.13999999081716
+          },
+          "before_trace": {
+            "median": 20.153800025582314,
+            "p95": 32.13119995780289,
+            "max": 48.99529996328056
+          },
+          "previous_trace": {
+            "median": 1.5601000050082803,
+            "p95": 2.360599988605827,
+            "max": 9.068200015462935
+          },
+          "previous_iteration": {
+            "median": 25.52379999542609,
+            "p95": 38.5289000114426,
+            "max": 56.74979998730123
+          }
+        },
+        "robust_viability": {
+          "planning_mode_counts": {
+            "robust_viability": 1410
+          },
+          "policy_phase_frame_counts": {
+            "0": 224,
+            "1": 192,
+            "2": 125,
+            "3": 166,
+            "4": 172,
+            "5": 180,
+            "6": 171,
+            "7": 180
+          },
+          "policy_decision_count": 1410,
+          "decision_without_query_count": 0,
+          "unique_solution_count": 181,
+          "solve_ms": {
+            "median": 50.69130001356825,
+            "p95": 272.56069995928556,
+            "max": 316.9112999457866
+          },
+          "first_observed_age_frames": {
+            "median": 2.0,
+            "p95": 3.0,
+            "max": 5.0
+          },
+          "forecast_lead_frames": {
+            "median": 16.0,
+            "p95": 16.0,
+            "max": 16.0
+          },
+          "backend_counts": {
+            "native": 181
+          },
+          "solver_phase_ms": {
+            "clearance": {
+              "median": 26.918300020042807,
+              "p95": 38.11169997788966,
+              "max": 45.11479998473078
+            },
+            "pre_viability_hook": {
+              "median": 0.044899992644786835,
+              "p95": 0.06639998173341155,
+              "max": 0.0877000275067985
+            },
+            "refinement_clearance": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "refinement_viability": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "rollout": {
+              "median": 0.0,
+              "p95": 7.334999972954392,
+              "max": 8.939200022723526
+            },
+            "safety_value": {
+              "median": 0.0,
+              "p95": 0.0,
+              "max": 0.0
+            },
+            "viability": {
+              "median": 9.663699951488525,
+              "p95": 258.7139999959618,
+              "max": 307.9513999982737
+            }
+          },
+          "serial_coverage_margin_frames": {
+            "median": 64.0,
+            "p95": 64.0,
+            "max": 64.0
+          },
+          "serial_worker_serviceable_count": 1410,
+          "policy_status_counts": {
+            "queryable": 1410
+          },
+          "reported_stale_solution_count": 0,
+          "query_count": 1410,
+          "available_query_count": 1410,
+          "unavailable_reason_counts": {},
+          "support_covered_query_count": 1410,
+          "support_uncovered_query_count": 0,
+          "viable_query_count": 307,
+          "empty_action_set_count": 1103,
+          "recovery_guided_query_count": 109,
+          "recovery_selected_count": 45,
+          "distant_recovery_guided_query_count": 212,
+          "distant_recovery_selected_count": 154,
+          "constrained_decision_count": 291,
+          "constrained_decision_fraction": 0.20392431674842326,
+          "safe_action_count": {
+            "median": 0.0,
+            "p95": 17.0,
+            "max": 17.0
+          },
+          "selected_repair_volume": {
+            "median": 0.0,
+            "p95": 153.0,
+            "max": 153.0
+          },
+          "selected_recovery_distance": {
+            "median": 64.0,
+            "p95": 336.0,
+            "max": 369.38868417968627
+          },
+          "selected_control_reserve_deficit": {
+            "median": 4.81421172618866,
+            "p95": 26.3431396484375,
+            "max": 31.120963096618652
+          },
+          "policy_age_frames": {
+            "median": 9.0,
+            "p95": 16.0,
+            "max": 21.0
+          }
+        },
+        "planner_consistency": {
+          "comparable_decision_count": 853,
+          "global_winning_local_prefix_safe_count": 186,
+          "global_winning_local_prefix_unsafe_count": 0,
+          "global_losing_local_prefix_safe_count": 648,
+          "global_losing_local_prefix_unsafe_count": 19,
+          "selected_certified_action_local_prefix_unsafe_count": 0,
+          "selected_certified_action_local_prefix_unsafe_fraction": 0.0,
+          "selected_action_outside_global_winning_set_count": 5,
+          "excluded_hazard_version_change_count": 530,
+          "excluded_deadline_hold_count": 0,
+          "semantics": "global is a remaining-horizon winning-set claim; local is a delay-plus-hold prefix claim. After excluding observed issue-time invalidations, a selected cached-policy action that the fresh local prefix finds unsafe is a forecast/version contradiction; future births can still make the cached hazard set older than the local one. Deadline holds are excluded because their final input is not governed by that policy query."
+        }
+      }
+    ],
+    "frame_lag": {
+      "interpretation": "Values >=120 are phase-counter discontinuities and are excluded from operational lag percentiles.",
+      "phase_counter_discontinuity_count": 0,
+      "snapshot": {
+        "median": 0.0,
+        "p95": 1.0,
+        "max": 1.0
+      },
+      "action": {
+        "median": 1.0,
+        "p95": 2.0,
+        "max": 5.0
+      }
+    }
+  },
+  "canonical_first_hit": {
+    "death": {
+      "case_id": "HARD-S5-F11557-T1",
+      "frame": 11557,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "player": {
+        "x": 364.6156005859375,
+        "y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 128.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 128.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_fast",
+      "mask": 17,
+      "issued_action_after_hit_detection": "up_fast",
+      "issued_mask_after_hit_detection": 17,
+      "active_input_action": "up_fast",
+      "active_input_mask": 17,
+      "last_alive_decision": {
+        "frame": 11555,
+        "issued_action": "up_fast",
+        "issued_mask": 17,
+        "active_input_action": "down_left",
+        "active_input_mask": 101,
+        "pipeline_clearance": 0.1715334951877594,
+        "minimum_clearance": -2.4212393760681152,
+        "action_hold_frames": 3,
+        "control_delay_frames": 2,
+        "control_delay_candidates": [
+          2,
+          3,
+          4
+        ],
+        "robust_control": {
+          "delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "override": false,
+          "worst_collisions": 4,
+          "min_clearance": -4.567138671875,
+          "cvar_risk": 90585.56690315079,
+          "worst_delay": 4,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": 364.85613603172413,
+          "viability_control_reserve_deficit": 8.687167644500732,
+          "viability_control_reserve_valid": true,
+          "preloss_continuation_preference_active": false,
+          "planned_route_gate_deficit": 0.0,
+          "local_collisions": 1,
+          "preloss_supplemental_beam_active": false,
+          "preloss_supplemental_beam_width": 0,
+          "preloss_historical_action": null,
+          "preloss_selected_from_supplemental": false,
+          "preloss_supplemental_candidate_count": 0,
+          "preloss_historical_route_gate_deficit": 0.0,
+          "preloss_supplemental_failure": null,
+          "preloss_supplemental_backend": "python",
+          "preloss_supplemental_status": "not_eligible",
+          "preloss_supplemental_completed": false,
+          "preloss_supplemental_historical_fallback": false,
+          "preloss_supplemental_background_compute_ms": null,
+          "viability_safety_value_preferred": false,
+          "viability_safety_state_value": null,
+          "viability_fresh_prefix_filtered": false,
+          "viability_fresh_prefix_relaxed": false,
+          "viability_survival_preferred": false,
+          "viability_survival_frames": null,
+          "viability_survival_bottleneck_margin": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 11554,
+          "age": 6,
+          "phase_frames": 6,
+          "layer": 0,
+          "available": true,
+          "state_viable": false,
+          "active_action": "down_left",
+          "observed_input_action": "down_left",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 349.4452746854649,
+            "left": 364.85613603172413,
+            "right": 395.170849127311,
+            "up": 374.8919844435194,
+            "down": 387.31898998112655,
+            "up_left": 364.85613603172413,
+            "up_right": 385.33102652135346,
+            "down_left": 377.6135590785903,
+            "down_right": 407.9215610874228,
+            "left_fast": 364.85613603172413,
+            "right_fast": 401.2779585275025,
+            "up_fast": 364.85613603172413,
+            "down_fast": 387.31898998112655,
+            "up_left_fast": 364.85613603172413,
+            "up_right_fast": 385.33102652135346,
+            "down_left_fast": 377.6135590785903,
+            "down_right_fast": 407.9215610874228
+          },
+          "survival_frames": null,
+          "survival_bottleneck_margin": null,
+          "survival_best_actions": [],
+          "selected_action": "up_fast",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": 364.85613603172413,
+          "selected_survival_preferred": false,
+          "position_error": 7.8682861328125,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 2,
+          "horizon_frames": 80,
+          "viable_state_count": 245,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 1
+      },
+      "action_deadline_miss": {
+        "at_hit": false,
+        "last_alive": false,
+        "hit_action_lag": 1,
+        "hit_support_high": 4,
+        "last_alive_action_lag": 1,
+        "last_alive_support_high": 4
+      },
+      "usable_pipeline_warning_lead_frames": 0,
+      "usable_robust_warning_lead_frames": 7,
+      "robust_action_set_exhausted_at_frame": 11550,
+      "usable_viability_warning_lead_frames": 104,
+      "viability_kernel_exhausted_at_frame": 11453,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 544,
+      "active_lasers": 0,
+      "active_items": 5,
+      "active_enemy_bodies": 25,
+      "enemy_body_snapshot_frame": 11552,
+      "hit_contact_observation": {
+        "frame_before": 11557,
+        "frame_after": 11557,
+        "stable": true,
+        "player_lethal_aabb": [
+          363.6156005859375,
+          427.0,
+          365.6156005859375,
+          429.0
+        ],
+        "enemy_bodies": []
+      },
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "control_delay_frames": 2,
+      "control_delay_candidates": [
+        2,
+        3,
+        4
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 14,
+        "censored": 113
+      },
+      "robust_control": {
+        "delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "override": false,
+        "worst_collisions": 1,
+        "min_clearance": -2.274798631668091,
+        "cvar_risk": 77060.31230230514,
+        "worst_delay": null,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": 350.90739519138094,
+        "viability_control_reserve_deficit": 9.494637489318848,
+        "viability_control_reserve_valid": true,
+        "preloss_continuation_preference_active": false,
+        "planned_route_gate_deficit": 0.0,
+        "local_collisions": 1,
+        "preloss_supplemental_beam_active": false,
+        "preloss_supplemental_beam_width": 0,
+        "preloss_historical_action": null,
+        "preloss_selected_from_supplemental": false,
+        "preloss_supplemental_candidate_count": 0,
+        "preloss_historical_route_gate_deficit": 0.0,
+        "preloss_supplemental_failure": null,
+        "preloss_supplemental_backend": "python",
+        "preloss_supplemental_status": "not_eligible",
+        "preloss_supplemental_completed": false,
+        "preloss_supplemental_historical_fallback": false,
+        "preloss_supplemental_background_compute_ms": null,
+        "viability_safety_value_preferred": false,
+        "viability_safety_state_value": null,
+        "viability_fresh_prefix_filtered": false,
+        "viability_fresh_prefix_relaxed": false,
+        "viability_survival_preferred": false,
+        "viability_survival_frames": null,
+        "viability_survival_bottleneck_margin": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 11556,
+        "age": 8,
+        "phase_frames": 0,
+        "layer": 1,
+        "available": true,
+        "state_viable": false,
+        "active_action": "up_fast",
+        "observed_input_action": "up_fast",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 349.4452746854649,
+          "left": 364.85613603172413,
+          "right": 396.1413889004783,
+          "up": 362.7450895601483,
+          "down": 387.31898998112655,
+          "up_left": 362.7450895601483,
+          "up_right": 384.66608896548183,
+          "down_left": 377.6135590785903,
+          "down_right": 407.9215610874228,
+          "left_fast": 355.2576529787923,
+          "right_fast": 407.29350596345137,
+          "up_fast": 350.90739519138094,
+          "down_fast": 387.31898998112655,
+          "up_left_fast": 352.3634487287238,
+          "up_right_fast": 380.3156583681508,
+          "down_left_fast": 377.6135590785903,
+          "down_right_fast": 407.9215610874228
+        },
+        "survival_frames": null,
+        "survival_bottleneck_margin": null,
+        "survival_best_actions": [],
+        "selected_action": "up_fast",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": 350.90739519138094,
+        "selected_survival_preferred": false,
+        "position_error": 4.6156005859375,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 2,
+        "horizon_frames": 80,
+        "viable_state_count": 512,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 3.709400014486164,
+      "plan_ms": 7.887100044172257,
+      "pipeline_clearance_at_hit": -2.274798631668091,
+      "minimum_pipeline_clearance_240f": -2.274798631668091,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 1516,
+        "x": 365.6285400390625,
+        "y": 427.5456237792969,
+        "velocity_x": 0.9122529625892639,
+        "velocity_y": 0.6146499514579773,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 4.568097399493867,
+        "aabb_clearance": 0.454376220703125
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 6141840,
+        "x_at_snapshot": 324.268798828125,
+        "y_at_snapshot": 403.9375915527344,
+        "velocity_x": 0.4322509765625,
+        "velocity_y": 0.901763916015625,
+        "internal_motion_x": 0.4322567284107208,
+        "internal_motion_y": 0.9017505645751953,
+        "projected_x_at_action": 326.4300537109375,
+        "projected_y_at_action": 408.4464111328125,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 16781645,
+        "snapshot_frame": 11552,
+        "elapsed_frames": 5,
+        "exact_same_epoch": false,
+        "aabb_clearance": 18.52949294988455
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "playfield_boundary",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "no_active_spell_at_hit",
+        "spell_id": null,
+        "spell_name": null,
+        "flags": 0
+      },
+      "sample_role": "canonical_fresh_attempt_causal_sample",
+      "bomb_input_verified_absent": true
+    },
+    "preceding_240f": {
+      "sample_count": 110,
+      "first_frame": 11318,
+      "minimum_pipeline_clearance": -2.274798631668091,
+      "minimum_corridor_slack": null
+    }
+  },
+  "death_clusters": [
+    {
+      "cluster_id": "cluster-01",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "start_frame": 11557,
+      "end_frame": 11557,
+      "death_count": 1,
+      "death_frames": [
+        11557
+      ],
+      "minimum_power": 128.0,
+      "maximum_active_bullets_at_hit": 544,
+      "cause_counts": {
+        "modeled_committed_prefix_collision": 1
+      }
+    },
+    {
+      "cluster_id": "cluster-02",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "start_frame": 14457,
+      "end_frame": 14457,
+      "death_count": 1,
+      "death_frames": [
+        14457
+      ],
+      "minimum_power": 118.0,
+      "maximum_active_bullets_at_hit": 496,
+      "cause_counts": {
+        "observed_bullet_overlap": 1
+      }
+    },
+    {
+      "cluster_id": "cluster-03",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "start_frame": 22900,
+      "end_frame": 22900,
+      "death_count": 1,
+      "death_frames": [
+        22900
+      ],
+      "minimum_power": 123.0,
+      "maximum_active_bullets_at_hit": 897,
+      "cause_counts": {
+        "modeled_committed_prefix_collision": 1
+      }
+    },
+    {
+      "cluster_id": "cluster-04",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "start_frame": 24323,
+      "end_frame": 24323,
+      "death_count": 1,
+      "death_frames": [
+        24323
+      ],
+      "minimum_power": 108.0,
+      "maximum_active_bullets_at_hit": 840,
+      "cause_counts": {
+        "modeled_committed_prefix_collision": 1
+      }
+    },
+    {
+      "cluster_id": "cluster-05",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "start_frame": 29045,
+      "end_frame": 29503,
+      "death_count": 2,
+      "death_frames": [
+        29045,
+        29503
+      ],
+      "minimum_power": 82.0,
+      "maximum_active_bullets_at_hit": 1019,
+      "cause_counts": {
+        "modeled_committed_prefix_collision": 2
+      }
+    },
+    {
+      "cluster_id": "cluster-06",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "start_frame": 32734,
+      "end_frame": 32734,
+      "death_count": 1,
+      "death_frames": [
+        32734
+      ],
+      "minimum_power": 77.0,
+      "maximum_active_bullets_at_hit": 483,
+      "cause_counts": {
+        "modeled_committed_prefix_collision": 1
+      }
+    },
+    {
+      "cluster_id": "cluster-07",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "start_frame": 35477,
+      "end_frame": 35477,
+      "death_count": 1,
+      "death_frames": [
+        35477
+      ],
+      "minimum_power": 62.0,
+      "maximum_active_bullets_at_hit": 295,
+      "cause_counts": {
+        "modeled_committed_prefix_collision": 1
+      }
+    }
+  ],
+  "deaths": [
+    {
+      "case_id": "HARD-S5-F11557-T1",
+      "frame": 11557,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "player": {
+        "x": 364.6156005859375,
+        "y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 128.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 128.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_fast",
+      "mask": 17,
+      "issued_action_after_hit_detection": "up_fast",
+      "issued_mask_after_hit_detection": 17,
+      "active_input_action": "up_fast",
+      "active_input_mask": 17,
+      "last_alive_decision": {
+        "frame": 11555,
+        "issued_action": "up_fast",
+        "issued_mask": 17,
+        "active_input_action": "down_left",
+        "active_input_mask": 101,
+        "pipeline_clearance": 0.1715334951877594,
+        "minimum_clearance": -2.4212393760681152,
+        "action_hold_frames": 3,
+        "control_delay_frames": 2,
+        "control_delay_candidates": [
+          2,
+          3,
+          4
+        ],
+        "robust_control": {
+          "delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "override": false,
+          "worst_collisions": 4,
+          "min_clearance": -4.567138671875,
+          "cvar_risk": 90585.56690315079,
+          "worst_delay": 4,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": 364.85613603172413,
+          "viability_control_reserve_deficit": 8.687167644500732,
+          "viability_control_reserve_valid": true,
+          "preloss_continuation_preference_active": false,
+          "planned_route_gate_deficit": 0.0,
+          "local_collisions": 1,
+          "preloss_supplemental_beam_active": false,
+          "preloss_supplemental_beam_width": 0,
+          "preloss_historical_action": null,
+          "preloss_selected_from_supplemental": false,
+          "preloss_supplemental_candidate_count": 0,
+          "preloss_historical_route_gate_deficit": 0.0,
+          "preloss_supplemental_failure": null,
+          "preloss_supplemental_backend": "python",
+          "preloss_supplemental_status": "not_eligible",
+          "preloss_supplemental_completed": false,
+          "preloss_supplemental_historical_fallback": false,
+          "preloss_supplemental_background_compute_ms": null,
+          "viability_safety_value_preferred": false,
+          "viability_safety_state_value": null,
+          "viability_fresh_prefix_filtered": false,
+          "viability_fresh_prefix_relaxed": false,
+          "viability_survival_preferred": false,
+          "viability_survival_frames": null,
+          "viability_survival_bottleneck_margin": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 11554,
+          "age": 6,
+          "phase_frames": 6,
+          "layer": 0,
+          "available": true,
+          "state_viable": false,
+          "active_action": "down_left",
+          "observed_input_action": "down_left",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 349.4452746854649,
+            "left": 364.85613603172413,
+            "right": 395.170849127311,
+            "up": 374.8919844435194,
+            "down": 387.31898998112655,
+            "up_left": 364.85613603172413,
+            "up_right": 385.33102652135346,
+            "down_left": 377.6135590785903,
+            "down_right": 407.9215610874228,
+            "left_fast": 364.85613603172413,
+            "right_fast": 401.2779585275025,
+            "up_fast": 364.85613603172413,
+            "down_fast": 387.31898998112655,
+            "up_left_fast": 364.85613603172413,
+            "up_right_fast": 385.33102652135346,
+            "down_left_fast": 377.6135590785903,
+            "down_right_fast": 407.9215610874228
+          },
+          "survival_frames": null,
+          "survival_bottleneck_margin": null,
+          "survival_best_actions": [],
+          "selected_action": "up_fast",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": 364.85613603172413,
+          "selected_survival_preferred": false,
+          "position_error": 7.8682861328125,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 2,
+          "horizon_frames": 80,
+          "viable_state_count": 245,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 1
+      },
+      "action_deadline_miss": {
+        "at_hit": false,
+        "last_alive": false,
+        "hit_action_lag": 1,
+        "hit_support_high": 4,
+        "last_alive_action_lag": 1,
+        "last_alive_support_high": 4
+      },
+      "usable_pipeline_warning_lead_frames": 0,
+      "usable_robust_warning_lead_frames": 7,
+      "robust_action_set_exhausted_at_frame": 11550,
+      "usable_viability_warning_lead_frames": 104,
+      "viability_kernel_exhausted_at_frame": 11453,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 544,
+      "active_lasers": 0,
+      "active_items": 5,
+      "active_enemy_bodies": 25,
+      "enemy_body_snapshot_frame": 11552,
+      "hit_contact_observation": {
+        "frame_before": 11557,
+        "frame_after": 11557,
+        "stable": true,
+        "player_lethal_aabb": [
+          363.6156005859375,
+          427.0,
+          365.6156005859375,
+          429.0
+        ],
+        "enemy_bodies": []
+      },
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "control_delay_frames": 2,
+      "control_delay_candidates": [
+        2,
+        3,
+        4
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 14,
+        "censored": 113
+      },
+      "robust_control": {
+        "delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "override": false,
+        "worst_collisions": 1,
+        "min_clearance": -2.274798631668091,
+        "cvar_risk": 77060.31230230514,
+        "worst_delay": null,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": 350.90739519138094,
+        "viability_control_reserve_deficit": 9.494637489318848,
+        "viability_control_reserve_valid": true,
+        "preloss_continuation_preference_active": false,
+        "planned_route_gate_deficit": 0.0,
+        "local_collisions": 1,
+        "preloss_supplemental_beam_active": false,
+        "preloss_supplemental_beam_width": 0,
+        "preloss_historical_action": null,
+        "preloss_selected_from_supplemental": false,
+        "preloss_supplemental_candidate_count": 0,
+        "preloss_historical_route_gate_deficit": 0.0,
+        "preloss_supplemental_failure": null,
+        "preloss_supplemental_backend": "python",
+        "preloss_supplemental_status": "not_eligible",
+        "preloss_supplemental_completed": false,
+        "preloss_supplemental_historical_fallback": false,
+        "preloss_supplemental_background_compute_ms": null,
+        "viability_safety_value_preferred": false,
+        "viability_safety_state_value": null,
+        "viability_fresh_prefix_filtered": false,
+        "viability_fresh_prefix_relaxed": false,
+        "viability_survival_preferred": false,
+        "viability_survival_frames": null,
+        "viability_survival_bottleneck_margin": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 11556,
+        "age": 8,
+        "phase_frames": 0,
+        "layer": 1,
+        "available": true,
+        "state_viable": false,
+        "active_action": "up_fast",
+        "observed_input_action": "up_fast",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 349.4452746854649,
+          "left": 364.85613603172413,
+          "right": 396.1413889004783,
+          "up": 362.7450895601483,
+          "down": 387.31898998112655,
+          "up_left": 362.7450895601483,
+          "up_right": 384.66608896548183,
+          "down_left": 377.6135590785903,
+          "down_right": 407.9215610874228,
+          "left_fast": 355.2576529787923,
+          "right_fast": 407.29350596345137,
+          "up_fast": 350.90739519138094,
+          "down_fast": 387.31898998112655,
+          "up_left_fast": 352.3634487287238,
+          "up_right_fast": 380.3156583681508,
+          "down_left_fast": 377.6135590785903,
+          "down_right_fast": 407.9215610874228
+        },
+        "survival_frames": null,
+        "survival_bottleneck_margin": null,
+        "survival_best_actions": [],
+        "selected_action": "up_fast",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": 350.90739519138094,
+        "selected_survival_preferred": false,
+        "position_error": 4.6156005859375,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 2,
+        "horizon_frames": 80,
+        "viable_state_count": 512,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 3.709400014486164,
+      "plan_ms": 7.887100044172257,
+      "pipeline_clearance_at_hit": -2.274798631668091,
+      "minimum_pipeline_clearance_240f": -2.274798631668091,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 1516,
+        "x": 365.6285400390625,
+        "y": 427.5456237792969,
+        "velocity_x": 0.9122529625892639,
+        "velocity_y": 0.6146499514579773,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 4.568097399493867,
+        "aabb_clearance": 0.454376220703125
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 6141840,
+        "x_at_snapshot": 324.268798828125,
+        "y_at_snapshot": 403.9375915527344,
+        "velocity_x": 0.4322509765625,
+        "velocity_y": 0.901763916015625,
+        "internal_motion_x": 0.4322567284107208,
+        "internal_motion_y": 0.9017505645751953,
+        "projected_x_at_action": 326.4300537109375,
+        "projected_y_at_action": 408.4464111328125,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 16781645,
+        "snapshot_frame": 11552,
+        "elapsed_frames": 5,
+        "exact_same_epoch": false,
+        "aabb_clearance": 18.52949294988455
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "playfield_boundary",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "no_active_spell_at_hit",
+        "spell_id": null,
+        "spell_name": null,
+        "flags": 0
+      },
+      "sample_role": "canonical_fresh_attempt_causal_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "HARD-S5-F14457-T1",
+      "frame": 14457,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "player": {
+        "x": 344.747314453125,
+        "y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 118.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 118.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "down_left",
+      "mask": 101,
+      "issued_action_after_hit_detection": "down_left",
+      "issued_mask_after_hit_detection": 101,
+      "active_input_action": "down_left",
+      "active_input_mask": 101,
+      "last_alive_decision": {
+        "frame": 14455,
+        "issued_action": "down_left",
+        "issued_mask": 101,
+        "active_input_action": "down_left_fast",
+        "active_input_mask": 97,
+        "pipeline_clearance": -0.500433087348938,
+        "minimum_clearance": -1.136804223060608,
+        "action_hold_frames": 2,
+        "control_delay_frames": 2,
+        "control_delay_candidates": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "robust_control": {
+          "delay_frames": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "override": true,
+          "worst_collisions": 4,
+          "min_clearance": -2.939312219619751,
+          "cvar_risk": 48664.635658417064,
+          "worst_delay": 6,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": null,
+          "viability_control_reserve_deficit": 10.343145847320557,
+          "viability_control_reserve_valid": false,
+          "preloss_continuation_preference_active": false,
+          "planned_route_gate_deficit": 0.0,
+          "local_collisions": 3,
+          "preloss_supplemental_beam_active": false,
+          "preloss_supplemental_beam_width": 0,
+          "preloss_historical_action": null,
+          "preloss_selected_from_supplemental": false,
+          "preloss_supplemental_candidate_count": 0,
+          "preloss_historical_route_gate_deficit": 0.0,
+          "preloss_supplemental_failure": null,
+          "preloss_supplemental_backend": "python",
+          "preloss_supplemental_status": "not_eligible",
+          "preloss_supplemental_completed": false,
+          "preloss_supplemental_historical_fallback": false,
+          "preloss_supplemental_background_compute_ms": null,
+          "viability_safety_value_preferred": false,
+          "viability_safety_state_value": null,
+          "viability_fresh_prefix_filtered": false,
+          "viability_fresh_prefix_relaxed": false,
+          "viability_survival_preferred": false,
+          "viability_survival_frames": null,
+          "viability_survival_bottleneck_margin": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 14454,
+          "age": 8,
+          "phase_frames": 0,
+          "layer": 1,
+          "available": true,
+          "state_viable": false,
+          "active_action": "down_left_fast",
+          "observed_input_action": "down_left_fast",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 35.77708763999664,
+            "left": 50.59644256269407,
+            "right": 35.77708763999664,
+            "up": 64.0,
+            "down": 64.0,
+            "up_left": 57.688820407423826,
+            "down_right": 115.37764081484765,
+            "left_fast": 57.688820407423826,
+            "right_fast": 35.77708763999664,
+            "up_fast": 65.96969000988257,
+            "down_fast": 64.0,
+            "up_left_fast": 57.688820407423826,
+            "down_right_fast": 115.37764081484765
+          },
+          "survival_frames": null,
+          "survival_bottleneck_margin": null,
+          "survival_best_actions": [],
+          "selected_action": "down_left",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": null,
+          "selected_survival_preferred": false,
+          "position_error": 6.4041748046875,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 2,
+          "horizon_frames": 80,
+          "viable_state_count": 35,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 1
+      },
+      "action_deadline_miss": {
+        "at_hit": false,
+        "last_alive": false,
+        "hit_action_lag": 1,
+        "hit_support_high": 6,
+        "last_alive_action_lag": 1,
+        "last_alive_support_high": 6
+      },
+      "usable_pipeline_warning_lead_frames": 2,
+      "usable_robust_warning_lead_frames": 6,
+      "robust_action_set_exhausted_at_frame": 14451,
+      "usable_viability_warning_lead_frames": 125,
+      "viability_kernel_exhausted_at_frame": 14332,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 496,
+      "active_lasers": 0,
+      "active_items": 0,
+      "active_enemy_bodies": 27,
+      "enemy_body_snapshot_frame": 14452,
+      "hit_contact_observation": {
+        "frame_before": 14457,
+        "frame_after": 14457,
+        "stable": true,
+        "player_lethal_aabb": [
+          342.1209716796875,
+          431.0,
+          344.1209716796875,
+          433.0
+        ],
+        "enemy_bodies": []
+      },
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "control_delay_frames": 2,
+      "control_delay_candidates": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 21,
+        "censored": 169
+      },
+      "robust_control": {
+        "delay_frames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "override": false,
+        "worst_collisions": 4,
+        "min_clearance": -2.437114953994751,
+        "cvar_risk": 49644.58093598951,
+        "worst_delay": null,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": null,
+        "viability_control_reserve_deficit": 14.841931819915771,
+        "viability_control_reserve_valid": true,
+        "preloss_continuation_preference_active": false,
+        "planned_route_gate_deficit": 0.0,
+        "local_collisions": 3,
+        "preloss_supplemental_beam_active": false,
+        "preloss_supplemental_beam_width": 0,
+        "preloss_historical_action": null,
+        "preloss_selected_from_supplemental": false,
+        "preloss_supplemental_candidate_count": 0,
+        "preloss_historical_route_gate_deficit": 0.0,
+        "preloss_supplemental_failure": null,
+        "preloss_supplemental_backend": "python",
+        "preloss_supplemental_status": "not_eligible",
+        "preloss_supplemental_completed": false,
+        "preloss_supplemental_historical_fallback": false,
+        "preloss_supplemental_background_compute_ms": null,
+        "viability_safety_value_preferred": false,
+        "viability_safety_state_value": null,
+        "viability_fresh_prefix_filtered": false,
+        "viability_fresh_prefix_relaxed": false,
+        "viability_survival_preferred": false,
+        "viability_survival_frames": null,
+        "viability_survival_bottleneck_margin": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 14456,
+        "age": 10,
+        "phase_frames": 2,
+        "layer": 1,
+        "available": true,
+        "state_viable": false,
+        "active_action": "down_left",
+        "observed_input_action": "down_left",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {
+          "right": 3,
+          "right_fast": 3
+        },
+        "recovery_distances": {},
+        "survival_frames": null,
+        "survival_bottleneck_margin": null,
+        "survival_best_actions": [],
+        "selected_action": "down_left",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": null,
+        "selected_survival_preferred": false,
+        "position_error": 0.747314453125,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 2,
+        "horizon_frames": 80,
+        "viable_state_count": 35,
+        "reason": "robust action set is empty; recovery neighborhoods found"
+      },
+      "read_ms": 3.4807000192813575,
+      "plan_ms": 13.403600023593754,
+      "pipeline_clearance_at_hit": -1.5591003894805908,
+      "minimum_pipeline_clearance_240f": -3.236968994140625,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 435,
+        "x": 347.22076416015625,
+        "y": 425.21759033203125,
+        "velocity_x": 0.6392901539802551,
+        "velocity_y": 1.1415096521377563,
+        "half_width": 5.0,
+        "half_height": 5.0,
+        "transform_flags": 0,
+        "center_distance": 7.219351380655255,
+        "aabb_clearance": -0.21759033203125
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 435,
+        "x": 347.22076416015625,
+        "y": 425.21759033203125,
+        "velocity_x": 0.6392901539802551,
+        "velocity_y": 1.1415096521377563,
+        "half_width": 5.0,
+        "half_height": 5.0,
+        "transform_flags": 0,
+        "center_distance": 7.219351380655255,
+        "aabb_clearance": -0.21759033203125
+      },
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 6549504,
+        "x_at_snapshot": 192.0,
+        "y_at_snapshot": 480.0,
+        "velocity_x": 0.0,
+        "velocity_y": 1.0,
+        "internal_motion_x": -4.371138828673793e-08,
+        "internal_motion_y": 1.0,
+        "projected_x_at_action": 192.0,
+        "projected_y_at_action": 485.0,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 17109065,
+        "snapshot_frame": 14452,
+        "elapsed_frames": 5,
+        "exact_same_epoch": false,
+        "aabb_clearance": 136.78760724026446
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "observed_bullet_overlap",
+      "contributing_factors": [
+        "playfield_boundary"
+      ],
+      "spell_attribution": {
+        "status": "no_active_spell_at_hit",
+        "spell_id": null,
+        "spell_name": null,
+        "flags": 8
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "HARD-S5-F22900-T1",
+      "frame": 22900,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "player": {
+        "x": 165.95010375976562,
+        "y": 428.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 6.0,
+        "power": 123.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 107.0
+      },
+      "post_hit_bomb_stock_decrease": 3.0,
+      "observed_bomb_cost": 3.0,
+      "deathbomb_requested": false,
+      "action": "right_fast",
+      "mask": 129,
+      "issued_action_after_hit_detection": "right_fast",
+      "issued_mask_after_hit_detection": 129,
+      "active_input_action": "up_right_fast",
+      "active_input_mask": 145,
+      "last_alive_decision": {
+        "frame": 22898,
+        "issued_action": "up_right_fast",
+        "issued_mask": 145,
+        "active_input_action": "down_left_fast",
+        "active_input_mask": 97,
+        "pipeline_clearance": -1.7488003969192505,
+        "minimum_clearance": -1.7488003969192505,
+        "action_hold_frames": 3,
+        "control_delay_frames": 3,
+        "control_delay_candidates": [
+          2,
+          3,
+          4
+        ],
+        "robust_control": {
+          "delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "override": true,
+          "worst_collisions": 1,
+          "min_clearance": -1.7488003969192505,
+          "cvar_risk": 26443.57145861096,
+          "worst_delay": 4,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": 128.9961239727768,
+          "viability_control_reserve_deficit": 0.0,
+          "viability_control_reserve_valid": false,
+          "preloss_continuation_preference_active": false,
+          "planned_route_gate_deficit": 0.0,
+          "local_collisions": 1,
+          "preloss_supplemental_beam_active": false,
+          "preloss_supplemental_beam_width": 0,
+          "preloss_historical_action": null,
+          "preloss_selected_from_supplemental": false,
+          "preloss_supplemental_candidate_count": 0,
+          "preloss_historical_route_gate_deficit": 0.0,
+          "preloss_supplemental_failure": null,
+          "preloss_supplemental_backend": "python",
+          "preloss_supplemental_status": "not_eligible",
+          "preloss_supplemental_completed": false,
+          "preloss_supplemental_historical_fallback": false,
+          "preloss_supplemental_background_compute_ms": null,
+          "viability_safety_value_preferred": false,
+          "viability_safety_state_value": null,
+          "viability_fresh_prefix_filtered": false,
+          "viability_fresh_prefix_relaxed": false,
+          "viability_survival_preferred": false,
+          "viability_survival_frames": null,
+          "viability_survival_bottleneck_margin": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 22897,
+          "age": 7,
+          "phase_frames": 7,
+          "layer": 0,
+          "available": true,
+          "state_viable": false,
+          "active_action": "up_fast",
+          "observed_input_action": "down_left_fast",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 32.0,
+            "left": 65.96969000988257,
+            "right": 97.32420048477151,
+            "up": 71.55417527999327,
+            "down": 50.59644256269407,
+            "up_left": 97.32420048477151,
+            "up_right": 137.63720427268203,
+            "down_left": 81.58431221748455,
+            "down_right": 116.48175822848829,
+            "left_fast": 50.59644256269407,
+            "right_fast": 128.9961239727768,
+            "up_fast": 113.13708498984761,
+            "down_fast": 50.59644256269407,
+            "up_left_fast": 97.32420048477151,
+            "up_right_fast": 128.9961239727768,
+            "down_left_fast": 81.58431221748455,
+            "down_right_fast": 116.48175822848829
+          },
+          "survival_frames": null,
+          "survival_bottleneck_margin": null,
+          "survival_best_actions": [],
+          "selected_action": "up_right_fast",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": 128.9961239727768,
+          "selected_survival_preferred": false,
+          "position_error": 0.778533935546875,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 3,
+          "horizon_frames": 80,
+          "viable_state_count": 214,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 1
+      },
+      "action_deadline_miss": {
+        "at_hit": false,
+        "last_alive": false,
+        "hit_action_lag": 1,
+        "hit_support_high": 4,
+        "last_alive_action_lag": 1,
+        "last_alive_support_high": 4
+      },
+      "usable_pipeline_warning_lead_frames": 2,
+      "usable_robust_warning_lead_frames": 2,
+      "robust_action_set_exhausted_at_frame": 22898,
+      "usable_viability_warning_lead_frames": 57,
+      "viability_kernel_exhausted_at_frame": 22843,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 897,
+      "active_lasers": 0,
+      "active_items": 21,
+      "active_enemy_bodies": 2,
+      "enemy_body_snapshot_frame": 22896,
+      "hit_contact_observation": {
+        "frame_before": 22902,
+        "frame_after": 22903,
+        "stable": false,
+        "player_lethal_aabb": [
+          167.77853393554688,
+          424.17156982421875,
+          169.77853393554688,
+          426.17156982421875
+        ],
+        "enemy_bodies": []
+      },
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "control_delay_frames": 3,
+      "control_delay_candidates": [
+        2,
+        3,
+        4
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 27,
+        "censored": 246
+      },
+      "robust_control": {
+        "delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "override": true,
+        "worst_collisions": 1,
+        "min_clearance": -2.142382860183716,
+        "cvar_risk": 23556.569452243064,
+        "worst_delay": 2,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": 113.13708498984761,
+        "viability_control_reserve_deficit": 0.0,
+        "viability_control_reserve_valid": false,
+        "preloss_continuation_preference_active": false,
+        "planned_route_gate_deficit": 0.0,
+        "local_collisions": 1,
+        "preloss_supplemental_beam_active": false,
+        "preloss_supplemental_beam_width": 0,
+        "preloss_historical_action": null,
+        "preloss_selected_from_supplemental": false,
+        "preloss_supplemental_candidate_count": 0,
+        "preloss_historical_route_gate_deficit": 0.0,
+        "preloss_supplemental_failure": null,
+        "preloss_supplemental_backend": "python",
+        "preloss_supplemental_status": "not_eligible",
+        "preloss_supplemental_completed": false,
+        "preloss_supplemental_historical_fallback": false,
+        "preloss_supplemental_background_compute_ms": null,
+        "viability_safety_value_preferred": false,
+        "viability_safety_state_value": null,
+        "viability_fresh_prefix_filtered": false,
+        "viability_fresh_prefix_relaxed": false,
+        "viability_survival_preferred": false,
+        "viability_survival_frames": null,
+        "viability_survival_bottleneck_margin": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 22899,
+        "age": 9,
+        "phase_frames": 1,
+        "layer": 1,
+        "available": true,
+        "state_viable": false,
+        "active_action": "up_right_fast",
+        "observed_input_action": "up_right_fast",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 32.0,
+          "left": 65.96969000988257,
+          "right": 97.32420048477151,
+          "up": 97.32420048477151,
+          "down": 65.96969000988257,
+          "up_left": 97.32420048477151,
+          "up_right": 115.37764081484765,
+          "down_left": 65.96969000988257,
+          "down_right": 96.0,
+          "left_fast": 65.96969000988257,
+          "right_fast": 113.13708498984761,
+          "up_fast": 102.44998779892558,
+          "down_fast": 65.96969000988257,
+          "up_left_fast": 81.58431221748455,
+          "up_right_fast": 115.37764081484765,
+          "down_left_fast": 65.96969000988257,
+          "down_right_fast": 96.0
+        },
+        "survival_frames": null,
+        "survival_bottleneck_margin": null,
+        "survival_best_actions": [],
+        "selected_action": "right_fast",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": 113.13708498984761,
+        "selected_survival_preferred": false,
+        "position_error": 4.494671800668768,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 3,
+        "horizon_frames": 80,
+        "viable_state_count": 239,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 3.5963000264018774,
+      "plan_ms": 15.354800038039684,
+      "pipeline_clearance_at_hit": -2.142382860183716,
+      "minimum_pipeline_clearance_240f": -2.142382860183716,
+      "minimum_corridor_slack_240f": 0.826433613840063,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 312,
+        "x": 171.3125762939453,
+        "y": 424.6478271484375,
+        "velocity_x": -0.47642743587493896,
+        "velocity_y": 1.3164409399032593,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 6.324015694681994,
+        "aabb_clearance": 1.3624725341796875
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 6292032,
+        "x_at_snapshot": 192.0,
+        "y_at_snapshot": 244.0,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0,
+        "internal_motion_x": 0.0,
+        "internal_motion_y": 0.0,
+        "projected_x_at_action": 192.0,
+        "projected_y_at_action": 244.0,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 16777225,
+        "snapshot_frame": 22896,
+        "elapsed_frames": 4,
+        "exact_same_epoch": false,
+        "aabb_clearance": 164.11155122208066
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "playfield_boundary",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 102,
+        "spell_name": "幻波「赤眼催眠(マインドブローイング)」",
+        "flags": 5,
+        "enemy_pointer": 5755632
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "HARD-S5-F24323-T1",
+      "frame": 24323,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "player": {
+        "x": 314.6376953125,
+        "y": 428.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 108.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 108.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_fast",
+      "mask": 17,
+      "issued_action_after_hit_detection": "up_fast",
+      "issued_mask_after_hit_detection": 17,
+      "active_input_action": "up_left_fast",
+      "active_input_mask": 81,
+      "last_alive_decision": {
+        "frame": 24321,
+        "issued_action": "up_left_fast",
+        "issued_mask": 81,
+        "active_input_action": "down_right_fast",
+        "active_input_mask": 161,
+        "pipeline_clearance": -2.7300167083740234,
+        "minimum_clearance": -2.7300167083740234,
+        "action_hold_frames": 3,
+        "control_delay_frames": 3,
+        "control_delay_candidates": [
+          2,
+          3,
+          4
+        ],
+        "robust_control": {
+          "delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "override": false,
+          "worst_collisions": 2,
+          "min_clearance": -2.7300167083740234,
+          "cvar_risk": 55308.80569007357,
+          "worst_delay": 2,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": null,
+          "viability_control_reserve_deficit": 0.0,
+          "viability_control_reserve_valid": true,
+          "preloss_continuation_preference_active": false,
+          "planned_route_gate_deficit": 0.0,
+          "local_collisions": 2,
+          "preloss_supplemental_beam_active": false,
+          "preloss_supplemental_beam_width": 0,
+          "preloss_historical_action": null,
+          "preloss_selected_from_supplemental": false,
+          "preloss_supplemental_candidate_count": 0,
+          "preloss_historical_route_gate_deficit": 0.0,
+          "preloss_supplemental_failure": null,
+          "preloss_supplemental_backend": "python",
+          "preloss_supplemental_status": "not_eligible",
+          "preloss_supplemental_completed": false,
+          "preloss_supplemental_historical_fallback": false,
+          "preloss_supplemental_background_compute_ms": null,
+          "viability_safety_value_preferred": false,
+          "viability_safety_state_value": null,
+          "viability_fresh_prefix_filtered": false,
+          "viability_fresh_prefix_relaxed": false,
+          "viability_survival_preferred": false,
+          "viability_survival_frames": null,
+          "viability_survival_bottleneck_margin": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 24321,
+          "age": 13,
+          "phase_frames": 5,
+          "layer": 1,
+          "available": true,
+          "state_viable": false,
+          "active_action": "up_fast",
+          "observed_input_action": "down_right_fast",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {
+            "stay": 1,
+            "up_right": 5,
+            "up_fast": 2,
+            "up_right_fast": 5
+          },
+          "recovery_distances": {},
+          "survival_frames": null,
+          "survival_bottleneck_margin": null,
+          "survival_best_actions": [],
+          "selected_action": "up_left_fast",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": null,
+          "selected_survival_preferred": false,
+          "position_error": 4.0045448915040165,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 3,
+          "horizon_frames": 80,
+          "viable_state_count": 1800,
+          "reason": "robust action set is empty; recovery neighborhoods found"
+        },
+        "action_lag": 1
+      },
+      "action_deadline_miss": {
+        "at_hit": false,
+        "last_alive": false,
+        "hit_action_lag": 1,
+        "hit_support_high": 4,
+        "last_alive_action_lag": 1,
+        "last_alive_support_high": 4
+      },
+      "usable_pipeline_warning_lead_frames": 2,
+      "usable_robust_warning_lead_frames": 4,
+      "robust_action_set_exhausted_at_frame": 24319,
+      "usable_viability_warning_lead_frames": 195,
+      "viability_kernel_exhausted_at_frame": 24128,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 840,
+      "active_lasers": 0,
+      "active_items": 36,
+      "active_enemy_bodies": 26,
+      "enemy_body_snapshot_frame": 24321,
+      "hit_contact_observation": {
+        "frame_before": 24324,
+        "frame_after": 24324,
+        "stable": true,
+        "player_lethal_aabb": [
+          310.80926513671875,
+          424.17156982421875,
+          312.80926513671875,
+          426.17156982421875
+        ],
+        "enemy_bodies": []
+      },
+      "snapshot_lag": 0,
+      "action_lag": 1,
+      "control_delay_frames": 3,
+      "control_delay_candidates": [
+        2,
+        3,
+        4
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 30,
+        "censored": 269
+      },
+      "robust_control": {
+        "delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "override": false,
+        "worst_collisions": 1,
+        "min_clearance": -2.334887742996216,
+        "cvar_risk": 48350.591066256064,
+        "worst_delay": 4,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": null,
+        "viability_control_reserve_deficit": 0.0,
+        "viability_control_reserve_valid": true,
+        "preloss_continuation_preference_active": false,
+        "planned_route_gate_deficit": 0.0,
+        "local_collisions": 1,
+        "preloss_supplemental_beam_active": false,
+        "preloss_supplemental_beam_width": 0,
+        "preloss_historical_action": null,
+        "preloss_selected_from_supplemental": false,
+        "preloss_supplemental_candidate_count": 0,
+        "preloss_historical_route_gate_deficit": 0.0,
+        "preloss_supplemental_failure": null,
+        "preloss_supplemental_backend": "python",
+        "preloss_supplemental_status": "not_eligible",
+        "preloss_supplemental_completed": false,
+        "preloss_supplemental_historical_fallback": false,
+        "preloss_supplemental_background_compute_ms": null,
+        "viability_safety_value_preferred": false,
+        "viability_safety_state_value": null,
+        "viability_fresh_prefix_filtered": false,
+        "viability_fresh_prefix_relaxed": false,
+        "viability_survival_preferred": false,
+        "viability_survival_frames": null,
+        "viability_survival_bottleneck_margin": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 24322,
+        "age": 14,
+        "phase_frames": 6,
+        "layer": 1,
+        "available": true,
+        "state_viable": false,
+        "active_action": "up_left_fast",
+        "observed_input_action": "up_left_fast",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {
+          "stay": 1
+        },
+        "recovery_distances": {},
+        "survival_frames": null,
+        "survival_bottleneck_margin": null,
+        "survival_best_actions": [],
+        "selected_action": "up_fast",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": null,
+        "selected_survival_preferred": false,
+        "position_error": 4.791391923187298,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 3,
+        "horizon_frames": 80,
+        "viable_state_count": 1800,
+        "reason": "robust action set is empty; recovery neighborhoods found"
+      },
+      "read_ms": 2.7747999993152916,
+      "plan_ms": 9.296400006860495,
+      "pipeline_clearance_at_hit": -2.334887742996216,
+      "minimum_pipeline_clearance_240f": -2.7300167083740234,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 601,
+        "x": 310.203369140625,
+        "y": 426.0380859375,
+        "velocity_x": -0.05307532101869583,
+        "velocity_y": 0.9985905289649963,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 4.848954050845486,
+        "aabb_clearance": 0.434326171875
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 5777088,
+        "x_at_snapshot": 192.0,
+        "y_at_snapshot": 244.0,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0,
+        "internal_motion_x": 0.0,
+        "internal_motion_y": 0.0,
+        "projected_x_at_action": 192.0,
+        "projected_y_at_action": 244.0,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 16777225,
+        "snapshot_frame": 24321,
+        "elapsed_frames": 2,
+        "exact_same_epoch": false,
+        "aabb_clearance": 193.4696268127418
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "playfield_boundary",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 102,
+        "spell_name": "幻波「赤眼催眠(マインドブローイング)」",
+        "flags": 1,
+        "enemy_pointer": 5755632
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "HARD-S5-F29045-T1",
+      "frame": 29045,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "player": {
+        "x": 306.006591796875,
+        "y": 423.8682861328125,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 97.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 97.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up",
+      "mask": 21,
+      "issued_action_after_hit_detection": "up",
+      "issued_mask_after_hit_detection": 21,
+      "active_input_action": "up_right_fast",
+      "active_input_mask": 145,
+      "last_alive_decision": {
+        "frame": 29041,
+        "issued_action": "up_right_fast",
+        "issued_mask": 145,
+        "active_input_action": "stay",
+        "active_input_mask": 5,
+        "pipeline_clearance": -4.6384453773498535,
+        "minimum_clearance": -6.171309471130371,
+        "action_hold_frames": 4,
+        "control_delay_frames": 4,
+        "control_delay_candidates": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "robust_control": {
+          "delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "override": true,
+          "worst_collisions": 3,
+          "min_clearance": -8.662407875061035,
+          "cvar_risk": 269305.422505177,
+          "worst_delay": 5,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": null,
+          "viability_control_reserve_deficit": 14.800000190734863,
+          "viability_control_reserve_valid": false,
+          "preloss_continuation_preference_active": false,
+          "planned_route_gate_deficit": 0.0,
+          "local_collisions": 1,
+          "preloss_supplemental_beam_active": false,
+          "preloss_supplemental_beam_width": 0,
+          "preloss_historical_action": null,
+          "preloss_selected_from_supplemental": false,
+          "preloss_supplemental_candidate_count": 0,
+          "preloss_historical_route_gate_deficit": 0.0,
+          "preloss_supplemental_failure": null,
+          "preloss_supplemental_backend": "python",
+          "preloss_supplemental_status": "not_eligible",
+          "preloss_supplemental_completed": false,
+          "preloss_supplemental_historical_fallback": false,
+          "preloss_supplemental_background_compute_ms": null,
+          "viability_safety_value_preferred": false,
+          "viability_safety_state_value": null,
+          "viability_fresh_prefix_filtered": false,
+          "viability_fresh_prefix_relaxed": false,
+          "viability_survival_preferred": false,
+          "viability_survival_frames": null,
+          "viability_survival_bottleneck_margin": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 29036,
+          "age": 1,
+          "phase_frames": 1,
+          "layer": 0,
+          "available": true,
+          "state_viable": false,
+          "active_action": "up_right",
+          "observed_input_action": "stay",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 48.0
+          },
+          "survival_frames": null,
+          "survival_bottleneck_margin": null,
+          "survival_best_actions": [],
+          "selected_action": "up_right_fast",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": null,
+          "selected_survival_preferred": false,
+          "position_error": 1.8748779296875,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 4,
+          "horizon_frames": 80,
+          "viable_state_count": 0,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 5
+      },
+      "action_deadline_miss": {
+        "at_hit": false,
+        "last_alive": false,
+        "hit_action_lag": 3,
+        "hit_support_high": 6,
+        "last_alive_action_lag": 5,
+        "last_alive_support_high": 6
+      },
+      "usable_pipeline_warning_lead_frames": 34,
+      "usable_robust_warning_lead_frames": 124,
+      "robust_action_set_exhausted_at_frame": 28921,
+      "usable_viability_warning_lead_frames": 239,
+      "viability_kernel_exhausted_at_frame": 28806,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 1016,
+      "active_lasers": 0,
+      "active_items": 95,
+      "active_enemy_bodies": 29,
+      "enemy_body_snapshot_frame": 29033,
+      "hit_contact_observation": {
+        "frame_before": 29046,
+        "frame_after": 29046,
+        "stable": true,
+        "player_lethal_aabb": [
+          310.6634521484375,
+          417.21142578125,
+          312.6634521484375,
+          419.21142578125
+        ],
+        "enemy_bodies": []
+      },
+      "snapshot_lag": 0,
+      "action_lag": 3,
+      "control_delay_frames": 4,
+      "control_delay_candidates": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 43,
+        "censored": 315
+      },
+      "robust_control": {
+        "delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "override": false,
+        "worst_collisions": 2,
+        "min_clearance": -6.494760036468506,
+        "cvar_risk": 237169.02496951036,
+        "worst_delay": 3,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": null,
+        "viability_control_reserve_deficit": 0.0,
+        "viability_control_reserve_valid": true,
+        "preloss_continuation_preference_active": false,
+        "planned_route_gate_deficit": 0.0,
+        "local_collisions": 2,
+        "preloss_supplemental_beam_active": false,
+        "preloss_supplemental_beam_width": 0,
+        "preloss_historical_action": null,
+        "preloss_selected_from_supplemental": false,
+        "preloss_supplemental_candidate_count": 0,
+        "preloss_historical_route_gate_deficit": 0.0,
+        "preloss_supplemental_failure": null,
+        "preloss_supplemental_backend": "python",
+        "preloss_supplemental_status": "not_eligible",
+        "preloss_supplemental_completed": false,
+        "preloss_supplemental_historical_fallback": false,
+        "preloss_supplemental_background_compute_ms": null,
+        "viability_safety_value_preferred": false,
+        "viability_safety_state_value": null,
+        "viability_fresh_prefix_filtered": false,
+        "viability_fresh_prefix_relaxed": false,
+        "viability_survival_preferred": false,
+        "viability_survival_frames": null,
+        "viability_survival_bottleneck_margin": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 29042,
+        "age": 7,
+        "phase_frames": 7,
+        "layer": 0,
+        "available": true,
+        "state_viable": false,
+        "active_action": "up_right_fast",
+        "observed_input_action": "up_right_fast",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 35.77708763999664
+        },
+        "survival_frames": null,
+        "survival_bottleneck_margin": null,
+        "survival_best_actions": [],
+        "selected_action": "up",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": null,
+        "selected_survival_preferred": false,
+        "position_error": 9.890948819860283,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 4,
+        "horizon_frames": 80,
+        "viable_state_count": 0,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 4.854700004216284,
+      "plan_ms": 27.401899977121502,
+      "pipeline_clearance_at_hit": -5.95729923248291,
+      "minimum_pipeline_clearance_240f": -5.95729923248291,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 117,
+        "x": 300.17181396484375,
+        "y": 421.1484680175781,
+        "velocity_x": -5.682480619384478e-08,
+        "velocity_y": 1.2999999523162842,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 4194304,
+        "center_distance": 6.437549450615534,
+        "aabb_clearance": 1.83477783203125
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 6013104,
+        "x_at_snapshot": 340.8235168457031,
+        "y_at_snapshot": 246.16664123535156,
+        "velocity_x": 1.0,
+        "velocity_y": 0.0,
+        "internal_motion_x": 1.0,
+        "internal_motion_y": 0.0,
+        "projected_x_at_action": 352.8235168457031,
+        "projected_y_at_action": 246.16664123535156,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 50336073,
+        "snapshot_frame": 29033,
+        "elapsed_frames": 12,
+        "exact_same_epoch": false,
+        "aabb_clearance": 159.96548462852644
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "pool_density_over_1000",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 106,
+        "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+        "flags": 5,
+        "enemy_pointer": 5755632
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "HARD-S5-F29503-T1",
+      "frame": 29503,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "player": {
+        "x": 189.25672912597656,
+        "y": 432.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 27
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 82.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 82.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_left",
+      "mask": 85,
+      "issued_action_after_hit_detection": "up_left",
+      "issued_mask_after_hit_detection": 85,
+      "active_input_action": "down_left",
+      "active_input_mask": 101,
+      "last_alive_decision": {
+        "frame": 29498,
+        "issued_action": "down_left",
+        "issued_mask": 101,
+        "active_input_action": "stay",
+        "active_input_mask": 5,
+        "pipeline_clearance": -4.182232856750488,
+        "minimum_clearance": -5.863028049468994,
+        "action_hold_frames": 4,
+        "control_delay_frames": 4,
+        "control_delay_candidates": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "robust_control": {
+          "delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "override": false,
+          "worst_collisions": 2,
+          "min_clearance": -6.589745998382568,
+          "cvar_risk": 213941.31593454536,
+          "worst_delay": 3,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": 214.66252583997982,
+          "viability_control_reserve_deficit": 20.7473087310791,
+          "viability_control_reserve_valid": true,
+          "preloss_continuation_preference_active": false,
+          "planned_route_gate_deficit": 0.0,
+          "local_collisions": 1,
+          "preloss_supplemental_beam_active": false,
+          "preloss_supplemental_beam_width": 0,
+          "preloss_historical_action": null,
+          "preloss_selected_from_supplemental": false,
+          "preloss_supplemental_candidate_count": 0,
+          "preloss_historical_route_gate_deficit": 0.0,
+          "preloss_supplemental_failure": null,
+          "preloss_supplemental_backend": "python",
+          "preloss_supplemental_status": "not_eligible",
+          "preloss_supplemental_completed": false,
+          "preloss_supplemental_historical_fallback": false,
+          "preloss_supplemental_background_compute_ms": null,
+          "viability_safety_value_preferred": false,
+          "viability_safety_state_value": null,
+          "viability_fresh_prefix_filtered": false,
+          "viability_fresh_prefix_relaxed": false,
+          "viability_survival_preferred": false,
+          "viability_survival_frames": null,
+          "viability_survival_bottleneck_margin": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 29496,
+          "age": 14,
+          "phase_frames": 6,
+          "layer": 1,
+          "available": true,
+          "state_viable": false,
+          "active_action": "stay",
+          "observed_input_action": "stay",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 64.0,
+            "left": 187.275198571514,
+            "right": 193.32873557751316,
+            "up": 172.32527382830412,
+            "down": 64.0,
+            "up_left": 187.275198571514,
+            "up_right": 193.32873557751316,
+            "down_left": 214.66252583997982,
+            "down_right": 200.47942537826668,
+            "left_fast": 197.9090700296477,
+            "right_fast": 172.32527382830412,
+            "up_fast": 172.32527382830412,
+            "down_fast": 64.0,
+            "up_left_fast": 187.275198571514,
+            "up_right_fast": 193.32873557751316,
+            "down_left_fast": 214.66252583997982,
+            "down_right_fast": 200.47942537826668
+          },
+          "survival_frames": null,
+          "survival_bottleneck_margin": null,
+          "survival_best_actions": [],
+          "selected_action": "down_left",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": 214.66252583997982,
+          "selected_survival_preferred": false,
+          "position_error": 5.2567291259765625,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 4,
+          "horizon_frames": 80,
+          "viable_state_count": 340,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 2
+      },
+      "action_deadline_miss": {
+        "at_hit": false,
+        "last_alive": false,
+        "hit_action_lag": 4,
+        "hit_support_high": 6,
+        "last_alive_action_lag": 2,
+        "last_alive_support_high": 6
+      },
+      "usable_pipeline_warning_lead_frames": 11,
+      "usable_robust_warning_lead_frames": 26,
+      "robust_action_set_exhausted_at_frame": 29477,
+      "usable_viability_warning_lead_frames": 153,
+      "viability_kernel_exhausted_at_frame": 29350,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 1019,
+      "active_lasers": 0,
+      "active_items": 72,
+      "active_enemy_bodies": 1,
+      "enemy_body_snapshot_frame": 29493,
+      "hit_contact_observation": {
+        "frame_before": 29503,
+        "frame_after": 29503,
+        "stable": true,
+        "player_lethal_aabb": [
+          186.63038635253906,
+          431.0,
+          188.63038635253906,
+          433.0
+        ],
+        "enemy_bodies": []
+      },
+      "snapshot_lag": 0,
+      "action_lag": 4,
+      "control_delay_frames": 4,
+      "control_delay_candidates": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 46,
+        "censored": 322
+      },
+      "robust_control": {
+        "delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "override": false,
+        "worst_collisions": 2,
+        "min_clearance": -5.80422306060791,
+        "cvar_risk": 221969.02259274462,
+        "worst_delay": 3,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": 208.61447696648477,
+        "viability_control_reserve_deficit": 24.0,
+        "viability_control_reserve_valid": true,
+        "preloss_continuation_preference_active": false,
+        "planned_route_gate_deficit": 0.0,
+        "local_collisions": 2,
+        "preloss_supplemental_beam_active": false,
+        "preloss_supplemental_beam_width": 0,
+        "preloss_historical_action": null,
+        "preloss_selected_from_supplemental": false,
+        "preloss_supplemental_candidate_count": 0,
+        "preloss_historical_route_gate_deficit": 0.0,
+        "preloss_supplemental_failure": null,
+        "preloss_supplemental_backend": "python",
+        "preloss_supplemental_status": "not_eligible",
+        "preloss_supplemental_completed": false,
+        "preloss_supplemental_historical_fallback": false,
+        "preloss_supplemental_background_compute_ms": null,
+        "viability_safety_value_preferred": false,
+        "viability_safety_state_value": null,
+        "viability_fresh_prefix_filtered": false,
+        "viability_fresh_prefix_relaxed": false,
+        "viability_survival_preferred": false,
+        "viability_survival_frames": null,
+        "viability_survival_bottleneck_margin": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 29499,
+        "age": 1,
+        "phase_frames": 1,
+        "layer": 0,
+        "available": true,
+        "state_viable": false,
+        "active_action": "down_left",
+        "observed_input_action": "down_left",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 102.44998779892558,
+          "left": 214.66252583997982,
+          "right": 202.3857702507763,
+          "up": 208.61447696648477,
+          "down": 222.27910383119686,
+          "up_left": 208.61447696648477,
+          "up_right": 222.27910383119686,
+          "down_left": 229.08513701242165,
+          "down_right": 249.92798962901293,
+          "left_fast": 213.46662502602135,
+          "right_fast": 202.3857702507763,
+          "up_fast": 208.61447696648477,
+          "down_fast": 236.2371689637344,
+          "up_left_fast": 208.61447696648477,
+          "up_right_fast": 222.27910383119686,
+          "down_left_fast": 214.66252583997982,
+          "down_right_fast": 249.92798962901293
+        },
+        "survival_frames": null,
+        "survival_bottleneck_margin": null,
+        "survival_best_actions": [],
+        "selected_action": "up_left",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": 208.61447696648477,
+        "selected_survival_preferred": false,
+        "position_error": 5.2567291259765625,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 4,
+        "horizon_frames": 80,
+        "viable_state_count": 97,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 4.334500001277775,
+      "plan_ms": 33.69289997499436,
+      "pipeline_clearance_at_hit": -4.558575630187988,
+      "minimum_pipeline_clearance_240f": -5.132519721984863,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 1251,
+        "x": 184.6389617919922,
+        "y": 433.2247314453125,
+        "velocity_x": -5.682480619384478e-08,
+        "velocity_y": 1.2999999523162842,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 4194304,
+        "center_distance": 4.777420042653818,
+        "aabb_clearance": 0.617767333984375
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 5755632,
+        "x_at_snapshot": 191.77296447753906,
+        "y_at_snapshot": 101.15619659423828,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0,
+        "internal_motion_x": 0.0,
+        "internal_motion_y": 0.0,
+        "projected_x_at_action": 191.77296447753906,
+        "projected_y_at_action": 101.15619659423828,
+        "half_width": 36.0,
+        "half_height": 24.0,
+        "flags": 287834191,
+        "snapshot_frame": 29493,
+        "elapsed_frames": 10,
+        "exact_same_epoch": false,
+        "aabb_clearance": 304.8438034057617
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "playfield_boundary",
+        "pool_density_over_1000"
+      ],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 106,
+        "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+        "flags": 1,
+        "enemy_pointer": 5755632
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "HARD-S5-F32734-T1",
+      "frame": 32734,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "player": {
+        "x": 376.0,
+        "y": 428.747314453125,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 77.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 77.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_left_fast",
+      "mask": 81,
+      "issued_action_after_hit_detection": "up_left_fast",
+      "issued_mask_after_hit_detection": 81,
+      "active_input_action": "up_left_fast",
+      "active_input_mask": 81,
+      "last_alive_decision": {
+        "frame": 32731,
+        "issued_action": "up_left_fast",
+        "issued_mask": 81,
+        "active_input_action": "up_right",
+        "active_input_mask": 149,
+        "pipeline_clearance": 0.8832651376724243,
+        "minimum_clearance": -2.5399773120880127,
+        "action_hold_frames": 3,
+        "control_delay_frames": 3,
+        "control_delay_candidates": [
+          2,
+          3,
+          4
+        ],
+        "robust_control": {
+          "delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "override": false,
+          "worst_collisions": 4,
+          "min_clearance": -2.635385036468506,
+          "cvar_risk": 142936.8944960741,
+          "worst_delay": 2,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": 112.0,
+          "viability_control_reserve_deficit": 0.0,
+          "viability_control_reserve_valid": true,
+          "preloss_continuation_preference_active": false,
+          "planned_route_gate_deficit": 0.0,
+          "local_collisions": 1,
+          "preloss_supplemental_beam_active": false,
+          "preloss_supplemental_beam_width": 0,
+          "preloss_historical_action": null,
+          "preloss_selected_from_supplemental": false,
+          "preloss_supplemental_candidate_count": 0,
+          "preloss_historical_route_gate_deficit": 0.0,
+          "preloss_supplemental_failure": null,
+          "preloss_supplemental_backend": "python",
+          "preloss_supplemental_status": "not_eligible",
+          "preloss_supplemental_completed": false,
+          "preloss_supplemental_historical_fallback": false,
+          "preloss_supplemental_background_compute_ms": null,
+          "viability_safety_value_preferred": false,
+          "viability_safety_state_value": null,
+          "viability_fresh_prefix_filtered": false,
+          "viability_fresh_prefix_relaxed": false,
+          "viability_survival_preferred": false,
+          "viability_survival_frames": null,
+          "viability_survival_bottleneck_margin": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 32730,
+          "age": 14,
+          "phase_frames": 6,
+          "layer": 1,
+          "available": true,
+          "state_viable": false,
+          "active_action": "up_right",
+          "observed_input_action": "up_right",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 113.13708498984761,
+            "left": 124.96399481450646,
+            "right": 124.96399481450646,
+            "up": 112.0,
+            "down": 128.0,
+            "up_left": 112.0,
+            "up_right": 112.0,
+            "down_left": 137.63720427268203,
+            "down_right": 128.0,
+            "left_fast": 115.37764081484765,
+            "right_fast": 128.0,
+            "up_fast": 112.0,
+            "down_fast": 137.63720427268203,
+            "up_left_fast": 112.0,
+            "up_right_fast": 112.0,
+            "down_left_fast": 150.94369811290565,
+            "down_right_fast": 144.0
+          },
+          "survival_frames": null,
+          "survival_bottleneck_margin": null,
+          "survival_best_actions": [],
+          "selected_action": "up_left_fast",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": 112.0,
+          "selected_survival_preferred": false,
+          "position_error": 0.0,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            2,
+            3,
+            4
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 2,
+          "horizon_frames": 80,
+          "viable_state_count": 3660,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 1
+      },
+      "action_deadline_miss": {
+        "at_hit": false,
+        "last_alive": false,
+        "hit_action_lag": 2,
+        "hit_support_high": 4,
+        "last_alive_action_lag": 1,
+        "last_alive_support_high": 4
+      },
+      "usable_pipeline_warning_lead_frames": 0,
+      "usable_robust_warning_lead_frames": 5,
+      "robust_action_set_exhausted_at_frame": 32729,
+      "usable_viability_warning_lead_frames": 239,
+      "viability_kernel_exhausted_at_frame": 32495,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 483,
+      "active_lasers": 0,
+      "active_items": 14,
+      "active_enemy_bodies": 1,
+      "enemy_body_snapshot_frame": 32728,
+      "hit_contact_observation": {
+        "frame_before": 32734,
+        "frame_after": 32734,
+        "stable": true,
+        "player_lethal_aabb": [
+          369.3431396484375,
+          422.0904541015625,
+          371.3431396484375,
+          424.0904541015625
+        ],
+        "enemy_bodies": []
+      },
+      "snapshot_lag": 1,
+      "action_lag": 2,
+      "control_delay_frames": 3,
+      "control_delay_candidates": [
+        2,
+        3,
+        4
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 4,
+        "censored": 14
+      },
+      "robust_control": {
+        "delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "override": false,
+        "worst_collisions": 4,
+        "min_clearance": -2.1484436988830566,
+        "cvar_risk": 131251.9799588758,
+        "worst_delay": null,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": 113.13708498984761,
+        "viability_control_reserve_deficit": 0.0,
+        "viability_control_reserve_valid": true,
+        "preloss_continuation_preference_active": false,
+        "planned_route_gate_deficit": 0.0,
+        "local_collisions": 4,
+        "preloss_supplemental_beam_active": false,
+        "preloss_supplemental_beam_width": 0,
+        "preloss_historical_action": null,
+        "preloss_selected_from_supplemental": false,
+        "preloss_supplemental_candidate_count": 0,
+        "preloss_historical_route_gate_deficit": 0.0,
+        "preloss_supplemental_failure": null,
+        "preloss_supplemental_backend": "python",
+        "preloss_supplemental_status": "not_eligible",
+        "preloss_supplemental_completed": false,
+        "preloss_supplemental_historical_fallback": false,
+        "preloss_supplemental_background_compute_ms": null,
+        "viability_safety_value_preferred": false,
+        "viability_safety_state_value": null,
+        "viability_fresh_prefix_filtered": false,
+        "viability_fresh_prefix_relaxed": false,
+        "viability_survival_preferred": false,
+        "viability_survival_frames": null,
+        "viability_survival_bottleneck_margin": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 32733,
+        "age": 1,
+        "phase_frames": 1,
+        "layer": 0,
+        "available": true,
+        "state_viable": false,
+        "active_action": "up_left_fast",
+        "observed_input_action": "up_left_fast",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 128.9961239727768,
+          "left": 113.13708498984761,
+          "right": 131.93938001976514,
+          "up": 116.48175822848829,
+          "down": 124.96399481450646,
+          "up_left": 113.13708498984761,
+          "up_right": 136.7040599250805,
+          "down_left": 144.88616221019868,
+          "down_right": 131.93938001976514,
+          "left_fast": 115.37764081484765,
+          "right_fast": 131.93938001976514,
+          "up_fast": 101.19288512538814,
+          "down_fast": 147.5127113166862,
+          "up_left_fast": 113.13708498984761,
+          "up_right_fast": 143.10835055998655,
+          "down_left_fast": 163.1686244349691,
+          "down_right_fast": 151.7893276880822
+        },
+        "survival_frames": null,
+        "survival_bottleneck_margin": null,
+        "survival_best_actions": [],
+        "selected_action": "up_left_fast",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": 113.13708498984761,
+        "selected_survival_preferred": false,
+        "position_error": 6.706707870661514,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          2,
+          3,
+          4
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 3,
+        "horizon_frames": 80,
+        "viable_state_count": 3102,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 5.802400002721697,
+      "plan_ms": 8.72079998953268,
+      "pipeline_clearance_at_hit": -2.0995841026306152,
+      "minimum_pipeline_clearance_240f": -2.0995841026306152,
+      "minimum_corridor_slack_240f": null,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 440,
+        "x": 369.4126892089844,
+        "y": 428.7035827636719,
+        "velocity_x": 0.3610118329524994,
+        "velocity_y": 0.9325612187385559,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 6.587455951890178,
+        "aabb_clearance": 2.587310791015625
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 5755632,
+        "x_at_snapshot": 245.74916076660156,
+        "y_at_snapshot": 56.553070068359375,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0,
+        "internal_motion_x": 0.0,
+        "internal_motion_y": 0.0,
+        "projected_x_at_action": 245.74916076660156,
+        "projected_y_at_action": 56.553070068359375,
+        "half_width": 36.0,
+        "half_height": 24.0,
+        "flags": 287899727,
+        "snapshot_frame": 32728,
+        "elapsed_frames": 6,
+        "exact_same_epoch": false,
+        "aabb_clearance": 358.2745765253309
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [
+        "playfield_boundary",
+        "fast_mode"
+      ],
+      "spell_attribution": {
+        "status": "no_active_spell_at_hit",
+        "spell_id": null,
+        "spell_name": null,
+        "flags": 0
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    },
+    {
+      "case_id": "HARD-S5-F35477-T1",
+      "frame": 35477,
+      "trace_index": 0,
+      "trace_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\hard_route2_stage5_unattended_20260727_185422.jsonl",
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "player": {
+        "x": 207.05429077148438,
+        "y": 201.58364868164062,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "resources_at_hit": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 62.0
+      },
+      "post_hit_first_changed_resources": {
+        "bombs": 3.0,
+        "power": 62.0
+      },
+      "post_hit_bomb_stock_decrease": 0.0,
+      "observed_bomb_cost": 0.0,
+      "deathbomb_requested": false,
+      "action": "up_right",
+      "mask": 149,
+      "issued_action_after_hit_detection": "up_right",
+      "issued_mask_after_hit_detection": 149,
+      "active_input_action": "up_right",
+      "active_input_mask": 149,
+      "last_alive_decision": {
+        "frame": 35474,
+        "issued_action": "up_right",
+        "issued_mask": 149,
+        "active_input_action": "right_fast",
+        "active_input_mask": 129,
+        "pipeline_clearance": 0.22809851169586182,
+        "minimum_clearance": -0.2241508960723877,
+        "action_hold_frames": 3,
+        "control_delay_frames": 3,
+        "control_delay_candidates": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "robust_control": {
+          "delay_frames": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "override": false,
+          "worst_collisions": 2,
+          "min_clearance": -3.1523497104644775,
+          "cvar_risk": 1337029.870445642,
+          "worst_delay": 4,
+          "viability_constrained": false,
+          "viability_safe_action_count": 0,
+          "viability_repair_volume": 0,
+          "viability_constraint_relaxed": false,
+          "viability_recovery_distance": 113.13708498984761,
+          "viability_control_reserve_deficit": 0.0,
+          "viability_control_reserve_valid": true,
+          "preloss_continuation_preference_active": false,
+          "planned_route_gate_deficit": 0.0,
+          "local_collisions": 0,
+          "preloss_supplemental_beam_active": false,
+          "preloss_supplemental_beam_width": 0,
+          "preloss_historical_action": null,
+          "preloss_selected_from_supplemental": false,
+          "preloss_supplemental_candidate_count": 0,
+          "preloss_historical_route_gate_deficit": 0.0,
+          "preloss_supplemental_failure": null,
+          "preloss_supplemental_backend": "python",
+          "preloss_supplemental_status": "not_eligible",
+          "preloss_supplemental_completed": false,
+          "preloss_supplemental_historical_fallback": false,
+          "preloss_supplemental_background_compute_ms": null,
+          "viability_safety_value_preferred": false,
+          "viability_safety_state_value": null,
+          "viability_fresh_prefix_filtered": false,
+          "viability_fresh_prefix_relaxed": false,
+          "viability_survival_preferred": false,
+          "viability_survival_frames": null,
+          "viability_survival_bottleneck_margin": null
+        },
+        "terminal_threat": {
+          "mode": "disabled_no_degenerate_boundary",
+          "horizon_frames": 10,
+          "collisions": 0,
+          "min_clearance": 9999.0
+        },
+        "viability": {
+          "query_frame": 35473,
+          "age": 10,
+          "phase_frames": 2,
+          "layer": 1,
+          "available": true,
+          "state_viable": false,
+          "active_action": "right_fast",
+          "observed_input_action": "right_fast",
+          "safe_action_count": 0,
+          "safe_actions": [],
+          "repair_volumes": {},
+          "recovery_distances": {
+            "stay": 80.0,
+            "left": 116.48175822848829,
+            "right": 86.16263691415206,
+            "up": 112.0,
+            "down": 121.85236969382254,
+            "up_left": 128.9961239727768,
+            "up_right": 113.13708498984761,
+            "down_left": 131.93938001976514,
+            "down_right": 107.33126291998991,
+            "left_fast": 131.93938001976514,
+            "right_fast": 86.16263691415206,
+            "up_fast": 107.33126291998991,
+            "down_fast": 116.48175822848829,
+            "up_left_fast": 128.0,
+            "up_right_fast": 107.33126291998991,
+            "down_left_fast": 135.7645019878171,
+            "down_right_fast": 101.19288512538814
+          },
+          "survival_frames": null,
+          "survival_bottleneck_margin": null,
+          "survival_best_actions": [],
+          "selected_action": "up_right",
+          "selected_repair_volume": 0,
+          "selected_recovery_distance": 113.13708498984761,
+          "selected_survival_preferred": false,
+          "position_error": 6.485671143799361,
+          "delay_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "current_delay_frames": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "support_covers_current": true,
+          "nominal_delay": 3,
+          "horizon_frames": 80,
+          "viable_state_count": 2709,
+          "reason": "robust action set is empty; distant recovery found"
+        },
+        "action_lag": 1
+      },
+      "action_deadline_miss": {
+        "at_hit": false,
+        "last_alive": false,
+        "hit_action_lag": 2,
+        "hit_support_high": 6,
+        "last_alive_action_lag": 1,
+        "last_alive_support_high": 6
+      },
+      "usable_pipeline_warning_lead_frames": 0,
+      "usable_robust_warning_lead_frames": 8,
+      "robust_action_set_exhausted_at_frame": 35469,
+      "usable_viability_warning_lead_frames": 111,
+      "viability_kernel_exhausted_at_frame": 35366,
+      "planner_failure_class": "global_viability_kernel_exhausted_before_hit",
+      "active_bullets": 295,
+      "active_lasers": 0,
+      "active_items": 75,
+      "active_enemy_bodies": 26,
+      "enemy_body_snapshot_frame": 35471,
+      "hit_contact_observation": {
+        "frame_before": 35477,
+        "frame_after": 35477,
+        "stable": true,
+        "player_lethal_aabb": [
+          207.68063354492188,
+          198.95730590820312,
+          209.68063354492188,
+          200.95730590820312
+        ],
+        "enemy_bodies": []
+      },
+      "snapshot_lag": 0,
+      "action_lag": 2,
+      "control_delay_frames": 3,
+      "control_delay_candidates": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "control_delay_estimator": {
+        "computation_samples": 120,
+        "pickup_samples": 120,
+        "end_to_end_samples": 120,
+        "guard_active": true,
+        "overruns": 14,
+        "censored": 57
+      },
+      "robust_control": {
+        "delay_frames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "override": false,
+        "worst_collisions": 2,
+        "min_clearance": -1.5726224184036255,
+        "cvar_risk": 1109535.633046963,
+        "worst_delay": null,
+        "viability_constrained": false,
+        "viability_safe_action_count": 0,
+        "viability_repair_volume": 0,
+        "viability_constraint_relaxed": false,
+        "viability_recovery_distance": 101.19288512538814,
+        "viability_control_reserve_deficit": 0.0,
+        "viability_control_reserve_valid": true,
+        "preloss_continuation_preference_active": false,
+        "planned_route_gate_deficit": 0.0,
+        "local_collisions": 2,
+        "preloss_supplemental_beam_active": false,
+        "preloss_supplemental_beam_width": 0,
+        "preloss_historical_action": null,
+        "preloss_selected_from_supplemental": false,
+        "preloss_supplemental_candidate_count": 0,
+        "preloss_historical_route_gate_deficit": 0.0,
+        "preloss_supplemental_failure": null,
+        "preloss_supplemental_backend": "python",
+        "preloss_supplemental_status": "not_eligible",
+        "preloss_supplemental_completed": false,
+        "preloss_supplemental_historical_fallback": false,
+        "preloss_supplemental_background_compute_ms": null,
+        "viability_safety_value_preferred": false,
+        "viability_safety_state_value": null,
+        "viability_fresh_prefix_filtered": false,
+        "viability_fresh_prefix_relaxed": false,
+        "viability_survival_preferred": false,
+        "viability_survival_frames": null,
+        "viability_survival_bottleneck_margin": null
+      },
+      "terminal_threat": {
+        "mode": "disabled_no_degenerate_boundary",
+        "horizon_frames": 10,
+        "collisions": 0,
+        "min_clearance": 9999.0
+      },
+      "viability": {
+        "query_frame": 35475,
+        "age": 12,
+        "phase_frames": 4,
+        "layer": 1,
+        "available": true,
+        "state_viable": false,
+        "active_action": "up_right",
+        "observed_input_action": "up_right",
+        "safe_action_count": 0,
+        "safe_actions": [],
+        "repair_volumes": {},
+        "recovery_distances": {
+          "stay": 80.0,
+          "left": 116.48175822848829,
+          "right": 86.16263691415206,
+          "up": 112.0,
+          "down": 121.85236969382254,
+          "up_left": 128.0,
+          "up_right": 101.19288512538814,
+          "down_left": 136.7040599250805,
+          "down_right": 107.33126291998991,
+          "left_fast": 128.9961239727768,
+          "right_fast": 101.19288512538814,
+          "up_fast": 115.37764081484765,
+          "down_fast": 128.0,
+          "up_left_fast": 128.0,
+          "up_right_fast": 107.33126291998991,
+          "down_left_fast": 136.7040599250805,
+          "down_right_fast": 107.33126291998991
+        },
+        "survival_frames": null,
+        "survival_bottleneck_margin": null,
+        "survival_best_actions": [],
+        "selected_action": "up_right",
+        "selected_repair_volume": 0,
+        "selected_recovery_distance": 101.19288512538814,
+        "selected_survival_preferred": false,
+        "position_error": 9.535857723836997,
+        "delay_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "current_delay_frames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_covers_current": true,
+        "nominal_delay": 3,
+        "horizon_frames": 80,
+        "viable_state_count": 2709,
+        "reason": "robust action set is empty; distant recovery found"
+      },
+      "read_ms": 4.203699994832277,
+      "plan_ms": 14.5448999828659,
+      "pipeline_clearance_at_hit": -1.5726224184036255,
+      "minimum_pipeline_clearance_240f": -1.5726224184036255,
+      "minimum_corridor_slack_240f": 6.456398010253906,
+      "corridor_lane": "none",
+      "nearest_observed_bullet": {
+        "slot": 714,
+        "x": 211.83303833007812,
+        "y": 206.58982849121094,
+        "velocity_x": -1.3943555355072021,
+        "velocity_y": 1.7016969919204712,
+        "half_width": 2.0,
+        "half_height": 2.0,
+        "transform_flags": 0,
+        "center_distance": 6.920857209516403,
+        "aabb_clearance": 1.2723386220667343
+      },
+      "observed_bullet_contact_candidate": null,
+      "nearest_observed_laser": null,
+      "observed_laser_contact_candidate": null,
+      "nearest_observed_enemy_body": {
+        "pointer": 6034560,
+        "x_at_snapshot": 192.0,
+        "y_at_snapshot": 244.0,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0,
+        "internal_motion_x": 0.0,
+        "internal_motion_y": 0.0,
+        "projected_x_at_action": 192.0,
+        "projected_y_at_action": 244.0,
+        "half_width": 18.0,
+        "half_height": 18.0,
+        "flags": 16777225,
+        "snapshot_frame": 35471,
+        "elapsed_frames": 6,
+        "exact_same_epoch": false,
+        "aabb_clearance": 22.416351318359375
+      },
+      "observed_enemy_body_contact_candidate": null,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "contributing_factors": [],
+      "spell_attribution": {
+        "status": "resolved_live_spell_state",
+        "spell_id": 110,
+        "spell_name": "懶惰「生神停止(マインドストッパー)」",
+        "flags": 5,
+        "enemy_pointer": 5755632
+      },
+      "sample_role": "post_respawn_discovery_sample",
+      "bomb_input_verified_absent": true
+    }
+  ]
+}

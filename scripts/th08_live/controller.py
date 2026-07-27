@@ -4729,81 +4729,6 @@ def _run_live_session(
                     "snapshot_frame": state["enemy_manager_frame"],
                     "snapshot_lag": snapshot_lag,
                     "action_lag": counter_at_action - int(state["enemy_manager_frame"]),
-                    "read_ms": read_ms,
-                    "plan_ms": plan_ms,
-                    "timing_ms": {
-                        "observe": observe_ms,
-                        "read_pools": read_ms,
-                        "read_enemy_background": enemy_background_ms,
-                        "read_enemy_prefix_capture": (
-                            enemy_prefix_capture_ms
-                        ),
-                        "read_enemy_prefix_merge": enemy_prefix_merge_ms,
-                        "read_bullet_pool": bullet_pool_read_ms,
-                        "read_laser_pool": laser_pool_read_ms,
-                        "read_item_pool": item_pool_read_ms,
-                        "read_boss_phase": boss_phase_read_ms,
-                        "read_spell_enemy_guard": (
-                            spell_enemy_guard_read_ms
-                        ),
-                        "read_ecl_lookahead": ecl_lookahead_read_ms,
-                        "read_hazard_bookkeeping": (
-                            hazard_read_bookkeeping_ms
-                        ),
-                        "read_enemy_pool": enemy_pool_read_ms,
-                        "read_enemy_prefix": (
-                            enemy_prefix_snapshot.read_ms
-                        ),
-                        "read_enemy_issue_prefix": issue_enemy_read_ms,
-                        "decode_pools": decode_ms,
-                        "decode_bullets": bullet_decode_ms,
-                        "attach_bullet_events": bullet_event_attach_ms,
-                        "decode_lasers": laser_decode_ms,
-                        "decode_items": item_decode_ms,
-                        "corridor_bookkeeping": corridor_overhead_ms,
-                        "local_plan": plan_ms,
-                        "local_plan_initial": (
-                            plan_ms - issue_enemy_recertificate_ms
-                        ),
-                        "issue_enemy_recertificate": (
-                            issue_enemy_recertificate_ms
-                        ),
-                        "issue_path_to_input": issue_path_ms,
-                        "observe_to_input": observe_to_issue_ms,
-                        "local_shared_laser_projection": (
-                            decision.local_certificate_timing
-                            .shared_laser_projection_ms
-                        ),
-                        "local_certificate_total": (
-                            decision.local_certificate_timing
-                            .certificate_total_ms
-                        ),
-                        "local_certificate_geometry": (
-                            decision.local_certificate_timing
-                            .geometry_kernel_ms
-                        ),
-                        "issue_certificate_total": (
-                            decision.issue_certificate_timing
-                            .certificate_total_ms
-                        ),
-                        "post_issue_root_shadow": (
-                            float(
-                                local_pipeline_certificate_shadow.get(
-                                    "wall_ms",
-                                    0.0,
-                                )
-                            )
-                            if local_pipeline_certificate_shadow is not None
-                            else 0.0
-                        ),
-                        "input": input_ms,
-                        "before_trace": (
-                            time.perf_counter() - iteration_started
-                        )
-                        * 1000.0,
-                        "previous_trace": previous_trace_ms,
-                        "previous_iteration": previous_iteration_ms,
-                    },
                 }
                 sensing_trace_fields = build_sensing_trace_fields(
                     SensingTraceInput(
@@ -4967,20 +4892,14 @@ def _run_live_session(
                             local_pipeline_certificate_shadow
                         ),
                         input_ms=input_ms,
-                        before_trace_ms=float(
-                            record["timing_ms"]["before_trace"]
-                        ),
+                        before_trace_ms=(
+                            time.perf_counter() - iteration_started
+                        )
+                        * 1000.0,
                         previous_trace_ms=previous_trace_ms,
                         previous_iteration_ms=previous_iteration_ms,
                     )
                 )
-                if any(
-                    record[key] != value
-                    for key, value in timing_trace_fields.items()
-                ):
-                    raise RuntimeError(
-                        "extracted decision timing trace changed schema"
-                    )
                 record.update(timing_trace_fields)
                 candidate_record = build_candidate_verifier_trace_record(
                     enabled=candidate_verifier is not None,
@@ -5037,37 +4956,6 @@ def _run_live_session(
                 )
                 if corridor_record is not None:
                     record["corridor"] = corridor_record
-                if args.trace_radius > 0.0:
-                    radius = args.trace_radius
-                    record["nearby_bullets"] = [
-                        serialize_bullet_trace(bullet)
-                        for bullet in bullets
-                        if abs(bullet.x - projected_player_x) <= radius
-                        and abs(bullet.y - projected_player_y) <= radius
-                    ]
-                    record["lasers"] = [
-                        serialize_laser_trace(laser)
-                        for laser in lasers
-                    ]
-                    record["items"] = [
-                        [
-                            item.slot,
-                            item.x,
-                            item.y,
-                            item.vx,
-                            item.vy,
-                            item.item_type,
-                            item.motion_state,
-                            item.full_value,
-                        ]
-                        for item in items
-                    ]
-                if args.trace_transform_runtime:
-                    record["transform_bullets"] = [
-                        serialize_bullet_trace(bullet)
-                        for bullet in bullets
-                        if bullet.transform_runtime is not None
-                    ]
                 optional_hazard_fields = (
                     build_optional_hazard_trace_fields(
                         trace_radius=args.trace_radius,
@@ -5083,13 +4971,6 @@ def _run_live_session(
                         serialize_laser_trace=serialize_laser_trace,
                     )
                 )
-                if any(
-                    record[key] != value
-                    for key, value in optional_hazard_fields.items()
-                ):
-                    raise RuntimeError(
-                        "extracted optional hazard trace changed schema"
-                    )
                 record.update(optional_hazard_fields)
                 trace_ms = trace_sink.emit(
                     record,

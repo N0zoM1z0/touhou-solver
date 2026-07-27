@@ -3622,3 +3622,42 @@ completed
 - **Evidence:** Matching compact run and dossier artifacts; ignored raw JSONL
   SHA-256
   `f22dae779704b0e0189a9cf3129ce77db1aeec83245c82a7264edd579ef4fea8`.
+
+## CE-0137: Hard Stage 5 exhausted every global kernel before contact
+
+Status: observed physical survival failure; timing/optional-hazard trace gate
+completed
+
+- **Observed high-pressure run:** Supervised no-Bomb run
+  `hard_route2_stage5_unattended_20260727_185422` completed frames
+  `2..40448`, 12,602 decisions, route completion, artifact materialization,
+  and cleanup. It reached 1,190 active bullets and took eight native hits at
+  `[11557,14457,22900,24323,29045,29503,32734,35477]`.
+- **Canonical first hit:** Frame 11,557 was a nonspell modeled
+  committed-prefix collision at player `(364.616,432.000)` with active
+  `up_fast`, 544 bullets, zero lasers, and signed pipeline clearance
+  `-2.275`. The global viability kernel was exhausted with a seven-frame
+  robust warning.
+- **Later discovery evidence:** Seven of eight contacts were modeled
+  committed-prefix collisions; one was an observed-bullet overlap. Every hit
+  followed global viability-kernel exhaustion, with warning leads
+  `[7,6,2,4,124,26,5,8]` frames. Later contacts include spells 102, 106, and
+  110 and remain geometry, boundary, delay, and planner evidence rather than
+  independent fresh trials.
+- **Pressure signature:** Six contacts involved the playfield boundary, five
+  used fast movement, and two occurred above 1,000 active bullets. Bottom
+  eight-pixel occupancy was 0.528 in the 60-frame pre-hit windows versus
+  0.193 elsewhere; mean selected control-reserve deficit was 10.223 versus
+  3.291. These are correlations, not causal acceptance claims.
+- **Structural boundary:** All 12,602 decisions retained the required timing
+  groups and enabled optional-hazard records, there was no serialization
+  exception or stall, hard no-Bomb passed, and all processes cleaned up.
+  This retains the trace refactor but does not rescue physical survival.
+- **Correction boundary:** Treat policy delivery, delay-support coverage, and
+  viability exhaustion as separate gates. Preserve a non-empty action kernel
+  before the former hit windows and compare phase-specific position and
+  warning lead; do not infer improvement from aggregate hits across different
+  RNG samples.
+- **Evidence:** Matching compact run and dossier artifacts; ignored raw JSONL
+  SHA-256
+  `14bb67c3f6448a232e338d5067047def7a380814b90fae4ffb2577e49047e1f3`.

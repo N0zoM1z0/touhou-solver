@@ -218,6 +218,18 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Timing/optional-hazard characterization passes `698/698` quick tests on
   Linux in `8.957 s` and Windows in `13.124 s` with three Windows platform
   skips. Live-focused tests pass `111/111`.
+- After deleting the inline timing and optional-hazard paths,
+  `controller.py` is 5,377 lines. Live-focused tests pass `111/111`; the
+  Linux quick suite passes `698/698` in `9.177 s`; the Windows quick suite
+  passes `698/698` in `12.894 s` with three platform skips. Supervised
+  high-pressure retention
+  `hard_route2_stage5_unattended_20260727_185422` completed Hard Stage 5 over
+  frames `2..40448` with 12,602 decisions, maximum 1,190 active bullets,
+  zero Bomb input, accepted route completion, compact artifacts, supervisor
+  completion, and no residual process. Every decision retained the required
+  timing fields and enabled optional-hazard records. The run took eight hits,
+  all after global-kernel exhaustion, so it is structural retention plus
+  CE-0137 survival-failure evidence rather than route acceptance.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

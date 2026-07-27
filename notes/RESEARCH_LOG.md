@@ -5027,3 +5027,31 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `111/111`; Ruff and `git diff --check` pass; Linux quick suite passes
   `698/698` in `8.957 s`; Windows quick suite passes `698/698` in `13.124 s`
   with three platform skips.
+
+### 2026-07-27 — Decision timing extraction and Stage-5 retention
+
+- **Observed structural change:** Removed the characterized inline timing and
+  optional detailed-hazard serialization paths. `_run_live_session` now
+  consumes the pure `th08_live.decision_trace` builders; `controller.py` is
+  5,377 lines.
+- **Observed automated gate:** Decision-trace tests pass `2/2`; live-focused
+  tests pass `111/111`; Ruff, byte compilation, and `git diff --check` pass;
+  the Linux quick suite passes `698/698` in `9.177 s`; the Windows quick suite
+  passes `698/698` in `12.894 s` with three platform skips.
+- **Observed high-pressure retention:** Supervised Windows run
+  `hard_route2_stage5_unattended_20260727_185422` completed Hard Stage 5 over
+  frames `2..40448`, 12,602 decisions, maximum 1,190 active bullets, zero
+  Bomb input, accepted route completion, compact artifacts, supervisor
+  completion, and no residual process. Streaming validation found zero
+  missing required timing groups and retained enabled optional hazards
+  (maximum 540 nearby bullets and 1,538 items).
+- **Observed survival failure:** Native hits occurred at
+  `[11557,14457,22900,24323,29045,29503,32734,35477]`. All eight followed
+  global viability-kernel exhaustion; seven were modeled committed-prefix
+  collisions. This is CE-0137 evidence, not survival acceptance.
+- **Authority:** Structure and serialization retention only. No clock read,
+  model, recurrence, sensing, planning, issue, no-write, fallback, worker,
+  action, or strategy authority changed.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 455,424,978-byte raw JSONL SHA-256
+  `14bb67c3f6448a232e338d5067047def7a380814b90fae4ffb2577e49047e1f3`.

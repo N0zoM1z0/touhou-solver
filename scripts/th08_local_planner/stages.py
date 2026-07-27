@@ -8,7 +8,10 @@ from typing import Any, Callable
 
 from .models import RobustActionCertificate
 from .requests import LocalPlannerRequest
-from .validation import ValidatedPlannerRequest
+from .validation import (
+    ValidatedPlannerRequest,
+    validate_local_planner_request,
+)
 
 
 @dataclass(frozen=True)
@@ -31,6 +34,13 @@ class HardPreflightResult:
     effective_allowed_first_actions: tuple[str, ...] | None
     viability_fresh_prefix_filtered: bool
     viability_fresh_prefix_relaxed: bool
+
+
+@dataclass(frozen=True)
+class PlannerPassPreparation:
+    validated: ValidatedPlannerRequest
+    hazards: PreparedLocalHazards
+    preflight: HardPreflightResult
 
 
 def prepare_local_hazards(
@@ -268,4 +278,50 @@ def run_hard_preflight(
         effective_allowed_first_actions=effective_allowed,
         viability_fresh_prefix_filtered=fresh_filtered,
         viability_fresh_prefix_relaxed=fresh_relaxed,
+    )
+
+
+def prepare_planner_pass(
+    request: LocalPlannerRequest,
+    *,
+    planner_action_names: frozenset[str],
+    terminal_threat_degeneracy: Callable[..., str | None],
+    item_objectives_enabled: bool,
+    select_items: Callable[..., tuple[Any, ...]],
+    focus_mask: int,
+    unfocused_cardinal_speed: float,
+    build_laser_timeline: Callable[..., tuple[Any, ...]],
+    actions: tuple[Any, ...],
+    certificate_provider: Callable[
+        ..., dict[str, RobustActionCertificate]
+    ],
+    timing_accumulator: Any,
+) -> PlannerPassPreparation:
+    validated = validate_local_planner_request(
+        request,
+        planner_action_names=planner_action_names,
+        terminal_threat_degeneracy=terminal_threat_degeneracy,
+    )
+    hazards = prepare_local_hazards(
+        request,
+        validated,
+        item_objectives_enabled=item_objectives_enabled,
+        select_items=select_items,
+        focus_mask=focus_mask,
+        unfocused_cardinal_speed=unfocused_cardinal_speed,
+        build_laser_timeline=build_laser_timeline,
+        timing_accumulator=timing_accumulator,
+    )
+    preflight = run_hard_preflight(
+        request,
+        validated,
+        hazards,
+        actions=actions,
+        certificate_provider=certificate_provider,
+        timing_accumulator=timing_accumulator,
+    )
+    return PlannerPassPreparation(
+        validated=validated,
+        hazards=hazards,
+        preflight=preflight,
     )

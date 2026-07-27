@@ -71,20 +71,19 @@ from th08_laser_model import (
 from th08_laser_runtime import (
     Laser,
     PackedLaserFrame as _PackedLaserFrame,
-    build_laser_collision_frames,
+    build_laser_collision_frames,  # noqa: F401 - compatibility export
     build_packed_laser_collision_frames as _build_packed_laser_collision_frames,
     pack_laser_frame as _pack_laser_frame,
     serialize_laser_trace,
 )
 from th08_local_planner import (
-    ActionCertificateSet,
     ActuatorPipeline,
     BaselineBeamContext,
     CompletedServiceResults,
     CompletedSupplementalLookup,
     DamageDecisionFields,
     Decision,
-    DecisionTelemetry,
+    DecisionTelemetry,  # noqa: F401 - compatibility export
     EndpointRanker,
     GlobalGuidance,
     IssueAdapter,
@@ -100,16 +99,15 @@ from th08_local_planner import (
     PlannerAction,
     PlannerConfig,
     PlannerMode,
+    PlannerPassPreparation,
     ProposalAssemblyContext,
     RobustActionCertificate,
     SearchNode,
     SupplementalDecisionFields,
     assemble_local_decision,
-    prepare_local_hazards,
-    run_hard_preflight,
+    prepare_planner_pass,
     run_baseline_beam,
     lookup_completed_supplemental,
-    validate_local_planner_request,
 )
 from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
@@ -3872,12 +3870,35 @@ def _terminal_threat_degeneracy(
     return None
 
 
-def _choose_action_request_once(
+def _prepare_local_planner_pass(
     request: LocalPlannerRequest,
     *,
+    timing_accumulator: _LocalCertificateTimingAccumulator,
+) -> PlannerPassPreparation:
+    return prepare_planner_pass(
+        request,
+        planner_action_names=frozenset(
+            action.name for action in _PLANNER_ACTIONS
+        ),
+        terminal_threat_degeneracy=_terminal_threat_degeneracy,
+        item_objectives_enabled=ITEM_OBJECTIVES_ENABLED,
+        select_items=_select_items,
+        focus_mask=FOCUS,
+        unfocused_cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
+        build_laser_timeline=_build_packed_laser_collision_frames,
+        actions=_PLANNER_ACTIONS,
+        certificate_provider=_robust_action_certificates,
+        timing_accumulator=timing_accumulator,
+    )
+
+
+def _run_local_planner_pass(
+    request: LocalPlannerRequest,
+    preparation: PlannerPassPreparation,
+    *,
     _certificate_timing_accumulator: (
-        _LocalCertificateTimingAccumulator | None
-    ) = None,
+        _LocalCertificateTimingAccumulator
+    ),
 ) -> Decision | _PlannerModeTransition:
     physical = request.physical
     actuator = request.actuator
@@ -3891,11 +3912,9 @@ def _choose_action_request_once(
     bullets = physical.bullets
     lasers = physical.lasers
     enemy_bodies = physical.enemy_bodies
-    items = physical.items
     snapshot_lag = physical.snapshot_lag
 
     previous_direction = actuator.previous_direction
-    can_bomb = actuator.can_bomb
     previous_focus = actuator.previous_focus
     local_pipeline_root = actuator.local_pipeline_root
     control_delay_frames = actuator.control_delay_frames
@@ -3911,16 +3930,9 @@ def _choose_action_request_once(
         guidance.viability_recovery_distances
     )
     viability_safety_actions = guidance.viability_safety_actions
-    viability_safety_state_value = guidance.viability_safety_state_value
     viability_survival_actions = guidance.viability_survival_actions
-    viability_survival_frames = guidance.viability_survival_frames
-    viability_survival_bottleneck_margin = (
-        guidance.viability_survival_bottleneck_margin
-    )
-    viability_position_error = guidance.viability_position_error
 
     horizon = config.horizon
-    threat_horizon = config.threat_horizon
     beam_width = config.beam_width
     preloss_continuation_preference = (
         config.preloss_continuation_preference
@@ -3953,18 +3965,7 @@ def _choose_action_request_once(
         request.mode is PlannerMode.RELAXED_VIABILITY
     )
 
-    if _certificate_timing_accumulator is None:
-        _certificate_timing_accumulator = (
-            _LocalCertificateTimingAccumulator()
-        )
-    validated = validate_local_planner_request(
-        request,
-        planner_action_names=frozenset(
-            action.name for action in _PLANNER_ACTIONS
-        ),
-        terminal_threat_degeneracy=_terminal_threat_degeneracy,
-    )
-    threat_horizon = validated.threat_horizon
+    validated = preparation.validated
     target_deadline = validated.target_deadline
     repair_by_action = validated.repair_by_action
     recovery_by_action = validated.recovery_by_action
@@ -3972,20 +3973,10 @@ def _choose_action_request_once(
     survival_actions = validated.survival_actions
     observed_player_x = player_x
     observed_player_y = player_y
-    prepared = prepare_local_hazards(
-        request,
-        validated,
-        item_objectives_enabled=ITEM_OBJECTIVES_ENABLED,
-        select_items=_select_items,
-        focus_mask=FOCUS,
-        unfocused_cardinal_speed=UNFOCUSED_CARDINAL_SPEED,
-        build_laser_timeline=_build_packed_laser_collision_frames,
-        timing_accumulator=_certificate_timing_accumulator,
-    )
+    prepared = preparation.hazards
     selected_items = prepared.selected_items
     delayed_mask = prepared.delayed_mask
     main_laser_offset = prepared.main_laser_offset
-    certificate_delay_frames = prepared.certificate_delay_frames
     diagnostic_losing_reserve_distance = (
         prepared.diagnostic_losing_reserve_distance
     )
@@ -3993,23 +3984,13 @@ def _choose_action_request_once(
     certificate_horizon = prepared.certificate_horizon
     potential_threat_horizon = prepared.potential_threat_horizon
     laser_timeline = prepared.laser_timeline
-    preflight = run_hard_preflight(
-        request,
-        validated,
-        prepared,
-        actions=_PLANNER_ACTIONS,
-        certificate_provider=_robust_action_certificates,
-        timing_accumulator=_certificate_timing_accumulator,
-    )
+    preflight = preparation.preflight
     robust_preflight_certificates = preflight.certificates
     viability_constraint_relaxed = (
         preflight.viability_constraint_relaxed
     )
     effective_allowed_first_actions = (
         preflight.effective_allowed_first_actions
-    )
-    viability_fresh_prefix_filtered = (
-        preflight.viability_fresh_prefix_filtered
     )
     viability_fresh_prefix_relaxed = (
         preflight.viability_fresh_prefix_relaxed
@@ -5444,13 +5425,23 @@ def _choose_action_decision_request(
     """Execute planner passes and return the compatibility decision."""
 
     timing = _LocalCertificateTimingAccumulator()
-    result = _choose_action_request_once(
+    preparation = _prepare_local_planner_pass(
         request,
+        timing_accumulator=timing,
+    )
+    result = _run_local_planner_pass(
+        request,
+        preparation,
         _certificate_timing_accumulator=timing,
     )
     if isinstance(result, _PlannerModeTransition):
-        retry = _choose_action_request_once(
+        retry_preparation = _prepare_local_planner_pass(
             result.next_request,
+            timing_accumulator=timing,
+        )
+        retry = _run_local_planner_pass(
+            result.next_request,
+            retry_preparation,
             _certificate_timing_accumulator=timing,
         )
         if isinstance(retry, _PlannerModeTransition):
@@ -7125,7 +7116,9 @@ def run(args: argparse.Namespace) -> int:
                 (
                     boss_phase_snapshot.as_progress_state(
                         context=corridor_context,
-                        bomb_active=bool(player["bomb_active"]),
+                        bomb_active=bool(
+                            state["player"]["bomb_active"]
+                        ),
                     )
                     if boss_phase_snapshot is not None
                     else None
@@ -9456,8 +9449,8 @@ def run(args: argparse.Namespace) -> int:
                             "horizon_frames": (
                                 safety_policy.horizon_frames
                             ),
-                            "guidance_active": (
-                                safety_value_guidance is not None
+                            "guidance_active": bool(
+                                policy_guidance.safety_actions
                             ),
                             "reason": safety_value_query.reason,
                         }

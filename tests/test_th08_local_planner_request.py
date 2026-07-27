@@ -256,7 +256,7 @@ class LocalPlannerRequestTests(unittest.TestCase):
 
         with patch.object(
             live,
-            "_choose_action_request_once",
+            "_run_local_planner_pass",
             side_effect=(transition, retry),
         ) as plan_once:
             result = live.choose_action_request(request)

@@ -29,7 +29,9 @@ from .validation import (
 )
 from .stages import (
     HardPreflightResult,
+    PlannerPassPreparation,
     PreparedLocalHazards,
+    prepare_planner_pass,
     prepare_local_hazards,
     run_hard_preflight,
 )
@@ -71,6 +73,7 @@ __all__ = [
     "PlannerConfig",
     "PlannerAction",
     "PlannerMode",
+    "PlannerPassPreparation",
     "ProposalAssemblyContext",
     "PreparedLocalHazards",
     "RobustActionCertificate",
@@ -78,6 +81,7 @@ __all__ = [
     "SupplementalDecisionFields",
     "ValidatedPlannerRequest",
     "prepare_local_hazards",
+    "prepare_planner_pass",
     "run_hard_preflight",
     "lookup_completed_supplemental",
     "run_baseline_beam",

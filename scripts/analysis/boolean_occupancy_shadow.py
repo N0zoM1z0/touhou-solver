@@ -16,12 +16,13 @@ from benchmarks.clearance_benchmark_support import (
     moving_aabbs,
     packed_segment_trajectories,
 )
-from corridor_planner import _axis, _hazard_clearance_volume
 from th08_corridor_adapter import (
     TH08_CORRIDOR_CONFIG,
     TH08_PLAYFIELD,
     TH08_VIABILITY_ACTIONS,
 )
+from touhou_control.corridor.clearance import hazard_clearance_volume
+from touhou_control.corridor.grid import axis
 from touhou_control.viability import (
     RobustViabilityPolicy,
     ViabilityConfig,
@@ -187,12 +188,12 @@ def main() -> int:
     ):
         parser.error("invalid workload or delay arguments")
 
-    x_axis = _axis(
+    x_axis = axis(
         TH08_PLAYFIELD.left,
         TH08_PLAYFIELD.right,
         TH08_CORRIDOR_CONFIG.grid_step,
     )
-    y_axis = _axis(
+    y_axis = axis(
         TH08_PLAYFIELD.top,
         TH08_PLAYFIELD.bottom,
         TH08_CORRIDOR_CONFIG.grid_step,
@@ -207,7 +208,7 @@ def main() -> int:
     clearance = None
     for _ in range(args.runs):
         started = time.perf_counter()
-        clearance = _hazard_clearance_volume(
+        clearance = hazard_clearance_volume(
             grid_x,
             grid_y,
             aabbs=aabbs,

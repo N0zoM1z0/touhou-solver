@@ -4148,3 +4148,31 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   corridor tests pass `26/26`; TH08 corridor adapter/runtime tests pass
   `19/19`; the complete Linux quick suite passes `586/586` in `5.507 s`;
   Python compilation and `git diff --check` pass.
+
+## 2026-07-27: Corridor Clearance Extraction
+
+- **Scope:** Moved moving/time-indexed/piecewise AABB, object/packed segment,
+  boundary, and full physical-frame clearance construction into
+  `touhou_control.corridor.clearance`. The module owns both the independent
+  NumPy/scalar path and the unchanged optional native dispatch/fallback.
+- **Compatibility and dependencies:** `corridor_planner.py` re-exports the
+  historical private helper names while planner calls resolve to the
+  canonical implementations. Analysis and benchmark callers now use the
+  explicit public `corridor.clearance` and `corridor.grid` APIs. Tests that
+  intentionally force native fallbacks patch the canonical implementation
+  seam instead of the facade.
+- **Observed structure:** Across the model/grid/clearance checkpoints,
+  `corridor_planner.py` decreased from 1,699 to 739 lines. The remaining file
+  contains legacy forward planning, robust preparation/solve/refinement,
+  representative rollout, and the public dispatcher; those responsibilities
+  remain scheduled for later R1 checkpoints.
+- **Authority:** This is a pure move and import-boundary change. Float32
+  operations, native arguments/fallbacks, signed clearance, policy inputs,
+  recurrence, masks, ranking, timings, live actions, strategy status, native
+  implementation, and C ABI are unchanged.
+- **Validation:** The R0 canonical report is byte/digest identical; corridor
+  tests pass `26/26`; TH08 corridor adapter/runtime tests pass `19/19`;
+  packed-hazard/capsule and adversarial/differential focused tests pass; the
+  complete quick suite passes `586/586` on Linux in `5.469 s` and on Windows
+  in `7.966 s` with one existing skip; Python compilation and
+  `git diff --check` pass.

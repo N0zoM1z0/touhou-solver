@@ -17,9 +17,9 @@ from corridor_planner import (
     AabbTrajectoryHazard,
     CorridorConfig,
     PiecewiseAabbHazard,
-    _hazard_clearance_volume,
 )
 from touhou_control import native_backend
+from touhou_control.corridor.clearance import hazard_clearance_volume
 from touhou_control.adversarial import (
     AdversarialScenario,
     generate_adversarial_scenario,
@@ -90,7 +90,7 @@ def _measure(
             else _dense_lower(scenario)
         )
         lowered = time.perf_counter()
-        volume = _hazard_clearance_volume(
+        volume = hazard_clearance_volume(
             grid_x,
             grid_y,
             aabbs=(),

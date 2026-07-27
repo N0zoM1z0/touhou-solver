@@ -20,8 +20,6 @@ import numpy as np
 
 from corridor_planner import (
     CorridorConfig,
-    _axis,
-    _hazard_clearance_volume,
 )
 from th08_corridor_adapter import (
     TH08_CORRIDOR_CONFIG,
@@ -29,6 +27,8 @@ from th08_corridor_adapter import (
     TH08_VIABILITY_ACTIONS,
 )
 from touhou_control import native_backend
+from touhou_control.corridor.clearance import hazard_clearance_volume
+from touhou_control.corridor.grid import axis
 from touhou_control.viability import (
     RobustViabilityPolicy,
     ViabilityConfig,
@@ -246,12 +246,12 @@ def _clearance(
     *,
     variant: AuditVariant,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    x_axis = _axis(
+    x_axis = axis(
         TH08_PLAYFIELD.left,
         TH08_PLAYFIELD.right,
         config.grid_step,
     )
-    y_axis = _axis(
+    y_axis = axis(
         TH08_PLAYFIELD.top,
         TH08_PLAYFIELD.bottom,
         config.grid_step,
@@ -270,7 +270,7 @@ def _clearance(
         packed_segments,
         frame_count=config.horizon_frames + 1,
     )
-    volume = _hazard_clearance_volume(
+    volume = hazard_clearance_volume(
         grid_x,
         grid_y,
         aabbs=aabbs,

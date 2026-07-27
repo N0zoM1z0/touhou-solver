@@ -20,11 +20,13 @@ from corridor_planner import (
     MovingAabbHazard,
     RobustControlSpec,
     SegmentHazard,
-    _aabb_clearance_volume,
-    _axis,
-    _segment_clearance_field,
     plan_corridor,
 )
+from touhou_control.corridor.clearance import (
+    aabb_clearance_volume,
+    segment_clearance_field,
+)
+from touhou_control.corridor.grid import axis
 from touhou_control.viability import ControlAction, ViabilityQuery
 
 
@@ -131,11 +133,11 @@ def _query_record(query: ViabilityQuery) -> dict[str, object]:
 
 
 def _clearance_report() -> dict[str, object]:
-    x_axis = _axis(0.0, 32.0, 8.0)
-    y_axis = _axis(0.0, 32.0, 8.0)
+    x_axis = axis(0.0, 32.0, 8.0)
+    y_axis = axis(0.0, 32.0, 8.0)
     grid_x, grid_y = np.meshgrid(x_axis, y_axis)
     horizon_frames = 8
-    aabb_volume = _aabb_clearance_volume(
+    aabb_volume = aabb_clearance_volume(
         grid_x,
         grid_y,
         (
@@ -179,7 +181,7 @@ def _clearance_report() -> dict[str, object]:
     for frame in range(horizon_frames + 1):
         volume[frame] = np.minimum(
             volume[frame],
-            _segment_clearance_field(
+            segment_clearance_field(
                 grid_x,
                 grid_y,
                 segment,

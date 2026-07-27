@@ -14,9 +14,9 @@ import numpy as np
 from corridor_planner import (
     CorridorConfig,
     PiecewiseAabbHazard,
-    _hazard_clearance_volume,
 )
 from touhou_control import native_backend
+from touhou_control.corridor.clearance import hazard_clearance_volume
 from touhou_control.adversarial import (
     AdversarialScenario,
     generate_adversarial_scenario,
@@ -65,7 +65,7 @@ def compare_scenario(
     lowered = _lower(scenario)
     lower_ms = (time.perf_counter() - lower_started) * 1000.0
     solve_started = time.perf_counter()
-    actual = _hazard_clearance_volume(
+    actual = hazard_clearance_volume(
         grid_x,
         grid_y,
         aabbs=(),

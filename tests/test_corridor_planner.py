@@ -506,7 +506,10 @@ class CorridorPlannerTests(unittest.TestCase):
                 ),
             )
         with patch(
-            "corridor_planner._aabb_sample_clearance_field",
+            (
+                "touhou_control.corridor.clearance."
+                "_aabb_sample_clearance_field"
+            ),
             side_effect=AssertionError(
                 "native AABB trajectory path fell back to Python geometry"
             ),
@@ -583,7 +586,10 @@ class CorridorPlannerTests(unittest.TestCase):
                 ),
             )
         with patch(
-            "corridor_planner._aabb_sample_clearance_field",
+            (
+                "touhou_control.corridor.clearance."
+                "_aabb_sample_clearance_field"
+            ),
             side_effect=AssertionError(
                 "native piecewise path fell back to Python geometry"
             ),
@@ -697,7 +703,10 @@ class CorridorPlannerTests(unittest.TestCase):
                 ),
             )
         with patch(
-            "corridor_planner._segment_clearance_field",
+            (
+                "touhou_control.corridor.clearance."
+                "_segment_clearance_field"
+            ),
             side_effect=AssertionError(
                 "native trajectory path fell back to Python geometry"
             ),

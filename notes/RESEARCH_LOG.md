@@ -4981,3 +4981,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `109/109`; Ruff and `git diff --check` pass; Linux quick suite passes
   `696/696` in `8.767 s`; Windows quick suite passes `696/696` in `13.385 s`
   with three platform skips.
+
+### 2026-07-27 — Sensing trace extraction and Stage-4A retention
+
+- **Observed structural change:** Removed the characterized inline resources,
+  boss, ECL, hazard-count, alignment, enemy-guard, and spell-owner fields.
+  `_run_live_session` now consumes the pure sensing field set after issue;
+  `controller.py` is 5,411 lines.
+- **Observed automated gate:** Live-focused tests pass `109/109`; Ruff and
+  `git diff --check` pass; Linux quick suite passes `696/696` in `8.558 s`;
+  Windows quick suite passes `696/696` in `13.785 s` with three platform
+  skips.
+- **Observed high-pressure retention:** Supervised Windows run
+  `hard_route2_stage4a_unattended_20260727_183640` completed Hard Stage 4A
+  over frames `2..45392` with 15,122 decisions, maximum 1,072 active bullets,
+  zero Bomb input, accepted route completion, compact artifacts, supervisor
+  completion, and no residual process. Streaming validation found zero
+  omissions across all 18 required sensing field groups.
+- **Observed survival failure:** Eight native hits occurred at frames
+  `[8957,12004,12430,12955,19187,29011,32526,36193]`. Six were classified as
+  global-kernel exhaustion, one as late collision after positive causal
+  margin, and one as local robust-set exhaustion. This is retained as
+  CE-0136 and is not a clean survival or strategy-promotion result.
+- **Authority:** Structure and implementation retention only. The pure
+  builder performs no memory read, hazard projection, sensor update,
+  recertification, issue, or input write. Model, recurrence, deadline,
+  fallback, worker, strategy, and action authority remain unchanged.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 440,885,387-byte raw JSONL SHA-256
+  `f22dae779704b0e0189a9cf3129ce77db1aeec83245c82a7264edd579ef4fea8`.

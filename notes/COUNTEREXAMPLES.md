@@ -3588,3 +3588,37 @@ live delivery rejected
 - **Regression:**
   `test_stop_redirect_and_reversal_cases_bound_dense_reference` plus the
   retained `g2_spatial_refinement_gate.py` six-root run.
+
+## CE-0136: Hard Stage 4A remained unsafe across kernel exhaustion and late contact
+
+Status: observed physical survival failure; structural sensing-trace gate
+completed
+
+- **Observed high-pressure run:** Supervised no-Bomb run
+  `hard_route2_stage4a_unattended_20260727_183640` completed frames
+  `2..45392`, 15,122 decisions, route completion, artifact materialization,
+  and cleanup. It reached 1,072 active bullets and took eight native hits at
+  `[8957,12004,12430,12955,19187,29011,32526,36193]`.
+- **Canonical first hit:** Frame 8,957 was a nonspell observed-bullet overlap
+  at player `(125.566,432.000)` with active `up_right_fast`, 176 bullets, zero
+  lasers, and signed pipeline clearance `-2.343`. The global viability kernel
+  was exhausted with a 14-frame robust warning.
+- **Later discovery evidence:** Five hits were observed bullet overlaps, two
+  were modeled committed-prefix collisions, and frame 19,187 was an exact
+  same-epoch enemy-body overlap. Planner attribution counted six
+  `global_viability_kernel_exhausted_before_hit`, one
+  `late_collision_after_positive_causal_margin`, and one
+  `robust_action_set_exhausted_before_hit`. Later contacts are geometry and
+  planner evidence, not independent fresh trials.
+- **Structural boundary:** All 15,122 decisions retained the 18 required
+  sensing field groups, there was no serialization exception or stall, hard
+  no-Bomb passed, and all processes cleaned up. This retains the sensing
+  refactor but does not rescue physical survival.
+- **Correction boundary:** Preserve and analyze the first exhaustion
+  transition before each contact, keep late-positive-margin and exact enemy
+  body cases separate, and require Stage 4A followed by Stage 5/6B evidence
+  for later planner/native changes. Do not infer improvement from the lower
+  hit count of an RNG-distinct run.
+- **Evidence:** Matching compact run and dossier artifacts; ignored raw JSONL
+  SHA-256
+  `f22dae779704b0e0189a9cf3129ce77db1aeec83245c82a7264edd579ef4fea8`.

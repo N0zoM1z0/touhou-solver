@@ -46,6 +46,13 @@ coupling, and the order for later structural work.
   over frames `2..20663` with 7,557 decisions, zero hits, zero Bomb input,
   accepted route completion, artifact materialization, and no residual
   process. Streaming validation found zero required control-field omissions.
+- **Observed:** after removing inline sensing fields, high-pressure Windows
+  smoke `hard_route2_stage4a_unattended_20260727_183640` completed Hard Stage
+  4A over frames `2..45392` with 15,122 decisions, maximum 1,072 bullets, zero
+  Bomb input, accepted route completion, artifact materialization, and no
+  residual process. All 18 required sensing field groups were present on
+  every decision. Eight native hits make this survival-failure evidence, not
+  a clean pass.
 - **Workload decision:** Stage 1 remains sufficient for lifecycle, cleanup,
   and trace-schema changes. Subsequent planner, recurrence, clearance, or
   native compute checkpoints use Hard Stage 4A as the primary focused
@@ -82,8 +89,8 @@ The earlier extraction reduced `scripts/th08_live/controller.py` from roughly
 to 6,614 lines. Extracting the characterized corridor trace builder reduces
 the controller to 6,126 lines; extracting candidate-verifier trace ownership
 reduces it to 5,817 lines, and extracting decision-control trace fields
-reduces it further to 5,594 lines. The dominant block remains
-`_run_live_session`.
+reduces it to 5,594 lines. Extracting sensing trace fields reduces the current
+controller to 5,411 lines. The dominant block remains `_run_live_session`.
 
 `scripts/th08_live/iteration.py` now defines and the live loop consumes:
 
@@ -130,7 +137,7 @@ implementation module where module-level patch identity matters.
 
 | Module | Lines | Decision | Reason |
 | --- | ---: | --- | --- |
-| `th08_live/controller.py` | 5,594 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, sensing trace, and outer composition; immutable handoff records plus pure corridor/candidate/control trace builders are live. |
+| `th08_live/controller.py` | 5,411 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, timing/optional-hazard trace, and outer composition; immutable handoff records plus pure corridor/candidate/control/sensing trace builders are live. |
 | `th08_live/planner_pass.py` | 1,685 | retain for now | Large but now one causal planner pass. Split baseline, supplemental, and finalization only after the dependency boundary has retained workload evidence. |
 | `analysis/th08_run_dossier.py` | 2,451 | split after live iteration contract | Offline reader, attribution, aggregation, validation, and rendering are separable and low authority-risk. |
 | `analysis/th08_practice_dossier.py` | 2,307 | split with shared dossier primitives | It duplicates trace reading, statistics, schema construction, and rendering responsibilities. |
@@ -155,7 +162,7 @@ decomposed.
 | Module | Lines | Decision |
 | --- | ---: | --- |
 | `th08_live_dodge_agent.py` | 22 | keep facade |
-| `th08_live/controller.py` | 5,594 | P0 staged extraction through iteration contracts |
+| `th08_live/controller.py` | 5,411 | P0 staged extraction through iteration contracts |
 | `th08_live/planner_pass.py` | 1,685 | P1 after session stages; split prepare/baseline/supplemental/finalize |
 | `touhou_control/query_survival.py` | 1,913 | P1 split identity/query/certification/native workspace |
 | `touhou_control/viability.py` | 1,400 | P1 split model/transition/numpy/native dispatch/public policy |
@@ -240,9 +247,9 @@ The structural sequence and current status are:
    followed the same characterization/removal sequence and is now consumed.
    Decision-control fields now have an immutable input contract and pure
    old/new parity builder, and the live record consumes them. Hazard-detail,
-   sensing, and outer record composition remain controller-owned. Sensing
-   fields now have their own immutable input and old/new parity builder; the
-   inline path is pending removal.
+   timing, and outer record composition remain controller-owned. Sensing
+   fields completed the same characterization/removal sequence and are now
+   consumed.
 
 The bounded iteration then becomes:
 

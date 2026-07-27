@@ -114,10 +114,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
   fields were compared key-for-key before update. Structural checkpoint
   `40daa6c Extract decision control trace fields` removes those inline fields
   and consumes the extracted field set.
-- The pending sensing-trace characterization adds an immutable
+- Sensing-trace characterization checkpoint `f70bccd` adds an immutable
   `SensingTraceInput` and pure boss/ECL/hazard/alignment/issue-guard record
-  builder. Historical inline fields remain for one checkpoint and are
-  compared key-for-key before update.
+  builder. The current uncommitted checkpoint removes the characterized
+  inline sensing path and consumes the extracted fields.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -200,6 +200,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Sensing-trace characterization passes `696/696` quick tests on Linux in
   `8.767 s` and Windows in `13.385 s` with three Windows platform skips.
   Live-focused tests pass `109/109`.
+- After deleting inline sensing fields, `controller.py` is 5,411 lines and
+  `696/696` quick tests pass on Linux in `8.558 s` and Windows in `13.785 s`
+  with three Windows platform skips. High-pressure Windows retention
+  `hard_route2_stage4a_unattended_20260727_183640` completed Hard Stage 4A
+  over frames `2..45392` with 15,122 decisions, maximum 1,072 active bullets,
+  zero Bomb input, accepted route completion, artifacts, and no residual
+  process. All decision records retained the 18 required sensing field groups.
+  The run took eight hits, six after global-kernel exhaustion, so it is
+  structural retention plus CE-0136 survival-failure evidence, not a route
+  acceptance result.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

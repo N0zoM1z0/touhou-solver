@@ -53,10 +53,6 @@ from th08_ecl_runtime import (
     analyze_tagged_velocity_toggles,
     read_main_ecl_vm_snapshot,
 )
-from th08_laser_model import (
-    LaserPhase,
-    LaserState,
-)
 from th08_laser_runtime import (
     Laser,
     PackedLaserFrame as _PackedLaserFrame,
@@ -76,10 +72,6 @@ from th08_live import (
     EnemyPoolSnapshot,
     GameplaySceneGuard,  # noqa: F401 - compatibility export
     INPUT_CLOCK_SHADOW_ROLE,
-    ITEM_POOL_SIZE,
-    ITEM_STRIDE,
-    LASER_POOL_SIZE,
-    LASER_STRIDE,
     IssueController,
     Item,
     LiveServiceResources,
@@ -129,6 +121,39 @@ from th08_live.bullet_decode import (  # noqa: F401
     finite as _finite,
     native_bullet_half_extents as _native_bullet_half_extents,
     planning_bullet_active_slots as _planning_bullet_active_slots,
+)
+from th08_live.hazard_decode import (  # noqa: F401
+    ITEM_ACTIVE_OFFSET,
+    ITEM_FULL_VALUE_OFFSET,
+    ITEM_MOTION_STATE_OFFSET,
+    ITEM_POOL_SIZE,
+    ITEM_POSITION_OFFSET,
+    ITEM_STRIDE,
+    ITEM_TYPE_OFFSET,
+    ITEM_VELOCITY_OFFSET,
+    LASER_ACTIVE_FRAMES_OFFSET,
+    LASER_ACTIVE_OFFSET,
+    LASER_ANGLE_OFFSET,
+    LASER_COLLISION_DISABLE_FRAME_OFFSET,
+    LASER_COLLISION_ENABLE_FRAME_OFFSET,
+    LASER_COLLISION_FLAG_OFFSET,
+    LASER_CURRENT_WIDTH_OFFSET,
+    LASER_FADE_FRAMES_OFFSET,
+    LASER_FLAGS_OFFSET,
+    LASER_HEAD_OFFSET,
+    LASER_MAXIMUM_LENGTH_OFFSET,
+    LASER_ORIGIN_OFFSET,
+    LASER_PHASE_OFFSET,
+    LASER_POOL_SIZE,
+    LASER_SPEED_OFFSET,
+    LASER_STRIDE,
+    LASER_TAIL_OFFSET,
+    LASER_TIMER_FRACTION_OFFSET,
+    LASER_TIMER_OFFSET,
+    LASER_WARMUP_FRAMES_OFFSET,
+    LASER_WIDTH_OFFSET,
+    decode_items,
+    decode_lasers,
 )
 from th08_local_planner import (
     ActuatorPipeline,
@@ -215,33 +240,6 @@ from touhou_control.supplemental_local_beam import (
 )
 ECL_CALLBACK_LOOKAHEAD_FRAMES = 256
 INPUT_CLOCK_SHADOW_WALL_CUT_SECONDS = 0.05
-
-LASER_ORIGIN_OFFSET = 0x0548
-LASER_ANGLE_OFFSET = 0x0554
-LASER_TAIL_OFFSET = 0x0558
-LASER_HEAD_OFFSET = 0x055C
-LASER_MAXIMUM_LENGTH_OFFSET = 0x0560
-LASER_WIDTH_OFFSET = 0x0564
-LASER_CURRENT_WIDTH_OFFSET = 0x0568
-LASER_SPEED_OFFSET = 0x056C
-LASER_WARMUP_FRAMES_OFFSET = 0x0570
-LASER_COLLISION_ENABLE_FRAME_OFFSET = 0x0574
-LASER_ACTIVE_FRAMES_OFFSET = 0x0578
-LASER_FADE_FRAMES_OFFSET = 0x057C
-LASER_COLLISION_DISABLE_FRAME_OFFSET = 0x0580
-LASER_ACTIVE_OFFSET = 0x0584
-LASER_TIMER_OFFSET = 0x0590
-LASER_TIMER_FRACTION_OFFSET = 0x058C
-LASER_FLAGS_OFFSET = 0x0594
-LASER_PHASE_OFFSET = 0x0598
-LASER_COLLISION_FLAG_OFFSET = 0x0599
-
-ITEM_POSITION_OFFSET = 0x02A4
-ITEM_VELOCITY_OFFSET = 0x02B0
-ITEM_TYPE_OFFSET = 0x02D4
-ITEM_ACTIVE_OFFSET = 0x02D5
-ITEM_MOTION_STATE_OFFSET = 0x02D7
-ITEM_FULL_VALUE_OFFSET = 0x02D8
 
 # This vector advances the enemy's internal +0x2D34 motion component in
 # sub_42DEB0.  It is not, in general, the derivative of the lethal world
@@ -595,134 +593,6 @@ def _local_pipeline_action_from_mask(input_mask: int) -> str:
     if direction == 0 and not input_mask & FOCUS:
         return "stay_unfocused"
     return _action_name_from_mask(input_mask)
-
-
-def decode_lasers(blob: bytes) -> tuple[Laser, ...]:
-    lasers: list[Laser] = []
-    for index in range(LASER_POOL_SIZE):
-        base = index * LASER_STRIDE
-        if not struct.unpack_from("<I", blob, base + LASER_ACTIVE_OFFSET)[0]:
-            continue
-        origin_x, origin_y = struct.unpack_from("<ff", blob, base + LASER_ORIGIN_OFFSET)
-        angle = struct.unpack_from("<f", blob, base + LASER_ANGLE_OFFSET)[0]
-        tail = struct.unpack_from("<f", blob, base + LASER_TAIL_OFFSET)[0]
-        head = struct.unpack_from("<f", blob, base + LASER_HEAD_OFFSET)[0]
-        maximum_length, width, current_width, speed = struct.unpack_from(
-            "<ffff",
-            blob,
-            base + LASER_MAXIMUM_LENGTH_OFFSET,
-        )
-        (
-            warmup_frames,
-            collision_enable_frame,
-            active_frames,
-            fade_frames,
-            collision_disable_frame,
-        ) = struct.unpack_from(
-            "<iiiii",
-            blob,
-            base + LASER_WARMUP_FRAMES_OFFSET,
-        )
-        timer = struct.unpack_from("<i", blob, base + LASER_TIMER_OFFSET)[0]
-        timer_fraction = struct.unpack_from(
-            "<f",
-            blob,
-            base + LASER_TIMER_FRACTION_OFFSET,
-        )[0]
-        flags = struct.unpack_from("<H", blob, base + LASER_FLAGS_OFFSET)[0]
-        phase_value = blob[base + LASER_PHASE_OFFSET]
-        collision_flag = blob[base + LASER_COLLISION_FLAG_OFFSET]
-        if not _finite(
-            (
-                origin_x,
-                origin_y,
-                angle,
-                tail,
-                head,
-                maximum_length,
-                width,
-                current_width,
-                speed,
-                timer_fraction,
-            )
-        ):
-            continue
-        if (
-            phase_value not in tuple(int(phase) for phase in LaserPhase)
-            or min(
-                maximum_length,
-                width,
-                warmup_frames,
-                collision_enable_frame,
-                active_frames,
-                fade_frames,
-                collision_disable_frame,
-                timer,
-            )
-            < 0
-        ):
-            continue
-        state = LaserState(
-            origin_x=origin_x,
-            origin_y=origin_y,
-            angle=angle,
-            tail_distance=tail,
-            head_distance=head,
-            maximum_length=maximum_length,
-            width=width,
-            speed=speed,
-            warmup_frames=warmup_frames,
-            active_frames=active_frames,
-            fade_frames=fade_frames,
-            collision_enable_frame=collision_enable_frame,
-            collision_disable_frame=collision_disable_frame,
-            flags=flags,
-            current_width=current_width,
-            phase=LaserPhase(phase_value),
-            timer=timer,
-            timer_fraction=timer_fraction,
-        )
-        lasers.append(
-            Laser(
-                origin_x,
-                origin_y,
-                angle,
-                tail,
-                head,
-                min(abs(width) * 0.25, 64.0),
-                state,
-                index,
-                collision_flag,
-                0.75,
-                0.0,
-            )
-        )
-    return tuple(lasers)
-
-
-def decode_items(blob: bytes) -> tuple[Item, ...]:
-    items: list[Item] = []
-    for index in range(ITEM_POOL_SIZE):
-        base = index * ITEM_STRIDE
-        if not blob[base + ITEM_ACTIVE_OFFSET]:
-            continue
-        x, y = struct.unpack_from("<ff", blob, base + ITEM_POSITION_OFFSET)
-        vx, vy = struct.unpack_from("<ff", blob, base + ITEM_VELOCITY_OFFSET)
-        if not _finite((x, y, vx, vy)):
-            continue
-        items.append(
-            Item(
-                slot=index,
-                x=x,
-                y=y,
-                vx=vx,
-                vy=vy,
-                item_type=blob[base + ITEM_TYPE_OFFSET],
-                motion_state=blob[base + ITEM_MOTION_STATE_OFFSET],
-                full_value=bool(blob[base + ITEM_FULL_VALUE_OFFSET]),
-            )
-        )
-    return tuple(items)
 
 
 def _decode_enemy_body_geometry(

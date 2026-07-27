@@ -6898,6 +6898,42 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Two corrected audit generations are byte-identical at canonical LF
   SHA-256
   `8f77c0afeaa8b7a31730f9ca799cd6c369f45edc695187e79a1c6ad31001b737`.
-- **Authority:** candidate B4 pass 1 of 2. One identical consecutive held run
-  remains required. CE-0147, future-event coverage, hit-reduction claims, and
-  physical action authority remain unchanged.
+- **Authority at this checkpoint:** candidate B4 pass 1 of 2. One identical
+  consecutive held run was still required. CE-0147, future-event coverage,
+  hit-reduction claims, and physical action authority remained unchanged.
+
+## 2026-07-28 — Closed the native-call observer tail with a second physical pass
+
+- At code checkpoint `617e03a`, run
+  `lunatic_route2_stage4a_unattended_20260728_070838` completed frames
+  `2..45454` over 15,011 decisions with 15 hits, hard no-Bomb, accepted
+  artifacts, supervisor completion, and cleanup.
+- All rows retain schema-v7/native/`gil-held` provenance. Validation,
+  timed-intent, and observer gates pass. Observation
+  p50/p95/p99/p99.9/max is `0.0632/0.1420/0.1967/0.3999/0.9087 ms`.
+- Native prepare/call/materialize/controller-residual maxima are
+  `0.2518/0.4384/0.8370/0.4926 ms`. No observation exceeds 2 ms and no
+  completed cyclic-GC collection overlaps any phase.
+- Cadence remains 2/3 frames median/p95; local plan p50/p95 is
+  `9.772/17.585 ms`; next-observation input visibility is 0.935.
+  Fifteen versus the preceding held run's nine hits is an
+  RNG/trajectory/density/resource-distinct comparison and does not establish
+  survival regression or improvement. Every contact follows global viability
+  exhaustion.
+- The audit retains 2,126 timed sightings, 82 deduplicated events, and 5,795
+  unique temporal supports over 94,231 activation edges. All 1,350 spell-57
+  rows still hit the callback instruction limit, independently retaining
+  CE-0147.
+- Raw trace is 498,842,901 bytes with SHA-256
+  `ee7b1f1048746a690bf9a6445297d0f8d517975547edbc78ee693e6193335f12`.
+  Two audit generations are byte-identical at canonical LF SHA-256
+  `acdd2e25d04b3a69b1a20e4f5d6a7f83f4a1409350f3960d3f569ec9f0a53bd0`.
+- **Observed closure:** The two consecutive held runs cover 28,907
+  observations with zero over-budget sample and close the specific B4
+  native-call observer-tail gate. **Inferred:** retaining the GIL is
+  sufficient under these workloads; scheduler causality and absence of every
+  possible OS preemption are not proved.
+- **Authority:** CE-0147, omitted birth-source/geometry coverage,
+  first-successor `UNKNOWN`, hit-reduction claims, and physical action
+  authority remain unchanged. Stage 5/6 remains closed until incomplete
+  callback results fail closed.

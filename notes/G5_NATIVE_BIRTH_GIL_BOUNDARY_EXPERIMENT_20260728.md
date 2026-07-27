@@ -241,6 +241,54 @@ The ignored raw trace is 483,745,822 bytes with SHA-256
 Two corrected report generations are byte-identical at canonical LF SHA-256
 `8f77c0afeaa8b7a31730f9ca799cd6c369f45edc695187e79a1c6ad31001b737`.
 
-This is candidate pass 1 of 2. One identical, complete, unpinned,
-GC-enabled, explicit-`gil-held` Stage-4A pass remains required before B4 can
-close. No future-event or physical action authority follows.
+At this checkpoint it was candidate pass 1 of 2; one identical, complete,
+unpinned, GC-enabled, explicit-`gil-held` Stage-4A pass was still required.
+No future-event or physical action authority followed.
+
+## Second Physical Gate Result
+
+Run `lunatic_route2_stage4a_unattended_20260728_070838` completed Lunatic
+Stage 4A over frames `2..45454` with 15,011 decisions, 15 hits, hard no-Bomb,
+accepted artifacts, supervisor completion, and no residual game/controller
+process. All rows use trace schema v7, the native backend, and explicit
+`gil-held` provenance. Validation and timed-intent gates pass.
+
+| Interval | p50 ms | p95 ms | p99 ms | p99.9 ms | max ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| total observation | `0.0632` | `0.1420` | `0.1967` | `0.3999` | `0.9087` |
+| prepare | `0.0020` | `0.0034` | `0.0042` | `0.0078` | `0.2518` |
+| native call | `0.0363` | `0.0576` | `0.0736` | `0.1343` | `0.4384` |
+| materialize | `0.0062` | `0.0769` | `0.1092` | `0.2104` | `0.8370` |
+| controller residual | `0.0130` | `0.0212` | `0.0271` | `0.0590` | `0.4926` |
+
+**Observed:** all fixed observer limits pass for the second consecutive run.
+There is no sample above `2.00 ms` and no completed cyclic-GC collection in
+any of the nine phase/generation buckets. Pre-emit total
+p50/p95/p99/p99.9/max is
+`0.1283/0.2585/0.3597/0.5621/1.0551 ms`. Previous-record emission is
+separate post-issue durability work and has p95/p99/max
+`0.1722/1.1777/7.0557 ms`.
+
+Cadence is 2/3 frames median/p95, local-plan p50/p95 is
+`9.772/17.585 ms`, and 7,182/7,682 unambiguous transitions (0.935) are
+visible in the next snapshot. The audit retains 2,126 timed sightings,
+82 deduplicated events, and 5,795 unique temporal supports over 94,231
+activation edges. All 1,350 spell-57 rows still exhaust the
+256-instruction callback lookahead, so CE-0147 remains open.
+
+The ignored raw trace is 498,842,901 bytes with SHA-256
+`ee7b1f1048746a690bf9a6445297d0f8d517975547edbc78ee693e6193335f12`.
+Two audit generations are byte-identical at canonical LF SHA-256
+`acdd2e25d04b3a69b1a20e4f5d6a7f83f4a1409350f3960d3f569ec9f0a53bd0`.
+
+**Observed closure:** the two consecutive held runs pass B4 over
+13,896 + 15,011 = 28,907 observations, with zero over-budget samples. This
+closes the specific native-call observer-tail correction under the declared
+unpinned, GC-enabled physical boundary. **Inferred:** avoiding the released
+GIL handoff is sufficient under these workloads; the runs do not directly
+prove scheduler causality or rule out every possible OS preemption.
+
+The 9- and 15-hit outcomes are RNG-, trajectory-, density-, and
+resource-distinct and are not a controlled survival comparison. All 24
+contacts follow global viability exhaustion. CE-0147, first-successor
+`UNKNOWN`, hit reduction, and physical action authority remain open.

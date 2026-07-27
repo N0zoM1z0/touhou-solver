@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `617e03a Retain first GIL-held Stage 4 pass`,
   `62e2248 Test native birth calls with the GIL held`,
   `7333cc8 Retain native-call Stage 4 tail attribution`,
   `200c259 Attribute native bullet birth wall tails`,
@@ -151,9 +152,18 @@ describe the same decision. Python/C++ parity is not physical correctness.
   guard that initially validated schema v7 but omitted its diagnostics from
   the report; the raw fields were intact, `{6, 7}` aggregation and a
   fail-loud test now pass, the deterministic report was rebuilt, and complete
-  Linux/Windows suites pass `801/801` in `9.202/15.761 s`. One second
-  consecutive held Stage-4A pass is still required. B4 and action authority
-  remain unchanged.
+  Linux/Windows suites pass `801/801` in `9.202/15.761 s`. The second held
+  run `20260728_070838` completed frames `2..45454`, 15,011 observations,
+  15 hits, hard no-Bomb, accepted artifacts, and cleanup. Observation
+  p50/p95/p99/p99.9/max was
+  `0.0632/0.1420/0.1967/0.3999/0.9087 ms`; native-call maximum was
+  `0.4384 ms`, with zero over-budget observations and zero completed GC.
+  Together, the two consecutive held runs cover 28,907 observations and
+  close the specific B4 observer-tail gate. This is a performance result,
+  not a survival improvement: the 9/15-hit attempts are not controlled, and
+  all 24 contacts followed global viability exhaustion. CE-0147 and
+  first-successor `UNKNOWN` still block future-event/action authority and
+  Stage 5/6 promotion.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

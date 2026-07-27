@@ -247,9 +247,23 @@ p50/p95/p99/p99.9/max is `0.0366/0.0580/0.0756/0.2210/0.5008 ms`, versus
 the released physical maximum `8.2585 ms`. No observation exceeds 2 ms and
 no completed GC overlaps a phase. Cadence remains 2/3 frames median/p95,
 local-plan p50/p95 is `9.764/17.910 ms`, and next-observation input
-visibility is 0.935. This is pass 1 of 2, not a closed B4 or survival result.
+visibility is 0.935. This was pass 1 of 2 and was not by itself a closed B4
+or survival result.
 CE-0151 fixed an audit-v5 `{6}` aggregation guard that initially omitted
 schema-v7 diagnostics from the report despite validating the raw fields.
+
+**Observed second physical GIL-held gate:** Run `20260728_070838` completed
+Stage 4A over frames `2..45454` with 15,011 decisions, 15 hits, hard no-Bomb,
+accepted artifacts, and cleanup. All rows have schema-v7 native
+`gil-held` provenance. Observer p50/p95/p99/p99.9/max is
+`0.0632/0.1420/0.1967/0.3999/0.9087 ms`; native-call maximum is
+`0.4384 ms`. No observation exceeds 2 ms and no completed GC overlaps a
+phase. Cadence remains 2/3 frames median/p95, local-plan p50/p95 is
+`9.772/17.585 ms`, and next-observation input visibility is 0.935. The two
+consecutive held runs therefore close the declared B4 observer-tail gate
+over 28,907 observations. They do not prove absence of every OS preemption
+or improve survival: the RNG-distinct runs have 9 and 15 hits, and all
+contacts follow global viability exhaustion.
 
 ### Priority
 
@@ -264,13 +278,11 @@ schema-v7 diagnostics from the report despite validating the raw fields.
    incomplete. Schema v4 physically validates bounded flush latency but
    rejects thread CPU as a useful sub-millisecond diagnostic. The
    parity-gated native data plane passes isolated gates and physical
-   percentiles, but CE-0149 retains a maximum-only failure. Schema-v6
+   percentiles. Schema-v6
    physically attributes every over-budget observation to the native-call
    interval with no overlapping GC. The explicit GIL-held/released
-   call-boundary correction passes offline and should receive its first
-   unpinned, GC-enabled `gil-held` Stage-4A diagnostic. Require two
-   consecutive physical passes before closing B4; the first pass now
-   succeeds, so run one identical second gate. In parallel, make
+   call-boundary correction passes offline and in two consecutive unpinned,
+   GC-enabled physical Stage-4A runs, closing this specific B4 tail. Now make
    incomplete callback coverage explicit and fail closed before trying Stage
    5/6. None of this narrows `UNKNOWN` coverage or adds action authority.
    The stationary-witness

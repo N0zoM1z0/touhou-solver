@@ -3960,9 +3960,8 @@ no physical action authority
 
 ## CE-0143: Birth observation passed synthetic timing but failed the physical issue boundary
 
-Status: observed physical delivery failure after four retained gates;
-post-issue isolation, columnar representation, and bounded flush complete;
-native or exact active-slot extraction gate open
+Status: observed physical delivery failure; corrected by native extraction
+and two consecutive GIL-held physical passes under the declared B4 boundary
 
 - **Observed symptom:** Default-off Lunatic Stage-4A trial
   `20260728_031127` completed 14,411 birth-audit decisions with zero observer
@@ -4049,6 +4048,16 @@ native or exact active-slot extraction gate open
   independent Python scalar parity, no extra RPM, and fixed wall limits.
   Optional asynchronous serialization may be measured separately, but it
   cannot hide extraction or weaken same-iteration durability.
+- **Observed closure:** The parity-gated native extractor preserved the
+  independent scalar recurrence and complete ordered output. After
+  native-call tail attribution and an explicit `CDLL`/`PyDLL` boundary
+  experiment, schema-v7 `gil-held` runs `20260728_065316` and
+  `20260728_070838` passed B4 consecutively over 28,907 observations.
+  Their p95/p99/max values were `0.1475/0.2021/1.0595 ms` and
+  `0.1420/0.1967/0.9087 ms`; neither run contained a sample above 2 ms.
+  This closes the physical extraction/delivery counterexample for the
+  declared retrospective observer boundary. It does not close birth-source
+  coverage, callback completeness, or future-hazard authority.
 
 ## CE-0144: Unknown deferred-fire state erased every physical timed intent
 
@@ -4222,8 +4231,8 @@ offline, physical recheck pending
 
 ## CE-0149: Native extraction passed physical percentiles but retained a 9-ms wall tail
 
-Status: observed physical performance failure; attribution resolved,
-correction open
+Status: observed physical performance failure; correction physically
+verified by two consecutive passes under the declared B4 boundary
 
 - **Observed symptom:** Explicit-native schema-v5 run
   `lunatic_route2_stage4a_unattended_20260728_055104` completed an accepted
@@ -4262,6 +4271,13 @@ correction open
   call-mode provenance, exact three-way parity, and all fixed unpinned
   Linux/Windows profiles pass. This makes one `gil-held` Stage-4A diagnostic
   eligible; it does not yet close the physical failure.
+- **Observed physical correction:** Explicit `gil-held` schema-v7 runs
+  `20260728_065316` and `20260728_070838` pass consecutively over
+  13,896 and 15,011 observations. Their native-call maxima are
+  `0.5008/0.4384 ms`; total observation maxima are `1.0595/0.9087 ms`;
+  neither run has an observation above 2 ms or an overlapping completed
+  cyclic-GC collection. This rejects the previously frequent released-call
+  tail under the declared unpinned, GC-enabled workloads.
 - **Evidence:** Raw trace is 510,433,900 bytes with SHA-256
   `ed4fbbb932e12ac7ef7f3e4b560fad1fa7dc8b0428c712edc5a02ec1c09b7a79`.
   Canonical deterministic report SHA-256 is
@@ -4270,8 +4286,15 @@ correction open
   `9f075f795327e6e1669b2cf18e0cfd28656a87ced1212cddf2ff3157b0dacc30`;
   its canonical deterministic report SHA-256 is
   `c0e71b3660651e11e15e3a924bef0d1f22adc49a3513bbc7ab39b83528d3e008`.
-- **Authority:** B4 remains failed. No future-hazard or physical action
-  authority follows.
+  The second held raw/audit SHA-256 values are
+  `ee7b1f1048746a690bf9a6445297d0f8d517975547edbc78ee693e6193335f12`
+  and
+  `acdd2e25d04b3a69b1a20e4f5d6a7f83f4a1409350f3960d3f569ec9f0a53bd0`.
+- **Authority:** The specific B4 native-call tail is closed. The evidence
+  does not prove the scheduler mechanism, rule out every possible future
+  preemption, close CE-0147, or grant future-hazard/physical action
+  authority. A later over-budget held observation reopens this
+  counterexample.
 
 ## CE-0150: Block-ordered decode ratio flipped across identical adjacent runs
 

@@ -2,13 +2,12 @@
 
 Date: 2026-07-28
 
-Status: B4/B5 failed six times with retained evidence. The schema-v6 native
-physical repeat passes observer p95 and p99 but its 8.3514-ms maximum still
-fails B4. It physically attributes every over-budget sample to the
-native-call wall interval with no overlapping cyclic GC. CE-0143 physical
-performance, CE-0145 source coverage, and CE-0147 callback-horizon coverage
-remain open; CE-0149 attribution is resolved and the first `gil-held`
-correction run is candidate pass 1 of 2. No future-hazard or physical action
+Status: the first six retained B4 attempts failed. Schema v6 attributed the
+remaining tail to the native-call wall interval with no overlapping cyclic
+GC. Two subsequent schema-v7 native `gil-held` Stage-4A runs pass every B4
+limit over 28,907 observations with zero sample above 2 ms, closing this
+specific observer-tail gate. CE-0145 source coverage and CE-0147
+callback-horizon coverage remain open. No future-hazard or physical action
 authority is granted.
 
 ## Outcome
@@ -143,9 +142,28 @@ but still fails B4:
   temporal supports over 96,984 activation edges (6.1093%);
 - all 1,324 spell-57 rows again hit the 256-instruction callback limit.
 
-The native-call interval is observed; a Windows scheduler/preemption cause is
-not. GIL-release interference is inferred and requires a controlled
-GIL-held/released experiment.
+The native-call interval was observed; a Windows scheduler/preemption cause
+was not. GIL-release interference was the bounded inference that motivated
+the controlled GIL-held/released experiment.
+
+The schema-v7 `gil-held` correction then passes twice:
+
+- run `20260728_065316` completes 13,896 observations with
+  p50/p95/p99/p99.9/max `0.0659/0.1475/0.2021/0.4001/1.0595 ms`,
+  native-call maximum `0.5008 ms`, and zero sample above 2 ms;
+- run `20260728_070838` completes 15,011 observations with
+  p50/p95/p99/p99.9/max `0.0632/0.1420/0.1967/0.3999/0.9087 ms`,
+  native-call maximum `0.4384 ms`, and zero sample above 2 ms;
+- both runs retain native/`gil-held` provenance, validation, timed intent,
+  hard no-Bomb, cadence, supervisor completion, accepted artifacts, cleanup,
+  and zero completed cyclic-GC collections; and
+- the two runs have 9 and 15 hits respectively. They are not controlled
+  survival comparisons, and all 24 contacts follow global viability
+  exhaustion.
+
+This closes B4 for the declared retrospective observer boundary. It does not
+close CE-0147, narrow first-successor `UNKNOWN`, or grant future geometry or
+input authority.
 
 ## Physical Scope And Provenance
 
@@ -408,10 +426,10 @@ both runs followed global viability exhaustion. Schema-v5 decision cadence
 remains 2 frames median and 3 frames p95, while next-observation input
 visibility is 0.9311 versus 0.9388 in schema v4.
 
-The bounded flush and native extraction changes are retained. Native
-extraction closes the steady and percentile cost, but not the physical
-maximum. Thread CPU timing remains rejected as a useful Windows
-sub-millisecond diagnostic, and the wall gate remains failed.
+The bounded flush and native extraction changes are retained. Thread CPU
+timing remains rejected as a useful Windows sub-millisecond diagnostic. The
+two consecutive `gil-held` physical runs close the wall gate under the
+declared boundary.
 
 That diagnostic was implemented under
 `G5_NATIVE_BIRTH_TAIL_ATTRIBUTION_CONTRACT_20260728.md`. Schema v6 and
@@ -430,9 +448,7 @@ That experiment is now implemented and fixed by
 `G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md`. Mode-specific
 `CDLL`/`PyDLL` loaders, schema-v7 provenance, exact three-way parity, all
 fixed Linux/Windows observer profiles, ABBA decode ratios, and complete
-`801/801` suites pass. This authorizes one first explicit `gil-held`
-Stage-4A diagnostic. A single pass is not sufficient: two consecutive
-complete passes under the unchanged physical gate are required to close B4.
+`801/801` suites pass.
 
 The first held run `20260728_065316` passes all B4 limits over 13,896
 observations: p50/p95/p99/p99.9/max is
@@ -440,8 +456,16 @@ observations: p50/p95/p99/p99.9/max is
 `0.5008 ms`, no observation exceeds 2 ms, and no completed GC overlaps a
 phase. The run completed frames `2..43253`, 9 hits, hard no-Bomb, accepted
 artifacts, and cleanup. CE-0151 fixed a report-only schema-v7 aggregation
-omission before publication. This is candidate pass 1 of 2, not a closed B4
-or survival comparison.
+omission before publication.
+
+The second held run `20260728_070838` passes all B4 limits over 15,011
+observations: p50/p95/p99/p99.9/max is
+`0.0632/0.1420/0.1967/0.3999/0.9087 ms`; native-call maximum is
+`0.4384 ms`, no observation exceeds 2 ms, and no completed GC overlaps a
+phase. It completed frames `2..45454`, 15 hits, hard no-Bomb, accepted
+artifacts, and cleanup. The two consecutive passes close B4 over 28,907
+observations, but do not establish survival improvement or future-event
+authority.
 
 In parallel, callback lookahead must expose an explicit incomplete result; an
 instruction-limit row cannot authorize an empty future event set. Stage 5 or

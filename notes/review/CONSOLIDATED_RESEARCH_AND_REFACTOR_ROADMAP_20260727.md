@@ -1070,8 +1070,15 @@ parity 當成每個 nature tie field 的逐 bit equality。
   zero completed GC；cadence 仍為 2/3 frames，local-plan p50/p95
   `9.764/17.910 ms`。CE-0151 修正 audit-v5 只 validate schema v7 卻在
   aggregation 用 `==6` 丟掉 diagnostics 的 report-only bug；同一 raw
-  已 deterministic 重建。這是 pass 1/2，不是 B4 close 或 survival
-  promotion；
+  已 deterministic 重建。第二個 held run `20260728_070838` 也完成
+  15,011 observations、15 hits、hard no-Bomb 與 cleanup；其
+  p50/p95/p99/p99.9/max 為
+  `0.0632/0.1420/0.1967/0.3999/0.9087 ms`，native-call max
+  `0.4384 ms`，同樣 zero >2-ms samples、zero completed GC。連續兩次
+  held physical pass 共 28,907 observations，因此在 declared
+  retrospective observer boundary 內關閉 B4 native-call tail。這不是
+  survival promotion：9/15 hits 是 RNG/trajectory/resource-distinct，且
+  24 個 contacts 全部發生在 global viability exhaustion 之後；
 - CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成

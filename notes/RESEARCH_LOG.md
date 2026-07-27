@@ -4278,3 +4278,27 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   pass `5/5`, and the complete quick suite passes `594/594` on Linux in
   `5.442 s` and on Windows in `7.999 s` with one existing skip. Python
   compilation, Ruff, and `git diff --check` pass.
+
+## 2026-07-27: Native Library And Status Boundary
+
+- **Scope:** Began roadmap R2 by adding
+  `touhou_control.native.library`. It now owns the platform-specific library
+  path, disabled/load-error state, configured single-function and atomic
+  function-group caches, and pipeline cancellation/deadline status
+  conversion. `native_backend` temporarily imports the historical private and
+  public names while its domain declarations and wrappers remain in place for
+  the next checkpoints.
+- **Observed compatibility:** A disabled environment still performs no load
+  and does not poison a later retry. An `OSError` remains cached. Missing
+  optional symbols and incomplete optional groups remain uncached and can be
+  retried; configured functions/groups are cached only after success.
+  Pipeline result codes `5`, `6`, and other nonzero values retain the same
+  exception types and exact messages.
+- **Authority:** This changes only loader/cache/status ownership. It changes no
+  array coercion, shape validation, output allocation, native call arguments,
+  fallback path, recurrence, worker behavior, action, strategy status,
+  native implementation, or C ABI. It adds no runtime or physical evidence.
+- **Validation:** Six focused loader/status characterization tests and the
+  43-symbol ABI manifest pass. The complete quick suite passes `600/600` on
+  Linux in `5.420 s` and on Windows in `8.223 s` with one existing skip.
+  Python compilation, Ruff, and `git diff --check` pass.

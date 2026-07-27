@@ -4,18 +4,20 @@ from __future__ import annotations
 
 import ctypes
 from dataclasses import dataclass
-import os
-from pathlib import Path
 import time
 
 import numpy as np
 
+from .native.library import (
+    PipelineNativeCancelledError as PipelineNativeCancelledError,
+    PipelineNativeDeadlineError as PipelineNativeDeadlineError,
+    library_path as _library_path,  # noqa: F401 - compatibility export
+    load_library as _load_library,
+    raise_pipeline_result as _raise_pipeline_result,
+)
 from .packed_hazards import PackedSegmentFrames
 
 
-ROOT = Path(__file__).resolve().parents[2]
-_DISABLE_ENV = "TOUHOU_DISABLE_NATIVE_PLANNER"
-_LIBRARY = None
 _VIABILITY_WORKER_LIMIT_FUNCTION = None
 _VIABILITY_FUNCTION = None
 _TERMINAL_VIABILITY_FUNCTION = None
@@ -46,7 +48,6 @@ _LOCAL_HAZARDS_FUNCTION = None
 _LOCAL_BEAM_REDUCE_FUNCTION = None
 _LOCAL_SUPPLEMENTAL_BEAM_REDUCE_FUNCTION = None
 _LOCAL_SUPPLEMENTAL_WORKSPACE_FUNCTIONS = None
-_LOAD_ERROR: OSError | None = None
 
 
 @dataclass(frozen=True)
@@ -185,38 +186,6 @@ class _LocalSupplementalOutputV1(ctypes.Structure):
         ("immediate_clearance", _C_DOUBLE_POINTER),
         ("count", _C_INT32_POINTER),
     ]
-
-
-def _library_path() -> Path:
-    if os.name == "nt":
-        return (
-            ROOT
-            / "native"
-            / "build"
-            / "windows-x86_64"
-            / "touhou_viability.dll"
-        )
-    return (
-        ROOT
-        / "native"
-        / "build"
-        / "linux-x86_64"
-        / "libtouhou_viability.so"
-    )
-
-
-def _load_library():
-    global _LIBRARY, _LOAD_ERROR
-    if _LIBRARY is not None or _LOAD_ERROR is not None:
-        return _LIBRARY
-    if os.environ.get(_DISABLE_ENV) == "1":
-        return None
-    try:
-        _LIBRARY = ctypes.CDLL(str(_library_path()))
-    except OSError as error:
-        _LOAD_ERROR = error
-        return None
-    return _LIBRARY
 
 
 def _load_viability_function():
@@ -2812,28 +2781,6 @@ def query_local_survival_arrays(
         action_margins,
         int(best_mask.value),
         int(evaluated_states.value),
-    )
-
-
-class PipelineNativeCancelledError(RuntimeError):
-    """A native workspace was invalidated while expanding."""
-
-
-class PipelineNativeDeadlineError(RuntimeError):
-    """A native workspace query exceeded its cooperative deadline."""
-
-
-def _raise_pipeline_result(operation: str, result: int) -> None:
-    if result == 5:
-        raise PipelineNativeCancelledError(
-            f"native pipeline workspace {operation} was cancelled"
-        )
-    if result == 6:
-        raise PipelineNativeDeadlineError(
-            f"native pipeline workspace {operation} exceeded its deadline"
-        )
-    raise RuntimeError(
-        f"native pipeline workspace {operation} returned {result}"
     )
 
 

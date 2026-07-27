@@ -5948,3 +5948,36 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Offline source ownership only. Contact geometry, causal
   attribution, warning predicates, report fields and ordering, recurrence,
   live sensing, issue behavior, action authority, and strategy are unchanged.
+
+### 2026-07-27 — Dossier rendering ownership
+
+- **Observed structural change:** Checkpoint `1cd3a9c` adds
+  `analysis/dossier/full_run_render.py` and `practice_render.py`. Stable
+  Markdown construction and death-CSV field/row ordering now have dedicated
+  offline owners, separate from trace ingestion, attribution, aggregation,
+  validation, regression construction, and CLI I/O. Entry modules retain the
+  historical formatter, `render_markdown`, and `write_death_csv` objects as
+  exact aliases.
+- **Observed size result:** Full-run/practice entry points changed from
+  1,305/2,058 to 815/1,449 lines. Their focused render owners are 501/621
+  lines. These are two distinct report schemas and therefore remain separate
+  instead of becoming one large conditional renderer.
+- **Observed exact-output gate:** A complete Stage-5 replay from the retained
+  548,614,220-byte trace produced JSON, Markdown, deaths CSV, and regression
+  JSON byte-identical to the pre-render-extraction output. Independently, the
+  current full-run renderer applied to retained dossier
+  `lunatic_route2_fullrun_unattended_20260725_083917` kept the pre-extraction
+  Markdown SHA-256
+  `46550ead7d40558f05a43e84046631ab253644fae92b5f2de0d9989cdccc3622`
+  and CSV SHA-256
+  `233206433787185ce5366c41bc63e9ba5747650dda9b543033ffa520be2fc500`.
+- **Validation:** New ownership tests pass `2/2`; full-run and practice
+  dossier tests pass `20/20` and `18/18`; Ruff, byte compilation, and
+  `git diff --check` pass. The first Linux full suite repeated the
+  already-recorded 1-ms cold-prewarm deadline flake. The focused file passed
+  `5/5`, and a fresh unmodified full run passed `713/713` in `8.409 s`.
+  Windows passed `713/713` in `12.383 s` with three platform skips. No test
+  was weakened.
+- **Authority:** Offline renderer ownership only. Dossier values, field and
+  row ordering, whitespace, attribution, recurrence, live sensing, issue
+  behavior, action authority, and strategy are unchanged.

@@ -1,5 +1,10 @@
 """TH08 live-controller composition and lifecycle boundaries."""
 
+from .fresh_issue import (
+    FreshEnemyIssueDependencies,
+    FreshEnemyIssueResult,
+    recertify_fresh_enemy_prefix,
+)
 from .issue_controller import InputDispatch, IssueController
 from .iteration import (
     CapturedIteration,
@@ -67,6 +72,8 @@ __all__ = [
     "EnemyBody",
     "EnemyBodyModeMemory",
     "EnemyPoolSnapshot",
+    "FreshEnemyIssueDependencies",
+    "FreshEnemyIssueResult",
     "FreshIssueResult",
     "INPUT_CLOCK_SHADOW_ROLE",
     "ITEM_MANAGER_BASE",
@@ -96,6 +103,7 @@ __all__ = [
     "auto_confirm_eligible",
     "frozen_auto_confirm_eligible",
     "input_clock_message_key",
+    "recertify_fresh_enemy_prefix",
     "semantic_clock_observation",
     "serialize_semantic_clock_event",
     "serialize_semantic_clock_observation",

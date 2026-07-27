@@ -116,7 +116,10 @@ reduces it to 5,594 lines. Extracting sensing trace fields reduces the current
 controller to 5,411 lines; extracting timing and optional-hazard trace fields
 reduced it to 5,377 lines. Movement contracts/geometry, local hazard
 projection, pipeline certificates, and local objective extraction reduce the
-current controller to 4,190 lines. The dominant block remains
+controller to 4,190 lines. Extracting the fresh enemy-prefix issue stage
+reduces the current controller to 4,181 lines while replacing an inline
+sensor/recertification transaction with a typed, independently tested
+boundary. The dominant block remains
 `_run_live_session`.
 
 `scripts/th08_live/iteration.py` now defines and the live loop consumes:
@@ -164,7 +167,7 @@ implementation module where module-level patch identity matters.
 
 | Module | Lines | Decision | Reason |
 | --- | ---: | --- | --- |
-| `th08_live/controller.py` | 4,190 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, and outer composition; immutable handoff records plus pure trace builders, movement, hazard, certificate, and objective modules are live. |
+| `th08_live/controller.py` | 4,181 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, deadline/override/dispatch, and outer composition; immutable handoffs plus pure trace, movement, hazard, certificate, objective, and fresh-enemy issue modules are live. |
 | `th08_live/planner_pass.py` | 320 | staged split complete | Prepare/orchestration only; shared contracts, baseline, supplemental lifecycle, and final selection/assembly have dedicated modules. |
 | `th08_live/planner_pass_supplemental.py` | 755 | retain through finalization gate | Cohesive pre-submit/search/exact-version lookup/fallback/terminal-label lifecycle; split native job construction from search only if later work makes either responsibility change independently. |
 | `th08_live/planner_pass_finalize.py` | 587 | retain | One selection/assembly responsibility: endpoint rank, robust override, pre-loss admission, damage shadow, decision assembly, and relaxed retry. |
@@ -191,7 +194,7 @@ decomposed.
 | Module | Lines | Decision |
 | --- | ---: | --- |
 | `th08_live_dodge_agent.py` | 22 | keep facade |
-| `th08_live/controller.py` | 4,190 | P0 staged extraction through iteration contracts |
+| `th08_live/controller.py` | 4,181 | P0 staged extraction through iteration contracts |
 | `th08_live/planner_pass.py` | 320 | staged split complete |
 | `touhou_control/query_survival.py` | 80 | compatibility facade; focused scalar/root/workspace/dispatch/problem modules complete |
 | `touhou_control/query_survival_types.py` | 140 | retain public contracts |
@@ -281,8 +284,10 @@ The structural sequence and current status are:
 4. Reuse `LocalProposal` as the local planning output; do not place fresh
    issue observations in it.
 5. Add `FreshIssueResult` around `IssueTransaction`: **implemented and
-   consumed at the outer physical dispatch boundary**. Fresh capture and
-   recertification still need extraction behind a dedicated stage function.
+   consumed at the outer physical dispatch boundary**. Fresh enemy-prefix
+   capture, aligned change detection, and conditional recertification now
+   live behind `th08_live.fresh_issue`; deadline/override/dispatch remains the
+   next bounded extraction.
    fresh enemy prefix, recertification, selected action, send/no-write result,
    issue frame, and deadline status.
 6. Build trace records from those immutable stage outputs after the issue

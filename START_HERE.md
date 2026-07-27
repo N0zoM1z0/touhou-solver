@@ -93,6 +93,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
   now consumes the captured contract and actuator state is updated from the
   fresh-issue contract. The surrounding controller remains the composition
   owner; this is a staged extraction, not a wholesale move.
+- The fresh enemy-prefix issue stage now lives in
+  `th08_live.fresh_issue`. It owns the bounded issue-time prefix read,
+  dormant-body merge, aligned change detection, and conditional hard
+  recertification result. The controller injects its current capture/change/
+  merge/commit callbacks on every iteration, preserving historical
+  monkeypatch and backend dispatch seams. Deadline handling, Bomb policy,
+  candidate lookup, physical dispatch, actuator updates, and trace
+  publication remain controller-owned.
 - Corridor-trace characterization checkpoint `6a75a6a` adds a pure
   `th08_live.corridor_trace` record builder. The live loop still constructs
   the historical inline record and asserts exact equality with the extracted

@@ -5764,3 +5764,28 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 729,382,239-byte raw JSONL SHA-256
   `5952e485bb26d75493e4b4ff5223e043d1b88de87addd0dd3b45694731306e54`.
+
+### 2026-07-27 — Fresh enemy-prefix issue-stage extraction
+
+- **Observed structural change:** Added `th08_live.fresh_issue` with immutable
+  dependencies and result contracts for the issue-time enemy-prefix read,
+  dormant-body merge, aligned planned/current comparison, and conditional
+  hard recertification. `_run_live_session` consumes the stage result before
+  action alignment and physical dispatch.
+- **Compatibility boundary:** The controller constructs dependencies from
+  its current `capture_enemy_pool_prefix_contiguous`,
+  `issue_enemy_snapshot_changes`, `merge_enemy_pool_prefix`, monotonic clock,
+  and `commit_local_proposal_for_fresh_hazards` globals on every iteration.
+  Existing backend selection and monkeypatch/fault-injection seams therefore
+  remain dynamic. The original issue-path timestamp is passed into the stage,
+  preserving the read-timing boundary.
+- **Validation:** Three focused stage tests cover unchanged no-commit,
+  changed merged-body recertification, and dormant identity retention.
+  Existing issue-transaction and live-controller suites pass `2/2` and
+  `92/92`; Ruff, byte compilation, and `git diff --check` pass. Quick suites
+  pass `702/702` on Linux in `9.088 s` and Windows in `12.905 s` with three
+  platform skips.
+- **Authority:** Structural issue-stage ownership only. Fresh/global
+  intersection semantics, enemy uncertainty, delay support, deadline
+  fallback, hard no-Bomb policy, physical dispatch, trace schema, live action
+  authority, and strategy are unchanged.

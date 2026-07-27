@@ -170,6 +170,10 @@ from th08_live.hazard_decode import (  # noqa: F401
     decode_items,
     decode_lasers,
 )
+from th08_live.fresh_issue import (
+    FreshEnemyIssueDependencies,
+    recertify_fresh_enemy_prefix,
+)
 from th08_live.iteration import (
     CapturedIteration,
     FreshIssueResult,
@@ -3139,80 +3143,67 @@ def _run_live_session(
             pre_issue_action = decision.action
             pre_issue_mask = decision.mask
             issue_path_started = time.perf_counter()
-            issue_enemy_read_started = issue_path_started
-            issue_enemy_prefix_snapshot = (
-                capture_enemy_pool_prefix_contiguous(reader)
-            )
-            issue_enemy_read_ms = (
-                time.perf_counter() - issue_enemy_read_started
-            ) * 1000.0
-            (
-                issue_enemy_prefix_bodies,
-                issue_dormant_enemy_body_pointers,
-            ) = enemy_body_memory.merge_snapshot(
-                issue_enemy_prefix_snapshot,
-                frame=int(state["enemy_manager_frame"]),
-            )
             alignment_frame = int(state["enemy_manager_frame"])
-            issue_enemy_changes = issue_enemy_snapshot_changes(
-                enemy_prefix_snapshot,
-                issue_enemy_prefix_snapshot,
-                EnemyPoolSnapshot(
-                    alignment_frame,
-                    alignment_frame,
-                    enemy_prefix_bodies,
-                    enemy_prefix_snapshot.read_ms,
-                    enemy_prefix_snapshot.attempts,
+            fresh_enemy_issue = recertify_fresh_enemy_prefix(
+                proposal=local_proposal,
+                reader=reader,
+                memory=enemy_body_memory,
+                alignment_frame=alignment_frame,
+                planned_prefix_snapshot=enemy_prefix_snapshot,
+                planned_prefix_bodies=enemy_prefix_bodies,
+                enemy_bodies=enemy_bodies,
+                commit=lambda proposal, fresh_enemy_bodies: (
+                    commit_local_proposal_for_fresh_hazards(
+                        proposal,
+                        player_x=float(player["x"]),
+                        player_y=float(player["y"]),
+                        previous_mask=previous_mask,
+                        delay_frames=delay_estimate.support,
+                        action_hold_frames=action_hold_frames,
+                        bullets=bullets,
+                        lasers=lasers,
+                        enemy_bodies=fresh_enemy_bodies,
+                        snapshot_lag=player_to_hazard_lag,
+                        allowed_first_actions=(
+                            policy_guidance.allowed_first_actions
+                        ),
+                        viability_repair_volumes=(
+                            policy_guidance.repair_volumes
+                        ),
+                        viability_recovery_distances=(
+                            policy_guidance.recovery_distances
+                        ),
+                        viability_safety_actions=(
+                            policy_guidance.safety_actions
+                        ),
+                        viability_survival_actions=(
+                            policy_guidance.survival_actions
+                        ),
+                    )
                 ),
-                EnemyPoolSnapshot(
-                    alignment_frame,
-                    alignment_frame,
-                    issue_enemy_prefix_bodies,
-                    issue_enemy_prefix_snapshot.read_ms,
-                    issue_enemy_prefix_snapshot.attempts,
+                read_started=issue_path_started,
+                dependencies=FreshEnemyIssueDependencies(
+                    capture_prefix=capture_enemy_pool_prefix_contiguous,
+                    detect_changes=issue_enemy_snapshot_changes,
+                    merge_prefix=merge_enemy_pool_prefix,
+                    monotonic=time.perf_counter,
                 ),
             )
-            issue_enemy_recertificate_ms = 0.0
-            issue_enemy_bodies_for_shadow = enemy_bodies
-            if issue_enemy_changes:
-                issue_enemy_bodies = merge_enemy_pool_prefix(
-                    enemy_bodies,
-                    issue_enemy_prefix_bodies,
-                )
-                issue_enemy_bodies_for_shadow = issue_enemy_bodies
-                issue_recertificate_started = time.perf_counter()
-                issued_decision = commit_local_proposal_for_fresh_hazards(
-                    local_proposal,
-                    player_x=float(player["x"]),
-                    player_y=float(player["y"]),
-                    previous_mask=previous_mask,
-                    delay_frames=delay_estimate.support,
-                    action_hold_frames=action_hold_frames,
-                    bullets=bullets,
-                    lasers=lasers,
-                    enemy_bodies=issue_enemy_bodies,
-                    snapshot_lag=player_to_hazard_lag,
-                    allowed_first_actions=(
-                        policy_guidance.allowed_first_actions
-                    ),
-                    viability_repair_volumes=(
-                        policy_guidance.repair_volumes
-                    ),
-                    viability_recovery_distances=(
-                        policy_guidance.recovery_distances
-                    ),
-                    viability_safety_actions=(
-                        policy_guidance.safety_actions
-                    ),
-                    viability_survival_actions=(
-                        policy_guidance.survival_actions
-                    ),
-                )
-                decision = issued_decision.decision
-                issue_enemy_recertificate_ms = (
-                    time.perf_counter() - issue_recertificate_started
-                ) * 1000.0
-                plan_ms += issue_enemy_recertificate_ms
+            issue_enemy_prefix_snapshot = fresh_enemy_issue.prefix_snapshot
+            issue_enemy_prefix_bodies = fresh_enemy_issue.prefix_bodies
+            issue_dormant_enemy_body_pointers = (
+                fresh_enemy_issue.dormant_pointers
+            )
+            issue_enemy_changes = fresh_enemy_issue.changes
+            issue_enemy_read_ms = fresh_enemy_issue.read_ms
+            issue_enemy_recertificate_ms = (
+                fresh_enemy_issue.recertification_ms
+            )
+            issue_enemy_bodies_for_shadow = (
+                fresh_enemy_issue.enemy_bodies_for_shadow
+            )
+            decision = fresh_enemy_issue.decision
+            plan_ms += issue_enemy_recertificate_ms
             post_issue_guard_action = decision.action
             post_issue_guard_mask = decision.mask
             phase_now = reader.u8(0x017D5EF8)

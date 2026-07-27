@@ -897,48 +897,48 @@ public:
             return 2;
         }
 
-        std::vector<BeliefStationaryWitnessStepV1> steps;
-        steps.reserve(path.steps.size());
+        if (
+            path.steps.size()
+            > static_cast<std::size_t>(step_capacity)
+        ) {
+            return 3;
+        }
+        int output_index = 0;
         for (const belief_pipeline::WitnessPathStep& path_step :
              path.steps) {
             const BeliefPipelineState& state = path_step.state;
             const belief_pipeline::WorstBranch& worst = path_step.worst;
-            steps.push_back(
+            output_steps[output_index++] =
                 BeliefStationaryWitnessStepV1{
-                    state.frame,
-                    state.row,
-                    state.column,
-                    state.active,
-                    state.pending,
-                    state.remaining_mask,
-                    path_step.selected_action,
-                    worst.nature.hidden_remaining,
-                    worst.nature.pickup_delay,
-                    worst.nature.cadence,
-                    worst.prefix_margin,
-                    worst.label.frames,
-                    worst.label.margin,
-                    worst.failed ? 1 : 0,
-                    worst.failed ? -1 : worst.successor.frame,
-                    worst.failed ? -1 : worst.successor.row,
-                    worst.failed ? -1 : worst.successor.column,
-                    worst.failed ? -1 : worst.successor.active,
-                    worst.failed ? -1 : worst.successor.pending,
-                    worst.failed ? 0 : worst.successor.remaining_mask,
-                    worst.failed
-                        ? std::uint16_t{0}
-                        : worst.successor_label.frames,
-                    worst.failed ? 0.0F : worst.successor_label.margin,
-                    worst.hidden_branch_count,
-                }
-            );
+                state.frame,
+                state.row,
+                state.column,
+                state.active,
+                state.pending,
+                state.remaining_mask,
+                path_step.selected_action,
+                worst.nature.hidden_remaining,
+                worst.nature.pickup_delay,
+                worst.nature.cadence,
+                worst.prefix_margin,
+                worst.label.frames,
+                worst.label.margin,
+                worst.failed ? 1 : 0,
+                worst.failed ? -1 : worst.successor.frame,
+                worst.failed ? -1 : worst.successor.row,
+                worst.failed ? -1 : worst.successor.column,
+                worst.failed ? -1 : worst.successor.active,
+                worst.failed ? -1 : worst.successor.pending,
+                worst.failed ? 0 : worst.successor.remaining_mask,
+                worst.failed
+                    ? std::uint16_t{0}
+                    : worst.successor_label.frames,
+                worst.failed ? 0.0F : worst.successor_label.margin,
+                worst.hidden_branch_count,
+            };
         }
 
-        if (steps.size() > static_cast<std::size_t>(step_capacity)) {
-            return 3;
-        }
-        std::copy(steps.begin(), steps.end(), output_steps);
-        *output_step_count = static_cast<int>(steps.size());
+        *output_step_count = output_index;
         *output_frames = path.label.frames;
         *output_margin = path.label.margin;
         *output_evaluated_state_count = static_cast<std::uint64_t>(

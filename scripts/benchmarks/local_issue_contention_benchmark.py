@@ -107,6 +107,7 @@ class _BackgroundViability:
         self.stop = threading.Event()
         self.ready = threading.Event()
         self.solve_ms: list[float] = []
+        self.solve_intervals: list[tuple[float, float]] = []
         self.priority_lowered = False
         self.worker_limit_applied = False
 
@@ -125,9 +126,9 @@ class _BackgroundViability:
         while not self.stop.is_set():
             started = time.perf_counter()
             build_robust_viability_policy(**self.problem)
-            self.solve_ms.append(
-                (time.perf_counter() - started) * 1000.0
-            )
+            finished = time.perf_counter()
+            self.solve_ms.append((finished - started) * 1000.0)
+            self.solve_intervals.append((started, finished))
 
 
 def _geometry_sequence(workload: dict[str, object]) -> None:

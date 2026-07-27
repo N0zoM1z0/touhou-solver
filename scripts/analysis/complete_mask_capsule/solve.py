@@ -35,7 +35,7 @@ from touhou_control.viability_audit_capsule import (
 from .types import CompleteMaskCapsuleRoot
 
 
-def _problem(
+def build_problem(
     root: CompleteMaskCapsuleRoot,
     *,
     capsule_dir: Path,
@@ -122,7 +122,7 @@ def audit_root(
     horizon: int,
     decision_frame_support: tuple[int, ...],
 ) -> dict[str, object]:
-    problem, query, position_error = _problem(
+    problem, query, position_error = build_problem(
         root,
         capsule_dir=capsule_dir,
         horizon=horizon,
@@ -209,4 +209,4 @@ def audit_root(
     }
 
 
-__all__ = ["audit_root"]
+__all__ = ["audit_root", "build_problem"]

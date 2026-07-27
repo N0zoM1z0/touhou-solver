@@ -315,7 +315,29 @@ Reports:
 
 Complete Linux/Windows quick suites pass `752/752` in `9.227/14.904 s`, with
 three existing Windows skips. B1 establishes cheap retrospective evidence
-only. B2–B5 and the first physical trace remain open.
+only. The deterministic B2 fixture is recorded below; B3–B5 and the first
+physical trace remain open.
+
+## B2 Result
+
+Checkpoint `c3c5a83 Strengthen bullet birth update-order fixtures` closes the
+deterministic base-state oracle portion of B2:
+
+- a newly allocated bullet moves before same-frame collision and can own the
+  hit before the later laser pass;
+- allocation uses the pre-update occupied set, so a full pool drops the
+  requested birth even when all slots are released later in that bullet pass;
+- only the next pass can reuse those slots, beginning at the unchanged
+  wrapping cursor;
+- collision suppression prevents contact but does not prevent same-frame
+  movement or age advance; and
+- slot 0 then 1,535 down through 1 scan order, age-16 graze gating, immediate
+  collision below graze age, and transform rejection remain covered.
+
+The focused file passes `10/10`; complete Linux/Windows quick suites pass
+`755/755` in `9.421/15.004 s`, with three existing Windows skips. These are
+executable adversarial fixtures supported by the IDA update order. B2 is not
+physical runtime proof; B4 must still join observed native ages and contacts.
 
 ## Ordered Gates
 
@@ -337,6 +359,8 @@ only. B2–B5 and the first physical trace remain open.
 
 ### B2 — Update-order fixture
 
+- **Deterministic adversarial fixture gate completed by `c3c5a83`;
+  shipped-runtime correlation remains open.**
 - Extend deterministic adversarial cases for spawn, pool full/drop, scan
   order, same-frame movement/contact, graze threshold, cancel, and slot reuse.
 - Keep the game-neutral scalar fixture independent of any future optimized

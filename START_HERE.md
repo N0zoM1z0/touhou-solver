@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation checkpoint:
+  `c3c5a83 Strengthen bullet birth update-order fixtures`, building on
   `4260113 Add trace-only bullet birth observer`. The default-off observer
   reads active state and candidate native age at bullet `+0x0D94` from the
   existing persistent pool blob, retains activation edges, timer regressions,
@@ -45,9 +46,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `Bullet`, issue, or coverage state. Fixed 5,000-iteration Linux/Windows
   gates pass: full-pool observer p95 is `0.0318/0.0339 ms`, p99 is
   `0.0540/0.0453 ms`, max is `0.3199/0.1005 ms`, and interleaved planning
-  decode p95 ratio is `0.998/1.007`. Retained-report validation brings the
-  Linux/Windows quick suites to `752/752` in `9.227/14.904 s`, with three
-  Windows skips.
+  decode p95 ratio is `0.998/1.007`. The independent base-state oracle now
+  also fixes full-pool drop-before-release, next-pass cursor reuse, same-frame
+  move/contact, collision suppression, graze age, native scan order, and
+  bullet-before-laser behavior. Linux/Windows quick suites pass `755/755` in
+  `9.421/15.004 s`, with three Windows skips. Shipped-runtime correlation
+  remains open.
 - Latest committed algorithmic checkpoint:
   `f8621bd Add cancellable stationary witness delivery benchmark`. A separate
   research-only DLL and modular newest-wins service now measure complete

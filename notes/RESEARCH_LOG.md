@@ -6340,3 +6340,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   update order, residual source coverage, future geometry, and physical
   repetition remain open. Hazard coverage and physical action authority do
   not change.
+
+## 2026-07-28 — Closed the deterministic bullet-birth update-order fixture
+
+- Checkpoint `c3c5a83` adds minimal adversarial cases to the independent
+  transform-free hostile-bullet pool oracle.
+- **Observed in the executable fixture:** a new bullet moves before
+  same-frame collision; collision suppression preserves movement and age
+  advance without contact; native scan order and the later laser pass retain
+  their existing order.
+- **Observed in the executable fixture:** allocation sees the pool before the
+  bullet scan. A full pool drops a requested spawn even if every old bullet
+  is released later in that same pass. Only the next pass reuses a free slot,
+  beginning at the unchanged wrapping cursor.
+- The focused file passes `10/10`; complete Linux/Windows quick suites pass
+  `755/755` in `9.421/15.004 s`, with three existing Windows skips.
+- **Boundary:** this is an IDA-supported deterministic oracle, not an observed
+  shipped-runtime birth/contact join. Physical update-order correlation,
+  ECL intent coverage, and future-geometry authority remain open.

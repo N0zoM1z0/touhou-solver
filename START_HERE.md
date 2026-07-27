@@ -295,10 +295,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   safety-value query results now live in `touhou_control.viability_types`;
   cached lattice-transition construction now lives in
   `viability_transitions`; queryable Boolean and signed-clearance policy
-  objects now live in `viability_policy`. `viability` preserves the original
-  public class identities and signed nearest-lattice error arrays. Its focused
-  suite passes `20/20` and the Linux quick suite passes `699/699` in
-  `9.096 s`.
+  objects now live in `viability_policy`; Boolean and signed-value induction
+  now live in `viability_builders`. `viability` is a 29-line compatibility
+  facade that preserves original public identities, signed nearest-lattice
+  error arrays, and the historical patchable `native_backend` attribute. Its
+  focused suite passes `20/20`; quick suites pass `699/699` on Linux in
+  `9.451 s` and Windows in `12.965 s` with three skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

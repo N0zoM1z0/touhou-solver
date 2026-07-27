@@ -5349,3 +5349,23 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural policy-query ownership only. Builder recurrence,
   signed-clearance certificate meaning, native parity, and live authority
   are unchanged.
+
+### 2026-07-27 — Viability builder extraction and facade completion
+
+- **Observed structural change:** Moved Boolean viability induction and
+  signed-clearance value induction into
+  `touhou_control.viability_builders`. `viability.py` is now a 29-line
+  compatibility facade over public values, policy objects, and builders.
+- **Compatibility boundary:** The first focused gate exposed that tests and
+  research tools patch `touhou_control.viability.native_backend` to force
+  fallback behavior. The facade now explicitly re-exports the same backend
+  module object used by the builders, preserving that fault-injection path
+  without duplicating state or weakening the test.
+- **Validation:** Viability tests pass `20/20`; query-survival and
+  variable-cadence suites pass `17/17` and `8/8`. Ruff, byte compilation, and
+  `git diff --check` pass. Quick suites pass `699/699` on Linux in `9.451 s`
+  and Windows in `12.965 s` with three platform skips.
+- **Authority:** Structural builder ownership only. Validation, terminal
+  continuation, Boolean and signed-value recurrences, native fallback,
+  sampling-error subtraction, compact mode, and live authority are
+  unchanged.

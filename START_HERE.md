@@ -45,8 +45,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `e4d994f Add the shadow pipeline pickup audit`. Complete-mask roots now join
   exact observation and immutable observation/hazard/policy/model/clock
   versions under SHA-256; missing/unknown hazard slabs fail closed. Physical
-  audit `153821` passed trace/continuity checks but found CE-0134, so full
-  pipeline authority remains blocked.
+  audit `153821` passed trace/continuity checks but found CE-0134. Its
+  movement alias is now corrected offline; full pipeline authority remains
+  blocked by live integration, hazard coverage, clock, publication, and
+  performance gates.
 - Latest structural checkpoint:
   `02d0e32 Extract the live local planner pass`, with compact evidence and the
   structural audit retained by
@@ -101,13 +103,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - The same audit found 135 complete-mask writes with unchanged movement/focus
   projection. At frame 13,133, `right+SHOT -> right` was a real write while
   right was pending and stay was active; the movement-only recurrence calls
-  it no-write. CE-0134 blocks full pipeline promotion until complete issue
-  identity participates in the scalar/native recurrence.
+  it no-write. CE-0134 blocks full pipeline promotion until the corrected
+  complete issue identity reaches an exact-version physical consumer; the
+  scalar/native offline recurrence is now corrected.
 - The first CE-0134 correction checkpoint defines a game-neutral injective
   complete-mask alphabet and a 36-token TH08 no-Bomb adapter. It preserves the
   old 17 movement projections while distinguishing equal-velocity Shot/Focus
-  writes. This is offline contract/test infrastructure only: the current
-  native belief workspace still has a 32-action/`uint32_t` capacity blocker.
+  writes.
+- The native correction adds backward-compatible 64-bit belief ABI v7/v3 and
+  keeps old direct/viability and belief ABI boundaries at 32 actions. A
+  deterministic six-frame witness shows equal-velocity pending identity swaps
+  root values `(5,+1)` and `(2,-1)`; all 36 Python/native action labels,
+  high best-action bits, and high upper-unresolved bits agree. This remains
+  offline/shadow infrastructure only.
 - No TH08 process, controller daemon, supervisor, or unfinished experiment is
   expected to be alive.
 - Native build output, raw traces, screenshots, caches, and the local
@@ -241,7 +249,7 @@ global-planning objective.
 | live | issue-time local collision certificate | Fresh hard fallback, per-position batch semantics, hard no-Bomb, and the CE-0127/0128 fresh/global transaction. Live callers still use the active-equals-held estimator fallback. |
 | live | coarse Boolean robust viability | Current global finite-model safety authority, subject to declared resolution/horizon/uncertainty and the unresolved transition-clock boundary. |
 | shadow | native FRScreen/MSG input-clock boundary | Detects episodes; cannot retire/reset policy or neutralize movement. |
-| shadow | explicit complete-mask active/held/pending certificate | Canonical trace identity and scalar/packed movement oracles exist. CE-0134, future-event unknown coverage, and CE-0120 block live ranking. |
+| shadow | explicit complete-mask active/held/pending certificate | Canonical trace identity and a 36-action scalar/native recurrence exist. CE-0134 is corrected offline; future-event unknown coverage, CE-0120, performance/publication, and physical integration block live ranking. |
 | shadow | restricted losing-root candidate verifier/publication | May prove a declared finite candidate and retain its witness; cannot claim unrestricted losing/optimality or change input. |
 | offline/shadow | belief lower bounds, revealed-delay upper, resumable refinement | Feasibility/optimality research; too slow or optimistic for current live authority. |
 | proposal-only | losing-state control reserve | Ranks fresh-hard-equivalent actions after Boolean exhaustion; physical effect unmeasured. |
@@ -263,9 +271,11 @@ measurement, and a `STRATEGY.md` status change.
 
 Current Hard failures overwhelmingly follow finite-kernel exhaustion.
 G0 exact-root classification and the G1 shadow identity/coverage audit are
-complete. G1 rejected live promotion because CE-0134 collapses a real
-complete-mask write to movement-action no-write, every physical root remains
-future-event `model_unknown`, and CE-0120 is open. Next work should:
+complete. G1 rejected live promotion after CE-0134 exposed a real
+complete-mask write collapsed to movement no-write. That alias is corrected
+offline, but every physical root remains future-event `model_unknown`,
+CE-0120 is open, and no complete-mask publication/consumer gate exists. Next
+work should:
 
 1. work first on the 47 same-root unresolved cases while preserving exact
    root/pipeline identity, explicit completion status, transition episode,

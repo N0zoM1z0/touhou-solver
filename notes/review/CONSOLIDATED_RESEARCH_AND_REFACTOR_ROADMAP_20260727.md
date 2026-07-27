@@ -710,8 +710,10 @@ fixed 240-frame window. See
 ### G1 — Model coverage、pipeline root 與 clock boundary
 
 Status: G1 shadow instrumentation and physical validation complete at
-`ff1af3c` / `e4d994f`; full pipeline promotion is blocked by CE-0134,
-fail-closed future-event `model_unknown`, and open CE-0120.
+`ff1af3c` / `e4d994f`; CE-0134's recurrence alias is corrected offline.
+Full pipeline promotion remains blocked by missing complete-mask
+publication/physical integration, fail-closed future-event `model_unknown`,
+open CE-0120, and unmeasured representative performance.
 
 這是 live promotion 的 correctness gate，與 offline solver 工作可平行：
 
@@ -749,9 +751,15 @@ Observed closure:
 - The first correction checkpoint now defines an injective 36-token TH08
   no-Bomb complete-mask alphabet. Equal-velocity Shot/Focus writes remain
   distinct, unsupported/opposed masks fail closed, and all old 17 movement
-  projections are preserved. The native belief workspace's 32-action
-  `uint32_t` limit is the next explicit implementation gate; the codec alone
-  changes no live or solver authority.
+  projections are preserved.
+- The second correction checkpoint adds backward-compatible belief ABI
+  v7/v3 with 64-bit action subsets, while legacy direct/viability and belief
+  v1-v6/v1-v2 boundaries stay 32-bit. A six-frame adversarial case proves
+  equal-velocity pending identity changes root value, all 36 scalar/native
+  action labels match, and best/unresolved masks retain bits above 31.
+  Complete-mask recurrence authority is still offline: future hazard coverage,
+  CE-0120, representative performance, publication, and live integration are
+  not closed.
 
 ### G2 — Dual-bound query-local refinement
 

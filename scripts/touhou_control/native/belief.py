@@ -16,7 +16,7 @@ from .library import (
 
 
 def _load_belief_pipeline_workspace_functions():
-    key = "belief_pipeline_workspace_v6"
+    key = "belief_pipeline_workspace_v7"
     cached = cached_function_group(key)
     if cached is not None:
         return cached
@@ -24,10 +24,10 @@ def _load_belief_pipeline_workspace_functions():
     if library is None:
         return None
     try:
-        create = library.touhou_belief_pipeline_workspace_create_v6
-        query = library.touhou_belief_pipeline_workspace_query_v2
+        create = library.touhou_belief_pipeline_workspace_create_v7
+        query = library.touhou_belief_pipeline_workspace_query_v3
         certify = (
-            library.touhou_belief_pipeline_workspace_certify_upper_v2
+            library.touhou_belief_pipeline_workspace_certify_upper_v3
         )
         recommend = (
             library
@@ -49,8 +49,8 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.POINTER(ctypes.c_double),
         ctypes.POINTER(ctypes.c_double),
         ctypes.c_int,
-        ctypes.c_uint32,
-        ctypes.c_uint32,
+        ctypes.c_uint64,
+        ctypes.c_uint64,
         ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,
@@ -78,7 +78,7 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_uint16),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_uint64),
         ctypes.POINTER(ctypes.c_uint64),
     ]
     query.restype = ctypes.c_int
@@ -95,7 +95,7 @@ def _load_belief_pipeline_workspace_functions():
         ctypes.c_uint16,
         ctypes.c_float,
         ctypes.c_int,
-        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_uint64),
         ctypes.POINTER(ctypes.c_int),
         ctypes.POINTER(ctypes.c_uint64),
     ]
@@ -290,7 +290,7 @@ class BeliefPipelineNativeWorkspace:
         state_margin = ctypes.c_float()
         action_frames = np.empty(action_count, dtype=np.uint16)
         action_margins = np.empty(action_count, dtype=np.float32)
-        best_mask = ctypes.c_uint32()
+        best_mask = ctypes.c_uint64()
         stats = np.empty(8, dtype=np.uint64)
         result = self._query(
             self._handle,
@@ -366,7 +366,7 @@ class BeliefPipelineNativeWorkspace:
             ),
             dtype=np.int32,
         )
-        unresolved_mask = ctypes.c_uint32()
+        unresolved_mask = ctypes.c_uint64()
         deadline_expired = ctypes.c_int()
         stats = np.empty(8, dtype=np.uint64)
         result = self._certify(

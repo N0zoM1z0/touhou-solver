@@ -381,6 +381,32 @@ void touhou_native_impl_pipeline_survival_workspace_destroy_v1(
     void* workspace
 );
 
+int touhou_native_impl_belief_pipeline_workspace_create_v7(
+    const float* clearance,
+    int frame_count,
+    int row_count,
+    int column_count,
+    double x_start,
+    double x_step,
+    double y_start,
+    double y_step,
+    const double* velocity_x,
+    const double* velocity_y,
+    int action_count,
+    std::uint64_t base_action_mask,
+    std::uint64_t budgeted_action_mask,
+    int continuation_budget,
+    int remaining_delay_bucket_size,
+    int continuation_policy_mode,
+    const int* delay_frames,
+    int delay_count,
+    const int* cadence_frames,
+    int cadence_count,
+    float required_clearance,
+    int clamp_to_bounds,
+    void** output_workspace
+);
+
 int touhou_native_impl_belief_pipeline_workspace_create_v6(
     const float* clearance,
     int frame_count,
@@ -525,6 +551,25 @@ int touhou_native_impl_belief_pipeline_workspace_create_v1(
     void** output_workspace
 );
 
+int touhou_native_impl_belief_pipeline_workspace_query_v3(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int continuation_action_budget,
+    int timeout_ms,
+    std::uint16_t* output_state_frames,
+    float* output_state_margin,
+    std::uint16_t* output_action_frames,
+    float* output_action_margins,
+    std::uint64_t* output_best_action_mask,
+    std::uint64_t* output_stats
+);
+
 int touhou_native_impl_belief_pipeline_workspace_query_v2(
     void* workspace,
     int start_frame,
@@ -559,6 +604,24 @@ int touhou_native_impl_belief_pipeline_workspace_query_v1(
     std::uint16_t* output_action_frames,
     float* output_action_margins,
     std::uint32_t* output_best_action_mask,
+    std::uint64_t* output_stats
+);
+
+int touhou_native_impl_belief_pipeline_workspace_certify_upper_v3(
+    void* workspace,
+    int start_frame,
+    int start_row,
+    int start_column,
+    int observed_action,
+    int pending_action,
+    const int* pending_remaining_frames,
+    int pending_remaining_count,
+    int continuation_action_budget,
+    std::uint16_t lower_frames,
+    float lower_margin,
+    int timeout_ms,
+    std::uint64_t* output_unresolved_action_mask,
+    int* output_deadline_expired,
     std::uint64_t* output_stats
 );
 

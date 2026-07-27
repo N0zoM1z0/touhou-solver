@@ -2,7 +2,8 @@
 
 Date: 2026-07-27
 
-Status: offline model correction in progress; no live action authority
+Status: offline scalar/native model correction implemented; no live action
+authority
 
 This note closes the modeling ambiguity exposed by CE-0134. It refines the
 input portion of
@@ -22,8 +23,13 @@ their hazard, cadence, observation, publication, or fallback requirements.
 - **Observed in source:** the corrected Python and C++ belief recurrences
   canonicalize pending state only when pending and active *action indices*
   are equal. They do not compare velocities.
-- **Observed in source:** the native belief workspace currently accepts at
-  most 32 action indices and represents action subsets with `uint32_t`.
+- **Observed before correction:** the native belief workspace accepted at
+  most 32 action indices and represented action subsets with `uint32_t`.
+- **Observed after correction:** belief ABI `create_v7`, `query_v3`, and
+  `certify_upper_v3` use 64-bit action masks and accept up to 64 actions.
+  Legacy v1-v6 creation and v1-v2 query/certification ABIs remain exported,
+  retain their 32-action boundary, and pass a direct runtime compatibility
+  smoke.
 - **Inferred:** unique complete-mask action tokens can reuse the corrected
   recurrence without changing its information-set quantifiers because action
   index equality already supplies the required issue identity.
@@ -99,8 +105,7 @@ if u == h:
 else:
     emit the complete ordered key transaction
     sample one declared pickup delay
-    replace any older unseen pending command (last write wins)
-    pending := u
+    held desired / latest pending identity := u
 ```
 
 Pickup changes the active complete token when the delayed write becomes
@@ -108,6 +113,14 @@ visible. Movement during each physical frame uses the velocity attached to
 the active token. Two tokens may therefore share every movement endpoint yet
 produce different active/pending observations and different future no-write
 choices.
+
+The retained recurrence permits an older already-in-flight transition to
+become active before the newly written token when their declared remaining
+times order that way. At the next decision boundary, the older token is
+active—not still the held/pending desired token—and the newly selected token
+is the sole pending desired token if it is still unseen. “Last write wins”
+refers to held desired identity, not retroactive cancellation of a pickup that
+has already advanced far enough to become observable.
 
 ## Uncertainty And Transitions
 
@@ -165,25 +178,26 @@ unmodeled scheduler behavior.
 ### 4. Does the algorithm solve or bound that recurrence?
 
 The independent scalar belief oracle is the reference exact finite
-recurrence. The native belief workspace may implement the same recurrence
-after its action capacity and subset masks support at least 36 unique action
-indices. Differential comparison must cover every root action label, not only
-the best state label.
+recurrence. The native belief workspace implements the same recurrence with
+64-bit action subsets. Differential comparison covers the state label, all 36
+root action labels, best-action masks including indices above 31, and upper
+unresolved masks including indices above 31.
 
 Falsifying cases include:
 
 - canonicalizing two equal-velocity, unequal-mask tokens together;
 - treating `0x85 -> 0x84` as no-write;
-- preserving the older pending token after that real write;
+- retaining the older token as held/pending desired after that real write;
 - allowing Bomb or contradictory direction masks;
 - scalar/native mismatch for any action label or hidden branch.
 
 ### 5. Can the result be consumed before issue time?
 
-Not yet. This is an offline recurrence correction. Native 64-bit action
-support, scalar/native parity, performance, exact-version publication,
-future-hazard coverage, and CE-0120 must pass independently before any live
-consumer is proposed.
+Not yet. Native 64-bit action support and bounded scalar/native parity now
+pass, but this remains an offline recurrence correction. Representative
+complete-mask workload performance, exact-version publication, future-hazard
+coverage, and CE-0120 must pass independently before any live consumer is
+proposed.
 
 ## Implementation Boundary And Staged Gate
 
@@ -194,8 +208,8 @@ Checkpoint A introduces:
 - injectivity, no-Bomb, valid-direction, old-movement-projection, and CE-0134
   regressions.
 
-Checkpoint B must add a backward-compatible 64-bit belief-workspace ABI while
-leaving legacy direct/viability 32-bit masks unchanged. It must then prove:
+Checkpoint B adds a backward-compatible 64-bit belief-workspace ABI while
+leaving legacy direct/viability 32-bit masks unchanged. It proves:
 
 ```text
 scalar_belief_result(36 complete tokens)
@@ -203,9 +217,23 @@ scalar_belief_result(36 complete tokens)
 native_belief_result(36 complete tokens)
 ```
 
-field by field for the state label and all 36 action labels, including a
-minimal CE-0134 fixture.
+field by field for the state label and all 36 action labels.
 
-Until Checkpoint B passes, the 36-token codec is a validated action contract,
-not a native solver capability. Until the remaining G1 blockers close, even a
-passing Checkpoint B remains offline/shadow only.
+The retained minimal adversarial fixture has active `0x05`, remaining support
+`[1,2]`, delay support `[1,3]`, cadence support `[1,2]`, and a three-token
+restricted causal continuation. Changing only the pending identity from
+`0x85` to equal-velocity `0x84` swaps the two root values:
+
+```text
+pending 0x85: select 0x85 -> (5, +1), select 0x84 -> (2, -1)
+pending 0x84: select 0x84 -> (5, +1), select 0x85 -> (2, -1)
+```
+
+Python scalar and C++ native labels match exactly. This falsifies any claim
+that complete-mask identity can be reconstructed from velocity without
+changing finite-game values.
+
+Checkpoint B passes as an offline native solver capability. The legacy
+32-bit ABI smoke, exact export manifest, Linux/Windows builds, and action bits
+above 31 pass. Until the remaining G1 blockers close, the corrected
+recurrence remains offline/shadow only.

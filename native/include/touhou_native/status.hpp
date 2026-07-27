@@ -6,6 +6,7 @@
 namespace touhou_native {
 
 inline constexpr int PIPELINE_MAX_ACTIONS = 32;
+inline constexpr int BELIEF_PIPELINE_MAX_ACTIONS = 64;
 inline constexpr int PIPELINE_MAX_DELAYS = 64;
 inline constexpr int PIPELINE_MAX_DECISION_FRAMES = 16;
 inline constexpr int PIPELINE_MAX_BRANCHES =
@@ -19,4 +20,3 @@ struct PipelineCancelledSignal {};
 struct PipelineDeadlineSignal {};
 
 }  // namespace touhou_native
-

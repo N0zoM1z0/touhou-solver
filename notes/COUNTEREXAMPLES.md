@@ -3487,8 +3487,8 @@ Status: observed audit-coverage failure; corrected in the G0 dossier
 
 ## CE-0134: A complete-mask write collapsed to movement-action no-write
 
-Status: observed physical pipeline-model counterexample; live authority
-already excluded
+Status: observed physical counterexample; corrected in the offline
+scalar/native recurrence, while live authority remains excluded
 
 - **Observed Windows counterexample:** In Hard Stage-1 shadow run
   `hard_route2_stage1_unattended_20260727_153821`, decision frame `13133`
@@ -3516,11 +3516,21 @@ already excluded
   equivalent issue token to controller action, observation, pending, and
   scalar/native memo identity. Alternatively prove an actuator invariant
   that forbids such reissues; no such invariant currently exists.
+- **Corrected finite witness:** The 36-token no-Bomb action alphabet and
+  64-bit belief ABI retain complete-mask indices even when velocities agree.
+  In the deterministic six-frame regression, changing only pending `0x85`
+  to `0x84` swaps the matching/mismatching root values between `(5,+1)` and
+  `(2,-1)`. Python scalar and C++ native labels agree for all 36 root actions.
+  This closes the movement-alias bug in the offline recurrence, not the
+  future-hazard, clock, delivery, or live-authority gates.
 - **Evidence:** Raw trace SHA-256
   `1cc423641141a6c884907754eed8742865f472ae40a1f1c77d47f4b916ab931e`;
   compact report
   `artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_153821.pipeline_pickup.json`;
   problem note
-  `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`.
+  `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`; correction
+  contract `notes/COMPLETE_MASK_ISSUE_ACTION_CONTRACT_20260727.md`.
 - **Regression:**
-  `test_pending_same_movement_complete_mask_write_blocks_promotion`.
+  `test_pending_same_movement_complete_mask_write_blocks_promotion`,
+  `test_equal_velocity_pending_identity_changes_no_write_value`, and
+  `test_36_action_ce_0134_root_matches_independent_scalar`.

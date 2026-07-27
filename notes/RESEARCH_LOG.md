@@ -4662,3 +4662,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** This checkpoint is offline contract and test infrastructure.
   It does not change the live action set, recurrence, publication, workers,
   cadence, fallback, or strategy status.
+
+## 2026-07-27: Native 64-Bit Complete-Mask Belief Gate
+
+- **Native capacity:** Added backward-compatible belief workspace
+  `create_v7`, `query_v3`, and `certify_upper_v3` ABIs using 64-bit action
+  subsets and a 64-action bound. The direct pipeline, viability kernels, and
+  legacy belief ABIs retain their 32-bit boundary.
+- **Compatibility:** The authoritative C ABI header and exact export manifest
+  contain 46 symbols. Linux and Windows libraries rebuild cleanly. A direct
+  legacy `create_v6` plus `query_v2` runtime smoke returns the expected
+  two-action best mask.
+- **Independent parity:** A 36-action CE-0134 root matches the independent
+  Python scalar belief oracle field by field for state, every root action,
+  and best actions. All 36 equal-valued actions are retained, exercising mask
+  bits above 31. The revealed-delay upper certificate likewise retains all 36
+  unresolved actions through the 64-bit mask.
+- **Adversarial value witness:** A deterministic six-frame fixture changes
+  only the pending token between equal-velocity `0x85` and `0x84`. The
+  matching token guarantees `(5,+1)` while the mismatching complete-mask
+  write guarantees only `(2,-1)`; swapping pending identity swaps the two
+  root values. Python and native agree across all 36 action labels.
+- **Bounded regression:** Existing variable-cadence tests, the formal audit,
+  and the 16-case belief benchmark pass with zero scalar/native, upper,
+  candidate, bound, portfolio, or certification failure.
+- **Authority:** CE-0134's movement-alias bug is corrected in offline
+  scalar/native recurrence infrastructure. No live planner, action set,
+  publication path, cadence, fallback, worker, or strategy status changes.
+  Future-event `model_unknown`, CE-0120, representative 36-action workload
+  performance, exact publication, and physical shadow integration remain.

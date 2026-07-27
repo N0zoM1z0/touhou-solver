@@ -245,16 +245,20 @@ Windows deadline gate. CE-0131 is the canonical final rejection witness.
 - **Model:** canonical shadow identity now retains complete native
   active/held/pending masks, remaining-delay support, exact observation, and
   immutable hazard/policy/model/clock versions. A tested 36-token no-Bomb
-  complete-mask alphabet now supplies unique equal-velocity issue identities;
-  the scalar/native production recurrence is not yet switched to it.
+  complete-mask alphabet now supplies unique equal-velocity issue identities.
+  The independent scalar oracle and backward-compatible 64-bit native belief
+  ABI retain those identities and match all 36 root action labels.
 - **Observed:** packed equivalent-root induction matches the independent
   scalar oracle. Hard Stage-1 `153821` retained 7,574 valid identities, 1,513
   multikey transactions, 173 last-write-wins replacements, 92 pending
   no-write carries, and 2,900 observed pickups with zero continuity failure.
 - **Limitation:** CE-0134 observes a pending complete-mask Shot reissue whose
   selected and held movement actions are equal. The physical actuator writes,
-  while the movement-only recurrence calls it no-write. All physical G1 roots
-  also remain future-event `model_unknown`, and CE-0120 remains open.
+  while the old movement-only recurrence calls it no-write. That alias is
+  corrected offline, and a deterministic fixture proves complete identity can
+  change finite values. All physical G1 roots remain future-event
+  `model_unknown`, CE-0120 remains open, and no complete-mask live consumer or
+  publication path exists.
 - **Boundary:** explicit pipeline ranking remains shadow. Live callers retain
   the active-equals-held fallback until the recurrence carries complete issue
   identity and hazard/clock coverage passes.

@@ -35,6 +35,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest committed algorithmic checkpoint:
+  `48f7e56 Add exact complete-mask capsule audit`. The offline Gate-5 audit
+  now reconstructs and digest-checks a physical 36-token complete-mask
+  active/held/pending root, replays its exact hazard-coverage record, joins
+  the capsule named by the same decision, completes all 36 no-Bomb root
+  actions under the exact stationary-held continuation, replays every worst
+  path, and checks scalar/native labels. Malformed slabs, JSONL, masks,
+  roots, frames, provenance, and delay support fail closed. Linux quick tests
+  pass `732/732` in `8.714/15.121 s` on Linux/Windows with three Windows
+  platform skips; the focused new Windows file passes `6/6`. No existing
+  physical trace contains both this root identity
+  and opted-in viability capsules, so physical evidence, future-event
+  coverage, delivery, and action authority remain open; see
+  `notes/G5_COMPLETE_MASK_CAPSULE_JOIN_GATE_20260728.md`.
+- The preceding native checkpoint
   `25d5f68 Add internal native stationary witness extraction`. Internal
   native extraction now retains the deterministic stationary worst path,
   including hidden remaining delay, recursive cadence, pickup/no-write,
@@ -720,8 +734,11 @@ Stage-4A/Stage-6B capsule report. CE-0140 proves that old Boolean-empty roots
 can still contain full stationary witnesses; stationary zero-prefix roots
 remain unrestricted-unresolved. Internal native worst-branch extraction now
 passes full-path Linux/Windows parity without changing the public ABI. The
-next useful gate builds exact complete-mask roots with future-event coverage,
-then measures cancellable delivery and Windows contention. Work should:
+exact complete-mask capsule audit is implemented, but the retained physical
+traces do not yet join canonical complete-mask roots and opted-in hazard
+capsules. The next useful gate retains that joined Stage-4A evidence while
+keeping unknown future events fail closed, then measures cancellable delivery
+and Windows contention. Work should:
 
 1. keep the native G3 extractor internal until exact complete-mask,
    coverage, delivery, and separately reviewed ABI/publication gates pass;

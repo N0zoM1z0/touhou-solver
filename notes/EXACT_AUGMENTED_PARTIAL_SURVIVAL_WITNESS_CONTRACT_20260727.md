@@ -2,9 +2,9 @@
 
 Date: 2026-07-27
 
-Status: G3 stationary scalar/oracle parity, retained-capsule, and internal
-native-extraction gates implemented; delivery remains open; no live or shadow
-action authority
+Status: G3 stationary scalar/oracle parity, retained-capsule, internal native
+extraction, and complete-mask capsule audit implementation complete; joined
+physical evidence and delivery remain open; no live or shadow action authority
 
 ## Question
 
@@ -198,7 +198,11 @@ intersection. A lookup miss must not start cold work on the issue thread.
    existing 46-symbol ABI until a separately reviewed ABI checkpoint.
    **Complete internally in `25d5f68`; full-path Python/native differentials
    pass and the production export manifest remains exactly 46 symbols.**
-5. Measure cancellable background delivery and Windows contention before any
+5. Join one physical canonical complete-mask root to its same-session
+   retained hazard capsule while keeping unknown future events fail closed.
+   **Audit implementation complete in `48f7e56`; joined physical evidence is
+   pending because the prior traces contain only one side of the join.**
+6. Measure cancellable background delivery and Windows contention before any
    shadow publication experiment.
 
 No step in this contract promotes S09, S16, candidate witnesses, survival
@@ -248,3 +252,12 @@ and Windows probes match the independent Python path on randomized
 all-root-action, pending no-write, merged-support, and unsafe-root cases.
 Delivery/contention remains Gate 5; details are in
 `G3_NATIVE_STATIONARY_WITNESS_GATE_20260728.md`.
+
+Checkpoint `48f7e56` implements the exact complete-mask physical
+root/capsule audit boundary. It rebuilds the content-addressed root and
+coverage record, completes every one of the 36 no-Bomb root actions under the
+exact held-mask stationary continuation, replays every worst path, and checks
+native labels. Unknown future-event coverage still yields
+`physical_action_authority = none`. Joined physical evidence and delivery
+remain open; details are in
+`G5_COMPLETE_MASK_CAPSULE_JOIN_GATE_20260728.md`.

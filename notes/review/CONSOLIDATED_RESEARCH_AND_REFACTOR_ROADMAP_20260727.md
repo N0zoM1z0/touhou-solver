@@ -884,10 +884,15 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
   Windows 對 randomized all-root-action、pending no-write、merged support、
   unsafe root 的完整 path 都與 independent Python witness 一致，公開 ABI
   仍精確維持 46 symbols；
-- 目前仍是 historical 17-movement-action capsule model 的 offline
-  restricted attainable lower witness。CE-0134 complete-mask capsule roots、
-  future-event coverage、background delivery/contention 與任何 physical
-  consumer 均未完成。
+- `48f7e56` 已完成 exact complete-mask capsule join 的 offline
+  instrumentation：重算 canonical identity digest 與 coverage record，
+  重建 active／held／pending root，逐一完成 36 個 no-Bomb root actions，
+  worst path replay 並比對 native labels；malformed slab／JSONL／mask／
+  delay／provenance 全部 fail closed；
+- 目前尚沒有同時含 canonical complete-mask roots 與 opted-in capsules
+  的 retained physical trace。因此 joined physical evidence、future-event
+  coverage、background delivery/contention 與任何 physical consumer 均未
+  完成。
 
 ### G4 — 更早保存 feasibility
 
@@ -906,6 +911,17 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
 這是「避免走進後來的 empty」，不是「把已 empty root 說成 viable」。
 
 ### G5 — Future hazard event coverage
+
+進度（2026-07-28，`48f7e56`）：
+
+- exact physical root/capsule join 與 36-action stationary audit 已完成；
+- `UNKNOWN` future-event slab 會把結果標為 `model_unknown`，即使 retained
+  finite capsule 內存在完整 witness，也保持 `physical_action_authority =
+  none`；
+- 下一個 evidence gate 是帶 `--viability-audit` 的 focused Lunatic
+  Stage-4A physical run，保留同一 session 的 canonical roots、capsules
+  與 compact report；
+- 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：
 

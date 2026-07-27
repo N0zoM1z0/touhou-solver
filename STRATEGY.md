@@ -78,15 +78,21 @@ zero-prefix stationary roots while unrestricted status remains unresolved.
 Internal native extraction now also matches the independent Python complete
 worst path on Linux and Windows for randomized all-root-action, pending
 no-write, merged-support, and unsafe-root cases without changing the public
-46-symbol ABI. This is restricted finite-model implementation evidence only;
-complete-mask roots, future-event coverage, delivery, and physical validation
-remain open.
+46-symbol ABI. Checkpoint `48f7e56` adds an offline complete-mask capsule join
+that digest-checks
+canonical physical roots and hazard coverage, evaluates all 36 no-Bomb root
+actions with the exact held-mask stationary continuation, replays every worst
+path, and checks native labels. Existing retained traces do not contain both
+canonical roots and opted-in capsules. This remains restricted finite-model
+implementation evidence only; joined physical evidence, future-event
+coverage, delivery, and physical validation remain open.
 
 ### Priority
 
-1. Preserve global feasibility earlier. Continue G3/G5 with exact
-   complete-mask roots, future-event coverage, and cancellable delivery after
-   the internal native witness gate, then extend partial-survival
+1. Preserve global feasibility earlier. Retain a joined physical
+   complete-mask root/capsule workload, continue G5 future-event coverage and
+   cancellable delivery after the internal native witness gate, then extend
+   partial-survival
    witnesses only through completed causal policy classes.
 2. Use proof-backed query-local refinement to separate coarsening, horizon,
    uncertainty, forecast/birth, route/tube, and unresolved losses. Do not use

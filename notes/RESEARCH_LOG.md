@@ -6133,3 +6133,29 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   stationary causal class only. Exact complete-mask capsule roots,
   future-event coverage, delivery/contention, issue-time certificates, and
   physical consumption remain open.
+
+### 2026-07-28 — Exact complete-mask capsule join instrumentation
+
+- **Observed implementation:** Checkpoint `48f7e56` adds a focused offline
+  trace/root/capsule audit. It recomputes the canonical pipeline identity
+  digest, reconstructs the exact active/held/pending complete masks, replays
+  every hazard-coverage slab, and checks capsule source/snapshot provenance.
+  Malformed JSONL, slabs, masks, frame joins, pending roots, and delay support
+  are explicit failures rather than silently omitted roots.
+- **Observed finite-model gate:** The synthetic joined fixture completes all
+  36 canonical no-Bomb root actions under the exact held-mask stationary
+  continuation. Every worst branch replays and every scalar label matches the
+  native belief implementation. `UNKNOWN` coverage still reports
+  `model_unknown` and `physical_action_authority = none`.
+- **Observed validation:** Ruff, byte compilation, and diff checks pass.
+  Linux/Windows quick tests pass `732/732` in `8.714/15.121 s`, with three
+  Windows platform skips. The focused new Windows file passes `6/6` in
+  `0.096 s`.
+- **Inferred evidence gap:** Prior physical runs contain historical
+  movement-only audit capsules or canonical complete-mask roots, but not both
+  in one session. A focused Stage-4A run with `--viability-audit` is required
+  before the joined finite-model result can be characterized on shipped-game
+  evidence.
+- **Authority:** Offline audit plumbing only. No future-event class, delivery
+  guarantee, publication path, live ranking, or physical action authority is
+  added.

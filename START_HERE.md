@@ -75,6 +75,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`. No model,
   recurrence, float comparison, worker policy, action authority, or strategy
   changed.
+- Current structural checkpoint splits the G2 implementation behind stable
+  compatibility facades. Spatial cells, transitions, root scope, patch
+  selection, clearance, result validation, scalar oracle, vector data plane,
+  and candidate guides now live in
+  `scripts/touhou_control/corridor/dual_refinement/`; the former
+  897/1022-line public modules are 44/22-line facades. This is a
+  behavior-preserving reorganization pending commit.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -105,6 +112,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Patch construction takes `3160.63..14153.12 ms`, vector solving takes
   `859.02..4008.67 ms`, and the worst root refines 77.47% of the field.
   `S09` therefore remains offline/shadow-only.
+- The post-G2 module split passes `686/686` quick tests on Linux in `9.057 s`
+  and Windows in `13.067 s` with three Windows platform skips. Three explicit
+  structure tests preserve old-facade/new-module symbol identity.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

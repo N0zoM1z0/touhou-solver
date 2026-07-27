@@ -368,6 +368,16 @@ scripts/
       prepared.py                     # PreparedCorridorProblem
       robust.py                       # robust finite-model solve
       refinement.py                   # explicit strategy interface
+      dual_refinement/
+        cells.py                      # spatial lower/upper aggregation
+        transitions.py                # explicit causal transition lattice
+        scope.py                      # exact-root branch relevance
+        patch.py                      # query-local dependency closure
+        clearance.py                  # patch geometry evaluation
+        result.py                     # validated bound artifact
+        scalar_solver.py              # independent small-case oracle
+        vector_solver.py              # retained dense-rectangle data plane
+        guides.py                     # proposal-only work selection
       rollout.py                      # representative path only
       forward_legacy.py               # non-authoritative legacy planner
       api.py
@@ -803,6 +813,11 @@ L_mixed ⊆ exhaustive_fine_reference ⊆ U_mixed
 Retained evidence:
 `notes/G2_QUERY_LOCAL_REFINEMENT_GATE_20260727.md` and
 `artifacts/viability_audit/g2_spatial_refinement_gate_20260727.json`.
+
+The G2 implementation is structurally split under
+`corridor/dual_refinement/`; `dual_bounds.py`,
+`adaptive_refinement.py`, and `refinement_guides.py` remain stable
+compatibility facades. This split changes no recurrence or retained result.
 
 ### G3 — Exact partial-survival lower witness
 

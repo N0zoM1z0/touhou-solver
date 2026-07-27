@@ -4763,3 +4763,23 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `artifacts/viability_audit/g2_spatial_refinement_gate_20260727.json`,
   SHA-256
   `bfc42d9f1c71f1b8228187360cca76d4023807201713a222d9c05664824f2bde`.
+
+### 2026-07-27 — G2 dual-refinement package split
+
+- **Observed structural change:** Split the 897-line `dual_bounds.py` and
+  1022-line `adaptive_refinement.py` into focused spatial-cell, transition,
+  exact-root scope, patch-selection, clearance, validated-result, scalar
+  oracle, vector data-plane, and candidate-guide modules under
+  `scripts/touhou_control/corridor/dual_refinement/`.
+- **Compatibility:** The historical `dual_bounds.py`,
+  `adaptive_refinement.py`, and `refinement_guides.py` import paths remain
+  44/22/5-line facades. Three characterization tests assert that every
+  public facade symbol is the same object as its focused implementation.
+- **Authority:** Pure reorganization. No model, recurrence, quantifier,
+  float comparison, hazard evaluation, action ordering, timeout behavior,
+  retained artifact, publisher, consumer, worker, live input, or strategy
+  status changed.
+- **Validation:** Focused dual-bound `8/8`, adaptive-refinement `12/12`, and
+  structure `3/3` tests pass; `ruff` and `git diff --check` pass; Linux quick
+  suite passes `686/686` in `9.057 s`; Windows quick suite passes `686/686`
+  in `13.067 s` with three platform skips.

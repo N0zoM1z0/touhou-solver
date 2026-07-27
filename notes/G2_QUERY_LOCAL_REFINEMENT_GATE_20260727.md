@@ -104,4 +104,3 @@ ruff:                              passed
 git diff --check:                  passed before documentation update
 retained six-root gate:            passed
 ```
-

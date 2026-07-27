@@ -4974,6 +4974,18 @@ def _run_live_session(
                         "current": state["input_current"],
                         "previous": state["input_previous"],
                     },
+                    "input_dispatch": {
+                        "role": "observed_issue_transaction",
+                        "previous_mask": input_dispatch.previous_mask,
+                        "target_mask": input_dispatch.target_mask,
+                        "write_required": bool(transitions),
+                        "transition_count": len(transitions),
+                        "transitions": [
+                            [transition.bit, transition.pressed]
+                            for transition in transitions
+                        ],
+                        "estimator_issued": bool(transitions),
+                    },
                     "local_pipeline_root": local_pipeline_root_record,
                     "local_pipeline_timing": {
                         "planning": _local_certificate_timing_record(

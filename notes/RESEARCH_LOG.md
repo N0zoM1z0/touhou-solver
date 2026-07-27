@@ -5010,3 +5010,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Evidence:** Matching compact artifacts under `notes/runs/` and
   `artifacts/runtime_reports/`; ignored 440,885,387-byte raw JSONL SHA-256
   `f22dae779704b0e0189a9cf3129ce77db1aeec83245c82a7264edd579ef4fea8`.
+
+### 2026-07-27 — Decision timing and optional-hazard characterization
+
+- **Observed structural change:** Added pure declared-timing and opt-in
+  nearby/transform hazard trace builders under `th08_live.decision_trace`.
+  The timing builder receives the already measured `before_trace` boundary
+  and performs no internal clock read.
+- **Observed parity boundary:** The live loop retains historical inline
+  timing and optional hazard fields, independently builds extracted values,
+  compares every emitted field, and only then updates the record.
+- **Authority:** Pure post-issue serialization. No timing measurement,
+  sensing, decoding, planning, certification, dispatch, or input authority
+  moved.
+- **Validation:** Decision-trace tests pass `2/2`; live-focused tests pass
+  `111/111`; Ruff and `git diff --check` pass; Linux quick suite passes
+  `698/698` in `8.957 s`; Windows quick suite passes `698/698` in `13.124 s`
+  with three platform skips.

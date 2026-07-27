@@ -249,7 +249,8 @@ The structural sequence and current status are:
    old/new parity builder, and the live record consumes them. Hazard-detail,
    timing, and outer record composition remain controller-owned. Sensing
    fields completed the same characterization/removal sequence and are now
-   consumed.
+   consumed. Timing and optional detailed-hazard fields now have pure
+   old/new parity builders; their inline paths are pending removal.
 
 The bounded iteration then becomes:
 

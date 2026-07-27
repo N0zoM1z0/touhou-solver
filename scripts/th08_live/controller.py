@@ -132,6 +132,11 @@ from th08_live.decision_control_trace import (
     DecisionControlTraceInput,
     build_decision_control_trace_fields,
 )
+from th08_live.decision_trace import (
+    DecisionTimingTraceInput,
+    build_decision_timing_trace_fields,
+    build_optional_hazard_trace_fields,
+)
 from th08_live.hazard_decode import (  # noqa: F401
     ITEM_ACTIVE_OFFSET,
     ITEM_FULL_VALUE_OFFSET,
@@ -4920,6 +4925,63 @@ def _run_live_session(
                     ),
                 )
                 record.update(control_trace_fields)
+                timing_trace_fields = build_decision_timing_trace_fields(
+                    DecisionTimingTraceInput(
+                        observe_ms=observe_ms,
+                        read_ms=read_ms,
+                        enemy_background_ms=enemy_background_ms,
+                        enemy_prefix_capture_ms=(
+                            enemy_prefix_capture_ms
+                        ),
+                        enemy_prefix_merge_ms=enemy_prefix_merge_ms,
+                        bullet_pool_read_ms=bullet_pool_read_ms,
+                        laser_pool_read_ms=laser_pool_read_ms,
+                        item_pool_read_ms=item_pool_read_ms,
+                        boss_phase_read_ms=boss_phase_read_ms,
+                        spell_enemy_guard_read_ms=(
+                            spell_enemy_guard_read_ms
+                        ),
+                        ecl_lookahead_read_ms=ecl_lookahead_read_ms,
+                        hazard_read_bookkeeping_ms=(
+                            hazard_read_bookkeeping_ms
+                        ),
+                        enemy_pool_read_ms=enemy_pool_read_ms,
+                        enemy_prefix_read_ms=(
+                            enemy_prefix_snapshot.read_ms
+                        ),
+                        issue_enemy_read_ms=issue_enemy_read_ms,
+                        decode_ms=decode_ms,
+                        bullet_decode_ms=bullet_decode_ms,
+                        bullet_event_attach_ms=bullet_event_attach_ms,
+                        laser_decode_ms=laser_decode_ms,
+                        item_decode_ms=item_decode_ms,
+                        corridor_overhead_ms=corridor_overhead_ms,
+                        plan_ms=plan_ms,
+                        issue_enemy_recertificate_ms=(
+                            issue_enemy_recertificate_ms
+                        ),
+                        issue_path_ms=issue_path_ms,
+                        observe_to_issue_ms=observe_to_issue_ms,
+                        decision=decision,
+                        local_pipeline_certificate_shadow=(
+                            local_pipeline_certificate_shadow
+                        ),
+                        input_ms=input_ms,
+                        before_trace_ms=float(
+                            record["timing_ms"]["before_trace"]
+                        ),
+                        previous_trace_ms=previous_trace_ms,
+                        previous_iteration_ms=previous_iteration_ms,
+                    )
+                )
+                if any(
+                    record[key] != value
+                    for key, value in timing_trace_fields.items()
+                ):
+                    raise RuntimeError(
+                        "extracted decision timing trace changed schema"
+                    )
+                record.update(timing_trace_fields)
                 candidate_record = build_candidate_verifier_trace_record(
                     enabled=candidate_verifier is not None,
                     target=candidate_verifier_target,
@@ -5006,6 +5068,29 @@ def _run_live_session(
                         for bullet in bullets
                         if bullet.transform_runtime is not None
                     ]
+                optional_hazard_fields = (
+                    build_optional_hazard_trace_fields(
+                        trace_radius=args.trace_radius,
+                        trace_transform_runtime=(
+                            args.trace_transform_runtime
+                        ),
+                        bullets=bullets,
+                        lasers=lasers,
+                        items=items,
+                        projected_player_x=projected_player_x,
+                        projected_player_y=projected_player_y,
+                        serialize_bullet_trace=serialize_bullet_trace,
+                        serialize_laser_trace=serialize_laser_trace,
+                    )
+                )
+                if any(
+                    record[key] != value
+                    for key, value in optional_hazard_fields.items()
+                ):
+                    raise RuntimeError(
+                        "extracted optional hazard trace changed schema"
+                    )
+                record.update(optional_hazard_fields)
                 trace_ms = trace_sink.emit(
                     record,
                     flush=True,

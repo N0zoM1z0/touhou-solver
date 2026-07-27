@@ -116,8 +116,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   and consumes the extracted field set.
 - Sensing-trace characterization checkpoint `f70bccd` adds an immutable
   `SensingTraceInput` and pure boss/ECL/hazard/alignment/issue-guard record
-  builder. The current uncommitted checkpoint removes the characterized
-  inline sensing path and consumes the extracted fields.
+  builder. Structural checkpoint `ad8de27 Extract live sensing trace fields`
+  removes the characterized inline sensing path and consumes the extracted
+  fields.
+- The pending final trace-characterization checkpoint adds pure declared
+  timing-boundary and optional nearby/transform hazard builders under
+  `th08_live.decision_trace`. Historical inline fields remain for one
+  checkpoint and are compared before update.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -210,6 +215,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   The run took eight hits, six after global-kernel exhaustion, so it is
   structural retention plus CE-0136 survival-failure evidence, not a route
   acceptance result.
+- Timing/optional-hazard characterization passes `698/698` quick tests on
+  Linux in `8.957 s` and Windows in `13.124 s` with three Windows platform
+  skips. Live-focused tests pass `111/111`.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

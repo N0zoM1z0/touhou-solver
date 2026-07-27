@@ -3475,6 +3475,19 @@ Status: observed physical survival failure; R5 lifecycle smoke completed
   Compact evidence is retained under the matching run name in `notes/runs/`
   and `artifacts/runtime_reports/`; raw JSONL SHA-256 is
   `3e0f5f89abd533b0d8f6d2420c71eca3f869fd4f6f4b371dad686b71f1cea83d`.
+- **Additional observed instance:** Post-candidate-trace-extraction run
+  `hard_route2_stage1_unattended_20260727_181119` completed Hard Stage 1 and
+  cleanup with zero Bomb input but took one fresh-attempt hit at frame 2,043.
+  At `(376.000,23.812)` on the right/top boundary, active input was `down`,
+  144 bullets and zero lasers were present, and signed pipeline clearance was
+  `-1.257`. The dossier classifies the physical contact as
+  `modeled_committed_prefix_collision` and the planner state as
+  `global_viability_kernel_exhausted_before_hit`, with four frames of robust
+  warning. No same-epoch observed bullet overlap was retained. This widens the
+  CE-0132 instances beyond the bottom boundary; kernel exhaustion and finite
+  committed-prefix collision remain the actionable facts. Compact evidence
+  is retained under the matching run name; raw JSONL SHA-256 is
+  `0dcf0130c3a31be57d2df643a4ca7a12048084cc02afd1f19ac258244aecbc80`.
 
 ## CE-0133: A fixed 240-frame pre-hit window missed four exhaustion boundaries
 

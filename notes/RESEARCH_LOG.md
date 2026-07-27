@@ -4886,3 +4886,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `git diff --check` pass; Linux quick suite passes `694/694` in `8.468 s`;
   Windows quick suite passes `694/694` in `13.079 s` with three platform
   skips.
+
+### 2026-07-27 — Candidate-verifier trace extraction and physical retention
+
+- **Observed structural change:** Removed the characterized controller-owned
+  candidate outcome/snapshot/publication helpers and inline shadow-service
+  serializer. Historical private imports alias the focused module.
+  `controller.py` is now 5,817 lines.
+- **Observed automated gate:** Candidate-focused tests pass `13/13`,
+  live-focused tests `107/107`, and Ruff plus `git diff --check` pass. Linux
+  quick suite passes `694/694` in `8.747 s`; Windows quick suite passes
+  `694/694` in `13.115 s` with three platform skips.
+- **Observed physical retention:** Supervised Windows run
+  `hard_route2_stage1_unattended_20260727_181119` completed Hard Stage 1 with
+  7,686 decisions, zero Bomb input, accepted route completion, compact
+  artifacts, supervisor completion, and no residual process. It produced
+  7,644 corridor records. Candidate shadow was disabled in this default
+  workload, so its serialization branch is retained by deterministic tests
+  rather than this physical run.
+- **Observed survival failure:** One native hit occurred at frame 2,043 after
+  global viability-kernel exhaustion, with a four-frame warning and a modeled
+  committed-prefix collision at the right/top boundary. This is appended to
+  CE-0132 and is not a clean survival pass.
+- **Authority:** Structure and implementation retention only. Candidate
+  verification remains shadow-only and no query timing, result semantics,
+  issue, input, model, recurrence, deadline, fallback, or strategy authority
+  intentionally changed.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 163,696,837-byte raw JSONL SHA-256
+  `0dcf0130c3a31be57d2df643a4ca7a12048084cc02afd1f19ac258244aecbc80`.

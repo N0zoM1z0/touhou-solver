@@ -100,11 +100,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   from 6,614 at the iteration-stage checkpoint. The builder consumes only
   completed publications and lookup-only values after issue; it performs no
   sensing, query expansion, worker mutation, or dispatch.
-- The pending candidate-trace characterization checkpoint adds pure outcome,
+- Candidate-trace characterization checkpoint `77418c0` adds pure outcome,
   snapshot, publication, and complete shadow-service record builders under
-  `th08_live.candidate_trace`. The live loop still constructs its historical
-  candidate record and asserts exact equality with the extracted result
-  before publishing it. Candidate verification remains shadow-only.
+  `th08_live.candidate_trace`. The current uncommitted checkpoint removes the
+  characterized controller helpers and inline record. Historical private
+  imports resolve aliases to the focused module; candidate verification
+  remains shadow-only.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -163,6 +164,17 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `8.468 s` and Windows in `13.079 s` with three Windows platform skips.
   Thirteen focused tests cover witness-publication authority, status
   precedence, disabled service behavior, and completed-result serialization.
+- After deleting the candidate helpers and inline serializer, `controller.py`
+  is 5,817 lines and the same `694/694` quick tests pass on Linux in
+  `8.747 s` and Windows in `13.115 s` with three Windows platform skips.
+  Supervised physical retention
+  `hard_route2_stage1_unattended_20260727_181119` completed Hard Stage 1 with
+  7,686 decisions, zero Bomb input, route completion, accepted artifacts, and
+  no residual process. The default workload did not enable the candidate
+  shadow, so candidate serialization authority rests on deterministic tests;
+  the physical run retains surrounding live-loop and lifecycle behavior. It
+  took one native hit at frame 2,043 after global-kernel exhaustion and is not
+  a clean survival pass.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

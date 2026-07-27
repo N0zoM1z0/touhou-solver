@@ -34,6 +34,13 @@ coupling, and the order for later structural work.
   corridor records had zero required-field omissions. It took one hit at
   frame 6,385 after global-kernel exhaustion and is not a clean survival
   pass.
+- **Observed:** after removing the characterized candidate-verifier trace
+  path, Windows smoke `hard_route2_stage1_unattended_20260727_181119`
+  completed Hard Stage 1 with 7,686 decisions, zero Bomb input, accepted
+  route completion, artifact materialization, and no residual process. The
+  default workload had candidate shadow disabled, so deterministic tests
+  retain that schema branch. The run took one hit at frame 2,043 after
+  global-kernel exhaustion and is not a clean survival pass.
 - **Inferred:** passing parity and physical lifecycle gates establishes
   implementation preservation for the exercised workloads. It does not prove
   physical-model validity, global optimality, or route acceptance.
@@ -62,7 +69,8 @@ instead of stale import-time bindings.
 The earlier extraction reduced `scripts/th08_live/controller.py` from roughly
 8,000 lines to 6,566 lines. Validated stage contracts temporarily raised it
 to 6,614 lines. Extracting the characterized corridor trace builder reduces
-the current controller to 6,126 lines; the dominant block remains
+the controller to 6,126 lines; extracting candidate-verifier trace ownership
+reduces it further to 5,817 lines. The dominant block remains
 `_run_live_session`.
 
 `scripts/th08_live/iteration.py` now defines and the live loop consumes:
@@ -110,7 +118,7 @@ implementation module where module-level patch identity matters.
 
 | Module | Lines | Decision | Reason |
 | --- | ---: | --- | --- |
-| `th08_live/controller.py` | 6,126 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, and non-corridor trace construction; the four immutable handoff records and pure corridor trace builder are now live. |
+| `th08_live/controller.py` | 5,817 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, fresh issue, and outer trace construction; immutable handoff records plus pure corridor/candidate trace builders are live. |
 | `th08_live/planner_pass.py` | 1,685 | retain for now | Large but now one causal planner pass. Split baseline, supplemental, and finalization only after the dependency boundary has retained workload evidence. |
 | `analysis/th08_run_dossier.py` | 2,451 | split after live iteration contract | Offline reader, attribution, aggregation, validation, and rendering are separable and low authority-risk. |
 | `analysis/th08_practice_dossier.py` | 2,307 | split with shared dossier primitives | It duplicates trace reading, statistics, schema construction, and rendering responsibilities. |
@@ -135,7 +143,7 @@ decomposed.
 | Module | Lines | Decision |
 | --- | ---: | --- |
 | `th08_live_dodge_agent.py` | 22 | keep facade |
-| `th08_live/controller.py` | 6,126 | P0 staged extraction through iteration contracts |
+| `th08_live/controller.py` | 5,817 | P0 staged extraction through iteration contracts |
 | `th08_live/planner_pass.py` | 1,685 | P1 after session stages; split prepare/baseline/supplemental/finalize |
 | `touhou_control/query_survival.py` | 1,913 | P1 split identity/query/certification/native workspace |
 | `touhou_control/viability.py` | 1,400 | P1 split model/transition/numpy/native dispatch/public policy |
@@ -217,7 +225,7 @@ The structural sequence and current status are:
    transaction: **corridor subrecord implemented and consumed**. One
    checkpoint compared the full historical inline record with the pure
    builder; the next removed the inline path. Candidate-verifier trace
-   extraction is now in its old/new equality-characterization checkpoint.
+   followed the same characterization/removal sequence and is now consumed.
    Hazard-detail and outer decision records remain controller-owned.
 
 The bounded iteration then becomes:

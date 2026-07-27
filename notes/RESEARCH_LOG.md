@@ -6010,3 +6010,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Offline aggregation ownership only. Numeric conventions,
   summary values and keys, report ordering, attribution, recurrence, live
   sensing, issue behavior, action authority, and strategy are unchanged.
+
+### 2026-07-27 — G3 exact partial-survival witness contract
+
+- Added
+  `EXACT_AUGMENTED_PARTIAL_SURVIVAL_WITNESS_CONTRACT_20260727.md` before
+  changing the witness implementation. It fixes the physical objective,
+  augmented observation state, no-write transition, recursive cadence and
+  hidden-delay quantifiers, finite horizon, exact digest identity,
+  complete-root-action requirement, lower-bound modes, publication deadline,
+  falsification cases, and staged scalar/native/physical gates.
+- The first code checkpoint is deliberately limited to offline stationary
+  continuation policies. Every root action remains unrestricted; later
+  decisions use one declared causal action. The oracle must retain a
+  deterministic worst observation-compatible nature path and exact
+  problem/policy/witness digests, then match both the existing independent
+  scalar label and native belief workspace.
+- **Authority:** Contract only. No recurrence, solver, publication, live
+  action, or strategy status changed.

@@ -61,15 +61,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
   blocked by live integration, hazard coverage, clock, publication, and
   performance gates.
 - Latest structural checkpoint:
-  `aa9358e Extract shared dossier ingestion modules`. The retained run and
-  practice dossier CLIs now share bounded JSONL scanning/provenance, epoch and
-  scope selection, compact-decision schema lowering, and stable percentile/
-  resource statistics under `scripts/analysis/dossier/`. The original private
-  imports remain compatibility aliases. The latest native structural
-  checkpoint remains `ef306ce Split native internal ABI declarations`,
-  following the focused live movement/hazard/certificate/objective
-  extractions and native local/viability/geometry/pipeline translation-unit
-  splits recorded in `notes/RESEARCH_LOG.md`.
+  `a0a7afb Separate native pipeline compatibility adapters`. Direct-pipeline
+  v1 create/query adapters now live in `pipeline/direct_compat.cpp`; belief
+  32-bit v2 query/upper adapters join the older create/query/upper adapters in
+  `pipeline/belief_compat.cpp`. Current direct/belief workspace files retain
+  the recurrence, memo, resume/cancel, and current query implementations. The
+  46-symbol ABI and legacy call behavior are unchanged.
+  Earlier offline checkpoint `aa9358e` moved bounded JSONL
+  scanning/provenance, epoch/scope selection, compact-decision lowering, and
+  stable percentile/resource statistics under `scripts/analysis/dossier/`.
+  Original private imports remain compatibility aliases.
   `th08_live_dodge_agent.py`, runtime, practice/full-route supervisors,
   hotkey daemon, semantic cases, and ECL tool are compatibility/composition
   entry points over narrow packages. The live package now owns session and

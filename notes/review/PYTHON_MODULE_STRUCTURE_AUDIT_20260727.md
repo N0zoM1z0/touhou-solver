@@ -269,9 +269,10 @@ implementation units are:
 
 | Module | Lines | Next seam |
 | --- | ---: | --- |
-| `pipeline/belief_workspace.cpp` | 2,264 | state identity / recurrence / certificates / current workspace ABI |
-| `pipeline/belief_compat.cpp` | 398 | legacy create/query/upper implementation adapters |
-| `pipeline/direct_workspace.cpp` | 1,447 | transition build / solve / resume |
+| `pipeline/belief_workspace.cpp` | 2,171 | state identity / recurrence / certificates / current workspace ABI |
+| `pipeline/belief_compat.cpp` | 498 | cohesive legacy create/query/upper implementation adapters |
+| `pipeline/direct_workspace.cpp` | 1,352 | transition build / solve / resume / current workspace ABI |
+| `pipeline/direct_compat.cpp` | 82 | legacy v1 create/query implementation adapters |
 | `viability/boolean.cpp` | 354 | Boolean/terminal viability induction |
 | `viability/value.cpp` | 508 | signed safety value and best-action policy |
 | `viability/survival.cpp` | 362 | survival-frame/bottleneck label induction |
@@ -296,6 +297,16 @@ implementation units are:
 Native splits must keep the checked-in explicit source list, exact exported
 symbol manifest, status/error behavior, Python/C++ parity, and Windows/Linux
 build gates. Line movement alone is not an accepted native checkpoint.
+
+Checkpoint `a0a7afb` consolidates the direct v1 and belief 32-bit v2 adapters
+behind the current workspace implementations. A narrow internal action-count
+predicate preserves the belief v2 rejection of workspaces wider than 32
+actions without exposing the private recurrence class. Both release targets,
+the exact 46-symbol manifest, legacy direct v1 and belief v2 calls, independent
+belief-oracle parity, and the Linux/Windows quick suites pass. The next native
+split should target a behavior-owning transition/solve boundary; do not move
+the complete class definition into a large header merely to lower one file's
+line count.
 
 ## Next Live-Session Contract
 

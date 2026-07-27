@@ -5846,3 +5846,29 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Offline source ownership only. Trace inputs, compact report
   schema, attribution, ordering, formatting, live sensing, recurrence,
   physical issue behavior, action authority, and strategy are unchanged.
+
+### 2026-07-27 — Native pipeline compatibility ownership
+
+- **Observed structural change:** Checkpoint `a0a7afb` adds
+  `pipeline/direct_compat.cpp` for the direct v1 create/query adapters and
+  moves belief 32-bit v2 query/upper adapters into the existing
+  `pipeline/belief_compat.cpp`. `direct_workspace.cpp` now owns current
+  workspace creation, query, root membership, prewarm/merge, cancel, and
+  destruction. `belief_workspace.cpp` owns the current 64-bit workspace and
+  a narrow internal predicate used to preserve the legacy 32-action limit.
+- **Observed size result:** Direct current/compat ownership is 1,352/82 lines;
+  belief current/compat ownership is 2,171/498 lines. The checked-in build
+  source list explicitly includes the new direct compatibility unit.
+- **Observed compatibility gate:** Added a ctypes legacy direct v1
+  create/query/destroy case. The pre-existing belief v6-create/v2-query case
+  remains green. Linux and Windows release libraries build successfully and
+  retain exactly the checked-in 46 exported symbols.
+- **Validation:** Focused ABI tests pass `6/6`; variable-cadence independent
+  oracle cases pass `8/8`; complete-mask belief cases pass `3/3`; direct
+  prewarm/resume cases pass `5/5`. Quick suites pass `705/705` on Linux in
+  `9.075 s` and Windows in `13.120 s` with three platform skips. Ruff and
+  `git diff --check` pass.
+- **Authority:** Native source ownership only. State identity,
+  canonicalization, transition branches, controller/nature quantifiers,
+  memoization, continuation budget, threshold certificates, resume/cancel,
+  status mapping, public ABI, and live action authority are unchanged.

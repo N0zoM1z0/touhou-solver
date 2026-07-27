@@ -889,10 +889,15 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
   重建 active／held／pending root，逐一完成 36 個 no-Bomb root actions，
   worst path replay 並比對 native labels；malformed slab／JSONL／mask／
   delay／provenance 全部 fail closed；
-- 目前尚沒有同時含 canonical complete-mask roots 與 opted-in capsules
-  的 retained physical trace。因此 joined physical evidence、future-event
-  coverage、background delivery/contention 與任何 physical consumer 均未
-  完成。
+- `20260728_005108` 已補上同時含 canonical complete-mask roots 與
+  opted-in capsules 的 retained physical trace。audit 接受 12,986 個
+  exact joins，第一個 eligible Boolean-empty root 完成全部 36 root
+  actions 並有 full 32-frame stationary witness；
+- 同一 audit 拒絕 1,613 個 query/coverage mixed roots，形成 CE-0141。
+  `d5866c4` 已把 future coverage root 對齊 canonical `query_frame`，但
+  post-fix physical recheck 尚未完成；
+- future-event coverage、background delivery/contention 與任何 physical
+  consumer 仍未完成。
 
 ### G4 — 更早保存 feasibility
 
@@ -918,9 +923,14 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
 - `UNKNOWN` future-event slab 會把結果標為 `model_unknown`，即使 retained
   finite capsule 內存在完整 witness，也保持 `physical_action_authority =
   none`；
-- 下一個 evidence gate 是帶 `--viability-audit` 的 focused Lunatic
-  Stage-4A physical run，保留同一 session 的 canonical roots、capsules
-  與 compact report；
+- 帶 `--viability-audit` 的 focused Lunatic Stage-4A physical evidence
+  gate 已由 `20260728_005108` 完成，保留同一 session 的 canonical
+  roots、capsules 與 compact report；
+- 該 run 接受 12,986 joins、零 missing capsules；保留的 root 完成 36
+  actions、32-frame witness、native zero mismatch，但 coverage 從第一個
+  successor 即為 `UNKNOWN`；
+- CE-0141 的 1,613 mixed-root rows 已 offline 修正，仍需小型 physical
+  trace recheck；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

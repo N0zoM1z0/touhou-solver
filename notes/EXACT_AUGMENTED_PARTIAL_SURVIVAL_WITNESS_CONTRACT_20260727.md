@@ -3,8 +3,9 @@
 Date: 2026-07-27
 
 Status: G3 stationary scalar/oracle parity, retained-capsule, internal native
-extraction, and complete-mask capsule audit implementation complete; joined
-physical evidence and delivery remain open; no live or shadow action authority
+extraction, complete-mask capsule audit, and same-session physical join
+complete; CE-0141 physical recheck and delivery remain open; no live or
+shadow action authority
 
 ## Question
 
@@ -200,8 +201,10 @@ intersection. A lookup miss must not start cold work on the issue thread.
    pass and the production export manifest remains exactly 46 symbols.**
 5. Join one physical canonical complete-mask root to its same-session
    retained hazard capsule while keeping unknown future events fail closed.
-   **Audit implementation complete in `48f7e56`; joined physical evidence is
-   pending because the prior traces contain only one side of the join.**
+   **Complete for run `20260728_005108`; the retained exact root has all 36
+   root actions and remains `model_unknown`. The audit also found CE-0141
+   mixed query/coverage roots; `d5866c4` fixes construction offline and a
+   physical recheck remains pending.**
 6. Measure cancellable background delivery and Windows contention before any
    shadow publication experiment.
 
@@ -261,3 +264,15 @@ native labels. Unknown future-event coverage still yields
 `physical_action_authority = none`. Joined physical evidence and delivery
 remain open; details are in
 `G5_COMPLETE_MASK_CAPSULE_JOIN_GATE_20260728.md`.
+
+Physical run `lunatic_route2_stage4a_unattended_20260728_005108` completes the
+same-session join. Decision/query/source `600/599/598` is Boolean-empty yet
+retains a full 32-frame witness after all 36 root actions complete; every path
+replays and native labels match exactly. Coverage is `UNKNOWN` from frame 600,
+so this extends CE-0140 without physical action authority.
+
+The audit rejected 1,613 mixed-root rows as CE-0141. Their coverage began at
+`manager_frame` while the canonical observable recurrence root was
+`query_frame`. Checkpoint `d5866c4` aligns future coverage construction to the
+query root without changing action behavior. Details and retained hashes are
+in `G5_PHYSICAL_COMPLETE_MASK_CAPSULE_GATE_20260728.md`.

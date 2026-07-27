@@ -35,6 +35,28 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest committed algorithmic checkpoint:
+  `d5866c4 Align hazard coverage with canonical query roots`. Physical Gate-5
+  auditing found CE-0141: 1,613 of 14,599 available-query rows mixed a
+  canonical `query_frame` root with coverage built from an earlier
+  `manager_frame`. The trace-only builder now roots coverage at the canonical
+  query frame. The G5 report retains exact failure counts with bounded
+  samples instead of thousands of duplicate strings. No planner, issue, or
+  action authority changed. Linux/Windows quick suites pass `732/732` in
+  `8.757/14.621 s`, with three Windows skips; physical recheck remains open.
+- Physical Gate-5 workload
+  `lunatic_route2_stage4a_unattended_20260728_005108` completed Lunatic Stage
+  4A over frames `2..44411`, 14,804 decisions, ten hits, hard no-Bomb,
+  accepted artifacts, supervisor exit, and cleanup. It retained 1,884
+  capsules. The exact audit accepted 12,986 root/capsule joins, rejected the
+  1,613 CE-0141 mixed roots, and found zero missing capsules. Physical
+  decision/query/source `600/599/598` was Boolean-empty but completed all 36
+  no-Bomb root actions with a 32-frame stationary witness and zero
+  scalar/native mismatch. Future-event coverage is `UNKNOWN` from frame 600,
+  so physical action authority remains none. The retained-artifact regression
+  brings Linux/Windows quick suites to `733/733` in `8.581/14.794 s`, with
+  three Windows skips. See
+  `notes/G5_PHYSICAL_COMPLETE_MASK_CAPSULE_GATE_20260728.md`.
+- The preceding audit implementation checkpoint
   `48f7e56 Add exact complete-mask capsule audit`. The offline Gate-5 audit
   now reconstructs and digest-checks a physical 36-token complete-mask
   active/held/pending root, replays its exact hazard-coverage record, joins
@@ -43,10 +65,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   path, and checks scalar/native labels. Malformed slabs, JSONL, masks,
   roots, frames, provenance, and delay support fail closed. Linux quick tests
   pass `732/732` in `8.714/15.121 s` on Linux/Windows with three Windows
-  platform skips; the focused new Windows file passes `6/6`. No existing
-  physical trace contains both this root identity
-  and opted-in viability capsules, so physical evidence, future-event
-  coverage, delivery, and action authority remain open; see
+  platform skips; the focused new Windows file passes `6/6`. The physical
+  join is now retained, while future-event coverage, delivery, and action
+  authority remain open; see
   `notes/G5_COMPLETE_MASK_CAPSULE_JOIN_GATE_20260728.md`.
 - The preceding native checkpoint
   `25d5f68 Add internal native stationary witness extraction`. Internal
@@ -734,11 +755,11 @@ Stage-4A/Stage-6B capsule report. CE-0140 proves that old Boolean-empty roots
 can still contain full stationary witnesses; stationary zero-prefix roots
 remain unrestricted-unresolved. Internal native worst-branch extraction now
 passes full-path Linux/Windows parity without changing the public ABI. The
-exact complete-mask capsule audit is implemented, but the retained physical
-traces do not yet join canonical complete-mask roots and opted-in hazard
-capsules. The next useful gate retains that joined Stage-4A evidence while
-keeping unknown future events fail closed, then measures cancellable delivery
-and Windows contention. Work should:
+exact complete-mask capsule audit now retains a joined Stage-4A workload. It
+also found and rejected CE-0141 mixed root frames; construction is corrected
+offline and needs a small physical trace recheck. The next useful gate keeps
+unknown future events fail closed while measuring cancellable delivery and
+Windows contention. Work should:
 
 1. keep the native G3 extractor internal until exact complete-mask,
    coverage, delivery, and separately reviewed ABI/publication gates pass;

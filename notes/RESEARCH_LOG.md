@@ -6159,3 +6159,53 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Offline audit plumbing only. No future-event class, delivery
   guarantee, publication path, live ranking, or physical action authority is
   added.
+
+### 2026-07-28 — Physical complete-mask capsule join and CE-0141
+
+- **Observed physical scope:** Supervised Lunatic Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260728_005108` completed frames
+  `2..44411`, 14,804 decisions, `route_complete`, compact artifact
+  materialization, supervisor exit zero, and cleanup. Hard no-Bomb passed
+  every decision. The opted-in audit retained 1,884 local capsules totaling
+  79,053,832 bytes.
+- **Observed contacts:** Ten hits occurred at
+  `[4259,11726,12357,13405,19017,21215,22063,31161,31625,42033]`; every hit
+  followed global-kernel exhaustion. The first hit is the canonical
+  fresh-attempt witness. This diagnostic-I/O run is not a survival A/B.
+- **Observed same-session exact join:** The G5 audit accepted 12,986
+  canonical root/capsule joins, found zero missing named capsules, and found
+  5,896 accepted Boolean-empty roots eligible for a 32-frame solve.
+  Decision/query/source `600/599/598` completed all 36 no-Bomb root actions
+  under exact held token `0x05`. It retained a 32-frame witness with margin
+  `0x1.f87dd20000000p+3`; every worst path replayed and native label/margin
+  mismatch was exactly zero.
+- **Observed authority separation:** Coverage becomes `UNKNOWN` at frame 600,
+  the first successor transition. The report retains exact restricted
+  finite-model authority but `physical_action_authority = none`. The
+  Boolean-empty/full-stationary result extends CE-0140 to a same-session
+  physical complete-mask root without proving unrestricted or physical
+  feasibility.
+- **Observed CE-0141:** 1,613 of 14,599 available-query rows mixed a
+  canonical query root with coverage rooted at the earlier manager frame.
+  Decision 267 is the minimal retained witness: manager/query/coverage roots
+  `266/267/266`. Checkpoint `d5866c4` roots future coverage at the canonical
+  query frame and makes duplicate audit failures compact but count-preserving.
+  The change is trace-only and adds no action authority.
+- **Observed validation:** Focused shadow/join/pickup suites pass
+  `3/3`, `6/6`, and `4/4`. After adding the retained-artifact contract,
+  Linux/Windows quick suites pass `733/733` in `8.581/14.794 s`, with three
+  Windows skips. Two complete G5 report generations are byte-identical.
+  Report content digest is
+  `a67bac60da036813a330483a30d9d93bea90097414926518985f4d9504efc6fe`;
+  file SHA-256 is
+  `aa76c5424788bd6628fdd275580256153024be9934864f0b392481f0663dfd8b`.
+- **Observed diagnostic timing:** local median/p95 was
+  `9.981/17.662 ms` versus `9.975/18.025 ms` in the preceding no-audit
+  Stage-4A workload; rolling solve median/p95 was `106.845/303.617 ms`
+  versus `108.792/310.049 ms`. No material contention is visible, but the
+  workloads differ in RNG, deaths, geometry, and resource history, so this
+  is not a controlled performance result.
+- **Authority and next gate:** CE-0141 needs one post-fix physical trace
+  recheck. Future events remain unknown. Native cancellation/completion-age
+  and unchanged Windows contention gates precede any complete-only shadow
+  lookup experiment.

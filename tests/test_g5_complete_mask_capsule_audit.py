@@ -9,6 +9,7 @@ import tempfile
 import unittest
 
 from analysis.complete_mask_capsule import audit
+from analysis.partial_witness_capsule.serialization import file_sha256
 from analysis.complete_mask_capsule.trace import (
     coverage_from_record,
     identity_from_record,
@@ -28,6 +29,15 @@ from touhou_control.pipeline_identity import (
 )
 from touhou_control.viability_audit_capsule import (
     write_viability_audit_capsule,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+RETAINED_REPORT = (
+    ROOT
+    / "artifacts"
+    / "viability_audit"
+    / "g5_complete_mask_stage4a_20260728.json"
 )
 
 
@@ -262,6 +272,48 @@ class CompleteMaskCapsuleAuditTests(unittest.TestCase):
             "joined capsule is absent: missing.npz",
             workload["root_validation_failure_samples"][0],
         )
+
+    def test_retained_physical_complete_mask_gate(self) -> None:
+        report = json.loads(RETAINED_REPORT.read_text(encoding="utf-8"))
+        self.assertEqual(
+            file_sha256(RETAINED_REPORT),
+            "aa76c5424788bd6628fdd275580256153"
+            "024be9934864f0b392481f0663dfd8b",
+        )
+        self.assertEqual(
+            report["report_digest"],
+            "a67bac60da036813a330483a30d9d93b"
+            "ea90097414926518985f4d9504efc6fe",
+        )
+        self.assertEqual(
+            report["schema"],
+            "th08-g5-complete-mask-capsule-audit-v2",
+        )
+        workload = report["workloads"][0]
+        self.assertEqual(workload["read_joined_root_count"], 12_986)
+        self.assertEqual(workload["root_validation_failure_count"], 1_613)
+        self.assertEqual(
+            workload["root_validation_failure_counts"],
+            {"coverage and pipeline root frames differ": 1_613},
+        )
+        self.assertEqual(workload["missing_capsule_count"], 0)
+        self.assertEqual(
+            workload["eligible_boolean_empty_root_count"],
+            5_896,
+        )
+        observation = workload["observations"][0]
+        self.assertEqual(
+            observation["root_identity"]["sha256"],
+            "42c0fcb51f6ba8ea2fa53196b199492c"
+            "45dd68322f8d68887c36bdaf1bbec1e6",
+        )
+        self.assertFalse(observation["trace"]["trace_boolean_state_viable"])
+        self.assertEqual(observation["state_label"]["guaranteed_frames"], 32)
+        self.assertEqual(len(observation["complete_root_actions"]), 36)
+        self.assertEqual(len(observation["action_witnesses"]), 36)
+        self.assertEqual(observation["native_parity"]["mismatch_count"], 0)
+        self.assertEqual(observation["physical_model_status"], "model_unknown")
+        self.assertEqual(observation["physical_action_authority"], "none")
 
 
 if __name__ == "__main__":

@@ -3863,3 +3863,53 @@ retained-capsule gate complete
   `artifacts/viability_audit/g3_stationary_partial_witness_capsule_audit_20260727.json`
   (content digest
   `82ae76afac47f556d01865cba4a0342db6c5b1da44e537e6af7b7a9f28d881f8`).
+
+### Same-session complete-mask extension
+
+- **Observed:** Lunatic Stage-4A physical decision/query/source
+  `600/599/598` in run `20260728_005108` joined an exact canonical
+  active/held `0x05` root to `policy_582_598.npz`. The live coarse Boolean
+  query was empty, but all 36 no-Bomb root actions completed and the exact
+  held-mask stationary class retained a 32-frame witness with margin
+  `0x1.f87dd20000000p+3`.
+- **Boundary:** Every worst path replayed and native labels matched exactly,
+  but future-event coverage is `UNKNOWN` from the first successor frame.
+  This strengthens the finite-model classification counterexample without
+  adding unrestricted feasibility or physical action authority.
+- **Evidence:**
+  `artifacts/viability_audit/g5_complete_mask_stage4a_20260728.json`.
+
+## CE-0141: Hazard coverage and canonical observation used different roots
+
+Status: observed physical trace-contract failure; construction fixed offline;
+physical recheck pending
+
+- **Observed symptom:** The exact same-session G5 audit rejected 1,613 of
+  14,599 available-policy decisions in Lunatic Stage-4A run
+  `20260728_005108`. Each rejected row had a valid canonical digest and
+  replayable coverage record, but `hazard_coverage.root_frame` differed from
+  `canonical_identity.observation.query_frame`.
+- **Minimal physical witness:** At decision frame 267 the canonical manager
+  frame was 266, canonical query frame was 267, coverage root was 266, and
+  coverage declared unknown from 267. Adjacent decisions at 265 and 269
+  matched. This is a mixed-root record, not one immutable physical query.
+- **Invalid assumption:** The trace-only pipeline builder treated the sampled
+  manager/source frame as the hazard-coverage root while the canonical
+  observation, player state, and policy query used the later snapshot/query
+  frame. A one-frame advance during capture exposed the difference.
+- **Correction:** Checkpoint `d5866c4` roots coverage at `query_frame`, the
+  observable recurrence root required by the formal coverage contract. The
+  manager frame remains separately retained under the open CE-0120 clock
+  version. No planner, issue, or action authority changes.
+- **Regression tests:** `test_pending_multikey_root_retains_complete_masks`
+  now uses manager/query `100/102` and requires coverage root/unknown-from
+  `102/103`. The G5 audit continues to reject any mixed root and aggregates
+  duplicate failures without hiding their count or bounded samples. Linux
+  and Windows quick suites pass `733/733` after adding the retained-artifact
+  contract.
+- **Evidence:** raw trace SHA-256
+  `93037d9febe609accd44eb150150088c29610443783a4434328478409fee41b0`;
+  compact audit
+  `artifacts/viability_audit/g5_complete_mask_stage4a_20260728.json`.
+- **Live verification:** pending a post-fix physical trace with zero
+  coverage/query-root mismatches.

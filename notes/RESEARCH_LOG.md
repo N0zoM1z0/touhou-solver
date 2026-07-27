@@ -5981,3 +5981,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Offline renderer ownership only. Dossier values, field and
   row ordering, whitespace, attribution, recurrence, live sensing, issue
   behavior, action authority, and strategy are unchanged.
+
+### 2026-07-27 — Practice dossier summary ownership
+
+- **Observed structural change:** Checkpoint `d25507e` adds
+  `analysis/dossier/planner_consistency.py`, `practice_timing.py`,
+  `practice_control.py`, and `practice_behavior.py`. The cross-tab of global
+  horizon versus fresh local-prefix claims is now shared by full-run and
+  practice aggregation. Timing/native-sensor summaries,
+  cadence/control/viability summaries, and pre-hit/per-spell behavior
+  summaries have independent owners. Historical entry-point names remain
+  exact aliases.
+- **Observed size result:** Practice/full-run entry points changed from
+  1,449/815 to 448/676 lines. The 447-line timing owner isolates corridor,
+  cadence, runtime, enemy-sensor, issue-guard, spell-owner, and
+  terminal-threat reports. The 407-line control owner isolates hold, delay,
+  adaptive estimator, viability, and input-visibility reports. The 234-line
+  behavior owner composes behavior slices and per-spell summaries. The
+  shared planner consistency owner is 152 lines.
+- **Observed exact-output gate:** The complete retained 548,614,220-byte
+  Stage-5 trace regenerated JSON, Markdown, deaths CSV, and regression JSON
+  byte-identically to the pre-summary-extraction output. Focused ownership,
+  full-run dossier, and practice dossier suites pass `3/3`, `20/20`, and
+  `18/18`.
+- **Validation:** Ruff, byte compilation, and `git diff --check` pass. Quick
+  suites pass `716/716` on Linux in `8.994 s` and Windows in `12.961 s` with
+  three platform skips.
+- **Authority:** Offline aggregation ownership only. Numeric conventions,
+  summary values and keys, report ordering, attribution, recurrence, live
+  sensing, issue behavior, action authority, and strategy are unchanged.

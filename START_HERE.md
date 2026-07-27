@@ -61,17 +61,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
   blocked by live integration, hazard coverage, clock, publication, and
   performance gates.
 - Latest structural checkpoint:
-  `1cd3a9c Separate dossier rendering from aggregation`. Stable full-run and
-  practice Markdown/CSV rendering now lives in
-  `analysis/dossier/full_run_render.py` and `practice_render.py`; the entry
-  points are 815/1,449 lines and retain exact historical renderer aliases. A
+  `d25507e Split practice dossier summary ownership`. Shared planner
+  consistency, practice timing/sensor, control/viability, and behavior/spell
+  summaries now live in five focused modules under `analysis/dossier/`.
+  Full-run/practice entry points are 676/448 lines and retain exact historical
+  aliases. A
   complete 548,614,220-byte Stage-5 replay produced byte-identical JSON,
   Markdown, death CSV, and regression JSON. A retained full-run fixture kept
   the exact pre-extraction rendered Markdown and CSV hashes. The fresh quick
-  suites pass `713/713` on Linux in `8.409 s` and Windows in `12.383 s` with
-  three platform skips. The first Linux run repeated the already-recorded
-  1-ms cold-prewarm deadline flake; its focused `5/5` and the unmodified fresh
-  full run passed, and no test was weakened.
+  suites pass `716/716` on Linux in `8.994 s` and Windows in `12.961 s` with
+  three platform skips.
+  The preceding renderer checkpoint
+  `1cd3a9c Separate dossier rendering from aggregation` moved stable full-run
+  and practice Markdown/CSV construction into
+  `analysis/dossier/full_run_render.py` and `practice_render.py`.
   The preceding attribution checkpoint `8149262 Extract shared dossier death
   attribution` moved physical contact witnesses, cause classification,
   warning leads, death-ledger construction, and clustering into
@@ -107,10 +110,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   implementation globals. R2/R3/R4 remain complete. The remaining structural
   target is the staged iteration contract inside `_run_live_session`, recorded
   in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`, plus the
-  aggregation/validation seams remaining in the two offline dossier entry
-  points. No model, recurrence, float comparison, worker policy, action
-  authority, report schema, attribution or rendering semantics, or strategy
-  changed.
+  staged action-alignment/dispatch contract inside `_run_live_session`.
+  Offline dossier entry points are now bounded aggregation, validation,
+  regression, and CLI composition. No model, recurrence, float comparison,
+  worker policy, action authority, report schema, attribution, summary, or
+  rendering semantics changed; strategy is also unchanged.
 - Structural checkpoint `6dbcc8b Split dual refinement into focused modules`
   splits the G2 implementation behind stable
   compatibility facades. Spatial cells, transitions, root scope, patch

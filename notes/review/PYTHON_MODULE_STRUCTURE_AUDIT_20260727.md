@@ -105,6 +105,10 @@ coupling, and the order for later structural work.
   Markdown/CSV rendering retains its exact pre-extraction hashes. The first
   Linux full run repeated the recorded 1-ms cold-prewarm deadline flake;
   focused `5/5` and the fresh unmodified full run passed.
+- **Observed:** summary checkpoint `d25507e` passes `716/716` quick tests on
+  Linux in `8.994 s` and Windows in `12.961 s` with three platform skips.
+  The full Stage-5 replay remains byte-identical across JSON, Markdown, death
+  CSV, and regression JSON.
 - **Workload decision:** Stage 1 remains sufficient for lifecycle, cleanup,
   and trace-schema changes. Subsequent planner, recurrence, clearance, or
   native compute checkpoints use Hard Stage 4A as the primary focused
@@ -203,6 +207,11 @@ trace, and lifecycle ownership remains in the controller.
   construction, and death clustering.
 - `analysis/dossier/full_run_render.py` and `practice_render.py` separately
   own the two stable Markdown and death-CSV schemas.
+- `analysis/dossier/planner_consistency.py` owns the shared global-horizon
+  versus fresh local-prefix cross-tab.
+- `analysis/dossier/practice_timing.py`, `practice_control.py`, and
+  `practice_behavior.py` own independent native-sensor/timing,
+  cadence/viability, and pre-hit/per-spell summaries.
 - `analysis/th08_run_dossier.py` and
   `analysis/th08_practice_dossier.py` retain compatibility aliases for their
   former private reader/schema/statistics imports; the full-run entry point
@@ -220,6 +229,9 @@ Stage-5 replay retained all four outputs byte for byte.
 Checkpoint `1cd3a9c` moved stable rendering into separate 501/621-line owners,
 reducing the entry points to 815/1,449 lines while retaining complete output
 and compatibility-alias parity.
+Checkpoint `d25507e` then reduced full-run/practice entry points to 676/448
+lines by extracting the shared planner cross-tab and grouped practice
+summaries. The complete Stage-5 output remains byte-identical.
 
 All compatibility facades preserve the historical import surface. The
 runtime, practice, full-route, hotkey, ECL, and live facades alias the
@@ -233,8 +245,8 @@ implementation module where module-level patch identity matters.
 | `th08_live/planner_pass.py` | 320 | staged split complete | Prepare/orchestration only; shared contracts, baseline, supplemental lifecycle, and final selection/assembly have dedicated modules. |
 | `th08_live/planner_pass_supplemental.py` | 755 | retain through finalization gate | Cohesive pre-submit/search/exact-version lookup/fallback/terminal-label lifecycle; split native job construction from search only if later work makes either responsibility change independently. |
 | `th08_live/planner_pass_finalize.py` | 587 | retain | One selection/assembly responsibility: endpoint rank, robust override, pre-loss admission, damage shadow, decision assembly, and relaxed retry. |
-| `analysis/th08_run_dossier.py` | 815 | retain entry composition | Reader, schema, statistics, attribution, and rendering are extracted; the remaining module owns full-run aggregation, validation, regression assembly, and CLI I/O. |
-| `analysis/th08_practice_dossier.py` | 1,449 | continue shared aggregation checkpoints | Shared ingestion, attribution, and rendering are complete; the entry still owns many independent timing/control summaries plus dossier/regression composition. |
+| `analysis/th08_run_dossier.py` | 676 | retain entry composition | Reader, schema, statistics, attribution, shared planner summary, and rendering are extracted; the remaining module owns full-run aggregation, validation, regression assembly, and CLI I/O. |
+| `analysis/th08_practice_dossier.py` | 448 | retain entry composition | Shared ingestion, attribution, planner/timing/control/behavior summaries, and rendering are extracted; the remaining module owns practice aggregation, validation, regression assembly, and CLI I/O. |
 | `th08_automation/practice_supervisor.py` | 683 | retain orchestration | Resource/process/menu/monitor/artifact logic is already behind narrow modules; the remaining file is composition and lifecycle flow. |
 | `th08_corridor_adapter.py` | 691 | retain; watch growth | This is the TH08-specific hazard-lowering and control-spec adapter required by the workspace boundary. Its dependencies point inward to game-neutral control code. |
 | `th08_corridor_runtime.py` | 643 | retain; watch growth | It is a cohesive publication/query lifecycle for corridor artifacts. A split is warranted only if candidate-verifier and prewarm lifecycles diverge further. |
@@ -285,13 +297,12 @@ Their heavy implementations are the modules listed above.
 
 ### Offline analysis
 
-`analysis/th08_run_dossier.py` (815) is now a reasonable full-run aggregation
-and entry module. `analysis/th08_practice_dossier.py` (1,449) remains the
-highest-value low-authority split. Shared reader, provenance, scope, compact
-schema, stable statistics, complete death/cause attribution, and rendering
-ownership is complete. Next group independently testable practice
-timing/sensor/control summaries without changing their numeric conventions.
-Other analysis/benchmark programs
+`analysis/th08_run_dossier.py` (676) and
+`analysis/th08_practice_dossier.py` (448) are now reasonable aggregation and
+entry modules. Shared reader, provenance, scope, compact schema, stable
+statistics, complete death/cause attribution, planner/timing/control/behavior
+summaries, and rendering ownership is complete. Other analysis/benchmark
+programs
 above roughly 800 lines should move shared readers/statistics/renderers into
 `analysis/dossier/` or benchmark helpers, while their executable files remain
 thin explicit entry points.
@@ -425,8 +436,10 @@ Shared offline modules under `scripts/analysis/dossier/` now have this status:
   entries, and clustering;
 - `full_run_render.py` and `practice_render.py`: **implemented** with exact
   Markdown/CSV output characterization;
-- thin full-run entry point: **implemented enough to retain** at 815 lines;
-- thinner practice entry point: pending summary aggregation checkpoints.
+- `planner_consistency.py`, `practice_timing.py`, `practice_control.py`, and
+  `practice_behavior.py`: **implemented** with complete output parity;
+- bounded full-run/practice entry points: **implemented enough to retain** at
+  676/448 lines.
 
 These tools remain offline. Their refactor must compare complete generated
 JSON/Markdown/CSV outputs against retained fixtures; schema or attribution

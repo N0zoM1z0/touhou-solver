@@ -198,6 +198,7 @@ from th08_live.planner_pass import (
     PlannerPassDependencies,
     _run_local_planner_pass as _run_local_planner_pass_impl,
 )
+from th08_live.pipeline_shadow import build_pipeline_shadow_snapshot
 from th08_local_planner import (  # noqa: F401
     ActuatorPipeline,
     BaselineBeamContext,
@@ -4234,92 +4235,32 @@ def _run_live_session(
             )
             corridor_target = primary_policy_query.target
             viability_query = primary_policy_query.viability_query
-            held_desired_action = _local_pipeline_action_from_mask(
-                previous_mask
-            )
-            active_supported_mask = (
-                int(state["input_current"]) & SUPPORTED_INPUT_MASK
-            )
             held_desired_mask = previous_mask & SUPPORTED_INPUT_MASK
-            pending_supported_mask = (
-                pending_command_estimate.expected_mask
-                & SUPPORTED_INPUT_MASK
-                if pipeline_pending_command is not None
-                and pending_command_estimate is not None
-                else None
-            )
-            local_pipeline_estimator_consistent = (
-                (
-                    pipeline_pending_command is None
-                    and held_desired_mask == active_supported_mask
-                )
-                or (
-                    pipeline_pending_command is not None
-                    and pending_supported_mask == held_desired_mask
-                )
+            pipeline_shadow_snapshot = build_pipeline_shadow_snapshot(
+                supported_mask=SUPPORTED_INPUT_MASK,
+                native_active_mask=int(state["input_current"]),
+                held_desired_mask=held_desired_mask,
+                pending_estimate=pending_command_estimate,
+                action_from_mask=_local_pipeline_action_from_mask,
+                gameplay_epoch=gameplay_epoch,
+                stage_route_index=int(state["stage_route_index"]),
+                spell_id=(
+                    int(spell_state["spell_id"])
+                    if spell_state["active"]
+                    else None
+                ),
+                manager_frame=int(state["enemy_manager_frame"]),
+                query_frame=counter_after_read,
+                target_frame=policy_query_request.target_frame,
+                player_x=projected_player_x,
+                player_y=projected_player_y,
+                hazard_horizon_frames=PLANNER_THREAT_HORIZON,
+                corridor_solution=corridor_solution,
             )
             observed_local_pipeline_root = (
-                LocalPipelineRoot(
-                    active_action=_local_pipeline_action_from_mask(
-                        active_supported_mask
-                    ),
-                    held_desired_action=held_desired_action,
-                    pending_action=(
-                        _local_pipeline_action_from_mask(
-                            int(pending_supported_mask)
-                        )
-                        if pending_supported_mask is not None
-                        else None
-                    ),
-                    remaining_delay_support=(
-                        pipeline_pending_command.remaining_frames
-                        if pipeline_pending_command is not None
-                        else ()
-                    ),
-                )
-                if local_pipeline_estimator_consistent
-                else None
+                pipeline_shadow_snapshot.local_root
             )
-            local_pipeline_root_record = {
-                "role": "shadow_no_action_authority",
-                "active_action": _local_pipeline_action_from_mask(
-                    active_supported_mask
-                ),
-                "active_mask": active_supported_mask,
-                "held_desired_action": held_desired_action,
-                "held_desired_mask": held_desired_mask,
-                "pending_action": (
-                    _local_pipeline_action_from_mask(
-                        int(pending_supported_mask)
-                    )
-                    if pending_supported_mask is not None
-                    else None
-                ),
-                "pending_mask": pending_supported_mask,
-                "remaining_delay_support": (
-                    pipeline_pending_command.remaining_frames
-                    if pipeline_pending_command is not None
-                    else ()
-                ),
-                "snapshot_age": (
-                    pending_command_estimate.snapshot_age
-                    if pending_command_estimate is not None
-                    else None
-                ),
-                "issue_age": (
-                    pending_command_estimate.issue_age
-                    if pending_command_estimate is not None
-                    else None
-                ),
-                "overdue": (
-                    pending_command_estimate.overdue
-                    if pending_command_estimate is not None
-                    else False
-                ),
-                "estimator_consistent": (
-                    local_pipeline_estimator_consistent
-                ),
-            }
+            local_pipeline_root_record = pipeline_shadow_snapshot.record
             candidate_verifier_target: (
                 CandidateVerifierTarget | None
             ) = None

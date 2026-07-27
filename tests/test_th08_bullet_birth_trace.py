@@ -115,6 +115,8 @@ def _intent() -> EclBirthLookaheadResult:
         instructions_scanned=4,
         stop_reason="horizon",
         horizon_covered=True,
+        requested_horizon_frames=80,
+        stop_frame=80,
     )
 
 
@@ -161,6 +163,14 @@ class BulletBirthTraceTests(unittest.TestCase):
         self.assertEqual(record["observation"]["evidence"]["slot"][0], 7)
         self.assertEqual(record["observation"]["evidence"]["status"][0], 4)
         self.assertEqual(record["intent"]["intents"][0]["opcode"], 0x60)
+        self.assertEqual(record["intent"]["coverage"]["status"], "complete")
+        self.assertEqual(
+            record["intent"]["coverage"]["covered_through_frame"],
+            80,
+        )
+        self.assertIsNone(
+            record["intent"]["coverage"]["unknown_from_frame"]
+        )
         self.assertEqual(record["alignment"]["ecl_frame_before"], 118)
         self.assertEqual(
             record["deferred_fire_state"]["status"],
@@ -206,7 +216,7 @@ class BulletBirthTraceTests(unittest.TestCase):
             observation_diagnostics=diagnostics,
         )
         record = build_bullet_birth_trace_record(trace_input)
-        self.assertEqual(record["schema_version"], 7)
+        self.assertEqual(record["schema_version"], 8)
         self.assertEqual(record["native_call_mode"], "gil-held")
         self.assertEqual(record["observation_diagnostics"], diagnostics)
 

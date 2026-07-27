@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 import unittest
 from types import SimpleNamespace
 
@@ -57,17 +58,23 @@ class SensingTraceTests(unittest.TestCase):
             time_scale=1.0,
             tag_mask=0x10,
         )
-        ecl_lookahead = SimpleNamespace(
-            instructions_scanned=4,
-            stop_reason="horizon",
-            horizon_covered=True,
-        )
         toggle = SimpleNamespace(
             frame=5,
             callback_index=12,
             tag_mask=0x10,
             alternate_velocity_x=1.0,
             alternate_velocity_y=2.0,
+        )
+        ecl_lookahead = SimpleNamespace(
+            instructions_scanned=4,
+            stop_reason="horizon",
+            horizon_covered=True,
+            coverage_status="complete",
+            requested_horizon_frames=80,
+            stop_frame=80,
+            covered_through_frame=80,
+            unknown_from_frame=None,
+            events=(toggle,),
         )
         guard = SimpleNamespace(body=active_body, contact_enabled=True)
         trace_input = SensingTraceInput(
@@ -132,6 +139,18 @@ class SensingTraceTests(unittest.TestCase):
             fields["bullet_velocity_lookahead"]["tagged_bullets"],
             1,
         )
+        self.assertEqual(
+            fields["bullet_velocity_lookahead"]["coverage_status"],
+            "complete",
+        )
+        self.assertEqual(
+            fields["bullet_velocity_lookahead"]["prefix_events"],
+            fields["bullet_velocity_lookahead"]["events"],
+        )
+        self.assertEqual(
+            fields["bullet_velocity_lookahead"]["lowering_status"],
+            "complete_schedule_lowered",
+        )
         self.assertEqual(fields["enemy_body_contact_enabled_count"], 1)
         self.assertEqual(fields["enemy_body_dormant_count"], 1)
         self.assertEqual(fields["enemy_body_snapshot_age"], 4)
@@ -145,6 +164,39 @@ class SensingTraceTests(unittest.TestCase):
         )
         self.assertTrue(
             fields["spell_enemy_body_guard"]["covered_by_async_pool"]
+        )
+
+        incomplete = SimpleNamespace(
+            instructions_scanned=256,
+            stop_reason="repeated_state",
+            horizon_covered=False,
+            coverage_status="unknown",
+            requested_horizon_frames=80,
+            stop_frame=4,
+            covered_through_frame=3,
+            unknown_from_frame=4,
+            events=(toggle,),
+        )
+        incomplete_fields = build_sensing_trace_fields(
+            replace(
+                trace_input,
+                ecl_lookahead=incomplete,
+                tagged_velocity_toggles=(),
+            ),
+            serialize_boss_phase_snapshot=lambda _snapshot: {"frame": 10},
+            serialize_enemy_bodies=lambda bodies: [
+                {"pointer": body.pointer} for body in bodies
+            ],
+            enemy_body_contact_enabled=lambda body: body.contact,
+            enemy_pointer_in_scanned_pool=lambda pointer: pointer == 1,
+            issue_recertification_record=lambda value: {"value": value},
+        )["bullet_velocity_lookahead"]
+        self.assertEqual(incomplete_fields["coverage_status"], "unknown")
+        self.assertEqual(len(incomplete_fields["prefix_events"]), 1)
+        self.assertEqual(incomplete_fields["events"], [])
+        self.assertEqual(
+            incomplete_fields["lowering_status"],
+            "incomplete_prefix_not_lowered",
         )
 
 

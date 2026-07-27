@@ -2,10 +2,11 @@
 
 Date: 2026-07-28
 
-Status: fixed pre-implementation correction contract for CE-0147. This note
-changes neither the callback recurrence nor physical input authority. It
-defines which bounded lookahead results may be lowered as a complete future
-schedule and which remain an observed prefix followed by `UNKNOWN`.
+Status: implemented and offline-validated correction contract for CE-0147.
+This note changes neither the callback recurrence nor physical input
+authority. It defines which bounded lookahead results may be lowered as a
+complete future schedule and which remain an observed prefix followed by
+`UNKNOWN`.
 
 This refines
 `TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`,
@@ -175,16 +176,53 @@ be inserted into an earlier decision.
 
 ## Ordered Gates
 
-1. Add explicit coverage support to callback and birth-intent results.
-2. Make the compatibility/lowering API reject incomplete results.
-3. Preserve prefix evidence and distinguish prefix versus lowered events in
-   sensing trace.
-4. Bump the birth trace/audit schema and fail closed on missing or
-   inconsistent coverage metadata.
-5. Retain deterministic instruction-limit, unsupported-flow, terminate,
-   horizon, and repeated-state fixtures.
-6. Re-audit the retained schema-v7 physical trace to quantify which
-   incomplete rows contain potentially affected tagged bullets.
-7. Only then choose between a proved repeated-state scheduler model, a
+1. **Complete:** add explicit coverage support to callback and birth-intent
+   results.
+2. **Complete:** make the compatibility/lowering API reject incomplete
+   results.
+3. **Complete:** preserve prefix evidence and distinguish prefix versus
+   lowered events in sensing trace.
+4. **Complete:** bump the birth trace/audit schema and fail closed on missing
+   or inconsistent coverage metadata.
+5. **Complete:** retain deterministic instruction-limit, unsupported-flow,
+   terminate, horizon, and repeated-state fixtures.
+6. **Complete:** re-audit the retained schema-v7 physical trace to quantify
+   which incomplete rows contain potentially affected tagged bullets.
+7. **Open:** choose between a proved repeated-state scheduler model, a
    conservative envelope, or certificate unavailability for the unresolved
    suffix.
+
+## Implementation And Offline Evidence
+
+The implementation keeps raw `events` as prefix evidence, exposes
+`complete_events` only for `horizon`/`terminate`, and raises
+`IncompleteEclLookaheadError` through the compatibility API when a caller
+requests an incomplete schedule. Live ECL capture lowers only
+`complete_events`; sensing trace records both prefix and lowered tuples plus
+their exact support.
+
+Trace schema v8 and residual-audit v6 validate stop reason, horizon,
+stop/covered/unknown frames, result kind, and lowering status. Schema-v1-v7
+records remain readable but are labeled `legacy_declared_complete` or
+`legacy_declared_unknown`; they are not silently reinterpreted as schema-v8
+certificates.
+
+Re-auditing retained run
+`lunatic_route2_stage4a_unattended_20260728_070838` finds:
+
+- 3,723 legacy-declared complete callback rows;
+- 2,405 legacy-declared unknown rows exposed through the old unchecked
+  schedule interface;
+- zero recorded prefix events in those incomplete rows; and
+- 975 incomplete rows with tagged bullets, maximum 1,367.
+
+Two generations of the compact retained callback-coverage re-audit are
+byte-identical at canonical LF SHA-256
+`b3019955f4bdd2ea008e2ae60eadddc99f0feb27416a2fb11c87af18c920ffbf`.
+
+Focused tests and Ruff pass. Complete Linux/Windows suites pass `806/806` in
+`9.046/15.657 s`, with three existing Windows platform skips.
+
+This corrects the consumption semantics only. The 2,405 unknown suffixes
+remain outside hard coverage authority until gate 7 and a schema-v8 physical
+semantic recheck succeed.

@@ -13,10 +13,10 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA = "th08-bullet-birth-residual-audit-v5"
+SCHEMA = "th08-bullet-birth-residual-audit-v6"
 TRACE_KIND = "bullet_birth_audit"
 TRACE_ROLE = "trace_only_no_action_authority"
-TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5, 6, 7))
+TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5, 6, 7, 8))
 NATIVE_CALL_MODES = frozenset(("gil-released", "gil-held"))
 MAX_SAMPLES = 20
 OBSERVER_P95_LIMIT_MS = 0.20
@@ -88,7 +88,13 @@ def _decision_scope(line: str) -> tuple[tuple[int, int], dict[str, object]]:
     lookahead_error: str | None = None
     lookahead_stop_reason: str | None = None
     lookahead_event_count = 0
+    lookahead_prefix_event_count = 0
     lookahead_instructions_scanned = 0
+    lookahead_coverage_status: str | None = None
+    lookahead_lowering_status: str | None = None
+    lookahead_unknown_from_frame: int | None = None
+    lookahead_tagged_bullets = 0
+    lookahead_metadata_valid = False
     lookahead_marker = '"bullet_velocity_lookahead": '
     lookahead_start = line.find(lookahead_marker)
     if lookahead_start >= 0:
@@ -108,9 +114,52 @@ def _decision_scope(line: str) -> tuple[tuple[int, int], dict[str, object]]:
             raw_events = lookahead.get("events")
             if isinstance(raw_events, list):
                 lookahead_event_count = len(raw_events)
+            raw_prefix_events = lookahead.get("prefix_events")
+            if isinstance(raw_prefix_events, list):
+                lookahead_prefix_event_count = len(raw_prefix_events)
             raw_scanned = lookahead.get("instructions_scanned")
             if type(raw_scanned) is int and raw_scanned >= 0:
                 lookahead_instructions_scanned = raw_scanned
+            lookahead_metadata_valid = _valid_velocity_lookahead_coverage(
+                lookahead
+            )
+            raw_coverage_status = lookahead.get("coverage_status")
+            lookahead_coverage_status = (
+                raw_coverage_status
+                if isinstance(raw_coverage_status, str)
+                else None
+            )
+            raw_lowering_status = lookahead.get("lowering_status")
+            lookahead_lowering_status = (
+                raw_lowering_status
+                if isinstance(raw_lowering_status, str)
+                else None
+            )
+            raw_horizon_covered = lookahead.get("horizon_covered")
+            if (
+                lookahead_coverage_status is None
+                and type(raw_horizon_covered) is bool
+            ):
+                if raw_horizon_covered:
+                    lookahead_coverage_status = "legacy_declared_complete"
+                    lookahead_lowering_status = (
+                        "legacy_complete_events_lowered_unchecked"
+                    )
+                else:
+                    lookahead_coverage_status = "legacy_declared_unknown"
+                    lookahead_lowering_status = (
+                        "legacy_incomplete_prefix_lowered_as_schedule"
+                    )
+                lookahead_prefix_event_count = lookahead_event_count
+            raw_unknown_from = lookahead.get("unknown_from_frame")
+            lookahead_unknown_from_frame = (
+                raw_unknown_from
+                if type(raw_unknown_from) is int
+                else None
+            )
+            raw_tagged_bullets = lookahead.get("tagged_bullets")
+            if type(raw_tagged_bullets) is int and raw_tagged_bullets >= 0:
+                lookahead_tagged_bullets = raw_tagged_bullets
     lookahead_read_ms: float | None = None
     timing_marker = '"timing_ms": '
     timing_start = line.find(timing_marker)
@@ -134,9 +183,19 @@ def _decision_scope(line: str) -> tuple[tuple[int, int], dict[str, object]]:
         "velocity_lookahead_error": lookahead_error,
         "velocity_lookahead_stop_reason": lookahead_stop_reason,
         "velocity_lookahead_event_count": lookahead_event_count,
+        "velocity_lookahead_prefix_event_count": (
+            lookahead_prefix_event_count
+        ),
         "velocity_lookahead_instructions_scanned": (
             lookahead_instructions_scanned
         ),
+        "velocity_lookahead_coverage_status": lookahead_coverage_status,
+        "velocity_lookahead_lowering_status": lookahead_lowering_status,
+        "velocity_lookahead_unknown_from_frame": (
+            lookahead_unknown_from_frame
+        ),
+        "velocity_lookahead_tagged_bullets": lookahead_tagged_bullets,
+        "velocity_lookahead_metadata_valid": lookahead_metadata_valid,
         "velocity_lookahead_read_ms": lookahead_read_ms,
     }
     return (values["gameplay_epoch"], values["frame"]), scope
@@ -182,6 +241,108 @@ def _evidence_count_bucket(count: int) -> str:
     return "321_plus"
 
 
+def _valid_velocity_lookahead_coverage(
+    lookahead: dict[str, Any],
+) -> bool:
+    horizon_covered = lookahead.get("horizon_covered")
+    status = lookahead.get("coverage_status")
+    horizon = lookahead.get("requested_horizon_frames")
+    stop_frame = lookahead.get("stop_frame")
+    covered_through = lookahead.get("covered_through_frame")
+    unknown_from = lookahead.get("unknown_from_frame")
+    result_kind = lookahead.get("result_kind")
+    stop_reason = lookahead.get("stop_reason")
+    prefix_events = lookahead.get("prefix_events")
+    lowered_events = lookahead.get("events")
+    lowering_status = lookahead.get("lowering_status")
+    if (
+        type(horizon_covered) is not bool
+        or type(horizon) is not int
+        or horizon < 0
+        or type(stop_frame) is not int
+        or not 0 <= stop_frame <= horizon
+        or type(covered_through) is not int
+        or not isinstance(prefix_events, list)
+        or not isinstance(lowered_events, list)
+    ):
+        return False
+    if horizon_covered:
+        return (
+            status == "complete"
+            and stop_reason in {"horizon", "terminate"}
+            and covered_through == horizon
+            and unknown_from is None
+            and result_kind == "complete_schedule"
+            and lowering_status == "complete_schedule_lowered"
+            and prefix_events == lowered_events
+        )
+    return (
+        status == "unknown"
+        and stop_reason not in {"horizon", "terminate"}
+        and isinstance(stop_reason, str)
+        and covered_through == max(0, stop_frame - 1)
+        and unknown_from == covered_through + 1
+        and result_kind == "prefix_only"
+        and lowering_status == "incomplete_prefix_not_lowered"
+        and not lowered_events
+    )
+
+
+def _validate_intent_coverage(
+    intent: dict[str, Any],
+    *,
+    line_number: int,
+) -> None:
+    coverage = intent.get("coverage")
+    if not isinstance(coverage, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: schema-v8 intent omits coverage"
+        )
+    horizon_covered = intent.get("horizon_covered")
+    status = coverage.get("status")
+    horizon = coverage.get("requested_horizon_frames")
+    stop_frame = coverage.get("stop_frame")
+    covered_through = coverage.get("covered_through_frame")
+    unknown_from = coverage.get("unknown_from_frame")
+    result_kind = coverage.get("result_kind")
+    stop_reason = intent.get("stop_reason")
+    if (
+        type(horizon_covered) is not bool
+        or type(horizon) is not int
+        or horizon < 0
+        or type(stop_frame) is not int
+        or not 0 <= stop_frame <= horizon
+        or type(covered_through) is not int
+    ):
+        raise BulletBirthAuditError(
+            f"line {line_number}: schema-v8 intent has invalid coverage"
+        )
+    expected_covered = horizon if horizon_covered else max(0, stop_frame - 1)
+    expected_unknown = None if horizon_covered else expected_covered + 1
+    expected_status = "complete" if horizon_covered else "unknown"
+    expected_kind = "complete_schedule" if horizon_covered else "prefix_only"
+    if (
+        status != expected_status
+        or (
+            horizon_covered
+            and stop_reason not in {"horizon", "terminate"}
+        )
+        or (
+            not horizon_covered
+            and (
+                not isinstance(stop_reason, str)
+                or stop_reason in {"horizon", "terminate"}
+            )
+        )
+        or covered_through != expected_covered
+        or unknown_from != expected_unknown
+        or result_kind != expected_kind
+    ):
+        raise BulletBirthAuditError(
+            f"line {line_number}: schema-v8 intent coverage is inconsistent"
+        )
+
+
 def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
     if not isinstance(record, dict):
         raise BulletBirthAuditError(
@@ -196,13 +357,13 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             f"line {line_number}: audit role is not trace-only"
         )
     if (
-        record.get("schema_version") in {5, 6, 7}
+        record.get("schema_version") in {5, 6, 7, 8}
         and record.get("observation_backend") not in {"python", "native"}
     ):
         raise BulletBirthAuditError(
             f"line {line_number}: audit omits a valid observation backend"
         )
-    if record.get("schema_version") == 7:
+    if record.get("schema_version") in {7, 8}:
         backend = record.get("observation_backend")
         native_call_mode = record.get("native_call_mode")
         if backend == "native" and native_call_mode not in NATIVE_CALL_MODES:
@@ -213,7 +374,7 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             raise BulletBirthAuditError(
                 f"line {line_number}: Python audit fabricates a native call mode"
             )
-    if record.get("schema_version") in {6, 7}:
+    if record.get("schema_version") in {6, 7, 8}:
         backend = record.get("observation_backend")
         diagnostics = record.get("observation_diagnostics")
         if backend == "python":
@@ -238,6 +399,10 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
                 f"line {line_number}: failed native audit publishes "
                 "diagnostics"
             )
+    if record.get("schema_version") == 8:
+        intent = record.get("intent")
+        if isinstance(intent, dict):
+            _validate_intent_coverage(intent, line_number=line_number)
     for field in ("frame", "snapshot_frame", "gameplay_epoch"):
         if type(record.get(field)) is not int:
             raise BulletBirthAuditError(
@@ -552,6 +717,36 @@ def _intent_events(
         if type(velocity_events) is int and velocity_events:
             by_phase[phase]["velocity_event_rows"] += 1
             by_phase[phase]["velocity_events"] += velocity_events
+        velocity_prefix_events = scope.get(
+            "velocity_lookahead_prefix_event_count"
+        )
+        if type(velocity_prefix_events) is int and velocity_prefix_events:
+            by_phase[phase]["velocity_prefix_event_rows"] += 1
+            by_phase[phase]["velocity_prefix_events"] += (
+                velocity_prefix_events
+            )
+        velocity_coverage = scope.get(
+            "velocity_lookahead_coverage_status"
+        )
+        if isinstance(velocity_coverage, str):
+            by_phase[phase][
+                f"velocity_lookahead_coverage:{velocity_coverage}"
+            ] += 1
+        velocity_lowering = scope.get(
+            "velocity_lookahead_lowering_status"
+        )
+        if isinstance(velocity_lowering, str):
+            by_phase[phase][
+                f"velocity_lookahead_lowering:{velocity_lowering}"
+            ] += 1
+        if (
+            audit["schema_version"] == 8
+            and pointer
+            and not scope.get("velocity_lookahead_metadata_valid")
+        ):
+            raise BulletBirthAuditError(
+                "schema-v8 active-main-VM row omits valid callback coverage"
+            )
         velocity_scanned = scope.get(
             "velocity_lookahead_instructions_scanned"
         )
@@ -864,7 +1059,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         bucket = _evidence_count_bucket(evidence_count)
         diagnostics = audit.get("observation_diagnostics")
         if (
-            audit["schema_version"] in {6, 7}
+            audit["schema_version"] in {6, 7, 8}
             and isinstance(diagnostics, dict)
         ):
             segments = diagnostics["native_segments_ms"]
@@ -1042,6 +1237,33 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         and observation_timing["max"] <= OBSERVER_MAX_LIMIT_MS
     )
     timed_intent_available = bool(events)
+    velocity_coverage_statuses: Counter[str] = Counter()
+    velocity_lowering_statuses: Counter[str] = Counter()
+    incomplete_tagged_rows = 0
+    incomplete_tagged_max = 0
+    velocity_prefix_events = 0
+    velocity_lowered_events = 0
+    for scope in decisions.values():
+        coverage = scope.get("velocity_lookahead_coverage_status")
+        if isinstance(coverage, str):
+            velocity_coverage_statuses[coverage] += 1
+        lowering = scope.get("velocity_lookahead_lowering_status")
+        if isinstance(lowering, str):
+            velocity_lowering_statuses[lowering] += 1
+        prefix_count = scope.get("velocity_lookahead_prefix_event_count")
+        if type(prefix_count) is int:
+            velocity_prefix_events += prefix_count
+        lowered_count = scope.get("velocity_lookahead_event_count")
+        if type(lowered_count) is int:
+            velocity_lowered_events += lowered_count
+        tagged = scope.get("velocity_lookahead_tagged_bullets")
+        if (
+            coverage in {"unknown", "legacy_declared_unknown"}
+            and type(tagged) is int
+            and tagged > 0
+        ):
+            incomplete_tagged_rows += 1
+            incomplete_tagged_max = max(incomplete_tagged_max, tagged)
     return {
         "schema": SCHEMA,
         "passed": (
@@ -1096,6 +1318,33 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             ),
             "deduplicated_timed_events": len(events),
             "untimed_intent_signatures": untimed_intent_signatures,
+        },
+        "callback_lookahead": {
+            "coverage_status_rows": _counter(
+                velocity_coverage_statuses
+            ),
+            "lowering_status_rows": _counter(
+                velocity_lowering_statuses
+            ),
+            "prefix_events": velocity_prefix_events,
+            "lowered_events": velocity_lowered_events,
+            "incomplete_tagged_rows": incomplete_tagged_rows,
+            "incomplete_tagged_max": incomplete_tagged_max,
+            "semantics": {
+                "complete": "events cover the declared main-VM horizon",
+                "unknown": "events are prefix evidence only",
+                "legacy_declared_complete": (
+                    "schema-v1-v7 declared horizon coverage without "
+                    "an enforced lowering interface"
+                ),
+                "legacy_declared_unknown": (
+                    "schema-v1-v7 incomplete prefix was exposed through "
+                    "the old schedule interface"
+                ),
+                "incomplete_lowering": (
+                    "no prefix tuple is consumed as complete"
+                ),
+            },
         },
         "join": {
             "classification": _counter(classifications),

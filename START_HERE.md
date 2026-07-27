@@ -28,7 +28,8 @@ and design/run notes retain derivations and history.
 18. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`
 19. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`
 20. `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`
-21. the relevant recent run note and counterexample rows before live work
+21. `notes/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
+22. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -38,6 +39,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `Fail closed on incomplete ECL lookahead`,
   `617e03a Retain first GIL-held Stage 4 pass`,
   `62e2248 Test native birth calls with the GIL held`,
   `7333cc8 Retain native-call Stage 4 tail attribution`,
@@ -164,6 +166,21 @@ describe the same decision. Python/C++ parity is not physical correctness.
   all 24 contacts followed global viability exhaustion. CE-0147 and
   first-successor `UNKNOWN` still block future-event/action authority and
   Stage 5/6 promotion.
+  The CE-0147 correction now gives callback and birth-intent traversal an
+  exact `COMPLETE`/`UNKNOWN` frame-support record. Only `complete_events`
+  can reach velocity lowering; incomplete prefixes remain trace evidence,
+  and the compatibility helper raises instead of returning one as a
+  schedule. Trace schema v8/residual-audit v6 reject inconsistent callback
+  or intent coverage. Re-auditing retained schema-v7 run `20260728_070838`
+  labels 3,723 rows `legacy_declared_complete` and 2,405 rows
+  `legacy_declared_unknown`; the latter were exposed through the old
+  unchecked schedule interface. Of those incomplete rows, 975 contain tagged
+  bullets, with a maximum of 1,367. Focused Ruff and complete Linux/Windows
+  suites pass `806/806` in `9.046/15.657 s`, with three existing Windows
+  skips. This closes the invalid prefix-consumption defect, not the unknown
+  suffix: no conservative spatial envelope or repeated-state scheduler proof
+  exists yet. A schema-v8 Stage-4A semantic recheck is the next physical gate
+  before any Stage-5/6 result can be considered for promotion.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

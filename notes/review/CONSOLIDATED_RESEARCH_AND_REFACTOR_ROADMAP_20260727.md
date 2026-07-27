@@ -1083,6 +1083,15 @@ parity 當成每個 nature tie field 的逐 bit equality。
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成
   explicit incomplete/`UNKNOWN`，不能用降低 instruction cap 假裝解決；
+- CE-0147 的第一層 consumption 修復已完成：callback 與 birth-intent
+  traversal 都輸出 exact frame-support 的 `COMPLETE`/`UNKNOWN`，live
+  lowering 只能取得 `complete_events`，prefix 只留 trace；舊 wrapper
+  對 incomplete 直接拋錯。schema v8/audit v6 會驗證 stop reason、
+  support、result kind 與 lowering status。重審 `20260728_070838`
+  得到 3,723 legacy complete、2,405 legacy unknown；975 個 unknown
+  rows 有 tagged bullets，max 1,367。Linux/Windows `806/806` 通過。
+  這只修正 optimistic consumption，unknown suffix 的 repeated-state
+  proof／conservative envelope／certificate-unavailable 三選一仍未完成；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：
@@ -1108,6 +1117,13 @@ trace 才是 observed。
 - 分 capture/read/decode/queue/solve/publish/pickup/cert/commit/send；
 - 保留 persistent RPM destination buffer；
 - 記錄 actual worker count 和 executor/native oversubscription。
+- 把已關閉的 G5 observer B4 `0.20/0.40/2.00 ms` boundary 保留為
+  regression gate；後續 schema-v8 與 Stage-5/6 trace 都要重新報
+  p50/p95/p99/p99.9/max，不能因研究線切換而停止性能驗證。
+- 目前全庫 Ruff 有 33 個既有結構化/lint debt，集中在 facade re-export
+  未標示、Windows `sys.path` bootstrap 的 E402、少量未用 import 與
+  lambda style。按模組重構 checkpoint 分批清理，不與語義修復混提交，
+  也不盲目刪除 compatibility re-export。
 
 ### 只有 profile 觸發才做
 

@@ -398,6 +398,8 @@ class EclBirthIntentTests(unittest.TestCase):
                 result = _analyze((blocker, fire))
                 self.assertEqual(result.stop_reason, reason)
                 self.assertEqual(result.intents, ())
+                self.assertEqual(result.coverage_status, "unknown")
+                self.assertEqual(result.unknown_from_frame, 1)
 
     def test_emission_state_mutation_stops_instead_of_using_root_values(self) -> None:
         for opcode in (0x52, 0x69, 0x6A, 0x6E, 0x6F):
@@ -437,6 +439,9 @@ class EclBirthIntentTests(unittest.TestCase):
         horizon = _analyze((later,))
         self.assertEqual(horizon.stop_reason, "horizon")
         self.assertTrue(horizon.horizon_covered)
+        self.assertEqual(horizon.coverage_status, "complete")
+        self.assertEqual(horizon.covered_through_frame, 20)
+        self.assertIsNone(horizon.unknown_from_frame)
         self.assertEqual(horizon.intents, ())
 
         malformed = _instruction(
@@ -447,7 +452,28 @@ class EclBirthIntentTests(unittest.TestCase):
         )
         invalid = _analyze((malformed,))
         self.assertEqual(invalid.stop_reason, "invalid_direct_fire_payload")
+        self.assertEqual(invalid.coverage_status, "unknown")
+        self.assertEqual(
+            invalid.record()["coverage"]["result_kind"],
+            "prefix_only",
+        )
         self.assertEqual(invalid.intents, ())
+
+    def test_instruction_limit_retains_only_prefix_intent_authority(self) -> None:
+        fire = _instruction(
+            BASE,
+            time=3,
+            opcode=0x61,
+            payload=_fire_payload(),
+        )
+        result = _analyze((fire,), max_instructions=1)
+        self.assertEqual(len(result.intents), 1)
+        self.assertEqual(result.stop_reason, "instruction_limit")
+        self.assertFalse(result.horizon_covered)
+        self.assertEqual(result.stop_frame, 3)
+        self.assertEqual(result.covered_through_frame, 2)
+        self.assertEqual(result.unknown_from_frame, 3)
+        self.assertEqual(result.coverage_status, "unknown")
 
 
 if __name__ == "__main__":

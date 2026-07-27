@@ -13,7 +13,7 @@ from .bullet_birth import BulletBirthObservation
 from .bullet_birth_native import NATIVE_CALL_MODES
 
 
-BULLET_BIRTH_TRACE_SCHEMA_VERSION = 7
+BULLET_BIRTH_TRACE_SCHEMA_VERSION = 8
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
 BULLET_BIRTH_POOL_SCOPE = "all_1536_hostile_bullet_slots"

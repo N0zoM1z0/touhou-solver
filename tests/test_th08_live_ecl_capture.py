@@ -9,6 +9,7 @@ from th08_ecl_runtime import (
     EclInstructionCache,
     EclLookaheadResult,
     EclVmSnapshot,
+    TaggedVelocityToggle,
 )
 from th08_live.ecl_capture import (
     ENEMY_MANAGER_FRAME_ADDRESS,
@@ -89,6 +90,8 @@ class MainEclCaptureTests(unittest.TestCase):
             instructions_scanned=3,
             stop_reason="horizon",
             horizon_covered=True,
+            requested_horizon_frames=80,
+            stop_frame=80,
         )
         capture = capture_main_ecl(
             _Reader(),
@@ -102,6 +105,38 @@ class MainEclCaptureTests(unittest.TestCase):
         )
         self.assertIsNotNone(capture.snapshot)
         self.assertIs(capture.lookahead, result)
+        self.assertIsNone(capture.error)
+
+    def test_incomplete_prefix_is_retained_but_not_lowered(self) -> None:
+        prefix_event = TaggedVelocityToggle(
+            frame=4,
+            callback_index=12,
+            tag_mask=0x10,
+            alternate_velocity_x=0.0,
+            alternate_velocity_y=0.0,
+        )
+        result = EclLookaheadResult(
+            events=(prefix_event,),
+            instructions_scanned=256,
+            stop_reason="instruction_limit",
+            horizon_covered=False,
+            requested_horizon_frames=80,
+            stop_frame=4,
+        )
+        capture = capture_main_ecl(
+            _Reader(),
+            enemy_pointer=0x500000,
+            instruction_cache=EclInstructionCache(),
+            horizon_frames=80,
+            active_difficulty_mask=8,
+            clock=iter((1.0, 1.001)).__next__,
+            snapshot_reader=_snapshot,
+            lookahead_analyzer=lambda *_args, **_kwargs: result,
+        )
+        self.assertIs(capture.lookahead, result)
+        self.assertEqual(capture.lookahead.events, (prefix_event,))
+        self.assertIsNone(capture.lookahead.complete_events)
+        self.assertEqual(capture.tagged_velocity_toggles, ())
         self.assertIsNone(capture.error)
 
 

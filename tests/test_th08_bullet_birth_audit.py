@@ -33,6 +33,22 @@ def _decision(frame: int, spell_id: int | None) -> dict[str, object]:
         "stage_route_index": 3,
         "spell": spell,
         "boss_phase": None,
+        "bullet_velocity_lookahead": {
+            "instructions_scanned": 4,
+            "stop_reason": "horizon",
+            "horizon_covered": True,
+            "coverage_status": "complete",
+            "requested_horizon_frames": 80,
+            "stop_frame": 80,
+            "covered_through_frame": 80,
+            "unknown_from_frame": None,
+            "result_kind": "complete_schedule",
+            "prefix_events": [],
+            "events": [],
+            "lowering_status": "complete_schedule_lowered",
+            "tagged_bullets": 0,
+            "error": None,
+        },
     }
     return record
 
@@ -196,6 +212,15 @@ def _audit(
         }
     if schema_version >= 7:
         record["native_call_mode"] = "gil-held"
+    if schema_version >= 8:
+        record["intent"]["coverage"] = {
+            "status": "complete",
+            "requested_horizon_frames": 80,
+            "stop_frame": 80,
+            "covered_through_frame": 80,
+            "unknown_from_frame": None,
+            "result_kind": "complete_schedule",
+        }
     return record
 
 
@@ -485,6 +510,153 @@ class BulletBirthAuditTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(BulletBirthAuditError, "fabricates"):
                 analyze_trace(trace)
+
+    def test_schema_v8_requires_consistent_callback_and_intent_coverage(
+        self,
+    ) -> None:
+        with TemporaryDirectory() as directory:
+            trace = self._trace(directory, schema_version=8)
+            report = analyze_trace(trace)
+            self.assertEqual(
+                report["callback_lookahead"]["coverage_status_rows"],
+                {"complete": 4},
+            )
+            self.assertEqual(
+                report["callback_lookahead"]["lowering_status_rows"],
+                {"complete_schedule_lowered": 4},
+            )
+            self.assertEqual(report["native_diagnostics"]["rows"], 4)
+
+            records = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            records[1]["bullet_velocity_lookahead"].update(
+                {
+                    "instructions_scanned": 256,
+                    "stop_reason": "repeated_state",
+                    "horizon_covered": False,
+                    "coverage_status": "unknown",
+                    "stop_frame": 4,
+                    "covered_through_frame": 3,
+                    "unknown_from_frame": 4,
+                    "result_kind": "prefix_only",
+                    "prefix_events": [[4, 12, 16, 0.0, 0.0]],
+                    "events": [],
+                    "lowering_status": "incomplete_prefix_not_lowered",
+                    "tagged_bullets": 3,
+                }
+            )
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            unknown_report = analyze_trace(trace)
+            self.assertEqual(
+                unknown_report["callback_lookahead"][
+                    "coverage_status_rows"
+                ],
+                {"complete": 3, "unknown": 1},
+            )
+            self.assertEqual(
+                unknown_report["callback_lookahead"]["prefix_events"],
+                1,
+            )
+            self.assertEqual(
+                unknown_report["callback_lookahead"]["lowered_events"],
+                0,
+            )
+            self.assertEqual(
+                unknown_report["callback_lookahead"][
+                    "incomplete_tagged_rows"
+                ],
+                1,
+            )
+            self.assertEqual(
+                unknown_report["callback_lookahead"][
+                    "incomplete_tagged_max"
+                ],
+                3,
+            )
+
+            records[0]["intent"]["coverage"]["unknown_from_frame"] = 1
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "intent coverage is inconsistent",
+            ):
+                analyze_trace(trace)
+
+            records[0]["intent"]["coverage"]["unknown_from_frame"] = None
+            records[1]["bullet_velocity_lookahead"][
+                "lowering_status"
+            ] = "complete_schedule_lowered"
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "callback coverage",
+            ):
+                analyze_trace(trace)
+
+            records[1]["bullet_velocity_lookahead"][
+                "lowering_status"
+            ] = "incomplete_prefix_not_lowered"
+            records[1]["bullet_velocity_lookahead"][
+                "stop_reason"
+            ] = "horizon"
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "callback coverage",
+            ):
+                analyze_trace(trace)
+
+    def test_schema_v7_callback_rows_are_labeled_legacy_not_reinterpreted(
+        self,
+    ) -> None:
+        with TemporaryDirectory() as directory:
+            trace = self._trace(directory, schema_version=7)
+            records = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            for record in records:
+                lookahead = record.get("bullet_velocity_lookahead")
+                if not isinstance(lookahead, dict):
+                    continue
+                for field in (
+                    "coverage_status",
+                    "requested_horizon_frames",
+                    "stop_frame",
+                    "covered_through_frame",
+                    "unknown_from_frame",
+                    "result_kind",
+                    "prefix_events",
+                    "lowering_status",
+                ):
+                    lookahead.pop(field)
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            report = analyze_trace(trace)
+            self.assertEqual(
+                report["callback_lookahead"]["coverage_status_rows"],
+                {"legacy_declared_complete": 4},
+            )
+            self.assertEqual(
+                report["callback_lookahead"]["lowering_status_rows"],
+                {"legacy_complete_events_lowered_unchecked": 4},
+            )
 
     def test_failed_schema_v1_trace_remains_auditable(self) -> None:
         with TemporaryDirectory() as directory:

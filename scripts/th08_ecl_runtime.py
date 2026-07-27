@@ -43,6 +43,8 @@ ECL_INT_TAG_MASK = 10000
 ECL_FLOAT_CALLBACK_ANGLE = 10016
 ECL_FLOAT_CALLBACK_SPEED = 10017
 CALLBACK_TOGGLE_TAGGED_BULLET = 12
+LOOKAHEAD_COVERAGE_COMPLETE = "complete"
+LOOKAHEAD_COVERAGE_UNKNOWN = "unknown"
 
 
 class ProcessMemoryReader(Protocol):
@@ -88,12 +90,64 @@ class TaggedVelocityToggle:
 
 @dataclass(frozen=True)
 class EclLookaheadResult:
-    """Auditable result of following one live ECL control-flow path."""
+    """Auditable prefix plus explicit horizon-completeness support."""
 
     events: tuple[TaggedVelocityToggle, ...]
     instructions_scanned: int
     stop_reason: str
     horizon_covered: bool
+    requested_horizon_frames: int
+    stop_frame: int
+
+    def __post_init__(self) -> None:
+        if self.requested_horizon_frames < 0:
+            raise ValueError("lookahead horizon cannot be negative")
+        if not 0 <= self.stop_frame <= self.requested_horizon_frames:
+            raise ValueError("lookahead stop frame is outside its horizon")
+        complete_stop = self.stop_reason in {"horizon", "terminate"}
+        if self.horizon_covered != complete_stop:
+            raise ValueError(
+                "lookahead completeness disagrees with its stop reason"
+            )
+
+    @property
+    def coverage_status(self) -> str:
+        return (
+            LOOKAHEAD_COVERAGE_COMPLETE
+            if self.horizon_covered
+            else LOOKAHEAD_COVERAGE_UNKNOWN
+        )
+
+    @property
+    def covered_through_frame(self) -> int:
+        if self.horizon_covered:
+            return self.requested_horizon_frames
+        return max(0, self.stop_frame - 1)
+
+    @property
+    def unknown_from_frame(self) -> int | None:
+        if self.horizon_covered:
+            return None
+        return self.covered_through_frame + 1
+
+    @property
+    def complete_events(self) -> tuple[TaggedVelocityToggle, ...] | None:
+        """Return a lowerable complete schedule, never a partial prefix."""
+
+        return self.events if self.horizon_covered else None
+
+    def require_complete_events(self) -> tuple[TaggedVelocityToggle, ...]:
+        events = self.complete_events
+        if events is None:
+            raise IncompleteEclLookaheadError(
+                "ECL callback lookahead is incomplete: "
+                f"{self.stop_reason} at relative frame {self.stop_frame}"
+            )
+        return events
+
+
+class IncompleteEclLookaheadError(RuntimeError):
+    """A prefix-only callback result was requested as a complete schedule."""
 
 
 class EclInstructionCache:
@@ -231,7 +285,7 @@ def predict_tagged_velocity_toggles(
     active_difficulty_mask: int,
     max_instructions: int = 256,
 ) -> tuple[TaggedVelocityToggle, ...]:
-    """Compatibility wrapper returning events from the audited lookahead."""
+    """Return events only when the audited lookahead covers the horizon."""
 
     return analyze_tagged_velocity_toggles(
         snapshot,
@@ -239,7 +293,7 @@ def predict_tagged_velocity_toggles(
         horizon_frames=horizon_frames,
         active_difficulty_mask=active_difficulty_mask,
         max_instructions=max_instructions,
-    ).events
+    ).require_complete_events()
 
 
 def analyze_tagged_velocity_toggles(
@@ -287,6 +341,7 @@ def analyze_tagged_velocity_toggles(
             if physical_frame + delta > horizon_frames:
                 stop_reason = "horizon"
                 horizon_covered = True
+                physical_frame = horizon_frames
                 break
             physical_frame += delta
             timer_value += delta * snapshot.time_scale
@@ -371,10 +426,12 @@ def analyze_tagged_velocity_toggles(
     else:
         stop_reason = "instruction_limit"
     return EclLookaheadResult(
-        tuple(events),
-        instructions_scanned,
-        stop_reason,
-        horizon_covered,
+        events=tuple(events),
+        instructions_scanned=instructions_scanned,
+        stop_reason=stop_reason,
+        horizon_covered=horizon_covered,
+        requested_horizon_frames=horizon_frames,
+        stop_frame=physical_frame,
     )
 
 

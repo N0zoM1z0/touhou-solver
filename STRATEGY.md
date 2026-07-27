@@ -265,6 +265,17 @@ over 28,907 observations. They do not prove absence of every OS preemption
 or improve survival: the RNG-distinct runs have 9 and 15 hits, and all
 contacts follow global viability exhaustion.
 
+**Observed offline CE-0147 correction:** Callback and birth-intent results now
+carry exact `COMPLETE`/`UNKNOWN` frame support. Incomplete event prefixes stay
+in trace and cannot reach velocity lowering; the old compatibility consumer
+raises rather than accepting one as a schedule. Trace schema v8/audit v6
+validate stop-reason/completeness consistency and preserve schema-v1-v7 rows
+under explicit legacy labels. Re-auditing held run `20260728_070838` finds
+3,723 legacy-declared complete and 2,405 legacy-declared unknown rows. Of the
+unknown rows, 975 contain tagged bullets, maximum 1,367. Linux/Windows suites
+pass `806/806`. This fixes an optimistic consumption path but does not bound
+the unknown suffix, prove repeated-state periodicity, or improve survival.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
@@ -282,9 +293,13 @@ contacts follow global viability exhaustion.
    physically attributes every over-budget observation to the native-call
    interval with no overlapping GC. The explicit GIL-held/released
    call-boundary correction passes offline and in two consecutive unpinned,
-   GC-enabled physical Stage-4A runs, closing this specific B4 tail. Now make
-   incomplete callback coverage explicit and fail closed before trying Stage
-   5/6. None of this narrows `UNKNOWN` coverage or adds action authority.
+   GC-enabled physical Stage-4A runs, closing this specific B4 tail.
+   Incomplete callback coverage is now explicit and fails closed in schema
+   v8. Run one Stage-4A semantic recheck, then choose a proved repeated-state
+   scheduler, a conservative containing envelope, or explicit certificate
+   unavailability before treating Stage-5/6 evidence as promotable. Hard
+   Stage-5/6 runs may still be used as trace-only workloads. None of this
+   narrows `UNKNOWN` coverage or adds action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

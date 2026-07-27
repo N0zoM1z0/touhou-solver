@@ -9,7 +9,12 @@ from dataclasses import dataclass
 from typing import Callable
 
 from th08_ecl_opcodes import opcode_spec
-from th08_ecl_runtime import EclVmSnapshot, RuntimeEclInstruction
+from th08_ecl_runtime import (
+    LOOKAHEAD_COVERAGE_COMPLETE,
+    LOOKAHEAD_COVERAGE_UNKNOWN,
+    EclVmSnapshot,
+    RuntimeEclInstruction,
+)
 
 
 ECL_OP_TERMINATE = 0x01
@@ -256,6 +261,39 @@ class EclBirthLookaheadResult:
     instructions_scanned: int
     stop_reason: str
     horizon_covered: bool
+    requested_horizon_frames: int
+    stop_frame: int
+
+    def __post_init__(self) -> None:
+        if self.requested_horizon_frames < 0:
+            raise ValueError("birth lookahead horizon cannot be negative")
+        if not 0 <= self.stop_frame <= self.requested_horizon_frames:
+            raise ValueError("birth lookahead stop frame is outside its horizon")
+        complete_stop = self.stop_reason in {"horizon", "terminate"}
+        if self.horizon_covered != complete_stop:
+            raise ValueError(
+                "birth lookahead completeness disagrees with its stop reason"
+            )
+
+    @property
+    def coverage_status(self) -> str:
+        return (
+            LOOKAHEAD_COVERAGE_COMPLETE
+            if self.horizon_covered
+            else LOOKAHEAD_COVERAGE_UNKNOWN
+        )
+
+    @property
+    def covered_through_frame(self) -> int:
+        if self.horizon_covered:
+            return self.requested_horizon_frames
+        return max(0, self.stop_frame - 1)
+
+    @property
+    def unknown_from_frame(self) -> int | None:
+        if self.horizon_covered:
+            return None
+        return self.covered_through_frame + 1
 
     def record(self) -> dict[str, object]:
         return {
@@ -264,6 +302,18 @@ class EclBirthLookaheadResult:
             "instructions_scanned": self.instructions_scanned,
             "stop_reason": self.stop_reason,
             "horizon_covered": self.horizon_covered,
+            "coverage": {
+                "status": self.coverage_status,
+                "requested_horizon_frames": self.requested_horizon_frames,
+                "stop_frame": self.stop_frame,
+                "covered_through_frame": self.covered_through_frame,
+                "unknown_from_frame": self.unknown_from_frame,
+                "result_kind": (
+                    "complete_schedule"
+                    if self.horizon_covered
+                    else "prefix_only"
+                ),
+            },
         }
 
 
@@ -490,6 +540,7 @@ def analyze_ecl_birth_intents(
             if physical_frame + delta > horizon_frames:
                 stop_reason = "horizon"
                 horizon_covered = True
+                physical_frame = horizon_frames
                 break
             physical_frame += delta
             timer_value += delta * snapshot.time_scale
@@ -593,6 +644,8 @@ def analyze_ecl_birth_intents(
         instructions_scanned=instructions_scanned,
         stop_reason=stop_reason,
         horizon_covered=horizon_covered,
+        requested_horizon_frames=horizon_frames,
+        stop_frame=physical_frame,
     )
 
 

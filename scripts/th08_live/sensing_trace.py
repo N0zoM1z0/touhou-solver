@@ -148,6 +148,54 @@ def build_sensing_trace_fields(
                     if ecl_lookahead is not None
                     else False
                 ),
+                "coverage_status": (
+                    ecl_lookahead.coverage_status
+                    if ecl_lookahead is not None
+                    else "unknown"
+                ),
+                "requested_horizon_frames": (
+                    ecl_lookahead.requested_horizon_frames
+                    if ecl_lookahead is not None
+                    else None
+                ),
+                "stop_frame": (
+                    ecl_lookahead.stop_frame
+                    if ecl_lookahead is not None
+                    else None
+                ),
+                "covered_through_frame": (
+                    ecl_lookahead.covered_through_frame
+                    if ecl_lookahead is not None
+                    else 0
+                ),
+                "unknown_from_frame": (
+                    ecl_lookahead.unknown_from_frame
+                    if ecl_lookahead is not None
+                    else 1
+                ),
+                "result_kind": (
+                    (
+                        "complete_schedule"
+                        if ecl_lookahead.horizon_covered
+                        else "prefix_only"
+                    )
+                    if ecl_lookahead is not None
+                    else "unavailable"
+                ),
+                "prefix_events": [
+                    [
+                        event.frame,
+                        event.callback_index,
+                        event.tag_mask,
+                        event.alternate_velocity_x,
+                        event.alternate_velocity_y,
+                    ]
+                    for event in (
+                        ecl_lookahead.events
+                        if ecl_lookahead is not None
+                        else ()
+                    )
+                ],
                 "events": [
                     [
                         event.frame,
@@ -158,6 +206,14 @@ def build_sensing_trace_fields(
                     ]
                     for event in trace_input.tagged_velocity_toggles
                 ],
+                "lowering_status": (
+                    "complete_schedule_lowered"
+                    if (
+                        ecl_lookahead is not None
+                        and ecl_lookahead.horizon_covered
+                    )
+                    else "incomplete_prefix_not_lowered"
+                ),
                 "attached_bullets": sum(
                     bool(bullet.velocity_changes) for bullet in bullets
                 ),

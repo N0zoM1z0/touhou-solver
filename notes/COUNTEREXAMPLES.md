@@ -4166,8 +4166,8 @@ callback-horizon coverage remains open
 
 ## CE-0147: Instruction-limit callback lookahead was consumed as an empty event list
 
-Status: observed incomplete model result; fail-closed coverage and bounded
-algorithm open
+Status: observed incomplete model result; invalid prefix consumption
+corrected offline, unresolved suffix remains open
 
 - **Observed physical workload:** On all 1,261 spell-57 rows in schema-v3 run
   `20260728_043724`, callback lookahead scanned the maximum 256 instructions,
@@ -4191,9 +4191,28 @@ algorithm open
   separately bounded native data plane without reducing the instruction cap
   or silently dropping branches. Retain a minimal spell-57 instruction/VM
   fixture and compare it with runtime callback/transform evidence.
+- **Implemented correction:** Callback and birth-intent results now carry
+  requested horizon, stop frame, covered-through frame, and first unknown
+  frame. Only `horizon` and `terminate` expose `complete_events`; incomplete
+  prefixes are retained for trace but never lowered, and the compatibility
+  API raises `IncompleteEclLookaheadError`. Schema v8/audit v6 fail closed on
+  inconsistent coverage, stop reason, result kind, or lowering status.
+- **Retained legacy re-audit:** Schema-v7 run `20260728_070838` contains
+  3,723 legacy-declared complete rows and 2,405 legacy-declared unknown rows.
+  The latter used the old unchecked schedule interface; 975 contain tagged
+  bullets and the maximum is 1,367. The exact split is 1,350
+  `instruction_limit` rows with zero tagged bullets and 1,055
+  `repeated_state` rows, 975 with tagged bullets. Recorded event tuples are
+  empty in all 2,405 rows.
+- **Remaining falsifier:** A schema-v8 physical trace must show that every
+  incomplete result is labeled `UNKNOWN`, preserves any prefix separately,
+  and lowers zero prefix events. That does not establish safe geometry after
+  `unknown_from_frame`; repeated-state proof, a conservative containing
+  envelope, or certificate unavailability is still required.
 - **Authority:** this counterexample does not prove that a missing callback
-  caused a hit. It proves that the current empty event list is not a complete
-  physical-hazard answer.
+  caused a hit. The invalid empty-schedule consumption is corrected, but the
+  unknown suffix is still not a complete physical-hazard answer and grants no
+  action authority.
 
 ## CE-0148: Per-call ctypes allocation created a periodic native-observer GC tail
 

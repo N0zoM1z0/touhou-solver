@@ -73,7 +73,7 @@ def capture_main_ecl(
                 horizon_frames=horizon_frames,
                 active_difficulty_mask=active_difficulty_mask,
             )
-            tagged_velocity_toggles = lookahead.events
+            tagged_velocity_toggles = lookahead.complete_events or ()
         except _CAPTURE_ERRORS as caught:
             error = f"{type(caught).__name__}: {caught}"
     frame_after = int(reader.u32(ENEMY_MANAGER_FRAME_ADDRESS))

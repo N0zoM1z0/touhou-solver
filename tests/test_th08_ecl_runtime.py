@@ -23,6 +23,7 @@ from th08_ecl_runtime import (
     ECL_OP_TERMINATE,
     EclInstructionCache,
     EclVmSnapshot,
+    IncompleteEclLookaheadError,
     TaggedVelocityToggle,
     analyze_tagged_velocity_toggles,
     predict_tagged_velocity_toggles,
@@ -260,6 +261,55 @@ class EclRuntimeTests(unittest.TestCase):
         self.assertEqual(changes[1].frame, 110)
         self.assertAlmostEqual(changes[1].velocity_x, 0.0, places=6)
         self.assertAlmostEqual(changes[1].velocity_y, 2.0)
+
+    def test_instruction_limit_prefix_cannot_be_consumed_as_complete(self) -> None:
+        base = 0x700000
+        code = _instruction(
+            1,
+            ECL_OP_INVOKE_CALLBACK,
+            12,
+            0,
+        )
+        memory = _Memory({base: code})
+        snapshot = EclVmSnapshot(
+            base,
+            0.0,
+            0,
+            0x100000,
+            0.0,
+            0.0,
+            1.0,
+        )
+        cache = EclInstructionCache()
+        result = analyze_tagged_velocity_toggles(
+            snapshot,
+            instruction_at=lambda address: cache.instruction(
+                memory.read,
+                address,
+            ),
+            horizon_frames=5,
+            active_difficulty_mask=0x08,
+            max_instructions=1,
+        )
+        self.assertEqual(len(result.events), 1)
+        self.assertEqual(result.coverage_status, "unknown")
+        self.assertEqual(result.stop_frame, 1)
+        self.assertEqual(result.covered_through_frame, 0)
+        self.assertEqual(result.unknown_from_frame, 1)
+        self.assertIsNone(result.complete_events)
+        with self.assertRaises(IncompleteEclLookaheadError):
+            result.require_complete_events()
+        with self.assertRaises(IncompleteEclLookaheadError):
+            predict_tagged_velocity_toggles(
+                snapshot,
+                instruction_at=lambda address: cache.instruction(
+                    memory.read,
+                    address,
+                ),
+                horizon_frames=5,
+                active_difficulty_mask=0x08,
+                max_instructions=1,
+            )
 
 
 if __name__ == "__main__":

@@ -6937,3 +6937,46 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   first-successor `UNKNOWN`, hit-reduction claims, and physical action
   authority remain unchanged. Stage 5/6 remains closed until incomplete
   callback results fail closed.
+
+## 2026-07-28 — Made incomplete callback lookahead fail closed
+
+- Fixed
+  `G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md` before code.
+  Callback and birth-intent results now record requested horizon, stop frame,
+  covered-through frame, first unknown frame, and `COMPLETE`/`UNKNOWN`.
+- The live callback consumer lowers only `complete_events`. Prefix events
+  remain separately visible in sensing trace; incomplete results expose no
+  lowerable schedule, and the compatibility helper raises
+  `IncompleteEclLookaheadError`.
+- Trace schema v8/residual-audit v6 validate completeness against stop reason,
+  frame support, result kind, and lowering status. Missing or inconsistent
+  metadata on an active main-VM schema-v8 row fails closed. Legacy schemas
+  remain readable under explicit labels rather than being upgraded into new
+  certificates.
+- **Observed retained re-audit:** Schema-v7 run `20260728_070838` contains
+  3,723 `legacy_declared_complete` and 2,405
+  `legacy_declared_unknown` callback rows. The unknown rows were exposed
+  through the previous unchecked schedule interface. Of them, 975 contain
+  tagged bullets and the maximum is 1,367. The known stop split remains 1,350
+  `instruction_limit` rows with zero tagged bullets and 1,055
+  `repeated_state` rows, 975 with tagged bullets. All 2,405 event tuples are
+  empty.
+- The compact retained callback-coverage re-audit is byte-identical across
+  two generations at canonical LF SHA-256
+  `b3019955f4bdd2ea008e2ae60eadddc99f0feb27416a2fb11c87af18c920ffbf`.
+- Deterministic instruction-limit fixtures prove that a nonempty prefix is
+  retained but not lowered. Horizon/terminate, invalid flow, trace
+  serialization, schema-v8 consistency, and schema-v7 legacy labeling are
+  covered. Focused Ruff passes.
+- Complete Linux suite passes `806/806` in `9.046 s`; Windows UNC discovery
+  passes `806/806` in `15.657 s`, with three existing platform skips.
+- **Repository hygiene observation:** an all-repository Ruff invocation also
+  exposes 33 pre-existing lint/compatibility-facade debts. They are outside
+  this semantic checkpoint and are retained for staged refactoring rather
+  than auto-fixed across unrelated modules.
+- **Authority:** The optimistic consumer defect is closed offline. No
+  conservative geometry exists after `unknown_from_frame`, repeated-state is
+  not proved periodic, and no survival/action authority changes. Next run one
+  schema-v8 Stage-4A semantic recheck, then choose repeated-state proof,
+  conservative envelope, or explicit certificate unavailability before a
+  Stage-5/6 result can be promotion evidence.

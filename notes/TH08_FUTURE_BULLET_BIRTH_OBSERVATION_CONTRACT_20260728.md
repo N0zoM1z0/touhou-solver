@@ -415,6 +415,27 @@ passes `3/3`. Complete Linux/Windows quick suites pass `773/773` in
 and regression result, not shipped-runtime source completeness. B4 and B5
 remain open.
 
+## Callback-Lookahead Completeness Correction
+
+CE-0147's invalid consumption path is corrected under
+`G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`. Callback and
+birth-intent traversal now distinguish a complete horizon schedule from
+prefix-only evidence using exact relative-frame support. Live lowering
+accepts only `complete_events`; incomplete callback prefixes remain trace-only
+and the compatibility helper raises.
+
+Schema v8/residual-audit v6 validate this boundary. Re-auditing retained
+schema-v7 run `20260728_070838` labels 3,723 rows legacy-declared complete and
+2,405 legacy-declared unknown. Of the unknown rows, 975 contain tagged
+bullets, maximum 1,367. Complete Linux/Windows suites pass `806/806` in
+`9.046/15.657 s`.
+
+This corrects a consumer and evidence-schema defect. It neither completes the
+birth-source model nor supplies a conservative callback envelope after the
+first unknown frame. A schema-v8 Stage-4A recheck and one of the declared
+repeated-state proof/envelope/certificate-unavailable continuations remain
+required.
+
 ## Ordered Gates
 
 ### B0 — Contract and static evidence
@@ -446,7 +467,9 @@ remain open.
 
 - **Fail-closed classifier completed by `52d0864` and trace-only integration
   completed by `98db592`; schema-v2 native deferred-state propagation is
-  implemented and awaits physical recheck.**
+  physically retained, and schema-v8 callback/birth lookahead completeness
+  consumption is implemented offline. Unknown suffix geometry remains
+  open.**
 - Add a separate main-VM birth scanner with explicit stop reasons.
 - Cover direct, deferred, current-pattern, child/aux-VM, callback, aimed, RNG,
   rank, dynamic-parameter, pool-full, and transform residual classes.

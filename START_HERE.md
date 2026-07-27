@@ -271,8 +271,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Query-local public value contracts now live in
   `touhou_control.query_survival_types`: pending command, reachable root,
   scalar/belief stats, upper certification, action recommendation, and query
-  result. The solver module is 1,800 lines; focused query-survival tests pass
-  `17/17` and the Linux quick suite retains `699/699` in `8.904 s`.
+  result. The retained legacy always-issue scalar recurrence now lives in the
+  independent `touhou_control.query_survival_scalar` module and shares only
+  cadence/lattice validation from `query_survival_lattice`; it does not call
+  the native implementation it audits. The facade is 1,505 lines and
+  preserves its public imports. Focused query-survival tests pass `17/17`;
+  quick suites pass `699/699` on Linux in `9.184 s` and Windows in `13.309 s`
+  with three skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

@@ -5178,3 +5178,24 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `8.904 s`.
 - **Authority:** Structural value ownership only. Formal and native solver
   authority are unchanged.
+
+### 2026-07-27 — Independent scalar query-survival oracle extraction
+
+- **Observed structural change:** Moved the complete retained legacy
+  always-issue recurrence into `touhou_control.query_survival_scalar` and
+  cadence/lattice validation into `query_survival_lattice`. The public
+  `query_survival` facade re-exports the same scalar entry point and is now
+  1,505 lines.
+- **Independence boundary:** The scalar module depends on NumPy, shared value
+  contracts, movement/configuration values, and `SurvivalLabel`; it does not
+  import or call `native_backend`. It therefore remains an independent Python
+  audit implementation rather than becoming a wrapper around the code it
+  checks.
+- **Validation:** Query-survival parity tests pass `17/17`; focused
+  complete-mask belief, reachability, prewarm, and variable-cadence suites
+  pass `3/3`, `5/5`, `5/5`, and `8/8`. Byte compilation and
+  `git diff --check` pass. Quick suites pass `699/699` on Linux in `9.184 s`
+  and Windows in `13.309 s` with three platform skips.
+- **Authority:** Structural oracle ownership only. The historical
+  always-issue recurrence retains its documented unknown physical bound
+  direction; no formal, native, live, or strategy authority changed.

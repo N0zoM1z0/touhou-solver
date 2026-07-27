@@ -84,6 +84,7 @@ from th08_local_planner import (
     ObjectiveContext,
     PhysicalHazardSnapshot,
     PlannerConfig,
+    PlannerMode,
 )
 from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
@@ -822,6 +823,13 @@ class Decision:
     preloss_supplemental_historical_fallback: bool = False
     preloss_supplemental_background_compute_ms: float | None = None
     local_collisions: int = 0
+
+
+@dataclass(frozen=True)
+class _PlannerModeTransition:
+    current_decision: Decision
+    next_request: LocalPlannerRequest
+    original_allowed_action_count: int
 
 
 @dataclass(frozen=True)
@@ -4047,61 +4055,93 @@ def _terminal_threat_degeneracy(
     return None
 
 
-def choose_action(
+def _choose_action_request_once(
+    request: LocalPlannerRequest,
     *,
-    player_x: float,
-    player_y: float,
-    bullets: tuple[Bullet, ...],
-    lasers: tuple[Laser, ...],
-    previous_direction: int,
-    can_bomb: bool,
-    enemy_bodies: tuple[EnemyBody, ...] = (),
-    items: tuple[Item, ...] = (),
-    power: float = 0.0,
-    bombs: float = 0.0,
-    previous_focus: bool = True,
-    local_pipeline_root: LocalPipelineRoot | None = None,
-    snapshot_lag: int = 0,
-    control_delay_frames: int = CONTROL_DELAY_FRAMES,
-    control_delay_candidates: tuple[int, ...] | None = None,
-    action_hold_frames: int = PLANNER_ACTION_HOLD,
-    horizon: int = PLANNER_HORIZON,
-    threat_horizon: int | None = None,
-    beam_width: int = PLANNER_BEAM_WIDTH,
-    target_x: float | None = None,
-    target_y: float | None = None,
-    target_deadline: int | None = None,
-    allowed_first_actions: tuple[str, ...] | None = None,
-    viability_repair_volumes: tuple[tuple[str, int], ...] = (),
-    viability_recovery_distances: tuple[tuple[str, float], ...] = (),
-    viability_safety_actions: tuple[str, ...] = (),
-    viability_safety_state_value: float | None = None,
-    viability_survival_actions: tuple[str, ...] = (),
-    viability_survival_frames: int | None = None,
-    viability_survival_bottleneck_margin: float | None = None,
-    viability_position_error: float = 0.0,
-    damage_target_x: float | None = None,
-    damage_target_half_width: float = 0.0,
-    damageable: bool = False,
-    recovery_control_reserve: bool = True,
-    losing_control_reserve: bool = False,
-    preloss_continuation_preference: bool = False,
-    preloss_supplemental_beam_width: int = 0,
-    preloss_supplemental_deadline_ms: float | None = None,
-    preloss_supplemental_async_service: (
-        ExactVersionSupplementalService | None
-    ) = None,
-    preloss_supplemental_version: object | None = None,
-    preserve_previous_direction_inertia: bool = True,
-    beam_dedup_mode: str = "quantized",
-    relax_stale_viability_contradiction: bool = False,
-    enforce_fresh_viability_intersection: bool = True,
-    _force_terminal_threat: bool = False,
-    _viability_retry: bool = False,
     _certificate_timing_accumulator: (
         _LocalCertificateTimingAccumulator | None
     ) = None,
-) -> Decision:
+) -> Decision | _PlannerModeTransition:
+    physical = request.physical
+    actuator = request.actuator
+    guidance = request.guidance
+    config = request.config
+    objective = request.objective
+    completed = request.completed_services
+
+    player_x = physical.player_x
+    player_y = physical.player_y
+    bullets = physical.bullets
+    lasers = physical.lasers
+    enemy_bodies = physical.enemy_bodies
+    items = physical.items
+    snapshot_lag = physical.snapshot_lag
+
+    previous_direction = actuator.previous_direction
+    can_bomb = actuator.can_bomb
+    previous_focus = actuator.previous_focus
+    local_pipeline_root = actuator.local_pipeline_root
+    control_delay_frames = actuator.control_delay_frames
+    control_delay_candidates = actuator.control_delay_candidates
+    action_hold_frames = actuator.action_hold_frames
+
+    target_x = guidance.target_x
+    target_y = guidance.target_y
+    target_deadline = guidance.target_deadline
+    allowed_first_actions = guidance.allowed_first_actions
+    viability_repair_volumes = guidance.viability_repair_volumes
+    viability_recovery_distances = (
+        guidance.viability_recovery_distances
+    )
+    viability_safety_actions = guidance.viability_safety_actions
+    viability_safety_state_value = guidance.viability_safety_state_value
+    viability_survival_actions = guidance.viability_survival_actions
+    viability_survival_frames = guidance.viability_survival_frames
+    viability_survival_bottleneck_margin = (
+        guidance.viability_survival_bottleneck_margin
+    )
+    viability_position_error = guidance.viability_position_error
+
+    horizon = config.horizon
+    threat_horizon = config.threat_horizon
+    beam_width = config.beam_width
+    recovery_control_reserve = config.recovery_control_reserve
+    losing_control_reserve = config.losing_control_reserve
+    preloss_continuation_preference = (
+        config.preloss_continuation_preference
+    )
+    preloss_supplemental_beam_width = (
+        config.preloss_supplemental_beam_width
+    )
+    preserve_previous_direction_inertia = (
+        config.preserve_previous_direction_inertia
+    )
+    beam_dedup_mode = config.beam_dedup_mode
+    relax_stale_viability_contradiction = (
+        config.relax_stale_viability_contradiction
+    )
+    enforce_fresh_viability_intersection = (
+        config.enforce_fresh_viability_intersection
+    )
+
+    power = objective.power
+    bombs = objective.bombs
+    damage_target_x = objective.damage_target_x
+    damage_target_half_width = objective.damage_target_half_width
+    damageable = objective.damageable
+
+    preloss_supplemental_deadline_ms = (
+        completed.supplemental_deadline_ms
+    )
+    preloss_supplemental_async_service = (
+        completed.supplemental_async_service
+    )
+    preloss_supplemental_version = completed.supplemental_version
+    _force_terminal_threat = (
+        request.mode is PlannerMode.RELAXED_VIABILITY
+    )
+    _viability_retry = _force_terminal_threat
+
     if _certificate_timing_accumulator is None:
         _certificate_timing_accumulator = (
             _LocalCertificateTimingAccumulator()
@@ -6176,96 +6216,31 @@ def choose_action(
         and relax_stale_viability_contradiction
         and not _viability_retry
     ):
-        retry = choose_action(
-            player_x=observed_player_x,
-            player_y=observed_player_y,
-            bullets=bullets,
-            lasers=lasers,
-            previous_direction=previous_direction,
-            can_bomb=can_bomb,
-            enemy_bodies=enemy_bodies,
-            items=items,
-            power=power,
-            bombs=bombs,
-            previous_focus=previous_focus,
-            local_pipeline_root=local_pipeline_root,
-            snapshot_lag=snapshot_lag,
-            control_delay_frames=control_delay_frames,
-            control_delay_candidates=control_delay_candidates,
-            action_hold_frames=action_hold_frames,
-            horizon=horizon,
-            threat_horizon=threat_horizon,
-            beam_width=beam_width,
-            target_x=target_x,
-            target_y=target_y,
-            target_deadline=target_deadline,
-            allowed_first_actions=None,
-            viability_repair_volumes=viability_repair_volumes,
-            viability_recovery_distances=viability_recovery_distances,
-            viability_safety_actions=viability_safety_actions,
-            viability_safety_state_value=viability_safety_state_value,
-            viability_survival_actions=viability_survival_actions,
-            viability_survival_frames=viability_survival_frames,
-            viability_survival_bottleneck_margin=(
-                viability_survival_bottleneck_margin
+        return _PlannerModeTransition(
+            current_decision=decision,
+            next_request=replace(
+                request,
+                physical=replace(
+                    physical,
+                    player_x=observed_player_x,
+                    player_y=observed_player_y,
+                ),
+                guidance=replace(
+                    guidance,
+                    allowed_first_actions=None,
+                ),
+                # Preserve the historical retry contract: damage guidance was
+                # not forwarded into the relaxed pass.
+                objective=ObjectiveContext(
+                    power=power,
+                    bombs=bombs,
+                ),
+                mode=PlannerMode.RELAXED_VIABILITY,
             ),
-            viability_position_error=viability_position_error,
-            recovery_control_reserve=recovery_control_reserve,
-            losing_control_reserve=losing_control_reserve,
-            preloss_continuation_preference=(
-                preloss_continuation_preference
-            ),
-            preloss_supplemental_beam_width=(
-                preloss_supplemental_beam_width
-            ),
-            preloss_supplemental_deadline_ms=(
-                preloss_supplemental_deadline_ms
-            ),
-            preloss_supplemental_async_service=(
-                preloss_supplemental_async_service
-            ),
-            preloss_supplemental_version=(
-                preloss_supplemental_version
-            ),
-            preserve_previous_direction_inertia=(
-                preserve_previous_direction_inertia
-            ),
-            beam_dedup_mode=beam_dedup_mode,
-            relax_stale_viability_contradiction=(
-                relax_stale_viability_contradiction
-            ),
-            enforce_fresh_viability_intersection=(
-                enforce_fresh_viability_intersection
-            ),
-            _force_terminal_threat=True,
-            _viability_retry=True,
-            _certificate_timing_accumulator=(
-                _certificate_timing_accumulator
+            original_allowed_action_count=len(
+                allowed_first_actions or ()
             ),
         )
-
-        def contradiction_key(candidate: Decision) -> tuple[object, ...]:
-            return (
-                candidate.robust_collisions,
-                max(-candidate.robust_min_clearance, 0.0),
-                -candidate.robust_min_clearance,
-                candidate.terminal_threat_collisions,
-                max(
-                    -candidate.terminal_threat_min_clearance,
-                    0.0,
-                ),
-                max(-candidate.min_clearance, 0.0),
-                candidate.score,
-            )
-
-        if contradiction_key(retry) < contradiction_key(decision):
-            return replace(
-                retry,
-                viability_safe_action_count=len(
-                    allowed_first_actions or ()
-                ),
-                viability_constraint_relaxed=True,
-            )
     return replace(
         decision,
         local_certificate_timing=(
@@ -6274,81 +6249,184 @@ def choose_action(
     )
 
 
+def _contradiction_key(candidate: Decision) -> tuple[object, ...]:
+    return (
+        candidate.robust_collisions,
+        max(-candidate.robust_min_clearance, 0.0),
+        -candidate.robust_min_clearance,
+        candidate.terminal_threat_collisions,
+        max(-candidate.terminal_threat_min_clearance, 0.0),
+        max(-candidate.min_clearance, 0.0),
+        candidate.score,
+    )
+
+
 def choose_action_request(request: LocalPlannerRequest) -> Decision:
     """Plan from the grouped immutable request contract."""
 
-    physical = request.physical
-    actuator = request.actuator
-    guidance = request.guidance
-    config = request.config
-    objective = request.objective
-    completed = request.completed_services
-    return choose_action(
-        player_x=physical.player_x,
-        player_y=physical.player_y,
-        bullets=physical.bullets,
-        lasers=physical.lasers,
-        previous_direction=actuator.previous_direction,
-        can_bomb=actuator.can_bomb,
-        enemy_bodies=physical.enemy_bodies,
-        items=physical.items,
-        power=objective.power,
-        bombs=objective.bombs,
-        previous_focus=actuator.previous_focus,
-        local_pipeline_root=actuator.local_pipeline_root,
-        snapshot_lag=physical.snapshot_lag,
-        control_delay_frames=actuator.control_delay_frames,
-        control_delay_candidates=actuator.control_delay_candidates,
-        action_hold_frames=actuator.action_hold_frames,
-        horizon=config.horizon,
-        threat_horizon=config.threat_horizon,
-        beam_width=config.beam_width,
-        target_x=guidance.target_x,
-        target_y=guidance.target_y,
-        target_deadline=guidance.target_deadline,
-        allowed_first_actions=guidance.allowed_first_actions,
-        viability_repair_volumes=guidance.viability_repair_volumes,
-        viability_recovery_distances=(
-            guidance.viability_recovery_distances
-        ),
-        viability_safety_actions=guidance.viability_safety_actions,
-        viability_safety_state_value=(
-            guidance.viability_safety_state_value
-        ),
-        viability_survival_actions=guidance.viability_survival_actions,
-        viability_survival_frames=guidance.viability_survival_frames,
-        viability_survival_bottleneck_margin=(
-            guidance.viability_survival_bottleneck_margin
-        ),
-        viability_position_error=guidance.viability_position_error,
-        damage_target_x=objective.damage_target_x,
-        damage_target_half_width=objective.damage_target_half_width,
-        damageable=objective.damageable,
-        recovery_control_reserve=config.recovery_control_reserve,
-        losing_control_reserve=config.losing_control_reserve,
-        preloss_continuation_preference=(
-            config.preloss_continuation_preference
-        ),
-        preloss_supplemental_beam_width=(
-            config.preloss_supplemental_beam_width
-        ),
-        preloss_supplemental_deadline_ms=(
-            completed.supplemental_deadline_ms
-        ),
-        preloss_supplemental_async_service=(
-            completed.supplemental_async_service
-        ),
-        preloss_supplemental_version=completed.supplemental_version,
-        preserve_previous_direction_inertia=(
-            config.preserve_previous_direction_inertia
-        ),
-        beam_dedup_mode=config.beam_dedup_mode,
-        relax_stale_viability_contradiction=(
-            config.relax_stale_viability_contradiction
-        ),
-        enforce_fresh_viability_intersection=(
-            config.enforce_fresh_viability_intersection
-        ),
+    timing = _LocalCertificateTimingAccumulator()
+    result = _choose_action_request_once(
+        request,
+        _certificate_timing_accumulator=timing,
+    )
+    if isinstance(result, _PlannerModeTransition):
+        retry = _choose_action_request_once(
+            result.next_request,
+            _certificate_timing_accumulator=timing,
+        )
+        if isinstance(retry, _PlannerModeTransition):
+            raise AssertionError("relaxed planner mode cannot transition again")
+        if _contradiction_key(retry) < _contradiction_key(
+            result.current_decision
+        ):
+            decision = replace(
+                retry,
+                viability_safe_action_count=(
+                    result.original_allowed_action_count
+                ),
+                viability_constraint_relaxed=True,
+            )
+        else:
+            decision = result.current_decision
+        return replace(
+            decision,
+            local_certificate_timing=timing.snapshot(),
+        )
+    return result
+
+
+def choose_action(
+    *,
+    player_x: float,
+    player_y: float,
+    bullets: tuple[Bullet, ...],
+    lasers: tuple[Laser, ...],
+    previous_direction: int,
+    can_bomb: bool,
+    enemy_bodies: tuple[EnemyBody, ...] = (),
+    items: tuple[Item, ...] = (),
+    power: float = 0.0,
+    bombs: float = 0.0,
+    previous_focus: bool = True,
+    local_pipeline_root: LocalPipelineRoot | None = None,
+    snapshot_lag: int = 0,
+    control_delay_frames: int = CONTROL_DELAY_FRAMES,
+    control_delay_candidates: tuple[int, ...] | None = None,
+    action_hold_frames: int = PLANNER_ACTION_HOLD,
+    horizon: int = PLANNER_HORIZON,
+    threat_horizon: int | None = None,
+    beam_width: int = PLANNER_BEAM_WIDTH,
+    target_x: float | None = None,
+    target_y: float | None = None,
+    target_deadline: int | None = None,
+    allowed_first_actions: tuple[str, ...] | None = None,
+    viability_repair_volumes: tuple[tuple[str, int], ...] = (),
+    viability_recovery_distances: tuple[tuple[str, float], ...] = (),
+    viability_safety_actions: tuple[str, ...] = (),
+    viability_safety_state_value: float | None = None,
+    viability_survival_actions: tuple[str, ...] = (),
+    viability_survival_frames: int | None = None,
+    viability_survival_bottleneck_margin: float | None = None,
+    viability_position_error: float = 0.0,
+    damage_target_x: float | None = None,
+    damage_target_half_width: float = 0.0,
+    damageable: bool = False,
+    recovery_control_reserve: bool = True,
+    losing_control_reserve: bool = False,
+    preloss_continuation_preference: bool = False,
+    preloss_supplemental_beam_width: int = 0,
+    preloss_supplemental_deadline_ms: float | None = None,
+    preloss_supplemental_async_service: (
+        ExactVersionSupplementalService | None
+    ) = None,
+    preloss_supplemental_version: object | None = None,
+    preserve_previous_direction_inertia: bool = True,
+    beam_dedup_mode: str = "quantized",
+    relax_stale_viability_contradiction: bool = False,
+    enforce_fresh_viability_intersection: bool = True,
+) -> Decision:
+    """Compatibility wrapper for callers not yet migrated to grouped input."""
+
+    return choose_action_request(
+        LocalPlannerRequest(
+            physical=PhysicalHazardSnapshot(
+                player_x=player_x,
+                player_y=player_y,
+                bullets=bullets,
+                lasers=lasers,
+                enemy_bodies=enemy_bodies,
+                items=items,
+                snapshot_lag=snapshot_lag,
+            ),
+            actuator=ActuatorPipeline(
+                previous_direction=previous_direction,
+                can_bomb=can_bomb,
+                previous_focus=previous_focus,
+                local_pipeline_root=local_pipeline_root,
+                control_delay_frames=control_delay_frames,
+                control_delay_candidates=control_delay_candidates,
+                action_hold_frames=action_hold_frames,
+            ),
+            guidance=GlobalGuidance(
+                target_x=target_x,
+                target_y=target_y,
+                target_deadline=target_deadline,
+                allowed_first_actions=allowed_first_actions,
+                viability_repair_volumes=viability_repair_volumes,
+                viability_recovery_distances=(
+                    viability_recovery_distances
+                ),
+                viability_safety_actions=viability_safety_actions,
+                viability_safety_state_value=(
+                    viability_safety_state_value
+                ),
+                viability_survival_actions=viability_survival_actions,
+                viability_survival_frames=viability_survival_frames,
+                viability_survival_bottleneck_margin=(
+                    viability_survival_bottleneck_margin
+                ),
+                viability_position_error=viability_position_error,
+            ),
+            config=PlannerConfig(
+                horizon=horizon,
+                threat_horizon=threat_horizon,
+                beam_width=beam_width,
+                recovery_control_reserve=recovery_control_reserve,
+                losing_control_reserve=losing_control_reserve,
+                preloss_continuation_preference=(
+                    preloss_continuation_preference
+                ),
+                preloss_supplemental_beam_width=(
+                    preloss_supplemental_beam_width
+                ),
+                preserve_previous_direction_inertia=(
+                    preserve_previous_direction_inertia
+                ),
+                beam_dedup_mode=beam_dedup_mode,
+                relax_stale_viability_contradiction=(
+                    relax_stale_viability_contradiction
+                ),
+                enforce_fresh_viability_intersection=(
+                    enforce_fresh_viability_intersection
+                ),
+            ),
+            objective=ObjectiveContext(
+                power=power,
+                bombs=bombs,
+                damage_target_x=damage_target_x,
+                damage_target_half_width=damage_target_half_width,
+                damageable=damageable,
+            ),
+            completed_services=CompletedServiceResults(
+                supplemental_deadline_ms=(
+                    preloss_supplemental_deadline_ms
+                ),
+                supplemental_async_service=(
+                    preloss_supplemental_async_service
+                ),
+                supplemental_version=preloss_supplemental_version,
+            ),
+        )
     )
 
 
@@ -8502,60 +8580,90 @@ def run(args: argparse.Namespace) -> int:
                 # Player-shot damage uses the unexpanded AABB.
                 damage_target_half_width = (
                     spell_enemy_body_guard.body.half_width * (2.0 / 3.0)
-                )
+            )
                 damageable = boss_phase_progress.state.damageable
             plan_started = time.perf_counter()
-            decision = choose_action(
-                player_x=float(player["x"]),
-                player_y=float(player["y"]),
-                bullets=bullets,
-                lasers=lasers,
-                enemy_bodies=enemy_bodies,
-                previous_direction=previous_direction,
-                can_bomb=can_bomb,
-                items=items,
-                power=float(resources["power"]),
-                bombs=float(resources["bombs"]),
-                previous_focus=bool(previous_mask & FOCUS),
-                snapshot_lag=player_to_hazard_lag,
-                control_delay_frames=control_delay_frames,
-                control_delay_candidates=delay_estimate.support,
-                action_hold_frames=action_hold_frames,
-                horizon=args.horizon,
-                threat_horizon=args.threat_horizon,
-                beam_width=args.beam_width,
-                target_x=(
-                    corridor_target[0] if corridor_target is not None else None
-                ),
-                target_y=(
-                    corridor_target[1] if corridor_target is not None else None
-                ),
-                target_deadline=(
-                    corridor_target[2] if corridor_target is not None else None
-                ),
-                allowed_first_actions=policy_guidance.allowed_first_actions,
-                viability_repair_volumes=policy_guidance.repair_volumes,
-                viability_recovery_distances=(
-                    policy_guidance.recovery_distances
-                ),
-                viability_safety_actions=policy_guidance.safety_actions,
-                viability_safety_state_value=(
-                    policy_guidance.safety_state_value
-                ),
-                viability_survival_actions=(
-                    policy_guidance.survival_actions
-                ),
-                viability_survival_frames=policy_guidance.survival_frames,
-                viability_survival_bottleneck_margin=(
-                    policy_guidance.survival_bottleneck_margin
-                ),
-                viability_position_error=policy_guidance.position_error,
-                damage_target_x=damage_target_x,
-                damage_target_half_width=damage_target_half_width,
-                damageable=damageable,
-                preserve_previous_direction_inertia=(
-                    not corridor_context_changed
-                ),
+            decision = choose_action_request(
+                LocalPlannerRequest(
+                    physical=PhysicalHazardSnapshot(
+                        player_x=float(player["x"]),
+                        player_y=float(player["y"]),
+                        bullets=bullets,
+                        lasers=lasers,
+                        enemy_bodies=enemy_bodies,
+                        items=items,
+                        snapshot_lag=player_to_hazard_lag,
+                    ),
+                    actuator=ActuatorPipeline(
+                        previous_direction=previous_direction,
+                        can_bomb=can_bomb,
+                        previous_focus=bool(previous_mask & FOCUS),
+                        control_delay_frames=control_delay_frames,
+                        control_delay_candidates=delay_estimate.support,
+                        action_hold_frames=action_hold_frames,
+                    ),
+                    guidance=GlobalGuidance(
+                        target_x=(
+                            corridor_target[0]
+                            if corridor_target is not None
+                            else None
+                        ),
+                        target_y=(
+                            corridor_target[1]
+                            if corridor_target is not None
+                            else None
+                        ),
+                        target_deadline=(
+                            corridor_target[2]
+                            if corridor_target is not None
+                            else None
+                        ),
+                        allowed_first_actions=(
+                            policy_guidance.allowed_first_actions
+                        ),
+                        viability_repair_volumes=(
+                            policy_guidance.repair_volumes
+                        ),
+                        viability_recovery_distances=(
+                            policy_guidance.recovery_distances
+                        ),
+                        viability_safety_actions=(
+                            policy_guidance.safety_actions
+                        ),
+                        viability_safety_state_value=(
+                            policy_guidance.safety_state_value
+                        ),
+                        viability_survival_actions=(
+                            policy_guidance.survival_actions
+                        ),
+                        viability_survival_frames=(
+                            policy_guidance.survival_frames
+                        ),
+                        viability_survival_bottleneck_margin=(
+                            policy_guidance.survival_bottleneck_margin
+                        ),
+                        viability_position_error=(
+                            policy_guidance.position_error
+                        ),
+                    ),
+                    config=PlannerConfig(
+                        horizon=args.horizon,
+                        threat_horizon=args.threat_horizon,
+                        beam_width=args.beam_width,
+                        preserve_previous_direction_inertia=(
+                            not corridor_context_changed
+                        ),
+                    ),
+                    objective=ObjectiveContext(
+                        power=float(resources["power"]),
+                        bombs=float(resources["bombs"]),
+                        damage_target_x=damage_target_x,
+                        damage_target_half_width=(
+                            damage_target_half_width
+                        ),
+                        damageable=damageable,
+                    ),
+                )
             )
             plan_ms = (time.perf_counter() - plan_started) * 1000.0
             pre_issue_action = decision.action

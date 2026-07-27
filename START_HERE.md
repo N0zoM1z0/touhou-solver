@@ -101,6 +101,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
   monkeypatch and backend dispatch seams. Deadline handling, Bomb policy,
   candidate lookup, physical dispatch, actuator updates, and trace
   publication remain controller-owned.
+- Post-extraction physical retention
+  `lunatic_route2_stage4a_unattended_20260727_220330` completed Stage 4A over
+  frames `2..41645` with 13,295 decisions, maximum 1,362 bullets, zero Bomb
+  input, accepted terminal unload, compact artifacts, supervisor completion,
+  and cleanup. All 13,295 decisions retained an issue observation; 2,178
+  changed observations produced exactly 2,178 recertifications, 39 action
+  overrides, and zero silent outside-global selections. Seven hits all
+  followed global-kernel exhaustion, extending CE-0136 rather than indicating
+  a structural regression.
 - Corridor-trace characterization checkpoint `6a75a6a` adds a pure
   `th08_live.corridor_trace` record builder. The live loop still constructs
   the historical inline record and asserts exact equality with the extracted

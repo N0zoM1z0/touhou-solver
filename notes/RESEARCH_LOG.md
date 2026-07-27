@@ -5789,3 +5789,30 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   intersection semantics, enemy uncertainty, delay support, deadline
   fallback, hard no-Bomb policy, physical dispatch, trace schema, live action
   authority, and strategy are unchanged.
+
+### 2026-07-27 — Fresh enemy issue-stage physical retention
+
+- **Observed physical gate:** Supervised Windows run
+  `lunatic_route2_stage4a_unattended_20260727_220330` completed Stage 4A over
+  frames `2..41645` with 13,295 decisions, maximum 1,362 bullets, native
+  decode/hazard/beam execution, hard no-Bomb, accepted terminal unload,
+  compact artifacts, supervisor completion, and no residual game/controller
+  process.
+- **Observed stage integrity:** The issue-time enemy guard retained 13,295
+  observations. It detected 2,178 during-plan geometry changes, performed
+  exactly 2,178 recertifications and transactions, overrode 39 actions,
+  preserved 2,139 planned actions, and recorded zero silent outside-global
+  selections. Read/recertification median/p95 was
+  `1.733/3.473 ms` and `1.826/3.484 ms`.
+- **Observed survival boundary:** Seven hits occurred at
+  `[2775,4158,10484,11966,20720,35517,36397]`; five were observed-bullet
+  overlaps and two modeled committed-prefix collisions. Every hit followed
+  global-kernel exhaustion. This extends CE-0136 and is not survival
+  acceptance.
+- **Authority:** Physical structural retention only. The extraction preserves
+  the exercised issue-time sensor, recertification, dispatch, trace, and
+  lifecycle path; model, recurrence, live authority, and strategy remain
+  unchanged.
+- **Evidence:** Matching compact artifacts under `notes/runs/` and
+  `artifacts/runtime_reports/`; ignored 421,171,745-byte raw JSONL SHA-256
+  `7a283ce85264a778e2fc24e01ad65efa0d3235161b733ed7105f8b9434264bcf`.

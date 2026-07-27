@@ -3589,7 +3589,7 @@ live delivery rejected
   `test_stop_redirect_and_reversal_cases_bound_dense_reference` plus the
   retained `g2_spatial_refinement_gate.py` six-root run.
 
-## CE-0136: Hard Stage 4A remained unsafe across kernel exhaustion and late contact
+## CE-0136: Stage 4A remained unsafe across kernel exhaustion and late contact
 
 Status: observed physical survival failure; structural sensing-trace gate
 completed
@@ -3619,9 +3619,25 @@ completed
   body cases separate, and require Stage 4A followed by Stage 5/6B evidence
   for later planner/native changes. Do not infer improvement from the lower
   hit count of an RNG-distinct run.
-- **Evidence:** Matching compact run and dossier artifacts; ignored raw JSONL
-  SHA-256
-  `f22dae779704b0e0189a9cf3129ce77db1aeec83245c82a7264edd579ef4fea8`.
+- **Observed fresh-issue-stage retention:** Lunatic run
+  `lunatic_route2_stage4a_unattended_20260727_220330` completed frames
+  `2..41645`, 13,295 decisions, maximum 1,362 bullets, hard no-Bomb,
+  accepted artifacts, and cleanup after extracting the fresh enemy-prefix
+  stage. It took seven hits at
+  `[2775,4158,10484,11966,20720,35517,36397]`; five were observed-bullet
+  overlaps and two were modeled committed-prefix collisions. Every hit
+  followed global-kernel exhaustion.
+- **Observed issue-stage integrity:** All 13,295 decisions retained an
+  issue-time enemy observation. The 2,178 changed observations produced
+  exactly 2,178 recertifications and 2,178 fresh/global transactions, with
+  39 action overrides and zero silent outside-global selections. This retains
+  the extracted stage but does not rescue survival.
+- **Evidence:** Matching compact run and dossier artifacts. Ignored raw JSONL
+  SHA-256 values are
+  `f22dae779704b0e0189a9cf3129ce77db1aeec83245c82a7264edd579ef4fea8`
+  for the Hard run and
+  `7a283ce85264a778e2fc24e01ad65efa0d3235161b733ed7105f8b9434264bcf`
+  for the post-extraction Lunatic run.
 
 ## CE-0137: Stage 5 exhausted every global kernel before contact
 

@@ -76,6 +76,14 @@ coupling, and the order for later structural work.
   viability/pipeline execution and phase transitions. Sixteen CE-0138 hits,
   including two exact laser overlaps and one multi-hazard overlap, remain
   physical-model/recovery evidence rather than structural acceptance.
+- **Observed:** after extracting the fresh enemy-prefix issue stage, Lunatic
+  Stage-4A run `lunatic_route2_stage4a_unattended_20260727_220330` completed
+  13,295 decisions over frames `2..41645`, reached 1,362 bullets, passed hard
+  no-Bomb, materialized accepted artifacts, and left no residual process.
+  Its 13,295 issue observations contained 2,178 changes and exactly 2,178
+  recertifications, with 39 overrides and zero silent outside-global
+  selections. Seven CE-0136 hits remain survival evidence, not a structural
+  regression.
 - **Workload decision:** Stage 1 remains sufficient for lifecycle, cleanup,
   and trace-schema changes. Subsequent planner, recurrence, clearance, or
   native compute checkpoints use Hard Stage 4A as the primary focused

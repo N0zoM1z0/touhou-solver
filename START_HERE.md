@@ -32,20 +32,21 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Repository branch: `main`.
 - Latest algorithmic checkpoint:
   `d4467bd Add deadline-aware native supplemental gate`.
-- Latest structural checkpoint: corridor-refactor R1 algorithm separation.
-  Corridor data, grid, clearance, callback-free preparation, legacy forward
-  planning, robust induction, representative rollout, and explicitly named
-  `LegacyFullFieldRefinement` now live in narrow modules under
-  `touhou_control.corridor`. `corridor_planner` is a 169-line compatibility
-  façade. Runtime still explicitly performs prepare, optional shadow prewarm,
-  then Boolean solve. The R0 behavior and 43-symbol ABI baselines remain
-  unchanged. No model, recurrence, action, strategy, or C ABI changed.
+- Latest structural checkpoint: corridor-refactor R1 runtime ownership split.
+  Corridor algorithms remain in narrow `touhou_control.corridor` modules and
+  `corridor_planner` remains a 169-line compatibility façade.
+  `CorridorSolution` now separates handle-free policy artifact, publication
+  state, and process-local handles while forwarding its historical fields.
+  TH08 audit submission/write and prewarm startup/query/retarget/close live in
+  dedicated modules; `th08_corridor_runtime` is 643 lines. The R0 behavior and
+  43-symbol ABI baselines remain unchanged. No model, recurrence, action,
+  strategy, or C ABI changed.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
   quick suite `584/584` on Linux in `5.213 s` and Windows in `14.365 s`.
-- The algorithm-split checkpoint passes the expanded quick suite `588/588`
-  on Linux in `5.327 s` and Windows in `8.037 s` with one existing skip.
+- The runtime-ownership checkpoint passes the expanded quick suite `594/594`
+  on Linux in `5.442 s` and Windows in `7.999 s` with one existing skip.
 - No TH08 process, controller daemon, supervisor, or unfinished experiment is
   expected to be alive.
 - Native build output, raw traces, screenshots, caches, and the local

@@ -4244,3 +4244,37 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   complete quick suite passes `588/588` on Linux in `5.327 s` and on Windows
   in `8.037 s` with one existing skip; Python compilation, Ruff, and
   `git diff --check` pass.
+
+## 2026-07-27: Corridor Runtime Ownership Separation
+
+- **Scope:** Split `CorridorSolution` into a handle-free
+  `CorridorPolicyArtifact`, value-only `CorridorPublication`, and
+  process-local `CorridorRuntimeHandles`. The compatibility wrapper preserves
+  historical constructor arguments and read-only field access while internal
+  post-publication updates replace only the relevant nested value.
+- **Observed ownership boundary:** Plans, exact version/context identity,
+  solve/worker timing, and worker-setting observations are artifact fields.
+  Audit and post-publication result metadata are publication fields. Audit
+  futures, persistent pipeline workspaces, and prewarm services are handles
+  and are absent from artifact/publication values.
+- **Service extraction:** TH08 capsule metadata/submission/write now belongs
+  to `th08_corridor_audit.py`. Prewarm startup, exact-version lookup, bounded
+  retarget scheduling, shared-service retirement, and close behavior now
+  belong to `th08_corridor_prewarm.py`; the old
+  `th08_corridor_runtime` imports remain compatibility re-exports.
+- **Observed structure:** `th08_corridor_runtime.py` decreased from 907 to
+  643 lines. `solve_corridor()` retains orchestration order but delegates
+  service lifecycle and constructs the three solution parts explicitly.
+- **Authority:** This changes only object and lifecycle ownership. It changes
+  no policy version tuple, initial root frame, decision support, root-limit
+  schedule, newest-version behavior, query/retarget result, audit metadata,
+  recurrence, masks, action selection, live/shadow setting, strategy status,
+  native implementation, or C ABI. Handles remain process-local; no new
+  publication path or action authority is introduced.
+- **Validation:** New tests cover compatibility forwarding, handle exclusion
+  from artifact/publication, sync/async audit ownership, exact-version
+  prewarm lookup/root identity, bounded retarget arguments, and deduplicated
+  retained-service closure. Corridor runtime tests pass `7/7`, service tests
+  pass `5/5`, and the complete quick suite passes `594/594` on Linux in
+  `5.442 s` and on Windows in `7.999 s` with one existing skip. Python
+  compilation, Ruff, and `git diff --check` pass.

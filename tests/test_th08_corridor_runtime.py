@@ -5,13 +5,19 @@ from __future__ import annotations
 
 import math
 import unittest
+from concurrent.futures import Future
+from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
 import th08_corridor_runtime as corridor_runtime_module
 
 from corridor_planner import CorridorPlan
+from th08_corridor_audit import CorridorAuditSubmission
 from th08_corridor_runtime import (
+    CorridorPolicyArtifact,
+    CorridorPublication,
+    CorridorRuntimeHandles,
     CorridorSolution,
     LIVE_REFINEMENT_GRID_STEPS,
     LIVE_SURVIVAL_LABELS,
@@ -123,6 +129,22 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
             active_action="stay",
         )
         self.assertIsNotNone(solution.plan.viability_policy)
+        self.assertIsInstance(solution.artifact, CorridorPolicyArtifact)
+        self.assertIsInstance(
+            solution.publication,
+            CorridorPublication,
+        )
+        self.assertIsInstance(
+            solution.handles,
+            CorridorRuntimeHandles,
+        )
+        self.assertIs(solution.plan, solution.artifact.plan)
+        self.assertFalse(
+            hasattr(solution.artifact, "pipeline_prewarm_service")
+        )
+        self.assertFalse(
+            hasattr(solution.publication, "audit_future")
+        )
         self.assertIsNone(solution.plan.survival_policy)
         self.assertIsNotNone(solution.plan.survival_query_problem)
         assert solution.plan.survival_query_problem is not None
@@ -237,7 +259,7 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
                 side_effect=checked_prepare,
             ),
             patch(
-                "th08_corridor_runtime.PipelinePrewarmService",
+                "th08_corridor_prewarm.PipelinePrewarmService",
                 side_effect=checked_service,
             ),
             patch(
@@ -265,6 +287,45 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
         self.assertEqual(events, ["prepare", "prewarm", "solve"])
         self.assertIs(solution.pipeline_prewarm_service, service)
         self.assertIsNone(solution.pipeline_prewarm_start_error)
+
+    def test_audit_values_and_future_are_split_on_solution(self) -> None:
+        future: Future[tuple[float, str | None]] = Future()
+        future.set_result((1.5, None))
+        submission = CorridorAuditSubmission(
+            capsule="/tmp/policy.npz",
+            write_ms=None,
+            error=None,
+            future=future,
+        )
+        with patch(
+            "th08_corridor_runtime.submit_corridor_audit",
+            return_value=submission,
+        ) as submit:
+            solution = solve_corridor(
+                source_frame=100,
+                snapshot_frame=90,
+                forecast_lead_frames=10,
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                control_delay_candidates=(1, 2),
+                nominal_control_delay=1,
+                active_action="stay",
+                audit_capsule_dir=Path("/tmp/audit"),
+            )
+
+        self.assertEqual(
+            solution.publication.audit_capsule,
+            "/tmp/policy.npz",
+        )
+        self.assertIs(solution.handles.audit_future, future)
+        self.assertFalse(hasattr(solution.publication, "audit_future"))
+        self.assertTrue(
+            submit.call_args.kwargs["plan_reachable"]
+        )
 
     def test_background_resource_controls_are_applied_and_reported(self) -> None:
         with (

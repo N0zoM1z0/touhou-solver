@@ -1,0 +1,280 @@
+"""Corridor policy artifacts, publication state, and runtime handles."""
+
+from __future__ import annotations
+
+from concurrent.futures import Future
+from dataclasses import dataclass, replace
+
+from ..pipeline_prewarm_service import PipelinePrewarmService
+from ..query_survival import PipelineSurvivalWorkspace
+from ..viability import RobustViabilityPolicy
+from .model import CorridorPlan
+
+
+@dataclass(frozen=True)
+class CorridorPolicyArtifact:
+    """Handle-free policy result plus value-only identity/timing metadata."""
+
+    source_frame: int
+    plan: CorridorPlan
+    solve_ms: float
+    snapshot_frame: int | None = None
+    forecast_lead_frames: int = 0
+    required_gate_lane: str | None = None
+    constraint_honored: bool = False
+    context_key: tuple[int, int, int | None] | None = None
+    worker_ms: float | None = None
+    background_priority_lowered: bool = False
+    native_viability_worker_limit: int | None = None
+    native_viability_worker_limit_applied: bool = False
+
+
+@dataclass(frozen=True)
+class CorridorPublication:
+    """Published diagnostics and post-publication shadow results."""
+
+    audit_capsule: str | None = None
+    audit_write_ms: float | None = None
+    audit_error: str | None = None
+    postpublished_survival_policy: RobustViabilityPolicy | None = None
+    postpublished_survival_ms: float | None = None
+    postpublished_survival_parity: bool | None = None
+    pipeline_survival_workspace_ms: float | None = None
+    pipeline_prewarm_start_error: str | None = None
+
+
+@dataclass(frozen=True)
+class CorridorRuntimeHandles:
+    """Process-local objects that must never cross publication boundaries."""
+
+    audit_future: Future[tuple[float, str | None]] | None = None
+    pipeline_survival_workspace: PipelineSurvivalWorkspace | None = None
+    pipeline_prewarm_service: PipelinePrewarmService | None = None
+
+
+@dataclass(frozen=True, init=False)
+class CorridorSolution:
+    """Compatibility view over separated artifact/publication/handle state."""
+
+    artifact: CorridorPolicyArtifact
+    publication: CorridorPublication
+    handles: CorridorRuntimeHandles
+
+    def __init__(
+        self,
+        source_frame: int | None = None,
+        plan: CorridorPlan | None = None,
+        solve_ms: float | None = None,
+        snapshot_frame: int | None = None,
+        forecast_lead_frames: int = 0,
+        required_gate_lane: str | None = None,
+        constraint_honored: bool = False,
+        context_key: tuple[int, int, int | None] | None = None,
+        audit_capsule: str | None = None,
+        audit_write_ms: float | None = None,
+        audit_error: str | None = None,
+        worker_ms: float | None = None,
+        audit_future: Future[tuple[float, str | None]] | None = None,
+        postpublished_survival_policy: (
+            RobustViabilityPolicy | None
+        ) = None,
+        postpublished_survival_ms: float | None = None,
+        postpublished_survival_parity: bool | None = None,
+        pipeline_survival_workspace: (
+            PipelineSurvivalWorkspace | None
+        ) = None,
+        pipeline_survival_workspace_ms: float | None = None,
+        pipeline_prewarm_service: PipelinePrewarmService | None = None,
+        pipeline_prewarm_start_error: str | None = None,
+        background_priority_lowered: bool = False,
+        native_viability_worker_limit: int | None = None,
+        native_viability_worker_limit_applied: bool = False,
+        *,
+        artifact: CorridorPolicyArtifact | None = None,
+        publication: CorridorPublication | None = None,
+        handles: CorridorRuntimeHandles | None = None,
+    ) -> None:
+        if artifact is None:
+            if source_frame is None or plan is None or solve_ms is None:
+                raise TypeError(
+                    "source_frame, plan, and solve_ms are required"
+                )
+            artifact = CorridorPolicyArtifact(
+                source_frame=source_frame,
+                plan=plan,
+                solve_ms=solve_ms,
+                snapshot_frame=snapshot_frame,
+                forecast_lead_frames=forecast_lead_frames,
+                required_gate_lane=required_gate_lane,
+                constraint_honored=constraint_honored,
+                context_key=context_key,
+                worker_ms=worker_ms,
+                background_priority_lowered=(
+                    background_priority_lowered
+                ),
+                native_viability_worker_limit=(
+                    native_viability_worker_limit
+                ),
+                native_viability_worker_limit_applied=(
+                    native_viability_worker_limit_applied
+                ),
+            )
+            publication = CorridorPublication(
+                audit_capsule=audit_capsule,
+                audit_write_ms=audit_write_ms,
+                audit_error=audit_error,
+                postpublished_survival_policy=(
+                    postpublished_survival_policy
+                ),
+                postpublished_survival_ms=(
+                    postpublished_survival_ms
+                ),
+                postpublished_survival_parity=(
+                    postpublished_survival_parity
+                ),
+                pipeline_survival_workspace_ms=(
+                    pipeline_survival_workspace_ms
+                ),
+                pipeline_prewarm_start_error=(
+                    pipeline_prewarm_start_error
+                ),
+            )
+            handles = CorridorRuntimeHandles(
+                audit_future=audit_future,
+                pipeline_survival_workspace=(
+                    pipeline_survival_workspace
+                ),
+                pipeline_prewarm_service=pipeline_prewarm_service,
+            )
+        else:
+            if source_frame is not None or plan is not None or solve_ms is not None:
+                raise TypeError(
+                    "artifact cannot be combined with legacy core fields"
+                )
+            publication = publication or CorridorPublication()
+            handles = handles or CorridorRuntimeHandles()
+        object.__setattr__(self, "artifact", artifact)
+        object.__setattr__(self, "publication", publication)
+        object.__setattr__(self, "handles", handles)
+
+    def with_publication(self, **changes: object) -> CorridorSolution:
+        return CorridorSolution(
+            artifact=self.artifact,
+            publication=replace(self.publication, **changes),
+            handles=self.handles,
+        )
+
+    def with_handles(self, **changes: object) -> CorridorSolution:
+        return CorridorSolution(
+            artifact=self.artifact,
+            publication=self.publication,
+            handles=replace(self.handles, **changes),
+        )
+
+    @property
+    def source_frame(self) -> int:
+        return self.artifact.source_frame
+
+    @property
+    def plan(self) -> CorridorPlan:
+        return self.artifact.plan
+
+    @property
+    def solve_ms(self) -> float:
+        return self.artifact.solve_ms
+
+    @property
+    def snapshot_frame(self) -> int | None:
+        return self.artifact.snapshot_frame
+
+    @property
+    def forecast_lead_frames(self) -> int:
+        return self.artifact.forecast_lead_frames
+
+    @property
+    def required_gate_lane(self) -> str | None:
+        return self.artifact.required_gate_lane
+
+    @property
+    def constraint_honored(self) -> bool:
+        return self.artifact.constraint_honored
+
+    @property
+    def context_key(self) -> tuple[int, int, int | None] | None:
+        return self.artifact.context_key
+
+    @property
+    def audit_capsule(self) -> str | None:
+        return self.publication.audit_capsule
+
+    @property
+    def audit_write_ms(self) -> float | None:
+        return self.publication.audit_write_ms
+
+    @property
+    def audit_error(self) -> str | None:
+        return self.publication.audit_error
+
+    @property
+    def worker_ms(self) -> float | None:
+        return self.artifact.worker_ms
+
+    @property
+    def audit_future(
+        self,
+    ) -> Future[tuple[float, str | None]] | None:
+        return self.handles.audit_future
+
+    @property
+    def postpublished_survival_policy(
+        self,
+    ) -> RobustViabilityPolicy | None:
+        return self.publication.postpublished_survival_policy
+
+    @property
+    def postpublished_survival_ms(self) -> float | None:
+        return self.publication.postpublished_survival_ms
+
+    @property
+    def postpublished_survival_parity(self) -> bool | None:
+        return self.publication.postpublished_survival_parity
+
+    @property
+    def pipeline_survival_workspace(
+        self,
+    ) -> PipelineSurvivalWorkspace | None:
+        return self.handles.pipeline_survival_workspace
+
+    @property
+    def pipeline_survival_workspace_ms(self) -> float | None:
+        return self.publication.pipeline_survival_workspace_ms
+
+    @property
+    def pipeline_prewarm_service(
+        self,
+    ) -> PipelinePrewarmService | None:
+        return self.handles.pipeline_prewarm_service
+
+    @property
+    def pipeline_prewarm_start_error(self) -> str | None:
+        return self.publication.pipeline_prewarm_start_error
+
+    @property
+    def background_priority_lowered(self) -> bool:
+        return self.artifact.background_priority_lowered
+
+    @property
+    def native_viability_worker_limit(self) -> int | None:
+        return self.artifact.native_viability_worker_limit
+
+    @property
+    def native_viability_worker_limit_applied(self) -> bool:
+        return self.artifact.native_viability_worker_limit_applied
+
+
+__all__ = [
+    "CorridorPolicyArtifact",
+    "CorridorPublication",
+    "CorridorRuntimeHandles",
+    "CorridorSolution",
+]

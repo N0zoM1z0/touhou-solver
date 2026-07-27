@@ -6797,3 +6797,39 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** One explicit-native Stage-4A attribution run is eligible.
   B4, CE-0149, future-event coverage, and physical action authority remain
   unchanged.
+
+## 2026-07-28 — Physically attributed the remaining native birth tail
+
+- Explicit-native schema-v6 run
+  `lunatic_route2_stage4a_unattended_20260728_062321` completed Lunatic
+  Stage 4A over frames `1..45170`, 14,868 decisions, 17 hits, hard no-Bomb,
+  accepted artifacts, supervisor completion, and cleanup.
+- All 14,868 audit rows use schema v6/native provenance with zero observation
+  or intent errors. Observer p50/p95/p99/p99.9/max is
+  `0.0648/0.1493/0.2245/2.1568/8.3514 ms`; B4 again fails only the unchanged
+  maximum.
+- **Observed:** all 17 samples above `2.00 ms` are dominated by the native
+  call. Native-call p50/p95/p99/p99.9/max is
+  `0.0365/0.0603/0.1125/2.1281/8.2585 ms`; prepare,
+  materialization, and controller-residual maxima are
+  `0.0703/0.7076/0.2362 ms`.
+- **Observed exclusion:** no completed cyclic-GC collection overlapped any
+  prepare, native-call, or materialization interval in the entire run. Tail
+  evidence counts are only `0, 4, 10, 20, 33, 48`. This resolves CE-0149's
+  attribution and rejects another Python-copy/GC optimization as the next
+  correction.
+- **Inferred/hypothesized:** `CDLL` GIL release may permit Python-thread
+  interference during an otherwise 0.0365-ms scan. The trace does not
+  directly observe Windows scheduling or preemption.
+- The audit retains 2,193 timed sightings, 120 deduplicated events, and 5,925
+  unique temporal supports over 96,984 activation edges. All 1,324 spell-57
+  rows still exhaust the 256-instruction callback lookahead, independently
+  reproducing CE-0147.
+- Raw trace is 483,475,546 bytes with SHA-256
+  `9f075f795327e6e1669b2cf18e0cfd28656a87ced1212cddf2ff3157b0dacc30`.
+  Two deterministic report generations are byte-identical at canonical LF
+  SHA-256
+  `c0e71b3660651e11e15e3a924bef0d1f22adc49a3513bbc7ab39b83528d3e008`.
+- **Authority:** B4 remains failed. The next correction gate compares
+  explicit GIL-held and GIL-released call boundaries without changing the
+  C++ recurrence/output, GC, affinity, wall limit, or action authority.

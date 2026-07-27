@@ -1045,7 +1045,17 @@ parity 當成每個 nature tie field 的逐 bit equality。
   `1.077 fail -> 0.940 pass`；CE-0150 改為 iteration 內 ABBA paired
   means 後 Linux/Windows/Windows-repeat 為
   `1.012/1.016/1.025`，均在原 `1.05` gate 內。下一步是 schema-v6
-  Stage-4A attribution physical run；
+  Stage-4A attribution physical run；該 run `20260728_062321` 已完成
+  14,868 decisions、17 hits、hard no-Bomb 與 cleanup。observer
+  p50/p95/p99/p99.9/max 為
+  `0.0648/0.1493/0.2245/2.1568/8.3514 ms`，仍只在 max 失敗；17 個
+  超過 2 ms 的樣本全部由 native-call wall interval 主導，其
+  p50/p95/p99/p99.9/max 為
+  `0.0365/0.0603/0.1125/2.1281/8.2585 ms`。14,868 rows 的所有
+  phase/generation completed-GC counts 都是 0，prepare/materialize/residual
+  max 只有 `0.0703/0.7076/0.2362 ms`。因此下一個 performance correction
+  是保持同一 C++ recurrence/output、GC、unpinned controller 與 fixed
+  wall gate 的 GIL-held/released call-boundary A/B，不再猜 Python copy/GC；
 - CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成

@@ -2,12 +2,13 @@
 
 Date: 2026-07-28
 
-Status: B4/B5 failed five times with retained evidence. The schema-v5 native
-physical repeat passes the observer p95 and p99 limits for the first time,
-but its 9.0498-ms maximum still fails B4. CE-0143 physical performance,
-CE-0145 source coverage, CE-0147 callback-horizon coverage, and CE-0149 tail
-attribution remain open. No future-hazard or physical action authority is
-granted.
+Status: B4/B5 failed six times with retained evidence. The schema-v6 native
+physical repeat passes observer p95 and p99 but its 8.3514-ms maximum still
+fails B4. It physically attributes every over-budget sample to the
+native-call wall interval with no overlapping cyclic GC. CE-0143 physical
+performance, CE-0145 source coverage, and CE-0147 callback-horizon coverage
+remain open; CE-0149 attribution is resolved but its correction is not. No
+future-hazard or physical action authority is granted.
 
 ## Outcome
 
@@ -120,6 +121,30 @@ physical distribution but still fails B4:
   activation edges (6.2300%);
 - all 1,339 spell-57 rows again stop at the 256-instruction callback limit
   without horizon coverage.
+
+The schema-v6 attribution repeat
+`lunatic_route2_stage4a_unattended_20260728_062321` resolves the tail segment
+but still fails B4:
+
+- all 14,868 rows use schema v6 and explicit native provenance with zero
+  observation or intent errors;
+- observer p50/p95/p99/p99.9/max is
+  `0.0648/0.1493/0.2245/2.1568/8.3514 ms`; p95 and p99 pass, maximum fails;
+- all 17 observations above `2.00 ms` are dominated by native-call wall time;
+  its p50/p95/p99/p99.9/max is
+  `0.0365/0.0603/0.1125/2.1281/8.2585 ms`;
+- prepare, materialization, and controller-residual maxima are only
+  `0.0703/0.7076/0.2362 ms`;
+- completed GC counts are zero for every phase and generation over all
+  observations, so Python materialization and cyclic GC are rejected as the
+  next correction target;
+- 2,193 timed sightings form 120 deduplicated events and 5,925 unique
+  temporal supports over 96,984 activation edges (6.1093%);
+- all 1,324 spell-57 rows again hit the 256-instruction callback limit.
+
+The native-call interval is observed; a Windows scheduler/preemption cause is
+not. GIL-release interference is inferred and requires a controlled
+GIL-held/released experiment.
 
 ## Physical Scope And Provenance
 
@@ -234,6 +259,30 @@ The canonical first hit at frame 1,487 is a modeled committed-prefix
 collision after global viability exhaustion. Across the run, six hits are
 observed bullet overlaps, five are modeled committed-prefix collisions, and
 two are observed enemy-body overlaps.
+
+The schema-v6 attribution repeat report is:
+
+- `artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_062321.birth_audit.json`
+- canonical LF SHA-256
+  `c0e71b3660651e11e15e3a924bef0d1f22adc49a3513bbc7ab39b83528d3e008`;
+- two generations from the same raw trace are byte-identical;
+- `passed = false`;
+- validation gate: pass;
+- observer budget gate: fail on maximum only;
+- timed-intent-available gate: pass.
+
+At checkpoint `200c259`, the run completed frames `1..45170` over 14,868
+decisions with accepted route completion, 17 hits at
+`1255, 2725, 3986, 4346, 9849, 11689, 12084, 12736, 21864, 22323, 30066,
+30711, 31907, 35498, 37755, 38928, 39662`, hard no-Bomb, supervisor
+completion, and no residual process. The ignored 483,475,546-byte raw trace
+SHA-256 is
+`9f075f795327e6e1669b2cf18e0cfd28656a87ced1212cddf2ff3157b0dacc30`.
+The canonical first hit at frame 1,255 is a modeled committed-prefix
+collision after global viability exhaustion. Across the run, eight hits are
+observed bullet overlaps, seven are modeled committed-prefix collisions, one
+is an observed enemy-body overlap, and one is a sensor-gap or unmodeled
+hazard.
 
 ## Corrections After The Failed Run
 
@@ -363,22 +412,18 @@ extraction closes the steady and percentile cost, but not the physical
 maximum. Thread CPU timing remains rejected as a useful Windows
 sub-millisecond diagnostic, and the wall gate remains failed.
 
-The next diagnostic gate must preserve the explicit native backend,
-independent Python scalar oracle, exact ordered columns, fixed wall limits,
-same-iteration durability, no added RPM, and default-off/no-action authority.
-It must separately time the native call and Python materialization and record
-whether a cyclic-GC collection overlaps the observation. It may not disable
-GC, move collection outside the measured boundary, pin the controller, or
-weaken the maximum. Only observed attribution may justify the next
-correction.
-
-That diagnostic is now implemented under
+That diagnostic was implemented under
 `G5_NATIVE_BIRTH_TAIL_ATTRIBUTION_CONTRACT_20260728.md`. Schema v6 and
 residual-audit v4 pass focused validation and complete Linux/Windows suites.
 CE-0150 rejects the old block-ordered decode ratio; ABBA-paired Linux and two
 adjacent Windows runs pass at `1.0123/1.0156/1.0248` while all isolated
-observer profiles remain inside the fixed limits. This authorizes only the
-explicit-native Stage-4A attribution repeat.
+observer profiles remain inside the fixed limits. The physical repeat now
+observes a collection-free native-call wall tail. Therefore the next
+correction gate is an explicit GIL-held/released call-boundary comparison,
+not another Python materialization rewrite. It must preserve the same native
+recurrence and output, independent Python oracle, GC, unpinned controller,
+same-iteration durability, no added RPM, default-off/no-action authority, and
+fixed maximum.
 
 In parallel, callback lookahead must expose an explicit incomplete result; an
 instruction-limit row cannot authorize an empty future event set. Stage 5 or

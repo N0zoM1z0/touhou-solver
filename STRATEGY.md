@@ -211,6 +211,21 @@ Windows runs pass unpinned at `1.012/1.016/1.025`. All observer profiles and
 `797/797` Linux/Windows quick suites pass. This permits one trace-only
 Stage-4A attribution repeat; B4 and action authority remain unchanged.
 
+**Observed physical attribution:** Explicit-native schema-v6 run
+`20260728_062321` completed Stage 4A over frames `1..45170`, 14,868
+decisions, 17 hits, hard no-Bomb, accepted artifacts, and cleanup. Observer
+p50/p95/p99/p99.9/max was
+`0.0648/0.1493/0.2245/2.1568/8.3514 ms`; B4 again fails only maximum. All 17
+over-budget observations are dominated by native-call wall time, whose
+p50/p95/p99/p99.9/max was `0.0365/0.0603/0.1125/2.1281/8.2585 ms`.
+Prepare/materialize/controller-residual maxima were
+`0.0703/0.7076/0.2362 ms`, and no completed cyclic-GC collection overlapped
+any phase in 14,868 rows. This physically rejects another Python-copy/GC
+rewrite as the next correction. GIL-release scheduling remains an inference,
+not an observed OS cause. A separately contracted GIL-held/released
+call-boundary experiment is the next performance gate; no action authority
+or survival claim follows from this 17-hit RNG-distinct run.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
@@ -224,13 +239,14 @@ Stage-4A attribution repeat; B4 and action authority remain unchanged.
    incomplete. Schema v4 physically validates bounded flush latency but
    rejects thread CPU as a useful sub-millisecond diagnostic. The
    parity-gated native data plane passes isolated gates and physical
-   percentiles, but CE-0149 retains a 9.0498-ms maximum. The schema-v6
-   split/GC diagnostic now passes offline and should receive one explicit
-   native Stage-4A attribution run without disabling GC, pinning the
-   controller, or weakening the wall limit. Use its observed dominant tail
-   segment to choose the correction. In parallel, make incomplete callback
-   coverage explicit and fail closed before trying Stage 5/6. None of this
-   narrows `UNKNOWN` coverage or adds action authority.
+   percentiles, but CE-0149 retains a maximum-only failure. Schema-v6
+   physically attributes every over-budget observation to the native-call
+   interval with no overlapping GC. Contract and test one explicit
+   GIL-held/released call-boundary correction without pinning the controller,
+   disabling GC, changing the recurrence/output, or weakening the wall
+   limit. In parallel, make incomplete callback coverage explicit and fail
+   closed before trying Stage 5/6. None of this narrows `UNKNOWN` coverage or
+   adds action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

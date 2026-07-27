@@ -4222,7 +4222,8 @@ offline, physical recheck pending
 
 ## CE-0149: Native extraction passed physical percentiles but retained a 9-ms wall tail
 
-Status: observed physical performance failure; attribution open
+Status: observed physical performance failure; attribution resolved,
+correction open
 
 - **Observed symptom:** Explicit-native schema-v5 run
   `lunatic_route2_stage4a_unattended_20260728_055104` completed an accepted
@@ -4238,19 +4239,33 @@ Status: observed physical performance failure; attribution open
   zero evidence; the remaining six have only 4, 6, or 20 rows. No tail
   sample is a 592-row burst, so output-linear evidence copying is not a
   sufficient cause.
-- **Unresolved attribution:** Windows current-thread CPU is zero on every
-  tail sample because accounting advances in 15.625-ms quanta. Existing
-  telemetry cannot distinguish time in the native call, Python
-  materialization or cyclic GC, and scheduler preemption. Any such diagnosis
+- **Observed attribution:** Schema-v6 physical repeat
+  `lunatic_route2_stage4a_unattended_20260728_062321` records 17 observations
+  above `2.00 ms`; every one is dominated by native-call wall time. Native
+  call p50/p95/p99/p99.9/max is
+  `0.0365/0.0603/0.1125/2.1281/8.2585 ms`, while
+  prepare/materialization/controller-residual maxima are
+  `0.0703/0.7076/0.2362 ms`.
+- **Observed exclusion:** All nine phase/generation GC completion totals are
+  zero across 14,868 observations. Evidence counts in tail rows are only
+  `0, 4, 10, 20, 33, 48`. Python materialization, cyclic GC, and large-burst
+  copying are not supported as the remaining cause.
+- **Inference boundary:** A released-GIL call-boundary scheduling effect is
+  plausible because normal native-call p50 is only `0.0365 ms`.
+  Scheduler/preemption events were not directly traced, so an OS cause
   remains hypothesized.
-- **Required falsifier:** A trace-only diagnostic must time native call and
-  materialization separately and record observation-overlapping GC
-  collections. It must keep GC enabled, remain unpinned, preserve the fixed
-  wall gate, and add no process read or action authority.
+- **Next falsifier:** Compare explicit GIL-held and GIL-released calls while
+  preserving the same C++ recurrence/output, independent scalar parity, GC,
+  unpinned controller, and fixed wall gate. A retained native-call tail in
+  the held mode falsifies Python-thread GIL handoff as a sufficient cause.
 - **Evidence:** Raw trace is 510,433,900 bytes with SHA-256
   `ed4fbbb932e12ac7ef7f3e4b560fad1fa7dc8b0428c712edc5a02ec1c09b7a79`.
   Canonical deterministic report SHA-256 is
   `1689bf8468b9129b16aaf1aeacee7b569975a4302a92ab7860ef77c4665a84ec`.
+  The schema-v6 raw trace is 483,475,546 bytes with SHA-256
+  `9f075f795327e6e1669b2cf18e0cfd28656a87ced1212cddf2ff3157b0dacc30`;
+  its canonical deterministic report SHA-256 is
+  `c0e71b3660651e11e15e3a924bef0d1f22adc49a3513bbc7ab39b83528d3e008`.
 - **Authority:** B4 remains failed. No future-hazard or physical action
   authority follows.
 

@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `200c259 Attribute native bullet birth wall tails`,
   `e892863 Retain native Stage 4 birth tail failure`,
   `bc57168 Add exact native bullet birth extraction`,
   `efac80f Retain schema-v4 Stage 4 birth gate`,
@@ -114,8 +115,22 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Windows runs flipped `1.077 -> 0.940`; ABBA-paired Linux and two adjacent
   Windows runs pass unpinned at `1.012/1.016/1.025`. All observer profiles
   and Linux/Windows `797/797` quick suites pass in `9.134/15.767 s`, with
-  three Windows skips. One explicit-native Stage-4A attribution run is the
-  next gate; B4 and action authority remain unchanged.
+  three Windows skips. Explicit-native schema-v6 attribution run
+  `20260728_062321` completed Stage 4A over frames `1..45170`, 14,868
+  decisions, 17 hits, hard no-Bomb, accepted artifacts, and cleanup.
+  Observer p50/p95/p99/p99.9/max was
+  `0.0648/0.1493/0.2245/2.1568/8.3514 ms`, so B4 again failed only its
+  maximum. All 17 observations above 2 ms were dominated by the native-call
+  interval; its p50/p95/p99/p99.9/max was
+  `0.0365/0.0603/0.1125/2.1281/8.2585 ms`. Prepare, materialization, and
+  controller-residual maxima were `0.0703/0.7076/0.2362 ms`, and all nine
+  phase/generation GC completion totals were zero across the run. **Observed:**
+  CE-0149 is a collection-free native-call wall tail, not a Python-copy or
+  cyclic-GC tail. **Inferred:** release-GIL call-boundary scheduling is a
+  plausible contributor; OS preemption is not directly observed. The next
+  correction gate is an explicit GIL-held versus GIL-released call-boundary
+  experiment under the same C++ recurrence, output, unpinned controller, GC,
+  and wall limits. B4 and action authority remain unchanged.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   CE-0143/0144/0145/0146/0147/0148/0149/0150.

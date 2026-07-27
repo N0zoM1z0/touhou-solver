@@ -2,11 +2,10 @@
 
 Date: 2026-07-28
 
-Status: offline implementation and Linux/Windows gates complete; one
-explicit-native Stage-4A diagnostic is proposed. This contract authorizes
-trace-only segmented timing and cyclic-GC overlap telemetry for that run. It
-adds no process read, planner state, future-hazard coverage, Bomb, input,
-strategy, or physical action authority.
+Status: physical attribution complete; B4 remains failed. This contract
+authorized trace-only segmented timing and cyclic-GC overlap telemetry for
+one explicit-native Stage-4A run. It adds no process read, planner state,
+future-hazard coverage, Bomb, input, strategy, or physical action authority.
 
 This contract follows CE-0149 and the failed schema-v5 physical gate in
 `G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md`. Native extraction passed the
@@ -203,3 +202,48 @@ Linux/Windows quick suites pass `797/797` in `9.134/15.767 s`, with three
 existing Windows skips. The physical attribution run is now eligible; B4
 and CE-0149 remain failed until its evidence identifies and corrects the
 tail.
+
+## Physical Gate Result
+
+Run `lunatic_route2_stage4a_unattended_20260728_062321` completed Stage 4A
+over frames `1..45170` with 14,868 decisions, 17 hits, hard no-Bomb,
+accepted artifacts, supervisor completion, and cleanup. All rows use trace
+schema v6 and the explicit native backend; observation and intent errors are
+zero. Validation and timed-intent gates pass. The observer budget fails only
+the unchanged maximum:
+
+| Interval | p50 ms | p95 ms | p99 ms | p99.9 ms | max ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| total observation | `0.0648` | `0.1493` | `0.2245` | `2.1568` | `8.3514` |
+| prepare | `0.0021` | `0.0034` | `0.0042` | `0.0113` | `0.0703` |
+| native call | `0.0365` | `0.0603` | `0.1125` | `2.1281` | `8.2585` |
+| materialize | `0.0066` | `0.0771` | `0.1072` | `0.2326` | `0.7076` |
+| controller residual | `0.0130` | `0.0212` | `0.0270` | `0.0707` | `0.2362` |
+
+**Observed:** all 17 observations above `2.00 ms` have `native_call` as the
+dominant segment. Their evidence counts are only
+`0, 4, 10, 20, 33, 48`; no large output burst explains them. All nine
+prepare/native-call/materialize generation counters total zero, so no
+completed cyclic-GC collection overlapped any of the 14,868 observations.
+This resolves CE-0149's requested attribution and rejects Python
+materialization or cyclic GC as the next optimization target.
+
+**Inferred:** because the exact scan normally takes only `0.0365 ms` at p50
+and ctypes calls through `CDLL` release the GIL, call-boundary scheduling is
+a plausible source of the collection-free wall tail. **Hypothesized:** a
+GIL-held call may suppress interference from other Python threads. The trace
+does not directly observe Windows scheduler or preemption events, so neither
+is claimed as the physical cause.
+
+The raw 483,475,546-byte trace remains local and ignored; SHA-256 is
+`9f075f795327e6e1669b2cf18e0cfd28656a87ced1212cddf2ff3157b0dacc30`.
+Two audit generations are byte-identical at canonical LF SHA-256
+`c0e71b3660651e11e15e3a924bef0d1f22adc49a3513bbc7ab39b83528d3e008`.
+The compact run dossier and review are retained under
+`artifacts/runtime_reports/` and `notes/runs/`.
+
+B4 remains failed. The next correction must preserve the exact C++ scan,
+ordered columns, ABI, independent scalar oracle, GC, unpinned controller,
+post-issue placement, and `0.20/0.40/2.00 ms` wall limits while explicitly
+comparing GIL-held and GIL-released calls. It grants no future-event or action
+authority.

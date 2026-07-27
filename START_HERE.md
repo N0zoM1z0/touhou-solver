@@ -33,14 +33,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Latest algorithmic checkpoint:
   `d4467bd Add deadline-aware native supplemental gate`.
 - Latest structural checkpoint:
-  `bc5180c Extract live bullet decoding`; roadmap R5 code decomposition is
-  complete. `th08_live_dodge_agent.py` is now a composition/compatibility
-  entry point. Session/resource ownership, persistent sensing buffers, bullet
-  decoding, policy and scene-clock coordination, issue dispatch, trace
-  publication, and sensing value models have narrow modules under
-  `scripts/th08_live/`. Historical imports and monkeypatch seams still resolve
-  to the controller module. R2/R3/R4 remain complete. No model, recurrence,
-  float comparison, worker policy, action authority, or strategy changed.
+  `02d0e32 Extract the live local planner pass`, with compact evidence and the
+  structural audit retained by
+  `2ea877b Record the extended structural retention gate`.
+  `th08_live_dodge_agent.py`, runtime, practice/full-route supervisors,
+  hotkey daemon, semantic cases, and ECL tool are compatibility/composition
+  entry points over narrow packages. The live package now owns session and
+  resource lifecycle, sensing/input, policy/scene clock, trace publication,
+  sensing models, hazard decoders, and the complete local-planner pass.
+  Historical imports and monkeypatch seams still resolve current
+  implementation globals. R2/R3/R4 remain complete. The remaining structural
+  target is the staged iteration contract inside `_run_live_session`, recorded
+  in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`. No model,
+  recurrence, float comparison, worker policy, action authority, or strategy
+  changed.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -51,15 +57,22 @@ describe the same decision. Python/C++ parity is not physical correctness.
   platform skips. Its six-workload intensive semantic run has exact
   Python/native actions and hard vectors with zero collision, clearance-sign,
   or batch-invariance mismatch.
-- The required focused Windows physical smoke
+- The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one
   native hit at frame 5,262; this is CE-0132 and is survival-failure evidence,
   not a clean-pass or strategy-promotion result.
+- The post-planner-extraction retention smoke
+  `hard_route2_stage1_unattended_20260727_144128` completed Hard Stage 1 with
+  7,502 decisions over frames `1..20768`, zero hits, zero Bomb input, accepted
+  terminal unload, artifact materialization, supervisor cleanup, and no
+  residual game/controller process. It is an implementation-retention gate,
+  not route-strategy promotion.
 - No TH08 process, controller daemon, supervisor, or unfinished experiment is
   expected to be alive.
 - Native build output, raw traces, screenshots, caches, and the local
-  `image.png` are ignored. A normal pre-work tree is clean.
+  `image.png` are ignored. The user-supplied `audits/` directory remains
+  intentionally untracked; other repository work is clean.
 
 Sanity check:
 

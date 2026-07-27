@@ -678,6 +678,70 @@ def root_branch_forward_tube(
     return forward
 
 
+def forward_reachable_tube(
+    *,
+    transitions: TransitionLattice,
+    layer_count: int,
+    initial_states: np.ndarray,
+) -> np.ndarray:
+    """Expand every declared causal action/branch from an initial state set."""
+
+    if layer_count <= 0:
+        raise ValueError("tube layer count must be positive")
+    initial = np.asarray(initial_states, dtype=np.bool_)
+    if initial.shape != transitions.state_shape:
+        raise ValueError(
+            "initial tube states must have active-action, row, and column axes"
+        )
+    forward = np.zeros(
+        (layer_count + 1,) + transitions.state_shape,
+        dtype=np.bool_,
+    )
+    forward[0] = initial
+    action_count = len(transitions.actions)
+    for layer in range(layer_count):
+        current = forward[layer]
+        following = forward[layer + 1]
+        for active_index in range(action_count):
+            source_rows, source_columns = np.nonzero(current[active_index])
+            for source_row, source_column in zip(
+                source_rows,
+                source_columns,
+                strict=True,
+            ):
+                for selected_index in range(action_count):
+                    for branch_index in range(len(transitions.delay_frames)):
+                        if not transitions.terminal_inside[
+                            active_index,
+                            selected_index,
+                            branch_index,
+                            source_row,
+                            source_column,
+                        ]:
+                            continue
+                        successor_row = transitions.terminal_rows[
+                            active_index,
+                            selected_index,
+                            branch_index,
+                            source_row,
+                            source_column,
+                        ]
+                        successor_column = transitions.terminal_columns[
+                            active_index,
+                            selected_index,
+                            branch_index,
+                            source_row,
+                            source_column,
+                        ]
+                        following[
+                            selected_index,
+                            successor_row,
+                            successor_column,
+                        ] = True
+    forward.setflags(write=False)
+    return forward
+
+
 @dataclass(frozen=True)
 class RootBranchTube:
     root_action: str
@@ -708,10 +772,13 @@ class PreparedDualBoundScope:
 
     transitions: TransitionLattice
     layer_count: int
+    root_layer: int
     root_active_index: int
     root_row: int
     root_column: int
     root_position_error: float
+    root_x: float
+    root_y: float
     terminal_coreachable: np.ndarray
 
     def branch_tube(
@@ -722,15 +789,17 @@ class PreparedDualBoundScope:
     ) -> RootBranchTube:
         selected_index = self.transitions.action_index(root_action)
         branch_index = self.transitions.delay_index(hidden_delay)
-        forward = root_branch_forward_tube(
+        local_forward = root_branch_forward_tube(
             transitions=self.transitions,
-            layer_count=self.layer_count,
+            layer_count=self.layer_count - self.root_layer,
             root_active_index=self.root_active_index,
             root_row=self.root_row,
             root_column=self.root_column,
             root_selected_index=selected_index,
             root_branch_index=branch_index,
         )
+        forward = np.zeros_like(self.terminal_coreachable)
+        forward[self.root_layer :] = local_forward
         relevant = forward & self.terminal_coreachable
         return RootBranchTube(
             root_action=root_action,
@@ -746,6 +815,8 @@ def prepare_dual_bound_scope(
     prepared_problem: PreparedCorridorProblem,
     start_x: float,
     start_y: float,
+    root_frame: int = 0,
+    root_active_action: str | None = None,
 ) -> PreparedDualBoundScope:
     """Prepare branch-preserving G2 tube data without solving or publishing."""
 
@@ -769,7 +840,9 @@ def prepare_dual_bound_scope(
 
     transitions = build_prepared_transition_lattice(prepared_problem)
     control = prepared_problem.robust_control
-    root_active_index = transitions.action_index(control.active_action)
+    root_active_index = transitions.action_index(
+        control.active_action if root_active_action is None else root_active_action
+    )
     terminal_scope = (
         np.asarray(control.terminal_viable, dtype=np.bool_)
         if control.terminal_viable is not None
@@ -779,6 +852,11 @@ def prepare_dual_bound_scope(
         prepared_problem.config.horizon_frames
         // prepared_problem.config.frames_per_layer
     )
+    if root_frame < 0:
+        raise ValueError("dual-bound root frame cannot be negative")
+    root_layer = root_frame // prepared_problem.config.frames_per_layer
+    if root_layer >= layer_count:
+        raise ValueError("dual-bound root is outside the prepared horizon")
     coreachable = terminal_coreachable_tube(
         transitions=transitions,
         layer_count=layer_count,
@@ -787,10 +865,13 @@ def prepare_dual_bound_scope(
     return PreparedDualBoundScope(
         transitions=transitions,
         layer_count=layer_count,
+        root_layer=root_layer,
         root_active_index=root_active_index,
         root_row=root_row,
         root_column=root_column,
         root_position_error=root_position_error,
+        root_x=start_x,
+        root_y=start_y,
         terminal_coreachable=coreachable,
     )
 
@@ -808,6 +889,7 @@ __all__ = [
     "build_spatial_cell_partition",
     "build_transition_lattice",
     "check_fine_reference_inclusion",
+    "forward_reachable_tube",
     "lift_coarse_action_masks",
     "prepare_dual_bound_scope",
     "root_branch_forward_tube",

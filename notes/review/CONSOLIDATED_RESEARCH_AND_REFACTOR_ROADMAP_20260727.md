@@ -763,13 +763,17 @@ Observed closure:
 
 ### G2 — Dual-bound query-local refinement
 
-Status: the first offline soundness seam is implemented. The retained formal
-contract defines round-to-even coarse cells, lower/intersection and
-upper/union action masks without collapsing time, active plane, or hidden
-branch, plus a fixed-root-action/fixed-root-delay forward tube intersected
-with an optimistic terminal co-reachable tube. Patch edge/sample closure,
-8/4-pixel solving, exhaustive retained-root gates, and Windows delivery remain
-open; no live authority changed.
+Status: the offline semantic gate is complete. The implementation preserves
+round-to-even cells, lower/intersection and upper/union action masks, explicit
+active/selected/delay branches, branch-fixed forward tubes, optimistic
+terminal co-reachability, conservative transition-sample closure, and a
+one-layer clearance halo. All six retained spatial roots have completed lower
+witnesses with zero false-safe or missing-upper action bits and no full-field
+patch. Delivery failed: Linux patch construction takes
+`3160.63..14153.12 ms` and vector solving `859.02..4008.67 ms`; one root
+requires a 77.47% 4-pixel patch. Sparse/native delivery, Windows timing,
+publication, cancellation, and shadow gates remain open; no live authority
+changed.
 
 在 `PreparedCorridorProblem` 上實作：
 
@@ -792,9 +796,13 @@ L_mixed ⊆ exhaustive_fine_reference ⊆ U_mixed
 退出條件：
 
 - zero false-safe；
-- 六個 known spatial cases 被 sound lower 解釋；
-- policy age/delivery 過 Windows gate；
+- 六個 known spatial cases 被 sound lower 解釋；**已通過**；
+- policy age/delivery 過 Windows gate；**目前實作明確未通過**；
 - uniform full-field 4 px 仍不進 live。
+
+Retained evidence:
+`notes/G2_QUERY_LOCAL_REFINEMENT_GATE_20260727.md` and
+`artifacts/viability_audit/g2_spatial_refinement_gate_20260727.json`.
 
 ### G3 — Exact partial-survival lower witness
 

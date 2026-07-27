@@ -3534,3 +3534,32 @@ scalar/native recurrence, while live authority remains excluded
   `test_pending_same_movement_complete_mask_write_blocks_promotion`,
   `test_equal_velocity_pending_identity_changes_no_write_value`, and
   `test_36_action_ce_0134_root_matches_independent_scalar`.
+
+## CE-0135: Sound query-local refinement missed the issue deadline by seconds
+
+Status: observed offline delivery failure; semantic implementation retained,
+live delivery rejected
+
+- **Observed retained gate:** All six retained `SPATIAL_AMBIGUITY` roots pass
+  the declared lower/reference/upper action inclusion relation and are
+  recovered by a completed lower witness. No case uses a full-field patch.
+- **Delivery failure:** Across ten attempted root/resolution evaluations,
+  Python patch construction takes `3160.63..14153.12 ms` and vectorized
+  rectangle solving takes `859.02..4008.67 ms` on Linux. One 4-pixel root
+  needs two empty-state expansion layers, 225,004 requested states, and 77.47%
+  of the spatial field.
+- **Why it matters:** Soundness after the issue deadline cannot authorize the
+  current input. A query-local label also does not imply small work when its
+  conservative dependency closure approaches the whole field.
+- **Correction boundary:** Keep the exact quantifiers, root identity, timeout
+  lower-zero/upper-all rule, and retained gate. Replace Python enumeration and
+  dense rectangle solving with sparse/native cooperatively cancellable work.
+  Do not add a publisher or consumer until Windows age, contention,
+  cancellation, and exact-version lookup gates pass.
+- **Evidence:** `notes/G2_QUERY_LOCAL_REFINEMENT_GATE_20260727.md` and
+  `artifacts/viability_audit/g2_spatial_refinement_gate_20260727.json`,
+  SHA-256
+  `bfc42d9f1c71f1b8228187360cca76d4023807201713a222d9c05664824f2bde`.
+- **Regression:**
+  `test_stop_redirect_and_reversal_cases_bound_dense_reference` plus the
+  retained `g2_spatial_refinement_gate.py` six-root run.

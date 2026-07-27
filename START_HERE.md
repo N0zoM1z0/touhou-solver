@@ -33,13 +33,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
-- Latest algorithmic checkpoint:
-  `7facf80 Extend belief actions to complete masks`. The independent scalar
-  recurrence and native belief ABI now carry 36 complete TH08 no-Bomb issue
-  tokens through 64-bit action subsets. This is offline/shadow authority.
-- Current uncommitted G2 checkpoint defines the finite-reference lower/upper
-  cell quantifiers and branch-preserving root-relevance seam. It remains
-  offline and does not yet implement patch dependency closure or refinement.
+- Latest committed algorithmic checkpoint:
+  `c38665b Define dual-bound refinement quantifiers`. The current G2
+  implementation adds conservative patch dependency closure, candidate-guided
+  8/4-pixel refinement, an independent scalar oracle, and a retained
+  vectorized rectangle gate. The six-root semantic gate passes, but the
+  multi-second patch/solve timings fail delivery. This is offline authority
+  only and is the pending checkpoint described below.
 - Latest live algorithmic checkpoint remains
   `d4467bd Add deadline-aware native supplemental gate`; no live action
   authority changed in the complete-mask correction.
@@ -98,6 +98,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   formal audit and 16-case belief benchmark report zero corrected
   scalar/native, upper, candidate, bound, portfolio, or certification
   failure.
+- The G2 offline semantic checkpoint passes `683/683` quick tests on Linux in
+  `8.381 s` and Windows in `12.852 s` with three Windows platform skips. All
+  six retained spatial roots satisfy lower/reference/upper action inclusion
+  and are recovered by a completed lower witness without a full-field patch.
+  Patch construction takes `3160.63..14153.12 ms`, vector solving takes
+  `859.02..4008.67 ms`, and the worst root refines 77.47% of the field.
+  `S09` therefore remains offline/shadow-only.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

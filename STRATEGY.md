@@ -65,9 +65,11 @@ Windows deadline gate. CE-0131 is the canonical final rejection witness.
    partial-survival witnesses for post-loss fallback.
 2. Use proof-backed query-local refinement to separate coarsening, horizon,
    uncertainty, forecast/birth, route/tube, and unresolved losses. Do not use
-   uniform full-field 4-pixel solving. The offline G2 seam now defines exact
-   cell intersection/union masks and branch-preserving kinematic relevance;
-   patch dependency closure and the retained six-root gate remain open.
+   uniform full-field 4-pixel solving. The offline G2 semantic gate passes all
+   six retained roots with exact cell inclusion and branch-preserving
+   relevance, but its multi-second Python patch/dense solve fails delivery.
+   Preserve the quantifiers while moving only the data plane to sparse/native
+   cancellable work.
 3. Publish the authoritative Boolean result before optional work. Use
    additional CPU through independent-root process shards; keep the live
    same-root worker limit at four until another contention gate passes.
@@ -192,12 +194,15 @@ Windows deadline gate. CE-0131 is the canonical final rejection witness.
   Full-field 4-pixel Hard roots later measured
   `1062.85/3506.43 ms` median/p95.
 - **Permitted successor:** cancellable query-local refinement published after
-  the authoritative Boolean result. Its offline G2 cell-bound and
-  branch-preserving tube seam is implemented; patch dependency closure,
-  retained-root inclusion, delivery, and shadow gates remain open.
+  the authoritative Boolean result. Its offline G2 cell-bound,
+  branch-preserving tube, dependency-closure, and six-root semantic gates
+  pass. The current Python/dense implementation takes seconds and is rejected
+  for delivery; sparse/native, Windows age/contention, cancellation, and
+  shadow gates remain open.
 - **Evidence:** rejection sections in `notes/RESEARCH_LOG.md` and
   `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`,
-  `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`.
+  `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`, and
+  `notes/G2_QUERY_LOCAL_REFINEMENT_GATE_20260727.md`.
 
 ### S10 — Damage-Aware Phase Completion
 

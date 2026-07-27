@@ -1,5 +1,13 @@
 """Game-neutral corridor planning components."""
 
+from .adaptive_refinement import (
+    QueryLocalDualBoundResult,
+    QueryLocalRefinementPatch,
+    build_query_local_refinement_patch,
+    solve_query_local_dual_bounds,
+    solve_query_local_dual_bounds_vectorized,
+    trivial_coarse_action_bounds,
+)
 from .clearance import (
     aabb_clearance_field,
     aabb_clearance_volume,
@@ -20,6 +28,7 @@ from .dual_bounds import (
     build_prepared_transition_lattice,
     build_spatial_cell_partition,
     check_fine_reference_inclusion,
+    forward_reachable_tube,
     lift_coarse_action_masks,
     prepare_dual_bound_scope,
 )
@@ -39,6 +48,7 @@ from .model import (
     SegmentTrajectoryHazard,
 )
 from .prepared import PreparedCorridorProblem, prepare_corridor_problem
+from .refinement_guides import build_policy_candidate_guide
 from .refinement import LegacyFullFieldRefinement
 from .robust import (
     RobustCorridorInduction,
@@ -58,6 +68,8 @@ __all__ = [
     "PiecewiseAabbHazard",
     "PreparedDualBoundScope",
     "PreparedCorridorProblem",
+    "QueryLocalDualBoundResult",
+    "QueryLocalRefinementPatch",
     "ReferenceInclusionReport",
     "RootBranchTube",
     "LegacyFullFieldRefinement",
@@ -73,8 +85,11 @@ __all__ = [
     "aggregate_fine_action_mask_bounds",
     "axis",
     "build_prepared_transition_lattice",
+    "build_policy_candidate_guide",
+    "build_query_local_refinement_patch",
     "build_spatial_cell_partition",
     "check_fine_reference_inclusion",
+    "forward_reachable_tube",
     "clearance_field",
     "hazard_clearance_volume",
     "lane",
@@ -88,4 +103,7 @@ __all__ = [
     "rollout_robust_corridor",
     "segment_clearance_field",
     "shift_from_source",
+    "solve_query_local_dual_bounds",
+    "solve_query_local_dual_bounds_vectorized",
+    "trivial_coarse_action_bounds",
 ]

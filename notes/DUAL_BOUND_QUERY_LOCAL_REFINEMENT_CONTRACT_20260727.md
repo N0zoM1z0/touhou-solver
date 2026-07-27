@@ -2,8 +2,11 @@
 
 Date: 2026-07-27
 
-Status: **offline finite-reference contract and Python oracle seam**. This
-document does not promote query-local refinement, change the live Boolean
+Status: **offline finite-reference contract and semantic gate passed; delivery
+failed**. The six retained spatial roots satisfy the declared action
+inclusion gate and have completed lower witnesses. The Python patch builder
+and dense rectangle solver take seconds and are rejected for live delivery.
+This document does not promote query-local refinement, change the live Boolean
 policy, or close G1 model-coverage, input-pipeline, clock, publication, or
 delivery gates.
 
@@ -237,11 +240,17 @@ The report must have:
 - comparisons before universal reduction for every hidden branch;
 - deterministic replay and content identity.
 
-After the semantic gate, G2 still requires:
+The 2026-07-27 offline semantic gate now establishes:
 
 - six known spatial cases explained by a completed sound lower witness;
 - bounded 16-to-8-to-4 work rather than uniform 4-pixel work;
-- Linux/Python and optimized/native parity if a native kernel is added;
+- zero false-safe and zero missing-upper action bits on retained roots;
+- independent scalar branch inclusion on generated stop, resume, redirect,
+  and reversal cases.
+
+G2 still requires:
+
+- scalar/native parity if a sparse native kernel is added;
 - Windows end-to-end solve, publication-age, contention, cancellation, and
   delivery measurements;
 - shadow physical evidence before any authority proposal.
@@ -282,11 +291,18 @@ The claim is falsified by any one of:
 3. **What does an exact solve answer?** Feasibility of the declared finite
    hazard, movement, delay, horizon, and terminal model at the exhaustive
    reference resolution. It does not by itself answer physical TH08 survival.
-4. **What does the algorithm prove?** The current seam proves only exact
-   spatial aggregation and kinematic relevance. The next patch solver must
-   prove dependency closure and the hard inclusion relation. A retained
-   action-specific inclusion counterexample falsifies soundness immediately.
-5. **Can it be consumed before issue?** No. This checkpoint has no publisher
-   or consumer. Later work must pass Windows age/delivery gates and retain the
-   existing fail-closed local-certificate and exact-version transaction
-   boundary before promotion can even be proposed.
+4. **What does the algorithm prove?** The completed offline implementation
+   proves the hard action inclusion relation for generated scalar cases and
+   the six retained roots under the declared finite model. The retained
+   vectorized reference shares the dense native recurrence, so it is not an
+   independent implementation oracle. A lower/reference or reference/upper
+   inclusion counterexample falsifies soundness immediately.
+5. **Can it be consumed before issue?** No. The retained patch builder takes
+   `3160.63..14153.12 ms` and the vector solve takes
+   `859.02..4008.67 ms` on Linux. This checkpoint has no publisher or
+   consumer. A sparse/native successor must pass Windows age/delivery gates
+   and retain the existing fail-closed local-certificate and exact-version
+   transaction boundary before promotion can even be proposed.
+
+The retained result and exact limitations are recorded in
+`notes/G2_QUERY_LOCAL_REFINEMENT_GATE_20260727.md`.

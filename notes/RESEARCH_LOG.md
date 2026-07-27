@@ -4726,3 +4726,40 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Windows delivery gates remain open.
 - Formal contract:
   `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`.
+
+### 2026-07-27 — G2 query-local refinement semantic gate
+
+- **Observed implementation:** Added conservative transition-sample
+  dependency closure, one-layer clearance halo, candidate-guided
+  root-relevant patch selection, 8/4-pixel refinement, deadline-preserving
+  lower-zero/upper-all defaults, an independent scalar recurrence, and a
+  vectorized rectangle retained-workload path. Exact query active action is
+  separate from the capsule source action; this corrected the first retained
+  root's active plane.
+- **Observed semantic gate:** Six of six retained spatial roots have completed
+  sound lower witnesses. All ten attempted resolution results have zero
+  false-safe and zero missing-upper action bits, and no patch covers the full
+  field. Generated scalar stop, resume, redirect, and reversal cases compare
+  lower/reference/upper action and hidden-branch masks.
+- **Observed delivery failure (CE-0135):** Linux patch construction takes
+  `3160.63..14153.12 ms` and vector solving `859.02..4008.67 ms`; one
+  4-pixel case requests 225,004 states over 77.47% of the field. This cannot
+  meet the issue deadline. No Windows retained timing or physical shadow was
+  started because the implementation already fails the earlier Linux
+  delivery gate by orders of magnitude.
+- **Limitations:** The retained vectorized rectangle and exhaustive fine
+  reference reuse the dense native recurrence and therefore are not
+  implementation-independent. Retained branch bounds remain the sound but
+  trivial zero-to-all interval; generated scalar cases test tightened branch
+  bounds.
+- **Authority:** Offline finite-model evidence only. No live action,
+  publisher, consumer, worker, cadence, fallback, strategy promotion, clock,
+  or hazard-coverage status changed. `S09` remains rejected live.
+- **Validation:** focused tests pass `8/8` and `12/12`; `ruff` passes; Linux
+  quick suite passes `683/683` in `8.381 s`; Windows quick suite passes
+  `683/683` in `12.852 s` with three platform skips; retained six-root gate
+  passes.
+- **Evidence:** `notes/G2_QUERY_LOCAL_REFINEMENT_GATE_20260727.md`;
+  `artifacts/viability_audit/g2_spatial_refinement_gate_20260727.json`,
+  SHA-256
+  `bfc42d9f1c71f1b8228187360cca76d4023807201713a222d9c05664824f2bde`.

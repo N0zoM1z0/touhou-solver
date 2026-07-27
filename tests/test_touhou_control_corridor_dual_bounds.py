@@ -240,6 +240,14 @@ class TransitionTubeTests(unittest.TestCase):
             delay_zero.forward & delay_zero.terminal_coreachable,
         )
 
+        overridden = prepare_dual_bound_scope(
+            prepared_problem=prepared,
+            start_x=7.0,
+            start_y=9.0,
+            root_active_action="right",
+        )
+        self.assertEqual(overridden.root_active_index, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

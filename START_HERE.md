@@ -356,6 +356,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   libraries rebuild with the unchanged 46-symbol manifest; focused
   hazard/beam/decode/semantic gates pass. Quick suites pass `699/699` on
   Linux in `8.927 s` and Windows in `13.102 s` with three skips.
+- The former 1,211-line native `viability/kernels.cpp` is now explicit
+  worker-limit, Boolean viability, signed-value/policy, and survival-label
+  translation units of 41, 354, 508, and 362 lines plus an 8-line internal
+  worker header. Linux/Windows release builds retain the exact 46-symbol ABI;
+  viability/query-survival/differential gates pass. Quick suites pass
+  `699/699` on Linux in `8.942 s` and Windows in `13.284 s` with three skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

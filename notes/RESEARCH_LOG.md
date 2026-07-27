@@ -5563,3 +5563,23 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   transformed-bullet decode, quantization, lexicographic beam ordering,
   cancellation/status codes, ABI, Python fallback, planner authority, and
   strategy are unchanged.
+
+### 2026-07-27 — Native viability-kernel translation-unit split
+
+- **Observed structural change:** Replaced the mixed 1,211-line
+  `native/src/viability/kernels.cpp` with dedicated worker-limit, Boolean
+  viability, signed safety-value/policy, and survival-label translation
+  units of 41, 354, 508, and 362 lines. The thread-local worker setting and
+  bounded hardware-thread calculation now have one narrow internal header and
+  source owner. The explicit build list names all four sources.
+- **Build boundary:** Linux and Windows release libraries rebuild. The Linux
+  export list exactly matches the checked-in 46-symbol manifest; the public
+  setter and every viability ABI symbol retain their names and signatures.
+- **Validation:** Viability, query-survival, and viability differential suites
+  pass `20/20`, `17/17`, and `5/5`. `git diff --check` and symbol comparison
+  pass. Quick suites pass `699/699` on Linux in `8.942 s` and Windows in
+  `13.284 s` with three platform skips.
+- **Authority:** Structural native recurrence ownership only. Boolean/value/
+  survival recurrences, terminal handling, sampling-error correction,
+  worker-limit semantics, exact masks/labels, Python-oracle independence,
+  live authority, and strategy are unchanged.

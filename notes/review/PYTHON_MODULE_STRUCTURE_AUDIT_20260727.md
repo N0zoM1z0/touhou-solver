@@ -211,7 +211,10 @@ implementation units are:
 | --- | ---: | --- |
 | `pipeline/belief_workspace.cpp` | 2,648 | state identity / recurrence / certificates / workspace |
 | `pipeline/direct_workspace.cpp` | 1,447 | transition build / solve / resume |
-| `viability/kernels.cpp` | 1,211 | Boolean / value / survival kernels |
+| `viability/boolean.cpp` | 354 | Boolean/terminal viability induction |
+| `viability/value.cpp` | 508 | signed safety value and best-action policy |
+| `viability/survival.cpp` | 362 | survival-frame/bottleneck label induction |
+| `viability/workers.cpp` | 41 | thread-local worker-limit ownership |
 | `local/hazards.cpp` | 399 | cohesive local bullet/laser/body hazard query |
 | `local/bullet_decode.cpp` | 196 | cohesive packed native-pool decoder |
 | `local/beam_reduce.cpp` | 573 | baseline/supplemental quantized beam reduction |

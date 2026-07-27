@@ -25,7 +25,10 @@ SOURCES = (
     NATIVE_ROOT / "src" / "pipeline" / "direct_workspace.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "belief_workspace.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "query_local.cpp",
-    NATIVE_ROOT / "src" / "viability" / "kernels.cpp",
+    NATIVE_ROOT / "src" / "viability" / "workers.cpp",
+    NATIVE_ROOT / "src" / "viability" / "boolean.cpp",
+    NATIVE_ROOT / "src" / "viability" / "value.cpp",
+    NATIVE_ROOT / "src" / "viability" / "survival.cpp",
     NATIVE_ROOT / "src" / "viability" / "losing_labels.cpp",
 )
 

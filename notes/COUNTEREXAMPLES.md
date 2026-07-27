@@ -3416,3 +3416,42 @@ Status: exact-version same-issue delivery rejected; offline implementation retai
   `artifacts/benchmarks/hard_supplemental_exact_async_final_direct_root_contention_windows_20260726.json`;
   the publication contract is
   `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`.
+
+## CE-0132: Post-R5 Stage-1 smoke reached the bottom boundary after kernel exhaustion
+
+Status: observed physical survival failure; R5 lifecycle smoke completed
+
+- **Observed Windows counterexample:** The focused Hard Stage-1
+  no-strategy-change smoke
+  `hard_route2_stage1_unattended_20260727_133807` completed 7,541 decisions
+  through terminal scene handling and supervisor cleanup with zero Bomb
+  input, but its fresh attempt took one native hit at frame 5,262 during
+  spell 0 `蛍符「地上の流星」`. The player was at `(232.731, 432.000)` with
+  208 bullets and no laser. The observed contact candidate was bullet slot
+  129 at `(235.567, 426.527)`, with AABB clearance `-1.527`.
+- **Causal boundary:** The hit row detected the native hit before issuing its
+  new `up_right_fast` action. The physical active input at contact was
+  `up_left_fast` (`input_current=0x51`); the decision row's newly issued mask
+  `0x91` is not the causal collision input. The signed pipeline clearance was
+  already nonpositive at frame 5,255 and was `-1.956` on the hit row.
+- **Observed planner state:** The exact published policy was queryable and its
+  current delay support `[2,3,4]` was covered, but the queried global state was
+  losing with zero safe actions. The dossier classifies the planner failure
+  as `global_viability_kernel_exhausted_before_hit` and records a positive
+  12-frame robust warning lead.
+- **Inference, not proof:** Bottom-boundary occupation and finite-kernel
+  exhaustion are contributing evidence, not proof that either alone caused
+  the contact or that the R5 structural move regressed survival. The retained
+  clean Stage-1 baseline used a different physical attempt; one stochastic
+  pair cannot establish strategy equivalence or regression.
+- **Correction boundary:** Keep R5 accepted only as a lifecycle, cleanup,
+  trace-schema, and no-Bomb structural gate. The algorithmic correction
+  remains the roadmap G0/G1/G2 sequence: preserve the exact-root loss window,
+  separate model coverage from finite losing and delivery states, then test a
+  conservative refinement or attainable continuation witness. Do not change
+  live authority based on this single run.
+- **Regression/evidence:** The compact witness is retained in
+  `notes/runs/hard_route2_stage1_unattended_20260727_133807.md` and the
+  matching summary, dossier, comparison, regression, death, and session
+  artifacts under `artifacts/runtime_reports/`. The 137 MiB raw JSONL remains
+  local and ignored.

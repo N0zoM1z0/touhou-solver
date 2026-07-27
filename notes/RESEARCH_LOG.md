@@ -4457,3 +4457,45 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   without changing identity/foreground/route/scene guards or supervisor
   behavior. A focused Windows physical no-strategy-change smoke is required
   before R5 is called complete.
+
+## 2026-07-27: Live Session Decomposition And Physical Lifecycle Gate
+
+- **Scope:** Completed roadmap R5 in commits `5cf80a6` through `bc5180c`.
+  `th08_live_dodge_agent.py` is now a small execution wrapper and aliases the
+  historical import surface to `th08_live.controller`. Narrow package modules
+  own session/process/reader/trace lifecycle, background services, persistent
+  pool buffers, physical issue dispatch, immutable policy queries, scene-clock
+  coordination, synchronous trace publication, sensing value models, and
+  bullet decoding.
+- **Compatibility boundary:** Existing callers and tests still import the
+  controller object through `th08_live_dodge_agent`; historical monkeypatch
+  seams therefore affect the same module globals. Resource and key closure is
+  idempotent, background owners are centralized, decision trace timing remains
+  synchronous, and the ordered pool-read/issue/trace paths retain their
+  schemas and side effects.
+- **Observed semantic gate:** The complete quick suite passes `628/628` on
+  Linux and Windows with three platform skips. The six intensive semantic
+  workloads pass with exact Python/native end-to-end actions and hard vectors,
+  zero collision, clearance-sign, clearance-value, or batch-invariance
+  mismatch. The structured live-like workload measured `28.213/28.738 ms`
+  native median/p95; this is implementation evidence, not physical-model
+  authority.
+- **Observed physical lifecycle gate:** Windows run
+  `hard_route2_stage1_unattended_20260727_133807` verified executable identity,
+  foreground/menu route, Hard difficulty, Sakuya/Remilia, the no-life-
+  decrement patch, trace production, terminal scene handling, post-stage
+  no-save, controller shutdown, game termination, and supervisor completion.
+  It produced 7,541 decisions over frames `1..20892`, zero Bomb input, and
+  status `completed`; no controller, supervisor, or game process remained.
+- **Observed survival failure:** The same fresh attempt took one native
+  bullet hit at frame 5,262 during spell 0, with the player at the bottom
+  boundary. The global policy was queryable and delay support covered, but
+  its current state had zero safe actions; the robust warning lead was 12
+  frames. This is CE-0132. It does not invalidate the R5 lifecycle boundary,
+  but it prevents calling the physical run a clean survival pass and adds no
+  strategy-promotion evidence.
+- **Authority:** R5 moved ownership and decoding code only. It changed no
+  recurrence, uncertainty set, signed-clearance arithmetic, action order,
+  no-Bomb rule, worker policy, publication identity, live authority, or
+  strategy status. The next algorithmic work remains the roadmap G0 exact-
+  root dossier before any G1/G2 model or refinement change.

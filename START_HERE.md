@@ -33,21 +33,29 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Latest algorithmic checkpoint:
   `d4467bd Add deadline-aware native supplemental gate`.
 - Latest structural checkpoint:
-  `f025eaf Separate local planner preparation from mode passes`; roadmap R4
-  is complete. The canonical planner accepts one immutable nested request and
-  executes explicit validation, hazard preparation, hard preflight, baseline
-  beam, completed-result lookup, ranking, proposal assembly, and at most one
-  relaxed-mode transition. Fresh issue recertification is an idempotent
-  `IssueTransaction`; proposal, certificate, issued-decision, and telemetry
-  values are separate. The 48-argument `choose_action()` remains only as a
-  compatibility facade. R2/R3 remain complete. No model, recurrence, float
-  comparison, worker policy, action authority, or strategy changed.
+  `bc5180c Extract live bullet decoding`; roadmap R5 code decomposition is
+  complete. `th08_live_dodge_agent.py` is now a composition/compatibility
+  entry point. Session/resource ownership, persistent sensing buffers, bullet
+  decoding, policy and scene-clock coordination, issue dispatch, trace
+  publication, and sensing value models have narrow modules under
+  `scripts/th08_live/`. Historical imports and monkeypatch seams still resolve
+  to the controller module. R2/R3/R4 remain complete. No model, recurrence,
+  float comparison, worker policy, action authority, or strategy changed.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
   quick suite `584/584` on Linux in `5.213 s` and Windows in `14.365 s`.
 - The completed R4 checkpoint passes the expanded quick suite `614/614`
   on Linux in `5.655 s` and Windows in `8.603 s` with three platform skips.
+- The R5 code checkpoint passes `628/628` on Linux and Windows with three
+  platform skips. Its six-workload intensive semantic run has exact
+  Python/native actions and hard vectors with zero collision, clearance-sign,
+  or batch-invariance mismatch.
+- The required focused Windows physical smoke
+  `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
+  supervisor cleanup with 7,541 decisions and zero Bomb input. It had one
+  native hit at frame 5,262; this is CE-0132 and is survival-failure evidence,
+  not a clean-pass or strategy-promotion result.
 - No TH08 process, controller daemon, supervisor, or unfinished experiment is
   expected to be alive.
 - Native build output, raw traces, screenshots, caches, and the local
@@ -96,6 +104,13 @@ physical authority.
 
 **Observed:** Hard Stage-1 run `175049` completed 7,099 decisions with zero
 hits, Bombs, or deadline misses.
+
+**Observed:** the post-R5-decomposition Hard Stage-1 smoke `133807` completed
+7,541 decisions, terminal scene handling, post-stage no-save, controller
+shutdown, and game cleanup with zero Bomb input. It had one native bullet hit
+at frame 5,262 during spell 0. The global kernel was queryable but empty, with
+a 12-frame warning lead. This validates the physical lifecycle/trace boundary,
+not survival equivalence; see CE-0132 and the retained run dossier.
 
 **Observed:** complete original-game Hard Route-2 run `184942` reached Final B
 and `route_complete` with 70,699 decisions, 39 hits, zero Bombs, and stage hit

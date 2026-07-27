@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import Counter
+
 from analysis.partial_witness_capsule.serialization import (
     canonical_sha256,
     file_sha256,
@@ -10,6 +12,17 @@ from analysis.partial_witness_capsule.serialization import (
 from .solve import audit_root
 from .trace import read_complete_mask_roots
 from .types import CompleteMaskWorkload
+
+
+def _failure_reason(failure: str) -> str:
+    parts = failure.split(": ", 2)
+    return parts[-1] if len(parts) == 3 else failure
+
+
+def _failure_samples(failures: list[str]) -> tuple[str, ...]:
+    if len(failures) <= 6:
+        return tuple(failures)
+    return (*failures[:5], failures[-1])
 
 
 def audit(
@@ -36,6 +49,10 @@ def audit(
             f"joined capsule is absent: {root.capsule}"
             for root in missing_capsules
         )
+        failure_counts = Counter(
+            _failure_reason(failure)
+            for failure in failures
+        )
         eligible = tuple(
             root
             for root in roots
@@ -60,7 +77,13 @@ def audit(
                     "sha256": file_sha256(workload.trace),
                 },
                 "read_joined_root_count": len(roots),
-                "root_validation_failures": failures,
+                "root_validation_failure_count": len(failures),
+                "root_validation_failure_counts": dict(
+                    sorted(failure_counts.items())
+                ),
+                "root_validation_failure_samples": (
+                    _failure_samples(failures)
+                ),
                 "missing_capsule_count": len(missing_capsules),
                 "eligible_boolean_empty_root_count": len(eligible),
                 "audited_root_count": len(selected),
@@ -76,7 +99,7 @@ def audit(
             }
         )
     report = {
-        "schema": "th08-g5-complete-mask-capsule-audit-v1",
+        "schema": "th08-g5-complete-mask-capsule-audit-v2",
         "scope": {
             "authority": (
                 "offline exact restricted finite-model witness; "

@@ -56,8 +56,12 @@ class Th08PipelineShadowTests(unittest.TestCase):
             "model_unknown",
         )
         self.assertEqual(
+            snapshot.record["hazard_coverage"]["root_frame"],
+            102,
+        )
+        self.assertEqual(
             snapshot.record["hazard_coverage"]["unknown_from_frame"],
-            101,
+            103,
         )
         self.assertEqual(
             snapshot.record["clock_authority"],

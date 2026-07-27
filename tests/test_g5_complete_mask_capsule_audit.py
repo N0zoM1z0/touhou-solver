@@ -224,7 +224,10 @@ class CompleteMaskCapsuleAuditTests(unittest.TestCase):
             root = Path(temporary)
             trace = root / "trace.jsonl"
             trace.write_text(
-                json.dumps(_decision("missing.npz")) + "\n",
+                "".join(
+                    json.dumps(_decision("missing.npz")) + "\n"
+                    for _index in range(8)
+                ),
                 encoding="utf-8",
             )
             report = audit(
@@ -243,12 +246,21 @@ class CompleteMaskCapsuleAuditTests(unittest.TestCase):
             )
 
         workload = report["workloads"][0]
-        self.assertEqual(workload["read_joined_root_count"], 1)
-        self.assertEqual(workload["missing_capsule_count"], 1)
+        self.assertEqual(workload["read_joined_root_count"], 8)
+        self.assertEqual(workload["missing_capsule_count"], 8)
+        self.assertEqual(workload["root_validation_failure_count"], 8)
+        self.assertEqual(
+            workload["root_validation_failure_counts"],
+            {"joined capsule is absent: missing.npz": 8},
+        )
+        self.assertEqual(
+            len(workload["root_validation_failure_samples"]),
+            6,
+        )
         self.assertEqual(workload["audited_root_count"], 0)
         self.assertIn(
             "joined capsule is absent: missing.npz",
-            workload["root_validation_failures"][0],
+            workload["root_validation_failure_samples"][0],
         )
 
 

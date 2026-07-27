@@ -156,7 +156,7 @@ def build_pipeline_shadow_snapshot(
         corridor_solution,
     )
     hazard_coverage = _unknown_future_coverage(
-        root_frame=manager_frame,
+        root_frame=query_frame,
         horizon_frames=hazard_horizon_frames,
         hazard_version=hazard_version,
     )

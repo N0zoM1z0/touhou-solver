@@ -3455,3 +3455,24 @@ Status: observed physical survival failure; R5 lifecycle smoke completed
   matching summary, dossier, comparison, regression, death, and session
   artifacts under `artifacts/runtime_reports/`. The 137 MiB raw JSONL remains
   local and ignored.
+
+## CE-0133: A fixed 240-frame pre-hit window missed four exhaustion boundaries
+
+Status: observed audit-coverage failure; corrected in the G0 dossier
+
+- **Observed failure:** the Hard Stage-4A `202439` audit selected queries from
+  240 frames before each of 15 contacts, but the latest same-gameplay-epoch
+  nonempty-to-empty global-kernel boundaries preceded four contacts by
+  `275`, `348`, `866`, and `874` frames. Those fixed windows began with an
+  already-empty kernel and could not identify the transition.
+- **Why it matters:** an audit that assumes the loss transition is inside a
+  fixed pre-hit window can mistake a persistent route/tube loss episode for a
+  last-moment local-planner failure. An absent transition is unresolved, not
+  proof that the kernel was always empty.
+- **Correction boundary:** retain the latest same-epoch viable-to-empty pair
+  before each contact and expand the context start to
+  `min(hit - 240, preceding_nonempty_frame)`. Keep these 15 transition
+  witnesses separate from the 61 stratified empty-query roots.
+- **Evidence:** `notes/EXACT_ROOT_LOSS_DOSSIER_20260727.md` and
+  `artifacts/viability_audit/hard_stage4a_20260726_202439_exact_root_dossier.json`.
+- **Regression:** `test_transition_window_expands_past_240_frames`.

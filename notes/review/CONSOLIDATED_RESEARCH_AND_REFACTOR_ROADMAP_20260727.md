@@ -674,6 +674,15 @@ symbol fallback 完全相同。
 
 ### G0 — Exact-root loss dossier
 
+Status 2026-07-27: **complete** at `e24544d`. The retained dossier
+content-addresses all 61 roots and their fresh/terminal dependencies, replays
+549 finite variants plus 122 pipeline variants with zero mismatch, reproduces
+the 6 spatial and 8 short-horizon observations, isolates 7
+`FUTURE_BIRTH_GAP` witnesses, and records 15 same-epoch exhaustion
+transitions. CE-0133 rejects assuming that every transition lies inside a
+fixed 240-frame window. See
+`notes/EXACT_ROOT_LOSS_DOSSIER_20260727.md`.
+
 先擴充現有 61-root audit，而不是先寫新 planner：
 
 1. 保存每個 hit 前首次 kernel exhaustion root，以及之前至少 240 frames 的

@@ -101,6 +101,44 @@ class ExactRootLossDossierTests(unittest.TestCase):
         self.assertEqual(boundary["first_empty"]["decision_frame"], 320)
         self.assertEqual(result["window_start_frame"], 160)
 
+    def test_transition_window_expands_past_240_frames(self) -> None:
+        def sample(frame: int, viable: bool) -> KernelSample:
+            return KernelSample(
+                decision_frame=frame,
+                query_frame=frame - 1,
+                state_viable=viable,
+                capsule=f"policy_{frame}.npz",
+                capsule_source_frame=frame - 8,
+                projected_x=1.0,
+                projected_y=2.0,
+                active_action="stay",
+                current_delay_support=(1, 2),
+                gameplay_epoch=3,
+                stage_route_index=3,
+                spell_id=10,
+                policy_status="ready",
+            )
+
+        trace = TraceEvidence(
+            hit_frames=(500,),
+            samples=(
+                sample(100, True),
+                sample(120, False),
+                sample(490, False),
+            ),
+            target_samples={},
+        )
+        result = transition_evidence(
+            trace,
+            minimum_pre_hit_frames=240,
+        )[0]
+        self.assertEqual(result["window_start_frame"], 100)
+        self.assertEqual(result["window_span_frames"], 400)
+        self.assertEqual(
+            result["nonempty_to_empty"]["lead_frames"],
+            380,
+        )
+
     def test_query_comparison_reports_field_mismatch(self) -> None:
         expected = {
             "available": True,

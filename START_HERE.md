@@ -32,6 +32,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Repository branch: `main`.
 - Latest algorithmic checkpoint:
   `d4467bd Add deadline-aware native supplemental gate`.
+- Latest offline research checkpoint:
+  `e24544d Retain the exact-root loss dossier`. G0 content-addresses all 61
+  Hard Stage-4A empty roots and their fresh/terminal dependencies. Full replay
+  matched 549 finite variants and 122 pipeline variants with zero query-field,
+  digest, or completion mismatch. This is offline finite-model evidence and
+  changes no live authority.
 - Latest structural checkpoint:
   `02d0e32 Extract the live local planner pass`, with compact evidence and the
   structural audit retained by
@@ -57,6 +63,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
   platform skips. Its six-workload intensive semantic run has exact
   Python/native actions and hard vectors with zero collision, clearance-sign,
   or batch-invariance mismatch.
+- The G0 checkpoint passes the expanded quick suite `635/635` on Linux and
+  Windows with three Windows platform skips. The exact-root package is split
+  into source, result-semantics, dossier, and replay modules; the legacy
+  differential audit remains its compatible evidence source.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one
@@ -133,10 +143,17 @@ local-plan median/p95 remained within `11.81..14.55/20.86..26.90 ms`, at up
 to 1,231 bullets and 256 lasers.
 
 **Observed:** Hard Stage-4A audit `202439` retained 1,741 validated capsules.
-Of 61 empty same-root queries, six were coarse spatial false empties, eight
-were primary horizon collapses, and 47 remained unresolved. Uniform full-field
-4-pixel solving cost `1062.85/3506.43 ms` median/p95 on 12 roots and is not a
-live design.
+The G0 replay independently reproduced all 61 empty same-root queries:
+six are `SPATIAL_AMBIGUITY`, eight are `SHORT_HORIZON_ONLY`, and 47 remain
+`MODELED_LOSING_UNRESOLVED`. Seven orthogonal `FUTURE_BIRTH_GAP` witnesses
+must not be counted as false-empty explanations. Uniform full-field 4-pixel
+solving cost `1062.85/3506.43 ms` median/p95 on 12 roots and is not a live
+design.
+
+**Observed:** all 15 contacts have a retained same-epoch nonempty-to-empty
+boundary. Leads are `10..874` frames with median 63; four are more than 240
+frames before contact. CE-0133 rejects assuming a fixed pre-hit window
+contains the exhaustion boundary.
 
 **Conclusion:** the primary algorithmic problem is preserving global
 feasibility earlier and defining certified behavior after finite-kernel
@@ -215,20 +232,22 @@ measurement, and a `STRATEGY.md` status change.
 ### P0 — Preserve global feasibility and define post-loss authority
 
 Current Hard failures overwhelmingly follow finite-kernel exhaustion.
-The next gate should:
+G0 exact-root classification is complete. G1 should:
 
-1. replay identical retained direct roots and split loss into spatial
-   coarsening, horizon, uncertainty, forecast/birth, route/tube, and unresolved
-   causes;
-2. introduce proof-backed query-local refinement only where a coarse state is
+1. work first on the 47 same-root unresolved cases while preserving exact
+   root/pipeline identity, explicit completion status, transition episode,
+   and observation-compatible delay information;
+2. complete future-birth, transform, body, pending-command, and clock coverage
+   without treating missing hazards as false-empty rescue evidence;
+3. introduce proof-backed query-local refinement only where a coarse state is
    ambiguous, never uniform full-field 4-pixel solving;
-3. retain root actions unrestricted while using exact augmented-root
+4. retain root actions unrestricted while using exact augmented-root
    partial-survival witnesses as a post-loss lower bound;
-4. keep survival hard and route/resource objectives inside the viable set;
-5. publish the authoritative Boolean result before optional work;
-6. use extra CPU through deterministic process-level independent-root shards,
+5. keep survival hard and route/resource objectives inside the viable set;
+6. publish the authoritative Boolean result before optional work;
+7. use extra CPU through deterministic process-level independent-root shards,
    without increasing the live same-root worker default beyond four;
-7. validate recurrence/geometry changes with the semantic fuzzer and validate
+8. validate recurrence/geometry changes with the semantic fuzzer and validate
    delivery claims on Windows direct roots.
 
 Candidate exhaustion, timeout, or a budgeted lower bound must remain
@@ -276,7 +295,8 @@ weaken four global workers or reuse a merely similar root.
   `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`
 - Hard feasibility:
   `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`,
-  `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`
+  `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`,
+  `notes/EXACT_ROOT_LOSS_DOSSIER_20260727.md`
 - Pre-loss/supplemental:
   `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`,
   `notes/IMMUTABLE_SUPPLEMENTAL_CONTINUATION_LANE_20260726.md`,
@@ -289,7 +309,7 @@ weaken four global workers or reuse a merely similar root.
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 
 Relevant durable failures include CE-0108, CE-0109, CE-0111, CE-0118,
-CE-0120 through CE-0125, and CE-0127 through CE-0131. Historical notes do not
+CE-0120 through CE-0125, and CE-0127 through CE-0133. Historical notes do not
 override the authority table above.
 
 ## Retained Workloads

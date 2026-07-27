@@ -4539,3 +4539,44 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   action mask/order, cadence, deadline, worker policy, trace schema, no-Bomb
   rule, live authority, or strategy status was intentionally changed. G0
   exact-root loss classification remains the next algorithmic checkpoint.
+
+## 2026-07-27: G0 Exact-Root Loss Dossier
+
+- **Scope:** commit `e24544d` added a modular offline analysis package with
+  separate trace/capsule source, completion/result semantics, dossier, and
+  deterministic replay layers. It extends the retained Hard Stage-4A
+  `202439` differential without changing the planner or live publication
+  path.
+- **Observed retained gate:** all 61 trace-empty roots are unique,
+  content-addressed, decoded, and paired with exact hexadecimal query
+  coordinates. Their 61 fresh-root and 61 terminal-continuation dependencies
+  are also content-addressed. Full native replay matched 549 finite variants
+  and 122 pipeline variants with zero query-field, primary/dependency digest,
+  or incomplete-source mismatch.
+- **Observed orthogonal result:** the replay reproduces 6
+  `SPATIAL_AMBIGUITY`, 8 `SHORT_HORIZON_ONLY`, and 47
+  `MODELED_LOSING_UNRESOLVED` primary roots. Seven
+  `FUTURE_BIRTH_GAP` observations are separate soundness evidence. Fourteen
+  roots have at least one actually solved viable singleton counterfactual;
+  no untested multi-factor combination is claimed.
+- **Observed transition result:** latest same-gameplay-epoch
+  nonempty-to-empty boundaries are retained for all 15 contacts. Their
+  minimum/median/maximum leads are `10/63/874` frames. Four leads exceed 240
+  frames, so a fixed 240-frame window begins already empty; CE-0133 records
+  this audit-coverage failure and its expanded-window regression.
+- **Completion boundary:** only a returned exact solve may be viable or empty.
+  Timeout, exception, unavailable query, unvisited variant, and missing
+  evidence remain unresolved. The gate reports zero incomplete result labeled
+  empty.
+- **Validation:** the focused dossier suite passes 7 tests. The complete
+  quick suite passes 635 tests in 5.893 seconds on Linux and 635 tests in
+  8.721 seconds with three platform skips through the verified Windows UNC
+  loader. A Windows native one-root replay matched finite, fresh-root, and
+  terminal-continuation outputs.
+- **Authority and decision:** G0 is complete offline evidence only. The legacy
+  labels are narrowed so finite finer-grid viability is not called physical
+  proof and shorter-horizon viability is not a safety repair. Live action
+  authority, recurrence, uncertainty, cadence, terminal contract, worker
+  count, and strategy ledger remain unchanged. G1 now starts with the 47
+  unresolved roots, future-birth/clock/pending-command coverage, and
+  query-local refinement only for the six spatially ambiguous roots.

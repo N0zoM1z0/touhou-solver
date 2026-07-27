@@ -4665,6 +4665,8 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 
 ## 2026-07-27: Native 64-Bit Complete-Mask Belief Gate
 
+- **Checkpoint:** `7facf80 Extend belief actions to complete masks`, following
+  `4b0f959 Define complete-mask issue actions`.
 - **Native capacity:** Added backward-compatible belief workspace
   `create_v7`, `query_v3`, and `certify_upper_v3` ABIs using 64-bit action
   subsets and a 64-action bound. The direct pipeline, viability kernels, and
@@ -4686,6 +4688,9 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Bounded regression:** Existing variable-cadence tests, the formal audit,
   and the 16-case belief benchmark pass with zero scalar/native, upper,
   candidate, bound, portfolio, or certification failure.
+- **Cross-platform gate:** The complete quick suite passes `663/663` in
+  `6.049 s` on Linux and `663/663` in `8.859 s` on Windows with three
+  platform skips.
 - **Authority:** CE-0134's movement-alias bug is corrected in offline
   scalar/native recurrence infrastructure. No live planner, action set,
   publication path, cadence, fallback, worker, or strategy status changes.

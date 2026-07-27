@@ -33,7 +33,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest algorithmic checkpoint:
-  `d4467bd Add deadline-aware native supplemental gate`.
+  `7facf80 Extend belief actions to complete masks`. The independent scalar
+  recurrence and native belief ABI now carry 36 complete TH08 no-Bomb issue
+  tokens through 64-bit action subsets. This is offline/shadow authority.
+- Latest live algorithmic checkpoint remains
+  `d4467bd Add deadline-aware native supplemental gate`; no live action
+  authority changed in the complete-mask correction.
 - Latest offline research checkpoint:
   `e24544d Retain the exact-root loss dossier`. G0 content-addresses all 61
   Hard Stage-4A empty roots and their fresh/terminal dependencies. Full replay
@@ -42,7 +47,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   changes no live authority.
 - Latest G1 shadow correctness checkpoints:
   `ff1af3c Define canonical pipeline and hazard coverage contracts` and
-  `e4d994f Add the shadow pipeline pickup audit`. Complete-mask roots now join
+  `e4d994f Add the shadow pipeline pickup audit`, followed by
+  `4b0f959 Define complete-mask issue actions` and
+  `7facf80 Extend belief actions to complete masks`. Complete-mask roots join
   exact observation and immutable observation/hazard/policy/model/clock
   versions under SHA-256; missing/unknown hazard slabs fail closed. Physical
   audit `153821` passed trace/continuity checks but found CE-0134. Its
@@ -81,6 +88,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - The final G1 checkpoint passes `653/653` on Linux in `5.628 s` and Windows
   in `8.784 s` with three platform skips, including CE-0134's explicit
   promotion-blocker regression.
+- The complete-mask correction rebuilds Linux and Windows native libraries
+  with an exact 46-symbol ABI manifest and passes `663/663` on Linux in
+  `6.049 s` and Windows in `8.859 s` with three platform skips. The bounded
+  formal audit and 16-case belief benchmark report zero corrected
+  scalar/native, upper, candidate, bound, portfolio, or certification
+  failure.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

@@ -748,12 +748,12 @@ Observed closure:
   movement-only recurrence calls no-write. Therefore the evidence gate
   completed by rejecting promotion, not by granting it. G2 remains
   offline/query-local and must not bypass this root-model blocker.
-- The first correction checkpoint now defines an injective 36-token TH08
+- Correction checkpoint `4b0f959` defines an injective 36-token TH08
   no-Bomb complete-mask alphabet. Equal-velocity Shot/Focus writes remain
   distinct, unsupported/opposed masks fail closed, and all old 17 movement
   projections are preserved.
-- The second correction checkpoint adds backward-compatible belief ABI
-  v7/v3 with 64-bit action subsets, while legacy direct/viability and belief
+- Correction checkpoint `7facf80` adds backward-compatible belief ABI v7/v3
+  with 64-bit action subsets, while legacy direct/viability and belief
   v1-v6/v1-v2 boundaries stay 32-bit. A six-frame adversarial case proves
   equal-velocity pending identity changes root value, all 36 scalar/native
   action labels match, and best/unresolved masks retain bits above 31.

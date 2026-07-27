@@ -32,10 +32,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Repository branch: `main`.
 - Latest algorithmic checkpoint:
   `d4467bd Add deadline-aware native supplemental gate`.
-- Latest structural checkpoint: corridor-refactor R0 characterization
-  baseline. It fixes deterministic clearance/path/policy/query digests,
-  public compatibility names, and the 43-symbol native ABI before code moves.
-  It changes no model, recurrence, action, strategy, or C ABI.
+- Latest structural checkpoint: corridor-refactor R1 model/grid extraction.
+  Corridor data contracts and lattice helpers now live under
+  `touhou_control.corridor`; `corridor_planner` retains compatibility aliases.
+  The R0 behavior and 43-symbol ABI baselines remain unchanged. No model,
+  recurrence, action, strategy, or C ABI changed.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced

@@ -4129,3 +4129,22 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Validation:** The new characterization and ABI tests pass; existing
   corridor tests pass `26/26`; Python compilation and `git diff --check`
   pass; and the complete Linux quick suite passes `586/586` in `5.492 s`.
+
+## 2026-07-27: Corridor Model And Grid Extraction
+
+- **Scope:** Moved the eleven corridor hazard/config/result contracts into
+  `touhou_control.corridor.model` and the axis, movement-offset, and
+  array-shift helpers into `touhou_control.corridor.grid`.
+- **Compatibility:** `scripts/corridor_planner.py` imports and re-exports the
+  same class/function objects, so existing TH08 adapters, runtime code,
+  analysis programs, tests, constructors, equality, and validation behavior
+  keep their historical import path while canonical package imports become
+  available.
+- **Authority:** This is a pure code move. Clearance construction, legacy
+  forward reachability, robust recurrence, refinement, rollout, timings,
+  policy masks, live actions, strategy status, native code, and C ABI are
+  unchanged.
+- **Validation:** The R0 canonical behavior report is identical; existing
+  corridor tests pass `26/26`; TH08 corridor adapter/runtime tests pass
+  `19/19`; the complete Linux quick suite passes `586/586` in `5.507 s`;
+  Python compilation and `git diff --check` pass.

@@ -1,6 +1,33 @@
-"""Game-neutral corridor planning components.
+"""Game-neutral corridor planning components."""
 
-The package is introduced behind the historical :mod:`corridor_planner`
-entry point.  Individual modules are populated only after the refactor
-characterization gate is fixed.
-"""
+from .grid import axis, movement_offsets, shift_from_source
+from .model import (
+    AabbHazard,
+    AabbTrajectoryHazard,
+    CorridorBounds,
+    CorridorConfig,
+    CorridorPlan,
+    CorridorPoint,
+    MovingAabbHazard,
+    PiecewiseAabbHazard,
+    RobustControlSpec,
+    SegmentHazard,
+    SegmentTrajectoryHazard,
+)
+
+__all__ = [
+    "AabbHazard",
+    "AabbTrajectoryHazard",
+    "CorridorBounds",
+    "CorridorConfig",
+    "CorridorPlan",
+    "CorridorPoint",
+    "MovingAabbHazard",
+    "PiecewiseAabbHazard",
+    "RobustControlSpec",
+    "SegmentHazard",
+    "SegmentTrajectoryHazard",
+    "axis",
+    "movement_offsets",
+    "shift_from_source",
+]

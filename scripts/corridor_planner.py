@@ -12,342 +12,36 @@ from __future__ import annotations
 
 import math
 import time
-from dataclasses import dataclass, replace
-from typing import Callable
+from dataclasses import replace
 
 import numpy as np
 
 from touhou_control import native_backend
+from touhou_control.corridor.grid import (
+    axis as _axis,
+    movement_offsets as _movement_offsets,
+    shift_from_source as _shift_from_source,
+)
+from touhou_control.corridor.model import (
+    AabbHazard,
+    AabbTrajectoryHazard,
+    CorridorBounds,
+    CorridorConfig,
+    CorridorPlan,
+    CorridorPoint,
+    MovingAabbHazard,
+    PiecewiseAabbHazard,
+    RobustControlSpec,
+    SegmentHazard,
+    SegmentTrajectoryHazard,
+)
 from touhou_control.packed_hazards import PackedSegmentFrames
-from touhou_control.trajectory import PiecewiseLinearTrajectory
 from touhou_control.query_survival import SurvivalQueryProblem
 from touhou_control.viability import (
-    ControlAction,
-    RobustSafetyValuePolicy,
-    RobustViabilityPolicy,
     ViabilityConfig,
     build_robust_safety_value_policy,
     build_robust_viability_policy,
 )
-
-
-@dataclass(frozen=True)
-class CorridorBounds:
-    left: float
-    right: float
-    top: float
-    bottom: float
-
-    def __post_init__(self) -> None:
-        if self.left >= self.right or self.top >= self.bottom:
-            raise ValueError("corridor bounds must have positive area")
-
-
-@dataclass(frozen=True)
-class MovingAabbHazard:
-    x: float
-    y: float
-    velocity_x: float
-    velocity_y: float
-    half_width: float
-    half_height: float
-    base_uncertainty: float = 0.0
-    uncertainty_per_frame: float = 0.0
-
-    def __post_init__(self) -> None:
-        if min(
-            self.half_width,
-            self.half_height,
-            self.base_uncertainty,
-            self.uncertainty_per_frame,
-        ) < 0.0:
-            raise ValueError("hazard dimensions and uncertainty cannot be negative")
-
-
-@dataclass(frozen=True)
-class AabbHazard:
-    """One time-indexed axis-aligned hazard sample."""
-
-    x: float
-    y: float
-    half_width: float
-    half_height: float
-    base_uncertainty: float = 0.0
-    uncertainty_per_frame: float = 0.0
-
-    def __post_init__(self) -> None:
-        if min(
-            self.half_width,
-            self.half_height,
-            self.base_uncertainty,
-            self.uncertainty_per_frame,
-        ) < 0.0:
-            raise ValueError("hazard dimensions and uncertainty cannot be negative")
-
-
-@dataclass(frozen=True)
-class AabbTrajectoryHazard:
-    """A finite time-indexed AABB trajectory supplied by a game adapter."""
-
-    samples: tuple[AabbHazard | None, ...]
-
-    def __post_init__(self) -> None:
-        if not self.samples:
-            raise ValueError("AABB trajectory must contain at least one frame")
-
-    def sample(self, frame: int) -> AabbHazard | None:
-        if frame < 0 or frame >= len(self.samples):
-            return None
-        return self.samples[frame]
-
-
-@dataclass(frozen=True)
-class PiecewiseAabbHazard:
-    """A sparse piecewise-linear AABB trajectory.
-
-    Keeping velocity replacements sparse lets native backends project hazards
-    without adapters materializing one Python object per hazard per frame.
-    """
-
-    motion: PiecewiseLinearTrajectory
-    half_width: float
-    half_height: float
-    base_uncertainty: float = 0.0
-    uncertainty_per_frame: float = 0.0
-
-    def __post_init__(self) -> None:
-        if min(
-            self.half_width,
-            self.half_height,
-            self.base_uncertainty,
-            self.uncertainty_per_frame,
-        ) < 0.0:
-            raise ValueError("hazard dimensions and uncertainty cannot be negative")
-
-    def sample(self, frame: int) -> AabbHazard | None:
-        if frame < 0:
-            return None
-        x, y = self.motion.position(frame)
-        return AabbHazard(
-            x=x,
-            y=y,
-            half_width=self.half_width,
-            half_height=self.half_height,
-            base_uncertainty=self.base_uncertainty,
-            uncertainty_per_frame=self.uncertainty_per_frame,
-        )
-
-
-@dataclass(frozen=True)
-class SegmentHazard:
-    origin_x: float
-    origin_y: float
-    angle: float
-    tail: float
-    head: float
-    half_width: float
-    base_uncertainty: float = 0.0
-    uncertainty_per_frame: float = 0.0
-
-    def __post_init__(self) -> None:
-        if min(
-            self.half_width,
-            self.base_uncertainty,
-            self.uncertainty_per_frame,
-        ) < 0.0:
-            raise ValueError("segment width and uncertainty cannot be negative")
-
-
-@dataclass(frozen=True)
-class SegmentTrajectoryHazard:
-    """A finite time-indexed segment trajectory supplied by a game adapter."""
-
-    samples: tuple[SegmentHazard | None, ...]
-
-    def __post_init__(self) -> None:
-        if not self.samples:
-            raise ValueError("segment trajectory must contain at least one frame")
-
-    def sample(self, frame: int) -> SegmentHazard | None:
-        if frame < 0 or frame >= len(self.samples):
-            return None
-        return self.samples[frame]
-
-
-@dataclass(frozen=True)
-class CorridorConfig:
-    grid_step: float = 8.0
-    frames_per_layer: int = 4
-    horizon_frames: int = 80
-    cardinal_speed: float = 4.0
-    diagonal_axis_speed: float = 2.8284270763397217
-    player_radius: float = 2.0
-    required_clearance: float = 0.0
-    preferred_clearance: float = 10.0
-    danger_radius: float = 48.0
-    boundary_danger_radius: float = 24.0
-    preferred_position_weight: float = 0.05
-
-    def __post_init__(self) -> None:
-        if self.grid_step <= 0.0:
-            raise ValueError("grid step must be positive")
-        if self.frames_per_layer <= 0 or self.horizon_frames <= 0:
-            raise ValueError("corridor horizon fields must be positive")
-        if self.horizon_frames % self.frames_per_layer:
-            raise ValueError("horizon must be divisible by frames per layer")
-        if min(
-            self.cardinal_speed,
-            self.diagonal_axis_speed,
-            self.player_radius,
-            self.danger_radius,
-            self.boundary_danger_radius,
-        ) < 0.0:
-            raise ValueError("corridor speeds and radii cannot be negative")
-
-
-@dataclass(frozen=True)
-class CorridorPoint:
-    frame: int
-    x: float
-    y: float
-    clearance: float
-
-
-@dataclass(frozen=True)
-class CorridorPlan:
-    reachable: bool
-    path: tuple[CorridorPoint, ...]
-    bottleneck_clearance: float
-    terminal_clearance: float
-    lane: str
-    gate: CorridorPoint | None
-    reason: str
-    planning_mode: str = "forward_reachability"
-    viability_policy: RobustViabilityPolicy | None = None
-    safety_value_policy: RobustSafetyValuePolicy | None = None
-    survival_policy: RobustViabilityPolicy | None = None
-    survival_query_problem: SurvivalQueryProblem | None = None
-    initial_safe_action_count: int = 0
-    initial_repair_volume: int = 0
-    viability_backend: str | None = None
-    viability_grid_step: float | None = None
-    solver_timing_ms: tuple[tuple[str, float], ...] = ()
-
-    def waypoint(self, frame: int) -> CorridorPoint:
-        if not self.path:
-            raise ValueError("unreachable corridor has no waypoint")
-        for point in self.path:
-            if point.frame >= frame:
-                return point
-        return self.path[-1]
-
-
-@dataclass(frozen=True)
-class RobustControlSpec:
-    actions: tuple[ControlAction, ...]
-    delay_frames: tuple[int, ...]
-    nominal_delay: int
-    active_action: str
-    safety_value_horizon_frames: int = 0
-    terminal_viable: np.ndarray | None = None
-    survival_labels: bool = False
-    retain_query_survival_problem: bool = False
-    refinement_grid_steps: tuple[float, ...] = ()
-    pre_viability_problem_hook: (
-        Callable[[SurvivalQueryProblem], None] | None
-    ) = None
-
-    def __post_init__(self) -> None:
-        if not self.actions:
-            raise ValueError("robust control requires at least one action")
-        if self.active_action not in {action.name for action in self.actions}:
-            raise ValueError("active action is absent from robust action set")
-        if self.safety_value_horizon_frames < 0:
-            raise ValueError("safety-value horizon cannot be negative")
-        if (
-            any(
-                not math.isfinite(step) or step <= 0.0
-                for step in self.refinement_grid_steps
-            )
-            or tuple(
-                sorted(set(self.refinement_grid_steps), reverse=True)
-            )
-            != self.refinement_grid_steps
-        ):
-            raise ValueError(
-                "refinement grid steps must be unique positive descending"
-            )
-        if self.refinement_grid_steps and self.terminal_viable is not None:
-            raise ValueError(
-                "adaptive refinement does not yet remap terminal masks"
-            )
-        if (
-            self.pre_viability_problem_hook is not None
-            and (
-                self.refinement_grid_steps
-                or self.terminal_viable is not None
-                or not self.retain_query_survival_problem
-            )
-        ):
-            raise ValueError(
-                "pre-viability query hooks require one retained, "
-                "unrefined policy without an external terminal mask"
-            )
-
-
-def _axis(start: float, end: float, step: float) -> np.ndarray:
-    count = int(round((end - start) / step))
-    if not math.isclose(start + count * step, end, abs_tol=1e-5):
-        raise ValueError("bounds must be an integer number of grid steps")
-    return np.linspace(start, end, count + 1, dtype=np.float32)
-
-
-def _movement_offsets(config: CorridorConfig) -> tuple[tuple[int, int], ...]:
-    max_cells = int(
-        math.ceil(
-            config.cardinal_speed * config.frames_per_layer / config.grid_step
-        )
-    )
-    offsets: list[tuple[int, int]] = []
-    for dy in range(-max_cells, max_cells + 1):
-        for dx in range(-max_cells, max_cells + 1):
-            horizontal = abs(dx) * config.grid_step
-            vertical = abs(dy) * config.grid_step
-            diagonal = min(horizontal, vertical)
-            straight = max(horizontal, vertical) - diagonal
-            required_frames = 0.0
-            if diagonal:
-                if config.diagonal_axis_speed == 0.0:
-                    continue
-                required_frames += diagonal / config.diagonal_axis_speed
-            if straight:
-                if config.cardinal_speed == 0.0:
-                    continue
-                required_frames += straight / config.cardinal_speed
-            if required_frames <= config.frames_per_layer + 1e-6:
-                offsets.append((dy, dx))
-    offsets.sort(key=lambda item: (abs(item[0]) + abs(item[1]), item[0], item[1]))
-    return tuple(offsets)
-
-
-def _shift_from_source(
-    values: np.ndarray, dy: int, dx: int, fill: float
-) -> np.ndarray:
-    shifted = np.full(values.shape, fill, dtype=values.dtype)
-    height, width = values.shape
-    source_y_start = max(0, -dy)
-    source_y_end = min(height, height - dy)
-    source_x_start = max(0, -dx)
-    source_x_end = min(width, width - dx)
-    destination_y_start = source_y_start + dy
-    destination_y_end = source_y_end + dy
-    destination_x_start = source_x_start + dx
-    destination_x_end = source_x_end + dx
-    shifted[
-        destination_y_start:destination_y_end,
-        destination_x_start:destination_x_end,
-    ] = values[source_y_start:source_y_end, source_x_start:source_x_end]
-    return shifted
 
 
 def _aabb_clearance_field(

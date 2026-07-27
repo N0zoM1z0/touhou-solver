@@ -130,9 +130,11 @@ class EclInstructionCache:
         )
         if size < ECL_HEADER_SIZE or size > 0x400:
             raise ValueError(f"invalid live ECL instruction size {size}")
-        payload = read_memory(
-            address + ECL_HEADER_SIZE,
-            size - ECL_HEADER_SIZE,
+        payload_size = size - ECL_HEADER_SIZE
+        payload = (
+            read_memory(address + ECL_HEADER_SIZE, payload_size)
+            if payload_size
+            else b""
         )
         instruction = RuntimeEclInstruction(
             address,

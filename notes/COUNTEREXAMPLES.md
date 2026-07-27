@@ -3960,8 +3960,8 @@ no physical action authority
 
 ## CE-0143: Birth observation passed synthetic timing but failed the physical issue boundary
 
-Status: observed physical delivery failure; post-issue isolation and scratch
-reuse complete, output-linear representation optimization open
+Status: observed physical delivery failure; post-issue isolation, scratch
+reuse, and columnar representation complete; physical recheck pending
 
 - **Observed symptom:** Default-off Lunatic Stage-4A trial
   `20260728_031127` completed 14,411 birth-audit decisions with zero observer
@@ -4007,6 +4007,14 @@ reuse complete, output-linear representation optimization open
   `c8d25c8b638794db93c1490a07829658d42bc707d1b65f8c674ec499458dec83`;
   deterministic report SHA-256
   `9ce122552d0b35e4379a4accad712ba5960671e2fac6d345a6687b0826a4890c`.
+- **Columnar correction:** Schema v3 keeps every candidate in read-only
+  columns and lazily materializes scalar witness objects. On Linux/Windows,
+  592-birth observer p95 falls from `2.4100/2.5376 ms` to
+  `0.1704/0.1528 ms`; record-plus-JSON p95 falls from
+  `2.3496/2.3570 ms` to `0.7763/1.0727 ms`, and payload size falls from
+  160,077 to 32,956 bytes. The independent scalar transition oracle and v2/v3
+  analyzer semantics pass. Scheduler, file-write, and physical contention
+  tails remain open until B4 repeats.
 
 ## CE-0144: Unknown deferred-fire state erased every physical timed intent
 
@@ -4049,8 +4057,8 @@ birth or geometry authority
 
 ## CE-0145: Main-VM lookahead explained births in only one Stage-4A spell
 
-Status: observed source-coverage failure; ownership diagnosis and
-control-flow extension open
+Status: observed source-coverage failure; one capture/parser coupling defect
+corrected offline, ownership diagnosis and physical recheck open
 
 - **Observed symptom:** Schema-v2 run `20260728_040144` retained 87,673
   activation edges. Only 2,860 had one temporal main-VM intent match and 73
@@ -4077,3 +4085,33 @@ control-flow extension open
   separate capture, delivery, and contention contract.
 - **Authority:** future-event coverage remains `UNKNOWN` from the first
   successor. This counterexample authorizes diagnostics only.
+
+## CE-0146: Header-only ECL instructions erased a valid main-VM snapshot
+
+Status: parser and capture coupling corrected; physical hazard/coverage
+recheck pending
+
+- **Observed physical residual:** The enhanced schema-v2 source report found
+  2,386 decision rows whose callback lookahead failed with
+  `ValueError: process read buffer size must be positive`. These included
+  every active-main-VM row in spells 61 (823) and 65 (1,124), plus 91/101/247
+  rows in spells 57/69/73. The birth classifier received no snapshot on those
+  rows.
+- **Invalid implementation:** `EclInstructionCache.instruction` validated a
+  legal 12-byte header-only instruction and then invoked the process reader
+  with `size=0`. The Windows reader rejects non-positive reads. A broad
+  controller exception path then set both callback lookahead and the already
+  observed `EclVmSnapshot` to `None`.
+- **Correction:** Zero payload is now represented by `b""` without process
+  I/O. `th08_live.ecl_capture` separates VM capture from callback
+  classification: a classifier error retains the immutable snapshot, empty
+  callback events, and explicit error. A strict deterministic reader fixture
+  rejects zero reads and all three capture/success/failure paths are tested.
+- **Potential impact:** Correct parsing can restore velocity-callback hazard
+  events as well as post-issue birth-intent diagnostics. This is therefore
+  not merely trace-schema plumbing and is not physically promoted from unit
+  tests. The next Stage-4A gate must retain per-phase callback outcomes,
+  geometry/action timing, hits, hard no-Bomb, and deterministic birth
+  residuals.
+- **Authority:** no new future-hazard coverage or action authority follows
+  until the physical recheck.

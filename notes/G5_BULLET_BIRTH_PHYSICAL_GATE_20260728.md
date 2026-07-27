@@ -168,6 +168,55 @@ report reproduces live planner contention. The next trace therefore also
 records record-build and pre-emit totals rather than omitting serialization
 between extraction and trace emission.
 
+### Columnar trace representation
+
+The schema-v3 observer retains candidate slots, transition/status codes,
+current/previous state and age, six geometry values, transform flags, and
+finite flags in read-only columns. Scalar `BulletBirthEvidence` objects are
+materialized only when a test or reviewer indexes one witness. Trace
+publication converts the columns directly to compact JSON; it does not omit,
+sample, aggregate, or reorder candidates.
+
+The independent 16-generation/all-1,536-slot scalar transition oracle still
+passes. The residual analyzer accepts schema v1/v2 row objects and schema v3
+columns, validates every column and code, and has an explicit v2/v3 semantic
+parity test.
+
+| Platform | Births | Observer p95 before/after | Record+JSON p95 before/after | JSON bytes before/after |
+| --- | ---: | ---: | ---: | ---: |
+| Linux | 33 | 0.2270 / 0.1004 ms | 0.1335 / 0.0940 ms | 9,007 / 2,071 |
+| Linux | 592 | 2.4100 / 0.1704 ms | 2.3496 / 0.7763 ms | 160,077 / 32,956 |
+| Windows | 33 | 0.2300 / 0.0941 ms | 0.1192 / 0.0857 ms | 9,007 / 2,071 |
+| Windows | 592 | 2.5376 / 0.1528 ms | 2.3570 / 1.0727 ms | 160,077 / 32,956 |
+
+The isolated 592-birth extraction gate now passes on both platforms and the
+payload is 79.4% smaller. Record serialization remains separately measured
+post-issue work; only another physical run can decide whether Windows
+scheduler and file-write tails pass B4.
+
+### Main-VM capture/classifier coupling
+
+The enhanced deterministic source report attributes every audit/classifier
+row and callback-lookahead error by phase. It identified 2,386 rows with:
+
+```text
+ValueError: process read buffer size must be positive
+```
+
+The ECL cache accepted the legal 12-byte instruction size, then still called
+the Windows reader for a zero-byte payload. The broad controller exception
+handler subsequently erased an already successful VM snapshot together with
+the failed callback classification. This accounted for every active-main-VM
+row in spells 61 and 65, plus 439 rows across spells 57, 69, and 73.
+
+The parser now maps a zero-length payload to `b""` without an RPM. Main-VM
+capture is an independently tested `th08_live.ecl_capture` seam: callback
+lookahead failure keeps the observed snapshot for post-issue birth
+classification while callback events remain empty/fail-closed. A strict
+reader fixture rejects every non-positive read. This may restore callback
+hazard events as well as diagnostic coverage, so physical geometry/action
+effects remain unpromoted until the next Stage-4A run.
+
 ## Authority And Next Gate
 
 The following remain unchanged:
@@ -179,13 +228,12 @@ The following remain unchanged:
 - Bomb remains forbidden;
 - no B6 conservative birth envelope may be proposed.
 
-The next implementation gate is an equivalent compact/columnar observation
-record that removes per-birth Python object and repeated-key construction
-without omitting any slot evidence. It must retain an independent scalar
-transition oracle, deterministic old/new schema analyzer parity, isolated
-Linux/Windows burst benchmarks, complete quick suites, and a third focused
-Stage-4A physical report. In parallel, extend the diagnostic report so
-main-VM control-flow stops and timed-intent coverage are attributed per phase;
-do not call an unmatched edge a classifier error until source ownership is
-observed. Stage 5 or 6 follows only after the Stage-4A semantic and performance
-gates pass.
+The columnar implementation, per-phase diagnostics, and ECL capture/parser
+corrections pass 786/786 Linux and Windows quick tests in 8.841/15.258 seconds,
+with three Windows skips. The next gate is a third focused Stage-4A physical
+report. Require schema-v3 parsing, exact evidence counts, callback/birth
+classifier outcomes by phase, deterministic residual output, no new action
+deadline or cadence regression, hard no-Bomb, accepted completion, and the
+unchanged physical extraction limits. Do not call an unmatched edge a
+classifier error until source ownership is observed. Stage 5 or 6 follows
+only after the Stage-4A semantic and performance gates pass.

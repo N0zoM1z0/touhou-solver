@@ -62,7 +62,7 @@ def _audit(
     activation_support: tuple[int, int],
     intents: list[dict[str, object]],
     ecl_frame: int,
-    schema_version: int = 2,
+    schema_version: int = 3,
 ) -> dict[str, object]:
     evidence = {
         "slot": frame,
@@ -83,6 +83,25 @@ def _audit(
         "transform_flags": 0,
         "geometry_finite": True,
     }
+    observation_evidence: object = [evidence]
+    if schema_version >= 3:
+        observation_evidence = {
+            "format": "columnar_v1",
+            "slot": [frame],
+            "code": [3],
+            "status": [
+                4
+                if activation_support[0] == activation_support[1]
+                else 2
+            ],
+            "state": [1],
+            "age": [1],
+            "previous_state": [0],
+            "previous_age": [0],
+            "geometry": [[0.0, 0.0, 0.0, 1.0, 8.0, 8.0]],
+            "transform_flags": [0],
+            "geometry_finite": [True],
+        }
     return {
         "kind": "bullet_birth_audit",
         "schema_version": schema_version,
@@ -128,7 +147,7 @@ def _audit(
             "previous_frame_after": activation_support[0],
             "active_count": 1,
             "evidence_count": 1,
-            "evidence": [evidence],
+            "evidence": observation_evidence,
         },
         "observation_error": None,
         "intent": {
@@ -158,7 +177,7 @@ def _audit(
 
 
 class BulletBirthAuditTests(unittest.TestCase):
-    def _trace(self, directory: str) -> Path:
+    def _trace(self, directory: str, *, schema_version: int = 3) -> Path:
         path = Path(directory) / "trace.jsonl"
         records = [
             _audit(
@@ -166,6 +185,7 @@ class BulletBirthAuditTests(unittest.TestCase):
                 activation_support=(10, 10),
                 intents=[_intent(address=0x1000, relative_frame=2)],
                 ecl_frame=8,
+                schema_version=schema_version,
             ),
             _decision(10, 57),
             _audit(
@@ -173,6 +193,7 @@ class BulletBirthAuditTests(unittest.TestCase):
                 activation_support=(19, 21),
                 intents=[_intent(address=0x2000, relative_frame=0)],
                 ecl_frame=20,
+                schema_version=schema_version,
             ),
             _decision(20, 57),
             _audit(
@@ -183,6 +204,7 @@ class BulletBirthAuditTests(unittest.TestCase):
                     _intent(address=0x3001, relative_frame=0),
                 ],
                 ecl_frame=30,
+                schema_version=schema_version,
             ),
             _decision(30, 57),
             _audit(
@@ -190,6 +212,7 @@ class BulletBirthAuditTests(unittest.TestCase):
                 activation_support=(40, 40),
                 intents=[],
                 ecl_frame=40,
+                schema_version=schema_version,
             ),
             _decision(40, None),
         ]
@@ -215,13 +238,23 @@ class BulletBirthAuditTests(unittest.TestCase):
         self.assertEqual(report["intent"]["deduplicated_timed_events"], 4)
         self.assertEqual(
             report["input"]["trace_schema_versions"],
-            {"2": 4},
+            {"3": 4},
         )
         self.assertEqual(
             report["input"]["deferred_fire_state_values"],
             {"disabled": 4},
         )
         self.assertEqual(report["join"]["unique_temporal_matches"], 2)
+        self.assertEqual(
+            report["by_phase_at_intent"]["stage_3:spell_57"][
+                "timed_sightings"
+            ],
+            4,
+        )
+        self.assertEqual(
+            report["by_phase_at_intent"]["stage_3:nonspell"]["audit_rows"],
+            1,
+        )
         self.assertEqual(
             report["scope"]["physical_action_authority"],
             "none",
@@ -272,6 +305,29 @@ class BulletBirthAuditTests(unittest.TestCase):
                 first.read_bytes(),
                 canonical_report_bytes(analyze_trace(trace)),
             )
+
+    def test_schema_v2_and_v3_have_identical_audit_semantics(self) -> None:
+        with TemporaryDirectory() as directory:
+            v2_directory = Path(directory) / "v2"
+            v3_directory = Path(directory) / "v3"
+            v2_directory.mkdir()
+            v3_directory.mkdir()
+            v2 = analyze_trace(
+                self._trace(str(v2_directory), schema_version=2)
+            )
+            v3 = analyze_trace(
+                self._trace(str(v3_directory), schema_version=3)
+            )
+        for field in (
+            "observation",
+            "intent",
+            "join",
+            "by_phase_at_capture",
+            "by_phase_at_intent",
+            "timing_ms",
+            "scope",
+        ):
+            self.assertEqual(v2[field], v3[field])
 
     def test_failed_schema_v1_trace_remains_auditable(self) -> None:
         with TemporaryDirectory() as directory:

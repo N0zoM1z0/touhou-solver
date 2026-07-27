@@ -13,10 +13,10 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA = "th08-bullet-birth-residual-audit-v1"
+SCHEMA = "th08-bullet-birth-residual-audit-v2"
 TRACE_KIND = "bullet_birth_audit"
 TRACE_ROLE = "trace_only_no_action_authority"
-TRACE_SCHEMA_VERSIONS = frozenset((1, 2))
+TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3))
 MAX_SAMPLES = 20
 OBSERVER_P95_LIMIT_MS = 0.20
 OBSERVER_P99_LIMIT_MS = 0.40
@@ -31,6 +31,18 @@ _INTEGER_FIELD = {
     )
 }
 _JSON_DECODER = json.JSONDecoder()
+_EVIDENCE_CODE_KIND = {
+    1: "invalid_timer",
+    2: "bootstrap_recent",
+    3: "activation_edge",
+    4: "timer_regression",
+}
+_EVIDENCE_STATUS_CODE = {
+    1: "invalid_timer",
+    2: "capture_spanned",
+    3: "slot_reuse_ambiguous",
+    4: "complete",
+}
 
 
 class BulletBirthAuditError(ValueError):
@@ -72,11 +84,25 @@ def _decision_scope(line: str) -> tuple[tuple[int, int], dict[str, object]]:
         spell_id = raw_spell_id
         raw_name = spell.get("name")
         spell_name = raw_name if isinstance(raw_name, str) else None
+    lookahead_error: str | None = None
+    lookahead_marker = '"bullet_velocity_lookahead": '
+    lookahead_start = line.find(lookahead_marker)
+    if lookahead_start >= 0:
+        lookahead, _lookahead_end = _JSON_DECODER.raw_decode(
+            line,
+            lookahead_start + len(lookahead_marker),
+        )
+        if isinstance(lookahead, dict):
+            raw_error = lookahead.get("error")
+            lookahead_error = (
+                raw_error if isinstance(raw_error, str) else None
+            )
     scope = {
         "stage_route_index": values["stage_route_index"],
         "spell_id": spell_id,
         "spell_name": spell_name,
         "phase": _phase_key(values["stage_route_index"], spell_id),
+        "velocity_lookahead_error": lookahead_error,
     }
     return (values["gameplay_epoch"], values["frame"]), scope
 
@@ -192,6 +218,135 @@ def _scope_for(
     return scope
 
 
+def _evidence_items(
+    observation: dict[str, Any],
+) -> list[dict[str, object]]:
+    evidence = observation.get("evidence")
+    if isinstance(evidence, list):
+        if not all(isinstance(item, dict) for item in evidence):
+            raise BulletBirthAuditError("birth evidence is not an object")
+        return evidence
+    if not isinstance(evidence, dict):
+        raise BulletBirthAuditError(
+            "observation evidence is neither legacy rows nor columns"
+        )
+    if evidence.get("format") != "columnar_v1":
+        raise BulletBirthAuditError("unknown birth evidence column format")
+    count = observation.get("evidence_count")
+    if type(count) is not int or count < 0:
+        raise BulletBirthAuditError("invalid birth evidence count")
+    column_names = (
+        "slot",
+        "code",
+        "status",
+        "state",
+        "age",
+        "geometry",
+        "transform_flags",
+        "geometry_finite",
+    )
+    columns: dict[str, list[Any]] = {}
+    for name in column_names:
+        value = evidence.get(name)
+        if not isinstance(value, list) or len(value) != count:
+            raise BulletBirthAuditError(
+                f"birth evidence column {name} has invalid length"
+            )
+        columns[name] = value
+    previous_columns: dict[str, list[Any]] = {}
+    for name in ("previous_state", "previous_age"):
+        value = evidence.get(name)
+        if value is None:
+            previous_columns[name] = [None] * count
+        elif isinstance(value, list) and len(value) == count:
+            previous_columns[name] = value
+        else:
+            raise BulletBirthAuditError(
+                f"birth evidence column {name} has invalid length"
+            )
+    support_start = observation.get("previous_frame_before")
+    support_end = observation.get("frame_after")
+    if support_start is not None and type(support_start) is not int:
+        raise BulletBirthAuditError("invalid previous capture frame")
+    if type(support_end) is not int:
+        raise BulletBirthAuditError("invalid capture end frame")
+
+    rows: list[dict[str, object]] = []
+    for index in range(count):
+        code = columns["code"][index]
+        status_code = columns["status"][index]
+        if type(code) is not int or code not in _EVIDENCE_CODE_KIND:
+            raise BulletBirthAuditError("unknown birth evidence code")
+        if (
+            type(status_code) is not int
+            or status_code not in _EVIDENCE_STATUS_CODE
+        ):
+            raise BulletBirthAuditError("unknown birth evidence status code")
+        slot = columns["slot"][index]
+        state = columns["state"][index]
+        age = columns["age"][index]
+        transform_flags = columns["transform_flags"][index]
+        geometry = columns["geometry"][index]
+        geometry_finite = columns["geometry_finite"][index]
+        if not all(
+            type(value) is int
+            for value in (slot, state, age, transform_flags)
+        ):
+            raise BulletBirthAuditError(
+                "birth evidence integer column contains a non-int"
+            )
+        if (
+            not isinstance(geometry, list)
+            or len(geometry) != 6
+            or not all(
+                value is None
+                or (
+                    isinstance(value, (int, float))
+                    and math.isfinite(value)
+                )
+                for value in geometry
+            )
+        ):
+            raise BulletBirthAuditError("invalid birth evidence geometry")
+        if type(geometry_finite) is not bool:
+            raise BulletBirthAuditError(
+                "birth evidence geometry flag is not a bool"
+            )
+        previous_state = previous_columns["previous_state"][index]
+        previous_age = previous_columns["previous_age"][index]
+        if (
+            previous_state is not None
+            and type(previous_state) is not int
+        ) or (
+            previous_age is not None
+            and type(previous_age) is not int
+        ):
+            raise BulletBirthAuditError(
+                "birth evidence previous column contains a non-int"
+            )
+        rows.append(
+            {
+                "slot": slot,
+                "kind": _EVIDENCE_CODE_KIND[code],
+                "observation_status": _EVIDENCE_STATUS_CODE[status_code],
+                "state": state,
+                "age": age,
+                "previous_state": previous_state,
+                "previous_age": previous_age,
+                "activation_support": [
+                    support_start if code in (3, 4) else None,
+                    support_end,
+                ],
+                "position": geometry[:2],
+                "velocity": geometry[2:4],
+                "geometry": geometry[4:],
+                "transform_flags": transform_flags,
+                "geometry_finite": geometry_finite,
+            }
+        )
+    return rows
+
+
 def _intent_events(
     audits: list[dict[str, Any]],
     decisions: dict[tuple[int, int], dict[str, object]],
@@ -201,6 +356,7 @@ def _intent_events(
     Counter[str],
     Counter[str],
     int,
+    dict[str, Counter[str]],
 ]:
     sightings: defaultdict[tuple[object, ...], list[dict[str, Any]]] = (
         defaultdict(list)
@@ -209,19 +365,36 @@ def _intent_events(
     stop_counts: Counter[str] = Counter()
     dependency_counts: Counter[str] = Counter()
     untimed_signatures: set[tuple[object, ...]] = set()
+    by_phase: defaultdict[str, Counter[str]] = defaultdict(Counter)
 
     for audit in audits:
+        scope = _scope_for(audit, decisions)
+        phase = str(scope["phase"])
+        by_phase[phase]["audit_rows"] += 1
+        pointer = audit.get("spell_enemy_pointer")
+        if type(pointer) is int and pointer:
+            by_phase[phase]["active_main_vm_rows"] += 1
+        else:
+            by_phase[phase]["no_active_main_vm_rows"] += 1
+        velocity_error = scope.get("velocity_lookahead_error")
+        if isinstance(velocity_error, str):
+            by_phase[phase][
+                f"velocity_lookahead_error:{velocity_error}"
+            ] += 1
         intent_result = audit.get("intent")
         if not isinstance(intent_result, dict):
+            by_phase[phase]["intent_result_absent"] += 1
             continue
+        by_phase[phase]["classified_rows"] += 1
         stop_counts[str(intent_result.get("stop_reason"))] += 1
-        scope = _scope_for(audit, decisions)
+        by_phase[phase][
+            f"stop:{intent_result.get('stop_reason')}"
+        ] += 1
         alignment = audit.get("alignment")
         if not isinstance(alignment, dict):
             raise BulletBirthAuditError("audit alignment is not an object")
         ecl_before = alignment.get("ecl_frame_before")
         ecl_after = alignment.get("ecl_frame_after")
-        pointer = audit.get("spell_enemy_pointer")
         if type(pointer) is not int:
             raise BulletBirthAuditError("audit spell pointer is not an int")
         intents = intent_result.get("intents")
@@ -232,6 +405,7 @@ def _intent_events(
                 raise BulletBirthAuditError("intent item is not an object")
             status = str(item.get("intent_status"))
             status_counts[status] += 1
+            by_phase[phase][f"status:{status}"] += 1
             dependencies = item.get("dependencies")
             if not isinstance(dependencies, list) or not all(
                 isinstance(value, str) for value in dependencies
@@ -260,7 +434,9 @@ def _intent_events(
                 or type(ecl_after) is not int
             ):
                 untimed_signatures.add(signature)
+                by_phase[phase]["untimed_sightings"] += 1
                 continue
+            by_phase[phase]["timed_sightings"] += 1
             support = (
                 ecl_before + relative[0],
                 ecl_after + relative[1],
@@ -342,6 +518,10 @@ def _intent_events(
                     ],
                 }
             )
+            by_phase[str(phase)]["deduplicated_timed_events"] += 1
+            by_phase[str(phase)]["timed_event_sightings"] += int(
+                cluster["sightings"]
+            )
     events.sort(
         key=lambda event: (
             event["gameplay_epoch"],
@@ -356,6 +536,7 @@ def _intent_events(
         stop_counts,
         dependency_counts,
         len(untimed_signatures),
+        dict(by_phase),
     )
 
 
@@ -367,6 +548,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         stop_reasons,
         intent_dependencies,
         untimed_intent_signatures,
+        intent_by_phase,
     ) = _intent_events(audits, decisions)
 
     event_by_epoch: defaultdict[int, list[dict[str, Any]]] = defaultdict(list)
@@ -449,13 +631,9 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         capture_span = observation.get("capture_span")
         if type(capture_span) is int:
             capture_spans[capture_span] += 1
-        evidence = observation.get("evidence")
-        if not isinstance(evidence, list):
-            raise BulletBirthAuditError("observation evidence is not a list")
+        evidence = _evidence_items(observation)
         evidence_per_row.append(float(len(evidence)))
         for item in evidence:
-            if not isinstance(item, dict):
-                raise BulletBirthAuditError("birth evidence is not an object")
             kind = str(item.get("kind"))
             status = str(item.get("observation_status"))
             evidence_kinds[kind] += 1
@@ -632,6 +810,10 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             },
         },
         "by_phase_at_capture": phase_report,
+        "by_phase_at_intent": {
+            phase: _counter(counts)
+            for phase, counts in sorted(intent_by_phase.items())
+        },
         "timing_ms": {
             "observation": observation_timing,
             "intent": _distribution(intent_ms),

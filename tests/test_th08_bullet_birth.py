@@ -368,8 +368,8 @@ class BulletBirthTrackerTests(unittest.TestCase):
         self.assertTrue(math.isnan(first.evidence[0].x))
         first_record = first.record()
         self.assertEqual(
-            first_record["evidence"][0]["position"],
-            [None, 20.0],
+            first_record["evidence"]["geometry"][0],
+            [None, 20.0, 1.0, -2.0, 6.0, 8.0],
         )
 
         tracker.reset()
@@ -380,8 +380,8 @@ class BulletBirthTrackerTests(unittest.TestCase):
             second_record.keys(),
         )
         self.assertEqual(
-            first_record["evidence"][0]["slot"],
-            second_record["evidence"][0]["slot"],
+            first_record["evidence"]["slot"][0],
+            second_record["evidence"]["slot"][0],
         )
 
     def test_observer_does_not_mutate_existing_planning_decode(self) -> None:

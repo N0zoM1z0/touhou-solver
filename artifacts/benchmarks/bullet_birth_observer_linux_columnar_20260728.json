@@ -1,0 +1,92 @@
+{
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 33,
+      "compact_json_bytes": 2071,
+      "observer": {
+        "max_ms": 0.31412,
+        "p50_ms": 0.07052749999999999,
+        "p95_ms": 0.10041529999999994,
+        "p99_ms": 0.11945487999999996
+      },
+      "record_json": {
+        "max_ms": 0.12994,
+        "p50_ms": 0.0694255,
+        "p95_ms": 0.09399524999999999,
+        "p99_ms": 0.11567480999999989
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "compact_json_bytes": 32956,
+      "observer": {
+        "max_ms": 0.35852,
+        "p50_ms": 0.1129255,
+        "p95_ms": 0.17035819999999996,
+        "p99_ms": 0.22582300999999977
+      },
+      "record_json": {
+        "max_ms": 0.996505,
+        "p50_ms": 0.713155,
+        "p95_ms": 0.7763478499999998,
+        "p99_ms": 0.84531724
+      }
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 8.60203,
+    "p50_ms": 6.6797445,
+    "p95_ms": 7.0607598,
+    "p99_ms": 7.404828940000006
+  },
+  "decode_interleaved": {
+    "max_ms": 7.089582,
+    "p50_ms": 6.594917499999999,
+    "p95_ms": 6.8580125,
+    "p99_ms": 6.97707048
+  },
+  "decode_iterations": 100,
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 0.097763,
+        "p50_ms": 0.0174,
+        "p95_ms": 0.025699949999999992,
+        "p99_ms": 0.03985025999999999
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.077592,
+        "p50_ms": 0.015911,
+        "p95_ms": 0.021394549999999984,
+        "p99_ms": 0.03157007
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.100475,
+        "p50_ms": 0.0146335,
+        "p95_ms": 0.021782599999999996,
+        "p99_ms": 0.03359362
+      }
+    }
+  ],
+  "gate": {
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": true,
+    "max_limit_ms": 2.0,
+    "observer_pass": true,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": true
+  },
+  "interleaved_p95_ratio": 0.9712853424074843,
+  "iterations": 2000,
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v3"
+}

@@ -54,6 +54,8 @@ class _Memory:
         self.chunks = chunks
 
     def read(self, address: int, size: int) -> bytes:
+        if size <= 0:
+            raise ValueError("process read buffer size must be positive")
         for base, data in self.chunks.items():
             if base <= address and address + size <= base + len(data):
                 start = address - base

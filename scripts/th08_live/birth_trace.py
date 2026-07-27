@@ -12,7 +12,7 @@ from th08_ecl_birth import (
 from .bullet_birth import BulletBirthObservation
 
 
-BULLET_BIRTH_TRACE_SCHEMA_VERSION = 2
+BULLET_BIRTH_TRACE_SCHEMA_VERSION = 3
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
 BULLET_BIRTH_POOL_SCOPE = "all_1536_hostile_bullet_slots"

@@ -143,17 +143,28 @@ Observer p95/p99/max improved to `0.4496/0.9314/10.2189 ms`, but the fixed
 gate still failed; emission p95/max was `1.2484/12.8322 ms`. B4/B5 therefore
 remain failed and no future-geometry or action authority follows.
 
+**Observed offline correction:** Schema-v3 columnar evidence preserves all
+ordered witnesses while reducing Linux/Windows 592-birth observer p95 from
+`2.4100/2.5376 ms` to `0.1704/0.1528 ms`, record-plus-JSON p95 from
+`2.3496/2.3570 ms` to `0.7763/1.0727 ms`, and payload from 160,077 to 32,956
+bytes. Per-phase audit also exposed CE-0146: 2,386 rows lost an already valid
+main-VM snapshot because a legal header-only ECL instruction triggered a
+zero-byte process read and broad exception cleanup. Zero payload and
+capture/classification are now separated with strict tests. Complete
+Linux/Windows quick suites pass `786/786`; physical callback geometry,
+cadence, and B4 remain unpromoted.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
    passes; continue G5 future-event coverage one event class at a time,
    beginning with bullet birth. B1–B3 and the default-off trace seam are
    implemented. The schema-v2 B4/B5 repeat validates deferred-state semantics
-   but still fails physical timing and source coverage. Replace output-linear
-   per-birth object/repeated-key construction with an equivalent columnar
-   trace, preserve independent scalar and old/new analyzer parity, then repeat
-   Stage 4A before trying Stage 5/6. It does not narrow `UNKNOWN` coverage or
-   add action authority.
+   but still fails physical timing and source coverage. The equivalent
+   columnar trace, independent scalar/v2-v3 parity, per-phase diagnostics, and
+   header-only ECL capture correction now pass offline. Repeat Stage 4A with
+   schema v3 and unchanged timing/cadence/no-Bomb gates before trying Stage
+   5/6. It does not narrow `UNKNOWN` coverage or add action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

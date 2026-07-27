@@ -54,8 +54,6 @@ from th08_ecl_runtime import (
     EclInstructionCache,
     EclVmSnapshot,
     TaggedVelocityToggle,
-    analyze_tagged_velocity_toggles,
-    read_main_ecl_vm_snapshot,
 )
 from th08_laser_runtime import (
     Laser,
@@ -103,6 +101,7 @@ from th08_live.bullet_birth import (
     BulletBirthObservation,
     BulletBirthTracker,
 )
+from th08_live.ecl_capture import capture_main_ecl
 from th08_live.bullet_decode import (  # noqa: F401
     BULLET_ANGLE_OFFSET,
     BULLET_CALLBACK_AUX_STATE_OFFSET,
@@ -2407,38 +2406,24 @@ def _run_live_session(
                 ) * 1000.0
             ecl_lookahead_read_ms = 0.0
             if spell_state.get("active") and spell_enemy_pointer:
-                ecl_lookahead_read_started = time.perf_counter()
-                ecl_frame_before = reader.u32(0x0164D30C)
-                try:
-                    ecl_vm_snapshot = read_main_ecl_vm_snapshot(
-                        reader,
-                        spell_enemy_pointer,
-                    )
-                    ecl_lookahead = analyze_tagged_velocity_toggles(
-                        ecl_vm_snapshot,
-                        instruction_at=lambda address: (
-                            ecl_instruction_cache.instruction(
-                                reader.read,
-                                address,
-                            )
-                        ),
-                        horizon_frames=ECL_CALLBACK_LOOKAHEAD_FRAMES,
-                        active_difficulty_mask=(
-                            1 << int(state["difficulty_index"])
-                        ),
-                    )
-                    tagged_velocity_toggles = ecl_lookahead.events
-                except (OSError, RuntimeError, ValueError, struct.error) as error:
-                    ecl_vm_snapshot = None
-                    ecl_lookahead = None
-                    tagged_velocity_toggles = ()
-                    ecl_lookahead_error = (
-                        f"{type(error).__name__}: {error}"
-                    )
-                ecl_frame_after = reader.u32(0x0164D30C)
-                ecl_lookahead_read_ms = (
-                    time.perf_counter() - ecl_lookahead_read_started
-                ) * 1000.0
+                ecl_capture = capture_main_ecl(
+                    reader,
+                    enemy_pointer=spell_enemy_pointer,
+                    instruction_cache=ecl_instruction_cache,
+                    horizon_frames=ECL_CALLBACK_LOOKAHEAD_FRAMES,
+                    active_difficulty_mask=(
+                        1 << int(state["difficulty_index"])
+                    ),
+                )
+                ecl_vm_snapshot = ecl_capture.snapshot
+                ecl_lookahead = ecl_capture.lookahead
+                tagged_velocity_toggles = (
+                    ecl_capture.tagged_velocity_toggles
+                )
+                ecl_lookahead_error = ecl_capture.error
+                ecl_frame_before = ecl_capture.frame_before
+                ecl_frame_after = ecl_capture.frame_after
+                ecl_lookahead_read_ms = ecl_capture.elapsed_ms
             hazard_read_bookkeeping_started = time.perf_counter()
             if (
                 spell_enemy_body_guard is not None

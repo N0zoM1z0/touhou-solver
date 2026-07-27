@@ -50,11 +50,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
   one temporal main-VM match and all were in spell 69; CE-0145 retains the
   omitted-source/control-flow residual. Observer p95/p99/max improved to
   `0.4496/0.9314/10.2189 ms` but still failed the fixed gate, while previous
-  emission p95/max was `1.2484/12.8322 ms`. Next remove output-linear
-  per-birth object/repeated-key construction with an equivalent columnar
-  schema and old/new analyzer parity, then repeat Stage 4A before Stage 5/6.
+  emission p95/max was `1.2484/12.8322 ms`. Schema v3 now removes
+  output-linear per-birth objects and repeated JSON keys without dropping
+  evidence: Linux/Windows 592-birth observer p95 is `0.1704/0.1528 ms`,
+  record-plus-JSON p95 is `0.7763/1.0727 ms`, and payload falls
+  `160,077 -> 32,956` bytes. Enhanced per-phase analysis also found CE-0146:
+  2,386 rows lost valid VM snapshots because a legal header-only ECL
+  instruction caused a zero-byte RPM and one broad exception erased capture
+  with classification. Zero payload is now local `b""`, and modular
+  `th08_live.ecl_capture` preserves the snapshot while keeping callback
+  events fail-closed. Linux/Windows quick suites pass `786/786` in
+  `8.841/15.258 s`, with three Windows skips. Repeat Stage 4A before Stage 5/6.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
-  CE-0143/0144/0145.
+  CE-0143/0144/0145/0146.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and
@@ -876,9 +884,10 @@ by fresh local prefixes. Continue birth, transform, body, and issue-snapshot
 audits with retained minimal witnesses. Do not broaden action authority from
 incomplete sensing. The schema-v2 birth trace now exposes timed intent, but
 84,740/87,673 Stage-4A activation edges remain temporally unmatched and the
-observer still fails its physical timing gate. Optimize the independent trace
-representation and attribute main-VM stop/source coverage per phase before
-adding source topology or proposing a future-hazard envelope.
+observer still fails its retained physical timing gate. The columnar
+implementation passes isolated extraction and per-phase diagnostics exposed
+the header-only ECL capture bug; repeat the unchanged Stage-4A physical gate
+before adding source topology or proposing a future-hazard envelope.
 
 ### P2 — Resolve CE-0120 at the actuator boundary
 

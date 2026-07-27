@@ -128,7 +128,12 @@ class BulletBirthTraceTests(unittest.TestCase):
         self.assertEqual(record["role"], BULLET_BIRTH_TRACE_ROLE)
         self.assertEqual(record["counts"]["observed_evidence"], 1)
         self.assertEqual(record["counts"]["visible_intents"], 1)
-        self.assertEqual(record["observation"]["evidence"][0]["slot"], 7)
+        self.assertEqual(
+            record["observation"]["evidence"]["format"],
+            "columnar_v1",
+        )
+        self.assertEqual(record["observation"]["evidence"]["slot"][0], 7)
+        self.assertEqual(record["observation"]["evidence"]["status"][0], 4)
         self.assertEqual(record["intent"]["intents"][0]["opcode"], 0x60)
         self.assertEqual(record["alignment"]["ecl_frame_before"], 118)
         self.assertEqual(

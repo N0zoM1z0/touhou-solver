@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -31,6 +32,27 @@ OBSERVATION_COMPLETE = "complete"
 OBSERVATION_CAPTURE_SPANNED = "capture_spanned"
 OBSERVATION_INVALID_TIMER = "invalid_timer"
 OBSERVATION_SLOT_REUSE_AMBIGUOUS = "slot_reuse_ambiguous"
+
+_CODE_TO_KIND_STATUS = {
+    1: (BIRTH_KIND_INVALID_TIMER, OBSERVATION_INVALID_TIMER),
+    2: (BIRTH_KIND_BOOTSTRAP_RECENT, OBSERVATION_CAPTURE_SPANNED),
+    3: (BIRTH_KIND_ACTIVATION_EDGE, OBSERVATION_CAPTURE_SPANNED),
+    4: (
+        BIRTH_KIND_TIMER_REGRESSION,
+        OBSERVATION_SLOT_REUSE_AMBIGUOUS,
+    ),
+}
+_KIND_TO_CODE = {
+    kind: code
+    for code, (kind, _status) in _CODE_TO_KIND_STATUS.items()
+}
+_STATUS_TO_CODE = {
+    OBSERVATION_INVALID_TIMER: 1,
+    OBSERVATION_CAPTURE_SPANNED: 2,
+    OBSERVATION_SLOT_REUSE_AMBIGUOUS: 3,
+    OBSERVATION_COMPLETE: 4,
+}
+_EVIDENCE_CODE_TO_STATUS_CODE = np.asarray((0, 1, 2, 2, 3), dtype=np.uint8)
 
 
 @dataclass(frozen=True)
@@ -104,6 +126,217 @@ class BulletBirthEvidence:
         }
 
 
+class BulletBirthEvidenceBatch(Sequence[BulletBirthEvidence]):
+    """Read-only columnar evidence with lazy scalar witness materialization."""
+
+    __slots__ = (
+        "_ages",
+        "_codes",
+        "_geometry",
+        "_geometry_finite",
+        "_previous_ages",
+        "_previous_states",
+        "_slots",
+        "_states",
+        "_support_end",
+        "_support_start",
+        "_transform_flags",
+    )
+
+    def __init__(
+        self,
+        *,
+        slots: np.ndarray,
+        codes: np.ndarray,
+        states: np.ndarray,
+        ages: np.ndarray,
+        previous_states: np.ndarray | None,
+        previous_ages: np.ndarray | None,
+        support_start: int | None,
+        support_end: int,
+        geometry: np.ndarray,
+        transform_flags: np.ndarray,
+        geometry_finite: np.ndarray,
+    ) -> None:
+        count = len(slots)
+        arrays = (
+            codes,
+            states,
+            ages,
+            geometry,
+            transform_flags,
+            geometry_finite,
+        )
+        if any(len(array) != count for array in arrays):
+            raise ValueError("bullet birth evidence columns differ in length")
+        if (
+            previous_states is None
+            or previous_ages is None
+        ) and previous_states is not previous_ages:
+            raise ValueError("previous birth columns must both be present")
+        if (
+            previous_states is not None
+            and (
+                len(previous_states) != count
+                or len(previous_ages) != count
+            )
+        ):
+            raise ValueError("previous birth columns differ in length")
+        if geometry.shape != (count, 6):
+            raise ValueError("bullet birth geometry must have six columns")
+        unknown_codes = set(int(value) for value in np.unique(codes)) - set(
+            _CODE_TO_KIND_STATUS
+        )
+        if unknown_codes:
+            raise ValueError(
+                f"unknown bullet birth evidence codes {sorted(unknown_codes)}"
+            )
+        for array in (
+            slots,
+            codes,
+            states,
+            ages,
+            previous_states,
+            previous_ages,
+            geometry,
+            transform_flags,
+            geometry_finite,
+        ):
+            if array is not None:
+                array.setflags(write=False)
+        self._slots = slots
+        self._codes = codes
+        self._states = states
+        self._ages = ages
+        self._previous_states = previous_states
+        self._previous_ages = previous_ages
+        self._support_start = support_start
+        self._support_end = support_end
+        self._geometry = geometry
+        self._transform_flags = transform_flags
+        self._geometry_finite = geometry_finite
+
+    def __len__(self) -> int:
+        return len(self._slots)
+
+    def __getitem__(
+        self,
+        index: int | slice,
+    ) -> BulletBirthEvidence | tuple[BulletBirthEvidence, ...]:
+        if isinstance(index, slice):
+            return tuple(self[position] for position in range(*index.indices(len(self))))
+        if index < 0:
+            index += len(self)
+        if not 0 <= index < len(self):
+            raise IndexError("bullet birth evidence index out of range")
+        code = int(self._codes[index])
+        kind, status = _CODE_TO_KIND_STATUS[code]
+        values = self._geometry[index]
+        return BulletBirthEvidence(
+            slot=int(self._slots[index]),
+            kind=kind,
+            observation_status=status,
+            state=int(self._states[index]),
+            age=int(self._ages[index]),
+            previous_state=(
+                int(self._previous_states[index])
+                if self._previous_states is not None
+                else None
+            ),
+            previous_age=(
+                int(self._previous_ages[index])
+                if self._previous_ages is not None
+                else None
+            ),
+            activation_support_start=(
+                self._support_start if code in (3, 4) else None
+            ),
+            activation_support_end=self._support_end,
+            x=float(values[0]),
+            y=float(values[1]),
+            velocity_x=float(values[2]),
+            velocity_y=float(values[3]),
+            width=float(values[4]),
+            height=float(values[5]),
+            transform_flags=int(self._transform_flags[index]),
+            geometry_finite=bool(self._geometry_finite[index]),
+        )
+
+    def record(self) -> dict[str, object]:
+        geometry: list[list[float | None]] = self._geometry.tolist()
+        for index in np.flatnonzero(
+            np.logical_not(self._geometry_finite)
+        ):
+            row = geometry[int(index)]
+            geometry[int(index)] = [
+                value if math.isfinite(value) else None
+                for value in row
+            ]
+        return {
+            "format": "columnar_v1",
+            "slot": self._slots.tolist(),
+            "code": self._codes.tolist(),
+            "status": np.take(
+                _EVIDENCE_CODE_TO_STATUS_CODE,
+                self._codes,
+            ).tolist(),
+            "state": self._states.tolist(),
+            "age": self._ages.tolist(),
+            "previous_state": (
+                self._previous_states.tolist()
+                if self._previous_states is not None
+                else None
+            ),
+            "previous_age": (
+                self._previous_ages.tolist()
+                if self._previous_ages is not None
+                else None
+            ),
+            "geometry": geometry,
+            "transform_flags": self._transform_flags.tolist(),
+            "geometry_finite": self._geometry_finite.tolist(),
+        }
+
+
+def _evidence_columns(
+    evidence: Sequence[BulletBirthEvidence],
+) -> dict[str, object]:
+    """Encode manually constructed scalar evidence in the columnar schema."""
+
+    geometry: list[list[float | None]] = []
+    for item in evidence:
+        row = (
+            item.x,
+            item.y,
+            item.velocity_x,
+            item.velocity_y,
+            item.width,
+            item.height,
+        )
+        geometry.append(
+            [
+                value if math.isfinite(value) else None
+                for value in row
+            ]
+        )
+    return {
+        "format": "columnar_v1",
+        "slot": [item.slot for item in evidence],
+        "code": [_KIND_TO_CODE[item.kind] for item in evidence],
+        "status": [
+            _STATUS_TO_CODE[item.observation_status]
+            for item in evidence
+        ],
+        "state": [item.state for item in evidence],
+        "age": [item.age for item in evidence],
+        "previous_state": [item.previous_state for item in evidence],
+        "previous_age": [item.previous_age for item in evidence],
+        "geometry": geometry,
+        "transform_flags": [item.transform_flags for item in evidence],
+        "geometry_finite": [item.geometry_finite for item in evidence],
+    }
+
+
 @dataclass(frozen=True)
 class BulletBirthObservation:
     """Birth evidence and provenance for one persistent-buffer capture."""
@@ -113,13 +346,18 @@ class BulletBirthObservation:
     previous_frame_before: int | None
     previous_frame_after: int | None
     active_count: int
-    evidence: tuple[BulletBirthEvidence, ...]
+    evidence: tuple[BulletBirthEvidence, ...] | BulletBirthEvidenceBatch
 
     @property
     def capture_span(self) -> int:
         return self.frame_after - self.frame_before
 
     def record(self) -> dict[str, object]:
+        evidence = (
+            self.evidence.record()
+            if isinstance(self.evidence, BulletBirthEvidenceBatch)
+            else _evidence_columns(self.evidence)
+        )
         return {
             "role": "trace_only_no_action_authority",
             "frame_before": self.frame_before,
@@ -129,7 +367,7 @@ class BulletBirthObservation:
             "previous_frame_after": self.previous_frame_after,
             "active_count": self.active_count,
             "evidence_count": len(self.evidence),
-            "evidence": [item.record() for item in self.evidence],
+            "evidence": evidence,
         }
 
 
@@ -285,77 +523,43 @@ class BulletBirthTracker:
             candidate_kind[work] = 4
 
         candidate_slots = np.flatnonzero(candidate_kind)
-        evidence: list[BulletBirthEvidence] = []
+        evidence: (
+            tuple[BulletBirthEvidence, ...]
+            | BulletBirthEvidenceBatch
+        ) = ()
         if candidate_slots.size:
             geometry, transform_flags, geometry_finite = _candidate_geometry(
                 blob,
                 slots=candidate_slots,
             )
-            support_start = self._previous_frame_before
-            for evidence_index, slot in enumerate(candidate_slots):
-                index = int(slot)
-                code = int(candidate_kind[index])
-                if code == 1:
-                    kind = BIRTH_KIND_INVALID_TIMER
-                    status = OBSERVATION_INVALID_TIMER
-                    candidate_support_start = None
-                elif code == 2:
-                    kind = BIRTH_KIND_BOOTSTRAP_RECENT
-                    status = OBSERVATION_CAPTURE_SPANNED
-                    candidate_support_start = None
-                elif code == 3:
-                    kind = BIRTH_KIND_ACTIVATION_EDGE
-                    status = OBSERVATION_CAPTURE_SPANNED
-                    candidate_support_start = support_start
-                elif code == 4:
-                    kind = BIRTH_KIND_TIMER_REGRESSION
-                    status = OBSERVATION_SLOT_REUSE_AMBIGUOUS
-                    candidate_support_start = support_start
-                else:
-                    raise AssertionError(
-                        f"unknown birth candidate code {code}"
-                    )
-                values = geometry[evidence_index]
-                evidence.append(
-                    BulletBirthEvidence(
-                        slot=index,
-                        kind=kind,
-                        observation_status=status,
-                        state=int(states[index]),
-                        age=int(ages[index]),
-                        previous_state=(
-                            int(previous_states[index])
-                            if previous_states is not None
-                            else None
-                        ),
-                        previous_age=(
-                            int(previous_ages[index])
-                            if previous_ages is not None
-                            else None
-                        ),
-                        activation_support_start=candidate_support_start,
-                        activation_support_end=frame_after,
-                        x=float(values[0]),
-                        y=float(values[1]),
-                        velocity_x=float(values[2]),
-                        velocity_y=float(values[3]),
-                        width=float(values[4]),
-                        height=float(values[5]),
-                        transform_flags=int(
-                            transform_flags[evidence_index]
-                        ),
-                        geometry_finite=bool(
-                            geometry_finite[evidence_index]
-                        ),
-                    )
-                )
+            evidence = BulletBirthEvidenceBatch(
+                slots=candidate_slots,
+                codes=np.take(candidate_kind, candidate_slots),
+                states=np.take(states, candidate_slots),
+                ages=np.take(ages, candidate_slots),
+                previous_states=(
+                    np.take(previous_states, candidate_slots)
+                    if previous_states is not None
+                    else None
+                ),
+                previous_ages=(
+                    np.take(previous_ages, candidate_slots)
+                    if previous_ages is not None
+                    else None
+                ),
+                support_start=self._previous_frame_before,
+                support_end=frame_after,
+                geometry=geometry,
+                transform_flags=transform_flags,
+                geometry_finite=geometry_finite,
+            )
         result = BulletBirthObservation(
             frame_before=frame_before,
             frame_after=frame_after,
             previous_frame_before=self._previous_frame_before,
             previous_frame_after=self._previous_frame_after,
             active_count=int(np.count_nonzero(active)),
-            evidence=tuple(evidence),
+            evidence=evidence,
         )
 
         self._previous_states, self._current_states = (
@@ -380,6 +584,7 @@ __all__ = [
     "BULLET_TIMER_BASE_OFFSET",
     "BULLET_TIMER_CURRENT_OFFSET",
     "BulletBirthEvidence",
+    "BulletBirthEvidenceBatch",
     "BulletBirthObservation",
     "BulletBirthTracker",
     "OBSERVATION_CAPTURE_SPANNED",

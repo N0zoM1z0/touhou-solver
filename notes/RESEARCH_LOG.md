@@ -6500,3 +6500,41 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `4ee56b3d5d9111e09a28aa9ea501164e85526017b69323ad53c54da74e2792fb`
   (Windows). These are performance baselines only; they add no evidence or
   action authority.
+
+## 2026-07-28 — Replaced per-birth objects and decoupled ECL capture
+
+- Schema-v3 birth evidence remains complete but columnar: ordered slot,
+  transition/status code, current/previous state and age, geometry, transform,
+  and finite columns are read-only. Scalar witness objects are lazy review
+  views and are not constructed on the production observation path.
+- **Observed fixed benchmarks:** Linux/Windows 592-birth observer p95 is
+  `0.1704/0.1528 ms`, down from `2.4100/2.5376 ms`; record-plus-JSON p95 is
+  `0.7763/1.0727 ms`, down from `2.3496/2.3570 ms`; payload falls from 160,077
+  to 32,956 bytes. 33-birth observer p95 is `0.1004/0.0941 ms`. Interleaved
+  decode ratios are `0.971/0.974`.
+- Retained columnar benchmark SHA-256 values are
+  `5465a25990ed50a94b1651eee091ddab0d90198e0355a64cd4571fbdcc7b8f2e`
+  (Linux) and
+  `f7334e940b8dc9dc7ce651935549a73b2a67a03223caed800c85ee2b2f985698`
+  (Windows). The independent 16-generation/all-1,536-slot scalar oracle and
+  explicit v2/v3 audit semantic parity pass.
+- Residual-audit schema v2 now attributes audit rows, available main-VM
+  snapshots, classifier absence, stops, statuses, sightings, deduplicated
+  events, and legacy callback errors by phase. Regeneration from the retained
+  physical trace is byte-identical, SHA-256
+  `2b0f2aa0a7332d102918607350fad74655bff8a75371e9cc26d3d191e69676bd`.
+- **Observed coupling defect:** 2,386 physical rows failed callback lookahead
+  with `ValueError: process read buffer size must be positive`; every spell
+  61/65 active-main-VM row was lost. The cache made a zero-byte process read
+  for a legal 12-byte header-only ECL instruction, and the controller then
+  discarded the already captured VM snapshot.
+- Zero payload now becomes `b""` without RPM. New modular
+  `th08_live.ecl_capture` retains an observed snapshot independently of a
+  fail-closed callback-classifier error. Strict zero-read, snapshot failure,
+  lookahead failure, and success fixtures pass.
+- Complete Linux/Windows quick suites pass `786/786` in `8.841/15.258 s`,
+  with three Windows skips.
+- **Authority:** the isolated extraction gate now passes, but B4 remains
+  physically open. Correct header-only parsing may change callback hazard
+  geometry and actions; no future coverage or live promotion follows before
+  another accepted hard-no-Bomb Stage-4A trial.

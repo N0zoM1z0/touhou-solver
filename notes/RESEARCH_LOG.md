@@ -4696,3 +4696,33 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   publication path, cadence, fallback, worker, or strategy status changes.
   Future-event `model_unknown`, CE-0120, representative 36-action workload
   performance, exact publication, and physical shadow integration remain.
+
+## 2026-07-27: G2 Finite-Reference Bound And Tube Contract
+
+- **Observed implementation:** added the offline
+  `touhou_control.corridor.dual_bounds` seam. It partitions fine lattice
+  points by the viability query's round-to-even projection, computes cell
+  lower masks by intersection and upper masks by union, preserves arbitrary
+  leading time/active-plane/hidden-branch axes, supports 64-bit action masks,
+  and reports action-specific failures of
+  `lift(lower) subset fine subset lift(upper)`.
+- **Observed transition scope:** an independent terminal-transition builder
+  preserves active action, selected action, and pickup-delay branch.
+  `PreparedDualBoundScope` fixes one root action and hidden root delay before
+  expanding all later causal choices, then intersects that exact discrete
+  forward tube with an optimistic terminal may-co-reachable tube.
+- **Observed focused gate:** eight deterministic tests cover round-to-even
+  midpoint ownership, 36-bit masks, leading-axis preservation, deliberate
+  lower/upper violations, transition planes/delays, branch-fixed forward
+  reachability, terminal plane identity, and `PreparedCorridorProblem`
+  integration.
+- **Inferred boundary:** endpoint relevance alone does not close every
+  physical transition sample read by a refined edge. The next G2 checkpoint
+  must add transition-sample dependency closure and a conservative halo
+  before a query-local patch can claim soundness.
+- **Authority:** offline only. No planner, publisher, consumer, live action,
+  worker allocation, hazard coverage, or fallback changed. CE-0102, CE-0120,
+  CE-0134's live-integration blockers, and the six retained spatial-root and
+  Windows delivery gates remain open.
+- Formal contract:
+  `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`.

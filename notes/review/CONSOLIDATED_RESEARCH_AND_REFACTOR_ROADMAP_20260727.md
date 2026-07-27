@@ -763,6 +763,14 @@ Observed closure:
 
 ### G2 — Dual-bound query-local refinement
 
+Status: the first offline soundness seam is implemented. The retained formal
+contract defines round-to-even coarse cells, lower/intersection and
+upper/union action masks without collapsing time, active plane, or hidden
+branch, plus a fixed-root-action/fixed-root-delay forward tube intersected
+with an optimistic terminal co-reachable tube. Patch edge/sample closure,
+8/4-pixel solving, exhaustive retained-root gates, and Windows delivery remain
+open; no live authority changed.
+
 在 `PreparedCorridorProblem` 上實作：
 
 1. 先定義 16 px lower/upper cell 和 transition 量詞；

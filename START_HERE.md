@@ -15,15 +15,16 @@ and design/run notes retain derivations and history.
 5. `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`
 6. `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`
 7. `notes/COMPLETE_MASK_ISSUE_ACTION_CONTRACT_20260727.md`
-8. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
-9. `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
-10. `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`
-11. `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`
-12. `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`
-13. `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`
-14. `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
-15. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
-16. the relevant recent run note and counterexample rows before live work
+8. `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`
+9. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
+10. `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
+11. `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`
+12. `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`
+13. `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`
+14. `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`
+15. `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
+16. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
+17. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -36,6 +37,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `7facf80 Extend belief actions to complete masks`. The independent scalar
   recurrence and native belief ABI now carry 36 complete TH08 no-Bomb issue
   tokens through 64-bit action subsets. This is offline/shadow authority.
+- Current uncommitted G2 checkpoint defines the finite-reference lower/upper
+  cell quantifiers and branch-preserving root-relevance seam. It remains
+  offline and does not yet implement patch dependency closure or refinement.
 - Latest live algorithmic checkpoint remains
   `d4467bd Add deadline-aware native supplemental gate`; no live action
   authority changed in the complete-mask correction.
@@ -297,7 +301,8 @@ work should:
    future-birth, transform, body, pending-command, and clock coverage
    without treating missing hazards as false-empty rescue evidence;
 3. introduce proof-backed query-local refinement only where a coarse state is
-   ambiguous, never uniform full-field 4-pixel solving;
+   ambiguous, using the retained cell-intersection/union and branch-preserving
+   tube contract; never use uniform full-field 4-pixel solving;
 4. retain root actions unrestricted while using exact augmented-root
    partial-survival witnesses as a post-loss lower bound;
 5. keep survival hard and route/resource objectives inside the viable set;
@@ -340,6 +345,7 @@ weaken four global workers or reuse a merely similar root.
 - Reachable tube:
   `notes/AUGMENTED_PIPELINE_REACHABLE_TUBE_20260725.md`
 - Lower/upper/anytime synthesis:
+  `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`,
   `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`,
   `notes/INCUMBENT_UPPER_CERTIFICATION_20260725.md`,
   `notes/RESUMABLE_INCUMBENT_CERTIFICATION_20260725.md`,

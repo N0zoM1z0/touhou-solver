@@ -307,11 +307,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
   decoding, together with their loaders, now live in
   `native.local_sensing`; baseline and supplemental quantized beam reducers,
   with their distinct loaders/orderings, now live in
-  `native.local_reducers`. The original `native.local` and `native_backend`
-  exports retain object identity. Native facade,
+  `native.local_reducers`; persistent rollout lifecycle, frame-major packing,
+  cancellation/deadline decoding, and result ownership now live in
+  `native.local_supplemental`. `native.local` is a 54-line compatibility
+  facade with a loader-injection shim; its and `native_backend`'s exports
+  retain object identity. Native facade,
   hazard/beam, and semantic differential suites pass `4/4`, `5/5`, `5/5`,
   and `6/6`; bullet-runtime decoding passes `12/12`; the Linux quick suite
-  passes `699/699` in `9.396 s`.
+  passes `699/699` in `9.290 s`; Windows passes `699/699` in `13.974 s` with
+  three skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

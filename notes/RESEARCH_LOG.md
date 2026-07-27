@@ -5423,3 +5423,25 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural reducer-binding ownership only. Beam
   approximation status, ordering, native ABI, live fallback, and action
   authority are unchanged.
+
+### 2026-07-27 — Native-local supplemental workspace extraction
+
+- **Observed structural change:** Moved persistent supplemental workspace
+  loading/lifecycle, frame-major field packing, native query lowering,
+  cooperative cancellation/deadline handling, and owned result copies into
+  `touhou_control.native.local_supplemental`. `native.local` is now a 54-line
+  compatibility facade.
+- **Compatibility boundary:** The facade retains
+  `_load_local_supplemental_workspace_functions` as a narrow shim that injects
+  its current `_load_library` hook into the defining module. Existing
+  function-group cache and fake-library fault injection therefore still
+  exercise the loader used through the historical facade. All other names
+  remain exact object re-exports.
+- **Validation:** Native-facade and semantic differential suites pass `4/4`
+  and `6/6`; Ruff, byte compilation, and `git diff --check` pass. Quick suites
+  pass `699/699` on Linux in `9.290 s` and Windows in `13.974 s` with three
+  platform skips.
+- **Authority:** Structural supplemental-workspace ownership only. Native ABI,
+  array packing, monotonic deadline, cancellation, output validation,
+  supplemental proposal status, live fallback, and action authority are
+  unchanged.

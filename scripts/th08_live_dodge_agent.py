@@ -76,6 +76,15 @@ from th08_laser_runtime import (
     pack_laser_frame as _pack_laser_frame,
     serialize_laser_trace,
 )
+from th08_local_planner import (
+    ActuatorPipeline,
+    CompletedServiceResults,
+    GlobalGuidance,
+    LocalPlannerRequest,
+    ObjectiveContext,
+    PhysicalHazardSnapshot,
+    PlannerConfig,
+)
 from th08_runtime_agent import (
     ADDR_ENGINE_FLAGS,
     ADDR_ENEMY_MANAGER_FRAME,
@@ -6261,6 +6270,84 @@ def choose_action(
         decision,
         local_certificate_timing=(
             _certificate_timing_accumulator.snapshot()
+        ),
+    )
+
+
+def choose_action_request(request: LocalPlannerRequest) -> Decision:
+    """Plan from the grouped immutable request contract."""
+
+    physical = request.physical
+    actuator = request.actuator
+    guidance = request.guidance
+    config = request.config
+    objective = request.objective
+    completed = request.completed_services
+    return choose_action(
+        player_x=physical.player_x,
+        player_y=physical.player_y,
+        bullets=physical.bullets,
+        lasers=physical.lasers,
+        previous_direction=actuator.previous_direction,
+        can_bomb=actuator.can_bomb,
+        enemy_bodies=physical.enemy_bodies,
+        items=physical.items,
+        power=objective.power,
+        bombs=objective.bombs,
+        previous_focus=actuator.previous_focus,
+        local_pipeline_root=actuator.local_pipeline_root,
+        snapshot_lag=physical.snapshot_lag,
+        control_delay_frames=actuator.control_delay_frames,
+        control_delay_candidates=actuator.control_delay_candidates,
+        action_hold_frames=actuator.action_hold_frames,
+        horizon=config.horizon,
+        threat_horizon=config.threat_horizon,
+        beam_width=config.beam_width,
+        target_x=guidance.target_x,
+        target_y=guidance.target_y,
+        target_deadline=guidance.target_deadline,
+        allowed_first_actions=guidance.allowed_first_actions,
+        viability_repair_volumes=guidance.viability_repair_volumes,
+        viability_recovery_distances=(
+            guidance.viability_recovery_distances
+        ),
+        viability_safety_actions=guidance.viability_safety_actions,
+        viability_safety_state_value=(
+            guidance.viability_safety_state_value
+        ),
+        viability_survival_actions=guidance.viability_survival_actions,
+        viability_survival_frames=guidance.viability_survival_frames,
+        viability_survival_bottleneck_margin=(
+            guidance.viability_survival_bottleneck_margin
+        ),
+        viability_position_error=guidance.viability_position_error,
+        damage_target_x=objective.damage_target_x,
+        damage_target_half_width=objective.damage_target_half_width,
+        damageable=objective.damageable,
+        recovery_control_reserve=config.recovery_control_reserve,
+        losing_control_reserve=config.losing_control_reserve,
+        preloss_continuation_preference=(
+            config.preloss_continuation_preference
+        ),
+        preloss_supplemental_beam_width=(
+            config.preloss_supplemental_beam_width
+        ),
+        preloss_supplemental_deadline_ms=(
+            completed.supplemental_deadline_ms
+        ),
+        preloss_supplemental_async_service=(
+            completed.supplemental_async_service
+        ),
+        preloss_supplemental_version=completed.supplemental_version,
+        preserve_previous_direction_inertia=(
+            config.preserve_previous_direction_inertia
+        ),
+        beam_dedup_mode=config.beam_dedup_mode,
+        relax_stale_viability_contradiction=(
+            config.relax_stale_viability_contradiction
+        ),
+        enforce_fresh_viability_intersection=(
+            config.enforce_fresh_viability_intersection
         ),
     )
 

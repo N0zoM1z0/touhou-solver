@@ -5218,3 +5218,23 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural reachability ownership only. Root semantics,
   uncertainty, collision certification, publication, live authority, and
   strategy are unchanged.
+
+### 2026-07-27 — Legacy native pipeline-workspace extraction
+
+- **Observed structural change:** Moved
+  `PipelineSurvivalWorkspace`, its stale-version error, and native
+  cancellation/deadline aliases into
+  `touhou_control.query_survival_workspace`. The public facade remains
+  backward compatible and is now 898 lines.
+- **Boundary:** Native creation, policy-version rejection, pending-action
+  validation, prewarm, same-problem continuation merge, and `contains_root`
+  lookup-before-query behavior moved together. The workspace imports the
+  problem only for static typing, so it does not create a runtime facade
+  cycle.
+- **Validation:** Query-survival tests pass `17/17`; pipeline-prewarm and
+  prewarm-service suites pass `5/5` and `2/2`. Ruff, byte compilation, and
+  `git diff --check` pass. Quick suites pass `699/699` on Linux in `9.182 s`
+  and Windows in `13.093 s` with three platform skips.
+- **Authority:** Structural native-memo ownership only. This remains the
+  documented legacy always-issue shadow/offline workspace; recurrence, ABI,
+  exact-version consumption, live authority, and strategy are unchanged.

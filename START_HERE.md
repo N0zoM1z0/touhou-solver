@@ -277,9 +277,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   the native implementation it audits. Exact kinematic next-root enumeration
   now lives in `query_survival_roots`, including its reusable prepared
   context; the facade preserves both the public enumerator and historical
-  private prewarm import. The facade is 1,208 lines. Focused
+  private prewarm import. The legacy versioned native memo, cancellation and
+  deadline aliases, stale-version error, prewarm/merge, and lookup-only
+  consumer now live in `query_survival_workspace`. The facade is 898 lines.
+  Focused
   query-survival/prewarm tests pass `17/17`, `5/5`, and `2/2`; quick suites
-  pass `699/699` on Linux in `9.390 s` and Windows in `13.306 s` with three
+  pass `699/699` on Linux in `9.182 s` and Windows in `13.093 s` with three
   skips.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and

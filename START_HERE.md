@@ -32,21 +32,22 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Repository branch: `main`.
 - Latest algorithmic checkpoint:
   `d4467bd Add deadline-aware native supplemental gate`.
-- Latest structural checkpoint: native C++ R3 complete.
-  Twelve explicitly listed domain/ABI `.cpp` sources replace the unity build;
-  `robust_viability_kernel.cpp` is a two-line compatibility path. Public C
-  wrappers exist only in four `src/abi` files and forward to hidden domain
-  implementations. `include/touhou_native/abi.h` is self-contained C11/C++17,
-  owns the supplemental struct layout, and matches the 43-symbol manifest;
-  Linux dynamic exports are exactly those 43 names. Legacy workspace adapters
-  map to the newest internal entry points. R2 remains complete. No model,
-  recurrence, float comparison, worker policy, action, or strategy changed.
+- Latest structural checkpoint:
+  `f025eaf Separate local planner preparation from mode passes`; roadmap R4
+  is complete. The canonical planner accepts one immutable nested request and
+  executes explicit validation, hazard preparation, hard preflight, baseline
+  beam, completed-result lookup, ranking, proposal assembly, and at most one
+  relaxed-mode transition. Fresh issue recertification is an idempotent
+  `IssueTransaction`; proposal, certificate, issued-decision, and telemetry
+  values are separate. The 48-argument `choose_action()` remains only as a
+  compatibility facade. R2/R3 remain complete. No model, recurrence, float
+  comparison, worker policy, action authority, or strategy changed.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
   quick suite `584/584` on Linux in `5.213 s` and Windows in `14.365 s`.
-- The completed R3 checkpoint passes the expanded quick suite `608/608`
-  on Linux in `5.398 s` and Windows in `8.478 s` with three platform skips.
+- The completed R4 checkpoint passes the expanded quick suite `614/614`
+  on Linux in `5.655 s` and Windows in `8.603 s` with three platform skips.
 - No TH08 process, controller daemon, supervisor, or unfinished experiment is
   expected to be alive.
 - Native build output, raw traces, screenshots, caches, and the local
@@ -81,6 +82,15 @@ endpoint mismatches. Research maxima were 3,900 bullets, 1,387 lasers,
 the dominant physical failure in current Hard evidence. This is implementation
 and sampled finite-semantics evidence, not complete shipped-game or physical
 safety proof. Keep the Python oracles and explicit rollback paths.
+
+**Observed structural gate:** the R4 local-planner split preserves all six
+generated intensive action/hard-vector comparisons with zero collision,
+clearance-sign, or batch-invariance mismatch. The isolated live-like native
+sequence measured `28.325/28.865 ms` median/p95 versus the retained
+`27.178/27.942 ms`; this is not a significant pure-refactor regression.
+Fresh/global historical regressions, field-by-field issue metadata rebinding,
+and hard no-Bomb checks pass. This is implementation parity, not new model or
+physical authority.
 
 ### Physical Hard evidence
 

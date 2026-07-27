@@ -4410,3 +4410,50 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   three platform skips. A fresh loaded ASan/UBSan build passes 58 focused
   tests with halt-on-error enabled. Python compilation, Ruff, C/C++ header
   compilation, and `git diff --check` pass.
+
+## 2026-07-27: Local Planner And Issue Transaction Separation
+
+- **Scope:** Completed roadmap R4 in commits `32b6066` through `f025eaf`.
+  Added immutable grouped physical, actuator, guidance, configuration,
+  objective, and completed-service requests. The live caller now constructs
+  that request directly; the historical 48-keyword entry point remains a
+  compatibility facade.
+- **Planner stages:** Validation, hazard preparation, hard preflight,
+  historical beam, completed supplemental lookup, endpoint ranking, and
+  proposal assembly have narrow modules under `th08_local_planner`. The
+  relaxed-viability retry is an explicit two-mode transition with separate
+  pass preparation and cannot recursively re-enter the public planner.
+- **Issue boundary:** `LocalProposal`, `ActionCertificateSet`,
+  `DecisionTelemetry`, and `IssuedDecision` are distinct immutable values.
+  `IssueTransaction.commit()` owns fresh-hazard recertification, exact
+  global/fresh intersection, metadata rebinding, no-Bomb assertion, and
+  idempotent publication of one issued result. The live issue path consumes
+  this transaction.
+- **Observed source defects:** Full static checking exposed a stale-loop
+  `player` reference in boss-phase progress and a removed
+  `safety_value_guidance` name in trace construction. They now read the
+  current captured player state and canonical `policy_guidance.safety_actions`
+  respectively. These are correctness repairs to existing sensing/telemetry
+  plumbing, not planner or strategy changes.
+- **Authority:** This checkpoint changes no physical state abstraction,
+  hazard projection, uncertainty support, recurrence, signed-clearance
+  arithmetic, action ordering, hard vector, candidate authority, worker
+  policy, C ABI, live setting, or strategy status. It adds no physical
+  evidence.
+- **Observed semantic gate:** The six generated intensive workloads pass with
+  zero collision, clearance-sign, or batch-invariance mismatch and exact
+  Python/native end-to-end action/hard-vector equality. An initially noisy
+  whole-machine timing sample slowed unrelated geometry workloads together;
+  the immediate isolated rerun returned the live-like native sequence to
+  `28.325/28.865 ms` median/p95 versus retained `27.178/27.942 ms`.
+- **Exit checks:** Historical fresh/global intersection tests remain clean.
+  New tests check every rebound decision-metadata field, unchanged telemetry,
+  fresh safe actions, transaction idempotence, and no Bomb. The complete quick
+  suite passes `614/614` on Linux in `5.655 s` and Windows in `8.603 s` with
+  three platform skips. Python compilation, Ruff, and `git diff --check`
+  pass.
+- **Next gate:** Roadmap R5 must separate session resource ownership,
+  sensing, policy/clock coordination, issue control, and trace construction
+  without changing identity/foreground/route/scene guards or supervisor
+  behavior. A focused Windows physical no-strategy-change smoke is required
+  before R5 is called complete.

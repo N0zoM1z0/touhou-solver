@@ -75,13 +75,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
   in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`. No model,
   recurrence, float comparison, worker policy, action authority, or strategy
   changed.
-- Current structural checkpoint splits the G2 implementation behind stable
+- Structural checkpoint `6dbcc8b Split dual refinement into focused modules`
+  splits the G2 implementation behind stable
   compatibility facades. Spatial cells, transitions, root scope, patch
   selection, clearance, result validation, scalar oracle, vector data plane,
   and candidate guides now live in
   `scripts/touhou_control/corridor/dual_refinement/`; the former
-  897/1022-line public modules are 44/22-line facades. This is a
-  behavior-preserving reorganization pending commit.
+  897/1022-line public modules are 44/22-line facades.
+- Current live-structure checkpoint introduces immutable, validated
+  `CapturedIteration`, `ServiceUpdate`, `PublishedGuidance`, and
+  `FreshIssueResult` boundaries inside `_run_live_session`. The local planner
+  now consumes the captured contract and actuator state is updated from the
+  fresh-issue contract. The surrounding controller remains the composition
+  owner; this is a staged extraction, not a wholesale move.
 - The current release-preparation commit must be a descendant of that
   checkpoint.
 - Release verification rebuilt both native targets and passed the reduced
@@ -115,6 +121,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - The post-G2 module split passes `686/686` quick tests on Linux in `9.057 s`
   and Windows in `13.067 s` with three Windows platform skips. Three explicit
   structure tests preserve old-facade/new-module symbol identity.
+- The live iteration-contract checkpoint passes `689/689` quick tests on
+  Linux in `8.887 s` and Windows in `12.802 s` with three Windows platform
+  skips. Its supervised Windows retention smoke
+  `hard_route2_stage1_unattended_20260727_173735` completed Hard Stage 1 over
+  frames `1..20950` with 7,680 decisions, zero hits, zero Bomb input,
+  accepted terminal unload, route completion, artifact materialization, and
+  no residual game/controller/supervisor process.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

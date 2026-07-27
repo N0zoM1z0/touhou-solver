@@ -653,6 +653,14 @@ symbol fallback 完全相同。
 
 ### R5 — Live session
 
+Status: lifecycle/resource/sensor/policy/scene/issue/trace modules and the
+22-line entry facade are complete. The live loop now consumes immutable
+capture, service-update, publication-guidance, and fresh-issue stage records.
+The Windows Hard Stage-1 retention gate `20260727_173735` passes with zero
+hits/Bombs and full cleanup. Trace construction and the remaining stage
+functions are still inside `_run_live_session`; R5 decomposition therefore
+continues without changing live strategy.
+
 1. 抽 `LiveSession` context manager，只負責資源 acquire/release。
 2. 抽 `Sensor`, `PolicyCoordinator`, `SceneClockCoordinator`,
    `IssueController`, `TraceSink`。

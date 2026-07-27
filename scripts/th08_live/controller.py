@@ -154,6 +154,12 @@ from th08_live.hazard_decode import (  # noqa: F401
     decode_items,
     decode_lasers,
 )
+from th08_live.iteration import (
+    CapturedIteration,
+    FreshIssueResult,
+    PublishedGuidance,
+    ServiceUpdate,
+)
 from th08_live.enemy_sensor import (  # noqa: F401
     ENEMY_ACTIVE_FLAG,
     ENEMY_BODY_READ_OFFSET,
@@ -4031,6 +4037,40 @@ def _run_live_session(
                 previous_mask,
                 control_delay_frames,
             )
+            held_desired_mask = previous_mask & SUPPORTED_INPUT_MASK
+            captured_iteration = CapturedIteration(
+                gameplay_epoch=gameplay_epoch,
+                stage_route_index=int(state["stage_route_index"]),
+                spell_id=(
+                    int(spell_state["spell_id"])
+                    if spell_state["active"]
+                    else None
+                ),
+                context_key=corridor_context,
+                source_frame=int(state["enemy_manager_frame"]),
+                snapshot_frame=counter_after_read,
+                player_x=float(player["x"]),
+                player_y=float(player["y"]),
+                projected_player_x=projected_player_x,
+                projected_player_y=projected_player_y,
+                native_active_mask=int(state["input_current"]),
+                held_desired_mask=held_desired_mask,
+                previous_direction=previous_direction,
+                can_bomb=can_bomb,
+                power=float(resources["power"]),
+                bombs=float(resources["bombs"]),
+                bullets=bullets,
+                lasers=lasers,
+                enemy_bodies=enemy_bodies,
+                items=items,
+                hazard_alignment=hazard_alignment,
+                snapshot_lag=snapshot_lag,
+                player_to_hazard_lag=player_to_hazard_lag,
+                hazard_snapshot_age=hazard_snapshot_age,
+                delay_estimate=delay_estimate,
+                control_delay_frames=control_delay_frames,
+                context_changed=corridor_context_changed,
+            )
             corridor_started = time.perf_counter()
             corridor_updated = False
             if (
@@ -4195,7 +4235,7 @@ def _run_live_session(
                         survival_candidate,
                     )
             observed_input_action = _action_name_from_mask(
-                int(state["input_current"])
+                captured_iteration.native_active_mask
             )
             pending_command_estimate = delay_estimator.pending_estimate(
                 frame=counter_after_read,
@@ -4216,18 +4256,22 @@ def _run_live_session(
             policy_query_request = PolicyQueryRequest(
                 solution=corridor_solution,
                 target_frame=(
-                    int(state["enemy_manager_frame"])
-                    + control_delay_frames
+                    captured_iteration.source_frame
+                    + captured_iteration.control_delay_frames
                 ),
-                query_frame=counter_after_read,
-                player_x=projected_player_x,
-                player_y=projected_player_y,
-                active_action=_action_name_from_mask(previous_mask),
+                query_frame=captured_iteration.snapshot_frame,
+                player_x=captured_iteration.projected_player_x,
+                player_y=captured_iteration.projected_player_y,
+                active_action=_action_name_from_mask(
+                    captured_iteration.held_desired_mask
+                ),
                 observed_action=observed_input_action,
                 pending_command=pipeline_pending_command,
                 lookahead_frames=args.corridor_lookahead,
                 max_age_frames=args.corridor_max_age,
-                current_delay_frames=delay_estimate.support,
+                current_delay_frames=(
+                    captured_iteration.delay_estimate.support
+                ),
                 pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
             )
             primary_policy_query = policy_coordinator.query_primary(
@@ -4235,25 +4279,22 @@ def _run_live_session(
             )
             corridor_target = primary_policy_query.target
             viability_query = primary_policy_query.viability_query
-            held_desired_mask = previous_mask & SUPPORTED_INPUT_MASK
             pipeline_shadow_snapshot = build_pipeline_shadow_snapshot(
                 supported_mask=SUPPORTED_INPUT_MASK,
-                native_active_mask=int(state["input_current"]),
-                held_desired_mask=held_desired_mask,
+                native_active_mask=captured_iteration.native_active_mask,
+                held_desired_mask=captured_iteration.held_desired_mask,
                 pending_estimate=pending_command_estimate,
                 action_from_mask=_local_pipeline_action_from_mask,
-                gameplay_epoch=gameplay_epoch,
-                stage_route_index=int(state["stage_route_index"]),
-                spell_id=(
-                    int(spell_state["spell_id"])
-                    if spell_state["active"]
-                    else None
+                gameplay_epoch=captured_iteration.gameplay_epoch,
+                stage_route_index=(
+                    captured_iteration.stage_route_index
                 ),
-                manager_frame=int(state["enemy_manager_frame"]),
-                query_frame=counter_after_read,
+                spell_id=captured_iteration.spell_id,
+                manager_frame=captured_iteration.source_frame,
+                query_frame=captured_iteration.snapshot_frame,
                 target_frame=policy_query_request.target_frame,
-                player_x=projected_player_x,
-                player_y=projected_player_y,
+                player_x=captured_iteration.projected_player_x,
+                player_y=captured_iteration.projected_player_y,
                 hazard_horizon_frames=PLANNER_THREAT_HORIZON,
                 corridor_solution=corridor_solution,
             )
@@ -4347,6 +4388,22 @@ def _run_live_session(
             corridor_overhead_ms = (
                 time.perf_counter() - corridor_started
             ) * 1000.0
+            service_update = ServiceUpdate(
+                context_key=captured_iteration.context_key,
+                query_frame=captured_iteration.snapshot_frame,
+                active_solution=corridor_solution,
+                pending_solution=corridor_pending_solution,
+                corridor_updated=corridor_updated,
+                elapsed_ms=corridor_overhead_ms,
+            )
+            published_guidance = PublishedGuidance(
+                capture=captured_iteration,
+                service_update=service_update,
+                request=policy_query_request,
+                primary_query=primary_policy_query,
+                completed_query=policy_queries,
+                pipeline_shadow=pipeline_shadow_snapshot,
+            )
             action_hold_frames = _estimate_live_action_hold(
                 tuple(decision_frame_deltas)
             )
@@ -4376,20 +4433,37 @@ def _run_live_session(
             local_proposal = choose_local_proposal_request(
                 LocalPlannerRequest(
                     physical=PhysicalHazardSnapshot(
-                        player_x=float(player["x"]),
-                        player_y=float(player["y"]),
-                        bullets=bullets,
-                        lasers=lasers,
-                        enemy_bodies=enemy_bodies,
-                        items=items,
-                        snapshot_lag=player_to_hazard_lag,
+                        player_x=(
+                            published_guidance.capture.player_x
+                        ),
+                        player_y=(
+                            published_guidance.capture.player_y
+                        ),
+                        bullets=published_guidance.capture.bullets,
+                        lasers=published_guidance.capture.lasers,
+                        enemy_bodies=(
+                            published_guidance.capture.enemy_bodies
+                        ),
+                        items=published_guidance.capture.items,
+                        snapshot_lag=(
+                            published_guidance.capture.player_to_hazard_lag
+                        ),
                     ),
                     actuator=ActuatorPipeline(
-                        previous_direction=previous_direction,
-                        can_bomb=can_bomb,
-                        previous_focus=bool(previous_mask & FOCUS),
-                        control_delay_frames=control_delay_frames,
-                        control_delay_candidates=delay_estimate.support,
+                        previous_direction=(
+                            published_guidance.capture.previous_direction
+                        ),
+                        can_bomb=published_guidance.capture.can_bomb,
+                        previous_focus=bool(
+                            published_guidance.capture.held_desired_mask
+                            & FOCUS
+                        ),
+                        control_delay_frames=(
+                            published_guidance.capture.control_delay_frames
+                        ),
+                        control_delay_candidates=(
+                            published_guidance.capture.delay_estimate.support
+                        ),
                         action_hold_frames=action_hold_frames,
                     ),
                     guidance=GlobalGuidance(
@@ -4445,8 +4519,8 @@ def _run_live_session(
                         ),
                     ),
                     objective=ObjectiveContext(
-                        power=float(resources["power"]),
-                        bombs=float(resources["bombs"]),
+                        power=published_guidance.capture.power,
+                        bombs=published_guidance.capture.bombs,
                         damage_target_x=damage_target_x,
                         damage_target_half_width=(
                             damage_target_half_width
@@ -4729,16 +4803,37 @@ def _run_live_session(
             observe_to_issue_ms = (
                 time.perf_counter() - iteration_started
             ) * 1000.0
+            fresh_issue_result = FreshIssueResult(
+                capture=captured_iteration,
+                proposal=local_proposal,
+                decision=decision,
+                alignment=action_alignment,
+                dispatch=input_dispatch,
+                issue_frame=counter_at_action,
+                pre_issue_action=pre_issue_action,
+                pre_issue_mask=pre_issue_mask,
+                post_guard_action=post_issue_guard_action,
+                post_guard_mask=post_issue_guard_mask,
+                planned_action=planned_action,
+                planned_mask=planned_mask,
+                fresh_enemy_changed=bool(issue_enemy_changes),
+                deadline_missed=action_deadline_missed,
+                recertification_ms=issue_enemy_recertificate_ms,
+                issue_path_ms=issue_path_ms,
+                observe_to_issue_ms=observe_to_issue_ms,
+            )
             if transitions:
                 delay_estimator.issued(
-                    snapshot_frame=int(state["enemy_manager_frame"]),
-                    issue_frame=counter_at_action,
-                    expected_mask=decision.mask,
+                    snapshot_frame=fresh_issue_result.capture.source_frame,
+                    issue_frame=fresh_issue_result.issue_frame,
+                    expected_mask=fresh_issue_result.decision.mask,
                     support_high=delay_estimate.support[-1],
                     support=delay_estimate.support,
                 )
-            previous_mask = decision.mask
-            previous_direction = decision.mask & (UP | DOWN | LEFT | RIGHT)
+            previous_mask = fresh_issue_result.decision.mask
+            previous_direction = fresh_issue_result.decision.mask & (
+                UP | DOWN | LEFT | RIGHT
+            )
             local_pipeline_certificate_shadow: (
                 dict[str, object] | None
             ) = None

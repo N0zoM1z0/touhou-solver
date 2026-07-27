@@ -1,6 +1,12 @@
 """TH08 live-controller composition and lifecycle boundaries."""
 
 from .issue_controller import InputDispatch, IssueController
+from .iteration import (
+    CapturedIteration,
+    FreshIssueResult,
+    PublishedGuidance,
+    ServiceUpdate,
+)
 from .models import (
     Bullet,
     ENEMY_MAX_OBSERVED_WORLD_SPEED,
@@ -55,11 +61,13 @@ __all__ = [
     "BULLET_STRIDE",
     "AutoConfirmPulse",
     "Bullet",
+    "CapturedIteration",
     "GameplaySceneGuard",
     "ENEMY_MAX_OBSERVED_WORLD_SPEED",
     "EnemyBody",
     "EnemyBodyModeMemory",
     "EnemyPoolSnapshot",
+    "FreshIssueResult",
     "INPUT_CLOCK_SHADOW_ROLE",
     "ITEM_MANAGER_BASE",
     "ITEM_POOL_SIZE",
@@ -77,10 +85,12 @@ __all__ = [
     "PolicyQuerySnapshot",
     "PackedBulletSnapshot",
     "PrimaryPolicyQuery",
+    "PublishedGuidance",
     "RawPoolCapture",
     "SceneClockCoordinator",
     "SceneGuardDecision",
     "Sensor",
+    "ServiceUpdate",
     "SpellEnemyBodyGuard",
     "TraceSink",
     "auto_confirm_eligible",

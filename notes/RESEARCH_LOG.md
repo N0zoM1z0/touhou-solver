@@ -4783,3 +4783,37 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   structure `3/3` tests pass; `ruff` and `git diff --check` pass; Linux quick
   suite passes `686/686` in `9.057 s`; Windows quick suite passes `686/686`
   in `13.067 s` with three platform skips.
+
+### 2026-07-27 — Live iteration stage contracts and physical retention
+
+- **Observed structural change:** Added immutable, validated
+  `CapturedIteration`, `ServiceUpdate`, `PublishedGuidance`, and
+  `FreshIssueResult` records. `_run_live_session` now binds decoded hazards,
+  source/snapshot frames, delay support, background publications, lookup-only
+  guidance, fresh issue alignment, and physical dispatch through those
+  records. The local planner consumes the captured record and actuator state
+  is updated from the issued record.
+- **Observed repository audit:** Refreshed all long Python/native module line
+  counts and decisions in
+  `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`.
+  `th08_live_dodge_agent.py` is already a 22-line facade and
+  `corridor_planner.py` a 169-line facade; their remaining heavy ownership is
+  explicitly identified. `native/robust_viability_kernel.cpp` is already a
+  two-line compatibility translation unit; long native implementation units
+  remain separately queued.
+- **Observed automated gate:** Live-focused tests pass `102/102`; Linux quick
+  suite passes `689/689` in `8.887 s`; Windows quick suite passes `689/689`
+  in `12.802 s` with three platform skips; Ruff and `git diff --check` pass.
+- **Observed physical retention:** Windows supervised run
+  `hard_route2_stage1_unattended_20260727_173735` completed Hard Stage 1 over
+  frames `1..20950` with 7,680 decisions, zero native hits, zero Bomb input,
+  `terminal_unload`, `route_complete`, accepted compact artifacts, supervisor
+  completion, and no residual game/controller/supervisor process.
+- **Authority:** Structure and implementation-retention evidence only. No
+  model, recurrence, uncertainty set, float comparison, action ranking,
+  strategy, worker policy, deadline, fallback, trace schema, or live action
+  authority intentionally changed. The clean Stage-1 run is not a strategy
+  promotion or repeatability claim.
+- **Evidence:** `notes/runs/hard_route2_stage1_unattended_20260727_173735.md`
+  and matching compact artifacts under `artifacts/runtime_reports/`. The
+  150 MiB raw JSONL remains local and ignored.

@@ -6,6 +6,11 @@ import json
 import os
 from pathlib import Path
 
+from th08_live.bullet_birth_native import (
+    NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_RELEASED,
+)
+
 
 LONG_RUN_DURATION_SECONDS = 3600
 
@@ -56,6 +61,7 @@ def build_long_run_arguments(
     trace_transform_runtime: bool = False,
     trace_bullet_births: bool = False,
     bullet_birth_backend: str = "python",
+    bullet_birth_native_call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
     safety_value_horizon: int = 0,
     viability_audit_dir: Path | None = None,
     postpublished_survival_shadow: bool = False,
@@ -87,6 +93,8 @@ def build_long_run_arguments(
         raise ValueError("unknown bullet decode backend")
     if bullet_birth_backend not in {"python", "native"}:
         raise ValueError("unknown bullet birth backend")
+    if bullet_birth_native_call_mode not in NATIVE_CALL_MODES:
+        raise ValueError("unknown native bullet birth call mode")
     arguments = [
         str(output),
         "--pid",
@@ -124,6 +132,8 @@ def build_long_run_arguments(
                 "--trace-bullet-births",
                 "--bullet-birth-backend",
                 bullet_birth_backend,
+                "--bullet-birth-native-call-mode",
+                bullet_birth_native_call_mode,
             )
         )
     if safety_value_horizon:

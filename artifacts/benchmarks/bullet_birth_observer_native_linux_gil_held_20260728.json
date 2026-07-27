@@ -1,0 +1,162 @@
+{
+  "backend": "native",
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 1,
+      "compact_json_bytes": 400,
+      "observer": {
+        "max_ms": 0.125308,
+        "p50_ms": 0.0266345,
+        "p95_ms": 0.03713924999999998,
+        "p99_9_ms": 0.11116507000000116,
+        "p99_ms": 0.05072151999999997
+      },
+      "record_json": {
+        "max_ms": 0.028522,
+        "p50_ms": 0.0092175,
+        "p95_ms": 0.010712649999999999,
+        "p99_9_ms": 0.025880275000000213,
+        "p99_ms": 0.013860999999999988
+      }
+    },
+    {
+      "births_per_observation": 8,
+      "compact_json_bytes": 750,
+      "observer": {
+        "max_ms": 0.342988,
+        "p50_ms": 0.0304935,
+        "p95_ms": 0.054127699999999994,
+        "p99_9_ms": 0.2951470070000039,
+        "p99_ms": 0.07627669999999975
+      },
+      "record_json": {
+        "max_ms": 0.060905,
+        "p50_ms": 0.0193685,
+        "p95_ms": 0.02124405,
+        "p99_9_ms": 0.06067018000000002,
+        "p99_ms": 0.0378004599999998
+      }
+    },
+    {
+      "births_per_observation": 32,
+      "compact_json_bytes": 2018,
+      "observer": {
+        "max_ms": 0.087092,
+        "p50_ms": 0.029844,
+        "p95_ms": 0.04512224999999996,
+        "p99_9_ms": 0.08544985200000013,
+        "p99_ms": 0.06543044999999988
+      },
+      "record_json": {
+        "max_ms": 0.070054,
+        "p50_ms": 0.047897499999999996,
+        "p95_ms": 0.0549232,
+        "p99_9_ms": 0.06979032500000003,
+        "p99_ms": 0.06498976999999996
+      }
+    },
+    {
+      "births_per_observation": 33,
+      "compact_json_bytes": 2071,
+      "observer": {
+        "max_ms": 0.277104,
+        "p50_ms": 0.031620499999999996,
+        "p95_ms": 0.045727399999999994,
+        "p99_9_ms": 0.25472943500000184,
+        "p99_ms": 0.10583527999999946
+      },
+      "record_json": {
+        "max_ms": 0.083796,
+        "p50_ms": 0.0442675,
+        "p95_ms": 0.05192919999999998,
+        "p99_9_ms": 0.08212798200000013,
+        "p99_ms": 0.07333301999999998
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "compact_json_bytes": 32956,
+      "observer": {
+        "max_ms": 0.140817,
+        "p50_ms": 0.037354,
+        "p95_ms": 0.05884615,
+        "p99_9_ms": 0.13287053200000065,
+        "p99_ms": 0.0905088099999999
+      },
+      "record_json": {
+        "max_ms": 1.014763,
+        "p50_ms": 0.6793775,
+        "p95_ms": 0.7402093,
+        "p99_9_ms": 0.9667769360000039,
+        "p99_ms": 0.77062928
+      }
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 8.122544999999999,
+    "p50_ms": 6.655723500000001,
+    "p95_ms": 7.251830175,
+    "p99_9_ms": 8.111084265,
+    "p99_ms": 8.00793765
+  },
+  "decode_interleaved": {
+    "max_ms": 8.820385,
+    "p50_ms": 6.67905675,
+    "p95_ms": 7.4644505,
+    "p99_9_ms": 8.761024154500006,
+    "p99_ms": 8.226776545000003
+  },
+  "decode_iterations": 100,
+  "decode_pairing": "abba_mean_per_iteration",
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 0.060733,
+        "p50_ms": 0.008726000000000001,
+        "p95_ms": 0.00992905,
+        "p99_9_ms": 0.027145543000003575,
+        "p99_ms": 0.014298859999999998
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.057963,
+        "p50_ms": 0.0089905,
+        "p95_ms": 0.0101494,
+        "p99_9_ms": 0.029756185000000854,
+        "p99_ms": 0.01766624
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.056322,
+        "p50_ms": 0.010241,
+        "p95_ms": 0.010889,
+        "p99_9_ms": 0.030297376000002724,
+        "p99_ms": 0.01644909
+      }
+    }
+  ],
+  "gate": {
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": true,
+    "max_limit_ms": 2.0,
+    "observer_failures": [],
+    "observer_pass": true,
+    "observer_profiles_checked": 8,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": true
+  },
+  "interleaved_p95_ratio": 1.02931954001529,
+  "iterations": 2000,
+  "native_call_mode": "gil-held",
+  "native_library": "/home/pentester/coding/codex_ida/th08/native/build/linux-x86_64/libtouhou_bullet_birth_trace.so",
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v6",
+  "thread_affinity_cpu": null
+}

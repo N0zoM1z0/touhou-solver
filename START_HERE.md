@@ -38,6 +38,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `7333cc8 Retain native-call Stage 4 tail attribution`,
   `200c259 Attribute native bullet birth wall tails`,
   `e892863 Retain native Stage 4 birth tail failure`,
   `bc57168 Add exact native bullet birth extraction`,
@@ -130,9 +131,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
   plausible contributor; OS preemption is not directly observed. The next
   correction gate is an explicit GIL-held versus GIL-released call-boundary
   experiment under the same C++ recurrence, output, unpinned controller, GC,
-  and wall limits. B4 and action authority remain unchanged.
+  and wall limits. That experiment is now implemented with separate
+  `CDLL`/`PyDLL` loaders and trace schema v7/residual-audit v5 provenance.
+  Both modes are bit-exact to the independent Python oracle over 16
+  full-pool generations. Unpinned Linux released/held profiles pass with
+  full-density p95 `0.0119/0.0109 ms`, 592-birth p95
+  `0.0598/0.0588 ms`, and decode ratios `1.0166/1.0293`; Windows passes at
+  `0.0118/0.0098 ms`, `0.0465/0.0452 ms`, and `1.0382/1.0181`.
+  Complete Linux/Windows suites pass `801/801` in `8.900/15.699 s`.
+  One explicit `gil-held` Stage-4A diagnostic is eligible; two consecutive
+  complete physical passes are required to close B4. B4 and action authority
+  remain unchanged.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
+  `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and
   CE-0143/0144/0145/0146/0147/0148/0149/0150.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on

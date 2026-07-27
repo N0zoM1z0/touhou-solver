@@ -22,6 +22,8 @@ from th08_live.bullet_birth import (  # noqa: E402
     BulletBirthTracker,
 )
 from th08_live.bullet_birth_native import (  # noqa: E402
+    NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_RELEASED,
     NativeBulletBirthTracker,
     native_bullet_birth_available,
     native_bullet_birth_library_path,
@@ -152,6 +154,7 @@ def _abba_samples(
 def run_benchmark(
     *,
     backend: str,
+    native_call_mode: str,
     thread_affinity_cpu: int | None,
     densities: tuple[int, ...],
     iterations: int,
@@ -161,17 +164,22 @@ def run_benchmark(
     warmup: int,
 ) -> dict[str, object]:
     if backend == "python":
-        tracker_type = BulletBirthTracker
+        tracker_factory = BulletBirthTracker
     elif backend == "native":
-        if not native_bullet_birth_available():
+        if not native_bullet_birth_available(native_call_mode):
             raise RuntimeError("native bullet-birth trace library is unavailable")
-        tracker_type = NativeBulletBirthTracker
+
+        def tracker_factory(**kwargs):
+            return NativeBulletBirthTracker(
+                native_call_mode=native_call_mode,
+                **kwargs,
+            )
     else:
         raise ValueError(f"unknown bullet-birth backend {backend!r}")
     density_rows: list[dict[str, object]] = []
     for density in densities:
         blob = _pool(density)
-        tracker = tracker_type(maximum_bootstrap_age=0)
+        tracker = tracker_factory(maximum_bootstrap_age=0)
         frame = 1
 
         def observe() -> None:
@@ -197,7 +205,7 @@ def run_benchmark(
         if not 0 < burst_size <= BULLET_POOL_SIZE:
             raise ValueError("burst size is outside the hostile-bullet pool")
         active_blob = _pool(burst_size)
-        tracker = tracker_type(maximum_bootstrap_age=0)
+        tracker = tracker_factory(maximum_bootstrap_age=0)
         frame = 1
         tracker.observe(
             inactive_blob,
@@ -224,7 +232,7 @@ def run_benchmark(
                 frame_before=frame,
                 frame_after=frame,
             )
-        serialization_tracker = tracker_type(
+        serialization_tracker = tracker_factory(
             maximum_bootstrap_age=0,
         )
         serialization_tracker.observe(
@@ -258,7 +266,7 @@ def run_benchmark(
         )
 
     full_blob = _pool(BULLET_POOL_SIZE)
-    tracker = tracker_type(maximum_bootstrap_age=0)
+    tracker = tracker_factory(maximum_bootstrap_age=0)
     frame = 1
 
     def interleaved() -> None:
@@ -319,8 +327,11 @@ def run_benchmark(
     }
     gate["passed"] = gate["observer_pass"] and gate["interleaved_pass"]
     return {
-        "schema": "th08-bullet-birth-observer-benchmark-v5",
+        "schema": "th08-bullet-birth-observer-benchmark-v6",
         "backend": backend,
+        "native_call_mode": (
+            native_call_mode if backend == "native" else None
+        ),
         "thread_affinity_cpu": thread_affinity_cpu,
         "native_library": (
             str(native_bullet_birth_library_path())
@@ -347,6 +358,11 @@ def main(argv: list[str] | None = None) -> int:
         "--backend",
         choices=("python", "native"),
         default="python",
+    )
+    parser.add_argument(
+        "--native-call-mode",
+        choices=NATIVE_CALL_MODES,
+        default=NATIVE_CALL_MODE_GIL_RELEASED,
     )
     parser.add_argument(
         "--thread-affinity-cpu",
@@ -395,6 +411,7 @@ def main(argv: list[str] | None = None) -> int:
 
     report = run_benchmark(
         backend=args.backend,
+        native_call_mode=args.native_call_mode,
         thread_affinity_cpu=affinity_cpu,
         densities=tuple(args.densities),
         iterations=args.iterations,

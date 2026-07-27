@@ -194,6 +194,8 @@ def _audit(
                 "materialize": [0, 0, 0],
             },
         }
+    if schema_version >= 7:
+        record["native_call_mode"] = "gil-held"
     return record
 
 
@@ -444,6 +446,43 @@ class BulletBirthAuditTests(unittest.TestCase):
                 BulletBirthAuditError,
                 "fabricates native diagnostics",
             ):
+                analyze_trace(trace)
+
+    def test_schema_v7_requires_one_explicit_native_call_mode(self) -> None:
+        with TemporaryDirectory() as directory:
+            trace = self._trace(directory, schema_version=7)
+            report = analyze_trace(trace)
+            self.assertEqual(
+                report["input"]["native_call_modes"],
+                {"gil-held": 4},
+            )
+
+            records = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            records[0].pop("native_call_mode")
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(BulletBirthAuditError, "call mode"):
+                analyze_trace(trace)
+
+            records[0]["native_call_mode"] = "gil-released"
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(BulletBirthAuditError, "mixes"):
+                analyze_trace(trace)
+
+            records[0]["observation_backend"] = "python"
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(BulletBirthAuditError, "fabricates"):
                 analyze_trace(trace)
 
     def test_failed_schema_v1_trace_remains_auditable(self) -> None:

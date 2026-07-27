@@ -14,6 +14,10 @@ from datetime import datetime
 from pathlib import Path
 
 from th08_agent_hotkey import AgentHotkey
+from th08_live.bullet_birth_native import (
+    NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_RELEASED,
+)
 from th08_automation.full_route_artifacts import (  # noqa: F401
     EXPECTED_ROUTE_STAGES,
     compare_full_dossiers,
@@ -194,6 +198,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "trace_transform_runtime": False,
         "trace_bullet_births": args.trace_bullet_births,
         "bullet_birth_backend": args.bullet_birth_backend,
+        "bullet_birth_native_call_mode": (
+            args.bullet_birth_native_call_mode
+        ),
         "viability_audit": False,
         "agent_duration_seconds": args.agent_duration,
         "leave_game_running": args.leave_game_running,
@@ -211,6 +218,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             terminal_stage=None,
             trace_bullet_births=args.trace_bullet_births,
             bullet_birth_backend=args.bullet_birth_backend,
+            bullet_birth_native_call_mode=(
+                args.bullet_birth_native_call_mode
+            ),
             safety_value_horizon=0,
             duration_seconds=args.agent_duration,
             detailed_summary=False,
@@ -445,6 +455,12 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("python", "native"),
         default="python",
         help="explicit trace-only hostile-bullet birth observer backend",
+    )
+    parser.add_argument(
+        "--bullet-birth-native-call-mode",
+        choices=NATIVE_CALL_MODES,
+        default=NATIVE_CALL_MODE_GIL_RELEASED,
+        help="explicit trace-only native call GIL boundary",
     )
     parser.add_argument(
         "--difficulty",

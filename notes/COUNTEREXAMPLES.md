@@ -4258,6 +4258,10 @@ correction open
   preserving the same C++ recurrence/output, independent scalar parity, GC,
   unpinned controller, and fixed wall gate. A retained native-call tail in
   the held mode falsifies Python-thread GIL handoff as a sufficient cause.
+- **Offline correction status:** Separate `CDLL`/`PyDLL` loaders, schema-v7
+  call-mode provenance, exact three-way parity, and all fixed unpinned
+  Linux/Windows profiles pass. This makes one `gil-held` Stage-4A diagnostic
+  eligible; it does not yet close the physical failure.
 - **Evidence:** Raw trace is 510,433,900 bytes with SHA-256
   `ed4fbbb932e12ac7ef7f3e4b560fad1fa7dc8b0428c712edc5a02ec1c09b7a79`.
   Canonical deterministic report SHA-256 is

@@ -6,6 +6,7 @@ import random
 import struct
 import time
 import unittest
+from unittest import mock
 
 import numpy as np
 
@@ -14,9 +15,12 @@ from th08_live.bullet_birth import (
     BulletBirthTracker,
 )
 from th08_live.bullet_birth_native import (
+    NATIVE_CALL_MODE_GIL_HELD,
+    NATIVE_CALL_MODE_GIL_RELEASED,
     NativeBulletBirthTracker,
     native_bullet_birth_available,
 )
+from th08_live import bullet_birth_native as native_module
 from th08_live.bullet_decode import (
     BULLET_GEOMETRY_OFFSET,
     BULLET_POOL_SIZE,
@@ -70,8 +74,70 @@ def _set_slot(
     )
 
 
+class NativeBulletBirthLoaderTests(unittest.TestCase):
+    def test_call_modes_select_distinct_ctypes_boundaries(self) -> None:
+        class FakeFunction:
+            pass
+
+        class FakeLibrary:
+            def __init__(self) -> None:
+                self.touhou_trace_bullet_births_v1 = FakeFunction()
+
+        released_library = FakeLibrary()
+        held_library = FakeLibrary()
+        with (
+            mock.patch.dict(native_module._LIBRARIES, {}, clear=True),
+            mock.patch.dict(native_module._LOAD_ERRORS, {}, clear=True),
+            mock.patch.dict(native_module._FUNCTIONS, {}, clear=True),
+            mock.patch.object(
+                native_module.ctypes,
+                "CDLL",
+                return_value=released_library,
+            ) as cdll,
+            mock.patch.object(
+                native_module.ctypes,
+                "PyDLL",
+                return_value=held_library,
+            ) as pydll,
+        ):
+            released = native_module._load_function(
+                NATIVE_CALL_MODE_GIL_RELEASED
+            )
+            held = native_module._load_function(NATIVE_CALL_MODE_GIL_HELD)
+            self.assertIs(
+                released,
+                released_library.touhou_trace_bullet_births_v1,
+            )
+            self.assertIs(
+                held,
+                held_library.touhou_trace_bullet_births_v1,
+            )
+            self.assertIsNot(released, held)
+            cdll.assert_called_once_with(
+                str(native_module.native_bullet_birth_library_path())
+            )
+            pydll.assert_called_once_with(
+                str(native_module.native_bullet_birth_library_path())
+            )
+            self.assertIs(
+                native_module._load_function(
+                    NATIVE_CALL_MODE_GIL_RELEASED
+                ),
+                released,
+            )
+            self.assertIs(
+                native_module._load_function(NATIVE_CALL_MODE_GIL_HELD),
+                held,
+            )
+
+    def test_unknown_call_mode_fails_closed(self) -> None:
+        with self.assertRaisesRegex(ValueError, "call mode"):
+            native_module._load_function("unknown")
+
+
 @unittest.skipUnless(
-    native_bullet_birth_available(),
+    native_bullet_birth_available()
+    and native_bullet_birth_available(NATIVE_CALL_MODE_GIL_HELD),
     "native bullet-birth trace library is unavailable",
 )
 class NativeBulletBirthTrackerTests(unittest.TestCase):
@@ -194,7 +260,14 @@ class NativeBulletBirthTrackerTests(unittest.TestCase):
         rng = random.Random(0xB17A)
         blob = _pool()
         python = BulletBirthTracker()
-        native = NativeBulletBirthTracker()
+        natives = (
+            NativeBulletBirthTracker(
+                native_call_mode=NATIVE_CALL_MODE_GIL_RELEASED
+            ),
+            NativeBulletBirthTracker(
+                native_call_mode=NATIVE_CALL_MODE_GIL_HELD
+            ),
+        )
         states = [0] * BULLET_POOL_SIZE
         ages = [0] * BULLET_POOL_SIZE
         for generation in range(16):
@@ -228,24 +301,33 @@ class NativeBulletBirthTrackerTests(unittest.TestCase):
                 )
             frame_before = generation * 3
             frame_after = frame_before + generation % 2
-            self.assert_observations_equal(
-                python.observe(
-                    blob,
-                    frame_before=frame_before,
-                    frame_after=frame_after,
-                ),
-                native.observe(
-                    blob,
-                    frame_before=frame_before,
-                    frame_after=frame_after,
-                ),
+            expected = python.observe(
+                blob,
+                frame_before=frame_before,
+                frame_after=frame_after,
             )
+            for native in natives:
+                self.assert_observations_equal(
+                    expected,
+                    native.observe(
+                        blob,
+                        frame_before=frame_before,
+                        frame_after=frame_after,
+                    ),
+                )
 
     def test_reset_and_validation_match_python(self) -> None:
         blob = _pool()
         python = BulletBirthTracker()
-        native = NativeBulletBirthTracker()
-        for tracker in (python, native):
+        natives = (
+            NativeBulletBirthTracker(
+                native_call_mode=NATIVE_CALL_MODE_GIL_RELEASED
+            ),
+            NativeBulletBirthTracker(
+                native_call_mode=NATIVE_CALL_MODE_GIL_HELD
+            ),
+        )
+        for tracker in (python, *natives):
             with self.assertRaisesRegex(ValueError, "requires"):
                 tracker.observe(
                     blob[:-1],
@@ -258,9 +340,37 @@ class NativeBulletBirthTrackerTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "regressed"):
                 tracker.observe(blob, frame_before=2, frame_after=3)
             tracker.reset()
+        expected = python.observe(blob, frame_before=0, frame_after=0)
+        for native in natives:
+            self.assert_observations_equal(
+                expected,
+                native.observe(blob, frame_before=0, frame_after=0),
+            )
+
+    def test_call_modes_report_identity_and_match_exactly(self) -> None:
+        blob = _pool()
+        _set_slot(
+            blob,
+            17,
+            state=5,
+            age=0,
+            geometry=(10.0, 20.0, 1.0, -2.0, 6.0, 8.0),
+            transform_flags=7,
+        )
+        released = NativeBulletBirthTracker(
+            native_call_mode=NATIVE_CALL_MODE_GIL_RELEASED
+        )
+        held = NativeBulletBirthTracker(
+            native_call_mode=NATIVE_CALL_MODE_GIL_HELD
+        )
+        self.assertEqual(
+            released.native_call_mode,
+            NATIVE_CALL_MODE_GIL_RELEASED,
+        )
+        self.assertEqual(held.native_call_mode, NATIVE_CALL_MODE_GIL_HELD)
         self.assert_observations_equal(
-            python.observe(blob, frame_before=0, frame_after=0),
-            native.observe(blob, frame_before=0, frame_after=0),
+            released.observe(blob, frame_before=1, frame_after=1),
+            held.observe(blob, frame_before=1, frame_after=1),
         )
 
     def test_capacity_error_does_not_advance_native_history(self) -> None:

@@ -10,9 +10,10 @@ from th08_ecl_birth import (
 )
 
 from .bullet_birth import BulletBirthObservation
+from .bullet_birth_native import NATIVE_CALL_MODES
 
 
-BULLET_BIRTH_TRACE_SCHEMA_VERSION = 6
+BULLET_BIRTH_TRACE_SCHEMA_VERSION = 7
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
 BULLET_BIRTH_POOL_SCOPE = "all_1536_hostile_bullet_slots"
@@ -41,6 +42,7 @@ class BulletBirthTraceInput:
     intent_ms: float
     previous_emit_ms: float | None
     observation_backend: str = "python"
+    native_call_mode: str | None = None
     observation_diagnostics: dict[str, object] | None = None
 
 
@@ -63,6 +65,16 @@ def build_bullet_birth_trace_record(
     intent = trace_input.intent
     if trace_input.observation_backend not in {"python", "native"}:
         raise ValueError("unknown bullet-birth observation backend")
+    if (
+        trace_input.observation_backend == "native"
+        and trace_input.native_call_mode not in NATIVE_CALL_MODES
+    ):
+        raise ValueError("native observation requires an explicit call mode")
+    if (
+        trace_input.observation_backend == "python"
+        and trace_input.native_call_mode is not None
+    ):
+        raise ValueError("Python observation may not publish a native call mode")
     if (
         trace_input.observation_backend == "native"
         and observation is not None
@@ -92,6 +104,7 @@ def build_bullet_birth_trace_record(
         "schema_version": BULLET_BIRTH_TRACE_SCHEMA_VERSION,
         "role": BULLET_BIRTH_TRACE_ROLE,
         "observation_backend": trace_input.observation_backend,
+        "native_call_mode": trace_input.native_call_mode,
         "observation_diagnostics": trace_input.observation_diagnostics,
         "frame": trace_input.frame,
         "snapshot_frame": trace_input.snapshot_frame,

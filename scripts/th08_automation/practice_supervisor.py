@@ -14,6 +14,10 @@ from datetime import datetime
 from pathlib import Path
 
 from th08_agent_hotkey import AgentHotkey
+from th08_live.bullet_birth_native import (
+    NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_RELEASED,
+)
 from th08_automation.practice_artifacts import (
     TrialArtifacts,
     materialize_artifacts as _materialize_artifacts,
@@ -205,6 +209,9 @@ def run_trial(
         "trace_transform_runtime": args.trace_transform_runtime,
         "trace_bullet_births": args.trace_bullet_births,
         "bullet_birth_backend": args.bullet_birth_backend,
+        "bullet_birth_native_call_mode": (
+            args.bullet_birth_native_call_mode
+        ),
         "viability_audit": args.viability_audit,
         "postpublished_survival_shadow": (
             args.postpublished_survival_shadow
@@ -239,6 +246,9 @@ def run_trial(
             trace_transform_runtime=args.trace_transform_runtime,
             trace_bullet_births=args.trace_bullet_births,
             bullet_birth_backend=args.bullet_birth_backend,
+            bullet_birth_native_call_mode=(
+                args.bullet_birth_native_call_mode
+            ),
             safety_value_horizon=args.safety_value_horizon,
             viability_audit_dir=(
                 ROOT
@@ -527,6 +537,12 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("python", "native"),
         default="python",
         help="explicit trace-only hostile-bullet birth observer backend",
+    )
+    parser.add_argument(
+        "--bullet-birth-native-call-mode",
+        choices=NATIVE_CALL_MODES,
+        default=NATIVE_CALL_MODE_GIL_RELEASED,
+        help="explicit trace-only native call GIL boundary",
     )
     parser.add_argument(
         "--safety-value-horizon",

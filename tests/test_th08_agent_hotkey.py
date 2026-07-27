@@ -69,6 +69,10 @@ class AgentHotkeyTests(unittest.TestCase):
         parsed = build_parser().parse_args(arguments)
         self.assertTrue(parsed.trace_bullet_births)
         self.assertEqual(parsed.bullet_birth_backend, "python")
+        self.assertEqual(
+            parsed.bullet_birth_native_call_mode,
+            "gil-released",
+        )
 
         native_arguments = build_long_run_arguments(
             output=Path("trial.jsonl"),
@@ -77,9 +81,14 @@ class AgentHotkeyTests(unittest.TestCase):
             difficulty=3,
             trace_bullet_births=True,
             bullet_birth_backend="native",
+            bullet_birth_native_call_mode="gil-held",
         )
         native_parsed = build_parser().parse_args(native_arguments)
         self.assertEqual(native_parsed.bullet_birth_backend, "native")
+        self.assertEqual(
+            native_parsed.bullet_birth_native_call_mode,
+            "gil-held",
+        )
 
     def test_full_route_can_extend_the_worker_deadline(self) -> None:
         arguments = build_long_run_arguments(

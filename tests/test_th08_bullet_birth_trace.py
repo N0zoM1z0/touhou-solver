@@ -150,6 +150,7 @@ class BulletBirthTraceTests(unittest.TestCase):
         )
         self.assertEqual(record["role"], BULLET_BIRTH_TRACE_ROLE)
         self.assertEqual(record["observation_backend"], "python")
+        self.assertIsNone(record["native_call_mode"])
         self.assertIsNone(record["observation_diagnostics"])
         self.assertEqual(record["counts"]["observed_evidence"], 1)
         self.assertEqual(record["counts"]["visible_intents"], 1)
@@ -201,10 +202,12 @@ class BulletBirthTraceTests(unittest.TestCase):
         trace_input = replace(
             _trace_input(observation=observation),
             observation_backend="native",
+            native_call_mode="gil-held",
             observation_diagnostics=diagnostics,
         )
         record = build_bullet_birth_trace_record(trace_input)
-        self.assertEqual(record["schema_version"], 6)
+        self.assertEqual(record["schema_version"], 7)
+        self.assertEqual(record["native_call_mode"], "gil-held")
         self.assertEqual(record["observation_diagnostics"], diagnostics)
 
         with self.assertRaisesRegex(ValueError, "requires diagnostics"):
@@ -219,6 +222,21 @@ class BulletBirthTraceTests(unittest.TestCase):
                 replace(
                     trace_input,
                     observation_backend="python",
+                    native_call_mode=None,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "explicit call mode"):
+            build_bullet_birth_trace_record(
+                replace(
+                    trace_input,
+                    native_call_mode=None,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "native call mode"):
+            build_bullet_birth_trace_record(
+                replace(
+                    _trace_input(observation=observation),
+                    native_call_mode="gil-held",
                 )
             )
 

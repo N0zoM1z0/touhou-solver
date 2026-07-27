@@ -22,6 +22,10 @@ from th08_automation.agent_contract import (
 from th08_corridor_adapter import prewarm_th08_corridor
 from th08_live_dodge_agent import build_parser as build_agent_parser
 from th08_live_dodge_agent import run as run_agent
+from th08_live.bullet_birth_native import (
+    NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_RELEASED,
+)
 from th08_runtime_agent import (
     ADDR_NO_LIFE_DECREMENT_PATCH,
     TARGET_EXE,
@@ -64,6 +68,9 @@ class AgentHotkey:
         trace_transform_runtime: bool = False,
         trace_bullet_births: bool = False,
         bullet_birth_backend: str = "python",
+        bullet_birth_native_call_mode: str = (
+            NATIVE_CALL_MODE_GIL_RELEASED
+        ),
         safety_value_horizon: int = 0,
         viability_audit_dir: Path | None = None,
         postpublished_survival_shadow: bool = False,
@@ -121,12 +128,15 @@ class AgentHotkey:
             raise ValueError("unknown bullet decode backend")
         if bullet_birth_backend not in {"python", "native"}:
             raise ValueError("unknown bullet birth backend")
+        if bullet_birth_native_call_mode not in NATIVE_CALL_MODES:
+            raise ValueError("unknown native bullet birth call mode")
         self.expected_difficulty = expected_difficulty
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
         self.trace_transform_runtime = trace_transform_runtime
         self.trace_bullet_births = trace_bullet_births
         self.bullet_birth_backend = bullet_birth_backend
+        self.bullet_birth_native_call_mode = bullet_birth_native_call_mode
         self.safety_value_horizon = safety_value_horizon
         self.viability_audit_dir = viability_audit_dir
         self.postpublished_survival_shadow = (
@@ -268,6 +278,9 @@ class AgentHotkey:
                 trace_transform_runtime=self.trace_transform_runtime,
                 trace_bullet_births=self.trace_bullet_births,
                 bullet_birth_backend=self.bullet_birth_backend,
+                bullet_birth_native_call_mode=(
+                    self.bullet_birth_native_call_mode
+                ),
                 safety_value_horizon=self.safety_value_horizon,
                 viability_audit_dir=self.viability_audit_dir,
                 postpublished_survival_shadow=(

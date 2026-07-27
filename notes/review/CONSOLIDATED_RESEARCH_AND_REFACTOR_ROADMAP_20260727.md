@@ -1056,6 +1056,14 @@ parity 當成每個 nature tie field 的逐 bit equality。
   max 只有 `0.0703/0.7076/0.2362 ms`。因此下一個 performance correction
   是保持同一 C++ recurrence/output、GC、unpinned controller 與 fixed
   wall gate 的 GIL-held/released call-boundary A/B，不再猜 Python copy/GC；
+  該 A/B 已以 mode-specific `CDLL`/`PyDLL`、trace schema v7 與
+  residual-audit v5 實作；16-generation full-pool 三方 parity 與
+  fail-closed provenance 通過。Linux released/held full-density p95
+  `0.0119/0.0109 ms`、592-birth p95 `0.0598/0.0588 ms`、ABBA ratio
+  `1.0166/1.0293`；Windows 為 `0.0118/0.0098 ms`、
+  `0.0465/0.0452 ms`、`1.0382/1.0181`，全部不綁核通過。下一步是第一個
+  explicit `gil-held` Stage-4A diagnostic；需要連續兩個完整 physical
+  pass 才能關閉 B4；
 - CE-0147 顯示 spell 57 的 1,261 rows 全部掃滿 256 callback
   instructions、未覆蓋 horizon 卻輸出可被 live lowering 消費的空 event
   list。這是 unknown-direction future-transform approximation；必須改成

@@ -103,6 +103,8 @@ from th08_live.bullet_birth import (
     BulletBirthTracker,
 )
 from th08_live.bullet_birth_native import (
+    NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_RELEASED,
     NativeBulletBirthDiagnostics,
     NativeBulletBirthTracker,
     native_bullet_birth_available,
@@ -1354,7 +1356,13 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
     if (
         getattr(args, "trace_bullet_births", False)
         and getattr(args, "bullet_birth_backend", "python") == "native"
-        and not native_bullet_birth_available()
+        and not native_bullet_birth_available(
+            getattr(
+                args,
+                "bullet_birth_native_call_mode",
+                NATIVE_CALL_MODE_GIL_RELEASED,
+            )
+        )
     ):
         raise RuntimeError(
             "native bullet-birth backend was selected but its trace "
@@ -1472,9 +1480,16 @@ def _run_live_session(
         "bullet_birth_backend",
         "python",
     )
+    bullet_birth_native_call_mode = getattr(
+        args,
+        "bullet_birth_native_call_mode",
+        NATIVE_CALL_MODE_GIL_RELEASED,
+    )
     bullet_birth_tracker = (
         (
-            NativeBulletBirthTracker()
+            NativeBulletBirthTracker(
+                native_call_mode=bullet_birth_native_call_mode,
+            )
             if bullet_birth_backend == "native"
             else BulletBirthTracker()
         )
@@ -3678,6 +3693,11 @@ def _run_live_session(
                                 previous_birth_trace_emit_ms
                             ),
                             observation_backend=bullet_birth_backend,
+                            native_call_mode=(
+                                bullet_birth_native_call_mode
+                                if bullet_birth_backend == "native"
+                                else None
+                            ),
                             observation_diagnostics=(
                                 bullet_birth_native_diagnostics.record(
                                     observation_ms=(
@@ -4349,6 +4369,15 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "select the explicit retrospective birth observer backend; "
             "used only with --trace-bullet-births"
+        ),
+    )
+    parser.add_argument(
+        "--bullet-birth-native-call-mode",
+        choices=NATIVE_CALL_MODES,
+        default=NATIVE_CALL_MODE_GIL_RELEASED,
+        help=(
+            "select whether the trace-only native birth call releases or "
+            "holds the Python GIL"
         ),
     )
     bomb_group = parser.add_mutually_exclusive_group()

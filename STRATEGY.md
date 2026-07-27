@@ -226,6 +226,18 @@ not an observed OS cause. A separately contracted GIL-held/released
 call-boundary experiment is the next performance gate; no action authority
 or survival claim follows from this 17-hit RNG-distinct run.
 
+**Observed offline GIL-boundary gate:** The correction experiment now uses
+separate mode-specific `CDLL`/`PyDLL` loaders without changing the native DLL
+or production ABI. Trace schema v7/residual-audit v5 require exact call-mode
+provenance and reject mixed modes. Both native modes are bit-exact to the
+independent Python observer over 16 full-pool generations. Unpinned Linux
+released/held full-density p95 is `0.0119/0.0109 ms`, 592-birth p95 is
+`0.0598/0.0588 ms`, and ABBA ratio is `1.0166/1.0293`; Windows values are
+`0.0118/0.0098 ms`, `0.0465/0.0452 ms`, and `1.0382/1.0181`.
+All profiles and `801/801` Linux/Windows quick suites pass. This permits one
+explicit `gil-held` Stage-4A diagnostic; two consecutive complete physical
+passes are required to close B4.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
@@ -241,12 +253,12 @@ or survival claim follows from this 17-hit RNG-distinct run.
    parity-gated native data plane passes isolated gates and physical
    percentiles, but CE-0149 retains a maximum-only failure. Schema-v6
    physically attributes every over-budget observation to the native-call
-   interval with no overlapping GC. Contract and test one explicit
-   GIL-held/released call-boundary correction without pinning the controller,
-   disabling GC, changing the recurrence/output, or weakening the wall
-   limit. In parallel, make incomplete callback coverage explicit and fail
-   closed before trying Stage 5/6. None of this narrows `UNKNOWN` coverage or
-   adds action authority.
+   interval with no overlapping GC. The explicit GIL-held/released
+   call-boundary correction passes offline and should receive its first
+   unpinned, GC-enabled `gil-held` Stage-4A diagnostic. Require two
+   consecutive physical passes before closing B4. In parallel, make
+   incomplete callback coverage explicit and fail closed before trying Stage
+   5/6. None of this narrows `UNKNOWN` coverage or adds action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

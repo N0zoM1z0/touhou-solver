@@ -6833,3 +6833,36 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** B4 remains failed. The next correction gate compares
   explicit GIL-held and GIL-released call boundaries without changing the
   C++ recurrence/output, GC, affinity, wall limit, or action authority.
+
+## 2026-07-28 — Implemented the native birth GIL-boundary experiment
+
+- Fixed `G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` before
+  implementation. The intervention is only the ctypes call boundary:
+  mode-specific `CDLL` releases the GIL and `PyDLL` retains it. The C++ scan,
+  output, native DLL, and production 46-symbol ABI are unchanged.
+- Trace schema v7 and residual-audit v5 retain exact `native_call_mode`.
+  Native rows require `gil-released` or `gil-held`; Python rows require
+  `null`; a mixed native-mode trace fails closed. Practice/full-route session
+  metadata and every agent-launch layer preserve the explicit choice.
+- Both native modes match the independent Python observer over 16 randomized
+  full-pool generations plus boundary/nonfinite, reset, validation, capacity,
+  history, and GC attribution cases. Loader tests prove distinct
+  `CDLL`/`PyDLL` function ownership.
+- Unpinned fixed Linux released/held full-density p95 is
+  `0.0119/0.0109 ms`, 592-birth p95 is `0.0598/0.0588 ms`, and ABBA decode
+  ratio is `1.0166/1.0293`. Windows values are `0.0118/0.0098 ms`,
+  `0.0465/0.0452 ms`, and `1.0382/1.0181`. Every observer profile and ratio
+  passes the unchanged limits.
+- Canonical LF report SHA-256 values for Linux released/held and Windows
+  released/held are
+  `a3c0501054340cbc09c57562d3ae5ee7a18b4e91360ad15ce52c779e8d6e6a6e`,
+  `a1ed1c4b32d5c9022e2e7dba5947b187e89e65a6aa566fc41a328450eb20e3cc`,
+  `76448d054a7c160589ed61b880ef1d54daf6e3cad13ed75fc4dce671ad8bd5bc`,
+  and
+  `305cdbc199cf62f8f22addd7e625b715112c67bd7b7b9e2713bbc4cfcb9b11ac`.
+- Ruff and complete Linux/Windows quick suites pass `801/801` in
+  `8.900/15.699 s`, with three existing Windows skips.
+- **Authority:** one explicit unpinned, GC-enabled `gil-held` Stage-4A
+  diagnostic is eligible. Two consecutive complete physical passes are
+  required to close B4. CE-0147, future-event coverage, hit reduction, and
+  action authority remain unchanged.

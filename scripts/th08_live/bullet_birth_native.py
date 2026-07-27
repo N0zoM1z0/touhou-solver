@@ -29,9 +29,15 @@ from th08_live.bullet_decode import (
 
 
 ROOT = Path(__file__).resolve().parents[2]
-_LIBRARY: Any | None = None
-_LOAD_ERROR: OSError | None = None
-_FUNCTION: Any | None = None
+NATIVE_CALL_MODE_GIL_RELEASED = "gil-released"
+NATIVE_CALL_MODE_GIL_HELD = "gil-held"
+NATIVE_CALL_MODES = (
+    NATIVE_CALL_MODE_GIL_RELEASED,
+    NATIVE_CALL_MODE_GIL_HELD,
+)
+_LIBRARIES: dict[str, Any] = {}
+_LOAD_ERRORS: dict[str, OSError | AttributeError] = {}
+_FUNCTIONS: dict[str, Any] = {}
 _ACTIVE_GC_TRACKER: Any | None = None
 _GC_CALLBACK_REGISTERED = False
 
@@ -119,20 +125,30 @@ def native_bullet_birth_library_path() -> Path:
     )
 
 
-def _load_function():
-    global _FUNCTION, _LIBRARY, _LOAD_ERROR
-    if _FUNCTION is not None:
-        return _FUNCTION
-    if _LOAD_ERROR is not None:
+def _load_function(
+    call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
+):
+    if call_mode not in NATIVE_CALL_MODES:
+        raise ValueError(f"unknown native bullet-birth call mode {call_mode!r}")
+    function = _FUNCTIONS.get(call_mode)
+    if function is not None:
+        return function
+    if call_mode in _LOAD_ERRORS:
         return None
+    loader = (
+        ctypes.CDLL
+        if call_mode == NATIVE_CALL_MODE_GIL_RELEASED
+        else ctypes.PyDLL
+    )
     try:
-        _LIBRARY = ctypes.CDLL(str(native_bullet_birth_library_path()))
+        library = loader(str(native_bullet_birth_library_path()))
     except OSError as error:
-        _LOAD_ERROR = error
+        _LOAD_ERRORS[call_mode] = error
         return None
     try:
-        function = _LIBRARY.touhou_trace_bullet_births_v1
-    except AttributeError:
+        function = library.touhou_trace_bullet_births_v1
+    except AttributeError as error:
+        _LOAD_ERRORS[call_mode] = error
         return None
     uint8_pointer = ctypes.POINTER(ctypes.c_uint8)
     uint16_pointer = ctypes.POINTER(ctypes.c_uint16)
@@ -166,26 +182,42 @@ def _load_function():
         int32_pointer,
     ]
     function.restype = ctypes.c_int
-    _FUNCTION = function
+    _LIBRARIES[call_mode] = library
+    _FUNCTIONS[call_mode] = function
     return function
 
 
-def native_bullet_birth_available() -> bool:
-    return _load_function() is not None
+def native_bullet_birth_available(
+    call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
+) -> bool:
+    return _load_function(call_mode) is not None
 
 
 class NativeBulletBirthTracker:
     """Exact native data plane behind the Python observation contract."""
 
-    def __init__(self, *, maximum_bootstrap_age: int = 8) -> None:
+    def __init__(
+        self,
+        *,
+        maximum_bootstrap_age: int = 8,
+        native_call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
+    ) -> None:
         if type(maximum_bootstrap_age) is not int or maximum_bootstrap_age < 0:
             raise ValueError("maximum bootstrap age must be a non-negative int")
-        if _load_function() is None:
-            detail = f": {_LOAD_ERROR}" if _LOAD_ERROR is not None else ""
+        if native_call_mode not in NATIVE_CALL_MODES:
+            raise ValueError(
+                f"unknown native bullet-birth call mode {native_call_mode!r}"
+            )
+        function = _load_function(native_call_mode)
+        if function is None:
+            error = _LOAD_ERRORS.get(native_call_mode)
+            detail = f": {error}" if error is not None else ""
             raise RuntimeError(
                 "native bullet-birth trace library is unavailable" + detail
             )
         _ensure_gc_callback_registered()
+        self.native_call_mode = native_call_mode
+        self._function = function
         self._maximum_bootstrap_age = maximum_bootstrap_age
         self._previous_states = np.empty(BULLET_POOL_SIZE, dtype=np.uint16)
         self._previous_ages = np.empty(BULLET_POOL_SIZE, dtype=np.int32)
@@ -322,11 +354,8 @@ class NativeBulletBirthTracker:
         required_size: int,
         output_capacity: int,
     ) -> int:
-        function = _load_function()
-        if function is None:
-            raise RuntimeError("native bullet-birth trace library disappeared")
         return int(
-            function(
+            self._function(
                 raw_pointer,
                 required_size,
                 BULLET_POOL_SIZE,
@@ -480,6 +509,9 @@ class NativeBulletBirthTracker:
 
 
 __all__ = [
+    "NATIVE_CALL_MODES",
+    "NATIVE_CALL_MODE_GIL_HELD",
+    "NATIVE_CALL_MODE_GIL_RELEASED",
     "NativeBulletBirthDiagnostics",
     "NativeBulletBirthTracker",
     "native_bullet_birth_available",

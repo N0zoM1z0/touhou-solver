@@ -13,10 +13,11 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA = "th08-bullet-birth-residual-audit-v4"
+SCHEMA = "th08-bullet-birth-residual-audit-v5"
 TRACE_KIND = "bullet_birth_audit"
 TRACE_ROLE = "trace_only_no_action_authority"
-TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5, 6))
+TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5, 6, 7))
+NATIVE_CALL_MODES = frozenset(("gil-released", "gil-held"))
 MAX_SAMPLES = 20
 OBSERVER_P95_LIMIT_MS = 0.20
 OBSERVER_P99_LIMIT_MS = 0.40
@@ -195,13 +196,24 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             f"line {line_number}: audit role is not trace-only"
         )
     if (
-        record.get("schema_version") in {5, 6}
+        record.get("schema_version") in {5, 6, 7}
         and record.get("observation_backend") not in {"python", "native"}
     ):
         raise BulletBirthAuditError(
             f"line {line_number}: audit omits a valid observation backend"
         )
-    if record.get("schema_version") == 6:
+    if record.get("schema_version") == 7:
+        backend = record.get("observation_backend")
+        native_call_mode = record.get("native_call_mode")
+        if backend == "native" and native_call_mode not in NATIVE_CALL_MODES:
+            raise BulletBirthAuditError(
+                f"line {line_number}: native audit omits a valid call mode"
+            )
+        if backend == "python" and native_call_mode is not None:
+            raise BulletBirthAuditError(
+                f"line {line_number}: Python audit fabricates a native call mode"
+            )
+    if record.get("schema_version") in {6, 7}:
         backend = record.get("observation_backend")
         diagnostics = record.get("observation_diagnostics")
         if backend == "python":
@@ -748,6 +760,8 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     omitted_sources: set[str] = set()
     trace_schema_versions: Counter[int] = Counter()
     observation_backends: Counter[str] = Counter()
+    native_call_modes: Counter[str] = Counter()
+    recorded_native_call_modes: set[str] = set()
     deferred_state_statuses: Counter[str] = Counter()
     deferred_state_values: Counter[str] = Counter()
     observation_by_evidence: defaultdict[str, list[float]] = defaultdict(list)
@@ -779,6 +793,16 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
                 )
             )
         ] += 1
+        native_call_mode = audit.get("native_call_mode")
+        native_call_modes[
+            (
+                str(native_call_mode)
+                if native_call_mode is not None
+                else "none_or_schema_v1_v6_unrecorded"
+            )
+        ] += 1
+        if native_call_mode in NATIVE_CALL_MODES:
+            recorded_native_call_modes.add(str(native_call_mode))
         scope = _scope_for(audit, decisions)
         phase = str(scope["phase"])
         pointer = audit.get("spell_enemy_pointer")
@@ -995,6 +1019,11 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             if classification == "ambiguous" and len(ambiguous_samples) < MAX_SAMPLES:
                 ambiguous_samples.append(sample)
 
+    if len(recorded_native_call_modes) > 1:
+        raise BulletBirthAuditError(
+            "trace mixes native bullet-birth call modes"
+        )
+
     phase_report = {
         phase: _counter(counts)
         for phase, counts in sorted(by_phase.items())
@@ -1043,6 +1072,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             "intent_errors": intent_errors,
             "trace_schema_versions": _counter(trace_schema_versions),
             "observation_backends": _counter(observation_backends),
+            "native_call_modes": _counter(native_call_modes),
             "deferred_fire_state_statuses": _counter(
                 deferred_state_statuses
             ),

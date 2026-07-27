@@ -425,6 +425,14 @@ recurrence and output, independent Python oracle, GC, unpinned controller,
 same-iteration durability, no added RPM, default-off/no-action authority, and
 fixed maximum.
 
+That experiment is now implemented and fixed by
+`G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md`. Mode-specific
+`CDLL`/`PyDLL` loaders, schema-v7 provenance, exact three-way parity, all
+fixed Linux/Windows observer profiles, ABBA decode ratios, and complete
+`801/801` suites pass. This authorizes one first explicit `gil-held`
+Stage-4A diagnostic. A single pass is not sufficient: two consecutive
+complete passes under the unchanged physical gate are required to close B4.
+
 In parallel, callback lookahead must expose an explicit incomplete result; an
 instruction-limit row cannot authorize an empty future event set. Stage 5 or
 6 follows only after Stage-4A semantics and performance pass.

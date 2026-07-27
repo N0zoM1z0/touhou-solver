@@ -5463,3 +5463,23 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Structural movement-contract ownership only. Physical
   dynamics, complete-mask issue semantics, planner recurrence, live action
   authority, and strategy are unchanged.
+
+### 2026-07-27 — Local hazard projection extraction
+
+- **Observed structural change:** Moved item projection/ranking, transformed
+  bullet frame construction, scalar geometry helpers, the independent NumPy
+  local-hazard kernel, and the parity-gated native adapter into
+  `th08_live.local_hazards`. The controller is now 4,812 lines and re-exports
+  every historical private entry point.
+- **Compatibility boundary:** Backend configuration and dispatch remain in
+  the controller. Existing tests and benchmarks can therefore still replace
+  controller `_hazards_for_positions`, select NumPy/native execution, and use
+  historical laser-packing and packed-bullet imports. Both implementations
+  consume the shared `th08_live.movement.PLAYER_RADIUS`.
+- **Validation:** Native-hazard, bullet-runtime decoder, local-certificate,
+  live-controller, and semantic differential suites pass `5/5`, `12/12`,
+  `8/8`, `92/92`, and `6/6`. Ruff, byte compilation, and `git diff --check`
+  pass. The Linux quick suite passes `699/699` in `9.006 s`.
+- **Authority:** Structural hazard-projection ownership only. Projection
+  equations, uncertainty inflation, collision thresholds, signed clearance,
+  native ABI, fallback selection, and live action authority are unchanged.

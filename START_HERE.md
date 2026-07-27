@@ -323,6 +323,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   pass `101/101`; the Linux quick suite passes `699/699` in `9.671 s`.
   This is a structural ownership change only; masks, float values, ordering,
   no-Bomb behavior, and action authority are unchanged.
+- Local item projection/ranking, transformed-bullet frame projection, the
+  independent NumPy hazard kernel, and the parity-gated native hazard adapter
+  now live in `th08_live.local_hazards`. Backend selection remains
+  controller-owned so historical runtime and benchmark patch seams retain
+  their semantics. `controller.py` is 4,812 lines. Hazard, bullet-decoder,
+  certificate, live-controller, and semantic differential focused suites
+  pass; the Linux quick suite passes `699/699` in `9.006 s`.
 - The original focused Windows physical smoke
   `hard_route2_stage1_unattended_20260727_133807` completed Stage 1 and
   supervisor cleanup with 7,541 decisions and zero Bomb input. It had one

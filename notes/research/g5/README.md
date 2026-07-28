@@ -18,8 +18,10 @@ themselves grant future-geometry, planner, or action authority.
 10. [native-owned coherence](G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md)
 11. [bounded visible retry](G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md)
 12. [shipped runtime ECL identity](G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md)
+13. [auxiliary literal fire-cycle intent](G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md)
 
 The corresponding `*_RESULT_*`, `*_GATE_*`, attribution, rejection, and
 performance-experiment notes retain the evidence for each transition. The
-next G5 step is one separately contracted auxiliary ECL event class, not a
-general source-completeness claim.
+current G5 step is offline implementation and independent-oracle validation
+of the fixed auxiliary literal fire-cycle intent. It is not a general
+source-completeness or future-geometry claim.

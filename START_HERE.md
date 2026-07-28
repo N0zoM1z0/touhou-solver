@@ -52,12 +52,13 @@ located; it does not change the authority order below.
 39. `notes/research/g5/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_STAGE5_RESULT_20260728.md`
 40. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`
 41. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`
-42. `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
-43. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
-44. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
-45. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
-46. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
-47. the relevant recent run note and counterexample rows before live work
+42. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md`
+43. `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
+44. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
+45. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
+46. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
+47. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
+48. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -66,6 +67,18 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
+- The first auxiliary instruction/path event class is now fixed in
+  `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md`.
+  Retained spell-107 trace `20260728_200739` has 3,214 usable contexts, all
+  targeting exact Stage-5 subroutines 69/72/73. Those are three-instruction
+  literal transform/fire/jump cycles with integer ECL timer thresholds
+  8/8/30. IDA
+  revalidation confirms the literal jump, direct-fire, transform, auxiliary
+  start, and four-context scheduler handlers. The old compact trace stores
+  only active-VM hashes, so it cannot be replay-lowered into PC/timer events.
+  The next G5 gate is a bounded production lowerer plus structurally
+  independent scalar byte oracle; unsupported timing, control, emission,
+  transform, source-life, and geometry dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model
   authority. The 515,082-byte research log and 311,238-byte, 165-entry
   counterexample ledger are stable 38/43-line indexes over seven daily and

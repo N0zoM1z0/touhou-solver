@@ -1391,8 +1391,17 @@ parity 當成每個 nature tie field 的逐 bit equality。
   the strict audit regenerates byte-identically at `f8c88c2c...45d5`.
   Instruction-byte identity is accepted only for this immutable image.
   Reachable auxiliary paths, operands, future geometry, source completeness,
-  and action authority remain open. The next G5 checkpoint contracts one
-  auxiliary event class and keeps unsupported dependencies `UNKNOWN`;
+  and action authority remain open. The next G5 checkpoint is now fixed in
+  `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md`.
+  Retained spell-107 contexts target only exact Stage-5 subroutines 69/72/73:
+  literal transform/fire/jump loops with integer ECL timer thresholds
+  8/8/30. Opcode `0x04` writes integer elapsed but preserves the fractional
+  accumulator, so physical-frame conversion must reproduce the native
+  time-scale recurrence. The first lowerer may report timer-domain
+  direct-fire intents only, preserves every
+  emission/transform/source/geometry residual, and must pass a structurally
+  independent scalar byte oracle before new physical tracing. The retained
+  compact active-VM hashes cannot be inverted into PC/timer evidence;
 - the projection audit now has an explicit universal `core` profile and keeps
   Stage-4A-only spell gates as its default. Stage 5 passes all core gates over
   4,871 rows while retaining 1,220 spell-115 unsupported-control rows as

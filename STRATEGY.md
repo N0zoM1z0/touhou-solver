@@ -548,9 +548,17 @@ comparison.
    identity, now passes physically on Stage-5 run `20260728_212622`: one
    four-read capture normalized the complete 47,224-byte image exactly to
    decoded `ecldata5.ecl` at SHA-256 `3148f45f...fe19`. This grants
-   instruction-byte identity for that immutable image only. The next gate is
-   separately contracted one-event-class auxiliary instruction/path lowering.
-   None of this changes the live strategy or grants future-hazard authority.
+   instruction-byte identity for that immutable image only. The first
+   one-event-class contract is now fixed as auxiliary literal fire-cycle
+   intent. Retained contexts target only Stage-5 subroutines 69/72/73, whose
+   exact programs are literal transform/fire/jump loops with integer ECL timer
+   thresholds 8/8/30. Opcode `0x04` preserves the fractional timer
+   accumulator, so physical-frame conversion requires the native time-scale
+   recurrence rather than a scalar reset. The retained compact trace stores
+   hashes rather than raw PC/timer state, so exact event replay requires a new
+   derived trace. Proceed to the bounded production lowerer and independent
+   scalar byte oracle. Timing, emission, shared transform state, source life,
+   geometry, and action authority remain unresolved.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over
    4,871 callback rows; spell 115 remains fail-closed on 1,220

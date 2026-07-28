@@ -8348,3 +8348,30 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   exposure attribution, a survival-filtered trace-only target shadow, and
   repeated focused physical trials. Survival stays hard, Bomb stays
   forbidden, and item/damage objectives retain no action authority.
+
+## 2026-07-28 — Revalidated the ordinary-enemy HP/damage observation boundary
+
+- Treated all inherited IDA names/comments/types and earlier boss notes as
+  hypotheses, then re-read the shipped instructions.
+- **Observed statically:** ECL opcode `0x83` writes the same evaluated integer
+  to enemy maximum/current/phase HP at
+  `0x41C97A/0x41C989/0x41C998`, corresponding to
+  `+0x2E00/+0x2DFC/+0x2E04`. The common object path applies to ordinary and
+  boss enemies.
+- **Observed statically:** the enemy update clears `+0x3354`, gates
+  player-shot damage with local flags `0x40`, blocking mask `0x830`, flags2
+  bit `0x80`, and separate global state, subtracts resolved damage at
+  `0x42D349`, republishes it at `0x42D355`, then tests nonpositive HP at
+  `0x42D54B` and dispatches a three-bit defeat mode.
+- **Important update-order inference:** one manager update can apply lethal
+  damage and complete cleanup before the next stable external capture.
+  Therefore disappearance or missing `HP <= 0` is not a verified player kill.
+  End reason remains a belief until damage, defeat mode, ECL/transition, and
+  drop evidence close the alternatives.
+- Updated IDA comments at `0x41C989`, `0x42D349`, `0x42D355`, and `0x42D54B`
+  with the revalidated instruction semantics and runtime limitation.
+- Added
+  `STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`.
+  Its first gate decodes a trace-only health/damage inventory from the
+  already-paid stable first-64 pool blob with zero added RPM and no action
+  consumer. Generation/end tracking and targeting remain later contracts.

@@ -1393,7 +1393,11 @@ exposure-normalized rate 低於 spell 合計。這支持「快速清怪可能縮
 ordinary-enemy HP/damageability/kill-vs-despawn、shot damage、Power/item
 transition 的 read-only telemetry 和 streaming audit，再做只在相同
 viable/issue-safe set 內排序的 trace-only shadow。任何 live promotion 都要
-多 RNG focused physical gate；單一低-hit run 無效。
+多 RNG focused physical gate；單一低-hit run 無效。第一個更窄的
+`STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md` 已在
+重新讀 shipped instructions 後固定：同一 manager update 可扣致命 HP 並
+完成 cleanup，所以 slot disappearance 不能直接標 kill；先從已付費的
+first-64 pool blob 零額外 RPM 解碼 raw HP/damage/flags。
 
 ## 12. Performance 路線
 

@@ -878,7 +878,8 @@ comparison.
   delta from alignment, no eligible survival-equivalent choices, or any
   clearance/reserve/cadence regression.
 - **Evidence:**
-  `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
+  `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`,
+  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`.
 
 ## Adding Or Changing A Strategy
 

@@ -50,7 +50,8 @@ and design/run notes retain derivations and history.
 40. `notes/G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`
 41. `notes/G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`
 42. `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
-43. the relevant recent run note and counterexample rows before live work
+43. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
+44. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still

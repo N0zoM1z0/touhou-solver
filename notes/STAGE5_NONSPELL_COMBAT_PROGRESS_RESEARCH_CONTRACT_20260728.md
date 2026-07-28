@@ -175,6 +175,10 @@ ordinary-enemy generation, health/threshold, damageability, source identity,
 spawn/end reason, and item/drop/pickup transitions if the binary and probes
 support them. Retain raw values and evidence when semantics are uncertain.
 
+The first narrower inventory/update-order gate is fixed in
+`STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`. It explicitly
+forbids treating slot disappearance as a verified kill.
+
 No inherited IDA name, comment, type, or prior offset is authority.
 
 ### C1 — Deterministic exposure audit

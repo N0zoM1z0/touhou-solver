@@ -34,7 +34,8 @@ and design/run notes retain derivations and history.
 24. `notes/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`
 25. `notes/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
 26. `notes/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`
-27. the relevant recent run note and counterexample rows before live work
+27. `notes/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`
+28. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -348,6 +349,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
   path and independently fix float32 add/normalization semantics before
   widening the shadow. Direct fire, RNG, dynamic state, calls, and
   interrupts remain unknown and live promotion remains forbidden.
+  The parallel B4 checkpoint is now fixed in
+  `G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`.
+  Regrouping the same physical rows shows zero/nonzero-evidence p95
+  `0.1553/0.2516 ms` and no-known/definite-known-future-overlap p95
+  `0.2015/0.2112 ms`. Windows profiling identifies non-allocating
+  thread-cycle delta bookkeeping as the first narrow optimization candidate.
+  The exact controller timing boundary, both future endpoint captures, GIL,
+  GC, workers, and all observation records remain fixed.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

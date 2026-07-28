@@ -405,6 +405,13 @@ comparison.
    This remains offline evidence infrastructure only. Matched live-path
    attribution and an independent float32 rounding oracle are next; direct
    fire, RNG, dynamic state, calls, and interrupts remain `UNKNOWN`.
+   The parallel B4 performance contract is now fixed. Same-run physical
+   cohorts report p95 `0.1553/0.2516 ms` for zero/nonzero evidence and
+   `0.2015/0.2112 ms` for no-known/definite-known-future overlap. This points
+   first to normal nonzero materialization and fixed telemetry, not another
+   worker-priority experiment. The first allowed optimization only rewrites
+   thread-cycle delta bookkeeping without moving any work outside the
+   existing wall interval or dropping endpoint provenance.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

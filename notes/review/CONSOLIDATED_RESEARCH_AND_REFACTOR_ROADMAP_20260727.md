@@ -1198,6 +1198,14 @@ parity 當成每個 nature tie field 的逐 bit equality。
   survival, or action authority. Next perform matched live-path attribution
   and establish an independent binary32 oracle before adding float
   add/normalization;
+- the parallel B4 line now has a fixed matched-path performance contract.
+  Regrouping the same 13,525 physical rows gives zero/nonzero-evidence p95
+  `0.1553/0.2516 ms` and no-known/definite-known-future-overlap p95
+  `0.2015/0.2112 ms`. Thus nonzero materialization plus fixed telemetry is
+  the first systematic target; another priority experiment is not justified.
+  The first patch may only remove generator/tuple overhead from exact
+  Windows cycle-delta bookkeeping. Both future endpoints, diagnostics, GIL,
+  GC, wall boundary, workers, and records remain unchanged;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

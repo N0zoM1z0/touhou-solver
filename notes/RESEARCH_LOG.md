@@ -7497,3 +7497,34 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   values, calls, interrupts, and spell 73 stay unknown. Next independently
   establish shipped binary32 rounding while separately profiling the matched
   live B4 path.
+
+## 2026-07-28 — Fixed the B4 matched-path performance boundary
+
+- **Observed from the same physical run:** zero-evidence rows have
+  p50/p95/p99/max `0.0912/0.1553/0.2882/0.6139 ms`; nonzero rows have
+  `0.1493/0.2516/0.4232/1.2276 ms`.
+- No-known-future-overlap rows have p50/p95/p99/max
+  `0.1037/0.2015/0.3816/0.6985 ms`; definite-known-overlap rows have
+  `0.1038/0.2112/0.2882/0.8924 ms`. One ambiguous endpoint row is the
+  `1.2276 ms` maximum.
+- Segment p95 over all 13,525 rows is
+  `0.0068/0.0590/0.0816/0.0749 ms` for
+  prepare/native-call/materialize/controller-residual. Nonzero materialize
+  p95 is `0.1064 ms`, versus `0.0132 ms` for zero evidence.
+- **Inference:** normal nonzero materialization and fixed telemetry dominate
+  the systematic p95 miss. Definite known-future overlap contributes about
+  ten microseconds at cohort p95 but does not explain the
+  zero/nonzero-evidence gap.
+- **Observed profiler evidence:** a 4,000-observation Windows GIL-held
+  32-birth profile assigns material time to four
+  `QueryThreadCycleTime` reads and generator/tuple/zip cycle-delta
+  bookkeeping. The latter is a narrow mechanically equivalent optimization
+  candidate. This profiler run is diagnostic, not a latency acceptance
+  measurement.
+- The preimplementation contract
+  `G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md` keeps all
+  work inside the current wall interval, retains both future endpoints,
+  diagnostics, GIL-held mode, GC, workers, and records, and forbids dropping
+  batch validation in this checkpoint.
+- **Authority:** performance contract only. No code, model, callback
+  coverage, future geometry, input, or action authority changes.

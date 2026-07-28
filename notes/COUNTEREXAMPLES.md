@@ -4862,3 +4862,51 @@ hypothesis rejected and observer isolated behind a separate explicit opt-in
   `9081e3ed9ea337016ecfd5fdf4cc8d2a17591b1416ec19060233ade6e3e6565b`.
 - **Authority:** Negative source/performance evidence only. No planner,
   recurrence, actuator, cadence, future geometry, or action authority changed.
+
+## CE-0162: Main-PC-only source coverage omits demonstrated auxiliary VMs and still loses Stage 5
+
+Status: observed physical source-topology, performance, and survival
+counterexample; ordinary inventory retained, main-only completeness rejected
+
+- **Observed workload:** Lunatic Stage-5 run `20260728_155426` completed
+  11,891 decisions over frames `1..41612` with 11 hits, hard no-Bomb,
+  `route_complete`, exact key release, and no residual process. The canonical
+  frame-2,390 nonspell contact and every later contact follow global viability
+  exhaustion.
+- **Main-VM observation:** All 11,891 schema-v11 rows validate. There are
+  138,255 valid main-VM rows, 64 unique PCs, zero invalid active VMs, 11,890
+  stable brackets, and one capture-spanned bracket. One unique affine base
+  maps 64/64 PCs to decoded Stage-5 ECL instruction boundaries.
+- **Direct source signal:** Twenty exact captured opcode-`0x60` to sequential
+  successor transitions align one-to-one with 20 activation batches containing
+  260 bullets. This falsifies treating the useful main-VM source class like
+  the zero-signal ready-parent scan.
+- **Completeness falsifier:** IDA observes opcode `0x87` allocating and
+  scheduling one of four heap auxiliary ECL contexts rooted at
+  `enemy+0x3384`. The trace contains 81 exact `0x87` advances, all compatible
+  with activation support, covering 105 batches and 1,520 bullets. Recording
+  only the main PC cannot be complete source coverage.
+- **Remaining source uncertainty:** Runtime ECL bytes are not keyed to the
+  decoded file, auxiliary context PCs are not captured, reachable fire paths
+  and operands are not independently lowered, slot reuse is not excluded,
+  and source candidates are not joined to hit slot generations. No hit-causal
+  coverage follows from the availability counts.
+- **Performance counterexample:** Inventory decode p50/p95/p99/max is
+  `0.1068/0.2384/0.3136/0.5379 ms`. Combined observer
+  p50/p95/p99/p99.9/max is
+  `0.1032/0.2029/0.3238/0.5339/1.7937 ms`: p99/max pass but p95 narrowly
+  misses the fixed `0.20 ms` limit. The instrumentation remains an explicit
+  action-free opt-in while decode/serialization are fused or moved off the
+  issue boundary.
+- **Correction:** Preserve the demonstrated source signal. First retain the
+  four auxiliary pointers from the already captured enemy blob, then contract
+  bounded post-issue context observation and exact immutable runtime ECL
+  identity. Unknown contexts enlarge unresolved coverage; they do not become
+  absent, safe, or losing.
+- **Evidence:** Source-join internal digest
+  `4c2ebf77be74340693c8962e81ce598422bb8c9d6012092eb3116f17151b3222`;
+  raw trace SHA-256
+  `8569d64d3ce50ced529bdcf4b48e8f0daa00bfbfa8d8cec9695665f04d0283a7`.
+- **Authority:** Source availability and negative completeness/performance/
+  survival evidence only. No future geometry, planner, recurrence, actuator,
+  cadence, feasibility, or live action authority changed.

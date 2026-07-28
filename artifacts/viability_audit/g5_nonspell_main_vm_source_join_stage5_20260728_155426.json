@@ -1,0 +1,1785 @@
+{
+  "authority": {
+    "direct_source_proof": false,
+    "hit_causal_coverage": "not_measured",
+    "live_guidance_authority": "none",
+    "role": "offline_trace_only_no_action_authority",
+    "runtime_instruction_identity": "unproved",
+    "source_availability": "static_affine_candidate"
+  },
+  "auxiliary_start_availability": {
+    "advance_diagnostics": {
+      "accepted_exact_sequential_advance": 81,
+      "epoch_discontinuity_pairs": 1,
+      "nonsequential_successor": 6,
+      "pending_instruction_row_transitions_examined": 1129,
+      "still_pending": 1018,
+      "unstable_capture": 24
+    },
+    "all_immediate_candidates_have_compatible_activation": true,
+    "compatible_activation_batches": 105,
+    "compatible_activation_bullets": 1520,
+    "event_samples": [
+      {
+        "decision_support": [
+          1550,
+          1552
+        ],
+        "enemy_pointer": 5777088,
+        "execution_support": [
+          1550,
+          1551
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          195,
+          196
+        ],
+        "opcode": 135,
+        "slot": 0,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          20,
+          22
+        ]
+      },
+      {
+        "decision_support": [
+          1560,
+          1563
+        ],
+        "enemy_pointer": 5798544,
+        "execution_support": [
+          1560,
+          1562
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          199,
+          200
+        ],
+        "opcode": 135,
+        "slot": 1,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          20,
+          23
+        ]
+      },
+      {
+        "decision_support": [
+          1569,
+          1571
+        ],
+        "enemy_pointer": 5820000,
+        "execution_support": [
+          1569,
+          1570
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          203,
+          204
+        ],
+        "opcode": 135,
+        "slot": 2,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          1579,
+          1581
+        ],
+        "enemy_pointer": 5841456,
+        "execution_support": [
+          1579,
+          1580
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          208,
+          209
+        ],
+        "opcode": 135,
+        "slot": 3,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          1590,
+          1593
+        ],
+        "enemy_pointer": 5862912,
+        "execution_support": [
+          1590,
+          1591
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          213,
+          214
+        ],
+        "opcode": 135,
+        "slot": 4,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          20,
+          22
+        ]
+      },
+      {
+        "decision_support": [
+          1599,
+          1601
+        ],
+        "enemy_pointer": 5884368,
+        "execution_support": [
+          1599,
+          1600
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          217,
+          218
+        ],
+        "opcode": 135,
+        "slot": 5,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          1610,
+          1612
+        ],
+        "enemy_pointer": 5905824,
+        "execution_support": [
+          1610,
+          1611
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          222,
+          223
+        ],
+        "opcode": 135,
+        "slot": 6,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          20,
+          22
+        ]
+      },
+      {
+        "decision_support": [
+          1819,
+          1821
+        ],
+        "enemy_pointer": 5777088,
+        "execution_support": [
+          1819,
+          1820
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          303,
+          304
+        ],
+        "opcode": 135,
+        "slot": 0,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          1829,
+          1831
+        ],
+        "enemy_pointer": 5798544,
+        "execution_support": [
+          1829,
+          1830
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          307,
+          308
+        ],
+        "opcode": 135,
+        "slot": 1,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          1839,
+          1841
+        ],
+        "enemy_pointer": 5820000,
+        "execution_support": [
+          1839,
+          1840
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          312,
+          313
+        ],
+        "opcode": 135,
+        "slot": 2,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          1849,
+          1851
+        ],
+        "enemy_pointer": 5841456,
+        "execution_support": [
+          1849,
+          1850
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          317,
+          318
+        ],
+        "opcode": 135,
+        "slot": 3,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          1861,
+          1863
+        ],
+        "enemy_pointer": 5862912,
+        "execution_support": [
+          1860,
+          1862
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          322,
+          323
+        ],
+        "opcode": 135,
+        "slot": 4,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          20,
+          23
+        ]
+      },
+      {
+        "decision_support": [
+          1870,
+          1872
+        ],
+        "enemy_pointer": 5884368,
+        "execution_support": [
+          1869,
+          1871
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          325,
+          326,
+          327
+        ],
+        "opcode": 135,
+        "slot": 5,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          22
+        ]
+      },
+      {
+        "decision_support": [
+          1879,
+          1881
+        ],
+        "enemy_pointer": 5905824,
+        "execution_support": [
+          1879,
+          1880
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          330,
+          331
+        ],
+        "opcode": 135,
+        "slot": 6,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          2069,
+          2072
+        ],
+        "enemy_pointer": 5777088,
+        "execution_support": [
+          2069,
+          2071
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          415,
+          416
+        ],
+        "opcode": 135,
+        "slot": 0,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          22
+        ]
+      },
+      {
+        "decision_support": [
+          2080,
+          2083
+        ],
+        "enemy_pointer": 5798544,
+        "execution_support": [
+          2080,
+          2082
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          420,
+          421
+        ],
+        "opcode": 135,
+        "slot": 1,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          20,
+          23
+        ]
+      },
+      {
+        "decision_support": [
+          2089,
+          2091
+        ],
+        "enemy_pointer": 5820000,
+        "execution_support": [
+          2089,
+          2090
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          424,
+          425
+        ],
+        "opcode": 135,
+        "slot": 2,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          2099,
+          2101
+        ],
+        "enemy_pointer": 6034560,
+        "execution_support": [
+          2098,
+          2100
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          428,
+          429
+        ],
+        "opcode": 135,
+        "slot": 12,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          18,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          2299,
+          2301
+        ],
+        "enemy_pointer": 5884368,
+        "execution_support": [
+          2299,
+          2300
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          513,
+          514
+        ],
+        "opcode": 135,
+        "slot": 5,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      },
+      {
+        "decision_support": [
+          2309,
+          2311
+        ],
+        "enemy_pointer": 5905824,
+        "execution_support": [
+          2309,
+          2310
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 20,
+        "matching_activation_batch_indices": [
+          518,
+          519
+        ],
+        "opcode": 135,
+        "slot": 6,
+        "source_pc": 186461416,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "static_target_subroutine": 30,
+        "successor_pc": 186461436,
+        "timer_elapsed": [
+          19,
+          21
+        ]
+      }
+    ],
+    "exact_sequential_start_advances": 81,
+    "immediate_candidates_with_compatible_activation": 81,
+    "immediate_fire_candidate_advances": 81,
+    "interpretation": "Static opcode 0x87 argument 1 selects a subroutine for a heap auxiliary VM. A contained time-zero fire instruction is availability evidence, not an interpreted reachable-path or runtime-byte proof.",
+    "observed_start_pcs": [
+      {
+        "file_offset": 11424,
+        "file_offset_hex": "0x2ca0",
+        "instruction_time": 20,
+        "main_subroutine_index": 29,
+        "observation_occurrences": 320,
+        "parameter_mask": 0,
+        "runtime_pc": 186461416,
+        "runtime_pc_hex": "0x0b1d2ce8",
+        "static_arguments": [
+          0,
+          30
+        ],
+        "static_target_subroutine": 30,
+        "target_fire_instructions": [
+          {
+            "file_offset": 11752,
+            "opcode": 97,
+            "parameter_mask": 80,
+            "time": 0
+          },
+          {
+            "file_offset": 11900,
+            "opcode": 97,
+            "parameter_mask": 80,
+            "time": 0
+          }
+        ]
+      },
+      {
+        "file_offset": 12096,
+        "file_offset_hex": "0x2f40",
+        "instruction_time": 20,
+        "main_subroutine_index": 31,
+        "observation_occurrences": 247,
+        "parameter_mask": 0,
+        "runtime_pc": 186462088,
+        "runtime_pc_hex": "0x0b1d2f88",
+        "static_arguments": [
+          0,
+          32
+        ],
+        "static_target_subroutine": 32,
+        "target_fire_instructions": [
+          {
+            "file_offset": 12464,
+            "opcode": 97,
+            "parameter_mask": 80,
+            "time": 0
+          },
+          {
+            "file_offset": 12652,
+            "opcode": 97,
+            "parameter_mask": 80,
+            "time": 0
+          }
+        ]
+      },
+      {
+        "file_offset": 22148,
+        "file_offset_hex": "0x5684",
+        "instruction_time": 60,
+        "main_subroutine_index": 55,
+        "observation_occurrences": 112,
+        "parameter_mask": 0,
+        "runtime_pc": 186472140,
+        "runtime_pc_hex": "0x0b1d56cc",
+        "static_arguments": [
+          0,
+          54
+        ],
+        "static_target_subroutine": 54,
+        "target_fire_instructions": [
+          {
+            "file_offset": 21804,
+            "opcode": 99,
+            "parameter_mask": 84,
+            "time": 0
+          },
+          {
+            "file_offset": 21924,
+            "opcode": 99,
+            "parameter_mask": 84,
+            "time": 2
+          }
+        ]
+      },
+      {
+        "file_offset": 23824,
+        "file_offset_hex": "0x5d10",
+        "instruction_time": 60,
+        "main_subroutine_index": 59,
+        "observation_occurrences": 162,
+        "parameter_mask": 0,
+        "runtime_pc": 186473816,
+        "runtime_pc_hex": "0x0b1d5d58",
+        "static_arguments": [
+          0,
+          57
+        ],
+        "static_target_subroutine": 57,
+        "target_fire_instructions": [
+          {
+            "file_offset": 23460,
+            "opcode": 96,
+            "parameter_mask": 80,
+            "time": 0
+          }
+        ]
+      },
+      {
+        "file_offset": 28820,
+        "file_offset_hex": "0x7094",
+        "instruction_time": 60,
+        "main_subroutine_index": 64,
+        "observation_occurrences": 288,
+        "parameter_mask": 0,
+        "runtime_pc": 186478812,
+        "runtime_pc_hex": "0x0b1d70dc",
+        "static_arguments": [
+          0,
+          65
+        ],
+        "static_target_subroutine": 65,
+        "target_fire_instructions": [
+          {
+            "file_offset": 28964,
+            "opcode": 99,
+            "parameter_mask": 70,
+            "time": 0
+          },
+          {
+            "file_offset": 29032,
+            "opcode": 99,
+            "parameter_mask": 70,
+            "time": 310
+          },
+          {
+            "file_offset": 29096,
+            "opcode": 96,
+            "parameter_mask": 0,
+            "time": 370
+          }
+        ]
+      }
+    ],
+    "start_advances_by_static_target": {
+      "30": 37,
+      "32": 28,
+      "54": 4,
+      "65": 12
+    },
+    "static_ida_semantics": {
+      "allocated_context_bytes": 9392,
+      "enemy_pointer_slots": "enemy+0x3384, four pointers",
+      "handler": "0x0041CDF3..0x0041CF81",
+      "local_state_offset_in_context": 560,
+      "opcode": "0x87",
+      "scheduler": "0x0041EBB6..0x0041EC7C",
+      "vm_offset_in_context": 8
+    }
+  },
+  "conclusion": {
+    "hypothesized": "The decoded file bytes equal the live runtime instruction bytes and the static fire operands exactly lower to the matched realized geometry.",
+    "inferred": "A unique complete affine address mapping plus one-to-one support overlap makes the ordinary main VM a strong direct source candidate for the matched 260 realized bullets. Observed opcode-0x87 advances also expose auxiliary-VM sources with immediate activation support.",
+    "next_gate": "Capture exact runtime instruction bytes under an immutable ECL image key, then independently lower opcode 0x60 operands and capture the four auxiliary-context PCs rooted at enemy+0x3384. Join predicted origin/template geometry to realized slots before granting source authority.",
+    "observed": "The physical trace contains stable ordinary-enemy VM PC/timer histories and exact captured PC advances. The decoded ECL file contains legal instruction boundaries and fire opcodes."
+  },
+  "direct_fire_availability": {
+    "advance_diagnostics": {
+      "accepted_exact_sequential_advance": 20,
+      "epoch_discontinuity_pairs": 1,
+      "pending_instruction_row_transitions_examined": 432,
+      "still_pending": 412
+    },
+    "exact_sequential_advances": 20,
+    "fire_opcode_range": [
+      "0x60",
+      "0x68"
+    ],
+    "nonspell_exact_sequential_advances": 20,
+    "observed_fire_pcs": [
+      {
+        "difficulty_mask": 255,
+        "file_offset": 688,
+        "file_offset_hex": "0x2b0",
+        "instruction_time": 50,
+        "observation_occurrences": 432,
+        "opcode": 96,
+        "parameter_mask": 24,
+        "runtime_pc": 186450680,
+        "runtime_pc_hex": "0x0b1d02f8",
+        "size": 44,
+        "static_arguments": [
+          393217,
+          1,
+          10000,
+          1176272896,
+          1065353216,
+          0,
+          0,
+          514
+        ],
+        "subroutine_index": 0
+      }
+    ]
+  },
+  "gates": {
+    "all_observed_pcs_have_unique_affine_static_mapping": true,
+    "auxiliary_start_pc_observed": true,
+    "direct_fire_pc_observed": true,
+    "direct_source_proof": false,
+    "every_fire_advance_has_compatible_activation": true,
+    "every_immediate_auxiliary_candidate_has_compatible_activation": true,
+    "exact_fire_operands_and_origin_lowered": false,
+    "exact_sequential_auxiliary_starts_observed": true,
+    "exact_sequential_fire_advances_observed": true,
+    "observation_compatible_slot_reuse_excluded": false,
+    "runtime_instruction_bytes_identical": false,
+    "strict_schema11_trace_available": true
+  },
+  "provenance": {
+    "ecl_bytes": 47224,
+    "ecl_file": "ecldata5.ecl",
+    "ecl_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "trace_bytes": 550904051,
+    "trace_lines": 23874,
+    "trace_sha256": "8569d64d3ce50ced529bdcf4b48e8f0daa00bfbfa8d8cec9695665f04d0283a7"
+  },
+  "realized_birth_join": {
+    "activation_batch_samples": [
+      {
+        "activation_support": [
+          1158,
+          1160
+        ],
+        "ages": {
+          "0": 12
+        },
+        "bullet_count": 12,
+        "decision_frame": 1161,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          0
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1168,
+          1171
+        ],
+        "ages": {
+          "0": 12
+        },
+        "bullet_count": 12,
+        "decision_frame": 1172,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          1
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1179,
+          1181
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1183,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          2
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1189,
+          1191
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1193,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          3
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1198,
+          1202
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1203,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          4
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1208,
+          1210
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1211,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          5
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1218,
+          1221
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1222,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          6
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1228,
+          1230
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1230,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          7
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1239,
+          1241
+        ],
+        "ages": {
+          "0": 14
+        },
+        "bullet_count": 14,
+        "decision_frame": 1243,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          8
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1248,
+          1250
+        ],
+        "ages": {
+          "0": 14
+        },
+        "bullet_count": 14,
+        "decision_frame": 1251,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          9
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1357,
+          1360
+        ],
+        "ages": {
+          "0": 12
+        },
+        "bullet_count": 12,
+        "decision_frame": 1361,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          10
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1368,
+          1370
+        ],
+        "ages": {
+          "0": 12
+        },
+        "bullet_count": 12,
+        "decision_frame": 1371,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          11
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1379,
+          1381
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1383,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          12
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1388,
+          1390
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1391,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          13
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1399,
+          1401
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1403,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          14
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1408,
+          1410
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1411,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          15
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1419,
+          1421
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1422,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          16
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1429,
+          1431
+        ],
+        "ages": {
+          "0": 13
+        },
+        "bullet_count": 13,
+        "decision_frame": 1432,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          17
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1438,
+          1440
+        ],
+        "ages": {
+          "0": 14
+        },
+        "bullet_count": 14,
+        "decision_frame": 1441,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          18
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      },
+      {
+        "activation_support": [
+          1447,
+          1450
+        ],
+        "ages": {
+          "0": 14
+        },
+        "bullet_count": 14,
+        "decision_frame": 1451,
+        "gameplay_epoch": 0,
+        "matching_fire_advance_indices": [
+          19
+        ],
+        "spell_id": null,
+        "stage_route_index": 5
+      }
+    ],
+    "activation_batches_with_compatible_event": 20,
+    "all_fire_advances_have_compatible_activation": true,
+    "all_matched_edges_one_to_one": true,
+    "compatible_activation_bullets": 260,
+    "event_samples": [
+      {
+        "decision_support": [
+          1158,
+          1161
+        ],
+        "enemy_pointer": 5777088,
+        "execution_support": [
+          1159,
+          1160
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          157
+        ],
+        "opcode": 96,
+        "slot": 0,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          51
+        ]
+      },
+      {
+        "decision_support": [
+          1170,
+          1172
+        ],
+        "enemy_pointer": 5798544,
+        "execution_support": [
+          1169,
+          1171
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          158
+        ],
+        "opcode": 96,
+        "slot": 1,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          52
+        ]
+      },
+      {
+        "decision_support": [
+          1180,
+          1183
+        ],
+        "enemy_pointer": 5820000,
+        "execution_support": [
+          1180,
+          1181
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          159
+        ],
+        "opcode": 96,
+        "slot": 2,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          50,
+          52
+        ]
+      },
+      {
+        "decision_support": [
+          1190,
+          1193
+        ],
+        "enemy_pointer": 5841456,
+        "execution_support": [
+          1190,
+          1191
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          160
+        ],
+        "opcode": 96,
+        "slot": 3,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          50,
+          52
+        ]
+      },
+      {
+        "decision_support": [
+          1200,
+          1203
+        ],
+        "enemy_pointer": 5862912,
+        "execution_support": [
+          1199,
+          1202
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          161
+        ],
+        "opcode": 96,
+        "slot": 4,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          53
+        ]
+      },
+      {
+        "decision_support": [
+          1209,
+          1211
+        ],
+        "enemy_pointer": 5884368,
+        "execution_support": [
+          1209,
+          1210
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          162
+        ],
+        "opcode": 96,
+        "slot": 5,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          51
+        ]
+      },
+      {
+        "decision_support": [
+          1220,
+          1222
+        ],
+        "enemy_pointer": 5905824,
+        "execution_support": [
+          1219,
+          1221
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          163
+        ],
+        "opcode": 96,
+        "slot": 6,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          52
+        ]
+      },
+      {
+        "decision_support": [
+          1229,
+          1230
+        ],
+        "enemy_pointer": 5927280,
+        "execution_support": [
+          1229,
+          1230
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          164
+        ],
+        "opcode": 96,
+        "slot": 7,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          51
+        ]
+      },
+      {
+        "decision_support": [
+          1240,
+          1243
+        ],
+        "enemy_pointer": 5948736,
+        "execution_support": [
+          1240,
+          1241
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          165
+        ],
+        "opcode": 96,
+        "slot": 8,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          50,
+          52
+        ]
+      },
+      {
+        "decision_support": [
+          1249,
+          1251
+        ],
+        "enemy_pointer": 5970192,
+        "execution_support": [
+          1249,
+          1250
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          166
+        ],
+        "opcode": 96,
+        "slot": 9,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          51
+        ]
+      },
+      {
+        "decision_support": [
+          1361,
+          1364
+        ],
+        "enemy_pointer": 5777088,
+        "execution_support": [
+          1360,
+          1362
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          177
+        ],
+        "opcode": 96,
+        "slot": 0,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          50,
+          53
+        ]
+      },
+      {
+        "decision_support": [
+          1369,
+          1371
+        ],
+        "enemy_pointer": 5798544,
+        "execution_support": [
+          1369,
+          1370
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          178
+        ],
+        "opcode": 96,
+        "slot": 1,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          51
+        ]
+      },
+      {
+        "decision_support": [
+          1380,
+          1383
+        ],
+        "enemy_pointer": 5820000,
+        "execution_support": [
+          1380,
+          1381
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          179
+        ],
+        "opcode": 96,
+        "slot": 2,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          50,
+          52
+        ]
+      },
+      {
+        "decision_support": [
+          1389,
+          1391
+        ],
+        "enemy_pointer": 5841456,
+        "execution_support": [
+          1389,
+          1390
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          180
+        ],
+        "opcode": 96,
+        "slot": 3,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          51
+        ]
+      },
+      {
+        "decision_support": [
+          1400,
+          1403
+        ],
+        "enemy_pointer": 5862912,
+        "execution_support": [
+          1400,
+          1401
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          181
+        ],
+        "opcode": 96,
+        "slot": 4,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          50,
+          52
+        ]
+      },
+      {
+        "decision_support": [
+          1409,
+          1411
+        ],
+        "enemy_pointer": 5884368,
+        "execution_support": [
+          1409,
+          1410
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          182
+        ],
+        "opcode": 96,
+        "slot": 5,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          51
+        ]
+      },
+      {
+        "decision_support": [
+          1420,
+          1422
+        ],
+        "enemy_pointer": 5905824,
+        "execution_support": [
+          1420,
+          1421
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          183
+        ],
+        "opcode": 96,
+        "slot": 6,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          50,
+          52
+        ]
+      },
+      {
+        "decision_support": [
+          1430,
+          1432
+        ],
+        "enemy_pointer": 5927280,
+        "execution_support": [
+          1430,
+          1431
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          184
+        ],
+        "opcode": 96,
+        "slot": 7,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          50,
+          52
+        ]
+      },
+      {
+        "decision_support": [
+          1439,
+          1441
+        ],
+        "enemy_pointer": 5948736,
+        "execution_support": [
+          1439,
+          1440
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          185
+        ],
+        "opcode": 96,
+        "slot": 8,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          49,
+          51
+        ]
+      },
+      {
+        "decision_support": [
+          1448,
+          1451
+        ],
+        "enemy_pointer": 5970192,
+        "execution_support": [
+          1448,
+          1450
+        ],
+        "gameplay_epoch": 0,
+        "instruction_time": 50,
+        "matching_activation_batch_indices": [
+          186
+        ],
+        "opcode": 96,
+        "slot": 9,
+        "source_pc": 186450680,
+        "spell_id": null,
+        "stage_route_index": 5,
+        "successor_pc": 186450724,
+        "timer_elapsed": [
+          48,
+          51
+        ]
+      }
+    ],
+    "events_with_compatible_activation": 20,
+    "join_rule": "same epoch/stage/spell scope and inclusive intersection between captured fire-PC advance support and activation support",
+    "one_to_one_event_batch_matches": 20
+  },
+  "report_digest": "4c2ebf77be74340693c8962e81ce598422bb8c9d6012092eb3116f17151b3222",
+  "schema": "th08-nonspell-main-vm-source-join-v1",
+  "static_pc_mapping": {
+    "interpretation": "runtime_pc == inferred_base + decoded_ecl_file_offset; exact boundaries do not prove live byte identity",
+    "mapped_opcode_occurrences": {
+      "0x01": 129140,
+      "0x04": 1,
+      "0x41": 4482,
+      "0x4a": 2849,
+      "0x5c": 222,
+      "0x60": 432,
+      "0x87": 1129
+    },
+    "mapped_pc_occurrences": 138255,
+    "mapped_unique_pcs": 64,
+    "runner_up_mapped_unique_pcs": 40,
+    "selected_base": 186449992,
+    "selected_base_hex": "0x0b1d0048",
+    "top_candidates": [
+      {
+        "base": 186449992,
+        "base_hex": "0x0b1d0048",
+        "mapped_unique_pcs": 64
+      },
+      {
+        "base": 186449968,
+        "base_hex": "0x0b1d0030",
+        "mapped_unique_pcs": 40
+      },
+      {
+        "base": 186449948,
+        "base_hex": "0x0b1d001c",
+        "mapped_unique_pcs": 31
+      },
+      {
+        "base": 186450012,
+        "base_hex": "0x0b1d005c",
+        "mapped_unique_pcs": 29
+      },
+      {
+        "base": 186450036,
+        "base_hex": "0x0b1d0074",
+        "mapped_unique_pcs": 26
+      },
+      {
+        "base": 186449488,
+        "base_hex": "0x0b1cfe50",
+        "mapped_unique_pcs": 25
+      },
+      {
+        "base": 186450052,
+        "base_hex": "0x0b1d0084",
+        "mapped_unique_pcs": 24
+      },
+      {
+        "base": 186450064,
+        "base_hex": "0x0b1d0090",
+        "mapped_unique_pcs": 24
+      },
+      {
+        "base": 186445696,
+        "base_hex": "0x0b1cef80",
+        "mapped_unique_pcs": 22
+      },
+      {
+        "base": 186447648,
+        "base_hex": "0x0b1cf720",
+        "mapped_unique_pcs": 22
+      },
+      {
+        "base": 186449820,
+        "base_hex": "0x0b1cff9c",
+        "mapped_unique_pcs": 22
+      },
+      {
+        "base": 186444604,
+        "base_hex": "0x0b1ceb3c",
+        "mapped_unique_pcs": 21
+      }
+    ],
+    "total_pc_occurrences": 138255,
+    "unique_complete_match": true,
+    "unique_observed_pcs": 64
+  },
+  "trace_scope": {
+    "activation_batches": 3832,
+    "activation_bullets": 84242,
+    "capture_spanned_inventory_rows": 1,
+    "invalid_active_vm_rows": 0,
+    "schema11_rows": 11891,
+    "stable_inventory_rows": 11890,
+    "vm_observation_rows": 138255
+  }
+}

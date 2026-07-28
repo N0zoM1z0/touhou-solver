@@ -486,9 +486,21 @@ comparison.
    only behind `--trace-derived-pattern-sources`; ordinary schema-v9 birth
    tracing pays no added scan. This is a rejected source strategy and
    performance boundary, not evidence against between-capture transforms.
-   Continue source coverage with ordinary nonspell enemy main VMs before
-   auxiliary/callback/native sources. Retain a fused scan as a candidate only
-   after a new source class demonstrates physical signal.
+   Ordinary main-VM phase A now demonstrates that signal on Stage 5. The
+   schema-v11 first-64 inventory reuses one existing enemy-prefix RPM. One
+   unique complete affine base maps all 64 observed PCs. Twenty exact
+   opcode-`0x60` advances align one-to-one with 260 realized bullets. More
+   importantly, IDA maps opcode `0x87` to four heap auxiliary VM contexts at
+   `enemy+0x3384`; 81 exact starts align with 105 activation batches and 1,520
+   bullets. Main-only source coverage is therefore structurally incomplete.
+   Retain the modular inventory/join as opt-in research instrumentation and
+   advance to exact runtime image identity plus bounded auxiliary-context
+   observation before callbacks/native sources. Runtime bytes, reachable-path
+   lowering, geometry, hit causality, and live authority remain unproved.
+   Physical combined-observer p95 narrowly misses at `0.2029 ms`, while
+   p99/max pass. Optimize this useful source path rather than rejecting it
+   solely on that small regression; never move unbounded cold reads into the
+   issue thread.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over
    4,871 callback rows; spell 115 remains fail-closed on 1,220

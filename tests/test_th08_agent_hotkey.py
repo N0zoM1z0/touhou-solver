@@ -101,6 +101,17 @@ class AgentHotkeyTests(unittest.TestCase):
         derived_parsed = build_parser().parse_args(derived_arguments)
         self.assertTrue(derived_parsed.trace_derived_pattern_sources)
 
+        main_vm_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_bullet_births=True,
+            trace_nonspell_main_vms=True,
+        )
+        main_vm_parsed = build_parser().parse_args(main_vm_arguments)
+        self.assertTrue(main_vm_parsed.trace_nonspell_main_vms)
+
         with self.assertRaisesRegex(ValueError, "requires"):
             build_long_run_arguments(
                 output=Path("trial.jsonl"),
@@ -108,6 +119,14 @@ class AgentHotkeyTests(unittest.TestCase):
                 pid=1234,
                 difficulty=3,
                 trace_derived_pattern_sources=True,
+            )
+        with self.assertRaisesRegex(ValueError, "requires"):
+            build_long_run_arguments(
+                output=Path("trial.jsonl"),
+                stop_file=Path("trial.stop"),
+                pid=1234,
+                difficulty=3,
+                trace_nonspell_main_vms=True,
             )
 
     def test_full_route_can_extend_the_worker_deadline(self) -> None:

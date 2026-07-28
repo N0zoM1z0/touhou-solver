@@ -13,9 +13,11 @@ from .bullet_birth import BulletBirthObservation
 from .bullet_birth_native import NATIVE_CALL_MODES
 from .birth_contention import BirthObserverContention
 from .derived_pattern_source import DerivedPatternSourceObservation
+from .enemy_ecl_inventory import EnemyMainEclVmInventory
 
 
 BULLET_BIRTH_TRACE_SCHEMA_VERSION = 10
+BULLET_BIRTH_MAIN_VM_TRACE_SCHEMA_VERSION = 11
 BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION = 9
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
@@ -52,6 +54,10 @@ class BulletBirthTraceInput:
     derived_source_error: str | None = None
     derived_source_ms: float = 0.0
     derived_source_diagnostics: dict[str, object] | None = None
+    nonspell_main_vm_inventory: EnemyMainEclVmInventory | None = None
+    enemy_prefix_frame_before: int | None = None
+    enemy_prefix_frame_after: int | None = None
+    enemy_prefix_capture_ms: float | None = None
 
 
 def birth_trace_requires_immediate_flush(
@@ -78,6 +84,9 @@ def build_bullet_birth_trace_record(
     derived_source_enabled = (
         derived_source is not None
         or trace_input.derived_source_error is not None
+    )
+    nonspell_main_vm_enabled = (
+        trace_input.nonspell_main_vm_inventory is not None
     )
     if (
         derived_source is not None
@@ -147,19 +156,28 @@ def build_bullet_birth_trace_record(
             "Python derived-source observation may not publish native diagnostics"
         )
     omitted_sources = [
-        "non_spell_enemy_main_vm",
         "child_enemy_or_auxiliary_vm",
         "callback_or_interrupt_source",
         "non_ecl_native_source",
     ]
+    if nonspell_main_vm_enabled:
+        omitted_sources.append(
+            "non_spell_enemy_main_vm_outside_first_64_or_instruction_semantics"
+        )
+    else:
+        omitted_sources.append("non_spell_enemy_main_vm")
     if trace_input.deferred_fire_state.active is None:
         omitted_sources.append("deferred_emission_runtime_state")
     record: dict[str, object] = {
         "kind": "bullet_birth_audit",
         "schema_version": (
-            BULLET_BIRTH_TRACE_SCHEMA_VERSION
-            if derived_source_enabled
-            else BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION
+            BULLET_BIRTH_MAIN_VM_TRACE_SCHEMA_VERSION
+            if nonspell_main_vm_enabled
+            else (
+                BULLET_BIRTH_TRACE_SCHEMA_VERSION
+                if derived_source_enabled
+                else BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION
+            )
         ),
         "role": BULLET_BIRTH_TRACE_ROLE,
         "observation_backend": trace_input.observation_backend,
@@ -173,6 +191,11 @@ def build_bullet_birth_trace_record(
         "scope": {
             "pool": BULLET_BIRTH_POOL_SCOPE,
             "intent": BULLET_BIRTH_INTENT_SCOPE,
+            "observed_sources": (
+                ["ordinary_enemy_pool_first_64_main_vm_state_only"]
+                if nonspell_main_vm_enabled
+                else []
+            ),
             "omitted_sources": omitted_sources,
         },
         "alignment": {
@@ -244,6 +267,27 @@ def build_bullet_birth_trace_record(
         )
         timing["combined_pool_observation"] = (
             trace_input.observation_ms + trace_input.derived_source_ms
+        )
+    if nonspell_main_vm_enabled:
+        inventory = trace_input.nonspell_main_vm_inventory
+        assert inventory is not None
+        counts = record["counts"]
+        timing = record["timing_ms"]
+        alignment = record["alignment"]
+        assert isinstance(counts, dict)
+        assert isinstance(timing, dict)
+        assert isinstance(alignment, dict)
+        record["nonspell_main_vm_inventory"] = inventory.record()
+        counts["active_ordinary_enemy_slots"] = inventory.active_slots
+        counts["valid_nonspell_main_vms"] = len(inventory.observations)
+        counts["invalid_nonspell_main_vms"] = len(inventory.invalid)
+        timing["nonspell_main_vm_decode"] = inventory.decode_ms
+        timing["enemy_prefix_capture"] = trace_input.enemy_prefix_capture_ms
+        alignment["enemy_prefix_frame_before"] = (
+            trace_input.enemy_prefix_frame_before
+        )
+        alignment["enemy_prefix_frame_after"] = (
+            trace_input.enemy_prefix_frame_after
         )
     return record
 

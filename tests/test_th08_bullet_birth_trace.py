@@ -15,6 +15,7 @@ from th08_ecl_birth import (
 from th08_live.birth_trace import (
     BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION,
     BULLET_BIRTH_INTENT_SCOPE,
+    BULLET_BIRTH_MAIN_VM_TRACE_SCHEMA_VERSION,
     BULLET_BIRTH_POOL_SCOPE,
     BULLET_BIRTH_TRACE_ROLE,
     BULLET_BIRTH_TRACE_SCHEMA_VERSION,
@@ -36,7 +37,12 @@ from th08_live.birth_contention import (
 from th08_live.derived_pattern_source import (
     DerivedPatternSourceObservation,
 )
+from th08_live.enemy_ecl_inventory import (
+    EnemyMainEclVmInventory,
+    EnemyMainEclVmObservation,
+)
 from th08_live.controller import _build_birth_trace_observers
+from th08_ecl_vm_state import EclVmLocalProjection
 
 
 def _trace_input(
@@ -276,6 +282,62 @@ class BulletBirthTraceTests(unittest.TestCase):
         self.assertIsNone(record["timing_ms"]["build"])
         self.assertIsNone(record["timing_ms"]["pre_emit_total"])
         self.assertEqual(record["timing_ms"]["previous_emit"], 0.012)
+
+    def test_nonspell_main_vm_inventory_uses_explicit_schema_v11(self) -> None:
+        inventory = EnemyMainEclVmInventory(
+            scanned_slots=64,
+            active_slots=1,
+            observations=(
+                EnemyMainEclVmObservation(
+                    slot=0,
+                    enemy_pointer=0x005826C0,
+                    enemy_flags=5,
+                    instruction_pointer=0x015A1234,
+                    timer_fraction_bits=0x3E800000,
+                    timer_elapsed=17,
+                    local_projection=EclVmLocalProjection(
+                        tuple(range(8)),
+                        tuple(0x3F800000 + index for index in range(8)),
+                        (101, 102, 103, 104),
+                    ),
+                ),
+            ),
+            invalid=(),
+            decode_ms=0.025,
+        )
+        record = build_bullet_birth_trace_record(
+            replace(
+                _trace_input(observation=_observation()),
+                nonspell_main_vm_inventory=inventory,
+                enemy_prefix_frame_before=116,
+                enemy_prefix_frame_after=116,
+                enemy_prefix_capture_ms=0.35,
+            )
+        )
+        self.assertEqual(
+            record["schema_version"],
+            BULLET_BIRTH_MAIN_VM_TRACE_SCHEMA_VERSION,
+        )
+        self.assertEqual(
+            record["counts"]["valid_nonspell_main_vms"],
+            1,
+        )
+        self.assertEqual(
+            record["alignment"]["enemy_prefix_frame_before"],
+            116,
+        )
+        self.assertEqual(
+            record["timing_ms"]["nonspell_main_vm_decode"],
+            0.025,
+        )
+        self.assertIn(
+            "ordinary_enemy_pool_first_64_main_vm_state_only",
+            record["scope"]["observed_sources"],
+        )
+        self.assertIn(
+            "non_spell_enemy_main_vm_outside_first_64_or_instruction_semantics",
+            record["scope"]["omitted_sources"],
+        )
 
     def test_native_schema_requires_explicit_reconciled_diagnostics(self) -> None:
         observation = _observation()

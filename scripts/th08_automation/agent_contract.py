@@ -61,6 +61,7 @@ def build_long_run_arguments(
     trace_transform_runtime: bool = False,
     trace_bullet_births: bool = False,
     trace_derived_pattern_sources: bool = False,
+    trace_nonspell_main_vms: bool = False,
     bullet_birth_backend: str = "python",
     bullet_birth_native_call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
     safety_value_horizon: int = 0,
@@ -100,6 +101,10 @@ def build_long_run_arguments(
     if trace_derived_pattern_sources and not trace_bullet_births:
         raise ValueError(
             "derived-pattern source tracing requires bullet-birth tracing"
+        )
+    if trace_nonspell_main_vms and not trace_bullet_births:
+        raise ValueError(
+            "nonspell main-VM tracing requires bullet-birth tracing"
         )
     arguments = [
         str(output),
@@ -144,6 +149,8 @@ def build_long_run_arguments(
         )
     if trace_derived_pattern_sources:
         arguments.append("--trace-derived-pattern-sources")
+    if trace_nonspell_main_vms:
+        arguments.append("--trace-nonspell-main-vms")
     if safety_value_horizon:
         arguments.extend(
             ("--safety-value-horizon", str(safety_value_horizon))

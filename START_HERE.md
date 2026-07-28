@@ -37,7 +37,9 @@ and design/run notes retain derivations and history.
 27. `notes/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`
 28. `notes/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
 29. `notes/G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`
-29. the relevant recent run note and counterexample rows before live work
+30. `notes/G5_NONSPELL_MAIN_VM_SOURCE_SHADOW_CONTRACT_20260728.md`
+31. `notes/G5_NONSPELL_MAIN_VM_STAGE5_RESULT_20260728.md`
+32. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -46,6 +48,30 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
+- The first-64 ordinary-enemy main-VM phase-A checkpoint is complete. The
+  opt-in schema-v11 decoder reuses the existing contiguous enemy-prefix blob
+  and issues no added enemy-pool RPM. Retained Stage-5 run
+  `20260728_155426` completed 11,891 decisions over frames `1..41612` with
+  11 hits, hard no-Bomb, `route_complete`, exact cleanup, and no residual
+  process. It has 11,890 stable brackets, one capture-spanned bracket,
+  138,255 valid VM rows, zero invalid active VMs, and 64 unique PCs.
+  Physical decode p50/p95/p99/max is
+  `0.1068/0.2384/0.3136/0.5379 ms`; combined observer p95 is
+  `0.2029 ms`, narrowly failing the fixed `0.20 ms` limit while p99/max pass.
+  This useful signal remains explicit opt-in and action-free rather than being
+  rejected solely for the small performance miss.
+- The modular offline join finds one unique complete affine mapping,
+  `runtime_pc = 0x0B1D0048 + ecldata5_file_offset`, for all 64 PCs. Twenty
+  exact captured opcode-`0x60` advances align one-to-one with 20 activation
+  batches containing 260 bullets. IDA additionally proves that opcode `0x87`
+  allocates one of four auxiliary VM contexts rooted at `enemy+0x3384` and
+  schedules it after the main VM. The trace has 81 exact `0x87` advances;
+  all align with activation support, covering 105 batches and 1,520 bullets.
+  Runtime byte identity, exact operand/geometry lowering, slot-reuse
+  exclusion, and hit causality remain unproved. CE-0162 makes exact runtime
+  ECL identity plus bounded auxiliary-context observation the next source
+  gate. The source-join report digest is `4c2ebf77...b3222`; raw SHA-256 is
+  `8569d64d...3a7`.
 - The G5 realized birth-to-hit gate is complete and action-free. Its modular
   streaming audit joins all 15 Stage-5 `124930` dossier candidates to exact
   native decision epochs and same-epoch slot generations. Four candidates are
@@ -76,12 +102,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `a08f1370...c9bda` / `9081e3ed...565b`.
   Isolated Linux/Windows source reports pass, native libraries build for both
   targets, and complete Linux/Windows discovery passes 889 tests.
-- The next G5 source contract starts with ordinary nonspell enemy main VMs.
-  Only after that class is falsified should work proceed to auxiliary VMs,
-  callbacks/interrupts, deferred enemy state, and non-ECL native sources.
-  Do not fuse or publish the zero-signal ready-parent class. Earlier
-  viability preservation under CE-0158 and general performance attribution
-  remain parallel work; roadmap candidates are not a ceiling.
+- The next G5 source checkpoint observes the four auxiliary VM contexts
+  already demonstrated by ordinary main opcode `0x87`, and establishes exact
+  runtime ECL image identity. First retain their pointers from the already
+  paid enemy blob, then contract bounded post-issue context reads or a
+  versioned background service. Do not fuse or publish the zero-signal
+  ready-parent class. Callbacks, deferred enemy state, sources outside the
+  first 64 records, and non-ECL native sources remain later unresolved
+  classes. Earlier viability preservation under CE-0158 and general
+  performance work continue in parallel; roadmap candidates are not a ceiling.
 - The latest harder-workload physical checkpoint is
   `lunatic_route2_stage5_unattended_20260728_133633`. It completed 13,304
   decisions over frames `1..44822` with 23 hits, hard no-Bomb, two successful

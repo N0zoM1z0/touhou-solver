@@ -1,0 +1,47 @@
+{
+  "authority": "offline_performance_only",
+  "fixture": {
+    "active_slots": 16,
+    "blob_bytes": 1373184,
+    "canonical_record_bytes": 2715,
+    "canonical_record_sha256": "aa8d425a2264396e8e10de93283539667e84cbde67c09a802a0a25079f9cdd70",
+    "invalid_active_vms": 2,
+    "scanned_slots": 64,
+    "valid_vms": 14
+  },
+  "iterations": 20000,
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.13.5",
+  "schema": "th08-enemy-main-ecl-vm-inventory-benchmark-v1",
+  "timing_ms": {
+    "body_decode_baseline": {
+      "max": 0.395558,
+      "p50": 0.0476365,
+      "p95": 0.0567121,
+      "p99": 0.07166568999999973,
+      "p99_9": 0.09821063500000013
+    },
+    "combined_body_and_vm_decode": {
+      "max": 0.5068790000000001,
+      "p50": 0.12679,
+      "p95": 0.15065574999999998,
+      "p99": 0.1742551599999998,
+      "p99_9": 0.25117593900000124
+    },
+    "inventory_json_build": {
+      "max": 0.356147,
+      "p50": 0.0339375,
+      "p95": 0.040837,
+      "p99": 0.05349529999999995,
+      "p99_9": 0.0861754810000003
+    },
+    "main_vm_inventory_increment": {
+      "max": 0.43093,
+      "p50": 0.07882549999999999,
+      "p95": 0.09468315000000001,
+      "p99": 0.11522874999999988,
+      "p99_9": 0.1691572990000011
+    }
+  },
+  "warmup": 1000
+}

@@ -7927,3 +7927,65 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   strategy. Do not spend a fused scan on a zero-signal class. Follow the
   contract stop order, beginning with ordinary nonspell enemy main VMs, while
   continuing viability-preservation and general performance work.
+
+## 2026-07-28 — Found ordinary main and auxiliary VM source signal physically
+
+- Contracted and implemented the opt-in first-64 ordinary-enemy main-VM
+  inventory. It reuses the existing one-blob enemy-prefix capture, retains
+  PC/timer/raw local bits, makes invalid active VMs explicit, adds no
+  enemy-pool RPM, and leaves ordinary birth tracing unchanged unless
+  `--trace-nonspell-main-vms` is selected.
+- Split the offline join under `scripts/analysis/main_vm_source_join/` into
+  strict trace scanning, static ECL mapping, exact captured PC advances, and
+  evidence/authority reporting. Deterministic tests cover unique/ambiguous
+  base inference, exact/nonsequential advances, schema support, provenance,
+  and fail-closed decision joins.
+- Retained 20,000-iteration Linux/Windows benchmarks. Inventory increment
+  p95 is `0.0947/0.1109 ms`; combined body/inventory p95 is
+  `0.1507/0.1795 ms`; canonical JSON p95 is `0.0408/0.0503 ms`. The 2,715-byte
+  canonical record digest agrees across platforms at
+  `aa8d425a2264396e8e10de93283539667e84cbde67c09a802a0a25079f9cdd70`.
+- **Observed physical workload:** Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_155426` completed frames
+  `1..41612`, 11,891 decisions, 11 hits, hard no-Bomb, `route_complete`,
+  exact key release, supervisor exit zero, and no residual process. All hits
+  follow global viability exhaustion.
+- All 11,891 schema-v11 rows validate: 11,890 stable brackets, one spanned
+  bracket, 138,255 valid VM rows, zero invalid active VMs, and 64 unique PCs.
+  Physical decode p50/p95/p99/max is
+  `0.1068/0.2384/0.3136/0.5379 ms`. Combined observer
+  p50/p95/p99/p99.9/max is
+  `0.1032/0.2029/0.3238/0.5339/1.7937 ms`; p95 misses by about
+  `0.0029 ms` while p99/max pass.
+- **Observed/inferred direct source:** One unique complete affine base
+  `0x0B1D0048` maps all 64 PCs and all 138,255 observations to decoded
+  Stage-5 instruction boundaries; the runner-up maps 40 PCs. The physical
+  trace has 20 exact opcode-`0x60` advances, each with one compatible
+  activation batch, totalling 260 bullets. Static-file/runtime-byte identity
+  remains unproved.
+- **Observed IDA auxiliary topology:** Opcode `0x87` at
+  `0x0041CDF3..0x0041CF81` replaces one of four `enemy+0x3384` heap contexts,
+  allocates `0x24B0` bytes, starts the auxiliary VM at `+0x08`, and the
+  scheduler at `0x0041EBB6..0x0041EC7C` selects VM `+0x08` and locals
+  `+0x230`. Comments were added at `0x0041CDF3`, `0x0041CF59`, and
+  `0x0041EBE9`.
+- **Inferred auxiliary source availability:** Five physical opcode-`0x87`
+  PCs select static subroutines 30/32/54/57/65. There are 81 exact captured
+  starts, all compatible with activation support, covering 105 unique batches
+  and 1,520 bullets. Exact runtime bytes, reachable paths, operands, geometry,
+  slot reuse, and hit causality remain unresolved.
+- The strict source report regenerates with internal digest
+  `4c2ebf77be74340693c8962e81ce598422bb8c9d6012092eb3116f17151b3222`;
+  its pretty file SHA-256 is
+  `cb4e90caa6aa0a9afb2129e78ea830169148b46dad9d7c29866a5b662ca46dc8`;
+  raw trace SHA-256 is
+  `8569d64d3ce50ced529bdcf4b48e8f0daa00bfbfa8d8cec9695665f04d0283a7`.
+- Focused Ruff passes. Complete Linux/Windows discovery both pass 904 tests;
+  Windows retains three existing skips. Repo-wide Ruff reports 33 pre-existing
+  findings in unrelated legacy shims/tests, so the checkpoint records focused
+  lint rather than mutating unrelated user code.
+- **Decision:** Record CE-0162. Retain and optimize the useful opt-in
+  inventory rather than rejecting it for the narrow p95 miss. Contract exact
+  runtime ECL identity and bounded auxiliary-context capture next, beginning
+  with the four pointers already present in the paid enemy blob. No live
+  source, future geometry, feasibility, or action authority is granted.

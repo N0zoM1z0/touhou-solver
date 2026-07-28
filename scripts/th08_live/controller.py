@@ -1388,6 +1388,13 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
             "derived-pattern source tracing requires bullet-birth tracing"
         )
     if (
+        getattr(args, "trace_nonspell_main_vms", False)
+        and not getattr(args, "trace_bullet_births", False)
+    ):
+        raise ValueError(
+            "nonspell main-VM tracing requires bullet-birth tracing"
+        )
+    if (
         args.stage_transition_timeout <= 0.0
         or args.terminal_inactive_grace <= 0.0
     ):
@@ -1533,6 +1540,9 @@ def _run_live_session(
     )
     trace_derived_pattern_sources = bool(
         getattr(args, "trace_derived_pattern_sources", False)
+    )
+    trace_nonspell_main_vms = bool(
+        getattr(args, "trace_nonspell_main_vms", False)
     )
     bullet_birth_backend = getattr(
         args,
@@ -2399,7 +2409,8 @@ def _run_live_session(
             ) * 1000.0
             enemy_prefix_capture_started = time.perf_counter()
             enemy_prefix_snapshot = capture_enemy_pool_prefix_contiguous(
-                reader
+                reader,
+                include_main_ecl_vms=trace_nonspell_main_vms,
             )
             enemy_prefix_capture_ms = (
                 time.perf_counter() - enemy_prefix_capture_started
@@ -3877,6 +3888,18 @@ def _run_live_session(
                             derived_source_diagnostics=(
                                 derived_source_diagnostics
                             ),
+                            nonspell_main_vm_inventory=(
+                                enemy_prefix_snapshot.main_ecl_vm_inventory
+                            ),
+                            enemy_prefix_frame_before=(
+                                enemy_prefix_snapshot.frame_before
+                            ),
+                            enemy_prefix_frame_after=(
+                                enemy_prefix_snapshot.frame_after
+                            ),
+                            enemy_prefix_capture_ms=(
+                                enemy_prefix_capture_ms
+                            ),
                     )
                 )
                 birth_trace_build_ms = (
@@ -4558,6 +4581,15 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "add the failed-gate ready-parent transform shadow to an "
             "explicit bullet-birth trace; diagnostic only"
+        ),
+    )
+    parser.add_argument(
+        "--trace-nonspell-main-vms",
+        action="store_true",
+        help=(
+            "decode first-64 ordinary-enemy main VMs from the existing "
+            "prefix capture into an explicit bullet-birth trace; "
+            "diagnostic only, no instruction reads"
         ),
     )
     parser.add_argument(

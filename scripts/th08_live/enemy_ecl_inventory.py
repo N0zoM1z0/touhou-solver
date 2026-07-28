@@ -1,0 +1,195 @@
+"""Compact main-ECL VM inventory decoded from an existing enemy-pool blob."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+import struct
+import time
+from typing import Callable
+
+from th08_ecl_runtime import (
+    ECL_VM_SNAPSHOT_SIZE,
+    ECL_VM_TIMER_ELAPSED_OFFSET,
+    ECL_VM_TIMER_FRACTION_OFFSET,
+    ENEMY_MAIN_ECL_VM_OFFSET,
+)
+from th08_ecl_vm_state import (
+    ECL_VM_LOCAL_PROJECTION_LAYOUT,
+    EclVmLocalProjection,
+)
+
+
+ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT = (
+    "th08-enemy-main-ecl-vm-inventory-v1"
+)
+MINIMUM_RUNTIME_ECL_ADDRESS = 0x00010000
+MAXIMUM_RUNTIME_ECL_ADDRESS = 0x7FFFFFFF
+
+
+@dataclass(frozen=True, slots=True)
+class EnemyMainEclVmObservation:
+    """Exact capture-time state for one initialized active enemy main VM."""
+
+    slot: int
+    enemy_pointer: int
+    enemy_flags: int
+    instruction_pointer: int
+    timer_fraction_bits: int
+    timer_elapsed: int
+    local_projection: EclVmLocalProjection
+
+    def record(self) -> list[object]:
+        """Serialize one fixed-position row without repeated field names."""
+
+        return [
+            self.slot,
+            self.enemy_pointer,
+            self.enemy_flags,
+            self.instruction_pointer,
+            self.timer_fraction_bits,
+            self.timer_elapsed,
+            list(self.local_projection.integer_locals),
+            list(self.local_projection.float_local_bits),
+            list(self.local_projection.scratch_integers),
+        ]
+
+
+@dataclass(frozen=True, slots=True)
+class InvalidEnemyMainEclVmObservation:
+    """An active enemy slot whose main VM is not initialized or is invalid."""
+
+    slot: int
+    enemy_pointer: int
+    enemy_flags: int
+    instruction_pointer: int
+
+    def record(self) -> list[int]:
+        return [
+            self.slot,
+            self.enemy_pointer,
+            self.enemy_flags,
+            self.instruction_pointer,
+        ]
+
+
+@dataclass(frozen=True, slots=True)
+class EnemyMainEclVmInventory:
+    """Bounded first-prefix main-VM observation with explicit omissions."""
+
+    scanned_slots: int
+    active_slots: int
+    observations: tuple[EnemyMainEclVmObservation, ...]
+    invalid: tuple[InvalidEnemyMainEclVmObservation, ...]
+    decode_ms: float
+
+    def record(self) -> dict[str, object]:
+        return {
+            "layout": ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT,
+            "vm_local_layout": ECL_VM_LOCAL_PROJECTION_LAYOUT,
+            "scope": "ordinary_enemy_pool_prefix_main_vm_only",
+            "scanned_slots": self.scanned_slots,
+            "active_slots": self.active_slots,
+            "valid_vms": len(self.observations),
+            "invalid_active_vms": len(self.invalid),
+            "rows": [observation.record() for observation in self.observations],
+            "invalid_rows": [observation.record() for observation in self.invalid],
+            "decode_ms": self.decode_ms,
+        }
+
+
+def decode_enemy_main_ecl_vm_inventory(
+    blob: bytes,
+    *,
+    pool_base: int,
+    pool_size: int,
+    enemy_stride: int,
+    enemy_flags_offset: int,
+    enemy_active_flag: int,
+    clock: Callable[[], float] = time.perf_counter,
+) -> EnemyMainEclVmInventory:
+    """Decode active main VMs without issuing any process-memory read."""
+
+    if pool_base <= 0:
+        raise ValueError("enemy pool base must be positive")
+    if pool_size < 0:
+        raise ValueError("enemy pool size must be non-negative")
+    if enemy_stride <= 0:
+        raise ValueError("enemy stride must be positive")
+    if not 0 <= enemy_flags_offset <= enemy_stride - 4:
+        raise ValueError("enemy flags offset must belong to one record")
+    if not enemy_active_flag:
+        raise ValueError("enemy active flag must be non-zero")
+    if ENEMY_MAIN_ECL_VM_OFFSET + ECL_VM_SNAPSHOT_SIZE > enemy_stride:
+        raise ValueError("main ECL VM prefix exceeds one enemy record")
+    expected_size = pool_size * enemy_stride
+    if len(blob) < expected_size:
+        raise ValueError(f"enemy pool prefix requires {expected_size} bytes")
+
+    started = clock()
+    observations: list[EnemyMainEclVmObservation] = []
+    invalid: list[InvalidEnemyMainEclVmObservation] = []
+    active_slots = 0
+    for slot in range(pool_size):
+        record_base = slot * enemy_stride
+        enemy_flags = struct.unpack_from(
+            "<I",
+            blob,
+            record_base + enemy_flags_offset,
+        )[0]
+        if not enemy_flags & enemy_active_flag:
+            continue
+        active_slots += 1
+        enemy_pointer = pool_base + record_base
+        vm_base = record_base + ENEMY_MAIN_ECL_VM_OFFSET
+        instruction_pointer = struct.unpack_from("<I", blob, vm_base)[0]
+        if not (
+            MINIMUM_RUNTIME_ECL_ADDRESS
+            <= instruction_pointer
+            <= MAXIMUM_RUNTIME_ECL_ADDRESS
+        ):
+            invalid.append(
+                InvalidEnemyMainEclVmObservation(
+                    slot,
+                    enemy_pointer,
+                    enemy_flags,
+                    instruction_pointer,
+                )
+            )
+            continue
+        vm = blob[vm_base : vm_base + ECL_VM_SNAPSHOT_SIZE]
+        observations.append(
+            EnemyMainEclVmObservation(
+                slot=slot,
+                enemy_pointer=enemy_pointer,
+                enemy_flags=enemy_flags,
+                instruction_pointer=instruction_pointer,
+                timer_fraction_bits=struct.unpack_from(
+                    "<I",
+                    vm,
+                    ECL_VM_TIMER_FRACTION_OFFSET,
+                )[0],
+                timer_elapsed=struct.unpack_from(
+                    "<i",
+                    vm,
+                    ECL_VM_TIMER_ELAPSED_OFFSET,
+                )[0],
+                local_projection=EclVmLocalProjection.from_vm_bytes(vm),
+            )
+        )
+    decode_ms = (clock() - started) * 1000.0
+    return EnemyMainEclVmInventory(
+        scanned_slots=pool_size,
+        active_slots=active_slots,
+        observations=tuple(observations),
+        invalid=tuple(invalid),
+        decode_ms=decode_ms,
+    )
+
+
+__all__ = [
+    "ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT",
+    "EnemyMainEclVmInventory",
+    "EnemyMainEclVmObservation",
+    "InvalidEnemyMainEclVmObservation",
+    "decode_enemy_main_ecl_vm_inventory",
+]

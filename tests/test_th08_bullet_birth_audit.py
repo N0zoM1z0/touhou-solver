@@ -279,6 +279,44 @@ def _audit(
         record["timing_ms"]["derived_source_observation"] = 0.01
         record["timing_ms"]["combined_pool_observation"] = 0.04
         record["timing_ms"]["pre_emit_total"] = 0.10
+    if schema_version >= 11:
+        record["scope"]["observed_sources"] = [
+            "ordinary_enemy_pool_first_64_main_vm_state_only"
+        ]
+        record["scope"]["omitted_sources"] = [
+            "non_spell_enemy_main_vm_outside_first_64_or_instruction_semantics"
+        ]
+        record["alignment"]["enemy_prefix_frame_before"] = frame
+        record["alignment"]["enemy_prefix_frame_after"] = frame
+        record["counts"]["active_ordinary_enemy_slots"] = 1
+        record["counts"]["valid_nonspell_main_vms"] = 1
+        record["counts"]["invalid_nonspell_main_vms"] = 0
+        record["nonspell_main_vm_inventory"] = {
+            "layout": "th08-enemy-main-ecl-vm-inventory-v1",
+            "vm_local_layout": "th08-ecl-vm-local-projection-v1",
+            "scope": "ordinary_enemy_pool_prefix_main_vm_only",
+            "scanned_slots": 64,
+            "active_slots": 1,
+            "valid_vms": 1,
+            "invalid_active_vms": 0,
+            "rows": [
+                [
+                    0,
+                    0x005826C0,
+                    5,
+                    0x015A0000 + frame,
+                    0x3E800000,
+                    frame,
+                    list(range(8)),
+                    [0x3F800000] * 8,
+                    [1, 2, 3, 4],
+                ]
+            ],
+            "invalid_rows": [],
+            "decode_ms": 0.02,
+        }
+        record["timing_ms"]["nonspell_main_vm_decode"] = 0.02
+        record["timing_ms"]["enemy_prefix_capture"] = 0.30
     return record
 
 
@@ -846,6 +884,35 @@ class BulletBirthAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 BulletBirthAuditError,
                 "derived-source observation",
+            ):
+                analyze_trace(trace)
+
+    def test_schema_v11_validates_and_reports_main_vm_inventory(self) -> None:
+        with TemporaryDirectory() as directory:
+            trace = self._trace(directory, schema_version=11)
+            report = analyze_trace(trace)
+            inventory = report["nonspell_main_vm_inventory"]
+            self.assertEqual(inventory["schema_v11_rows"], 4)
+            self.assertEqual(inventory["active_slots_per_row"]["p95"], 1.0)
+            self.assertEqual(inventory["valid_vms_per_row"]["p95"], 1.0)
+            self.assertEqual(inventory["invalid_active_vms_per_row"]["max"], 0.0)
+            self.assertEqual(inventory["stability"], {"stable": 4})
+            self.assertEqual(inventory["decode_ms"]["p95"], 0.02)
+            self.assertEqual(inventory["enemy_prefix_capture_ms"]["p95"], 0.3)
+            self.assertEqual(inventory["source_proof"], "none")
+
+            records = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            records[0]["nonspell_main_vm_inventory"]["rows"][0][1] += 4
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "main-VM identity",
             ):
                 analyze_trace(trace)
 

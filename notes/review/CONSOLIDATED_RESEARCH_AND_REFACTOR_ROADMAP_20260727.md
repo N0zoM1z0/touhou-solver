@@ -1296,6 +1296,25 @@ parity 當成每個 nature tie field 的逐 bit equality。
   birth failure, future coverage, a containing envelope, or action authority.
   Earlier viability preservation and the still-open Stage-4A B4 maximum
   performance gate continue in parallel;
+- the first ready-derived-parent source hypothesis is physically rejected.
+  Stage-5 run `20260728_150827` reproduced the target two-age waves but all
+  11,801 source rows contain zero ready parents, and the separate second scan
+  fails the combined p95/p99/max budget. Keep it isolated and do not optimize
+  a zero-signal source class into production;
+- ordinary main-VM phase A is now physically complete on retained Stage-5 run
+  `20260728_155426`. Its schema-v11 inventory is modular, reuses the existing
+  first-64 enemy blob, and performs no added pool RPM. All 64 unique physical
+  PCs share one complete affine mapping to decoded Stage-5 ECL boundaries.
+  Twenty exact direct-fire PC advances align one-to-one with 260 realized
+  bullets. IDA and 81 exact opcode-`0x87` advances expose the higher-value
+  missing topology: four auxiliary VM contexts rooted at `enemy+0x3384`,
+  whose immediate availability overlaps 105 activation batches and 1,520
+  bullets. This is strong source availability, not runtime-byte, reachable
+  path, geometry, or hit proof. Combined observer p95 is `0.2029 ms`, a
+  narrow physical miss to optimize rather than a reason to discard the
+  capability. Next retain auxiliary pointers from the already-paid blob,
+  contract bounded context capture, and key exact runtime instructions by an
+  immutable ECL image before any live lowering;
 - the projection audit now has an explicit universal `core` profile and keeps
   Stage-4A-only spell gates as its default. Stage 5 passes all core gates over
   4,871 rows while retaining 1,220 spell-115 unsupported-control rows as

@@ -211,6 +211,7 @@ def run_trial(
         "trace_derived_pattern_sources": (
             args.trace_derived_pattern_sources
         ),
+        "trace_nonspell_main_vms": args.trace_nonspell_main_vms,
         "bullet_birth_backend": args.bullet_birth_backend,
         "bullet_birth_native_call_mode": (
             args.bullet_birth_native_call_mode
@@ -254,6 +255,7 @@ def run_trial(
             trace_derived_pattern_sources=(
                 args.trace_derived_pattern_sources
             ),
+            trace_nonspell_main_vms=args.trace_nonspell_main_vms,
             bullet_birth_backend=args.bullet_birth_backend,
             bullet_birth_native_call_mode=(
                 args.bullet_birth_native_call_mode
@@ -568,6 +570,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "add the failed-gate ready-parent transform shadow to an "
             "explicit bullet-birth trace; diagnostic only"
+        ),
+    )
+    parser.add_argument(
+        "--trace-nonspell-main-vms",
+        action="store_true",
+        help=(
+            "record first-64 ordinary-enemy main-VM state from the existing "
+            "prefix capture; diagnostic only"
         ),
     )
     parser.add_argument(

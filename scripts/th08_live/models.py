@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, replace
-from typing import Iterator
+from typing import TYPE_CHECKING, Iterator
 
 import numpy as np
 
@@ -13,6 +13,9 @@ from th08_bullet_transform_model import (
     TransformRecord,
 )
 from touhou_control.trajectory import VelocityChange
+
+if TYPE_CHECKING:
+    from th08_live.enemy_ecl_inventory import EnemyMainEclVmInventory
 
 
 ENEMY_MAX_OBSERVED_WORLD_SPEED = 32.0
@@ -208,6 +211,7 @@ class EnemyPoolSnapshot:
     bodies: tuple[EnemyBody, ...]
     read_ms: float
     attempts: int = 1
+    main_ecl_vm_inventory: EnemyMainEclVmInventory | None = None
 
     @property
     def stable(self) -> bool:

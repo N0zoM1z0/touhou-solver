@@ -68,6 +68,7 @@ class AgentHotkey:
         trace_transform_runtime: bool = False,
         trace_bullet_births: bool = False,
         trace_derived_pattern_sources: bool = False,
+        trace_nonspell_main_vms: bool = False,
         bullet_birth_backend: str = "python",
         bullet_birth_native_call_mode: str = (
             NATIVE_CALL_MODE_GIL_RELEASED
@@ -138,6 +139,7 @@ class AgentHotkey:
         self.trace_transform_runtime = trace_transform_runtime
         self.trace_bullet_births = trace_bullet_births
         self.trace_derived_pattern_sources = trace_derived_pattern_sources
+        self.trace_nonspell_main_vms = trace_nonspell_main_vms
         self.bullet_birth_backend = bullet_birth_backend
         self.bullet_birth_native_call_mode = bullet_birth_native_call_mode
         self.safety_value_horizon = safety_value_horizon
@@ -292,6 +294,7 @@ class AgentHotkey:
                 trace_derived_pattern_sources=(
                     self.trace_derived_pattern_sources
                 ),
+                trace_nonspell_main_vms=self.trace_nonspell_main_vms,
                 bullet_birth_backend=self.bullet_birth_backend,
                 bullet_birth_native_call_mode=(
                     self.bullet_birth_native_call_mode

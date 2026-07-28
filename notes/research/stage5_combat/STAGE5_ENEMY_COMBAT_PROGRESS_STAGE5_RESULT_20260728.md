@@ -110,6 +110,13 @@ The audit intentionally grants:
 An adjacent slot HP decrease is only a candidate until generation continuity
 and the end transition are independently established.
 
+The supervisor's periodic operator text initially displayed
+`kind=enemy_combat_progress frame=None` because this post-issue schema names
+the field `decision_frame`. The retained trace and strict audit used the
+correct field and were unaffected. The monitor now prefers the ordinary
+`frame` field and falls back to `decision_frame`, with focused regression
+coverage.
+
 ## Interpretation And Next Gate
 
 The following phase contract is now worth testing, but remains

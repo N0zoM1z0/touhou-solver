@@ -359,6 +359,19 @@ class PracticeSupervisorTests(unittest.TestCase):
         )
         self.assertIn("spell=57", text)
 
+    def test_progress_text_reads_post_issue_decision_frame(self) -> None:
+        text = _progress_text(
+            {
+                "kind": "enemy_combat_progress",
+                "decision_frame": 2397,
+                "stage_route_index": 5,
+            }
+        )
+        self.assertIn(
+            "kind=enemy_combat_progress frame=2397 stage=5",
+            text,
+        )
+
     def test_ce_0050_wrapper_does_not_use_dependency_free_ida_python(self) -> None:
         wrapper = (ROOT / "run_th08_practice_agent.bat").read_text(
             encoding="utf-8"

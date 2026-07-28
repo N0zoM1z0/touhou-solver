@@ -36,6 +36,9 @@ def read_last_json_record(path: Path) -> dict[str, object] | None:
 def progress_text(record: dict[str, object] | None) -> str:
     if not record:
         return "waiting for trace output"
+    frame = record.get("frame")
+    if frame is None:
+        frame = record.get("decision_frame")
     spell_id = record.get("spell_id")
     spell = record.get("spell")
     if (
@@ -45,7 +48,7 @@ def progress_text(record: dict[str, object] | None) -> str:
     ):
         spell_id = spell.get("spell_id")
     return (
-        f"kind={record.get('kind')} frame={record.get('frame')} "
+        f"kind={record.get('kind')} frame={frame} "
         f"stage={record.get('stage_route_index')} "
         f"spell={spell_id} hits={record.get('hit_count')} "
         f"bullets={record.get('active_bullets')} "

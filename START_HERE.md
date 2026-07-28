@@ -40,6 +40,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `Implement schema-v9 tail attribution`,
   `Retain schema-v8 callback physical gate`,
   `Fail closed on incomplete ECL lookahead`,
   `617e03a Retain first GIL-held Stage 4 pass`,
@@ -201,7 +202,24 @@ describe the same decision. Python/C++ parity is not physical correctness.
   next checkpoint: allocation-stable current-thread cycle deltas and
   lookup-only background-future endpoint states before another physical run
   or promotable Stage-5/6 claim. It authorizes telemetry only, not worker or
-  copy intervention.
+  copy intervention. That schema-v9/audit-v7 telemetry is now implemented:
+  Windows uses a cached GIL-held `QueryThreadCycleTime` sampler, every native
+  phase retains raw cycle deltas with fail-closed provenance, and the
+  controller records lookup-only before/after states for its corridor,
+  survival, and enemy futures. Both endpoint lookups are inside the existing
+  observer wall interval. The retained overhead gates pass all eight native
+  profiles on Linux/Windows; 592-birth p95/max is
+  `0.0718/0.2150` and `0.0441/0.1388 ms`, while ABBA decode p95 ratios are
+  `1.0401/1.0068`. Windows reports only
+  `windows_query_thread_cycle_time`; Linux explicitly reports
+  `unavailable_non_windows`. Complete Linux/Windows suites pass `812/812` in
+  `9.709/15.434 s`, with three existing Windows skips. Audit v7
+  deterministically re-audits the retained schema-v8 run without requiring
+  unavailable historical cycles; its unchanged B4 maximum still fails.
+  The next useful gate is one explicit GIL-held schema-v9 Stage-4A
+  attribution run. No worker/copy/planner intervention is authorized until
+  its cycle/contention classification fixes a separate intervention
+  contract.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

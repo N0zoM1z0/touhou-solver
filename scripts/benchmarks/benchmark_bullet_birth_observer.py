@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import statistics
 import struct
 import time
@@ -39,6 +40,9 @@ from th08_live.sensor import BULLET_POOL_SIZE, BULLET_STRIDE  # noqa: E402
 from touhou_control.background_priority import (  # noqa: E402
     pin_current_thread_to_cpu,
     preferred_performance_cpu,
+)
+from touhou_control.thread_cycles import (  # noqa: E402
+    THREAD_CYCLE_SOURCE_WINDOWS,
 )
 
 
@@ -163,6 +167,8 @@ def run_benchmark(
     burst_iterations: int,
     warmup: int,
 ) -> dict[str, object]:
+    native_cycle_sources: set[str] = set()
+
     if backend == "python":
         tracker_factory = BulletBirthTracker
     elif backend == "native":
@@ -176,6 +182,13 @@ def run_benchmark(
             )
     else:
         raise ValueError(f"unknown bullet-birth backend {backend!r}")
+
+    def record_native_cycle_source(tracker: object) -> None:
+        if isinstance(tracker, NativeBulletBirthTracker):
+            native_cycle_sources.add(
+                tracker.diagnostics().thread_cycle_source
+            )
+
     density_rows: list[dict[str, object]] = []
     for density in densities:
         blob = _pool(density)
@@ -192,6 +205,7 @@ def run_benchmark(
             iterations=iterations,
             warmup=warmup,
         )
+        record_native_cycle_source(tracker)
         density_rows.append(
             {
                 "density": density,
@@ -232,6 +246,7 @@ def run_benchmark(
                 frame_before=frame,
                 frame_after=frame,
             )
+        record_native_cycle_source(tracker)
         serialization_tracker = tracker_factory(
             maximum_bootstrap_age=0,
         )
@@ -245,6 +260,7 @@ def run_benchmark(
             frame_before=2,
             frame_after=2,
         )
+        record_native_cycle_source(serialization_tracker)
         serialization_samples = _samples(
             lambda: json.dumps(serialized_observation.record()),
             iterations=burst_iterations,
@@ -285,6 +301,7 @@ def run_benchmark(
         iterations=decode_iterations,
         warmup=max(2, warmup // 4),
     )
+    record_native_cycle_source(tracker)
     baseline = _summary(baseline_samples)
     interleaved = _summary(interleaved_samples)
     ratio = interleaved["p95_ms"] / max(baseline["p95_ms"], 1e-12)
@@ -325,9 +342,20 @@ def run_benchmark(
         "observer_pass": not observer_failures,
         "interleaved_pass": ratio <= INTERLEAVED_P95_RATIO_LIMIT,
     }
-    gate["passed"] = gate["observer_pass"] and gate["interleaved_pass"]
+    cycle_attribution_required = backend == "native" and os.name == "nt"
+    cycle_attribution_available = (
+        not cycle_attribution_required
+        or native_cycle_sources == {THREAD_CYCLE_SOURCE_WINDOWS}
+    )
+    gate["cycle_attribution_required"] = cycle_attribution_required
+    gate["cycle_attribution_available"] = cycle_attribution_available
+    gate["passed"] = (
+        gate["observer_pass"]
+        and gate["interleaved_pass"]
+        and cycle_attribution_available
+    )
     return {
-        "schema": "th08-bullet-birth-observer-benchmark-v6",
+        "schema": "th08-bullet-birth-observer-benchmark-v7",
         "backend": backend,
         "native_call_mode": (
             native_call_mode if backend == "native" else None
@@ -338,6 +366,7 @@ def run_benchmark(
             if backend == "native"
             else None
         ),
+        "native_thread_cycle_sources": sorted(native_cycle_sources),
         "pool_size": BULLET_POOL_SIZE,
         "iterations": iterations,
         "decode_iterations": decode_iterations,

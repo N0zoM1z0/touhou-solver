@@ -94,6 +94,8 @@ external thread or process caused it.
 The implementation must:
 
 - cache the Windows function signatures and pseudo-handle;
+- call the Windows API through a GIL-held `PyDLL` boundary so telemetry does
+  not reintroduce the released-GIL intervention rejected by CE-0149;
 - allocate no per-row ctypes object after construction;
 - return an explicit unsupported/query-failed source instead of fabricating
   zero cycles;

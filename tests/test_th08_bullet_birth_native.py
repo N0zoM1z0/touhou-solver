@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import gc
 import math
+import os
 import random
 import struct
 import time
@@ -29,6 +30,11 @@ from th08_live.bullet_decode import (
     BULLET_STRIDE,
     BULLET_TRANSFORM_FLAGS_OFFSET,
     BULLET_VELOCITY_OFFSET,
+)
+from touhou_control.thread_cycles import (
+    THREAD_CYCLE_SOURCE_QUERY_FAILED,
+    THREAD_CYCLE_SOURCE_UNAVAILABLE,
+    THREAD_CYCLE_SOURCE_WINDOWS,
 )
 
 
@@ -133,6 +139,16 @@ class NativeBulletBirthLoaderTests(unittest.TestCase):
     def test_unknown_call_mode_fails_closed(self) -> None:
         with self.assertRaisesRegex(ValueError, "call mode"):
             native_module._load_function("unknown")
+
+
+class _CycleSampler:
+    source = THREAD_CYCLE_SOURCE_WINDOWS
+
+    def __init__(self, values: tuple[int, ...]) -> None:
+        self._values = iter(values)
+
+    def read(self) -> int:
+        return next(self._values)
 
 
 @unittest.skipUnless(
@@ -408,6 +424,39 @@ class NativeBulletBirthTrackerTests(unittest.TestCase):
             before_ages,
         )
 
+    def test_diagnostics_retain_phase_cycle_deltas_fail_closed(self) -> None:
+        blob = _pool()
+        tracker = NativeBulletBirthTracker(
+            thread_cycle_sampler=_CycleSampler((100, 140, 230, 400))
+        )
+        tracker.observe(blob, frame_before=0, frame_after=0)
+        diagnostics = tracker.diagnostics()
+        self.assertEqual(
+            diagnostics.thread_cycle_source,
+            THREAD_CYCLE_SOURCE_WINDOWS,
+        )
+        self.assertEqual(diagnostics.thread_cycles, (40, 90, 170))
+        self.assertEqual(
+            diagnostics.record(observation_ms=1.0)["thread_cycles"],
+            {
+                "source": THREAD_CYCLE_SOURCE_WINDOWS,
+                "prepare": 40,
+                "native_call": 90,
+                "materialize": 170,
+            },
+        )
+
+        regressed = NativeBulletBirthTracker(
+            thread_cycle_sampler=_CycleSampler((400, 300, 500, 600))
+        )
+        regressed.observe(blob, frame_before=0, frame_after=0)
+        invalid = regressed.diagnostics()
+        self.assertEqual(
+            invalid.thread_cycle_source,
+            THREAD_CYCLE_SOURCE_QUERY_FAILED,
+        )
+        self.assertEqual(invalid.thread_cycles, (None, None, None))
+
     def test_diagnostics_reconcile_and_count_native_phase_gc(self) -> None:
         blob = _pool()
         tracker = NativeBulletBirthTracker()
@@ -436,6 +485,26 @@ class NativeBulletBirthTrackerTests(unittest.TestCase):
         self.assertEqual(completed["prepare"], [0, 0, 0])
         self.assertEqual(completed["native_call"], [1, 0, 0])
         self.assertEqual(completed["materialize"], [0, 0, 0])
+        if os.name == "nt":
+            self.assertEqual(
+                diagnostics.thread_cycle_source,
+                THREAD_CYCLE_SOURCE_WINDOWS,
+            )
+            self.assertTrue(
+                all(
+                    type(value) is int and value >= 0
+                    for value in diagnostics.thread_cycles
+                )
+            )
+        else:
+            self.assertEqual(
+                diagnostics.thread_cycle_source,
+                THREAD_CYCLE_SOURCE_UNAVAILABLE,
+            )
+            self.assertEqual(
+                diagnostics.thread_cycles,
+                (None, None, None),
+            )
 
         gc.collect(0)
         tracker._invoke = original_invoke

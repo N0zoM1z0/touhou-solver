@@ -11,9 +11,10 @@ from th08_ecl_birth import (
 
 from .bullet_birth import BulletBirthObservation
 from .bullet_birth_native import NATIVE_CALL_MODES
+from .birth_contention import BirthObserverContention
 
 
-BULLET_BIRTH_TRACE_SCHEMA_VERSION = 8
+BULLET_BIRTH_TRACE_SCHEMA_VERSION = 9
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
 BULLET_BIRTH_POOL_SCOPE = "all_1536_hostile_bullet_slots"
@@ -41,6 +42,7 @@ class BulletBirthTraceInput:
     observation_cpu_ms: float
     intent_ms: float
     previous_emit_ms: float | None
+    observer_contention: BirthObserverContention
     observation_backend: str = "python"
     native_call_mode: str | None = None
     observation_diagnostics: dict[str, object] | None = None
@@ -85,6 +87,21 @@ def build_bullet_birth_trace_record(
             "successful native observation requires diagnostics"
         )
     if (
+        trace_input.observation_backend == "native"
+        and observation is not None
+        and trace_input.observation_error is None
+        and (
+            not isinstance(trace_input.observation_diagnostics, dict)
+            or not isinstance(
+                trace_input.observation_diagnostics.get("thread_cycles"),
+                dict,
+            )
+        )
+    ):
+        raise ValueError(
+            "schema-v9 native observation requires thread cycles"
+        )
+    if (
         trace_input.observation_backend == "python"
         and trace_input.observation_diagnostics is not None
     ):
@@ -106,6 +123,7 @@ def build_bullet_birth_trace_record(
         "observation_backend": trace_input.observation_backend,
         "native_call_mode": trace_input.native_call_mode,
         "observation_diagnostics": trace_input.observation_diagnostics,
+        "observer_contention": trace_input.observer_contention.record(),
         "frame": trace_input.frame,
         "snapshot_frame": trace_input.snapshot_frame,
         "gameplay_epoch": trace_input.gameplay_epoch,

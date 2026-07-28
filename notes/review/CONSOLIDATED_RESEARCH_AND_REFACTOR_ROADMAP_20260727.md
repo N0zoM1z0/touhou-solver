@@ -1104,6 +1104,13 @@ parity 當成每個 nature tie field 的逐 bit equality。
   telemetry-only 邊界：用 thread-cycle delta 與三個 background future
   的 before/after state 區分實際 copy cost／deschedule，再另立 contract
   決定 copy packing 或 worker isolation，不靠重跑挑一個 passing max；
+- schema-v9/audit-v7 已實作上述邊界：Windows 的 cached GIL-held
+  `QueryThreadCycleTime` 提供三段 raw cycle delta，controller 的
+  corridor/survival/enemy Future endpoint lookup 全部包含在原 observer
+  wall interval。Linux/Windows 八個 overhead profiles 與 ABBA gate
+  通過，完整 quick suite 為 `812/812`；下一步是一次 GIL-held
+  schema-v9 Stage-4A 歸因實機，結果只決定後續 intervention contract，
+  不增加 action authority；
 - spell-57 callback traversal 本身 p95/max `0.5460/10.3328 ms`，即使
   fail-closed 也仍在 issue thread。後續性能線要做 exact-state/cache/
   transfer-summary 分析，不能靠降低 256 cap 或 stage-specific shortcut；

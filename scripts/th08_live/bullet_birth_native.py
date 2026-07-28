@@ -26,6 +26,12 @@ from th08_live.bullet_decode import (
     BULLET_TRANSFORM_FLAGS_OFFSET,
     BULLET_VELOCITY_OFFSET,
 )
+from touhou_control.thread_cycles import (
+    THREAD_CYCLE_SOURCE_QUERY_FAILED,
+    THREAD_CYCLE_SOURCE_WINDOWS,
+    CurrentThreadCycleSampler,
+    ThreadCycleSampler,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -83,6 +89,8 @@ class NativeBulletBirthDiagnostics:
         tuple[int, int, int],
         tuple[int, int, int],
     ]
+    thread_cycle_source: str
+    thread_cycles: tuple[int | None, int | None, int | None]
 
     def record(self, *, observation_ms: float) -> dict[str, object]:
         controller_residual_ms = observation_ms - (
@@ -103,6 +111,16 @@ class NativeBulletBirthDiagnostics:
                     _GC_PHASE_NAMES,
                     self.gc_completed,
                 )
+            },
+            "thread_cycles": {
+                "source": self.thread_cycle_source,
+                **{
+                    phase: value
+                    for phase, value in zip(
+                        _GC_PHASE_NAMES,
+                        self.thread_cycles,
+                    )
+                },
             },
         }
 
@@ -201,6 +219,7 @@ class NativeBulletBirthTracker:
         *,
         maximum_bootstrap_age: int = 8,
         native_call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
+        thread_cycle_sampler: ThreadCycleSampler | None = None,
     ) -> None:
         if type(maximum_bootstrap_age) is not int or maximum_bootstrap_age < 0:
             raise ValueError("maximum bootstrap age must be a non-negative int")
@@ -219,6 +238,9 @@ class NativeBulletBirthTracker:
         self.native_call_mode = native_call_mode
         self._function = function
         self._maximum_bootstrap_age = maximum_bootstrap_age
+        self._thread_cycle_sampler = (
+            thread_cycle_sampler or CurrentThreadCycleSampler()
+        )
         self._previous_states = np.empty(BULLET_POOL_SIZE, dtype=np.uint16)
         self._previous_ages = np.empty(BULLET_POOL_SIZE, dtype=np.int32)
         self._slots = np.empty(BULLET_POOL_SIZE, dtype=np.int32)
@@ -296,6 +318,12 @@ class NativeBulletBirthTracker:
         self._last_prepare_ms: float | None = None
         self._last_native_call_ms: float | None = None
         self._last_materialize_ms: float | None = None
+        self._last_thread_cycle_source: str | None = None
+        self._last_thread_cycles: tuple[
+            int | None,
+            int | None,
+            int | None,
+        ] | None = None
 
     def reset(self) -> None:
         self._has_previous = False
@@ -304,6 +332,8 @@ class NativeBulletBirthTracker:
         self._last_prepare_ms = None
         self._last_native_call_ms = None
         self._last_materialize_ms = None
+        self._last_thread_cycle_source = None
+        self._last_thread_cycles = None
 
     def _record_completed_gc(self, generation: int) -> None:
         phase = self._gc_phase
@@ -326,7 +356,41 @@ class NativeBulletBirthTracker:
             gc_completed=tuple(
                 tuple(counts) for counts in self._gc_completed
             ),
+            thread_cycle_source=(
+                self._last_thread_cycle_source
+                if self._last_thread_cycle_source is not None
+                else THREAD_CYCLE_SOURCE_QUERY_FAILED
+            ),
+            thread_cycles=(
+                self._last_thread_cycles
+                if self._last_thread_cycles is not None
+                else (None, None, None)
+            ),
         )
+
+    def _record_thread_cycles(
+        self,
+        boundaries: tuple[int | None, int | None, int | None, int | None],
+    ) -> None:
+        source = self._thread_cycle_sampler.source
+        if source == THREAD_CYCLE_SOURCE_WINDOWS and all(
+            type(value) is int for value in boundaries
+        ):
+            concrete = tuple(int(value) for value in boundaries)
+            deltas = tuple(
+                end - start
+                for start, end in zip(concrete, concrete[1:])
+            )
+            if all(delta >= 0 for delta in deltas):
+                self._last_thread_cycle_source = source
+                self._last_thread_cycles = deltas
+                return
+        self._last_thread_cycle_source = (
+            source
+            if source != THREAD_CYCLE_SOURCE_WINDOWS
+            else THREAD_CYCLE_SOURCE_QUERY_FAILED
+        )
+        self._last_thread_cycles = (None, None, None)
 
     def _raw_pointer_for(
         self,
@@ -400,10 +464,13 @@ class NativeBulletBirthTracker:
         self._last_prepare_ms = None
         self._last_native_call_ms = None
         self._last_materialize_ms = None
+        self._last_thread_cycle_source = None
+        self._last_thread_cycles = None
         for phase_counts in self._gc_completed:
             phase_counts[:] = (0, 0, 0)
         _ACTIVE_GC_TRACKER = self
         self._gc_phase = _GC_PHASE_PREPARE
+        cycle_0 = self._thread_cycle_sampler.read()
         prepare_started = time.perf_counter()
         try:
             required_size = BULLET_POOL_SIZE * BULLET_STRIDE
@@ -428,6 +495,7 @@ class NativeBulletBirthTracker:
                 blob,
                 required_size=required_size,
             )
+            cycle_1 = self._thread_cycle_sampler.read()
             native_call_started = time.perf_counter()
             self._last_prepare_ms = (
                 native_call_started - prepare_started
@@ -438,6 +506,7 @@ class NativeBulletBirthTracker:
                 required_size=required_size,
                 output_capacity=BULLET_POOL_SIZE,
             )
+            cycle_2 = self._thread_cycle_sampler.read()
             materialize_started = time.perf_counter()
             self._last_native_call_ms = (
                 materialize_started - native_call_started
@@ -499,9 +568,13 @@ class NativeBulletBirthTracker:
             self._has_previous = True
             self._previous_frame_before = frame_before
             self._previous_frame_after = frame_after
+            cycle_3 = self._thread_cycle_sampler.read()
             self._last_materialize_ms = (
                 time.perf_counter() - materialize_started
             ) * 1000.0
+            self._record_thread_cycles(
+                (cycle_0, cycle_1, cycle_2, cycle_3)
+            )
             return observation
         finally:
             self._gc_phase = _GC_PHASE_INACTIVE

@@ -98,6 +98,10 @@ from th08_live.birth_trace import (
     birth_trace_requires_immediate_flush,
     build_bullet_birth_trace_record,
 )
+from th08_live.birth_contention import (
+    BirthObserverContention,
+    capture_birth_observer_future_states,
+)
 from th08_live.bullet_birth import (
     BulletBirthObservation,
     BulletBirthTracker,
@@ -2385,6 +2389,9 @@ def _run_live_session(
             bullet_birth_native_diagnostics: (
                 NativeBulletBirthDiagnostics | None
             ) = None
+            bullet_birth_observer_contention: (
+                BirthObserverContention | None
+            ) = None
             bullet_birth_observation_ms = 0.0
             bullet_birth_observation_cpu_ms = 0.0
             ecl_vm_snapshot: EclVmSnapshot | None = None
@@ -3587,6 +3594,13 @@ def _run_live_session(
                 if bullet_birth_tracker is not None:
                     bullet_birth_observation_started = time.perf_counter()
                     bullet_birth_observation_cpu_started = time.thread_time()
+                    birth_contention_before = (
+                        capture_birth_observer_future_states(
+                            corridor_future=corridor_future,
+                            survival_future=corridor_survival_future,
+                            enemy_future=enemy_future,
+                        )
+                    )
                     try:
                         bullet_birth_observation = (
                             bullet_birth_tracker.observe(
@@ -3612,6 +3626,13 @@ def _run_live_session(
                         bullet_birth_observation_error = (
                             f"{type(error).__name__}: {error}"
                         )
+                    birth_contention_after = (
+                        capture_birth_observer_future_states(
+                            corridor_future=corridor_future,
+                            survival_future=corridor_survival_future,
+                            enemy_future=enemy_future,
+                        )
+                    )
                     bullet_birth_observation_ms = (
                         time.perf_counter()
                         - bullet_birth_observation_started
@@ -3620,6 +3641,25 @@ def _run_live_session(
                         time.thread_time()
                         - bullet_birth_observation_cpu_started
                     ) * 1000.0
+                else:
+                    birth_contention_before = (
+                        capture_birth_observer_future_states(
+                            corridor_future=corridor_future,
+                            survival_future=corridor_survival_future,
+                            enemy_future=enemy_future,
+                        )
+                    )
+                    birth_contention_after = (
+                        capture_birth_observer_future_states(
+                            corridor_future=corridor_future,
+                            survival_future=corridor_survival_future,
+                            enemy_future=enemy_future,
+                        )
+                    )
+                bullet_birth_observer_contention = BirthObserverContention(
+                    birth_contention_before,
+                    birth_contention_after,
+                )
                 if ecl_vm_snapshot is not None:
                     ecl_birth_intent_started = time.perf_counter()
                     try:
@@ -3655,6 +3695,7 @@ def _run_live_session(
                     ecl_birth_intent_ms = (
                         time.perf_counter() - ecl_birth_intent_started
                     ) * 1000.0
+                assert bullet_birth_observer_contention is not None
                 birth_trace_build_started = time.perf_counter()
                 bullet_birth_trace_record = build_bullet_birth_trace_record(
                     BulletBirthTraceInput(
@@ -3691,6 +3732,9 @@ def _run_live_session(
                             intent_ms=ecl_birth_intent_ms,
                             previous_emit_ms=(
                                 previous_birth_trace_emit_ms
+                            ),
+                            observer_contention=(
+                                bullet_birth_observer_contention
                             ),
                             observation_backend=bullet_birth_backend,
                             native_call_mode=(

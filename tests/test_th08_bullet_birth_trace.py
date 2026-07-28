@@ -27,6 +27,11 @@ from th08_live.bullet_birth import (
     BulletBirthEvidence,
     BulletBirthObservation,
 )
+from th08_live.birth_contention import (
+    FUTURE_ABSENT,
+    BirthObserverContention,
+    BirthObserverFutureStates,
+)
 
 
 def _trace_input(
@@ -36,6 +41,11 @@ def _trace_input(
     observation_error: str | None = None,
     intent_error: str | None = None,
 ) -> BulletBirthTraceInput:
+    future_states = BirthObserverFutureStates(
+        FUTURE_ABSENT,
+        FUTURE_ABSENT,
+        FUTURE_ABSENT,
+    )
     return BulletBirthTraceInput(
         frame=120,
         snapshot_frame=117,
@@ -63,6 +73,10 @@ def _trace_input(
         observation_cpu_ms=0.021,
         intent_ms=0.044,
         previous_emit_ms=0.012,
+        observer_contention=BirthObserverContention(
+            future_states,
+            future_states,
+        ),
     )
 
 
@@ -208,6 +222,12 @@ class BulletBirthTraceTests(unittest.TestCase):
                 "native_call": [1, 0, 0],
                 "materialize": [0, 0, 0],
             },
+            "thread_cycles": {
+                "source": "windows_query_thread_cycle_time",
+                "prepare": 100,
+                "native_call": 200,
+                "materialize": 300,
+            },
         }
         trace_input = replace(
             _trace_input(observation=observation),
@@ -216,7 +236,7 @@ class BulletBirthTraceTests(unittest.TestCase):
             observation_diagnostics=diagnostics,
         )
         record = build_bullet_birth_trace_record(trace_input)
-        self.assertEqual(record["schema_version"], 8)
+        self.assertEqual(record["schema_version"], 9)
         self.assertEqual(record["native_call_mode"], "gil-held")
         self.assertEqual(record["observation_diagnostics"], diagnostics)
 
@@ -225,6 +245,15 @@ class BulletBirthTraceTests(unittest.TestCase):
                 replace(
                     trace_input,
                     observation_diagnostics=None,
+                )
+            )
+        without_cycles = dict(diagnostics)
+        without_cycles.pop("thread_cycles")
+        with self.assertRaisesRegex(ValueError, "thread cycles"):
+            build_bullet_birth_trace_record(
+                replace(
+                    trace_input,
+                    observation_diagnostics=without_cycles,
                 )
             )
         with self.assertRaisesRegex(ValueError, "may not publish"):

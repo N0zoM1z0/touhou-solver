@@ -317,7 +317,14 @@ comparison.
    regression. The fixed
    `G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` adds only
    per-phase current-thread cycle deltas and background-future endpoint
-   evidence before choosing an intervention.
+   evidence before choosing an intervention. Schema v9/audit v7 now
+   implements that boundary and passes its Linux/Windows focused, complete,
+   observer-overhead, and ABBA gates. Windows cycle provenance is available
+   on every measured native profile; historical schema-v8 traces remain
+   auditable without fabricated attribution. One GIL-held schema-v9
+   Stage-4A run is the next gate. Worker, copy, priority, affinity, and
+   planner intervention remain unauthorized until that run classifies the
+   tail and a separate intervention contract is fixed.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

@@ -221,6 +221,34 @@ def _audit(
             "unknown_from_frame": None,
             "result_kind": "complete_schedule",
         }
+    if schema_version >= 9:
+        record["observation_diagnostics"]["thread_cycles"] = {
+            "source": "windows_query_thread_cycle_time",
+            "prepare": 100,
+            "native_call": 200,
+            "materialize": 300,
+        }
+        record["observer_contention"] = {
+            "corridor_future": {
+                "before": "inflight",
+                "after": "inflight",
+            },
+            "survival_future": {
+                "before": "absent",
+                "after": "absent",
+            },
+            "enemy_future": {
+                "before": "inflight",
+                "after": "done",
+            },
+            "omitted_sources": [
+                "game_process",
+                "os_scheduler_and_other_processes",
+                "native_internal_workers_after_endpoint_ambiguity",
+                "candidate_supplemental_and_prewarm_services",
+                "allocator_and_page_faults",
+            ],
+        }
     return record
 
 
@@ -657,6 +685,101 @@ class BulletBirthAuditTests(unittest.TestCase):
                 report["callback_lookahead"]["lowering_status_rows"],
                 {"legacy_complete_events_lowered_unchecked": 4},
             )
+
+    def test_schema_v9_requires_cycles_and_future_endpoints(self) -> None:
+        with TemporaryDirectory() as directory:
+            trace = self._trace(directory, schema_version=9)
+            report = analyze_trace(trace)
+            self.assertTrue(
+                report["gates"]["cycle_attribution_available"]
+            )
+            self.assertEqual(
+                report["native_diagnostics"]["thread_cycle_sources"],
+                {"windows_query_thread_cycle_time": 4},
+            )
+            self.assertEqual(
+                report["native_diagnostics"][
+                    "thread_cycle_attribution_rows"
+                ],
+                4,
+            )
+            self.assertEqual(
+                report["native_diagnostics"]["observer_contention"][
+                    "classifications"
+                ],
+                {"definite_known_future_overlap": 4},
+            )
+
+            records = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            cycles = records[0]["observation_diagnostics"]["thread_cycles"]
+            cycles.update(
+                {
+                    "source": "unavailable_non_windows",
+                    "prepare": None,
+                    "native_call": None,
+                    "materialize": None,
+                }
+            )
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            unavailable = analyze_trace(trace)
+            self.assertFalse(
+                unavailable["gates"]["cycle_attribution_available"]
+            )
+            self.assertFalse(unavailable["passed"])
+
+            cycles["materialize"] = 3
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "fabricate",
+            ):
+                analyze_trace(trace)
+
+            cycles.update(
+                {
+                    "source": "windows_query_thread_cycle_time",
+                    "prepare": 1,
+                    "native_call": 2,
+                    "materialize": 3,
+                }
+            )
+            records[0]["observer_contention"]["enemy_future"][
+                "after"
+            ] = "waiting"
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "enemy_future",
+            ):
+                analyze_trace(trace)
+
+            records[0]["observer_contention"]["enemy_future"][
+                "after"
+            ] = "done"
+            records[0]["observer_contention"]["omitted_sources"].append(
+                "game_process"
+            )
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "omitted sources",
+            ):
+                analyze_trace(trace)
 
     def test_failed_schema_v1_trace_remains_auditable(self) -> None:
         with TemporaryDirectory() as directory:

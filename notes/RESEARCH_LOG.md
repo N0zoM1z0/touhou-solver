@@ -7045,3 +7045,40 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   traversal, input, or action change is authorized. The attribution result
   must select a separately contracted intervention; rerunning until one
   maximum passes is rejected.
+
+## 2026-07-28 — Implemented schema-v9 materialization-tail attribution
+
+- Added an allocation-stable current-thread cycle sampler. Windows caches
+  `GetCurrentThread`, `QueryThreadCycleTime`, and one destination behind a
+  GIL-held `PyDLL`; Linux reports `unavailable_non_windows`. Query failure,
+  mixed availability, and decreasing boundaries publish no fabricated
+  deltas.
+- Native birth diagnostics retain raw prepare/native/materialize deltas.
+  The controller also records lookup-only before/after states for its rolling
+  corridor, post-publication survival, and enemy-capture futures. Both
+  endpoint reads are inside the existing authoritative observer wall
+  interval; no wait, result, cancellation, submission, or priority change was
+  added.
+- Trace schema v9 and residual-audit v7 reject missing/malformed cycle
+  provenance, invalid future states, duplicate/missing omitted-source
+  declarations, or changed segment/GC reconciliation. Audit v7
+  deterministically re-audits schema-v8 run `20260728_075455` with identical
+  output SHA-256
+  `3a118328e1e2eb91ba3f336928b756032c5717021d4d53baadfdb9a1f9747db4`;
+  historical rows correctly require no unavailable cycle attribution and the
+  unchanged `8.9834 ms` maximum still fails B4.
+- Retained native observer benchmark reports pass all eight profiles with
+  telemetry enabled. Linux 592-birth p95/max is `0.0718/0.2150 ms` and ABBA
+  p95 ratio is `1.0401`; report SHA-256 is
+  `f168347728641e3c6d4168ae92b0b065467c9a1937fbadaf7352f0aa1ce5651e`.
+  Windows reports only `windows_query_thread_cycle_time`, with 592-birth
+  p95/max `0.0441/0.1388 ms` and ABBA ratio `1.0068`; report SHA-256 is
+  `1d1fba6e6b57939454d8cef4fe442198ac80ce2153a152451a5714e9f65a3e78`.
+- Focused tests pass on Linux and Windows. Complete suites pass `812/812` in
+  `9.709/15.434 s`, with three existing Windows skips. No native source or
+  production ABI changed.
+- **Authority and next gate:** This is retrospective telemetry only. Run one
+  explicit GIL-held schema-v9 Stage-4A attribution workload. Use its
+  wall/cycle/evidence-count and known-future-overlap classification to fix a
+  separate intervention contract; do not rerun-select, change workers, pack
+  copies, or claim Stage-5/6 promotion yet.

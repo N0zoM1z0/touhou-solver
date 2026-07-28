@@ -13,11 +13,35 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA = "th08-bullet-birth-residual-audit-v6"
+SCHEMA = "th08-bullet-birth-residual-audit-v7"
 TRACE_KIND = "bullet_birth_audit"
 TRACE_ROLE = "trace_only_no_action_authority"
-TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5, 6, 7, 8))
+TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5, 6, 7, 8, 9))
 NATIVE_CALL_MODES = frozenset(("gil-released", "gil-held"))
+NATIVE_PHASES = ("prepare", "native_call", "materialize")
+THREAD_CYCLE_SOURCE_WINDOWS = "windows_query_thread_cycle_time"
+THREAD_CYCLE_SOURCES = frozenset(
+    (
+        THREAD_CYCLE_SOURCE_WINDOWS,
+        "unavailable_non_windows",
+        "query_failed",
+    )
+)
+FUTURE_STATES = frozenset(("absent", "done", "inflight"))
+CONTENTION_FUTURES = (
+    "corridor_future",
+    "survival_future",
+    "enemy_future",
+)
+CONTENTION_OMITTED_SOURCES = frozenset(
+    (
+        "game_process",
+        "os_scheduler_and_other_processes",
+        "native_internal_workers_after_endpoint_ambiguity",
+        "candidate_supplemental_and_prewarm_services",
+        "allocator_and_page_faults",
+    )
+)
 MAX_SAMPLES = 20
 OBSERVER_P95_LIMIT_MS = 0.20
 OBSERVER_P99_LIMIT_MS = 0.40
@@ -241,6 +265,34 @@ def _evidence_count_bucket(count: int) -> str:
     return "321_plus"
 
 
+def _contention_overlap(
+    contention: dict[str, Any],
+) -> tuple[str, list[str], str]:
+    definite: list[str] = []
+    ambiguous: list[str] = []
+    pattern: list[str] = []
+    for future_name in CONTENTION_FUTURES:
+        endpoints = contention[future_name]
+        assert isinstance(endpoints, dict)
+        before = str(endpoints["before"])
+        after = str(endpoints["after"])
+        pattern.append(f"{future_name}:{before}->{after}")
+        if before == after == "inflight":
+            definite.append(future_name)
+        elif "inflight" in {before, after}:
+            ambiguous.append(future_name)
+    if definite:
+        classification = "definite_known_future_overlap"
+        names = definite
+    elif ambiguous:
+        classification = "ambiguous_endpoint_overlap"
+        names = ambiguous
+    else:
+        classification = "no_known_future_overlap"
+        names = []
+    return classification, names, "|".join(pattern)
+
+
 def _valid_velocity_lookahead_coverage(
     lookahead: dict[str, Any],
 ) -> bool:
@@ -357,13 +409,13 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             f"line {line_number}: audit role is not trace-only"
         )
     if (
-        record.get("schema_version") in {5, 6, 7, 8}
+        record.get("schema_version") in {5, 6, 7, 8, 9}
         and record.get("observation_backend") not in {"python", "native"}
     ):
         raise BulletBirthAuditError(
             f"line {line_number}: audit omits a valid observation backend"
         )
-    if record.get("schema_version") in {7, 8}:
+    if record.get("schema_version") in {7, 8, 9}:
         backend = record.get("observation_backend")
         native_call_mode = record.get("native_call_mode")
         if backend == "native" and native_call_mode not in NATIVE_CALL_MODES:
@@ -374,7 +426,7 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             raise BulletBirthAuditError(
                 f"line {line_number}: Python audit fabricates a native call mode"
             )
-    if record.get("schema_version") in {6, 7, 8}:
+    if record.get("schema_version") in {6, 7, 8, 9}:
         backend = record.get("observation_backend")
         diagnostics = record.get("observation_diagnostics")
         if backend == "python":
@@ -393,16 +445,22 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
                 diagnostics,
                 timing=record.get("timing_ms"),
                 line_number=line_number,
+                require_thread_cycles=record.get("schema_version") == 9,
             )
         elif diagnostics is not None:
             raise BulletBirthAuditError(
                 f"line {line_number}: failed native audit publishes "
                 "diagnostics"
             )
-    if record.get("schema_version") == 8:
+    if record.get("schema_version") in {8, 9}:
         intent = record.get("intent")
         if isinstance(intent, dict):
             _validate_intent_coverage(intent, line_number=line_number)
+    if record.get("schema_version") == 9:
+        _validate_observer_contention(
+            record.get("observer_contention"),
+            line_number=line_number,
+        )
     for field in ("frame", "snapshot_frame", "gameplay_epoch"):
         if type(record.get(field)) is not int:
             raise BulletBirthAuditError(
@@ -416,6 +474,7 @@ def _validate_native_diagnostics(
     *,
     timing: Any,
     line_number: int,
+    require_thread_cycles: bool = False,
 ) -> None:
     if not isinstance(diagnostics, dict):
         raise BulletBirthAuditError(
@@ -479,6 +538,69 @@ def _validate_native_diagnostics(
             raise BulletBirthAuditError(
                 f"line {line_number}: invalid {phase} GC counts"
             )
+    if require_thread_cycles:
+        _validate_thread_cycles(
+            diagnostics.get("thread_cycles"),
+            line_number=line_number,
+        )
+
+
+def _validate_thread_cycles(
+    cycles: Any,
+    *,
+    line_number: int,
+) -> bool:
+    if not isinstance(cycles, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: native diagnostics omit thread cycles"
+        )
+    source = cycles.get("source")
+    if source not in THREAD_CYCLE_SOURCES:
+        raise BulletBirthAuditError(
+            f"line {line_number}: invalid thread-cycle source"
+        )
+    values = [cycles.get(phase) for phase in NATIVE_PHASES]
+    if source == THREAD_CYCLE_SOURCE_WINDOWS:
+        if any(type(value) is not int or value < 0 for value in values):
+            raise BulletBirthAuditError(
+                f"line {line_number}: invalid Windows thread-cycle delta"
+            )
+        return True
+    if any(value is not None for value in values):
+        raise BulletBirthAuditError(
+            f"line {line_number}: unavailable thread cycles fabricate deltas"
+        )
+    return False
+
+
+def _validate_observer_contention(
+    contention: Any,
+    *,
+    line_number: int,
+) -> None:
+    if not isinstance(contention, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: schema-v9 row omits observer contention"
+        )
+    for future_name in CONTENTION_FUTURES:
+        endpoints = contention.get(future_name)
+        if (
+            not isinstance(endpoints, dict)
+            or endpoints.get("before") not in FUTURE_STATES
+            or endpoints.get("after") not in FUTURE_STATES
+        ):
+            raise BulletBirthAuditError(
+                f"line {line_number}: invalid {future_name} endpoints"
+            )
+    omitted = contention.get("omitted_sources")
+    if (
+        not isinstance(omitted, list)
+        or len(omitted) != len(CONTENTION_OMITTED_SOURCES)
+        or frozenset(omitted) != CONTENTION_OMITTED_SOURCES
+    ):
+        raise BulletBirthAuditError(
+            f"line {line_number}: invalid contention omitted sources"
+        )
 
 
 def _read_trace(
@@ -740,12 +862,12 @@ def _intent_events(
                 f"velocity_lookahead_lowering:{velocity_lowering}"
             ] += 1
         if (
-            audit["schema_version"] == 8
+            audit["schema_version"] in {8, 9}
             and pointer
             and not scope.get("velocity_lookahead_metadata_valid")
         ):
             raise BulletBirthAuditError(
-                "schema-v8 active-main-VM row omits valid callback coverage"
+                "schema-v8+ active-main-VM row omits valid callback coverage"
             )
         velocity_scanned = scope.get(
             "velocity_lookahead_instructions_scanned"
@@ -976,6 +1098,16 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     )
     native_over_budget_dominant_segments: Counter[str] = Counter()
     native_over_budget_samples: list[dict[str, object]] = []
+    native_thread_cycle_sources: Counter[str] = Counter()
+    native_thread_cycles: defaultdict[str, list[float]] = defaultdict(list)
+    native_thread_cycles_by_evidence: defaultdict[
+        str,
+        defaultdict[str, list[float]],
+    ] = defaultdict(lambda: defaultdict(list))
+    native_cycle_attribution_rows = 0
+    schema_v9_native_success_rows = 0
+    observer_contention_classes: Counter[str] = Counter()
+    observer_contention_patterns: Counter[str] = Counter()
     previous_evidence_count: int | None = None
 
     for audit in audits:
@@ -1058,8 +1190,12 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         evidence_per_row.append(float(evidence_count))
         bucket = _evidence_count_bucket(evidence_count)
         diagnostics = audit.get("observation_diagnostics")
+        row_thread_cycles: dict[str, Any] | None = None
+        row_contention: dict[str, Any] | None = None
+        row_contention_class: str | None = None
+        row_contention_names: list[str] = []
         if (
-            audit["schema_version"] in {6, 7, 8}
+            audit["schema_version"] in {6, 7, 8, 9}
             and isinstance(diagnostics, dict)
         ):
             segments = diagnostics["native_segments_ms"]
@@ -1077,6 +1213,33 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             }
             for field, value in numeric_segments.items():
                 native_segment_ms[field].append(value)
+            if audit["schema_version"] == 9:
+                schema_v9_native_success_rows += 1
+                raw_cycles = diagnostics.get("thread_cycles")
+                assert isinstance(raw_cycles, dict)
+                row_thread_cycles = raw_cycles
+                cycle_source = str(raw_cycles["source"])
+                native_thread_cycle_sources[cycle_source] += 1
+                if cycle_source == THREAD_CYCLE_SOURCE_WINDOWS:
+                    native_cycle_attribution_rows += 1
+                    for cycle_phase in NATIVE_PHASES:
+                        cycle_value = int(raw_cycles[cycle_phase])
+                        native_thread_cycles[cycle_phase].append(
+                            float(cycle_value)
+                        )
+                        native_thread_cycles_by_evidence[cycle_phase][
+                            bucket
+                        ].append(float(cycle_value))
+                raw_contention = audit.get("observer_contention")
+                assert isinstance(raw_contention, dict)
+                row_contention = raw_contention
+                (
+                    row_contention_class,
+                    row_contention_names,
+                    contention_pattern,
+                ) = _contention_overlap(raw_contention)
+                observer_contention_classes[row_contention_class] += 1
+                observer_contention_patterns[contention_pattern] += 1
             gc_total = 0
             for gc_phase in (
                 "prepare",
@@ -1113,6 +1276,12 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
                                 "observation_ms": observation_value,
                                 "segments_ms": numeric_segments,
                                 "gc_completed": completed,
+                                "thread_cycles": row_thread_cycles,
+                                "observer_contention": row_contention,
+                                "known_future_overlap": {
+                                    "classification": row_contention_class,
+                                    "futures": row_contention_names,
+                                },
                             }
                         )
         for field, target in (
@@ -1236,6 +1405,14 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         and observation_timing["p99"] <= OBSERVER_P99_LIMIT_MS
         and observation_timing["max"] <= OBSERVER_MAX_LIMIT_MS
     )
+    cycle_attribution_required = schema_v9_native_success_rows > 0
+    cycle_attribution_available = (
+        not cycle_attribution_required
+        or (
+            native_cycle_attribution_rows
+            == schema_v9_native_success_rows
+        )
+    )
     timed_intent_available = bool(events)
     velocity_coverage_statuses: Counter[str] = Counter()
     velocity_lowering_statuses: Counter[str] = Counter()
@@ -1270,11 +1447,14 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             validation_passed
             and observer_budget_passed
             and timed_intent_available
+            and cycle_attribution_available
         ),
         "gates": {
             "validation_passed": validation_passed,
             "observer_budget_passed": observer_budget_passed,
             "timed_intent_available": timed_intent_available,
+            "cycle_attribution_required": cycle_attribution_required,
+            "cycle_attribution_available": cycle_attribution_available,
             "observer_limits_ms": {
                 "p95": OBSERVER_P95_LIMIT_MS,
                 "p99": OBSERVER_P99_LIMIT_MS,
@@ -1438,6 +1618,46 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
                 native_over_budget_dominant_segments
             ),
             "over_budget_samples": native_over_budget_samples,
+            "thread_cycle_sources": _counter(
+                native_thread_cycle_sources
+            ),
+            "thread_cycle_attribution_rows": (
+                native_cycle_attribution_rows
+            ),
+            "thread_cycles": {
+                phase: _distribution(values)
+                for phase, values in sorted(native_thread_cycles.items())
+            },
+            "thread_cycles_by_evidence_count": {
+                phase: {
+                    bucket: _distribution(values)
+                    for bucket, values in sorted(buckets.items())
+                }
+                for phase, buckets in sorted(
+                    native_thread_cycles_by_evidence.items()
+                )
+            },
+            "observer_contention": {
+                "classifications": _counter(
+                    observer_contention_classes
+                ),
+                "endpoint_patterns": _counter(
+                    observer_contention_patterns
+                ),
+                "semantics": {
+                    "definite_known_future_overlap": (
+                        "one known future was inflight at both endpoints"
+                    ),
+                    "ambiguous_endpoint_overlap": (
+                        "one known future changed to or from inflight"
+                    ),
+                    "no_known_future_overlap": (
+                        "none of the three known futures overlapped both "
+                        "endpoints"
+                    ),
+                    "causal_authority": "none",
+                },
+            },
         },
         "scope": {
             "intent_source": "active_spell_enemy_main_vm_only",

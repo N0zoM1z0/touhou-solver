@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import struct
 import time
 from typing import Any
 
@@ -24,7 +23,7 @@ from .native import (
 )
 
 
-AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION = 1
+AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION = 2
 AUXILIARY_VM_BATCH_TRACE_ROLE = "trace_only_no_action_authority"
 
 
@@ -104,56 +103,10 @@ class AuxiliaryVmBatchTraceService:
             return None
 
         total_started = time.perf_counter()
-        owner_capture_started = total_started
-        owner_frame_before: int | None = None
-        owner_frame_after: int | None = None
-        try:
-            owner_frame_before = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
-            owner_blob = reader.read(
-                ENEMY_POOL_BASE,
-                ENEMY_LOCAL_PREFIX_SIZE * ENEMY_STRIDE,
-            )
-            owner_frame_after = reader.u32(ADDR_ENEMY_MANAGER_FRAME)
-        except (OSError, RuntimeError, ValueError, struct.error) as error:
-            return self._error_record(
-                decision_frame=decision_frame,
-                manager_frame=manager_frame,
-                gameplay_epoch=gameplay_epoch,
-                stage_route_index=stage_route_index,
-                spell_id=spell_id,
-                owner_frame_before=owner_frame_before,
-                owner_frame_after=owner_frame_after,
-                error=f"{type(error).__name__}: {error}",
-                status="owner_capture_failed",
-                total_started=total_started,
-                owner_capture_started=owner_capture_started,
-            )
-        owner_capture_ms = (
-            time.perf_counter() - owner_capture_started
-        ) * 1000.0
-        if owner_frame_before != owner_frame_after:
-            return self._error_record(
-                decision_frame=decision_frame,
-                manager_frame=manager_frame,
-                gameplay_epoch=gameplay_epoch,
-                stage_route_index=stage_route_index,
-                spell_id=spell_id,
-                owner_frame_before=owner_frame_before,
-                owner_frame_after=owner_frame_after,
-                error="enemy manager frame changed across owner capture",
-                status="owner_frame_changed",
-                total_started=total_started,
-                owner_capture_started=owner_capture_started,
-                owner_capture_ms=owner_capture_ms,
-            )
-        assert owner_frame_after is not None
-        self._last_attempt_frame = owner_frame_after
-
-        observation_started = time.perf_counter()
+        observation_started = total_started
         try:
             observation = self.capture.capture_process(
                 reader,
-                owner_blob,
                 pool_base=ENEMY_POOL_BASE,
                 manager_frame_address=ADDR_ENEMY_MANAGER_FRAME,
                 record_count=ENEMY_LOCAL_PREFIX_SIZE,
@@ -163,7 +116,6 @@ class AuxiliaryVmBatchTraceService:
                 context_pointer_offset=(
                     ENEMY_AUXILIARY_ECL_CONTEXT_POINTERS_OFFSET
                 ),
-                expected_manager_frame=owner_frame_after,
             )
         except (OSError, RuntimeError, TypeError, ValueError) as error:
             return self._error_record(
@@ -172,13 +124,9 @@ class AuxiliaryVmBatchTraceService:
                 gameplay_epoch=gameplay_epoch,
                 stage_route_index=stage_route_index,
                 spell_id=spell_id,
-                owner_frame_before=owner_frame_before,
-                owner_frame_after=owner_frame_after,
                 error=f"{type(error).__name__}: {error}",
-                status="native_batch_failed",
+                status="native_transaction_failed",
                 total_started=total_started,
-                owner_capture_started=owner_capture_started,
-                owner_capture_ms=owner_capture_ms,
             )
         observation_ms = (
             time.perf_counter() - observation_started
@@ -202,14 +150,17 @@ class AuxiliaryVmBatchTraceService:
             "native_call_mode": self.native_call_mode,
             "status": "success" if observation.success else "rejected",
             "error": None,
-            "owner_frame_before": owner_frame_before,
-            "owner_frame_after": owner_frame_after,
-            "process_read_count_including_owner_capture": (
-                observation.process_read_count + 3
+            "selected_manager_frame": observation.expected_manager_frame,
+            "owner_manager_frame_after": (
+                observation.owner_manager_frame_after
             ),
+            "context_manager_frame_before": (
+                observation.manager_frame_before
+            ),
+            "manager_frame_after": observation.manager_frame_after,
+            "process_read_count": observation.process_read_count,
             "observation": compact,
             "timing_ms": {
-                "owner_capture": owner_capture_ms,
                 "native_call": diagnostics.native_call_ms,
                 "materialize": diagnostics.materialize_ms,
                 "observation": observation_ms,
@@ -226,18 +177,10 @@ class AuxiliaryVmBatchTraceService:
         gameplay_epoch: int,
         stage_route_index: int,
         spell_id: int | None,
-        owner_frame_before: int | None,
-        owner_frame_after: int | None,
         error: str,
         status: str,
         total_started: float,
-        owner_capture_started: float,
-        owner_capture_ms: float | None = None,
     ) -> dict[str, object]:
-        if owner_capture_ms is None:
-            owner_capture_ms = (
-                time.perf_counter() - owner_capture_started
-            ) * 1000.0
         return {
             "kind": "auxiliary_vm_batch",
             "schema_version": AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
@@ -252,12 +195,13 @@ class AuxiliaryVmBatchTraceService:
             "native_call_mode": self.native_call_mode,
             "status": status,
             "error": error,
-            "owner_frame_before": owner_frame_before,
-            "owner_frame_after": owner_frame_after,
-            "process_read_count_including_owner_capture": None,
+            "selected_manager_frame": None,
+            "owner_manager_frame_after": None,
+            "context_manager_frame_before": None,
+            "manager_frame_after": None,
+            "process_read_count": None,
             "observation": None,
             "timing_ms": {
-                "owner_capture": owner_capture_ms,
                 "native_call": 0.0,
                 "materialize": 0.0,
                 "observation": 0.0,

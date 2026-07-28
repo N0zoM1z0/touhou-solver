@@ -26,9 +26,12 @@ MAXIMUM_STATE_PAYLOAD_BYTES = (
     * (1 + MAXIMUM_RESTORABLE_FRAMES)
     * ACTIVE_VM_BYTES
 )
+MAXIMUM_OWNER_BLOB_BYTES = MAXIMUM_OWNERS * 0x53D0
 MINIMUM_RUNTIME_ADDRESS = 0x00010000
 MAXIMUM_RUNTIME_ADDRESS = 0x7FFFFFFF
 UNOBSERVED_MANAGER_FRAME = -(1 << 31)
+AUXILIARY_VM_BATCH_LAYOUT_V1 = "th08-auxiliary-vm-batch-v1"
+AUXILIARY_VM_BATCH_LAYOUT_V2 = "th08-auxiliary-vm-batch-v2"
 
 
 class BatchStatus(IntFlag):
@@ -39,6 +42,7 @@ class BatchStatus(IntFlag):
     OWNER_BLOB_INVALID = 1 << 3
     UNSUPPORTED_PLATFORM = 1 << 4
     PROCESS_READ_FAILED = 1 << 5
+    OWNER_CAPTURE_FRAME_MISMATCH = 1 << 6
 
 
 class RecordStatus(IntFlag):
@@ -114,6 +118,9 @@ class AuxiliaryVmBatchObservation:
     records: tuple[AuxiliaryVmBatchRecord, ...]
     process_read_count: int
     state_payload_bytes: int
+    layout: str = AUXILIARY_VM_BATCH_LAYOUT_V1
+    owner_manager_frame_after: int | None = None
+    owner_blob_bytes: int = 0
 
     @property
     def active_owner_count(self) -> int:
@@ -141,12 +148,9 @@ class AuxiliaryVmBatchObservation:
         )
 
     def compact_record(self) -> dict[str, object]:
-        return {
-            "layout": "th08-auxiliary-vm-batch-v1",
+        record: dict[str, object] = {
+            "layout": self.layout,
             "authority": "trace_only_no_action_authority",
-            "expected_manager_frame": self.expected_manager_frame,
-            "manager_frame_before": self.manager_frame_before,
-            "manager_frame_after": self.manager_frame_after,
             "batch_status_bits": int(self.batch_status),
             "success": self.success,
             "active_owner_count": self.active_owner_count,
@@ -157,11 +161,38 @@ class AuxiliaryVmBatchObservation:
             "state_payload_bytes": self.state_payload_bytes,
             "records": [record.compact_record() for record in self.records],
         }
+        if self.layout == AUXILIARY_VM_BATCH_LAYOUT_V1:
+            record.update(
+                {
+                    "expected_manager_frame": self.expected_manager_frame,
+                    "manager_frame_before": self.manager_frame_before,
+                    "manager_frame_after": self.manager_frame_after,
+                }
+            )
+        elif self.layout == AUXILIARY_VM_BATCH_LAYOUT_V2:
+            record.update(
+                {
+                    "selected_manager_frame": self.expected_manager_frame,
+                    "owner_manager_frame_after": (
+                        self.owner_manager_frame_after
+                    ),
+                    "context_manager_frame_before": (
+                        self.manager_frame_before
+                    ),
+                    "manager_frame_after": self.manager_frame_after,
+                    "owner_blob_bytes": self.owner_blob_bytes,
+                }
+            )
+        else:
+            raise ValueError(f"unknown auxiliary-VM layout {self.layout!r}")
+        return record
 
 
 __all__ = [
     "ACTIVE_VM_AUXILIARY_MARKER_OFFSET",
     "ACTIVE_VM_BYTES",
+    "AUXILIARY_VM_BATCH_LAYOUT_V1",
+    "AUXILIARY_VM_BATCH_LAYOUT_V2",
     "AUXILIARY_POINTERS_PER_OWNER",
     "AuxiliaryVmBatchObservation",
     "AuxiliaryVmBatchRecord",
@@ -172,6 +203,7 @@ __all__ = [
     "CONTEXT_PREFIX_BYTES",
     "CONTEXT_TARGET_OFFSET",
     "MAXIMUM_OWNERS",
+    "MAXIMUM_OWNER_BLOB_BYTES",
     "MAXIMUM_RECORDS",
     "MAXIMUM_RESTORABLE_FRAMES",
     "MAXIMUM_RUNTIME_ADDRESS",

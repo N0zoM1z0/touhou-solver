@@ -224,10 +224,14 @@ the focused action-neutral spell-107 run are complete in
 separate Python owner-prefix capture because 9 of 124 attempts crossed one
 manager frame before native entry.
 
-1. Contract and implement a versioned one-call native owner/context coherence
-   transaction with caller-owned buffers and the unchanged zero-failure gate.
-2. Repeat the focused spell-107 physical gate without hiding skipped or
-   retried brackets.
+The native-owned v2 correction and physical repeat are complete in
+`G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_STAGE5_RESULT_20260728.md`. CE-0165
+rejects the no-retry zero-failure assumption after 7 of 235 transactions
+crossed an update boundary.
+
+1. Contract a fixed small-budget, fully visible retry composition; exhaustion
+   remains failure and every attempt is charged to the unchanged gate.
+2. Repeat the focused spell-107 physical gate without hiding failed attempts.
 3. Capture and compare one exact shipped Stage-5 runtime ECL image outside the
    issue boundary.
 4. Only after those pass, interpret a fail-closed auxiliary fire subset and

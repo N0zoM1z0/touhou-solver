@@ -9,6 +9,7 @@ from .model import (
     ACTIVE_VM_AUXILIARY_MARKER_OFFSET,
     ACTIVE_VM_BYTES,
     AUXILIARY_POINTERS_PER_OWNER,
+    AUXILIARY_VM_BATCH_LAYOUT_V2,
     AuxiliaryVmBatchObservation,
     AuxiliaryVmBatchRecord,
     BatchStatus,
@@ -415,4 +416,73 @@ def decode_auxiliary_vm_batch_fixture(
     )
 
 
-__all__ = ["decode_auxiliary_vm_batch_fixture"]
+def decode_auxiliary_vm_batch_owned_fixture(
+    owner_blob: bytes,
+    owner_blob_after: bytes,
+    arena_before: bytes,
+    arena_after: bytes,
+    *,
+    arena_base: int,
+    pool_base: int,
+    record_count: int,
+    enemy_stride: int,
+    enemy_flags_offset: int,
+    enemy_active_flag: int,
+    context_pointer_offset: int,
+    selected_manager_frame: int,
+    owner_manager_frame_after: int,
+    context_manager_frame_before: int,
+    manager_frame_after: int,
+    output_payload_capacity: int = MAXIMUM_STATE_PAYLOAD_BYTES,
+) -> AuxiliaryVmBatchObservation:
+    """Compose the v2 native-owned read schedule over independent bytes."""
+
+    owner_blob_bytes = 0
+    if record_count >= 0 and enemy_stride >= 0:
+        required = record_count * enemy_stride
+        if required <= len(owner_blob) and required <= 0xFFFFFFFF:
+            owner_blob_bytes = required
+    if owner_manager_frame_after != selected_manager_frame:
+        return AuxiliaryVmBatchObservation(
+            expected_manager_frame=selected_manager_frame,
+            manager_frame_before=UNOBSERVED_MANAGER_FRAME,
+            manager_frame_after=UNOBSERVED_MANAGER_FRAME,
+            batch_status=BatchStatus.OWNER_CAPTURE_FRAME_MISMATCH,
+            records=(),
+            process_read_count=3,
+            state_payload_bytes=0,
+            layout=AUXILIARY_VM_BATCH_LAYOUT_V2,
+            owner_manager_frame_after=owner_manager_frame_after,
+            owner_blob_bytes=owner_blob_bytes,
+        )
+
+    inner = decode_auxiliary_vm_batch_fixture(
+        owner_blob,
+        owner_blob_after,
+        arena_before,
+        arena_after,
+        arena_base=arena_base,
+        pool_base=pool_base,
+        record_count=record_count,
+        enemy_stride=enemy_stride,
+        enemy_flags_offset=enemy_flags_offset,
+        enemy_active_flag=enemy_active_flag,
+        context_pointer_offset=context_pointer_offset,
+        expected_manager_frame=selected_manager_frame,
+        manager_frame_before=context_manager_frame_before,
+        manager_frame_after=manager_frame_after,
+        output_payload_capacity=output_payload_capacity,
+    )
+    return replace(
+        inner,
+        process_read_count=inner.process_read_count + 3,
+        layout=AUXILIARY_VM_BATCH_LAYOUT_V2,
+        owner_manager_frame_after=owner_manager_frame_after,
+        owner_blob_bytes=owner_blob_bytes,
+    )
+
+
+__all__ = [
+    "decode_auxiliary_vm_batch_fixture",
+    "decode_auxiliary_vm_batch_owned_fixture",
+]

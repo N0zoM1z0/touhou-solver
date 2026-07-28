@@ -12,7 +12,10 @@ from th08_live.auxiliary_vm import (
     BatchStatus,
     RecordStatus,
 )
-from th08_live.auxiliary_vm.model import ACTIVE_VM_BYTES
+from th08_live.auxiliary_vm.model import (
+    ACTIVE_VM_BYTES,
+    AUXILIARY_VM_BATCH_LAYOUT_V2,
+)
 
 
 def _decision(frame: int) -> dict[str, object]:
@@ -51,12 +54,15 @@ def _batch(frame: int) -> dict[str, object]:
                 saved_frames=(),
             ),
         ),
-        process_read_count=6,
+        process_read_count=9,
         state_payload_bytes=ACTIVE_VM_BYTES,
+        layout=AUXILIARY_VM_BATCH_LAYOUT_V2,
+        owner_manager_frame_after=frame,
+        owner_blob_bytes=0x53D0,
     )
     return {
         "kind": "auxiliary_vm_batch",
-        "schema_version": 1,
+        "schema_version": 2,
         "authority": "trace_only_no_action_authority",
         "frame": frame,
         "snapshot_frame": frame,
@@ -68,12 +74,13 @@ def _batch(frame: int) -> dict[str, object]:
         "native_call_mode": "gil-held",
         "status": "success",
         "error": None,
-        "owner_frame_before": frame,
-        "owner_frame_after": frame,
-        "process_read_count_including_owner_capture": 9,
+        "selected_manager_frame": frame,
+        "owner_manager_frame_after": frame,
+        "context_manager_frame_before": frame,
+        "manager_frame_after": frame,
+        "process_read_count": 9,
         "observation": observation.compact_record(),
         "timing_ms": {
-            "owner_capture": 0.5,
             "native_call": 0.25,
             "materialize": 0.1,
             "observation": 0.4,
@@ -155,7 +162,10 @@ class AuxiliaryVmBatchTraceTests(unittest.TestCase):
         with TemporaryDirectory() as temporary:
             trace = Path(temporary) / "trace.jsonl"
             row = _batch(100)
-            row["owner_frame_after"] = 101
+            row["owner_manager_frame_after"] = 101
+            observation = row["observation"]
+            assert isinstance(observation, dict)
+            observation["owner_manager_frame_after"] = 101
             _write_rows(trace, [row])
             scan = scan_trace(trace, audit_batches=True)
         self.assertTrue(scan.validation_errors)

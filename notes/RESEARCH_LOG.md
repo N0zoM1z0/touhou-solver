@@ -8108,3 +8108,51 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Do not hide failed attempts as skips or retries. No source-completeness,
   future-hazard, planner, feasibility, publication, or action authority is
   added.
+
+## 2026-07-28 — Removed the owner transport gap and exposed asynchronous snapshot boundaries
+
+- Fixed
+  `G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md` before code.
+  Decision snapshot frame is trigger metadata only. Native selects `m0`, then
+  records `m0 -> owner -> m1 -> m2 -> contexts/owner rechecks -> m3`; all four
+  frames are explicit and no retry is allowed.
+- Added packed `BatchV2`, fixture/process-v2 exports, a reusable 1,373,184-byte
+  owner buffer, independent scalar v2 composition, schema-v2 service/audit,
+  and exact logical read accounting. Python owner `read/u32` calls are
+  regression-fatal. V1 exports/fixtures remain for retained evidence.
+- Independent/native parity covers all frame mismatch locations,
+  depth/capacity/PC/marker/owner/context failures, 64 randomized v2 cases, and
+  the 256-context/depth-15 bound at exactly 837 logical reads. The complete
+  suite caught and fixed an early-inner-validation diagnostic count
+  regression (`3 -> 0`).
+- Retained Linux/Windows v2 benchmark digests
+  `caadd8b48188d12f9b070e20df6b9da2a34ccf36192fa2524ac0bf8a0979c442`
+  and
+  `56530701b3b8609f7a0a9a4192d8d9fd34e2ea385cdeaa23fa66261073ac15d8`.
+  Required 34-context/depth-15 end-to-end p95 is `0.501/0.521 ms`.
+  Complete Linux/Windows discovery passes 935 tests; Windows retains three
+  existing platform skips.
+- **Observed physical workload:** Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_193820` completed frames
+  `2..45403`, 13,586 decisions, twenty hits, hard no-Bomb, `route_complete`,
+  accepted session/transition gates, exact key release, and no residual
+  process. The action policy was unchanged, so hit count is not a causal
+  comparison.
+- The spell-107 audit retained 235 schema-v2 attempts, 6,634 non-null depth-0
+  contexts, 12,674 null rows, 1,964 active-VM hashes, and 228 fully coherent
+  batches. Native p50/p95/p99/max is
+  `0.330/0.463/0.584/0.894 ms`; decision cadence remains p50/p95/p99
+  `2/4/4`.
+- **Observed CE-0165:** Two transactions crossed at owner close and five
+  crossed only at final close. The fixed no-retry zero-failure gate rejects
+  v2 despite every timing/cadence/route/cleanup gate passing. Strict report
+  digest is
+  `23313712483c80c3a8323f18f31d19abbf2ed00e3bd2efcf8ef02f9b03712634`;
+  raw SHA-256 is
+  `76472605d19b32b875b33d918527f0e6d13169ba862362451bc0f0ae015d8f13`.
+- **Decision:** Retain one-call native ownership and explicit frame evidence.
+  Reject no-retry physical acceptance. Contract a bounded, fully visible
+  retry composition before code; exhaustion remains failure and all attempt
+  cost remains inside the unchanged physical gate. Polling one full frame or
+  pausing the game is not authorized. No source-completeness, future-hazard,
+  planner, feasibility, publication, or action authority is added.

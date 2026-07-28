@@ -1,0 +1,229 @@
+{
+  "authority": "offline trace-only preflight; no live action authority",
+  "passed": true,
+  "platform": {
+    "machine": "x86_64",
+    "python": "3.13.5",
+    "release": "6.6.87.2-microsoft-standard-WSL2",
+    "system": "Linux"
+  },
+  "report_digest": "caadd8b48188d12f9b070e20df6b9da2a34ccf36192fa2524ac0bf8a0979c442",
+  "results": [
+    {
+      "active_owner_count": 7,
+      "depth_cycle": [
+        0,
+        1
+      ],
+      "name": "stage5_observed_p95_density",
+      "non_null_context_count": 26,
+      "parity": {
+        "compact_record_sha256": "308e7e7ce276e1ddd26815932cc98a301999b70d7f3342a461f36b79d01d7c5d",
+        "passed": true
+      },
+      "preflight_gate": {
+        "max_limit_ms": 12.0,
+        "max_pass": true,
+        "p95_limit_ms": 2.0,
+        "p95_pass": true,
+        "p99_limit_ms": 4.0,
+        "p99_pass": true,
+        "passed": true
+      },
+      "process_read_count_fixture_schedule": 90,
+      "record_count": 28,
+      "required_for_preflight": true,
+      "state_payload_bytes": 21528,
+      "timing_ms": {
+        "end_to_end": {
+          "count": 1000,
+          "max": 0.5564929888350889,
+          "mean": 0.24954730685567483,
+          "p50": 0.2404784972895868,
+          "p95": 0.2909327486122492,
+          "p99": 0.32166418139240704
+        },
+        "native_fixture_call": {
+          "count": 1000,
+          "max": 0.021979998564347625,
+          "mean": 0.006343123925034888,
+          "p50": 0.006132002454251051,
+          "p95": 0.0077203956607263535,
+          "p99": 0.009201341454172507
+        },
+        "python_materialize": {
+          "count": 1000,
+          "max": 0.5310239939717576,
+          "mean": 0.2339163860597182,
+          "p50": 0.22512350551551208,
+          "p95": 0.27209080071770586,
+          "p99": 0.29837219204637216
+        }
+      }
+    },
+    {
+      "active_owner_count": 9,
+      "depth_cycle": [
+        0
+      ],
+      "name": "contract_34_context_depth0",
+      "non_null_context_count": 34,
+      "parity": {
+        "compact_record_sha256": "f295be977231b6af899013c1110f3c52b0e51b2a7053733d94a60478b9620e67",
+        "passed": true
+      },
+      "preflight_gate": {
+        "max_limit_ms": 12.0,
+        "max_pass": true,
+        "p95_limit_ms": 2.0,
+        "p95_pass": true,
+        "p99_limit_ms": 4.0,
+        "p99_pass": true,
+        "passed": true
+      },
+      "process_read_count_fixture_schedule": 116,
+      "record_count": 36,
+      "required_for_preflight": true,
+      "state_payload_bytes": 18768,
+      "timing_ms": {
+        "end_to_end": {
+          "count": 1000,
+          "max": 0.6271780002862215,
+          "mean": 0.31548780495359097,
+          "p50": 0.3110719917458482,
+          "p95": 0.38413029615185224,
+          "p99": 0.41426045121625066
+        },
+        "native_fixture_call": {
+          "count": 1000,
+          "max": 0.03722299879882485,
+          "mean": 0.006545528711285442,
+          "p50": 0.006281501555349678,
+          "p95": 0.008152197551680729,
+          "p99": 0.011555185192264608
+        },
+        "python_materialize": {
+          "count": 1000,
+          "max": 0.6086299981689081,
+          "mean": 0.29951931597315706,
+          "p50": 0.2953755029011518,
+          "p95": 0.3652390543720685,
+          "p99": 0.39438728636014275
+        }
+      }
+    },
+    {
+      "active_owner_count": 9,
+      "depth_cycle": [
+        15
+      ],
+      "name": "stage5_observed_max_density_depth15",
+      "non_null_context_count": 34,
+      "parity": {
+        "compact_record_sha256": "45dc3a52a9bd6c8e4842632e3569f093f09833b4f78cf8b7e8abb9053e2598ed",
+        "passed": true
+      },
+      "preflight_gate": {
+        "max_limit_ms": 12.0,
+        "max_pass": true,
+        "p95_limit_ms": 2.0,
+        "p95_pass": true,
+        "p99_limit_ms": 4.0,
+        "p99_pass": true,
+        "passed": true
+      },
+      "process_read_count_fixture_schedule": 116,
+      "record_count": 36,
+      "required_for_preflight": true,
+      "state_payload_bytes": 300288,
+      "timing_ms": {
+        "end_to_end": {
+          "count": 1000,
+          "max": 0.8811220031930134,
+          "mean": 0.4529703778825933,
+          "p50": 0.44733200047630817,
+          "p95": 0.5012169473047834,
+          "p99": 0.5513794644502922
+        },
+        "native_fixture_call": {
+          "count": 1000,
+          "max": 0.08485600119456649,
+          "mean": 0.01966153377725277,
+          "p50": 0.019070503185503185,
+          "p95": 0.022101850481703874,
+          "p99": 0.030894008814357218
+        },
+        "python_materialize": {
+          "count": 1000,
+          "max": 0.8130019996315241,
+          "mean": 0.4070847232360393,
+          "p50": 0.4017129977000877,
+          "p95": 0.44977475117775606,
+          "p99": 0.49947042396524916
+        }
+      }
+    },
+    {
+      "active_owner_count": 64,
+      "depth_cycle": [
+        15
+      ],
+      "name": "contract_256_context_depth15",
+      "non_null_context_count": 256,
+      "parity": {
+        "compact_record_sha256": "3119cbadaeb98a8411a8462558f16d334aaaa4adbb0273a8d8a79c2aeeb7091b",
+        "passed": true
+      },
+      "preflight_gate": {
+        "max_limit_ms": 12.0,
+        "max_pass": true,
+        "p95_limit_ms": 2.0,
+        "p95_pass": false,
+        "p99_limit_ms": 4.0,
+        "p99_pass": true,
+        "passed": false
+      },
+      "process_read_count_fixture_schedule": 837,
+      "record_count": 256,
+      "required_for_preflight": false,
+      "state_payload_bytes": 2260992,
+      "timing_ms": {
+        "end_to_end": {
+          "count": 1000,
+          "max": 5.1966629980597645,
+          "mean": 3.1846146229072474,
+          "p50": 3.1558395057800226,
+          "p95": 3.653176012448966,
+          "p99": 3.9222625548427454
+        },
+        "native_fixture_call": {
+          "count": 1000,
+          "max": 0.4726110055344179,
+          "mean": 0.17045138093817513,
+          "p50": 0.15787699521752074,
+          "p95": 0.2650134520081337,
+          "p99": 0.3500233273371122
+        },
+        "python_materialize": {
+          "count": 1000,
+          "max": 4.511760998866521,
+          "mean": 2.8033368208562024,
+          "p50": 2.7838070018333383,
+          "p95": 3.1493728056375403,
+          "p99": 3.3891520726319864
+        }
+      }
+    }
+  ],
+  "schema": "th08-auxiliary-vm-batch-benchmark-v2",
+  "timing_boundary": {
+    "excludes": "game-process owner/context ReadProcessMemory latency, compact hashing, JSON serialization, planning, and input",
+    "includes": "ctypes pointer preparation, one fixture FFI call, bounded v2 owner/context bracket composition over local fixture bytes, and Python raw-byte materialization",
+    "interpretation": "cross-platform deterministic preflight only; the Windows game-process physical contention gate remains required"
+  },
+  "workload": {
+    "iterations_per_case": 1000,
+    "native_call_mode": "gil-held",
+    "warmup_per_case": 50
+  }
+}

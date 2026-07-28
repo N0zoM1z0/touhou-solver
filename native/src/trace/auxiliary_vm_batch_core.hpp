@@ -28,6 +28,7 @@ enum BatchStatus : std::uint32_t {
     kOwnerBlobInvalid = 1U << 3,
     kUnsupportedPlatform = 1U << 4,
     kProcessReadFailed = 1U << 5,
+    kOwnerCaptureFrameMismatch = 1U << 6,
 };
 
 enum RecordStatus : std::uint32_t {
@@ -80,10 +81,26 @@ struct BatchV1 {
     std::uint32_t usable_context_count;
     std::uint64_t state_payload_bytes;
 };
+
+struct BatchV2 {
+    std::uint32_t status_bits;
+    std::int32_t selected_manager_frame;
+    std::int32_t owner_manager_frame_after;
+    std::int32_t context_manager_frame_before;
+    std::int32_t manager_frame_after;
+    std::uint32_t process_read_count;
+    std::uint32_t owner_blob_bytes;
+    std::uint32_t active_owner_count;
+    std::uint32_t record_count;
+    std::uint32_t non_null_context_count;
+    std::uint32_t usable_context_count;
+    std::uint64_t state_payload_bytes;
+};
 #pragma pack(pop)
 
 static_assert(sizeof(RecordV1) == 52, "unexpected auxiliary record ABI");
 static_assert(sizeof(BatchV1) == 44, "unexpected auxiliary batch ABI");
+static_assert(sizeof(BatchV2) == 52, "unexpected auxiliary batch-v2 ABI");
 
 template <typename Value>
 Value read_value(const std::uint8_t* bytes, std::size_t offset) {
@@ -516,6 +533,100 @@ int capture_batch(
     if (output_batch->status_bits == kBatchOk && !row_failure) {
         output_batch->usable_context_count = locally_usable_contexts;
     }
+    output_batch->process_read_count = reader.read_count;
+    return 0;
+}
+
+inline void initialize_batch_v2(BatchV2* output_batch) {
+    std::memset(output_batch, 0, sizeof(*output_batch));
+    constexpr auto kUnobserved = std::numeric_limits<std::int32_t>::min();
+    output_batch->selected_manager_frame = kUnobserved;
+    output_batch->owner_manager_frame_after = kUnobserved;
+    output_batch->context_manager_frame_before = kUnobserved;
+    output_batch->manager_frame_after = kUnobserved;
+}
+
+inline void copy_batch_v1_to_v2(
+    const BatchV1& source,
+    BatchV2* destination
+) {
+    destination->status_bits |= source.status_bits;
+    destination->context_manager_frame_before = (
+        source.manager_frame_before
+    );
+    destination->manager_frame_after = source.manager_frame_after;
+    destination->process_read_count = source.process_read_count;
+    destination->active_owner_count = source.active_owner_count;
+    destination->record_count = source.record_count;
+    destination->non_null_context_count = (
+        source.non_null_context_count
+    );
+    destination->usable_context_count = source.usable_context_count;
+    destination->state_payload_bytes = source.state_payload_bytes;
+}
+
+template <typename Reader>
+int capture_batch_v2_after_owner(
+    Reader& reader,
+    const std::uint8_t* owner_blob,
+    std::uint64_t owner_blob_size,
+    std::uint32_t pool_base,
+    int record_count,
+    int stride,
+    int flags_offset,
+    std::uint32_t active_flag,
+    int context_pointer_offset,
+    std::int32_t selected_manager_frame,
+    std::int32_t owner_manager_frame_after,
+    RecordV1* output_records,
+    int output_record_capacity,
+    std::uint8_t* output_payload,
+    std::uint64_t output_payload_capacity,
+    BatchV2* output_batch
+) {
+    if (
+        owner_blob == nullptr
+        || output_records == nullptr
+        || output_payload == nullptr
+        || output_batch == nullptr
+    ) {
+        return -1;
+    }
+    output_batch->selected_manager_frame = selected_manager_frame;
+    output_batch->owner_manager_frame_after = (
+        owner_manager_frame_after
+    );
+    if (owner_manager_frame_after != selected_manager_frame) {
+        output_batch->status_bits |= kOwnerCaptureFrameMismatch;
+        output_batch->process_read_count = reader.read_count;
+        return 0;
+    }
+
+    BatchV1 inner{};
+    const auto result = capture_batch(
+        reader,
+        owner_blob,
+        owner_blob_size,
+        pool_base,
+        record_count,
+        stride,
+        flags_offset,
+        active_flag,
+        context_pointer_offset,
+        selected_manager_frame,
+        output_records,
+        output_record_capacity,
+        output_payload,
+        output_payload_capacity,
+        &inner
+    );
+    if (result != 0) {
+        return result;
+    }
+    copy_batch_v1_to_v2(inner, output_batch);
+    // The v2 reader already accounts for the three owner-transaction reads.
+    // Inner v1 validation can return before copying that carried count into
+    // BatchV1, so the composed diagnostic must use the reader itself.
     output_batch->process_read_count = reader.read_count;
     return 0;
 }

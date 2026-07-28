@@ -520,6 +520,15 @@ comparison.
    uncontracted retries remain rejected delivery designs. The exact
    runtime-image primitive has only synthetic authority until a shipped
    Stage-5 image matches byte for byte.
+   Native-owned v2 now removes the Python owner copy and trigger-frame
+   assumption. Its Stage-5 spell-107 run passes full-transaction timing at
+   `0.463/0.584/0.894 ms` p95/p99/max and preserves cadence, but CE-0165
+   rejects no-retry acceptance: 2/235 transactions cross at owner close and
+   5/235 cross only at final close. Retain v2 transport and explicit frames.
+   The next proposed strategy is a fixed small-budget retry whose every
+   attempt is published, whose exhaustion fails closed, and whose total cost
+   remains inside the unchanged gates. Do not poll one frame, pause the game,
+   hide failed attempts, or consume this trace in live guidance.
    None of this changes the live strategy or grants future-hazard authority.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over

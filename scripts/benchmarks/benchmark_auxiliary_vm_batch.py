@@ -22,7 +22,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 from th08_live.auxiliary_vm import (  # noqa: E402
     NativeAuxiliaryVmBatchCapture,
-    decode_auxiliary_vm_batch_fixture,
+    decode_auxiliary_vm_batch_owned_fixture,
 )
 from th08_live.auxiliary_vm.model import (  # noqa: E402
     ACTIVE_VM_AUXILIARY_MARKER_OFFSET,
@@ -175,8 +175,9 @@ def _arguments(workload: Workload) -> dict[str, int]:
         "enemy_flags_offset": ENEMY_FLAGS_OFFSET,
         "enemy_active_flag": 1,
         "context_pointer_offset": CONTEXT_POINTER_OFFSET,
-        "expected_manager_frame": 100,
-        "manager_frame_before": 100,
+        "selected_manager_frame": 100,
+        "owner_manager_frame_after": 100,
+        "context_manager_frame_before": 100,
         "manager_frame_after": 100,
         "output_payload_capacity": MAXIMUM_STATE_PAYLOAD_BYTES,
     }
@@ -191,14 +192,14 @@ def _benchmark_workload(
 ) -> dict[str, object]:
     owner, arena = _fixture(workload)
     arguments = _arguments(workload)
-    scalar = decode_auxiliary_vm_batch_fixture(
+    scalar = decode_auxiliary_vm_batch_owned_fixture(
         owner,
         owner,
         arena,
         arena,
         **arguments,
     )
-    native = capture.decode_fixture(
+    native = capture.decode_owned_fixture(
         owner,
         owner,
         arena,
@@ -208,14 +209,20 @@ def _benchmark_workload(
     if native != scalar:
         raise RuntimeError(f"{workload.name}: scalar/native parity failed")
     for _ in range(warmup):
-        capture.decode_fixture(owner, owner, arena, arena, **arguments)
+        capture.decode_owned_fixture(
+            owner,
+            owner,
+            arena,
+            arena,
+            **arguments,
+        )
 
     total_ms: list[float] = []
     native_ms: list[float] = []
     materialize_ms: list[float] = []
     for _ in range(iterations):
         started = time.perf_counter()
-        observation = capture.decode_fixture(
+        observation = capture.decode_owned_fixture(
             owner,
             owner,
             arena,
@@ -299,7 +306,7 @@ def main(argv: list[str] | None = None) -> int:
         ):
             passed = False
     report: dict[str, object] = {
-        "schema": "th08-auxiliary-vm-batch-benchmark-v1",
+        "schema": "th08-auxiliary-vm-batch-benchmark-v2",
         "platform": {
             "system": platform.system(),
             "release": platform.release(),
@@ -314,11 +321,11 @@ def main(argv: list[str] | None = None) -> int:
         "timing_boundary": {
             "includes": (
                 "ctypes pointer preparation, one fixture FFI call, bounded "
-                "native local-memory reads/validation, and Python raw-byte "
-                "materialization"
+                "v2 owner/context bracket composition over local fixture "
+                "bytes, and Python raw-byte materialization"
             ),
             "excludes": (
-                "game-process ReadProcessMemory latency, owner-pool capture, "
+                "game-process owner/context ReadProcessMemory latency, "
                 "compact hashing, JSON serialization, planning, and input"
             ),
             "interpretation": (

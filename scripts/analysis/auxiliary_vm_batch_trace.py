@@ -78,6 +78,7 @@ class TraceScan:
     hit_frames: list[int] = field(default_factory=list)
     summary: dict[str, object] | None = None
     batch_count: int = 0
+    batch_schema_versions: Counter[int] = field(default_factory=Counter)
     batch_statuses: Counter[str] = field(default_factory=Counter)
     batch_status_bits: Counter[int] = field(default_factory=Counter)
     record_status_bits: Counter[int] = field(default_factory=Counter)
@@ -93,6 +94,7 @@ class TraceScan:
     usable_counts: list[float] = field(default_factory=list)
     payload_bytes: list[float] = field(default_factory=list)
     process_reads: list[float] = field(default_factory=list)
+    owner_blob_bytes: list[float] = field(default_factory=list)
     validation_errors: list[str] = field(default_factory=list)
 
 
@@ -115,8 +117,11 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
     index = scan.batch_count
     context = f"batch[{index}]"
     scan.batch_count += 1
-    if row.get("schema_version") != AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION:
+    schema_version = row.get("schema_version")
+    if schema_version not in (1, AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION):
         raise ValueError(f"{context}: unexpected schema version")
+    assert isinstance(schema_version, int)
+    scan.batch_schema_versions[schema_version] += 1
     if row.get("authority") != AUXILIARY_VM_BATCH_TRACE_ROLE:
         raise ValueError(f"{context}: unexpected authority")
     status = row.get("status")
@@ -126,9 +131,10 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
     timing = row.get("timing_ms")
     if not isinstance(timing, dict):
         raise ValueError(f"{context}: timing_ms is not an object")
-    scan.owner_capture_ms.append(
-        _number(timing, "owner_capture", context=context)
-    )
+    if "owner_capture" in timing:
+        scan.owner_capture_ms.append(
+            _number(timing, "owner_capture", context=context)
+        )
     scan.total_ms.append(_number(timing, "total", context=context))
 
     observation = row.get("observation")
@@ -136,8 +142,12 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         return
     if not isinstance(observation, dict):
         raise ValueError(f"{context}: observation is not an object")
-    if observation.get("layout") != "th08-auxiliary-vm-batch-v1":
-        raise ValueError(f"{context}: unexpected observation layout")
+    layout = observation.get("layout")
+    expected_layout = f"th08-auxiliary-vm-batch-v{schema_version}"
+    if layout != expected_layout:
+        raise ValueError(
+            f"{context}: expected observation layout {expected_layout}"
+        )
     if (
         observation.get("authority")
         != "trace_only_no_action_authority"
@@ -157,16 +167,40 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
     if not isinstance(batch_bits, int) or isinstance(batch_bits, bool):
         raise ValueError(f"{context}: batch status is not an integer")
     scan.batch_status_bits[batch_bits] += 1
-    owner_after = row.get("owner_frame_after")
-    for key in (
-        "expected_manager_frame",
-        "manager_frame_before",
-        "manager_frame_after",
-    ):
-        if observation.get(key) != owner_after:
+    if schema_version == 1:
+        owner_after = row.get("owner_frame_after")
+        for key in (
+            "expected_manager_frame",
+            "manager_frame_before",
+            "manager_frame_after",
+        ):
+            if observation.get(key) != owner_after:
+                scan.validation_errors.append(
+                    f"{context}: {key} does not equal owner frame"
+                )
+    else:
+        frame_keys = (
+            "selected_manager_frame",
+            "owner_manager_frame_after",
+            "context_manager_frame_before",
+            "manager_frame_after",
+        )
+        for key in frame_keys:
+            if observation.get(key) != row.get(key):
+                scan.validation_errors.append(
+                    f"{context}: top-level/observation {key} mismatch"
+                )
+        selected = observation.get("selected_manager_frame")
+        if batch_bits == 0 and any(
+            observation.get(key) != selected
+            for key in frame_keys[1:]
+        ):
             scan.validation_errors.append(
-                f"{context}: {key} does not equal owner frame"
+                f"{context}: successful v2 manager bracket differs"
             )
+        scan.owner_blob_bytes.append(
+            _number(observation, "owner_blob_bytes", context=context)
+        )
     scan.owner_counts.append(
         _number(observation, "active_owner_count", context=context)
     )
@@ -352,6 +386,8 @@ def main(argv: list[str] | None = None) -> int:
     session, session_pass = _session_gate(arguments.session)
     gates = {
         "batch_rows_present": scan.batch_count > 0,
+        "schema_v2_only": scan.batch_schema_versions
+        == Counter({AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION: scan.batch_count}),
         "usable_context_observed": sum(scan.usable_counts) > 0,
         "zero_batch_failures": (
             scan.batch_statuses == Counter({"success": scan.batch_count})
@@ -378,13 +414,19 @@ def main(argv: list[str] | None = None) -> int:
     }
     passed = all(gates.values())
     report: dict[str, object] = {
-        "schema": "th08-auxiliary-vm-batch-physical-gate-v1",
+        "schema": "th08-auxiliary-vm-batch-physical-gate-v2",
         "authority": "physical trace-only evidence; no action authority",
         "trace": _scan_record(scan),
         "baseline": _scan_record(baseline),
         "session": session,
         "batch": {
             "count": scan.batch_count,
+            "schema_versions": {
+                str(key): value
+                for key, value in sorted(
+                    scan.batch_schema_versions.items()
+                )
+            },
             "statuses": dict(sorted(scan.batch_statuses.items())),
             "batch_status_bits": {
                 str(key): value
@@ -405,6 +447,7 @@ def main(argv: list[str] | None = None) -> int:
             "usable_context_count": _distribution(scan.usable_counts),
             "state_payload_bytes": _distribution(scan.payload_bytes),
             "process_read_count": _distribution(scan.process_reads),
+            "owner_blob_bytes": _distribution(scan.owner_blob_bytes),
             "timing_ms": {
                 "owner_capture": _distribution(scan.owner_capture_ms),
                 "native_call": native,

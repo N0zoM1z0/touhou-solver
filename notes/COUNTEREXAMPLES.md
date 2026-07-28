@@ -4986,3 +4986,40 @@ semantics retained, external-owner-capture composition rejected
 - **Authority:** Delivery/coherence, state-density, and timing evidence only.
   No future geometry, source completeness, planner, recurrence, actuator,
   cadence, feasibility, or live action authority changed.
+
+## CE-0165: One native-owned snapshot can still cross the game update boundary
+
+Status: observed physical asynchronous-snapshot counterexample; v2 transport
+retained, no-retry physical acceptance rejected
+
+- **Observed workload:** Explicit trace-only Lunatic Stage-5 spell-107 run
+  `20260728_193820` completed 13,586 decisions over frames `2..45403`, twenty
+  hits, hard no-Bomb, `route_complete`, accepted transition/session cleanup,
+  and no residual game or controller process.
+- **Correction already achieved:** V2 removed all Python owner reads/copies,
+  selected its own post-entry frame, exposed four manager frames, and captured
+  owner plus contexts in one native call. Full native p95/p99/max is
+  `0.463/0.584/0.894 ms`; cadence and every non-coherence gate pass.
+- **Observed failure:** 7 of 235 due transactions were rejected. Two crossed
+  from selected frame to owner-close frame; five retained equal selected,
+  owner-close, and context-open frames but the final frame advanced by one.
+  The exact frame pairs are
+  `30871->30872`, `33360->33361`, `30888->30889`,
+  `31946->31947`, `32975->32976`, `33135->33136`, and
+  `33549->33550`.
+- **Invalid assumption:** Removing the Python/native gap would make every
+  asynchronously started external snapshot fit wholly inside one 60-Hz game
+  update interval. Even a sub-millisecond transaction can begin immediately
+  before an update boundary.
+- **Correction:** Retain v2 transport and frame evidence. Reject the no-retry
+  acceptance claim. Before any retry implementation, contract a fixed small
+  attempt budget, expose every attempt, publish only one coherent final
+  attempt, treat exhaustion as failure, and charge all attempts to unchanged
+  timing/cadence gates. Do not poll for up to one frame or pause the game.
+- **Evidence:** Strict physical report digest
+  `23313712483c80c3a8323f18f31d19abbf2ed00e3bd2efcf8ef02f9b03712634`;
+  raw trace SHA-256
+  `76472605d19b32b875b33d918527f0e6d13169ba862362451bc0f0ae015d8f13`.
+- **Authority:** Delivery/coherence, density, and timing evidence only. No
+  future geometry, source completeness, planner, recurrence, actuator,
+  feasibility, or live action authority changed.

@@ -189,3 +189,9 @@ and a specific delivery failure. It does not prove runtime ECL byte identity,
 future instruction/geometry completeness, hit causality, robust feasibility,
 or survival improvement. Unknown auxiliary state remains unresolved and
 cannot be treated as absent, safe, or losing.
+
+The proposed native-owned v2 transaction was subsequently implemented and
+physically rejected under its no-retry gate in
+`G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_STAGE5_RESULT_20260728.md`. It fixes
+CE-0164's Python/native gap but exposes CE-0165 at the asynchronous game-frame
+boundary.

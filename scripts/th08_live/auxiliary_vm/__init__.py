@@ -14,7 +14,10 @@ from .native import (
     NativeAuxiliaryVmBatchError,
     native_auxiliary_vm_batch_available,
 )
-from .scalar import decode_auxiliary_vm_batch_fixture
+from .scalar import (
+    decode_auxiliary_vm_batch_fixture,
+    decode_auxiliary_vm_batch_owned_fixture,
+)
 from .trace_service import AuxiliaryVmBatchTraceService
 
 __all__ = [
@@ -29,5 +32,6 @@ __all__ = [
     "NativeAuxiliaryVmBatchError",
     "RecordStatus",
     "decode_auxiliary_vm_batch_fixture",
+    "decode_auxiliary_vm_batch_owned_fixture",
     "native_auxiliary_vm_batch_available",
 ]

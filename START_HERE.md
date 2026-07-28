@@ -43,7 +43,9 @@ and design/run notes retain derivations and history.
 33. `notes/G5_AUXILIARY_POINTER_STAGE5_RESULT_20260728.md`
 34. `notes/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`
 35. `notes/G5_NATIVE_AUXILIARY_VM_BATCH_STAGE5_RESULT_20260728.md`
-36. the relevant recent run note and counterexample rows before live work
+36. `notes/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md`
+37. `notes/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_STAGE5_RESULT_20260728.md`
+38. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -52,7 +54,23 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
-- The newest action-neutral G5 checkpoint is explicit auxiliary-batch
+- The newest action-neutral G5 checkpoint is native-owned auxiliary-batch
+  Stage-5 spell-107 run
+  `lunatic_route2_stage5_unattended_20260728_193820`, executed from parent
+  `4dec6c2` plus the enclosing checkpoint changes. It completed 13,586
+  decisions over frames `2..45403`, hard no-Bomb, with twenty hits,
+  `route_complete`, accepted transition/session gates, exact key/process
+  cleanup, and no residual process. V2 removes all Python owner reads/copies
+  and records four frames in one native transaction. Full native
+  p95/p99/max is `0.463/0.584/0.894 ms`; cadence remains `2/4/4`.
+  The no-retry gate is nevertheless rejected: 2/235 captures crossed at
+  owner close and 5/235 crossed at final close. CE-0165 therefore retains
+  native-owned v2 transport but rejects no-retry physical acceptance. The
+  next gate is a separately contracted bounded, fully visible retry
+  composition; exhaustion remains failure and all attempt cost stays inside
+  unchanged timing/cadence limits. Strict report/raw digests are
+  `23313712...2634` / `76472605...8f13`.
+- The preceding external-owner auxiliary-batch checkpoint is
   Stage-5 spell-107 run
   `lunatic_route2_stage5_unattended_20260728_185838`, executed from parent
   `997335b` plus the enclosing checkpoint changes. It completed 12,216
@@ -141,11 +159,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `a08f1370...c9bda` / `9081e3ed...565b`.
   Isolated Linux/Windows source reports pass, native libraries build for both
   targets, and complete Linux/Windows discovery passes 889 tests.
-- The next G5 source gate is a versioned one-call native owner/context
-  coherence transaction correcting CE-0164, followed by the unchanged
-  action-neutral spell-107 physical gate. Separately capture and byte-compare
-  one exact shipped Stage-5 runtime ECL image outside the issue boundary. Do
-  not fuse or publish the zero-signal ready-parent class.
+- The next G5 source gate is a fixed small-budget, fully visible native retry
+  composition correcting CE-0165, followed by the unchanged action-neutral
+  spell-107 physical gate. Separately capture and byte-compare one exact
+  shipped Stage-5 runtime ECL image outside the issue boundary. Do not fuse
+  or publish the zero-signal ready-parent class.
   Callbacks, deferred enemy state, sources outside the first 64 records, and
   non-ECL native sources remain later unresolved classes. Earlier viability
   preservation under CE-0158 and general performance work continue in
@@ -1455,7 +1473,8 @@ weaken four global workers or reuse a merely similar root.
   `notes/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
 - Auxiliary runtime observation and native-batch delivery:
   `notes/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`,
-  `notes/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`
+  `notes/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`,
+  `notes/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md`
 - Generated differential:
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 

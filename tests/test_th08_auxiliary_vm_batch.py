@@ -10,6 +10,7 @@ from th08_live.auxiliary_vm import (
     NativeAuxiliaryVmBatchCapture,
     RecordStatus,
     decode_auxiliary_vm_batch_fixture,
+    decode_auxiliary_vm_batch_owned_fixture,
     native_auxiliary_vm_batch_available,
 )
 from th08_live.auxiliary_vm.model import (
@@ -120,6 +121,71 @@ def _decode_native(
         context_pointer_offset=_POINTER_OFFSET,
         expected_manager_frame=expected_frame,
         manager_frame_before=frame_before,
+        manager_frame_after=frame_after,
+        output_payload_capacity=capacity,
+    )
+
+
+def _decode_owned(
+    before_owner: bytes,
+    after_owner: bytes,
+    before_arena: bytes,
+    after_arena: bytes | None = None,
+    *,
+    selected_frame: int = 100,
+    owner_frame_after: int = 100,
+    context_frame_before: int = 100,
+    frame_after: int = 100,
+    capacity: int = MAXIMUM_STATE_PAYLOAD_BYTES,
+):
+    return decode_auxiliary_vm_batch_owned_fixture(
+        before_owner,
+        after_owner,
+        before_arena,
+        before_arena if after_arena is None else after_arena,
+        arena_base=_ARENA_BASE,
+        pool_base=_POOL_BASE,
+        record_count=1,
+        enemy_stride=_STRIDE,
+        enemy_flags_offset=_FLAGS_OFFSET,
+        enemy_active_flag=1,
+        context_pointer_offset=_POINTER_OFFSET,
+        selected_manager_frame=selected_frame,
+        owner_manager_frame_after=owner_frame_after,
+        context_manager_frame_before=context_frame_before,
+        manager_frame_after=frame_after,
+        output_payload_capacity=capacity,
+    )
+
+
+def _decode_owned_native(
+    capture: NativeAuxiliaryVmBatchCapture,
+    before_owner: bytes,
+    after_owner: bytes,
+    before_arena: bytes,
+    after_arena: bytes | None = None,
+    *,
+    selected_frame: int = 100,
+    owner_frame_after: int = 100,
+    context_frame_before: int = 100,
+    frame_after: int = 100,
+    capacity: int = MAXIMUM_STATE_PAYLOAD_BYTES,
+):
+    return capture.decode_owned_fixture(
+        before_owner,
+        after_owner,
+        before_arena,
+        before_arena if after_arena is None else after_arena,
+        arena_base=_ARENA_BASE,
+        pool_base=_POOL_BASE,
+        record_count=1,
+        enemy_stride=_STRIDE,
+        enemy_flags_offset=_FLAGS_OFFSET,
+        enemy_active_flag=1,
+        context_pointer_offset=_POINTER_OFFSET,
+        selected_manager_frame=selected_frame,
+        owner_manager_frame_after=owner_frame_after,
+        context_manager_frame_before=context_frame_before,
         manager_frame_after=frame_after,
         output_payload_capacity=capacity,
     )
@@ -275,6 +341,59 @@ class AuxiliaryVmScalarBatchTests(unittest.TestCase):
             & RecordStatus.CONTEXT_ADDRESS_INVALID
         )
 
+    def test_owned_schedule_exposes_every_manager_bracket(self) -> None:
+        pointer = _ARENA_BASE
+        owner = _owner_blob((pointer, 0, 0, 0))
+        arena = _context(depth=1, auxiliary_index=0)
+        v1 = _decode(owner, owner, arena)
+        owned = _decode_owned(owner, owner, arena)
+        self.assertTrue(owned.success)
+        self.assertEqual(owned.records, v1.records)
+        self.assertEqual(
+            owned.process_read_count,
+            v1.process_read_count + 3,
+        )
+        self.assertEqual(owned.owner_blob_bytes, _STRIDE)
+
+        owner_mismatch = _decode_owned(
+            owner,
+            owner,
+            arena,
+            owner_frame_after=101,
+        )
+        self.assertEqual(
+            owner_mismatch.batch_status,
+            BatchStatus.OWNER_CAPTURE_FRAME_MISMATCH,
+        )
+        self.assertEqual(owner_mismatch.process_read_count, 3)
+        self.assertEqual(owner_mismatch.records, ())
+
+        context_mismatch = _decode_owned(
+            owner,
+            owner,
+            arena,
+            context_frame_before=101,
+        )
+        self.assertEqual(
+            context_mismatch.batch_status,
+            BatchStatus.FRAME_BEFORE_MISMATCH,
+        )
+        self.assertEqual(context_mismatch.process_read_count, 4)
+        self.assertEqual(context_mismatch.records, ())
+
+        final_mismatch = _decode_owned(
+            owner,
+            owner,
+            arena,
+            frame_after=101,
+        )
+        self.assertEqual(
+            final_mismatch.batch_status,
+            BatchStatus.FRAME_AFTER_MISMATCH,
+        )
+        self.assertFalse(final_mismatch.success)
+        self.assertEqual(final_mismatch.usable_context_count, 0)
+
 
 @unittest.skipUnless(
     native_auxiliary_vm_batch_available(),
@@ -301,6 +420,31 @@ class AuxiliaryVmNativeParityTests(unittest.TestCase):
             **kwargs,
         )
         native = _decode_native(
+            self.capture,
+            before_owner,
+            after_owner,
+            before_arena,
+            after_arena,
+            **kwargs,
+        )
+        self.assertEqual(native, scalar)
+
+    def assert_owned_fixture_parity(
+        self,
+        before_owner: bytes,
+        after_owner: bytes,
+        before_arena: bytes,
+        after_arena: bytes | None = None,
+        **kwargs,
+    ) -> None:
+        scalar = _decode_owned(
+            before_owner,
+            after_owner,
+            before_arena,
+            after_arena,
+            **kwargs,
+        )
+        native = _decode_owned_native(
             self.capture,
             before_owner,
             after_owner,
@@ -418,6 +562,54 @@ class AuxiliaryVmNativeParityTests(unittest.TestCase):
                     capacity=capacity,
                 )
 
+    def test_owned_fixture_frames_and_random_bytes_match_scalar(self) -> None:
+        pointer = _ARENA_BASE
+        owner = _owner_blob((pointer, 0, 0, 0))
+        for frames in (
+            {},
+            {"owner_frame_after": 101},
+            {"context_frame_before": 101},
+            {"frame_after": 101},
+        ):
+            with self.subTest(frames=frames):
+                self.assert_owned_fixture_parity(
+                    owner,
+                    owner,
+                    _context(depth=15, auxiliary_index=0),
+                    **frames,
+                )
+        self.assert_owned_fixture_parity(b"", b"", b"")
+        self.assert_owned_fixture_parity(
+            owner,
+            owner,
+            _context(depth=0, auxiliary_index=0),
+            capacity=ACTIVE_VM_BYTES - 1,
+        )
+
+        rng = random.Random(0xCE0164)
+        for case in range(64):
+            depth = rng.choice((0, 1, 14, 15))
+            context = bytearray(
+                _context(depth=depth, auxiliary_index=0)
+            )
+            if rng.randrange(5) == 0:
+                context[rng.randrange(12)] ^= 0x3C
+            frame_case = rng.randrange(5)
+            frames: dict[str, int] = {}
+            if frame_case == 1:
+                frames["owner_frame_after"] = 101
+            elif frame_case == 2:
+                frames["context_frame_before"] = 101
+            elif frame_case == 3:
+                frames["frame_after"] = 101
+            with self.subTest(case=case):
+                self.assert_owned_fixture_parity(
+                    owner,
+                    owner,
+                    bytes(context),
+                    **frames,
+                )
+
     def test_maximum_batch_is_ordered_bounded_and_deterministic(self) -> None:
         owner = bytearray(64 * _STRIDE)
         arena = bytearray(256 * CONTEXT_BYTES)
@@ -484,13 +676,44 @@ class AuxiliaryVmNativeParityTests(unittest.TestCase):
         self.assertEqual(native.usable_context_count, 256)
         self.assertEqual(native.process_read_count, 834)
 
+        owned_arguments = {
+            "arena_base": _ARENA_BASE,
+            "pool_base": _POOL_BASE,
+            "record_count": 64,
+            "enemy_stride": _STRIDE,
+            "enemy_flags_offset": _FLAGS_OFFSET,
+            "enemy_active_flag": 1,
+            "context_pointer_offset": _POINTER_OFFSET,
+            "selected_manager_frame": 100,
+            "owner_manager_frame_after": 100,
+            "context_manager_frame_before": 100,
+            "manager_frame_after": 100,
+        }
+        scalar_owned = decode_auxiliary_vm_batch_owned_fixture(
+            owner_bytes,
+            owner_bytes,
+            arena_bytes,
+            arena_bytes,
+            **owned_arguments,
+        )
+        native_owned = self.capture.decode_owned_fixture(
+            owner_bytes,
+            owner_bytes,
+            arena_bytes,
+            arena_bytes,
+            **owned_arguments,
+        )
+        self.assertEqual(native_owned, scalar_owned)
+        self.assertEqual(native_owned.usable_context_count, 256)
+        self.assertEqual(native_owned.process_read_count, 837)
+        self.assertEqual(native_owned.owner_blob_bytes, 64 * _STRIDE)
+
     def test_process_entry_fails_without_emulation_or_input(self) -> None:
         class InvalidReader:
             handle = -1
 
         observation = self.capture.capture_process(
             InvalidReader(),
-            bytes(64 * _STRIDE),
             pool_base=_POOL_BASE,
             manager_frame_address=0x0164D30C,
             record_count=64,
@@ -498,7 +721,6 @@ class AuxiliaryVmNativeParityTests(unittest.TestCase):
             enemy_flags_offset=_FLAGS_OFFSET,
             enemy_active_flag=1,
             context_pointer_offset=_POINTER_OFFSET,
-            expected_manager_frame=100,
         )
         expected = (
             BatchStatus.PROCESS_READ_FAILED

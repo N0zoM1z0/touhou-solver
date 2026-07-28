@@ -248,3 +248,16 @@ subroutines, target mix, timing, and strategy do not transfer.
   existing skips; and
 - Ruff passes over every changed production, analysis, automation, and test
   file.
+
+## Physical Disposition
+
+The fixed schema-v4 gate was executed on 2026-07-29 and failed. Exact
+transport/version/raw-byte replay passed for all 3,830 requests, while six
+initial zero-context rows failed the all-success status gate and event
+derivation, replay compact maximum, and synchronous emit timing missed their
+fixed limits. The thresholds and result are not revised.
+
+See
+`G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_STAGE5_RESULT_20260729.md`
+and CE-0168. A corrected delivery requires a new contract and physical run;
+this contract grants no physical delivery authority.

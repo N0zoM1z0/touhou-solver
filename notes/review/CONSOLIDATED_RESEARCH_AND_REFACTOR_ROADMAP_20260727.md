@@ -110,8 +110,17 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   Schema v4 reuses the coherent selected batch, stores hash-checked raw VM and
   saved-frame bytes, binds every request to one accepted runtime-ECL version,
   and independently reconstructs classification/canonicalization plus the
-  raw-byte oracle. Synthetic transport/replay and tamper tests pass. Physical
-  spell-107 timing/cadence/session authority remains pending.
+  raw-byte oracle. Synthetic transport/replay and tamper tests pass.
+- Physical schema-v4 run `20260729_014125` preserves exact semantics:
+  142/142 coherent immutable-version transactions and 3,830/3,830 independent
+  raw-byte replay requests pass with zero unknown. Delivery is rejected:
+  six initial zero-context rows fail the fixed all-success status gate, event
+  derivation p95 is `0.879 ms`, replay compact maximum is `11.335 ms`, and
+  synchronous emit p95 is `2.871 ms`. CE-0168 fixes this failure in history.
+  The next G5 delivery version must contract bounded exact-version caching,
+  visible pre-bind, hash-addressed compact replay, and independently verified
+  empty-prefix semantics before implementation; unchanged per-batch timing
+  and cadence gates require a fresh physical run.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

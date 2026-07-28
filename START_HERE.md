@@ -60,7 +60,8 @@ located; it does not change the authority order below.
 47. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
 48. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
 49. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
-50. the relevant recent run note and counterexample rows before live work
+50. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_STAGE5_RESULT_20260729.md`
+51. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -89,15 +90,25 @@ describe the same decision. Python/C++ parity is not physical correctness.
   fail-closed classification, canonicalization, and raw-byte-oracle results;
   exact synthetic delivery and four tamper classes pass/fail as specified.
   Linux/Windows quick suites pass 1,011 tests, with three existing Windows
-  skips. The old spell-107 trace's 3,214 contexts remain unreplayable. The
-  next G5 gate is the fixed focused spell-107 physical delivery audit.
+  skips. Physical run `20260729_014125` then failed the immutable schema-v4
+  delivery gate despite exact semantics: 142/142 coherent transactions and
+  3,830/3,830 independent request replays pass with zero unknown, but six
+  initial zero-context batches violate the fixed all-success status gate;
+  event-derive p95 is `0.879 ms`, replay-compact maximum is `11.335 ms`, and
+  synchronous-emit p95 is `2.871 ms`. CE-0168 retains the failure. The next
+  G5 gate requires a separately contracted bounded exact-version cache,
+  visible pre-bind, compact hash-addressed replay bundle, and independently
+  verified empty-prefix semantics under unchanged per-batch timing/cadence
+  limits. Schema v4 has no physical delivery authority. The old spell-107
+  trace's 3,214 contexts remain unreplayable.
   Unsupported emission, source-life, dynamic parameter, transform,
   realized-birth, geometry, and action dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model
-  authority. The 515,082-byte research log and 311,238-byte, 165-entry
-  counterexample ledger are stable 38/43-line indexes over seven daily and
-  four CE-range source-preserved shards. Reconstructing the legacy payloads
-  exactly matches SHA-256 `432cbdc...0ab` / `2267928c...ab0`. Fifty-six
+  authority. The legacy 515,082-byte research log and 311,238-byte, 165-entry
+  counterexample corpus is preserved behind stable 39/43-line indexes over
+  eight daily and four CE-range shards; three later counterexamples bring the
+  live ledger through CE-0168. Reconstructing the legacy payloads exactly
+  matches SHA-256 `432cbdc...0ab` / `2267928c...ab0`. Fifty-six
   clear-responsibility notes moved into G5, Stage-5 combat, architecture,
   foundations, operations, and review directories; root note count fell from
   92 to 37. `notes/README.md` is the navigation entrypoint. Historical path

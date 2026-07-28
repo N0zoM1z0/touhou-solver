@@ -564,12 +564,18 @@ comparison.
    p95 failure and a later `15.674 ms` maximum, so one isolated pass is not
    stable live timing authority. This grants offline unresolved-intent
    authority only. The replay-capable default-off post-capture service and
-   strict independent physical auditor are now implemented under
+   strict independent physical auditor are implemented under
    `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_CONTRACT_20260728.md`.
    Schema v4 adds no process read, requires the accepted immutable runtime-ECL
    version, and retains raw hash-checked replay state. Synthetic exact replay
-   and tamper gates pass. Proceed to the focused spell-107 physical delivery
-   gate; no physical delivery authority exists yet.
+   and tamper gates pass. Its focused spell-107 physical gate now fails on run
+   `20260729_014125`: all 3,830 requests independently replay exactly with
+   zero unknown, but six initial zero-context batches violate the fixed
+   all-success status gate, and event-derive, replay-compact maximum, and
+   synchronous-emit timing fail. CE-0168 retains the immutable failure.
+   Proceed only through a separately contracted bounded exact-version cache,
+   visible pre-bind, compact hash-addressed replay bundle, and independently
+   checked empty-prefix semantics. No physical delivery authority exists.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the

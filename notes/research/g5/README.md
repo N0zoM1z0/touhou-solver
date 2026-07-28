@@ -20,10 +20,14 @@ themselves grant future-geometry, planner, or action authority.
 12. [shipped runtime ECL identity](G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md)
 13. [auxiliary literal fire-cycle intent](G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md)
 14. [auxiliary literal fire-cycle offline gate](G5_AUXILIARY_LITERAL_FIRE_CYCLE_OFFLINE_GATE_20260728.md)
+15. [auxiliary literal fire-cycle runtime delivery](G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_CONTRACT_20260728.md)
+16. [failed Stage-5 runtime delivery result](G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_STAGE5_RESULT_20260729.md)
 
 The corresponding `*_RESULT_*`, `*_GATE_*`, attribution, rejection, and
 performance-experiment notes retain the evidence for each transition. The
-current G5 offline lowerer/oracle and Linux/Windows timing gate pass. The next
-step is default-off replay-capable post-capture integration and one focused
-Stage-5 spell-107 physical delivery gate. It is not a general
-source-completeness, future-geometry, or action-authority claim.
+current G5 offline lowerer/oracle and Linux/Windows timing gate pass. The
+schema-v4 replay-capable physical run proved exact replay parity but failed
+its empty-status and live timing gates. The next step is a separately
+contracted bounded-cache/compact-replay delivery version, not reinterpretation
+of the failed gate. It is not a general source-completeness, future-geometry,
+or action-authority claim.

@@ -1,0 +1,72 @@
+{
+  "environment": {
+    "gc_enabled": true,
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]"
+  },
+  "gates": {
+    "spell57_frame10971": true,
+    "spell73_frame42279": true
+  },
+  "input": {
+    "ecl_name": "ecldata4asp.ecl",
+    "ecl_sha256": "9ac983ec5a34fd607b73891d5ba95a19caadb493565b8986320c04d0de8a8df3",
+    "iterations": 10000,
+    "runtime_base": "0x0B1C1430"
+  },
+  "passed": true,
+  "schema": "th08-ecl-control-flow-benchmark-v1",
+  "workloads": [
+    {
+      "name": "spell57_frame10971",
+      "passed": true,
+      "result": {
+        "coverage_status": "unknown",
+        "instructions_scanned": 26,
+        "lowered_event_count": null,
+        "prefix_event_count": 0,
+        "stop_frame": 159,
+        "stop_reason": "unsupported_control_flow"
+      },
+      "snapshot": {
+        "active_difficulty_mask": 8,
+        "decoded_offset": "0x331C",
+        "horizon_frames": 256,
+        "instruction_pointer": "0x0B1C474C",
+        "tag_mask": 16,
+        "timer_elapsed": 32
+      },
+      "timing_ms": {
+        "max": 0.2487,
+        "median": 0.0241,
+        "p95": 0.0307
+      }
+    },
+    {
+      "name": "spell73_frame42279",
+      "passed": true,
+      "result": {
+        "coverage_status": "unknown",
+        "instructions_scanned": 3,
+        "lowered_event_count": null,
+        "prefix_event_count": 0,
+        "stop_frame": 141,
+        "stop_reason": "unsupported_control_flow"
+      },
+      "snapshot": {
+        "active_difficulty_mask": 8,
+        "decoded_offset": "0x70DC",
+        "horizon_frames": 256,
+        "instruction_pointer": "0x0B1C850C",
+        "tag_mask": 66,
+        "timer_elapsed": 319
+      },
+      "timing_ms": {
+        "max": 0.0385,
+        "median": 0.0042,
+        "p95": 0.0043
+      }
+    }
+  ]
+}

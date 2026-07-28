@@ -7278,3 +7278,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   separate logical versus executed instruction accounting.
 - The preimplementation contract is
   `notes/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`.
+
+## 2026-07-28 — Failed closed on hidden ECL control branches
+
+- The callback scanner now stops on unsupported timer reset,
+  loop-decrement/conditional branches, and call/return. Literal jump,
+  terminate, the 256-instruction cap, RPM, lowering fallback, native ABI, and
+  action semantics are unchanged.
+- Deterministic divergent-successor tests retain CE-0154. Shipped spell-57
+  and spell-73 fixtures stop at the exact `0x05/0x33` boundary with
+  `26/3` inspected instructions and no complete lowering.
+- Replaying retained run `20260728_092619` exactly classifies 5,788/5,803
+  rows. It finds 1,996 old complete-horizon claims crossing unsupported
+  control (997 spell 61, 999 spell 65), converts no unknown to complete, and
+  reduces total scanned instructions `563,466 -> 58,204` (`89.6704%`).
+  Spell 57 falls `344,320 -> 3,155` (`99.0837%`).
+- Fifteen late spell-73 transition rows cannot be mapped to the retained
+  decoded image. The deterministic audit intentionally fails only its
+  all-rows replay gate and retains SHA-256
+  `99f17fbc0a98a5bb9c2711c98e52bef00f3703566d97a26a0e59cfbb10f1edd1`.
+  Fresh physical validation remains required.
+- Ten-thousand-iteration Linux/Windows shipped-code reports pass their exact
+  result gates. Spell-57 p95 is `0.0223/0.0307 ms`; report SHA-256 values are
+  `c4ab3cd721b7cf9ce9cb8c62f17366f4b3527a8f780af8be749ef72bfe6ceaaa`
+  and
+  `89174afc0565dacda7345bb128face3b4ad3892dece153b8d05f092cf522aaa7`.
+- Focused ECL tests pass 46/46. Complete Linux/Windows suites pass 823/823 in
+  `9.877/16.371 s`, with three existing Windows skips.
+- **Authority:** offline correctness/performance correction only. Callback
+  coverage shrinks; no future-event or action authority is added.

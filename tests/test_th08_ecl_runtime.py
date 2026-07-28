@@ -17,8 +17,10 @@ from th08_ecl_runtime import (
     ECL_VM_TIMER_FRACTION_OFFSET,
     ENEMY_MAIN_ECL_VM_OFFSET,
     GAMEPLAY_TIME_SCALE_ADDRESS,
+    ECL_OP_FIRST_CONDITIONAL_JUMP,
     ECL_OP_INVOKE_CALLBACK,
     ECL_OP_JUMP,
+    ECL_OP_LOOP_DECREMENT_JUMP,
     ECL_OP_SET_INT,
     ECL_OP_TERMINATE,
     EclInstructionCache,
@@ -231,6 +233,113 @@ class EclRuntimeTests(unittest.TestCase):
         )
         self.assertEqual(result.stop_reason, "horizon")
         self.assertTrue(result.horizon_covered)
+
+    def test_unobserved_control_successor_stops_before_false_completion(
+        self,
+    ) -> None:
+        base = 0x680000
+        callback = _instruction(
+            0,
+            ECL_OP_INVOKE_CALLBACK,
+            12,
+            0,
+        )
+        for opcode, arguments in (
+            (
+                ECL_OP_LOOP_DECREMENT_JUMP,
+                (0, 36, 10000),
+            ),
+            (
+                ECL_OP_FIRST_CONDITIONAL_JUMP,
+                (10000, 1, 0, 40),
+            ),
+        ):
+            with self.subTest(opcode=opcode):
+                branch = _instruction(
+                    0,
+                    opcode,
+                    *arguments,
+                    parameter_mask=1,
+                )
+                memory = _Memory(
+                    {
+                        base: branch
+                        + _instruction(10, ECL_OP_TERMINATE)
+                        + callback,
+                    }
+                )
+                cache = EclInstructionCache()
+                snapshot = EclVmSnapshot(
+                    base,
+                    0.0,
+                    0,
+                    0x100000,
+                    0.0,
+                    0.0,
+                    1.0,
+                )
+                result = analyze_tagged_velocity_toggles(
+                    snapshot,
+                    instruction_at=lambda address: cache.instruction(
+                        memory.read,
+                        address,
+                    ),
+                    horizon_frames=5,
+                    active_difficulty_mask=0x08,
+                )
+                self.assertEqual(
+                    result.stop_reason,
+                    "unsupported_control_flow",
+                )
+                self.assertEqual(result.instructions_scanned, 1)
+                self.assertEqual(result.coverage_status, "unknown")
+                self.assertEqual(result.events, ())
+                self.assertIsNone(result.complete_events)
+
+    def test_shipped_stage4_loops_stop_at_first_unobserved_control(self) -> None:
+        path = (
+            Path(__file__).resolve().parents[1]
+            / "artifacts"
+            / "decoded"
+            / "ecldata4asp.ecl"
+        )
+        code = path.read_bytes()
+        base = 0x500000
+        memory = _Memory({base: code})
+        snapshots = (
+            ("spell57", base + 0x331C, 32, 64),
+            ("spell73", base + 0x70DC, 319, 16),
+        )
+        for name, pc, timer, instruction_limit in snapshots:
+            with self.subTest(name=name):
+                cache = EclInstructionCache()
+                result = analyze_tagged_velocity_toggles(
+                    EclVmSnapshot(
+                        pc,
+                        0.0,
+                        timer,
+                        0x10,
+                        0.0,
+                        0.0,
+                        1.0,
+                    ),
+                    instruction_at=lambda address: cache.instruction(
+                        memory.read,
+                        address,
+                    ),
+                    horizon_frames=256,
+                    active_difficulty_mask=0x08,
+                )
+                self.assertEqual(
+                    result.stop_reason,
+                    "unsupported_control_flow",
+                )
+                self.assertLess(
+                    result.instructions_scanned,
+                    instruction_limit,
+                )
+                self.assertEqual(result.coverage_status, "unknown")
+                self.assertIsNone(result.complete_events)
 
     def test_callback_toggle_lowers_to_stop_then_original_velocity(self) -> None:
         snapshot = EclVmSnapshot(

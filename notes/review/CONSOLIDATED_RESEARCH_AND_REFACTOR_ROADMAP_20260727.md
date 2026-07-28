@@ -1136,8 +1136,21 @@ parity 當成每個 nature tie field 的逐 bit equality。
   因此 intervention 已拒絕、不跑第二遍，不能把單一 lower max 當作
   performance 結論；
 - spell-57 callback traversal 本身 p95/max `0.5460/10.3328 ms`，即使
-  fail-closed 也仍在 issue thread。後續性能線要做 exact-state/cache/
-  transfer-summary 分析，不能靠降低 256 cap 或 stage-specific shortcut；
+  fail-closed 也仍在 issue thread。IDA 後續確認 spell 73 的
+  `jump_float_ge` 讀取動態 player/enemy distance `10050`，spell 57 的
+  `0x05` 則依賴 snapshot 未包含的 local/RNG loop state，故 naive
+  exact-state memoization 已拒絕。CE-0154 修正已讓 callback scanner 在
+  unsupported timer/control 當場 fail closed，不降低 256 cap，也不加
+  stage shortcut。重放 retained `20260728_092619` 的 5,788/5,803
+  callback rows 發現 1,996 個舊 complete spell-61/65 rows 曾跨越
+  unmodeled branch；修正後 zero unknown->complete，總 instruction
+  `563,466 -> 58,204`（-89.67%），spell 57
+  `344,320 -> 3,155`（-99.08%）。Linux/Windows shipped workload
+  spell-57 p95 `0.0223/0.0307 ms`，完整 suite 823/823 通過。15 個 late
+  transition rows 因 retained decoded image 與當時 runtime bytes
+  不對齊而未能 replay，audit 故意 fail all-rows gate；下一步先用 fresh
+  physical trace 關閉 exact runtime scope，再研究 dependency-complete
+  transfer summary；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

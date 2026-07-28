@@ -2,7 +2,9 @@
 
 Date: 2026-07-28
 
-Status: fixed preimplementation correction and performance experiment.
+Status: implemented and offline-validated correction; fresh physical runtime
+validation remains open because the retained decoded file cannot replay 15
+late transition rows.
 
 This refines
 `G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`. It changes
@@ -178,3 +180,60 @@ may not maximize or follow either hidden successor as if observed.
    checkpoint.
 7. Only then reconsider dependency-complete block summaries or a conservative
    spatial envelope.
+
+## Implementation And Offline Evidence
+
+The callback scanner now stops on unsupported timer reset, loop-decrement
+branch, conditional branch, and call/return opcodes. The 256-instruction cap,
+literal jump, termination, callback lowering API, native ABI, RPM boundary,
+and action path are unchanged. Two deterministic divergent-successor
+fixtures prevent an omitted branch operand from becoming a complete empty
+schedule. Shipped spell-57/spell-73 fixtures require
+`unsupported_control_flow`, `UNKNOWN`, and fewer than `64/16` inspected
+instructions.
+
+Post-hoc control replay over retained run `20260728_092619` accounts for all
+5,803 callback rows and exactly replays 5,788 (`99.7415%`) against the
+retained decoded Stage-4A image:
+
+- no `UNKNOWN -> COMPLETE` transition occurs;
+- 1,480 horizon rows and one termination remain complete;
+- all 1,345 spell-57 instruction-limit rows and all 966 spell-73
+  repeated-state rows become earlier `unsupported_control_flow` unknowns;
+- 1,996 old complete horizon rows also correctly lose completeness:
+  997 in spell 61 and 999 in spell 65 crossed unmodeled `0x05` or `0x34`
+  transfers;
+- total inspected instructions fall
+  `563,466 -> 58,204` (`89.6704%`);
+- spell-57 instructions fall
+  `344,320 -> 3,155` (`99.0837%`), maximum 26 per row; and
+- replay emits zero prefix events, so it does not insert a new schedule.
+
+Fifteen late spell-73 transition rows cannot be replayed because the retained
+runtime instruction image is no longer byte-aligned with
+`artifacts/decoded/ecldata4asp.ecl`, and raw instruction bytes were not
+retained. All 15 were old declared-complete horizon rows; no old unknown row
+is excluded. The deterministic report therefore deliberately has
+`passed=false` on `all_callback_rows_replayed`, despite passing every semantic
+gate on the replayable scope. Two generations are byte-identical at SHA-256
+`99f17fbc0a98a5bb9c2711c98e52bef00f3703566d97a26a0e59cfbb10f1edd1`.
+This is an evidence limitation, not permission to infer those rows.
+
+Ten-thousand-iteration shipped-code benchmarks pass on Linux/Windows. The
+representative spell-57 result is 26 instructions with p50/p95
+`0.0196/0.0223 ms` and `0.0241/0.0307 ms`; spell 73 is three instructions
+with p50/p95 `0.0035/0.0039 ms` and `0.0042/0.0043 ms`. Report SHA-256
+values are
+`c4ab3cd721b7cf9ce9cb8c62f17366f4b3527a8f780af8be749ef72bfe6ceaaa`
+and
+`89174afc0565dacda7345bb128face3b4ad3892dece153b8d05f092cf522aaa7`.
+Timing is descriptive; deterministic control/status/instruction gates carry
+acceptance.
+
+Focused ECL tests pass 46/46. Complete Linux/Windows suites pass 823/823 in
+`9.877/16.371 s`, with three existing Windows platform skips.
+
+Ordered gates 1–3 and 5 are complete. Gate 4 remains open for the 15 unmapped
+runtime rows and must be closed by a fresh physical trace before this
+checkpoint can claim complete runtime-workload validation. No transfer
+summary or callback/action authority is promoted meanwhile.

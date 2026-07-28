@@ -34,9 +34,15 @@ ECL_VM_SNAPSHOT_SIZE = max(
 
 ECL_HEADER_SIZE = 12
 ECL_OP_TERMINATE = 0x01
+ECL_OP_RESET_TIMER = 0x02
 ECL_OP_JUMP = 0x04
+ECL_OP_LOOP_DECREMENT_JUMP = 0x05
 ECL_OP_SET_INT = 0x06
 ECL_OP_SET_FLOAT = 0x07
+ECL_OP_FIRST_CONDITIONAL_JUMP = 0x28
+ECL_OP_LAST_CONDITIONAL_JUMP = 0x33
+ECL_OP_CALL_SUBROUTINE = 0x34
+ECL_OP_RETURN_SUBROUTINE = 0x35
 ECL_OP_INVOKE_CALLBACK = 0x88
 
 ECL_INT_TAG_MASK = 10000
@@ -310,6 +316,8 @@ def analyze_tagged_velocity_toggles(
         raise ValueError("ECL lookahead horizon cannot be negative")
     if active_difficulty_mask <= 0:
         raise ValueError("active difficulty mask must be positive")
+    if max_instructions <= 0:
+        raise ValueError("instruction limit must be positive")
     pc = snapshot.instruction_pointer
     timer_value = snapshot.timer_value
     physical_frame = 0
@@ -360,6 +368,19 @@ def analyze_tagged_velocity_toggles(
             pc = instruction.address + relative_offset
             timer_value = float(target_time)
             continue
+        if eligible and instruction.opcode == ECL_OP_RESET_TIMER:
+            stop_reason = "unsupported_timer_reset"
+            break
+        if eligible and (
+            instruction.opcode == ECL_OP_LOOP_DECREMENT_JUMP
+            or ECL_OP_FIRST_CONDITIONAL_JUMP
+            <= instruction.opcode
+            <= ECL_OP_LAST_CONDITIONAL_JUMP
+            or instruction.opcode
+            in (ECL_OP_CALL_SUBROUTINE, ECL_OP_RETURN_SUBROUTINE)
+        ):
+            stop_reason = "unsupported_control_flow"
+            break
         if eligible and instruction.opcode == ECL_OP_SET_INT:
             pair = _literal_pair(instruction)
             if pair is not None:

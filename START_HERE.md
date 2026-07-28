@@ -43,6 +43,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `Fail closed on hidden ECL control branches`,
+  `Define fail-closed ECL control boundary`,
   `Implement corridor completion priority experiment`,
   `Define corridor completion priority experiment`,
   `Retain schema-v9 physical attribution`,
@@ -276,11 +278,22 @@ describe the same decision. Python/C++ parity is not physical correctness.
   the first unsupported transfer instead of spending the rest of the
   256-instruction cap on an unjustified fallthrough. This may shrink coverage
   and issue cost but cannot add callback or action authority. Dependency-
-  complete transfer summaries remain a later gate.
+  complete transfer summaries remain a later gate. That correction is now
+  implemented. Retained-trace replay finds CE-0154: 1,996 previously complete
+  spell-61/65 horizon rows crossed unsupported `0x05/0x34` transfers.
+  Across 5,788 exactly replayed rows, no unknown becomes complete and scanned
+  instructions fall `563,466 -> 58,204` (`89.6704%`); spell 57 falls
+  `344,320 -> 3,155`. Shipped representatives inspect `26/3` instructions
+  for spell 57/73, and Linux/Windows p95 is
+  `0.0223/0.0307` and `0.0039/0.0043 ms`. Full suites pass 823/823.
+  Fifteen late transition rows are not byte-mappable to the retained decoded
+  file, so the deterministic replay report deliberately fails its all-rows
+  gate. A fresh physical runtime trace is the next gate before any transfer
+  summary or coverage promotion.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and
-  CE-0143/0144/0145/0146/0147/0148/0149/0150/0151/0152/0153.
+  CE-0143/0144/0145/0146/0147/0148/0149/0150/0151/0152/0153/0154.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and

@@ -4493,3 +4493,49 @@ precommitted run
   `5a2d0884147f12bbd18ce66cae4b9ebdcefd8c9b19034e73fd14731e95716686`
   and
   `3bcbf3e25667c9f5f2efa6ba57a4dd2899dafbf10e0207e08562b8a1a6ff2dab`.
+
+## CE-0154: Callback traversal declared complete after skipping hidden ECL branches
+
+Status: observed deterministic and retained-trace model failure; fail-closed
+correction implemented and offline validated, fresh physical validation open
+
+- **Minimal falsifier:** Put an eligible `loop_decrement_jump` (`0x05`) or
+  conditional jump (`0x28..0x33`) before two successors, place callback 12
+  only on the branch, omit the local/dynamic operand from `EclVmSnapshot`,
+  and put the encoded fallthrough's next timestamp beyond the horizon. The
+  old scanner skipped the branch opcode and could publish a complete empty
+  schedule although an observation-compatible physical successor invokes
+  the callback.
+- **Observed native dependency:** IDA shows spell 73's opcode `0x33` reads
+  ECL variable `10050`, the Euclidean distance between the current global
+  player and enemy positions. Spell 57's opcode `0x05` reads/decrements VM
+  local state, including a loop initialized from gameplay RNG. Neither
+  future dependency is in the current snapshot.
+- **Observed retained scope:** Replaying 5,788/5,803 callback rows from
+  physical run `20260728_092619` finds 1,996 old
+  `complete:horizon` rows that cross unsupported control: all 997 replayed
+  spell-61 rows and 999/1,035 spell-65 rows. This is a concrete completeness
+  failure, not only a performance inefficiency.
+- **Correction:** Callback traversal now stops at unsupported timer reset,
+  loop/conditional control, and call/return. Incomplete prefixes remain
+  unavailable to lowering. No unknown row becomes complete.
+- **Performance effect:** Total retained-scope instruction work falls
+  `563,466 -> 58,204` (`89.6704%`). Spell 57 falls
+  `344,320 -> 3,155` (`99.0837%`), maximum 26 instructions per row.
+  Linux/Windows 10,000-iteration spell-57 p95 is
+  `0.0223/0.0307 ms`.
+- **Open evidence:** Fifteen late spell-73 transition rows cannot be replayed
+  from the retained decoded file because its bytes are not aligned with the
+  then-live runtime instruction image. The audit deliberately fails its
+  all-rows gate. A fresh physical trace must close this exact runtime scope;
+  the rows may not be inferred.
+- **Evidence:** Deterministic replay report SHA-256 is
+  `99f17fbc0a98a5bb9c2711c98e52bef00f3703566d97a26a0e59cfbb10f1edd1`.
+  Linux/Windows benchmark SHA-256 values are
+  `c4ab3cd721b7cf9ce9cb8c62f17366f4b3527a8f780af8be749ef72bfe6ceaaa`
+  and
+  `89174afc0565dacda7345bb128face3b4ad3892dece153b8d05f092cf522aaa7`.
+  Complete suites pass 823/823 on both systems.
+- **Authority:** This correction shrinks callback completeness and reduces
+  issue work. It does not model the hidden branches, bound their callback
+  effects spatially, prove survival, or add action authority.

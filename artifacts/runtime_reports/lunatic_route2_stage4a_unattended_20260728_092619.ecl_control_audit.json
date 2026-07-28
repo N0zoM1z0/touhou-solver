@@ -1,0 +1,257 @@
+{
+  "counts": {
+    "callback_rows": 5803,
+    "control_boundaries": {
+      "spell=57,opcode=0x05,offset=0x3510": 873,
+      "spell=57,opcode=0x05,offset=0x35B8": 472,
+      "spell=61,opcode=0x05,offset=0x3F44": 497,
+      "spell=61,opcode=0x05,offset=0x3FD4": 171,
+      "spell=61,opcode=0x34,offset=0x3D54": 329,
+      "spell=65,opcode=0x05,offset=0x46DC": 771,
+      "spell=65,opcode=0x34,offset=0x4768": 37,
+      "spell=65,opcode=0x34,offset=0x479C": 43,
+      "spell=65,opcode=0x34,offset=0x47D0": 37,
+      "spell=65,opcode=0x34,offset=0x4804": 41,
+      "spell=65,opcode=0x34,offset=0x4838": 39,
+      "spell=65,opcode=0x34,offset=0x486C": 31,
+      "spell=73,opcode=0x33,offset=0x7100": 966
+    },
+    "decision_rows": 14649,
+    "instruction_reduction_percent": 89.67036165447428,
+    "new_instructions": 58204,
+    "new_prefix_events": 0,
+    "new_stop_counts": {
+      "horizon": 1480,
+      "terminate": 1,
+      "unsupported_control_flow": 4307
+    },
+    "old_instructions": 563466,
+    "old_stop_counts": {
+      "horizon": 3476,
+      "instruction_limit": 1345,
+      "repeated_state": 966,
+      "terminate": 1
+    },
+    "replayed_rows": 5788,
+    "transitions": {
+      "complete:horizon->complete:horizon": 1480,
+      "complete:horizon->unknown:unsupported_control_flow": 1996,
+      "complete:terminate->complete:terminate": 1,
+      "unknown:instruction_limit->unknown:unsupported_control_flow": 1345,
+      "unknown:repeated_state->unknown:unsupported_control_flow": 966
+    }
+  },
+  "gates": {
+    "all_callback_rows_accounted": true,
+    "all_callback_rows_replayed": false,
+    "decoded_mapping_covers_at_least_99_percent": true,
+    "no_unknown_rows_excluded_by_static_mapping": true,
+    "no_unknown_to_complete": true,
+    "spell57_inspects_fewer_than_64_instructions": true,
+    "spell57_stops_at_unsupported_control": true,
+    "spell73_dynamic_control_boundary_observed": true
+  },
+  "mapping_exclusions": {
+    "count": 15,
+    "reason": "late runtime instruction image is not byte-aligned with the retained decoded Stage-4A file; no raw instruction bytes were retained",
+    "samples": [
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44939,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44943,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44946,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 43690",
+        "frame": 44949,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44953,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44956,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 48059",
+        "frame": 44960,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44964,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44966,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 43690",
+        "frame": 44969,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44974,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44978,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 1132",
+        "frame": 44982,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 0",
+        "frame": 44988,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      },
+      {
+        "error": "ValueError: invalid live ECL instruction size 48059",
+        "frame": 44991,
+        "old_reason": "horizon",
+        "old_status": "complete",
+        "spell": "73"
+      }
+    ]
+  },
+  "model": {
+    "active_difficulty_mask": 8,
+    "callback_angle_speed_source": "unavailable_in_trace_zeroed_for_control_coverage_replay",
+    "coverage_control_replay_claimed": true,
+    "horizon_frames": 256,
+    "schedule_value_parity_claimed": false
+  },
+  "passed": false,
+  "per_spell": {
+    "57": {
+      "instruction_reduction_percent": 99.08370120817844,
+      "new_instructions": 3155,
+      "new_max_instructions": 26,
+      "new_stop_counts": {
+        "unsupported_control_flow": 1345
+      },
+      "old_instructions": 344320,
+      "rows": 1345,
+      "transitions": {
+        "unknown:instruction_limit->unknown:unsupported_control_flow": 1345
+      }
+    },
+    "61": {
+      "instruction_reduction_percent": 81.57889035724344,
+      "new_instructions": 8503,
+      "new_max_instructions": 21,
+      "new_stop_counts": {
+        "terminate": 1,
+        "unsupported_control_flow": 997
+      },
+      "old_instructions": 46159,
+      "rows": 998,
+      "transitions": {
+        "complete:horizon->unknown:unsupported_control_flow": 997,
+        "complete:terminate->complete:terminate": 1
+      }
+    },
+    "65": {
+      "instruction_reduction_percent": 94.51069453727897,
+      "new_instructions": 7227,
+      "new_max_instructions": 20,
+      "new_stop_counts": {
+        "horizon": 36,
+        "unsupported_control_flow": 999
+      },
+      "old_instructions": 131656,
+      "rows": 1035,
+      "transitions": {
+        "complete:horizon->complete:horizon": 36,
+        "complete:horizon->unknown:unsupported_control_flow": 999
+      }
+    },
+    "69": {
+      "instruction_reduction_percent": 0.0,
+      "new_instructions": 33259,
+      "new_max_instructions": 62,
+      "new_stop_counts": {
+        "horizon": 1346
+      },
+      "old_instructions": 33259,
+      "rows": 1346,
+      "transitions": {
+        "complete:horizon->complete:horizon": 1346
+      }
+    },
+    "73": {
+      "instruction_reduction_percent": 24.925668979187314,
+      "new_instructions": 6060,
+      "new_max_instructions": 37,
+      "new_stop_counts": {
+        "horizon": 98,
+        "unsupported_control_flow": 966
+      },
+      "old_instructions": 8072,
+      "rows": 1064,
+      "transitions": {
+        "complete:horizon->complete:horizon": 98,
+        "unknown:repeated_state->unknown:unsupported_control_flow": 966
+      }
+    }
+  },
+  "schema": "th08-ecl-control-flow-audit-v1",
+  "source": {
+    "ecl_name": "ecldata4asp.ecl",
+    "ecl_sha256": "9ac983ec5a34fd607b73891d5ba95a19caadb493565b8986320c04d0de8a8df3",
+    "runtime_base": "0x0B1C1430",
+    "trace_name": "lunatic_route2_stage4a_unattended_20260728_092619.jsonl",
+    "trace_sha256": "cedcc97153373bee1758b8dc0a0e4e8ad3879f0c3647091cb27250390a827e12"
+  },
+  "violations": {
+    "unknown_to_complete": []
+  }
+}

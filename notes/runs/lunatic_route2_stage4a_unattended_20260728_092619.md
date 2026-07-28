@@ -94,3 +94,18 @@ Contributing factors:
 ## Next Correction Gate
 
 Treat policy delivery, delay-support coverage, and viability exhaustion as separate gates. The next focused run must keep rolling-policy queries available, reduce unsupported query epochs, and preserve a non-empty action kernel before each former hit window. Compare per-phase position and warning lead, not only aggregate hit count.
+
+## Post-Hoc ECL Control Replay
+
+The later CE-0154 correction replays 5,788/5,803 callback rows against the
+retained decoded Stage-4A image. No unknown row becomes complete. It finds
+1,996 old complete-horizon rows that crossed unsupported loop/call control
+(997 spell 61, 999 spell 65), and changes all spell-57/spell-73 incomplete
+rows to the earlier exact unsupported-control boundary. Total inspected
+instructions fall `563,466 -> 58,204`; spell 57 falls
+`344,320 -> 3,155`.
+
+Fifteen late spell-73 transition rows are not byte-mappable to the retained
+decoded file. The deterministic audit therefore fails its all-rows gate and
+does not infer them. Report SHA-256 is
+`99f17fbc0a98a5bb9c2711c98e52bef00f3703566d97a26a0e59cfbb10f1edd1`.

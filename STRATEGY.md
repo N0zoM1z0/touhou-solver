@@ -355,8 +355,14 @@ comparison.
    first stops at unsupported timer/control transfers. It preserves the
    256-instruction cap and may only shrink complete coverage while reducing
    non-authoritative scan work. Exact dependency-complete block summaries
-   remain proposal-only until this correction, retained-trace replay, and
-   Linux/Windows gates pass.
+   remain proposal-only. The correction and Linux/Windows gates now pass.
+   Retained replay exposes CE-0154: 1,996 old complete spell-61/65 rows cross
+   unsupported control. No unknown becomes complete; total instruction work
+   falls `89.6704%`, and spell-57 work falls `99.0837%`. The replay exactly
+   covers 5,788/5,803 rows but deliberately fails its all-rows gate because
+   15 late runtime instruction states are not byte-mappable to the retained
+   decoded file. Require a fresh physical trace before any transfer-summary
+   or callback-coverage promotion.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

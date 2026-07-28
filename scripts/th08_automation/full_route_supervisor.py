@@ -201,6 +201,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "bullet_birth_native_call_mode": (
             args.bullet_birth_native_call_mode
         ),
+        "corridor_background_low_priority": (
+            args.corridor_background_low_priority
+        ),
         "viability_audit": False,
         "agent_duration_seconds": args.agent_duration,
         "leave_game_running": args.leave_game_running,
@@ -220,6 +223,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             bullet_birth_backend=args.bullet_birth_backend,
             bullet_birth_native_call_mode=(
                 args.bullet_birth_native_call_mode
+            ),
+            corridor_background_low_priority=(
+                args.corridor_background_low_priority
             ),
             safety_value_horizon=0,
             duration_seconds=args.agent_duration,
@@ -461,6 +467,14 @@ def build_parser() -> argparse.ArgumentParser:
         choices=NATIVE_CALL_MODES,
         default=NATIVE_CALL_MODE_GIL_RELEASED,
         help="explicit trace-only native call GIL boundary",
+    )
+    parser.add_argument(
+        "--corridor-background-low-priority",
+        action="store_true",
+        help=(
+            "run only the Python corridor parent below normal priority; "
+            "default-off G5 contention experiment"
+        ),
     )
     parser.add_argument(
         "--difficulty",

@@ -199,6 +199,40 @@ class AgentHotkeyTests(unittest.TestCase):
                         2.5,
                     )
 
+    def test_corridor_background_priority_is_explicitly_opt_in(self) -> None:
+        default_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+        )
+        enabled_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            corridor_background_low_priority=True,
+        )
+
+        self.assertNotIn(
+            "--corridor-background-low-priority",
+            default_arguments,
+        )
+        self.assertIn(
+            "--corridor-background-low-priority",
+            enabled_arguments,
+        )
+        self.assertFalse(
+            build_parser()
+            .parse_args(default_arguments)
+            .corridor_background_low_priority
+        )
+        self.assertTrue(
+            build_parser()
+            .parse_args(enabled_arguments)
+            .corridor_background_low_priority
+        )
+
     def test_direct_root_certificate_shadow_is_explicitly_opt_in(
         self,
     ) -> None:

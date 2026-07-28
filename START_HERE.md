@@ -42,6 +42,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `Implement corridor completion priority experiment`,
   `Define corridor completion priority experiment`,
   `Retain schema-v9 physical attribution`,
   `Implement schema-v9 tail attribution`,
@@ -242,8 +243,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
   semantics, fails loud if priority is not applied, and rejects tail
   improvement that worsens publication age, queryability, support, action
   lag, or first-hit viability warning. Two consecutive complete physical
-  passes are required. Implementation and offline gates come next; no
-  priority/copy/planner intervention is active yet.
+  passes are required. The option and its deterministic
+  `th08-corridor-priority-audit-v1` are now implemented. It remains
+  default-off, propagates explicitly through both supervisors, records
+  requested/applied priority and the unchanged four-worker limit, and fails
+  loud on an unapplied request. Re-auditing the normal-priority schema-v9
+  baseline reproduces all retained delivery values exactly and fails only
+  the expected application gate. Fresh Linux/Windows complete suites pass
+  `820/820` in `8.943/16.230 s`, with three Windows skips. Fresh observer
+  overhead/ABBA gates pass at Linux/Windows ratios
+  `1.0232/1.0469`; no native source or 46-symbol ABI changed. One unrelated
+  first Linux suite invocation exposed the existing warm-cache sensitivity
+  of a one-millisecond native deadline test; its focused and immediate full
+  reruns passed. The first explicit priority-on physical pass is next; no
+  physical performance conclusion or B4 closure exists yet.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

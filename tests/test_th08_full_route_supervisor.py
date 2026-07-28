@@ -26,6 +26,15 @@ class FullRouteSupervisorTests(unittest.TestCase):
         self.assertEqual(args.difficulty.menu_index, 2)
         self.assertTrue(args.leave_game_running)
 
+    def test_corridor_background_priority_is_explicitly_opt_in(self) -> None:
+        default_args = build_parser().parse_args([])
+        enabled_args = build_parser().parse_args(
+            ["--corridor-background-low-priority"]
+        )
+
+        self.assertFalse(default_args.corridor_background_low_priority)
+        self.assertTrue(enabled_args.corridor_background_low_priority)
+
     def test_team_preconfirm_uses_selected_difficulty_cursor(self) -> None:
         import th08_full_route_supervisor as supervisor
         from unittest.mock import patch

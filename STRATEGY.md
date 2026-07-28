@@ -336,7 +336,11 @@ comparison.
    provenance and at least one completion transition, and rejects any
    observer improvement that ages publication, loses query/support coverage,
    increases action lag, or exposes a viable-policy hit contradiction.
-   Implementation/offline gates are next; the option is not active yet.
+   The explicit option, fail-loud application check, supervisor propagation,
+   and deterministic raw-trace audit are implemented and remain default-off.
+   Linux/Windows complete and observer-overhead gates pass with no native or
+   ABI change. One explicit priority-on Stage-4A run is next; no physical
+   performance conclusion or B4 closure exists yet.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

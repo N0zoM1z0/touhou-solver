@@ -67,6 +67,7 @@ def build_long_run_arguments(
     postpublished_survival_shadow: bool = False,
     pipeline_prewarm_shadow: bool = False,
     candidate_verifier_shadow: bool = False,
+    corridor_background_low_priority: bool = False,
     input_clock_boundary_shadow: bool = False,
     input_clock_shadow_sample_ms: float = 1.0,
     local_pipeline_root_shadow_every: int = 0,
@@ -150,6 +151,8 @@ def build_long_run_arguments(
         arguments.append("--pipeline-prewarm-shadow")
     if candidate_verifier_shadow:
         arguments.append("--candidate-verifier-shadow")
+    if corridor_background_low_priority:
+        arguments.append("--corridor-background-low-priority")
     if input_clock_boundary_shadow:
         arguments.extend(
             (

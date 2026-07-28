@@ -237,6 +237,22 @@ class PracticeSupervisorTests(unittest.TestCase):
                 if attribute == "input_clock_boundary_shadow":
                     self.assertEqual(args.input_clock_shadow_sample_ms, 2.5)
 
+    def test_corridor_background_priority_is_explicitly_opt_in(self) -> None:
+        default_args = build_parser().parse_args(
+            ["--stage", "4a", "--armed"]
+        )
+        enabled_args = build_parser().parse_args(
+            [
+                "--stage",
+                "4a",
+                "--corridor-background-low-priority",
+                "--armed",
+            ]
+        )
+
+        self.assertFalse(default_args.corridor_background_low_priority)
+        self.assertTrue(enabled_args.corridor_background_low_priority)
+
     def test_native_backends_default_with_explicit_rollbacks(self) -> None:
         cases = (
             ("local_hazard_backend", "--local-hazard-backend", "numpy"),

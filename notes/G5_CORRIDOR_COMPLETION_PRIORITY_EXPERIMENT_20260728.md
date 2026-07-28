@@ -133,6 +133,40 @@ Before physical use:
    unchanged; and
 7. no native source or 46-symbol production ABI changes.
 
+### Offline gate result
+
+Implemented after this contract:
+
+- `--corridor-background-low-priority` remains absent from default argument
+  generation and propagates explicitly through the practice/full-route
+  supervisors, hotkey launcher, and controller only when requested;
+- every completed corridor solution is checked before publication; an
+  unapplied explicit request raises and enters the existing cleanup path;
+- session, controller configuration, and corridor records retain requested
+  priority, applied priority, configured native worker count, and worker-limit
+  application;
+- `th08-corridor-priority-audit-v1` streams the raw trace and deterministically
+  evaluates the application, solve/publication-age, queryability, support,
+  local-plan, and action-lag gates. Re-auditing normal-priority run
+  `20260728_083433` exactly reproduces its 1,791 unique solutions, solve
+  median/p95/max `110.3032/308.4683/401.3608 ms`, first-observed age
+  median/p95/max `2/4/1789` frames, no-query fraction `0.6843%`, queryable
+  fraction `99.3230%`, local-plan p95 `17.6320 ms`, and action-lag p95/max
+  `2/3`. Delivery passes and the intentionally absent priority request fails
+  only the application gate;
+- complete Linux and Windows suites pass `820/820` in `8.943/16.230 s`, with
+  three existing Windows skips;
+- fresh schema-v9 observer/ABBA reports pass all eight profiles. Linux and
+  Windows interleaved p95 ratios are `1.0232` and `1.0469`; Windows retains
+  `windows_query_thread_cycle_time` provenance; and
+- no file below `native/` and no production ABI changed.
+
+One first Linux complete-suite invocation saw the existing one-millisecond
+native cold-expansion deadline test complete before expiry. The focused test
+and immediate complete rerun passed. This is unrelated to the intervention
+but exposes a warm-cache timing assumption to harden separately; it is not
+hidden or counted as the passing gate.
+
 ## Fixed Physical Gates
 
 The first explicit low-priority Stage-4A run is an intervention diagnostic.

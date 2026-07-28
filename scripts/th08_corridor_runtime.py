@@ -290,6 +290,19 @@ def solve_corridor(
     )
 
 
+def require_corridor_background_priority(
+    solution: CorridorSolution,
+    *,
+    requested: bool,
+) -> None:
+    """Fail an explicit priority experiment that did not apply its request."""
+
+    if requested and not solution.background_priority_lowered:
+        raise RuntimeError(
+            "requested corridor background priority was not applied"
+        )
+
+
 def corridor_target(
     solution: CorridorSolution | None,
     *,
@@ -637,6 +650,7 @@ __all__ = [
     "corridor_target",
     "corridor_viability_query",
     "prepare_pipeline_survival_workspace",
+    "require_corridor_background_priority",
     "solve_corridor",
     "solve_postpublished_survival",
     "stage_corridor_solution",

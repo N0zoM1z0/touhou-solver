@@ -76,6 +76,7 @@ class AgentHotkey:
         postpublished_survival_shadow: bool = False,
         pipeline_prewarm_shadow: bool = False,
         candidate_verifier_shadow: bool = False,
+        corridor_background_low_priority: bool = False,
         input_clock_boundary_shadow: bool = False,
         input_clock_shadow_sample_ms: float = 1.0,
         local_pipeline_root_shadow_every: int = 0,
@@ -144,6 +145,9 @@ class AgentHotkey:
         )
         self.pipeline_prewarm_shadow = pipeline_prewarm_shadow
         self.candidate_verifier_shadow = candidate_verifier_shadow
+        self.corridor_background_low_priority = (
+            corridor_background_low_priority
+        )
         self.input_clock_boundary_shadow = input_clock_boundary_shadow
         self.input_clock_shadow_sample_ms = input_clock_shadow_sample_ms
         self.local_pipeline_root_shadow_every = (
@@ -289,6 +293,9 @@ class AgentHotkey:
                 pipeline_prewarm_shadow=self.pipeline_prewarm_shadow,
                 candidate_verifier_shadow=(
                     self.candidate_verifier_shadow
+                ),
+                corridor_background_low_priority=(
+                    self.corridor_background_low_priority
                 ),
                 input_clock_boundary_shadow=(
                     self.input_clock_boundary_shadow

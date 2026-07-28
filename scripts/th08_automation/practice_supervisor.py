@@ -220,6 +220,9 @@ def run_trial(
         "candidate_verifier_shadow": (
             args.candidate_verifier_shadow
         ),
+        "corridor_background_low_priority": (
+            args.corridor_background_low_priority
+        ),
         "input_clock_boundary_shadow": (
             args.input_clock_boundary_shadow
         ),
@@ -265,6 +268,9 @@ def run_trial(
             pipeline_prewarm_shadow=args.pipeline_prewarm_shadow,
             candidate_verifier_shadow=(
                 args.candidate_verifier_shadow
+            ),
+            corridor_background_low_priority=(
+                args.corridor_background_low_priority
             ),
             input_clock_boundary_shadow=(
                 args.input_clock_boundary_shadow
@@ -543,6 +549,14 @@ def build_parser() -> argparse.ArgumentParser:
         choices=NATIVE_CALL_MODES,
         default=NATIVE_CALL_MODE_GIL_RELEASED,
         help="explicit trace-only native call GIL boundary",
+    )
+    parser.add_argument(
+        "--corridor-background-low-priority",
+        action="store_true",
+        help=(
+            "run only the Python corridor parent below normal priority; "
+            "default-off G5 contention experiment"
+        ),
     )
     parser.add_argument(
         "--safety-value-horizon",

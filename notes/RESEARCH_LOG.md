@@ -7154,3 +7154,44 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Next gate:** implement only CLI/provenance/forwarding/fail-loud plumbing,
   then pass Linux/Windows focused, complete, observer, ABBA, and unchanged-ABI
   gates before physical use.
+
+## 2026-07-28 — Implemented and gated the corridor priority experiment
+
+- The fixed default-off option now propagates through practice/full-route
+  supervisors, `AgentHotkey`, long-run argument construction, and the live
+  controller. Default argument generation has no new flag and the default
+  solve path never invokes the priority API.
+- An explicit request lowers only the Python corridor parent through the
+  existing solve seam. The controller checks the applied result before
+  staging it and raises if lowering failed. Session, controller configuration,
+  and every reported solution retain the request, application result, native
+  worker limit, and worker-limit application.
+- Added deterministic `th08-corridor-priority-audit-v1`. It streams raw JSONL,
+  hashes the exact trace, deduplicates first-observed solutions by source
+  frame, and evaluates the fixed application, solve, publication-age,
+  queryability, support, local-plan, and action-lag gates.
+- Re-auditing normal-priority schema-v9 run `20260728_083433` reproduces its
+  13,842 decisions, 1,791 unique solutions, solve median/p95/max
+  `110.3032/308.4683/401.3608 ms`, first-observed age median/p95/max
+  `2/4/1789` frames, expired/no-query/queryable fractions
+  `0.0946%/0.6843%/99.3230%`, zero support-uncovered query, local-plan p95
+  `17.6320 ms`, and action-lag p95/max `2/3`. Every delivery gate passes; the
+  expected default-off configuration fails only the priority application
+  gate.
+- Focused Ruff/tests pass. Complete Linux/Windows suites pass `820/820` in
+  `8.943/16.230 s`, with three existing Windows skips. The first Linux
+  complete invocation exposed an unrelated warm-cache-sensitive
+  one-millisecond native deadline test; its focused and immediate complete
+  reruns passed. This timing assumption remains visible for separate
+  hardening.
+- Fresh Linux/Windows schema-v9 observer benchmarks pass all eight profiles
+  and ABBA at ratios `1.0232/1.0469`. Report SHA-256 values are
+  `dd31a55623a087eafb96d6b77106cab05ea6f41e8a44649b88fec49cdc7bc9d5`
+  and
+  `5044e9dd9d5928159b1d2ab7e03a3d87a932dc7924f92a8ff7a194551610545a`.
+  Windows retains only `windows_query_thread_cycle_time`; no native source or
+  production ABI changed.
+- **Authority and next gate:** offline eligibility is complete, but no
+  physical result exists. Run one explicit priority-on GIL-held schema-v9
+  Stage-4A workload, retain the deterministic priority and birth audits, and
+  accept it only if every fixed gate and cleanup condition passes.

@@ -28,6 +28,7 @@ from th08_corridor_runtime import (
     corridor_postpublished_survival_query,
     corridor_viability_query,
     prepare_pipeline_survival_workspace,
+    require_corridor_background_priority,
     solve_corridor,
     solve_postpublished_survival,
 )
@@ -39,6 +40,26 @@ from touhou_control.viability import (
 
 
 class Th08CorridorRuntimeTests(unittest.TestCase):
+    def test_requested_background_priority_fails_loud(self) -> None:
+        class Solution:
+            background_priority_lowered = False
+
+        require_corridor_background_priority(
+            Solution(),
+            requested=False,
+        )
+        with self.assertRaisesRegex(RuntimeError, "was not applied"):
+            require_corridor_background_priority(
+                Solution(),
+                requested=True,
+            )
+
+        Solution.background_priority_lowered = True
+        require_corridor_background_priority(
+            Solution(),
+            requested=True,
+        )
+
     def test_rejected_fine_and_survival_strategies_remain_shadow_only(self) -> None:
         self.assertEqual(LIVE_REFINEMENT_GRID_STEPS, ())
         self.assertFalse(LIVE_SURVIVAL_LABELS)
@@ -360,6 +381,28 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
         self.assertTrue(solution.background_priority_lowered)
         self.assertEqual(solution.native_viability_worker_limit, 2)
         self.assertTrue(solution.native_viability_worker_limit_applied)
+
+    def test_default_solve_does_not_lower_parent_worker_priority(self) -> None:
+        with patch(
+            "th08_corridor_runtime.lower_current_thread_priority",
+        ) as priority:
+            solution = solve_corridor(
+                source_frame=100,
+                snapshot_frame=90,
+                forecast_lead_frames=10,
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                enemy_bodies=(),
+                snapshot_lag=0,
+                control_delay_candidates=(1, 2),
+                nominal_control_delay=1,
+                active_action="stay",
+            )
+
+        priority.assert_not_called()
+        self.assertFalse(solution.background_priority_lowered)
 
     def test_background_worker_limit_rejects_out_of_range_values(self) -> None:
         with self.assertRaisesRegex(ValueError, "must be 1..4"):

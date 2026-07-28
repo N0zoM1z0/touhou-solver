@@ -37,6 +37,11 @@
   partial survival，以及由較早 global version 產生的 pre-loss continuation
   reserve。
 
+性能不是只跑一次的附屬 gate，也不受這份 roadmap 已列出的候選方法限制。
+任何新 physical tail、publication miss、hit 因果鏈或資源爭用，只要可能影響
+survival，都應先保留 evidence、固定單一 intervention contract，再做
+Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸。
+
 禁止 big-bang rewrite。任何「搬檔 + 改 recurrence + 做效能優化」的混合提交都
 應拆開。
 
@@ -1122,7 +1127,11 @@ parity 當成每個 nature tie field 的逐 bit equality。
   前固定：只降低 Python corridor parent，四個 native workers、
   recurrence、cadence、issue/fallback 全不變；要求 applied provenance、
   至少一個 completion transition，及兩個連續完整 physical passes；
-  這不增加 action authority；
+  這不增加 action authority。該 default-off option、fail-loud check、
+  supervisor forwarding 與 deterministic raw-trace audit 已實作；
+  Linux/Windows 完整 suite 和 observer/ABBA gate 通過且 native/ABI
+  未改。下一步是第一個 priority-on Stage-4A physical pass，尚未得到
+  performance 結論；
 - spell-57 callback traversal 本身 p95/max `0.5460/10.3328 ms`，即使
   fail-closed 也仍在 issue thread。後續性能線要做 exact-state/cache/
   transfer-summary 分析，不能靠降低 256 cap 或 stage-specific shortcut；

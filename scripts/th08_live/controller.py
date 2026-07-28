@@ -38,6 +38,7 @@ from th08_corridor_runtime import (
     corridor_submit_due as _corridor_submit_due,
     corridor_target as _corridor_target,  # noqa: F401 - compatibility export
     corridor_viability_query as _corridor_viability_query,  # noqa: F401
+    require_corridor_background_priority,
     solve_corridor as _solve_corridor,
     solve_postpublished_survival as _solve_postpublished_survival,
     stage_corridor_solution as _stage_corridor_solution,
@@ -1747,7 +1748,9 @@ def _run_live_session(
                     "viability_horizon_frames": (
                         TH08_CORRIDOR_CONFIG.horizon_frames
                     ),
-                    "corridor_background_low_priority": False,
+                    "corridor_background_low_priority": (
+                        args.corridor_background_low_priority
+                    ),
                     "corridor_native_viability_workers": (
                         args.corridor_native_workers
                     ),
@@ -2805,6 +2808,10 @@ def _run_live_session(
             if corridor_future is not None and corridor_future.done():
                 completed_solution = corridor_future.result()
                 corridor_future = None
+                require_corridor_background_priority(
+                    completed_solution,
+                    requested=args.corridor_background_low_priority,
+                )
                 corridor_policy_lead.observe(
                     completed_solution.worker_ms
                     if completed_solution.worker_ms is not None
@@ -2894,6 +2901,9 @@ def _run_live_session(
                     audit_executor=audit_executor,
                     pipeline_prewarm_shadow=(
                         args.pipeline_prewarm_shadow
+                    ),
+                    background_low_priority=(
+                        args.corridor_background_low_priority
                     ),
                     native_viability_worker_limit=(
                         args.corridor_native_workers
@@ -4229,6 +4239,14 @@ def build_parser() -> argparse.ArgumentParser:
             "native viability worker cap on the asynchronous corridor "
             "thread; four preserves authoritative plan throughput, while "
             "smaller values are explicit contention ablations"
+        ),
+    )
+    parser.add_argument(
+        "--corridor-background-low-priority",
+        action="store_true",
+        help=(
+            "run only the Python corridor parent below normal priority; "
+            "default-off G5 contention experiment"
         ),
     )
     parser.add_argument(

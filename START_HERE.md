@@ -257,12 +257,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
   sensitivity of a one-millisecond native deadline test. A separate
   test-only checkpoint enlarged the cold reachable region; 128/128 repeated
   deadline cases and fresh Linux/Windows `820/820` suites now pass in
-  `9.488/16.010 s`. The first explicit priority-on physical pass is next; no
-  physical performance conclusion or B4 closure exists yet.
+  `9.488/16.010 s`. Priority-on run `20260728_092619` then completed frames
+  `2..44999`, 14,649 decisions, 18 hits, hard no-Bomb, retention, and
+  cleanup. All 1,900 solutions applied the request and unchanged four-worker
+  limit. It is rejected: observer p95 `0.2049 ms` and expired-policy fraction
+  `0.2472%` exceed their fixed limits, and no `inflight -> done` endpoint
+  supplies the required completion witness. The lower `0.8925 ms` maximum is
+  therefore non-attributable. All hits followed global-kernel exhaustion and
+  the first retained positive `40/9`-frame viability/robust warnings. Do not
+  run the second pass. B4 remains open; next analyze exact memoized/transfer
+  summary callback traversal rather than another priority variant.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and
-  CE-0143/0144/0145/0146/0147/0148/0149/0150/0151/0152.
+  CE-0143/0144/0145/0146/0147/0148/0149/0150/0151/0152/0153.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and

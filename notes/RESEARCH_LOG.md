@@ -7212,3 +7212,44 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** deterministic test hardening only. This provides no planner,
   performance, or physical-survival evidence and does not alter the corridor
   priority experiment.
+
+## 2026-07-28 — Rejected the corridor-parent priority intervention
+
+- Accepted priority-on Lunatic Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260728_092619` completed frames
+  `2..44999`, 14,649 decisions, 18 hits, hard no-Bomb, `route_complete`,
+  artifact retention, supervisor completion, exact-target cleanup, and no
+  manual input or foreground contamination.
+- All 1,900 unique corridor solutions retain
+  `background_priority_lowered=true`, native worker limit four, and
+  worker-limit application. Solve median/p95/max is
+  `111.4190/302.3068/407.8457 ms`; first-observed age median/p95 is `2/4`;
+  local-plan p95 is `17.9999 ms`; action-lag p95/max is `2/3`; support
+  uncovered is zero.
+- The fixed delivery gate fails. Expired-policy fraction is
+  `36/14562 = 0.2472%`, above `0.20%`. No-query/queryable fractions
+  `0.8309%/99.1622%` remain inside their limits.
+- Schema-v9/native/GIL-held/cycle validation passes on all 14,649 birth rows.
+  Observer p50/p95/p99/p99.9/max is
+  `0.1022/0.2049/0.3401/0.5282/0.8925 ms`; p95 exceeds `0.200 ms`.
+  No row exceeds the maximum limit and no completed GC overlaps it.
+- The lower maximum is not an attributable success: zero observer endpoints
+  changed `inflight -> done`, so the precommitted completion witness is
+  absent. Every endpoint is stable at both lookups. The run cannot establish
+  that priority removed CE-0152 rather than sampling no completion handoff.
+- The first hit at frame 1,299 followed viability/robust exhaustion at
+  `1,259/1,290`, retaining positive `40/9`-frame warnings and no
+  viable-policy/action contradiction. All 18 contacts followed global-kernel
+  exhaustion. The 18/12 hit comparison is descriptive only.
+- Raw JSONL is 497,836,057 bytes with SHA-256
+  `cedcc97153373bee1758b8dc0a0e4e8ad3879f0c3647091cb27250390a827e12`.
+  Two priority and birth audit generations are respectively byte-identical at
+  SHA-256
+  `5a2d0884147f12bbd18ce66cae4b9ebdcefd8c9b19034e73fd14731e95716686`
+  and
+  `3bcbf3e25667c9f5f2efa6ba57a4dd2899dafbf10e0207e08562b8a1a6ff2dab`.
+- **Decision:** reject the intervention and do not run the second pass. Keep
+  the option default-off for reproduction only. B4 remains open. The next
+  joint model/performance boundary is exact memoized or transfer-summary ECL
+  callback traversal, which must preserve complete/unknown semantics and
+  fail-closed lowering while reducing issue-thread cost.

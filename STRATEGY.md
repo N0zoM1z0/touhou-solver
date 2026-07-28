@@ -339,8 +339,12 @@ comparison.
    The explicit option, fail-loud application check, supervisor propagation,
    and deterministic raw-trace audit are implemented and remain default-off.
    Linux/Windows complete and observer-overhead gates pass with no native or
-   ABI change. One explicit priority-on Stage-4A run is next; no physical
-   performance conclusion or B4 closure exists yet.
+   ABI change. Physical run `20260728_092619` applied priority to every 1,900
+   solution but failed observer p95 `0.2049 ms`, expired-policy fraction
+   `0.2472%`, and the required completion-transition witness. Its lower
+   `0.8925 ms` maximum is non-attributable because no `inflight -> done`
+   endpoint occurred. The intervention is **rejected**; do not run the second
+   pass. Keep it default-off for reproduction only.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

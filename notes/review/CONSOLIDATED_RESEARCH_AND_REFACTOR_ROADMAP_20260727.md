@@ -1130,7 +1130,10 @@ parity 當成每個 nature tie field 的逐 bit equality。
   這不增加 action authority。該 default-off option、fail-loud check、
   supervisor forwarding 與 deterministic raw-trace audit 已實作；
   Linux/Windows 完整 suite 和 observer/ABBA gate 通過且 native/ABI
-  未改。下一步是第一個 priority-on Stage-4A physical pass，尚未得到
+  未改。priority-on Stage-4A run `20260728_092619` 雖然把 observer
+  max 降到 `0.8925 ms`，但 p95 `0.2049 ms`、expired fraction
+  `0.2472%` 超過 fixed gates，且沒有任何 `inflight -> done` witness；
+  因此 intervention 已拒絕、不跑第二遍，不能把單一 lower max 當作
   performance 結論；
 - spell-57 callback traversal 本身 p95/max `0.5460/10.3328 ms`，即使
   fail-closed 也仍在 issue thread。後續性能線要做 exact-state/cache/

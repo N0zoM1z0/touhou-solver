@@ -4450,3 +4450,46 @@ corridor-completion correlation with mixed scheduler/executed-work evidence
   two earlier passing runs. It does not invalidate their native-call
   attribution, alter callback coverage authority, or support a survival
   comparison.
+
+## CE-0153: Lowering the corridor parent removed the transition witness but failed fixed delivery gates
+
+Status: observed physical intervention failure; rejected after the first
+precommitted run
+
+- **Observed application:** Priority-on Stage-4A run `20260728_092619`
+  completed frames `2..44999` with 14,649 decisions. All 1,900 unique
+  corridor solutions report the below-normal parent priority and the
+  unchanged four-worker native limit applied.
+- **Observed failure:** Observer p95 is `0.2049 ms`, above the fixed
+  `0.200 ms` limit. Expired-policy fraction is `36/14562 = 0.2472%`, above
+  the fixed `0.20%` limit. The deterministic priority audit therefore passes
+  application but fails delivery.
+- **Missing falsifier witness:** Observer maximum fell descriptively from
+  `5.1274` to `0.8925 ms`, but none of 14,649 rows retained a corridor
+  `inflight -> done` endpoint. The contract required at least one such row.
+  Without it, the lower maximum cannot be attributed to completion priority
+  and may not be selected as a passing result.
+- **Preserved controls:** Solve p95/max `302.3068/407.8457 ms`,
+  first-observed age median/p95 `2/4`, no-query/queryable fractions
+  `0.8309%/99.1622%`, zero support-uncovered query, local-plan p95
+  `17.9999 ms`, and action-lag p95/max `2/3` all pass. No observer row
+  exceeds `2 ms`; no completed GC overlaps it.
+- **Physical boundary:** The accepted route completed with 18 hits and hard
+  no-Bomb. The first hit at frame 1,299 followed viability/robust exhaustion
+  at `1,259/1,290`, retaining positive `40/9`-frame warnings. All contacts
+  followed global-kernel exhaustion; hit count remains a descriptive,
+  RNG-distinct workload result.
+- **Rejected inference:** A lower single-run maximum with no matching
+  completion transition does not prove that below-normal parent priority
+  removed the CE-0152 mechanism. Do not run-select a second sample after the
+  fixed p95 and expiration failures.
+- **Correction boundary:** Keep the option default-off for reproduction.
+  Reopen performance work through a new causal contract; prioritize exact
+  memoized/transfer-summary ECL callback traversal because it combines
+  issue-thread latency with the still-open incomplete future-event boundary.
+- **Evidence:** Raw SHA-256
+  `cedcc97153373bee1758b8dc0a0e4e8ad3879f0c3647091cb27250390a827e12`;
+  priority/birth audit SHA-256 values
+  `5a2d0884147f12bbd18ce66cae4b9ebdcefd8c9b19034e73fd14731e95716686`
+  and
+  `3bcbf3e25667c9f5f2efa6ba57a4dd2899dafbf10e0207e08562b8a1a6ff2dab`.

@@ -218,6 +218,30 @@ consecutive complete low-priority Stage-4A runs pass every fixed observer,
 delivery, support, issue, no-Bomb, acceptance, and cleanup gate. Do not
 repeat-select around an intervening failure.
 
+## Physical Result And Decision
+
+The first explicit run `20260728_092619` applied the requested priority and
+unchanged four-worker limit to every one of 1,900 unique solutions. It
+completed frames `2..44999`, 14,649 decisions, 18 hits, hard no-Bomb,
+`route_complete`, artifact retention, supervisor completion, and cleanup.
+
+It failed three precommitted requirements:
+
+1. observer p95 was `0.2049 ms`, above `0.200 ms`;
+2. expired-policy fraction was `36/14562 = 0.2472%`, above `0.20%`; and
+3. no corridor `inflight -> done` endpoint was retained.
+
+Observer maximum was `0.8925 ms`, lower than the normal-priority run's
+`5.1274 ms`, but the absent completion transition makes that descriptive
+change non-attributable. Solve, first-observed age, queryless/queryable,
+support, local-plan, and action-lag gates passed. The canonical first hit
+retained positive viability/robust warnings and no viable-policy/action
+contradiction.
+
+The intervention is rejected. Do not run the second pass. The explicit
+option remains default-off for reproducibility and has no live authority.
+See `G5_CORRIDOR_COMPLETION_PRIORITY_REJECTION_20260728.md` and CE-0153.
+
 ## Interpretation And Follow-Up
 
 - Passing transition tails with preserved publication gates supports the

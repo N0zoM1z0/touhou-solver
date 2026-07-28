@@ -35,9 +35,15 @@ def auxiliary_static_semantics() -> dict[str, object]:
         "vm_offset_in_context": 0x08,
         "active_vm_bytes": 0x228,
         "live_local_offsets_in_vm": "0x18..0x64",
+        "call_depth_offset_in_context": 0x06,
+        "call_depth_semantics": "signed_i16_saturates_at_15",
         "saved_call_frame_area_offset_in_context": 0x230,
         "saved_call_frame_stride": 0x228,
-        "maximum_saved_call_frames": 15,
+        "maximum_restorable_saved_call_frames": 15,
+        "physical_saved_call_frame_slots": 16,
+        "saturated_slot_15_semantics": (
+            "written_by_calls_at_depth_15_but_next_return_restores_slot_14"
+        ),
         "scheduler": "0x0041EBB6..0x0041EC7C",
     }
 

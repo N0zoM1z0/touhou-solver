@@ -52,6 +52,9 @@ database:
 - `ecl_call_subroutine` saves the complete `0x228`-byte active VM at context
   `+0x230 + depth * 0x228`; context `+0x230` is the saved-call-frame area,
   not the live-local base;
+- context `+0x06` is signed 16-bit call depth, saturating at 15; the
+  `0x24B0` allocation contains 16 physical saved slots, ordinary returns
+  restore at most slots `0..14`, and saturated calls can write slot 15;
 - `g_ecl_file_context` is rooted at `0x004ECCB8`;
 - `ecl_load_file` at `0x00418330` loads the decoded ECL resource, requires
   magic `0x800`, relocates all 16 header timeline/end slots in place, points
@@ -121,8 +124,10 @@ The minimum exact auxiliary observation is:
 - VM PC at context `+0x08`;
 - raw timer bits and the same complete projected live-local layout within the
   active VM used by the main inventory;
-- call depth and, for interpretation crossing call/return, the exact required
-  `0x228`-byte saved frames from the `+0x230` area; and
+- signed call depth and, for interpretation crossing call/return, the exact
+  restorable `0x228`-byte saved frames `[0, depth)` from the `+0x230` area;
+  physical slot 15 remains distinct from the maximum 15 restorable frames;
+  and
 - before/after owner-pointer evidence sufficient to reject context reuse.
 
 No per-context cold read may be added to the live issue path merely because a

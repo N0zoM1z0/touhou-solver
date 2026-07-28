@@ -103,6 +103,10 @@ from th08_live.birth_contention import (
     BirthObserverContention,
     capture_birth_observer_future_states,
 )
+from th08_live.auxiliary_vm import (
+    AuxiliaryVmBatchTraceService,
+    native_auxiliary_vm_batch_available,
+)
 from th08_live.derived_pattern_source import (
     DerivedPatternSourceObservation,
     observe_derived_pattern_sources,
@@ -116,6 +120,7 @@ from th08_live.bullet_birth import (
 )
 from th08_live.bullet_birth_native import (
     NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_HELD,
     NATIVE_CALL_MODE_GIL_RELEASED,
     NativeBulletBirthDiagnostics,
     NativeBulletBirthTracker,
@@ -1362,6 +1367,13 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         raise ValueError(
             "local pipeline root shadow cadence cannot be negative"
         )
+    if args.auxiliary_vm_batch_every <= 0:
+        raise ValueError("auxiliary-VM batch cadence must be positive")
+    if (
+        args.auxiliary_vm_batch_spell_id is not None
+        and args.auxiliary_vm_batch_spell_id < 0
+    ):
+        raise ValueError("auxiliary-VM spell filter cannot be negative")
     _configure_local_hazard_backend(args.local_hazard_backend)
     _configure_local_beam_reducer(args.local_beam_reducer)
     _configure_local_bullet_decoder(args.bullet_decode_backend)
@@ -1393,6 +1405,20 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
     ):
         raise ValueError(
             "nonspell main-VM tracing requires bullet-birth tracing"
+        )
+    if (
+        getattr(args, "trace_auxiliary_vm_batches", False)
+        and not native_auxiliary_vm_batch_available(
+            getattr(
+                args,
+                "auxiliary_vm_native_call_mode",
+                "gil-held",
+            )
+        )
+    ):
+        raise RuntimeError(
+            "auxiliary-VM batch tracing was selected but its native "
+            "trace library is unavailable"
         )
     if (
         args.stage_transition_timeout <= 0.0
@@ -1544,6 +1570,19 @@ def _run_live_session(
     trace_nonspell_main_vms = bool(
         getattr(args, "trace_nonspell_main_vms", False)
     )
+    trace_auxiliary_vm_batches = bool(
+        getattr(args, "trace_auxiliary_vm_batches", False)
+    )
+    auxiliary_vm_batch_service = (
+        AuxiliaryVmBatchTraceService(
+            cadence_frames=args.auxiliary_vm_batch_every,
+            spell_id_filter=args.auxiliary_vm_batch_spell_id,
+            native_call_mode=args.auxiliary_vm_native_call_mode,
+        )
+        if trace_auxiliary_vm_batches
+        else None
+    )
+    previous_auxiliary_vm_batch_emit_ms: float | None = None
     bullet_birth_backend = getattr(
         args,
         "bullet_birth_backend",
@@ -3569,6 +3608,42 @@ def _run_live_session(
             previous_direction = fresh_issue_result.decision.mask & (
                 UP | DOWN | LEFT | RIGHT
             )
+            if auxiliary_vm_batch_service is not None:
+                current_spell_id = (
+                    int(spell_state["spell_id"])
+                    if spell_state["active"]
+                    else None
+                )
+                auxiliary_vm_batch_record = (
+                    auxiliary_vm_batch_service.observe_if_due(
+                        reader,
+                        decision_frame=counter_at_action,
+                        manager_frame=int(
+                            state["enemy_manager_frame"]
+                        ),
+                        gameplay_epoch=gameplay_epoch,
+                        stage_route_index=int(
+                            state["stage_route_index"]
+                        ),
+                        spell_id=current_spell_id,
+                    )
+                )
+                if auxiliary_vm_batch_record is not None:
+                    timing = auxiliary_vm_batch_record.get("timing_ms")
+                    if isinstance(timing, dict):
+                        timing["previous_emit"] = (
+                            previous_auxiliary_vm_batch_emit_ms
+                        )
+                    previous_auxiliary_vm_batch_emit_ms = (
+                        trace_sink.emit(
+                            auxiliary_vm_batch_record,
+                            flush=(
+                                auxiliary_vm_batch_record["status"]
+                                != "success"
+                            ),
+                            measure=True,
+                        )
+                    )
             local_pipeline_certificate_shadow: (
                 dict[str, object] | None
             ) = None
@@ -3930,6 +4005,7 @@ def _run_live_session(
             trace_ms = 0.0
             if (
                 trace_bullet_births
+                or trace_auxiliary_vm_batches
                 or iterations % args.log_every == 0
                 or decision.bomb
                 or current_phase != previous_phase
@@ -4590,6 +4666,40 @@ def build_parser() -> argparse.ArgumentParser:
             "decode first-64 ordinary-enemy main VMs from the existing "
             "prefix capture into an explicit bullet-birth trace; "
             "diagnostic only, no instruction reads"
+        ),
+    )
+    parser.add_argument(
+        "--trace-auxiliary-vm-batches",
+        action="store_true",
+        help=(
+            "capture a bounded post-issue first-64 auxiliary ECL VM batch "
+            "at an explicit changed-manager-frame cadence; trace only"
+        ),
+    )
+    parser.add_argument(
+        "--auxiliary-vm-batch-every",
+        type=int,
+        default=16,
+        metavar="MANAGER_FRAMES",
+        help=(
+            "changed enemy-manager frames between post-issue auxiliary-VM "
+            "batch attempts"
+        ),
+    )
+    parser.add_argument(
+        "--auxiliary-vm-batch-spell-id",
+        type=int,
+        help=(
+            "optional exact spell-id filter for auxiliary-VM batch tracing"
+        ),
+    )
+    parser.add_argument(
+        "--auxiliary-vm-native-call-mode",
+        choices=NATIVE_CALL_MODES,
+        default=NATIVE_CALL_MODE_GIL_HELD,
+        help=(
+            "select whether the trace-only native auxiliary-VM batch call "
+            "releases or holds the Python GIL"
         ),
     )
     parser.add_argument(

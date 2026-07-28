@@ -507,10 +507,19 @@ comparison.
    `4/26/32/34`. Fifty-six of 57 heap addresses recur at multiple
    `(slot, auxiliary-index)` observations, so pointer value is not source
    identity and every later state capture must recheck its owner and pointer
-   set. The selected proposed Phase-B strategy is one bounded native compact
-   batch; per-pointer Python reads and full `0x24B0` context copies are
-   rejected delivery designs. The exact runtime-image primitive has only
-   synthetic authority until a shipped Stage-5 image matches byte for byte.
+   set. Phase-B v1 now implements one bounded native compact batch with exact
+   scalar/native parity and fast native timing. Physical spell-107 run
+   `20260728_185838` rejects its delivery composition: 9 of 124 separate
+   Python owner-prefix captures crossed one manager frame before native entry,
+   while all 115 native batches were semantically clean at
+   `0.154/0.185/0.301 ms` p95/p99/max. CE-0164 retains that fail-closed
+   transport counterexample. Retain the v1 state semantics, reject external
+   owner capture, and propose a separately versioned one-call native
+   owner/context coherence transaction under the unchanged physical gate.
+   Per-pointer Python reads, full `0x24B0` context copies, silent skips, and
+   uncontracted retries remain rejected delivery designs. The exact
+   runtime-image primitive has only synthetic authority until a shipped
+   Stage-5 image matches byte for byte.
    None of this changes the live strategy or grants future-hazard authority.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over

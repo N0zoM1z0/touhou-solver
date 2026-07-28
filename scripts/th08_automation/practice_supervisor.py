@@ -16,6 +16,7 @@ from pathlib import Path
 from th08_agent_hotkey import AgentHotkey
 from th08_live.bullet_birth_native import (
     NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_HELD,
     NATIVE_CALL_MODE_GIL_RELEASED,
 )
 from th08_automation.practice_artifacts import (
@@ -212,6 +213,16 @@ def run_trial(
             args.trace_derived_pattern_sources
         ),
         "trace_nonspell_main_vms": args.trace_nonspell_main_vms,
+        "trace_auxiliary_vm_batches": (
+            args.trace_auxiliary_vm_batches
+        ),
+        "auxiliary_vm_batch_every": args.auxiliary_vm_batch_every,
+        "auxiliary_vm_batch_spell_id": (
+            args.auxiliary_vm_batch_spell_id
+        ),
+        "auxiliary_vm_native_call_mode": (
+            args.auxiliary_vm_native_call_mode
+        ),
         "bullet_birth_backend": args.bullet_birth_backend,
         "bullet_birth_native_call_mode": (
             args.bullet_birth_native_call_mode
@@ -256,6 +267,16 @@ def run_trial(
                 args.trace_derived_pattern_sources
             ),
             trace_nonspell_main_vms=args.trace_nonspell_main_vms,
+            trace_auxiliary_vm_batches=(
+                args.trace_auxiliary_vm_batches
+            ),
+            auxiliary_vm_batch_every=args.auxiliary_vm_batch_every,
+            auxiliary_vm_batch_spell_id=(
+                args.auxiliary_vm_batch_spell_id
+            ),
+            auxiliary_vm_native_call_mode=(
+                args.auxiliary_vm_native_call_mode
+            ),
             bullet_birth_backend=args.bullet_birth_backend,
             bullet_birth_native_call_mode=(
                 args.bullet_birth_native_call_mode
@@ -579,6 +600,24 @@ def build_parser() -> argparse.ArgumentParser:
             "record first-64 ordinary-enemy main-VM state from the existing "
             "prefix capture; diagnostic only"
         ),
+    )
+    parser.add_argument(
+        "--trace-auxiliary-vm-batches",
+        action="store_true",
+        help="record bounded post-issue auxiliary ECL VM batches",
+    )
+    parser.add_argument(
+        "--auxiliary-vm-batch-every",
+        type=int,
+        default=16,
+        metavar="MANAGER_FRAMES",
+    )
+    parser.add_argument("--auxiliary-vm-batch-spell-id", type=int)
+    parser.add_argument(
+        "--auxiliary-vm-native-call-mode",
+        choices=NATIVE_CALL_MODES,
+        default=NATIVE_CALL_MODE_GIL_HELD,
+        help="explicit auxiliary-VM trace-only native GIL boundary",
     )
     parser.add_argument(
         "--bullet-birth-native-call-mode",

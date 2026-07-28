@@ -180,6 +180,13 @@ class MainVmSourceMappingTests(unittest.TestCase):
             0x230,
         )
         self.assertEqual(semantics["saved_call_frame_stride"], 0x228)
+        self.assertEqual(semantics["call_depth_offset_in_context"], 0x06)
+        self.assertEqual(
+            semantics["maximum_restorable_saved_call_frames"],
+            15,
+        )
+        self.assertEqual(semantics["physical_saved_call_frame_slots"], 16)
+        self.assertNotIn("maximum_saved_call_frames", semantics)
         self.assertNotIn("local_state_offset_in_context", semantics)
 
     def test_unique_complete_affine_base_is_selected(self) -> None:

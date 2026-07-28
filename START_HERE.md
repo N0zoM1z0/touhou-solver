@@ -41,7 +41,9 @@ and design/run notes retain derivations and history.
 31. `notes/G5_NONSPELL_MAIN_VM_STAGE5_RESULT_20260728.md`
 32. `notes/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`
 33. `notes/G5_AUXILIARY_POINTER_STAGE5_RESULT_20260728.md`
-34. the relevant recent run note and counterexample rows before live work
+34. `notes/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`
+35. `notes/G5_NATIVE_AUXILIARY_VM_BATCH_STAGE5_RESULT_20260728.md`
+36. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -50,7 +52,23 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
-- The newest action-neutral G5 checkpoint is Stage-5 run
+- The newest action-neutral G5 checkpoint is explicit auxiliary-batch
+  Stage-5 spell-107 run
+  `lunatic_route2_stage5_unattended_20260728_185838`, executed from parent
+  `997335b` plus the enclosing checkpoint changes. It completed 12,216
+  decisions over frames `1..41601`, hard no-Bomb, with ten hits,
+  `route_complete`, accepted transition/session gates, exact key/process
+  cleanup, and no residual process. The strict physical gate is rejected:
+  9 of 124 separately bracketed Python owner-prefix copies crossed exactly
+  one enemy-manager frame. All 115 batches that entered native code have
+  zero batch/record/coherence failure, 3,028 usable contexts, and native
+  p95/p99/max `0.154/0.185/0.301 ms`; cadence p50/p95/p99 remains `2/4/4`.
+  CE-0164 localizes the failure to the external owner-capture transport
+  boundary. Retain v1 semantics, but move owner capture and context capture
+  into one separately contracted native coherent transaction before another
+  physical gate. Strict report/raw digests are
+  `440bf0ba...c18` / `734878ff...927`.
+- The compatible no-batch Stage-5 baseline is
   `lunatic_route2_stage5_unattended_20260728_171633`, executed from parent
   `3adad09` plus the enclosing checkpoint changes. It completed 12,032
   decisions over frames `2..41630`, hard no-Bomb, with eight hits at
@@ -91,7 +109,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Runtime byte identity, exact operand/geometry lowering, slot-reuse
   exclusion, and hit causality remain unproved. CE-0162 makes exact runtime
   ECL identity plus bounded auxiliary-context observation the next source
-  gate. The corrected source-join report digest is `106ef264...b4488`; raw SHA-256 is
+  gate. The revalidated source-join report digest is `077a9c76...f691`; raw SHA-256 is
   `8569d64d...3a7`.
 - The G5 realized birth-to-hit gate is complete and action-free. Its modular
   streaming audit joins all 15 Stage-5 `124930` dossier candidates to exact
@@ -123,12 +141,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `a08f1370...c9bda` / `9081e3ed...565b`.
   Isolated Linux/Windows source reports pass, native libraries build for both
   targets, and complete Linux/Windows discovery passes 889 tests.
-- The next G5 source gate revalidates auxiliary call depth/saved-frame offsets,
-  freezes a native compact-batch ABI and budget, proves scalar/native parity
-  under churn/reuse/unreadable/max-density cases, and measures Windows timing
-  before one action-neutral spell-107 physical trial. Separately capture and
-  byte-compare one exact shipped Stage-5 runtime ECL image outside the issue
-  boundary. Do not fuse or publish the zero-signal ready-parent class.
+- The next G5 source gate is a versioned one-call native owner/context
+  coherence transaction correcting CE-0164, followed by the unchanged
+  action-neutral spell-107 physical gate. Separately capture and byte-compare
+  one exact shipped Stage-5 runtime ECL image outside the issue boundary. Do
+  not fuse or publish the zero-signal ready-parent class.
   Callbacks, deferred enemy state, sources outside the first 64 records, and
   non-ECL native sources remain later unresolved classes. Earlier viability
   preservation under CE-0158 and general performance work continue in
@@ -1436,12 +1453,15 @@ weaken four global workers or reuse a merely similar root.
   `notes/G3_G4_FIRST_LOSS_CAPSULE_EXPERIMENT_CONTRACT_20260728.md`
 - Realized activation-to-hit provenance:
   `notes/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
+- Auxiliary runtime observation and native-batch delivery:
+  `notes/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`,
+  `notes/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`
 - Generated differential:
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 
 Relevant durable failures include CE-0108, CE-0109, CE-0111, CE-0118,
-CE-0120 through CE-0125, and CE-0127 through CE-0134. Historical notes do not
-override the authority table above.
+CE-0120 through CE-0125, CE-0127 through CE-0134, and CE-0162 through
+CE-0164. Historical notes do not override the authority table above.
 
 ## Retained Workloads
 

@@ -59,12 +59,13 @@ The offline analyzer is split under
 
 The retained report is
 `artifacts/viability_audit/g5_nonspell_main_vm_source_join_stage5_20260728_155426.json`.
-After the CE-0163 semantic-label correction, its internal digest is
-`106ef2645396dad59dddff83d31c544f063014bb6c7b0e273ccbce4a7e1b4488`.
+After the CE-0163 active/restorable/physical-slot revalidation, its internal
+digest is
+`077a9c7655a44db3228ebd86a3a2e03988c9286ed10233f6476275461ebaf691`.
 The corrected pretty retained file has SHA-256
-`09fbfc8ec9a0c66d02b581c55fdb0da32d28c7795ecd3de2f968f4002dc72a5a`.
-The prior digests remain identifiable in Git history but describe the
-superseded report that mislabeled the saved-call-frame area as live locals.
+`10cd5bcc31badeed2b6d617125665cf168bdf1b44916e3f56677b8c774c1af5f`.
+Prior digests remain identifiable in Git history but describe superseded
+reports with incomplete auxiliary-frame semantics.
 
 ## Offline Performance
 
@@ -173,9 +174,12 @@ The following is **observed statically** in IDA:
 Later evaluator/call-path review corrected the original `+0x230` label:
 `ecl_eval_int` and `ecl_resolve_int_lvalue` read live locals from the active
 VM at `+0x18..+0x64`; `ecl_call_subroutine` copies the complete `0x228`-byte
-VM to the `+0x230` area at a `0x228` stride. The area is a 15-entry saved
-call-frame stack, not a live-local base. This correction changes no retained
-PC/timer/local bits and had no action authority.
+VM to the `+0x230` area at a `0x228` stride. Context `+0x06` is signed
+16-bit call depth, which saturates at 15. The allocation contains 16 physical
+slots, but ordinary returns restore at most slots `0..14`; a saturated call
+may write slot 15 before the next return restores slot 14. This area is not a
+live-local base. The correction changes no retained PC/timer/local bits and
+had no action authority.
 
 The Stage-5 trace observes five mapped opcode-`0x87` PCs 1,129 times. Their
 static arguments select auxiliary subroutines 30, 32, 54, 57, and 65. Every

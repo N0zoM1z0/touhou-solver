@@ -4904,7 +4904,7 @@ counterexample; ordinary inventory retained, main-only completeness rejected
   identity. Unknown contexts enlarge unresolved coverage; they do not become
   absent, safe, or losing.
 - **Evidence:** Source-join internal digest
-  `106ef2645396dad59dddff83d31c544f063014bb6c7b0e273ccbce4a7e1b4488`;
+  `077a9c7655a44db3228ebd86a3a2e03988c9286ed10233f6476275461ebaf691`;
   raw trace SHA-256
   `8569d64d3ce50ced529bdcf4b48e8f0daa00bfbfa8d8cec9695665f04d0283a7`.
 - **Authority:** Source availability and negative completeness/performance/
@@ -4925,8 +4925,11 @@ auxiliary-VM capture implementation
   lvalue resolver read current integers, floats, and scratch values from the
   active VM pointer at context `+0x08`, with locals at VM
   `+0x18..+0x64`. `ecl_call_subroutine` at `0x00421BD0` copies the complete
-  `0x228`-byte active VM into context `+0x230 + depth * 0x228`; that region
-  is the 15-entry saved-call-frame stack.
+  `0x228`-byte active VM into context `+0x230 + depth * 0x228`.
+  Context `+0x06` is signed 16-bit depth, saturating at 15. The allocation
+  contains 16 physical slots; ordinary return restores at most slots
+  `0..14`, while a saturated call can write slot 15 before return restores
+  slot 14.
 - **Impact:** The already retained main-VM PC, timer, and local projection
   bytes are correct, and the bad label never reached the planner or actuator.
   It would, however, have made a later auxiliary capture semantically wrong
@@ -4937,11 +4940,49 @@ auxiliary-VM capture implementation
   Regression coverage rejects the obsolete `local_state_offset_in_context`
   field.
 - **Evidence:** Corrected source-join internal digest
-  `106ef2645396dad59dddff83d31c544f063014bb6c7b0e273ccbce4a7e1b4488`;
+  `077a9c7655a44db3228ebd86a3a2e03988c9286ed10233f6476275461ebaf691`;
   corrected retained-file SHA-256
-  `09fbfc8ec9a0c66d02b581c55fdb0da32d28c7795ecd3de2f968f4002dc72a5a`.
+  `10cd5bcc31badeed2b6d617125665cf168bdf1b44916e3f56677b8c774c1af5f`.
 - **Durable rule:** Inherited IDA names, types, comments, pseudocode
   variables, and earlier semantic labels are hypotheses. Material conclusions
   require instruction/dataflow, caller/callee, and where possible runtime
   revalidation, with inherited, confirmed, and corrected provenance recorded
   separately.
+
+## CE-0164: A separate owner-pool copy crosses the batch coherence frame
+
+Status: observed physical delivery/coherence counterexample; v1 batch
+semantics retained, external-owner-capture composition rejected
+
+- **Observed workload:** Explicit trace-only Lunatic Stage-5 spell-107 run
+  `20260728_185838` completed 12,216 decisions over frames `1..41601`, ten
+  hits, hard no-Bomb, `route_complete`, accepted transition/session cleanup,
+  and no residual game or controller process.
+- **Precommitted falsifier:** Initial physical acceptance required zero
+  frame-bracket, context, owner, capacity, or native failures at once per 16
+  changed manager frames. Skipped or unvisited attempts could not be
+  reinterpreted as success.
+- **Observed failure:** The Python service separately bracketed and copied
+  the 64-record, about 1.37-MiB owner prefix before entering the native
+  context transaction. Nine of 124 due attempts changed by exactly one
+  enemy-manager frame across that copy. Owner-capture p50/p95/max was
+  `1.372/1.952/3.215 ms`.
+- **Native negative evidence:** All 115 attempts that entered native code had
+  zero batch status; 3,028 non-null contexts were usable, 5,848 null rows were
+  explicit, and depth/PC/marker/context/owner/frame/capacity/native failures
+  were all zero. Native p95/p99/max was
+  `0.154/0.185/0.301 ms`. The failure is therefore localized to the external
+  owner-capture transport boundary, not evidence that auxiliary VM state has
+  no value.
+- **Correction:** Do not waive, silently skip, or retry around the fixed
+  failure. Contract a versioned one-call native transaction that brackets and
+  captures the owner prefix, derives context pointers from that exact buffer,
+  captures/rechecks contexts and owners, and closes the same manager bracket
+  using caller-owned storage. Repeat the unchanged physical gate.
+- **Evidence:** Strict physical report digest
+  `440bf0ba3c653714a0b53a17f98c2413e5f592ebe85ac7e709b011901ab5bc18`;
+  raw trace SHA-256
+  `734878ffe0bfe891767621971b8d220ec2f5c4108d516a4776a2396f6e0a6927`.
+- **Authority:** Delivery/coherence, state-density, and timing evidence only.
+  No future geometry, source completeness, planner, recurrence, actuator,
+  cadence, feasibility, or live action authority changed.

@@ -740,15 +740,19 @@
       "65": 12
     },
     "static_ida_semantics": {
+      "active_vm_bytes": 552,
       "allocated_context_bytes": 9392,
+      "call_depth_offset_in_context": 6,
+      "call_depth_semantics": "signed_i16_saturates_at_15",
       "enemy_pointer_slots": "enemy+0x3384, four pointers",
       "handler": "0x0041CDF3..0x0041CF81",
-      "active_vm_bytes": 552,
       "live_local_offsets_in_vm": "0x18..0x64",
-      "maximum_saved_call_frames": 15,
+      "maximum_restorable_saved_call_frames": 15,
+      "opcode": "0x87",
+      "physical_saved_call_frame_slots": 16,
+      "saturated_slot_15_semantics": "written_by_calls_at_depth_15_but_next_return_restores_slot_14",
       "saved_call_frame_area_offset_in_context": 560,
       "saved_call_frame_stride": 552,
-      "opcode": "0x87",
       "scheduler": "0x0041EBB6..0x0041EC7C",
       "vm_offset_in_context": 8
     }
@@ -1693,7 +1697,7 @@
     "join_rule": "same epoch/stage/spell scope and inclusive intersection between captured fire-PC advance support and activation support",
     "one_to_one_event_batch_matches": 20
   },
-  "report_digest": "106ef2645396dad59dddff83d31c544f063014bb6c7b0e273ccbce4a7e1b4488",
+  "report_digest": "077a9c7655a44db3228ebd86a3a2e03988c9286ed10233f6476275461ebaf691",
   "schema": "th08-nonspell-main-vm-source-join-v1",
   "static_pc_mapping": {
     "interpretation": "runtime_pc == inferred_base + decoded_ecl_file_offset; exact boundaries do not prove live byte identity",

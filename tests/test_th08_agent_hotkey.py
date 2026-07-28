@@ -39,6 +39,7 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.terminal_stage, 2)
         self.assertFalse(parsed.trace_transform_runtime)
         self.assertFalse(parsed.trace_bullet_births)
+        self.assertFalse(parsed.trace_auxiliary_vm_batches)
         self.assertEqual(parsed.safety_value_horizon, 0)
         self.assertIsNone(parsed.viability_audit_dir)
         self.assertFalse(parsed.postpublished_survival_shadow)
@@ -111,6 +112,25 @@ class AgentHotkeyTests(unittest.TestCase):
         )
         main_vm_parsed = build_parser().parse_args(main_vm_arguments)
         self.assertTrue(main_vm_parsed.trace_nonspell_main_vms)
+
+        auxiliary_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_auxiliary_vm_batches=True,
+            auxiliary_vm_batch_every=16,
+            auxiliary_vm_batch_spell_id=107,
+            auxiliary_vm_native_call_mode="gil-held",
+        )
+        auxiliary_parsed = build_parser().parse_args(auxiliary_arguments)
+        self.assertTrue(auxiliary_parsed.trace_auxiliary_vm_batches)
+        self.assertEqual(auxiliary_parsed.auxiliary_vm_batch_every, 16)
+        self.assertEqual(auxiliary_parsed.auxiliary_vm_batch_spell_id, 107)
+        self.assertEqual(
+            auxiliary_parsed.auxiliary_vm_native_call_mode,
+            "gil-held",
+        )
 
         with self.assertRaisesRegex(ValueError, "requires"):
             build_long_run_arguments(

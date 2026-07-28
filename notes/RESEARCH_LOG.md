@@ -7977,11 +7977,11 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   starts, all compatible with activation support, covering 105 unique batches
   and 1,520 bullets. Exact runtime bytes, reachable paths, operands, geometry,
   slot reuse, and hit causality remain unresolved.
-- After the CE-0163 semantic-label correction, the strict source report
-  regenerates with internal digest
-  `106ef2645396dad59dddff83d31c544f063014bb6c7b0e273ccbce4a7e1b4488`;
+- After the CE-0163 active/restorable/physical-slot correction, the strict
+  source report regenerates with internal digest
+  `077a9c7655a44db3228ebd86a3a2e03988c9286ed10233f6476275461ebaf691`;
   its corrected pretty file SHA-256 is
-  `09fbfc8ec9a0c66d02b581c55fdb0da32d28c7795ecd3de2f968f4002dc72a5a`;
+  `10cd5bcc31badeed2b6d617125665cf168bdf1b44916e3f56677b8c774c1af5f`;
   raw trace SHA-256 is
   `8569d64d3ce50ced529bdcf4b48e8f0daa00bfbfa8d8cec9695665f04d0283a7`.
 - Focused Ruff passes. Complete Linux/Windows discovery both pass 904 tests;
@@ -8054,4 +8054,57 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Authority:** Pointer topology, density, reuse, and delivery-design
   evidence only. No auxiliary VM state, runtime ECL identity, future hazard,
   source completeness, planner, feasibility, cadence, or action authority is
+  added.
+
+## 2026-07-28 — Implemented and physically rejected the external-owner auxiliary batch
+
+- Revalidated the complete `0x24B0` context layout before implementation.
+  Context `+0x06` is signed depth `0..15`; `+0x08` is the active `0x228` VM;
+  `+0x230` begins 16 physical saved slots, of which at most slots `0..14`
+  are restorable. IDA comments at `0x0041CF59`, `0x0041EBE9`,
+  `0x00421C31`, and `0x00421D02` now distinguish active state, restorable
+  frames, and the saturated physical slot.
+- Fixed `G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md` before code. The
+  default-off service is post-issue, spell-filterable, once per 16 changed
+  manager frames, hard fail-closed, and has no live-action consumer.
+- Added an independent scalar oracle and shared bounded native fixture/process
+  decoder for 64 owners, 256 pointer rows, depth 15, and a 2,260,992-byte
+  caller-owned payload. Adversarial depth, PC, marker, context/owner churn,
+  capacity, frame, unreadable, random, and maximum-bound cases match exactly.
+  Linux and MinGW release builds and warning-strict Linux compilation pass.
+- Added the modular Python boundary and service under
+  `scripts/th08_live/auxiliary_vm/`, a streaming strict audit, a deterministic
+  cross-platform benchmark, explicit supervisor propagation, and a narrow
+  post-issue orchestration hook. All instrumentation remains default-off.
+- Retained Linux/Windows benchmark digests
+  `e3a0472eefb56d33ad996e805785607ecb34078f79bf75b4c406f9e8f3444b2f`
+  and
+  `2113b412c3bdebf692c7c3e59e6a32ab8c826f624ffb694a9499ec066676c912`.
+  Observed-density and 34-context/depth-15 preflight pass. The deliberately
+  non-required 256-context/depth-15 end-to-end stress case fails p95/p99 on
+  both hosts and Linux maximum; native p95/p99/max remains below
+  `0.268/0.374/0.731 ms`.
+- **Observed physical workload:** Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_185838` completed frames
+  `1..41601`, 12,216 decisions, ten hits, hard no-Bomb, `route_complete`,
+  accepted session/transition gates, exact key release, and no residual
+  process. The action policy was unchanged, so the hit count is not a causal
+  comparison.
+- The spell-107 audit attempted 124 batches. All 115 native observations had
+  zero batch status, yielding 3,028 usable depth-0 contexts, 5,848 explicit
+  null rows, 1,022 active-VM hashes, and zero record/coherence failures after
+  native entry. Native p95/p99/max is `0.154/0.185/0.301 ms`; decision cadence
+  p50/p95/p99 remains `2/4/4`, equal to the compatible baseline.
+- **Observed CE-0164:** Nine separately bracketed Python owner-pool copies
+  crossed exactly one manager frame. The fixed zero-frame-failure gate
+  therefore rejects v1 physical delivery even though every native and
+  cadence/timing gate passes. The strict report digest is
+  `440bf0ba3c653714a0b53a17f98c2413e5f592ebe85ac7e709b011901ab5bc18`;
+  raw SHA-256 is
+  `734878ffe0bfe891767621971b8d220ec2f5c4108d516a4776a2396f6e0a6927`.
+- **Decision:** Retain v1 scalar/native semantics and diagnostics. Reject the
+  external-owner-capture composition. Contract a one-call native-owned owner
+  and context coherence transaction, then repeat the unchanged Stage-5 gate.
+  Do not hide failed attempts as skips or retries. No source-completeness,
+  future-hazard, planner, feasibility, publication, or action authority is
   added.

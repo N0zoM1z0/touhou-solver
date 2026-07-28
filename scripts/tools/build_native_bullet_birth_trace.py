@@ -15,6 +15,7 @@ NATIVE_ROOT = ROOT / "native"
 SOURCES = (
     NATIVE_ROOT / "src" / "trace" / "bullet_birth.cpp",
     NATIVE_ROOT / "src" / "trace" / "derived_pattern_source.cpp",
+    NATIVE_ROOT / "src" / "trace" / "auxiliary_vm_batch.cpp",
 )
 
 

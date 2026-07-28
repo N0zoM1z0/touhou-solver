@@ -24,6 +24,7 @@ from th08_live_dodge_agent import build_parser as build_agent_parser
 from th08_live_dodge_agent import run as run_agent
 from th08_live.bullet_birth_native import (
     NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_HELD,
     NATIVE_CALL_MODE_GIL_RELEASED,
 )
 from th08_runtime_agent import (
@@ -69,6 +70,12 @@ class AgentHotkey:
         trace_bullet_births: bool = False,
         trace_derived_pattern_sources: bool = False,
         trace_nonspell_main_vms: bool = False,
+        trace_auxiliary_vm_batches: bool = False,
+        auxiliary_vm_batch_every: int = 16,
+        auxiliary_vm_batch_spell_id: int | None = None,
+        auxiliary_vm_native_call_mode: str = (
+            NATIVE_CALL_MODE_GIL_HELD
+        ),
         bullet_birth_backend: str = "python",
         bullet_birth_native_call_mode: str = (
             NATIVE_CALL_MODE_GIL_RELEASED
@@ -133,6 +140,15 @@ class AgentHotkey:
             raise ValueError("unknown bullet birth backend")
         if bullet_birth_native_call_mode not in NATIVE_CALL_MODES:
             raise ValueError("unknown native bullet birth call mode")
+        if auxiliary_vm_native_call_mode not in NATIVE_CALL_MODES:
+            raise ValueError("unknown native auxiliary-VM call mode")
+        if auxiliary_vm_batch_every <= 0:
+            raise ValueError("auxiliary-VM batch cadence must be positive")
+        if (
+            auxiliary_vm_batch_spell_id is not None
+            and auxiliary_vm_batch_spell_id < 0
+        ):
+            raise ValueError("auxiliary-VM spell filter cannot be negative")
         self.expected_difficulty = expected_difficulty
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
@@ -140,6 +156,12 @@ class AgentHotkey:
         self.trace_bullet_births = trace_bullet_births
         self.trace_derived_pattern_sources = trace_derived_pattern_sources
         self.trace_nonspell_main_vms = trace_nonspell_main_vms
+        self.trace_auxiliary_vm_batches = trace_auxiliary_vm_batches
+        self.auxiliary_vm_batch_every = auxiliary_vm_batch_every
+        self.auxiliary_vm_batch_spell_id = auxiliary_vm_batch_spell_id
+        self.auxiliary_vm_native_call_mode = (
+            auxiliary_vm_native_call_mode
+        )
         self.bullet_birth_backend = bullet_birth_backend
         self.bullet_birth_native_call_mode = bullet_birth_native_call_mode
         self.safety_value_horizon = safety_value_horizon
@@ -295,6 +317,16 @@ class AgentHotkey:
                     self.trace_derived_pattern_sources
                 ),
                 trace_nonspell_main_vms=self.trace_nonspell_main_vms,
+                trace_auxiliary_vm_batches=(
+                    self.trace_auxiliary_vm_batches
+                ),
+                auxiliary_vm_batch_every=self.auxiliary_vm_batch_every,
+                auxiliary_vm_batch_spell_id=(
+                    self.auxiliary_vm_batch_spell_id
+                ),
+                auxiliary_vm_native_call_mode=(
+                    self.auxiliary_vm_native_call_mode
+                ),
                 bullet_birth_backend=self.bullet_birth_backend,
                 bullet_birth_native_call_mode=(
                     self.bullet_birth_native_call_mode

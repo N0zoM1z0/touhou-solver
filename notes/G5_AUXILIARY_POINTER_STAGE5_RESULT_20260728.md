@@ -196,9 +196,11 @@ The deterministic density/churn report has:
 The earlier inherited IDA label for context `+0x230` was wrong. Revalidation
 of `ecl_eval_int`, the lvalue resolver, and `ecl_call_subroutine` establishes:
 
+- signed call depth: context `+0x06`, saturating at 15;
 - active VM: context `+0x08`;
 - live locals: active VM `+0x18..+0x64`; and
-- saved call frames: context `+0x230 + depth * 0x228`.
+- saved call frames: context `+0x230 + depth * 0x228`, with 16 physical
+  slots but at most 15 restorable frames.
 
 The IDA comment at `0x0041EBE9` and every retained source of truth were
 corrected. CE-0163 records why inherited IDA names, types, comments, and
@@ -216,18 +218,20 @@ revalidation.
 
 ## Next Gate
 
-1. Freeze the native compact-batch ABI and exact call-depth/saved-frame
-   offsets from independently revalidated IDA/dataflow evidence.
-2. Implement scalar and native decoders with adversarial pointer churn,
-   owner reuse, unreadable context, maximum density, and bounded-output tests.
-3. Measure Windows batch wall/cycle time, bytes, freshness, cancellation, and
-   issue-path isolation.
-4. Capture and compare one exact shipped Stage-5 runtime ECL image outside the
+Phase-B v1 implementation, scalar/native parity, cross-platform timing, and
+the focused action-neutral spell-107 run are complete in
+`G5_NATIVE_AUXILIARY_VM_BATCH_STAGE5_RESULT_20260728.md`. CE-0164 rejects the
+separate Python owner-prefix capture because 9 of 124 attempts crossed one
+manager frame before native entry.
+
+1. Contract and implement a versioned one-call native owner/context coherence
+   transaction with caller-owned buffers and the unchanged zero-failure gate.
+2. Repeat the focused spell-107 physical gate without hiding skipped or
+   retried brackets.
+3. Capture and compare one exact shipped Stage-5 runtime ECL image outside the
    issue boundary.
-5. Run a focused action-neutral Stage-5 spell-107 physical gate, because it is
-   the densest observed phase.
-6. Only then interpret a fail-closed auxiliary fire subset and join it to
-   realized slot generations and first-hit witnesses.
+4. Only after those pass, interpret a fail-closed auxiliary fire subset and
+   join it to realized slot generations and first-hit witnesses.
 
 Viability preservation under CE-0158, hard-stage performance, and wider
 Stage-4/5/6 mechanics research continue in parallel; this source contract is

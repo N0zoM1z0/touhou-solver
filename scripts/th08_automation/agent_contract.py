@@ -8,6 +8,7 @@ from pathlib import Path
 
 from th08_live.bullet_birth_native import (
     NATIVE_CALL_MODES,
+    NATIVE_CALL_MODE_GIL_HELD,
     NATIVE_CALL_MODE_GIL_RELEASED,
 )
 
@@ -62,6 +63,10 @@ def build_long_run_arguments(
     trace_bullet_births: bool = False,
     trace_derived_pattern_sources: bool = False,
     trace_nonspell_main_vms: bool = False,
+    trace_auxiliary_vm_batches: bool = False,
+    auxiliary_vm_batch_every: int = 16,
+    auxiliary_vm_batch_spell_id: int | None = None,
+    auxiliary_vm_native_call_mode: str = NATIVE_CALL_MODE_GIL_HELD,
     bullet_birth_backend: str = "python",
     bullet_birth_native_call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
     safety_value_horizon: int = 0,
@@ -98,6 +103,15 @@ def build_long_run_arguments(
         raise ValueError("unknown bullet birth backend")
     if bullet_birth_native_call_mode not in NATIVE_CALL_MODES:
         raise ValueError("unknown native bullet birth call mode")
+    if auxiliary_vm_native_call_mode not in NATIVE_CALL_MODES:
+        raise ValueError("unknown native auxiliary-VM call mode")
+    if auxiliary_vm_batch_every <= 0:
+        raise ValueError("auxiliary-VM batch cadence must be positive")
+    if (
+        auxiliary_vm_batch_spell_id is not None
+        and auxiliary_vm_batch_spell_id < 0
+    ):
+        raise ValueError("auxiliary-VM spell filter cannot be negative")
     if trace_derived_pattern_sources and not trace_bullet_births:
         raise ValueError(
             "derived-pattern source tracing requires bullet-birth tracing"
@@ -151,6 +165,23 @@ def build_long_run_arguments(
         arguments.append("--trace-derived-pattern-sources")
     if trace_nonspell_main_vms:
         arguments.append("--trace-nonspell-main-vms")
+    if trace_auxiliary_vm_batches:
+        arguments.extend(
+            (
+                "--trace-auxiliary-vm-batches",
+                "--auxiliary-vm-batch-every",
+                str(auxiliary_vm_batch_every),
+                "--auxiliary-vm-native-call-mode",
+                auxiliary_vm_native_call_mode,
+            )
+        )
+        if auxiliary_vm_batch_spell_id is not None:
+            arguments.extend(
+                (
+                    "--auxiliary-vm-batch-spell-id",
+                    str(auxiliary_vm_batch_spell_id),
+                )
+            )
     if safety_value_horizon:
         arguments.extend(
             ("--safety-value-horizon", str(safety_value_horizon))

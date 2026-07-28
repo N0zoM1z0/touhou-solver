@@ -62,7 +62,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
   unknown-to-complete transition remains, and the all-row gate stays failed.
   Recovering those rows requires retained raw instruction bytes or immutable
   runtime image identity; live coverage and action authority are unchanged.
+- The next validation-preserving materialization patch removes 36,549 nested
+  copy-helper calls on the fixed profile, performs finite-flag conversion in
+  one owned allocation, and retains all length/shape/code/read-only failures.
+  Linux passes all 23 profiles. The first Windows report fails only the ABBA
+  decode ratio at `1.05839`; two adjacent complete repeats pass at
+  `1.01980/1.00674`. Profiler observer cumulative time improves
+  `0.295 -> 0.275 s`, but Windows controller p95 is statistically flat.
+  This deterministic work reduction is retained; it does not close B4.
 - Latest G5 observation/performance checkpoints:
+  `Reduce validated birth materialization work`,
   `Retain failed optimized B4 physical gate`,
   `Verify physical ECL loop transitions offline`,
   `Add exact offline ECL loop shadow`,

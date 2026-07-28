@@ -1225,6 +1225,14 @@ parity 當成每個 nature tie field 的逐 bit equality。
   even if stale bytes decode plausibly. The corrected auditor excludes 27
   late spell-73 rows and deliberately remains failed. Recover them only with
   retained raw instruction bytes or immutable runtime-image identity;
+- the next profile-triggered materialization patch retains all batch
+  validation/read-only semantics while removing nested prefix-copy calls and
+  one finite-flag allocation. Identical profiler work falls
+  `1,468,272/1.632 s -> 1,395,171/1.543 s`. Linux's 23-profile gate passes;
+  the first Windows ABBA ratio fails narrowly, then two adjacent complete
+  repeats pass. This is deterministic work reduction, not a physical B4
+  closure. Use Stage 5 only as a harder transfer workload and keep the
+  Stage-4A maximum failure open;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

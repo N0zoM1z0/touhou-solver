@@ -427,6 +427,12 @@ comparison.
    a runtime/file mapping mismatch at frame 44212, plausible later bytes must
    not be decoded independently. The auditor now excludes all 27 later rows
    and remains failed; live coverage is unchanged.
+   A second profile-triggered patch removes nested prefix-copy calls and one
+   finite-flag allocation while retaining every batch validation. Linux
+   passes all 23 profiles; one Windows ABBA ratio fails at `1.05839`, followed
+   by two adjacent complete passes at `1.01980/1.00674`. Deterministic profiler
+   work falls, but Windows controller p95 is flat. Retain it as mechanical
+   work reduction only; CE-0156 and B4 remain open.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

@@ -1,0 +1,469 @@
+{
+  "backend": "native",
+  "burst_iterations": 200,
+  "burst_results": [
+    {
+      "births_per_observation": 1,
+      "compact_json_bytes": 400,
+      "observer": {
+        "max_ms": 0.0931,
+        "p50_ms": 0.032,
+        "p95_ms": 0.040909999999999995,
+        "p99_9_ms": 0.08466240000000069,
+        "p99_ms": 0.04832399999999998
+      },
+      "record_json": {
+        "max_ms": 0.0603,
+        "p50_ms": 0.0105,
+        "p95_ms": 0.011104999999999999,
+        "p99_9_ms": 0.0516037000000007,
+        "p99_ms": 0.01323399999999997
+      }
+    },
+    {
+      "births_per_observation": 8,
+      "compact_json_bytes": 750,
+      "observer": {
+        "max_ms": 0.1273,
+        "p50_ms": 0.03405,
+        "p95_ms": 0.04071999999999999,
+        "p99_9_ms": 0.11822560000000074,
+        "p99_ms": 0.05051499999999971
+      },
+      "record_json": {
+        "max_ms": 0.032,
+        "p50_ms": 0.02135,
+        "p95_ms": 0.022,
+        "p99_9_ms": 0.03166170000000003,
+        "p99_ms": 0.02831999999999998
+      }
+    },
+    {
+      "births_per_observation": 32,
+      "compact_json_bytes": 2018,
+      "observer": {
+        "max_ms": 0.0872,
+        "p50_ms": 0.0344,
+        "p95_ms": 0.04315499999999998,
+        "p99_9_ms": 0.08582690000000011,
+        "p99_ms": 0.05089699999999973
+      },
+      "record_json": {
+        "max_ms": 0.1464,
+        "p50_ms": 0.078,
+        "p95_ms": 0.09171,
+        "p99_9_ms": 0.1378231000000007,
+        "p99_ms": 0.10102299999999999
+      }
+    },
+    {
+      "births_per_observation": 33,
+      "compact_json_bytes": 2071,
+      "observer": {
+        "max_ms": 0.1271,
+        "p50_ms": 0.0414,
+        "p95_ms": 0.053059999999999975,
+        "p99_9_ms": 0.1232792000000003,
+        "p99_ms": 0.06859699999999963
+      },
+      "record_json": {
+        "max_ms": 0.1207,
+        "p50_ms": 0.0574,
+        "p95_ms": 0.06271,
+        "p99_9_ms": 0.11049130000000083,
+        "p99_ms": 0.068905
+      }
+    },
+    {
+      "births_per_observation": 592,
+      "compact_json_bytes": 32956,
+      "observer": {
+        "max_ms": 0.0967,
+        "p50_ms": 0.036449999999999996,
+        "p95_ms": 0.044769999999999976,
+        "p99_9_ms": 0.09520750000000011,
+        "p99_ms": 0.057222999999999705
+      },
+      "record_json": {
+        "max_ms": 1.3561,
+        "p50_ms": 0.89645,
+        "p95_ms": 0.9565899999999999,
+        "p99_9_ms": 1.3550851000000002,
+        "p99_ms": 1.3297149999999998
+      }
+    }
+  ],
+  "controller_path_results": [
+    {
+      "births_per_observation": 1,
+      "future_scenario": "absent",
+      "observation": {
+        "max_ms": 0.03860000288113952,
+        "p50_ms": 0.02440001117065549,
+        "p95_ms": 0.027604977367445827,
+        "p99_9_ms": 0.03808259894140069,
+        "p99_ms": 0.03560398006811737
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 8,
+      "future_scenario": "absent",
+      "observation": {
+        "max_ms": 0.09789998875930905,
+        "p50_ms": 0.026649999199435115,
+        "p95_ms": 0.03120000183116641,
+        "p99_9_ms": 0.08645748271374125,
+        "p99_ms": 0.03653904423117634
+      },
+      "observation_cpu": {
+        "max_ms": 15.625,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 12.515625000000252,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 32,
+      "future_scenario": "absent",
+      "observation": {
+        "max_ms": 0.6753999623470008,
+        "p50_ms": 0.027699978090822697,
+        "p95_ms": 0.033215020084753626,
+        "p99_9_ms": 0.5487563710194183,
+        "p99_ms": 0.03701999085023997
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 33,
+      "future_scenario": "absent",
+      "observation": {
+        "max_ms": 0.07029995322227478,
+        "p50_ms": 0.02680000034160912,
+        "p95_ms": 0.030795001657679646,
+        "p99_9_ms": 0.06506625970359935,
+        "p99_ms": 0.040040013263933326
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 592,
+      "future_scenario": "absent",
+      "observation": {
+        "max_ms": 0.09310001041740179,
+        "p50_ms": 0.035299977753311396,
+        "p95_ms": 0.04520999500527978,
+        "p99_9_ms": 0.08589620189741312,
+        "p99_ms": 0.05373200110625473
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 1,
+      "future_scenario": "done",
+      "observation": {
+        "max_ms": 0.08600001456215978,
+        "p50_ms": 0.02700003096833825,
+        "p95_ms": 0.03140500339213759,
+        "p99_9_ms": 0.07698531541973426,
+        "p99_ms": 0.03683898947201666
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 8,
+      "future_scenario": "done",
+      "observation": {
+        "max_ms": 0.12169999536126852,
+        "p50_ms": 0.02745000529102981,
+        "p95_ms": 0.03845999890472738,
+        "p99_9_ms": 0.10916300414828685,
+        "p99_ms": 0.04889902251306912
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 32,
+      "future_scenario": "done",
+      "observation": {
+        "max_ms": 0.09440002031624317,
+        "p50_ms": 0.02770003629848361,
+        "p95_ms": 0.03299996315035969,
+        "p99_9_ms": 0.09026081196498159,
+        "p99_ms": 0.04360298044048222
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 33,
+      "future_scenario": "done",
+      "observation": {
+        "max_ms": 0.045199994929134846,
+        "p50_ms": 0.02820001100189984,
+        "p95_ms": 0.03554497961886226,
+        "p99_9_ms": 0.04518009477760643,
+        "p99_ms": 0.044406988890841596
+      },
+      "observation_cpu": {
+        "max_ms": 15.625,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 12.515625000000252,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 592,
+      "future_scenario": "done",
+      "observation": {
+        "max_ms": 0.14479999663308263,
+        "p50_ms": 0.03880000440403819,
+        "p95_ms": 0.05050503241363913,
+        "p99_9_ms": 0.1317058011773053,
+        "p99_ms": 0.06355601712129996
+      },
+      "observation_cpu": {
+        "max_ms": 15.625,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 15.625,
+        "p99_ms": 0.1562499999998579
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 1,
+      "future_scenario": "inflight",
+      "observation": {
+        "max_ms": 0.03920000744983554,
+        "p50_ms": 0.026799971237778664,
+        "p95_ms": 0.030054996022954566,
+        "p99_9_ms": 0.03904080623760821,
+        "p99_ms": 0.03681598929688333
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 8,
+      "future_scenario": "inflight",
+      "observation": {
+        "max_ms": 0.0488999648950994,
+        "p50_ms": 0.027350004529580474,
+        "p95_ms": 0.03964495554100721,
+        "p99_9_ms": 0.048860164592042565,
+        "p99_ms": 0.04860102024395019
+      },
+      "observation_cpu": {
+        "max_ms": 15.625,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 12.515625000000252,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 32,
+      "future_scenario": "inflight",
+      "observation": {
+        "max_ms": 0.05719996988773346,
+        "p50_ms": 0.02845001290552318,
+        "p95_ms": 0.03415002720430492,
+        "p99_9_ms": 0.055707470106426744,
+        "p99_ms": 0.041780025931075146
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 33,
+      "future_scenario": "inflight",
+      "observation": {
+        "max_ms": 0.05119998240843415,
+        "p50_ms": 0.028050009859725833,
+        "p95_ms": 0.04003001376986503,
+        "p99_9_ms": 0.050523388839792516,
+        "p99_ms": 0.04611700191162525
+      },
+      "observation_cpu": {
+        "max_ms": 15.625,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 12.515625000000252,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    },
+    {
+      "births_per_observation": 592,
+      "future_scenario": "inflight",
+      "observation": {
+        "max_ms": 0.0923000043258071,
+        "p50_ms": 0.03779999678954482,
+        "p95_ms": 0.04720501019619405,
+        "p99_9_ms": 0.08822050801245529,
+        "p99_ms": 0.06783999269828196
+      },
+      "observation_cpu": {
+        "max_ms": 0.0,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_9_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "same_blob_owner": true,
+      "timed_boundary": "thread_time_start+future_before+native_observe+diagnostics+future_after"
+    }
+  ],
+  "decode_baseline": {
+    "max_ms": 11.954799999999999,
+    "p50_ms": 8.23275,
+    "p95_ms": 8.815392500000002,
+    "p99_9_ms": 11.843420050000011,
+    "p99_ms": 10.841000500000007
+  },
+  "decode_interleaved": {
+    "max_ms": 10.8919,
+    "p50_ms": 8.3055,
+    "p95_ms": 8.9899,
+    "p99_9_ms": 10.873248400000001,
+    "p99_ms": 10.705384
+  },
+  "decode_iterations": 100,
+  "decode_pairing": "abba_mean_per_iteration",
+  "density_results": [
+    {
+      "density": 0,
+      "observer": {
+        "max_ms": 0.191,
+        "p50_ms": 0.0181,
+        "p95_ms": 0.0313,
+        "p99_9_ms": 0.10080100000000021,
+        "p99_ms": 0.03911899999999999
+      }
+    },
+    {
+      "density": 512,
+      "observer": {
+        "max_ms": 0.0842,
+        "p50_ms": 0.0125,
+        "p95_ms": 0.014204999999999995,
+        "p99_9_ms": 0.03651930000000393,
+        "p99_ms": 0.019402999999999997
+      }
+    },
+    {
+      "density": 1536,
+      "observer": {
+        "max_ms": 0.0571,
+        "p50_ms": 0.0134,
+        "p95_ms": 0.014,
+        "p99_9_ms": 0.05220130000000027,
+        "p99_ms": 0.018500999999999997
+      }
+    }
+  ],
+  "gate": {
+    "cycle_attribution_available": true,
+    "cycle_attribution_required": true,
+    "interleaved_p95_ratio_limit": 1.05,
+    "interleaved_pass": true,
+    "max_limit_ms": 2.0,
+    "observer_failures": [],
+    "observer_pass": true,
+    "observer_profiles_checked": 23,
+    "p95_limit_ms": 0.2,
+    "p99_limit_ms": 0.4,
+    "passed": true
+  },
+  "interleaved_p95_ratio": 1.0197957719976734,
+  "iterations": 2000,
+  "native_call_mode": "gil-held",
+  "native_library": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\native\\build\\windows-x86_64\\touhou_bullet_birth_trace.dll",
+  "native_thread_cycle_sources": [
+    "windows_query_thread_cycle_time"
+  ],
+  "pool_size": 1536,
+  "schema": "th08-bullet-birth-observer-benchmark-v8",
+  "thread_affinity_cpu": null
+}

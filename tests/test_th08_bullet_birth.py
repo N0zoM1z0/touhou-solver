@@ -4,12 +4,15 @@ import math
 import struct
 import unittest
 
+import numpy as np
+
 from th08_live.bullet_birth import (
     BIRTH_KIND_ACTIVATION_EDGE,
     BIRTH_KIND_BOOTSTRAP_RECENT,
     BIRTH_KIND_INVALID_TIMER,
     BIRTH_KIND_TIMER_REGRESSION,
     BULLET_TIMER_CURRENT_OFFSET,
+    BulletBirthEvidenceBatch,
     BulletBirthTracker,
     OBSERVATION_CAPTURE_SPANNED,
     OBSERVATION_INVALID_TIMER,
@@ -81,6 +84,67 @@ def _set_slot(
 
 
 class BulletBirthTrackerTests(unittest.TestCase):
+    def test_columnar_batch_retains_validation_and_read_only_columns(
+        self,
+    ) -> None:
+        arguments = {
+            "slots": np.array([7], dtype=np.int32),
+            "codes": np.array([3], dtype=np.uint8),
+            "states": np.array([2], dtype=np.uint16),
+            "ages": np.array([4], dtype=np.int32),
+            "previous_states": np.array([0], dtype=np.uint16),
+            "previous_ages": np.array([9], dtype=np.int32),
+            "support_start": 100,
+            "support_end": 104,
+            "geometry": np.array(
+                [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]],
+                dtype=np.float32,
+            ),
+            "transform_flags": np.array([11], dtype=np.uint32),
+            "geometry_finite": np.array([True], dtype=np.bool_),
+        }
+        batch = BulletBirthEvidenceBatch(**arguments)
+        self.assertEqual(batch[0].slot, 7)
+        self.assertEqual(batch[0].activation_support_start, 100)
+        self.assertEqual(
+            batch.record()["geometry_finite"],
+            [True],
+        )
+        for column in (
+            batch._slots,
+            batch._codes,
+            batch._states,
+            batch._ages,
+            batch._previous_states,
+            batch._previous_ages,
+            batch._geometry,
+            batch._transform_flags,
+            batch._geometry_finite,
+        ):
+            self.assertFalse(column.flags.writeable)
+
+        invalid_cases = {
+            "length": {
+                **arguments,
+                "codes": np.array([], dtype=np.uint8),
+            },
+            "previous_pair": {
+                **arguments,
+                "previous_states": None,
+            },
+            "geometry_shape": {
+                **arguments,
+                "geometry": np.zeros((1, 5), dtype=np.float32),
+            },
+            "code": {
+                **arguments,
+                "codes": np.array([5], dtype=np.uint8),
+            },
+        }
+        for name, invalid in invalid_cases.items():
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                BulletBirthEvidenceBatch(**invalid)
+
     def test_compact_double_buffer_matches_independent_scalar_transitions(
         self,
     ) -> None:

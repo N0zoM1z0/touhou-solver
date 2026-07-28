@@ -536,33 +536,33 @@ class NativeBulletBirthTracker:
                     "native bullet-birth extractor returned invalid counts"
                 )
 
-            def prefix_copy(values: np.ndarray) -> np.ndarray:
-                return values[:count].copy()
-
             evidence: tuple[()] | BulletBirthEvidenceBatch = ()
             if count:
                 evidence = BulletBirthEvidenceBatch(
-                    slots=prefix_copy(self._slots),
-                    codes=prefix_copy(self._codes),
-                    states=prefix_copy(self._states),
-                    ages=prefix_copy(self._ages),
+                    slots=self._slots[:count].copy(),
+                    codes=self._codes[:count].copy(),
+                    states=self._states[:count].copy(),
+                    ages=self._ages[:count].copy(),
                     previous_states=(
-                        prefix_copy(self._evidence_previous_states)
+                        self._evidence_previous_states[:count].copy()
                         if self._has_previous
                         else None
                     ),
                     previous_ages=(
-                        prefix_copy(self._evidence_previous_ages)
+                        self._evidence_previous_ages[:count].copy()
                         if self._has_previous
                         else None
                     ),
                     support_start=self._previous_frame_before,
                     support_end=frame_after,
-                    geometry=prefix_copy(self._geometry),
-                    transform_flags=prefix_copy(self._transform_flags),
-                    geometry_finite=prefix_copy(
-                        self._geometry_finite
-                    ).astype(np.bool_),
+                    geometry=self._geometry[:count].copy(),
+                    transform_flags=(
+                        self._transform_flags[:count].copy()
+                    ),
+                    geometry_finite=self._geometry_finite[:count].astype(
+                        np.bool_,
+                        copy=True,
+                    ),
                 )
             observation = BulletBirthObservation(
                 frame_before=frame_before,

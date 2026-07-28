@@ -160,15 +160,14 @@ class BulletBirthEvidenceBatch(Sequence[BulletBirthEvidence]):
         geometry_finite: np.ndarray,
     ) -> None:
         count = len(slots)
-        arrays = (
-            codes,
-            states,
-            ages,
-            geometry,
-            transform_flags,
-            geometry_finite,
-        )
-        if any(len(array) != count for array in arrays):
+        if (
+            len(codes) != count
+            or len(states) != count
+            or len(ages) != count
+            or len(geometry) != count
+            or len(transform_flags) != count
+            or len(geometry_finite) != count
+        ):
             raise ValueError("bullet birth evidence columns differ in length")
         if (
             previous_states is None

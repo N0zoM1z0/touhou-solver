@@ -7632,3 +7632,35 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - The preimplementation boundary is the
   `Second Validation-Preserving Materialization Candidate` section of
   `G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`.
+
+## 2026-07-28 — Reduced validated birth materialization work
+
+- Direct identical NumPy prefix copies replace 36,549 nested helper calls on
+  the fixed profile; finite flags now convert `uint8 -> bool` in one owned
+  allocation; direct length comparisons replace the generator.
+- Every length, previous-pair, geometry-shape, and code-range failure remains
+  live. All nine retained arrays remain read-only. Native/Python parity,
+  nonfinite records, reset/capacity, GIL-held, diagnostics, Futures, GC,
+  workers, cadence, and authority are unchanged.
+- **Observed profiler result:** On identical 9,196-observation /
+  4,061-nonzero-batch work, total calls/time falls
+  `1,468,272/1.632 s -> 1,395,171/1.543 s`; observer cumulative time falls
+  `0.295 -> 0.275 s`; batch-constructor cumulative time falls
+  `0.067 -> 0.058 s`.
+- Linux passes all 23 profiles with worst controller p95 `0.05654 ms`.
+  Windows report 1 passes observer profiles but fails only ABBA decode ratio
+  `1.05839 > 1.05`; two adjacent complete repeats pass at
+  `1.01980/1.00674`. Worst controller p95 is
+  `0.04791/0.05051/0.04671 ms`, providing no clear Windows speedup but no
+  repeatable regression. The first failed report is retained.
+- Linux/Windows/repeat report SHA-256 values are
+  `11e91d1054493a90d6d1a4636b68faff56642ab47e087b402ebd73a2a54423c0`,
+  `b1250d5f1e1c67e46eccb5b484b68f2058c7772b4c9ba0485588541988d08e07`,
+  `e0e6189e5d5c8811201516c5d261687d8b716d2de49764ef5aac233a82d6380f`,
+  and
+  `c007896daae1271c66b9996431e78bf57c99979aa376007096bcf964cde2094f`.
+- Ruff and complete Linux/Windows suites pass 852 tests in
+  `9.183/16.077 s`, with three existing Windows skips.
+- **Decision:** Retain the deterministic work reduction. It does not close
+  CE-0156 or B4. A harder Stage-5 run may test transfer behavior but cannot
+  replace the failed Stage-4A maximum gate or establish survival improvement.

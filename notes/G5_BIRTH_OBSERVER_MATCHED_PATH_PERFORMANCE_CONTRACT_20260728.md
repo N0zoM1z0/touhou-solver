@@ -351,3 +351,53 @@ benchmark and complete suites must pass. A later Stage-5 physical run may be
 used as a harder transfer workload, but it cannot close the Stage-4A B4 gate
 or establish survival improvement. If the isolated path regresses or any
 failure class changes, reject this candidate.
+
+## Validation-Preserving Materialization Checkpoint
+
+The implementation performs the three permitted mechanical rewrites. It
+retains every constructor failure and read-only column. New focused tests
+exercise valid scalar/record output, all nine read-only arrays, length
+mismatch, unpaired previous columns, geometry shape, and unknown evidence
+code. Existing native/Python full-pool, boundary, nonfinite, reset, capacity,
+call-mode, and diagnostic tests remain unchanged and pass.
+
+On the identical Linux diagnostic workload, 9,196 observations and 4,061
+nonzero batches change as follows:
+
+- total profiler calls/time:
+  `1,468,272 / 1.632 s -> 1,395,171 / 1.543 s`;
+- `NativeBulletBirthTracker.observe` cumulative:
+  `0.295 -> 0.275 s`;
+- `BulletBirthEvidenceBatch.__init__` cumulative:
+  `0.067 -> 0.058 s`; and
+- all 36,549 nested `prefix_copy` calls disappear.
+
+This confirms removed Python work. Profiler totals still are not acceptance
+latency.
+
+The unchanged Linux 23-profile gate passes. Worst controller-path p95 changes
+descriptively `0.06603 -> 0.05654 ms`; 592-birth observer p95 changes
+`0.06757 -> 0.05310 ms`. The first Windows report passes every observer
+profile but fails only the independent ABBA decode ratio at `1.05839` versus
+`1.05`. Two adjacent complete confirmation reports pass at
+`1.01980/1.00674`. Their worst controller-path p95 values are
+`0.04791/0.05051/0.04671 ms`, versus the preceding `0.04680 ms`; therefore
+Windows establishes no clear latency improvement, only no repeatable
+regression. The first failure is retained rather than discarded.
+
+Report SHA-256 values are:
+
+- Linux:
+  `11e91d1054493a90d6d1a4636b68faff56642ab47e087b402ebd73a2a54423c0`;
+- Windows first report:
+  `b1250d5f1e1c67e46eccb5b484b68f2058c7772b4c9ba0485588541988d08e07`;
+- Windows adjacent repeat 1:
+  `e0e6189e5d5c8811201516c5d261687d8b716d2de49764ef5aac233a82d6380f`;
+  and
+- Windows adjacent repeat 2:
+  `c007896daae1271c66b9996431e78bf57c99979aa376007096bcf964cde2094f`.
+
+Ruff and complete Linux/Windows suites pass 852 tests in
+`9.183/16.077 s`; Windows retains three existing skips. The optimization is
+retained for deterministic call/allocation reduction, not as a B4 closure.
+CE-0156 and the fixed physical maximum remain open.

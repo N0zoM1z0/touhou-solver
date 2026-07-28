@@ -1174,8 +1174,11 @@ parity 當成每個 nature tie field 的逐 bit equality。
 - phase A is now implemented and offline-validated on Linux/Windows. The
   one-call capture/bit-parity gates and all 832 tests pass; isolated projection
   decode median is about `3.9 us` Linux and `4.8 us` Windows. These timings are
-  descriptive. A fresh Stage-4A projection/B4 audit is the next gate before
-  phase-B interpretation;
+  descriptive. Fresh Stage-4A run `20260728_110438` validates all 5,615
+  physical projections and observes 12/33/13 distinct `10036` values in
+  spells 57/61/65. Coverage remains 1,490 complete / 4,125 unknown. B4 still
+  fails at `0.2059 ms` p95, so next build only the independent offline scalar
+  oracle while separately attributing matched-path performance;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

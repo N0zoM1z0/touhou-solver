@@ -2,10 +2,10 @@
 
 Date: 2026-07-28
 
-Status: phase A capture/trace projection is implemented and offline-validated
-on Linux and Windows. A fresh retained physical projection is still pending.
-Phase B offline interpretation and any live coverage change remain
-unauthorized until the physical projection and independent-oracle gates pass.
+Status: phase A capture/trace projection is implemented, Linux/Windows
+offline-validated, and validated on one fresh complete physical Stage-4A
+workload. The independent phase-B oracle is still pending. No local
+interpretation or live coverage change is authorized.
 
 This follows
 `G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`.
@@ -251,3 +251,61 @@ Both hard-gate bit-exact compatibility, a 104-byte one-call VM capture, the
 `3.859/4.118 us` on Linux and `4.767/4.931 us` on Windows. These are
 descriptive pure-Python decode timings, not physical B4 timings. The next
 ordered gate is the fresh Stage-4A physical trace and compact audit.
+
+## Phase-A Physical Checkpoint
+
+Fresh normal-priority Lunatic Stage-4A run
+`lunatic_route2_stage4a_unattended_20260728_110438` completed the route with
+13,525 decisions, hard no-Bomb, verified automatic transitions, and complete
+process/key cleanup. It retained 5,615 callback rows:
+
+- every row carries one valid v1 projection with exact 104-byte layout and no
+  tag-mask mismatch;
+- coverage remains 1,490 `complete` and 4,125 `unknown`; every unknown
+  schedule is unavailable to lowering and no legacy instruction-limit or
+  repeated-state stop appears;
+- variable `10036` takes 12, 33, and 13 distinct observed values during
+  spells 57, 61, and 65 respectively, confirming that the old seven fields
+  merged physically distinct loop-counter histories;
+- actual compact projection records are 238/249 bytes at p50/p95; and
+- two independent regenerations of each projection, control-flow, and birth
+  audit are byte-identical.
+
+Per-spell `read_ecl_lookahead` p50/p95/max is
+`0.0849/0.1989/1.1745 ms` for spell 57,
+`0.0959/0.2098/2.0083 ms` for spell 61,
+`0.0969/0.1960/1.6761 ms` for spell 65,
+`0.1111/0.2185/2.6370 ms` for spell 69, and
+`0.0906/0.2177/2.4713 ms` for spell 73. These values differ from the prior
+RNG-distinct run and do not isolate the projection cost. The independent
+native birth-observer B4 gate still fails narrowly: p50/p95/p99/p99.9/max is
+`0.1038/0.2059/0.3486/0.5555/1.2276 ms` against the fixed
+`0.20/0.40/2.00 ms` p95/p99/max limits. There was no completed GC and no
+dominant over-budget segment. Phase A therefore closes the correctness and
+physical-observation gate, but does not close B4 performance.
+
+The run had 14 contacts at
+`[2189, 4221, 8883, 9533, 9959, 11488, 13337, 13845, 21517, 33483, 36211,
+36901, 37425, 40372]`. The first is the canonical fresh-attempt witness;
+13/14 follow global-kernel exhaustion, while frame 33483 is a late
+enemy-body contact after positive causal margin. Because phase A is
+trace-only and the workload is RNG/resource-distinct, the aggregate is not a
+projection survival effect.
+
+Evidence SHA-256 values are:
+
+- raw local JSONL:
+  `aa86ba40f2b2141ff5212ffca7374d27d73ca6680c21cad22e09a9520ad1cf9e`;
+- projection audit:
+  `cbfb75db83988e48b1c5305124a31383218c426df3bcde18e9a6d3f34ed09b3e`;
+- control-flow audit:
+  `aedbe0fece76b7cf4bfe8722babd1093694e07b4e6ee4da33547157bd97166ba`;
+  and
+- birth audit:
+  `91c25c9594e8a5711bb5cf742765bd5b46741436ef55ae96d204dde198d0cccb`.
+
+The next ordered research checkpoint is the independent scalar oracle and
+offline exact opcode-`0x05` subset. The parallel performance checkpoint is
+matched-path attribution of the remaining ECL/B4 cost; neither changes live
+authority. Post-audit Linux and Windows suites pass 834 tests; Windows
+retains three existing platform skips.

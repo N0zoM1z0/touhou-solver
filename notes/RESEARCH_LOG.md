@@ -7384,3 +7384,45 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Complete Linux and Windows suites pass 832 tests; Windows retains three
   existing platform skips. The next gate is one fresh normal-priority
   Stage-4A trace before any phase-B interpreter work.
+
+## 2026-07-28 — Physically validated capture-aligned ECL locals
+
+- **Observed physical:** normal-priority Lunatic Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260728_110438` completed with 13,525
+  decisions, hard no-Bomb, accepted automatic transitions, and clean
+  supervisor/game/controller shutdown.
+- All 5,615 callback rows contain a valid
+  `th08-ecl-vm-local-projection-v1`; layout/range/tag parity and lookahead
+  metadata have zero violations. Coverage remains 1,490 complete / 4,125
+  unknown, with no legacy instruction-budget/repeated-state stop and no
+  incomplete prefix lowered.
+- **Observed physical:** local `10036` takes 12/33/13 distinct values in
+  spells 57/61/65. The old seven-field state therefore merged physical
+  histories that are not loop-control equivalent. Spell 73 still has 1,008
+  unsupported-control rows and remains outside the local interpreter scope.
+- Actual projection payload p50/p95 is 238/249 bytes. Per-spell ECL
+  read/lookahead p50/p95/max is
+  `0.0849/0.1989/1.1745`, `0.0959/0.2098/2.0083`,
+  `0.0969/0.1960/1.6761`, `0.1111/0.2185/2.6370`, and
+  `0.0906/0.2177/2.4713 ms` for spells 57/61/65/69/73.
+- B4 still fails: native birth-observer p50/p95/p99/p99.9/max is
+  `0.1038/0.2059/0.3486/0.5555/1.2276 ms`. No completed GC or dominant
+  over-budget segment explains the narrow p95 miss. Different physical paths
+  prevent attributing the whole ECL timing delta to the projection.
+- The route had 14 hits at
+  `[2189, 4221, 8883, 9533, 9959, 11488, 13337, 13845, 21517, 33483, 36211,
+  36901, 37425, 40372]`. Frame 2189 is canonical; 13 contacts follow global
+  viability exhaustion. Frame 33483 is a late enemy-body contact after
+  positive causal margin. The trace-only projection is not a survival claim.
+- Projection/control/birth audits regenerate byte-identically at SHA-256
+  `cbfb75db83988e48b1c5305124a31383218c426df3bcde18e9a6d3f34ed09b3e`,
+  `aedbe0fece76b7cf4bfe8722babd1093694e07b4e6ee4da33547157bd97166ba`,
+  and `91c25c9594e8a5711bb5cf742765bd5b46741436ef55ae96d204dde198d0cccb`.
+  Raw JSONL is retained locally at 463,899,234 bytes, SHA-256
+  `aa86ba40f2b2141ff5212ffca7374d27d73ca6680c21cad22e09a9520ad1cf9e`.
+- **Decision:** phase-A observation correctness is physically closed. B4 is
+  not. Next implement the independent offline scalar oracle and separately
+  compare matched ECL paths before any performance or coverage promotion.
+- The projection auditor shares coverage/spell/percentile helpers with the
+  prior control-flow auditor rather than duplicating them. Ruff and complete
+  Linux/Windows suites pass 834 tests; Windows retains three existing skips.

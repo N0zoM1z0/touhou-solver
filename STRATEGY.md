@@ -387,7 +387,11 @@ comparison.
    The phase-A code and isolated Linux/Windows gates now pass: the VM capture
    remains one call, grows by 40 bytes, old fields are bit-exact, and the
    complete suites pass 832 tests. Pure decode cost is descriptive only; the
-   fresh physical Stage-4A trace/B4 gate remains pending.
+   fresh physical Stage-4A trace now validates 5,615/5,615 projections and
+   observes the expected loop-counter diversity. Coverage remains fail-closed
+   at 1,490 complete / 4,125 unknown. B4 remains failed at `0.2059 ms` p95,
+   so phase B is limited to the independent offline oracle and performance
+   attribution; live interpretation remains unpromoted.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

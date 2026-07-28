@@ -1,0 +1,159 @@
+{
+  "authority": {
+    "callback_schedule": "complete_rows_only",
+    "physical_action": "none_added",
+    "survival": "not_claimed"
+  },
+  "counts": {
+    "callback_rows": 5615,
+    "coverage_status_rows": {
+      "complete": 1490,
+      "unknown": 4125
+    },
+    "decision_rows": 13525,
+    "lookahead_errors": 0,
+    "lowering_status_rows": {
+      "complete_schedule_lowered": 1490,
+      "incomplete_prefix_not_lowered": 4125
+    },
+    "metadata_error_count": 0,
+    "phase_end_rows": 26,
+    "phase_end_valid_rows": 26,
+    "stop_reason_rows": {
+      "horizon": 1490,
+      "unsupported_control_flow": 4125
+    }
+  },
+  "gates": {
+    "callback_rows_present": true,
+    "coverage_metadata_consistent": true,
+    "hidden_control_is_unknown": true,
+    "no_legacy_budget_or_repeat_stop": true,
+    "no_lookahead_errors": true,
+    "phase_end_runtime_rows_observed_and_valid": true,
+    "spell57_stops_at_control_with_under_64_instructions": true,
+    "spell61_control_boundary_observed": true,
+    "spell65_control_boundary_observed": true,
+    "spell73_dynamic_control_boundary_observed": true
+  },
+  "passed": true,
+  "per_spell": {
+    "57": {
+      "coverage_status_rows": {
+        "unknown": 1296
+      },
+      "instructions_scanned": {
+        "count": 1296,
+        "max": 26.0,
+        "median": 1.0,
+        "p95": 19.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 1296,
+        "max": 1.1744999792426825,
+        "median": 0.08490000618621707,
+        "p95": 0.19890000112354755
+      },
+      "rows": 1296,
+      "stop_reason_rows": {
+        "unsupported_control_flow": 1296
+      }
+    },
+    "61": {
+      "coverage_status_rows": {
+        "unknown": 1224
+      },
+      "instructions_scanned": {
+        "count": 1224,
+        "max": 21.0,
+        "median": 2.0,
+        "p95": 21.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 1224,
+        "max": 2.008299983572215,
+        "median": 0.0958500022534281,
+        "p95": 0.20980002591386437
+      },
+      "rows": 1224,
+      "stop_reason_rows": {
+        "unsupported_control_flow": 1224
+      }
+    },
+    "65": {
+      "coverage_status_rows": {
+        "complete": 37,
+        "unknown": 597
+      },
+      "instructions_scanned": {
+        "count": 634,
+        "max": 20.0,
+        "median": 11.0,
+        "p95": 11.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 634,
+        "max": 1.6761000151745975,
+        "median": 0.09690001024864614,
+        "p95": 0.19599997904151678
+      },
+      "rows": 634,
+      "stop_reason_rows": {
+        "horizon": 37,
+        "unsupported_control_flow": 597
+      }
+    },
+    "69": {
+      "coverage_status_rows": {
+        "complete": 1359
+      },
+      "instructions_scanned": {
+        "count": 1359,
+        "max": 62.0,
+        "median": 21.0,
+        "p95": 50.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 1359,
+        "max": 2.6369999977760017,
+        "median": 0.11109997285529971,
+        "p95": 0.21849997574463487
+      },
+      "rows": 1359,
+      "stop_reason_rows": {
+        "horizon": 1359
+      }
+    },
+    "73": {
+      "coverage_status_rows": {
+        "complete": 94,
+        "unknown": 1008
+      },
+      "instructions_scanned": {
+        "count": 1102,
+        "max": 34.0,
+        "median": 3.0,
+        "p95": 29.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 1102,
+        "max": 2.4713000166229904,
+        "median": 0.09059999138116837,
+        "p95": 0.21770002786070108
+      },
+      "rows": 1102,
+      "stop_reason_rows": {
+        "horizon": 94,
+        "unsupported_control_flow": 1008
+      }
+    }
+  },
+  "schema": "th08-ecl-control-flow-live-audit-v1",
+  "source": {
+    "trace_name": "lunatic_route2_stage4a_unattended_20260728_110438.jsonl",
+    "trace_sha256": "aa86ba40f2b2141ff5212ffca7374d27d73ca6680c21cad22e09a9520ad1cf9e"
+  },
+  "violations": {
+    "metadata_error_samples": []
+  }
+}

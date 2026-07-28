@@ -315,8 +315,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   coverage. The projection is now implemented and Linux/Windows
   offline-validated: all 832 tests pass, the same-read/field-parity gates
   pass, and pure decode costs approximately 3.9/4.8 microseconds median on
-  Linux/Windows. A fresh physical local projection and B4 timing audit must
-  precede any offline interpreter or live promotion.
+  Linux/Windows. Fresh physical run `20260728_110438` now validates all
+  5,615 projected callback rows and observes multiple `10036` values in
+  spells 57/61/65 without changing fail-closed coverage. The native B4 p95 is
+  still over budget at `0.2059 ms`. Proceed only to the independent offline
+  scalar oracle and matched-path performance attribution; live promotion
+  remains forbidden. Post-audit Linux/Windows suites pass 834 tests.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

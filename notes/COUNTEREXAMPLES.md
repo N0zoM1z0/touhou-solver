@@ -4565,3 +4565,40 @@ validated
 - **Authority:** This correction shrinks callback completeness and reduces
   issue work. It does not model the hidden branches, bound their callback
   effects spatially, prove survival, or add action authority.
+
+## CE-0155: Observed ECL loop locals did not restore viability or close B4
+
+Status: observed physical Stage-4A counterexample; capture correction
+validated, survival and performance failures remain open
+
+- **Observed physical counterexample:** Fresh normal-priority Lunatic
+  Stage-4A run `lunatic_route2_stage4a_unattended_20260728_110438` completed
+  hard no-Bomb with 14 hits at
+  `[2189, 4221, 8883, 9533, 9959, 11488, 13337, 13845, 21517, 33483, 36211,
+  36901, 37425, 40372]`. Frame 2189 is the canonical fresh-attempt witness.
+  Thirteen contacts follow global viability exhaustion.
+- **Distinct late failure:** frame 33483 is an enemy-body overlap after
+  positive causal margin (`pipeline 17.837`, robust 6.394) and is classified
+  `late_collision_after_positive_causal_margin`. It remains a separate
+  sensing/latency/body-transition counterexample, not evidence that the local
+  projection changed behavior.
+- **Observed state-alias correction:** every one of 5,615 callback rows has a
+  valid projection. Variable `10036` takes 12/33/13 distinct values in spells
+  57/61/65, proving that the old seven fields merged physically distinct
+  loop-control histories.
+- **Rejected inference:** making those locals observable does not itself
+  complete hidden control, produce a viable action, or reduce hits. Coverage
+  remains 1,490 complete / 4,125 unknown and phase A is trace-only.
+- **Performance counterexample:** native observer p95 is `0.2059 ms` against
+  the fixed `0.2000 ms` B4 limit. No completed GC or dominant segment explains
+  the miss. Do not claim the 40-byte read is free, but do not attribute the
+  cross-run ECL delta without matched paths.
+- **Correction boundary:** retain phase-A capture. Build an independent scalar
+  oracle for only exact local opcode `0x05` histories, and separately
+  attribute matched-path decode/read work. Keep calls, interrupts, dynamic
+  `10050`, auxiliary VMs, and unsupported writes unknown.
+- **Evidence:** raw/projection/control/birth SHA-256 values are
+  `aa86ba40f2b2141ff5212ffca7374d27d73ca6680c21cad22e09a9520ad1cf9e`,
+  `cbfb75db83988e48b1c5305124a31383218c426df3bcde18e9a6d3f34ed09b3e`,
+  `aedbe0fece76b7cf4bfe8722babd1093694e07b4e6ee4da33547157bd97166ba`,
+  and `91c25c9594e8a5711bb5cf742765bd5b46741436ef55ae96d204dde198d0cccb`.

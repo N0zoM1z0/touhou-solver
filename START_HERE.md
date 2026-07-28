@@ -253,9 +253,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `820/820` in `8.943/16.230 s`, with three Windows skips. Fresh observer
   overhead/ABBA gates pass at Linux/Windows ratios
   `1.0232/1.0469`; no native source or 46-symbol ABI changed. One unrelated
-  first Linux suite invocation exposed the existing warm-cache sensitivity
-  of a one-millisecond native deadline test; its focused and immediate full
-  reruns passed. The first explicit priority-on physical pass is next; no
+  first Linux suite invocation reproduced the long-standing warm-cache
+  sensitivity of a one-millisecond native deadline test. A separate
+  test-only checkpoint enlarged the cold reachable region; 128/128 repeated
+  deadline cases and fresh Linux/Windows `820/820` suites now pass in
+  `9.488/16.010 s`. The first explicit priority-on physical pass is next; no
   physical performance conclusion or B4 closure exists yet.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus

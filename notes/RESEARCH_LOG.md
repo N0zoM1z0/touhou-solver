@@ -7182,8 +7182,8 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `8.943/16.230 s`, with three existing Windows skips. The first Linux
   complete invocation exposed an unrelated warm-cache-sensitive
   one-millisecond native deadline test; its focused and immediate complete
-  reruns passed. This timing assumption remains visible for separate
-  hardening.
+  reruns passed. The separate test-only checkpoint below hardens this timing
+  assumption without changing runtime deadline semantics.
 - Fresh Linux/Windows schema-v9 observer benchmarks pass all eight profiles
   and ABBA at ratios `1.0232/1.0469`. Report SHA-256 values are
   `dd31a55623a087eafb96d6b77106cab05ea6f41e8a44649b88fec49cdc7bc9d5`
@@ -7195,3 +7195,20 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   physical result exists. Run one explicit priority-on GIL-held schema-v9
   Stage-4A workload, retain the deterministic priority and birth audits, and
   accept it only if every fixed gate and cleanup condition passes.
+
+## 2026-07-28 — Hardened the warm-cache native deadline fixture
+
+- **Observed:** The full priority-gate suite reproduced the older recorded
+  flake in `test_native_deadline_aborts_cold_expansion`: its `20x20` reachable
+  region occasionally completed inside the one-millisecond deadline, so the
+  expected deadline exception was not guaranteed. The focused rerun and
+  immediate full rerun passed, excluding a persistent runtime regression.
+- The test-only fixture now uses a `64x64` region with the same 81-frame
+  horizon, action set, delay support, one-millisecond deadline, and native
+  path. Runtime timeout semantics and production code are unchanged.
+- The deadline case passes 128/128 repeated fresh workspaces. Its focused
+  file passes `5/5`; fresh Linux/Windows complete suites pass `820/820` in
+  `9.488/16.010 s`, with three existing Windows skips.
+- **Authority:** deterministic test hardening only. This provides no planner,
+  performance, or physical-survival evidence and does not alter the corridor
+  priority experiment.

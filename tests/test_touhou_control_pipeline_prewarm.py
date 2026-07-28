@@ -148,8 +148,10 @@ class PipelinePrewarmTests(unittest.TestCase):
                 )
 
     def test_native_deadline_aborts_cold_expansion(self) -> None:
-        axis = np.arange(20, dtype=np.float32)
-        clearance = np.full((81, 20, 20), 10.0, dtype=np.float32)
+        # Keep the cold reachable region well beyond a warm-cache 1 ms solve.
+        # The old 20x20 fixture could occasionally finish before the deadline.
+        axis = np.arange(64, dtype=np.float32)
+        clearance = np.full((81, 64, 64), 10.0, dtype=np.float32)
         problem = SurvivalQueryProblem(
             x_axis=axis,
             y_axis=axis,
@@ -173,8 +175,8 @@ class PipelinePrewarmTests(unittest.TestCase):
                 workspace.query_cell(
                     policy_version="deadline",
                     frame=0,
-                    row=10,
-                    column=10,
+                    row=32,
+                    column=32,
                     observed_action="stay",
                     timeout_ms=1,
                 )

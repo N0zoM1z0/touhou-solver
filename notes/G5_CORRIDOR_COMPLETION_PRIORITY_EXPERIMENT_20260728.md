@@ -163,9 +163,10 @@ Implemented after this contract:
 
 One first Linux complete-suite invocation saw the existing one-millisecond
 native cold-expansion deadline test complete before expiry. The focused test
-and immediate complete rerun passed. This is unrelated to the intervention
-but exposes a warm-cache timing assumption to harden separately; it is not
-hidden or counted as the passing gate.
+and immediate complete rerun passed. This was unrelated to the intervention
+and was not counted as the passing gate. A subsequent test-only checkpoint
+enlarged the cold reachable region from `20x20` to `64x64`; 128/128 repeated
+deadline cases and fresh Linux/Windows complete suites pass.
 
 ## Fixed Physical Gates
 

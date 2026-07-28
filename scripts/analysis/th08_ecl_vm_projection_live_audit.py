@@ -22,6 +22,12 @@ from th08_ecl_vm_state import (
 
 
 SCHEMA = "th08-ecl-vm-projection-live-audit-v1"
+WORKLOAD_PROFILE_STAGE4A = "stage4a"
+WORKLOAD_PROFILE_CORE = "core"
+WORKLOAD_PROFILES = (
+    WORKLOAD_PROFILE_STAGE4A,
+    WORKLOAD_PROFILE_CORE,
+)
 
 
 def _int_summary(values: list[int]) -> dict[str, object]:
@@ -114,7 +120,15 @@ def _projection_errors(
     return errors
 
 
-def audit_vm_projection_trace(trace_path: Path) -> dict[str, object]:
+def audit_vm_projection_trace(
+    trace_path: Path,
+    *,
+    workload_profile: str = WORKLOAD_PROFILE_STAGE4A,
+) -> dict[str, object]:
+    if workload_profile not in WORKLOAD_PROFILES:
+        raise ValueError(
+            f"unknown ECL projection workload profile {workload_profile!r}"
+        )
     trace_digest = hashlib.sha256()
     decision_rows = 0
     callback_rows = 0
@@ -213,15 +227,24 @@ def audit_vm_projection_trace(trace_path: Path) -> dict[str, object]:
         "hidden_control_remains_unknown": (
             stop_reasons["unsupported_control_flow"] > 0
         ),
-        "stage4_loop_counter_workloads_observed": all(
-            count > 0 for count in required_spell_rows.values()
-        ),
-        "spell73_dynamic_control_remains_unknown": (
-            stop_reasons_by_spell["73"]["unsupported_control_flow"] > 0
-        ),
     }
+    if workload_profile == WORKLOAD_PROFILE_STAGE4A:
+        gates.update(
+            {
+                "stage4_loop_counter_workloads_observed": all(
+                    count > 0 for count in required_spell_rows.values()
+                ),
+                "spell73_dynamic_control_remains_unknown": (
+                    stop_reasons_by_spell["73"][
+                        "unsupported_control_flow"
+                    ]
+                    > 0
+                ),
+            }
+        )
     return {
         "schema": SCHEMA,
+        "workload_profile": workload_profile,
         "source": {
             "trace_name": trace_path.name,
             "trace_sha256": trace_digest.hexdigest(),
@@ -268,9 +291,17 @@ def audit_vm_projection_trace(trace_path: Path) -> dict[str, object]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("trace", type=Path)
+    parser.add_argument(
+        "--workload-profile",
+        choices=WORKLOAD_PROFILES,
+        default=WORKLOAD_PROFILE_STAGE4A,
+    )
     parser.add_argument("--output", type=Path)
     arguments = parser.parse_args()
-    report = audit_vm_projection_trace(arguments.trace)
+    report = audit_vm_projection_trace(
+        arguments.trace,
+        workload_profile=arguments.workload_profile,
+    )
     encoded = json.dumps(
         report,
         indent=2,

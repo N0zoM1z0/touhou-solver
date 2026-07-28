@@ -4669,3 +4669,55 @@ mapping-epoch correction implemented
 - **Authority:** This only prevents optimistic offline evidence. The live
   scanner already remained fail-closed; no schedule, geometry, or action
   authority changes.
+
+## CE-0158: Stage-5 geometric recovery remained in a 118-frame post-loss basin
+
+Status: observed physical survival counterexample; deterministic first-loss
+capsule required
+
+- **Observed run:** Lunatic Stage-5 workload
+  `lunatic_route2_stage5_unattended_20260728_124930` completed frames
+  `1..44593` over 13,326 decisions with 15 hits, hard no-Bomb, accepted
+  automatic transitions, `route_complete`, exact key release, and no residual
+  process.
+- **Canonical causal witness:** On the fresh attempt, the global viability
+  kernel first becomes empty at frame 2049. The first native hit occurs at
+  frame 2167, 118 frames later, at `(8.000, 424.000)` with active input
+  `up_right_fast`, 657 bullets, and observed slot-1357 overlap/AABB clearance
+  `-2.202`.
+- **Observed fallback path:** The frame-2049 query is already losing while
+  some repair volumes remain positive; it selects `down_right_fast`. At frame
+  2163 the root is still losing, distant recovery distances are hundreds of
+  pixels, and selected `up_fast` has two predicted committed-prefix
+  collisions with minimum clearance `-2.602`. Frame 2165 selects
+  `up_right_fast` with one predicted collision. The frame-2167 newly issued
+  `right_fast` occurs after hit detection and is not the causal active input.
+- **Route-wide recurrence:** All 15 contacts are classified
+  `global_viability_kernel_exhausted_before_hit`; 8,494 of 13,146 available
+  queries have empty action sets. Spell 107 contributes six later contacts,
+  including warning leads of 120 and 81 frames. These later deaths are
+  geometry/planner discovery evidence, not independent initial-stock clears.
+- **Rejected explanation:** This is not principally a missing-policy-query or
+  unsupported-delay sample. The run has zero queried supports outside the
+  cached policy, only 24 expired statuses, and 104 robust decisions without a
+  query. The canonical root remains post-loss for far longer than the
+  ordinary query/pickup age.
+- **Model gap:** Current repair-volume and distant-kernel ranking provide
+  geometric direction after a Boolean loss but carry no completed causal
+  survival label. They cannot distinguish a continuation that survives 17,
+  32, or more frames from one that merely approaches a distant viable cell.
+- **Required falsifier:** Retain the exact immutable root at the first
+  winning-to-losing transition, including hazard/policy versions,
+  float32-margin identity, active/held/pending complete masks, remaining-delay
+  information set, cadence support, action set, and continuation contract.
+  Compare every proposed root action using completed G3/G4 causal
+  partial-survival witnesses and the independent scalar belief oracle.
+- **Decision:** Do not tune the live geometric fallback from this trace.
+  First implement deterministic first-loss capsule capture, reproduce the
+  Boolean-empty root offline, and measure whether a completed restricted
+  policy class provides a longer attainable survival prefix. Any unvisited,
+  timed-out, or unsupported action remains unresolved.
+- **Evidence:** Raw trace SHA-256 is
+  `711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965`;
+  the compact run review is
+  `notes/runs/lunatic_route2_stage5_unattended_20260728_124930.md`.

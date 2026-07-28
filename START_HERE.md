@@ -44,6 +44,30 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
+- The latest harder-workload physical checkpoint is
+  `lunatic_route2_stage5_unattended_20260728_124930`. It completed 13,326
+  decisions over frames `1..44593` with 15 hits, hard no-Bomb, two successful
+  automatic dialogue confirmations, `route_complete`, exact key release, and
+  no residual game/controller/supervisor process. This is not a controlled
+  survival comparison: it is above the immediately preceding retained
+  Stage-5 count of 13 but below the accepted historical median of 20.5, with
+  different RNG, phase timing, density, and post-death resources.
+- All 15 Stage-5 contacts followed global viability exhaustion. At the
+  canonical first hit, the global kernel became empty at frame 2049 and
+  contact occurred at frame 2167, leaving a 118-frame causal interval in
+  which the live fallback used repair volume or geometric distant-kernel
+  distance without exact survival labels. CE-0158 makes first-loss capsule
+  retention and completed G3/G4 partial-survival comparison the next
+  hit-reduction gate; it does not authorize a post-loss heuristic.
+- The same Stage-5 run is a successful B4 transfer workload:
+  observer p50/p95/p99/p99.9/max is
+  `0.0973/0.1936/0.3387/0.5376/0.8346 ms` across all 13,326 rows, with zero
+  over-budget samples and zero completed GC. This does not erase CE-0156 or
+  close the failed Stage-4A maximum gate. The generic ECL projection gates
+  pass all 4,871 callback rows under the explicit `core` workload profile;
+  Stage-4A-only spell gates remain the default. Spell 115 retains 1,220
+  `unsupported_control_flow` unknown rows and no incomplete prefix is
+  lowered.
 - The latest unchanged physical performance gate is
   `lunatic_route2_stage4a_unattended_20260728_121028`. It completed 14,066
   decisions with ten hits, hard no-Bomb, accepted route completion, and exact

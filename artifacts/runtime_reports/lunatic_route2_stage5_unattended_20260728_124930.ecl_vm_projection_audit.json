@@ -1,0 +1,218 @@
+{
+  "authority": {
+    "callback_schedule": "unchanged_complete_rows_only",
+    "physical_action": "none_added",
+    "projection": "trace_only",
+    "survival": "not_claimed"
+  },
+  "counter_10036_by_spell": {
+    "103": {
+      "count": 985,
+      "max": 50,
+      "median": 50,
+      "min": 0,
+      "most_common": [
+        [
+          50,
+          923
+        ],
+        [
+          0,
+          62
+        ]
+      ],
+      "p95": 50,
+      "unique_count": 2
+    },
+    "107": {
+      "count": 1405,
+      "max": 50,
+      "median": 50,
+      "min": 50,
+      "most_common": [
+        [
+          50,
+          1405
+        ]
+      ],
+      "p95": 50,
+      "unique_count": 1
+    },
+    "111": {
+      "count": 1249,
+      "max": 50,
+      "median": 50,
+      "min": 50,
+      "most_common": [
+        [
+          50,
+          1249
+        ]
+      ],
+      "p95": 50,
+      "unique_count": 1
+    },
+    "115": {
+      "count": 1232,
+      "max": 50,
+      "median": 50.0,
+      "min": 0,
+      "most_common": [
+        [
+          50,
+          856
+        ],
+        [
+          0,
+          348
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "p95": 50,
+      "unique_count": 8
+    },
+    "57": {
+      "count": 0,
+      "max": null,
+      "median": null,
+      "min": null,
+      "most_common": [],
+      "p95": null,
+      "unique_count": 0
+    },
+    "61": {
+      "count": 0,
+      "max": null,
+      "median": null,
+      "min": null,
+      "most_common": [],
+      "p95": null,
+      "unique_count": 0
+    },
+    "65": {
+      "count": 0,
+      "max": null,
+      "median": null,
+      "min": null,
+      "most_common": [],
+      "p95": null,
+      "unique_count": 0
+    }
+  },
+  "counts": {
+    "callback_rows": 4871,
+    "coverage_status_rows": {
+      "complete": 3651,
+      "unknown": 1220
+    },
+    "decision_rows": 13326,
+    "float_local_bit_classes": {
+      "normal": 15795,
+      "zero": 23173
+    },
+    "metadata_errors": {},
+    "projection_errors": {},
+    "projection_rows": 4871,
+    "stop_reason_rows": {
+      "horizon": 3651,
+      "unsupported_control_flow": 1220
+    },
+    "stop_reason_rows_by_spell": {
+      "103": {
+        "horizon": 985
+      },
+      "107": {
+        "horizon": 1405
+      },
+      "111": {
+        "horizon": 1249
+      },
+      "115": {
+        "horizon": 12,
+        "unsupported_control_flow": 1220
+      }
+    }
+  },
+  "gates": {
+    "callback_rows_present": true,
+    "complete_and_unknown_rows_observed": true,
+    "hidden_control_remains_unknown": true,
+    "legacy_tag_mask_bit_exact": true,
+    "lookahead_metadata_unchanged_and_consistent": true,
+    "projection_layout_and_ranges_valid": true,
+    "projection_present_on_every_callback_row": true
+  },
+  "passed": true,
+  "projection_trace_payload_bytes": {
+    "count": 4871,
+    "max": 243.0,
+    "p50": 232.0,
+    "p95": 243.0,
+    "p99": 243.0,
+    "p99_9": 243.0
+  },
+  "read_ecl_lookahead_ms_by_spell": {
+    "103": {
+      "count": 985,
+      "max": 2.0117000094614923,
+      "p50": 0.16789999790489674,
+      "p95": 0.3276999923400581,
+      "p99": 0.6111999973654747,
+      "p99_9": 1.742199994623661
+    },
+    "107": {
+      "count": 1405,
+      "max": 1.2830999912694097,
+      "p50": 0.13559998478740454,
+      "p95": 0.2519999979995191,
+      "p99": 0.5292000132612884,
+      "p99_9": 1.2037000269629061
+    },
+    "111": {
+      "count": 1249,
+      "max": 1.187700021546334,
+      "p50": 0.11169997742399573,
+      "p95": 0.20340003538876772,
+      "p99": 0.32980000833049417,
+      "p99_9": 0.5512000061571598
+    },
+    "115": {
+      "count": 1232,
+      "max": 3.3050000201910734,
+      "p50": 0.13100000796839595,
+      "p95": 0.24859997211024165,
+      "p99": 0.41450001299381256,
+      "p99_9": 2.2944999509491026
+    }
+  },
+  "schema": "th08-ecl-vm-projection-live-audit-v1",
+  "source": {
+    "trace_name": "lunatic_route2_stage5_unattended_20260728_124930.jsonl",
+    "trace_sha256": "711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965"
+  },
+  "violations": [],
+  "workload_profile": "core"
+}

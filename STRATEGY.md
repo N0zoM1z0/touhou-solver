@@ -433,6 +433,22 @@ comparison.
    by two adjacent complete passes at `1.01980/1.00674`. Deterministic profiler
    work falls, but Windows controller p95 is flat. Retain it as mechanical
    work reduction only; CE-0156 and B4 remain open.
+   The first harder transfer workload is retained as Stage-5 run
+   `20260728_124930`. All 13,326 observer rows pass B4 at
+   `0.0973/0.1936/0.3387/0.5376/0.8346 ms`
+   p50/p95/p99/p99.9/max with no completed GC. This supports transfer of the
+   optimized implementation but cannot close the Stage-4A maximum failure.
+   The run completed with 15 hits and hard no-Bomb; all contacts followed
+   global viability exhaustion. Its canonical first global loss precedes the
+   first hit by 118 frames, during which current repair/distant recovery has
+   no exact survival labels. Therefore the next survival-focused G3/G4 gate
+   is a trace-only first-loss capsule plus completed causal partial-survival
+   witnesses for every compared root action. Geometric post-loss distance
+   remains live fallback behavior, not promoted authority.
+   The projection auditor now separates universal `core` gates from the
+   default Stage-4A spell workload gates. Stage 5 passes all core gates over
+   4,871 callback rows; spell 115 remains fail-closed on 1,220
+   unsupported-control rows.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

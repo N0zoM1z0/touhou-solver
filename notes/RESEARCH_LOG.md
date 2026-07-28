@@ -7664,3 +7664,48 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Decision:** Retain the deterministic work reduction. It does not close
   CE-0156 or B4. A harder Stage-5 run may test transfer behavior but cannot
   replace the failed Stage-4A maximum gate or establish survival improvement.
+
+## 2026-07-28 — Retained the Stage-5 transfer and first-loss counterexample
+
+- Fresh normal-priority Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_124930` completed frames
+  `1..44593` over 13,326 decisions with 15 hits, hard no-Bomb, two successful
+  automatic dialogue confirmations, `route_complete`, exact key release,
+  supervisor/game/controller termination, and no residual process.
+- The count is worse than the immediately preceding retained Stage-5 result
+  of 13 and better than the accepted historical median of 20.5. RNG, phase
+  timing, density, and post-death resources differ, so this is neither a
+  controlled survival improvement nor a regression.
+- **Observed B4 transfer:** All 13,326 schema-v9 native/GIL-held rows pass the
+  fixed observer limits at `0.0973/0.1936/0.3387/0.5376/0.8346 ms`
+  p50/p95/p99/p99.9/max. There are no over-budget samples or completed GC
+  intervals. Prepare/native/materialize/residual p95 is
+  `0.0064/0.0587/0.0784/0.0658 ms`; materialization maximum is `0.7553 ms`.
+  Birth audit SHA-256 is
+  `c12d96202d2b6c6ad23963a54c8fcd10c48388975e10d628ae90695cfbe30d01`.
+- **Decision:** The validation-preserving optimization transfers to this
+  harder workload, but CE-0156 and the Stage-4A maximum stay open.
+- The VM projection auditor now separates universal correctness gates into
+  the explicit `core` workload profile while retaining Stage-4A spell gates
+  as the default. Stage 5 passes every core gate across 4,871 callback rows:
+  3,651 complete horizon schedules and 1,220 fail-closed
+  `unsupported_control_flow` rows, all in spell 115 except 12 complete rows.
+  No incomplete prefix is lowered. Projection audit SHA-256 is
+  `427a12b5f638b98657091b5a4abd5abebdbc71baf76db2b6f30bffb33b5d81e1`.
+- **Observed survival counterexample:** All 15 hits follow global viability
+  exhaustion. The canonical first loss is frame 2049 and first contact is
+  frame 2167, leaving 118 frames in which current repair/distant recovery has
+  no exact survival labels. Spell 107 contributes six later contacts; the run
+  exposes 8,494 empty action sets among 13,146 available queries.
+- **Decision:** CE-0158 makes deterministic first-global-loss capsule
+  retention the next hit-reduction checkpoint. Reproduce the immutable empty
+  root offline, then compare completed G3/G4 causal partial-survival witnesses
+  for every evaluated root action against the independent scalar oracle.
+  Do not tune or promote geometric post-loss recovery from aggregate hit
+  counts.
+- Raw JSONL remains ignored locally at 620,930,441 bytes, SHA-256
+  `711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965`.
+  Compact dossier, summary, session, comparison, regressions, death ledger,
+  birth audit, projection audit, and run note are retained.
+- Ruff and complete Linux/Windows suites pass 854 tests in
+  `9.419/16.256 s`; Windows retains three existing platform skips.

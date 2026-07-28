@@ -108,6 +108,45 @@ class EclVmProjectionLiveAuditTests(unittest.TestCase):
         )
         self.assertEqual(len(report["violations"]), 2)
 
+    def test_core_profile_is_not_tied_to_stage4_spell_ids(self) -> None:
+        rows = [
+            _decision(1, 103, complete=True),
+            _decision(2, 115, complete=False),
+        ]
+        with tempfile.TemporaryDirectory() as temporary:
+            trace = Path(temporary) / "trace.jsonl"
+            trace.write_text(
+                "".join(json.dumps(row) + "\n" for row in rows),
+                encoding="utf-8",
+            )
+            stage4_report = audit_vm_projection_trace(trace)
+            core_report = audit_vm_projection_trace(
+                trace,
+                workload_profile="core",
+            )
+
+        self.assertFalse(stage4_report["passed"])
+        self.assertTrue(core_report["passed"])
+        self.assertEqual(core_report["workload_profile"], "core")
+        self.assertNotIn(
+            "stage4_loop_counter_workloads_observed",
+            core_report["gates"],
+        )
+        self.assertNotIn(
+            "spell73_dynamic_control_remains_unknown",
+            core_report["gates"],
+        )
+
+    def test_unknown_workload_profile_fails_closed(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "unknown ECL projection workload profile",
+        ):
+            audit_vm_projection_trace(
+                Path("unused.jsonl"),
+                workload_profile="stage5",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -401,3 +401,48 @@ Ruff and complete Linux/Windows suites pass 852 tests in
 `9.183/16.077 s`; Windows retains three existing skips. The optimization is
 retained for deterministic call/allocation reduction, not as a B4 closure.
 CE-0156 and the fixed physical maximum remain open.
+
+## Harder Stage-5 Transfer Checkpoint
+
+Fresh normal-priority run
+`lunatic_route2_stage5_unattended_20260728_124930` executes the optimized
+observer on a distinct, denser physical workload. It completed 13,326
+decision rows over frames `1..44593`, hard no-Bomb, accepted route completion,
+automatic dialogue transitions, exact key release, and process cleanup.
+
+**Observed:** Every row has schema-v9 native/GIL-held provenance and valid
+Windows current-thread cycle attribution. Observation
+p50/p95/p99/p99.9/max is
+`0.0973/0.1936/0.3387/0.5376/0.8346 ms`. All fixed B4 limits pass, no sample
+exceeds its wall budget, and no cyclic-GC completion overlaps the measured
+interval. Segment p95/max values are:
+
+| Segment | p95 ms | max ms |
+| --- | ---: | ---: |
+| prepare | 0.0064 | 0.3039 |
+| native call | 0.0587 | 0.5065 |
+| materialize | 0.0784 | 0.7553 |
+| controller residual | 0.0658 | 0.5436 |
+
+Materialization cycle p50/p95/p99/p99.9/max is
+`21,144/232,702/313,154/420,792/610,250`. There are 5,530 definite known
+Future-overlap rows and 7,796 no-known-overlap rows. One enemy Future changes
+`inflight -> done`; no corridor or survival Future endpoint is ambiguous.
+
+**Inference:** The validation-preserving implementation transfers without a
+repeatable percentile or maximum regression on this Stage-5 sample.
+
+**Rejected inference:** This one passing workload does not bound Windows
+scheduling tails, erase the two CE-0156 Stage-4A tails, or close B4 globally.
+The Stage-4A maximum remains the unresolved fixed gate. It also does not
+establish survival improvement: this run has 15 hits, and every contact
+follows global viability exhaustion.
+
+The compact birth audit is byte-identical on regeneration. Its SHA-256 is
+`c12d96202d2b6c6ad23963a54c8fcd10c48388975e10d628ae90695cfbe30d01`;
+the retained local raw trace is 620,930,441 bytes with SHA-256
+`711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965`.
+This checkpoint adds no observation, model, planner, cadence, worker, input,
+Bomb, or physical action authority. Ruff and complete Linux/Windows suites
+pass 854 tests in `9.419/16.256 s`; Windows retains three existing platform
+skips.

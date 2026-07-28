@@ -1233,6 +1233,20 @@ parity 當成每個 nature tie field 的逐 bit equality。
   repeats pass. This is deterministic work reduction, not a physical B4
   closure. Use Stage 5 only as a harder transfer workload and keep the
   Stage-4A maximum failure open;
+- the Stage-5 transfer workload `20260728_124930` now passes B4 on all 13,326
+  observations at `0.0973/0.1936/0.3387/0.5376/0.8346 ms`
+  p50/p95/p99/p99.9/max with zero completed GC. This retains the optimized
+  data path but does not erase CE-0156. The same run has 15 hits, all after
+  global viability exhaustion; the canonical loss-to-hit interval is 118
+  frames. Therefore the next hit-reduction work is not another aggregate
+  heuristic tune: retain the immutable first-loss root and compare completed
+  G3/G4 partial-survival witnesses per root action. Unvisited or timed-out
+  actions remain unresolved;
+- the projection audit now has an explicit universal `core` profile and keeps
+  Stage-4A-only spell gates as its default. Stage 5 passes all core gates over
+  4,871 rows while retaining 1,220 spell-115 unsupported-control rows as
+  `UNKNOWN`. This makes Stage-5/6 projection evidence comparable without
+  weakening the original Stage-4A acceptance workload;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

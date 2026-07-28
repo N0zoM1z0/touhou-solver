@@ -8266,3 +8266,25 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   identity. Further controller decomposition must first characterize another
   complete post-issue shadow or outer-trace owner; do not trade one monolith
   for another.
+
+## 2026-07-28 — Fixed the shipped runtime-ECL identity physical gate
+
+- Added
+  `G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md` before live
+  integration. It fixes one default-off, action-neutral, post-issue Stage-5
+  attempt with four bounded RPM reads, no hidden retry, exact loader-write-set
+  normalization, immutable physical provenance, and fail-closed mismatch
+  semantics.
+- **Observed repository evidence:** `artifacts/extracted/ecldata5.ecl` is a
+  47,228-byte `edzE` wrapped artifact. The existing resource decoder produces
+  bytes exactly equal to the 47,224-byte
+  `artifacts/decoded/ecldata5.ecl`; decoded SHA-256 is
+  `3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19`.
+- The physical gate fixes executable SHA-256, route 2, Lunatic, Stage-5 route
+  index 4, static payload identity, one-shot visibility, timing, exact-match,
+  route-completion, hard no-Bomb, and cleanup requirements. Exact equality
+  may grant only runtime instruction-byte identity for that stage image.
+- Existing IDA names/comments/types remain hypotheses unless the underlying
+  instructions, dataflow, static bytes, or runtime evidence are independently
+  revalidated. No future-event lowering or action consumer is authorized by
+  this contract.

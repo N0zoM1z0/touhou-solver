@@ -3,12 +3,13 @@
 Date: 2026-07-28
 
 Status: fixed before implementation; phase-A pointer inventory,
-cross-platform benchmark, physical Stage-5 density/churn gate, and Phase-B
-delivery selection complete. The runtime-image primitive passes synthetic
-oracles; shipped-runtime image identity and native auxiliary-state capture
-remain pending. This work has no live guidance, future hazard, feasibility,
-publication, or action authority. Results are retained in
-`G5_AUXILIARY_POINTER_STAGE5_RESULT_20260728.md`.
+cross-platform benchmark, physical Stage-5 density/churn gate, and bounded
+Phase-B delivery are complete. The runtime-image primitive passes synthetic
+oracles; shipped-runtime image identity remains pending under
+`G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`. This work has
+no live guidance, future hazard, feasibility, publication, or action
+authority. Phase-A and Phase-B results are retained in their Stage-5 result
+notes.
 
 This contract follows
 `G5_NONSPELL_MAIN_VM_SOURCE_SHADOW_CONTRACT_20260728.md` and its retained
@@ -288,11 +289,11 @@ calling production encoders. They must cover:
    remains pending.
 5. **Complete:** Select native compact batch using measured density, payload,
    pointer reuse, read-count risk, and deadline slack.
-6. **Next:** Revalidate call-depth/saved-frame offsets, freeze the native
-   batch ABI/budget, implement scalar/native parity, and pass adversarial plus
-   Windows timing gates.
-7. **Then:** Capture one exact shipped Stage-5 runtime image and run an
-   action-neutral densest-phase physical auxiliary-state gate.
+6. **Complete:** Revalidate call-depth/saved-frame offsets, freeze the native
+   batch ABI/budget, implement scalar/native parity, and pass adversarial,
+   Windows timing, and bounded visible-retry physical delivery gates.
+7. **Next under a separate fixed physical contract:** Capture and
+   byte-compare one exact shipped Stage-5 runtime image.
 8. Only after exact auxiliary state exists, lower a fail-closed fire/control
    subset and join emission descriptors to realized slot generations and
    first-hit causal witnesses.

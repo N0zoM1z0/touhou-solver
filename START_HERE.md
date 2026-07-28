@@ -47,7 +47,8 @@ and design/run notes retain derivations and history.
 37. `notes/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_STAGE5_RESULT_20260728.md`
 38. `notes/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md`
 39. `notes/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_STAGE5_RESULT_20260728.md`
-40. the relevant recent run note and counterexample rows before live work
+40. `notes/G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`
+41. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still

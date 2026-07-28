@@ -35,7 +35,8 @@ and design/run notes retain derivations and history.
 25. `notes/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
 26. `notes/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`
 27. `notes/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`
-28. the relevant recent run note and counterexample rows before live work
+28. `notes/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
+29. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -44,6 +45,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
+- The next fixed G5 gate is retrospective and action-free:
+  `G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md` will join
+  retained native activation supports to exact-overlap and nearest-only hit
+  candidates without treating the latter as colliders. Read-only exploration
+  over Stage-5 run `124930` finds that the canonical slot-1,357 overlap was
+  born 160 frames before its loss boundary, while the later exact slot-1,295
+  overlap activated six frames after loss in a nonspell 30-bullet wave for
+  which the current active-spell-main-VM observer has no intent source. This
+  fixes the smallest evidence gate for a nonspell source-topology proposal;
+  it supplies no counterfactual or action authority.
 - The latest harder-workload physical checkpoint is
   `lunatic_route2_stage5_unattended_20260728_133633`. It completed 13,304
   decisions over frames `1..44822` with 23 hits, hard no-Bomb, two successful

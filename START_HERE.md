@@ -36,6 +36,7 @@ and design/run notes retain derivations and history.
 26. `notes/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`
 27. `notes/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`
 28. `notes/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
+29. `notes/G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`
 29. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
@@ -58,6 +59,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
   byte-stable at internal/file digests `4d774124...ff5c` /
   `7934ac27...d676`; Linux/Windows pass 876 tests. No forecast,
   counterfactual, or action authority is added.
+- The next fixed G5 gate is the default-off derived-pattern source shadow in
+  `G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`. Connected IDA xrefs
+  show that existing bullets can call the same pattern emitter through
+  `bullet_apply_next_transform @ 0x43077E`. The retained wave's ten groups of
+  three, split by native age across two frames, is compatible with that path
+  but does not prove it. The new observer must reuse the existing pool blob,
+  materialize only ready parent candidates, pass the unchanged combined
+  `0.20/0.40/2.00 ms` p95/p99/max gate, and remain trace-only.
 - The latest harder-workload physical checkpoint is
   `lunatic_route2_stage5_unattended_20260728_133633`. It completed 13,304
   decisions over frames `1..44822` with 23 hits, hard no-Bomb, two successful

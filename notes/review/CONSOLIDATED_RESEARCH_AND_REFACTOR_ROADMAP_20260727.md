@@ -958,7 +958,7 @@ J(s) = 1 + max_action min_hidden J(successor) otherwise
 ### G4 — 更早保存 feasibility
 
 2026-07-28 delivery gate 已在量測前固定於
-`STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`：
+`notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`：
 
 - physical Stage-4A exact-root/capsule reservoir；
 - workspace create 到 36 root actions complete publication 的 Windows
@@ -1020,7 +1020,7 @@ parity 當成每個 nature tie field 的逐 bit equality。
   trace `20260728_020910` 的 15,069 joins 全部通過且 zero mixed roots，
   trace construction gate 已關閉；
 - bullet-birth 第一個 gate 已由
-  `TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md` 固定：
+  `notes/research/g5/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md` 固定：
   先用既有 persistent pool blob 的 native age 做 retrospective birth
   observation，再與較早 ECL intent 及 same-frame update order 對齊；預設
   關閉、trace-only、不新增 RPM、不改 planner `Bullet`，也不縮小
@@ -1153,7 +1153,7 @@ parity 當成每個 nature tie field 的逐 bit equality。
   但同一 run 暴露 CE-0152：observer 唯一 >2-ms row 是 24-evidence
   materialization `8.9333 ms`，native call `0.0335 ms`、zero completed GC；
   因此 B4 performance regression 重新打開。
-  `G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` 已先固定
+  `notes/research/g5/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` 已先固定
   telemetry-only 邊界：用 thread-cycle delta 與三個 background future
   的 before/after state 區分實際 copy cost／deschedule，再另立 contract
   決定 copy packing 或 worker isolation，不靠重跑挑一個 passing max；
@@ -1171,7 +1171,7 @@ parity 當成每個 nature tie field 的逐 bit equality。
   固定 default-off corridor-worker-priority intervention contract，並用
   publication age、viable-query coverage、observer wall 與 survival
   作 rejection gates。該 contract
-  `G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md` 現已在 code
+  `notes/research/g5/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md` 現已在 code
   前固定：只降低 Python corridor parent，四個 native workers、
   recurrence、cadence、issue/fallback 全不變；要求 applied provenance、
   至少一個 completion transition，及兩個連續完整 physical passes；
@@ -1212,7 +1212,7 @@ parity 當成每個 nature tie field 的逐 bit equality。
   for only an independently verified opcode subset; all dynamic motion,
   uncaptured RNG, call-stack, and interrupt dependencies remain `UNKNOWN`;
 - that next contract is now
-  `G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`. Phase A only
+  `notes/research/g5/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`. Phase A only
   retains a compact raw-bit projection from the already existing VM RPM call,
   growing it `0x40 -> 0x68` bytes without changing live analysis. IDA maps
   `10036..10039` to context `+0x58..+0x64` and confirms `0x05` uses the
@@ -1414,12 +1414,12 @@ trace 才是 observed。
 128；但 nonspell 的 55/118 hits 同時來自 74,789/113,353 decisions，其
 exposure-normalized rate 低於 spell 合計。這支持「快速清怪可能縮短累積
 暴露」的可驗證 hypothesis，不支持 generic aggressive weight。先依
-`STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md` 建立
+`notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md` 建立
 ordinary-enemy HP/damageability/kill-vs-despawn、shot damage、Power/item
 transition 的 read-only telemetry 和 streaming audit，再做只在相同
 viable/issue-safe set 內排序的 trace-only shadow。任何 live promotion 都要
 多 RNG focused physical gate；單一低-hit run 無效。第一個更窄的
-`STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md` 已在
+`notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md` 已在
 重新讀 shipped instructions 後固定：同一 manager update 可扣致命 HP 並
 完成 cleanup，所以 slot disappearance 不能直接標 kill；先從已付費的
 first-64 pool blob 零額外 RPM 解碼 raw HP/damage/flags。

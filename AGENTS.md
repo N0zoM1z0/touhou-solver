@@ -11,6 +11,8 @@ These instructions apply to every task and file in this repository.
   live/shadow/proposed/rejected strategy ledger.
 - Read the formal and design notes named by `START_HERE.md` before changing a
   model, recurrence, uncertainty set, planner, actuator, or delivery service.
+- Use `notes/README.md` to navigate responsibility directories. It is an
+  index, not an authority source.
 - Route durable failures through `notes/COUNTEREXAMPLES.md` to its current
   range shard, and chronological evidence through `notes/RESEARCH_LOG.md` to
   its current daily shard. The canonical files are short indexes; detailed

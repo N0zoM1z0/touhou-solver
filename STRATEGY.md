@@ -325,7 +325,7 @@ comparison.
    Incomplete callback coverage is explicit, fails closed in schema v8, and
    passes its Stage-4A semantic recheck. CE-0152 reopens the B4 performance
    regression. The fixed
-   `G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` adds only
+   `notes/research/g5/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` adds only
    per-phase current-thread cycle deltas and background-future endpoint
    evidence before choosing an intervention. Schema v9/audit v7 now
    implements that boundary and passes its Linux/Windows focused, complete,
@@ -340,7 +340,7 @@ comparison.
    GIL/scheduler boundary with mixed executed work, not output-size scaling
    or a causal worker proof. Worker, copy, priority, affinity, and planner
    intervention remained unauthorized until
-   `G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md` fixed one
+   `notes/research/g5/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md` fixed one
    default-off corridor-parent below-normal experiment. It preserves four
    native workers and exact live query/fallback semantics, requires applied
    provenance and at least one completion transition, and rejects any
@@ -361,7 +361,7 @@ comparison.
    decrement-and-branch loop whose local/RNG state is absent from
    `EclVmSnapshot`. Therefore result memoization over the present snapshot is
    unsound. The fixed
-   `G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
+   `notes/research/g5/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
    first stops at unsupported timer/control transfers. It preserves the
    256-instruction cap and may only shrink complete coverage while reducing
    non-authoritative scan work. Exact dependency-complete block summaries
@@ -388,7 +388,7 @@ comparison.
    future motion, uncaptured RNG, call-stack, and interrupt dependencies must
    remain `UNKNOWN`.
    Its phase-A contract is now fixed by
-   `G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`. The first code
+   `notes/research/g5/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`. The first code
    checkpoint only extends the existing contiguous VM read from 64 to 104
    bytes, preserves raw float bits, and records a versioned projection. It
    must leave every live coverage/lowering result unchanged. Offline local
@@ -637,7 +637,7 @@ comparison.
   but a corridor target is not a collision or survival certificate.
 - **Boundary:** route preference is evaluated only within the currently
   viable/hard-safe set.
-- **Evidence:** `notes/ROBUST_VIABILITY.md`.
+- **Evidence:** `notes/foundations/ROBUST_VIABILITY.md`.
 
 ### S03 — Dynamic Action Hold And Adaptive Delay Support
 
@@ -660,7 +660,7 @@ comparison.
   compressed pipeline state can make the kernel empty before the physical
   route is necessarily lost. Hard `184942` makes this the primary problem.
 - **Next gate:** proof-backed query-local refinement and post-loss witnesses.
-- **Evidence:** `notes/ROBUST_VIABILITY.md`,
+- **Evidence:** `notes/foundations/ROBUST_VIABILITY.md`,
   `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`,
   `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`.
 
@@ -680,7 +680,7 @@ comparison.
 - **Reason:** native/scalar parity did not solve delivery cost or the mismatch
   between a scalar proxy and physical no-hit authority.
 - **Permitted use:** oracle, bound, and candidate ordering only.
-- **Evidence:** max-min sections of `notes/ROBUST_VIABILITY.md`.
+- **Evidence:** max-min sections of `notes/foundations/ROBUST_VIABILITY.md`.
 
 ### S07 — Observation-Complete, Versioned Safety Transaction
 
@@ -692,7 +692,7 @@ comparison.
   transactions with zero silent outside-global selections.
 - **Limitation:** future bullet/laser births, transforms, bodies, and every
   issue-snapshot discontinuity are not yet proven complete.
-- **Evidence:** `notes/VERSIONED_REACH_AVOID_ARCHITECTURE.md` and CE-0127/0128.
+- **Evidence:** `notes/foundations/VERSIONED_REACH_AVOID_ARCHITECTURE.md` and CE-0127/0128.
 
 ### S08 — Item, Power, Score, And Graze Objectives
 
@@ -700,11 +700,11 @@ comparison.
 - **Reason:** soft collection incentives previously reinforced unsafe motion.
 - **Boundary:** these objectives may return only inside a proven viable set
   with explicit resource state and route profile.
-- **New observation:** every canonical first hit in nine retained Stage-5
+- **New observation:** every canonical first hit in ten retained Stage-5
   runs occurred in nonspell at Power 128. Later Power is hit/respawn
   contaminated and cannot justify a collection policy.
-- **Evidence:** CE-0090, `notes/ALGORITHM_REVIEW_20260724.md`, and
-  `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
+- **Evidence:** CE-0090, `notes/review/ALGORITHM_REVIEW_20260724.md`, and
+  `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
 
 ### S09 — Full-Horizon Fine Refinement And Fused Survival Labels
 
@@ -738,7 +738,7 @@ comparison.
   action authority. Ordinary-enemy HP, verified kill/despawn cause, and
   hazard-exposure reduction remain unavailable.
 - **Evidence:** damage-aware sections in `notes/research_log/2026-07-24.md` and
-  `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
+  `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
 
 ### S11 — Delivery-Aware Hierarchical Planning
 
@@ -760,7 +760,7 @@ comparison.
 - **Boundary:** unavoidable TH08 mechanics belong in adapters/profiles;
   universal control semantics remain game-neutral. One RNG sample cannot
   promote a profile.
-- **Evidence:** `notes/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`.
+- **Evidence:** `notes/foundations/ROUTE_CONDITIONED_STRATEGY_ARCHITECTURE_20260724.md`.
 
 ### S13 — Native Semantic Manager-Clock Boundary
 
@@ -800,7 +800,7 @@ comparison.
   the active-equals-held fallback until the recurrence carries complete issue
   identity and hazard/clock coverage passes.
 - **Evidence:** CE-0122/0123/0124/0134,
-  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`, and
+  `notes/architecture/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`, and
   `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`,
   `notes/COMPLETE_MASK_ISSUE_ACTION_CONTRACT_20260727.md`.
 
@@ -816,7 +816,7 @@ comparison.
   beyond-pool geometry can still have high tails.
 - **Decision:** retain conservative AABB pruning. Do not add viewport cropping
   or a per-decision grid/BVH without a direct-root bottleneck and proof.
-- **Evidence:** `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`,
+- **Evidence:** `notes/architecture/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`,
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`.
 
 ### S16 — Pre-Loss Continuation And Interior Reserve
@@ -898,10 +898,10 @@ comparison.
   delta from alignment, no eligible survival-equivalent choices, or any
   clearance/reserve/cadence regression.
 - **Evidence:**
-  `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`,
-  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`,
-  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`, and
-  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`. The raw
+  `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`,
+  `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`,
+  `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`, and
+  `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`. The raw
   first-64 inventory now has physical trace-only observation authority.
   Generation/end tracking, exposure causality, targeting, and S18 live action
   authority remain none.

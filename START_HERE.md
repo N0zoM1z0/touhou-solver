@@ -4,6 +4,9 @@ This is the volatile entrypoint for the TH08 Sakuya/Remilia no-Bomb solver.
 `AGENTS.md` is the durable contract, `STRATEGY.md` is the promotion ledger,
 and design/run notes retain derivations and history.
 
+`notes/README.md` is the short topology index when a referenced note must be
+located; it does not change the authority order below.
+
 ## Read In This Order
 
 1. `AGENTS.md`
@@ -27,33 +30,33 @@ and design/run notes retain derivations and history.
 17. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
 18. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`
 19. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`
-20. `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`
-21. `notes/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
-22. `notes/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
-23. `notes/G5_MATERIALIZATION_TAIL_PHYSICAL_ATTRIBUTION_20260728.md`
-24. `notes/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`
-25. `notes/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
-26. `notes/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`
-27. `notes/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`
-28. `notes/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
-29. `notes/G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`
-30. `notes/G5_NONSPELL_MAIN_VM_SOURCE_SHADOW_CONTRACT_20260728.md`
-31. `notes/G5_NONSPELL_MAIN_VM_STAGE5_RESULT_20260728.md`
-32. `notes/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`
-33. `notes/G5_AUXILIARY_POINTER_STAGE5_RESULT_20260728.md`
-34. `notes/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`
-35. `notes/G5_NATIVE_AUXILIARY_VM_BATCH_STAGE5_RESULT_20260728.md`
-36. `notes/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md`
-37. `notes/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_STAGE5_RESULT_20260728.md`
-38. `notes/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md`
-39. `notes/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_STAGE5_RESULT_20260728.md`
-40. `notes/G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`
-41. `notes/G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`
-42. `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
-43. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
-44. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
-45. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
-46. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
+20. `notes/research/g5/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`
+21. `notes/research/g5/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
+22. `notes/research/g5/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
+23. `notes/research/g5/G5_MATERIALIZATION_TAIL_PHYSICAL_ATTRIBUTION_20260728.md`
+24. `notes/research/g5/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`
+25. `notes/research/g5/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
+26. `notes/research/g5/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`
+27. `notes/research/g5/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`
+28. `notes/research/g5/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
+29. `notes/research/g5/G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`
+30. `notes/research/g5/G5_NONSPELL_MAIN_VM_SOURCE_SHADOW_CONTRACT_20260728.md`
+31. `notes/research/g5/G5_NONSPELL_MAIN_VM_STAGE5_RESULT_20260728.md`
+32. `notes/research/g5/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`
+33. `notes/research/g5/G5_AUXILIARY_POINTER_STAGE5_RESULT_20260728.md`
+34. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`
+35. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_BATCH_STAGE5_RESULT_20260728.md`
+36. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md`
+37. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_STAGE5_RESULT_20260728.md`
+38. `notes/research/g5/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md`
+39. `notes/research/g5/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_STAGE5_RESULT_20260728.md`
+40. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`
+41. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`
+42. `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
+43. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
+44. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
+45. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
+46. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
 47. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
@@ -63,6 +66,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
+- The evidence topology is now responsibility-based without changing model
+  authority. The 515,082-byte research log and 311,238-byte, 165-entry
+  counterexample ledger are stable 38/43-line indexes over seven daily and
+  four CE-range source-preserved shards. Reconstructing the legacy payloads
+  exactly matches SHA-256 `432cbdc...0ab` / `2267928c...ab0`. Fifty-six
+  clear-responsibility notes moved into G5, Stage-5 combat, architecture,
+  foundations, operations, and review directories; root note count fell from
+  92 to 37. `notes/README.md` is the navigation entrypoint. Historical path
+  literals inside legacy-marked payloads remain intentionally unchanged.
 - The ordinary-enemy combat-progress C0 physical observation gate now passes
   on default-off Lunatic Stage-5 run
   `lunatic_route2_stage5_unattended_20260728_224116`, executed from
@@ -185,7 +197,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `7934ac27...d676`; Linux/Windows pass 876 tests. No forecast,
   counterfactual, or action authority is added.
 - The first nonspell source hypothesis is now physically rejected under
-  `G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`. Lunatic Stage-5
+  `notes/research/g5/G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`. Lunatic Stage-5
   run `20260728_150827` completed 11,801 decisions over frames `2..42172`
   with 12 hits, hard no-Bomb, `route_complete`, exact cleanup, and no
   residual process. All schema-v10 source scans validated but returned zero
@@ -369,7 +381,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   disabling GC, pinning the controller, or weakening the maximum. Callback
   incompleteness must also fail closed before Stage 5/6.
   Schema v6 now implements that attribution under
-  `notes/G5_NATIVE_BIRTH_TAIL_ATTRIBUTION_CONTRACT_20260728.md`;
+  `notes/research/g5/G5_NATIVE_BIRTH_TAIL_ATTRIBUTION_CONTRACT_20260728.md`;
   residual-audit v4 validates reconciled segments and phase/generation GC
   counts. CE-0150 rejects the old block-ordered decode ratio after identical
   Windows runs flipped `1.077 -> 0.940`; ABBA-paired Linux and two adjacent
@@ -450,7 +462,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   call is `0.0335 ms`; no completed GC overlaps it, and adjacent 24-row
   materializations are at most `0.0741 ms`. Spell-57 ECL lookahead itself
   also costs p95/max `0.5460/10.3328 ms`.
-  `G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` now fixes the
+  `notes/research/g5/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` now fixes the
   next checkpoint: allocation-stable current-thread cycle deltas and
   lookup-only background-future endpoint states before another physical run
   or promotable Stage-5/6 claim. It authorizes telemetry only, not worker or
@@ -484,7 +496,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   pure copy or pure scheduler result. All 12 hits follow global viability
   exhaustion and do not support a survival comparison. The next useful gate
   is now fixed by
-  `G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`: one explicit,
+  `notes/research/g5/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`: one explicit,
   default-off corridor-parent below-normal option using the already-tested
   solve seam. It preserves the four native workers and all recurrence/issue
   semantics, fails loud if priority is not applied, and rejects tail
@@ -518,7 +530,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `0x33` reads ECL variable `10050`, which is the current player/enemy
   Euclidean distance, while spell 57 opcode `0x05` depends on VM locals and
   RNG-derived loop state absent from the snapshot. The fixed next contract is
-  `G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`: stop at
+  `notes/research/g5/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`: stop at
   the first unsupported transfer instead of spending the rest of the
   256-instruction cap on an unjustified fallthrough. This may shrink coverage
   and issue cost but cannot add callback or action authority. Dependency-
@@ -549,7 +561,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   gate is a capture-aligned VM-local/control interpreter contract, not a
   spell shortcut or guessed transfer summary.
   That next phase-A boundary is now fixed in
-  `G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`: extend the
+  `notes/research/g5/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`: extend the
   existing one-call VM capture from `0x40` to `0x68` bytes and retain raw
   locals only. IDA confirms `10036..10039` at context `+0x58..+0x64` and
   opcode `0x05` branches on the post-decrement lvalue. Call/return saves the
@@ -586,7 +598,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   widening the shadow. Direct fire, RNG, dynamic state, calls, and
   interrupts remain unknown and live promotion remains forbidden.
   The parallel B4 checkpoint is now fixed in
-  `G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`.
+  `notes/research/g5/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`.
   Regrouping the same physical rows shows zero/nonzero-evidence p95
   `0.1553/0.2516 ms` and no-known/definite-known-future-overlap p95
   `0.2015/0.2112 ms`. Windows profiling identifies non-allocating
@@ -604,9 +616,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `0.06643 -> 0.06603 ms`. All provenance and 23 profiles pass, as do 850
   tests. This is comparable to the physical `0.0059 ms` p95 miss but does not
   close B4 without a fresh unchanged normal-priority Stage-4A trace.
-  See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
-  `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
-  `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and
+  See `notes/research/g5/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
+  `notes/research/g5/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
+  `notes/research/g5/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and
   CE-0143/0144/0145/0146/0147/0148/0149/0150/0151/0152/0153/0154.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
@@ -653,9 +665,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   future-event coverage remains `UNKNOWN` from the first successor and
   physical action authority remains none. Linux/Windows quick suites pass
   `741/741` in `8.850/14.854 s`, with three Windows skips. See
-  `notes/G5_CE0141_PHYSICAL_RECHECK_20260728.md`.
+  `notes/research/g5/G5_CE0141_PHYSICAL_RECHECK_20260728.md`.
 - G5 bullet-birth work is now fixed by
-  `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`.
+  `notes/research/g5/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`.
   B1 now reuses the persistent hostile-bullet pool capture to retain candidate
   native age, activation edges, timer regressions, capture support, and
   compact geometry with no additional RPM. B2's independent update-order
@@ -685,7 +697,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   so physical action authority remains none. The retained-artifact regression
   brings Linux/Windows quick suites to `733/733` in `8.581/14.794 s`, with
   three Windows skips. See
-  `notes/G5_PHYSICAL_COMPLETE_MASK_CAPSULE_GATE_20260728.md`.
+  `notes/research/g5/G5_PHYSICAL_COMPLETE_MASK_CAPSULE_GATE_20260728.md`.
 - The stationary-witness performance gate and its post-failure resource
   isolation variants are fixed in
   `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`. CE-0142
@@ -704,7 +716,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   platform skips; the focused new Windows file passes `6/6`. The physical
   join is now retained, while future-event coverage, delivery, and action
   authority remain open; see
-  `notes/G5_COMPLETE_MASK_CAPSULE_JOIN_GATE_20260728.md`.
+  `notes/research/g5/G5_COMPLETE_MASK_CAPSULE_JOIN_GATE_20260728.md`.
 - The preceding native checkpoint
   `25d5f68 Add internal native stationary witness extraction`. Internal
   native extraction now retains the deterministic stationary worst path,
@@ -761,7 +773,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   blocked by live integration, hazard coverage, clock, publication, and
   performance gates.
 - Latest structural checkpoint:
-  `notes/LIVE_BULLET_BIRTH_STAGE_REFACTOR_20260728.md` moves the ordered
+  `notes/architecture/LIVE_BULLET_BIRTH_STAGE_REFACTOR_20260728.md` moves the ordered
   post-issue deferred-state, bullet-birth observation, future-contention
   bracket, optional derived-source observation, ECL intent, record build, and
   failure-aware publication behind `th08_live.bullet_birth_stage`. The
@@ -775,7 +787,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `459ef12077391415e15953e6822191bf916b332ffa56df48461ec6069b043939`.
   This is trace-only structural evidence, not new hazard/action authority or
   a causal survival improvement. The preceding physical-side-effect
-  checkpoint `notes/LIVE_PHYSICAL_ISSUE_STAGE_REFACTOR_20260728.md` remains
+  checkpoint `notes/architecture/LIVE_PHYSICAL_ISSUE_STAGE_REFACTOR_20260728.md` remains
   the authority record for issue-time dispatch/no-write and delay-estimator
   semantics. The next research checkpoint is immutable shipped-runtime ECL
   identity; further controller extraction must first characterize another
@@ -1496,7 +1508,7 @@ and middle nonspell exposure a focused route barrier without proving that
 ordinary enemies are intrinsically more dangerous. The proposed next
 strategy gate is read-only kill/damage/despawn/Power telemetry followed by a
 survival-filtered target shadow under
-`STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`. Do not enable
+`notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`. Do not enable
 item or damage action authority from hit counts alone.
 
 ### P2 — Resolve CE-0120 at the actuator boundary
@@ -1530,8 +1542,8 @@ weaken four global workers or reuse a merely similar root.
   `notes/CANDIDATE_WITNESS_PUBLICATION_CONTRACT_20260726.md`,
   `notes/FEASIBILITY_FIRST_STAGE6B_PHYSICAL_CONTENTION_20260726.md`
 - Local pipeline and native acceleration:
-  `notes/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`,
-  `notes/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`
+  `notes/architecture/LOCAL_PIPELINE_CERTIFICATE_AND_BEAM_AUDIT_20260726.md`,
+  `notes/architecture/LOCAL_NATIVE_GEOMETRY_AND_CONTENTION_20260726.md`
 - Hard feasibility:
   `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`,
   `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`,
@@ -1547,19 +1559,19 @@ weaken four global workers or reuse a merely similar root.
 - Canonical pipeline root and hazard coverage:
   `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`
 - Callback and birth-intent lookahead completeness:
-  `notes/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
+  `notes/research/g5/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
 - GIL-held materialization-tail attribution:
-  `notes/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
+  `notes/research/g5/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
 - First-loss exact-root selection and restricted G3/G4 experiment:
   `notes/G3_G4_FIRST_LOSS_CAPSULE_EXPERIMENT_CONTRACT_20260728.md`
 - Realized activation-to-hit provenance:
-  `notes/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
+  `notes/research/g5/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
 - Auxiliary runtime observation and native-batch delivery:
-  `notes/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`,
-  `notes/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`,
-  `notes/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md`,
-  `notes/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md`,
-  `notes/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_STAGE5_RESULT_20260728.md`
+  `notes/research/g5/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`,
+  `notes/research/g5/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`,
+  `notes/research/g5/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md`,
+  `notes/research/g5/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md`,
+  `notes/research/g5/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_STAGE5_RESULT_20260728.md`
 - Generated differential:
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 

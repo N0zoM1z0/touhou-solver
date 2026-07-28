@@ -2,8 +2,7 @@
 
 Date: 2026-07-28
 
-Status: accepted repository-maintenance plan; no model or action-authority
-change
+Status: implemented and validated; no model or action-authority change
 
 ## Problem
 
@@ -24,8 +23,9 @@ formal contract. They are valuable evidence and must not be summarized away,
 but reading either monolith to locate one recent checkpoint wastes context and
 encourages stale handoffs.
 
-There are 14 tracked inbound references to `RESEARCH_LOG.md` across seven
-files and 12 references to `COUNTEREXAMPLES.md` across nine files. No tracked
+There are 14 tracked inbound references to `notes/RESEARCH_LOG.md` across
+seven files and 12 references to `notes/COUNTEREXAMPLES.md` across nine
+files. No tracked
 reference uses a Markdown anchor into either ledger. This makes stable
 entrypoint indexes plus shards possible without breaking anchor targets.
 
@@ -66,6 +66,7 @@ notes/
     g5/                             future-hazard/ECL G5 contracts and results
     stage5_combat/                  combat-progress contracts and results
   architecture/                     refactor and maintenance evidence
+  foundations/                      durable game/solver design references
   operations/                       practice and unattended-run protocols
   runs/                             compact physical run reviews
   review/                           external/consolidated review documents
@@ -85,13 +86,13 @@ The chronological body is split by the date written in each heading:
 
 | Shard | Original inclusive lines |
 | --- | ---: |
-| `2026-07-22.md` | 3..769 |
-| `2026-07-23.md` | 770..1331 |
-| `2026-07-24.md` | 1332..2572 |
-| `2026-07-25.md` | 2573..3095 |
-| `2026-07-26.md` | 3096..4042 |
-| `2026-07-27.md` | 4043..6111 |
-| `2026-07-28.md` | 6112..end |
+| `notes/research_log/2026-07-22.md` | 3..769 |
+| `notes/research_log/2026-07-23.md` | 770..1331 |
+| `notes/research_log/2026-07-24.md` | 1332..2572 |
+| `notes/research_log/2026-07-25.md` | 2573..3095 |
+| `notes/research_log/2026-07-26.md` | 3096..4042 |
+| `notes/research_log/2026-07-27.md` | 4043..6111 |
+| `notes/research_log/2026-07-28.md` | 6112..end |
 
 The legacy G2 section begins as an H2 on July 27 and continues with dated H3
 entries on July 28. The July-28 shard receives a local wrapper heading, while
@@ -104,10 +105,10 @@ The durable failures are split on existing CE headings:
 
 | Shard | First original line | Entries |
 | --- | ---: | ---: |
-| `CE-0001-0049.md` | 21 | 49 |
-| `CE-0050-0099.md` | 992 | 50 |
-| `CE-0100-0139.md` | 2458 | 40 |
-| `CE-0140-0165.md` | 3849 | 26 |
+| `notes/counterexamples/CE-0001-0049.md` | 21 | 49 |
+| `notes/counterexamples/CE-0050-0099.md` | 992 | 50 |
+| `notes/counterexamples/CE-0100-0139.md` | 2458 | 40 |
+| `notes/counterexamples/CE-0140-0165.md` | 3849 | 26 |
 
 The entry template stays in the canonical index. New failures append to the
 current range until a 50-entry boundary is reached.
@@ -119,7 +120,9 @@ This checkpoint moves only clear responsibility families:
 - every `G5_*.md` note to `notes/research/g5/`;
 - the five `STAGE5_*COMBAT*.md` notes to
   `notes/research/stage5_combat/`;
-- explicit refactor/maintenance notes to `notes/architecture/`; and
+- explicit refactor/implementation notes to `notes/architecture/`;
+- durable broad models to `notes/foundations/`;
+- internal audits and reassessments to `notes/review/`; and
 - practice/automation protocols to `notes/operations/`.
 
 Mixed or foundational formal notes remain in place. This reduces root clutter
@@ -148,10 +151,17 @@ Before committing the migration:
 
 ## Acceptance And Follow-Up
 
-The migration is accepted when historical content is reconstructable,
-canonical indexes route a new agent to the current shard, links resolve, and
-the root note count falls materially. It does not change any strategy status
-or evidence authority.
+The migration is accepted:
+
+- both legacy monoliths reconstruct byte-for-byte at their recorded SHA-256;
+- all 165 CE headings occur exactly once in the legacy payloads;
+- the canonical indexes route the current daily/range append targets;
+- 56 clear-responsibility files moved with zero stale current-path references;
+- all tracked Markdown links and current backticked Markdown paths resolve;
+- the root note count fell from 92 to 37; and
+- `git diff --check` passes.
+
+It does not change any strategy status or evidence authority.
 
 Afterward, resume the roadmap at the next narrow live-session/controller seam
 and the separately contracted auxiliary ECL event class. Notes organization

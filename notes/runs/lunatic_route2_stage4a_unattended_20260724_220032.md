@@ -15,7 +15,7 @@ baseline. Full-horizon 8-pixel refinement reduced empty queries but increased
 solve median/p95 from `170.77/380.59` to `532.04/1174.21` ms, cut delivered
 unique policies from 1,728 to 630, and raised expired decisions from 34 to
 178. CE-0102 and
-`notes/DELIVERY_AWARE_STRATEGY_REASSESSMENT_20260724.md` record the rollback.
+`notes/review/DELIVERY_AWARE_STRATEGY_REASSESSMENT_20260724.md` record the rollback.
 
 Bomb-stock changes in the trace are death/respawn state changes. They are not Bomb use: every scoped input mask has bit `0x02` clear, every decision has `bomb=false`, and no action requests Bomb.
 

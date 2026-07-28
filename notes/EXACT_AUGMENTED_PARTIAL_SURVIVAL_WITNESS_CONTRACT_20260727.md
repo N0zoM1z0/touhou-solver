@@ -263,7 +263,7 @@ exact held-mask stationary continuation, replays every worst path, and checks
 native labels. Unknown future-event coverage still yields
 `physical_action_authority = none`. Joined physical evidence and delivery
 remain open; details are in
-`G5_COMPLETE_MASK_CAPSULE_JOIN_GATE_20260728.md`.
+`notes/research/g5/G5_COMPLETE_MASK_CAPSULE_JOIN_GATE_20260728.md`.
 
 Physical run `lunatic_route2_stage4a_unattended_20260728_005108` completes the
 same-session join. Decision/query/source `600/599/598` is Boolean-empty yet
@@ -275,4 +275,4 @@ The audit rejected 1,613 mixed-root rows as CE-0141. Their coverage began at
 `manager_frame` while the canonical observable recurrence root was
 `query_frame`. Checkpoint `d5866c4` aligns future coverage construction to the
 query root without changing action behavior. Details and retained hashes are
-in `G5_PHYSICAL_COMPLETE_MASK_CAPSULE_GATE_20260728.md`.
+in `notes/research/g5/G5_PHYSICAL_COMPLETE_MASK_CAPSULE_GATE_20260728.md`.

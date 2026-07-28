@@ -57,6 +57,7 @@ For the exact checkpoint and authority status, read:
 - [`AGENTS.md`](AGENTS.md) — durable workspace and evidence contract;
 - [`START_HERE.md`](START_HERE.md) — current handoff, commands, and next gate;
 - [`STRATEGY.md`](STRATEGY.md) — live, shadow, proposed, and rejected ledger;
+- [`notes/README.md`](notes/README.md) — responsibility-based evidence index;
 - [`notes/COUNTEREXAMPLES.md`](notes/COUNTEREXAMPLES.md) — retained failures;
 - [`notes/RESEARCH_LOG.md`](notes/RESEARCH_LOG.md) — chronological evidence.
 

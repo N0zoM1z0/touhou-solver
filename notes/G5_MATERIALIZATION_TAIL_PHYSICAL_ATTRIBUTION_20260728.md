@@ -123,11 +123,11 @@ repair the unknown callback suffix or add future-hazard coverage.
 B4 remains open. Do not rerun-select a passing maximum and do not promote
 Stage 5/6.
 
-Before changing runtime behavior, fix a corridor-completion contention
-intervention contract. The smallest existing mechanism is the already-tested
-`background_low_priority` option in `th08_corridor_runtime.solve_corridor`;
-the live controller currently hard-codes it false. Any explicit experiment
-must:
+The corridor-completion contention intervention is now fixed before code in
+`G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`. The smallest
+existing mechanism is the already-tested `background_low_priority` option in
+`th08_corridor_runtime.solve_corridor`; the live controller currently
+hard-codes it false. Any explicit experiment must:
 
 1. change only the corridor worker's thread priority, with an immediate
    default-off rollback;

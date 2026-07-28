@@ -31,7 +31,8 @@ and design/run notes retain derivations and history.
 21. `notes/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
 22. `notes/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
 23. `notes/G5_MATERIALIZATION_TAIL_PHYSICAL_ATTRIBUTION_20260728.md`
-24. the relevant recent run note and counterexample rows before live work
+24. `notes/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`
+25. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -41,6 +42,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `Define corridor completion priority experiment`,
   `Retain schema-v9 physical attribution`,
   `Implement schema-v9 tail attribution`,
   `Retain schema-v8 callback physical gate`,
@@ -233,10 +235,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `646,576` materialization cycles, so attribution is mixed rather than a
   pure copy or pure scheduler result. All 12 hits follow global viability
   exhaustion and do not support a survival comparison. The next useful gate
-  is a separately fixed, default-off corridor-completion contention
-  intervention using the already-tested worker-priority seam, with
-  publication-age and viability freshness as rejection gates. No
-  worker/copy/planner intervention is yet authorized.
+  is now fixed by
+  `G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`: one explicit,
+  default-off corridor-parent below-normal option using the already-tested
+  solve seam. It preserves the four native workers and all recurrence/issue
+  semantics, fails loud if priority is not applied, and rejects tail
+  improvement that worsens publication age, queryability, support, action
+  lag, or first-hit viability warning. Two consecutive complete physical
+  passes are required. Implementation and offline gates come next; no
+  priority/copy/planner intervention is active yet.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

@@ -7125,3 +7125,32 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Measure solve/publication age, viable-query coverage, observer wall,
   action lag, and first-hit warning; require two consecutive physical passes
   before re-closing B4.
+
+## 2026-07-28 — Fixed the corridor-completion priority experiment
+
+- Fixed
+  `G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md` before code.
+  The only intervention is an explicit, default-off request to run the
+  existing Python corridor parent below normal priority. Four native
+  viability workers, controller/game priority and affinity, recurrence,
+  cadence, policy consumption, issue semantics, GC, and hard no-Bomb remain
+  unchanged.
+- Requested priority must be retained in session/configuration provenance and
+  applied on every completed solution. Failure to apply it fails loud rather
+  than silently turning the experiment into a normal-priority run.
+- The first physical run is eligible only with exact process/patch/foreground
+  checks, accepted route completion, no-Bomb, complete cycle provenance, at
+  least one corridor completion endpoint, artifact retention, and cleanup.
+- Fixed B4 limits remain `0.20/0.40/2.00 ms`. Delivery rejection gates cover
+  first-observed age `3/5` frames median/p95, expired/queryless/queryable
+  fractions `0.20%/1.00%/98.0%`, corridor solve p95/max
+  `385.6/500.0 ms`, local-plan p95 `20.0 ms`, action-lag p95/max `2/3`, and
+  zero delay-support-uncovered query.
+- Hit count remains descriptive across RNG-distinct runs. A fresh
+  viable-policy/action contradiction, missing positive prior viability
+  warning, Bomb, or cleanup failure rejects the intervention. Two consecutive
+  complete physical passes are required to close B4; a run without a
+  completion transition cannot count toward that pair.
+- **Next gate:** implement only CLI/provenance/forwarding/fail-loud plumbing,
+  then pass Linux/Windows focused, complete, observer, ABBA, and unchanged-ABI
+  gates before physical use.

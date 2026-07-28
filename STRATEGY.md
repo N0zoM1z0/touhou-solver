@@ -329,9 +329,14 @@ comparison.
    has the run-wide maximum cycle count. This supports a corridor-completion
    GIL/scheduler boundary with mixed executed work, not output-size scaling
    or a causal worker proof. Worker, copy, priority, affinity, and planner
-   intervention remain unauthorized until a separate default-off
-   corridor-priority contract fixes publication-age, viable-query,
-   observer-wall, and survival rejection gates.
+   intervention remained unauthorized until
+   `G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md` fixed one
+   default-off corridor-parent below-normal experiment. It preserves four
+   native workers and exact live query/fallback semantics, requires applied
+   provenance and at least one completion transition, and rejects any
+   observer improvement that ages publication, loses query/support coverage,
+   increases action lag, or exposes a viable-policy hit contradiction.
+   Implementation/offline gates are next; the option is not active yet.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

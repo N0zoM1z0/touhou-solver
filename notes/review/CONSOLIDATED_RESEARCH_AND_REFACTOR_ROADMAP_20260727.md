@@ -1117,7 +1117,12 @@ parity 當成每個 nature tie field 的逐 bit equality。
   不支持 output-size 說法，也還不是 worker causality proof。下一步先
   固定 default-off corridor-worker-priority intervention contract，並用
   publication age、viable-query coverage、observer wall 與 survival
-  作 rejection gates；這不增加 action authority；
+  作 rejection gates。該 contract
+  `G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md` 現已在 code
+  前固定：只降低 Python corridor parent，四個 native workers、
+  recurrence、cadence、issue/fallback 全不變；要求 applied provenance、
+  至少一個 completion transition，及兩個連續完整 physical passes；
+  這不增加 action authority；
 - spell-57 callback traversal 本身 p95/max `0.5460/10.3328 ms`，即使
   fail-closed 也仍在 issue thread。後續性能線要做 exact-state/cache/
   transfer-summary 分析，不能靠降低 256 cap 或 stage-specific shortcut；

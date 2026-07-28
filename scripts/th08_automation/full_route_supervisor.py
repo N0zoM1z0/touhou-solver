@@ -159,7 +159,13 @@ def materialize_artifacts(
 def _write_session(path: Path, session: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        json.dumps(session, indent=2, ensure_ascii=False) + "\n",
+        json.dumps(
+            session,
+            indent=2,
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n",
         encoding="utf-8",
     )
 

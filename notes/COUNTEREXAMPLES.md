@@ -4670,10 +4670,10 @@ mapping-epoch correction implemented
   scanner already remained fail-closed; no schedule, geometry, or action
   authority changes.
 
-## CE-0158: Stage-5 pre-hit loss episode persisted for 118 frames
+## CE-0158: Stage-5 pre-hit loss episodes outlived the restricted horizon
 
-Status: observed physical survival counterexample; deterministic pre-hit loss
-capsules required
+Status: observed physical survival counterexample; exact Stage-5 capsules
+retained, future-hazard coverage still blocks action comparison
 
 - **Observed run:** Lunatic Stage-5 workload
   `lunatic_route2_stage5_unattended_20260728_124930` completed frames
@@ -4726,7 +4726,59 @@ capsules required
   both `36 x 36` portfolios with zero scalar/native mismatch, but both roots
   are `model_unknown` from the first successor. The Stage-5 physical
   counterexample and future-hazard-coverage blocker therefore remain open.
+- **Fresh physical falsifier workload:** Capsule-enabled Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_133633` completes 13,304
+  decisions over frames `1..44822` with 23 hits and hard no-Bomb. Its
+  canonical hit is frame 4027; after 24 earlier recovered episodes the active
+  loss begins at frame 3752, 275 frames before contact. All 1,879 capsules
+  are readable and cleanup is complete.
+- **Finite-model separation:** Exact roots
+  `3750 viable -> 3752 losing` complete both `36 x 36` portfolios with zero
+  scalar/native mismatch. Issued masks `0x55/0x85` retain `30/22` frames,
+  while best G4/G3 masks `0x10/0x11` and `0x20/0x21` retain 32.
+- **Why this does not close the counterexample:** Both roots declare unseen
+  future hazards `UNKNOWN` from the first successor. The ten-frame G3
+  difference is exact only inside the retained finite proxy. It is not a
+  physical lower bound and cannot authorize replacing the live action.
+- **Revised decision:** The missing-capsule gate is closed. Keep CE-0158 open
+  on physical-model validity and continue G5 causal containing coverage
+  before another action-ranking or promotion experiment.
 - **Evidence:** Raw trace SHA-256 is
   `711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965`;
   the compact run review is
   `notes/runs/lunatic_route2_stage5_unattended_20260728_124930.md`.
+
+## CE-0159: Nonfinite lane sentinels produced non-standard JSON evidence
+
+Status: observed artifact-integrity counterexample; future publication fixed
+offline, post-fix physical trace gate pending
+
+- **Observed:** Fresh Stage-5 raw trace `20260728_133633` contains 9,104
+  `-Infinity` tokens. Its generated summary and embedded session summary each
+  contain 98 more. Strict RFC-compatible JSON readers reject those files.
+- **Cause:** An unreachable corridor plan represents
+  `lane=none` bottleneck clearance as negative infinity. The trace adapter
+  copied that internal numeric sentinel directly, and JSON writers used
+  Python's permissive default.
+- **Correction:** The trace adapter now publishes a nonfinite
+  bottleneck-clearance sentinel as explicit JSON `null`. The live `TraceSink`
+  and every unattended summary, session, dossier, regression, and comparison
+  writer use `allow_nan=False`, so any unhandled nonfinite value fails before
+  publishing the offending record.
+- **Retained evidence:** The raw trace is not rewritten and remains SHA-256
+  `5a40e13e0979fc484f41147e15730c23ebf4876e463e1428fc4ac9ad80fc9bdd`.
+  The two new derived compact files were mechanically normalized only at the
+  98 known lane-transition sentinels; strict readers accept every retained
+  compact JSON.
+- **Performance check:** On one retained 27,253-byte decision record, ABBA
+  strict/default JSON median ratios are `1.0082` on Linux and `1.0163` on
+  Windows, adding about `0.003/0.008 ms`. This is a local serialization
+  check, not a physical B4 pass.
+- **Validation:** Deterministic tests cover `null` normalization, strict
+  single/batch emission, and rejection before publishing a nonfinite record.
+  Complete Linux/Windows suites pass 866 tests; Windows has three existing
+  skips.
+- **Authority:** Artifact serialization only. No recurrence, planner,
+  actuator, cadence, or live action changed. A future no-capsule physical
+  run must confirm trace compatibility and unchanged timing before any B4
+  conclusion.

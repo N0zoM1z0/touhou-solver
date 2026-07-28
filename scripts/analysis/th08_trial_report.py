@@ -36,6 +36,13 @@ def _latency(values: Iterable[float]) -> dict[str, float] | None:
     }
 
 
+def _finite_float_or_none(value: object) -> float | None:
+    if value is None:
+        return None
+    parsed = float(value)
+    return parsed if math.isfinite(parsed) else None
+
+
 def _nearest_bullet(row: dict[str, object]) -> dict[str, float | int] | None:
     player = row.get("player")
     bullets = row.get("nearby_bullets")
@@ -183,7 +190,7 @@ def summarize_rows(rows: list[dict[str, object]]) -> dict[str, object]:
                 {
                     "source_frame": source_frame,
                     "lane": lane,
-                    "bottleneck_clearance": float(
+                    "bottleneck_clearance": _finite_float_or_none(
                         solution["bottleneck_clearance"]
                     ),
                 }
@@ -277,7 +284,7 @@ def summarize_rows(rows: list[dict[str, object]]) -> dict[str, object]:
             "stale_fraction": (
                 stale_count / len(corridor_records)
                 if corridor_records
-                else math.nan
+                else None
             ),
             "solve_latency_ms": _latency(
                 solution["solve_ms"] for solution in unique_solutions.values()
@@ -322,7 +329,15 @@ def main(argv: list[str] | None = None) -> int:
         if line.strip()
     ]
     report = summarize_rows(rows)
-    rendered = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
+    rendered = (
+        json.dumps(
+            report,
+            indent=2,
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n"
+    )
     if args.output is None:
         print(rendered, end="")
     else:

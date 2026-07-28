@@ -45,35 +45,37 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - The latest harder-workload physical checkpoint is
-  `lunatic_route2_stage5_unattended_20260728_124930`. It completed 13,326
-  decisions over frames `1..44593` with 15 hits, hard no-Bomb, two successful
+  `lunatic_route2_stage5_unattended_20260728_133633`. It completed 13,304
+  decisions over frames `1..44822` with 23 hits, hard no-Bomb, two successful
   automatic dialogue confirmations, `route_complete`, exact key release, and
-  no residual game/controller/supervisor process. This is not a controlled
-  survival comparison: it is above the immediately preceding retained
-  Stage-5 count of 13 but below the accepted historical median of 20.5, with
-  different RNG, phase timing, density, and post-death resources.
-- All 15 Stage-5 contacts followed global viability exhaustion. At the
-  canonical first hit, the active loss episode began at frame 2049 and
-  contact occurred at frame 2167, leaving a 118-frame causal interval in
-  which the live fallback used repair volume or geometric distant-kernel
-  distance without exact survival labels. Earlier short empty episodes
-  recovered. CE-0158 makes this pre-hit loss bracket and completed G3/G4
-  partial-survival comparison the next hit-reduction gate; it does not
-  authorize a post-loss heuristic.
-- The G3/G4 offline bracket analyzer is now implemented. Replaying the same
-  Stage-5 trace correctly stops unresolved at frame 2049 because
-  `--viability-audit` was absent; it counts 15 earlier recovered loss
-  episodes and does not substitute another root. An older capsule-bearing
-  Stage-4A trace passes the implementation gate at the exact
-  `1039 viable -> 1041 losing` bracket before its frame-1099 first hit:
-  both roots complete all `36 x 36` root/continuation choices with zero
-  scalar/native mismatch. The issued frame-1039 mask `0x05` retains the full
-  32-frame restricted prefix but is not best; the issued frame-1041 mask
-  `0x45` retains only five frames while masks `0x50/0x51` retain 32.
-  Both roots become `model_unknown` at the first successor because unseen
-  future hazards are uncovered, so this is finite-proxy evidence only and
-  grants no physical or live authority. The next gate is one fresh
-  capsule-enabled Stage-5 survival workload.
+  no residual game/controller/supervisor process. Its 1,879 diagnostic
+  capsules are all readable. Capsule I/O explicitly contaminates timing, and
+  the hit count is eight above the preceding run and 2.5 above the accepted
+  historical median; different RNG, phase timing, density, and post-death
+  resources forbid a causal regression claim.
+- All 23 contacts followed global viability exhaustion. The exact loss
+  episode containing the canonical first hit begins at frame 3752 and contact
+  occurs at frame 4027, a 275-frame interval after 24 earlier recovered loss
+  episodes. The G3/G4 audit selects exact decision/query roots
+  `3750/3749 viable -> 3752/3751 losing`, completes both `36 x 36`
+  portfolios, replays every worst path, and has zero scalar/native mismatch.
+  At G4 the issued mask `0x55` retains 30 frames while best masks
+  `0x10/0x11` retain 32; at G3 issued `0x85` retains 22 while
+  `0x20/0x21` retain 32. Both roots are `model_unknown` from the first
+  successor due uncovered future hazards. This is a finite-proxy
+  discriminator, not a physical counterfactual or live ranking. CE-0158 stays
+  open and the next hit-reduction gate returns to G5 causal future-hazard
+  coverage.
+- CE-0159 records a long-standing artifact defect exposed by this run:
+  unreachable `lane=none` plans copied `-Infinity` into 9,104 raw decision
+  rows and 98 compact lane transitions, which strict JSON readers reject.
+  Future corridor traces serialize that sentinel as `null`; live JSONL and
+  all compact supervisor/dossier boundaries now reject any other nonfinite
+  value. The current raw trace remains immutable at its recorded SHA, while
+  its derived summary/session were deterministically normalized. Linux and
+  Windows pass 866 tests; representative strict-encoding median overhead is
+  about `0.003/0.008 ms`. This code correction has no action authority and
+  has not yet received a post-fix physical timing gate.
 - The same Stage-5 run is a successful B4 transfer workload:
   observer p50/p95/p99/p99.9/max is
   `0.0973/0.1936/0.3387/0.5376/0.8346 ms` across all 13,326 rows, with zero

@@ -455,8 +455,17 @@ comparison.
    guarantees only five finite-model frames while `0x50/0x51` guarantee 32,
    but hazard coverage is `UNKNOWN` from the first successor at both roots.
    This is a useful G3/G4 implementation discriminator, not physical
-   survival evidence or strategy promotion. One capsule-enabled Stage-5
-   workload is the next gate.
+   survival evidence or strategy promotion.
+   The capsule-enabled Stage-5 gate `20260728_133633` is now complete. It
+   selects `3750 viable -> 3752 losing` before the frame-4027 hit, after 24
+   recovered episodes, and completes both `36 x 36` portfolios with zero
+   parity failure. The issued G4/G3 masks `0x55/0x85` retain `30/22` frames,
+   while best masks `0x10/0x11` and `0x20/0x21` retain 32. This repeats the
+   finite-proxy action separation on the target workload, but coverage is
+   `UNKNOWN` from `query + 1`; no physical prefix or action promotion exists.
+   The next useful survival gate is G5 causal future-hazard coverage, followed
+   by the same immutable-root audit. Do not tune live recovery from these
+   labels alone.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over
    4,871 callback rows; spell 115 remains fail-closed on 1,220

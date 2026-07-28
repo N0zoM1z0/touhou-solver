@@ -3,9 +3,15 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+import math
 from typing import Any
 
 from th08_corridor_runtime import corridor_policy_status
+
+
+def _finite_float_or_none(value: object) -> float | None:
+    parsed = float(value)
+    return parsed if math.isfinite(parsed) else None
 
 
 def _pipeline_prewarm_record(
@@ -185,7 +191,9 @@ def build_corridor_trace_record(
         "audit_error": audit_error,
         "audit_pending": audit_pending,
         "lane": plan.lane,
-        "bottleneck_clearance": plan.bottleneck_clearance,
+        "bottleneck_clearance": _finite_float_or_none(
+            plan.bottleneck_clearance
+        ),
         "initial_safe_action_count": plan.initial_safe_action_count,
         "initial_repair_volume": plan.initial_repair_volume,
         "policy_status": status,

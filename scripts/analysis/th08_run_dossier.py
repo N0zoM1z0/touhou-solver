@@ -641,7 +641,13 @@ def main(argv: list[str] | None = None) -> int:
 
     args.json_output.parent.mkdir(parents=True, exist_ok=True)
     args.json_output.write_text(
-        json.dumps(dossier, indent=2, ensure_ascii=False) + "\n",
+        json.dumps(
+            dossier,
+            indent=2,
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n",
         encoding="utf-8",
     )
     args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
@@ -664,6 +670,7 @@ def main(argv: list[str] | None = None) -> int:
             },
             indent=2,
             ensure_ascii=False,
+            allow_nan=False,
         )
         + "\n",
         encoding="utf-8",

@@ -447,7 +447,13 @@ def run_trial(
         session["finished_at"] = datetime.now().astimezone().isoformat()
         session["status"] = "completed" if accepted else "discarded"
         session_json.write_text(
-            json.dumps(session, indent=2, ensure_ascii=False) + "\n",
+            json.dumps(
+                session,
+                indent=2,
+                ensure_ascii=False,
+                allow_nan=False,
+            )
+            + "\n",
             encoding="utf-8",
         )
         artifacts = materialize_artifacts(
@@ -466,7 +472,13 @@ def run_trial(
         session["error"] = str(exc)
         session_json.parent.mkdir(parents=True, exist_ok=True)
         session_json.write_text(
-            json.dumps(session, indent=2, ensure_ascii=False) + "\n",
+            json.dumps(
+                session,
+                indent=2,
+                ensure_ascii=False,
+                allow_nan=False,
+            )
+            + "\n",
             encoding="utf-8",
         )
         raise

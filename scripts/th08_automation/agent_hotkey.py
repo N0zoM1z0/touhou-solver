@@ -210,7 +210,13 @@ class AgentHotkey:
             self.last_summary = report
             summary = self.output.with_suffix(".summary.json")
             summary.write_text(
-                json.dumps(report, indent=2, ensure_ascii=False) + "\n",
+                json.dumps(
+                    report,
+                    indent=2,
+                    ensure_ascii=False,
+                    allow_nan=False,
+                )
+                + "\n",
                 encoding="utf-8",
             )
             print(

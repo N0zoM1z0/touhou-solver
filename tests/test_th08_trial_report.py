@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import json
+import math
 import unittest
 
 from analysis.th08_trial_report import summarize_rows
@@ -60,6 +62,17 @@ class Th08TrialReportTests(unittest.TestCase):
         report = summarize_rows([first, repeated])
         self.assertEqual(report["corridor"]["record_count"], 2)
         self.assertEqual(report["corridor"]["unique_solution_count"], 1)
+
+    def test_nonfinite_lane_sentinel_becomes_strict_json_null(self) -> None:
+        decision = _decision(100, 2.0)
+        decision["corridor"]["lane"] = "none"
+        decision["corridor"]["bottleneck_clearance"] = -math.inf
+
+        report = summarize_rows([decision])
+
+        transition = report["corridor"]["lane_transitions"][0]
+        self.assertIsNone(transition["bottleneck_clearance"])
+        json.dumps(report, allow_nan=False)
 
     def test_hit_witness_and_pipeline_boundary_are_structured(self) -> None:
         safe = _decision(100, 2.0)

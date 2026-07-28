@@ -7787,3 +7787,63 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   run is survival/model evidence only. If its canonical hit episode has an
   exact bracket, repeat the complete G3/G4 audit; if no hit occurs, retain the
   clean physical outcome without inventing a loss root.
+
+## 2026-07-28 — Completed the physical Stage-5 pre-hit loss gate
+
+- Capsule-enabled Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_133633` completed frames
+  `1..44822` over 13,304 decisions with 23 hits, hard no-Bomb, two successful
+  automatic confirmations, `route_complete`, no-save selection, exact key
+  release, target termination, and no residual process.
+- The hit count is eight above the preceding retained run and 2.5 above the
+  historical accepted median. Capsule I/O, RNG, phase timing, density, and
+  post-death resources differ; this is neither a controlled survival
+  regression nor a performance workload.
+- All 23 hits follow global viability exhaustion. The phase attribution is
+  nonspell/103/107/111/115 = `10/3/4/2/4`; 16 hits involve a playfield
+  boundary and 21 use fast mode. Bottom-eight-pixel occupancy is `0.502` in
+  the 60-frame pre-hit windows versus `0.196` outside, and mean selected
+  control-reserve deficit is `10.097` versus `3.993`. These correlations
+  identify boundary/reserve pressure but do not authorize a heuristic.
+- All 1,879 capsules totaling 104,461,318 bytes load without error. The sorted
+  `SHA-256 basename` manifest digest is
+  `065b7da853125239f1389dc1077f562199da1509ace886c7474db25cee43779f`.
+- The exact canonical bracket is decision/query
+  `3750/3749 viable -> 3752/3751 losing`; contact is frame 4027, 275 frames
+  later, after 24 earlier recovered episodes. Both roots complete all
+  `36 x 36` root/continuation choices, replay every worst branch, and have
+  zero scalar/native mismatch.
+- At G4 the issued `0x55` action has a 30-frame label while best
+  `0x10/0x11` have 32. At G3 issued `0x85` has 22 while best
+  `0x20/0x21` have 32. Both roots become `model_unknown` at the first
+  successor, so the result is a finite-proxy discriminator only:
+  no physical survival claim, live ranking, or strategy promotion.
+- The G3/G4 report regenerates byte-identically. Internal/file digests are
+  `8a1efd3ecaf38f215c9a739befef674e95ae83de4a723cd27c0a8707c2678a2b` /
+  `122db4b26be6f36416a3eb69e72c88faeae195c77a784265bd9696d20502aa1e`.
+  Raw trace SHA-256 is
+  `5a40e13e0979fc484f41147e15730c23ebf4876e463e1428fc4ac9ad80fc9bdd`.
+- **Decision:** Close the missing-capsule experiment gate, retain CE-0158 on
+  future-model validity, and return to G5 causal containing future-hazard
+  coverage before considering the finite action ordering.
+
+## 2026-07-28 — Made unattended JSON evidence strict
+
+- **Observed CE-0159:** The fresh raw trace contains 9,104 `-Infinity`
+  bottleneck-clearance sentinels, while summary/session contain 98 each.
+  Strict JSON readers reject them.
+- Future corridor trace records map the known `lane=none` nonfinite sentinel
+  to `null`. `TraceSink` and every unattended compact writer now use
+  `allow_nan=False`; an unexpected nonfinite fails before publishing the
+  offending record.
+- The raw physical trace remains immutable at its recorded SHA. Only the 98
+  known derived summary/session lane-transition sentinels were mechanically
+  normalized; all six retained compact JSON files pass a strict parser.
+- Representative 27,253-byte decision serialization gives strict/default
+  median ratios `1.0082/1.0163` on Linux/Windows, about
+  `+0.003/+0.008 ms`. This bounds local overhead but is not a physical B4
+  result.
+- Ruff, focused tests, and complete Linux/Windows suites pass 866 tests in
+  `10.800/17.440 s`; Windows retains three existing platform skips.
+- **Authority:** Evidence serialization only. The next no-capsule physical
+  trace must verify compatibility and timing; no action authority changed.

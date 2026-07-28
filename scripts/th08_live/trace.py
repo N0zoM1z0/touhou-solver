@@ -27,7 +27,7 @@ class TraceSink:
         measure: bool = False,
     ) -> float:
         started = self._clock() if measure else 0.0
-        self._output.write(json.dumps(record) + "\n")
+        self._output.write(json.dumps(record, allow_nan=False) + "\n")
         if flush:
             self._output.flush()
         return (
@@ -45,7 +45,7 @@ class TraceSink:
     ) -> float:
         started = self._clock() if measure else 0.0
         for record in records:
-            self._output.write(json.dumps(record) + "\n")
+            self._output.write(json.dumps(record, allow_nan=False) + "\n")
         if flush:
             self._output.flush()
         return (

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import json
+import math
 import unittest
 from types import SimpleNamespace
 
@@ -136,6 +138,48 @@ class CorridorTraceTests(unittest.TestCase):
                 "slack": 8.0,
             },
         )
+
+    def test_unreachable_clearance_is_strict_json_null(self) -> None:
+        solution = self._solution()
+        solution.plan.bottleneck_clearance = -math.inf
+        lead = SimpleNamespace(
+            frames=80,
+            sample_count=5,
+            p90_solve_frames=12,
+        )
+        commitment = SimpleNamespace(
+            active_lane=lambda _frame: None,
+            expires_frame=None,
+        )
+        record = build_corridor_trace_record(
+            active_solution=solution,
+            pending_solution=None,
+            issue_frame=110,
+            query_frame=108,
+            max_age_frames=64,
+            viability_query=None,
+            postpublished_survival_query=None,
+            pipeline_prewarm_query=None,
+            pipeline_prewarm_retarget=None,
+            safety_value_query=None,
+            policy_lead=lead,
+            commitment=commitment,
+            context_key=(3, 1, None),
+            observed_input_action="stay",
+            decision=SimpleNamespace(action="stay", mask=0),
+            delay_support=(1, 2),
+            guidance=SimpleNamespace(safety_actions=()),
+            pending_command_estimate=None,
+            target=None,
+            control_origin_x=0.0,
+            control_origin_y=0.0,
+            action_name_from_mask=lambda _mask: "stay",
+            minimum_travel_frames=lambda *_args: 0.0,
+        )
+
+        assert record is not None
+        self.assertIsNone(record["bottleneck_clearance"])
+        json.dumps(record, allow_nan=False)
 
 
 if __name__ == "__main__":

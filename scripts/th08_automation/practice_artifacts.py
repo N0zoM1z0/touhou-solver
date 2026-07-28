@@ -119,6 +119,7 @@ def materialize_artifacts(
                 compare_dossiers(before, after),
                 indent=2,
                 ensure_ascii=False,
+                allow_nan=False,
             )
             + "\n",
             encoding="utf-8",

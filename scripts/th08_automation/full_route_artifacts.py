@@ -276,7 +276,13 @@ def write_compact_full_route_summary(
         }
     )
     path.write_text(
-        json.dumps(existing, indent=2, ensure_ascii=False) + "\n",
+        json.dumps(
+            existing,
+            indent=2,
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n",
         encoding="utf-8",
     )
 
@@ -369,6 +375,7 @@ def materialize_artifacts(
                 ),
                 indent=2,
                 ensure_ascii=False,
+                allow_nan=False,
             )
             + "\n",
             encoding="utf-8",

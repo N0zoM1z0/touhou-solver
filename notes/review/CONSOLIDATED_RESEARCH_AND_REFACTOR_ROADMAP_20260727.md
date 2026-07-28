@@ -1252,8 +1252,20 @@ parity 當成每個 nature tie field 的逐 bit equality。
   mask `0x45` retains only five finite-model frames while `0x50/0x51` retain
   32, but both roots are `model_unknown` from the first successor. This
   validates the discriminator without authorizing a physical conclusion.
-  A fresh survival-focused Stage-5 run must opt into diagnostic capsule I/O
-  and is therefore ineligible for B4 timing conclusions;
+  The fresh capsule-enabled Stage-5 gate `20260728_133633` is now complete:
+  it selects `3750 viable -> 3752 losing`, 275 frames before the frame-4027
+  hit, after 24 recovered episodes. Both `36 x 36` portfolios pass with zero
+  parity mismatch. Issued G4/G3 masks `0x55/0x85` retain `30/22` frames
+  versus best `0x10/0x11` and `0x20/0x21` at 32. Because both roots are
+  `UNKNOWN` from the first successor, the next gate is G5 causal future-hazard
+  coverage, not live recovery tuning;
+- CE-0159 fixes a separate evidence-boundary defect: unreachable
+  `lane=none` plans previously emitted `-Infinity`, making raw and compact
+  outputs non-standard JSON. Future trace adapters emit `null` for that known
+  sentinel and every JSON publication boundary rejects other nonfinite
+  values. Linux/Windows representative strict-encoding overhead is only
+  about `0.003/0.008 ms`, but a post-fix no-capsule physical timing gate is
+  still required before a B4 conclusion;
 - the projection audit now has an explicit universal `core` profile and keeps
   Stage-4A-only spell gates as its default. Stage 5 passes all core gates over
   4,871 rows while retaining 1,220 spell-115 unsupported-control rows as

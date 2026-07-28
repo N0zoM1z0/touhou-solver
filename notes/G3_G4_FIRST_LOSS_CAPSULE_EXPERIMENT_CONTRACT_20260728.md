@@ -2,7 +2,8 @@
 
 Date: 2026-07-28
 
-Status: offline analyzer implemented; fresh Stage-5 capsule gate pending.
+Status: Stage-5 finite-model gate complete; physical promotion rejected
+because first-successor future-hazard coverage is unknown.
 
 This contract follows CE-0158. Lunatic Stage-5 run
 `lunatic_route2_stage5_unattended_20260728_124930` enters the loss episode
@@ -205,6 +206,54 @@ The Stage-4A positive report has internal digest
 and file SHA-256
 `c29004d280634b892a7e36e0705a6693c3b7c2150a3665ab63a71813be29ac63`.
 Both regenerate byte-identically.
+
+## Fresh Stage-5 Physical Gate
+
+**Observed:** Capsule-enabled run
+`lunatic_route2_stage5_unattended_20260728_133633` completed frames
+`1..44822` over 13,304 decisions with 23 hits, hard no-Bomb, accepted
+automatic transitions, `route_complete`, exact key release, and complete
+process cleanup. It retained 1,879 readable capsules totaling 104,461,318
+bytes. The sorted `SHA-256 basename` manifest digest is
+`065b7da853125239f1389dc1077f562199da1509ace886c7474db25cee43779f`.
+Capsule I/O makes the run ineligible for timing conclusions.
+
+The canonical first hit is frame 4027. After 24 earlier recovered loss
+episodes, the persistent episode begins at first-losing decision/query
+`3752/3751`; the last viable decision/query is `3750/3749`. Thus the
+finite-model loss precedes contact by 275 frames.
+
+Both selected roots complete all 36 root actions against all 36 stationary
+continuation candidates. Every worst path replays and scalar/native mismatch
+count is zero:
+
+- G4 issued mask `0x55` has a 30-frame label; best masks `0x10/0x11` have
+  32-frame labels.
+- G3 issued mask `0x85` has a 22-frame label; best masks `0x20/0x21` have
+  32-frame labels.
+
+Both roots declare `UNKNOWN` coverage from the first successor
+(`3750` and `3752` respectively). The audit therefore passes only its
+finite-model implementation gate:
+`finite_model_audit_passed=true`,
+`physical_survival_claim_available=false`, and
+`strategy_promotion_available=false`. The apparent 10-frame G3 separation is
+not a physical counterfactual because the finite slab omits all future births
+from that first successor.
+
+The report regenerates byte-identically with internal digest
+`8a1efd3ecaf38f215c9a739befef674e95ae83de4a723cd27c0a8707c2678a2b`
+and file SHA-256
+`122db4b26be6f36416a3eb69e72c88faeae195c77a784265bd9696d20502aa1e`.
+The immutable raw trace SHA-256 is
+`5a40e13e0979fc484f41147e15730c23ebf4876e463e1428fc4ac9ad80fc9bdd`.
+
+**Decision:** The experiment is complete as an offline discriminator. It
+falsifies the claim that the historical issued actions were always best in
+the retained finite proxy, but it cannot falsify or prove their physical
+survival ordering. Continue G5 future-hazard coverage; rerun this exact
+quantified audit only after a causal containing model covers the claimed
+prefix.
 
 ## Acceptance Gates
 

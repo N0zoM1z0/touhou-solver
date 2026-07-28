@@ -53,12 +53,27 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Stage-5 count of 13 but below the accepted historical median of 20.5, with
   different RNG, phase timing, density, and post-death resources.
 - All 15 Stage-5 contacts followed global viability exhaustion. At the
-  canonical first hit, the global kernel became empty at frame 2049 and
+  canonical first hit, the active loss episode began at frame 2049 and
   contact occurred at frame 2167, leaving a 118-frame causal interval in
   which the live fallback used repair volume or geometric distant-kernel
-  distance without exact survival labels. CE-0158 makes first-loss capsule
-  retention and completed G3/G4 partial-survival comparison the next
-  hit-reduction gate; it does not authorize a post-loss heuristic.
+  distance without exact survival labels. Earlier short empty episodes
+  recovered. CE-0158 makes this pre-hit loss bracket and completed G3/G4
+  partial-survival comparison the next hit-reduction gate; it does not
+  authorize a post-loss heuristic.
+- The G3/G4 offline bracket analyzer is now implemented. Replaying the same
+  Stage-5 trace correctly stops unresolved at frame 2049 because
+  `--viability-audit` was absent; it counts 15 earlier recovered loss
+  episodes and does not substitute another root. An older capsule-bearing
+  Stage-4A trace passes the implementation gate at the exact
+  `1039 viable -> 1041 losing` bracket before its frame-1099 first hit:
+  both roots complete all `36 x 36` root/continuation choices with zero
+  scalar/native mismatch. The issued frame-1039 mask `0x05` retains the full
+  32-frame restricted prefix but is not best; the issued frame-1041 mask
+  `0x45` retains only five frames while masks `0x50/0x51` retain 32.
+  Both roots become `model_unknown` at the first successor because unseen
+  future hazards are uncovered, so this is finite-proxy evidence only and
+  grants no physical or live authority. The next gate is one fresh
+  capsule-enabled Stage-5 survival workload.
 - The same Stage-5 run is a successful B4 transfer workload:
   observer p50/p95/p99/p99.9/max is
   `0.0973/0.1936/0.3387/0.5376/0.8346 ms` across all 13,326 rows, with zero

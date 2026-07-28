@@ -121,16 +121,27 @@ def audit_root(
     capsule_dir: Path,
     horizon: int,
     decision_frame_support: tuple[int, ...],
+    continuation_mode: str = "held",
 ) -> dict[str, object]:
     problem, query, position_error = build_problem(
         root,
         capsule_dir=capsule_dir,
         horizon=horizon,
     )
+    if continuation_mode == "held":
+        continuation_candidates = (root.held_token,)
+    elif continuation_mode == "all_actions":
+        continuation_candidates = tuple(
+            action.name for action in problem.actions
+        )
+    else:
+        raise ValueError(
+            f"unknown stationary continuation mode {continuation_mode!r}"
+        )
     portfolio = build_stationary_witness_portfolio(
         problem=problem,
         decision_frame_support=decision_frame_support,
-        continuation_candidates=(root.held_token,),
+        continuation_candidates=continuation_candidates,
         unrestricted_status="unresolved",
         **query,
     )
@@ -169,6 +180,7 @@ def audit_root(
         ),
         "physical_action_authority": "none",
         "trace": {
+            "line": root.trace_line,
             "decision_frame": root.decision_frame,
             "source_frame": root.source_frame,
             "trace_boolean_state_viable": root.trace_state_viable,
@@ -191,6 +203,7 @@ def audit_root(
         },
         "problem_digest": portfolio.problem_digest,
         "portfolio_digest": portfolio.portfolio_digest,
+        "continuation_mode": continuation_mode,
         "continuation_candidates": portfolio.continuation_candidates,
         "complete_root_actions": portfolio.complete_root_actions,
         "state_label": label_record(portfolio.state_label),

@@ -1,0 +1,58 @@
+{
+  "conclusions": {
+    "finite_model_audit_passed": false,
+    "physical_survival_claim_available": false,
+    "strategy_promotion_available": false
+  },
+  "gates": {
+    "both_restricted_portfolios_complete": false,
+    "exact_uninterrupted_bracket_selected": false,
+    "physical_action_authority_unchanged": true,
+    "root_stream_has_no_validation_failure": true
+  },
+  "observations": {},
+  "passed": false,
+  "report_digest": "846dd73c6d3f8a56689b1d0d88eb71bef192a3b64ac3450974c92b3cf82c08e4",
+  "schema": "th08-g3-g4-first-loss-capsule-audit-v1",
+  "scope": {
+    "authority": "offline restricted attainable lower witnesses only",
+    "continuations": "all 36 stationary complete-mask candidates",
+    "decision_frame_support": [
+      4,
+      5,
+      6
+    ],
+    "gameplay_epoch_filter": 0,
+    "horizon_frames": 32,
+    "root_actions": "all 36 canonical no-Bomb complete-mask actions",
+    "stage_route_index_filter": 5,
+    "timing_authority": "none; viability capsule I/O contaminates B4 timing"
+  },
+  "selection": {
+    "interruption_counts": {
+      "audit_capsule_missing": 1015,
+      "corridor_record_missing": 17,
+      "viability_query_missing": 58
+    },
+    "recovered_loss_episodes": 15,
+    "root_validation_failure_count": 0,
+    "root_validation_failure_samples": [],
+    "status": "unresolved_pre_hit_loss",
+    "target_hit_frame": 2167,
+    "unresolved": {
+      "decision_frame": 2049,
+      "gameplay_epoch": 0,
+      "line": 2073,
+      "query_frame": 2048,
+      "reason": "audit_capsule_missing",
+      "stage_route_index": 5
+    }
+  },
+  "solve_error": null,
+  "source": {
+    "capsule_dir": "artifacts/viability_audit/raw/lunatic_route2_stage5_unattended_20260728_124930",
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_124930.jsonl",
+    "trace_bytes": 620930441,
+    "trace_sha256": "711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965"
+  }
+}

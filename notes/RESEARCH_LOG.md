@@ -7693,11 +7693,13 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   No incomplete prefix is lowered. Projection audit SHA-256 is
   `427a12b5f638b98657091b5a4abd5abebdbc71baf76db2b6f30bffb33b5d81e1`.
 - **Observed survival counterexample:** All 15 hits follow global viability
-  exhaustion. The canonical first loss is frame 2049 and first contact is
-  frame 2167, leaving 118 frames in which current repair/distant recovery has
-  no exact survival labels. Spell 107 contributes six later contacts; the run
-  exposes 8,494 empty action sets among 13,146 available queries.
-- **Decision:** CE-0158 makes deterministic first-global-loss capsule
+  exhaustion. Earlier short empty episodes recover. The viable-to-losing
+  transition of the episode containing the canonical first hit is frame 2049;
+  contact is frame 2167, leaving 118 frames in which current repair/distant
+  recovery has no exact survival labels. Spell 107 contributes six later
+  contacts; the run exposes 8,494 empty action sets among 13,146 available
+  queries.
+- **Decision:** CE-0158 makes deterministic canonical pre-hit loss-bracket
   retention the next hit-reduction checkpoint. Reproduce the immutable empty
   root offline, then compare completed G3/G4 causal partial-survival witnesses
   for every evaluated root action against the independent scalar oracle.
@@ -7721,11 +7723,13 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - The next survival-focused physical workload may explicitly enable
   diagnostic capsules. Its I/O contamination disqualifies it from B4 timing
   conclusions.
-- Selection is fixed to the first uninterrupted pair of exact queried roots
-  in one gameplay epoch/stage: viable followed by losing. Unavailable policy,
-  absent query, missing capsule, unavailable canonical root, malformed join,
-  or epoch change breaks continuity. An explicit losing query without exact
-  evidence leaves first loss unresolved and cannot be skipped.
+- Selection is fixed to the uninterrupted exact queried viable-to-losing
+  transition of the loss episode containing the canonical first hit in one
+  gameplay epoch/stage. Earlier episodes that return to viable are counted
+  and skipped. Unavailable policy, absent query, missing capsule, unavailable
+  canonical root, malformed join, or epoch change breaks continuity. If the
+  active pre-hit loss episode lacks exact evidence, it remains unresolved and
+  a different episode may not replace it.
 - The last viable root is the G4 preservation sample; the first losing root is
   the G3 partial-survival sample. Both retain complete-mask roots, all
   unpruned root actions, declared stationary causal continuations, worst
@@ -7734,3 +7738,52 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   authority.
 - The preimplementation contract is
   `notes/G3_G4_FIRST_LOSS_CAPSULE_EXPERIMENT_CONTRACT_20260728.md`.
+
+## 2026-07-28 — Implemented the canonical pre-hit loss capsule audit
+
+- Added modular trace selection, report construction, and immutable selection
+  records under `scripts/analysis/first_loss_capsule/`, with
+  `scripts/analysis/g3_g4_first_loss_capsule_audit.py` as the offline entry
+  point. Existing complete-mask capsule solving now optionally completes all
+  stationary action continuations and records the exact trace line.
+- The parser now rejects non-Boolean `state_viable` values instead of
+  coercing arbitrary truthy values. Seven deterministic tests cover a clean
+  persistent bracket, an earlier recovered episode, unavailable-query and
+  missing-capsule interruptions, scope changes, malformed identity, complete
+  `36 x 36` portfolios, deterministic output, scalar/native parity, and
+  unchanged action authority.
+- **Observed negative Stage-5 gate:** The analyzer replays
+  `lunatic_route2_stage5_unattended_20260728_124930`, counts 15 recovered
+  earlier loss episodes, targets hit frame 2167, and reports
+  `unresolved_pre_hit_loss` at decision/query `2049/2048` because
+  `audit_capsule_missing`. There are zero root-validation failures. This is
+  the required deterministic rejection of an unreconstructable root.
+- **Observed positive implementation gate:** On capsule-bearing physical
+  Stage-4A trace `lunatic_route2_stage4a_unattended_20260728_020910`, the
+  analyzer selects decision/query `1039/1038` as last viable and `1041/1040`
+  as first losing before hit frame 1099, after nine recovered episodes. Both
+  roots complete every one of 36 root actions against all 36 stationary
+  continuations; worst-path replay and scalar/native labels have zero
+  mismatch.
+- The G4 historical issued mask `0x05` has a completed 32-frame witness but
+  is not best; `0x50/0x51/0x54/0x55` are best. At G3, historical issued mask
+  `0x45` has only a five-frame witness while `0x50/0x51` retain 32. This is
+  an observed finite-model separation, not a physical counterfactual.
+- Both Stage-4A roots become `model_unknown` at `query + 1` because unseen
+  future hazards are uncovered. Consequently
+  `finite_model_audit_passed=true`, while
+  `physical_survival_claim_available=false` and
+  `strategy_promotion_available=false`. No live consumer, worker, input, or
+  fallback changed.
+- The Stage-5 negative report internal/file digests are
+  `846dd73c6d3f8a56689b1d0d88eb71bef192a3b64ac3450974c92b3cf82c08e4` /
+  `03d20656358fee400fdcad7dc211091c9a84a0d93fdd4a9e7a41ba9fbffa0535`.
+  The Stage-4A positive report internal/file digests are
+  `010cbbc819b82066153bfcf5b4e022a5e6c223667bb7ae5182b9a820ffd77c1b` /
+  `c29004d280634b892a7e36e0705a6693c3b7c2150a3665ab63a71813be29ac63`.
+  Each report regenerates byte-identically.
+- **Decision:** Run one fresh Stage-5 workload with explicit
+  `--viability-audit`. Capsule I/O contaminates performance evidence, so that
+  run is survival/model evidence only. If its canonical hit episode has an
+  exact bracket, repeat the complete G3/G4 audit; if no hit occurs, retain the
+  clean physical outcome without inventing a loss root.

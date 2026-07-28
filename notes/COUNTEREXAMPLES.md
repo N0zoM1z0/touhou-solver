@@ -4670,19 +4670,20 @@ mapping-epoch correction implemented
   scanner already remained fail-closed; no schedule, geometry, or action
   authority changes.
 
-## CE-0158: Stage-5 geometric recovery remained in a 118-frame post-loss basin
+## CE-0158: Stage-5 pre-hit loss episode persisted for 118 frames
 
-Status: observed physical survival counterexample; deterministic first-loss
-capsule required
+Status: observed physical survival counterexample; deterministic pre-hit loss
+capsules required
 
 - **Observed run:** Lunatic Stage-5 workload
   `lunatic_route2_stage5_unattended_20260728_124930` completed frames
   `1..44593` over 13,326 decisions with 15 hits, hard no-Bomb, accepted
   automatic transitions, `route_complete`, exact key release, and no residual
   process.
-- **Canonical causal witness:** On the fresh attempt, the global viability
-  kernel first becomes empty at frame 2049. The first native hit occurs at
-  frame 2167, 118 frames later, at `(8.000, 424.000)` with active input
+- **Canonical causal witness:** The run has earlier short Boolean-empty
+  episodes that later return to viable. The viable-to-losing transition of
+  the episode containing the first native hit is frame 2049. Contact occurs
+  at frame 2167, 118 frames later, at `(8.000, 424.000)` with active input
   `up_right_fast`, 657 bullets, and observed slot-1357 overlap/AABB clearance
   `-2.202`.
 - **Observed fallback path:** The frame-2049 query is already losing while
@@ -4706,17 +4707,25 @@ capsule required
   geometric direction after a Boolean loss but carry no completed causal
   survival label. They cannot distinguish a continuation that survives 17,
   32, or more frames from one that merely approaches a distant viable cell.
-- **Required falsifier:** Retain the exact immutable root at the first
-  winning-to-losing transition, including hazard/policy versions,
+- **Required falsifier:** Retain the exact immutable roots bracketing the
+  viable-to-losing transition of the episode containing the canonical first
+  hit, including hazard/policy versions,
   float32-margin identity, active/held/pending complete masks, remaining-delay
   information set, cadence support, action set, and continuation contract.
   Compare every proposed root action using completed G3/G4 causal
   partial-survival witnesses and the independent scalar belief oracle.
 - **Decision:** Do not tune the live geometric fallback from this trace.
-  First implement deterministic first-loss capsule capture, reproduce the
-  Boolean-empty root offline, and measure whether a completed restricted
-  policy class provides a longer attainable survival prefix. Any unvisited,
-  timed-out, or unsupported action remains unresolved.
+  First implement deterministic pre-hit loss-bracket capsule selection,
+  reproduce the Boolean-empty root offline, and measure whether a completed
+  restricted policy class provides a longer attainable survival prefix. Any
+  unvisited, timed-out, or unsupported action remains unresolved.
+- **Observed tooling gate:** The implemented analyzer counts 15 earlier
+  recovered episodes and stops unresolved at decision/query `2049/2048`
+  because this run has no audit capsule. It does not substitute a later or
+  similar root. A capsule-bearing Stage-4A implementation check completes
+  both `36 x 36` portfolios with zero scalar/native mismatch, but both roots
+  are `model_unknown` from the first successor. The Stage-5 physical
+  counterexample and future-hazard-coverage blocker therefore remain open.
 - **Evidence:** Raw trace SHA-256 is
   `711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965`;
   the compact run review is

@@ -11,6 +11,7 @@ from touhou_control.pipeline_identity import PipelineQueryIdentity
 
 @dataclass(frozen=True)
 class CompleteMaskCapsuleRoot:
+    trace_line: int
     decision_frame: int
     source_frame: int
     capsule: str

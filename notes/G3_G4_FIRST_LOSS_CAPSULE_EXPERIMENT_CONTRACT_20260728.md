@@ -2,12 +2,13 @@
 
 Date: 2026-07-28
 
-Status: fixed pre-implementation offline/shadow experiment contract.
+Status: offline analyzer implemented; fresh Stage-5 capsule gate pending.
 
 This contract follows CE-0158. Lunatic Stage-5 run
-`lunatic_route2_stage5_unattended_20260728_124930` first reports an empty
-global Boolean action set at decision frame 2049 and first contacts a bullet
-at frame 2167. That run did not enable `--viability-audit`; its trace contains
+`lunatic_route2_stage5_unattended_20260728_124930` enters the loss episode
+containing its canonical first hit at decision frame 2049 and contacts a
+bullet at frame 2167. Earlier short empty episodes recover. That run did not
+enable `--viability-audit`; its trace contains
 the canonical query identity but not the complete lowered hazard slab.
 Therefore the frame-2049 finite problem cannot be reconstructed exactly from
 that trace.
@@ -18,8 +19,9 @@ reopen B4, compare controller timing, or promote a live strategy.
 
 ## Physical Question
 
-For the first clean-attempt global winning-to-losing bracket in one gameplay
-epoch:
+For the loss episode containing the canonical first native hit in one
+gameplay epoch, select its uninterrupted exact queried winning-to-losing
+bracket and ask:
 
 1. which exact root actions have completed attainable stationary survival
    witnesses at the last viable root;
@@ -112,12 +114,17 @@ capsule write is added to the issue thread by this checkpoint.
 
 ## Exact Bracket Selection
 
-Decision rows are processed in trace order. A bracket is eligible only when:
+Decision rows are processed in trace order. The canonical target is the first
+row with `hit_started == true` in the requested gameplay epoch/stage. Earlier
+losing episodes that return to an explicit viable state are counted and
+discarded. The transition whose losing state persists through the target hit
+is eligible only when:
 
 1. both rows are in the same gameplay epoch and stage route index;
 2. both viability queries explicitly report `available == true`;
 3. the earlier exact root reports `state_viable == true`;
-4. the next eligible exact root reports `state_viable == false`;
+4. the next eligible exact root reports `state_viable == false`, and all
+   subsequent queried states through the target hit remain explicitly losing;
 5. both rows have an available canonical complete-mask root and an audit
    capsule; and
 6. no unavailable query, missing capsule, unavailable canonical root,
@@ -126,14 +133,14 @@ Decision rows are processed in trace order. A bracket is eligible only when:
 
 Any such interruption resets the viable predecessor. A timeout,
 `pending_future_epoch`, expired policy, absent query, or missing capsule is
-not a finite-model loss. If an explicit losing query lacks exact root
-evidence, the first-loss result is unresolved; a later exact losing row may
-not silently replace it.
+not a finite-model loss. If the loss episode active at the target hit lacks
+exact root evidence, the result is unresolved; a different episode may not
+silently replace it.
 
-The selected pair is the first eligible bracket in the requested physical
-scope. The report retains every exclusion count and the selected trace line,
-decision frame, query frame, source frame, epoch, stage, spell, and immutable
-identity digest.
+The selected pair is the active eligible bracket at the canonical first hit.
+The report retains recovered episode counts, every exclusion count, target-hit
+frame, and the selected trace line, decision frame, query frame, source frame,
+epoch, stage, spell, and immutable identity digest.
 
 ## Five Formal Questions
 
@@ -155,11 +162,56 @@ identity digest.
    Any future G4 shadow or consumer requires a separate immutable publication,
    cancellation, newest-version, deadline, and fresh-certificate gate.
 
+## Implementation Checkpoint
+
+The modular analyzer lives in
+`scripts/analysis/first_loss_capsule/` with the command-line entry point
+`scripts/analysis/g3_g4_first_loss_capsule_audit.py`. It joins exact roots by
+trace line, rejects non-Boolean viability records, selects only the loss
+episode containing the canonical first hit, and asks the existing independent
+scalar/native capsule machinery to complete all 36 root actions against all
+36 stationary continuation candidates.
+
+Two retained workloads bound the current conclusion:
+
+- **Observed negative Stage-5 gate:** Replaying
+  `lunatic_route2_stage5_unattended_20260728_124930` selects no substitute.
+  It counts 15 recovered loss episodes, identifies the active unresolved
+  transition at decision/query frame `2049/2048`, and stops on
+  `audit_capsule_missing`. The canonical hit remains frame 2167. This
+  deterministically confirms that the missing immutable hazard slab cannot be
+  repaired after the fact.
+- **Observed positive implementation gate:** Capsule-bearing physical
+  Stage-4A trace `lunatic_route2_stage4a_unattended_20260728_020910` selects
+  last-viable decision/query `1039/1038` and first-losing decision/query
+  `1041/1040` before the frame-1099 canonical hit, after nine earlier
+  recovered episodes. Both roots complete `36 x 36` portfolios and worst-path
+  replay with zero scalar/native mismatch. The G4 issued mask `0x05` retains
+  the full 32-frame restricted prefix but is not best; masks
+  `0x50/0x51/0x54/0x55` are best. The G3 issued mask `0x45` retains only five
+  frames while best masks `0x50/0x51` retain 32.
+
+Both Stage-4A roots have `UNKNOWN` unseen-future-hazard coverage beginning at
+the first successor (`query + 1`). Therefore the positive gate establishes
+implementation completeness and a finite-proxy action separation only.
+It provides no physical survival prefix, live ranking, or strategy promotion.
+
+The compact Stage-5 negative report has internal digest
+`846dd73c6d3f8a56689b1d0d88eb71bef192a3b64ac3450974c92b3cf82c08e4`
+and file SHA-256
+`03d20656358fee400fdcad7dc211091c9a84a0d93fdd4a9e7a41ba9fbffa0535`.
+The Stage-4A positive report has internal digest
+`010cbbc819b82066153bfcf5b4e022a5e6c223667bb7ae5182b9a820ffd77c1b`
+and file SHA-256
+`c29004d280634b892a7e36e0705a6693c3b7c2150a3665ab63a71813be29ac63`.
+Both regenerate byte-identically.
+
 ## Acceptance Gates
 
-- deterministic synthetic tests cover a clean bracket, unavailable-query
-  interruption, missing capsule, malformed identity, epoch transition, and
-  explicit losing query without exact evidence;
+- deterministic synthetic tests cover a clean pre-hit persistent bracket, a
+  recovered earlier loss episode, unavailable-query interruption, missing
+  capsule, malformed identity, epoch transition, and a hit-containing losing
+  episode without exact evidence;
 - existing complete-mask trace/capsule tests remain unchanged and pass;
 - both selected roots complete all 36 root actions and all declared
   stationary continuation candidates;
@@ -172,10 +224,11 @@ identity digest.
 
 ## Stop Rules
 
-Stop without a survival conclusion if the first explicit losing query lacks
-an exact capsule root, if the bracket crosses an unknown row, if capsule
-metadata disagrees with the canonical root, if coverage is unknown before the
-claimed physical prefix, or if any portfolio is incomplete.
+Stop without a survival conclusion if the loss episode active at the
+canonical first hit lacks an exact capsule root, if its bracket crosses an
+unknown row, if capsule metadata disagrees with the canonical root, if
+coverage is unknown before the claimed physical prefix, or if any portfolio
+is incomplete.
 
 Do not tune the live geometric fallback from aggregate labels. A later
 proposal must identify a completed causal policy class, show that its result

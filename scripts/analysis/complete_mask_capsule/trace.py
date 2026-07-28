@@ -220,8 +220,14 @@ def read_complete_mask_roots(
                     raise ValueError(
                         "nominal control delay is outside its support"
                     )
+                state_viable = viability["state_viable"]
+                if type(state_viable) is not bool:
+                    raise ValueError(
+                        "trace state viability must be Boolean"
+                    )
                 roots.append(
                     CompleteMaskCapsuleRoot(
+                        trace_line=line_number,
                         decision_frame=int(row["frame"]),
                         source_frame=int(corridor["source_frame"]),
                         capsule=capsule,
@@ -235,9 +241,7 @@ def read_complete_mask_roots(
                         ),
                         delay_frames=delays,
                         nominal_delay=nominal_delay,
-                        trace_state_viable=bool(
-                            viability["state_viable"]
-                        ),
+                        trace_state_viable=state_viable,
                         issued_mask=int(row["mask"]),
                     )
                 )

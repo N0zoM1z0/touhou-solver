@@ -439,12 +439,24 @@ comparison.
    p50/p95/p99/p99.9/max with no completed GC. This supports transfer of the
    optimized implementation but cannot close the Stage-4A maximum failure.
    The run completed with 15 hits and hard no-Bomb; all contacts followed
-   global viability exhaustion. Its canonical first global loss precedes the
-   first hit by 118 frames, during which current repair/distant recovery has
-   no exact survival labels. Therefore the next survival-focused G3/G4 gate
-   is a trace-only first-loss capsule plus completed causal partial-survival
+   global viability exhaustion. The loss episode containing the canonical
+   first hit begins at frame 2049, 118 frames before contact; earlier short
+   empty episodes recover. Current repair/distant recovery has no exact
+   survival labels. Therefore the next survival-focused G3/G4 gate is a
+   trace-only pre-hit loss bracket plus completed causal partial-survival
    witnesses for every compared root action. Geometric post-loss distance
    remains live fallback behavior, not promoted authority.
+   The offline analyzer now enforces that bracket and completes all 36 root
+   actions against all 36 stationary continuation candidates. It rejects the
+   capsule-free Stage-5 root exactly at frame 2049 after counting 15 recovered
+   earlier episodes. On capsule-bearing Stage-4A evidence it selects
+   `1039 viable -> 1041 losing` before the frame-1099 hit with zero
+   scalar/native mismatch. The historical issued losing action `0x45`
+   guarantees only five finite-model frames while `0x50/0x51` guarantee 32,
+   but hazard coverage is `UNKNOWN` from the first successor at both roots.
+   This is a useful G3/G4 implementation discriminator, not physical
+   survival evidence or strategy promotion. One capsule-enabled Stage-5
+   workload is the next gate.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over
    4,871 callback rows; spell 115 remains fail-closed on 1,220

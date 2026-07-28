@@ -345,6 +345,18 @@ comparison.
    `0.8925 ms` maximum is non-attributable because no `inflight -> done`
    endpoint occurred. The intervention is **rejected**; do not run the second
    pass. Keep it default-off for reproduction only.
+   New shipped-binary analysis fixes the next callback/performance boundary.
+   **Observed statically:** spell 73's `jump_float_ge` reads ECL variable
+   `10050`, the current player/enemy Euclidean distance; spell 57 reaches a
+   decrement-and-branch loop whose local/RNG state is absent from
+   `EclVmSnapshot`. Therefore result memoization over the present snapshot is
+   unsound. The fixed
+   `G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
+   first stops at unsupported timer/control transfers. It preserves the
+   256-instruction cap and may only shrink complete coverage while reducing
+   non-authoritative scan work. Exact dependency-complete block summaries
+   remain proposal-only until this correction, retained-trace replay, and
+   Linux/Windows gates pass.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

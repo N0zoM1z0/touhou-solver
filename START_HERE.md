@@ -32,7 +32,8 @@ and design/run notes retain derivations and history.
 22. `notes/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
 23. `notes/G5_MATERIALIZATION_TAIL_PHYSICAL_ATTRIBUTION_20260728.md`
 24. `notes/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`
-25. the relevant recent run note and counterexample rows before live work
+25. `notes/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
+26. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -266,7 +267,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
   therefore non-attributable. All hits followed global-kernel exhaustion and
   the first retained positive `40/9`-frame viability/robust warnings. Do not
   run the second pass. B4 remains open; next analyze exact memoized/transfer
-  summary callback traversal rather than another priority variant.
+  summary callback traversal rather than another priority variant. IDA
+  analysis then rejects naive memoization as the first step: spell 73 opcode
+  `0x33` reads ECL variable `10050`, which is the current player/enemy
+  Euclidean distance, while spell 57 opcode `0x05` depends on VM locals and
+  RNG-derived loop state absent from the snapshot. The fixed next contract is
+  `G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`: stop at
+  the first unsupported transfer instead of spending the rest of the
+  256-instruction cap on an unjustified fallthrough. This may shrink coverage
+  and issue cost but cannot add callback or action authority. Dependency-
+  complete transfer summaries remain a later gate.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

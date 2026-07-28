@@ -7253,3 +7253,28 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   joint model/performance boundary is exact memoized or transfer-summary ECL
   callback traversal, which must preserve complete/unknown semantics and
   fail-closed lowering while reducing issue-thread cost.
+
+## 2026-07-28 — Fixed the ECL unsupported-control performance contract
+
+- **Observed statically in the connected shipped-game IDA database:**
+  `enemy_ecl_vm_step` dispatches opcodes `0x28..0x33` through
+  `ecl_conditional_jump`; opcode `0x33` takes its relative branch when the
+  evaluated float left operand is greater than or equal to the right.
+- `ecl_eval_float` variable `10050` at `0x0042074B` computes the Euclidean
+  distance between the global player position and the current enemy position.
+  Thus the spell-73 branch depends on future player/enemy motion, not a
+  missing scalar local that can be copied once into the current snapshot.
+- The vector helpers at `0x004090D0/0x0040B4C0` were renamed
+  `vec3_subtract/vec3_length`; IDA comments at `0x0042074B` and
+  `0x00421AB1` retain the dependency and branch semantics.
+- **Observed in retained physical evidence:** all 1,345 spell-57 rows in run
+  `20260728_092619` inspect 256 instructions and remain unknown. Its shipped
+  loop reaches opcode `0x05`, whose local/RNG-derived branch state is absent
+  from `EclVmSnapshot`.
+- **Decision:** naive result memoization is rejected. The fixed first
+  correction stops at unsupported timer/control transfers instead of scanning
+  an unjustified fallthrough. It preserves the cap and can only shrink
+  authority. A later block summary requires an exact dependency set and
+  separate logical versus executed instruction accounting.
+- The preimplementation contract is
+  `notes/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`.

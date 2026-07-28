@@ -133,6 +133,18 @@ def build_sensing_trace_fields(
                 "timer_elapsed": ecl_snapshot.timer_elapsed,
                 "time_scale": ecl_snapshot.time_scale,
                 "tag_mask": ecl_snapshot.tag_mask,
+                "vm_local_projection": (
+                    projection.trace_record()
+                    if (
+                        projection := getattr(
+                            ecl_snapshot,
+                            "local_projection",
+                            None,
+                        )
+                    )
+                    is not None
+                    else None
+                ),
                 "instructions_scanned": (
                     ecl_lookahead.instructions_scanned
                     if ecl_lookahead is not None

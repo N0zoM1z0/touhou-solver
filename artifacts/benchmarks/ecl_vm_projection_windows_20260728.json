@@ -1,0 +1,40 @@
+{
+  "environment": {
+    "gc_enabled": true,
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]"
+  },
+  "gates": {
+    "capture_growth_is_40_bytes": true,
+    "compatibility_fields_bit_exact": true,
+    "legacy_benchmark_stable": true,
+    "one_call_capture_size_is_104": true,
+    "projection_benchmark_stable": true
+  },
+  "input": {
+    "batches": 40,
+    "iterations_per_batch": 10000,
+    "total_decodes_per_variant": 400000
+  },
+  "passed": true,
+  "payload": {
+    "compact_projection_trace_bytes": 262,
+    "legacy_vm_read_bytes": 64,
+    "projection_vm_read_bytes": 104,
+    "vm_read_growth_bytes": 40
+  },
+  "schema": "th08-ecl-vm-projection-benchmark-v1",
+  "timing": {
+    "legacy": {
+      "max_ns_per_decode": 1362.45,
+      "median_ns_per_decode": 637.13,
+      "p95_ns_per_decode": 1002.32
+    },
+    "projection": {
+      "max_ns_per_decode": 4958.06,
+      "median_ns_per_decode": 4766.594999999999,
+      "p95_ns_per_decode": 4930.56
+    }
+  }
+}

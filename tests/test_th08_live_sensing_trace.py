@@ -11,6 +11,7 @@ from th08_live.sensing_trace import (
     SensingTraceInput,
     build_sensing_trace_fields,
 )
+from th08_ecl_vm_state import EclVmLocalProjection
 
 
 class SensingTraceTests(unittest.TestCase):
@@ -57,6 +58,20 @@ class SensingTraceTests(unittest.TestCase):
             timer_elapsed=20,
             time_scale=1.0,
             tag_mask=0x10,
+            local_projection=EclVmLocalProjection(
+                (0x10, 1, 2, 3, 4, 5, 6, 7),
+                (
+                    0x3F800000,
+                    0x40000000,
+                    0x40400000,
+                    0x40800000,
+                    0x40A00000,
+                    0x40C00000,
+                    0x40E00000,
+                    0x41000000,
+                ),
+                (9, 8, 7, 6),
+            ),
         )
         toggle = SimpleNamespace(
             frame=5,
@@ -150,6 +165,25 @@ class SensingTraceTests(unittest.TestCase):
         self.assertEqual(
             fields["bullet_velocity_lookahead"]["lowering_status"],
             "complete_schedule_lowered",
+        )
+        self.assertEqual(
+            fields["bullet_velocity_lookahead"]["vm_local_projection"],
+            {
+                "layout": "th08-ecl-vm-local-projection-v1",
+                "capture_bytes": 104,
+                "integer_locals": [0x10, 1, 2, 3, 4, 5, 6, 7],
+                "float_local_bits": [
+                    0x3F800000,
+                    0x40000000,
+                    0x40400000,
+                    0x40800000,
+                    0x40A00000,
+                    0x40C00000,
+                    0x40E00000,
+                    0x41000000,
+                ],
+                "scratch_integers": [9, 8, 7, 6],
+            },
         )
         self.assertEqual(fields["enemy_body_contact_enabled_count"], 1)
         self.assertEqual(fields["enemy_body_dormant_count"], 1)

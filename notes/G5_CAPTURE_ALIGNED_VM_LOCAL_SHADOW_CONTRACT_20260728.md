@@ -2,10 +2,10 @@
 
 Date: 2026-07-28
 
-Status: preimplementation contract; phase A authorizes capture and trace
-projection only. Phase B offline interpretation and any live coverage change
-remain unauthorized until the retained physical projection and independent
-oracle gates pass.
+Status: phase A capture/trace projection is implemented and offline-validated
+on Linux and Windows. A fresh retained physical projection is still pending.
+Phase B offline interpretation and any live coverage change remain
+unauthorized until the physical projection and independent-oracle gates pass.
 
 This follows
 `G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`.
@@ -224,3 +224,30 @@ live status falsifies the checkpoint.
    interpreter.
 6. Replay every candidate completion, retain counterexamples, and separately
    decide whether a live shadow is justified.
+
+## Phase-A Offline Checkpoint
+
+The implementation separates the TH08 layout and immutable projection into
+`scripts/th08_ecl_vm_state.py`. `th08_ecl_runtime.py` remains the compatibility
+facade, reads exactly one `0x68`-byte VM prefix plus the unchanged four-byte
+time-scale value, validates old-field/raw-bit identity, and does not consult
+the projection during lookahead. `sensing_trace.py` writes one
+`th08-ecl-vm-local-projection-v1` record with fixed arrays.
+
+Deterministic tests prove the exact offsets and signed/raw representations,
+reject malformed projections, preserve non-finite dormant float bits, prove
+the two-read call/size sequence, reject compatibility mismatches, and compare
+lookahead results with and without the projection. The complete Linux and
+Windows suites pass 832 tests; Windows retains three existing platform skips.
+
+Retained isolated reports are:
+
+- `artifacts/benchmarks/ecl_vm_projection_linux_20260728.json`; and
+- `artifacts/benchmarks/ecl_vm_projection_windows_20260728.json`.
+
+Both hard-gate bit-exact compatibility, a 104-byte one-call VM capture, the
+40-byte read growth, and a 262-byte compact projection trace record. Across
+400,000 decodes per variant, projection median/p95 is approximately
+`3.859/4.118 us` on Linux and `4.767/4.931 us` on Windows. These are
+descriptive pure-Python decode timings, not physical B4 timings. The next
+ordered gate is the fresh Stage-4A physical trace and compact audit.

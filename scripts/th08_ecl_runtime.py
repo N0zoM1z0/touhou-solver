@@ -14,23 +14,27 @@ from dataclasses import dataclass
 from typing import Callable, Protocol
 
 from touhou_control.trajectory import VelocityChange
+from th08_ecl_vm_state import (
+    ECL_VM_FLOAT_LOCALS_OFFSET,
+    ECL_VM_INTEGER_LOCALS_OFFSET,
+    ECL_VM_LOCAL_PROJECTION_SIZE,
+    EclVmLocalProjection,
+    float32_bits,
+)
 
 
 GAMEPLAY_TIME_SCALE_ADDRESS = 0x017CE8E0
 ENEMY_MAIN_ECL_VM_OFFSET = 0x07F8
-ECL_VM_TAG_MASK_OFFSET = 0x18
-ECL_VM_CALLBACK_ANGLE_OFFSET = 0x38
-ECL_VM_CALLBACK_SPEED_OFFSET = 0x3C
+ECL_VM_TAG_MASK_OFFSET = ECL_VM_INTEGER_LOCALS_OFFSET
+ECL_VM_CALLBACK_ANGLE_OFFSET = ECL_VM_FLOAT_LOCALS_OFFSET
+ECL_VM_CALLBACK_SPEED_OFFSET = ECL_VM_FLOAT_LOCALS_OFFSET + 0x04
 # The main VM timer begins immediately after the current-instruction pointer.
 # Its root/previous value is +0x04, fractional elapsed is +0x08, and integer
 # elapsed is +0x0C. VM +0x90 is a separate -999-gated wait timer.
 ECL_VM_TIMER_OFFSET = 0x04
 ECL_VM_TIMER_FRACTION_OFFSET = ECL_VM_TIMER_OFFSET + 0x04
 ECL_VM_TIMER_ELAPSED_OFFSET = ECL_VM_TIMER_OFFSET + 0x08
-ECL_VM_SNAPSHOT_SIZE = max(
-    ECL_VM_TIMER_ELAPSED_OFFSET + 0x04,
-    ECL_VM_CALLBACK_SPEED_OFFSET + 0x04,
-)
+ECL_VM_SNAPSHOT_SIZE = ECL_VM_LOCAL_PROJECTION_SIZE
 
 ECL_HEADER_SIZE = 12
 ECL_OP_TERMINATE = 0x01
@@ -66,6 +70,22 @@ class EclVmSnapshot:
     callback_angle: float
     callback_speed: float
     time_scale: float
+    local_projection: EclVmLocalProjection | None = None
+
+    def __post_init__(self) -> None:
+        projection = self.local_projection
+        if projection is None:
+            return
+        if self.tag_mask != projection.integer_locals[0] & 0xFFFFFFFF:
+            raise ValueError("ECL tag mask disagrees with its local projection")
+        if float32_bits(self.callback_angle) != projection.float_local_bits[0]:
+            raise ValueError(
+                "ECL callback angle disagrees with its local projection"
+            )
+        if float32_bits(self.callback_speed) != projection.float_local_bits[1]:
+            raise ValueError(
+                "ECL callback speed disagrees with its local projection"
+            )
 
     @property
     def timer_value(self) -> float:
@@ -219,18 +239,13 @@ def read_main_ecl_vm_snapshot(
         enemy_pointer + ENEMY_MAIN_ECL_VM_OFFSET,
         ECL_VM_SNAPSHOT_SIZE,
     )
+    local_projection = EclVmLocalProjection.from_vm_bytes(vm)
     instruction_pointer = struct.unpack_from("<I", vm, 0)[0]
-    tag_mask = struct.unpack_from("<I", vm, ECL_VM_TAG_MASK_OFFSET)[0]
-    callback_angle = struct.unpack_from(
-        "<f",
-        vm,
-        ECL_VM_CALLBACK_ANGLE_OFFSET,
-    )[0]
-    callback_speed = struct.unpack_from(
-        "<f",
-        vm,
-        ECL_VM_CALLBACK_SPEED_OFFSET,
-    )[0]
+    tag_mask = local_projection.integer_locals[0] & 0xFFFFFFFF
+    callback_angle = local_projection.float_value(ECL_FLOAT_CALLBACK_ANGLE)
+    callback_speed = local_projection.float_value(ECL_FLOAT_CALLBACK_SPEED)
+    assert callback_angle is not None
+    assert callback_speed is not None
     timer_fraction = struct.unpack_from(
         "<f",
         vm,
@@ -265,6 +280,7 @@ def read_main_ecl_vm_snapshot(
         callback_angle,
         callback_speed,
         time_scale,
+        local_projection,
     )
 
 

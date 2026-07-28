@@ -384,6 +384,10 @@ comparison.
    must leave every live coverage/lowering result unchanged. Offline local
    interpretation remains proposed until fresh physical projection and
    independent scalar-oracle gates pass.
+   The phase-A code and isolated Linux/Windows gates now pass: the VM capture
+   remains one call, grows by 40 bytes, old fields are bit-exact, and the
+   complete suites pass 832 tests. Pure decode cost is descriptive only; the
+   fresh physical Stage-4A trace/B4 gate remains pending.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

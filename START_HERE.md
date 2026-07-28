@@ -312,8 +312,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   locals only. IDA confirms `10036..10039` at context `+0x58..+0x64` and
   opcode `0x05` branches on the post-decrement lvalue. Call/return saves the
   full `0x228` context and remains unsupported. Phase A may not change live
-  coverage; a fresh physical local projection must precede any offline
-  interpreter or live promotion.
+  coverage. The projection is now implemented and Linux/Windows
+  offline-validated: all 832 tests pass, the same-read/field-parity gates
+  pass, and pure decode costs approximately 3.9/4.8 microseconds median on
+  Linux/Windows. A fresh physical local projection and B4 timing audit must
+  precede any offline interpreter or live promotion.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

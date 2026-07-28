@@ -1171,6 +1171,11 @@ parity 當成每個 nature tie field 的逐 bit equality。
   post-decrement value. Call/return copies the full `0x228` context and stays
   unsupported. A fresh projected physical trace and independent scalar
   oracle are mandatory before candidate completion or live lowering;
+- phase A is now implemented and offline-validated on Linux/Windows. The
+  one-call capture/bit-parity gates and all 832 tests pass; isolated projection
+  decode median is about `3.9 us` Linux and `4.8 us` Windows. These timings are
+  descriptive. A fresh Stage-4A projection/B4 audit is the next gate before
+  phase-B interpretation;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

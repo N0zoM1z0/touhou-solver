@@ -7370,3 +7370,17 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   checked offline interpreter.
 - The preimplementation contract is
   `notes/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`.
+- **Implemented and observed offline:** `th08_ecl_vm_state.py` now owns the
+  immutable fixed-layout projection; the runtime facade derives legacy fields
+  from it and trace serialization uses one versioned fixed-array record.
+  Tests prove one 104-byte VM read plus the unchanged four-byte time-scale
+  read, raw-bit compatibility, malformed-state rejection, and unchanged
+  lookahead authority.
+- Retained Linux/Windows projection benchmarks both pass every hard gate.
+  The compact trace record is 262 bytes. For 400,000 decodes per variant,
+  projection median/p95 is `3.859/4.118 us` on Linux and
+  `4.767/4.931 us` on Windows. This is isolated Python decoding and does not
+  establish physical B4 timing.
+- Complete Linux and Windows suites pass 832 tests; Windows retains three
+  existing platform skips. The next gate is one fresh normal-priority
+  Stage-4A trace before any phase-B interpreter work.

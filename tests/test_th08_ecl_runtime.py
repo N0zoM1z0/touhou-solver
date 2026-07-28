@@ -32,6 +32,7 @@ from th08_ecl_runtime import (
     read_main_ecl_vm_snapshot,
     velocity_changes_for_tagged_bullet,
 )
+from th08_ecl_vm_state import EclVmLocalProjection
 
 
 def _instruction(
@@ -55,8 +56,10 @@ def _instruction(
 class _Memory:
     def __init__(self, chunks: dict[int, bytes]) -> None:
         self.chunks = chunks
+        self.calls: list[tuple[int, int]] = []
 
     def read(self, address: int, size: int) -> bytes:
+        self.calls.append((address, size))
         if size <= 0:
             raise ValueError("process read buffer size must be positive")
         for base, data in self.chunks.items():
@@ -98,6 +101,7 @@ class EclRuntimeTests(unittest.TestCase):
             ECL_VM_CALLBACK_SPEED_OFFSET,
             1.5,
         )
+        struct.pack_into("<4i", vm, 0x58, 9, 8, 7, 6)
         memory = _Memory(
             {
                 enemy + ENEMY_MAIN_ECL_VM_OFFSET: bytes(vm),
@@ -110,6 +114,73 @@ class EclRuntimeTests(unittest.TestCase):
         self.assertAlmostEqual(snapshot.timer_fraction, 0.25)
         self.assertEqual(snapshot.tag_mask, 0x100000)
         self.assertAlmostEqual(snapshot.callback_speed, 1.5)
+        self.assertIsNotNone(snapshot.local_projection)
+        assert snapshot.local_projection is not None
+        self.assertEqual(
+            snapshot.local_projection.scratch_integers,
+            (9, 8, 7, 6),
+        )
+        self.assertEqual(
+            memory.calls,
+            [
+                (
+                    enemy + ENEMY_MAIN_ECL_VM_OFFSET,
+                    ECL_VM_SNAPSHOT_SIZE,
+                ),
+                (GAMEPLAY_TIME_SCALE_ADDRESS, 4),
+            ],
+        )
+        self.assertEqual(ECL_VM_SNAPSHOT_SIZE, 0x68)
+
+    def test_snapshot_rejects_projection_compatibility_mismatch(self) -> None:
+        vm = bytearray(ECL_VM_SNAPSHOT_SIZE)
+        struct.pack_into("<i", vm, ECL_VM_TAG_MASK_OFFSET, 7)
+        projection = EclVmLocalProjection.from_vm_bytes(vm)
+        with self.assertRaisesRegex(ValueError, "tag mask"):
+            EclVmSnapshot(
+                0x500000,
+                0.0,
+                1,
+                8,
+                0.0,
+                0.0,
+                1.0,
+                projection,
+            )
+
+    def test_projection_does_not_change_lookahead_authority(self) -> None:
+        base = 0x590000
+        memory = _Memory({base: _instruction(10, ECL_OP_TERMINATE)})
+        cache = EclInstructionCache()
+        plain = EclVmSnapshot(base, 0.0, 0, 0x10, 0.0, 0.0, 1.0)
+        projection = EclVmLocalProjection(
+            (0x10, 1, 2, 3, 4, 5, 6, 7),
+            (0, 0, 2, 3, 4, 5, 6, 7),
+            (9, 8, 7, 6),
+        )
+        projected = EclVmSnapshot(
+            base,
+            0.0,
+            0,
+            0x10,
+            0.0,
+            0.0,
+            1.0,
+            projection,
+        )
+
+        def analyze(snapshot: EclVmSnapshot):
+            return analyze_tagged_velocity_toggles(
+                snapshot,
+                instruction_at=lambda address: cache.instruction(
+                    memory.read,
+                    address,
+                ),
+                horizon_frames=20,
+                active_difficulty_mask=0x08,
+            )
+
+        self.assertEqual(analyze(projected), analyze(plain))
 
     def test_predicts_literal_callback_after_current_timer(self) -> None:
         base = 0x500000

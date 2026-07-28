@@ -466,6 +466,18 @@ comparison.
    The next useful survival gate is G5 causal future-hazard coverage, followed
    by the same immutable-root audit. Do not tune live recovery from these
    labels alone.
+   The action-free realized-provenance join now classifies all 15 Stage-5
+   `20260728_124930` hits against exact same-epoch slot generations. Four
+   dossier candidates are exact observed overlaps and eleven are nearest-only.
+   Three exact overlaps, including the canonical first hit, activated before
+   or at loss. Slot 1295 belongs to a 30-bullet nonspell wave whose native
+   activation support `13868..13869` is strictly after loss frame 13864 and
+   whose exact overlap occurs at frame 14043. No intent row covers the wave,
+   because current observation scope is spell-main-VM-only. This observed
+   source-coverage counterexample makes nonspell source topology the next G5
+   contract, while earlier viability preservation remains a parallel problem.
+   It does not authorize a future envelope, causal blame for the hit, or any
+   live action.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over
    4,871 callback rows; spell 115 remains fail-closed on 1,220

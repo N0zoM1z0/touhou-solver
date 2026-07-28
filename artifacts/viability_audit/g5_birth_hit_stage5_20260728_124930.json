@@ -1,0 +1,1142 @@
+{
+  "conclusions": {
+    "audit_complete": true,
+    "canonical_first_hit_is_post_loss_birth": false,
+    "future_hazard_coverage_complete": false,
+    "observed_post_loss_exact_overlap_available": true,
+    "physical_survival_claim_available": false,
+    "post_loss_exact_overlap_count": 1,
+    "strategy_promotion_available": false
+  },
+  "counts": {
+    "activation_relations": {
+      "activation_after_loss": 1,
+      "activation_before_or_at_loss": 14
+    },
+    "candidate_roles": {
+      "exact_observed_overlap": 4,
+      "nearest_only": 11
+    },
+    "exact_overlap_activation_relations": {
+      "activation_after_loss": 1,
+      "activation_before_or_at_loss": 3
+    },
+    "hit_count": 15
+  },
+  "gates": {
+    "all_filtered_dossier_hits_classified": true,
+    "all_filtered_dossier_hits_have_exact_trace_epoch": true,
+    "candidate_roles_preserved": true,
+    "exact_overlap_not_inferred_from_nearest": true,
+    "filtered_scope_contains_hit": true,
+    "physical_action_authority_unchanged": true,
+    "trace_contains_birth_rows": true
+  },
+  "hits": [
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 1889,
+        "gameplay_epoch": 0,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 0,
+          "velocity_x": -0.8283124566078186,
+          "velocity_y": 1.095438838005066,
+          "x": 237.16920471191406,
+          "y": 124.16596984863281
+        },
+        "intent_available": false,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "deferred_emission_runtime_state",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 1357,
+        "snapshot_frame": 1888,
+        "spell_enemy_pointer": 0,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 1888,
+        "support_start": 1887,
+        "trace_line": 1912,
+        "wave_evidence_count": 8
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -161,
+        "start": -162
+      },
+      "candidate": {
+        "aabb_clearance": -2.2022171020507812,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 1357,
+        "velocity_x": -0.8283124566078186,
+        "velocity_y": 1.095438838005066,
+        "x": 9.797782897949219,
+        "y": 424.8628845214844
+      },
+      "candidate_role": "exact_observed_overlap",
+      "frame": 2167,
+      "gameplay_epoch": 0,
+      "hit_minus_activation_support": {
+        "end": 279,
+        "start": 280
+      },
+      "observed_generation_count_before_hit": 2,
+      "primary_cause_class": "observed_bullet_overlap",
+      "sample_role": "canonical_fresh_attempt_causal_sample",
+      "spell_attribution": {
+        "flags": 0,
+        "spell_id": null,
+        "spell_name": null,
+        "status": "no_active_spell_at_hit"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 2049
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 3808,
+        "gameplay_epoch": 0,
+        "geometry": {
+          "half_height": 10.0,
+          "half_width": 10.0,
+          "transform_flags": 0,
+          "velocity_x": -1.144189476966858,
+          "velocity_y": 1.5944392681121826,
+          "x": 198.56834411621094,
+          "y": 160.2523651123047
+        },
+        "intent_available": false,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "deferred_emission_runtime_state",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 152,
+        "snapshot_frame": 3807,
+        "spell_enemy_pointer": 0,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 3807,
+        "support_start": 3806,
+        "trace_line": 3778,
+        "wave_evidence_count": 16
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -48,
+        "start": -49
+      },
+      "candidate": {
+        "aabb_clearance": -1.525115966796875,
+        "half_height": 5.0,
+        "half_width": 5.0,
+        "slot": 152,
+        "velocity_x": -1.144189476966858,
+        "velocity_y": 1.5944392681121826,
+        "x": 7.488453388214111,
+        "y": 426.5251159667969
+      },
+      "candidate_role": "exact_observed_overlap",
+      "frame": 3987,
+      "gameplay_epoch": 0,
+      "hit_minus_activation_support": {
+        "end": 180,
+        "start": 181
+      },
+      "observed_generation_count_before_hit": 6,
+      "primary_cause_class": "observed_bullet_overlap",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "flags": 0,
+        "spell_id": null,
+        "spell_name": null,
+        "status": "no_active_spell_at_hit"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 3855
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 10688,
+        "gameplay_epoch": 1,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 64,
+          "velocity_x": -2.77703857421875,
+          "velocity_y": 0.7440982460975647,
+          "x": 138.809326171875,
+          "y": 137.15548706054688
+        },
+        "intent_available": false,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "deferred_emission_runtime_state",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 879,
+        "snapshot_frame": 10687,
+        "spell_enemy_pointer": 0,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 10687,
+        "support_start": 10686,
+        "trace_line": 6969,
+        "wave_evidence_count": 16
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -56,
+        "start": -57
+      },
+      "candidate": {
+        "aabb_clearance": 8.774063110351562,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 879,
+        "velocity_x": 0.2846983075141907,
+        "velocity_y": 1.0625191926956177,
+        "x": 106.23953247070312,
+        "y": 404.39208984375
+      },
+      "candidate_role": "nearest_only",
+      "frame": 10983,
+      "gameplay_epoch": 1,
+      "hit_minus_activation_support": {
+        "end": 296,
+        "start": 297
+      },
+      "observed_generation_count_before_hit": 1,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "flags": 8,
+        "spell_id": null,
+        "spell_name": null,
+        "status": "no_active_spell_at_hit"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 10743
+    },
+    {
+      "activation": {
+        "age": 1,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 13870,
+        "gameplay_epoch": 1,
+        "geometry": {
+          "half_height": 10.0,
+          "half_width": 10.0,
+          "transform_flags": 0,
+          "velocity_x": -0.3048275411128998,
+          "velocity_y": 1.5324772596359253,
+          "x": 122.95648193359375,
+          "y": 150.71847534179688
+        },
+        "intent_available": false,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "deferred_emission_runtime_state",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 1295,
+        "snapshot_frame": 13869,
+        "spell_enemy_pointer": 0,
+        "stage_route_index": 5,
+        "state": 1,
+        "status_code": 2,
+        "support_end": 13869,
+        "support_start": 13868,
+        "trace_line": 9999,
+        "wave_evidence_count": 30
+      },
+      "activation_relation": "activation_after_loss",
+      "activation_support_minus_loss": {
+        "end": 5,
+        "start": 4
+      },
+      "candidate": {
+        "aabb_clearance": -1.469757080078125,
+        "half_height": 5.0,
+        "half_width": 5.0,
+        "slot": 1295,
+        "velocity_x": -0.3048275411128998,
+        "velocity_y": 1.5324772596359253,
+        "x": 70.22178649902344,
+        "y": 415.8359069824219
+      },
+      "candidate_role": "exact_observed_overlap",
+      "frame": 14043,
+      "gameplay_epoch": 1,
+      "hit_minus_activation_support": {
+        "end": 174,
+        "start": 175
+      },
+      "observed_generation_count_before_hit": 5,
+      "primary_cause_class": "observed_bullet_overlap",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "flags": 8,
+        "spell_id": null,
+        "spell_name": null,
+        "status": "no_active_spell_at_hit"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 13864
+    },
+    {
+      "activation": {
+        "age": 5,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 23659,
+        "gameplay_epoch": 1,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 0,
+          "velocity_x": 0.2509375810623169,
+          "velocity_y": 0.9680032730102539,
+          "x": 193.25465393066406,
+          "y": 132.8400115966797
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 721,
+        "snapshot_frame": 23655,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 1,
+        "status_code": 2,
+        "support_end": 23655,
+        "support_start": 23651,
+        "trace_line": 13615,
+        "wave_evidence_count": 96
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -120,
+        "start": -124
+      },
+      "candidate": {
+        "aabb_clearance": 2.7301025390625,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 721,
+        "velocity_x": 0.2509375810623169,
+        "velocity_y": 0.9680032730102539,
+        "x": 373.82110595703125,
+        "y": 425.2698974609375
+      },
+      "candidate_role": "nearest_only",
+      "frame": 24013,
+      "gameplay_epoch": 1,
+      "hit_minus_activation_support": {
+        "end": 358,
+        "start": 362
+      },
+      "observed_generation_count_before_hit": 15,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 5,
+        "spell_id": 103,
+        "spell_name": "幻波「赤眼催眠(マインドブローイング)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 23775
+    },
+    {
+      "activation": {
+        "age": 2,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 24484,
+        "gameplay_epoch": 1,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 0,
+          "velocity_x": -1.334631085395813,
+          "velocity_y": 0.42279982566833496,
+          "x": 189.33074951171875,
+          "y": 128.84561157226562
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 12,
+        "snapshot_frame": 24481,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 1,
+        "status_code": 2,
+        "support_end": 24481,
+        "support_start": 24480,
+        "trace_line": 14165,
+        "wave_evidence_count": 256
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -267,
+        "start": -268
+      },
+      "candidate": {
+        "aabb_clearance": 2.9015809297561646,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 12,
+        "velocity_x": -1.334631085395813,
+        "velocity_y": 0.42279982566833496,
+        "x": 1.0984190702438354,
+        "y": 374.6968994140625
+      },
+      "candidate_role": "nearest_only",
+      "frame": 24931,
+      "gameplay_epoch": 1,
+      "hit_minus_activation_support": {
+        "end": 450,
+        "start": 451
+      },
+      "observed_generation_count_before_hit": 15,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 1,
+        "spell_id": 103,
+        "spell_name": "幻波「赤眼催眠(マインドブローイング)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 24748
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 28756,
+        "gameplay_epoch": 2,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 4194304,
+          "velocity_x": -5.682480619384478e-08,
+          "velocity_y": 1.2999999523162842,
+          "x": 349.8772888183594,
+          "y": 208.4862518310547
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 696,
+        "snapshot_frame": 28755,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 28755,
+        "support_start": 28754,
+        "trace_line": 16166,
+        "wave_evidence_count": 8
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -288,
+        "start": -289
+      },
+      "candidate": {
+        "aabb_clearance": 3.8564910888671875,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 696,
+        "velocity_x": -5.682480619384478e-08,
+        "velocity_y": 1.2999999523162842,
+        "x": 85.87751770019531,
+        "y": 432.08465576171875
+      },
+      "candidate_role": "nearest_only",
+      "frame": 29133,
+      "gameplay_epoch": 2,
+      "hit_minus_activation_support": {
+        "end": 378,
+        "start": 379
+      },
+      "observed_generation_count_before_hit": 7,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 5,
+        "spell_id": 107,
+        "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 29043
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 30936,
+        "gameplay_epoch": 2,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 4194304,
+          "velocity_x": -5.682480619384478e-08,
+          "velocity_y": 1.2999999523162842,
+          "x": 302.26116943359375,
+          "y": 228.917236328125
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 1280,
+        "snapshot_frame": 30933,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 30933,
+        "support_start": 30931,
+        "trace_line": 17454,
+        "wave_evidence_count": 12
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -24,
+        "start": -26
+      },
+      "candidate": {
+        "aabb_clearance": 2.51910400390625,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 1280,
+        "velocity_x": -5.682480619384478e-08,
+        "velocity_y": 1.2999999523162842,
+        "x": 362.26177978515625,
+        "y": 434.965576171875
+      },
+      "candidate_role": "nearest_only",
+      "frame": 31196,
+      "gameplay_epoch": 2,
+      "hit_minus_activation_support": {
+        "end": 263,
+        "start": 265
+      },
+      "observed_generation_count_before_hit": 9,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 1,
+        "spell_id": 107,
+        "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 30957
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 31402,
+        "gameplay_epoch": 2,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 4194304,
+          "velocity_x": -4.371138828673793e-08,
+          "velocity_y": 1.0,
+          "x": 12.74224853515625,
+          "y": 231.69570922851562
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 972,
+        "snapshot_frame": 31400,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 31400,
+        "support_start": 31398,
+        "trace_line": 17712,
+        "wave_evidence_count": 18
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -107,
+        "start": -109
+      },
+      "candidate": {
+        "aabb_clearance": 4.923836272080493,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 972,
+        "velocity_x": -4.371138828673793e-08,
+        "velocity_y": 1.0,
+        "x": 276.74114990234375,
+        "y": 371.1957092285156
+      },
+      "candidate_role": "nearest_only",
+      "frame": 31745,
+      "gameplay_epoch": 2,
+      "hit_minus_activation_support": {
+        "end": 345,
+        "start": 347
+      },
+      "observed_generation_count_before_hit": 12,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 1,
+        "spell_id": 107,
+        "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 31507
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 31844,
+        "gameplay_epoch": 2,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 4194304,
+          "velocity_x": -4.371138828673793e-08,
+          "velocity_y": 1.0,
+          "x": 295.8182067871094,
+          "y": 210.74575805664062
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 540,
+        "snapshot_frame": 31842,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 31842,
+        "support_start": 31840,
+        "trace_line": 17946,
+        "wave_evidence_count": 16
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -206,
+        "start": -208
+      },
+      "candidate": {
+        "aabb_clearance": 3.048317797074096,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 540,
+        "velocity_x": -4.371138828673793e-08,
+        "velocity_y": 1.0,
+        "x": 175.81698608398438,
+        "y": 425.2457580566406
+      },
+      "candidate_role": "nearest_only",
+      "frame": 32263,
+      "gameplay_epoch": 2,
+      "hit_minus_activation_support": {
+        "end": 421,
+        "start": 423
+      },
+      "observed_generation_count_before_hit": 12,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 1,
+        "spell_id": 107,
+        "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 32048
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 32480,
+        "gameplay_epoch": 2,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 4194304,
+          "velocity_x": -5.682480619384478e-08,
+          "velocity_y": 1.2999999523162842,
+          "x": 88.96316528320312,
+          "y": 222.3815155029297
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 556,
+        "snapshot_frame": 32478,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 32478,
+        "support_start": 32475,
+        "trace_line": 18292,
+        "wave_evidence_count": 22
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -90,
+        "start": -93
+      },
+      "candidate": {
+        "aabb_clearance": 0.0351409912109375,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 556,
+        "velocity_x": -5.682480619384478e-08,
+        "velocity_y": 1.2999999523162842,
+        "x": 208.96388244628906,
+        "y": 382.93035888671875
+      },
+      "candidate_role": "nearest_only",
+      "frame": 32806,
+      "gameplay_epoch": 2,
+      "hit_minus_activation_support": {
+        "end": 328,
+        "start": 331
+      },
+      "observed_generation_count_before_hit": 12,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 1,
+        "spell_id": 107,
+        "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 32568
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 32851,
+        "gameplay_epoch": 2,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 4194304,
+          "velocity_x": -5.682480619384478e-08,
+          "velocity_y": 1.2999999523162842,
+          "x": 166.19577026367188,
+          "y": 213.15330505371094
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 1278,
+        "snapshot_frame": 32849,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 32849,
+        "support_start": 32846,
+        "trace_line": 18498,
+        "wave_evidence_count": 16
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -260,
+        "start": -263
+      },
+      "candidate": {
+        "aabb_clearance": 4.29718017578125,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 1278,
+        "velocity_x": -5.682480619384478e-08,
+        "velocity_y": 1.2999999523162842,
+        "x": 226.19638061523438,
+        "y": 429.6017150878906
+      },
+      "candidate_role": "nearest_only",
+      "frame": 33121,
+      "gameplay_epoch": 2,
+      "hit_minus_activation_support": {
+        "end": 272,
+        "start": 275
+      },
+      "observed_generation_count_before_hit": 13,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 1,
+        "spell_id": 107,
+        "spell_name": "狂視「狂視調律(イリュージョンシーカー)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 33109
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 39287,
+        "gameplay_epoch": 2,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 0,
+          "velocity_x": 0.7172186374664307,
+          "velocity_y": 0.9620798230171204,
+          "x": 78.20696258544922,
+          "y": 13.59480094909668
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 681,
+        "snapshot_frame": 39285,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 39285,
+        "support_start": 39283,
+        "trace_line": 22436,
+        "wave_evidence_count": 768
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -184,
+        "start": -186
+      },
+      "candidate": {
+        "aabb_clearance": 1.6605721296394695,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 681,
+        "velocity_x": 0.7172186374664307,
+        "velocity_y": 0.9620798230171204,
+        "x": 188.3003692626953,
+        "y": 161.27420043945312
+      },
+      "candidate_role": "nearest_only",
+      "frame": 39543,
+      "gameplay_epoch": 2,
+      "hit_minus_activation_support": {
+        "end": 258,
+        "start": 260
+      },
+      "observed_generation_count_before_hit": 22,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 5,
+        "spell_id": 111,
+        "spell_name": "懶惰「生神停止(マインドストッパー)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 39469
+    },
+    {
+      "activation": {
+        "age": 0,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 40486,
+        "gameplay_epoch": 2,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 0,
+          "velocity_x": -0.7005108594894409,
+          "velocity_y": -2.085493803024292,
+          "x": 305.75128173828125,
+          "y": 437.2137145996094
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "deferred_emission_runtime_state",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 701,
+        "snapshot_frame": 40484,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 2,
+        "status_code": 2,
+        "support_end": 40484,
+        "support_start": 40482,
+        "trace_line": 23374,
+        "wave_evidence_count": 12
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -80,
+        "start": -82
+      },
+      "candidate": {
+        "aabb_clearance": -3.1720123291015625,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 701,
+        "velocity_x": -0.7005108594894409,
+        "velocity_y": -2.085493803024292,
+        "x": 232.5484619140625,
+        "y": 219.28070068359375
+      },
+      "candidate_role": "exact_observed_overlap",
+      "frame": 40693,
+      "gameplay_epoch": 2,
+      "hit_minus_activation_support": {
+        "end": 209,
+        "start": 211
+      },
+      "observed_generation_count_before_hit": 24,
+      "primary_cause_class": "observed_bullet_overlap",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 1,
+        "spell_id": 111,
+        "spell_name": "懶惰「生神停止(マインドストッパー)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 40564
+    },
+    {
+      "activation": {
+        "age": 3,
+        "evidence_code": 3,
+        "evidence_kind": "activation_edge",
+        "frame": 43445,
+        "gameplay_epoch": 2,
+        "geometry": {
+          "half_height": 4.0,
+          "half_width": 4.0,
+          "transform_flags": 0,
+          "velocity_x": -0.6861959099769592,
+          "velocity_y": 1.2203012704849243,
+          "x": 189.94139099121094,
+          "y": 131.66091918945312
+        },
+        "intent_available": true,
+        "intent_scope": "active_spell_enemy_main_vm_only",
+        "omitted_sources": [
+          "callback_or_interrupt_source",
+          "child_enemy_or_auxiliary_vm",
+          "non_ecl_native_source",
+          "non_spell_enemy_main_vm"
+        ],
+        "previous_age": 0,
+        "previous_state": 0,
+        "slot": 521,
+        "snapshot_frame": 43444,
+        "spell_enemy_pointer": 5755632,
+        "stage_route_index": 5,
+        "state": 1,
+        "status_code": 2,
+        "support_end": 43444,
+        "support_start": 43442,
+        "trace_line": 25756,
+        "wave_evidence_count": 224
+      },
+      "activation_relation": "activation_before_or_at_loss",
+      "activation_support_minus_loss": {
+        "end": -193,
+        "start": -195
+      },
+      "candidate": {
+        "aabb_clearance": 0.6761207580566406,
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "slot": 521,
+        "velocity_x": -0.6861956715583801,
+        "velocity_y": 1.2203013896942139,
+        "x": 22.607078552246094,
+        "y": 429.2424621582031
+      },
+      "candidate_role": "nearest_only",
+      "frame": 43846,
+      "gameplay_epoch": 2,
+      "hit_minus_activation_support": {
+        "end": 402,
+        "start": 404
+      },
+      "observed_generation_count_before_hit": 27,
+      "primary_cause_class": "modeled_committed_prefix_collision",
+      "sample_role": "post_respawn_discovery_sample",
+      "spell_attribution": {
+        "enemy_pointer": 5755632,
+        "flags": 5,
+        "spell_id": 115,
+        "spell_name": "散符「真実の月(インビジブルフルムーン)」",
+        "status": "resolved_live_spell_state"
+      },
+      "stage_route_index": 5,
+      "viability_loss_frame": 43637
+    }
+  ],
+  "passed": true,
+  "report_digest": "4d774124cf4de47ba69f53b462a0fe642377a988f3ec1a1b0d64ab0e20e2ff5c",
+  "schema": "th08-g5-realized-birth-to-hit-provenance-v1",
+  "scope": {
+    "authority": "retrospective trace-only provenance",
+    "candidate_roles": "exact_observed_overlap is physical overlap evidence; nearest_only is noncausal diagnostics",
+    "gameplay_epoch_filter": null,
+    "physical_action_authority": "none",
+    "stage_route_index_filter": 5,
+    "timing_authority": "none; retained files only"
+  },
+  "source": {
+    "birth_row_count": 13326,
+    "dossier": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_124930.dossier.json",
+    "dossier_bytes": 277648,
+    "dossier_hit_count_before_epoch_filter": 15,
+    "dossier_sha256": "7a968ea7b30b33f6dc275cd49599c99240463cedab35b84dfb8a03567ba64690",
+    "hit_decision_epoch_count": 15,
+    "invalid_timer_evidence_count": 7,
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_124930.jsonl",
+    "trace_bytes": 620930441,
+    "trace_row_count": 26744,
+    "trace_sha256": "711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965"
+  }
+}

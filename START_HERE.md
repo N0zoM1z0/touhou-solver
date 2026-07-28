@@ -45,16 +45,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
-- The next fixed G5 gate is retrospective and action-free:
-  `G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md` will join
-  retained native activation supports to exact-overlap and nearest-only hit
-  candidates without treating the latter as colliders. Read-only exploration
-  over Stage-5 run `124930` finds that the canonical slot-1,357 overlap was
-  born 160 frames before its loss boundary, while the later exact slot-1,295
-  overlap activated six frames after loss in a nonspell 30-bullet wave for
-  which the current active-spell-main-VM observer has no intent source. This
-  fixes the smallest evidence gate for a nonspell source-topology proposal;
-  it supplies no counterfactual or action authority.
+- The G5 realized birth-to-hit gate is complete and action-free. Its modular
+  streaming audit joins all 15 Stage-5 `124930` dossier candidates to exact
+  native decision epochs and same-epoch slot generations. Four candidates are
+  exact overlaps and eleven are nearest-only diagnostics. Three exact
+  overlaps activated before their reported loss boundary; slot 1,295 at hit
+  frame 14,043 activated in support `13868..13869`, four to five frames after
+  loss, in a nonspell 30-bullet wave for which the active-spell-main-VM-only
+  observer has no intent. The canonical slot-1,357 overlap instead activated
+  161–162 frames before loss. This proves that future birth can become a
+  physical overlap but is not the sole canonical explanation. The report is
+  byte-stable at internal/file digests `4d774124...ff5c` /
+  `7934ac27...d676`; Linux/Windows pass 876 tests. No forecast,
+  counterfactual, or action authority is added.
 - The latest harder-workload physical checkpoint is
   `lunatic_route2_stage5_unattended_20260728_133633`. It completed 13,304
   decisions over frames `1..44822` with 23 hits, hard no-Bomb, two successful
@@ -1280,6 +1283,20 @@ but still fails timing and exposes incomplete instruction-limit callback
 coverage. Fix those boundaries and repeat the unchanged Stage-4A gate before
 adding source topology or proposing a future-hazard envelope.
 
+The retained Stage-5 realized-provenance audit now narrows that open boundary
+without changing action authority. Across all 15 hits in `20260728_124930`,
+four dossier candidates are exact observed overlaps and eleven are
+nearest-only. Three exact-overlap slot generations activated before or at
+their reported loss, including the canonical first hit. One 30-bullet
+nonspell wave activated strictly after loss: slot 1295 has native support
+`13868..13869`, after loss frame 13864, and later overlaps exactly at frame
+14043. The trace has no captured intent for that wave and the current observer
+scope excludes nonspell source topology. This is observed evidence for a
+missing source class, not evidence that every hit is caused by future birth or
+that a containing forecast is complete. Contract nonspell source identity and
+its observation deadline before extending the live observer; continue earlier
+viability preservation in parallel.
+
 ### P2 — Resolve CE-0120 at the actuator boundary
 
 Retain exact episode-entry active/held/pending roots and a no-write
@@ -1333,6 +1350,8 @@ weaken four global workers or reuse a merely similar root.
   `notes/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
 - First-loss exact-root selection and restricted G3/G4 experiment:
   `notes/G3_G4_FIRST_LOSS_CAPSULE_EXPERIMENT_CONTRACT_20260728.md`
+- Realized activation-to-hit provenance:
+  `notes/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
 - Generated differential:
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 
@@ -1345,6 +1364,7 @@ override the authority table above.
 | Workload | Bundle | Purpose |
 | --- | --- | --- |
 | Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor. |
+| Lunatic Route-2 Stage 5 | `124930`, `133633` | Birth-observer performance transfer, realized hit provenance, and exact G3/G4 capsule bracket. |
 | Hard Route-2 Stage 1 | `175049`, `144128`, `153821` | Zero-hit native/local and refactor gates; G1 trace/pickup gate with one survival failure. |
 | Hard Route-2 full route | `184942` | Complete route, 39-hit feasibility diagnosis; one-bundle evidence only. |
 | Hard Route-2 Stage 4A | `202439`, `211210`, `212756` | Capsule audit and fresh/global issue transaction; `211210/212756` form the newest compatible no-audit floor. |

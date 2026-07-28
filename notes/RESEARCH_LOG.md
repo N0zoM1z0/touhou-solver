@@ -7847,3 +7847,41 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `10.800/17.440 s`; Windows retains three existing platform skips.
 - **Authority:** Evidence serialization only. The next no-capsule physical
   trace must verify compatibility and timing; no action authority changed.
+
+## 2026-07-28 — Joined realized bullet births to hit provenance
+
+- Fixed
+  `notes/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md` before
+  implementation. The audit is action-free and distinguishes exact observed
+  overlap from nearest-only dossier context.
+- Added a modular streaming analyzer under
+  `scripts/analysis/birth_hit_provenance/` plus the thin
+  `g5_realized_birth_hit_audit.py` entry point. One raw-trace pass validates
+  schema-v9 column lengths, code/status pairs, finite geometry, native support,
+  and immutable raw SHA while joining every dossier hit to its exact decision
+  epoch and latest same-epoch slot generation.
+- The first implementation exposed its own counterexample: applying the
+  canonical hit's epoch globally selected an older reused-slot generation for
+  a later hit. The retained implementation resolves each hit's exact trace
+  epoch before selecting a generation and preserves bootstrap/timer-regression
+  ambiguity.
+- **Observed Stage-5 result:** All 15 hits are classified. Four candidates are
+  exact observed overlaps and eleven are nearest-only. Three exact overlaps,
+  including the canonical frame-2167 contact, activated before or at loss.
+  Slot 1295 belongs to a 30-bullet nonspell wave with native activation
+  support `13868..13869`, after loss frame 13864; it overlaps exactly at frame
+  14043. No intent row covers that omitted source class.
+- The compact report regenerates byte-identically. Its internal/file digests
+  are
+  `4d774124cf4de47ba69f53b462a0fe642377a988f3ec1a1b0d64ab0e20e2ff5c` /
+  `7934ac279aef7911f23141efa6287239f427a2c08e87e376c0d10d873691d676`;
+  raw trace SHA-256 remains
+  `711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965`.
+- Ten deterministic focused tests cover before/after/straddle relations,
+  exact-versus-nearest roles, same-epoch reuse, bootstrap/timer ambiguity,
+  missing candidates, scope, malformed columns, code/status consistency, and
+  deterministic digest. Ruff and complete Linux/Windows discovery pass 876
+  tests; Windows retains three existing skips.
+- **Decision:** Record CE-0160 and contract nonspell source topology next.
+  Continue earlier viability-preservation and performance work in parallel.
+  This checkpoint changes no live path and grants no action authority.

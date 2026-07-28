@@ -1266,6 +1266,19 @@ parity 當成每個 nature tie field 的逐 bit equality。
   values. Linux/Windows representative strict-encoding overhead is only
   about `0.003/0.008 ms`, but a post-fix no-capsule physical timing gate is
   still required before a B4 conclusion;
+- action-free realized provenance is now complete for all 15 hits in Stage-5
+  `20260728_124930`. The modular analyzer performs one strict raw-trace pass,
+  joins each hit through its exact gameplay epoch, and keeps exact observed
+  overlaps separate from nearest-only context. Four hits have exact overlap
+  candidates and eleven are nearest-only. The canonical exact overlap
+  activated before loss; one later slot-1295 member of a 30-bullet nonspell
+  wave activated at native support `13868..13869`, after loss frame 13864,
+  and overlapped exactly at frame 14043. No captured intent covers that wave,
+  because the current scope is spell-main-VM-only. This fixes a concrete next
+  G5 target—contract nonspell source topology—without claiming every hit is a
+  birth failure, future coverage, a containing envelope, or action authority.
+  Earlier viability preservation and the still-open Stage-4A B4 maximum
+  performance gate continue in parallel;
 - the projection audit now has an explicit universal `core` profile and keeps
   Stage-4A-only spell gates as its default. Stage 5 passes all core gates over
   4,871 rows while retaining 1,220 spell-115 unsupported-control rows as

@@ -2,9 +2,11 @@
 
 Date: 2026-07-28
 
-Status: fixed before implementation. This contract authorizes one deterministic
-offline audit over already retained trace and dossier evidence. It adds no
-hazard forecast, planner, publication, issue, or physical action authority.
+Status: fixed before implementation by checkpoint `f630949`, then implemented,
+offline-validated, and retained on one accepted physical Stage-5 workload.
+This contract authorizes one deterministic offline audit over already retained
+trace and dossier evidence. It adds no hazard forecast, planner, publication,
+issue, or physical action authority.
 
 This refines the retrospective B5 boundary in
 `TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`. It is motivated
@@ -225,3 +227,65 @@ byte-identical.
    and the consolidated roadmap.
 7. Use the result to contract the next nonspell source-topology observation.
    Do not change live sensing or action authority in this checkpoint.
+
+## Implementation And Retained Evidence
+
+The implementation is deliberately modular:
+
+- `scripts/analysis/birth_hit_provenance/trace.py` performs one validated,
+  bounded-memory JSONL scan while hashing the exact source bytes;
+- `types.py` owns immutable activation/scan records;
+- `report.py` joins dossier candidates, native hit-decision epochs, slot
+  generations, activation support, and source scope; and
+- `scripts/analysis/g5_realized_birth_hit_audit.py` is the strict-JSON CLI.
+
+Ten deterministic tests cover pre-loss, post-loss, and straddling activation;
+exact-overlap versus nearest-only roles; latest same-epoch slot generation;
+bootstrap/reuse ambiguity; missing evidence; source-scope preservation;
+malformed columns; invalid code/status pairs; and stable report digests.
+
+The same-epoch test protects an observed analysis counterexample found during
+the first retained replay: a global `gameplay_epoch=0` filter excluded the
+frame-14,043 epoch-1 activation and selected an older slot-1,295 generation.
+The corrected audit first joins each dossier hit to its exact native decision
+epoch, then selects only generations in that epoch. The incorrect exploratory
+report was overwritten and is not retained.
+
+The corrected Stage-5 report is
+`artifacts/viability_audit/g5_birth_hit_stage5_20260728_124930.json`.
+Two generations are byte-identical. Its internal/file SHA-256 digests are:
+
+```text
+4d774124cf4de47ba69f53b462a0fe642377a988f3ec1a1b0d64ab0e20e2ff5c
+7934ac279aef7911f23141efa6287239f427a2c08e87e376c0d10d873691d676
+```
+
+**Observed retained result:**
+
+- all 15 dossier hits have an exact native decision epoch and a classified
+  candidate;
+- four candidates are exact observed overlaps and eleven are nearest-only
+  diagnostics;
+- all 15 selected slots have a same-epoch activation edge;
+- among exact overlaps, three activation supports end before the reported
+  loss boundary and one begins after it;
+- the canonical frame-2,167 slot-1,357 activation support is
+  `1887..1888`, 161–162 frames before loss frame 2,049;
+- the frame-14,043 slot-1,295 activation support is `13868..13869`, four to
+  five frames after loss frame 13,864 and 174–175 frames before the hit; and
+- that post-loss edge is a nonspell 30-bullet wave with no intent and the
+  explicit active-spell-main-VM-only source boundary.
+
+This establishes a realized future-birth hit witness, not complete source
+coverage. It also rejects using that class as the sole canonical explanation:
+the first hit's overlapping bullet was already active well before loss.
+Therefore the next work has two parallel obligations:
+
+1. contract and observe nonspell enemy/source topology for the demonstrated
+   post-loss wave; and
+2. continue preserving interior/global feasibility earlier for the canonical
+   pre-loss-bullet route failure.
+
+Focused tests and Ruff pass. Complete Linux and Windows suites pass 876 tests;
+Windows retains three existing platform skips. The audit is offline only, so
+these are implementation gates rather than a live B4 timing or survival gate.

@@ -504,3 +504,23 @@ finite support for a narrowly declared event subset. The proposal must still
 show that uncovered sources cannot enter the reachable tube, pass the
 semantic differential/fuzzer and physical repetition gates, meet delivery,
 and leave all other event classes `UNKNOWN`.
+
+## Realized Hit-Provenance Follow-Up
+
+`G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md` adds an orthogonal
+retrospective join from native activation evidence to dossier hit candidates
+and reported loss boundaries. It does not change the intent/birth B5 source
+coverage result.
+
+On accepted Stage-5 trace `20260728_124930`, all 15 candidates have a
+same-gameplay-epoch activation generation. Four candidates are exact observed
+overlaps; one of those, slot 1,295 at hit frame 14,043, activated in support
+`13868..13869`, strictly after loss frame 13,864. That nonspell 30-bullet wave
+has no current intent source. The canonical slot-1,357 overlap instead
+activated well before its loss boundary.
+
+This is observed evidence that missing future birth can become physical
+overlap, but not that every hit or the canonical hit has that cause. It
+selects nonspell source topology as the next G5 sensing contract while keeping
+earlier route/viability preservation open. No coverage or action authority is
+promoted.

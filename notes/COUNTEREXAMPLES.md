@@ -4782,3 +4782,47 @@ offline, post-fix physical trace gate pending
   actuator, cadence, or live action changed. A future no-capsule physical
   run must confirm trace compatibility and unchanged timing before any B4
   conclusion.
+
+## CE-0160: A post-loss nonspell birth and reused slots defeat naive hit provenance
+
+Status: observed physical source-coverage and provenance counterexample;
+offline join corrected, G5 source coverage open
+
+- **Observed workload:** Accepted Stage-5 run `20260728_124930` contains 15
+  dossier hits. The strict same-epoch audit classifies four candidates as
+  exact observed overlaps and eleven as nearest-only; it never upgrades a
+  nearest candidate into an exact collider.
+- **Canonical negative result:** The canonical frame-2167 exact overlap in
+  slot 1357 has native activation support `1887..1888`, before loss frame
+  2049. It is not a realized post-loss birth.
+- **Positive source-coverage witness:** Slot 1295 belongs to a 30-bullet
+  activation wave with native support `13868..13869`, strictly after loss
+  frame 13864. It later overlaps exactly at frame 14043 with signed clearance
+  about `-1.4697`. The phase is nonspell, `spell_enemy_pointer == 0`, and no
+  captured intent covers the wave. Current observer scope is
+  `active_spell_enemy_main_vm_only`; omitted source classes include nonspell
+  main VMs, child/auxiliary VMs, callbacks or interrupts, deferred native
+  state, and non-ECL native sources.
+- **Analysis counterexample:** A first implementation applied one global
+  epoch to all dossier hits and selected an older reused-slot generation for
+  frame 14043. Joining each hit to its exact decision row first, then selecting
+  only a latest activation in that hit's gameplay epoch, corrects the result.
+  Bootstrap and timer-regression rows remain explicit ambiguity instead of
+  invented exact birth times.
+- **Rejected inferences:** The witness does not show that every hit is a
+  future-birth failure, that this later post-death contact is an independent
+  survival trial, or that observing the source would have produced a viable
+  counterfactual action. Eleven nearest-only candidates are not colliders.
+- **Correction and next gate:** Retain the modular action-free audit. Contract
+  nonspell source identity, update order, observation availability, and
+  deadline before extending live capture. In parallel, keep working on
+  earlier finite-model viability loss; do not promote an envelope or action.
+- **Evidence:** Compact report
+  `artifacts/viability_audit/g5_birth_hit_stage5_20260728_124930.json` has
+  internal/file SHA-256
+  `4d774124cf4de47ba69f53b462a0fe642377a988f3ec1a1b0d64ab0e20e2ff5c` /
+  `7934ac279aef7911f23141efa6287239f427a2c08e87e376c0d10d873691d676`.
+  Raw trace SHA-256 is
+  `711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965`.
+- **Authority:** Evidence and offline analysis only. No planner, recurrence,
+  actuator, cadence, or live action changed.

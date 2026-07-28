@@ -166,6 +166,7 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertEqual(args.difficulty.key, "lunatic")
         self.assertIsNone(args.runtime_ecl_static_image)
         self.assertIsNone(args.runtime_ecl_static_sha256)
+        self.assertFalse(args.trace_auxiliary_ecl_events)
 
     def test_parser_accepts_explicit_runtime_ecl_identity(self) -> None:
         args = build_parser().parse_args(
@@ -176,6 +177,8 @@ class PracticeSupervisorTests(unittest.TestCase):
                 "artifacts/decoded/ecldata5.ecl",
                 "--runtime-ecl-static-sha256",
                 "1" * 64,
+                "--trace-auxiliary-vm-batches",
+                "--trace-auxiliary-ecl-events",
                 "--armed",
             ]
         )
@@ -184,6 +187,7 @@ class PracticeSupervisorTests(unittest.TestCase):
             Path("artifacts/decoded/ecldata5.ecl"),
         )
         self.assertEqual(args.runtime_ecl_static_sha256, "1" * 64)
+        self.assertTrue(args.trace_auxiliary_ecl_events)
 
     def test_enemy_combat_progress_is_explicitly_opt_in(self) -> None:
         default_args = build_parser().parse_args([])

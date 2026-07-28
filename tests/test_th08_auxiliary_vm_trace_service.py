@@ -15,6 +15,7 @@ from th08_live.auxiliary_vm.model import (
     AUXILIARY_VM_BATCH_LAYOUT_V2,
     UNOBSERVED_MANAGER_FRAME,
 )
+from th08_live.runtime_ecl_identity import RuntimeEclAcceptedVersion
 
 
 class _Reader:
@@ -36,9 +37,11 @@ class _Capture:
         self,
         *,
         batch_statuses: tuple[BatchStatus, ...] = (BatchStatus.OK,),
+        records: tuple[AuxiliaryVmBatchRecord, ...] = (),
     ) -> None:
         self.calls: list[dict[str, object]] = []
         self.batch_statuses = batch_statuses
+        self.records = records
 
     def capture_process(
         self,
@@ -89,7 +92,7 @@ class _Capture:
             manager_frame_before=context_frame,
             manager_frame_after=final_frame,
             batch_status=batch_status,
-            records=(),
+            records=self.records,
             process_read_count=(
                 3
                 if batch_status
@@ -105,6 +108,35 @@ class _Capture:
     @staticmethod
     def diagnostics() -> NativeAuxiliaryVmBatchDiagnostics:
         return NativeAuxiliaryVmBatchDiagnostics(0.25, 0.1)
+
+
+class _EventService:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+        self.unavailable_calls: list[str] = []
+
+    def derive(self, observation, **arguments) -> dict[str, object]:
+        self.calls.append(
+            {
+                "observation": observation,
+                **arguments,
+            }
+        )
+        return {"status": "derived"}
+
+    def unavailable_record(
+        self,
+        reason: str,
+        **_arguments,
+    ) -> dict[str, object]:
+        self.unavailable_calls.append(reason)
+        return {"status": reason}
+
+
+class _FailingCapture:
+    @staticmethod
+    def capture_process(_reader, **_arguments) -> AuxiliaryVmBatchObservation:
+        raise OSError("unavailable")
 
 
 class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
@@ -416,6 +448,147 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
             )
             self.assertIsNotNone(record)
         self.assertEqual(len(capture.calls), 3)
+
+    def test_default_v3_trace_keeps_hash_only_record_schema(self) -> None:
+        active_vm = b"\x01" * 0x228
+        saved_frame = b"\x02" * 0x228
+        capture = _Capture(
+            records=(
+                AuxiliaryVmBatchRecord(
+                    slot=0,
+                    auxiliary_index=0,
+                    enemy_pointer=0x005826C0,
+                    context_pointer=0x02100000,
+                    context_pointer_after=0x02100000,
+                    enemy_flags_before=1,
+                    enemy_flags_after=1,
+                    status=RecordStatus.OK,
+                    target_subroutine=69,
+                    call_depth=0,
+                    auxiliary_marker=1,
+                    active_vm=active_vm,
+                    saved_frames=(saved_frame,),
+                ),
+            )
+        )
+        record = AuxiliaryVmBatchTraceService(
+            capture=capture
+        ).observe_if_due(
+            _Reader(100),
+            decision_frame=100,
+            manager_frame=100,
+            gameplay_epoch=7,
+            stage_route_index=5,
+            spell_id=107,
+        )
+
+        assert record is not None
+        self.assertEqual(record["schema_version"], 3)
+        self.assertNotIn("event_derivation", record)
+        timing = record["timing_ms"]
+        assert isinstance(timing, dict)
+        self.assertNotIn("event_derive", timing)
+        observation = record["observation"]
+        assert isinstance(observation, dict)
+        records = observation["records"]
+        assert isinstance(records, list)
+        self.assertNotIn("active_vm_hex", records[0])
+        self.assertNotIn("saved_frame_hex", records[0])
+        self.assertIsNotNone(records[0]["active_vm_sha256"])
+        self.assertEqual(len(records[0]["saved_frame_sha256"]), 1)
+
+    def test_event_v4_reuses_capture_and_retains_replay_state(self) -> None:
+        active_vm = b"\x01" * 0x228
+        saved_frame = b"\x02" * 0x228
+        captured = AuxiliaryVmBatchRecord(
+            slot=0,
+            auxiliary_index=0,
+            enemy_pointer=0x005826C0,
+            context_pointer=0x02100000,
+            context_pointer_after=0x02100000,
+            enemy_flags_before=1,
+            enemy_flags_after=1,
+            status=RecordStatus.OK,
+            target_subroutine=69,
+            call_depth=0,
+            auxiliary_marker=1,
+            active_vm=active_vm,
+            saved_frames=(saved_frame,),
+        )
+        capture = _Capture(records=(captured,))
+        event_service = _EventService()
+        version = RuntimeEclAcceptedVersion(
+            runtime_base=0x00500000,
+            image_length=0x100,
+            relocated_sha256="1" * 64,
+            normalized_sha256="2" * 64,
+            static_sha256="2" * 64,
+            route_id=2,
+            difficulty_index=3,
+            stage_route_index=5,
+            gameplay_epoch=7,
+            decision_frame=1,
+            snapshot_frame=1,
+        )
+        record = AuxiliaryVmBatchTraceService(
+            capture=capture,
+            event_service=event_service,
+        ).observe_if_due(
+            _Reader(100),
+            decision_frame=100,
+            manager_frame=100,
+            gameplay_epoch=7,
+            stage_route_index=5,
+            spell_id=107,
+            runtime_ecl_version=version,
+        )
+
+        assert record is not None
+        self.assertEqual(record["schema_version"], 4)
+        self.assertEqual(record["event_derivation"], {"status": "derived"})
+        self.assertEqual(len(capture.calls), 1)
+        self.assertEqual(len(event_service.calls), 1)
+        event_call = event_service.calls[0]
+        self.assertIs(event_call["runtime_version"], version)
+        self.assertEqual(event_call["gameplay_epoch"], 7)
+        self.assertEqual(event_call["stage_route_index"], 5)
+        observation = record["observation"]
+        assert isinstance(observation, dict)
+        records = observation["records"]
+        assert isinstance(records, list)
+        self.assertEqual(records[0]["active_vm_hex"], active_vm.hex())
+        self.assertEqual(records[0]["saved_frame_hex"], [saved_frame.hex()])
+        timing = record["timing_ms"]
+        assert isinstance(timing, dict)
+        self.assertIn("event_derive", timing)
+        self.assertEqual(record["process_read_count"], 5)
+
+    def test_event_v4_native_error_has_explicit_unavailable_result(self) -> None:
+        event_service = _EventService()
+        record = AuxiliaryVmBatchTraceService(
+            capture=_FailingCapture(),
+            event_service=event_service,
+        ).observe_if_due(
+            _Reader(100),
+            decision_frame=100,
+            manager_frame=100,
+            gameplay_epoch=7,
+            stage_route_index=5,
+            spell_id=107,
+        )
+
+        assert record is not None
+        self.assertEqual(record["schema_version"], 4)
+        self.assertEqual(record["status"], "native_transaction_failed")
+        self.assertEqual(
+            record["event_derivation"],
+            {"status": "native_transaction_failed"},
+        )
+        self.assertEqual(
+            event_service.unavailable_calls,
+            ["native_transaction_failed"],
+        )
+        self.assertEqual(event_service.calls, [])
 
 
 if __name__ == "__main__":

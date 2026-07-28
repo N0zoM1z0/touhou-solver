@@ -84,8 +84,12 @@ class AuxiliaryVmBatchRecord:
     def usable(self) -> bool:
         return self.status == RecordStatus.OK
 
-    def compact_record(self) -> dict[str, object]:
-        return {
+    def compact_record(
+        self,
+        *,
+        include_replay_state: bool = False,
+    ) -> dict[str, object]:
+        record: dict[str, object] = {
             "slot": self.slot,
             "auxiliary_index": self.auxiliary_index,
             "enemy_pointer": self.enemy_pointer,
@@ -107,6 +111,14 @@ class AuxiliaryVmBatchRecord:
                 for frame in self.saved_frames
             ],
         }
+        if include_replay_state:
+            record["active_vm_hex"] = (
+                self.active_vm.hex() if self.active_vm else None
+            )
+            record["saved_frame_hex"] = [
+                frame.hex() for frame in self.saved_frames
+            ]
+        return record
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,7 +159,11 @@ class AuxiliaryVmBatchObservation:
             )
         )
 
-    def compact_record(self) -> dict[str, object]:
+    def compact_record(
+        self,
+        *,
+        include_replay_state: bool = False,
+    ) -> dict[str, object]:
         record: dict[str, object] = {
             "layout": self.layout,
             "authority": "trace_only_no_action_authority",
@@ -159,7 +175,12 @@ class AuxiliaryVmBatchObservation:
             "usable_context_count": self.usable_context_count,
             "process_read_count": self.process_read_count,
             "state_payload_bytes": self.state_payload_bytes,
-            "records": [record.compact_record() for record in self.records],
+            "records": [
+                record.compact_record(
+                    include_replay_state=include_replay_state
+                )
+                for record in self.records
+            ],
         }
         if self.layout == AUXILIARY_VM_BATCH_LAYOUT_V1:
             record.update(

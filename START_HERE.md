@@ -53,12 +53,14 @@ located; it does not change the authority order below.
 40. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`
 41. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`
 42. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md`
-43. `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
-44. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
-45. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
-46. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
-47. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
-48. the relevant recent run note and counterexample rows before live work
+43. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_OFFLINE_GATE_20260728.md`
+44. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_CONTRACT_20260728.md`
+45. `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
+46. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
+47. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
+48. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
+49. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
+50. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -77,13 +79,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
   p95/p99/max is `0.243/0.300/0.471 ms` on Linux and two adjacent Windows
   reports pass at `0.239/0.254/0.503` and `0.232/0.248/0.522 ms`.
   CE-0166 retains earlier incompatible p95 and maximum failures, so isolated
-  timing is not live contention authority. Linux/Windows quick suites pass
-  997 tests. The old spell-107 trace's 3,214 contexts retain hashes only and
-  remain unreplayable. The next G5 gate is replay-capable default-off
-  post-capture integration with no extra RPM and a focused spell-107 physical
-  delivery audit. Unsupported emission, source-life, dynamic parameter,
-  transform, realized-birth, geometry, and action dependencies remain
-  `UNKNOWN`.
+  timing is not live contention authority. Replay-capable schema-v4
+  post-capture integration is now implemented under
+  `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_CONTRACT_20260728.md`.
+  It reuses the coherent native batch with zero event-layer RPM, requires one
+  exact accepted runtime-ECL version, preserves raw hash-checked VM/saved
+  frames, and is fully default-off: schema v3 remains unchanged otherwise.
+  A modular strict auditor independently reconstructs raw state, PC ownership,
+  fail-closed classification, canonicalization, and raw-byte-oracle results;
+  exact synthetic delivery and four tamper classes pass/fail as specified.
+  Linux/Windows quick suites pass 1,011 tests, with three existing Windows
+  skips. The old spell-107 trace's 3,214 contexts remain unreplayable. The
+  next G5 gate is the fixed focused spell-107 physical delivery audit.
+  Unsupported emission, source-life, dynamic parameter, transform,
+  realized-birth, geometry, and action dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model
   authority. The 515,082-byte research log and 311,238-byte, 165-entry
   counterexample ledger are stable 38/43-line indexes over seven daily and

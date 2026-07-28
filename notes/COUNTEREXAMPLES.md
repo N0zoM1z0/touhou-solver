@@ -31,7 +31,7 @@ CE bodies to this index.
 | [CE-0001–CE-0049](counterexamples/CE-0001-0049.md) | 49 |
 | [CE-0050–CE-0099](counterexamples/CE-0050-0099.md) | 50 |
 | [CE-0100–CE-0139](counterexamples/CE-0100-0139.md) | 40 |
-| [CE-0140–CE-0166](counterexamples/CE-0140-0165.md) | 27 |
+| [CE-0140–CE-0167](counterexamples/CE-0140-0165.md) | 28 |
 
 The pre-shard file had SHA-256
 `2267928c8b59e4704dfb1cd7c7219d4ee42f2d12f50677c333ec23231fe1cab0`.

@@ -7,7 +7,7 @@ current task.
 ## Append Rule
 
 Append new chronological evidence to the current daily shard, presently
-[`research_log/2026-07-28.md`](research_log/2026-07-28.md). When the date
+[`research_log/2026-07-29.md`](research_log/2026-07-29.md). When the date
 changes, create one new daily shard and add it here. Do not append historical
 body text to this index.
 
@@ -27,6 +27,7 @@ in [`../STRATEGY.md`](../STRATEGY.md), and the volatile handoff belongs in
 | [2026-07-26](research_log/2026-07-26.md) | Candidate delivery, frozen clock, Hard route diagnosis, and supplemental lane. |
 | [2026-07-27](research_log/2026-07-27.md) | Refactor checkpoints, exact-root dossiers, and G2/G3 work. |
 | [2026-07-28](research_log/2026-07-28.md) | Current G3/G5, performance, ECL-source, and combat-progress checkpoints. |
+| [2026-07-29](research_log/2026-07-29.md) | Runtime-delivery review and physical validation checkpoints. |
 
 ## Preservation
 

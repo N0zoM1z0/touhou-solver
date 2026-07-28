@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 import time
-from typing import Any
+from typing import Any, Protocol
 
 from th08_live.enemy_sensor import (
     ENEMY_ACTIVE_FLAG,
@@ -16,6 +16,7 @@ from th08_live.enemy_sensor import (
 from th08_live.enemy_ecl_inventory import (
     ENEMY_AUXILIARY_ECL_CONTEXT_POINTERS_OFFSET,
 )
+from th08_live.runtime_ecl_identity import RuntimeEclAcceptedVersion
 from th08_runtime_agent import ADDR_ENEMY_MANAGER_FRAME
 
 from .native import (
@@ -30,6 +31,7 @@ from .model import (
 
 
 AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION = 3
+AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION = 4
 AUXILIARY_VM_BATCH_TRACE_ROLE = "trace_only_no_action_authority"
 AUXILIARY_VM_BATCH_MAXIMUM_ATTEMPTS = 3
 _RETRYABLE_BATCH_BITS = (
@@ -44,6 +46,25 @@ _RETRYABLE_RECORD_BITS = (
     | RecordStatus.OWNER_FLAGS_CHANGED
     | RecordStatus.POINTER_CHANGED
 )
+
+
+class AuxiliaryEclEventDeriver(Protocol):
+    def derive(
+        self,
+        observation: AuxiliaryVmBatchObservation | None,
+        *,
+        runtime_version: RuntimeEclAcceptedVersion | None,
+        gameplay_epoch: int,
+        stage_route_index: int,
+    ) -> dict[str, object]: ...
+
+    def unavailable_record(
+        self,
+        reason: str,
+        *,
+        runtime_version: RuntimeEclAcceptedVersion | None = None,
+        total_ms: float = 0.0,
+    ) -> dict[str, object]: ...
 
 
 def auxiliary_vm_batch_attempt_retryable(
@@ -115,6 +136,7 @@ class AuxiliaryVmBatchTraceService:
         spell_id_filter: int | None = None,
         native_call_mode: str = NATIVE_CALL_MODE_GIL_HELD,
         capture: Any | None = None,
+        event_service: AuxiliaryEclEventDeriver | None = None,
     ) -> None:
         if cadence_frames <= 0:
             raise ValueError("auxiliary-VM batch cadence must be positive")
@@ -128,6 +150,7 @@ class AuxiliaryVmBatchTraceService:
             else capture
         )
         self.native_call_mode = native_call_mode
+        self.event_service = event_service
         self._context: tuple[int, int, int | None] | None = None
         self._last_attempt_frame: int | None = None
 
@@ -171,6 +194,7 @@ class AuxiliaryVmBatchTraceService:
         gameplay_epoch: int,
         stage_route_index: int,
         spell_id: int | None,
+        runtime_ecl_version: RuntimeEclAcceptedVersion | None = None,
     ) -> dict[str, object] | None:
         if not self._due(
             manager_frame=manager_frame,
@@ -237,17 +261,35 @@ class AuxiliaryVmBatchTraceService:
         observation_ms = (
             time.perf_counter() - observation_started
         ) * 1000.0
+        event_started = time.perf_counter()
+        event_derivation = (
+            self.event_service.derive(
+                selected,
+                runtime_version=runtime_ecl_version,
+                gameplay_epoch=gameplay_epoch,
+                stage_route_index=stage_route_index,
+            )
+            if self.event_service is not None
+            else None
+        )
+        event_ms = (time.perf_counter() - event_started) * 1000.0
         compact_started = time.perf_counter()
         compact = (
-            selected.compact_record()
+            selected.compact_record(
+                include_replay_state=self.event_service is not None
+            )
             if selected is not None
             else None
         )
         compact_ms = (time.perf_counter() - compact_started) * 1000.0
         total_ms = (time.perf_counter() - total_started) * 1000.0
-        return {
+        record: dict[str, object] = {
             "kind": "auxiliary_vm_batch",
-            "schema_version": AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
+            "schema_version": (
+                AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION
+                if self.event_service is not None
+                else AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION
+            ),
             "authority": AUXILIARY_VM_BATCH_TRACE_ROLE,
             "frame": decision_frame,
             "snapshot_frame": manager_frame,
@@ -296,6 +338,12 @@ class AuxiliaryVmBatchTraceService:
                 "total": total_ms,
             },
         }
+        if self.event_service is not None:
+            record["event_derivation"] = event_derivation
+            timing = record["timing_ms"]
+            assert isinstance(timing, dict)
+            timing["event_derive"] = event_ms
+        return record
 
     def _error_record(
         self,
@@ -312,9 +360,13 @@ class AuxiliaryVmBatchTraceService:
         native_call_ms: float,
         materialize_ms: float,
     ) -> dict[str, object]:
-        return {
+        record: dict[str, object] = {
             "kind": "auxiliary_vm_batch",
-            "schema_version": AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
+            "schema_version": (
+                AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION
+                if self.event_service is not None
+                else AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION
+            ),
             "authority": AUXILIARY_VM_BATCH_TRACE_ROLE,
             "frame": decision_frame,
             "snapshot_frame": manager_frame,
@@ -350,12 +402,22 @@ class AuxiliaryVmBatchTraceService:
                 * 1000.0,
             },
         }
+        if self.event_service is not None:
+            record["event_derivation"] = (
+                self.event_service.unavailable_record(status)
+            )
+            timing = record["timing_ms"]
+            assert isinstance(timing, dict)
+            timing["event_derive"] = 0.0
+        return record
 
 
 __all__ = [
+    "AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION",
     "AUXILIARY_VM_BATCH_MAXIMUM_ATTEMPTS",
     "AUXILIARY_VM_BATCH_TRACE_ROLE",
     "AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION",
+    "AuxiliaryEclEventDeriver",
     "AuxiliaryVmBatchTraceService",
     "auxiliary_vm_batch_attempt_retryable",
 ]

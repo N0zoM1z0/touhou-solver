@@ -65,6 +65,7 @@ def build_long_run_arguments(
     trace_nonspell_main_vms: bool = False,
     trace_enemy_combat_progress: bool = False,
     trace_auxiliary_vm_batches: bool = False,
+    trace_auxiliary_ecl_events: bool = False,
     auxiliary_vm_batch_every: int = 16,
     auxiliary_vm_batch_spell_id: int | None = None,
     auxiliary_vm_native_call_mode: str = NATIVE_CALL_MODE_GIL_HELD,
@@ -124,6 +125,21 @@ def build_long_run_arguments(
     if runtime_ecl_static_image is not None and expected_stage is None:
         raise ValueError(
             "runtime ECL identity requires an explicit expected stage"
+        )
+    if trace_auxiliary_ecl_events and not trace_auxiliary_vm_batches:
+        raise ValueError(
+            "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
+        )
+    if trace_auxiliary_ecl_events and runtime_ecl_static_image is None:
+        raise ValueError(
+            "auxiliary ECL event tracing requires exact runtime ECL identity"
+        )
+    if trace_auxiliary_ecl_events and (
+        difficulty != 3 or expected_stage != 5
+    ):
+        raise ValueError(
+            "the contracted auxiliary ECL event service is limited to "
+            "Lunatic Stage 5"
         )
     if trace_derived_pattern_sources and not trace_bullet_births:
         raise ValueError(
@@ -190,6 +206,8 @@ def build_long_run_arguments(
                 auxiliary_vm_native_call_mode,
             )
         )
+        if trace_auxiliary_ecl_events:
+            arguments.append("--trace-auxiliary-ecl-events")
         if auxiliary_vm_batch_spell_id is not None:
             arguments.extend(
                 (

@@ -46,6 +46,7 @@ class Th08LiveCliTests(unittest.TestCase):
         self.assertEqual(arguments.stage_transition_timeout, 91.0)
         self.assertEqual(arguments.terminal_inactive_grace, 6.0)
         self.assertEqual(arguments.auxiliary_vm_native_call_mode, "held")
+        self.assertFalse(arguments.trace_auxiliary_ecl_events)
         self.assertEqual(
             arguments.bullet_birth_native_call_mode,
             "released",

@@ -19,6 +19,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from th08_live.auxiliary_vm.trace_service import (  # noqa: E402
+    AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
     AUXILIARY_VM_BATCH_TRACE_ROLE,
     AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
 )
@@ -419,6 +420,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         1,
         2,
         AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
+        AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
     ):
         raise ValueError(f"{context}: unexpected schema version")
     assert isinstance(schema_version, int)
@@ -437,7 +439,10 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
             _number(timing, "owner_capture", context=context)
         )
     scan.total_ms.append(_number(timing, "total", context=context))
-    if schema_version == 3:
+    if schema_version in (
+        AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
+        AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
+    ):
         _audit_v3_attempts(scan, row, context=context, timing=timing)
 
     observation = row.get("observation")
@@ -448,7 +453,11 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
     layout = observation.get("layout")
     expected_layout = (
         "th08-auxiliary-vm-batch-v2"
-        if schema_version == 3
+        if schema_version
+        in (
+            AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
+            AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
+        )
         else f"th08-auxiliary-vm-batch-v{schema_version}"
     )
     if layout != expected_layout:
@@ -522,7 +531,15 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
     )
     scan.process_reads.append(
         _number(
-            row if schema_version == 3 else observation,
+            (
+                row
+                if schema_version
+                in (
+                    AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
+                    AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
+                )
+                else observation
+            ),
             "process_read_count",
             context=context,
         )

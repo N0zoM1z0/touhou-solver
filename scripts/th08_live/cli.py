@@ -330,6 +330,15 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
+        "--trace-auxiliary-ecl-events",
+        action="store_true",
+        help=(
+            "retain replay-capable auxiliary VM state and derive the "
+            "contracted Stage-5 literal-fire event class after capture; "
+            "trace only, requires exact runtime ECL identity"
+        ),
+    )
+    parser.add_argument(
         "--auxiliary-vm-batch-every",
         type=int,
         default=16,

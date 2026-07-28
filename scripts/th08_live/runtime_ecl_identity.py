@@ -63,6 +63,39 @@ class RuntimeEclIdentityAttempt:
     emit_ms: float
 
 
+@dataclass(frozen=True, slots=True)
+class RuntimeEclAcceptedVersion:
+    """Exact immutable runtime/static image binding for later trace work."""
+
+    runtime_base: int
+    image_length: int
+    relocated_sha256: str
+    normalized_sha256: str
+    static_sha256: str
+    route_id: int
+    difficulty_index: int
+    stage_route_index: int
+    gameplay_epoch: int
+    decision_frame: int
+    snapshot_frame: int
+
+    def record(self) -> dict[str, object]:
+        return {
+            "schema": "th08-runtime-ecl-accepted-version-v1",
+            "runtime_base": self.runtime_base,
+            "image_length": self.image_length,
+            "relocated_sha256": self.relocated_sha256,
+            "normalized_sha256": self.normalized_sha256,
+            "static_sha256": self.static_sha256,
+            "route_id": self.route_id,
+            "difficulty_index": self.difficulty_index,
+            "stage_route_index": self.stage_route_index,
+            "gameplay_epoch": self.gameplay_epoch,
+            "decision_frame": self.decision_frame,
+            "snapshot_frame": self.snapshot_frame,
+        }
+
+
 class RuntimeEclIdentityService:
     """Attempt exactly once when the configured physical stage is observed."""
 
@@ -111,10 +144,15 @@ class RuntimeEclIdentityService:
         )
         self._dependencies = dependencies
         self._attempted = False
+        self._accepted_version: RuntimeEclAcceptedVersion | None = None
 
     @property
     def attempted(self) -> bool:
         return self._attempted
+
+    @property
+    def accepted_version(self) -> RuntimeEclAcceptedVersion | None:
+        return self._accepted_version
 
     def _matches_trigger(
         self,
@@ -166,6 +204,20 @@ class RuntimeEclIdentityService:
                 status = (
                     "exact_match" if identity.exact_match else "byte_mismatch"
                 )
+                if identity.exact_match:
+                    self._accepted_version = RuntimeEclAcceptedVersion(
+                        runtime_base=capture.runtime_base,
+                        image_length=capture.image_length,
+                        relocated_sha256=capture.relocated_sha256,
+                        normalized_sha256=capture.normalized_sha256,
+                        static_sha256=identity.static_sha256,
+                        route_id=provenance.route_id,
+                        difficulty_index=provenance.difficulty_index,
+                        stage_route_index=provenance.stage_route_index,
+                        gameplay_epoch=provenance.gameplay_epoch,
+                        decision_frame=provenance.decision_frame,
+                        snapshot_frame=provenance.snapshot_frame,
+                    )
             except _CAPTURE_ERRORS as error:
                 status = "capture_error"
                 error_text = f"{type(error).__name__}: {error}"
@@ -201,6 +253,7 @@ class RuntimeEclIdentityService:
 
 
 __all__ = [
+    "RuntimeEclAcceptedVersion",
     "RuntimeEclIdentityAttempt",
     "RuntimeEclIdentityDependencies",
     "RuntimeEclIdentityService",

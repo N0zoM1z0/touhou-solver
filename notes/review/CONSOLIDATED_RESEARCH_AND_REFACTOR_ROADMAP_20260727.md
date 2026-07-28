@@ -105,6 +105,13 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   a focused Lunatic Stage-5 spell-107 physical delivery run. Owner/source
   lifetime, dynamic parameters, realized births, transforms, geometry, and
   planning remain later contracts.
+- The replay-capable runtime layer and strict audit are now implemented under
+  `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_CONTRACT_20260728.md`.
+  Schema v4 reuses the coherent selected batch, stores hash-checked raw VM and
+  saved-frame bytes, binds every request to one accepted runtime-ECL version,
+  and independently reconstructs classification/canonicalization plus the
+  raw-byte oracle. Synthetic transport/replay and tamper tests pass. Physical
+  spell-107 timing/cadence/session authority remains pending.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

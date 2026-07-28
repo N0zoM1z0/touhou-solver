@@ -117,6 +117,10 @@ from th08_live.auxiliary_vm import (
     AuxiliaryVmBatchTraceService,
     native_auxiliary_vm_batch_available,
 )
+from th08_live.auxiliary_vm.event_service import (
+    AuxiliaryEclEventConfiguration,
+    AuxiliaryEclEventTraceService,
+)
 from th08_live.derived_pattern_source import observe_derived_pattern_sources
 from th08_live.derived_pattern_source_native import (
     NativeDerivedPatternSourceObserver,
@@ -1408,6 +1412,28 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         raise ValueError(
             "runtime ECL identity requires an explicit expected stage"
         )
+    trace_auxiliary_ecl_events = bool(
+        getattr(args, "trace_auxiliary_ecl_events", False)
+    )
+    if trace_auxiliary_ecl_events and not getattr(
+        args,
+        "trace_auxiliary_vm_batches",
+        False,
+    ):
+        raise ValueError(
+            "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
+        )
+    if trace_auxiliary_ecl_events and runtime_ecl_static_image is None:
+        raise ValueError(
+            "auxiliary ECL event tracing requires exact runtime ECL identity"
+        )
+    if trace_auxiliary_ecl_events and (
+        args.difficulty != 3 or args.expected_stage != 5
+    ):
+        raise ValueError(
+            "the contracted auxiliary ECL event service is limited to "
+            "Lunatic Stage 5"
+        )
     _configure_local_hazard_backend(args.local_hazard_backend)
     _configure_local_beam_reducer(args.local_beam_reducer)
     _configure_local_bullet_decoder(args.bullet_decode_backend)
@@ -1610,7 +1636,11 @@ def _run_live_session(
     trace_auxiliary_vm_batches = bool(
         getattr(args, "trace_auxiliary_vm_batches", False)
     )
+    trace_auxiliary_ecl_events = bool(
+        getattr(args, "trace_auxiliary_ecl_events", False)
+    )
     runtime_ecl_identity_service: RuntimeEclIdentityService | None = None
+    auxiliary_ecl_event_service: AuxiliaryEclEventTraceService | None = None
     runtime_ecl_static_image = getattr(
         args,
         "runtime_ecl_static_image",
@@ -1631,11 +1661,22 @@ def _run_live_session(
             expected_difficulty_index=args.difficulty,
             expected_stage_route_index=args.expected_stage,
         )
+        if trace_auxiliary_ecl_events:
+            auxiliary_ecl_event_service = AuxiliaryEclEventTraceService(
+                AuxiliaryEclEventConfiguration(
+                    static_path=runtime_ecl_static_path,
+                    expected_static_sha256=args.runtime_ecl_static_sha256,
+                    expected_route_id=2,
+                    expected_difficulty_index=args.difficulty,
+                    expected_stage_route_index=args.expected_stage,
+                )
+            )
     auxiliary_vm_batch_service = (
         AuxiliaryVmBatchTraceService(
             cadence_frames=args.auxiliary_vm_batch_every,
             spell_id_filter=args.auxiliary_vm_batch_spell_id,
             native_call_mode=args.auxiliary_vm_native_call_mode,
+            event_service=auxiliary_ecl_event_service,
         )
         if trace_auxiliary_vm_batches
         else None
@@ -3720,6 +3761,11 @@ def _run_live_session(
                             state["stage_route_index"]
                         ),
                         spell_id=current_spell_id,
+                        runtime_ecl_version=(
+                            runtime_ecl_identity_service.accepted_version
+                            if runtime_ecl_identity_service is not None
+                            else None
+                        ),
                     )
                 )
                 if auxiliary_vm_batch_record is not None:

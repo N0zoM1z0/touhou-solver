@@ -219,6 +219,7 @@ def run_trial(
         "trace_auxiliary_vm_batches": (
             args.trace_auxiliary_vm_batches
         ),
+        "trace_auxiliary_ecl_events": args.trace_auxiliary_ecl_events,
         "auxiliary_vm_batch_every": args.auxiliary_vm_batch_every,
         "auxiliary_vm_batch_spell_id": (
             args.auxiliary_vm_batch_spell_id
@@ -283,6 +284,9 @@ def run_trial(
             ),
             trace_auxiliary_vm_batches=(
                 args.trace_auxiliary_vm_batches
+            ),
+            trace_auxiliary_ecl_events=(
+                args.trace_auxiliary_ecl_events
             ),
             auxiliary_vm_batch_every=args.auxiliary_vm_batch_every,
             auxiliary_vm_batch_spell_id=(
@@ -631,6 +635,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="record bounded post-issue auxiliary ECL VM batches",
     )
     parser.add_argument(
+        "--trace-auxiliary-ecl-events",
+        action="store_true",
+        help=(
+            "derive replay-capable Stage-5 auxiliary literal-fire events "
+            "after each selected batch; trace only"
+        ),
+    )
+    parser.add_argument(
         "--auxiliary-vm-batch-every",
         type=int,
         default=16,
@@ -805,6 +817,24 @@ def main(argv: list[str] | None = None) -> int:
     ):
         raise ValueError(
             "runtime ECL identity requires both a static image and SHA-256"
+        )
+    if args.trace_auxiliary_ecl_events and not args.trace_auxiliary_vm_batches:
+        raise ValueError(
+            "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
+        )
+    if (
+        args.trace_auxiliary_ecl_events
+        and args.runtime_ecl_static_image is None
+    ):
+        raise ValueError(
+            "auxiliary ECL event tracing requires exact runtime ECL identity"
+        )
+    if args.trace_auxiliary_ecl_events and (
+        args.difficulty.menu_index != 3 or args.stage.route_index != 5
+    ):
+        raise ValueError(
+            "the contracted auxiliary ECL event service is limited to "
+            "Lunatic Stage 5"
         )
     if min(
         args.cooldown,

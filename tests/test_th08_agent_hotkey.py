@@ -41,6 +41,7 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertFalse(parsed.trace_bullet_births)
         self.assertFalse(parsed.trace_enemy_combat_progress)
         self.assertFalse(parsed.trace_auxiliary_vm_batches)
+        self.assertFalse(parsed.trace_auxiliary_ecl_events)
         self.assertIsNone(parsed.runtime_ecl_static_image)
         self.assertIsNone(parsed.runtime_ecl_static_sha256)
         self.assertEqual(parsed.safety_value_horizon, 0)
@@ -125,15 +126,23 @@ class AgentHotkeyTests(unittest.TestCase):
             auxiliary_vm_batch_every=16,
             auxiliary_vm_batch_spell_id=107,
             auxiliary_vm_native_call_mode="gil-held",
+            expected_stage=5,
+            trace_auxiliary_ecl_events=True,
+            runtime_ecl_static_image=Path(
+                "artifacts/decoded/ecldata5.ecl"
+            ),
+            runtime_ecl_static_sha256="1" * 64,
         )
         auxiliary_parsed = build_parser().parse_args(auxiliary_arguments)
         self.assertTrue(auxiliary_parsed.trace_auxiliary_vm_batches)
+        self.assertTrue(auxiliary_parsed.trace_auxiliary_ecl_events)
         self.assertEqual(auxiliary_parsed.auxiliary_vm_batch_every, 16)
         self.assertEqual(auxiliary_parsed.auxiliary_vm_batch_spell_id, 107)
         self.assertEqual(
             auxiliary_parsed.auxiliary_vm_native_call_mode,
             "gil-held",
         )
+        self.assertIn("--trace-auxiliary-ecl-events", auxiliary_arguments)
 
         with self.assertRaisesRegex(ValueError, "requires"):
             build_long_run_arguments(

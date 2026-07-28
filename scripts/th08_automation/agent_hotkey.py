@@ -72,6 +72,7 @@ class AgentHotkey:
         trace_nonspell_main_vms: bool = False,
         trace_enemy_combat_progress: bool = False,
         trace_auxiliary_vm_batches: bool = False,
+        trace_auxiliary_ecl_events: bool = False,
         auxiliary_vm_batch_every: int = 16,
         auxiliary_vm_batch_spell_id: int | None = None,
         auxiliary_vm_native_call_mode: str = (
@@ -163,6 +164,21 @@ class AgentHotkey:
             raise ValueError(
                 "runtime ECL identity requires an explicit expected stage"
             )
+        if trace_auxiliary_ecl_events and not trace_auxiliary_vm_batches:
+            raise ValueError(
+                "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
+            )
+        if trace_auxiliary_ecl_events and runtime_ecl_static_image is None:
+            raise ValueError(
+                "auxiliary ECL event tracing requires exact runtime ECL identity"
+            )
+        if trace_auxiliary_ecl_events and (
+            expected_difficulty != 3 or expected_stage != 5
+        ):
+            raise ValueError(
+                "the contracted auxiliary ECL event service is limited to "
+                "Lunatic Stage 5"
+            )
         self.expected_difficulty = expected_difficulty
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
@@ -172,6 +188,7 @@ class AgentHotkey:
         self.trace_nonspell_main_vms = trace_nonspell_main_vms
         self.trace_enemy_combat_progress = trace_enemy_combat_progress
         self.trace_auxiliary_vm_batches = trace_auxiliary_vm_batches
+        self.trace_auxiliary_ecl_events = trace_auxiliary_ecl_events
         self.auxiliary_vm_batch_every = auxiliary_vm_batch_every
         self.auxiliary_vm_batch_spell_id = auxiliary_vm_batch_spell_id
         self.auxiliary_vm_native_call_mode = (
@@ -339,6 +356,9 @@ class AgentHotkey:
                 ),
                 trace_auxiliary_vm_batches=(
                     self.trace_auxiliary_vm_batches
+                ),
+                trace_auxiliary_ecl_events=(
+                    self.trace_auxiliary_ecl_events
                 ),
                 auxiliary_vm_batch_every=self.auxiliary_vm_batch_every,
                 auxiliary_vm_batch_spell_id=(

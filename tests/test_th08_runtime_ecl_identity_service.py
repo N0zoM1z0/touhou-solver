@@ -133,6 +133,26 @@ class RuntimeEclIdentityServiceTests(unittest.TestCase):
         self.assertEqual(result.emit_ms, 0.25)
         self.assertEqual(len(sink.calls), 1)
         self.assertEqual(sink.calls[0][1:], (True, True))
+        accepted = service.accepted_version
+        self.assertIsNotNone(accepted)
+        assert accepted is not None
+        self.assertEqual(
+            accepted.record(),
+            {
+                "schema": "th08-runtime-ecl-accepted-version-v1",
+                "runtime_base": capture.runtime_base,
+                "image_length": capture.image_length,
+                "relocated_sha256": capture.relocated_sha256,
+                "normalized_sha256": digest,
+                "static_sha256": digest,
+                "route_id": 2,
+                "difficulty_index": 3,
+                "stage_route_index": 5,
+                "gameplay_epoch": 7,
+                "decision_frame": 120,
+                "snapshot_frame": 118,
+            },
+        )
 
         self.assertIsNone(
             service.observe_if_due(
@@ -183,6 +203,7 @@ class RuntimeEclIdentityServiceTests(unittest.TestCase):
         self.assertIsNone(result.record["capture"])
         self.assertIsNone(result.record["identity"])
         self.assertEqual(attempts, 1)
+        self.assertIsNone(service.accepted_version)
         self.assertIsNone(
             service.observe_if_due(
                 SimpleNamespace(),  # type: ignore[arg-type]
@@ -223,6 +244,7 @@ class RuntimeEclIdentityServiceTests(unittest.TestCase):
             "physical_identity_mismatch",
         )
         self.assertTrue(service.attempted)
+        self.assertIsNone(service.accepted_version)
 
 
 if __name__ == "__main__":

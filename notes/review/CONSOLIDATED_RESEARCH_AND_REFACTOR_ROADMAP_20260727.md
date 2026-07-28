@@ -1242,6 +1242,16 @@ parity 當成每個 nature tie field 的逐 bit equality。
   heuristic tune: retain the immutable first-loss root and compare completed
   G3/G4 partial-survival witnesses per root action. Unvisited or timed-out
   actions remain unresolved;
+- the first-loss experiment is now fixed before implementation. The existing
+  Stage-5 trace has no viability capsules and cannot be repaired from nearby
+  geometry. A fresh survival-focused run must opt into diagnostic capsule I/O
+  and is therefore ineligible for B4 timing conclusions. The analyzer must
+  select an uninterrupted exact viable-to-losing pair in one epoch/stage;
+  unavailable queries, missing capsules, malformed roots, and epoch changes
+  break continuity. It audits the last viable root for G4 and the first losing
+  root for G3 with complete unpruned root-action portfolios, declared
+  stationary causal continuations, scalar/native parity, and no action
+  authority;
 - the projection audit now has an explicit universal `core` profile and keeps
   Stage-4A-only spell gates as its default. Stage 5 passes all core gates over
   4,871 rows while retaining 1,220 spell-115 unsupported-control rows as

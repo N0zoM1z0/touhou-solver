@@ -7709,3 +7709,28 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   birth audit, projection audit, and run note are retained.
 - Ruff and complete Linux/Windows suites pass 854 tests in
   `9.419/16.256 s`; Windows retains three existing platform skips.
+
+## 2026-07-28 — Fixed the G3/G4 first-loss capsule experiment
+
+- **Observed omission:** Stage-5 run `20260728_124930` did not enable
+  `--viability-audit`. Its trace retains canonical pipeline identities but
+  every corridor capsule field is null, so the complete frame-2049 lowered
+  hazard problem cannot be reconstructed after the fact.
+- **Rejected shortcut:** Nearby trace geometry, a later policy capsule, or a
+  similar root cannot be substituted for the missing immutable hazard slab.
+- The next survival-focused physical workload may explicitly enable
+  diagnostic capsules. Its I/O contamination disqualifies it from B4 timing
+  conclusions.
+- Selection is fixed to the first uninterrupted pair of exact queried roots
+  in one gameplay epoch/stage: viable followed by losing. Unavailable policy,
+  absent query, missing capsule, unavailable canonical root, malformed join,
+  or epoch change breaks continuity. An explicit losing query without exact
+  evidence leaves first loss unresolved and cannot be skipped.
+- The last viable root is the G4 preservation sample; the first losing root is
+  the G3 partial-survival sample. Both retain complete-mask roots, all
+  unpruned root actions, declared stationary causal continuations, worst
+  branches, independent scalar/native parity, coverage status, and immutable
+  digests. Results remain attainable restricted lower bounds with no live
+  authority.
+- The preimplementation contract is
+  `notes/G3_G4_FIRST_LOSS_CAPSULE_EXPERIMENT_CONTRACT_20260728.md`.

@@ -1303,6 +1303,8 @@ weaken four global workers or reuse a merely similar root.
   `notes/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
 - GIL-held materialization-tail attribution:
   `notes/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
+- First-loss exact-root selection and restricted G3/G4 experiment:
+  `notes/G3_G4_FIRST_LOSS_CAPSULE_EXPERIMENT_CONTRACT_20260728.md`
 - Generated differential:
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 

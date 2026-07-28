@@ -91,6 +91,25 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   equal, compatibility globals remain late-bound, and the controller falls
   from 4,698 to 4,341 lines. This is a behavior-neutral ownership checkpoint;
   the dominant `_run_live_session` block remains the next structural target.
+- The first auxiliary literal fire-cycle event class now passes an independent
+  raw-byte oracle, exact shipped-image tests, compact retained inventory, and
+  fixed Linux/Windows 34-context lower-plus-serialize gates. The former
+  756-line prototype is a 40-line facade over state/image/timer/descriptor/
+  traversal/batch modules; analysis and benchmark code have separate
+  packages. CE-0166 retains incompatible Windows p95/maximum failures before
+  two adjacent passing reports; the isolated checkpoint passes, but stable
+  live contention and cadence remain unproved. This is offline intent
+  authority only.
+- The next G5 gate is replay-capable, default-off post-capture derivation with
+  no added RPM, exact runtime-image versioning, strict independent audit, and
+  a focused Lunatic Stage-5 spell-107 physical delivery run. Owner/source
+  lifetime, dynamic parameters, realized births, transforms, geometry, and
+  planning remain later contracts.
+- Add Lunatic Stage 3 to the later physical matrix as an independent workload.
+  Historical deaths justify a fresh baseline, but Stage-5 phase/source,
+  nonspell, Power, and strategy conclusions must not be transferred without
+  Stage-3 evidence. Normal-route testing starts from Power 0 and attributes
+  phase, resource, and first-hit provenance.
 
 ## 2. 審閱材料與證據邊界
 

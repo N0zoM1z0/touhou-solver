@@ -555,10 +555,18 @@ comparison.
    thresholds 8/8/30. Opcode `0x04` preserves the fractional timer
    accumulator, so physical-frame conversion requires the native time-scale
    recurrence rather than a scalar reset. The retained compact trace stores
-   hashes rather than raw PC/timer state, so exact event replay requires a new
-   derived trace. Proceed to the bounded production lowerer and independent
-   scalar byte oracle. Timing, emission, shared transform state, source life,
-   geometry, and action authority remain unresolved.
+   hashes rather than raw PC/timer state, so it cannot be event-replayed. The
+   bounded modular production lowerer now matches an independent raw-byte
+   oracle, exact shipped subroutines 69/72/73, and adversarial fail-closed
+   cases. Fixed 34-context lower-plus-compact-serialize p95/p99/max is
+   `0.243/0.300/0.471 ms` on Linux; two adjacent Windows reports pass at
+   `0.239/0.254/0.503` and `0.232/0.248/0.522 ms`. CE-0166 retains an earlier
+   p95 failure and a later `15.674 ms` maximum, so one isolated pass is not
+   stable live timing authority. This grants offline unresolved-intent
+   authority only. Proceed to a replay-capable default-off post-capture
+   service and focused spell-107 physical delivery gate with no added RPM.
+   Emission, shared transform state, source life, geometry, and action
+   authority remain unresolved.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over
    4,871 callback rows; spell 115 remains fail-closed on 1,220
@@ -902,6 +910,11 @@ comparison.
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
   only actions already viable and issue-safe under the unchanged live
   certificate.
+- **Workloads:** add Lunatic Stage 3 as a separate later baseline because
+  historical attempts had many deaths. Begin from normal-route Power 0 and
+  retain stage/phase, first-hit, resources, item/Power, and event/source
+  coverage. Do not transfer Stage-5 target mix, phase profile, or strategy
+  promotion to Stage 3 without its own evidence.
 - **Falsifiers:** no exposure reduction after earlier verified kill, no HP
   delta from alignment, no eligible survival-equivalent choices, or any
   clearance/reserve/cadence regression.

@@ -19,9 +19,11 @@ themselves grant future-geometry, planner, or action authority.
 11. [bounded visible retry](G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md)
 12. [shipped runtime ECL identity](G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md)
 13. [auxiliary literal fire-cycle intent](G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md)
+14. [auxiliary literal fire-cycle offline gate](G5_AUXILIARY_LITERAL_FIRE_CYCLE_OFFLINE_GATE_20260728.md)
 
 The corresponding `*_RESULT_*`, `*_GATE_*`, attribution, rejection, and
 performance-experiment notes retain the evidence for each transition. The
-current G5 step is offline implementation and independent-oracle validation
-of the fixed auxiliary literal fire-cycle intent. It is not a general
-source-completeness or future-geometry claim.
+current G5 offline lowerer/oracle and Linux/Windows timing gate pass. The next
+step is default-off replay-capable post-capture integration and one focused
+Stage-5 spell-107 physical delivery gate. It is not a general
+source-completeness, future-geometry, or action-authority claim.

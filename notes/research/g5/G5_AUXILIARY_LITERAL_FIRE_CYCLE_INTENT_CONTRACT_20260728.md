@@ -246,7 +246,8 @@ At each instruction:
    dependency, publish one intent, then advance;
 5. for literal `0x04`, assign target integer elapsed, preserve fractional
    state, and apply relative PC exactly; and
-6. otherwise stop with the first precise unavailable reason.
+6. for `0x01`, publish exact terminal completion with no later event on this
+   VM path; otherwise stop with the first precise unavailable reason.
 
 An intent whose residual dependency set is nonempty is not a complete
 emission. Even an empty descriptor dependency set would still require a
@@ -286,8 +287,10 @@ Minimal falsifiers are:
 
 ## Architecture Boundary
 
-- Put the reusable TH08 literal auxiliary lowerer in a narrow
-  `scripts/th08_ecl_auxiliary.py` module.
+- Keep `scripts/th08_ecl_auxiliary.py` as a narrow stable facade and split the
+  reusable TH08 implementation by state, exact image, timer, descriptor,
+  traversal, and batch responsibilities under
+  `scripts/th08_ecl_auxiliary_core/`.
 - Put the structurally independent oracle and retained-trace/report logic
   under `scripts/analysis/auxiliary_ecl_event/`.
 - Keep `scripts/th08_live/auxiliary_vm/trace_service.py` responsible only for
@@ -296,6 +299,10 @@ Minimal falsifiers are:
   `scripts/th08_live/controller.py`.
 - If runtime integration is later accepted, expose one narrow stage/service
   call and one immutable configuration object.
+- Keep exact workload construction and timing under
+  `scripts/benchmarks/auxiliary_ecl_event/`; compact batch canonicalization
+  may merge only states equivalent for the declared unresolved intent
+  recurrence and must preserve a result mapping for every request.
 
 ## Performance Gates
 

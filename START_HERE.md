@@ -67,18 +67,23 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
-- The first auxiliary instruction/path event class is now fixed in
-  `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md`.
-  Retained spell-107 trace `20260728_200739` has 3,214 usable contexts, all
-  targeting exact Stage-5 subroutines 69/72/73. Those are three-instruction
-  literal transform/fire/jump cycles with integer ECL timer thresholds
-  8/8/30. IDA
-  revalidation confirms the literal jump, direct-fire, transform, auxiliary
-  start, and four-context scheduler handlers. The old compact trace stores
-  only active-VM hashes, so it cannot be replay-lowered into PC/timer events.
-  The next G5 gate is a bounded production lowerer plus structurally
-  independent scalar byte oracle; unsupported timing, control, emission,
-  transform, source-life, and geometry dependencies remain `UNKNOWN`.
+- The first auxiliary instruction/path event class now passes its offline gate
+  under
+  `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_OFFLINE_GATE_20260728.md`.
+  A modular bounded lowerer matches a structurally independent raw-byte oracle
+  over exact shipped Stage-5 subroutines 69/72/73 and adversarial fail-closed
+  cases. Request-local intent-equivalence canonicalization preserves one
+  mapping per input. Fixed 34-context lower-plus-compact-serialize
+  p95/p99/max is `0.243/0.300/0.471 ms` on Linux and two adjacent Windows
+  reports pass at `0.239/0.254/0.503` and `0.232/0.248/0.522 ms`.
+  CE-0166 retains earlier incompatible p95 and maximum failures, so isolated
+  timing is not live contention authority. Linux/Windows quick suites pass
+  997 tests. The old spell-107 trace's 3,214 contexts retain hashes only and
+  remain unreplayable. The next G5 gate is replay-capable default-off
+  post-capture integration with no extra RPM and a focused spell-107 physical
+  delivery audit. Unsupported emission, source-life, dynamic parameter,
+  transform, realized-birth, geometry, and action dependencies remain
+  `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model
   authority. The 515,082-byte research log and 311,238-byte, 165-entry
   counterexample ledger are stable 38/43-line indexes over seven daily and
@@ -1515,11 +1520,13 @@ Ordinary main-source topology, auxiliary-pointer phase A, coherent
 bounded-visible-retry auxiliary capture, and exact shipped Stage-5 runtime
 instruction-byte identity are now complete. Main-only coverage remains
 structurally incomplete, pointer value is not stable identity, and exact
-bytes do not prove a reachable path or complete operands. The next P1 gate is
-a separately fixed auxiliary instruction/path lowering contract for one event
-class. It must preserve scheduler/timer/call state and keep every unsupported
-control, source, operand, emission, transform, or geometry dependency
-`UNKNOWN`; it is not a planner envelope.
+bytes do not prove a reachable path or complete operands. The first fixed
+auxiliary instruction/path class now passes independent offline semantics and
+Linux/Windows delivery microbenchmarks. The next P1 gate is replay-capable
+default-off post-capture integration using the already coherent bytes, exact
+runtime-image versioning, and a focused spell-107 physical delivery audit. It
+must add no RPM and keep every unsupported control, source, operand, emission,
+transform, or geometry dependency `UNKNOWN`; it is not a planner envelope.
 
 Separately, all nine retained complete Stage-5 runs have their canonical
 fresh-attempt first hit in a nonspell phase at full Power 128. Nonspell
@@ -1606,6 +1613,7 @@ CE-0164. Historical notes do not override the authority table above.
 | --- | --- | --- |
 | Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor. |
 | Lunatic Route-2 Stage 5 | `124930`, `155426`, `171633` | Birth provenance, ordinary main/auxiliary source mapping, and newest schema-12 pointer-density gate. |
+| Lunatic Route-2 Stage 3 | pending fresh baseline | Independent harder-workload baseline: historical deaths, Power-0 resources, phase/first-hit and source coverage; do not transfer Stage-5 profiles. |
 | Hard Route-2 Stage 1 | `175049`, `144128`, `153821` | Zero-hit native/local and refactor gates; G1 trace/pickup gate with one survival failure. |
 | Hard Route-2 full route | `184942` | Complete route, 39-hit feasibility diagnosis; one-bundle evidence only. |
 | Hard Route-2 Stage 4A | `202439`, `211210`, `212756` | Capsule audit and fresh/global issue transaction; `211210/212756` form the newest compatible no-audit floor. |
@@ -1625,6 +1633,12 @@ Compact benchmark evidence:
 - `artifacts/benchmarks/derived_pattern_source_observer_native_windows_20260728.json`
 - `artifacts/benchmarks/g5_auxiliary_context_pointer_inventory_linux_20260728.json`
 - `artifacts/benchmarks/g5_auxiliary_context_pointer_inventory_windows_20260728.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_linux_20260728.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_windows_20260728.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_windows_repeat_20260728.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_windows_request_allocation_failure_20260728.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_windows_prebuilt_max_failure_20260728.json`
+- `artifacts/viability_audit/g5_auxiliary_ecl_event_inventory_stage5_20260728_200739.json`
 - `artifacts/viability_audit/g5_derived_source_stage5_20260728_150827.json`
 - `artifacts/viability_audit/g5_auxiliary_pointer_density_stage5_20260728_171633.json`
 

@@ -1,0 +1,209 @@
+{
+  "authority": "offline_timing_no_action_authority",
+  "configuration": {
+    "iterations": 2000,
+    "time_scale": 1.0,
+    "warmup": 200
+  },
+  "fixture": {
+    "batch_workload": "stage5_observed_mix_34_context",
+    "ecl_path": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\decoded\\ecldata5.ecl",
+    "ecl_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "identity_digest": "eb0a22d974dd2e9855f3558d35f600e77da70a3322b1dd803f976f0aa635f453"
+  },
+  "gate": {
+    "checks": {
+      "max": true,
+      "p95": true,
+      "p99": true
+    },
+    "limits_ms": {
+      "max": 3.0,
+      "p95": 0.5,
+      "p99": 1.0
+    },
+    "metric": "stage5_observed_mix_34_context.timing.lower_and_serialize",
+    "passed": true
+  },
+  "platform": {
+    "implementation": "CPython",
+    "machine": "AMD64",
+    "python": "3.12.10",
+    "system": "Windows"
+  },
+  "schema": "th08-g5-auxiliary-ecl-event-benchmark-v1",
+  "workloads": {
+    "stage5_observed_mix_34_context": {
+      "context_count": 34,
+      "intent_count": 102,
+      "serialized_bytes": 8183,
+      "serialized_sha256": "0925a59c8b9ebd8f48f0c0b42e69e5eb853d6dd969c305b516cc9cbbbfd52634",
+      "timing": {
+        "lower": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.1784,
+          "non_gc_max_ms": 0.1784,
+          "p50_ms": 0.1173,
+          "p95_ms": 0.125705,
+          "p99_ms": 0.1602
+        },
+        "lower_and_serialize": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.5215,
+          "non_gc_max_ms": 0.5215,
+          "p50_ms": 0.2175,
+          "p95_ms": 0.23240999999999998,
+          "p99_ms": 0.247903
+        },
+        "serialization": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.1211,
+          "non_gc_max_ms": 0.1211,
+          "p50_ms": 0.0875,
+          "p95_ms": 0.0908,
+          "p99_ms": 0.09680799999999999
+        }
+      },
+      "transform_definition_count": 34,
+      "unique_result_count": 3
+    },
+    "sub69_one_context": {
+      "context_count": 1,
+      "intent_count": 3,
+      "serialized_bytes": 2807,
+      "serialized_sha256": "2261e5525ce15180953764e0a8e9318fe6e2ddf87f1d8ac5b4e732ea8d50cabb",
+      "timing": {
+        "lower": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.0912,
+          "non_gc_max_ms": 0.0912,
+          "p50_ms": 0.0387,
+          "p95_ms": 0.056,
+          "p99_ms": 0.0606
+        },
+        "lower_and_serialize": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.4315,
+          "non_gc_max_ms": 0.4315,
+          "p50_ms": 0.0806,
+          "p95_ms": 0.0862,
+          "p99_ms": 0.094707
+        },
+        "serialization": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.0561,
+          "non_gc_max_ms": 0.0561,
+          "p50_ms": 0.0369,
+          "p95_ms": 0.0402,
+          "p99_ms": 0.0412
+        }
+      },
+      "transform_definition_count": 1,
+      "unique_result_count": 1
+    },
+    "sub72_one_context": {
+      "context_count": 1,
+      "intent_count": 3,
+      "serialized_bytes": 2807,
+      "serialized_sha256": "9af66a1f59a8784ccf34aa62693fcb79c7cbad1eb97e888a5c64ca7fbe92f41c",
+      "timing": {
+        "lower": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.0895,
+          "non_gc_max_ms": 0.0895,
+          "p50_ms": 0.0371,
+          "p95_ms": 0.0389,
+          "p99_ms": 0.054801
+        },
+        "lower_and_serialize": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.1278,
+          "non_gc_max_ms": 0.1278,
+          "p50_ms": 0.0774,
+          "p95_ms": 0.0817,
+          "p99_ms": 0.08960399999999999
+        },
+        "serialization": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.0753,
+          "non_gc_max_ms": 0.0753,
+          "p50_ms": 0.0358,
+          "p95_ms": 0.0372,
+          "p99_ms": 0.0393
+        }
+      },
+      "transform_definition_count": 1,
+      "unique_result_count": 1
+    },
+    "sub73_one_context": {
+      "context_count": 1,
+      "intent_count": 3,
+      "serialized_bytes": 2764,
+      "serialized_sha256": "373255d55e3bbb93a50cb57b6b705772deed6be29f20192512d810e4bbee0397",
+      "timing": {
+        "lower": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.1548,
+          "non_gc_max_ms": 0.1548,
+          "p50_ms": 0.0366,
+          "p95_ms": 0.06290499999999999,
+          "p99_ms": 0.086
+        },
+        "lower_and_serialize": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.3778,
+          "non_gc_max_ms": 0.3778,
+          "p50_ms": 0.0736,
+          "p95_ms": 0.076205,
+          "p99_ms": 0.08610999999999999
+        },
+        "serialization": {
+          "count": 2000,
+          "gc_overlap_max_ms": null,
+          "gc_overlap_sample_count": 0,
+          "gc_start_counts": {},
+          "max_ms": 0.0482,
+          "non_gc_max_ms": 0.0482,
+          "p50_ms": 0.0316,
+          "p95_ms": 0.0329,
+          "p99_ms": 0.0336
+        }
+      },
+      "transform_definition_count": 1,
+      "unique_result_count": 1
+    }
+  }
+}

@@ -377,6 +377,13 @@ comparison.
    capture-aligned VM-local interpreter for a declared opcode subset. Dynamic
    future motion, uncaptured RNG, call-stack, and interrupt dependencies must
    remain `UNKNOWN`.
+   Its phase-A contract is now fixed by
+   `G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`. The first code
+   checkpoint only extends the existing contiguous VM read from 64 to 104
+   bytes, preserves raw float bits, and records a versioned projection. It
+   must leave every live coverage/lowering result unchanged. Offline local
+   interpretation remains proposed until fresh physical projection and
+   independent scalar-oracle gates pass.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

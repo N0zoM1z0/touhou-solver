@@ -1163,6 +1163,14 @@ parity 當成每個 nature tie field 的逐 bit equality。
   endpoint transition. Next contract a capture-aligned VM-local interpreter
   for only an independently verified opcode subset; all dynamic motion,
   uncaptured RNG, call-stack, and interrupt dependencies remain `UNKNOWN`;
+- that next contract is now
+  `G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`. Phase A only
+  retains a compact raw-bit projection from the already existing VM RPM call,
+  growing it `0x40 -> 0x68` bytes without changing live analysis. IDA maps
+  `10036..10039` to context `+0x58..+0x64` and confirms `0x05` uses the
+  post-decrement value. Call/return copies the full `0x228` context and stays
+  unsupported. A fresh projected physical trace and independent scalar
+  oracle are mandatory before candidate completion or live lowering;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

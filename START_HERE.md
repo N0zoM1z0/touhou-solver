@@ -33,7 +33,8 @@ and design/run notes retain derivations and history.
 23. `notes/G5_MATERIALIZATION_TAIL_PHYSICAL_ATTRIBUTION_20260728.md`
 24. `notes/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`
 25. `notes/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
-26. the relevant recent run note and counterexample rows before live work
+26. `notes/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`
+27. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -305,6 +306,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
   viability exhaustion, so the hit count is descriptive only. The next G5
   gate is a capture-aligned VM-local/control interpreter contract, not a
   spell shortcut or guessed transfer summary.
+  That next phase-A boundary is now fixed in
+  `G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`: extend the
+  existing one-call VM capture from `0x40` to `0x68` bytes and retain raw
+  locals only. IDA confirms `10036..10039` at context `+0x58..+0x64` and
+  opcode `0x05` branches on the post-decrement lvalue. Call/return saves the
+  full `0x228` context and remains unsupported. Phase A may not change live
+  coverage; a fresh physical local projection must precede any offline
+  interpreter or live promotion.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

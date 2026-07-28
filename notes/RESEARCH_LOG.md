@@ -7346,3 +7346,27 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - The new fail-closed live-audit tests, Ruff gate, and complete Linux/Windows
   suites pass. Both systems run 825/825 tests; Linux takes `9.909 s` and
   Windows retains three existing platform skips.
+
+## 2026-07-28 — Fixed the capture-aligned ECL VM-local shadow boundary
+
+- **Observed statically in shipped TH08:** `ecl_eval_int` maps VM variables
+  `10036..10039` to active-context offsets `+0x58..+0x64`; the existing
+  64-byte read ends before them. The first eight int locals are
+  `+0x18..+0x34`, and float locals `10016..10023` are `+0x38..+0x54`.
+- Opcode `0x05` resolves and decrements argument 2, then branches while its
+  post-decrement value is positive. Every retained Stage-4 spell-57/61/65
+  boundary uses parameter mask `0x0004` and variable `10036`.
+- Call/return saves/restores the complete `0x228` VM context; call setup also
+  copies 32 parameter bytes to `+0x70..+0x8F`. A local projection cannot
+  model this boundary. Literal-lvalue `0x05` is also excluded because the
+  shipped VM mutates instruction payload that the current cache treats as
+  immutable.
+- IDA comments at `0x0041F45C`, `0x0041F598`, `0x0041869A`,
+  `0x00421C31`, and `0x00421C62` retain the recovered mappings.
+- **Decision:** phase A extends the same contiguous VM read
+  `0x40 -> 0x68` bytes and records fixed arrays of int32/raw-float-bits/
+  scratch-int32 values. It adds no RPM call and may not change live callback
+  status or lowering. Fresh physical projection precedes an independently
+  checked offline interpreter.
+- The preimplementation contract is
+  `notes/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`.

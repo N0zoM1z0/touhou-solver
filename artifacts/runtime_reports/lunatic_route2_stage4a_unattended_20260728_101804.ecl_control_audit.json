@@ -1,0 +1,159 @@
+{
+  "authority": {
+    "callback_schedule": "complete_rows_only",
+    "physical_action": "none_added",
+    "survival": "not_claimed"
+  },
+  "counts": {
+    "callback_rows": 5749,
+    "coverage_status_rows": {
+      "complete": 1442,
+      "unknown": 4307
+    },
+    "decision_rows": 14126,
+    "lookahead_errors": 0,
+    "lowering_status_rows": {
+      "complete_schedule_lowered": 1442,
+      "incomplete_prefix_not_lowered": 4307
+    },
+    "metadata_error_count": 0,
+    "phase_end_rows": 25,
+    "phase_end_valid_rows": 25,
+    "stop_reason_rows": {
+      "horizon": 1442,
+      "unsupported_control_flow": 4307
+    }
+  },
+  "gates": {
+    "callback_rows_present": true,
+    "coverage_metadata_consistent": true,
+    "hidden_control_is_unknown": true,
+    "no_legacy_budget_or_repeat_stop": true,
+    "no_lookahead_errors": true,
+    "phase_end_runtime_rows_observed_and_valid": true,
+    "spell57_stops_at_control_with_under_64_instructions": true,
+    "spell61_control_boundary_observed": true,
+    "spell65_control_boundary_observed": true,
+    "spell73_dynamic_control_boundary_observed": true
+  },
+  "passed": true,
+  "per_spell": {
+    "57": {
+      "coverage_status_rows": {
+        "unknown": 1308
+      },
+      "instructions_scanned": {
+        "count": 1308,
+        "max": 26.0,
+        "median": 1.0,
+        "p95": 19.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 1308,
+        "max": 2.6108999736607075,
+        "median": 0.06360001862049103,
+        "p95": 0.15659997006878257
+      },
+      "rows": 1308,
+      "stop_reason_rows": {
+        "unsupported_control_flow": 1308
+      }
+    },
+    "61": {
+      "coverage_status_rows": {
+        "unknown": 1117
+      },
+      "instructions_scanned": {
+        "count": 1117,
+        "max": 21.0,
+        "median": 2.0,
+        "p95": 21.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 1117,
+        "max": 1.5160000184550881,
+        "median": 0.07770000956952572,
+        "p95": 0.17439998919144273
+      },
+      "rows": 1117,
+      "stop_reason_rows": {
+        "unsupported_control_flow": 1117
+      }
+    },
+    "65": {
+      "coverage_status_rows": {
+        "complete": 36,
+        "unknown": 906
+      },
+      "instructions_scanned": {
+        "count": 942,
+        "max": 20.0,
+        "median": 11.0,
+        "p95": 11.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 942,
+        "max": 4.061400017235428,
+        "median": 0.07700000423938036,
+        "p95": 0.15839998377487063
+      },
+      "rows": 942,
+      "stop_reason_rows": {
+        "horizon": 36,
+        "unsupported_control_flow": 906
+      }
+    },
+    "69": {
+      "coverage_status_rows": {
+        "complete": 1310
+      },
+      "instructions_scanned": {
+        "count": 1310,
+        "max": 62.0,
+        "median": 21.0,
+        "p95": 50.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 1310,
+        "max": 5.898800038266927,
+        "median": 0.08935001096688211,
+        "p95": 0.23579999106004834
+      },
+      "rows": 1310,
+      "stop_reason_rows": {
+        "horizon": 1310
+      }
+    },
+    "73": {
+      "coverage_status_rows": {
+        "complete": 96,
+        "unknown": 976
+      },
+      "instructions_scanned": {
+        "count": 1072,
+        "max": 34.0,
+        "median": 3.0,
+        "p95": 29.0
+      },
+      "read_ecl_lookahead_ms": {
+        "count": 1072,
+        "max": 7.362000003922731,
+        "median": 0.06905000191181898,
+        "p95": 0.2074999501928687
+      },
+      "rows": 1072,
+      "stop_reason_rows": {
+        "horizon": 96,
+        "unsupported_control_flow": 976
+      }
+    }
+  },
+  "schema": "th08-ecl-control-flow-live-audit-v1",
+  "source": {
+    "trace_name": "lunatic_route2_stage4a_unattended_20260728_101804.jsonl",
+    "trace_sha256": "ad7e4da69eeee28adb6abad683598cbf26d9aa8d3f5e671c869e1394d357e885"
+  },
+  "violations": {
+    "metadata_error_samples": []
+  }
+}

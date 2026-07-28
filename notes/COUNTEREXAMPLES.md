@@ -4388,7 +4388,8 @@ Status: observed report aggregation failure; corrected and regression-tested
 ## CE-0152: A GIL-held observer incurred an isolated materialization wall tail
 
 Status: observed physical performance failure; schema-v9 attribution shows a
-corridor-completion correlation with mixed scheduler/executed-work evidence
+corridor-completion correlation with mixed scheduler/executed-work evidence,
+while the latest normal-priority repeat fails p95 without that transition
 
 - **Observed symptom:** Accepted schema-v8 Stage-4A run `20260728_075455`
   passes callback/intention validation but fails the unchanged B4 observer
@@ -4426,6 +4427,16 @@ corridor-completion correlation with mixed scheduler/executed-work evidence
 - **Diagnostic overhead:** Schema-v9 p95 also marginally exceeds `0.20 ms`.
   Future endpoint and cycle telemetry remains inside the declared wall
   boundary and may not be subtracted to claim a pass.
+- **Latest normal-priority repeat:** Fresh ECL-control run
+  `20260728_101804` again fails only p95:
+  `0.1018/0.2018/0.3326/0.5441/0.7539 ms`
+  p50/p95/p99/p99.9/max. There are no over-2-ms rows, no completed GC, valid
+  Windows cycle attribution on all 14,126 rows, and no endpoint transition.
+  Segment p95/max values are `0.0065/0.0940` prepare,
+  `0.0593/0.6459` native call, `0.0823/0.5023` materialize, and
+  `0.0720/0.5382 ms` residual. This does not reproduce the prior
+  corridor-completion correlation and does not authorize selecting the lower
+  maximum as a closed B4 result.
 - **Related trace cost:** The same run's pure-Python callback traversal is
   also expensive on incomplete paths. Spell-57 read/lookahead
   p50/p95/p99/p99.9/max is
@@ -4497,7 +4508,8 @@ precommitted run
 ## CE-0154: Callback traversal declared complete after skipping hidden ECL branches
 
 Status: observed deterministic and retained-trace model failure; fail-closed
-correction implemented and offline validated, fresh physical validation open
+correction implemented, offline validated, and fresh physical runtime scope
+validated
 
 - **Minimal falsifier:** Put an eligible `loop_decrement_jump` (`0x05`) or
   conditional jump (`0x28..0x33`) before two successors, place callback 12
@@ -4524,18 +4536,32 @@ correction implemented and offline validated, fresh physical validation open
   `344,320 -> 3,155` (`99.0837%`), maximum 26 instructions per row.
   Linux/Windows 10,000-iteration spell-57 p95 is
   `0.0223/0.0307 ms`.
-- **Open evidence:** Fifteen late spell-73 transition rows cannot be replayed
+- **Former evidence gap:** Fifteen late spell-73 transition rows cannot be replayed
   from the retained decoded file because its bytes are not aligned with the
-  then-live runtime instruction image. The audit deliberately fails its
-  all-rows gate. A fresh physical trace must close this exact runtime scope;
-  the rows may not be inferred.
+  then-live runtime instruction image. That historical audit correctly
+  remains failed rather than inferring them.
+- **Observed physical closure:** Fresh normal-priority run
+  `20260728_101804` exercises the corrected live image over 5,749 callback
+  rows. Exactly 1,442 are complete horizon rows and 4,307 stop
+  `unsupported_control_flow`; no row uses `instruction_limit` or
+  `repeated_state`, and every incomplete prefix is not lowered. All 25
+  phase-end rows validate, closing the prior runtime-transition class without
+  rewriting the historical failed audit. Spell-57 has 1,308/1,308
+  unsupported-control rows and a maximum of 26 inspected instructions.
+- **Physical contacts:** The route completed with 13 hits at
+  `[3919, 4271, 9854, 11602, 12243, 13162, 20611, 21058, 21383, 29548,
+  30483, 34070, 38026]` and hard no-Bomb. The first hit is the canonical
+  fresh-attempt witness; all 13 follow global viability exhaustion. This
+  trace-only correction does not establish a hit reduction.
 - **Evidence:** Deterministic replay report SHA-256 is
   `99f17fbc0a98a5bb9c2711c98e52bef00f3703566d97a26a0e59cfbb10f1edd1`.
   Linux/Windows benchmark SHA-256 values are
   `c4ab3cd721b7cf9ce9cb8c62f17366f4b3527a8f780af8be749ef72bfe6ceaaa`
   and
   `89174afc0565dacda7345bb128face3b4ad3892dece153b8d05f092cf522aaa7`.
-  Complete suites pass 823/823 on both systems.
+  The fresh physical ECL audit is byte-identical across two generations at
+  `e1d89da6cee5aced7a87187bde950a2d3fed2303292a366621134526bc963210`.
+  Complete pre-physical suites pass 823/823 on both systems.
 - **Authority:** This correction shrinks callback completeness and reduces
   issue work. It does not model the hidden branches, bound their callback
   effects spatially, prove survival, or add action authority.

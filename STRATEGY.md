@@ -363,6 +363,20 @@ comparison.
    15 late runtime instruction states are not byte-mappable to the retained
    decoded file. Require a fresh physical trace before any transfer-summary
    or callback-coverage promotion.
+   Fresh normal-priority Stage-4A run `20260728_101804` now closes that exact
+   runtime scope: all 5,749 callback rows validate as 1,442 complete horizon
+   schedules or 4,307 `unsupported_control_flow` unknowns; zero incomplete
+   prefix is lowered, no legacy budget/repeat stop remains, and all 25
+   phase-end rows validate. The run completed with 13 hits, hard no-Bomb, and
+   cleanup; all contacts follow global viability exhaustion. This promotes
+   the fail-closed implementation from offline to physically validated
+   instrumentation, not callback coverage or action authority. Observer B4
+   remains open because p95 is `0.2018 ms` against the fixed `0.2000 ms`
+   limit, although max is `0.7539 ms` with no GC or endpoint transition.
+   The next proposed intervention is an independently checked,
+   capture-aligned VM-local interpreter for a declared opcode subset. Dynamic
+   future motion, uncaptured RNG, call-stack, and interrupt dependencies must
+   remain `UNKNOWN`.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

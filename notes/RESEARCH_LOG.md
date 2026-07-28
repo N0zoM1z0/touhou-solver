@@ -7307,3 +7307,42 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `9.877/16.371 s`, with three existing Windows skips.
 - **Authority:** offline correctness/performance correction only. Callback
   coverage shrinks; no future-event or action authority is added.
+
+## 2026-07-28 — Physically validated the fail-closed ECL control boundary
+
+- Fresh normal-priority Lunatic Stage-4A run `20260728_101804` completed
+  frames `1..43865` over 14,126 decisions with 13 hits, hard no-Bomb,
+  `route_complete`, retained artifacts, supervisor exit, game termination,
+  key release, and exact process cleanup.
+- A new raw-runtime ECL audit accounts for all 5,749 callback rows. It
+  validates 1,442 complete horizon schedules and 4,307
+  `unsupported_control_flow` unknowns, with matching complete-only versus
+  incomplete-not-lowered states, zero lookahead errors, and zero legacy
+  `instruction_limit`/`repeated_state` stops.
+- All 1,308 spell-57 rows stop on control with at most 26 instructions.
+  Spell 61/65/73 boundaries are observed, and all 25 phase-end rows validate.
+  This directly closes the old 15-row runtime-image evidence class. Two audit
+  generations are byte-identical at SHA-256
+  `e1d89da6cee5aced7a87187bde950a2d3fed2303292a366621134526bc963210`.
+- Physical spell-57 read/lookahead p50/p95/max is
+  `0.0636/0.1566/2.6109 ms`, descriptively below the old p50/p95 but with a
+  larger scheduling tail. Spell 69 remains complete on all 1,310 rows and has
+  p95/max `0.2358/5.8988 ms`; this identifies remaining capture/decode/wall
+  cost outside the newly removed fallthrough work.
+- The unchanged birth-observer gate remains failed at p95:
+  `0.1018/0.2018/0.3326/0.5441/0.7539 ms`
+  p50/p95/p99/p99.9/max versus the `0.2000 ms` p95 limit. No observation
+  exceeds 2 ms, no completed GC or endpoint transition occurs, and all rows
+  have Windows cycle provenance. Birth-audit SHA-256 is
+  `8a5c2fbeb961b58c06c00f71e2e70e491904ca80b82e283f6eb9a6ad53812cf4`.
+- Raw JSONL is 480,071,751 bytes with SHA-256
+  `ad7e4da69eeee28adb6abad683598cbf26d9aa8d3f5e671c869e1394d357e885`.
+  The canonical first hit is frame 3,919; all 13 contacts follow global
+  viability exhaustion, so the 13/18/12 cross-run counts remain descriptive.
+- **Decision:** close CE-0154's fresh runtime validation gate and retain B4 as
+  open. The next G5 intervention must begin with a capture-aligned VM-local
+  interpreter contract and an independent scalar oracle; dynamic motion,
+  uncaptured RNG, call-stack, and interrupt dependencies stay `UNKNOWN`.
+- The new fail-closed live-audit tests, Ruff gate, and complete Linux/Windows
+  suites pass. Both systems run 825/825 tests; Linux takes `9.909 s` and
+  Windows retains three existing platform skips.

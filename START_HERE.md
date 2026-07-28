@@ -43,6 +43,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `Retain physical ECL control-flow gate`,
   `Fail closed on hidden ECL control branches`,
   `Define fail-closed ECL control boundary`,
   `Implement corridor completion priority experiment`,
@@ -288,8 +289,22 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `0.0223/0.0307` and `0.0039/0.0043 ms`. Full suites pass 823/823.
   Fifteen late transition rows are not byte-mappable to the retained decoded
   file, so the deterministic replay report deliberately fails its all-rows
-  gate. A fresh physical runtime trace is the next gate before any transfer
-  summary or coverage promotion.
+  gate. Fresh normal-priority run `20260728_101804` now closes the live
+  runtime scope without rewriting that historical limitation. It completed
+  frames `1..43865`, 14,126 decisions, 13 hits, hard no-Bomb, route
+  completion, retained artifacts, and cleanup. The deterministic live audit
+  accounts for all 5,749 callback rows: 1,442 complete horizon schedules,
+  4,307 `unsupported_control_flow` unknowns, zero legacy
+  instruction-limit/repeated-state stops, and 25/25 valid phase-end rows.
+  Spell 57 stops at control on all 1,308 rows with at most 26 instructions.
+  The audit is byte-identical at SHA-256
+  `e1d89da6cee5aced7a87187bde950a2d3fed2303292a366621134526bc963210`.
+  The same run fails the unchanged observer p95 narrowly at
+  `0.2018 > 0.2000 ms` despite max `0.7539 ms`, no completed GC, and no
+  endpoint transition; B4 remains open. All 13 contacts follow global
+  viability exhaustion, so the hit count is descriptive only. The next G5
+  gate is a capture-aligned VM-local/control interpreter contract, not a
+  spell shortcut or guessed transfer summary.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

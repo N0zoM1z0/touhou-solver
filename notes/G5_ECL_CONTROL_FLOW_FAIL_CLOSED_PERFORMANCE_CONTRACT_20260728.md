@@ -2,9 +2,9 @@
 
 Date: 2026-07-28
 
-Status: implemented and offline-validated correction; fresh physical runtime
-validation remains open because the retained decoded file cannot replay 15
-late transition rows.
+Status: implemented, offline-validated, and physically validated on one fresh
+complete Stage-4A runtime workload. Callback completeness remains deliberately
+smaller; no transfer summary or action authority is promoted.
 
 This refines
 `G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`. It changes
@@ -233,7 +233,53 @@ acceptance.
 Focused ECL tests pass 46/46. Complete Linux/Windows suites pass 823/823 in
 `9.877/16.371 s`, with three existing Windows platform skips.
 
-Ordered gates 1–3 and 5 are complete. Gate 4 remains open for the 15 unmapped
-runtime rows and must be closed by a fresh physical trace before this
-checkpoint can claim complete runtime-workload validation. No transfer
-summary or callback/action authority is promoted meanwhile.
+## Fresh Physical Runtime Evidence
+
+Accepted normal-priority Lunatic Stage-4A run
+`lunatic_route2_stage4a_unattended_20260728_101804` directly exercises the
+corrected runtime image over frames `1..43865` and 14,126 decisions. A
+dedicated raw-trace audit accounts for all 5,749 callback rows:
+
+- 1,442 rows are complete horizon schedules and are lowered through the
+  complete-only interface;
+- 4,307 rows stop at `unsupported_control_flow`, remain `UNKNOWN`, and expose
+  no lowered event;
+- no row reports the legacy `instruction_limit` or `repeated_state` stop;
+- all 1,308 spell-57 rows stop at control with at most 26 inspected
+  instructions;
+- spell 61, 65, and 73 control boundaries are all observed;
+- all 25 phase-end rows pass the same metadata validation, directly closing
+  the old 15-row retained-image evidence gap; and
+- two report generations are byte-identical at SHA-256
+  `e1d89da6cee5aced7a87187bde950a2d3fed2303292a366621134526bc963210`.
+
+The physical spell-57 scanner p50/p95/max is
+`0.0636/0.1566/2.6109 ms`, descriptively below the old
+`0.2808/0.5360/1.4769 ms` p50/p95 but with a larger scheduling tail. Spell
+69 contains no newly unsupported control and remains complete on all 1,310
+rows; its p95/max is `0.2358/5.8988 ms`. These live wall timings include
+capture, decoding, and scheduling effects and are not interchangeable with
+the isolated scanner benchmark.
+
+The unchanged birth-observer B4 gate fails narrowly at p95:
+`0.1018/0.2018/0.3326/0.5441/0.7539 ms`
+p50/p95/p99/p99.9/max versus the fixed `0.2000 ms` p95 limit. It has no
+over-2-ms row, no completed GC, valid cycle attribution on all 14,126 rows,
+and no endpoint transition. The run therefore closes the ECL correctness
+scope but does not close B4 performance or identify a new completion-handoff
+cause.
+
+The route completed with 13 hits and hard no-Bomb. The first hit at frame
+3,919 is the canonical witness; all 13 contacts follow global viability
+exhaustion. The hit count is RNG- and resource-distinct workload evidence,
+not a causal survival improvement from a trace-only callback correction.
+Supervisor completion, game termination, key release, and exact process
+cleanup were observed.
+
+All ordered gates are now complete for this fail-closed checkpoint. The next
+coverage intervention must first contract capture-aligned VM-local semantics,
+including exact mutation dependencies and an independent scalar interpreter.
+Dynamic player/enemy branches, RNG operations not already reflected in the
+captured local state, call-stack state, and interrupts remain `UNKNOWN`.
+Post-physical Linux/Windows quick suites pass 825/825, with three existing
+Windows platform skips; Linux completes in `9.909 s`.

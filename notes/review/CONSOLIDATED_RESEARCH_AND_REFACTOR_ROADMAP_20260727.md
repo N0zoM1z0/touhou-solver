@@ -1151,6 +1151,18 @@ parity 當成每個 nature tie field 的逐 bit equality。
   不對齊而未能 replay，audit 故意 fail all-rows gate；下一步先用 fresh
   physical trace 關閉 exact runtime scope，再研究 dependency-complete
   transfer summary；
+- fresh normal-priority Stage-4A run `20260728_101804` now closes that
+  runtime scope over all 5,749 callback rows: 1,442 complete horizon
+  schedules, 4,307 fail-closed unsupported-control unknowns, no legacy
+  instruction-limit/repeated-state stops, and 25/25 valid phase-end rows.
+  Spell 57 stops on control in all 1,308 rows with at most 26 instructions.
+  The route completed with 13 hits and hard no-Bomb; every contact follows
+  global viability exhaustion, so this is correctness/performance evidence,
+  not survival promotion. The observer still misses the fixed p95 gate by
+  `0.0018 ms` (`0.2018 > 0.2000`) with max `0.7539 ms`, no GC, and no
+  endpoint transition. Next contract a capture-aligned VM-local interpreter
+  for only an independently verified opcode subset; all dynamic motion,
+  uncaptured RNG, call-stack, and interrupt dependencies remain `UNKNOWN`;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

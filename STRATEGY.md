@@ -276,6 +276,24 @@ unknown rows, 975 contain tagged bullets, maximum 1,367. Linux/Windows suites
 pass `806/806`. This fixes an optimistic consumption path but does not bound
 the unknown suffix, prove repeated-state periodicity, or improve survival.
 
+**Observed physical schema-v8 gate:** Run `20260728_075455` completed Stage
+4A over frames `1..45499`, 14,903 decisions, 16 hits, hard no-Bomb, accepted
+artifacts, and cleanup. All 6,089 active-main-VM joins pass coverage
+validation. Callback rows split into 3,763 complete and 2,326 unknown, with
+every unknown prefix not lowered. Spell 57 supplies 1,313 instruction-limit
+unknowns; spell 73 supplies 1,013 repeated-state unknowns plus 125 complete
+rows. This physically closes the invalid-consumer gate.
+
+**Observed CE-0152 performance regression:** The same run fails the unchanged
+B4 maximum with observer p50/p95/p99/p99.9/max
+`0.0636/0.1448/0.2007/0.3858/8.9834 ms`. Its sole over-budget row spends
+`8.9333 ms` in materialization of only 24 evidence rows; native call is
+`0.0335 ms`, no completed GC overlaps, and adjacent equal-size copies are
+below `0.075 ms`. Scheduler/background contention is only hypothesized.
+Spell-57 callback traversal also has p95/max `0.5460/10.3328 ms`. All 16
+hits follow global viability exhaustion and do not establish a survival
+comparison.
+
 ### Priority
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
@@ -294,12 +312,15 @@ the unknown suffix, prove repeated-state periodicity, or improve survival.
    interval with no overlapping GC. The explicit GIL-held/released
    call-boundary correction passes offline and in two consecutive unpinned,
    GC-enabled physical Stage-4A runs, closing this specific B4 tail.
-   Incomplete callback coverage is now explicit and fails closed in schema
-   v8. Run one Stage-4A semantic recheck, then choose a proved repeated-state
-   scheduler, a conservative containing envelope, or explicit certificate
-   unavailability before treating Stage-5/6 evidence as promotable. Hard
-   Stage-5/6 runs may still be used as trace-only workloads. None of this
-   narrows `UNKNOWN` coverage or adds action authority.
+   Incomplete callback coverage is explicit, fails closed in schema v8, and
+   passes its Stage-4A semantic recheck. CE-0152 reopens the B4 performance
+   regression: add per-phase current-thread cycle deltas and
+   background-worker-overlap evidence before choosing an intervention.
+   Separately choose a proved repeated-state scheduler, a conservative
+   containing envelope, or explicit certificate unavailability before
+   treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still
+   be used as trace-only workloads. None of this narrows `UNKNOWN` coverage
+   or adds action authority.
    The stationary-witness
    Windows delivery gate passes twice only under the fixed P-core isolation
    boundary. The next optional step is a separately reviewed, default-off,

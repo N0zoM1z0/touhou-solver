@@ -39,6 +39,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `Retain schema-v8 callback physical gate`,
   `Fail closed on incomplete ECL lookahead`,
   `617e03a Retain first GIL-held Stage 4 pass`,
   `62e2248 Test native birth calls with the GIL held`,
@@ -179,12 +180,28 @@ describe the same decision. Python/C++ parity is not physical correctness.
   suites pass `806/806` in `9.046/15.657 s`, with three existing Windows
   skips. This closes the invalid prefix-consumption defect, not the unknown
   suffix: no conservative spatial envelope or repeated-state scheduler proof
-  exists yet. A schema-v8 Stage-4A semantic recheck is the next physical gate
-  before any Stage-5/6 result can be considered for promotion.
+  exists yet. Schema-v8 run `20260728_075455` now physically validates the
+  corrected consumer over 14,903 rows and 6,089 active-main-VM joins:
+  3,763 callback rows are complete and 2,326 are unknown, with exactly
+  matching complete-lowered/incomplete-not-lowered counts. Spell 57 supplies
+  1,313 instruction-limit unknowns; spell 73 supplies 1,013 repeated-state
+  unknowns and 125 complete rows. There are 936 incomplete rows with tagged
+  bullets, maximum 1,360. The run completed frames `1..45499`, 16 hits, hard
+  no-Bomb, accepted artifacts, `route_complete`, and cleanup; all contacts
+  follow global viability exhaustion.
+  This semantic pass also exposes CE-0152 and reopens B4 performance
+  regression status. Observation p50/p95/p99/p99.9/max is
+  `0.0636/0.1448/0.2007/0.3858/8.9834 ms`. Its only over-budget row has 24
+  evidence records and spends `8.9333 ms` in materialization while native
+  call is `0.0335 ms`; no completed GC overlaps it, and adjacent 24-row
+  materializations are at most `0.0741 ms`. Spell-57 ECL lookahead itself
+  also costs p95/max `0.5460/10.3328 ms`. The next checkpoint adds
+  current-thread cycle and background-worker-overlap attribution under a
+  fixed contract before another physical run or promotable Stage-5/6 claim.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and
-  CE-0143/0144/0145/0146/0147/0148/0149/0150/0151.
+  CE-0143/0144/0145/0146/0147/0148/0149/0150/0151/0152.
 - Preceding G5 observation checkpoint:
   `98db592 Integrate trace-only bullet birth audit`, building on
   `52d0864 Add fail-closed ECL birth intent classifier`, `c3c5a83`, and

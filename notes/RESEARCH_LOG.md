@@ -6980,3 +6980,49 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   schema-v8 Stage-4A semantic recheck, then choose repeated-state proof,
   conservative envelope, or explicit certificate unavailability before a
   Stage-5/6 result can be promotion evidence.
+
+## 2026-07-28 — Physically validated callback fail-closed semantics and found a new tail
+
+- At code checkpoint `b36fd3b`, run
+  `lunatic_route2_stage4a_unattended_20260728_075455` completed Lunatic
+  Stage 4A over frames `1..45499`, 14,903 decisions, 16 hits, hard no-Bomb,
+  accepted artifacts, supervisor `route_complete`, and identity-scoped
+  cleanup.
+- **Observed semantic pass:** All audit rows are schema-v8/native/`gil-held`;
+  validation passes with zero observation or intent errors. All 6,089
+  active-main-VM joins contain valid callback support. The run records 3,763
+  complete and 2,326 unknown callback rows, with exactly matching
+  `complete_schedule_lowered` and `incomplete_prefix_not_lowered` counts.
+  Prefix and lowered event totals are both zero.
+- Spell 57 supplies 1,313 `instruction_limit`/unknown rows. Spell 73 supplies
+  1,013 `repeated_state`/unknown rows and 125 complete horizon rows. There are
+  936 incomplete rows with tagged bullets, maximum 1,360. This physically
+  closes CE-0147's invalid-consumer falsifier but not its unknown spatial
+  suffix.
+- **Observed performance failure CE-0152:** Observer
+  p50/p95/p99/p99.9/max is `0.0636/0.1448/0.2007/0.3858/8.9834 ms`.
+  The only sample above `2.00 ms`, nonspell frame 15,809 with 24 evidence
+  rows, spends `8.9333 ms` in materialization; native call is only
+  `0.0335 ms`. No completed GC overlaps it. Adjacent 24-row materializations
+  are `0.0741/0.0575/0.0527/0.0707 ms`, so output size is not a sufficient
+  explanation.
+- **Observed callback traversal cost:** Spell-57 ECL read/lookahead
+  p50/p95/p99/p99.9/max is
+  `0.2868/0.5460/0.8128/1.9979/10.3328 ms`; spell-73 maximum is
+  `2.5051 ms`. These incomplete trace paths add no hard event certificate but
+  remain issue-thread cost.
+- All 16 contacts follow global viability-kernel exhaustion. Sixteen versus
+  prior RNG/trajectory/resource-distinct 9/15-hit runs is not a survival
+  regression or improvement. The first canonical hit is frame 1,189 in a
+  nonspell before the callback phases.
+- Raw trace is 503,847,529 bytes with SHA-256
+  `4f0d1cb39c3f125998cd9d2b3b36ef5366cf8683d97d5e37e63e98f01892f908`.
+  Two deterministic audit generations have canonical LF SHA-256
+  `a620ec0077820ec7516138bc4051fa9d7fd36549af43262d90d011e2ed2599ea`.
+- **Authority and next gate:** Callback fail-closed consumption is physically
+  retained. The fresh held-mode materialization tail reopens B4 regression
+  status. Before another physical run, fix a trace-only attribution contract
+  for current-thread cycle deltas and background-worker overlap; preserve the
+  recurrence, GC, unpinned controller, and wall limits. Stage 5/6 remains a
+  trace-only workload until this performance regression and the unknown
+  callback suffix have explicit fallbacks.

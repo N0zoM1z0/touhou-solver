@@ -4167,7 +4167,7 @@ callback-horizon coverage remains open
 ## CE-0147: Instruction-limit callback lookahead was consumed as an empty event list
 
 Status: observed incomplete model result; invalid prefix consumption
-corrected offline, unresolved suffix remains open
+physically corrected, unresolved suffix remains open
 
 - **Observed physical workload:** On all 1,261 spell-57 rows in schema-v3 run
   `20260728_043724`, callback lookahead scanned the maximum 256 instructions,
@@ -4209,6 +4209,14 @@ corrected offline, unresolved suffix remains open
   and lowers zero prefix events. That does not establish safe geometry after
   `unknown_from_frame`; repeated-state proof, a conservative containing
   envelope, or certificate unavailability is still required.
+- **Physical semantic recheck:** Accepted schema-v8 run `20260728_075455`
+  validates all 14,903 audit rows and all 6,089 active-main-VM decision
+  joins. It records 3,763 complete and 2,326 unknown callback rows. Every
+  unknown row is `incomplete_prefix_not_lowered`; prefix and lowered event
+  totals are both zero. Spell 57 contributes 1,313
+  `instruction_limit`/unknown rows. Spell 73 contributes 1,013
+  `repeated_state`/unknown rows and 125 complete horizon rows. Of all
+  incomplete rows, 936 contain tagged bullets, maximum 1,360.
 - **Authority:** this counterexample does not prove that a missing callback
   caused a hit. The invalid empty-schedule consumption is corrected, but the
   unknown suffix is still not a complete physical-hazard answer and grants no
@@ -4376,3 +4384,48 @@ Status: observed report aggregation failure; corrected and regression-tested
 - **Authority:** The corrected report supports one candidate B4 pass. It does
   not erase the two-pass requirement, close CE-0147, or grant action
   authority.
+
+## CE-0152: A GIL-held observer incurred an isolated materialization wall tail
+
+Status: observed physical performance failure; scheduler versus executed-work
+attribution open
+
+- **Observed symptom:** Accepted schema-v8 Stage-4A run `20260728_075455`
+  passes callback/intention validation but fails the unchanged B4 observer
+  maximum. Observation p50/p95/p99/p99.9/max is
+  `0.0636/0.1448/0.2007/0.3858/8.9834 ms`.
+- **Observed segment:** Exactly one of 14,903 observations exceeds `2.00 ms`.
+  At nonspell frame 15,809 it has 24 evidence rows and spends
+  `0.0019/0.0335/8.9333/0.0147 ms` in
+  prepare/native-call/materialize/controller-residual. Native-call maximum
+  over the full run remains `0.3911 ms`, so CE-0149's released-call mechanism
+  did not recur.
+- **Rejected output-size explanation:** Adjacent 24-row materializations at
+  frames 15,793, 15,801, 15,817, and 15,824 take
+  `0.0741/0.0575/0.0527/0.0707 ms`. The next-highest 20–28-row
+  materialization in the run is `0.2658 ms`; 24 rows do not explain
+  `8.9333 ms`.
+- **Observed exclusion:** No completed cyclic-GC collection overlaps any
+  observer phase. Windows thread CPU telemetry remains too coarse to
+  distinguish executed copying from descheduling. OS preemption or
+  background native-worker contention is therefore hypothesized, not
+  observed.
+- **Related trace cost:** The same run's pure-Python callback traversal is
+  also expensive on incomplete paths. Spell-57 read/lookahead
+  p50/p95/p99/p99.9/max is
+  `0.2868/0.5460/0.8128/1.9979/10.3328 ms`; spell 73 maximum is
+  `2.5051 ms`. This does not violate the narrow birth-observer gate but is
+  part of issue-thread performance debt.
+- **Next falsifier:** Add low-overhead per-phase current-thread cycle deltas
+  and explicit background-worker-inflight evidence under a fixed contract.
+  Low cycle delta with a high wall delta supports descheduling; proportional
+  cycles support optimizing prefix copies. Preserve GC, unpinned controller,
+  the exact observer recurrence/output, and the fixed wall limits.
+- **Evidence:** Raw trace is 503,847,529 bytes with SHA-256
+  `4f0d1cb39c3f125998cd9d2b3b36ef5366cf8683d97d5e37e63e98f01892f908`.
+  Two audit generations are byte-identical at canonical LF SHA-256
+  `a620ec0077820ec7516138bc4051fa9d7fd36549af43262d90d011e2ed2599ea`.
+- **Authority:** The fresh failure reopens B4 regression status despite the
+  two earlier passing runs. It does not invalidate their native-call
+  attribution, alter callback coverage authority, or support a survival
+  comparison.

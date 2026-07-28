@@ -1092,6 +1092,19 @@ parity 當成每個 nature tie field 的逐 bit equality。
   rows 有 tagged bullets，max 1,367。Linux/Windows `806/806` 通過。
   這只修正 optimistic consumption，unknown suffix 的 repeated-state
   proof／conservative envelope／certificate-unavailable 三選一仍未完成；
+- schema-v8 實機 `20260728_075455` 已在 14,903 rows／6,089
+  active-main-VM joins 上驗證 consumption：3,763 complete、2,326
+  unknown，所有 unknown 都是 prefix-not-lowered；spell 57 有 1,313
+  instruction-limit unknown，spell 73 有 1,013 repeated-state unknown 與
+  125 complete。936 個 incomplete rows 有 tagged bullets，max 1,360。
+  但同一 run 暴露 CE-0152：observer 唯一 >2-ms row 是 24-evidence
+  materialization `8.9333 ms`，native call `0.0335 ms`、zero completed GC；
+  因此 B4 performance regression 重新打開。下一步先用 thread-cycle
+  delta 與 background-worker-overlap 區分實際 copy cost／deschedule，再
+  決定 copy packing 或 worker isolation，不靠重跑挑一個 passing max；
+- spell-57 callback traversal 本身 p95/max `0.5460/10.3328 ms`，即使
+  fail-closed 也仍在 issue thread。後續性能線要做 exact-state/cache/
+  transfer-summary 分析，不能靠降低 256 cap 或 stage-specific shortcut；
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

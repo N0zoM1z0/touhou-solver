@@ -1,0 +1,1461 @@
+{
+  "by_phase_at_capture": {
+    "stage_3:nonspell": {
+      "activation_edges": 40614,
+      "all_evidence": 40694,
+      "evidence_kind:bootstrap_recent": 73,
+      "evidence_kind:invalid_timer": 4,
+      "evidence_kind:timer_regression": 3,
+      "unmatched": 40614
+    },
+    "stage_3:spell_57": {
+      "activation_edges": 8439,
+      "all_evidence": 8441,
+      "evidence_kind:invalid_timer": 2,
+      "unmatched": 8439
+    },
+    "stage_3:spell_61": {
+      "activation_edges": 11760,
+      "all_evidence": 11761,
+      "evidence_kind:invalid_timer": 1,
+      "support": 3029,
+      "unmatched": 8731
+    },
+    "stage_3:spell_65": {
+      "activation_edges": 19644,
+      "all_evidence": 19801,
+      "evidence_kind:invalid_timer": 1,
+      "evidence_kind:timer_regression": 156,
+      "unmatched": 19644
+    },
+    "stage_3:spell_69": {
+      "activation_edges": 5955,
+      "all_evidence": 5957,
+      "ambiguous": 98,
+      "evidence_kind:invalid_timer": 2,
+      "support": 2860,
+      "unmatched": 2997
+    },
+    "stage_3:spell_73": {
+      "activation_edges": 11081,
+      "all_evidence": 11086,
+      "evidence_kind:invalid_timer": 2,
+      "evidence_kind:timer_regression": 3,
+      "unmatched": 11081
+    }
+  },
+  "by_phase_at_intent": {
+    "stage_3:nonspell": {
+      "audit_rows": 8814,
+      "intent_result_absent": 8814,
+      "no_active_main_vm_rows": 8814,
+      "velocity_instructions_scanned": 0
+    },
+    "stage_3:spell_57": {
+      "active_main_vm_rows": 1313,
+      "audit_rows": 1313,
+      "classified_rows": 1313,
+      "stop:horizon": 12,
+      "stop:unsupported_auxiliary_or_callback": 72,
+      "stop:unsupported_control_flow": 1229,
+      "velocity_instructions_scanned": 336128,
+      "velocity_lookahead_coverage:unknown": 1313,
+      "velocity_lookahead_lowering:incomplete_prefix_not_lowered": 1313,
+      "velocity_lookahead_stop:instruction_limit": 1313
+    },
+    "stage_3:spell_61": {
+      "active_main_vm_rows": 1301,
+      "audit_rows": 1301,
+      "classified_rows": 1301,
+      "deduplicated_timed_events": 15,
+      "status:deferred": 7,
+      "status:dynamic_parameter": 418,
+      "stop:horizon": 4,
+      "stop:source_topology_change": 425,
+      "stop:unsupported_auxiliary_or_callback": 39,
+      "stop:unsupported_control_flow": 832,
+      "stop:unsupported_emission_state_mutation": 1,
+      "timed_event_sightings": 418,
+      "timed_sightings": 418,
+      "untimed_sightings": 7,
+      "velocity_instructions_scanned": 59838,
+      "velocity_lookahead_coverage:complete": 1301,
+      "velocity_lookahead_lowering:complete_schedule_lowered": 1301,
+      "velocity_lookahead_stop:horizon": 1301
+    },
+    "stage_3:spell_65": {
+      "active_main_vm_rows": 989,
+      "audit_rows": 989,
+      "classified_rows": 989,
+      "stop:horizon": 75,
+      "stop:source_topology_change": 473,
+      "stop:unsupported_auxiliary_or_callback": 37,
+      "stop:unsupported_control_flow": 404,
+      "velocity_instructions_scanned": 125822,
+      "velocity_lookahead_coverage:complete": 989,
+      "velocity_lookahead_lowering:complete_schedule_lowered": 989,
+      "velocity_lookahead_stop:horizon": 989
+    },
+    "stage_3:spell_69": {
+      "active_main_vm_rows": 1348,
+      "audit_rows": 1348,
+      "classified_rows": 1348,
+      "deduplicated_timed_events": 80,
+      "status:deferred": 7,
+      "status:dynamic_parameter": 1680,
+      "stop:horizon": 1310,
+      "stop:source_topology_change": 38,
+      "timed_event_sightings": 1680,
+      "timed_sightings": 1680,
+      "untimed_sightings": 7,
+      "velocity_instructions_scanned": 33344,
+      "velocity_lookahead_coverage:complete": 1348,
+      "velocity_lookahead_lowering:complete_schedule_lowered": 1348,
+      "velocity_lookahead_stop:horizon": 1348
+    },
+    "stage_3:spell_73": {
+      "active_main_vm_rows": 1138,
+      "audit_rows": 1138,
+      "classified_rows": 1138,
+      "stop:horizon": 102,
+      "stop:source_topology_change": 37,
+      "stop:unsupported_auxiliary_or_callback": 39,
+      "stop:unsupported_control_flow": 960,
+      "velocity_instructions_scanned": 8972,
+      "velocity_lookahead_coverage:complete": 125,
+      "velocity_lookahead_coverage:unknown": 1013,
+      "velocity_lookahead_lowering:complete_schedule_lowered": 125,
+      "velocity_lookahead_lowering:incomplete_prefix_not_lowered": 1013,
+      "velocity_lookahead_stop:horizon": 125,
+      "velocity_lookahead_stop:repeated_state": 1013
+    }
+  },
+  "callback_lookahead": {
+    "coverage_status_rows": {
+      "complete": 3763,
+      "unknown": 2326
+    },
+    "incomplete_tagged_max": 1360,
+    "incomplete_tagged_rows": 936,
+    "lowered_events": 0,
+    "lowering_status_rows": {
+      "complete_schedule_lowered": 3763,
+      "incomplete_prefix_not_lowered": 2326
+    },
+    "prefix_events": 0,
+    "semantics": {
+      "complete": "events cover the declared main-VM horizon",
+      "incomplete_lowering": "no prefix tuple is consumed as complete",
+      "legacy_declared_complete": "schema-v1-v7 declared horizon coverage without an enforced lowering interface",
+      "legacy_declared_unknown": "schema-v1-v7 incomplete prefix was exposed through the old schedule interface",
+      "unknown": "events are prefix evidence only"
+    }
+  },
+  "gates": {
+    "observer_budget_passed": false,
+    "observer_limits_ms": {
+      "max": 2.0,
+      "p95": 0.2,
+      "p99": 0.4
+    },
+    "timed_intent_available": true,
+    "validation_passed": true
+  },
+  "input": {
+    "active_spell_main_vm_rows": 6089,
+    "audit_rows": 14903,
+    "decision_scopes": 14903,
+    "deferred_fire_state_statuses": {
+      "aligned_complete": 6015,
+      "capture_misaligned": 74,
+      "enemy_flags_unavailable": 3382,
+      "enemy_pointer_mismatch": 5432
+    },
+    "deferred_fire_state_values": {
+      "disabled": 6015,
+      "unknown": 8888
+    },
+    "intent_errors": 0,
+    "native_call_modes": {
+      "gil-held": 14903
+    },
+    "observation_backends": {
+      "native": 14903
+    },
+    "observation_errors": 0,
+    "trace_schema_versions": {
+      "8": 14903
+    }
+  },
+  "intent": {
+    "deduplicated_timed_events": 95,
+    "dependency_sightings": {
+      "bullet_template_geometry": 2112,
+      "deferred_state": 14,
+      "emission_origin": 2112,
+      "minimum_fire_distance": 2112,
+      "player_aim_at_emission": 2112,
+      "pool_capacity": 2112,
+      "transform_program": 2112,
+      "vm_parameter:angle1": 1687,
+      "vm_parameter:count1": 425,
+      "vm_parameter:speed1": 425
+    },
+    "status_sightings": {
+      "deferred": 14,
+      "dynamic_parameter": 2098
+    },
+    "stop_reasons": {
+      "horizon": 1503,
+      "source_topology_change": 973,
+      "unsupported_auxiliary_or_callback": 187,
+      "unsupported_control_flow": 3425,
+      "unsupported_emission_state_mutation": 1
+    },
+    "timed_event_sightings": 2098,
+    "untimed_intent_signatures": 2
+  },
+  "join": {
+    "activation_edges": 97493,
+    "ambiguous_samples": [
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 997
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 998
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 999
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1000
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1001
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1002
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1003
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1004
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1005
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1006
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1007
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1008
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1009
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1010
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1011
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1012
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1013
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1014
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1015
+      },
+      {
+        "activation_support": [
+          40316,
+          40318
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            40316,
+            40316
+          ],
+          [
+            40317,
+            40317
+          ]
+        ],
+        "frame": 40319,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:spell_69",
+        "slot": 1016
+      }
+    ],
+    "any_temporal_matches": 5987,
+    "classification": {
+      "ambiguous": 98,
+      "support": 5889,
+      "unmatched": 91506
+    },
+    "residual_reasons": {
+      "active_spell_main_vm_absent": 40614,
+      "evidence_kind:bootstrap_recent": 73,
+      "evidence_kind:invalid_timer": 12,
+      "evidence_kind:timer_regression": 162,
+      "intent_dependency:bullet_template_geometry": 5889,
+      "intent_dependency:emission_origin": 5889,
+      "intent_dependency:minimum_fire_distance": 5889,
+      "intent_dependency:player_aim_at_emission": 5889,
+      "intent_dependency:pool_capacity": 5889,
+      "intent_dependency:transform_program": 5889,
+      "intent_dependency:vm_parameter:angle1": 2860,
+      "intent_dependency:vm_parameter:count1": 3029,
+      "intent_dependency:vm_parameter:speed1": 3029,
+      "multiple_temporal_intents": 98,
+      "no_temporally_overlapping_timed_intent": 50892,
+      "observation_status:capture_spanned": 97493,
+      "omitted_source_competition": 5889,
+      "temporal_support_not_point": 5889
+    },
+    "semantics": {
+      "ambiguous": "multiple intent intervals overlap",
+      "causal_authority": "none",
+      "exact": "one point intent equals one point observation",
+      "support": "one intent interval overlaps the observation",
+      "unmatched": "no timed main-VM intent interval overlaps"
+    },
+    "unique_temporal_fraction": 0.060404,
+    "unique_temporal_matches": 5889,
+    "unmatched_samples": [
+      {
+        "activation_support": [
+          400,
+          403
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 404,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 0
+      },
+      {
+        "activation_support": [
+          400,
+          403
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 404,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 1
+      },
+      {
+        "activation_support": [
+          400,
+          403
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 404,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 2
+      },
+      {
+        "activation_support": [
+          400,
+          403
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 404,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 3
+      },
+      {
+        "activation_support": [
+          408,
+          410
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 411,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 4
+      },
+      {
+        "activation_support": [
+          408,
+          410
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 411,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 5
+      },
+      {
+        "activation_support": [
+          408,
+          410
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 411,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 6
+      },
+      {
+        "activation_support": [
+          408,
+          410
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 411,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 7
+      },
+      {
+        "activation_support": [
+          410,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 8
+      },
+      {
+        "activation_support": [
+          410,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 9
+      },
+      {
+        "activation_support": [
+          410,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 10
+      },
+      {
+        "activation_support": [
+          410,
+          412
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 413,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 11
+      },
+      {
+        "activation_support": [
+          417,
+          420
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 421,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 12
+      },
+      {
+        "activation_support": [
+          417,
+          420
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 421,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 13
+      },
+      {
+        "activation_support": [
+          417,
+          420
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 421,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 14
+      },
+      {
+        "activation_support": [
+          417,
+          420
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 421,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 15
+      },
+      {
+        "activation_support": [
+          417,
+          420
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 421,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 16
+      },
+      {
+        "activation_support": [
+          417,
+          420
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 421,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 17
+      },
+      {
+        "activation_support": [
+          417,
+          420
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 421,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 18
+      },
+      {
+        "activation_support": [
+          417,
+          420
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 421,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 19
+      }
+    ]
+  },
+  "native_diagnostics": {
+    "gc_completed": {
+      "materialize:generation_0": 0,
+      "materialize:generation_1": 0,
+      "materialize:generation_2": 0,
+      "native_call:generation_0": 0,
+      "native_call:generation_1": 0,
+      "native_call:generation_2": 0,
+      "prepare:generation_0": 0,
+      "prepare:generation_1": 0,
+      "prepare:generation_2": 0
+    },
+    "observation_ms_by_gc_overlap": {
+      "without_gc": {
+        "count": 14903,
+        "max": 8.9834,
+        "p50": 0.0636,
+        "p95": 0.1448,
+        "p99": 0.2007,
+        "p99_9": 0.3858
+      }
+    },
+    "over_budget_dominant_segments": {
+      "materialize": 1
+    },
+    "over_budget_samples": [
+      {
+        "evidence_count": 24,
+        "frame": 15809,
+        "gc_completed": {
+          "materialize": [
+            0,
+            0,
+            0
+          ],
+          "native_call": [
+            0,
+            0,
+            0
+          ],
+          "prepare": [
+            0,
+            0,
+            0
+          ]
+        },
+        "observation_ms": 8.983400010038167,
+        "segments_ms": {
+          "controller_residual": 0.014699995517730713,
+          "materialize": 8.933299977798015,
+          "native_call": 0.03350002225488424,
+          "prepare": 0.001900014467537403
+        }
+      }
+    ],
+    "rows": 14903,
+    "rows_with_gc": 0,
+    "segments_ms": {
+      "controller_residual": {
+        "count": 14903,
+        "max": 0.4815,
+        "p50": 0.0131,
+        "p95": 0.0214,
+        "p99": 0.0274,
+        "p99_9": 0.0787
+      },
+      "materialize": {
+        "count": 14903,
+        "max": 8.9333,
+        "p50": 0.0066,
+        "p95": 0.0787,
+        "p99": 0.1105,
+        "p99_9": 0.2327
+      },
+      "native_call": {
+        "count": 14903,
+        "max": 0.3911,
+        "p50": 0.0362,
+        "p95": 0.0569,
+        "p99": 0.0746,
+        "p99_9": 0.1085
+      },
+      "prepare": {
+        "count": 14903,
+        "max": 0.2517,
+        "p50": 0.0021,
+        "p95": 0.0035,
+        "p99": 0.0044,
+        "p99_9": 0.0076
+      }
+    }
+  },
+  "observation": {
+    "age": {
+      "count": 97740,
+      "max": 3.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "p99_9": 1.0
+    },
+    "capture_spans": {
+      "0": 14284,
+      "1": 619
+    },
+    "evidence_kinds": {
+      "activation_edge": 97493,
+      "bootstrap_recent": 73,
+      "invalid_timer": 12,
+      "timer_regression": 162
+    },
+    "evidence_per_row": {
+      "count": 14903,
+      "max": 592.0,
+      "p50": 0.0,
+      "p95": 37.0,
+      "p99": 73.0,
+      "p99_9": 320.0
+    },
+    "observation_statuses": {
+      "capture_spanned": 97566,
+      "invalid_timer": 12,
+      "slot_reuse_ambiguous": 162
+    }
+  },
+  "passed": false,
+  "schema": "th08-bullet-birth-residual-audit-v6",
+  "scope": {
+    "future_geometry_authority": "none",
+    "hazard_coverage_authority": "none",
+    "intent_source": "active_spell_enemy_main_vm_only",
+    "omitted_sources": [
+      "callback_or_interrupt_source",
+      "child_enemy_or_auxiliary_vm",
+      "deferred_emission_runtime_state",
+      "non_ecl_native_source",
+      "non_spell_enemy_main_vm"
+    ],
+    "physical_action_authority": "none"
+  },
+  "source": {
+    "trace_bytes": 503847529,
+    "trace_name": "lunatic_route2_stage4a_unattended_20260728_075455.jsonl",
+    "trace_sha256": "4f0d1cb39c3f125998cd9d2b3b36ef5366cf8683d97d5e37e63e98f01892f908"
+  },
+  "timing_by_evidence_count": {
+    "build": {
+      "0": {
+        "count": 10516,
+        "max": 0.3507,
+        "p50": 0.0385,
+        "p95": 0.0636,
+        "p99": 0.0861,
+        "p99_9": 0.138
+      },
+      "1_8": {
+        "count": 1354,
+        "max": 0.4446,
+        "p50": 0.0692,
+        "p95": 0.1147,
+        "p99": 0.1589,
+        "p99_9": 0.3718
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 0.864,
+        "p50": 0.2258,
+        "p95": 0.864,
+        "p99": 0.864,
+        "p99_9": 0.864
+      },
+      "33_64": {
+        "count": 736,
+        "max": 0.3689,
+        "p50": 0.0771,
+        "p95": 0.1251,
+        "p99": 0.158,
+        "p99_9": 0.3689
+      },
+      "65_320": {
+        "count": 150,
+        "max": 0.5391,
+        "p50": 0.0929,
+        "p95": 0.1882,
+        "p99": 0.5053,
+        "p99_9": 0.5391
+      },
+      "9_32": {
+        "count": 2135,
+        "max": 0.3678,
+        "p50": 0.0707,
+        "p95": 0.1158,
+        "p99": 0.1471,
+        "p99_9": 0.366
+      }
+    },
+    "observation": {
+      "0": {
+        "count": 10516,
+        "max": 0.4227,
+        "p50": 0.0569,
+        "p95": 0.0913,
+        "p99": 0.1188,
+        "p99_9": 0.2072
+      },
+      "1_8": {
+        "count": 1354,
+        "max": 0.6788,
+        "p50": 0.1134,
+        "p95": 0.1892,
+        "p99": 0.3096,
+        "p99_9": 0.6205
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 0.2369,
+        "p50": 0.127,
+        "p95": 0.2369,
+        "p99": 0.2369,
+        "p99_9": 0.2369
+      },
+      "33_64": {
+        "count": 736,
+        "max": 0.5256,
+        "p50": 0.1148,
+        "p95": 0.1837,
+        "p99": 0.2587,
+        "p99_9": 0.5256
+      },
+      "65_320": {
+        "count": 150,
+        "max": 0.4588,
+        "p50": 0.1181,
+        "p95": 0.2014,
+        "p99": 0.3776,
+        "p99_9": 0.4588
+      },
+      "9_32": {
+        "count": 2135,
+        "max": 8.9834,
+        "p50": 0.1135,
+        "p95": 0.1827,
+        "p99": 0.228,
+        "p99_9": 0.3173
+      }
+    },
+    "observation_cpu": {
+      "0": {
+        "count": 10516,
+        "max": 31.25,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 15.625
+      },
+      "1_8": {
+        "count": 1354,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 15.625
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 0.0
+      },
+      "33_64": {
+        "count": 736,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 15.625
+      },
+      "65_320": {
+        "count": 150,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 15.625,
+        "p99_9": 15.625
+      },
+      "9_32": {
+        "count": 2135,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 0.0
+      }
+    },
+    "pre_emit_total": {
+      "0": {
+        "count": 10516,
+        "max": 0.5659,
+        "p50": 0.1062,
+        "p95": 0.2027,
+        "p99": 0.2794,
+        "p99_9": 0.4697
+      },
+      "1_8": {
+        "count": 1354,
+        "max": 0.7991,
+        "p50": 0.1943,
+        "p95": 0.3253,
+        "p99": 0.4998,
+        "p99_9": 0.734
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 1.1009,
+        "p50": 0.3375,
+        "p95": 1.1009,
+        "p99": 1.1009,
+        "p99_9": 1.1009
+      },
+      "33_64": {
+        "count": 736,
+        "max": 0.6596,
+        "p50": 0.2146,
+        "p95": 0.3492,
+        "p99": 0.4401,
+        "p99_9": 0.6596
+      },
+      "65_320": {
+        "count": 150,
+        "max": 0.6842,
+        "p50": 0.2314,
+        "p95": 0.4766,
+        "p99": 0.6426,
+        "p99_9": 0.6842
+      },
+      "9_32": {
+        "count": 2135,
+        "max": 9.0543,
+        "p50": 0.1995,
+        "p95": 0.3309,
+        "p99": 0.4146,
+        "p99_9": 0.5081
+      }
+    },
+    "previous_emit": {
+      "0": {
+        "count": 10515,
+        "max": 0.521,
+        "p50": 0.0535,
+        "p95": 0.0903,
+        "p99": 0.1211,
+        "p99_9": 0.3006
+      },
+      "1_8": {
+        "count": 1354,
+        "max": 0.3648,
+        "p50": 0.0757,
+        "p95": 0.1245,
+        "p99": 0.1536,
+        "p99_9": 0.3205
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 5.8555,
+        "p50": 2.4117,
+        "p95": 5.8555,
+        "p99": 5.8555,
+        "p99_9": 5.8555
+      },
+      "33_64": {
+        "count": 736,
+        "max": 2.1379,
+        "p50": 0.1829,
+        "p95": 1.2247,
+        "p99": 1.6058,
+        "p99_9": 2.1379
+      },
+      "65_320": {
+        "count": 150,
+        "max": 5.8006,
+        "p50": 1.3027,
+        "p95": 2.0849,
+        "p99": 3.1065,
+        "p99_9": 5.8006
+      },
+      "9_32": {
+        "count": 2135,
+        "max": 0.3898,
+        "p50": 0.1172,
+        "p95": 0.2011,
+        "p99": 0.2665,
+        "p99_9": 0.381
+      }
+    },
+    "semantics": {
+      "observation_build_pre_emit": "bucketed by the current audit evidence count",
+      "previous_emit": "bucketed by the preceding audit evidence count"
+    }
+  },
+  "timing_ms": {
+    "build": {
+      "count": 14903,
+      "max": 0.864,
+      "p50": 0.0436,
+      "p95": 0.0945,
+      "p99": 0.1306,
+      "p99_9": 0.3403
+    },
+    "intent": {
+      "count": 14903,
+      "max": 0.4293,
+      "p50": 0.0,
+      "p95": 0.0783,
+      "p99": 0.1115,
+      "p99_9": 0.1871
+    },
+    "observation": {
+      "count": 14903,
+      "max": 8.9834,
+      "p50": 0.0636,
+      "p95": 0.1448,
+      "p99": 0.2007,
+      "p99_9": 0.3858
+    },
+    "observation_cpu": {
+      "count": 14903,
+      "max": 31.25,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "p99_9": 15.625
+    },
+    "pre_emit_total": {
+      "count": 14903,
+      "max": 9.0543,
+      "p50": 0.1318,
+      "p95": 0.2721,
+      "p99": 0.3725,
+      "p99_9": 0.5659
+    },
+    "previous_emit": {
+      "count": 14902,
+      "max": 5.8555,
+      "p50": 0.0608,
+      "p95": 0.181,
+      "p99": 1.1759,
+      "p99_9": 2.1559
+    }
+  },
+  "velocity_lookahead_read_ms_by_phase": {
+    "stage_3:nonspell": {
+      "count": 8814,
+      "max": 0.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "p99_9": 0.0
+    },
+    "stage_3:spell_57": {
+      "count": 1313,
+      "max": 10.3328,
+      "p50": 0.2868,
+      "p95": 0.546,
+      "p99": 0.8128,
+      "p99_9": 1.9979
+    },
+    "stage_3:spell_61": {
+      "count": 1301,
+      "max": 1.7457,
+      "p50": 0.1155,
+      "p95": 0.2284,
+      "p99": 0.3608,
+      "p99_9": 1.5262
+    },
+    "stage_3:spell_65": {
+      "count": 989,
+      "max": 1.9162,
+      "p50": 0.2047,
+      "p95": 0.3142,
+      "p99": 0.6033,
+      "p99_9": 1.9162
+    },
+    "stage_3:spell_69": {
+      "count": 1348,
+      "max": 1.9425,
+      "p50": 0.0861,
+      "p95": 0.1792,
+      "p99": 0.3969,
+      "p99_9": 1.0505
+    },
+    "stage_3:spell_73": {
+      "count": 1138,
+      "max": 2.5051,
+      "p50": 0.0689,
+      "p95": 0.1913,
+      "p99": 0.5814,
+      "p99_9": 2.0671
+    }
+  }
+}

@@ -223,6 +223,15 @@ byte-identical at canonical LF SHA-256
 Focused tests and Ruff pass. Complete Linux/Windows suites pass `806/806` in
 `9.046/15.657 s`, with three existing Windows platform skips.
 
-This corrects the consumption semantics only. The 2,405 unknown suffixes
-remain outside hard coverage authority until gate 7 and a schema-v8 physical
-semantic recheck succeed.
+Schema-v8 physical run `20260728_075455` then validates all 14,903 audit rows
+and 6,089 active-main-VM joins. It records 3,763 complete and 2,326 unknown
+callback rows. Every unknown row is
+`incomplete_prefix_not_lowered`; prefix and lowered event totals are both
+zero. Spell 57 contributes 1,313 instruction-limit unknowns. Spell 73
+contributes 1,013 repeated-state unknowns and 125 complete horizon rows. Of
+all incomplete rows, 936 contain tagged bullets, maximum 1,360.
+
+This physically validates the consumption semantics only. The 2,326 unknown
+suffixes remain outside hard coverage authority until gate 7 succeeds. The
+same physical run also exposes CE-0152, an unrelated `8.9333 ms`
+materialization wall tail, so B4 performance regression status is open.

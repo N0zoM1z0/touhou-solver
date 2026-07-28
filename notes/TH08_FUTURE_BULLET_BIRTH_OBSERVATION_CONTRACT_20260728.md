@@ -430,11 +430,18 @@ schema-v7 run `20260728_070838` labels 3,723 rows legacy-declared complete and
 bullets, maximum 1,367. Complete Linux/Windows suites pass `806/806` in
 `9.046/15.657 s`.
 
+Schema-v8 Stage-4A run `20260728_075455` physically validates the corrected
+consumer over 3,763 complete and 2,326 unknown callback rows. Every unknown
+row is prefix-only/not-lowered. Spell 57 supplies 1,313 instruction-limit
+unknowns; spell 73 supplies 1,013 repeated-state unknowns and 125 complete
+horizon rows.
+
 This corrects a consumer and evidence-schema defect. It neither completes the
 birth-source model nor supplies a conservative callback envelope after the
-first unknown frame. A schema-v8 Stage-4A recheck and one of the declared
-repeated-state proof/envelope/certificate-unavailable continuations remain
-required.
+first unknown frame. One of the declared repeated-state
+proof/envelope/certificate-unavailable continuations remains required.
+CE-0152 also reopens B4 performance regression status after one
+materialization sample reached `8.9333 ms`.
 
 ## Ordered Gates
 

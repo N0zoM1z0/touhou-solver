@@ -8205,3 +8205,30 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   publication, cadence, or live-action authority follows. Next capture and
   byte-compare one shipped Stage-5 runtime ECL image, then lower event classes
   one at a time under separate contracts.
+
+## 2026-07-28 — Extracted the typed physical-issue stage
+
+- Moved the ordered issue-time player/predeath/frame reads, action alignment,
+  physical dispatch/no-write decision, issued-delay registration, and next
+  actuator mask/direction result behind `th08_live.issue_stage`.
+- The controller retains discontinuity/session resets, hit and override
+  policy, optional services, trace composition, and all cleanup ownership.
+  Existing compatibility symbols remain available.
+- Focused tests prove exact read/dispatch order, write-path delay arguments,
+  no-write preservation of pending delay state, frame/mask binding, and next
+  actuator state. Focused Ruff passes. Complete Linux/Windows discovery both
+  pass 945 tests; Windows retains three existing skips.
+- **Observed physical retention:** Hard Stage-1 run
+  `hard_route2_stage1_unattended_20260728_203408` completed 7,755 decisions
+  over frames `1..20950`, one hit at frame 2520, hard no-Bomb,
+  `route_complete`, automatic terminal confirmation, exact key release, and
+  no residual process. One hit is workload evidence, not a causal structural
+  regression.
+- A strict streaming audit finds 3,018 writes and 4,737 no-write
+  transactions, with zero target/transition/write/estimator disagreement,
+  Bomb row, or deadline-suppressed write. Decision cadence is p50/p95 `2/3`.
+- Raw SHA-256 is
+  `1c8434c8a768e98492b81c4eb189df9efdfc71b7859c5916c03a75ff433844ac`.
+  **Decision:** Accept the structural seam with unchanged authority. Extract
+  the post-issue bullet-birth trace stage next; do not move `_run_live_session`
+  wholesale or mix action and optional trace ownership.

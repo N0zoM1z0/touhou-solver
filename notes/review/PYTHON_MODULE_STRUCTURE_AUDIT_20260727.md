@@ -156,6 +156,14 @@ boundary. Extracting the ordered deadline and post-hit input overrides reduces
 the current controller to 4,168 lines. The dominant block remains
 `_run_live_session`.
 
+Later G5 source instrumentation grew the controller to 4,758 lines. The
+physical-issue-stage checkpoint moves issue-time native reads, alignment,
+dispatch/no-write, issued-delay registration, and next actuator mask/direction
+behind `th08_live.issue_stage`; the controller is now 4,751 lines. The small
+line-count delta is not the result: the extracted unit owns the physical side
+effect and no-write estimator invariant behind an independently tested
+contract. Epoch/session reset remains with the lifecycle owner.
+
 `scripts/th08_live/iteration.py` now defines and the live loop consumes:
 
 - `CapturedIteration`: exact source/snapshot/hazard/delay identity and decoded
@@ -241,7 +249,7 @@ implementation module where module-level patch identity matters.
 
 | Module | Lines | Decision | Reason |
 | --- | ---: | --- | --- |
-| `th08_live/controller.py` | 4,168 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, action alignment/dispatch, and outer composition; immutable handoffs plus pure trace, movement, hazard, certificate, objective, fresh-enemy issue, and input-override modules are live. |
+| `th08_live/controller.py` | 4,751 | continue through stage contracts | `_run_live_session` still combines scene lifecycle, capture, service mutation, optional post-issue research, and outer composition; physical issue alignment/dispatch/state mutation and earlier immutable/pure stages now have dedicated owners. |
 | `th08_live/planner_pass.py` | 320 | staged split complete | Prepare/orchestration only; shared contracts, baseline, supplemental lifecycle, and final selection/assembly have dedicated modules. |
 | `th08_live/planner_pass_supplemental.py` | 755 | retain through finalization gate | Cohesive pre-submit/search/exact-version lookup/fallback/terminal-label lifecycle; split native job construction from search only if later work makes either responsibility change independently. |
 | `th08_live/planner_pass_finalize.py` | 587 | retain | One selection/assembly responsibility: endpoint rank, robust override, pre-loss admission, damage shadow, decision assembly, and relaxed retry. |
@@ -268,7 +276,7 @@ decomposed.
 | Module | Lines | Decision |
 | --- | ---: | --- |
 | `th08_live_dodge_agent.py` | 22 | keep facade |
-| `th08_live/controller.py` | 4,168 | P0 staged extraction through iteration contracts |
+| `th08_live/controller.py` | 4,751 | P0 staged extraction through iteration contracts |
 | `th08_live/planner_pass.py` | 320 | staged split complete |
 | `touhou_control/query_survival.py` | 80 | compatibility facade; focused scalar/root/workspace/dispatch/problem modules complete |
 | `touhou_control/query_survival_types.py` | 140 | retain public contracts |
@@ -375,9 +383,11 @@ The structural sequence and current status are:
    consumed at the outer physical dispatch boundary**. Fresh enemy-prefix
    capture, aligned change detection, and conditional recertification now
    live behind `th08_live.fresh_issue`; deadline and post-hit mask overrides
-   now live behind `th08_live.issue_overrides`. Action alignment, physical
-   send/no-write, and actuator-state mutation remain the next bounded
-   extraction.
+   now live behind `th08_live.issue_overrides`. Issue-time player/predeath/
+   frame reads, action alignment, physical send/no-write, issued-delay
+   registration, and actuator-state mutation now live behind
+   `th08_live.issue_stage`. The controller retains epoch-discontinuity and
+   session reset ownership.
    fresh enemy prefix, recertification, selected action, send/no-write result,
    issue frame, and deadline status.
 6. Build trace records from those immutable stage outputs after the issue

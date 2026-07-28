@@ -11,6 +11,13 @@ from .issue_overrides import (
     apply_deadline_hold,
     apply_post_hit_input_overrides,
 )
+from .issue_stage import (
+    ActionIssueObservation,
+    PhysicalIssueCommit,
+    PhysicalIssueRequest,
+    commit_physical_issue,
+    observe_action_issue,
+)
 from .iteration import (
     CapturedIteration,
     FreshIssueResult,
@@ -70,6 +77,7 @@ __all__ = [
     "BULLET_POOL_SIZE",
     "BULLET_STRIDE",
     "AutoConfirmPulse",
+    "ActionIssueObservation",
     "Bullet",
     "CapturedIteration",
     "GameplaySceneGuard",
@@ -97,6 +105,8 @@ __all__ = [
     "PolicyQueryRequest",
     "PolicyQuerySnapshot",
     "PackedBulletSnapshot",
+    "PhysicalIssueCommit",
+    "PhysicalIssueRequest",
     "PrimaryPolicyQuery",
     "PublishedGuidance",
     "RawPoolCapture",
@@ -109,8 +119,10 @@ __all__ = [
     "apply_deadline_hold",
     "apply_post_hit_input_overrides",
     "auto_confirm_eligible",
+    "commit_physical_issue",
     "frozen_auto_confirm_eligible",
     "input_clock_message_key",
+    "observe_action_issue",
     "recertify_fresh_enemy_prefix",
     "semantic_clock_observation",
     "serialize_semantic_clock_event",

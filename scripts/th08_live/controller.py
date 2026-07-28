@@ -213,13 +213,18 @@ from th08_live.fresh_issue import (
 )
 from th08_live.iteration import (
     CapturedIteration,
-    FreshIssueResult,
+    FreshIssueResult,  # noqa: F401 - compatibility export
     PublishedGuidance,
     ServiceUpdate,
 )
 from th08_live.issue_overrides import (
     apply_deadline_hold,
     apply_post_hit_input_overrides,
+)
+from th08_live.issue_stage import (
+    PhysicalIssueRequest,
+    commit_physical_issue,
+    observe_action_issue,
 )
 from th08_live.local_certificates import (
     control_prefix_hazards as _control_prefix_hazards_impl,
@@ -385,7 +390,7 @@ from touhou_control.candidate_verifier_service import (
     CandidateVerifierTarget,
 )
 from touhou_control.epochs import (
-    ActionIssueAlignment,
+    ActionIssueAlignment,  # noqa: F401 - compatibility export
     FrameWindow,
     HazardEpochAlignment,
 )
@@ -3399,15 +3404,16 @@ def _run_live_session(
             plan_ms += issue_enemy_recertificate_ms
             post_issue_guard_action = decision.action
             post_issue_guard_mask = decision.mask
-            phase_now = reader.u8(0x017D5EF8)
-            predeath_now = reader.i32(0x017D5EF8 + 0xE2A68)
-            counter_at_action = reader.u32(0x0164D30C)
-            action_alignment = ActionIssueAlignment(
+            action_issue_observation = observe_action_issue(
+                reader,
                 source_frame=int(state["enemy_manager_frame"]),
                 capture_frame=counter_after_read,
-                issue_frame=counter_at_action,
                 delay_support=delay_estimate.support,
             )
+            phase_now = action_issue_observation.player_phase
+            predeath_now = action_issue_observation.predeath_counter
+            counter_at_action = action_issue_observation.issue_frame
+            action_alignment = action_issue_observation.alignment
             if action_alignment.crosses_contiguous_epoch(
                 maximum_post_capture_advance=(
                     MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES
@@ -3565,49 +3571,36 @@ def _run_live_session(
                 candidate_publication_ms = (
                     time.perf_counter() - candidate_publication_started
                 ) * 1000.0
-            input_dispatch = issue_controller.dispatch(
-                previous_mask,
-                decision.mask,
+            physical_issue = commit_physical_issue(
+                PhysicalIssueRequest(
+                    capture=captured_iteration,
+                    proposal=local_proposal,
+                    decision=decision,
+                    alignment=action_alignment,
+                    previous_mask=previous_mask,
+                    direction_mask=UP | DOWN | LEFT | RIGHT,
+                    pre_issue_action=pre_issue_action,
+                    pre_issue_mask=pre_issue_mask,
+                    post_guard_action=post_issue_guard_action,
+                    post_guard_mask=post_issue_guard_mask,
+                    planned_action=planned_action,
+                    planned_mask=planned_mask,
+                    fresh_enemy_changed=bool(issue_enemy_changes),
+                    recertification_ms=issue_enemy_recertificate_ms,
+                    issue_path_started=issue_path_started,
+                    iteration_started=iteration_started,
+                ),
+                issue_controller=issue_controller,
+                delay_recorder=delay_estimator,
+                clock=time.perf_counter,
             )
-            transitions = input_dispatch.transitions
+            fresh_issue_result = physical_issue.issue
+            input_dispatch = fresh_issue_result.dispatch
             input_ms = input_dispatch.input_ms
-            issue_path_ms = (
-                time.perf_counter() - issue_path_started
-            ) * 1000.0
-            observe_to_issue_ms = (
-                time.perf_counter() - iteration_started
-            ) * 1000.0
-            fresh_issue_result = FreshIssueResult(
-                capture=captured_iteration,
-                proposal=local_proposal,
-                decision=decision,
-                alignment=action_alignment,
-                dispatch=input_dispatch,
-                issue_frame=counter_at_action,
-                pre_issue_action=pre_issue_action,
-                pre_issue_mask=pre_issue_mask,
-                post_guard_action=post_issue_guard_action,
-                post_guard_mask=post_issue_guard_mask,
-                planned_action=planned_action,
-                planned_mask=planned_mask,
-                fresh_enemy_changed=bool(issue_enemy_changes),
-                deadline_missed=action_deadline_missed,
-                recertification_ms=issue_enemy_recertificate_ms,
-                issue_path_ms=issue_path_ms,
-                observe_to_issue_ms=observe_to_issue_ms,
-            )
-            if transitions:
-                delay_estimator.issued(
-                    snapshot_frame=fresh_issue_result.capture.source_frame,
-                    issue_frame=fresh_issue_result.issue_frame,
-                    expected_mask=fresh_issue_result.decision.mask,
-                    support_high=delay_estimate.support[-1],
-                    support=delay_estimate.support,
-                )
-            previous_mask = fresh_issue_result.decision.mask
-            previous_direction = fresh_issue_result.decision.mask & (
-                UP | DOWN | LEFT | RIGHT
-            )
+            issue_path_ms = fresh_issue_result.issue_path_ms
+            observe_to_issue_ms = fresh_issue_result.observe_to_issue_ms
+            previous_mask = physical_issue.previous_mask
+            previous_direction = physical_issue.previous_direction
             if auxiliary_vm_batch_service is not None:
                 current_spell_id = (
                     int(spell_state["spell_id"])

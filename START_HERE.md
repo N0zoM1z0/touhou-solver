@@ -724,7 +724,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
   blocked by live integration, hazard coverage, clock, publication, and
   performance gates.
 - Latest structural checkpoint:
-  `d25507e Split practice dossier summary ownership`. Shared planner
+  the enclosing `notes/LIVE_PHYSICAL_ISSUE_STAGE_REFACTOR_20260728.md`
+  checkpoint
+  moves issue-time player/predeath/frame reads, frame alignment, physical
+  dispatch/no-write, issued-delay registration, and next actuator
+  mask/direction behind `th08_live.issue_stage`. Linux/Windows pass 945
+  tests. Hard Stage-1 retention `20260728_203408` completed 7,755 decisions
+  over frames `1..20950`, one hit, hard no-Bomb, `route_complete`, automatic
+  terminal confirmation, and cleanup. All 7,755 trace transactions are
+  self-consistent: 3,018 writes, 4,737 no-writes, and zero target/transition/
+  write/estimator disagreement or Bomb row. The next structural seam is the
+  post-issue bullet-birth observation/publication stage.
+  The preceding dossier checkpoint
+  `d25507e Split practice dossier summary ownership` moved shared planner
   consistency, practice timing/sensor, control/viability, and behavior/spell
   summaries now live in five focused modules under `analysis/dossier/`.
   Full-run/practice entry points are 676/448 lines and retain exact historical
@@ -747,8 +759,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   The preceding live checkpoint `a388a1d Extract issue-time input overrides`
   moved deadline-hold construction and the ordered
   deathbomb/counter/auto-confirm/final hard-no-Bomb checks into
-  `th08_live.issue_overrides`; physical dispatch, actuator mutation, and
-  scene lifecycle remain controller-owned. The preceding native
+  `th08_live.issue_overrides`; physical dispatch and actuator mutation now
+  belong to the newer issue-stage checkpoint, while scene lifecycle remains
+  controller-owned. The preceding native
   checkpoint `a0a7afb Separate native pipeline compatibility adapters` moved
   direct-pipeline v1 create/query adapters into `pipeline/direct_compat.cpp`;
   belief
@@ -772,8 +785,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Historical imports and monkeypatch seams still resolve current
   implementation globals. R2/R3/R4 remain complete. The remaining structural
   target is the staged iteration contract inside `_run_live_session`, recorded
-  in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`, plus the
-  staged action-alignment/dispatch contract inside `_run_live_session`.
+  in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`, beginning with
+  optional post-issue trace-stage ownership now that action issue is split.
   Offline dossier entry points are now bounded aggregation, validation,
   regression, and CLI composition. No model, recurrence, float comparison,
   worker policy, action authority, report schema, attribution, summary, or
@@ -798,8 +811,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   merge/commit callbacks on every iteration, preserving historical
   monkeypatch and backend dispatch seams. Deadline handling, Bomb policy, and
   auto-confirm mask selection now delegate to the pure
-  `th08_live.issue_overrides` boundary. Candidate lookup, physical dispatch,
-  actuator updates, and trace publication remain controller-owned.
+  `th08_live.issue_overrides` boundary. Issue-time frame observation,
+  physical dispatch/no-write, delay registration, and actuator state now
+  delegate to `th08_live.issue_stage`. Candidate lookup, discontinuity
+  lifecycle, optional research stages, and trace composition remain
+  controller-owned.
 - Post-extraction physical retention
   `lunatic_route2_stage4a_unattended_20260727_220330` completed Stage 4A over
   frames `2..41645` with 13,295 decisions, maximum 1,362 bullets, zero Bomb

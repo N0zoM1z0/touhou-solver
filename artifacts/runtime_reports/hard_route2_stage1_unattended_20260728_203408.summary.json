@@ -1,0 +1,1585 @@
+{
+  "decision_count": 7755,
+  "first_frame": 1,
+  "last_frame": 20950,
+  "frame_span": 20949,
+  "termination_reason": "route_complete",
+  "counter_gaps": 146,
+  "hit_frames": [
+    2520
+  ],
+  "hit_analyses": [
+    {
+      "hit_frame": 2520,
+      "window_start": 2280,
+      "stage_route_index": 0,
+      "stage_label": "Stage 1",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 7.0
+      },
+      "player": {
+        "x": 373.117919921875,
+        "y": 432.0,
+        "projected_x": 370.2894928455353,
+        "projected_y": 429.1715729236603,
+        "control_origin_x": 367.46106576919556,
+        "control_origin_y": 426.34314584732056,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": {
+        "frame": 2382,
+        "source_frame": 2367,
+        "lane": "right",
+        "slack": 11.246153316369167,
+        "deadline": 16,
+        "travel_frames": 4.753846683630834
+      },
+      "first_negative_gate": {
+        "frame": 2320,
+        "source_frame": 2318,
+        "lane": "right",
+        "slack": -14.128455186925997,
+        "deadline": 21,
+        "travel_frames": 35.128455186926
+      },
+      "minimum_gate_slack": -21.84032305589144,
+      "first_nonpositive_pipeline": {
+        "frame": 2520,
+        "clearance": -0.992284893989563
+      },
+      "minimum_pipeline_clearance": -0.992284893989563,
+      "nearest_bullet": {
+        "slot": 727,
+        "x": 371.1541442871094,
+        "y": 424.4429016113281,
+        "center_distance": 7.808082402214143,
+        "aabb_clearance": 2.557098388671875
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    }
+  ],
+  "resources": {
+    "bombs": [
+      3.0,
+      3.0
+    ],
+    "lives": [
+      8.0,
+      8.0
+    ],
+    "power": [
+      0.0,
+      1.0
+    ]
+  },
+  "local_latency_ms": {
+    "read": {
+      "median": 3.6019000690430403,
+      "p95": 6.660199956968427,
+      "max": 18.34810001309961
+    },
+    "plan": {
+      "median": 9.475899976678193,
+      "p95": 16.65200002025813,
+      "max": 33.4840000141412
+    }
+  },
+  "frame_lag": {
+    "snapshot": {
+      "median": 0.0,
+      "p95": 1.0,
+      "max": 1.0
+    },
+    "action": {
+      "median": 1.0,
+      "p95": 2.0,
+      "max": 3.0
+    },
+    "modeled_control_delays": [
+      1,
+      2,
+      3
+    ]
+  },
+  "corridor": {
+    "record_count": 7711,
+    "unique_solution_count": 916,
+    "stale_record_count": 13,
+    "stale_fraction": 0.001685903255090131,
+    "solve_latency_ms": {
+      "median": 106.12674994627014,
+      "p95": 295.808200025931,
+      "max": 389.4805000163615
+    },
+    "lane_transitions": [
+      {
+        "source_frame": 81,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 429,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 468,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 489,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 509,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 730,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 747,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 844,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 860,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 877,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 894,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 960,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 992,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1009,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 1144,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1180,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 1213,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1230,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 1376,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1593,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 1610,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1644,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 1743,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1760,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 1793,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1828,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 1994,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2010,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 2027,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2043,
+        "lane": "left",
+        "bottleneck_clearance": 13.897643089294434
+      },
+      {
+        "source_frame": 2059,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2091,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 2140,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2205,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 2237,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2254,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 2270,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2302,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 2399,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2547,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 2581,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2597,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 2744,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 3140,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3206,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 3256,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3288,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 3304,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3321,
+        "lane": "left",
+        "bottleneck_clearance": 8.228063583374023
+      },
+      {
+        "source_frame": 3452,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3468,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 3484,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 3516,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3532,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 3744,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3777,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 3844,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3861,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 3909,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3926,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 3942,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3958,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 4007,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4136,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 4153,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4170,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 4187,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4228,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 4264,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4282,
+        "lane": "left",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 4581,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4696,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 4728,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4760,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 4776,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4793,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 4809,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4841,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 4907,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4939,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 4972,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 5071,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 5204,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 5288,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 5401,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 5419,
+        "lane": "left",
+        "bottleneck_clearance": 1.497654914855957
+      },
+      {
+        "source_frame": 5436,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 5470,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 5550,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 5567,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 5600,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 5681,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 5713,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 5729,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 5779,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 5844,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 5861,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 6057,
+        "lane": "center",
+        "bottleneck_clearance": 2.006174087524414
+      },
+      {
+        "source_frame": 6273,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 6289,
+        "lane": "center",
+        "bottleneck_clearance": 1.6369962692260742
+      },
+      {
+        "source_frame": 6529,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 6546,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 6563,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 6579,
+        "lane": "left",
+        "bottleneck_clearance": 15.999984741210938
+      },
+      {
+        "source_frame": 6712,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 6762,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 6811,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7072,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7137,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7170,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 7187,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7204,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7237,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7319,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7335,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7368,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7400,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7449,
+        "lane": "left",
+        "bottleneck_clearance": 14.9940185546875
+      },
+      {
+        "source_frame": 7465,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7482,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 7515,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7547,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 7614,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7633,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 11518,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 11550,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 11616,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 11633,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 11666,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 11715,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 11829,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 11879,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 11895,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 11928,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 12076,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12093,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 12304,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12354,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 12387,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12420,
+        "lane": "left",
+        "bottleneck_clearance": 15.863295555114746
+      },
+      {
+        "source_frame": 12469,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12486,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 12503,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12553,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 12976,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12992,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13009,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13026,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13096,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13115,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 13156,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13175,
+        "lane": "right",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 13214,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13232,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 13271,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13288,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 13353,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13385,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13401,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13418,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13468,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 13485,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13517,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13600,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13681,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13714,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13779,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13830,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13847,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13863,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13895,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13928,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13945,
+        "lane": "right",
+        "bottleneck_clearance": 6.782267093658447
+      },
+      {
+        "source_frame": 13962,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13994,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 14010,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 14044,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 14320,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 14336,
+        "lane": "right",
+        "bottleneck_clearance": 1.9642515182495117
+      },
+      {
+        "source_frame": 14353,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 14370,
+        "lane": "right",
+        "bottleneck_clearance": 5.1351318359375
+      },
+      {
+        "source_frame": 14386,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 14450,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 14564,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 14648,
+        "lane": "right",
+        "bottleneck_clearance": 4.354284763336182
+      },
+      {
+        "source_frame": 14665,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 14732,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 14748,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 14764,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 14780,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 14812,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 14909,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 16764,
+        "lane": "left",
+        "bottleneck_clearance": 1.0301971435546875
+      },
+      {
+        "source_frame": 16856,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 16873,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 16922,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 17042,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17092,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 17257,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 17273,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17289,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 17339,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17355,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 17372,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17388,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 17504,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17538,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 17572,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17588,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 17719,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17736,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 17752,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17769,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 17786,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17802,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 17836,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17852,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 17933,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 17949,
+        "lane": "right",
+        "bottleneck_clearance": 21.825170516967773
+      },
+      {
+        "source_frame": 17999,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 18015,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 18047,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 18129,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 18210,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 18277,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 18425,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 18441,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 18491,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 18541,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 18589,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 18701,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 18718,
+        "lane": "right",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 18735,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 18754,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 18774,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 18889,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 18923,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19154,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19203,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19220,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19237,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19270,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19288,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19336,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19370,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19402,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19419,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19502,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19551,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19585,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19633,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19666,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19683,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 19765,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19782,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19832,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19865,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19881,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19897,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19913,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19930,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19946,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 19962,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19996,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 20012,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 20111,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 20295,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 20311,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 20327,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 20392,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 20409,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 20527,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 20543,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 20559,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 20592,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 20721,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 20906,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 20922,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 20941,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      }
+    ]
+  },
+  "boundary_occupancy": {
+    "bottom_frames": 305,
+    "side_frames": 175
+  },
+  "stage_progress": {
+    "transitions": [
+      {
+        "frame": 1,
+        "stage_route_index": 0,
+        "stage_label": "Stage 1"
+      }
+    ],
+    "last_stage_route_index": 0,
+    "last_stage_label": "Stage 1"
+  },
+  "first_hit_analysis": {
+    "hit_frame": 2520,
+    "window_start": 2280,
+    "stage_route_index": 0,
+    "stage_label": "Stage 1",
+    "resources": {
+      "lives": 8.0,
+      "bombs": 3.0,
+      "power": 7.0
+    },
+    "player": {
+      "x": 373.117919921875,
+      "y": 432.0,
+      "projected_x": 370.2894928455353,
+      "projected_y": 429.1715729236603,
+      "control_origin_x": 367.46106576919556,
+      "control_origin_y": 426.34314584732056,
+      "phase": 0,
+      "phase_at_action": 2,
+      "predeath_at_action": 15
+    },
+    "last_nonnegative_gate": {
+      "frame": 2382,
+      "source_frame": 2367,
+      "lane": "right",
+      "slack": 11.246153316369167,
+      "deadline": 16,
+      "travel_frames": 4.753846683630834
+    },
+    "first_negative_gate": {
+      "frame": 2320,
+      "source_frame": 2318,
+      "lane": "right",
+      "slack": -14.128455186925997,
+      "deadline": 21,
+      "travel_frames": 35.128455186926
+    },
+    "minimum_gate_slack": -21.84032305589144,
+    "first_nonpositive_pipeline": {
+      "frame": 2520,
+      "clearance": -0.992284893989563
+    },
+    "minimum_pipeline_clearance": -0.992284893989563,
+    "nearest_bullet": {
+      "slot": 727,
+      "x": 371.1541442871094,
+      "y": 424.4429016113281,
+      "center_distance": 7.808082402214143,
+      "aabb_clearance": 2.557098388671875
+    },
+    "observed_bullet_contact_candidate": null,
+    "active_lasers_at_observation": 0
+  }
+}

@@ -6,11 +6,22 @@ Status: the first six retained B4 attempts failed. Schema v6 attributed the
 remaining tail to the native-call wall interval with no overlapping cyclic
 GC. Two subsequent schema-v7 native `gil-held` Stage-4A runs pass every B4
 limit over 28,907 observations with zero sample above 2 ms, closing this
-specific observer-tail gate. CE-0145 source coverage and CE-0147
-callback-horizon coverage remain open. No future-hazard or physical action
-authority is granted.
+specific native-call mechanism at that checkpoint. Schema v8 later reopened
+B4 with a materialization tail. Schema v9 physically correlates all three
+corridor Future completion transitions with the three largest
+materialization walls and still fails p95/max, so B4 is currently open.
+Callback unknown-suffix and omitted-source coverage remain open. No
+future-hazard or physical action authority is granted.
 
 ## Outcome
+
+Current retained status is detailed in
+`G5_MATERIALIZATION_TAIL_PHYSICAL_ATTRIBUTION_20260728.md`: schema-v9 run
+`20260728_083433` completes 13,842 native observations but fails B4 at
+p95/max `0.2039/5.1274 ms`. The only three ambiguous endpoint rows are
+corridor Future `inflight -> done`, exactly matching the three largest
+materialization walls. Worker intervention remains unauthorized pending a
+separate publication-age/contention contract.
 
 Lunatic Stage-4A run
 `lunatic_route2_stage4a_unattended_20260728_031127` completed the route and

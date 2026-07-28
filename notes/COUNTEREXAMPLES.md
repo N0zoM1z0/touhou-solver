@@ -4387,8 +4387,8 @@ Status: observed report aggregation failure; corrected and regression-tested
 
 ## CE-0152: A GIL-held observer incurred an isolated materialization wall tail
 
-Status: observed physical performance failure; scheduler versus executed-work
-attribution open
+Status: observed physical performance failure; schema-v9 attribution shows a
+corridor-completion correlation with mixed scheduler/executed-work evidence
 
 - **Observed symptom:** Accepted schema-v8 Stage-4A run `20260728_075455`
   passes callback/intention validation but fails the unchanged B4 observer
@@ -4410,21 +4410,42 @@ attribution open
   distinguish executed copying from descheduling. OS preemption or
   background native-worker contention is therefore hypothesized, not
   observed.
+- **Schema-v9 falsifier outcome:** Accepted Stage-4A run `20260728_083433`
+  retains valid Windows current-thread cycles on all 13,842 native rows and
+  again fails B4 at p95/max `0.2039/5.1274 ms`. Its only three ambiguous
+  endpoint rows are all `corridor_future: inflight -> done`; they are exactly
+  the complete run's three largest materialization walls at
+  `5.0415/4.2546/1.1657 ms`. The next-largest materialization is
+  `0.4756 ms`, and definite-overlap maximum is `0.4270 ms`.
+- **Mixed cycle evidence:** The 6- and 3-evidence transition rows use
+  `271,960/311,714` materialization cycles, ordinary-to-p95 for their
+  1–8-evidence bucket. The 25-evidence transition uses `646,576` cycles, the
+  9–32 bucket and run-wide maximum. This supports a completion/GIL handoff
+  with one mixed executed-work sample; it rejects pure output-size scaling
+  but does not prove that the corridor worker caused the OS schedule.
+- **Diagnostic overhead:** Schema-v9 p95 also marginally exceeds `0.20 ms`.
+  Future endpoint and cycle telemetry remains inside the declared wall
+  boundary and may not be subtracted to claim a pass.
 - **Related trace cost:** The same run's pure-Python callback traversal is
   also expensive on incomplete paths. Spell-57 read/lookahead
   p50/p95/p99/p99.9/max is
   `0.2868/0.5460/0.8128/1.9979/10.3328 ms`; spell 73 maximum is
   `2.5051 ms`. This does not violate the narrow birth-observer gate but is
   part of issue-thread performance debt.
-- **Next falsifier:** Add low-overhead per-phase current-thread cycle deltas
-  and explicit background-worker-inflight evidence under a fixed contract.
-  Low cycle delta with a high wall delta supports descheduling; proportional
-  cycles support optimizing prefix copies. Preserve GC, unpinned controller,
-  the exact observer recurrence/output, and the fixed wall limits.
+- **Next falsifier:** Fix a separate default-off corridor-worker priority
+  intervention using the existing tested `background_low_priority` seam.
+  Preserve recurrence, worker count, native worker limit, GC, unpinned
+  controller, observer output, issue semantics, and fixed wall limits.
+  Reject it if solve/publication age, viable-query coverage, action lag, or
+  first-hit warning degrades.
 - **Evidence:** Raw trace is 503,847,529 bytes with SHA-256
   `4f0d1cb39c3f125998cd9d2b3b36ef5366cf8683d97d5e37e63e98f01892f908`.
   Two audit generations are byte-identical at canonical LF SHA-256
   `a620ec0077820ec7516138bc4051fa9d7fd36549af43262d90d011e2ed2599ea`.
+  The schema-v9 raw trace is 477,513,549 bytes with SHA-256
+  `a01d0b172415b2c19759e11bfa03c68936f209827331dd8381d4bacf2232e82a`;
+  two audit generations are byte-identical at SHA-256
+  `0b2dcad76644b90ce39c0922b5a82b41b5a09cd2c403ecd8048440c4462b9961`.
 - **Authority:** The fresh failure reopens B4 regression status despite the
   two earlier passing runs. It does not invalidate their native-call
   attribution, alter callback coverage authority, or support a survival

@@ -1108,9 +1108,16 @@ parity 當成每個 nature tie field 的逐 bit equality。
   `QueryThreadCycleTime` 提供三段 raw cycle delta，controller 的
   corridor/survival/enemy Future endpoint lookup 全部包含在原 observer
   wall interval。Linux/Windows 八個 overhead profiles 與 ABBA gate
-  通過，完整 quick suite 為 `812/812`；下一步是一次 GIL-held
-  schema-v9 Stage-4A 歸因實機，結果只決定後續 intervention contract，
-  不增加 action authority；
+  通過，完整 quick suite 為 `812/812`。GIL-held schema-v9 Stage-4A
+  實機 `20260728_083433` 隨後在 p95/max `0.2039/5.1274 ms` 再次失敗；
+  唯三的 endpoint transitions 全是 corridor Future `inflight -> done`，
+  也恰好是全 run 最大三個 materialization walls
+  `5.0415/4.2546/1.1657 ms`。其中兩個 cycle count 普通，另一個是
+  run-wide max，支持 completion/GIL handoff 加 mixed executed work，
+  不支持 output-size 說法，也還不是 worker causality proof。下一步先
+  固定 default-off corridor-worker-priority intervention contract，並用
+  publication age、viable-query coverage、observer wall 與 survival
+  作 rejection gates；這不增加 action authority；
 - spell-57 callback traversal 本身 p95/max `0.5460/10.3328 ms`，即使
   fail-closed 也仍在 issue thread。後續性能線要做 exact-state/cache/
   transfer-summary 分析，不能靠降低 256 cap 或 stage-specific shortcut；

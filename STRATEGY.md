@@ -321,10 +321,17 @@ comparison.
    implements that boundary and passes its Linux/Windows focused, complete,
    observer-overhead, and ABBA gates. Windows cycle provenance is available
    on every measured native profile; historical schema-v8 traces remain
-   auditable without fabricated attribution. One GIL-held schema-v9
-   Stage-4A run is the next gate. Worker, copy, priority, affinity, and
-   planner intervention remain unauthorized until that run classifies the
-   tail and a separate intervention contract is fixed.
+   auditable without fabricated attribution. GIL-held schema-v9 Stage-4A run
+   `20260728_083433` fails B4 at p95/max `0.2039/5.1274 ms`.
+   Its only three ambiguous endpoint rows are all corridor-future
+   `inflight -> done` transitions and exactly the three largest
+   materialization walls. Two have ordinary-to-p95 same-bucket cycles; one
+   has the run-wide maximum cycle count. This supports a corridor-completion
+   GIL/scheduler boundary with mixed executed work, not output-size scaling
+   or a causal worker proof. Worker, copy, priority, affinity, and planner
+   intervention remain unauthorized until a separate default-off
+   corridor-priority contract fixes publication-age, viable-query,
+   observer-wall, and survival rejection gates.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

@@ -30,7 +30,8 @@ and design/run notes retain derivations and history.
 20. `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`
 21. `notes/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
 22. `notes/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
-23. the relevant recent run note and counterexample rows before live work
+23. `notes/G5_MATERIALIZATION_TAIL_PHYSICAL_ATTRIBUTION_20260728.md`
+24. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -40,6 +41,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `Retain schema-v9 physical attribution`,
   `Implement schema-v9 tail attribution`,
   `Retain schema-v8 callback physical gate`,
   `Fail closed on incomplete ECL lookahead`,
@@ -216,10 +218,25 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `9.709/15.434 s`, with three existing Windows skips. Audit v7
   deterministically re-audits the retained schema-v8 run without requiring
   unavailable historical cycles; its unchanged B4 maximum still fails.
-  The next useful gate is one explicit GIL-held schema-v9 Stage-4A
-  attribution run. No worker/copy/planner intervention is authorized until
-  its cycle/contention classification fixes a separate intervention
-  contract.
+  The planned gate was one explicit GIL-held schema-v9 Stage-4A attribution
+  run. That accepted run `20260728_083433` is now complete over
+  frames `1..43149`, 13,842 decisions, 12 hits, hard no-Bomb, route
+  completion, artifact retention, and cleanup. All native rows have valid
+  Windows cycle attribution. Observation p50/p95/p99/p99.9/max is
+  `0.1001/0.2039/0.3454/0.5545/5.1274 ms`, so B4 remains failed.
+  The only three ambiguous endpoint rows are all
+  `corridor_future: inflight -> done`, and they are exactly the three largest
+  materialization walls: `5.0415/4.2546/1.1657 ms`. The next-largest
+  materialization is `0.4756 ms`; definite-overlap maximum is `0.4270 ms`.
+  Two transition rows have ordinary-to-p95 same-bucket cycles, supporting
+  descheduling/GIL handoff; the `4.2546 ms` row also has the run-wide maximum
+  `646,576` materialization cycles, so attribution is mixed rather than a
+  pure copy or pure scheduler result. All 12 hits follow global viability
+  exhaustion and do not support a survival comparison. The next useful gate
+  is a separately fixed, default-off corridor-completion contention
+  intervention using the already-tested worker-priority seam, with
+  publication-age and viability freshness as rejection gates. No
+  worker/copy/planner intervention is yet authorized.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

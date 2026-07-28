@@ -7082,3 +7082,46 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   wall/cycle/evidence-count and known-future-overlap classification to fix a
   separate intervention contract; do not rerun-select, change workers, pack
   copies, or claim Stage-5/6 promotion yet.
+
+## 2026-07-28 — Retained schema-v9 Stage-4A tail attribution
+
+- Accepted Lunatic Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260728_083433` completed frames
+  `1..43149`, 13,842 decisions, 12 hits, hard no-Bomb, `route_complete`,
+  compact artifact materialization, exact-target termination, and cleanup.
+  The executable identity and no-life-decrement patch passed. All contacts
+  followed global viability-kernel exhaustion; this is not a survival
+  comparison.
+- All 13,842 native rows retain valid
+  `windows_query_thread_cycle_time` phase deltas. Validation, callback
+  lowering, timed intent, and cycle availability pass. Callback coverage is
+  3,444 complete/lowered versus 2,262 unknown/not-lowered, with zero
+  incomplete prefix consumed.
+- Observation p50/p95/p99/p99.9/max is
+  `0.1001/0.2039/0.3454/0.5545/5.1274 ms`; p95 and maximum fail B4. The two
+  over-budget rows are materialization-dominant, and no completed cyclic GC
+  overlaps any phase. Schema-v9 diagnostic overhead is inside the wall
+  boundary and cannot be subtracted from the p95 failure.
+- Exactly three rows have an ambiguous known-future endpoint. All are
+  corridor Future `inflight -> done` transitions, and all are exactly the
+  three largest materialization walls:
+  frame/evidence/wall/cycles `2119/6/5.0415/271960`,
+  `37349/25/4.2546/646576`, and
+  `1496/3/1.1657/311714`. The next-largest materialization is `0.4756 ms`;
+  definite-overlap maximum is `0.4270 ms`.
+- Two transition rows have ordinary-to-p95 1–8-evidence cycle counts. The
+  25-evidence row is the 9–32 bucket and run-wide materialization cycle
+  maximum. **Inferred:** corridor completion/GIL handoff is the dominant
+  correlation, with one mixed executed-work sample. This rejects pure
+  output-size scaling but does not prove worker causality.
+- Raw trace is 477,513,549 bytes with SHA-256
+  `a01d0b172415b2c19759e11bfa03c68936f209827331dd8381d4bacf2232e82a`.
+  Two deterministic audit generations have SHA-256
+  `0b2dcad76644b90ce39c0922b5a82b41b5a09cd2c403ecd8048440c4462b9961`.
+- **Authority and next gate:** B4 remains open. Fix a default-off
+  corridor-worker-priority intervention contract around the already-tested
+  `background_low_priority` solve seam. Preserve recurrence, worker count,
+  native worker limit, controller scheduling, GC, input, and hard no-Bomb.
+  Measure solve/publication age, viable-query coverage, observer wall,
+  action lag, and first-hit warning; require two consecutive physical passes
+  before re-closing B4.

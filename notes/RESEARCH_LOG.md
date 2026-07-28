@@ -7614,3 +7614,21 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   failure evidence; no callback, geometry, survival, or action authority is
   added. Ruff and complete Linux/Windows suites pass 851 tests in
   `9.398/16.771 s`, with three existing Windows skips.
+
+## 2026-07-28 — Fixed the second validation-preserving B4 candidate
+
+- A post-cycle-optimization Linux cProfile diagnostic executes 9,196 native
+  observations and 4,061 nonzero batch constructions.
+  `prefix_copy` accounts for 36,549 calls / `0.028 s` cumulative;
+  `BulletBirthEvidenceBatch.__init__` accounts for `0.067 s` cumulative.
+- **Inference:** This is ordinary Python call/allocation/validation work and
+  modest GIL exposure. It does not explain the CE-0156 5–8 ms wall tails.
+- The next patch may only inline identical prefix copies, perform the
+  `uint8 -> bool` finite-flag copy in one allocation, and replace
+  generator-driven length comparison with direct comparisons.
+- All length/shape/code/pairing failures, independent ownership, read-only
+  flags, canonical records, native/Python parity, diagnostics, GIL-held mode,
+  GC, Futures, wall boundary, workers, cadence, and authority remain fixed.
+- The preimplementation boundary is the
+  `Second Validation-Preserving Materialization Candidate` section of
+  `G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`.

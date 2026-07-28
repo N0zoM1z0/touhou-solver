@@ -308,3 +308,46 @@ The three compact audits regenerate byte-identically. This checkpoint changes
 neither live callback interpretation nor action authority. Ruff and complete
 Linux/Windows suites pass 851 tests in `9.398/16.771 s`; Windows retains three
 existing skips.
+
+## Second Validation-Preserving Materialization Candidate
+
+A post-optimization Linux cProfile diagnostic executes 9,196 native
+observations, including 4,061 nonzero batches. It attributes:
+
+- 36,549 nested `prefix_copy` calls to `0.028 s` cumulative; and
+- `BulletBirthEvidenceBatch.__init__` to `0.067 s` cumulative, including
+  generator-based length checks, code min/max checks, and read-only flagging.
+
+These are profiler attributions, not latency acceptance results. They do not
+explain either CE-0156 wall tail, but they identify ordinary materialization
+work that increases the controller's exposure to a GIL handoff.
+
+The second optimization may only:
+
+1. replace the nested prefix-copy helper with direct identical NumPy prefix
+   copies;
+2. convert the `geometry_finite` prefix directly to a new Boolean array
+   instead of first copying `uint8` and then allocating again for `astype`;
+   and
+3. replace generator-driven length comparison with equivalent direct
+   comparisons.
+
+It must retain:
+
+- independent ownership of every published column;
+- exact dtype, value, order, scalar witness, and canonical record parity;
+- paired previous-state/age validation;
+- every column-length, six-float geometry-shape, and evidence-code-range
+  failure;
+- read-only flags on every retained column;
+- native count/active bounds and reset behavior; and
+- the same GIL-held call, GC, thread-cycle, Future endpoint, wall, trace,
+  worker, cadence, and authority boundaries.
+
+Focused tests must exercise valid and invalid direct batch construction,
+read-only publication, native/Python parity, nonfinite geometry, and
+diagnostic reconciliation. The unchanged 23-profile Linux/Windows controller
+benchmark and complete suites must pass. A later Stage-5 physical run may be
+used as a harder transfer workload, but it cannot close the Stage-4A B4 gate
+or establish survival improvement. If the isolated path regresses or any
+failure class changes, reject this candidate.

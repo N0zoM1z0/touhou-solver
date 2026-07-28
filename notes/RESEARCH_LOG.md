@@ -8232,3 +8232,37 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   **Decision:** Accept the structural seam with unchanged authority. Extract
   the post-issue bullet-birth trace stage next; do not move `_run_live_session`
   wholesale or mix action and optional trace ownership.
+
+## 2026-07-28 — Extracted the post-issue bullet-birth stage
+
+- Added `th08_live.bullet_birth_stage` with immutable request/result and
+  injected dependency contracts. It owns the historical deferred-state,
+  worker-contention bracket, Python/native birth observation, optional
+  derived-source observation, active-spell intent, record build, and
+  failure-aware emit order. It has no action consumer.
+- The controller retains service construction/reset, epoch/session
+  lifecycle, the previous-emit chain and reset, all worker ownership, outer
+  trace composition, and all stop/error key-release paths. The controller
+  falls from 4,751 to 4,554 lines.
+- Focused tests retain order, immutable identity, timing, observer reset and
+  flush, absent-tracker behavior, and native/derived diagnostics. Ruff and
+  `git diff --check` pass. Full Linux and Windows UNC discovery pass 949
+  tests; Windows retains three existing platform skips.
+- **Observed:** supervised Hard Stage-1 run
+  `hard_route2_stage1_unattended_20260728_205207` completed frames
+  `1..20448`, 7,401 decisions, zero hits, hard no-Bomb, `route_complete`,
+  accepted artifacts, key release, game termination, and supervisor cleanup.
+- **Observed:** all 7,401 trace rows are schema v9, native/gil-held, with zero
+  observation, intent, or derived-source errors and complete thread-cycle
+  attribution. Observer p95/p99/max are `0.1743/0.3295/0.7970` ms and pass
+  the declared `0.2/0.4/2.0` ms limits. The deterministic audit is
+  byte-identical on regeneration at SHA-256
+  `459ef12077391415e15953e6822191bf916b332ffa56df48461ec6069b043939`.
+- **Inferred:** the physical trace plus automated tests are strong evidence
+  that module extraction preserved this action-neutral runtime ordering.
+  Zero hits cannot be attributed to the refactor because policy/model
+  semantics did not change.
+- The next research checkpoint returns to immutable shipped-runtime ECL
+  identity. Further controller decomposition must first characterize another
+  complete post-issue shadow or outer-trace owner; do not trade one monolith
+  for another.

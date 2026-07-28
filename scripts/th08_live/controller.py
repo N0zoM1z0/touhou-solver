@@ -46,7 +46,6 @@ from th08_corridor_runtime import (
 )
 from th08_corridor_adapter import TH08_CORRIDOR_CONFIG
 from th08_ecl_birth import (
-    EclBirthLookaheadResult,
     analyze_ecl_birth_intents,
     observe_deferred_fire_state,
 )
@@ -95,34 +94,32 @@ from th08_live import (
     serialize_semantic_clock_observation as _serialize_semantic_clock_observation,
 )
 from th08_live.birth_trace import (
-    BulletBirthTraceInput,
     birth_trace_requires_immediate_flush,
     build_bullet_birth_trace_record,
 )
 from th08_live.birth_contention import (
-    BirthObserverContention,
     capture_birth_observer_future_states,
+)
+from th08_live.bullet_birth_stage import (
+    BulletBirthStageDependencies,
+    BulletBirthStageRequest,
+    run_bullet_birth_stage,
 )
 from th08_live.auxiliary_vm import (
     AuxiliaryVmBatchTraceService,
     native_auxiliary_vm_batch_available,
 )
-from th08_live.derived_pattern_source import (
-    DerivedPatternSourceObservation,
-    observe_derived_pattern_sources,
-)
+from th08_live.derived_pattern_source import observe_derived_pattern_sources
 from th08_live.derived_pattern_source_native import (
     NativeDerivedPatternSourceObserver,
 )
 from th08_live.bullet_birth import (
-    BulletBirthObservation,
     BulletBirthTracker,
 )
 from th08_live.bullet_birth_native import (
     NATIVE_CALL_MODES,
     NATIVE_CALL_MODE_GIL_HELD,
     NATIVE_CALL_MODE_GIL_RELEASED,
-    NativeBulletBirthDiagnostics,
     NativeBulletBirthTracker,
     native_bullet_birth_available,
 )
@@ -2494,29 +2491,10 @@ def _run_live_session(
             bullet_pool_read_ms = raw_pools.bullet_pool_read_ms
             laser_pool_read_ms = raw_pools.laser_pool_read_ms
             item_pool_read_ms = raw_pools.item_pool_read_ms
-            bullet_birth_observation: BulletBirthObservation | None = None
-            bullet_birth_observation_error: str | None = None
-            bullet_birth_native_diagnostics: (
-                NativeBulletBirthDiagnostics | None
-            ) = None
-            bullet_birth_observer_contention: (
-                BirthObserverContention | None
-            ) = None
-            bullet_birth_observation_ms = 0.0
-            bullet_birth_observation_cpu_ms = 0.0
-            derived_source_observation: (
-                DerivedPatternSourceObservation | None
-            ) = None
-            derived_source_observation_error: str | None = None
-            derived_source_observation_ms = 0.0
-            derived_source_diagnostics: dict[str, object] | None = None
             ecl_vm_snapshot: EclVmSnapshot | None = None
             ecl_lookahead: EclLookaheadResult | None = None
             tagged_velocity_toggles: tuple[TaggedVelocityToggle, ...] = ()
             ecl_lookahead_error: str | None = None
-            ecl_birth_intent: EclBirthLookaheadResult | None = None
-            ecl_birth_intent_error: str | None = None
-            ecl_birth_intent_ms = 0.0
             ecl_frame_before: int | None = None
             ecl_frame_after: int | None = None
             spell_enemy_body_guard: SpellEnemyBodyGuard | None = None
@@ -3721,279 +3699,104 @@ def _run_live_session(
             current_bombs = resources["bombs"]
             current_power = resources["power"]
             if trace_bullet_births:
-                deferred_fire_state = observe_deferred_fire_state(
-                    spell_enemy_pointer=spell_enemy_pointer,
-                    observed_enemy_pointer=(
-                        spell_enemy_body_guard.body.pointer
-                        if spell_enemy_body_guard is not None
-                        else None
-                    ),
-                    enemy_flags=(
-                        spell_enemy_body_guard.body.flags
-                        if spell_enemy_body_guard is not None
-                        else None
-                    ),
-                    frame_before=boss_guard_frame_before,
-                    frame_after=boss_guard_frame_after,
-                    ecl_frame_before=ecl_frame_before,
-                    ecl_frame_after=ecl_frame_after,
-                )
-                if bullet_birth_tracker is not None:
-                    bullet_birth_observation_started = time.perf_counter()
-                    bullet_birth_observation_cpu_started = time.thread_time()
-                    birth_contention_before = (
-                        capture_birth_observer_future_states(
-                            corridor_future=corridor_future,
-                            survival_future=corridor_survival_future,
-                            enemy_future=enemy_future,
-                        )
-                    )
-                    try:
-                        bullet_birth_observation = (
-                            bullet_birth_tracker.observe(
-                                bullet_blob,
-                                frame_before=bullet_frame_before,
-                                frame_after=bullet_frame_after,
-                            )
-                        )
-                        if isinstance(
-                            bullet_birth_tracker,
-                            NativeBulletBirthTracker,
-                        ):
-                            bullet_birth_native_diagnostics = (
-                                bullet_birth_tracker.diagnostics()
-                            )
-                    except (
-                        RuntimeError,
-                        TypeError,
-                        ValueError,
-                        struct.error,
-                    ) as error:
-                        bullet_birth_tracker.reset()
-                        bullet_birth_observation_error = (
-                            f"{type(error).__name__}: {error}"
-                        )
-                    birth_contention_after = (
-                        capture_birth_observer_future_states(
-                            corridor_future=corridor_future,
-                            survival_future=corridor_survival_future,
-                            enemy_future=enemy_future,
-                        )
-                    )
-                    bullet_birth_observation_ms = (
-                        time.perf_counter()
-                        - bullet_birth_observation_started
-                    ) * 1000.0
-                    bullet_birth_observation_cpu_ms = (
-                        time.thread_time()
-                        - bullet_birth_observation_cpu_started
-                    ) * 1000.0
-                else:
-                    birth_contention_before = (
-                        capture_birth_observer_future_states(
-                            corridor_future=corridor_future,
-                            survival_future=corridor_survival_future,
-                            enemy_future=enemy_future,
-                        )
-                    )
-                    birth_contention_after = (
-                        capture_birth_observer_future_states(
-                            corridor_future=corridor_future,
-                            survival_future=corridor_survival_future,
-                            enemy_future=enemy_future,
-                        )
-                    )
-                bullet_birth_observer_contention = BirthObserverContention(
-                    birth_contention_before,
-                    birth_contention_after,
-                )
-                if trace_derived_pattern_sources:
-                    derived_source_started = time.perf_counter()
-                    try:
-                        if derived_pattern_source_observer is not None:
-                            derived_source_observation = (
-                                derived_pattern_source_observer.observe(
-                                    bullet_blob,
-                                    frame_before=bullet_frame_before,
-                                    frame_after=bullet_frame_after,
-                                )
-                            )
-                        else:
-                            derived_source_observation = (
-                                observe_derived_pattern_sources(
-                                    bullet_blob,
-                                    frame_before=bullet_frame_before,
-                                    frame_after=bullet_frame_after,
-                                )
-                            )
-                    except (
-                        RuntimeError,
-                        TypeError,
-                        ValueError,
-                        struct.error,
-                    ) as error:
-                        derived_source_observation_error = (
-                            f"{type(error).__name__}: {error}"
-                        )
-                    derived_source_observation_ms = (
-                        time.perf_counter() - derived_source_started
-                    ) * 1000.0
-                    if (
-                        derived_pattern_source_observer is not None
-                        and derived_source_observation is not None
-                        and derived_source_observation_error is None
-                    ):
-                        derived_source_diagnostics = (
+                bullet_birth_stage = run_bullet_birth_stage(
+                    BulletBirthStageRequest(
+                        trace_sink=trace_sink,
+                        tracker=bullet_birth_tracker,
+                        derived_source_observer=(
                             derived_pattern_source_observer
-                            .diagnostics()
-                            .record(
-                                observation_ms=(
-                                    derived_source_observation_ms
-                                ),
-                            )
-                        )
-                if ecl_vm_snapshot is not None:
-                    ecl_birth_intent_started = time.perf_counter()
-                    try:
-                        ecl_birth_intent = analyze_ecl_birth_intents(
-                            ecl_vm_snapshot,
-                            instruction_at=(
-                                ecl_instruction_cache.cached_instruction
-                            ),
-                            horizon_frames=ECL_BIRTH_LOOKAHEAD_FRAMES,
-                            active_difficulty_mask=(
-                                1 << int(state["difficulty_index"])
-                            ),
-                            deferred_fire_active=(
-                                deferred_fire_state.active
-                            ),
-                            spell_active=True,
-                            minimum_fire_distance_clear=None,
-                            fire_filter_clear=None,
-                            available_slots=None,
-                            template_geometry_resolved=False,
-                            emission_origin_resolved=False,
-                        )
-                    except (
-                        OSError,
-                        RuntimeError,
-                        TypeError,
-                        ValueError,
-                        struct.error,
-                    ) as error:
-                        ecl_birth_intent_error = (
-                            f"{type(error).__name__}: {error}"
-                        )
-                    ecl_birth_intent_ms = (
-                        time.perf_counter() - ecl_birth_intent_started
-                    ) * 1000.0
-                assert bullet_birth_observer_contention is not None
-                birth_trace_build_started = time.perf_counter()
-                bullet_birth_trace_record = build_bullet_birth_trace_record(
-                    BulletBirthTraceInput(
-                            frame=counter_at_action,
-                            snapshot_frame=int(
-                                state["enemy_manager_frame"]
-                            ),
-                            gameplay_epoch=gameplay_epoch,
-                            stage_route_index=int(
-                                state["stage_route_index"]
-                            ),
-                            observation=bullet_birth_observation,
-                            observation_error=(
-                                bullet_birth_observation_error
-                            ),
-                            intent=ecl_birth_intent,
-                            intent_error=ecl_birth_intent_error,
-                            deferred_fire_state=deferred_fire_state,
-                            spell_enemy_pointer=spell_enemy_pointer,
-                            ecl_frame_before=ecl_frame_before,
-                            ecl_frame_after=ecl_frame_after,
-                            ecl_event_frame_offset=(
-                                ecl_event_frame_offset
-                            ),
-                            ecl_event_frame_uncertainty=(
-                                ecl_event_frame_uncertainty
-                            ),
-                            observation_ms=(
-                                bullet_birth_observation_ms
-                            ),
-                            observation_cpu_ms=(
-                                bullet_birth_observation_cpu_ms
-                            ),
-                            intent_ms=ecl_birth_intent_ms,
-                            previous_emit_ms=(
-                                previous_birth_trace_emit_ms
-                            ),
-                            observer_contention=(
-                                bullet_birth_observer_contention
-                            ),
-                            observation_backend=bullet_birth_backend,
-                            native_call_mode=(
-                                bullet_birth_native_call_mode
-                                if bullet_birth_backend == "native"
-                                else None
-                            ),
-                            observation_diagnostics=(
-                                bullet_birth_native_diagnostics.record(
-                                    observation_ms=(
-                                        bullet_birth_observation_ms
-                                    )
-                                )
-                                if bullet_birth_native_diagnostics
-                                is not None
-                                else None
-                            ),
-                            derived_source_observation=(
-                                derived_source_observation
-                            ),
-                            derived_source_error=(
-                                derived_source_observation_error
-                            ),
-                            derived_source_ms=(
-                                derived_source_observation_ms
-                            ),
-                            derived_source_diagnostics=(
-                                derived_source_diagnostics
-                            ),
-                            nonspell_main_vm_inventory=(
-                                enemy_prefix_snapshot.main_ecl_vm_inventory
-                            ),
-                            enemy_prefix_frame_before=(
-                                enemy_prefix_snapshot.frame_before
-                            ),
-                            enemy_prefix_frame_after=(
-                                enemy_prefix_snapshot.frame_after
-                            ),
-                            enemy_prefix_capture_ms=(
-                                enemy_prefix_capture_ms
-                            ),
-                    )
-                )
-                birth_trace_build_ms = (
-                    time.perf_counter() - birth_trace_build_started
-                ) * 1000.0
-                birth_trace_timing = bullet_birth_trace_record["timing_ms"]
-                assert isinstance(birth_trace_timing, dict)
-                birth_trace_timing["build"] = birth_trace_build_ms
-                birth_trace_timing["pre_emit_total"] = (
-                    bullet_birth_observation_ms
-                    + derived_source_observation_ms
-                    + ecl_birth_intent_ms
-                    + birth_trace_build_ms
-                )
-                previous_birth_trace_emit_ms = trace_sink.emit(
-                    bullet_birth_trace_record,
-                    flush=birth_trace_requires_immediate_flush(
-                        observation_error=(
-                            bullet_birth_observation_error
                         ),
-                        intent_error=ecl_birth_intent_error,
-                        derived_source_error=(
-                            derived_source_observation_error
+                        trace_derived_sources=(
+                            trace_derived_pattern_sources
+                        ),
+                        bullet_blob=bullet_blob,
+                        bullet_frame_before=bullet_frame_before,
+                        bullet_frame_after=bullet_frame_after,
+                        corridor_future=corridor_future,
+                        survival_future=corridor_survival_future,
+                        enemy_future=enemy_future,
+                        ecl_vm_snapshot=ecl_vm_snapshot,
+                        instruction_at=(
+                            ecl_instruction_cache.cached_instruction
+                        ),
+                        intent_horizon_frames=(
+                            ECL_BIRTH_LOOKAHEAD_FRAMES
+                        ),
+                        difficulty_index=int(
+                            state["difficulty_index"]
+                        ),
+                        spell_enemy_pointer=spell_enemy_pointer,
+                        observed_enemy_pointer=(
+                            spell_enemy_body_guard.body.pointer
+                            if spell_enemy_body_guard is not None
+                            else None
+                        ),
+                        observed_enemy_flags=(
+                            spell_enemy_body_guard.body.flags
+                            if spell_enemy_body_guard is not None
+                            else None
+                        ),
+                        boss_guard_frame_before=boss_guard_frame_before,
+                        boss_guard_frame_after=boss_guard_frame_after,
+                        ecl_frame_before=ecl_frame_before,
+                        ecl_frame_after=ecl_frame_after,
+                        ecl_event_frame_offset=ecl_event_frame_offset,
+                        ecl_event_frame_uncertainty=(
+                            ecl_event_frame_uncertainty
+                        ),
+                        issue_frame=counter_at_action,
+                        snapshot_frame=int(
+                            state["enemy_manager_frame"]
+                        ),
+                        gameplay_epoch=gameplay_epoch,
+                        stage_route_index=int(
+                            state["stage_route_index"]
+                        ),
+                        observation_backend=bullet_birth_backend,
+                        native_call_mode=(
+                            bullet_birth_native_call_mode
+                        ),
+                        previous_emit_ms=(
+                            previous_birth_trace_emit_ms
+                        ),
+                        nonspell_main_vm_inventory=(
+                            enemy_prefix_snapshot
+                            .main_ecl_vm_inventory
+                        ),
+                        enemy_prefix_frame_before=(
+                            enemy_prefix_snapshot.frame_before
+                        ),
+                        enemy_prefix_frame_after=(
+                            enemy_prefix_snapshot.frame_after
+                        ),
+                        enemy_prefix_capture_ms=(
+                            enemy_prefix_capture_ms
                         ),
                     ),
-                    measure=True,
+                    dependencies=BulletBirthStageDependencies(
+                        observe_deferred_fire=(
+                            observe_deferred_fire_state
+                        ),
+                        capture_future_states=(
+                            capture_birth_observer_future_states
+                        ),
+                        observe_derived_sources=(
+                            observe_derived_pattern_sources
+                        ),
+                        analyze_intents=analyze_ecl_birth_intents,
+                        build_record=build_bullet_birth_trace_record,
+                        requires_immediate_flush=(
+                            birth_trace_requires_immediate_flush
+                        ),
+                        native_tracker_type=(
+                            NativeBulletBirthTracker
+                        ),
+                        wall_clock=time.perf_counter,
+                        cpu_clock=time.thread_time,
+                    ),
+                )
+                previous_birth_trace_emit_ms = (
+                    bullet_birth_stage.emit_ms
                 )
             trace_ms = 0.0
             if (

@@ -681,11 +681,15 @@ capture, service-update, publication-guidance, and fresh-issue stage records.
 Corridor, candidate, decision-control, sensing, timing, and optional-hazard
 trace construction is outside the issue path. Fresh enemy-prefix
 recertification and ordered deadline/deathbomb/auto-confirm/no-Bomb overrides
-also have focused owners. Lunatic Stage-4A/5/6B retention gates completed
-with hard no-Bomb, accepted artifacts, and full cleanup; their hits remain
-CE-0136/0137/0138/0139 model/recovery evidence. Action alignment, physical
-send/no-write, actuator mutation, and outer scene composition remain inside
-`_run_live_session`; R5 therefore continues without changing live strategy.
+also have focused owners. Action alignment, physical send/no-write, issued
+delay registration, and actuator mutation now belong to `issue_stage`; the
+complete optional post-issue bullet-birth transaction belongs to
+`bullet_birth_stage`. Lunatic Stage-4A/5/6B and focused Hard Stage-1 retention
+gates completed with hard no-Bomb, accepted artifacts, and full cleanup;
+their hits remain model/recovery evidence rather than structural conclusions.
+Other post-issue shadows, outer decision-trace composition, and scene
+lifecycle remain inside `_run_live_session`; R5 therefore continues without
+changing live strategy.
 
 1. 抽 `LiveSession` context manager，只負責資源 acquire/release。
 2. 抽 `Sensor`, `PolicyCoordinator`, `SceneClockCoordinator`,

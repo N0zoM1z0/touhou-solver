@@ -724,17 +724,25 @@ describe the same decision. Python/C++ parity is not physical correctness.
   blocked by live integration, hazard coverage, clock, publication, and
   performance gates.
 - Latest structural checkpoint:
-  the enclosing `notes/LIVE_PHYSICAL_ISSUE_STAGE_REFACTOR_20260728.md`
-  checkpoint
-  moves issue-time player/predeath/frame reads, frame alignment, physical
-  dispatch/no-write, issued-delay registration, and next actuator
-  mask/direction behind `th08_live.issue_stage`. Linux/Windows pass 945
-  tests. Hard Stage-1 retention `20260728_203408` completed 7,755 decisions
-  over frames `1..20950`, one hit, hard no-Bomb, `route_complete`, automatic
-  terminal confirmation, and cleanup. All 7,755 trace transactions are
-  self-consistent: 3,018 writes, 4,737 no-writes, and zero target/transition/
-  write/estimator disagreement or Bomb row. The next structural seam is the
-  post-issue bullet-birth observation/publication stage.
+  `notes/LIVE_BULLET_BIRTH_STAGE_REFACTOR_20260728.md` moves the ordered
+  post-issue deferred-state, bullet-birth observation, future-contention
+  bracket, optional derived-source observation, ECL intent, record build, and
+  failure-aware publication behind `th08_live.bullet_birth_stage`. The
+  controller is 4,554 lines. Linux/Windows pass 949 tests. Hard Stage-1
+  retention `20260728_205207` completed 7,401 decisions over frames
+  `1..20448`, zero hits, hard no-Bomb, `route_complete`, accepted terminal
+  unload, and cleanup. All 7,401 schema-v9 native/gil-held rows pass the
+  deterministic birth audit with zero observer/intent errors and complete
+  cycle attribution; observer p95/p99/max are
+  `0.1743/0.3295/0.7970` ms. Audit regeneration is byte-identical at SHA-256
+  `459ef12077391415e15953e6822191bf916b332ffa56df48461ec6069b043939`.
+  This is trace-only structural evidence, not new hazard/action authority or
+  a causal survival improvement. The preceding physical-side-effect
+  checkpoint `notes/LIVE_PHYSICAL_ISSUE_STAGE_REFACTOR_20260728.md` remains
+  the authority record for issue-time dispatch/no-write and delay-estimator
+  semantics. The next research checkpoint is immutable shipped-runtime ECL
+  identity; further controller extraction must first characterize another
+  complete behavior-owning post-issue or outer-trace boundary.
   The preceding dossier checkpoint
   `d25507e Split practice dossier summary ownership` moved shared planner
   consistency, practice timing/sensor, control/viability, and behavior/spell
@@ -785,8 +793,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Historical imports and monkeypatch seams still resolve current
   implementation globals. R2/R3/R4 remain complete. The remaining structural
   target is the staged iteration contract inside `_run_live_session`, recorded
-  in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`, beginning with
-  optional post-issue trace-stage ownership now that action issue is split.
+  in `notes/review/PYTHON_MODULE_STRUCTURE_AUDIT_20260727.md`. Physical issue
+  and bullet-birth trace stages are now split; subsequent work must isolate
+  another complete post-issue shadow or outer-trace owner rather than move
+  unrelated statements for line-count optics.
   Offline dossier entry points are now bounded aggregation, validation,
   regression, and CLI composition. No model, recurrence, float comparison,
   worker policy, action authority, report schema, attribution, summary, or
@@ -813,9 +823,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   auto-confirm mask selection now delegate to the pure
   `th08_live.issue_overrides` boundary. Issue-time frame observation,
   physical dispatch/no-write, delay registration, and actuator state now
-  delegate to `th08_live.issue_stage`. Candidate lookup, discontinuity
-  lifecycle, optional research stages, and trace composition remain
-  controller-owned.
+  delegate to `th08_live.issue_stage`. The optional bullet-birth diagnostic
+  transaction now delegates to `th08_live.bullet_birth_stage`, while its
+  service lifecycle and previous-emit reset remain controller-owned.
+  Candidate lookup, discontinuity lifecycle, other optional research stages,
+  and outer trace composition remain controller-owned.
 - Post-extraction physical retention
   `lunatic_route2_stage4a_unattended_20260727_220330` completed Stage 4A over
   frames `2..41645` with 13,295 decisions, maximum 1,362 bullets, zero Bomb

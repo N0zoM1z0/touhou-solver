@@ -164,6 +164,16 @@ line-count delta is not the result: the extracted unit owns the physical side
 effect and no-write estimator invariant behind an independently tested
 contract. Epoch/session reset remains with the lifecycle owner.
 
+The next checkpoint moves the complete optional post-issue bullet-birth
+transaction behind `th08_live.bullet_birth_stage`: deferred-state observation,
+future-contention bracketing, Python/native birth observation, optional
+derived-source observation, active-spell intent, record timing, and
+failure-aware publication. The controller is now 4,554 lines. Its service
+lifecycle and previous-emit reset remain with the controller. Linux/Windows
+pass 949 tests, and a 7,401-decision native physical trace passes the
+deterministic birth audit with zero observation/intent errors. This is
+trace-only structural evidence; no hazard or action authority changed.
+
 `scripts/th08_live/iteration.py` now defines and the live loop consumes:
 
 - `CapturedIteration`: exact source/snapshot/hazard/delay identity and decoded
@@ -398,7 +408,11 @@ The structural sequence and current status are:
    Decision-control and sensing fields completed the same
    characterization/removal sequence and are now consumed. Timing and
    optional detailed-hazard fields also completed that sequence and are
-   consumed after issue. Outer record composition remains controller-owned.
+   consumed after issue. The complete optional bullet-birth observation and
+   publication transaction now lives behind
+   `th08_live.bullet_birth_stage`; its service lifecycle and previous-emit
+   reset remain controller-owned. Outer decision-record composition and other
+   optional post-issue shadows remain controller-owned.
 
 The bounded iteration then becomes:
 

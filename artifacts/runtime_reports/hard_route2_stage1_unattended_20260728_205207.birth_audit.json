@@ -1,0 +1,1182 @@
+{
+  "by_phase_at_capture": {
+    "stage_0:nonspell": {
+      "activation_edges": 5196,
+      "all_evidence": 5233,
+      "evidence_kind:bootstrap_recent": 36,
+      "evidence_kind:invalid_timer": 1,
+      "unmatched": 5196
+    },
+    "stage_0:spell_0": {
+      "activation_edges": 2584,
+      "all_evidence": 2584,
+      "unmatched": 2584
+    },
+    "stage_0:spell_4": {
+      "activation_edges": 1913,
+      "all_evidence": 1913,
+      "unmatched": 1913
+    },
+    "stage_0:spell_8": {
+      "activation_edges": 2604,
+      "all_evidence": 2605,
+      "evidence_kind:invalid_timer": 1,
+      "support": 1654,
+      "unmatched": 950
+    }
+  },
+  "by_phase_at_intent": {
+    "stage_0:nonspell": {
+      "audit_rows": 4302,
+      "intent_result_absent": 4302,
+      "no_active_main_vm_rows": 4302,
+      "velocity_instructions_scanned": 0
+    },
+    "stage_0:spell_0": {
+      "active_main_vm_rows": 1059,
+      "audit_rows": 1059,
+      "classified_rows": 1059,
+      "stop:horizon": 616,
+      "stop:source_topology_change": 406,
+      "stop:unsupported_auxiliary_or_callback": 37,
+      "velocity_instructions_scanned": 12057,
+      "velocity_lookahead_coverage:unknown": 1059,
+      "velocity_lookahead_lowering:incomplete_prefix_not_lowered": 1059,
+      "velocity_lookahead_stop:unsupported_control_flow": 1059
+    },
+    "stage_0:spell_4": {
+      "active_main_vm_rows": 947,
+      "audit_rows": 947,
+      "classified_rows": 947,
+      "stop:horizon": 89,
+      "stop:unsupported_control_flow": 858,
+      "velocity_instructions_scanned": 2694,
+      "velocity_lookahead_coverage:unknown": 947,
+      "velocity_lookahead_lowering:incomplete_prefix_not_lowered": 947,
+      "velocity_lookahead_stop:unsupported_control_flow": 947
+    },
+    "stage_0:spell_8": {
+      "active_main_vm_rows": 1093,
+      "audit_rows": 1093,
+      "classified_rows": 1093,
+      "deduplicated_timed_events": 127,
+      "status:deferred": 3,
+      "status:dynamic_parameter": 244,
+      "stop:horizon": 329,
+      "stop:source_topology_change": 113,
+      "stop:unsupported_control_flow": 404,
+      "stop:unsupported_emission_state_mutation": 247,
+      "timed_event_sightings": 244,
+      "timed_sightings": 244,
+      "untimed_sightings": 3,
+      "velocity_instructions_scanned": 7913,
+      "velocity_lookahead_coverage:unknown": 1093,
+      "velocity_lookahead_lowering:incomplete_prefix_not_lowered": 1093,
+      "velocity_lookahead_stop:unsupported_control_flow": 1093
+    }
+  },
+  "callback_lookahead": {
+    "coverage_status_rows": {
+      "unknown": 3099
+    },
+    "incomplete_tagged_max": 0,
+    "incomplete_tagged_rows": 0,
+    "lowered_events": 0,
+    "lowering_status_rows": {
+      "incomplete_prefix_not_lowered": 3099
+    },
+    "prefix_events": 0,
+    "semantics": {
+      "complete": "events cover the declared main-VM horizon",
+      "incomplete_lowering": "no prefix tuple is consumed as complete",
+      "legacy_declared_complete": "schema-v1-v7 declared horizon coverage without an enforced lowering interface",
+      "legacy_declared_unknown": "schema-v1-v7 incomplete prefix was exposed through the old schedule interface",
+      "unknown": "events are prefix evidence only"
+    }
+  },
+  "derived_pattern_source": {
+    "authority": "trace_only",
+    "candidate_rows": 0,
+    "candidate_sightings": 0,
+    "future_hazard_coverage": "unknown",
+    "native_segments_ms": {},
+    "rows_including_schema_v11_or_v12": 0,
+    "schema_v10_rows": 0
+  },
+  "derived_pattern_source_join": {
+    "activation_group_sizes": {},
+    "activation_groups_after_source_rows": 0,
+    "complete_edge_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "groups_with_ambiguous_stationary_geometry_candidates": 0,
+    "groups_with_count_candidates": 0,
+    "groups_with_stationary_geometry_candidates": 0,
+    "groups_with_unique_stationary_geometry_candidate": 0,
+    "match_samples": [],
+    "next_observation_discontinuities": 0,
+    "parameters": {
+      "join_horizon": "next_accepted_pool_observation_only",
+      "origin_cluster_tolerance_px": 0.05,
+      "stationary_parent_tolerance_px": 1.0
+    },
+    "schema": "th08-derived-pattern-source-next-observation-join-v1",
+    "semantics": {
+      "backprojected_origin": "observed_position_minus_observed_velocity_times_age",
+      "future_hazard_coverage": "unknown",
+      "hit_outcome_used": false,
+      "source_attribution_authority": "none",
+      "stationary_geometry_candidate": "diagnostic compatibility under a stationary-parent proxy; parent motion and update order remain unresolved"
+    },
+    "source_rows": 0,
+    "source_sightings": 0,
+    "unmatched_source_samples": [],
+    "unmatched_source_sightings": 0
+  },
+  "gates": {
+    "cycle_attribution_available": true,
+    "cycle_attribution_required": true,
+    "observer_budget_passed": true,
+    "observer_limits_ms": {
+      "boundary": "birth_observation",
+      "max": 2.0,
+      "p95": 0.2,
+      "p99": 0.4
+    },
+    "timed_intent_available": true,
+    "validation_passed": true
+  },
+  "input": {
+    "active_spell_main_vm_rows": 3099,
+    "audit_rows": 7401,
+    "decision_scopes": 7401,
+    "deferred_fire_state_statuses": {
+      "aligned_complete": 3080,
+      "capture_misaligned": 19,
+      "enemy_flags_unavailable": 2030,
+      "enemy_pointer_mismatch": 2272
+    },
+    "deferred_fire_state_values": {
+      "disabled": 3080,
+      "unknown": 4321
+    },
+    "derived_source_errors": 0,
+    "intent_errors": 0,
+    "native_call_modes": {
+      "gil-held": 7401
+    },
+    "observation_backends": {
+      "native": 7401
+    },
+    "observation_errors": 0,
+    "trace_schema_versions": {
+      "9": 7401
+    }
+  },
+  "intent": {
+    "deduplicated_timed_events": 127,
+    "dependency_sightings": {
+      "bullet_template_geometry": 247,
+      "deferred_state": 3,
+      "emission_origin": 247,
+      "minimum_fire_distance": 247,
+      "pool_capacity": 247,
+      "transform_program": 247,
+      "vm_parameter:angle1": 247,
+      "vm_parameter:count1": 247,
+      "vm_parameter:speed1": 247
+    },
+    "status_sightings": {
+      "deferred": 3,
+      "dynamic_parameter": 244
+    },
+    "stop_reasons": {
+      "horizon": 1034,
+      "source_topology_change": 519,
+      "unsupported_auxiliary_or_callback": 37,
+      "unsupported_control_flow": 1262,
+      "unsupported_emission_state_mutation": 247
+    },
+    "timed_event_sightings": 244,
+    "untimed_intent_signatures": 2
+  },
+  "join": {
+    "activation_edges": 12297,
+    "ambiguous_samples": [],
+    "any_temporal_matches": 1654,
+    "classification": {
+      "support": 1654,
+      "unmatched": 10643
+    },
+    "residual_reasons": {
+      "active_spell_main_vm_absent": 5196,
+      "evidence_kind:bootstrap_recent": 36,
+      "evidence_kind:invalid_timer": 2,
+      "intent_dependency:bullet_template_geometry": 1654,
+      "intent_dependency:emission_origin": 1654,
+      "intent_dependency:minimum_fire_distance": 1654,
+      "intent_dependency:pool_capacity": 1654,
+      "intent_dependency:transform_program": 1654,
+      "intent_dependency:vm_parameter:angle1": 1654,
+      "intent_dependency:vm_parameter:count1": 1654,
+      "intent_dependency:vm_parameter:speed1": 1654,
+      "no_temporally_overlapping_timed_intent": 5447,
+      "observation_status:capture_spanned": 12297,
+      "omitted_source_competition": 1654,
+      "temporal_support_not_point": 1654
+    },
+    "semantics": {
+      "ambiguous": "multiple intent intervals overlap",
+      "causal_authority": "none",
+      "exact": "one point intent equals one point observation",
+      "support": "one intent interval overlaps the observation",
+      "unmatched": "no timed main-VM intent interval overlaps"
+    },
+    "unique_temporal_fraction": 0.134504,
+    "unique_temporal_matches": 1654,
+    "unmatched_samples": [
+      {
+        "activation_support": [
+          488,
+          490
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 492,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 0
+      },
+      {
+        "activation_support": [
+          509,
+          512
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 513,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 1
+      },
+      {
+        "activation_support": [
+          528,
+          531
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 532,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 2
+      },
+      {
+        "activation_support": [
+          547,
+          550
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 551,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 3
+      },
+      {
+        "activation_support": [
+          568,
+          570
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 571,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 4
+      },
+      {
+        "activation_support": [
+          578,
+          581
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 582,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 5
+      },
+      {
+        "activation_support": [
+          603,
+          605
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 606,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 6
+      },
+      {
+        "activation_support": [
+          613,
+          616
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 617,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 7
+      },
+      {
+        "activation_support": [
+          674,
+          676
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 677,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 8
+      },
+      {
+        "activation_support": [
+          676,
+          678
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 679,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 9
+      },
+      {
+        "activation_support": [
+          688,
+          690
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 691,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 10
+      },
+      {
+        "activation_support": [
+          700,
+          702
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 703,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 11
+      },
+      {
+        "activation_support": [
+          709,
+          712
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 713,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 12
+      },
+      {
+        "activation_support": [
+          712,
+          714
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 715,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 13
+      },
+      {
+        "activation_support": [
+          729,
+          731
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 732,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 14
+      },
+      {
+        "activation_support": [
+          748,
+          750
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 751,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 15
+      },
+      {
+        "activation_support": [
+          768,
+          770
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 771,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 16
+      },
+      {
+        "activation_support": [
+          772,
+          774
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 775,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 17
+      },
+      {
+        "activation_support": [
+          777,
+          779
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 780,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 18
+      },
+      {
+        "activation_support": [
+          789,
+          792
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 793,
+        "gameplay_epoch": 0,
+        "phase": "stage_0:nonspell",
+        "slot": 19
+      }
+    ]
+  },
+  "native_diagnostics": {
+    "gc_completed": {
+      "materialize:generation_0": 0,
+      "materialize:generation_1": 0,
+      "materialize:generation_2": 0,
+      "native_call:generation_0": 0,
+      "native_call:generation_1": 0,
+      "native_call:generation_2": 0,
+      "prepare:generation_0": 0,
+      "prepare:generation_1": 0,
+      "prepare:generation_2": 0
+    },
+    "observation_ms_by_gc_overlap": {
+      "without_gc": {
+        "count": 7401,
+        "max": 0.797,
+        "p50": 0.0887,
+        "p95": 0.1743,
+        "p99": 0.3295,
+        "p99_9": 0.525
+      }
+    },
+    "observer_contention": {
+      "classifications": {
+        "ambiguous_endpoint_overlap": 1,
+        "definite_known_future_overlap": 3196,
+        "no_known_future_overlap": 4204
+      },
+      "endpoint_patterns": {
+        "corridor_future:absent->absent|survival_future:absent->absent|enemy_future:absent->absent": 2102,
+        "corridor_future:absent->absent|survival_future:absent->absent|enemy_future:done->done": 1698,
+        "corridor_future:absent->absent|survival_future:absent->absent|enemy_future:inflight->inflight": 3,
+        "corridor_future:done->done|survival_future:absent->absent|enemy_future:absent->absent": 183,
+        "corridor_future:done->done|survival_future:absent->absent|enemy_future:done->done": 221,
+        "corridor_future:done->done|survival_future:absent->absent|enemy_future:inflight->done": 1,
+        "corridor_future:done->done|survival_future:absent->absent|enemy_future:inflight->inflight": 8,
+        "corridor_future:inflight->inflight|survival_future:absent->absent|enemy_future:absent->absent": 1634,
+        "corridor_future:inflight->inflight|survival_future:absent->absent|enemy_future:done->done": 1343,
+        "corridor_future:inflight->inflight|survival_future:absent->absent|enemy_future:inflight->done": 1,
+        "corridor_future:inflight->inflight|survival_future:absent->absent|enemy_future:inflight->inflight": 207
+      },
+      "semantics": {
+        "ambiguous_endpoint_overlap": "one known future changed to or from inflight",
+        "causal_authority": "none",
+        "definite_known_future_overlap": "one known future was inflight at both endpoints",
+        "no_known_future_overlap": "none of the three known futures overlapped both endpoints"
+      }
+    },
+    "over_budget_dominant_segments": {},
+    "over_budget_samples": [],
+    "rows": 7401,
+    "rows_with_gc": 0,
+    "segments_ms": {
+      "controller_residual": {
+        "count": 7401,
+        "max": 0.4446,
+        "p50": 0.0381,
+        "p95": 0.0632,
+        "p99": 0.088,
+        "p99_9": 0.3829
+      },
+      "materialize": {
+        "count": 7401,
+        "max": 0.4977,
+        "p50": 0.0067,
+        "p95": 0.0715,
+        "p99": 0.1013,
+        "p99_9": 0.3645
+      },
+      "native_call": {
+        "count": 7401,
+        "max": 0.5943,
+        "p50": 0.0358,
+        "p95": 0.0569,
+        "p99": 0.0883,
+        "p99_9": 0.3593
+      },
+      "prepare": {
+        "count": 7401,
+        "max": 0.079,
+        "p50": 0.0037,
+        "p95": 0.0068,
+        "p99": 0.0091,
+        "p99_9": 0.0249
+      }
+    },
+    "thread_cycle_attribution_rows": 7401,
+    "thread_cycle_sources": {
+      "windows_query_thread_cycle_time": 7401
+    },
+    "thread_cycles": {
+      "materialize": {
+        "count": 7401,
+        "max": 631182.0,
+        "p50": 20516.0,
+        "p95": 212458.0,
+        "p99": 293960.0,
+        "p99_9": 412938.0
+      },
+      "native_call": {
+        "count": 7401,
+        "max": 406568.0,
+        "p50": 105478.0,
+        "p95": 161390.0,
+        "p99": 201848.0,
+        "p99_9": 264758.0
+      },
+      "prepare": {
+        "count": 7401,
+        "max": 176898.0,
+        "p50": 13756.0,
+        "p95": 26124.0,
+        "p99": 43326.0,
+        "p99_9": 133858.0
+      }
+    },
+    "thread_cycles_by_evidence_count": {
+      "materialize": {
+        "0": {
+          "count": 5868,
+          "max": 224928.0,
+          "p50": 19332.0,
+          "p95": 36540.0,
+          "p99": 56212.0,
+          "p99_9": 156482.0
+        },
+        "1_8": {
+          "count": 1011,
+          "max": 631182.0,
+          "p50": 178766.0,
+          "p95": 290568.0,
+          "p99": 352992.0,
+          "p99_9": 415700.0
+        },
+        "33_64": {
+          "count": 44,
+          "max": 369322.0,
+          "p50": 184164.0,
+          "p95": 293856.0,
+          "p99": 369322.0,
+          "p99_9": 369322.0
+        },
+        "65_320": {
+          "count": 4,
+          "max": 240190.0,
+          "p50": 201720.0,
+          "p95": 240190.0,
+          "p99": 240190.0,
+          "p99_9": 240190.0
+        },
+        "9_32": {
+          "count": 474,
+          "max": 481346.0,
+          "p50": 176168.0,
+          "p95": 297092.0,
+          "p99": 412938.0,
+          "p99_9": 481346.0
+        }
+      },
+      "native_call": {
+        "0": {
+          "count": 5868,
+          "max": 361980.0,
+          "p50": 105350.0,
+          "p95": 161524.0,
+          "p99": 200482.0,
+          "p99_9": 255584.0
+        },
+        "1_8": {
+          "count": 1011,
+          "max": 406568.0,
+          "p50": 105340.0,
+          "p95": 157786.0,
+          "p99": 204314.0,
+          "p99_9": 325776.0
+        },
+        "33_64": {
+          "count": 44,
+          "max": 305080.0,
+          "p50": 112188.0,
+          "p95": 168596.0,
+          "p99": 305080.0,
+          "p99_9": 305080.0
+        },
+        "65_320": {
+          "count": 4,
+          "max": 131866.0,
+          "p50": 115672.0,
+          "p95": 131866.0,
+          "p99": 131866.0,
+          "p99_9": 131866.0
+        },
+        "9_32": {
+          "count": 474,
+          "max": 276092.0,
+          "p50": 106486.0,
+          "p95": 164288.0,
+          "p99": 211578.0,
+          "p99_9": 276092.0
+        }
+      },
+      "prepare": {
+        "0": {
+          "count": 5868,
+          "max": 157158.0,
+          "p50": 13762.0,
+          "p95": 26434.0,
+          "p99": 41536.0,
+          "p99_9": 134132.0
+        },
+        "1_8": {
+          "count": 1011,
+          "max": 176898.0,
+          "p50": 13796.0,
+          "p95": 24954.0,
+          "p99": 52268.0,
+          "p99_9": 120810.0
+        },
+        "33_64": {
+          "count": 44,
+          "max": 27246.0,
+          "p50": 14094.0,
+          "p95": 23208.0,
+          "p99": 27246.0,
+          "p99_9": 27246.0
+        },
+        "65_320": {
+          "count": 4,
+          "max": 18856.0,
+          "p50": 15200.0,
+          "p95": 18856.0,
+          "p99": 18856.0,
+          "p99_9": 18856.0
+        },
+        "9_32": {
+          "count": 474,
+          "max": 92926.0,
+          "p50": 13516.0,
+          "p95": 24920.0,
+          "p99": 31176.0,
+          "p99_9": 92926.0
+        }
+      }
+    }
+  },
+  "nonspell_main_vm_inventory": {
+    "active_slots_per_row": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
+    "authority": "trace_only_state_inventory",
+    "auxiliary_pointer_owners_per_row": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
+    "decode_ms": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
+    "enemy_prefix_capture_ms": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
+    "invalid_active_vms_per_row": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
+    "invalid_auxiliary_contexts_per_row": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
+    "non_null_auxiliary_contexts_per_row": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
+    "schema_v11_rows": 0,
+    "schema_v12_rows": 0,
+    "source_proof": "none",
+    "stability": {},
+    "unique_instruction_pointers": 0,
+    "valid_vms_per_row": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    }
+  },
+  "observation": {
+    "age": {
+      "count": 12335,
+      "max": 3.0,
+      "p50": 0.0,
+      "p95": 1.0,
+      "p99": 2.0,
+      "p99_9": 2.0
+    },
+    "capture_spans": {
+      "0": 7159,
+      "1": 242
+    },
+    "evidence_kinds": {
+      "activation_edge": 12297,
+      "bootstrap_recent": 36,
+      "invalid_timer": 2
+    },
+    "evidence_per_row": {
+      "count": 7401,
+      "max": 66.0,
+      "p50": 0.0,
+      "p95": 10.0,
+      "p99": 16.0,
+      "p99_9": 64.0
+    },
+    "observation_statuses": {
+      "capture_spanned": 12333,
+      "invalid_timer": 2
+    }
+  },
+  "passed": true,
+  "schema": "th08-bullet-birth-residual-audit-v9",
+  "scope": {
+    "future_geometry_authority": "none",
+    "hazard_coverage_authority": "none",
+    "intent_source": "active_spell_enemy_main_vm_only",
+    "omitted_sources": [
+      "callback_or_interrupt_source",
+      "child_enemy_or_auxiliary_vm",
+      "deferred_emission_runtime_state",
+      "non_ecl_native_source",
+      "non_spell_enemy_main_vm"
+    ],
+    "physical_action_authority": "none"
+  },
+  "source": {
+    "trace_bytes": 178496273,
+    "trace_name": "hard_route2_stage1_unattended_20260728_205207.jsonl",
+    "trace_sha256": "de92777b5d6745972b5ad3c489e351859bd87ba713257b25a053200b76f3efef"
+  },
+  "timing_by_evidence_count": {
+    "build": {
+      "0": {
+        "count": 5868,
+        "max": 0.347,
+        "p50": 0.0412,
+        "p95": 0.0655,
+        "p99": 0.0851,
+        "p99_9": 0.1586
+      },
+      "1_8": {
+        "count": 1011,
+        "max": 0.3017,
+        "p50": 0.0692,
+        "p95": 0.1099,
+        "p99": 0.1314,
+        "p99_9": 0.1519
+      },
+      "33_64": {
+        "count": 44,
+        "max": 0.3929,
+        "p50": 0.0833,
+        "p95": 0.1726,
+        "p99": 0.3929,
+        "p99_9": 0.3929
+      },
+      "65_320": {
+        "count": 4,
+        "max": 0.1049,
+        "p50": 0.09,
+        "p95": 0.1049,
+        "p99": 0.1049,
+        "p99_9": 0.1049
+      },
+      "9_32": {
+        "count": 474,
+        "max": 0.3984,
+        "p50": 0.0729,
+        "p95": 0.1192,
+        "p99": 0.1569,
+        "p99_9": 0.3984
+      }
+    },
+    "observation": {
+      "0": {
+        "count": 5868,
+        "max": 0.6763,
+        "p50": 0.084,
+        "p95": 0.1404,
+        "p99": 0.2232,
+        "p99_9": 0.4626
+      },
+      "1_8": {
+        "count": 1011,
+        "max": 0.6462,
+        "p50": 0.1389,
+        "p95": 0.2303,
+        "p99": 0.4446,
+        "p99_9": 0.5796
+      },
+      "33_64": {
+        "count": 44,
+        "max": 0.5104,
+        "p50": 0.1442,
+        "p95": 0.2364,
+        "p99": 0.5104,
+        "p99_9": 0.5104
+      },
+      "65_320": {
+        "count": 4,
+        "max": 0.1749,
+        "p50": 0.1581,
+        "p95": 0.1749,
+        "p99": 0.1749,
+        "p99_9": 0.1749
+      },
+      "9_32": {
+        "count": 474,
+        "max": 0.797,
+        "p50": 0.1378,
+        "p95": 0.2286,
+        "p99": 0.4499,
+        "p99_9": 0.797
+      }
+    },
+    "observation_cpu": {
+      "0": {
+        "count": 5868,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 15.625
+      },
+      "1_8": {
+        "count": 1011,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 15.625
+      },
+      "33_64": {
+        "count": 44,
+        "max": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 0.0
+      },
+      "65_320": {
+        "count": 4,
+        "max": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 0.0
+      },
+      "9_32": {
+        "count": 474,
+        "max": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 0.0
+      }
+    },
+    "pre_emit_total": {
+      "0": {
+        "count": 5868,
+        "max": 0.7837,
+        "p50": 0.1345,
+        "p95": 0.2258,
+        "p99": 0.3602,
+        "p99_9": 0.5925
+      },
+      "1_8": {
+        "count": 1011,
+        "max": 0.7406,
+        "p50": 0.2189,
+        "p95": 0.3678,
+        "p99": 0.5274,
+        "p99_9": 0.7316
+      },
+      "33_64": {
+        "count": 44,
+        "max": 0.72,
+        "p50": 0.2361,
+        "p95": 0.5828,
+        "p99": 0.72,
+        "p99_9": 0.72
+      },
+      "65_320": {
+        "count": 4,
+        "max": 0.2798,
+        "p50": 0.2481,
+        "p95": 0.2798,
+        "p99": 0.2798,
+        "p99_9": 0.2798
+      },
+      "9_32": {
+        "count": 474,
+        "max": 0.9835,
+        "p50": 0.2369,
+        "p95": 0.4069,
+        "p99": 0.5586,
+        "p99_9": 0.9835
+      }
+    },
+    "previous_emit": {
+      "0": {
+        "count": 5867,
+        "max": 0.4159,
+        "p50": 0.0613,
+        "p95": 0.0988,
+        "p99": 0.126,
+        "p99_9": 0.2603
+      },
+      "1_8": {
+        "count": 1011,
+        "max": 0.4005,
+        "p50": 0.0751,
+        "p95": 0.1249,
+        "p99": 0.16,
+        "p99_9": 0.3615
+      },
+      "33_64": {
+        "count": 44,
+        "max": 7.5323,
+        "p50": 1.067,
+        "p95": 1.7546,
+        "p99": 7.5323,
+        "p99_9": 7.5323
+      },
+      "65_320": {
+        "count": 4,
+        "max": 1.449,
+        "p50": 0.9508,
+        "p95": 1.449,
+        "p99": 1.449,
+        "p99_9": 1.449
+      },
+      "9_32": {
+        "count": 474,
+        "max": 0.3024,
+        "p50": 0.1084,
+        "p95": 0.179,
+        "p99": 0.2352,
+        "p99_9": 0.3024
+      }
+    },
+    "semantics": {
+      "observation_build_pre_emit": "bucketed by the current audit evidence count",
+      "previous_emit": "bucketed by the preceding audit evidence count"
+    }
+  },
+  "timing_ms": {
+    "build": {
+      "count": 7401,
+      "max": 0.3984,
+      "p50": 0.0433,
+      "p95": 0.0856,
+      "p99": 0.1183,
+      "p99_9": 0.2515
+    },
+    "combined_pool_observation": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
+    "derived_source_observation": {
+      "count": 0,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "p99_9": null
+    },
+    "intent": {
+      "count": 7401,
+      "max": 0.4471,
+      "p50": 0.0,
+      "p95": 0.0476,
+      "p99": 0.0668,
+      "p99_9": 0.1067
+    },
+    "observation": {
+      "count": 7401,
+      "max": 0.797,
+      "p50": 0.0887,
+      "p95": 0.1743,
+      "p99": 0.3295,
+      "p99_9": 0.525
+    },
+    "observation_cpu": {
+      "count": 7401,
+      "max": 15.625,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "p99_9": 15.625
+    },
+    "pre_emit_total": {
+      "count": 7401,
+      "max": 0.9835,
+      "p50": 0.1444,
+      "p95": 0.2863,
+      "p99": 0.4298,
+      "p99_9": 0.6711
+    },
+    "previous_emit": {
+      "count": 7400,
+      "max": 7.5323,
+      "p50": 0.0638,
+      "p95": 0.1173,
+      "p99": 0.1878,
+      "p99_9": 1.4034
+    }
+  },
+  "velocity_lookahead_read_ms_by_phase": {
+    "stage_0:nonspell": {
+      "count": 4302,
+      "max": 0.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "p99_9": 0.0
+    },
+    "stage_0:spell_0": {
+      "count": 1059,
+      "max": 2.5003,
+      "p50": 0.0976,
+      "p95": 0.1584,
+      "p99": 0.3349,
+      "p99_9": 1.3974
+    },
+    "stage_0:spell_4": {
+      "count": 947,
+      "max": 1.8221,
+      "p50": 0.0832,
+      "p95": 0.1944,
+      "p99": 0.4527,
+      "p99_9": 1.8221
+    },
+    "stage_0:spell_8": {
+      "count": 1093,
+      "max": 2.1166,
+      "p50": 0.0913,
+      "p95": 0.1941,
+      "p99": 0.4742,
+      "p99_9": 1.1484
+    }
+  }
+}

@@ -8156,3 +8156,52 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   cost remains inside the unchanged physical gate. Polling one full frame or
   pausing the game is not authorized. No source-completeness, future-hazard,
   planner, feasibility, publication, or action authority is added.
+
+## 2026-07-28 — Accepted bounded visible retry for auxiliary-VM delivery
+
+- Fixed
+  `G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md` before code.
+  One due trace-only transaction composes at most three unchanged complete v2
+  native-owned captures. Only declared frame-boundary and accompanying
+  owner/context-churn statuses are retryable. There is no sleep, frame poll,
+  pause, action change, or Python owner/frame read; exhaustion and terminal
+  errors publish no state.
+- Added schema-v3 ordered attempt summaries, selected-version identity,
+  summed read/native/materialization accounting, and a strict streaming
+  analyzer that independently recomputes retryability. It rejects hidden or
+  reordered attempts, retry after success/terminal failure, selected
+  summary/observation disagreement, status-histogram disagreement, forged
+  retryability, and read/timing sum or hard-bound violations.
+- Focused tests cover first- and second-retry success, three-attempt
+  exhaustion, terminal stop, closed status whitelists including unknown
+  bits, no Python owner/frame reads, and strict analyzer forgeries. Focused
+  Ruff passes. Complete Linux and Windows UNC discovery both pass 942 tests;
+  Windows retains three existing platform skips.
+- **Observed physical workload:** Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_200739` completed frames
+  `2..43163`, 13,097 decisions, ten hits, hard no-Bomb, `route_complete`,
+  accepted transition/session gates, exact key release, and no residual
+  process. The observer is action-neutral, so hit differences from the
+  eight-hit baseline and twenty-hit v2 run are not causal performance claims.
+- The spell-107 audit retained 123 schema-v3 transactions. All selected
+  coherent state. Four first attempts crossed at owner close
+  (`30878->30879`, `31444->31445`, `31807->31808`,
+  `32050->32051`); every immediate second complete attempt succeeded at the
+  later frame. Maximum attempt count was two, with zero exhaustion, terminal
+  rejection, exception, selected failure, or validation error.
+- Selected state contains 3,214 usable depth-0 contexts, 6,162 explicit null
+  rows, and 1,058 unique active-VM hashes. Summed native
+  p50/p95/p99/max is `0.325/0.487/0.536/0.848 ms`; total service
+  p50/p95/p99/max is `1.087/1.618/2.169/2.248 ms`. Decision cadence remains
+  p50/p95/p99 `2/4/4`, equal at p95/p99 to the compatible baseline.
+- Every fixed gate passes. Strict report digest is
+  `faf5009c326fa65d18aae331221a6fc3ce0652e313de3c1d41d27b5f916748f6`;
+  raw trace SHA-256 is
+  `953a5c3cb4bef84a809c9d2681aedcc081f67cc7f8dc39aa942bc42f0da779e9`.
+- **Decision:** Accept bounded visible retry for default-off trace-only
+  auxiliary-VM state delivery and retain CE-0165 as the durable refutation of
+  asynchronous atomicity/no-retry assumptions. No runtime-ECL identity,
+  source-completeness, future-hazard, geometry, planner, feasibility,
+  publication, cadence, or live-action authority follows. Next capture and
+  byte-compare one shipped Stage-5 runtime ECL image, then lower event classes
+  one at a time under separate contracts.

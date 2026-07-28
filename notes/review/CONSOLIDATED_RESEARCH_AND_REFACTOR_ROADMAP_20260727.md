@@ -1331,6 +1331,21 @@ parity 當成每個 nature tie field 的逐 bit equality。
   but shipped Stage-5 byte identity remains pending. CE-0163 also records
   that inherited IDA labels are never authority: context `+0x230` is the
   saved-call-frame stack, not live locals;
+- phase-B delivery is now physically complete without weakening its
+  coherence gate. External-owner v1 was rejected by CE-0164 after 9/124
+  Python owner copies crossed a manager frame. Native-owned no-retry v2
+  removed that transport gap but CE-0165 still exposed 7/235 asynchronous
+  crossings. The separately contracted schema-v3 composition keeps every
+  complete v2 attempt visible, retries only a closed frame/churn whitelist,
+  publishes only one coherent selected version, and fails closed after at
+  most three attempts. Stage-5 spell-107 run `20260728_200739` exercised four
+  owner-close crossings; all four coherent second attempts succeeded, so all
+  123 due transactions passed with maximum attempt count two and zero
+  exhaustion/terminal/validation failure. Summed native p95/p99/max is
+  `0.487/0.536/0.848 ms`, and cadence remains `2/4/4`. This accepts
+  default-off trace delivery only. Runtime-ECL identity, instruction/path
+  lowering, source completeness, future geometry, and action authority
+  remain open;
 - the projection audit now has an explicit universal `core` profile and keeps
   Stage-4A-only spell gates as its default. Stage 5 passes all core gates over
   4,871 rows while retaining 1,220 spell-115 unsupported-control rows as

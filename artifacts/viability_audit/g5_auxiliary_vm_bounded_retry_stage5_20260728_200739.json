@@ -1,0 +1,241 @@
+{
+  "authority": "physical trace-only evidence; no action authority",
+  "baseline": {
+    "bytes": 553193476,
+    "decision_count": 12032,
+    "decision_frame_delta": {
+      "count": 12030,
+      "max": 1802.0,
+      "mean": 3.3102244389027433,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 4.0
+    },
+    "hit_frames": [
+      12324,
+      14116,
+      24615,
+      25486,
+      30504,
+      33449,
+      36710,
+      40462
+    ],
+    "input_bomb_rows": 0,
+    "line_count": 24156,
+    "path": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_171633.jsonl",
+    "previous_iteration_ms": {
+      "count": 12031,
+      "max": 94.09080003388226,
+      "mean": 30.66400975800313,
+      "p50": 28.274700045585632,
+      "p95": 53.126699989661574,
+      "p99": 65.49377999035649
+    },
+    "sha256": "de697d66bac26ac4ba59185a55c1432249e10111f275299f9c78085d363e78ec",
+    "summary": {
+      "counter_gaps": 957,
+      "hit_count": 8,
+      "kind": "summary",
+      "last_frame": 41630,
+      "termination_reason": "route_complete"
+    }
+  },
+  "batch": {
+    "active_owner_count": {
+      "count": 123,
+      "max": 41.0,
+      "mean": 19.056910569105693,
+      "p50": 16.0,
+      "p95": 38.900000000000006,
+      "p99": 40.0
+    },
+    "attempt_batch_status_bits": {
+      "0": 123,
+      "64": 4
+    },
+    "attempt_count": {
+      "count": 123,
+      "max": 2.0,
+      "mean": 1.032520325203252,
+      "p50": 1.0,
+      "p95": 1.0,
+      "p99": 2.0
+    },
+    "attempt_record_status_bits": {
+      "0": 3214,
+      "1": 6162
+    },
+    "batch_status_bits": {
+      "0": 123
+    },
+    "call_depths": {
+      "0": 3214
+    },
+    "count": 123,
+    "non_null_context_count": {
+      "count": 123,
+      "max": 34.0,
+      "mean": 26.130081300813007,
+      "p50": 30.0,
+      "p95": 32.0,
+      "p99": 34.0
+    },
+    "owner_blob_bytes": {
+      "count": 123,
+      "max": 1373184.0,
+      "mean": 1373184.0,
+      "p50": 1373184.0,
+      "p95": 1373184.0,
+      "p99": 1373184.0
+    },
+    "process_read_count": {
+      "count": 123,
+      "max": 142.0,
+      "mean": 102.54471544715447,
+      "p50": 117.0,
+      "p95": 133.9,
+      "p99": 136.56
+    },
+    "record_status_bits": {
+      "0": 3214,
+      "1": 6162
+    },
+    "retried_transaction_count": 4,
+    "schema_versions": {
+      "3": 123
+    },
+    "state_payload_bytes": {
+      "count": 123,
+      "max": 18768.0,
+      "mean": 14423.80487804878,
+      "p50": 16560.0,
+      "p95": 17664.0,
+      "p99": 18768.0
+    },
+    "statuses": {
+      "success": 123
+    },
+    "timing_ms": {
+      "compact": {
+        "count": 123,
+        "max": 0.3429000498726964,
+        "mean": 0.11587479602303205,
+        "p50": 0.11279992759227753,
+        "p95": 0.18414990045130256,
+        "p99": 0.2392320102080703
+      },
+      "materialize": {
+        "count": 123,
+        "max": 1.361300004646182,
+        "mean": 0.5715008166323348,
+        "p50": 0.5426000570878386,
+        "p95": 0.9694700478576124,
+        "p99": 1.3350539724342525
+      },
+      "native_call": {
+        "count": 123,
+        "max": 0.847900053486228,
+        "mean": 0.3430658546314249,
+        "p50": 0.3252999158576131,
+        "p95": 0.4874799866229296,
+        "p99": 0.5357860052026808
+      },
+      "owner_capture": null,
+      "total": {
+        "count": 123,
+        "max": 2.24760000128299,
+        "mean": 1.1034235822006575,
+        "p50": 1.0872000129893422,
+        "p95": 1.6181399929337204,
+        "p99": 2.1691740746609867
+      }
+    },
+    "unique_active_vm_hashes": 1058,
+    "usable_context_count": {
+      "count": 123,
+      "max": 34.0,
+      "mean": 26.130081300813007,
+      "p50": 30.0,
+      "p95": 32.0,
+      "p99": 34.0
+    },
+    "validation_errors": []
+  },
+  "gates": {
+    "batch_rows_present": true,
+    "decision_cadence_p95_regression_at_most_one_frame": true,
+    "hard_no_bomb_trace": true,
+    "native_max_ms": true,
+    "native_p95_ms": true,
+    "native_p99_ms": true,
+    "retry_path_observed": true,
+    "route_transition_cleanup_session": true,
+    "schema_v3_only": true,
+    "usable_context_observed": true,
+    "zero_batch_failures": true
+  },
+  "limits": {
+    "decision_cadence_p95_regression_frames": 1.0,
+    "native_max_ms": 12.0,
+    "native_p95_ms": 2.0,
+    "native_p99_ms": 4.0
+  },
+  "passed": true,
+  "report_digest": "faf5009c326fa65d18aae331221a6fc3ce0652e313de3c1d41d27b5f916748f6",
+  "schema": "th08-auxiliary-vm-batch-physical-gate-v3",
+  "session": {
+    "decision_count": 13097,
+    "hard_no_bomb": true,
+    "hit_count": null,
+    "passed": true,
+    "path": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_200739.session.json",
+    "run_id": "lunatic_route2_stage5_unattended_20260728_200739",
+    "status": "completed",
+    "termination_reason": "route_complete",
+    "trial_accepted": true
+  },
+  "trace": {
+    "bytes": 613142286,
+    "decision_count": 13097,
+    "decision_frame_delta": {
+      "count": 13094,
+      "max": 1803.0,
+      "mean": 3.0206965022147547,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 4.0
+    },
+    "hit_frames": [
+      4184,
+      11206,
+      11665,
+      12314,
+      12786,
+      23566,
+      25065,
+      32057,
+      36515,
+      42417
+    ],
+    "input_bomb_rows": 0,
+    "line_count": 26409,
+    "path": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_200739.jsonl",
+    "previous_iteration_ms": {
+      "count": 13096,
+      "max": 94.73370003979653,
+      "mean": 29.64196300377134,
+      "p50": 27.403399988543242,
+      "p95": 50.02080005942844,
+      "p99": 62.79954494675621
+    },
+    "sha256": "953a5c3cb4bef84a809c9d2681aedcc081f67cc7f8dc39aa942bc42f0da779e9",
+    "summary": {
+      "counter_gaps": 845,
+      "hit_count": 10,
+      "kind": "summary",
+      "last_frame": 43163,
+      "termination_reason": "route_complete"
+    }
+  }
+}

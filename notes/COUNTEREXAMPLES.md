@@ -4990,7 +4990,8 @@ semantics retained, external-owner-capture composition rejected
 ## CE-0165: One native-owned snapshot can still cross the game update boundary
 
 Status: observed physical asynchronous-snapshot counterexample; v2 transport
-retained, no-retry physical acceptance rejected
+retained, no-retry physical acceptance rejected; bounded-visible-retry
+correction physically accepted
 
 - **Observed workload:** Explicit trace-only Lunatic Stage-5 spell-107 run
   `20260728_193820` completed 13,586 decisions over frames `2..45403`, twenty
@@ -5016,10 +5017,27 @@ retained, no-retry physical acceptance rejected
   attempt budget, expose every attempt, publish only one coherent final
   attempt, treat exhaustion as failure, and charge all attempts to unchanged
   timing/cadence gates. Do not poll for up to one frame or pause the game.
+- **Observed correction validation:** Schema-v3 Stage-5 spell-107 run
+  `20260728_200739` exercised four owner-close crossings among 123 due
+  transactions. Each failed attempt performed three reads, exposed status
+  bit 64 and its frame pair, then selected a coherent complete second attempt
+  at the later frame. All 123 transactions succeeded; maximum attempt count
+  was two, with zero exhaustion, terminal failure, exception, or validation
+  error. Summed native p95/p99/max was
+  `0.487/0.536/0.848 ms`, cadence remained `2/4/4`, and every hard no-Bomb,
+  route, session, and cleanup gate passed.
+- **Retained lesson:** This validates a bounded fail-closed correction, not
+  the invalid atomic-snapshot assumption. Any future delivery change must
+  retain complete attempt visibility, hard exhaustion, selected-version
+  identity, and total transaction charging.
 - **Evidence:** Strict physical report digest
   `23313712483c80c3a8323f18f31d19abbf2ed00e3bd2efcf8ef02f9b03712634`;
   raw trace SHA-256
   `76472605d19b32b875b33d918527f0e6d13169ba862362451bc0f0ae015d8f13`.
+  Corrected v3 report/raw digests are
+  `faf5009c326fa65d18aae331221a6fc3ce0652e313de3c1d41d27b5f916748f6`
+  and
+  `953a5c3cb4bef84a809c9d2681aedcc081f67cc7f8dc39aa942bc42f0da779e9`.
 - **Authority:** Delivery/coherence, density, and timing evidence only. No
   future geometry, source completeness, planner, recurrence, actuator,
   feasibility, or live action authority changed.

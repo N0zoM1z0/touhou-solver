@@ -525,10 +525,17 @@ comparison.
    `0.463/0.584/0.894 ms` p95/p99/max and preserves cadence, but CE-0165
    rejects no-retry acceptance: 2/235 transactions cross at owner close and
    5/235 cross only at final close. Retain v2 transport and explicit frames.
-   The next proposed strategy is a fixed small-budget retry whose every
-   attempt is published, whose exhaustion fails closed, and whose total cost
-   remains inside the unchanged gates. Do not poll one frame, pause the game,
-   hide failed attempts, or consume this trace in live guidance.
+   Schema-v3 bounded visible retry now passes its physical delivery gate.
+   Stage-5 spell-107 run `20260728_200739` selected coherent state for all
+   123 due transactions; four owner-close crossings were exposed and all
+   four immediate complete retries succeeded. Maximum attempt count was two,
+   with zero exhaustion/terminal/exception/validation failure. Summed native
+   p95/p99/max is `0.487/0.536/0.848 ms`, and cadence remains `2/4/4`.
+   Accept this composition only for default-off trace delivery. CE-0165 still
+   rejects asynchronous atomicity and no-retry assumptions. Do not poll one
+   frame, pause the game, hide failed attempts, or consume this trace in live
+   guidance. The next source gate is immutable shipped runtime-ECL byte
+   identity, followed by separately contracted event-class lowering.
    None of this changes the live strategy or grants future-hazard authority.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over

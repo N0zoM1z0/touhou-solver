@@ -95,6 +95,14 @@ class TraceScan:
     payload_bytes: list[float] = field(default_factory=list)
     process_reads: list[float] = field(default_factory=list)
     owner_blob_bytes: list[float] = field(default_factory=list)
+    transaction_attempt_counts: list[float] = field(default_factory=list)
+    retried_transaction_count: int = 0
+    attempt_batch_status_bits: Counter[int] = field(
+        default_factory=Counter
+    )
+    attempt_record_status_bits: Counter[int] = field(
+        default_factory=Counter
+    )
     validation_errors: list[str] = field(default_factory=list)
 
 
@@ -113,12 +121,305 @@ def _number(
     return converted
 
 
+_RETRYABLE_BATCH_BITS = (1 << 0) | (1 << 1) | (1 << 6)
+_RETRYABLE_RECORD_BITS = (
+    (1 << 0) | (1 << 7) | (1 << 11) | (1 << 12) | (1 << 13)
+)
+_MAXIMUM_ATTEMPT_READS = 837
+_MAXIMUM_TRANSACTION_READS = 3 * _MAXIMUM_ATTEMPT_READS
+
+
+def _status_histogram(
+    value: object,
+    *,
+    context: str,
+) -> Counter[int]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{context}: record_status_bits is not an object")
+    result: Counter[int] = Counter()
+    for raw_bits, raw_count in value.items():
+        try:
+            bits = int(raw_bits)
+        except (TypeError, ValueError) as error:
+            raise ValueError(
+                f"{context}: invalid record status key {raw_bits!r}"
+            ) from error
+        if (
+            bits < 0
+            or not isinstance(raw_count, int)
+            or isinstance(raw_count, bool)
+            or raw_count <= 0
+        ):
+            raise ValueError(f"{context}: invalid record status count")
+        if str(bits) != raw_bits:
+            raise ValueError(
+                f"{context}: noncanonical record status key {raw_bits!r}"
+            )
+        result[bits] += raw_count
+    return result
+
+
+def _attempt_retryable(
+    *,
+    batch_bits: int,
+    record_statuses: Counter[int],
+) -> bool:
+    return (
+        batch_bits != 0
+        and not (batch_bits & ~_RETRYABLE_BATCH_BITS)
+        and all(
+            not (bits & ~_RETRYABLE_RECORD_BITS)
+            for bits in record_statuses
+        )
+    )
+
+
+def _audit_v3_attempts(
+    scan: TraceScan,
+    row: dict[str, object],
+    *,
+    context: str,
+    timing: dict[str, object],
+) -> None:
+    attempt_limit = row.get("attempt_limit")
+    attempt_count = row.get("attempt_count")
+    attempts = row.get("attempts")
+    if attempt_limit != 3:
+        scan.validation_errors.append(
+            f"{context}: attempt limit is not three"
+        )
+    if (
+        not isinstance(attempt_count, int)
+        or isinstance(attempt_count, bool)
+        or not 0 <= attempt_count <= 3
+        or not isinstance(attempts, list)
+        or len(attempts) != attempt_count
+    ):
+        raise ValueError(f"{context}: invalid attempt count/array")
+    if attempt_count == 0:
+        if row.get("status") != "native_transaction_failed":
+            scan.validation_errors.append(
+                f"{context}: empty non-exception transaction"
+            )
+        if row.get("selected_attempt_index") is not None:
+            scan.validation_errors.append(
+                f"{context}: empty transaction selected an attempt"
+            )
+        top_reads = row.get("process_read_count")
+        if top_reads != 0:
+            scan.validation_errors.append(
+                f"{context}: empty transaction reports reads"
+            )
+        for key in ("native_call", "materialize"):
+            if _number(timing, key, context=context) != 0.0:
+                scan.validation_errors.append(
+                    f"{context}: empty transaction reports {key}"
+                )
+        scan.transaction_attempt_counts.append(0.0)
+        return
+    scan.transaction_attempt_counts.append(float(attempt_count))
+    if attempt_count > 1:
+        scan.retried_transaction_count += 1
+
+    native_sum = 0.0
+    materialize_sum = 0.0
+    read_sum = 0
+    computed_retryable: list[bool] = []
+    successes: list[bool] = []
+    for attempt_index, attempt in enumerate(attempts):
+        attempt_context = f"{context}.attempts[{attempt_index}]"
+        if not isinstance(attempt, dict):
+            raise ValueError(f"{attempt_context}: not an object")
+        if attempt.get("index") != attempt_index:
+            scan.validation_errors.append(
+                f"{attempt_context}: noncanonical index"
+            )
+        batch_bits = attempt.get("batch_status_bits")
+        success = attempt.get("success")
+        producer_retryable = attempt.get("retryable")
+        if (
+            not isinstance(batch_bits, int)
+            or isinstance(batch_bits, bool)
+            or not isinstance(success, bool)
+            or not isinstance(producer_retryable, bool)
+        ):
+            raise ValueError(f"{attempt_context}: invalid status fields")
+        record_statuses = _status_histogram(
+            attempt.get("record_status_bits"),
+            context=attempt_context,
+        )
+        retryable = _attempt_retryable(
+            batch_bits=batch_bits,
+            record_statuses=record_statuses,
+        )
+        if retryable != producer_retryable:
+            scan.validation_errors.append(
+                f"{attempt_context}: forged retryable classification"
+            )
+        if success != (batch_bits == 0 and not any(
+            bits not in (0, 1) for bits in record_statuses
+        )):
+            scan.validation_errors.append(
+                f"{attempt_context}: success/status inconsistency"
+            )
+        scan.attempt_batch_status_bits[batch_bits] += 1
+        scan.attempt_record_status_bits.update(record_statuses)
+        computed_retryable.append(retryable)
+        successes.append(success)
+
+        attempt_timing = attempt.get("timing_ms")
+        if not isinstance(attempt_timing, dict):
+            raise ValueError(f"{attempt_context}: timing is not an object")
+        native_sum += _number(
+            attempt_timing,
+            "native_call",
+            context=attempt_context,
+        )
+        materialize_sum += _number(
+            attempt_timing,
+            "materialize",
+            context=attempt_context,
+        )
+        reads = attempt.get("process_read_count")
+        if (
+            not isinstance(reads, int)
+            or isinstance(reads, bool)
+            or reads < 0
+            or reads > _MAXIMUM_ATTEMPT_READS
+        ):
+            raise ValueError(f"{attempt_context}: invalid read count")
+        read_sum += reads
+
+    for attempt_index in range(attempt_count - 1):
+        if successes[attempt_index] or not computed_retryable[attempt_index]:
+            scan.validation_errors.append(
+                f"{context}: illegal attempt after success/terminal failure"
+            )
+    status = row.get("status")
+    selected = row.get("selected_attempt_index")
+    last = attempt_count - 1
+    if status == "success":
+        if selected != last or not successes[last]:
+            scan.validation_errors.append(
+                f"{context}: invalid selected successful attempt"
+            )
+        observation = row.get("observation")
+        if not isinstance(observation, dict):
+            scan.validation_errors.append(
+                f"{context}: successful transaction has no observation"
+            )
+        else:
+            selected_attempt = attempts[last]
+            assert isinstance(selected_attempt, dict)
+            selected_fields = (
+                "selected_manager_frame",
+                "owner_manager_frame_after",
+                "context_manager_frame_before",
+                "manager_frame_after",
+                "batch_status_bits",
+                "success",
+                "active_owner_count",
+                "record_count",
+                "non_null_context_count",
+                "usable_context_count",
+                "state_payload_bytes",
+                "owner_blob_bytes",
+            )
+            for key in selected_fields:
+                if selected_attempt.get(key) != observation.get(key):
+                    scan.validation_errors.append(
+                        f"{context}: selected attempt/observation "
+                        f"{key} mismatch"
+                    )
+            observation_records = observation.get("records")
+            if not isinstance(observation_records, list):
+                scan.validation_errors.append(
+                    f"{context}: selected observation records not an array"
+                )
+            else:
+                selected_histogram = _status_histogram(
+                    selected_attempt.get("record_status_bits"),
+                    context=f"{context}.selected_attempt",
+                )
+                observation_histogram: Counter[int] = Counter()
+                for record_index, record in enumerate(
+                    observation_records
+                ):
+                    if not isinstance(record, dict):
+                        raise ValueError(
+                            f"{context}.observation.records"
+                            f"[{record_index}]: not an object"
+                        )
+                    bits = record.get("status_bits")
+                    if not isinstance(bits, int) or isinstance(bits, bool):
+                        raise ValueError(
+                            f"{context}.observation.records"
+                            f"[{record_index}]: invalid status"
+                        )
+                    observation_histogram[bits] += 1
+                if selected_histogram != observation_histogram:
+                    scan.validation_errors.append(
+                        f"{context}: selected attempt/observation "
+                        "record-status histogram mismatch"
+                    )
+    elif status == "retry_exhausted":
+        if (
+            attempt_count != 3
+            or selected is not None
+            or not computed_retryable[last]
+            or row.get("observation") is not None
+        ):
+            scan.validation_errors.append(
+                f"{context}: invalid exhausted transaction"
+            )
+    elif status == "terminal_rejected":
+        if (
+            selected is not None
+            or successes[last]
+            or computed_retryable[last]
+            or row.get("observation") is not None
+        ):
+            scan.validation_errors.append(
+                f"{context}: invalid terminal transaction"
+            )
+    elif status == "native_transaction_failed":
+        if (
+            selected is not None
+            or attempt_count >= 3
+            or any(successes)
+            or not all(computed_retryable)
+            or row.get("observation") is not None
+        ):
+            scan.validation_errors.append(
+                f"{context}: exception selected an attempt"
+            )
+    else:
+        scan.validation_errors.append(f"{context}: unknown v3 status")
+
+    top_reads = row.get("process_read_count")
+    if top_reads != read_sum or read_sum > _MAXIMUM_TRANSACTION_READS:
+        scan.validation_errors.append(f"{context}: read-count sum mismatch")
+    for key, computed in (
+        ("native_call", native_sum),
+        ("materialize", materialize_sum),
+    ):
+        reported = _number(timing, key, context=context)
+        if not math.isclose(reported, computed, abs_tol=1e-6):
+            scan.validation_errors.append(
+                f"{context}: {key} sum mismatch"
+            )
+
+
 def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
     index = scan.batch_count
     context = f"batch[{index}]"
     scan.batch_count += 1
     schema_version = row.get("schema_version")
-    if schema_version not in (1, AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION):
+    if schema_version not in (
+        1,
+        2,
+        AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
+    ):
         raise ValueError(f"{context}: unexpected schema version")
     assert isinstance(schema_version, int)
     scan.batch_schema_versions[schema_version] += 1
@@ -136,6 +437,8 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
             _number(timing, "owner_capture", context=context)
         )
     scan.total_ms.append(_number(timing, "total", context=context))
+    if schema_version == 3:
+        _audit_v3_attempts(scan, row, context=context, timing=timing)
 
     observation = row.get("observation")
     if observation is None:
@@ -143,7 +446,11 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
     if not isinstance(observation, dict):
         raise ValueError(f"{context}: observation is not an object")
     layout = observation.get("layout")
-    expected_layout = f"th08-auxiliary-vm-batch-v{schema_version}"
+    expected_layout = (
+        "th08-auxiliary-vm-batch-v2"
+        if schema_version == 3
+        else f"th08-auxiliary-vm-batch-v{schema_version}"
+    )
     if layout != expected_layout:
         raise ValueError(
             f"{context}: expected observation layout {expected_layout}"
@@ -153,9 +460,9 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         != "trace_only_no_action_authority"
     ):
         raise ValueError(f"{context}: unexpected observation authority")
-    # A pre-native owner-capture failure has no native invocation to time.
-    # Keep end-to-end and owner-capture distributions over all due attempts,
-    # but report native/materialization/compaction only for real observations.
+    # Failed v3 transactions have no selected observation and fail the
+    # physical gate. Keep selected-state distributions uncontaminated by
+    # their failed attempt state.
     scan.native_call_ms.append(
         _number(timing, "native_call", context=context)
     )
@@ -214,29 +521,71 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         _number(observation, "state_payload_bytes", context=context)
     )
     scan.process_reads.append(
-        _number(observation, "process_read_count", context=context)
+        _number(
+            row if schema_version == 3 else observation,
+            "process_read_count",
+            context=context,
+        )
     )
     records = observation.get("records")
     if not isinstance(records, list):
         raise ValueError(f"{context}: records is not an array")
+    observed_record_statuses: Counter[int] = Counter()
+    active_owner_slots: set[int] = set()
+    non_null_contexts = 0
     for record_index, record in enumerate(records):
         if not isinstance(record, dict):
             raise ValueError(
                 f"{context}.records[{record_index}] is not an object"
             )
+        slot = record.get("slot")
+        context_pointer = record.get("context_pointer")
+        if (
+            not isinstance(slot, int)
+            or isinstance(slot, bool)
+            or not isinstance(context_pointer, int)
+            or isinstance(context_pointer, bool)
+        ):
+            raise ValueError(
+                f"{context}.records[{record_index}] identity is invalid"
+            )
+        active_owner_slots.add(slot)
+        non_null_contexts += context_pointer != 0
         bits = record.get("status_bits")
         if not isinstance(bits, int) or isinstance(bits, bool):
             raise ValueError(
                 f"{context}.records[{record_index}] status is not integer"
             )
+        observed_record_statuses[bits] += 1
         scan.record_status_bits[bits] += 1
-        if record.get("context_pointer") != 0:
+        if context_pointer != 0:
             depth = record.get("call_depth")
             if isinstance(depth, int) and not isinstance(depth, bool):
                 scan.call_depths[depth] += 1
             active_hash = record.get("active_vm_sha256")
             if isinstance(active_hash, str):
                 scan.active_vm_hashes.add(active_hash)
+    semantic_success = (
+        batch_bits == 0
+        and all(bits in (0, 1) for bits in observed_record_statuses)
+    )
+    expected_counts = {
+        "record_count": len(records),
+        "active_owner_count": len(active_owner_slots),
+        "non_null_context_count": non_null_contexts,
+        "usable_context_count": (
+            observed_record_statuses[0] if semantic_success else 0
+        ),
+    }
+    for key, expected in expected_counts.items():
+        if observation.get(key) != expected:
+            scan.validation_errors.append(
+                f"{context}: observation {key} mismatch"
+            )
+    if observation.get("success") != semantic_success:
+        scan.validation_errors.append(
+            f"{context}: observation success/status inconsistency"
+        )
 
 
 def scan_trace(path: Path, *, audit_batches: bool) -> TraceScan:
@@ -386,8 +735,9 @@ def main(argv: list[str] | None = None) -> int:
     session, session_pass = _session_gate(arguments.session)
     gates = {
         "batch_rows_present": scan.batch_count > 0,
-        "schema_v2_only": scan.batch_schema_versions
+        "schema_v3_only": scan.batch_schema_versions
         == Counter({AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION: scan.batch_count}),
+        "retry_path_observed": scan.retried_transaction_count > 0,
         "usable_context_observed": sum(scan.usable_counts) > 0,
         "zero_batch_failures": (
             scan.batch_statuses == Counter({"success": scan.batch_count})
@@ -414,7 +764,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     passed = all(gates.values())
     report: dict[str, object] = {
-        "schema": "th08-auxiliary-vm-batch-physical-gate-v2",
+        "schema": "th08-auxiliary-vm-batch-physical-gate-v3",
         "authority": "physical trace-only evidence; no action authority",
         "trace": _scan_record(scan),
         "baseline": _scan_record(baseline),
@@ -435,6 +785,22 @@ def main(argv: list[str] | None = None) -> int:
             "record_status_bits": {
                 str(key): value
                 for key, value in sorted(scan.record_status_bits.items())
+            },
+            "retried_transaction_count": scan.retried_transaction_count,
+            "attempt_count": _distribution(
+                scan.transaction_attempt_counts
+            ),
+            "attempt_batch_status_bits": {
+                str(key): value
+                for key, value in sorted(
+                    scan.attempt_batch_status_bits.items()
+                )
+            },
+            "attempt_record_status_bits": {
+                str(key): value
+                for key, value in sorted(
+                    scan.attempt_record_status_bits.items()
+                )
             },
             "validation_errors": scan.validation_errors,
             "call_depths": {

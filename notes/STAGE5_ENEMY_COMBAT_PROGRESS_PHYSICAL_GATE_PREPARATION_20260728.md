@@ -104,3 +104,7 @@ A passing audit accepts only default-off physical combat-progress observation.
 It does not accept S18 targeting. A separate generation/end tracker and
 streaming exposure audit must be contracted before comparing fast-kill
 strategies, Power collection, boss alignment, or survival outcomes.
+
+The authorized run and audit passed on 2026-07-28. The bounded result and
+remaining authority exclusions are retained in
+`STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`.

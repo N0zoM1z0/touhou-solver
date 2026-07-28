@@ -201,6 +201,15 @@ The first focused workload should retain the opening nonspell segment even if
 the full Stage-5 practice run continues. One run cannot promote targeting or
 estimate a clean-route survival rate.
 
+This gate passes in
+`STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`. Run
+`lunatic_route2_stage5_unattended_20260728_224116` retained 11,735 stable
+observations, 133,070 active rows, 2,014 positive current-frame damage rows,
+and 1,588 adjacent active-slot HP-decrease candidates. Decode/record timing
+passes, strict regeneration is byte-identical, and hard no-Bomb/session
+cleanup pass. The ten-hit survival result, including the canonical frame-2,397
+nonspell hit, does not grant any targeting or action authority.
+
 ## Falsifiers And Stop Rules
 
 Reject this observation gate if:

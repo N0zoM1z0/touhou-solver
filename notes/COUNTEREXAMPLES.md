@@ -3708,6 +3708,21 @@ completed
   resources differ, so this is observed workload-level progress relative to
   early baselines, not a causal A/B survival improvement from the structural
   extraction.
+- **Observed combat-progress-gate continuation:** Default-off observation run
+  `lunatic_route2_stage5_unattended_20260728_224116`, executed from
+  `c42bbf3`, completed frames `1..40036`, 11,735 decisions, hard no-Bomb,
+  accepted artifacts, and cleanup. It took ten hits at
+  `[2397,3533,10371,10698,13759,22368,23236,37636,38897,39516]`; phase hits
+  were nonspell/103/107/111/115 = `5/2/0/0/3`. The canonical fresh hit was
+  again nonspell at frame 2,397, and every contact followed global-kernel
+  exhaustion.
+- **Observed trace boundary:** all 11,735 combat-progress observations had
+  stable brackets; the strict audit retained 133,070 active rows, 2,014
+  positive current-frame damage rows, and 1,588 adjacent active-slot
+  HP-decrease candidates. Decode/record p95 was `0.0603/0.0151 ms`, cadence
+  was `2/4/4`, and audit regeneration was byte-identical. This accepts the
+  observer but does not repair CE-0137 or prove generation, kill/end reason,
+  targeting, Power strategy, or action authority.
 - **Evidence:** Matching compact run and dossier artifacts. Ignored raw JSONL
   SHA-256 values are
   `14bb67c3f6448a232e338d5067047def7a380814b90fae4ffb2577e49047e1f3`
@@ -3716,6 +3731,8 @@ completed
   for the first Lunatic run. The 548,614,220-byte post-override trace has
   SHA-256
   `f6b01748e01eeaceb07aff7f54f703b9dd9e4cf4d184883f23c61d89519e4da6`.
+  The 483,145,909-byte combat-progress-gate trace has SHA-256
+  `569a8767e25806661acf9b66365cdf227189d53bb525a906d913cd08fe61d8bb`.
 
 ## CE-0138: Stage 6B concentrated contact at boundaries after kernel exhaustion
 

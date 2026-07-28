@@ -53,7 +53,8 @@ and design/run notes retain derivations and history.
 43. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
 44. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
 45. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
-46. the relevant recent run note and counterexample rows before live work
+46. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
+47. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -62,24 +63,22 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
-- The ordinary-enemy combat-progress C0 offline gate is complete and remains
-  default-off. Its first-64 inventory and explicit
-  `--trace-enemy-combat-progress` delivery reuse the existing coherent
-  enemy-pool blob, add zero RPM, preserve body output, and expose only raw HP,
-  current-update damage, local damage flags, and defeat mode. A dense 64-slot
-  independent scalar oracle, strict streaming physical audit, focused tests,
-  Ruff, and the complete 972-test Linux/Windows quick suites pass. Fixed
-  10,000-iteration Linux
-  decode/record p95 is `0.059839/0.012975 ms`; Windows is
-  `0.078700/0.016900 ms`. Both reports pass the unchanged
-  `0.10/0.20/2.00 ms` p95/p99/max gates and share canonical SHA-256
-  `f00ced83...bf23`. The initial frozen-dataclass decode missed at
-  `0.122955 ms`; an immutable named tuple removed allocation overhead without
-  removing fields or weakening the deadline. The option now propagates
-  supervisor -> hotkey -> controller and emits only after physical issue.
-  This is physical-gate preparation authority only: no physical run has used
-  it, and it grants no generation, kill/end-reason, complete damageability,
-  targeting, planner, or action authority.
+- The ordinary-enemy combat-progress C0 physical observation gate now passes
+  on default-off Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_224116`, executed from
+  `c42bbf3`. It completed frames `1..40036`, 11,735 decisions,
+  `route_complete`, hard no-Bomb, accepted artifacts, and exact cleanup.
+  The strict audit accepts all 11,735 stable observations, 133,070 active
+  rows, 2,014 positive current-frame damage rows, and 1,588 adjacent active
+  HP-decrease candidates. Decode/record p95 is `0.0603/0.0151 ms`; cadence is
+  `2/4/4` frames median/p95/p99. Audit regeneration is byte-identical at file
+  SHA-256 `ac2a43a8...9c589`; raw SHA-256 is `569a876...d8bb`. The run still
+  took ten hits, with a canonical nonspell first hit at frame 2,397; phase
+  hits were nonspell/103/107/111/115 = `5/2/0/0/3`, and every contact followed
+  global-kernel exhaustion. This accepts the trace-only raw inventory, not
+  generation, kill/end-reason, complete damageability, exposure causality,
+  targeting, planning, Power strategy, or action authority. The next combat
+  gate is a separate generation/end tracker and deterministic exposure audit.
 - The newest action-neutral G5 checkpoint is shipped runtime-ECL identity on
   `lunatic_route2_stage5_unattended_20260728_212622`. It completed 12,100
   decisions over frames `1..40984`, hard no-Bomb, with nine hits,

@@ -33,24 +33,24 @@ strictly below survival feasibility.
 
 ## Retained Stage-5 Observation
 
-Nine complete retained Lunatic Stage-5 runs from 2026-07-28 contain 118 hit
-edges over 113,353 decisions:
+Ten complete retained Lunatic Stage-5 runs from 2026-07-28 contain 128 hit
+edges over 125,088 decisions:
 
 | Phase | Hits | Decisions | Hits / 1,000 decisions |
 | --- | ---: | ---: | ---: |
-| nonspell | 55 | 74,789 | 0.735 |
-| spell 103 | 16 | 8,355 | 1.915 |
-| spell 107 | 21 | 8,489 | 2.474 |
-| spell 111 | 12 | 10,711 | 1.120 |
-| spell 115 | 14 | 11,009 | 1.272 |
+| nonspell | 60 | 82,588 | 0.727 |
+| spell 103 | 18 | 9,373 | 1.920 |
+| spell 107 | 21 | 9,090 | 2.310 |
+| spell 111 | 12 | 11,713 | 1.025 |
+| spell 115 | 17 | 12,324 | 1.379 |
 
-The four newest compatible runs contain 29/49 nonspell hits over
-34,094/50,999 decisions. Their nonspell rate is `0.851` hits per 1,000
-decisions versus `1.183` for all spell decisions.
+The five newest compatible runs contain 34/59 nonspell hits over
+41,893/62,734 decisions. Their nonspell rate is `0.812` hits per 1,000
+decisions versus `1.199` for all spell decisions.
 
-**Observed:** every one of the nine canonical fresh-attempt first hits
+**Observed:** every one of the ten canonical fresh-attempt first hits
 occurred with no active spell and Power `128`. Their first-hit frames were
-`[2167, 4027, 1394, 2390, 12324, 1490, 1489, 4184, 2038]`.
+`[2167, 4027, 1394, 2390, 12324, 1490, 1489, 4184, 2038, 2397]`.
 
 **Observed in the newest run
 `lunatic_route2_stage5_unattended_20260728_212622`:**
@@ -94,6 +94,12 @@ estimate of the benefit of collection or damage alignment. Later contacts
 remain geometry and planner evidence, not independent clean-route survival
 samples.
 
+The retained Stage-5 practice workloads begin at Power 128. Normal full-route
+acceptance instead begins at Power 0 and must retain collection, damage, and
+route progress from that initial condition. Post-death Power recovery is
+useful for loss-recovery diagnosis, but it is outside the clean pre-loss
+history and cannot justify final no-miss authority.
+
 ## Formal State And Information Contract
 
 A combat-progress state must extend, not replace, the exact survival root:
@@ -133,17 +139,21 @@ thread.
 
 ### H1 — Ordinary-enemy exposure compression
 
-Killing a damageable ordinary enemy earlier reduces its remaining emission
-opportunities and lowers later hazard exposure.
+Some damageable ordinary enemies have a kill-before-saturation deadline.
+Killing one before that deadline removes later dense tracking or homing
+emission opportunities and preserves a viable continuation.
 
 Falsifiers include identical emission/exposure after verified earlier kill,
-scripted emissions independent of owner life, or first-hit windows that occur
-before any eligible damage choice could change kill time.
+scripted emissions independent of owner life, no identifiable density/deadline
+change, or first-hit windows that occur before any eligible damage choice
+could change kill time.
 
 ### H2 — Boss phase compression
 
-Among actions with identical hard survival authority, better verified shot
-alignment and damage rate reduce phase duration.
+Spellcards remain survival-first. Among actions with identical hard survival
+authority, better verified shot alignment and damage rate may reduce boss
+phase duration; this is a subordinate phase-compression objective, not a
+requirement to chase damage through a pattern.
 
 Falsifiers include no HP-delta improvement, invulnerability dominating the
 window, longer unsafe positioning recovery, or no survival-equivalent action
@@ -152,7 +162,9 @@ choice.
 ### H3 — Power recovery inside viability
 
 Power pickups selected only within the already viable issue-safe set can
-improve later damage without reducing survival margin.
+improve later damage without reducing survival margin. The primary workload is
+the normal route beginning at Power 0. Post-death recovery is retained only as
+a separate diagnostic.
 
 Falsifiers include a changed hard certificate, reduced clearance/reserve,
 increased exposure, no verified pickup, or no later damage improvement.
@@ -181,8 +193,13 @@ forbids treating slot disappearance as a verified kill.
 
 Its offline implementation and unchanged performance gate are accepted in
 `STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`. This closes only the
-first-64 raw inventory sub-gate. Physical integration, generation identity,
-end reason, drops, pickups, and source attribution remain open.
+first-64 raw inventory sub-gate.
+
+Its physical integration passes in
+`STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`: all 11,735
+observations have stable brackets, the fixed decode/record timing gates pass,
+and the strict report regenerates byte-identically. Generation identity, end
+reason, drops, pickups, and source attribution remain open.
 
 No inherited IDA name, comment, type, or prior offset is authority.
 

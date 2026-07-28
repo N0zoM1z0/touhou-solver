@@ -8430,3 +8430,33 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Decision:** authorize one isolated supervised Lunatic Stage-5 physical
   observation with no other experimental observer. No physical acceptance
   exists yet.
+
+## 2026-07-28 — Accepted the physical combat-progress observer
+
+- Ran default-off combat-progress workload
+  `lunatic_route2_stage5_unattended_20260728_224116` from `c42bbf3`. The
+  supervised Lunatic Stage-5 practice completed frames `1..40036`, 11,735
+  decisions, `route_complete`, hard no-Bomb, accepted artifacts, post-stage
+  no-save, game termination, and exact process/key cleanup.
+- **Observed observer gate:** the strict audit accepts all 11,735 stable
+  records, 133,070 active rows, 2,014 positive current-frame damage rows, and
+  1,588 adjacent active-slot HP-decrease candidates. Decode/record
+  p95/p99/max is `0.0603/0.0763/0.1720 ms` and
+  `0.0151/0.0209/0.3091 ms`; cadence median/p95/p99 is `2/4/4` frames.
+  Regeneration is byte-identical.
+- **Observed survival failure:** the run took ten hits at
+  `[2397,3533,10371,10698,13759,22368,23236,37636,38897,39516]`.
+  Nonspell/103/107/111/115 phase hits were `5/2/0/0/3`; the canonical first
+  hit was nonspell at Power 128, and every contact followed global-kernel
+  exhaustion.
+- **Inference:** opening/middle nonspell remains the clean-route barrier in
+  this workload. Clean spell 107/111 phases are consistent with improved
+  Reisen spell handling but are one RNG sample, not a causal promotion.
+- **Hypothesis:** ordinary enemies may require kill-before-dense/homing-
+  saturation control, while spellcards remain survival-first and damage is
+  subordinate to viability. Normal full-route Power work begins from Power
+  0; post-death recovery remains a separate diagnostic.
+- **Decision:** accept the first-64 raw observer for trace-only physical use.
+  Generation, kill/end reason, exposure causality, targeting, Power strategy,
+  planner consumption, and action authority remain none. Next freeze a
+  separate generation/end tracker and deterministic exposure audit.

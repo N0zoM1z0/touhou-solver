@@ -73,11 +73,19 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   hypotheses, not live weights.
 - The first-64 raw enemy HP/current-damage/local-flag inventory now passes an
   independent scalar oracle and unchanged Linux/Windows performance gates
-  while reusing the existing capture with zero added RPM. Its explicit
-  supervisor/hotkey/controller path and strict streaming audit are now ready
-  for one isolated default-off physical gate. Generation/end reason,
-  kill-versus-despawn, exposure causality, targeting, and action promotion
-  remain later ordered gates.
+  while reusing the existing capture with zero added RPM. Its isolated
+  default-off Lunatic Stage-5 physical gate now passes over all 11,735
+  decisions with byte-identical strict-audit regeneration. The run still
+  took ten hits, with five in nonspell and a nonspell canonical first hit;
+  spells 107 and 111 were clean in this RNG sample. This accepts observation
+  only. Generation/end reason, kill-versus-despawn, exposure causality,
+  targeting, and action promotion remain later ordered gates.
+- The next combat hypothesis is deliberately phase-specific: ordinary
+  nonspell enemies may have a kill-before-dense/homing-saturation deadline,
+  whereas spellcards remain survival-first with boss damage only inside
+  survival-equivalent choices. Normal-route Power work must begin from Power
+  0; post-death recovery is a separate diagnostic and cannot contaminate the
+  final no-miss authority path.
 
 ## 2. 審閱材料與證據邊界
 

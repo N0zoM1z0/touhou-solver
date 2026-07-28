@@ -284,6 +284,16 @@ every unknown prefix not lowered. Spell 57 supplies 1,313 instruction-limit
 unknowns; spell 73 supplies 1,013 repeated-state unknowns plus 125 complete
 rows. This physically closes the invalid-consumer gate.
 
+**Observed Stage-5 combat-progress gate:** Default-off run
+`20260728_224116` completed 11,735 decisions, hard no-Bomb, accepted
+artifacts, and cleanup. Its strict audit accepts every stable combat
+observation, 133,070 active rows, 2,014 positive current-frame damage rows,
+and 1,588 adjacent active-slot HP-decrease candidates while publishing no
+generation, kill, end-reason, target, or action authority. The run took ten
+hits; the canonical first hit and five total hits were nonspell, spells 107
+and 111 were clean in this RNG sample, and every contact followed global
+kernel exhaustion. This physically accepts the observer only.
+
 **Observed CE-0152 performance regression:** The same run fails the unchanged
 B4 maximum with observer p50/p95/p99/p99.9/max
 `0.0636/0.1448/0.2007/0.3858/8.9834 ms`. Its sole over-budget row spends
@@ -575,11 +585,15 @@ comparison.
    hazard/policy version or isolated execution resources, followed by the
    unchanged Windows gate.
 7. Investigate Stage-5 nonspell exposure, verified kill/despawn time, Power,
-   and boss damage as a separate trace-only line. All nine retained canonical
+   and boss damage as a separate trace-only line. All ten retained canonical
    first hits are nonspell at Power 128, but exposure-normalized nonspell hit
-   rate is lower than the combined spells. Do not turn this count into a
-   generic aggression weight. First establish combat-progress telemetry, then
-   rank only inside the unchanged viable and issue-safe set.
+   rate is lower than the combined spells. The raw combat-progress observer
+   now passes physically; next establish generation/end semantics and test
+   the more specific kill-before-saturation hypothesis. Normal full-route
+   play begins from Power 0, unlike max-Power practice, and post-death recovery
+   is a separate diagnostic rather than final no-miss authority. Do not turn
+   any count into a generic aggression weight. Rank only inside the unchanged
+   viable and issue-safe set.
 
 ## Strategy Summary
 
@@ -861,14 +875,18 @@ comparison.
 ### S18 — Survival-Filtered Nonspell Combat Progress
 
 - **Status:** proposed trace-only research; no live action authority.
-- **Observed:** all nine retained complete Lunatic Stage-5 runs have a
-  nonspell canonical first hit at Power 128. Nonspell contributes 55/118
-  total hits while occupying 74,789/113,353 decisions, so absolute burden is
-  high but intrinsic per-decision danger is not established.
-- **Hypothesis:** verified earlier ordinary-enemy kills can reduce remaining
-  emissions and exposure; verified boss alignment can reduce phase duration;
-  Power recovery may help only when it does not change hard survival
-  authority.
+- **Observed:** all ten retained complete Lunatic Stage-5 runs have a
+  nonspell canonical first hit at Power 128. Nonspell contributes 60/128
+  total hits while occupying 82,588/125,088 decisions, so absolute burden is
+  high but intrinsic per-decision danger is not established. In the accepted
+  combat-observer run, nonspell contributed 5/10 hits while spells 107 and
+  111 completed cleanly.
+- **Hypothesis:** some ordinary enemies have a kill-before-saturation
+  deadline: verified earlier removal prevents later dense tracking/homing
+  emissions and reduces exposure. Spellcards remain survival-first unless
+  survival-equivalent boss alignment measurably compresses the phase.
+  Normal-route Power collection begins from Power 0 and may help only inside
+  viability; post-death recovery is a separate diagnostic.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -880,11 +898,11 @@ comparison.
 - **Evidence:**
   `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`,
   `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`,
-  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`. The raw
-  first-64 inventory and
-  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
-  now have authority for one isolated default-off physical observation gate;
-  S18 remains proposed trace-only and has no live action authority.
+  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`, and
+  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`. The raw
+  first-64 inventory now has physical trace-only observation authority.
+  Generation/end tracking, exposure causality, targeting, and S18 live action
+  authority remain none.
 
 ## Adding Or Changing A Strategy
 

@@ -40,6 +40,8 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertFalse(parsed.trace_transform_runtime)
         self.assertFalse(parsed.trace_bullet_births)
         self.assertFalse(parsed.trace_auxiliary_vm_batches)
+        self.assertIsNone(parsed.runtime_ecl_static_image)
+        self.assertIsNone(parsed.runtime_ecl_static_sha256)
         self.assertEqual(parsed.safety_value_horizon, 0)
         self.assertIsNone(parsed.viability_audit_dir)
         self.assertFalse(parsed.postpublished_survival_shadow)
@@ -147,6 +149,41 @@ class AgentHotkeyTests(unittest.TestCase):
                 pid=1234,
                 difficulty=3,
                 trace_nonspell_main_vms=True,
+            )
+
+    def test_runtime_ecl_identity_is_explicit_and_bound_to_stage(self) -> None:
+        image = Path("artifacts/decoded/ecldata5.ecl")
+        digest = "1" * 64
+        arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            expected_stage=5,
+            runtime_ecl_static_image=image,
+            runtime_ecl_static_sha256=digest,
+        )
+        parsed = build_parser().parse_args(arguments)
+        self.assertEqual(parsed.runtime_ecl_static_image, image)
+        self.assertEqual(parsed.runtime_ecl_static_sha256, digest)
+
+        with self.assertRaisesRegex(ValueError, "both"):
+            build_long_run_arguments(
+                output=Path("trial.jsonl"),
+                stop_file=Path("trial.stop"),
+                pid=1234,
+                difficulty=3,
+                expected_stage=5,
+                runtime_ecl_static_image=image,
+            )
+        with self.assertRaisesRegex(ValueError, "expected stage"):
+            build_long_run_arguments(
+                output=Path("trial.jsonl"),
+                stop_file=Path("trial.stop"),
+                pid=1234,
+                difficulty=3,
+                runtime_ecl_static_image=image,
+                runtime_ecl_static_sha256=digest,
             )
 
     def test_full_route_can_extend_the_worker_deadline(self) -> None:

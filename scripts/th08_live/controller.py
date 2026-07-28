@@ -105,6 +105,10 @@ from th08_live.bullet_birth_stage import (
     BulletBirthStageRequest,
     run_bullet_birth_stage,
 )
+from th08_live.runtime_ecl_identity import (
+    RuntimeEclIdentityService,
+    RuntimeEclPhysicalProvenance,
+)
 from th08_live.auxiliary_vm import (
     AuxiliaryVmBatchTraceService,
     native_auxiliary_vm_batch_available,
@@ -1376,6 +1380,29 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         and args.auxiliary_vm_batch_spell_id < 0
     ):
         raise ValueError("auxiliary-VM spell filter cannot be negative")
+    runtime_ecl_static_image = getattr(
+        args,
+        "runtime_ecl_static_image",
+        None,
+    )
+    runtime_ecl_static_sha256 = getattr(
+        args,
+        "runtime_ecl_static_sha256",
+        None,
+    )
+    if (runtime_ecl_static_image is None) != (
+        runtime_ecl_static_sha256 is None
+    ):
+        raise ValueError(
+            "runtime ECL identity requires both a static image and SHA-256"
+        )
+    if (
+        runtime_ecl_static_image is not None
+        and args.expected_stage is None
+    ):
+        raise ValueError(
+            "runtime ECL identity requires an explicit expected stage"
+        )
     _configure_local_hazard_backend(args.local_hazard_backend)
     _configure_local_beam_reducer(args.local_beam_reducer)
     _configure_local_bullet_decoder(args.bullet_decode_backend)
@@ -1575,6 +1602,27 @@ def _run_live_session(
     trace_auxiliary_vm_batches = bool(
         getattr(args, "trace_auxiliary_vm_batches", False)
     )
+    runtime_ecl_identity_service: RuntimeEclIdentityService | None = None
+    runtime_ecl_static_image = getattr(
+        args,
+        "runtime_ecl_static_image",
+        None,
+    )
+    if runtime_ecl_static_image is not None:
+        runtime_ecl_static_path = runtime_ecl_static_image
+        if not runtime_ecl_static_path.is_absolute():
+            runtime_ecl_static_path = (
+                Path(__file__).resolve().parents[2]
+                / runtime_ecl_static_path
+            )
+        runtime_ecl_identity_service = RuntimeEclIdentityService(
+            static_image=runtime_ecl_static_path.read_bytes(),
+            static_label=runtime_ecl_static_image.as_posix(),
+            expected_static_sha256=args.runtime_ecl_static_sha256,
+            expected_route_id=2,
+            expected_difficulty_index=args.difficulty,
+            expected_stage_route_index=args.expected_stage,
+        )
     auxiliary_vm_batch_service = (
         AuxiliaryVmBatchTraceService(
             cadence_frames=args.auxiliary_vm_batch_every,
@@ -3579,6 +3627,30 @@ def _run_live_session(
             observe_to_issue_ms = fresh_issue_result.observe_to_issue_ms
             previous_mask = physical_issue.previous_mask
             previous_direction = physical_issue.previous_direction
+            if runtime_ecl_identity_service is not None:
+                runtime_ecl_identity_service.observe_if_due(
+                    reader,
+                    trace_sink,
+                    provenance=RuntimeEclPhysicalProvenance(
+                        pid=pid,
+                        executable_sha256=str(identity["sha256"]),
+                        route_id=int(state["route_id"]),
+                        difficulty_index=int(
+                            state["difficulty_index"]
+                        ),
+                        stage_route_index=int(
+                            state["stage_route_index"]
+                        ),
+                        gameplay_epoch=gameplay_epoch,
+                        decision_frame=counter_at_action,
+                        snapshot_frame=int(
+                            state["enemy_manager_frame"]
+                        ),
+                        gameplay_active=bool(
+                            state["gameplay_active"]
+                        ),
+                    ),
+                )
             if auxiliary_vm_batch_service is not None:
                 current_spell_id = (
                     int(spell_state["spell_id"])
@@ -4496,6 +4568,20 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "select whether the trace-only native auxiliary-VM batch call "
             "releases or holds the Python GIL"
+        ),
+    )
+    parser.add_argument(
+        "--runtime-ecl-static-image",
+        type=Path,
+        help=(
+            "one decoded static ECL image for a default-off post-issue "
+            "one-shot runtime byte-identity observation"
+        ),
+    )
+    parser.add_argument(
+        "--runtime-ecl-static-sha256",
+        help=(
+            "required immutable SHA-256 for --runtime-ecl-static-image"
         ),
     )
     parser.add_argument(

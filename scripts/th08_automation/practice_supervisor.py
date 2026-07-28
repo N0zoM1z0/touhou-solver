@@ -223,6 +223,14 @@ def run_trial(
         "auxiliary_vm_native_call_mode": (
             args.auxiliary_vm_native_call_mode
         ),
+        "runtime_ecl_static_image": (
+            str(args.runtime_ecl_static_image)
+            if args.runtime_ecl_static_image is not None
+            else None
+        ),
+        "runtime_ecl_static_sha256": (
+            args.runtime_ecl_static_sha256
+        ),
         "bullet_birth_backend": args.bullet_birth_backend,
         "bullet_birth_native_call_mode": (
             args.bullet_birth_native_call_mode
@@ -277,6 +285,8 @@ def run_trial(
             auxiliary_vm_native_call_mode=(
                 args.auxiliary_vm_native_call_mode
             ),
+            runtime_ecl_static_image=args.runtime_ecl_static_image,
+            runtime_ecl_static_sha256=args.runtime_ecl_static_sha256,
             bullet_birth_backend=args.bullet_birth_backend,
             bullet_birth_native_call_mode=(
                 args.bullet_birth_native_call_mode
@@ -620,6 +630,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicit auxiliary-VM trace-only native GIL boundary",
     )
     parser.add_argument(
+        "--runtime-ecl-static-image",
+        type=Path,
+        help=(
+            "decoded static ECL image for one default-off post-issue "
+            "runtime byte-identity observation"
+        ),
+    )
+    parser.add_argument(
+        "--runtime-ecl-static-sha256",
+        help="required immutable SHA-256 for --runtime-ecl-static-image",
+    )
+    parser.add_argument(
         "--bullet-birth-native-call-mode",
         choices=NATIVE_CALL_MODES,
         default=NATIVE_CALL_MODE_GIL_RELEASED,
@@ -763,6 +785,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.local_pipeline_root_shadow_every < 0:
         raise ValueError(
             "--local-pipeline-root-shadow-every cannot be negative"
+        )
+    if (args.runtime_ecl_static_image is None) != (
+        args.runtime_ecl_static_sha256 is None
+    ):
+        raise ValueError(
+            "runtime ECL identity requires both a static image and SHA-256"
         )
     if min(
         args.cooldown,

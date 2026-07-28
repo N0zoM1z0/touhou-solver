@@ -164,6 +164,26 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertFalse(args.input_clock_boundary_shadow)
         self.assertEqual(args.input_clock_shadow_sample_ms, 1.0)
         self.assertEqual(args.difficulty.key, "lunatic")
+        self.assertIsNone(args.runtime_ecl_static_image)
+        self.assertIsNone(args.runtime_ecl_static_sha256)
+
+    def test_parser_accepts_explicit_runtime_ecl_identity(self) -> None:
+        args = build_parser().parse_args(
+            [
+                "--stage",
+                "5",
+                "--runtime-ecl-static-image",
+                "artifacts/decoded/ecldata5.ecl",
+                "--runtime-ecl-static-sha256",
+                "1" * 64,
+                "--armed",
+            ]
+        )
+        self.assertEqual(
+            args.runtime_ecl_static_image,
+            Path("artifacts/decoded/ecldata5.ecl"),
+        )
+        self.assertEqual(args.runtime_ecl_static_sha256, "1" * 64)
 
     def test_parser_accepts_normal_and_hard_practice_difficulties(
         self,

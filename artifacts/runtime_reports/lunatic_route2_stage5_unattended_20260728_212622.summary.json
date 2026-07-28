@@ -1,0 +1,1463 @@
+{
+  "decision_count": 12100,
+  "first_frame": 1,
+  "last_frame": 40984,
+  "frame_span": 40983,
+  "termination_reason": "route_complete",
+  "counter_gaps": 698,
+  "hit_frames": [
+    2038,
+    4202,
+    7998,
+    11923,
+    12768,
+    13735,
+    23000,
+    29569,
+    36025
+  ],
+  "hit_analyses": [
+    {
+      "hit_frame": 2038,
+      "window_start": 1798,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 128.0
+      },
+      "player": {
+        "x": 376.0,
+        "y": 422.3431396484375,
+        "projected_x": 376.0,
+        "projected_y": 422.3431396484375,
+        "control_origin_x": 370.34314584732056,
+        "control_origin_y": 416.68628549575806,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 2036,
+        "clearance": -0.0240841805934906
+      },
+      "minimum_pipeline_clearance": -2.493121385574341,
+      "nearest_bullet": {
+        "slot": 1028,
+        "x": 380.2065734863281,
+        "y": 421.38592529296875,
+        "center_distance": 4.314107070784662,
+        "aabb_clearance": 0.206573486328125
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 4202,
+      "window_start": 3962,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 123.0
+      },
+      "player": {
+        "x": 335.32421875,
+        "y": 415.97161865234375,
+        "projected_x": 335.32421875,
+        "projected_y": 415.97161865234375,
+        "control_origin_x": 329.66736459732056,
+        "control_origin_y": 410.3147644996643,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 14
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 4194,
+        "clearance": -0.2234860360622406
+      },
+      "minimum_pipeline_clearance": -2.439074754714966,
+      "nearest_bullet": {
+        "slot": 1373,
+        "x": 340.7502136230469,
+        "y": 410.40740966796875,
+        "center_distance": 7.7718621953898825,
+        "aabb_clearance": -1.435791015625
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1373,
+        "x": 340.7502136230469,
+        "y": 410.40740966796875,
+        "center_distance": 7.7718621953898825,
+        "aabb_clearance": -1.435791015625
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 7998,
+      "window_start": 7758,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 4.0,
+        "power": 108.0
+      },
+      "player": {
+        "x": 138.98533630371094,
+        "y": 432.0,
+        "projected_x": 138.98533630371094,
+        "projected_y": 432.0,
+        "control_origin_x": 138.98533630371094,
+        "control_origin_y": 424.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": {
+        "frame": 7862,
+        "source_frame": 7847,
+        "lane": "center",
+        "slack": 5.057218074798584,
+        "deadline": 16,
+        "travel_frames": 10.942781925201416
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 5.057218074798584,
+      "first_nonpositive_pipeline": {
+        "frame": 7998,
+        "clearance": -2.6820404529571533
+      },
+      "minimum_pipeline_clearance": -2.6820404529571533,
+      "nearest_bullet": {
+        "slot": 1450,
+        "x": 141.8927001953125,
+        "y": 427.9701843261719,
+        "center_distance": 4.969122574783138,
+        "aabb_clearance": -0.970184326171875
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 1450,
+        "x": 141.8927001953125,
+        "y": 427.9701843261719,
+        "center_distance": 4.969122574783138,
+        "aabb_clearance": -0.970184326171875
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 11923,
+      "window_start": 11683,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 93.0
+      },
+      "player": {
+        "x": 371.4000244140625,
+        "y": 425.63983154296875,
+        "projected_x": 371.4000244140625,
+        "projected_y": 425.63983154296875,
+        "control_origin_x": 371.4000244140625,
+        "control_origin_y": 417.63983154296875,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": {
+        "frame": 11731,
+        "source_frame": 11714,
+        "lane": "right",
+        "slack": 12.468376155468462,
+        "deadline": 22,
+        "travel_frames": 9.531623844531538
+      },
+      "first_negative_gate": {
+        "frame": 11716,
+        "source_frame": 11714,
+        "lane": "right",
+        "slack": -0.015421859427476647,
+        "deadline": 21,
+        "travel_frames": 21.015421859427477
+      },
+      "minimum_gate_slack": -0.015421859427476647,
+      "first_nonpositive_pipeline": {
+        "frame": 11917,
+        "clearance": -0.1389523446559906
+      },
+      "minimum_pipeline_clearance": -3.764422655105591,
+      "nearest_bullet": {
+        "slot": 956,
+        "x": 370.42559814453125,
+        "y": 429.9331970214844,
+        "center_distance": 4.4025553587504485,
+        "aabb_clearance": 0.293365478515625
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 12768,
+      "window_start": 12528,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 78.0
+      },
+      "player": {
+        "x": 190.40719604492188,
+        "y": 432.0,
+        "projected_x": 190.40719604492188,
+        "projected_y": 432.0,
+        "control_origin_x": 198.40719604492188,
+        "control_origin_y": 432.0,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 14
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": {
+        "frame": 12672,
+        "source_frame": 12670,
+        "lane": "left",
+        "slack": -1.3080386686332908,
+        "deadline": 21,
+        "travel_frames": 22.30803866863329
+      },
+      "minimum_gate_slack": -1.3080386686332908,
+      "first_nonpositive_pipeline": {
+        "frame": 12546,
+        "clearance": -0.0220700204372406
+      },
+      "minimum_pipeline_clearance": -1.0416138172149658,
+      "nearest_bullet": {
+        "slot": 625,
+        "x": 192.4154815673828,
+        "y": 432.4228515625,
+        "center_distance": 2.052319220695185,
+        "aabb_clearance": -1.9917144775390625
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 625,
+        "x": 192.4154815673828,
+        "y": 432.4228515625,
+        "center_distance": 2.052319220695185,
+        "aabb_clearance": -1.9917144775390625
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 13735,
+      "window_start": 13495,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 64.0
+      },
+      "player": {
+        "x": 369.0586242675781,
+        "y": 432.0,
+        "projected_x": 369.0586242675781,
+        "projected_y": 432.0,
+        "control_origin_x": 374.71547842025757,
+        "control_origin_y": 426.34314584732056,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 15
+      },
+      "last_nonnegative_gate": {
+        "frame": 13521,
+        "source_frame": 13506,
+        "lane": "center",
+        "slack": 12.9845290184021,
+        "deadline": 16,
+        "travel_frames": 3.0154709815979004
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 8.099836573317036,
+      "first_nonpositive_pipeline": {
+        "frame": 13727,
+        "clearance": -2.68267822265625
+      },
+      "minimum_pipeline_clearance": -14.41827392578125,
+      "nearest_bullet": {
+        "slot": 1317,
+        "x": 374.1640930175781,
+        "y": 424.70184326171875,
+        "center_distance": 8.90667743514643,
+        "aabb_clearance": 0.29815673828125
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 23000,
+      "window_start": 22760,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 5.0,
+        "power": 67.0
+      },
+      "player": {
+        "x": 8.0,
+        "y": 432.0,
+        "projected_x": 8.0,
+        "projected_y": 432.0,
+        "control_origin_x": 8.0,
+        "control_origin_y": 416.0,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 30
+      },
+      "last_nonnegative_gate": {
+        "frame": 22972,
+        "source_frame": 22954,
+        "lane": "left",
+        "slack": 9.150959472755805,
+        "deadline": 21,
+        "travel_frames": 11.849040527244195
+      },
+      "first_negative_gate": {
+        "frame": 22957,
+        "source_frame": 22954,
+        "lane": "left",
+        "slack": -2.7071037906595734,
+        "deadline": 19,
+        "travel_frames": 21.707103790659573
+      },
+      "minimum_gate_slack": -4.67156982421875,
+      "first_nonpositive_pipeline": {
+        "frame": 22937,
+        "clearance": -0.005649179220199585
+      },
+      "minimum_pipeline_clearance": -2.9164791107177734,
+      "nearest_bullet": {
+        "slot": 198,
+        "x": 13.114277839660645,
+        "y": 427.0297546386719,
+        "center_distance": 7.131562014947896,
+        "aabb_clearance": 1.4774948951307876
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 29569,
+      "window_start": 29329,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 51.0
+      },
+      "player": {
+        "x": 169.14761352539062,
+        "y": 432.0,
+        "projected_x": 169.14761352539062,
+        "projected_y": 432.0,
+        "control_origin_x": 175.65299606323242,
+        "control_origin_y": 432.0,
+        "phase": 2,
+        "phase_at_action": 2,
+        "predeath_at_action": 27
+      },
+      "last_nonnegative_gate": null,
+      "first_negative_gate": null,
+      "minimum_gate_slack": null,
+      "first_nonpositive_pipeline": {
+        "frame": 29489,
+        "clearance": -2.1303484439849854
+      },
+      "minimum_pipeline_clearance": -6.035931587219238,
+      "nearest_bullet": {
+        "slot": 937,
+        "x": 171.90745544433594,
+        "y": 433.4640197753906,
+        "center_distance": 3.1241128853328206,
+        "aabb_clearance": -1.2401580810546875
+      },
+      "observed_bullet_contact_candidate": {
+        "slot": 937,
+        "x": 171.90745544433594,
+        "y": 433.4640197753906,
+        "center_distance": 3.1241128853328206,
+        "aabb_clearance": -1.2401580810546875
+      },
+      "active_lasers_at_observation": 0
+    },
+    {
+      "hit_frame": 36025,
+      "window_start": 35785,
+      "stage_route_index": 5,
+      "stage_label": "Stage 5",
+      "resources": {
+        "lives": 8.0,
+        "bombs": 3.0,
+        "power": 35.0
+      },
+      "player": {
+        "x": 172.21778869628906,
+        "y": 188.8418731689453,
+        "projected_x": 172.21778869628906,
+        "projected_y": 188.8418731689453,
+        "control_origin_x": 172.21778869628906,
+        "control_origin_y": 181.94187331199646,
+        "phase": 0,
+        "phase_at_action": 2,
+        "predeath_at_action": 29
+      },
+      "last_nonnegative_gate": {
+        "frame": 35912,
+        "source_frame": 35896,
+        "lane": "center",
+        "slack": 16.21482731849428,
+        "deadline": 22,
+        "travel_frames": 5.7851726815057205
+      },
+      "first_negative_gate": null,
+      "minimum_gate_slack": 10.21482731849428,
+      "first_nonpositive_pipeline": {
+        "frame": 36025,
+        "clearance": -3.0006465911865234
+      },
+      "minimum_pipeline_clearance": -3.0006465911865234,
+      "nearest_bullet": {
+        "slot": 422,
+        "x": 173.4332733154297,
+        "y": 184.389404296875,
+        "center_distance": 4.61539618192442,
+        "aabb_clearance": 0.4524688720703125
+      },
+      "observed_bullet_contact_candidate": null,
+      "active_lasers_at_observation": 0
+    }
+  ],
+  "resources": {
+    "bombs": [
+      3.0,
+      3.0
+    ],
+    "lives": [
+      8.0,
+      8.0
+    ],
+    "power": [
+      128.0,
+      31.0
+    ]
+  },
+  "local_latency_ms": {
+    "read": {
+      "median": 3.6467000609263778,
+      "p95": 6.6154999658465385,
+      "max": 19.178300048224628
+    },
+    "plan": {
+      "median": 10.429600020870566,
+      "p95": 21.145100006833673,
+      "max": 54.84050000086427
+    }
+  },
+  "frame_lag": {
+    "snapshot": {
+      "median": 0.0,
+      "p95": 1.0,
+      "max": 1.0
+    },
+    "action": {
+      "median": 1.0,
+      "p95": 3.0,
+      "max": 5.0
+    },
+    "modeled_control_delays": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "corridor": {
+    "record_count": 12035,
+    "unique_solution_count": 1646,
+    "stale_record_count": 32,
+    "stale_fraction": 0.002658911508101371,
+    "solve_latency_ms": {
+      "median": 97.23359998315573,
+      "p95": 314.4410999957472,
+      "max": 426.0435999603942
+    },
+    "lane_transitions": [
+      {
+        "source_frame": 81,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 358,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 395,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 414,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 812,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 861,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 877,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 953,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 975,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 1047,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1070,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 1119,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1146,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 1186,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1203,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 1238,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1256,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 1425,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1458,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 1474,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 1507,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 1790,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2104,
+        "lane": "center",
+        "bottleneck_clearance": 27.58622932434082
+      },
+      {
+        "source_frame": 2121,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2154,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 2301,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2317,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 2333,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 2349,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2381,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 2397,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2413,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 2495,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2561,
+        "lane": "left",
+        "bottleneck_clearance": 6.129169464111328
+      },
+      {
+        "source_frame": 2642,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2845,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 2878,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2894,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 2944,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 2968,
+        "lane": "left",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 3015,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3039,
+        "lane": "left",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 3087,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3138,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 3154,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3453,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 3470,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 3486,
+        "lane": "center",
+        "bottleneck_clearance": 3.7694029808044434
+      },
+      {
+        "source_frame": 3570,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4269,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 4386,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 4403,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 4422,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 6407,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 6426,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 6447,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 6485,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 6567,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 6615,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 6746,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 6778,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 6794,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 6810,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7057,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7073,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7090,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7106,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7155,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7189,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7240,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7257,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7273,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7289,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7306,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7436,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7552,
+        "lane": "right",
+        "bottleneck_clearance": 10.68646240234375
+      },
+      {
+        "source_frame": 7600,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 7847,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 7863,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 9834,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 10031,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 10064,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 10080,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 10096,
+        "lane": "right",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 10163,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 10496,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 10513,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 10645,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 10661,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 10777,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 10793,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 11459,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 11505,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 11528,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 11573,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 11599,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 11698,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 11714,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 11731,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12077,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 12094,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12142,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 12158,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12289,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 12307,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12670,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 12687,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 12819,
+        "lane": "center",
+        "bottleneck_clearance": 6.023083686828613
+      },
+      {
+        "source_frame": 13000,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13019,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 13178,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13263,
+        "lane": "right",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 13359,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13383,
+        "lane": "right",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 13424,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 13490,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 13522,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 14206,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 19886,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 22163,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 22207,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 22230,
+        "lane": "left",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 22272,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 22291,
+        "lane": "center",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 22555,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 22954,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 22971,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 23075,
+        "lane": "center",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 23363,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 23519,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 23691,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 23708,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 26991,
+        "lane": "left",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 27009,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 27046,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 27164,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 28466,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 28990,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 29007,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 29025,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 32351,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 32518,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 32908,
+        "lane": "left",
+        "bottleneck_clearance": 2.3281593322753906
+      },
+      {
+        "source_frame": 32925,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 34829,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 35191,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 35338,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 35389,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 35471,
+        "lane": "center",
+        "bottleneck_clearance": 29.43254852294922
+      },
+      {
+        "source_frame": 35539,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 35843,
+        "lane": "center",
+        "bottleneck_clearance": 38.570621490478516
+      },
+      {
+        "source_frame": 35913,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 36082,
+        "lane": "center",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 36240,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 36256,
+        "lane": "center",
+        "bottleneck_clearance": 37.573543548583984
+      },
+      {
+        "source_frame": 36290,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 36339,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 36453,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 36486,
+        "lane": "left",
+        "bottleneck_clearance": 14.286646842956543
+      },
+      {
+        "source_frame": 36536,
+        "lane": "center",
+        "bottleneck_clearance": 45.393218994140625
+      },
+      {
+        "source_frame": 36654,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 36935,
+        "lane": "center",
+        "bottleneck_clearance": 38.46958923339844
+      },
+      {
+        "source_frame": 37018,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 37267,
+        "lane": "center",
+        "bottleneck_clearance": 42.25775909423828
+      },
+      {
+        "source_frame": 37382,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 37665,
+        "lane": "center",
+        "bottleneck_clearance": 29.547813415527344
+      },
+      {
+        "source_frame": 37732,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 37876,
+        "lane": "center",
+        "bottleneck_clearance": 48.0
+      },
+      {
+        "source_frame": 38233,
+        "lane": "left",
+        "bottleneck_clearance": 16.0
+      },
+      {
+        "source_frame": 38298,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 38397,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 38429,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 38596,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 38613,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 40261,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 40294,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 40891,
+        "lane": "left",
+        "bottleneck_clearance": 0.0
+      },
+      {
+        "source_frame": 40924,
+        "lane": "none",
+        "bottleneck_clearance": null
+      },
+      {
+        "source_frame": 40957,
+        "lane": "left",
+        "bottleneck_clearance": 32.0
+      },
+      {
+        "source_frame": 40973,
+        "lane": "none",
+        "bottleneck_clearance": null
+      }
+    ]
+  },
+  "boundary_occupancy": {
+    "bottom_frames": 1937,
+    "side_frames": 716
+  },
+  "stage_progress": {
+    "transitions": [
+      {
+        "frame": 1,
+        "stage_route_index": 5,
+        "stage_label": "Stage 5"
+      }
+    ],
+    "last_stage_route_index": 5,
+    "last_stage_label": "Stage 5"
+  },
+  "first_hit_analysis": {
+    "hit_frame": 2038,
+    "window_start": 1798,
+    "stage_route_index": 5,
+    "stage_label": "Stage 5",
+    "resources": {
+      "lives": 8.0,
+      "bombs": 3.0,
+      "power": 128.0
+    },
+    "player": {
+      "x": 376.0,
+      "y": 422.3431396484375,
+      "projected_x": 376.0,
+      "projected_y": 422.3431396484375,
+      "control_origin_x": 370.34314584732056,
+      "control_origin_y": 416.68628549575806,
+      "phase": 0,
+      "phase_at_action": 2,
+      "predeath_at_action": 15
+    },
+    "last_nonnegative_gate": null,
+    "first_negative_gate": null,
+    "minimum_gate_slack": null,
+    "first_nonpositive_pipeline": {
+      "frame": 2036,
+      "clearance": -0.0240841805934906
+    },
+    "minimum_pipeline_clearance": -2.493121385574341,
+    "nearest_bullet": {
+      "slot": 1028,
+      "x": 380.2065734863281,
+      "y": 421.38592529296875,
+      "center_distance": 4.314107070784662,
+      "aabb_clearance": 0.206573486328125
+    },
+    "observed_bullet_contact_candidate": null,
+    "active_lasers_at_observation": 0
+  }
+}

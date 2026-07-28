@@ -534,8 +534,12 @@ comparison.
    Accept this composition only for default-off trace delivery. CE-0165 still
    rejects asynchronous atomicity and no-retry assumptions. Do not poll one
    frame, pause the game, hide failed attempts, or consume this trace in live
-   guidance. The next source gate is immutable shipped runtime-ECL byte
-   identity, followed by separately contracted event-class lowering.
+   guidance. The next source gate, immutable shipped runtime-ECL byte
+   identity, now passes physically on Stage-5 run `20260728_212622`: one
+   four-read capture normalized the complete 47,224-byte image exactly to
+   decoded `ecldata5.ecl` at SHA-256 `3148f45f...fe19`. This grants
+   instruction-byte identity for that immutable image only. The next gate is
+   separately contracted one-event-class auxiliary instruction/path lowering.
    None of this changes the live strategy or grants future-hazard authority.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over
@@ -570,6 +574,12 @@ comparison.
 6. Reopen supplemental delivery only with a genuinely earlier causal
    hazard/policy version or isolated execution resources, followed by the
    unchanged Windows gate.
+7. Investigate Stage-5 nonspell exposure, verified kill/despawn time, Power,
+   and boss damage as a separate trace-only line. All nine retained canonical
+   first hits are nonspell at Power 128, but exposure-normalized nonspell hit
+   rate is lower than the combined spells. Do not turn this count into a
+   generic aggression weight. First establish combat-progress telemetry, then
+   rank only inside the unchanged viable and issue-safe set.
 
 ## Strategy Summary
 
@@ -592,6 +602,7 @@ comparison.
 | S15 | native local implementation acceleration | Live optimization |
 | S16 | pre-loss continuation and supplemental lane | Proposed finite selector; live delivery rejected |
 | S17 | exact stationary complete-mask witness delivery | Offline gate passed; trace-only shadow review proposed |
+| S18 | survival-filtered nonspell combat progress | Proposed trace-only research; no action authority |
 
 ## Strategy Details
 
@@ -673,7 +684,11 @@ comparison.
 - **Reason:** soft collection incentives previously reinforced unsafe motion.
 - **Boundary:** these objectives may return only inside a proven viable set
   with explicit resource state and route profile.
-- **Evidence:** CE-0090 and `notes/ALGORITHM_REVIEW_20260724.md`.
+- **New observation:** every canonical first hit in nine retained Stage-5
+  runs occurred in nonspell at Power 128. Later Power is hit/respawn
+  contaminated and cannot justify a collection policy.
+- **Evidence:** CE-0090, `notes/ALGORITHM_REVIEW_20260724.md`, and
+  `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
 
 ### S09 — Full-Horizon Fine Refinement And Fused Survival Labels
 
@@ -702,7 +717,12 @@ comparison.
   robust across RNG, entry resources, and route state.
 - **Boundary:** damage is an objective/resource constraint only inside the
   viable set.
-- **Evidence:** damage-aware sections in `notes/RESEARCH_LOG.md`.
+- **Current shadow:** stable boss health/timer progress and a
+  survival-filtered horizontal alignment candidate are retained without
+  action authority. Ordinary-enemy HP, verified kill/despawn cause, and
+  hazard-exposure reduction remain unavailable.
+- **Evidence:** damage-aware sections in `notes/RESEARCH_LOG.md` and
+  `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
 
 ### S11 — Delivery-Aware Hierarchical Planning
 
@@ -837,6 +857,28 @@ comparison.
 - **Evidence:**
   `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`,
   `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`, CE-0142.
+
+### S18 — Survival-Filtered Nonspell Combat Progress
+
+- **Status:** proposed trace-only research; no live action authority.
+- **Observed:** all nine retained complete Lunatic Stage-5 runs have a
+  nonspell canonical first hit at Power 128. Nonspell contributes 55/118
+  total hits while occupying 74,789/113,353 decisions, so absolute burden is
+  high but intrinsic per-decision danger is not established.
+- **Hypothesis:** verified earlier ordinary-enemy kills can reduce remaining
+  emissions and exposure; verified boss alignment can reduce phase duration;
+  Power recovery may help only when it does not change hard survival
+  authority.
+- **Boundary:** first revalidate native HP/damageability/end-reason/drop
+  semantics, retain trace-only exposure and damage attribution, and separate
+  kill, timeout, scripted despawn, and unknown. Any shadow target may rank
+  only actions already viable and issue-safe under the unchanged live
+  certificate.
+- **Falsifiers:** no exposure reduction after earlier verified kill, no HP
+  delta from alignment, no eligible survival-equivalent choices, or any
+  clearance/reserve/cadence regression.
+- **Evidence:**
+  `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
 
 ## Adding Or Changing A Strategy
 

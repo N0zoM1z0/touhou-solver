@@ -67,6 +67,8 @@ def build_long_run_arguments(
     auxiliary_vm_batch_every: int = 16,
     auxiliary_vm_batch_spell_id: int | None = None,
     auxiliary_vm_native_call_mode: str = NATIVE_CALL_MODE_GIL_HELD,
+    runtime_ecl_static_image: Path | None = None,
+    runtime_ecl_static_sha256: str | None = None,
     bullet_birth_backend: str = "python",
     bullet_birth_native_call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
     safety_value_horizon: int = 0,
@@ -112,6 +114,16 @@ def build_long_run_arguments(
         and auxiliary_vm_batch_spell_id < 0
     ):
         raise ValueError("auxiliary-VM spell filter cannot be negative")
+    if (runtime_ecl_static_image is None) != (
+        runtime_ecl_static_sha256 is None
+    ):
+        raise ValueError(
+            "runtime ECL identity requires both a static image and SHA-256"
+        )
+    if runtime_ecl_static_image is not None and expected_stage is None:
+        raise ValueError(
+            "runtime ECL identity requires an explicit expected stage"
+        )
     if trace_derived_pattern_sources and not trace_bullet_births:
         raise ValueError(
             "derived-pattern source tracing requires bullet-birth tracing"
@@ -182,6 +194,15 @@ def build_long_run_arguments(
                     str(auxiliary_vm_batch_spell_id),
                 )
             )
+    if runtime_ecl_static_image is not None:
+        arguments.extend(
+            (
+                "--runtime-ecl-static-image",
+                str(runtime_ecl_static_image),
+                "--runtime-ecl-static-sha256",
+                str(runtime_ecl_static_sha256),
+            )
+        )
     if safety_value_horizon:
         arguments.extend(
             ("--safety-value-horizon", str(safety_value_horizon))

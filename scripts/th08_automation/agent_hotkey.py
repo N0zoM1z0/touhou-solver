@@ -76,6 +76,8 @@ class AgentHotkey:
         auxiliary_vm_native_call_mode: str = (
             NATIVE_CALL_MODE_GIL_HELD
         ),
+        runtime_ecl_static_image: Path | None = None,
+        runtime_ecl_static_sha256: str | None = None,
         bullet_birth_backend: str = "python",
         bullet_birth_native_call_mode: str = (
             NATIVE_CALL_MODE_GIL_RELEASED
@@ -149,6 +151,17 @@ class AgentHotkey:
             and auxiliary_vm_batch_spell_id < 0
         ):
             raise ValueError("auxiliary-VM spell filter cannot be negative")
+        if (runtime_ecl_static_image is None) != (
+            runtime_ecl_static_sha256 is None
+        ):
+            raise ValueError(
+                "runtime ECL identity requires both a static image and "
+                "SHA-256"
+            )
+        if runtime_ecl_static_image is not None and expected_stage is None:
+            raise ValueError(
+                "runtime ECL identity requires an explicit expected stage"
+            )
         self.expected_difficulty = expected_difficulty
         self.expected_stage = expected_stage
         self.terminal_stage = terminal_stage
@@ -162,6 +175,8 @@ class AgentHotkey:
         self.auxiliary_vm_native_call_mode = (
             auxiliary_vm_native_call_mode
         )
+        self.runtime_ecl_static_image = runtime_ecl_static_image
+        self.runtime_ecl_static_sha256 = runtime_ecl_static_sha256
         self.bullet_birth_backend = bullet_birth_backend
         self.bullet_birth_native_call_mode = bullet_birth_native_call_mode
         self.safety_value_horizon = safety_value_horizon
@@ -326,6 +341,12 @@ class AgentHotkey:
                 ),
                 auxiliary_vm_native_call_mode=(
                     self.auxiliary_vm_native_call_mode
+                ),
+                runtime_ecl_static_image=(
+                    self.runtime_ecl_static_image
+                ),
+                runtime_ecl_static_sha256=(
+                    self.runtime_ecl_static_sha256
                 ),
                 bullet_birth_backend=self.bullet_birth_backend,
                 bullet_birth_native_call_mode=(

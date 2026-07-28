@@ -8281,10 +8281,70 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   `artifacts/decoded/ecldata5.ecl`; decoded SHA-256 is
   `3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19`.
 - The physical gate fixes executable SHA-256, route 2, Lunatic, Stage-5 route
-  index 4, static payload identity, one-shot visibility, timing, exact-match,
+  index 5, static payload identity, one-shot visibility, timing, exact-match,
   route-completion, hard no-Bomb, and cleanup requirements. Exact equality
   may grant only runtime instruction-byte identity for that stage image.
+- **Correction before implementation:** Stage 5 is route index `5`, not `4`;
+  4A and 4B occupy indices `3` and `4`. Both the practice-menu mapping and
+  retained shipped Stage-5 trace `20260728_200739` independently report `5`.
+  Never derive a native stage identity by subtracting one from its label.
 - Existing IDA names/comments/types remain hypotheses unless the underlying
   instructions, dataflow, static bytes, or runtime evidence are independently
   revalidated. No future-event lowering or action consumer is authorized by
   this contract.
+
+## 2026-07-28 — Accepted exact shipped Stage-5 runtime ECL bytes
+
+- Added a default-off `RuntimeEclIdentityService`, supervisor/hotkey option
+  propagation, and a strict streaming audit. The service reads/verifies its
+  static candidate before the loop, triggers only on exact physical identity,
+  performs one post-issue action-neutral attempt, makes four RPM calls on
+  success, flushes one visible terminal row, and never retries or exposes an
+  action consumer.
+- Focused image/service/audit/hotkey/supervisor tests and Ruff pass. Complete
+  Linux and Windows discovery both pass 957 tests; Windows retains the three
+  existing platform skips.
+- **Observed physical gate:** Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_212622` completed frames
+  `1..40984`, 12,100 decisions, nine hits, hard no-Bomb, automatic
+  transitions, `route_complete`, accepted artifacts, supervisor exit zero,
+  exact key release, and no residual process.
+- The one frame-1 transaction captured 47,224 bytes at runtime base
+  `0x0B1E0048`, with 90 subroutines, one timeline, and four reads.
+  Capture/transaction wall time was `0.2083/2.9961 ms`; the next decision was
+  frame 3. Relocated SHA-256 is `f2d69f5e...e2a8`; normalized and static
+  SHA-256 both equal `3148f45f...fe19`, with no first difference.
+- The strict audit regenerates byte-identically at SHA-256
+  `f8c88c2c68a8a28eec4f8981a9474295c5fce1aed3bc96f35bd55c9f5c4145d5`;
+  raw trace SHA-256 is
+  `c00fc8379526f2f998df984d10a1e3c076bd339583386ae95821ce33f1948d27`.
+- **Decision:** accept exact instruction-byte identity for this immutable
+  executable/Stage-5 image only. Contract one auxiliary event class next.
+  Reachable paths, source completeness, operands, future geometry, planner,
+  and action authority remain open.
+
+## 2026-07-28 — Contracted nonspell combat-progress research
+
+- **Observed across nine retained complete Lunatic Stage-5 runs:** all nine
+  canonical fresh-attempt first hits occur with no active spell and Power
+  128. Nonspell contributes 55/118 total hits over 74,789/113,353 decisions.
+  Its `0.735` hits per 1,000 decisions are lower than every individual spell
+  aggregate, so absolute hit burden is not evidence of greater intrinsic
+  per-decision danger.
+- **Observed in the newest run:** the first six of nine hits are nonspell,
+  with 10..21 active enemy bodies at the hit observations. Nonspell occupies
+  8,002/12,100 decisions. Later Power `128 -> 31` is hit/respawn
+  contaminated and cannot estimate collection benefit.
+- **Inferred:** opening/middle nonspell exposure is a canonical clean-route
+  barrier, while its hit count is partly a duration/exposure effect.
+- **Hypothesized:** faster verified ordinary-enemy kills may reduce remaining
+  emissions and exposure; verified boss alignment and safe Power recovery may
+  improve later route state. Current traces lack sufficient ordinary-enemy
+  HP, damage, kill-versus-despawn, pickup ownership, and counterfactual data
+  to establish causality.
+- Added
+  `STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
+  The ordered gates are read-only native telemetry, deterministic streaming
+  exposure attribution, a survival-filtered trace-only target shadow, and
+  repeated focused physical trials. Survival stays hard, Bomb stays
+  forbidden, and item/damage objectives retain no action authority.

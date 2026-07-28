@@ -684,12 +684,14 @@ recertification and ordered deadline/deathbomb/auto-confirm/no-Bomb overrides
 also have focused owners. Action alignment, physical send/no-write, issued
 delay registration, and actuator mutation now belong to `issue_stage`; the
 complete optional post-issue bullet-birth transaction belongs to
-`bullet_birth_stage`. Lunatic Stage-4A/5/6B and focused Hard Stage-1 retention
-gates completed with hard no-Bomb, accepted artifacts, and full cleanup;
-their hits remain model/recovery evidence rather than structural conclusions.
-Other post-issue shadows, outer decision-trace composition, and scene
-lifecycle remain inside `_run_live_session`; R5 therefore continues without
-changing live strategy.
+`bullet_birth_stage`. The one-shot shipped runtime-ECL comparison is also an
+independently tested default-off service with no action consumer. Lunatic
+Stage-4A/5/6B and focused Hard Stage-1 retention gates completed with hard
+no-Bomb, accepted artifacts, and full cleanup; their hits remain
+model/recovery evidence rather than structural conclusions. Other post-issue
+shadows, combat-progress observation, outer decision-trace composition, and
+scene lifecycle remain inside `_run_live_session`; R5 therefore continues
+without changing live strategy.
 
 1. 抽 `LiveSession` context manager，只負責資源 acquire/release。
 2. 抽 `Sensor`, `PolicyCoordinator`, `SceneClockCoordinator`,
@@ -1350,6 +1352,17 @@ parity 當成每個 nature tie field 的逐 bit equality。
   default-off trace delivery only. Runtime-ECL identity, instruction/path
   lowering, source completeness, future geometry, and action authority
   remain open;
+- exact shipped-runtime ECL identity is now physically complete on Stage-5
+  run `20260728_212622`. One frame-1 action-neutral transaction used four RPM
+  reads, captured the 47,224-byte image at runtime base `0x0B1E0048`, and
+  normalized exactly to decoded `ecldata5.ecl` SHA-256
+  `3148f45f...fe19`, with no first difference. The run completed 12,100
+  decisions, nine hits, hard no-Bomb, `route_complete`, and exact cleanup;
+  the strict audit regenerates byte-identically at `f8c88c2c...45d5`.
+  Instruction-byte identity is accepted only for this immutable image.
+  Reachable auxiliary paths, operands, future geometry, source completeness,
+  and action authority remain open. The next G5 checkpoint contracts one
+  auxiliary event class and keeps unsupported dependencies `UNKNOWN`;
 - the projection audit now has an explicit universal `core` profile and keeps
   Stage-4A-only spell gates as its default. Stage 5 passes all core gates over
   4,871 rows while retaining 1,220 spell-115 unsupported-control rows as
@@ -1370,6 +1383,17 @@ parity 當成每個 nature tie field 的逐 bit equality。
 每類都要有 IDA/static conclusion、native runtime trace、update-order fixture、
 semantic fuzzer 和 retained residual report。靜態分析結論標 inferred，runtime
 trace 才是 observed。
+
+平行新增一條 combat-progress 研究線，不把它混成 G5 hazard completeness：
+九個 retained Stage-5 run 的 canonical first hit 全部是 nonspell 且 Power
+128；但 nonspell 的 55/118 hits 同時來自 74,789/113,353 decisions，其
+exposure-normalized rate 低於 spell 合計。這支持「快速清怪可能縮短累積
+暴露」的可驗證 hypothesis，不支持 generic aggressive weight。先依
+`STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md` 建立
+ordinary-enemy HP/damageability/kill-vs-despawn、shot damage、Power/item
+transition 的 read-only telemetry 和 streaming audit，再做只在相同
+viable/issue-safe set 內排序的 trace-only shadow。任何 live promotion 都要
+多 RNG focused physical gate；單一低-hit run 無效。
 
 ## 12. Performance 路線
 
@@ -1493,6 +1517,9 @@ alternate-action hard safety。
     決定能否 promotion；
 11. bitset、incremental、SIMD、process isolation 都是後續加速器，不是當前
     核心答案。
+12. nonspell 清怪、Power recovery 與 boss damage 先做 combat-progress
+    telemetry；只在 viable set 內作 lexicographic objective，且與 G5
+    future-hazard completeness 分開驗證。
 
 這條路線既直接針對 38/39 post-empty contacts，也降低下一輪研究把 model、
 algorithm、delivery 與 code movement 混為一談的風險。

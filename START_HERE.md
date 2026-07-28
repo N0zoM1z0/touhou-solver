@@ -48,7 +48,9 @@ and design/run notes retain derivations and history.
 38. `notes/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md`
 39. `notes/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_STAGE5_RESULT_20260728.md`
 40. `notes/G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`
-41. the relevant recent run note and counterexample rows before live work
+41. `notes/G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`
+42. `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
+43. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -57,7 +59,21 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
-- The newest action-neutral G5 checkpoint is bounded-visible-retry
+- The newest action-neutral G5 checkpoint is shipped runtime-ECL identity on
+  `lunatic_route2_stage5_unattended_20260728_212622`. It completed 12,100
+  decisions over frames `1..40984`, hard no-Bomb, with nine hits,
+  `route_complete`, accepted artifacts, exact key/process cleanup, and no
+  residual process. The one frame-1 observation used four RPM reads and
+  captured a 47,224-byte image at runtime base `0x0B1E0048`. Normalization
+  produced exact SHA-256
+  `3148f45f...fe19`, equal to shipped decoded `ecldata5.ecl`, with no first
+  difference. Capture/whole-transaction walls were `0.2083/2.9961 ms`; the
+  next decision arrived two frames later. The strict report regenerates
+  byte-identically at SHA-256 `f8c88c2c...45d5`; raw SHA-256 is
+  `c00fc837...d27`. This accepts immutable Stage-5 instruction-byte identity
+  only. Source completeness, reachable auxiliary paths, future geometry,
+  planner, and action authority remain none.
+- The preceding action-neutral G5 checkpoint is bounded-visible-retry
   auxiliary-batch Stage-5 spell-107 run
   `lunatic_route2_stage5_unattended_20260728_200739`, executed from parent
   `789d4ca` plus the enclosing checkpoint changes. It completed 13,097
@@ -1442,14 +1458,26 @@ that a containing forecast is complete. Contract nonspell source identity and
 its observation deadline before extending the live observer; continue earlier
 viability preservation in parallel.
 
-Ordinary main-source topology and zero-read auxiliary-pointer phase A are now
-complete. Main-only coverage is structurally incomplete, auxiliary pointer
-identity is physically unstable across slot/index reuse, and exact shipped
-runtime bytes plus coherent auxiliary VM state remain unavailable. The next
-P1 gate is therefore the bounded native compact batch and one-shot runtime
-image comparison described by
-`G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`, not a
-planner envelope. Unknown contexts remain unresolved source branches.
+Ordinary main-source topology, auxiliary-pointer phase A, coherent
+bounded-visible-retry auxiliary capture, and exact shipped Stage-5 runtime
+instruction-byte identity are now complete. Main-only coverage remains
+structurally incomplete, pointer value is not stable identity, and exact
+bytes do not prove a reachable path or complete operands. The next P1 gate is
+a separately fixed auxiliary instruction/path lowering contract for one event
+class. It must preserve scheduler/timer/call state and keep every unsupported
+control, source, operand, emission, transform, or geometry dependency
+`UNKNOWN`; it is not a planner envelope.
+
+Separately, all nine retained complete Stage-5 runs have their canonical
+fresh-attempt first hit in a nonspell phase at full Power 128. Nonspell
+accounts for 55/118 hits but also 74,789/113,353 decisions; its aggregate
+per-decision hit rate is lower than the combined spells. This makes opening
+and middle nonspell exposure a focused route barrier without proving that
+ordinary enemies are intrinsically more dangerous. The proposed next
+strategy gate is read-only kill/damage/despawn/Power telemetry followed by a
+survival-filtered target shadow under
+`STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`. Do not enable
+item or damage action authority from hit counts alone.
 
 ### P2 — Resolve CE-0120 at the actuator boundary
 

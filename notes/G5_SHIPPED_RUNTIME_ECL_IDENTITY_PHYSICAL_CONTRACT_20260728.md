@@ -2,9 +2,10 @@
 
 Date: 2026-07-28
 
-Status: fixed before physical integration. The existing bounded
-normalization primitive passes synthetic independent oracles; this contract
-governs its first shipped Stage-5 runtime use. It grants no source
+Status: fixed before physical integration and physically accepted by
+`G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`. The existing
+bounded normalization primitive passes synthetic independent oracles and the
+shipped Stage-5 image now matches exactly. This contract grants no source
 completeness, future geometry, planner, feasibility, publication, cadence, or
 physical action authority.
 
@@ -42,7 +43,7 @@ The physical workload is:
 
 - Sakuya/Remilia route id `2`;
 - Lunatic difficulty index `3`;
-- Stage-5 route index `4`;
+- Stage-5 route index `5`;
 - no-life-decrement patch verified by the existing supervisor;
 - hard no-Bomb;
 - one supervised practice run with normal controller authority unchanged.

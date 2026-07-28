@@ -627,7 +627,8 @@ comparison.
   planning failures behind Bomb/deathbomb behavior. Survival is now hard and
   Bomb bit `0x02` is forbidden by default.
 - **Retained value:** emergency geometry and first-hit witnesses.
-- **Evidence:** early complete-run sections in `notes/RESEARCH_LOG.md`.
+- **Evidence:** early complete-run sections in
+  `notes/research_log/2026-07-23.md`.
 
 ### S02 — Forward Corridor Waypoints And Gate Commitment
 
@@ -646,7 +647,8 @@ comparison.
 - **Observed:** reduced physical Stage-3 hits in its promotion experiments.
 - **Limitation:** a delay certificate remains only as sound as the hazard
   snapshot and clock boundary; CE-0120 is unresolved.
-- **Evidence:** dynamic-hold sections of `notes/RESEARCH_LOG.md`.
+- **Evidence:** dynamic-hold sections of
+  `notes/research_log/2026-07-23.md`.
 
 ### S04 — Robust Backward Viability
 
@@ -718,7 +720,7 @@ comparison.
   pass. The current Python/dense implementation takes seconds and is rejected
   for delivery; sparse/native, Windows age/contention, cancellation, and
   shadow gates remain open.
-- **Evidence:** rejection sections in `notes/RESEARCH_LOG.md` and
+- **Evidence:** rejection sections in `notes/research_log/2026-07-24.md` and
   `notes/HARD_STAGE4A_VIABILITY_DIFFERENTIAL_20260726.md`,
   `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`, and
   `notes/G2_QUERY_LOCAL_REFINEMENT_GATE_20260727.md`.
@@ -735,7 +737,7 @@ comparison.
   survival-filtered horizontal alignment candidate are retained without
   action authority. Ordinary-enemy HP, verified kill/despawn cause, and
   hazard-exposure reduction remain unavailable.
-- **Evidence:** damage-aware sections in `notes/RESEARCH_LOG.md` and
+- **Evidence:** damage-aware sections in `notes/research_log/2026-07-24.md` and
   `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
 
 ### S11 — Delivery-Aware Hierarchical Planning

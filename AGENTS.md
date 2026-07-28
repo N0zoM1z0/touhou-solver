@@ -11,9 +11,11 @@ These instructions apply to every task and file in this repository.
   live/shadow/proposed/rejected strategy ledger.
 - Read the formal and design notes named by `START_HERE.md` before changing a
   model, recurrence, uncertainty set, planner, actuator, or delivery service.
-- Record durable failures in `notes/COUNTEREXAMPLES.md` and chronological
-  evidence in `notes/RESEARCH_LOG.md`. Detailed history does not belong in
-  this contract or the short handoff.
+- Route durable failures through `notes/COUNTEREXAMPLES.md` to its current
+  range shard, and chronological evidence through `notes/RESEARCH_LOG.md` to
+  its current daily shard. The canonical files are short indexes; detailed
+  history does not belong in this contract, either index, or the short
+  handoff.
 - If documents disagree, reconcile them against code and retained evidence,
   then update every affected source of truth in the same checkpoint.
 
@@ -47,7 +49,8 @@ These instructions apply to every task and file in this repository.
   affected source of truth.
 - Persist addresses, structures, calling conventions, and reproducible
   evidence in `notes/`. Rename/type strong conclusions in IDA and record
-  material database changes in `notes/RESEARCH_LOG.md`.
+  material database changes in the current daily shard routed by
+  `notes/RESEARCH_LOG.md`.
 
 ## Formal Problem And Authority
 

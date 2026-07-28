@@ -95,8 +95,8 @@ The chronological body is split by the date written in each heading:
 
 The legacy G2 section begins as an H2 on July 27 and continues with dated H3
 entries on July 28. The July-28 shard receives a local wrapper heading, while
-the original body from line 6112 onward remains byte-preserved below an
-explicit source-content marker.
+the original body from line 6112 onward remains byte-preserved between
+explicit source-content markers.
 
 ### Counterexamples
 

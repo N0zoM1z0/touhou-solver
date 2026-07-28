@@ -13,9 +13,9 @@ from th08_ecl_birth import (
     observe_deferred_fire_state,
 )
 from th08_live.birth_trace import (
+    BULLET_BIRTH_AUXILIARY_POINTER_TRACE_SCHEMA_VERSION,
     BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION,
     BULLET_BIRTH_INTENT_SCOPE,
-    BULLET_BIRTH_MAIN_VM_TRACE_SCHEMA_VERSION,
     BULLET_BIRTH_POOL_SCOPE,
     BULLET_BIRTH_TRACE_ROLE,
     BULLET_BIRTH_TRACE_SCHEMA_VERSION,
@@ -38,6 +38,7 @@ from th08_live.derived_pattern_source import (
     DerivedPatternSourceObservation,
 )
 from th08_live.enemy_ecl_inventory import (
+    EnemyAuxiliaryEclContextPointerObservation,
     EnemyMainEclVmInventory,
     EnemyMainEclVmObservation,
 )
@@ -283,7 +284,9 @@ class BulletBirthTraceTests(unittest.TestCase):
         self.assertIsNone(record["timing_ms"]["pre_emit_total"])
         self.assertEqual(record["timing_ms"]["previous_emit"], 0.012)
 
-    def test_nonspell_main_vm_inventory_uses_explicit_schema_v11(self) -> None:
+    def test_nonspell_inventory_uses_explicit_auxiliary_pointer_schema(
+        self,
+    ) -> None:
         inventory = EnemyMainEclVmInventory(
             scanned_slots=64,
             active_slots=1,
@@ -303,6 +306,15 @@ class BulletBirthTraceTests(unittest.TestCase):
                 ),
             ),
             invalid=(),
+            auxiliary_contexts=(
+                EnemyAuxiliaryEclContextPointerObservation(
+                    slot=0,
+                    enemy_pointer=0x005826C0,
+                    enemy_flags=5,
+                    context_pointers=(0x02100000, 0, 0x021024B0, 0),
+                ),
+            ),
+            invalid_auxiliary_contexts=(),
             decode_ms=0.025,
         )
         record = build_bullet_birth_trace_record(
@@ -316,11 +328,15 @@ class BulletBirthTraceTests(unittest.TestCase):
         )
         self.assertEqual(
             record["schema_version"],
-            BULLET_BIRTH_MAIN_VM_TRACE_SCHEMA_VERSION,
+            BULLET_BIRTH_AUXILIARY_POINTER_TRACE_SCHEMA_VERSION,
         )
         self.assertEqual(
             record["counts"]["valid_nonspell_main_vms"],
             1,
+        )
+        self.assertEqual(
+            record["counts"]["non_null_auxiliary_contexts"],
+            2,
         )
         self.assertEqual(
             record["alignment"]["enemy_prefix_frame_before"],
@@ -331,11 +347,15 @@ class BulletBirthTraceTests(unittest.TestCase):
             0.025,
         )
         self.assertIn(
-            "ordinary_enemy_pool_first_64_main_vm_state_only",
+            "ordinary_enemy_pool_first_64_main_vm_state",
             record["scope"]["observed_sources"],
         )
         self.assertIn(
-            "non_spell_enemy_main_vm_outside_first_64_or_instruction_semantics",
+            "ordinary_enemy_pool_first_64_auxiliary_context_pointers_only",
+            record["scope"]["observed_sources"],
+        )
+        self.assertIn(
+            "auxiliary_vm_state_or_instruction_semantics",
             record["scope"]["omitted_sources"],
         )
 

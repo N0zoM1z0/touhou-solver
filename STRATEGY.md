@@ -501,6 +501,17 @@ comparison.
    p99/max pass. Optimize this useful source path rather than rejecting it
    solely on that small regression; never move unbounded cold reads into the
    issue thread.
+   Auxiliary-pointer phase A now passes on action-neutral Stage-5 workload
+   `20260728_171633`: all 12,032 schema-12 brackets are stable, no added pool
+   RPM is issued, and non-null context density is p50/p95/p99/max
+   `4/26/32/34`. Fifty-six of 57 heap addresses recur at multiple
+   `(slot, auxiliary-index)` observations, so pointer value is not source
+   identity and every later state capture must recheck its owner and pointer
+   set. The selected proposed Phase-B strategy is one bounded native compact
+   batch; per-pointer Python reads and full `0x24B0` context copies are
+   rejected delivery designs. The exact runtime-image primitive has only
+   synthetic authority until a shipped Stage-5 image matches byte for byte.
+   None of this changes the live strategy or grants future-hazard authority.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over
    4,871 callback rows; spell 115 remains fail-closed on 1,220

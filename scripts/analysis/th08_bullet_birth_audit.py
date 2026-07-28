@@ -21,7 +21,7 @@ SCHEMA = "th08-bullet-birth-residual-audit-v9"
 TRACE_KIND = "bullet_birth_audit"
 TRACE_ROLE = "trace_only_no_action_authority"
 TRACE_SCHEMA_VERSIONS = frozenset(
-    (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+    (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
 )
 NATIVE_CALL_MODES = frozenset(("gil-released", "gil-held"))
 NATIVE_PHASES = ("prepare", "native_call", "materialize")
@@ -598,13 +598,22 @@ def _validate_nonspell_main_vm_inventory(
     assert isinstance(timing, dict)
     assert isinstance(alignment, dict)
     assert isinstance(scope, dict)
+    schema_version = record.get("schema_version")
+    expected_layout = (
+        "th08-enemy-main-ecl-vm-inventory-v2"
+        if schema_version == 12
+        else "th08-enemy-main-ecl-vm-inventory-v1"
+    )
+    expected_scope = (
+        "ordinary_enemy_pool_prefix_main_vm_and_auxiliary_pointers"
+        if schema_version == 12
+        else "ordinary_enemy_pool_prefix_main_vm_only"
+    )
     if (
-        inventory.get("layout")
-        != "th08-enemy-main-ecl-vm-inventory-v1"
+        inventory.get("layout") != expected_layout
         or inventory.get("vm_local_layout")
         != "th08-ecl-vm-local-projection-v1"
-        or inventory.get("scope")
-        != "ordinary_enemy_pool_prefix_main_vm_only"
+        or inventory.get("scope") != expected_scope
         or inventory.get("scanned_slots") != 64
     ):
         raise BulletBirthAuditError(
@@ -696,6 +705,84 @@ def _validate_nonspell_main_vm_inventory(
             raise BulletBirthAuditError(
                 f"line {line_number}: initialized VM is labelled invalid"
             )
+    if schema_version == 12:
+        auxiliary_rows = inventory.get("auxiliary_context_rows")
+        invalid_auxiliary_rows = inventory.get(
+            "invalid_auxiliary_context_rows"
+        )
+        non_null_auxiliary = inventory.get(
+            "non_null_auxiliary_contexts"
+        )
+        invalid_auxiliary = inventory.get("invalid_auxiliary_contexts")
+        if (
+            inventory.get("auxiliary_context_row_layout")
+            != "slot_enemy_pointer_enemy_flags_four_raw_context_pointers"
+            or not isinstance(auxiliary_rows, list)
+            or len(auxiliary_rows) != active_slots
+            or not isinstance(invalid_auxiliary_rows, list)
+            or type(non_null_auxiliary) is not int
+            or type(invalid_auxiliary) is not int
+            or len(invalid_auxiliary_rows) != invalid_auxiliary
+        ):
+            raise BulletBirthAuditError(
+                f"line {line_number}: invalid auxiliary-context metadata"
+            )
+        auxiliary_slots: set[int] = set()
+        expected_invalid: set[tuple[int, int, int, int]] = set()
+        observed_non_null = 0
+        for row in auxiliary_rows:
+            if not isinstance(row, list) or len(row) != 4:
+                raise BulletBirthAuditError(
+                    f"line {line_number}: invalid auxiliary-context row"
+                )
+            slot, pointer, flags, context_pointers = row
+            if (
+                type(slot) is not int
+                or slot not in seen_slots
+                or slot in auxiliary_slots
+                or type(pointer) is not int
+                or pointer != 0x005826C0 + slot * 0x53D0
+                or type(flags) is not int
+                or not flags & 1
+                or not isinstance(context_pointers, list)
+                or len(context_pointers) != 4
+                or not all(
+                    type(value) is int and 0 <= value <= 0xFFFFFFFF
+                    for value in context_pointers
+                )
+            ):
+                raise BulletBirthAuditError(
+                    f"line {line_number}: invalid auxiliary-context identity"
+                )
+            auxiliary_slots.add(slot)
+            for index, context_pointer in enumerate(context_pointers):
+                if context_pointer:
+                    observed_non_null += 1
+                if context_pointer and not (
+                    0x00010000 <= context_pointer <= 0x7FFFFFFF
+                ):
+                    expected_invalid.add(
+                        (slot, pointer, index, context_pointer)
+                    )
+        observed_invalid: set[tuple[int, int, int, int]] = set()
+        for row in invalid_auxiliary_rows:
+            if (
+                not isinstance(row, list)
+                or len(row) != 4
+                or not all(type(value) is int for value in row)
+            ):
+                raise BulletBirthAuditError(
+                    f"line {line_number}: invalid auxiliary-context rejection"
+                )
+            observed_invalid.add(tuple(row))
+        if (
+            auxiliary_slots != seen_slots
+            or observed_non_null != non_null_auxiliary
+            or expected_invalid != observed_invalid
+        ):
+            raise BulletBirthAuditError(
+                f"line {line_number}: auxiliary-context counts do not reconcile"
+            )
     if (
         counts.get("active_ordinary_enemy_slots") != active_slots
         or counts.get("valid_nonspell_main_vms") != valid_vms
@@ -707,8 +794,27 @@ def _validate_nonspell_main_vm_inventory(
         or timing["enemy_prefix_capture"] < inventory["decode_ms"]
         or type(alignment.get("enemy_prefix_frame_before")) is not int
         or type(alignment.get("enemy_prefix_frame_after")) is not int
-        or "ordinary_enemy_pool_first_64_main_vm_state_only"
-        not in scope.get("observed_sources", [])
+        or (
+            schema_version == 11
+            and "ordinary_enemy_pool_first_64_main_vm_state_only"
+            not in scope.get("observed_sources", [])
+        )
+        or (
+            schema_version == 12
+            and (
+                counts.get("non_null_auxiliary_contexts")
+                != inventory.get("non_null_auxiliary_contexts")
+                or counts.get("invalid_auxiliary_contexts")
+                != inventory.get("invalid_auxiliary_contexts")
+                or "ordinary_enemy_pool_first_64_main_vm_state"
+                not in scope.get("observed_sources", [])
+                or (
+                    "ordinary_enemy_pool_first_64_"
+                    "auxiliary_context_pointers_only"
+                )
+                not in scope.get("observed_sources", [])
+            )
+        )
     ):
         raise BulletBirthAuditError(
             f"line {line_number}: main-VM metadata does not reconcile"
@@ -729,13 +835,13 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             f"line {line_number}: audit role is not trace-only"
         )
     if (
-        record.get("schema_version") in {5, 6, 7, 8, 9, 10, 11}
+        record.get("schema_version") in {5, 6, 7, 8, 9, 10, 11, 12}
         and record.get("observation_backend") not in {"python", "native"}
     ):
         raise BulletBirthAuditError(
             f"line {line_number}: audit omits a valid observation backend"
         )
-    if record.get("schema_version") in {7, 8, 9, 10, 11}:
+    if record.get("schema_version") in {7, 8, 9, 10, 11, 12}:
         backend = record.get("observation_backend")
         native_call_mode = record.get("native_call_mode")
         if backend == "native" and native_call_mode not in NATIVE_CALL_MODES:
@@ -746,7 +852,7 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             raise BulletBirthAuditError(
                 f"line {line_number}: Python audit fabricates a native call mode"
             )
-    if record.get("schema_version") in {6, 7, 8, 9, 10, 11}:
+    if record.get("schema_version") in {6, 7, 8, 9, 10, 11, 12}:
         backend = record.get("observation_backend")
         diagnostics = record.get("observation_diagnostics")
         if backend == "python":
@@ -765,18 +871,19 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
                 diagnostics,
                 timing=record.get("timing_ms"),
                 line_number=line_number,
-                require_thread_cycles=record.get("schema_version") in {9, 10, 11},
+                require_thread_cycles=record.get("schema_version")
+                in {9, 10, 11, 12},
             )
         elif diagnostics is not None:
             raise BulletBirthAuditError(
                 f"line {line_number}: failed native audit publishes "
                 "diagnostics"
             )
-    if record.get("schema_version") in {8, 9, 10, 11}:
+    if record.get("schema_version") in {8, 9, 10, 11, 12}:
         intent = record.get("intent")
         if isinstance(intent, dict):
             _validate_intent_coverage(intent, line_number=line_number)
-    if record.get("schema_version") in {9, 10, 11}:
+    if record.get("schema_version") in {9, 10, 11, 12}:
         _validate_observer_contention(
             record.get("observer_contention"),
             line_number=line_number,
@@ -784,7 +891,7 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
     if (
         record.get("schema_version") == 10
         or (
-            record.get("schema_version") == 11
+            record.get("schema_version") in {11, 12}
             and (
                 "derived_source_observation" in record
                 or "derived_source_error" in record
@@ -795,7 +902,7 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             record,
             line_number=line_number,
         )
-    if record.get("schema_version") == 11:
+    if record.get("schema_version") in {11, 12}:
         _validate_nonspell_main_vm_inventory(
             record,
             line_number=line_number,
@@ -1201,7 +1308,7 @@ def _intent_events(
                 f"velocity_lookahead_lowering:{velocity_lowering}"
             ] += 1
         if (
-            audit["schema_version"] in {8, 9, 10, 11}
+            audit["schema_version"] in {8, 9, 10, 11, 12}
             and pointer
             and not scope.get("velocity_lookahead_metadata_valid")
         ):
@@ -1422,6 +1529,9 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     nonspell_main_vm_active_counts: list[float] = []
     nonspell_main_vm_valid_counts: list[float] = []
     nonspell_main_vm_invalid_counts: list[float] = []
+    auxiliary_context_non_null_counts: list[float] = []
+    auxiliary_context_invalid_counts: list[float] = []
+    auxiliary_context_owner_counts: list[float] = []
     nonspell_main_vm_instruction_pointers: Counter[int] = Counter()
     nonspell_main_vm_stability: Counter[str] = Counter()
     intent_errors = 0
@@ -1460,6 +1570,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     schema_v9_native_success_rows = 0
     schema_v10_rows = 0
     schema_v11_rows = 0
+    schema_v12_rows = 0
     derived_source_rows = 0
     derived_source_native_segment_ms: defaultdict[str, list[float]] = (
         defaultdict(list)
@@ -1473,6 +1584,8 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             schema_v10_rows += 1
         if audit["schema_version"] == 11:
             schema_v11_rows += 1
+        if audit["schema_version"] == 12:
+            schema_v12_rows += 1
         if (
             "derived_source_observation" in audit
             or "derived_source_error" in audit
@@ -1565,6 +1678,19 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             nonspell_main_vm_active_counts.append(float(active_count))
             nonspell_main_vm_valid_counts.append(float(valid_count))
             nonspell_main_vm_invalid_counts.append(float(invalid_count))
+            auxiliary_rows = main_vm_inventory.get(
+                "auxiliary_context_rows"
+            )
+            if isinstance(auxiliary_rows, list):
+                auxiliary_context_owner_counts.append(
+                    float(len(auxiliary_rows))
+                )
+                auxiliary_context_non_null_counts.append(
+                    float(main_vm_inventory["non_null_auxiliary_contexts"])
+                )
+                auxiliary_context_invalid_counts.append(
+                    float(main_vm_inventory["invalid_auxiliary_contexts"])
+                )
             for row in main_vm_inventory["rows"]:
                 nonspell_main_vm_instruction_pointers[int(row[3])] += 1
             alignment = audit["alignment"]
@@ -1616,7 +1742,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         row_contention_class: str | None = None
         row_contention_names: list[str] = []
         if (
-            audit["schema_version"] in {6, 7, 8, 9, 10, 11}
+            audit["schema_version"] in {6, 7, 8, 9, 10, 11, 12}
             and isinstance(diagnostics, dict)
         ):
             segments = diagnostics["native_segments_ms"]
@@ -1634,7 +1760,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             }
             for field, value in numeric_segments.items():
                 native_segment_ms[field].append(value)
-            if audit["schema_version"] in {9, 10, 11}:
+            if audit["schema_version"] in {9, 10, 11, 12}:
                 schema_v9_native_success_rows += 1
                 raw_cycles = diagnostics.get("thread_cycles")
                 assert isinstance(raw_cycles, dict)
@@ -1930,7 +2056,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         },
         "derived_pattern_source": {
             "schema_v10_rows": schema_v10_rows,
-            "rows_including_schema_v11": derived_source_rows,
+            "rows_including_schema_v11_or_v12": derived_source_rows,
             "candidate_rows": derived_source_candidate_rows,
             "candidate_sightings": derived_source_candidates,
             "authority": "trace_only",
@@ -1944,6 +2070,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         },
         "nonspell_main_vm_inventory": {
             "schema_v11_rows": schema_v11_rows,
+            "schema_v12_rows": schema_v12_rows,
             "authority": "trace_only_state_inventory",
             "source_proof": "none",
             "active_slots_per_row": _distribution(
@@ -1954,6 +2081,15 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             ),
             "invalid_active_vms_per_row": _distribution(
                 nonspell_main_vm_invalid_counts
+            ),
+            "auxiliary_pointer_owners_per_row": _distribution(
+                auxiliary_context_owner_counts
+            ),
+            "non_null_auxiliary_contexts_per_row": _distribution(
+                auxiliary_context_non_null_counts
+            ),
+            "invalid_auxiliary_contexts_per_row": _distribution(
+                auxiliary_context_invalid_counts
             ),
             "unique_instruction_pointers": len(
                 nonspell_main_vm_instruction_pointers

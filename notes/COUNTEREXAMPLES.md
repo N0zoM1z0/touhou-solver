@@ -4904,9 +4904,44 @@ counterexample; ordinary inventory retained, main-only completeness rejected
   identity. Unknown contexts enlarge unresolved coverage; they do not become
   absent, safe, or losing.
 - **Evidence:** Source-join internal digest
-  `4c2ebf77be74340693c8962e81ce598422bb8c9d6012092eb3116f17151b3222`;
+  `106ef2645396dad59dddff83d31c544f063014bb6c7b0e273ccbce4a7e1b4488`;
   raw trace SHA-256
   `8569d64d3ce50ced529bdcf4b48e8f0daa00bfbfa8d8cec9695665f04d0283a7`.
 - **Authority:** Source availability and negative completeness/performance/
   survival evidence only. No future geometry, planner, recurrence, actuator,
   cadence, feasibility, or live action authority changed.
+
+## CE-0163: An inherited IDA label confused saved call frames with live locals
+
+Status: observed static-analysis provenance failure; corrected before
+auxiliary-VM capture implementation
+
+- **Observed failure:** The first auxiliary-context topology note, generated
+  source-join report, and inherited IDA comment labeled context `+0x230` as
+  the auxiliary VM's live-local base.
+- **Invalid assumption:** A pre-existing IDA name or comment was treated as
+  semantic evidence without revalidating every consumer of the field.
+- **Revalidation:** `ecl_eval_int` at `0x0041F420` and the corresponding
+  lvalue resolver read current integers, floats, and scratch values from the
+  active VM pointer at context `+0x08`, with locals at VM
+  `+0x18..+0x64`. `ecl_call_subroutine` at `0x00421BD0` copies the complete
+  `0x228`-byte active VM into context `+0x230 + depth * 0x228`; that region
+  is the 15-entry saved-call-frame stack.
+- **Impact:** The already retained main-VM PC, timer, and local projection
+  bytes are correct, and the bad label never reached the planner or actuator.
+  It would, however, have made a later auxiliary capture semantically wrong
+  across calls if left uncorrected.
+- **Correction:** The IDA comment at `0x0041EBE9`, source generator, retained
+  report, formal observation contract, result note, research log, and
+  repository contract now distinguish active state from saved frames.
+  Regression coverage rejects the obsolete `local_state_offset_in_context`
+  field.
+- **Evidence:** Corrected source-join internal digest
+  `106ef2645396dad59dddff83d31c544f063014bb6c7b0e273ccbce4a7e1b4488`;
+  corrected retained-file SHA-256
+  `09fbfc8ec9a0c66d02b581c55fdb0da32d28c7795ecd3de2f968f4002dc72a5a`.
+- **Durable rule:** Inherited IDA names, types, comments, pseudocode
+  variables, and earlier semantic labels are hypotheses. Material conclusions
+  require instruction/dataflow, caller/callee, and where possible runtime
+  revalidation, with inherited, confirmed, and corrected provenance recorded
+  separately.

@@ -38,6 +38,13 @@ These instructions apply to every task and file in this repository.
   requested.
 - Do not use REA in this workspace. Use IDA Pro MCP for new binary static
   analysis and native probes for runtime evidence.
+- Treat inherited IDA names, types, comments, pseudocode variable names, and
+  earlier semantic labels as hypotheses, not authority. Before using one to
+  define a model field, offset, recurrence, capture layout, or live decision,
+  revalidate it against instructions/dataflow, relevant callers/callees, and
+  runtime evidence when available. Record whether a conclusion is inherited,
+  revalidated, or corrected; update misleading database annotations and every
+  affected source of truth.
 - Persist addresses, structures, calling conventions, and reproducible
   evidence in `notes/`. Rename/type strong conclusions in IDA and record
   material database changes in `notes/RESEARCH_LOG.md`.

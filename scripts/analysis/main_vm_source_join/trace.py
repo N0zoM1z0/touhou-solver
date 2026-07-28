@@ -1,4 +1,4 @@
-"""Strict streaming reader for schema-11 main-VM inventory traces."""
+"""Strict streaming reader for schema-11/12 enemy ECL inventory traces."""
 
 from __future__ import annotations
 
@@ -10,10 +10,12 @@ from typing import Any
 
 from th08_live.enemy_ecl_inventory import (
     ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT,
+    ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT_V1,
 )
 
 from .model import (
     ActivationBatch,
+    AuxiliaryPointerOwner,
     DecisionScope,
     InventoryCapture,
     TraceScan,
@@ -22,7 +24,7 @@ from .model import (
 
 
 TRACE_KIND = "bullet_birth_audit"
-TRACE_SCHEMA_VERSION = 11
+TRACE_SCHEMA_VERSIONS = frozenset((11, 12))
 ACTIVATION_EDGE_CODE = 3
 
 
@@ -67,7 +69,10 @@ def _decision_scope(record: dict[str, Any]) -> DecisionScope:
 
 
 def _vm_rows(inventory: dict[str, Any]) -> tuple[VmRow, ...]:
-    if inventory.get("layout") != ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT:
+    if inventory.get("layout") not in {
+        ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT_V1,
+        ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT,
+    }:
         raise MainVmTraceError("unknown main-VM inventory layout")
     scanned_slots = _integer(
         inventory.get("scanned_slots"),
@@ -131,6 +136,92 @@ def _vm_rows(inventory: dict[str, Any]) -> tuple[VmRow, ...]:
     return tuple(decoded)
 
 
+def _auxiliary_pointer_summary(
+    inventory: dict[str, Any],
+) -> tuple[tuple[AuxiliaryPointerOwner, ...], int, int]:
+    if inventory.get("layout") == ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT_V1:
+        return (), 0, 0
+    rows = inventory.get("auxiliary_context_rows")
+    invalid_rows = inventory.get("invalid_auxiliary_context_rows")
+    active_slots = _integer(
+        inventory.get("active_slots"),
+        label="inventory active_slots",
+    )
+    non_null = _integer(
+        inventory.get("non_null_auxiliary_contexts"),
+        label="inventory non_null_auxiliary_contexts",
+    )
+    invalid = _integer(
+        inventory.get("invalid_auxiliary_contexts"),
+        label="inventory invalid_auxiliary_contexts",
+    )
+    if (
+        not isinstance(rows, list)
+        or len(rows) != active_slots
+        or not isinstance(invalid_rows, list)
+        or len(invalid_rows) != invalid
+    ):
+        raise MainVmTraceError("auxiliary pointer counts do not reconcile")
+    seen_slots: set[int] = set()
+    decoded_owners: list[AuxiliaryPointerOwner] = []
+    observed_non_null = 0
+    expected_invalid: set[tuple[int, int, int, int]] = set()
+    for index, row in enumerate(rows):
+        if not isinstance(row, list) or len(row) != 4:
+            raise MainVmTraceError(
+                f"auxiliary pointer row {index} has invalid shape"
+            )
+        slot, enemy_pointer, enemy_flags, pointers = row
+        if (
+            type(slot) is not int
+            or not 0 <= slot < 64
+            or slot in seen_slots
+            or type(enemy_pointer) is not int
+            or enemy_pointer != 0x005826C0 + slot * 0x53D0
+            or type(enemy_flags) is not int
+            or not enemy_flags & 1
+            or not isinstance(pointers, list)
+            or len(pointers) != 4
+            or not all(
+                type(pointer) is int and 0 <= pointer <= 0xFFFFFFFF
+                for pointer in pointers
+            )
+        ):
+            raise MainVmTraceError(
+                f"auxiliary pointer row {index} has invalid identity"
+            )
+        seen_slots.add(slot)
+        decoded_owners.append(
+            AuxiliaryPointerOwner(
+                slot=slot,
+                enemy_pointer=enemy_pointer,
+                enemy_flags=enemy_flags,
+                context_pointers=tuple(pointers),
+            )
+        )
+        for auxiliary_index, pointer in enumerate(pointers):
+            if pointer:
+                observed_non_null += 1
+            if pointer and not 0x00010000 <= pointer <= 0x7FFFFFFF:
+                expected_invalid.add(
+                    (slot, enemy_pointer, auxiliary_index, pointer)
+                )
+    observed_invalid: set[tuple[int, int, int, int]] = set()
+    for index, row in enumerate(invalid_rows):
+        if (
+            not isinstance(row, list)
+            or len(row) != 4
+            or not all(type(value) is int for value in row)
+        ):
+            raise MainVmTraceError(
+                f"invalid auxiliary pointer row {index} has invalid shape"
+            )
+        observed_invalid.add(tuple(row))
+    if observed_non_null != non_null or observed_invalid != expected_invalid:
+        raise MainVmTraceError("auxiliary pointer evidence does not reconcile")
+    return tuple(decoded_owners), non_null, invalid
+
+
 def _activation_batch(
     record: dict[str, Any],
     *,
@@ -183,20 +274,31 @@ def _activation_batch(
 
 
 def scan_schema11_trace(trace_path: Path) -> TraceScan:
-    """Read only decisions and schema-11 birth audits with strict joins."""
+    """Read decisions and compatible schema-11/12 audits with strict joins."""
 
     digest = hashlib.sha256()
     trace_bytes = 0
     trace_lines = 0
     schema11_rows = 0
+    schema12_rows = 0
     decisions: dict[tuple[int, int], DecisionScope] = {}
     pending_captures: list[
-        tuple[tuple[int, int], int, int, int, tuple[VmRow, ...]]
+        tuple[
+            tuple[int, int],
+            int,
+            int,
+            int,
+            tuple[VmRow, ...],
+            tuple[AuxiliaryPointerOwner, ...],
+        ]
     ] = []
     pending_batches: list[
         tuple[tuple[int, int], int, int | None, int, int, tuple[int, ...]]
     ] = []
     invalid_active_vm_rows = 0
+    auxiliary_pointer_owner_rows = 0
+    non_null_auxiliary_contexts = 0
+    invalid_auxiliary_contexts = 0
 
     with trace_path.open("rb") as stream:
         for line_number, raw_line in enumerate(stream, 1):
@@ -221,11 +323,15 @@ def scan_schema11_trace(trace_path: Path) -> TraceScan:
                 continue
             if (
                 kind != TRACE_KIND
-                or record.get("schema_version") != TRACE_SCHEMA_VERSION
+                or record.get("schema_version") not in TRACE_SCHEMA_VERSIONS
             ):
                 continue
 
-            schema11_rows += 1
+            schema_version = record.get("schema_version")
+            if schema_version == 11:
+                schema11_rows += 1
+            else:
+                schema12_rows += 1
             key = (
                 _integer(
                     record.get("gameplay_epoch"),
@@ -252,7 +358,24 @@ def scan_schema11_trace(trace_path: Path) -> TraceScan:
             )
             if before > after:
                 raise MainVmTraceError("enemy prefix frame bracket is reversed")
+            expected_layout = (
+                ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT_V1
+                if schema_version == 11
+                else ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT
+            )
+            if inventory.get("layout") != expected_layout:
+                raise MainVmTraceError(
+                    "trace schema and inventory layout differ"
+                )
             rows = _vm_rows(inventory)
+            (
+                pointer_owners,
+                non_null_pointers,
+                invalid_pointers,
+            ) = _auxiliary_pointer_summary(inventory)
+            auxiliary_pointer_owner_rows += len(pointer_owners)
+            non_null_auxiliary_contexts += non_null_pointers
+            invalid_auxiliary_contexts += invalid_pointers
             invalid_active_vm_rows += _integer(
                 inventory.get("invalid_active_vms"),
                 label="inventory invalid_active_vms",
@@ -265,7 +388,14 @@ def scan_schema11_trace(trace_path: Path) -> TraceScan:
             ):
                 raise MainVmTraceError("inventory decode_ms is invalid")
             pending_captures.append(
-                (key, stage_route_index, before, after, rows)
+                (
+                    key,
+                    stage_route_index,
+                    before,
+                    after,
+                    rows,
+                    pointer_owners,
+                )
             )
             provisional_scope = DecisionScope(
                 gameplay_epoch=key[0],
@@ -286,10 +416,12 @@ def scan_schema11_trace(trace_path: Path) -> TraceScan:
                     )
                 )
 
-    if schema11_rows == 0:
-        raise MainVmTraceError("trace contains no schema-11 audit rows")
+    if schema11_rows + schema12_rows == 0:
+        raise MainVmTraceError(
+            "trace contains no schema-11/12 audit rows"
+        )
     captures: list[InventoryCapture] = []
-    for key, stage, before, after, rows in pending_captures:
+    for key, stage, before, after, rows, pointer_owners in pending_captures:
         scope = decisions.get(key)
         if scope is None:
             raise MainVmTraceError(f"audit has no matching decision {key}")
@@ -301,6 +433,7 @@ def scan_schema11_trace(trace_path: Path) -> TraceScan:
                 prefix_frame_before=before,
                 prefix_frame_after=after,
                 rows=rows,
+                auxiliary_pointer_owners=pointer_owners,
             )
         )
     activation_batches: list[ActivationBatch] = []
@@ -327,6 +460,10 @@ def scan_schema11_trace(trace_path: Path) -> TraceScan:
         captures=tuple(captures),
         activation_batches=tuple(activation_batches),
         invalid_active_vm_rows=invalid_active_vm_rows,
+        schema12_rows=schema12_rows,
+        auxiliary_pointer_owner_rows=auxiliary_pointer_owner_rows,
+        non_null_auxiliary_contexts=non_null_auxiliary_contexts,
+        invalid_auxiliary_contexts=invalid_auxiliary_contexts,
     )
 
 

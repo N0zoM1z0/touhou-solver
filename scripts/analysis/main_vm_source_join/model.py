@@ -24,11 +24,24 @@ class VmRow:
 
 
 @dataclass(frozen=True, slots=True)
+class AuxiliaryPointerOwner:
+    slot: int
+    enemy_pointer: int
+    enemy_flags: int
+    context_pointers: tuple[int, int, int, int]
+
+    @property
+    def non_null_count(self) -> int:
+        return sum(pointer != 0 for pointer in self.context_pointers)
+
+
+@dataclass(frozen=True, slots=True)
 class InventoryCapture:
     scope: DecisionScope
     prefix_frame_before: int
     prefix_frame_after: int
     rows: tuple[VmRow, ...]
+    auxiliary_pointer_owners: tuple[AuxiliaryPointerOwner, ...] = ()
 
     @property
     def stable(self) -> bool:
@@ -53,6 +66,10 @@ class TraceScan:
     captures: tuple[InventoryCapture, ...]
     activation_batches: tuple[ActivationBatch, ...]
     invalid_active_vm_rows: int
+    schema12_rows: int = 0
+    auxiliary_pointer_owner_rows: int = 0
+    non_null_auxiliary_contexts: int = 0
+    invalid_auxiliary_contexts: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -112,6 +129,7 @@ class InstructionAdvance:
 
 __all__ = [
     "ActivationBatch",
+    "AuxiliaryPointerOwner",
     "DecisionScope",
     "InventoryCapture",
     "InstructionAdvance",

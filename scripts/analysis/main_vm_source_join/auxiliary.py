@@ -24,6 +24,24 @@ class AuxiliaryAnalysis:
     every_immediate_candidate_matched: bool
 
 
+def auxiliary_static_semantics() -> dict[str, object]:
+    """Return the revalidated auxiliary-context layout used by reports."""
+
+    return {
+        "opcode": "0x87",
+        "handler": "0x0041CDF3..0x0041CF81",
+        "enemy_pointer_slots": "enemy+0x3384, four pointers",
+        "allocated_context_bytes": 0x24B0,
+        "vm_offset_in_context": 0x08,
+        "active_vm_bytes": 0x228,
+        "live_local_offsets_in_vm": "0x18..0x64",
+        "saved_call_frame_area_offset_in_context": 0x230,
+        "saved_call_frame_stride": 0x228,
+        "maximum_saved_call_frames": 15,
+        "scheduler": "0x0041EBB6..0x0041EC7C",
+    }
+
+
 def _unsigned_to_signed(value: int) -> int:
     return value - (1 << 32) if value & 0x80000000 else value
 
@@ -98,15 +116,7 @@ def build_auxiliary_analysis(
         and len(support_join.matched_event_indices) == len(immediate_advances)
     )
     section: dict[str, object] = {
-        "static_ida_semantics": {
-            "opcode": "0x87",
-            "handler": "0x0041CDF3..0x0041CF81",
-            "enemy_pointer_slots": "enemy+0x3384, four pointers",
-            "allocated_context_bytes": 0x24B0,
-            "vm_offset_in_context": 0x08,
-            "local_state_offset_in_context": 0x230,
-            "scheduler": "0x0041EBB6..0x0041EC7C",
-        },
+        "static_ida_semantics": auxiliary_static_semantics(),
         "interpretation": (
             "Static opcode 0x87 argument 1 selects a subroutine for a "
             "heap auxiliary VM. A contained time-zero fire instruction "

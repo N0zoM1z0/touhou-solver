@@ -292,6 +292,31 @@ def _build_report(
             ),
         },
     }
+    if trace.schema12_rows:
+        trace_scope = report["trace_scope"]
+        gates = report["gates"]
+        assert isinstance(trace_scope, dict)
+        assert isinstance(gates, dict)
+        trace_scope.update(
+            {
+                "schema12_rows": trace.schema12_rows,
+                "auxiliary_pointer_owner_rows": (
+                    trace.auxiliary_pointer_owner_rows
+                ),
+                "non_null_auxiliary_contexts": (
+                    trace.non_null_auxiliary_contexts
+                ),
+                "invalid_auxiliary_contexts": (
+                    trace.invalid_auxiliary_contexts
+                ),
+            }
+        )
+        gates["strict_schema11_or_schema12_trace_available"] = (
+            trace.schema11_rows + trace.schema12_rows > 0
+        )
+        gates["auxiliary_context_pointer_inventory_available"] = (
+            trace.auxiliary_pointer_owner_rows > 0
+        )
     report["report_digest"] = hashlib.sha256(
         canonical_report_bytes(report)
     ).hexdigest()

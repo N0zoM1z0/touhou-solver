@@ -18,6 +18,7 @@ from .enemy_ecl_inventory import EnemyMainEclVmInventory
 
 BULLET_BIRTH_TRACE_SCHEMA_VERSION = 10
 BULLET_BIRTH_MAIN_VM_TRACE_SCHEMA_VERSION = 11
+BULLET_BIRTH_AUXILIARY_POINTER_TRACE_SCHEMA_VERSION = 12
 BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION = 9
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
@@ -156,22 +157,25 @@ def build_bullet_birth_trace_record(
             "Python derived-source observation may not publish native diagnostics"
         )
     omitted_sources = [
-        "child_enemy_or_auxiliary_vm",
         "callback_or_interrupt_source",
         "non_ecl_native_source",
     ]
     if nonspell_main_vm_enabled:
-        omitted_sources.append(
-            "non_spell_enemy_main_vm_outside_first_64_or_instruction_semantics"
+        omitted_sources.extend(
+            (
+                "ordinary_enemy_outside_first_64",
+                "auxiliary_vm_state_or_instruction_semantics",
+            )
         )
     else:
+        omitted_sources.append("child_enemy_or_auxiliary_vm")
         omitted_sources.append("non_spell_enemy_main_vm")
     if trace_input.deferred_fire_state.active is None:
         omitted_sources.append("deferred_emission_runtime_state")
     record: dict[str, object] = {
         "kind": "bullet_birth_audit",
         "schema_version": (
-            BULLET_BIRTH_MAIN_VM_TRACE_SCHEMA_VERSION
+            BULLET_BIRTH_AUXILIARY_POINTER_TRACE_SCHEMA_VERSION
             if nonspell_main_vm_enabled
             else (
                 BULLET_BIRTH_TRACE_SCHEMA_VERSION
@@ -192,7 +196,13 @@ def build_bullet_birth_trace_record(
             "pool": BULLET_BIRTH_POOL_SCOPE,
             "intent": BULLET_BIRTH_INTENT_SCOPE,
             "observed_sources": (
-                ["ordinary_enemy_pool_first_64_main_vm_state_only"]
+                [
+                    "ordinary_enemy_pool_first_64_main_vm_state",
+                    (
+                        "ordinary_enemy_pool_first_64_"
+                        "auxiliary_context_pointers_only"
+                    ),
+                ]
                 if nonspell_main_vm_enabled
                 else []
             ),
@@ -281,6 +291,14 @@ def build_bullet_birth_trace_record(
         counts["active_ordinary_enemy_slots"] = inventory.active_slots
         counts["valid_nonspell_main_vms"] = len(inventory.observations)
         counts["invalid_nonspell_main_vms"] = len(inventory.invalid)
+        counts["non_null_auxiliary_contexts"] = sum(
+            pointer != 0
+            for owner in inventory.auxiliary_contexts
+            for pointer in owner.context_pointers
+        )
+        counts["invalid_auxiliary_contexts"] = len(
+            inventory.invalid_auxiliary_contexts
+        )
         timing["nonspell_main_vm_decode"] = inventory.decode_ms
         timing["enemy_prefix_capture"] = trace_input.enemy_prefix_capture_ms
         alignment["enemy_prefix_frame_before"] = (
@@ -293,6 +311,7 @@ def build_bullet_birth_trace_record(
 
 
 __all__ = [
+    "BULLET_BIRTH_AUXILIARY_POINTER_TRACE_SCHEMA_VERSION",
     "BULLET_BIRTH_INTENT_SCOPE",
     "BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION",
     "BULLET_BIRTH_POOL_SCOPE",

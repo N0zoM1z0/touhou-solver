@@ -19,7 +19,10 @@ from analysis.main_vm_source_join.advance import (
     find_auxiliary_start_advances,
     find_fire_advances,
 )
-from analysis.main_vm_source_join.auxiliary import static_auxiliary_target
+from analysis.main_vm_source_join.auxiliary import (
+    auxiliary_static_semantics,
+    static_auxiliary_target,
+)
 from analysis.main_vm_source_join.join import join_activation_support
 from analysis.main_vm_source_join.trace import (
     MainVmTraceError,
@@ -142,7 +145,43 @@ def _audit(frame: int, *, pc: int = 0x510100) -> dict[str, object]:
     }
 
 
+def _audit_v12(frame: int, *, pc: int = 0x510100) -> dict[str, object]:
+    record = json.loads(json.dumps(_audit(frame, pc=pc)))
+    record["schema_version"] = 12
+    inventory = record["nonspell_main_vm_inventory"]
+    assert isinstance(inventory, dict)
+    inventory.update(
+        {
+            "layout": "th08-enemy-main-ecl-vm-inventory-v2",
+            "scope": (
+                "ordinary_enemy_pool_prefix_main_vm_and_auxiliary_pointers"
+            ),
+            "auxiliary_context_row_layout": (
+                "slot_enemy_pointer_enemy_flags_four_raw_context_pointers"
+            ),
+            "auxiliary_context_rows": [
+                [0, 0x5826C0, 1, [0x02100000, 0, 0x021024B0, 0]]
+            ],
+            "non_null_auxiliary_contexts": 2,
+            "invalid_auxiliary_contexts": 0,
+            "invalid_auxiliary_context_rows": [],
+        }
+    )
+    return record
+
+
 class MainVmSourceMappingTests(unittest.TestCase):
+    def test_auxiliary_semantics_distinguish_live_and_saved_state(self) -> None:
+        semantics = auxiliary_static_semantics()
+        self.assertEqual(semantics["vm_offset_in_context"], 0x08)
+        self.assertEqual(semantics["live_local_offsets_in_vm"], "0x18..0x64")
+        self.assertEqual(
+            semantics["saved_call_frame_area_offset_in_context"],
+            0x230,
+        )
+        self.assertEqual(semantics["saved_call_frame_stride"], 0x228)
+        self.assertNotIn("local_state_offset_in_context", semantics)
+
     def test_unique_complete_affine_base_is_selected(self) -> None:
         base = 0x510048
         instructions = (
@@ -313,6 +352,31 @@ class MainVmSourceTraceTests(unittest.TestCase):
                 "no matching decision",
             ):
                 scan_schema11_trace(path)
+
+    def test_schema12_trace_retains_auxiliary_pointer_summary(self) -> None:
+        records = (_decision(20), _audit_v12(20))
+        raw = b"".join(
+            json.dumps(record, sort_keys=True).encode() + b"\n"
+            for record in records
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "trace.jsonl"
+            path.write_bytes(raw)
+            scan = scan_schema11_trace(path)
+
+        self.assertEqual(scan.schema11_rows, 0)
+        self.assertEqual(scan.schema12_rows, 1)
+        self.assertEqual(scan.auxiliary_pointer_owner_rows, 1)
+        self.assertEqual(scan.non_null_auxiliary_contexts, 2)
+        self.assertEqual(scan.invalid_auxiliary_contexts, 0)
+        owners = scan.captures[0].auxiliary_pointer_owners
+        self.assertEqual(len(owners), 1)
+        self.assertEqual(owners[0].slot, 0)
+        self.assertEqual(
+            owners[0].context_pointers,
+            (0x02100000, 0, 0x021024B0, 0),
+        )
+        self.assertEqual(owners[0].non_null_count, 2)
 
 
 if __name__ == "__main__":

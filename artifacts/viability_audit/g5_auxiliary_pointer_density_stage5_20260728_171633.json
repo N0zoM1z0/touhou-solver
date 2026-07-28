@@ -1,0 +1,1061 @@
+{
+  "authority": {
+    "forbids": [
+      "future_geometry",
+      "source_completeness",
+      "planner_input",
+      "feasibility",
+      "live_action"
+    ],
+    "permits": [
+      "auxiliary_pointer_density_measurement",
+      "observation_level_pointer_churn_measurement",
+      "bounded_capture_delivery_design"
+    ],
+    "status": "offline_observation_only"
+  },
+  "bounded_capture_payload": {
+    "declared_maximum_contexts_from_64_owners": 256,
+    "excludes": [
+      "owner_pointer_recheck_transport",
+      "native_batch_headers",
+      "call_depth_and_required_saved_frames"
+    ],
+    "full_allocated_context_bytes_per_context": 9392,
+    "full_context_payload_per_capture": {
+      "count": 12032,
+      "max": 319328,
+      "min": 0,
+      "p50": 37568.0,
+      "p95": 244192.0,
+      "p99": 300544.0
+    },
+    "minimum_active_vm_projection_bytes_per_context": 104,
+    "minimum_projection_payload_per_capture": {
+      "count": 12032,
+      "max": 3536,
+      "min": 0,
+      "p50": 416.0,
+      "p95": 2704.0,
+      "p99": 3328.0
+    }
+  },
+  "capture_density": {
+    "active_owners_per_capture": {
+      "count": 12032,
+      "max": 42,
+      "min": 0,
+      "p50": 10.0,
+      "p95": 29.0,
+      "p99": 38.0
+    },
+    "non_null_contexts_per_active_owner": {
+      "count": 132514,
+      "max": 2,
+      "min": 0,
+      "p50": 1.0,
+      "p95": 2.0,
+      "p99": 2.0
+    },
+    "non_null_contexts_per_capture": {
+      "count": 12032,
+      "max": 34,
+      "min": 0,
+      "p50": 4.0,
+      "p95": 26.0,
+      "p99": 32.0
+    },
+    "per_phase": {
+      "103": {
+        "active_owners_per_capture": {
+          "count": 933,
+          "max": 25,
+          "min": 0,
+          "p50": 1.0,
+          "p95": 25.0,
+          "p99": 25.0
+        },
+        "captures": 933,
+        "non_null_contexts_per_capture": {
+          "count": 933,
+          "max": 0,
+          "min": 0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0
+        }
+      },
+      "107": {
+        "active_owners_per_capture": {
+          "count": 695,
+          "max": 41,
+          "min": 0,
+          "p50": 16.0,
+          "p95": 39.0,
+          "p99": 41.0
+        },
+        "captures": 695,
+        "non_null_contexts_per_capture": {
+          "count": 695,
+          "max": 34,
+          "min": 0,
+          "p50": 30.0,
+          "p95": 32.0,
+          "p99": 32.0
+        }
+      },
+      "111": {
+        "active_owners_per_capture": {
+          "count": 1025,
+          "max": 37,
+          "min": 0,
+          "p50": 12.0,
+          "p95": 34.0,
+          "p99": 37.0
+        },
+        "captures": 1025,
+        "non_null_contexts_per_capture": {
+          "count": 1025,
+          "max": 12,
+          "min": 0,
+          "p50": 12.0,
+          "p95": 12.0,
+          "p99": 12.0
+        }
+      },
+      "115": {
+        "active_owners_per_capture": {
+          "count": 1177,
+          "max": 33,
+          "min": 0,
+          "p50": 16.0,
+          "p95": 30.0,
+          "p99": 31.0
+        },
+        "captures": 1177,
+        "non_null_contexts_per_capture": {
+          "count": 1177,
+          "max": 16,
+          "min": 0,
+          "p50": 5.0,
+          "p95": 16.0,
+          "p99": 16.0
+        }
+      },
+      "nonspell": {
+        "active_owners_per_capture": {
+          "count": 8202,
+          "max": 42,
+          "min": 0,
+          "p50": 6.0,
+          "p95": 27.0,
+          "p99": 37.0
+        },
+        "captures": 8202,
+        "non_null_contexts_per_capture": {
+          "count": 8202,
+          "max": 34,
+          "min": 0,
+          "p50": 3.0,
+          "p95": 16.0,
+          "p99": 26.0
+        }
+      }
+    }
+  },
+  "delivery_decision": {
+    "fallback": "On churn, unreadable state, deadline, or version mismatch, publish no auxiliary state and preserve existing live policy.",
+    "phase_b_status": "design_selected_not_implemented",
+    "rationale": "One Python RPM per pointer would add a data-dependent 0..34 calls on this workload and up to 256 under the declared first-64/four-context scope. A native compact batch can bound pointer validation, active-VM projection, saved-frame selection, and owner recheck under one explicit frame/version bracket.",
+    "selected_design": "native_compact_batch"
+  },
+  "gates": {
+    "all_prefix_brackets_stable": true,
+    "pointer_presence_has_no_action_authority": true,
+    "pure_schema12_trace": true,
+    "zero_invalid_auxiliary_pointers": true
+  },
+  "observed_dynamics": {
+    "capture_frame_gap": {
+      "count": 12030,
+      "max": 1802,
+      "min": 1,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 4.0
+    },
+    "comparable_capture_pairs": 12030,
+    "fully_bounded_run_observed_frame_span": {
+      "count": 512,
+      "max": 2972,
+      "min": 6,
+      "p50": 179.5,
+      "p95": 1151.0,
+      "p99": 2972.0
+    },
+    "fully_bounded_runs": 512,
+    "observed_non_null_runs": 544,
+    "owner_slot_transitions": {
+      "enemy_flags_changed": 3302,
+      "same_slot_present": 130580,
+      "slot_appeared": 1934,
+      "slot_disappeared": 1918
+    },
+    "pointer_transitions_for_continuing_owner_slots": {
+      "non_null_replaced": 0,
+      "non_null_to_null": 40,
+      "null_to_non_null": 242,
+      "same_non_null": 83006,
+      "same_null": 439032
+    },
+    "pointer_values_seen_at_multiple_slot_indices": 56,
+    "reused_pointer_samples": [
+      {
+        "pointer": 186431688,
+        "pointer_hex": "0x0b1cb8c8",
+        "slot_auxiliary_indices": [
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            7,
+            0
+          ],
+          [
+            8,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186441088,
+        "pointer_hex": "0x0b1cdd80",
+        "slot_auxiliary_indices": [
+          [
+            4,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            6,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186450488,
+        "pointer_hex": "0x0b1d0238",
+        "slot_auxiliary_indices": [
+          [
+            5,
+            0
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            10,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186459888,
+        "pointer_hex": "0x0b1d26f0",
+        "slot_auxiliary_indices": [
+          [
+            2,
+            0
+          ],
+          [
+            7,
+            0
+          ],
+          [
+            11,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186469288,
+        "pointer_hex": "0x0b1d4ba8",
+        "slot_auxiliary_indices": [
+          [
+            8,
+            0
+          ],
+          [
+            12,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186478688,
+        "pointer_hex": "0x0b1d7060",
+        "slot_auxiliary_indices": [
+          [
+            9,
+            0
+          ],
+          [
+            13,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186488088,
+        "pointer_hex": "0x0b1d9518",
+        "slot_auxiliary_indices": [
+          [
+            10,
+            0
+          ],
+          [
+            14,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186497488,
+        "pointer_hex": "0x0b1db9d0",
+        "slot_auxiliary_indices": [
+          [
+            11,
+            0
+          ],
+          [
+            15,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186506888,
+        "pointer_hex": "0x0b1dde88",
+        "slot_auxiliary_indices": [
+          [
+            12,
+            0
+          ],
+          [
+            16,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186654496,
+        "pointer_hex": "0x0b201f20",
+        "slot_auxiliary_indices": [
+          [
+            14,
+            0
+          ],
+          [
+            17,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186663896,
+        "pointer_hex": "0x0b2043d8",
+        "slot_auxiliary_indices": [
+          [
+            15,
+            0
+          ],
+          [
+            18,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 186673296,
+        "pointer_hex": "0x0b206890",
+        "slot_auxiliary_indices": [
+          [
+            16,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 187138088,
+        "pointer_hex": "0x0b278028",
+        "slot_auxiliary_indices": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            11,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 187147488,
+        "pointer_hex": "0x0b27a4e0",
+        "slot_auxiliary_indices": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            8,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 187156888,
+        "pointer_hex": "0x0b27c998",
+        "slot_auxiliary_indices": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            9,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 187166288,
+        "pointer_hex": "0x0b27ee50",
+        "slot_auxiliary_indices": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            12,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 223949104,
+        "pointer_hex": "0x0d593130",
+        "slot_auxiliary_indices": [
+          [
+            0,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            19,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 223958840,
+        "pointer_hex": "0x0d595738",
+        "slot_auxiliary_indices": [
+          [
+            0,
+            1
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            22,
+            0
+          ],
+          [
+            38,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 223968576,
+        "pointer_hex": "0x0d597d40",
+        "slot_auxiliary_indices": [
+          [
+            1,
+            1
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            9,
+            0
+          ],
+          [
+            10,
+            0
+          ],
+          [
+            26,
+            0
+          ],
+          [
+            35,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 223978312,
+        "pointer_hex": "0x0d59a348",
+        "slot_auxiliary_indices": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            9,
+            0
+          ],
+          [
+            11,
+            0
+          ],
+          [
+            34,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 223988048,
+        "pointer_hex": "0x0d59c950",
+        "slot_auxiliary_indices": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            8,
+            0
+          ],
+          [
+            18,
+            0
+          ],
+          [
+            36,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 223997784,
+        "pointer_hex": "0x0d59ef58",
+        "slot_auxiliary_indices": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            23,
+            0
+          ],
+          [
+            40,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 224007520,
+        "pointer_hex": "0x0d5a1560",
+        "slot_auxiliary_indices": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            24,
+            0
+          ],
+          [
+            39,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 224017256,
+        "pointer_hex": "0x0d5a3b68",
+        "slot_auxiliary_indices": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            20,
+            0
+          ],
+          [
+            37,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 224026992,
+        "pointer_hex": "0x0d5a6170",
+        "slot_auxiliary_indices": [
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            9,
+            0
+          ],
+          [
+            21,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 224036728,
+        "pointer_hex": "0x0d5a8778",
+        "slot_auxiliary_indices": [
+          [
+            4,
+            1
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            7,
+            0
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            25,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 224046464,
+        "pointer_hex": "0x0d5aad80",
+        "slot_auxiliary_indices": [
+          [
+            0,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            7,
+            0
+          ],
+          [
+            10,
+            0
+          ],
+          [
+            12,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 224056200,
+        "pointer_hex": "0x0d5ad388",
+        "slot_auxiliary_indices": [
+          [
+            2,
+            0
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            12,
+            0
+          ],
+          [
+            13,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 224065936,
+        "pointer_hex": "0x0d5af990",
+        "slot_auxiliary_indices": [
+          [
+            3,
+            0
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            7,
+            0
+          ],
+          [
+            8,
+            1
+          ],
+          [
+            11,
+            0
+          ],
+          [
+            13,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 284105496,
+        "pointer_hex": "0x10ef1b18",
+        "slot_auxiliary_indices": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            7,
+            0
+          ],
+          [
+            8,
+            0
+          ],
+          [
+            10,
+            1
+          ],
+          [
+            11,
+            0
+          ],
+          [
+            11,
+            1
+          ],
+          [
+            16,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 284115232,
+        "pointer_hex": "0x10ef4120",
+        "slot_auxiliary_indices": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            7,
+            0
+          ],
+          [
+            8,
+            0
+          ],
+          [
+            9,
+            0
+          ],
+          [
+            12,
+            0
+          ],
+          [
+            15,
+            0
+          ]
+        ]
+      },
+      {
+        "pointer": 284124968,
+        "pointer_hex": "0x10ef6728",
+        "slot_auxiliary_indices": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            7,
+            0
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            8,
+            0
+          ],
+          [
+            9,
+            0
+          ],
+          [
+            14,
+            0
+          ],
+          [
+            15,
+            0
+          ]
+        ]
+      }
+    ],
+    "run_observation_count": {
+      "count": 544,
+      "max": 1274,
+      "min": 2,
+      "p50": 76.5,
+      "p95": 445.4,
+      "p99": 1274.0
+    },
+    "run_observed_frame_span": {
+      "count": 544,
+      "max": 2972,
+      "min": 3,
+      "p50": 182.5,
+      "p95": 1102.25,
+      "p99": 2972.0
+    },
+    "run_semantics": "Runs are consecutive observation agreement, not exact allocation lifetimes; boundary runs are censored.",
+    "unique_non_null_pointer_values": 57
+  },
+  "provenance": {
+    "schema12_rows": 12032,
+    "trace_bytes": 553193476,
+    "trace_lines": 24156,
+    "trace_path": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_171633.jsonl",
+    "trace_sha256": "de697d66bac26ac4ba59185a55c1432249e10111f275299f9c78085d363e78ec"
+  },
+  "report_digest": "43f98f713158d60e20edd37b0ebfed76fedd4790450e3c5a23957faeabaa7c5c",
+  "schema": "th08-g5-auxiliary-pointer-density-v1",
+  "scope": {
+    "captures": 12032,
+    "identity_limit": "slot and enemy address do not distinguish reincarnations that reuse the same ordinary-enemy pool slot",
+    "invalid_active_main_vms": 0,
+    "invalid_auxiliary_context_pointers": 0,
+    "stable_enemy_prefix_brackets": 12032
+  }
+}

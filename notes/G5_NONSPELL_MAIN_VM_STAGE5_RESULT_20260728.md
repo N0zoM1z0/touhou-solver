@@ -59,10 +59,12 @@ The offline analyzer is split under
 
 The retained report is
 `artifacts/viability_audit/g5_nonspell_main_vm_source_join_stage5_20260728_155426.json`.
-Its internal digest is
-`4c2ebf77be74340693c8962e81ce598422bb8c9d6012092eb3116f17151b3222`.
-The pretty retained file regenerates byte-identically at SHA-256
-`cb4e90caa6aa0a9afb2129e78ea830169148b46dad9d7c29866a5b662ca46dc8`.
+After the CE-0163 semantic-label correction, its internal digest is
+`106ef2645396dad59dddff83d31c544f063014bb6c7b0e273ccbce4a7e1b4488`.
+The corrected pretty retained file has SHA-256
+`09fbfc8ec9a0c66d02b581c55fdb0da32d28c7795ecd3de2f968f4002dc72a5a`.
+The prior digests remain identifiable in Git history but describe the
+superseded report that mislabeled the saved-call-frame area as live locals.
 
 ## Offline Performance
 
@@ -165,7 +167,15 @@ The following is **observed statically** in IDA:
 - `ecl_start_subroutine` initializes the auxiliary VM at context `+0x08`;
 - selected local state is copied into the context; and
 - `0x0041EBB6..0x0041EC7C` schedules every non-null context after the main VM,
-  selecting VM `+0x08` and local base `+0x230`.
+  selecting the active `0x228`-byte VM at `+0x08` and the saved-call-frame
+  area at `+0x230`.
+
+Later evaluator/call-path review corrected the original `+0x230` label:
+`ecl_eval_int` and `ecl_resolve_int_lvalue` read live locals from the active
+VM at `+0x18..+0x64`; `ecl_call_subroutine` copies the complete `0x228`-byte
+VM to the `+0x230` area at a `0x228` stride. The area is a 15-entry saved
+call-frame stack, not a live-local base. This correction changes no retained
+PC/timer/local bits and had no action authority.
 
 The Stage-5 trace observes five mapped opcode-`0x87` PCs 1,129 times. Their
 static arguments select auxiliary subroutines 30, 32, 54, 57, and 65. Every

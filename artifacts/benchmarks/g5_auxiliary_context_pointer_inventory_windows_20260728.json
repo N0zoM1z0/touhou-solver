@@ -1,0 +1,78 @@
+{
+  "authority": "offline_performance_only",
+  "fixture": {
+    "active_slots": 16,
+    "baseline_canonical_record_bytes": 2715,
+    "baseline_canonical_record_sha256": "aa8d425a2264396e8e10de93283539667e84cbde67c09a802a0a25079f9cdd70",
+    "blob_bytes": 1373184,
+    "canonical_record_bytes": 3620,
+    "canonical_record_sha256": "3763f94d367379997682ffb88b8da3c195fbb162e4c72e4410004cdb022b5675",
+    "invalid_active_vms": 2,
+    "non_null_auxiliary_contexts": 40,
+    "scanned_slots": 64,
+    "valid_vms": 14
+  },
+  "iterations": 20000,
+  "platform": "Windows-11-10.0.22631-SP0",
+  "python": "3.12.10",
+  "schema": "th08-enemy-main-ecl-vm-inventory-benchmark-v2",
+  "timing_ms": {
+    "auxiliary_pointer_decode_paired_delta": {
+      "max": 0.3468,
+      "p50": 0.019800000000000012,
+      "p95": 0.0242,
+      "p99": 0.036000999999999846,
+      "p99_9": 0.0749004000000001
+    },
+    "auxiliary_pointer_json_paired_delta": {
+      "max": 0.6581,
+      "p50": 0.016300000000000002,
+      "p95": 0.0196,
+      "p99": 0.026900000000000007,
+      "p99_9": 0.05429999999999999
+    },
+    "body_decode_baseline": {
+      "max": 0.2626,
+      "p50": 0.0546,
+      "p95": 0.0596,
+      "p99": 0.07700299999999952,
+      "p99_9": 0.1211010000000002
+    },
+    "combined_body_and_vm_decode": {
+      "max": 0.5698,
+      "p50": 0.1614,
+      "p95": 0.1762,
+      "p99": 0.2217119999999981,
+      "p99_9": 0.35280130000000026
+    },
+    "main_vm_and_auxiliary_pointer_inventory": {
+      "max": 0.4842,
+      "p50": 0.1065,
+      "p95": 0.11670499999999992,
+      "p99": 0.14970099999999983,
+      "p99_9": 0.2256059000000012
+    },
+    "main_vm_and_auxiliary_pointer_json_build": {
+      "max": 0.7469,
+      "p50": 0.0547,
+      "p95": 0.0605,
+      "p99": 0.0754,
+      "p99_9": 0.13150020000000004
+    },
+    "main_vm_inventory_baseline": {
+      "max": 0.298,
+      "p50": 0.0865,
+      "p95": 0.0951,
+      "p99": 0.11910799999999871,
+      "p99_9": 0.17020060000000012
+    },
+    "main_vm_inventory_json_build": {
+      "max": 0.223,
+      "p50": 0.0384,
+      "p95": 0.0427,
+      "p99": 0.052900999999999844,
+      "p99_9": 0.08880080000000017
+    }
+  },
+  "warmup": 1000
+}

@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from th08_live.enemy_ecl_inventory import (  # noqa: E402
+    ENEMY_AUXILIARY_ECL_CONTEXT_POINTERS_OFFSET,
     ENEMY_MAIN_ECL_VM_INVENTORY_LAYOUT,
     decode_enemy_main_ecl_vm_inventory,
 )
@@ -36,6 +37,7 @@ def _write_active_record(
     instruction_pointer: int,
     timer_fraction_bits: int,
     timer_elapsed: int,
+    auxiliary_context_pointers: tuple[int, int, int, int] = (0, 0, 0, 0),
 ) -> None:
     base = slot * _STRIDE
     struct.pack_into("<I", blob, base + _FLAGS, 0x00000005)
@@ -62,6 +64,12 @@ def _write_active_record(
         102,
         103,
         104,
+    )
+    struct.pack_into(
+        "<4I",
+        blob,
+        base + ENEMY_AUXILIARY_ECL_CONTEXT_POINTERS_OFFSET,
+        *auxiliary_context_pointers,
     )
     struct.pack_into("<ff", blob, base + 0x2D4C, 1.0, -2.0)
     struct.pack_into("<ff", blob, base + 0x2D70, 8.0, 10.0)
@@ -99,6 +107,12 @@ class EnemyEclInventoryTests(unittest.TestCase):
             instruction_pointer=0x015A1234,
             timer_fraction_bits=0x3E800000,
             timer_elapsed=17,
+            auxiliary_context_pointers=(
+                0x02100000,
+                0,
+                0x021024B0,
+                0,
+            ),
         )
         _write_active_record(
             self.blob,
@@ -106,6 +120,7 @@ class EnemyEclInventoryTests(unittest.TestCase):
             instruction_pointer=0,
             timer_fraction_bits=0x7FC01234,
             timer_elapsed=-9,
+            auxiliary_context_pointers=(0, 0xFFFFFFF0, 0, 0),
         )
 
     def test_independent_raw_layout_oracle_preserves_exact_vm_state(self) -> None:
@@ -141,6 +156,20 @@ class EnemyEclInventoryTests(unittest.TestCase):
         )
         self.assertEqual(inventory.invalid[0].slot, 1)
         self.assertEqual(inventory.invalid[0].instruction_pointer, 0)
+        self.assertEqual(len(inventory.auxiliary_contexts), 2)
+        self.assertEqual(
+            inventory.auxiliary_contexts[0].context_pointers,
+            (0x02100000, 0, 0x021024B0, 0),
+        )
+        self.assertEqual(
+            inventory.auxiliary_contexts[1].context_pointers,
+            (0, 0xFFFFFFF0, 0, 0),
+        )
+        self.assertEqual(len(inventory.invalid_auxiliary_contexts), 1)
+        self.assertEqual(
+            inventory.invalid_auxiliary_contexts[0].record(),
+            [1, 0x005826C0 + _STRIDE, 1, 0xFFFFFFF0],
+        )
         self.assertAlmostEqual(inventory.decode_ms, 0.25)
 
     def test_compact_record_is_deterministic_and_versioned(self) -> None:
@@ -162,9 +191,39 @@ class EnemyEclInventoryTests(unittest.TestCase):
         self.assertEqual(record["active_slots"], 2)
         self.assertEqual(record["valid_vms"], 1)
         self.assertEqual(record["invalid_active_vms"], 1)
+        self.assertEqual(record["non_null_auxiliary_contexts"], 3)
+        self.assertEqual(record["invalid_auxiliary_contexts"], 1)
+        self.assertEqual(len(record["auxiliary_context_rows"]), 2)
         encoded = json.dumps(record, sort_keys=True, separators=(",", ":"))
         self.assertEqual(encoded, json.dumps(record, sort_keys=True, separators=(",", ":")))
         self.assertNotIn("instruction_pointer", encoded)
+
+    def test_main_only_baseline_remains_exact_schema_v1(self) -> None:
+        auxiliary = decode_enemy_main_ecl_vm_inventory(
+            bytes(self.blob),
+            pool_base=ENEMY_POOL_BASE,
+            pool_size=3,
+            enemy_stride=ENEMY_STRIDE,
+            enemy_flags_offset=ENEMY_FLAGS_OFFSET,
+            enemy_active_flag=ENEMY_ACTIVE_FLAG,
+        )
+        baseline = decode_enemy_main_ecl_vm_inventory(
+            bytes(self.blob),
+            pool_base=ENEMY_POOL_BASE,
+            pool_size=3,
+            enemy_stride=ENEMY_STRIDE,
+            enemy_flags_offset=ENEMY_FLAGS_OFFSET,
+            enemy_active_flag=ENEMY_ACTIVE_FLAG,
+            include_auxiliary_context_pointers=False,
+        )
+        self.assertEqual(auxiliary.observations, baseline.observations)
+        record = baseline.record()
+        self.assertEqual(
+            record["layout"],
+            "th08-enemy-main-ecl-vm-inventory-v1",
+        )
+        self.assertNotIn("auxiliary_context_rows", record)
+        self.assertFalse(baseline.auxiliary_pointer_coverage)
 
     def test_capture_reuses_one_blob_and_preserves_body_parity(self) -> None:
         plain_reader = _Reader(bytes(self.blob))

@@ -13,6 +13,7 @@ import struct
 import time
 
 from th08_live.enemy_ecl_inventory import (
+    ENEMY_AUXILIARY_ECL_CONTEXT_POINTERS_OFFSET,
     decode_enemy_main_ecl_vm_inventory,
 )
 from th08_live.enemy_sensor import (
@@ -25,7 +26,7 @@ from th08_live.enemy_sensor import (
 )
 
 
-SCHEMA = "th08-enemy-main-ecl-vm-inventory-benchmark-v1"
+SCHEMA = "th08-enemy-main-ecl-vm-inventory-benchmark-v2"
 
 
 def _fixture(*, active_slots: int, invalid_slots: int) -> bytes:
@@ -60,6 +61,20 @@ def _fixture(*, active_slots: int, invalid_slots: int) -> bytes:
             blob,
             base + 0x0850,
             *(slot * 4 + index for index in range(4)),
+        )
+        auxiliary_pointers = tuple(
+            (
+                0x02000000 + (slot * 4 + index) * 0x24B0
+                if index <= slot % 4
+                else 0
+            )
+            for index in range(4)
+        )
+        struct.pack_into(
+            "<4I",
+            blob,
+            base + ENEMY_AUXILIARY_ECL_CONTEXT_POINTERS_OFFSET,
+            *auxiliary_pointers,
         )
         struct.pack_into("<ff", blob, base + 0x2D4C, 1.0, -1.0)
         struct.pack_into("<ff", blob, base + 0x2D70, 8.0, 8.0)
@@ -106,7 +121,7 @@ def run_benchmark(
         invalid_slots=invalid_slots,
     )
 
-    def decode_inventory():
+    def decode_inventory(*, include_auxiliary_context_pointers: bool):
         return decode_enemy_main_ecl_vm_inventory(
             blob,
             pool_base=ENEMY_POOL_BASE,
@@ -114,6 +129,9 @@ def run_benchmark(
             enemy_stride=ENEMY_STRIDE,
             enemy_flags_offset=ENEMY_FLAGS_OFFSET,
             enemy_active_flag=ENEMY_ACTIVE_FLAG,
+            include_auxiliary_context_pointers=(
+                include_auxiliary_context_pointers
+            ),
         )
 
     for _ in range(warmup):
@@ -122,17 +140,29 @@ def run_benchmark(
             pool_size=ENEMY_LOCAL_PREFIX_SIZE,
             include_contact_disabled=True,
         )
-        inventory = decode_inventory()
+        baseline_inventory = decode_inventory(
+            include_auxiliary_context_pointers=False
+        )
+        inventory = decode_inventory(
+            include_auxiliary_context_pointers=True
+        )
+        json.dumps(
+            replace(baseline_inventory, decode_ms=0.0).record(),
+            separators=(",", ":"),
+        )
         json.dumps(
             replace(inventory, decode_ms=0.0).record(),
             separators=(",", ":"),
         )
 
     body_ms: list[float] = []
-    inventory_ms: list[float] = []
-    record_ms: list[float] = []
+    baseline_inventory_ms: list[float] = []
+    auxiliary_inventory_ms: list[float] = []
+    baseline_record_ms: list[float] = []
+    auxiliary_record_ms: list[float] = []
+    baseline_inventory = None
     inventory = None
-    for _ in range(iterations):
+    for iteration in range(iterations):
         started = time.perf_counter_ns()
         decode_enemy_bodies(
             blob,
@@ -141,18 +171,53 @@ def run_benchmark(
         )
         body_ms.append((time.perf_counter_ns() - started) / 1_000_000.0)
 
-        started = time.perf_counter_ns()
-        inventory = decode_inventory()
-        inventory_ms.append(
-            (time.perf_counter_ns() - started) / 1_000_000.0
+        decode_order = (
+            (False, True) if iteration % 2 == 0 else (True, False)
         )
+        decode_elapsed: dict[bool, float] = {}
+        for include_auxiliary in decode_order:
+            started = time.perf_counter_ns()
+            decoded = decode_inventory(
+                include_auxiliary_context_pointers=include_auxiliary
+            )
+            decode_elapsed[include_auxiliary] = (
+                time.perf_counter_ns() - started
+            ) / 1_000_000.0
+            if include_auxiliary:
+                inventory = decoded
+            else:
+                baseline_inventory = decoded
+        baseline_inventory_ms.append(decode_elapsed[False])
+        auxiliary_inventory_ms.append(decode_elapsed[True])
+        assert baseline_inventory is not None and inventory is not None
 
-        started = time.perf_counter_ns()
-        json.dumps(inventory.record(), separators=(",", ":"))
-        record_ms.append((time.perf_counter_ns() - started) / 1_000_000.0)
+        record_order = (
+            (baseline_inventory, baseline_record_ms),
+            (inventory, auxiliary_record_ms),
+        )
+        if iteration % 2:
+            record_order = tuple(reversed(record_order))
+        for current_inventory, target in record_order:
+            started = time.perf_counter_ns()
+            json.dumps(
+                current_inventory.record(),
+                separators=(",", ":"),
+            )
+            target.append(
+                (time.perf_counter_ns() - started) / 1_000_000.0
+            )
 
-    assert inventory is not None
+    assert baseline_inventory is not None and inventory is not None
+    baseline_canonical_record = replace(
+        baseline_inventory,
+        decode_ms=0.0,
+    ).record()
     canonical_record = replace(inventory, decode_ms=0.0).record()
+    baseline_canonical_bytes = json.dumps(
+        baseline_canonical_record,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
     canonical_bytes = json.dumps(
         canonical_record,
         sort_keys=True,
@@ -160,7 +225,23 @@ def run_benchmark(
     ).encode("utf-8")
     combined_ms = [
         body + vm
-        for body, vm in zip(body_ms, inventory_ms, strict=True)
+        for body, vm in zip(body_ms, auxiliary_inventory_ms, strict=True)
+    ]
+    pointer_decode_delta_ms = [
+        auxiliary - baseline
+        for baseline, auxiliary in zip(
+            baseline_inventory_ms,
+            auxiliary_inventory_ms,
+            strict=True,
+        )
+    ]
+    pointer_record_delta_ms = [
+        auxiliary - baseline
+        for baseline, auxiliary in zip(
+            baseline_record_ms,
+            auxiliary_record_ms,
+            strict=True,
+        )
     ]
     return {
         "schema": SCHEMA,
@@ -174,6 +255,17 @@ def run_benchmark(
             "active_slots": active_slots,
             "valid_vms": len(inventory.observations),
             "invalid_active_vms": len(inventory.invalid),
+            "non_null_auxiliary_contexts": sum(
+                pointer != 0
+                for owner in inventory.auxiliary_contexts
+                for pointer in owner.context_pointers
+            ),
+            "baseline_canonical_record_bytes": len(
+                baseline_canonical_bytes
+            ),
+            "baseline_canonical_record_sha256": hashlib.sha256(
+                baseline_canonical_bytes
+            ).hexdigest(),
             "canonical_record_bytes": len(canonical_bytes),
             "canonical_record_sha256": hashlib.sha256(
                 canonical_bytes
@@ -181,9 +273,25 @@ def run_benchmark(
         },
         "timing_ms": {
             "body_decode_baseline": _distribution(body_ms),
-            "main_vm_inventory_increment": _distribution(inventory_ms),
+            "main_vm_inventory_baseline": _distribution(
+                baseline_inventory_ms
+            ),
+            "main_vm_and_auxiliary_pointer_inventory": _distribution(
+                auxiliary_inventory_ms
+            ),
+            "auxiliary_pointer_decode_paired_delta": _distribution(
+                pointer_decode_delta_ms
+            ),
             "combined_body_and_vm_decode": _distribution(combined_ms),
-            "inventory_json_build": _distribution(record_ms),
+            "main_vm_inventory_json_build": _distribution(
+                baseline_record_ms
+            ),
+            "main_vm_and_auxiliary_pointer_json_build": _distribution(
+                auxiliary_record_ms
+            ),
+            "auxiliary_pointer_json_paired_delta": _distribution(
+                pointer_record_delta_ms
+            ),
         },
         "authority": "offline_performance_only",
     }

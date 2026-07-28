@@ -1315,6 +1315,22 @@ parity 當成每個 nature tie field 的逐 bit equality。
   capability. Next retain auxiliary pointers from the already-paid blob,
   contract bounded context capture, and key exact runtime instructions by an
   immutable ECL image before any live lowering;
+- auxiliary-pointer phase A is now physically complete on Stage-5 run
+  `20260728_171633`. Schema 12 adds zero enemy-pool RPM and retains all
+  first-64 owner pointer rows under stable frame brackets. The run completed
+  12,032 decisions, hard no-Bomb, with eight hits; because action authority
+  did not change, its later first hit is a workload outcome rather than a
+  causal survival gain. Physical context density is p50/p95/p99/max
+  `4/26/32/34`, and 56 of 57 unique heap pointer values are reused across
+  different `(slot, auxiliary-index)` observations. Pointer value is
+  therefore not stable source identity. The 104-byte projection payload is
+  only `416/2704/3328/3536` bytes per capture, while per-pointer Python RPM
+  would require up to 34 observed and 256 declared calls. Phase B is fixed as
+  one native compact batch with owner/pointer recheck and fail-closed
+  publication. The exact runtime-image primitive passes synthetic oracles,
+  but shipped Stage-5 byte identity remains pending. CE-0163 also records
+  that inherited IDA labels are never authority: context `+0x230` is the
+  saved-call-frame stack, not live locals;
 - the projection audit now has an explicit universal `core` profile and keeps
   Stage-4A-only spell gates as its default. Stage 5 passes all core gates over
   4,871 rows while retaining 1,220 spell-115 unsupported-control rows as

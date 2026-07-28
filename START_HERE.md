@@ -39,7 +39,9 @@ and design/run notes retain derivations and history.
 29. `notes/G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`
 30. `notes/G5_NONSPELL_MAIN_VM_SOURCE_SHADOW_CONTRACT_20260728.md`
 31. `notes/G5_NONSPELL_MAIN_VM_STAGE5_RESULT_20260728.md`
-32. the relevant recent run note and counterexample rows before live work
+32. `notes/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`
+33. `notes/G5_AUXILIARY_POINTER_STAGE5_RESULT_20260728.md`
+34. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -48,6 +50,25 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
+- The newest action-neutral G5 checkpoint is Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_171633`, executed from parent
+  `3adad09` plus the enclosing checkpoint changes. It completed 12,032
+  decisions over frames `2..41630`, hard no-Bomb, with eight hits at
+  `[12324, 14116, 24615, 25486, 30504, 33449, 36710, 40462]`,
+  `route_complete`, exact key/process cleanup, and no residual process. All
+  rows are strict schema 12 with stable enemy-prefix brackets, zero invalid
+  main VMs, zero invalid auxiliary pointers, and zero added enemy-pool RPM.
+  Non-null auxiliary contexts per capture are p50/p95/p99/max
+  `4/26/32/34`; 56 of 57 unique heap addresses recur across different
+  `(slot, auxiliary-index)` observations, so pointer value is not a stable
+  source identity. The selected proposed Phase-B delivery is one bounded
+  native compact batch with owner/pointer recheck. The 104-byte projection
+  payload is p50/p95/p99/max `416/2704/3328/3536` bytes. Exact shipped
+  runtime ECL byte identity remains pending; the normalization primitive has
+  synthetic authority only. Density-report internal/file digests are
+  `43f98f71...7c5c` / `0845f258...7fb3`; raw SHA-256 is
+  `de697d66...8ec`. The live action path did not change, so the lower hit
+  count is not a causal survival claim.
 - The first-64 ordinary-enemy main-VM phase-A checkpoint is complete. The
   opt-in schema-v11 decoder reuses the existing contiguous enemy-prefix blob
   and issues no added enemy-pool RPM. Retained Stage-5 run
@@ -70,7 +91,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Runtime byte identity, exact operand/geometry lowering, slot-reuse
   exclusion, and hit causality remain unproved. CE-0162 makes exact runtime
   ECL identity plus bounded auxiliary-context observation the next source
-  gate. The source-join report digest is `4c2ebf77...b3222`; raw SHA-256 is
+  gate. The corrected source-join report digest is `106ef264...b4488`; raw SHA-256 is
   `8569d64d...3a7`.
 - The G5 realized birth-to-hit gate is complete and action-free. Its modular
   streaming audit joins all 15 Stage-5 `124930` dossier candidates to exact
@@ -102,15 +123,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `a08f1370...c9bda` / `9081e3ed...565b`.
   Isolated Linux/Windows source reports pass, native libraries build for both
   targets, and complete Linux/Windows discovery passes 889 tests.
-- The next G5 source checkpoint observes the four auxiliary VM contexts
-  already demonstrated by ordinary main opcode `0x87`, and establishes exact
-  runtime ECL image identity. First retain their pointers from the already
-  paid enemy blob, then contract bounded post-issue context reads or a
-  versioned background service. Do not fuse or publish the zero-signal
-  ready-parent class. Callbacks, deferred enemy state, sources outside the
-  first 64 records, and non-ECL native sources remain later unresolved
-  classes. Earlier viability preservation under CE-0158 and general
-  performance work continue in parallel; roadmap candidates are not a ceiling.
+- The next G5 source gate revalidates auxiliary call depth/saved-frame offsets,
+  freezes a native compact-batch ABI and budget, proves scalar/native parity
+  under churn/reuse/unreadable/max-density cases, and measures Windows timing
+  before one action-neutral spell-107 physical trial. Separately capture and
+  byte-compare one exact shipped Stage-5 runtime ECL image outside the issue
+  boundary. Do not fuse or publish the zero-signal ready-parent class.
+  Callbacks, deferred enemy state, sources outside the first 64 records, and
+  non-ECL native sources remain later unresolved classes. Earlier viability
+  preservation under CE-0158 and general performance work continue in
+  parallel; roadmap candidates are not a ceiling.
 - The latest harder-workload physical checkpoint is
   `lunatic_route2_stage5_unattended_20260728_133633`. It completed 13,304
   decisions over frames `1..44822` with 23 hits, hard no-Bomb, two successful
@@ -1350,6 +1372,15 @@ that a containing forecast is complete. Contract nonspell source identity and
 its observation deadline before extending the live observer; continue earlier
 viability preservation in parallel.
 
+Ordinary main-source topology and zero-read auxiliary-pointer phase A are now
+complete. Main-only coverage is structurally incomplete, auxiliary pointer
+identity is physically unstable across slot/index reuse, and exact shipped
+runtime bytes plus coherent auxiliary VM state remain unavailable. The next
+P1 gate is therefore the bounded native compact batch and one-shot runtime
+image comparison described by
+`G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`, not a
+planner envelope. Unknown contexts remain unresolved source branches.
+
 ### P2 — Resolve CE-0120 at the actuator boundary
 
 Retain exact episode-entry active/held/pending roots and a no-write
@@ -1417,7 +1448,7 @@ override the authority table above.
 | Workload | Bundle | Purpose |
 | --- | --- | --- |
 | Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor. |
-| Lunatic Route-2 Stage 5 | `124930`, `133633`, `150827` | Birth performance/provenance, exact G3/G4 capsule bracket, and rejected derived-source gate. |
+| Lunatic Route-2 Stage 5 | `124930`, `155426`, `171633` | Birth provenance, ordinary main/auxiliary source mapping, and newest schema-12 pointer-density gate. |
 | Hard Route-2 Stage 1 | `175049`, `144128`, `153821` | Zero-hit native/local and refactor gates; G1 trace/pickup gate with one survival failure. |
 | Hard Route-2 full route | `184942` | Complete route, 39-hit feasibility diagnosis; one-bundle evidence only. |
 | Hard Route-2 Stage 4A | `202439`, `211210`, `212756` | Capsule audit and fresh/global issue transaction; `211210/212756` form the newest compatible no-audit floor. |
@@ -1435,7 +1466,10 @@ Compact benchmark evidence:
 - `artifacts/benchmarks/th08_semantic_differential_research_20260726.json`
 - `artifacts/benchmarks/derived_pattern_source_observer_native_linux_20260728.json`
 - `artifacts/benchmarks/derived_pattern_source_observer_native_windows_20260728.json`
+- `artifacts/benchmarks/g5_auxiliary_context_pointer_inventory_linux_20260728.json`
+- `artifacts/benchmarks/g5_auxiliary_context_pointer_inventory_windows_20260728.json`
 - `artifacts/viability_audit/g5_derived_source_stage5_20260728_150827.json`
+- `artifacts/viability_audit/g5_auxiliary_pointer_density_stage5_20260728_171633.json`
 
 Raw replay bundles remain local and ignored. Do not delete an older workload
 bundle until the two-newer-compatible-bundle rule in `AGENTS.md` is satisfied.

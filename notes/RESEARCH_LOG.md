@@ -7966,18 +7966,22 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Observed IDA auxiliary topology:** Opcode `0x87` at
   `0x0041CDF3..0x0041CF81` replaces one of four `enemy+0x3384` heap contexts,
   allocates `0x24B0` bytes, starts the auxiliary VM at `+0x08`, and the
-  scheduler at `0x0041EBB6..0x0041EC7C` selects VM `+0x08` and locals
-  `+0x230`. Comments were added at `0x0041CDF3`, `0x0041CF59`, and
-  `0x0041EBE9`.
+  scheduler at `0x0041EBB6..0x0041EC7C` selects VM `+0x08` and its saved
+  call-frame area `+0x230`. The original checkpoint mislabeled `+0x230` as
+  locals; later `ecl_eval_int`, `ecl_resolve_int_lvalue`, and
+  `ecl_call_subroutine` review proves live locals are inside the active VM and
+  `+0x230` stores `0x228`-byte saved frames. The IDA comment at `0x0041EBE9`
+  was corrected; comments at `0x0041CDF3` and `0x0041CF59` remain valid.
 - **Inferred auxiliary source availability:** Five physical opcode-`0x87`
   PCs select static subroutines 30/32/54/57/65. There are 81 exact captured
   starts, all compatible with activation support, covering 105 unique batches
   and 1,520 bullets. Exact runtime bytes, reachable paths, operands, geometry,
   slot reuse, and hit causality remain unresolved.
-- The strict source report regenerates with internal digest
-  `4c2ebf77be74340693c8962e81ce598422bb8c9d6012092eb3116f17151b3222`;
-  its pretty file SHA-256 is
-  `cb4e90caa6aa0a9afb2129e78ea830169148b46dad9d7c29866a5b662ca46dc8`;
+- After the CE-0163 semantic-label correction, the strict source report
+  regenerates with internal digest
+  `106ef2645396dad59dddff83d31c544f063014bb6c7b0e273ccbce4a7e1b4488`;
+  its corrected pretty file SHA-256 is
+  `09fbfc8ec9a0c66d02b581c55fdb0da32d28c7795ecd3de2f968f4002dc72a5a`;
   raw trace SHA-256 is
   `8569d64d3ce50ced529bdcf4b48e8f0daa00bfbfa8d8cec9695665f04d0283a7`.
 - Focused Ruff passes. Complete Linux/Windows discovery both pass 904 tests;
@@ -7989,3 +7993,65 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   runtime ECL identity and bounded auxiliary-context capture next, beginning
   with the four pointers already present in the paid enemy blob. No live
   source, future geometry, feasibility, or action authority is granted.
+
+## 2026-07-28 — Measured auxiliary-pointer density and selected native batch
+
+- Added strict schema-12 auxiliary pointer rows to the existing first-64
+  main-VM inventory. The four `enemy+0x3384` values are decoded from the
+  already-paid contiguous enemy-prefix blob, so the option adds zero
+  enemy-pool RPM. Schema 11 remains exact when pointer rows are disabled.
+- Added modular strict parsing, observation-level pointer density/churn
+  analysis, censored dwell reporting, and deterministic authority-scoped
+  output under `scripts/analysis/auxiliary_pointer_inventory/`.
+- Retained 20,000-iteration Linux/Windows benchmarks. Pointer-only paired
+  decode p95 is `0.0316/0.0242 ms`; paired JSON delta p95 is
+  `0.0212/0.0196 ms`; pointer-inclusive inventory p95 is
+  `0.1101/0.1167 ms`; combined body/inventory p95 is
+  `0.1651/0.1762 ms`. The schema-v1 digest remains
+  `aa8d425a2264396e8e10de93283539667e84cbde67c09a802a0a25079f9cdd70`;
+  schema v2 is
+  `3763f94d367379997682ffb88b8da3c195fbb162e4c72e4410004cdb022b5675`.
+- **Observed physical workload:** Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_171633` completed frames
+  `2..41630`, 12,032 decisions, eight hits, hard no-Bomb, `route_complete`,
+  exact key release, supervisor exit zero, and no residual process. Its first
+  hit is frame 12,324. Live action code did not change, so comparison with the
+  preceding 11-hit workload is not a causal survival estimate.
+- All 12,032 schema-12 rows have stable brackets, zero invalid main VMs, and
+  zero invalid auxiliary pointers. Inventory decode p50/p95/p99/p99.9/max is
+  `0.1193/0.2789/0.3690/0.5551/0.6620 ms`. The unchanged native birth
+  observation boundary passes at `0.0980/0.1970/0.3359/0.5110/0.6995 ms`;
+  inventory timing remains separate trace-only evidence.
+- **Observed pointer density/reuse:** Context count per capture is
+  p50/p95/p99/max `4/26/32/34`. There are 57 unique non-null heap addresses;
+  56 appear at multiple `(slot, auxiliary-index)` observations. Pointer value
+  alone is therefore not stable identity. The analyzer retains 83,006
+  continuing-pointer observations, 242 null-to-non-null and 40
+  non-null-to-null transitions, zero direct non-null replacements, and 544
+  observed runs, 512 bounded on both sides.
+- The minimum 104-byte active-VM projection payload is
+  `416/2704/3328/3536` bytes at p50/p95/p99/max. Full `0x24B0` context copies
+  would be `37568/244192/300544/319328` bytes. **Decision:** Phase B uses one
+  native compact batch with owner/pointer recheck; reject one Python RPM per
+  context and full-context copying.
+- Implemented a four-read runtime ECL image capture/normalizer that reverses
+  only loader-observed relocation slots and rejects malformed runtime/static
+  offsets, context churn, and any non-relocation difference. Synthetic oracle
+  tests pass; a shipped Stage-5 runtime/static exact comparison remains
+  pending.
+- Revalidated an inherited IDA label and recorded CE-0163. Context `+0x230`
+  is the `0x228`-stride saved-call-frame stack; live locals are in the active
+  VM at context `+0x08`, VM `+0x18..+0x64`. The IDA comment, report generator,
+  retained report, notes, and durable repository contract were corrected.
+- The density/churn report internal digest is
+  `43f98f713158d60e20edd37b0ebfed76fedd4790450e3c5a23957faeabaa7c5c`;
+  pretty-file SHA-256 is
+  `0845f258c26c42bff76944a5d14fe86c2571fabaea3d9a25e964fd25cf737fb3`;
+  raw trace SHA-256 is
+  `de697d66bac26ac4ba59185a55c1432249e10111f275299f9c78085d363e78ec`.
+- Focused Ruff passes. Complete Linux and Windows UNC discovery both pass
+  918 tests; Windows retains three existing platform skips.
+- **Authority:** Pointer topology, density, reuse, and delivery-design
+  evidence only. No auxiliary VM state, runtime ECL identity, future hazard,
+  source completeness, planner, feasibility, cadence, or action authority is
+  added.

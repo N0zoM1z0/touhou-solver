@@ -356,7 +356,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `0.2015/0.2112 ms`. Windows profiling identifies non-allocating
   thread-cycle delta bookkeeping as the first narrow optimization candidate.
   The exact controller timing boundary, both future endpoint captures, GIL,
-  GC, workers, and all observation records remain fixed.
+  GC, workers, and all observation records remain fixed. Benchmark schema v8
+  now measures that exact controller wrapper with one persistent blob across
+  15 birth/future profiles. All 23 combined profiles pass; the largest
+  controller-path p95 is `0.06643/0.04872 ms` on Linux/Windows. This is only
+  the offline implementation floor and cannot replace the fresh physical B4
+  gate. Complete suites pass 850 tests.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

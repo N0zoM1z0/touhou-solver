@@ -9,7 +9,10 @@ import os
 import statistics
 import struct
 import time
+from concurrent.futures import Future
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -20,14 +23,20 @@ if str(SCRIPTS_DIR) not in __import__("sys").path:
 
 from th08_live.bullet_birth import (  # noqa: E402
     BULLET_TIMER_CURRENT_OFFSET,
+    BulletBirthObservation,
     BulletBirthTracker,
 )
 from th08_live.bullet_birth_native import (  # noqa: E402
     NATIVE_CALL_MODES,
     NATIVE_CALL_MODE_GIL_RELEASED,
+    NativeBulletBirthDiagnostics,
     NativeBulletBirthTracker,
     native_bullet_birth_available,
     native_bullet_birth_library_path,
+)
+from th08_live.birth_contention import (  # noqa: E402
+    BirthObserverContention,
+    capture_birth_observer_future_states,
 )
 from th08_live.bullet_decode import (  # noqa: E402
     BULLET_GEOMETRY_OFFSET,
@@ -50,6 +59,15 @@ P95_LIMIT_MS = 0.20
 P99_LIMIT_MS = 0.40
 MAX_LIMIT_MS = 2.00
 INTERLEAVED_P95_RATIO_LIMIT = 1.05
+
+
+@dataclass(frozen=True, slots=True)
+class ControllerObservationSample:
+    observation: BulletBirthObservation
+    diagnostics: NativeBulletBirthDiagnostics
+    contention: BirthObserverContention
+    observation_ms: float
+    observation_cpu_ms: float
 
 
 def _percentile(values: list[float], percentile: float) -> float:
@@ -91,6 +109,81 @@ def _pool(density: int) -> bytearray:
             0.5,
         )
     return blob
+
+
+def _set_active_states(
+    blob: bytearray,
+    *,
+    density: int,
+    active: bool,
+) -> None:
+    state = 1 if active else 0
+    for slot in range(density):
+        struct.pack_into(
+            "<H",
+            blob,
+            slot * BULLET_STRIDE + BULLET_STATE_OFFSET,
+            state,
+        )
+
+
+def _future_scenarios() -> dict[
+    str,
+    tuple[Future[Any] | None, Future[Any] | None, Future[Any] | None],
+]:
+    done: Future[None] = Future()
+    done.set_result(None)
+    inflight: Future[None] = Future()
+    return {
+        "absent": (None, None, None),
+        "done": (done, None, None),
+        "inflight": (inflight, None, None),
+    }
+
+
+def _controller_observation(
+    tracker: NativeBulletBirthTracker,
+    blob: bytes | bytearray | memoryview,
+    *,
+    frame: int,
+    futures: tuple[
+        Future[Any] | None,
+        Future[Any] | None,
+        Future[Any] | None,
+    ],
+) -> ControllerObservationSample:
+    corridor_future, survival_future, enemy_future = futures
+    observation_started = time.perf_counter()
+    observation_cpu_started = time.thread_time()
+    before = capture_birth_observer_future_states(
+        corridor_future=corridor_future,
+        survival_future=survival_future,
+        enemy_future=enemy_future,
+    )
+    observation = tracker.observe(
+        blob,
+        frame_before=frame,
+        frame_after=frame,
+    )
+    diagnostics = tracker.diagnostics()
+    after = capture_birth_observer_future_states(
+        corridor_future=corridor_future,
+        survival_future=survival_future,
+        enemy_future=enemy_future,
+    )
+    observation_ms = (
+        time.perf_counter() - observation_started
+    ) * 1000.0
+    observation_cpu_ms = (
+        time.thread_time() - observation_cpu_started
+    ) * 1000.0
+    return ControllerObservationSample(
+        observation=observation,
+        diagnostics=diagnostics,
+        contention=BirthObserverContention(before, after),
+        observation_ms=observation_ms,
+        observation_cpu_ms=observation_cpu_ms,
+    )
 
 
 def _samples(
@@ -281,6 +374,117 @@ def run_benchmark(
             }
         )
 
+    controller_path_rows: list[dict[str, object]] = []
+    if backend == "native":
+        for scenario, futures in _future_scenarios().items():
+            expected_states = capture_birth_observer_future_states(
+                corridor_future=futures[0],
+                survival_future=futures[1],
+                enemy_future=futures[2],
+            )
+            for burst_size in burst_sizes:
+                blob = _pool(burst_size)
+                _set_active_states(
+                    blob,
+                    density=burst_size,
+                    active=False,
+                )
+                tracker = tracker_factory(maximum_bootstrap_age=0)
+                frame = 1
+                tracker.observe(
+                    blob,
+                    frame_before=frame,
+                    frame_after=frame,
+                )
+                for _ in range(warmup):
+                    frame += 1
+                    _set_active_states(
+                        blob,
+                        density=burst_size,
+                        active=True,
+                    )
+                    _controller_observation(
+                        tracker,
+                        blob,
+                        frame=frame,
+                        futures=futures,
+                    )
+                    frame += 1
+                    _set_active_states(
+                        blob,
+                        density=burst_size,
+                        active=False,
+                    )
+                    tracker.observe(
+                        blob,
+                        frame_before=frame,
+                        frame_after=frame,
+                    )
+                observation_samples: list[float] = []
+                cpu_samples: list[float] = []
+                last_sample: ControllerObservationSample | None = None
+                for _ in range(burst_iterations):
+                    frame += 1
+                    _set_active_states(
+                        blob,
+                        density=burst_size,
+                        active=True,
+                    )
+                    last_sample = _controller_observation(
+                        tracker,
+                        blob,
+                        frame=frame,
+                        futures=futures,
+                    )
+                    observation_samples.append(
+                        last_sample.observation_ms
+                    )
+                    cpu_samples.append(
+                        last_sample.observation_cpu_ms
+                    )
+                    if (
+                        len(last_sample.observation.evidence)
+                        != burst_size
+                    ):
+                        raise AssertionError(
+                            "controller-path birth burst lost evidence"
+                        )
+                    if (
+                        last_sample.contention.before != expected_states
+                        or last_sample.contention.after != expected_states
+                    ):
+                        raise AssertionError(
+                            "controller-path future endpoint changed"
+                        )
+                    frame += 1
+                    _set_active_states(
+                        blob,
+                        density=burst_size,
+                        active=False,
+                    )
+                    tracker.observe(
+                        blob,
+                        frame_before=frame,
+                        frame_after=frame,
+                    )
+                assert last_sample is not None
+                native_cycle_sources.add(
+                    last_sample.diagnostics.thread_cycle_source
+                )
+                controller_path_rows.append(
+                    {
+                        "future_scenario": scenario,
+                        "births_per_observation": burst_size,
+                        "same_blob_owner": True,
+                        "timed_boundary": (
+                            "thread_time_start+future_before+"
+                            "native_observe+diagnostics+future_after"
+                        ),
+                        "observation": _summary(observation_samples),
+                        "observation_cpu": _summary(cpu_samples),
+                    }
+                )
+
     full_blob = _pool(BULLET_POOL_SIZE)
     tracker = tracker_factory(maximum_bootstrap_age=0)
     frame = 1
@@ -317,6 +521,16 @@ def run_benchmark(
             row["observer"],
         )
         for row in burst_rows
+    ] + [
+        (
+            (
+                "controller:"
+                f"{row['future_scenario']}:"
+                f"{row['births_per_observation']}"
+            ),
+            row["observation"],
+        )
+        for row in controller_path_rows
     ]
     observer_failures = [
         {
@@ -355,7 +569,7 @@ def run_benchmark(
         and cycle_attribution_available
     )
     return {
-        "schema": "th08-bullet-birth-observer-benchmark-v7",
+        "schema": "th08-bullet-birth-observer-benchmark-v8",
         "backend": backend,
         "native_call_mode": (
             native_call_mode if backend == "native" else None
@@ -374,6 +588,7 @@ def run_benchmark(
         "burst_iterations": burst_iterations,
         "density_results": density_rows,
         "burst_results": burst_rows,
+        "controller_path_results": controller_path_rows,
         "decode_baseline": baseline,
         "decode_interleaved": interleaved,
         "interleaved_p95_ratio": ratio,

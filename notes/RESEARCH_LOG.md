@@ -7526,5 +7526,17 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   work inside the current wall interval, retains both future endpoints,
   diagnostics, GIL-held mode, GC, workers, and records, and forbids dropping
   batch validation in this checkpoint.
+- Benchmark schema v8 now exercises the exact controller wrapper with one
+  persistent blob owner, all `1/8/32/33/592` activation sizes, and stable
+  absent/done/inflight futures. All 23 core/controller profiles pass. The
+  maximum controller-path p95 is `0.06643 ms` Linux and `0.04872 ms`
+  Windows, confirming an offline implementation floor but not reproducing
+  the physical `0.2059 ms` p95.
+- Retained baseline report SHA-256 values are
+  `7caf09e8807b03b19cd341b752b112a31bc78cfa30b4404d880bec81de418654`
+  and
+  `d89e0497a54ca20ea8df69f52c7b5181d1a2be47475aa29728e2536bb13893ca`.
+  Complete Linux/Windows suites pass 850 tests, with three existing Windows
+  skips.
 - **Authority:** performance contract only. No code, model, callback
   coverage, future geometry, input, or action authority changes.

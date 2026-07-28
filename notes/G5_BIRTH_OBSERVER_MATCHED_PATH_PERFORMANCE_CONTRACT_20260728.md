@@ -176,3 +176,32 @@ Stop and retain a counterexample if any of the following occurs:
 Passing B4 proves only that this default-off retrospective observer meets its
 declared delivery budget. It does not add future-birth geometry or reduce
 hits by itself.
+
+## Matched-Path Baseline Checkpoint
+
+Benchmark schema v8 now measures the exact controller wrapper separately
+from the core observer. It uses one persistent blob owner, toggles only the
+declared active slots outside the timed interval, and covers
+`1/8/32/33/592` activation edges under absent, done, and inflight future
+states. The reported wall contains `thread_time` start, both future endpoint
+captures, native observation, and diagnostic snapshot exactly as declared.
+
+All 23 core/controller profiles and the interleaved decode gate pass on
+Linux and Windows. The largest controller-path p95 is `0.06643 ms` on Linux
+and `0.04872 ms` on Windows. These offline values are far below the physical
+`0.2059 ms` p95 and therefore characterize implementation floor only; they
+cannot close B4 or reproduce game/worker/OS contention.
+
+The retained reports are:
+
+- `artifacts/benchmarks/bullet_birth_observer_native_linux_matched_baseline_20260728.json`,
+  SHA-256
+  `7caf09e8807b03b19cd341b752b112a31bc78cfa30b4404d880bec81de418654`;
+  and
+- `artifacts/benchmarks/bullet_birth_observer_native_windows_matched_baseline_20260728.json`,
+  SHA-256
+  `d89e0497a54ca20ea8df69f52c7b5181d1a2be47475aa29728e2536bb13893ca`.
+
+Complete Linux/Windows suites pass 850 tests; Windows retains three existing
+platform skips. Production remains unchanged. The first optimization
+candidate and fresh physical requirement are unchanged.

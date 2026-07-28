@@ -208,6 +208,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             args.trace_derived_pattern_sources
         ),
         "trace_nonspell_main_vms": args.trace_nonspell_main_vms,
+        "trace_enemy_combat_progress": (
+            args.trace_enemy_combat_progress
+        ),
         "trace_auxiliary_vm_batches": (
             args.trace_auxiliary_vm_batches
         ),
@@ -245,6 +248,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
                 args.trace_derived_pattern_sources
             ),
             trace_nonspell_main_vms=args.trace_nonspell_main_vms,
+            trace_enemy_combat_progress=(
+                args.trace_enemy_combat_progress
+            ),
             trace_auxiliary_vm_batches=(
                 args.trace_auxiliary_vm_batches
             ),
@@ -511,6 +517,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "record first-64 ordinary-enemy main-VM state from the existing "
             "prefix capture; diagnostic only"
+        ),
+    )
+    parser.add_argument(
+        "--trace-enemy-combat-progress",
+        action="store_true",
+        help=(
+            "record first-64 raw ordinary-enemy HP/damage fields from the "
+            "existing prefix capture; trace only"
         ),
     )
     parser.add_argument(

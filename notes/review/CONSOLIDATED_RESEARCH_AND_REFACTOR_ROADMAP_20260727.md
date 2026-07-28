@@ -73,10 +73,11 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   hypotheses, not live weights.
 - The first-64 raw enemy HP/current-damage/local-flag inventory now passes an
   independent scalar oracle and unchanged Linux/Windows performance gates
-  while reusing the existing capture with zero added RPM. It remains
-  default-off and has offline integration authority only. Physical tracing,
-  generation/end reason, kill-versus-despawn, exposure causality, targeting,
-  and action promotion are the ordered next gates.
+  while reusing the existing capture with zero added RPM. Its explicit
+  supervisor/hotkey/controller path and strict streaming audit are now ready
+  for one isolated default-off physical gate. Generation/end reason,
+  kill-versus-despawn, exposure causality, targeting, and action promotion
+  remain later ordered gates.
 
 ## 2. 審閱材料與證據邊界
 

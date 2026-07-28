@@ -372,6 +372,8 @@ class EnemyCombatProgressTests(unittest.TestCase):
                 frame_before=899,
                 frame_after=899,
                 capture_attempts=1,
+                capture_ms=0.15,
+                previous_emit_ms=0.075,
             ),
             dependencies=EnemyCombatProgressStageDependencies(
                 build_record=lambda observed: (
@@ -384,9 +386,38 @@ class EnemyCombatProgressTests(unittest.TestCase):
         )
         self.assertEqual(result.record["inventory"], built)
         self.assertTrue(result.record["stable"])
+        self.assertEqual(result.record["capture_ms"], 0.15)
+        self.assertEqual(result.record["previous_emit_ms"], 0.075)
         self.assertAlmostEqual(result.stage_ms, 0.02)
         self.assertEqual(result.emit_ms, 0.125)
         self.assertEqual(sink.calls[0][1:], (False, True))
+
+    def test_physical_stage_rejects_wrong_scope_or_invalid_timing(self) -> None:
+        sink = _TraceSink()
+        base = {
+            "trace_sink": sink,
+            "inventory": EnemyCombatProgressInventory(63, 0, (), 0.0),
+            "route_id": 2,
+            "difficulty_index": 3,
+            "stage_route_index": 5,
+            "gameplay_epoch": 1,
+            "decision_frame": 10,
+            "frame_before": 10,
+            "frame_after": 10,
+            "capture_attempts": 1,
+            "capture_ms": 0.1,
+            "previous_emit_ms": None,
+        }
+        with self.assertRaisesRegex(ValueError, "requires 64"):
+            run_enemy_combat_progress_stage(
+                EnemyCombatProgressStageRequest(**base),  # type: ignore[arg-type]
+            )
+        base["inventory"] = EnemyCombatProgressInventory(64, 0, (), 0.0)
+        base["previous_emit_ms"] = float("nan")
+        with self.assertRaisesRegex(ValueError, "emit timing"):
+            run_enemy_combat_progress_stage(
+                EnemyCombatProgressStageRequest(**base),  # type: ignore[arg-type]
+            )
 
 
 if __name__ == "__main__":

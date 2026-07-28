@@ -881,8 +881,10 @@ comparison.
   `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`,
   `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`,
   `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`. The raw
-  first-64 inventory now has offline integration authority; S18 remains
-  proposed trace-only and has no live action authority.
+  first-64 inventory and
+  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
+  now have authority for one isolated default-off physical observation gate;
+  S18 remains proposed trace-only and has no live action authority.
 
 ## Adding Or Changing A Strategy
 

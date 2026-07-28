@@ -39,6 +39,7 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.terminal_stage, 2)
         self.assertFalse(parsed.trace_transform_runtime)
         self.assertFalse(parsed.trace_bullet_births)
+        self.assertFalse(parsed.trace_enemy_combat_progress)
         self.assertFalse(parsed.trace_auxiliary_vm_batches)
         self.assertIsNone(parsed.runtime_ecl_static_image)
         self.assertIsNone(parsed.runtime_ecl_static_sha256)
@@ -150,6 +151,19 @@ class AgentHotkeyTests(unittest.TestCase):
                 difficulty=3,
                 trace_nonspell_main_vms=True,
             )
+
+    def test_enemy_combat_progress_is_independently_opt_in(self) -> None:
+        arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_enemy_combat_progress=True,
+        )
+        self.assertIn("--trace-enemy-combat-progress", arguments)
+        self.assertNotIn("--trace-bullet-births", arguments)
+        parsed = build_parser().parse_args(arguments)
+        self.assertTrue(parsed.trace_enemy_combat_progress)
 
     def test_runtime_ecl_identity_is_explicit_and_bound_to_stage(self) -> None:
         image = Path("artifacts/decoded/ecldata5.ecl")

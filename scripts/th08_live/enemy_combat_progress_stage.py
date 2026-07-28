@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 import time
 from typing import Callable
 
@@ -25,6 +26,8 @@ class EnemyCombatProgressStageRequest:
     frame_before: int
     frame_after: int
     capture_attempts: int
+    capture_ms: float
+    previous_emit_ms: float | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +55,20 @@ def run_enemy_combat_progress_stage(
 ) -> EnemyCombatProgressStageResult:
     """Build and enqueue one capture-bound inventory after physical issue."""
 
+    if request.inventory.scanned_slots != 64:
+        raise ValueError("enemy combat-progress physical stage requires 64 slots")
+    if request.capture_attempts <= 0:
+        raise ValueError("enemy combat-progress capture attempts must be positive")
+    if not math.isfinite(request.capture_ms) or request.capture_ms < 0.0:
+        raise ValueError("enemy combat-progress capture timing must be finite")
+    if (
+        request.previous_emit_ms is not None
+        and (
+            not math.isfinite(request.previous_emit_ms)
+            or request.previous_emit_ms < 0.0
+        )
+    ):
+        raise ValueError("enemy combat-progress emit timing must be finite")
     started = clock()
     inventory_record = dependencies.build_record(request.inventory)
     record: dict[str, object] = {
@@ -65,10 +82,14 @@ def run_enemy_combat_progress_stage(
         "frame_before": request.frame_before,
         "frame_after": request.frame_after,
         "capture_attempts": request.capture_attempts,
+        "capture_ms": request.capture_ms,
+        "previous_emit_ms": request.previous_emit_ms,
         "stable": request.frame_before == request.frame_after,
         "inventory": inventory_record,
     }
     stage_ms = (clock() - started) * 1000.0
+    if not math.isfinite(stage_ms) or stage_ms < 0.0:
+        raise ValueError("enemy combat-progress stage timing must be finite")
     record["stage_ms"] = stage_ms
     emit_ms = request.trace_sink.emit(record, measure=True)
     return EnemyCombatProgressStageResult(

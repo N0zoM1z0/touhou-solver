@@ -173,6 +173,12 @@ oracle, cross-platform deterministic digest, and final Linux/Windows timing.
 This is authority to integrate the explicit default-off physical observer,
 not physical acceptance.
 
+The completed CLI/supervisor/controller delivery and strict streaming audit
+are fixed in
+`STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`.
+Delivery is post-issue and action-neutral for the current decision, but its
+synchronous serialization may perturb the next cadence and is measured.
+
 ## Physical Stage-5 Gate
 
 Use one supervised Lunatic Stage-5 run with:

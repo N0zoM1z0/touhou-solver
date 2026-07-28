@@ -8406,3 +8406,27 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   integration. No physical run has exercised it yet. Generation identity,
   kill/end-reason, complete damageability, exposure causality, targeting,
   planning, and action authority remain none.
+
+## 2026-07-28 — Prepared isolated physical combat-progress delivery
+
+- Added explicit default-off `--trace-enemy-combat-progress` propagation
+  through both supervisors, the Windows hotkey daemon, long-run argument
+  construction, controller capture, and a narrow post-issue stage. It is
+  independent of bullet-birth tracing.
+- **Observed code boundary:** enabling the flag decodes the already-paid
+  first-64 prefix blob and adds no RPM. The trace record is synchronously
+  serialized only after physical issue, so the current action is unchanged;
+  previous serialization time is carried forward because the next cadence
+  may be perturbed.
+- Added a strict one-pass audit, split behind a stable wrapper into schema,
+  streaming-report, and CLI modules, with literal offset/mask, slot-pointer,
+  active/local-gate/defeat-mode, physical identity, stable bracket, timing,
+  and decision-cadence validation. It requires active rows, positive damage,
+  and one adjacent active-slot positive-HP decrease candidate while explicitly
+  publishing no generation, end-reason, kill, targeting, or action authority.
+- Focused integration/audit tests and Ruff pass. Complete Linux discovery
+  passes 972 tests in 11.319 seconds. Complete Windows discovery passes 972
+  tests in 18.037 seconds with three existing platform skips.
+- **Decision:** authorize one isolated supervised Lunatic Stage-5 physical
+  observation with no other experimental observer. No physical acceptance
+  exists yet.

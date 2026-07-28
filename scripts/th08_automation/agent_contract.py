@@ -63,6 +63,7 @@ def build_long_run_arguments(
     trace_bullet_births: bool = False,
     trace_derived_pattern_sources: bool = False,
     trace_nonspell_main_vms: bool = False,
+    trace_enemy_combat_progress: bool = False,
     trace_auxiliary_vm_batches: bool = False,
     auxiliary_vm_batch_every: int = 16,
     auxiliary_vm_batch_spell_id: int | None = None,
@@ -177,6 +178,8 @@ def build_long_run_arguments(
         arguments.append("--trace-derived-pattern-sources")
     if trace_nonspell_main_vms:
         arguments.append("--trace-nonspell-main-vms")
+    if trace_enemy_combat_progress:
+        arguments.append("--trace-enemy-combat-progress")
     if trace_auxiliary_vm_batches:
         arguments.extend(
             (

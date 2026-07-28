@@ -52,7 +52,8 @@ and design/run notes retain derivations and history.
 42. `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
 43. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
 44. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
-45. the relevant recent run note and counterexample rows before live work
+45. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
+46. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -62,19 +63,22 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - The ordinary-enemy combat-progress C0 offline gate is complete and remains
-  default-off. Its first-64 inventory reuses the existing coherent enemy-pool
-  blob, adds zero RPM, preserves body output, and exposes only raw HP,
+  default-off. Its first-64 inventory and explicit
+  `--trace-enemy-combat-progress` delivery reuse the existing coherent
+  enemy-pool blob, add zero RPM, preserve body output, and expose only raw HP,
   current-update damage, local damage flags, and defeat mode. A dense 64-slot
-  independent scalar oracle, eight focused tests, Ruff, and the complete
-  Linux/Windows quick suites pass. Fixed 10,000-iteration Linux
+  independent scalar oracle, strict streaming physical audit, focused tests,
+  Ruff, and the complete 972-test Linux/Windows quick suites pass. Fixed
+  10,000-iteration Linux
   decode/record p95 is `0.059839/0.012975 ms`; Windows is
   `0.078700/0.016900 ms`. Both reports pass the unchanged
   `0.10/0.20/2.00 ms` p95/p99/max gates and share canonical SHA-256
   `f00ced83...bf23`. The initial frozen-dataclass decode missed at
   `0.122955 ms`; an immutable named tuple removed allocation overhead without
-  removing fields or weakening the deadline. This is offline integration
-  authority only: the observer is not wired into the controller, has no
-  physical result, and grants no generation, kill/end-reason, damageability,
+  removing fields or weakening the deadline. The option now propagates
+  supervisor -> hotkey -> controller and emits only after physical issue.
+  This is physical-gate preparation authority only: no physical run has used
+  it, and it grants no generation, kill/end-reason, complete damageability,
   targeting, planner, or action authority.
 - The newest action-neutral G5 checkpoint is shipped runtime-ECL identity on
   `lunatic_route2_stage5_unattended_20260728_212622`. It completed 12,100
@@ -1707,6 +1711,16 @@ The rejected derived-parent experiment additionally requires:
 It emits schema v10 and is retained only for reproduction. Ordinary
 birth-observer runs omit this flag, remain schema v9, and do not pay the
 second pool scan.
+
+The current isolated ordinary-enemy combat-progress gate uses:
+
+```bash
+  --trace-enemy-combat-progress
+```
+
+It is independent of bullet-birth tracing, reuses the existing first-64
+enemy-prefix capture, and emits only post-issue trace records. Do not combine
+its first physical gate with another observer.
 
 Continuous Hard Route-2, leaving the accepted game alive for manual replay
 save:

@@ -105,6 +105,10 @@ from th08_live.bullet_birth_stage import (
     BulletBirthStageRequest,
     run_bullet_birth_stage,
 )
+from th08_live.enemy_combat_progress_stage import (
+    EnemyCombatProgressStageRequest,
+    run_enemy_combat_progress_stage,
+)
 from th08_live.runtime_ecl_identity import (
     RuntimeEclIdentityService,
     RuntimeEclPhysicalProvenance,
@@ -1599,6 +1603,9 @@ def _run_live_session(
     trace_nonspell_main_vms = bool(
         getattr(args, "trace_nonspell_main_vms", False)
     )
+    trace_enemy_combat_progress = bool(
+        getattr(args, "trace_enemy_combat_progress", False)
+    )
     trace_auxiliary_vm_batches = bool(
         getattr(args, "trace_auxiliary_vm_batches", False)
     )
@@ -1633,6 +1640,7 @@ def _run_live_session(
         else None
     )
     previous_auxiliary_vm_batch_emit_ms: float | None = None
+    previous_enemy_combat_progress_emit_ms: float | None = None
     bullet_birth_backend = getattr(
         args,
         "bullet_birth_backend",
@@ -2500,6 +2508,7 @@ def _run_live_session(
             enemy_prefix_snapshot = capture_enemy_pool_prefix_contiguous(
                 reader,
                 include_main_ecl_vms=trace_nonspell_main_vms,
+                include_combat_progress=trace_enemy_combat_progress,
             )
             enemy_prefix_capture_ms = (
                 time.perf_counter() - enemy_prefix_capture_started
@@ -3627,6 +3636,47 @@ def _run_live_session(
             observe_to_issue_ms = fresh_issue_result.observe_to_issue_ms
             previous_mask = physical_issue.previous_mask
             previous_direction = physical_issue.previous_direction
+            if trace_enemy_combat_progress:
+                enemy_combat_progress_inventory = (
+                    enemy_prefix_snapshot.combat_progress_inventory
+                )
+                if enemy_combat_progress_inventory is None:
+                    raise RuntimeError(
+                        "combat-progress tracing omitted its capture inventory"
+                    )
+                enemy_combat_progress_stage = (
+                    run_enemy_combat_progress_stage(
+                        EnemyCombatProgressStageRequest(
+                            trace_sink=trace_sink,
+                            inventory=enemy_combat_progress_inventory,
+                            route_id=int(state["route_id"]),
+                            difficulty_index=int(
+                                state["difficulty_index"]
+                            ),
+                            stage_route_index=int(
+                                state["stage_route_index"]
+                            ),
+                            gameplay_epoch=gameplay_epoch,
+                            decision_frame=counter_at_action,
+                            frame_before=(
+                                enemy_prefix_snapshot.frame_before
+                            ),
+                            frame_after=(
+                                enemy_prefix_snapshot.frame_after
+                            ),
+                            capture_attempts=(
+                                enemy_prefix_snapshot.attempts
+                            ),
+                            capture_ms=enemy_prefix_capture_ms,
+                            previous_emit_ms=(
+                                previous_enemy_combat_progress_emit_ms
+                            ),
+                        )
+                    )
+                )
+                previous_enemy_combat_progress_emit_ms = (
+                    enemy_combat_progress_stage.emit_ms
+                )
             if runtime_ecl_identity_service is not None:
                 runtime_ecl_identity_service.observe_if_due(
                     reader,
@@ -4534,6 +4584,14 @@ def build_parser() -> argparse.ArgumentParser:
             "decode first-64 ordinary-enemy main VMs from the existing "
             "prefix capture into an explicit bullet-birth trace; "
             "diagnostic only, no instruction reads"
+        ),
+    )
+    parser.add_argument(
+        "--trace-enemy-combat-progress",
+        action="store_true",
+        help=(
+            "decode first-64 ordinary-enemy raw HP/damage fields from the "
+            "existing prefix capture; trace only, never changes live actions"
         ),
     )
     parser.add_argument(

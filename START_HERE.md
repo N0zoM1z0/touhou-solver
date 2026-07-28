@@ -361,7 +361,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   15 birth/future profiles. All 23 combined profiles pass; the largest
   controller-path p95 is `0.06643/0.04872 ms` on Linux/Windows. This is only
   the offline implementation floor and cannot replace the fresh physical B4
-  gate. Complete suites pass 850 tests.
+  gate. The first production optimization now removes only generator/tuple
+  work from exact Windows cycle-delta bookkeeping. Windows maximum
+  controller-path p95 improves `0.04872 -> 0.04680 ms`, with an independent
+  optimized repeat at `0.04410 ms`; Linux stays effectively flat
+  `0.06643 -> 0.06603 ms`. All provenance and 23 profiles pass, as do 850
+  tests. This is comparable to the physical `0.0059 ms` p95 miss but does not
+  close B4 without a fresh unchanged normal-priority Stage-4A trace.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

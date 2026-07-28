@@ -144,10 +144,16 @@ class NativeBulletBirthLoaderTests(unittest.TestCase):
 class _CycleSampler:
     source = THREAD_CYCLE_SOURCE_WINDOWS
 
-    def __init__(self, values: tuple[int, ...]) -> None:
+    def __init__(
+        self,
+        values: tuple[int | None, ...],
+        *,
+        source: str = THREAD_CYCLE_SOURCE_WINDOWS,
+    ) -> None:
         self._values = iter(values)
+        self.source = source
 
-    def read(self) -> int:
+    def read(self) -> int | None:
         return next(self._values)
 
 
@@ -456,6 +462,37 @@ class NativeBulletBirthTrackerTests(unittest.TestCase):
             THREAD_CYCLE_SOURCE_QUERY_FAILED,
         )
         self.assertEqual(invalid.thread_cycles, (None, None, None))
+
+        mixed = NativeBulletBirthTracker(
+            thread_cycle_sampler=_CycleSampler((100, None, 230, 400))
+        )
+        mixed.observe(blob, frame_before=0, frame_after=0)
+        mixed_diagnostics = mixed.diagnostics()
+        self.assertEqual(
+            mixed_diagnostics.thread_cycle_source,
+            THREAD_CYCLE_SOURCE_QUERY_FAILED,
+        )
+        self.assertEqual(
+            mixed_diagnostics.thread_cycles,
+            (None, None, None),
+        )
+
+        unavailable = NativeBulletBirthTracker(
+            thread_cycle_sampler=_CycleSampler(
+                (None, None, None, None),
+                source=THREAD_CYCLE_SOURCE_UNAVAILABLE,
+            )
+        )
+        unavailable.observe(blob, frame_before=0, frame_after=0)
+        unavailable_diagnostics = unavailable.diagnostics()
+        self.assertEqual(
+            unavailable_diagnostics.thread_cycle_source,
+            THREAD_CYCLE_SOURCE_UNAVAILABLE,
+        )
+        self.assertEqual(
+            unavailable_diagnostics.thread_cycles,
+            (None, None, None),
+        )
 
     def test_diagnostics_reconcile_and_count_native_phase_gc(self) -> None:
         blob = _pool()

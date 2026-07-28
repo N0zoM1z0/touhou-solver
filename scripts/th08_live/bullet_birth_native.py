@@ -373,17 +373,24 @@ class NativeBulletBirthTracker:
         boundaries: tuple[int | None, int | None, int | None, int | None],
     ) -> None:
         source = self._thread_cycle_sampler.source
-        if source == THREAD_CYCLE_SOURCE_WINDOWS and all(
-            type(value) is int for value in boundaries
+        cycle_0, cycle_1, cycle_2, cycle_3 = boundaries
+        if (
+            source == THREAD_CYCLE_SOURCE_WINDOWS
+            and type(cycle_0) is int
+            and type(cycle_1) is int
+            and type(cycle_2) is int
+            and type(cycle_3) is int
         ):
-            concrete = tuple(int(value) for value in boundaries)
-            deltas = tuple(
-                end - start
-                for start, end in zip(concrete, concrete[1:])
-            )
-            if all(delta >= 0 for delta in deltas):
+            prepare = cycle_1 - cycle_0
+            native_call = cycle_2 - cycle_1
+            materialize = cycle_3 - cycle_2
+            if prepare >= 0 and native_call >= 0 and materialize >= 0:
                 self._last_thread_cycle_source = source
-                self._last_thread_cycles = deltas
+                self._last_thread_cycles = (
+                    prepare,
+                    native_call,
+                    materialize,
+                )
                 return
         self._last_thread_cycle_source = (
             source

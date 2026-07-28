@@ -1205,7 +1205,12 @@ parity 當成每個 nature tie field 的逐 bit equality。
   the first systematic target; another priority experiment is not justified.
   The first patch may only remove generator/tuple overhead from exact
   Windows cycle-delta bookkeeping. Both future endpoints, diagnostics, GIL,
-  GC, wall boundary, workers, and records remain unchanged;
+  GC, wall boundary, workers, and records remain unchanged. That first patch
+  now passes all parity/provenance gates: Windows maximum exact-wrapper p95
+  improves `0.04872 -> 0.04680 ms`, repeated at `0.04410 ms`, while Linux
+  remains flat. Because physical B4 missed by only `0.0059 ms`, run one fresh
+  unchanged normal-priority Stage-4A gate before considering more invasive
+  batch-validation or worker changes;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

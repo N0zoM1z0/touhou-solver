@@ -411,7 +411,11 @@ comparison.
    first to normal nonzero materialization and fixed telemetry, not another
    worker-priority experiment. The first allowed optimization only rewrites
    thread-cycle delta bookkeeping without moving any work outside the
-   existing wall interval or dropping endpoint provenance.
+   existing wall interval or dropping endpoint provenance. That patch now
+   passes exact cycle-source/delta tests and all 23 Linux/Windows profiles.
+   Windows maximum controller-path p95 improves
+   `0.04872 -> 0.04680 ms`, repeated at `0.04410 ms`; Linux remains
+   effectively flat. B4 stays open until the unchanged fresh physical gate.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

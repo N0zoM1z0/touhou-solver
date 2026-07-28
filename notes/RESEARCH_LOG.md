@@ -7540,3 +7540,35 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   skips.
 - **Authority:** performance contract only. No code, model, callback
   coverage, future geometry, input, or action authority changes.
+
+## 2026-07-28 — Reduced exact Windows cycle-attribution overhead
+
+- Replaced generator/`zip`/tuple conversion in
+  `NativeBulletBirthTracker._record_thread_cycles` with direct unpacking and
+  adjacent subtraction of the same four samples.
+- Valid integer deltas, decreasing-boundary rejection, mixed-availability
+  rejection, non-Windows unavailable source, Windows query-failed source,
+  GC phases, wall boundaries, and diagnostic schema are unchanged. Tests
+  explicitly cover each source/failure class.
+- **Observed diagnostic profile:** the same Windows GIL-held 4,000-observation
+  32-birth workload falls from 268,076 calls / `0.406 s` to 188,056 calls /
+  `0.219 s`. Cumulative `_record_thread_cycles` attribution falls from about
+  `0.054 s` to `0.004 s`. These instrumented totals establish the removed
+  Python work but are not acceptance latency.
+- **Observed matched benchmark:** all 23 profiles pass before and after.
+  Linux maximum controller-path p95 is
+  `0.06643 -> 0.06603 ms`. Windows improves
+  `0.04872 -> 0.04680 ms`; an independent optimized repeat is
+  `0.04410 ms`. Core burst timings vary with run noise and are not used to
+  enlarge the claim.
+- Optimized Linux/Windows report SHA-256 values are
+  `9e7e45cfbc1bb92cfb044866e736f68e917be167c74a96e046f26d6a0f040235`
+  and
+  `d0f9bbca41ccc210e3fbe80db914c7465f120080564f4f5441ac6d5fe4c3dbd1`.
+- Ruff and complete Linux/Windows suites pass 850 tests in
+  `9.503/16.856 s`, with three existing Windows skips.
+- **Decision:** retain the optimization and run one unchanged
+  normal-priority Stage-4A physical B4 gate. The offline improvement is of
+  the same order as the physical `0.0059 ms` p95 miss, but B4 remains open.
+  No model, callback coverage, geometry, cadence, worker, input, or action
+  authority changes.

@@ -205,3 +205,40 @@ The retained reports are:
 Complete Linux/Windows suites pass 850 tests; Windows retains three existing
 platform skips. Production remains unchanged. The first optimization
 candidate and fresh physical requirement are unchanged.
+
+## Cycle-Delta Optimization Checkpoint
+
+`NativeBulletBirthTracker._record_thread_cycles` now directly unpacks the
+four existing samples and computes the same three adjacent differences. It
+preserves exact-int checks, non-negative validation, Windows/query-failed/
+unavailable source classification, and the three-value diagnostic record.
+It removes only transient generator, `zip`, and conversion work.
+
+Focused tests now explicitly cover valid, decreasing, mixed-availability,
+and unsupported-source boundaries. A diagnostic Windows 4,000-observation
+profile falls from 268,076 calls / `0.406 s` to 188,056 calls / `0.219 s`;
+the `_record_thread_cycles` cumulative profile attribution falls from about
+`0.054 s` to `0.004 s`. Profiler totals are attribution evidence, not
+acceptance timings.
+
+The complete schema-v8 benchmarks pass all 23 profiles after the change:
+
+- Linux maximum controller-path p95 is
+  `0.06643 -> 0.06603 ms`, as expected for a non-Windows cycle source;
+- Windows maximum controller-path p95 is
+  `0.04872 -> 0.04680 ms`; and
+- an independent Windows optimized repeat reports `0.04410 ms`.
+
+The retained optimized reports have SHA-256 values:
+
+- Linux:
+  `9e7e45cfbc1bb92cfb044866e736f68e917be167c74a96e046f26d6a0f040235`;
+  and
+- Windows:
+  `d0f9bbca41ccc210e3fbe80db914c7465f120080564f4f5441ac6d5fe4c3dbd1`.
+
+Ruff and complete Linux/Windows suites pass 850 tests; Windows retains three
+existing skips. The improvement is similar in scale to the physical
+`0.0059 ms` p95 miss, but offline timing cannot establish the result under
+game/worker contention. B4 remains open pending one fresh unchanged
+normal-priority Stage-4A trace.

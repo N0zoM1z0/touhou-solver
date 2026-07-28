@@ -29,7 +29,8 @@ and design/run notes retain derivations and history.
 19. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`
 20. `notes/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`
 21. `notes/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
-22. the relevant recent run note and counterexample rows before live work
+22. `notes/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
+23. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -195,9 +196,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   evidence records and spends `8.9333 ms` in materialization while native
   call is `0.0335 ms`; no completed GC overlaps it, and adjacent 24-row
   materializations are at most `0.0741 ms`. Spell-57 ECL lookahead itself
-  also costs p95/max `0.5460/10.3328 ms`. The next checkpoint adds
-  current-thread cycle and background-worker-overlap attribution under a
-  fixed contract before another physical run or promotable Stage-5/6 claim.
+  also costs p95/max `0.5460/10.3328 ms`.
+  `G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` now fixes the
+  next checkpoint: allocation-stable current-thread cycle deltas and
+  lookup-only background-future endpoint states before another physical run
+  or promotable Stage-5/6 claim. It authorizes telemetry only, not worker or
+  copy intervention.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and
@@ -1079,6 +1083,8 @@ weaken four global workers or reuse a merely similar root.
   `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`
 - Callback and birth-intent lookahead completeness:
   `notes/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
+- GIL-held materialization-tail attribution:
+  `notes/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
 - Generated differential:
   `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
 

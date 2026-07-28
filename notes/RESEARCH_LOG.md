@@ -7026,3 +7026,22 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   recurrence, GC, unpinned controller, and wall limits. Stage 5/6 remains a
   trace-only workload until this performance regression and the unknown
   callback suffix have explicit fallbacks.
+
+## 2026-07-28 — Fixed the GIL-held materialization-tail attribution boundary
+
+- Fixed
+  `G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` before code.
+  It authorizes post-issue telemetry only: Windows current-thread cycle
+  deltas at the existing prepare/native/materialize boundaries and
+  lookup-only before/after states for corridor, survival, and enemy futures.
+- A direct target-Windows runtime probe observed
+  `QueryThreadCycleTime(GetCurrentThread())` succeeding with error zero.
+  Cycle counts remain raw integers and are compared only within phase and
+  evidence-count bucket; they are not converted to milliseconds.
+- Schema v9/audit v7 will fail closed on missing cycle provenance, malformed
+  deltas, invalid future endpoint states, or changed existing segment/GC
+  reconciliation. Wall limits remain authoritative.
+- No copy packing, worker count/priority, affinity, GC, planner, callback
+  traversal, input, or action change is authorized. The attribution result
+  must select a separately contracted intervention; rerunning until one
+  maximum passes is rejected.

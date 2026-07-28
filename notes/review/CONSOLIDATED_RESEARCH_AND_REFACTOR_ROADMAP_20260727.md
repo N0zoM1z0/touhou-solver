@@ -1099,8 +1099,10 @@ parity 當成每個 nature tie field 的逐 bit equality。
   125 complete。936 個 incomplete rows 有 tagged bullets，max 1,360。
   但同一 run 暴露 CE-0152：observer 唯一 >2-ms row 是 24-evidence
   materialization `8.9333 ms`，native call `0.0335 ms`、zero completed GC；
-  因此 B4 performance regression 重新打開。下一步先用 thread-cycle
-  delta 與 background-worker-overlap 區分實際 copy cost／deschedule，再
+  因此 B4 performance regression 重新打開。
+  `G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` 已先固定
+  telemetry-only 邊界：用 thread-cycle delta 與三個 background future
+  的 before/after state 區分實際 copy cost／deschedule，再另立 contract
   決定 copy packing 或 worker isolation，不靠重跑挑一個 passing max；
 - spell-57 callback traversal 本身 p95/max `0.5460/10.3328 ms`，即使
   fail-closed 也仍在 issue thread。後續性能線要做 exact-state/cache/

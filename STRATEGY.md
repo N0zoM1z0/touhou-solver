@@ -314,8 +314,10 @@ comparison.
    GC-enabled physical Stage-4A runs, closing this specific B4 tail.
    Incomplete callback coverage is explicit, fails closed in schema v8, and
    passes its Stage-4A semantic recheck. CE-0152 reopens the B4 performance
-   regression: add per-phase current-thread cycle deltas and
-   background-worker-overlap evidence before choosing an intervention.
+   regression. The fixed
+   `G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md` adds only
+   per-phase current-thread cycle deltas and background-future endpoint
+   evidence before choosing an intervention.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

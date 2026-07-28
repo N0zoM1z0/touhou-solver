@@ -61,6 +61,22 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   auxiliary/callback/deferred/native sources. Parallel survival work remains
   the earlier viability-loss problem; zero derived-source signal does not
   reduce CE-0158.
+- Subsequent checkpoints completed the ordinary main-VM and bounded native
+  auxiliary-VM observation chain, then physically verified exact shipped
+  Stage-5 runtime ECL instruction-byte identity. The next G5 gate is one
+  separately contracted auxiliary event class; runtime-image identity alone
+  does not grant future-geometry or planner authority.
+- Nine retained Lunatic Stage-5 runs also establish nonspell exposure as the
+  canonical first-hit route barrier, but not as the highest per-decision
+  danger. This opens a separate survival-filtered combat-progress line:
+  earlier verified kills, boss phase compression, and safe Power recovery are
+  hypotheses, not live weights.
+- The first-64 raw enemy HP/current-damage/local-flag inventory now passes an
+  independent scalar oracle and unchanged Linux/Windows performance gates
+  while reusing the existing capture with zero added RPM. It remains
+  default-off and has offline integration authority only. Physical tracing,
+  generation/end reason, kill-versus-despawn, exposure causality, targeting,
+  and action promotion are the ordered next gates.
 
 ## 2. 審閱材料與證據邊界
 

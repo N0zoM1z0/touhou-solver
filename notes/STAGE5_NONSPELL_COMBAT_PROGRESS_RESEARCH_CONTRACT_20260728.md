@@ -179,6 +179,11 @@ The first narrower inventory/update-order gate is fixed in
 `STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`. It explicitly
 forbids treating slot disappearance as a verified kill.
 
+Its offline implementation and unchanged performance gate are accepted in
+`STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`. This closes only the
+first-64 raw inventory sub-gate. Physical integration, generation identity,
+end reason, drops, pickups, and source attribution remain open.
+
 No inherited IDA name, comment, type, or prior offset is authority.
 
 ### C1 — Deterministic exposure audit

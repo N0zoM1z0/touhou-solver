@@ -15,6 +15,7 @@ from th08_bullet_transform_model import (
 from touhou_control.trajectory import VelocityChange
 
 if TYPE_CHECKING:
+    from th08_live.enemy_combat_progress import EnemyCombatProgressInventory
     from th08_live.enemy_ecl_inventory import EnemyMainEclVmInventory
 
 
@@ -212,6 +213,7 @@ class EnemyPoolSnapshot:
     read_ms: float
     attempts: int = 1
     main_ecl_vm_inventory: EnemyMainEclVmInventory | None = None
+    combat_progress_inventory: EnemyCombatProgressInventory | None = None
 
     @property
     def stable(self) -> bool:

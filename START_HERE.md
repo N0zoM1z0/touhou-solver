@@ -51,7 +51,8 @@ and design/run notes retain derivations and history.
 41. `notes/G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`
 42. `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
 43. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
-44. the relevant recent run note and counterexample rows before live work
+44. `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
+45. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -60,6 +61,21 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
+- The ordinary-enemy combat-progress C0 offline gate is complete and remains
+  default-off. Its first-64 inventory reuses the existing coherent enemy-pool
+  blob, adds zero RPM, preserves body output, and exposes only raw HP,
+  current-update damage, local damage flags, and defeat mode. A dense 64-slot
+  independent scalar oracle, eight focused tests, Ruff, and the complete
+  Linux/Windows quick suites pass. Fixed 10,000-iteration Linux
+  decode/record p95 is `0.059839/0.012975 ms`; Windows is
+  `0.078700/0.016900 ms`. Both reports pass the unchanged
+  `0.10/0.20/2.00 ms` p95/p99/max gates and share canonical SHA-256
+  `f00ced83...bf23`. The initial frozen-dataclass decode missed at
+  `0.122955 ms`; an immutable named tuple removed allocation overhead without
+  removing fields or weakening the deadline. This is offline integration
+  authority only: the observer is not wired into the controller, has no
+  physical result, and grants no generation, kill/end-reason, damageability,
+  targeting, planner, or action authority.
 - The newest action-neutral G5 checkpoint is shipped runtime-ECL identity on
   `lunatic_route2_stage5_unattended_20260728_212622`. It completed 12,100
   decisions over frames `1..40984`, hard no-Bomb, with nine hits,

@@ -7,6 +7,9 @@ import time
 from dataclasses import replace
 
 from th08_live.bullet_decode import finite
+from th08_live.enemy_combat_progress import (
+    decode_enemy_combat_progress_inventory,
+)
 from th08_live.enemy_ecl_inventory import (
     decode_enemy_main_ecl_vm_inventory,
 )
@@ -256,6 +259,7 @@ def capture_enemy_pool_prefix_contiguous(
     pool_size: int = ENEMY_LOCAL_PREFIX_SIZE,
     maximum_attempts: int = 2,
     include_main_ecl_vms: bool = False,
+    include_combat_progress: bool = False,
 ) -> EnemyPoolSnapshot:
     """Capture the allocation head once per local decision."""
 
@@ -281,6 +285,17 @@ def capture_enemy_pool_prefix_contiguous(
             if include_main_ecl_vms
             else None
         )
+        combat_progress_inventory = (
+            decode_enemy_combat_progress_inventory(
+                blob,
+                pool_base=ENEMY_POOL_BASE,
+                pool_size=pool_size,
+                enemy_stride=ENEMY_STRIDE,
+                enemy_active_flag=ENEMY_ACTIVE_FLAG,
+            )
+            if include_combat_progress
+            else None
+        )
         snapshot = EnemyPoolSnapshot(
             frame_before,
             frame_after,
@@ -292,6 +307,7 @@ def capture_enemy_pool_prefix_contiguous(
             (time.perf_counter() - started) * 1000.0,
             attempt,
             main_ecl_vm_inventory,
+            combat_progress_inventory,
         )
         if snapshot.stable:
             return snapshot

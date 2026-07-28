@@ -8375,3 +8375,34 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   Its first gate decodes a trace-only health/damage inventory from the
   already-paid stable first-64 pool blob with zero added RPM and no action
   consumer. Generation/end tracking and targeting remain later contracts.
+
+## 2026-07-28 — Accepted the combat-progress offline integration gate
+
+- Implemented an opt-in first-64 raw combat-progress inventory from the
+  already-paid coherent enemy-pool blob plus a narrow post-issue trace stage.
+  The disabled and enabled paths have identical `u32/read/u32` calls and equal
+  body output; the decoder performs no RPM.
+- **Observed correctness:** eight focused tests cover signed values, inactive
+  rows, all local gate bits, defeat modes, malformed/timing failures,
+  capture-call parity, stage identity, and one dense 64-slot independent
+  scalar oracle. Focused Ruff passes.
+- **Observed failed attempt:** four per-row unpack calls produced Linux decode
+  p95 `0.138854 ms`. One precompiled packed struct improved p95 only to
+  `0.122955 ms`, still above the fixed `0.10 ms` gate.
+- **Observed repair:** retaining the packed struct but replacing 64 frozen
+  dataclass allocations with immutable named tuples preserved canonical
+  SHA-256 `f00ced83...bf23`. Repeated Linux decode p95 values fell to
+  `0.071152/0.065151/0.059225 ms`; no field or deadline was removed.
+- Final retained 10,000-iteration Linux decode/record p95/p99/max is
+  `0.059839/0.079025/0.340649 ms` and
+  `0.012975/0.018512/0.097177 ms`. Windows is
+  `0.078700/0.097900/0.207600 ms` and
+  `0.016900/0.021400/0.066900 ms`. Both pass the unchanged
+  `0.10/0.20/2.00 ms` gates and share the canonical digest.
+- Complete Linux discovery passes 965 tests after the final oracle test.
+  Complete Windows discovery exits zero over the same pattern; the focused
+  eight-test Windows suite also passes.
+- **Decision:** accept the decoder for explicit default-off physical
+  integration. No physical run has exercised it yet. Generation identity,
+  kill/end-reason, complete damageability, exposure causality, targeting,
+  planning, and action authority remain none.

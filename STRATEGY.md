@@ -879,7 +879,10 @@ comparison.
   clearance/reserve/cadence regression.
 - **Evidence:**
   `notes/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`,
-  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`.
+  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`,
+  `notes/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`. The raw
+  first-64 inventory now has offline integration authority; S18 remains
+  proposed trace-only and has no live action authority.
 
 ## Adding Or Changing A Strategy
 

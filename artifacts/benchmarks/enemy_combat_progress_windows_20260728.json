@@ -1,0 +1,27 @@
+{
+  "active_slots": 64,
+  "canonical_record_sha256": "f00ced83950978bffc354742bd01c04bba74ea1e301310efcdb97f9cf4b1bf23",
+  "decode_ms": {
+    "max": 0.20759995095431805,
+    "median": 0.056999968364834785,
+    "p95": 0.07870001718401909,
+    "p99": 0.09790004696696997
+  },
+  "iterations": 10000,
+  "limits_ms": {
+    "max": 2.0,
+    "p95": 0.1,
+    "p99": 0.2
+  },
+  "passed": true,
+  "platform": "Windows-11-10.0.22631-SP0",
+  "pool_size": 64,
+  "python": "3.12.10",
+  "record_ms": {
+    "max": 0.06690004374831915,
+    "median": 0.012199976481497288,
+    "p95": 0.0168998958542943,
+    "p99": 0.021399930119514465
+  },
+  "schema": "th08-enemy-combat-progress-benchmark-v1"
+}

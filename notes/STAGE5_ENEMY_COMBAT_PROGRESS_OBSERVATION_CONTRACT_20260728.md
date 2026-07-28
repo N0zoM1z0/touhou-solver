@@ -166,6 +166,13 @@ Timing is measured separately for decode and record construction. A timing
 miss preserves the useful signal as explicit trace-only research but rejects
 physical gate promotion until separately optimized.
 
+The offline gate is accepted in
+`STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`. It records the
+initial timing failure, representation-only optimization, independent scalar
+oracle, cross-platform deterministic digest, and final Linux/Windows timing.
+This is authority to integrate the explicit default-off physical observer,
+not physical acceptance.
+
 ## Physical Stage-5 Gate
 
 Use one supervised Lunatic Stage-5 run with:

@@ -174,6 +174,14 @@ pass 949 tests, and a 7,401-decision native physical trace passes the
 deterministic birth audit with zero observation/intent errors. This is
 trace-only structural evidence; no hazard or action authority changed.
 
+Later source/combat instrumentation grew the controller to 4,698 lines. The
+CLI-schema checkpoint moves all 57 parser actions behind the immutable
+`th08_live.cli.LiveParserDefaults` boundary while preserving the public
+controller wrapper and resolving compatibility globals at each call. A
+parent/new normalized schema comparison is exact, complete Linux/Windows
+suites pass 976 tests, and the controller is now 4,341 lines. This is launch
+schema ownership only; `_run_live_session` remains the dominant block.
+
 `scripts/th08_live/iteration.py` now defines and the live loop consumes:
 
 - `CapturedIteration`: exact source/snapshot/hazard/delay identity and decoded

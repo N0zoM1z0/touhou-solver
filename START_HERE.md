@@ -75,6 +75,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
   foundations, operations, and review directories; root note count fell from
   92 to 37. `notes/README.md` is the navigation entrypoint. Historical path
   literals inside legacy-marked payloads remain intentionally unchanged.
+- The live controller CLI is now isolated in `scripts/th08_live/cli.py` behind
+  immutable explicit defaults. The public controller `build_parser()` wrapper
+  remains late-bound to compatibility globals. Parent/new normalized schemas
+  agree over all 57 actions and the Bomb mutual-exclusion group; focused
+  launch suites, Ruff, and complete 976-test Linux/Windows suites pass.
+  `controller.py` falls from 4,698 to 4,341 lines. This changes no option,
+  runtime path, trace, mask, model, or action authority; `_run_live_session`
+  remains the next structural target.
 - The ordinary-enemy combat-progress C0 physical observation gate now passes
   on default-off Lunatic Stage-5 run
   `lunatic_route2_stage5_unattended_20260728_224116`, executed from

@@ -86,6 +86,11 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   survival-equivalent choices. Normal-route Power work must begin from Power
   0; post-death recovery is a separate diagnostic and cannot contaminate the
   final no-miss authority path.
+- The 57-action live CLI schema is now isolated behind immutable explicit
+  defaults. Parent/new parser action and mutual-exclusion schemas are exactly
+  equal, compatibility globals remain late-bound, and the controller falls
+  from 4,698 to 4,341 lines. This is a behavior-neutral ownership checkpoint;
+  the dominant `_run_live_session` block remains the next structural target.
 
 ## 2. 審閱材料與證據邊界
 

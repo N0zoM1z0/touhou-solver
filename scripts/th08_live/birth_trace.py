@@ -12,9 +12,11 @@ from th08_ecl_birth import (
 from .bullet_birth import BulletBirthObservation
 from .bullet_birth_native import NATIVE_CALL_MODES
 from .birth_contention import BirthObserverContention
+from .derived_pattern_source import DerivedPatternSourceObservation
 
 
-BULLET_BIRTH_TRACE_SCHEMA_VERSION = 9
+BULLET_BIRTH_TRACE_SCHEMA_VERSION = 10
+BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION = 9
 BULLET_BIRTH_TRACE_ROLE = "trace_only_no_action_authority"
 BULLET_BIRTH_INTENT_SCOPE = "active_spell_enemy_main_vm_only"
 BULLET_BIRTH_POOL_SCOPE = "all_1536_hostile_bullet_slots"
@@ -46,16 +48,23 @@ class BulletBirthTraceInput:
     observation_backend: str = "python"
     native_call_mode: str | None = None
     observation_diagnostics: dict[str, object] | None = None
+    derived_source_observation: DerivedPatternSourceObservation | None = None
+    derived_source_error: str | None = None
+    derived_source_ms: float = 0.0
+    derived_source_diagnostics: dict[str, object] | None = None
 
 
 def birth_trace_requires_immediate_flush(
     *,
     observation_error: str | None,
     intent_error: str | None,
+    derived_source_error: str | None = None,
 ) -> bool:
     """Flush failures now; ordinary rows flush with the decision this loop."""
 
-    return bool(observation_error or intent_error)
+    return bool(
+        observation_error or intent_error or derived_source_error
+    )
 
 
 def build_bullet_birth_trace_record(
@@ -65,6 +74,18 @@ def build_bullet_birth_trace_record(
 
     observation = trace_input.observation
     intent = trace_input.intent
+    derived_source = trace_input.derived_source_observation
+    derived_source_enabled = (
+        derived_source is not None
+        or trace_input.derived_source_error is not None
+    )
+    if (
+        derived_source is not None
+        and trace_input.derived_source_error is not None
+    ):
+        raise ValueError(
+            "derived-source observation may not accompany an error"
+        )
     if trace_input.observation_backend not in {"python", "native"}:
         raise ValueError("unknown bullet-birth observation backend")
     if (
@@ -108,6 +129,23 @@ def build_bullet_birth_trace_record(
         raise ValueError(
             "Python observation may not publish native diagnostics"
         )
+    if (
+        derived_source_enabled
+        and trace_input.observation_backend == "native"
+        and derived_source is not None
+        and trace_input.derived_source_error is None
+        and trace_input.derived_source_diagnostics is None
+    ):
+        raise ValueError(
+            "successful native derived-source observation requires diagnostics"
+        )
+    if (
+        trace_input.observation_backend == "python"
+        and trace_input.derived_source_diagnostics is not None
+    ):
+        raise ValueError(
+            "Python derived-source observation may not publish native diagnostics"
+        )
     omitted_sources = [
         "non_spell_enemy_main_vm",
         "child_enemy_or_auxiliary_vm",
@@ -116,9 +154,13 @@ def build_bullet_birth_trace_record(
     ]
     if trace_input.deferred_fire_state.active is None:
         omitted_sources.append("deferred_emission_runtime_state")
-    return {
+    record: dict[str, object] = {
         "kind": "bullet_birth_audit",
-        "schema_version": BULLET_BIRTH_TRACE_SCHEMA_VERSION,
+        "schema_version": (
+            BULLET_BIRTH_TRACE_SCHEMA_VERSION
+            if derived_source_enabled
+            else BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION
+        ),
         "role": BULLET_BIRTH_TRACE_ROLE,
         "observation_backend": trace_input.observation_backend,
         "native_call_mode": trace_input.native_call_mode,
@@ -174,10 +216,41 @@ def build_bullet_birth_trace_record(
             "coverage_authority": "none",
         },
     }
+    if derived_source_enabled:
+        counts = record["counts"]
+        timing = record["timing_ms"]
+        assert isinstance(counts, dict)
+        assert isinstance(timing, dict)
+        record.update(
+            {
+                "derived_source_observation": (
+                    derived_source.record()
+                    if derived_source is not None
+                    else None
+                ),
+                "derived_source_error": trace_input.derived_source_error,
+                "derived_source_diagnostics": (
+                    trace_input.derived_source_diagnostics
+                ),
+            }
+        )
+        counts["ready_derived_sources"] = (
+            len(derived_source.candidates)
+            if derived_source is not None
+            else 0
+        )
+        timing["derived_source_observation"] = (
+            trace_input.derived_source_ms
+        )
+        timing["combined_pool_observation"] = (
+            trace_input.observation_ms + trace_input.derived_source_ms
+        )
+    return record
 
 
 __all__ = [
     "BULLET_BIRTH_INTENT_SCOPE",
+    "BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION",
     "BULLET_BIRTH_POOL_SCOPE",
     "BULLET_BIRTH_TRACE_ROLE",
     "BULLET_BIRTH_TRACE_SCHEMA_VERSION",

@@ -59,14 +59,29 @@ describe the same decision. Python/C++ parity is not physical correctness.
   byte-stable at internal/file digests `4d774124...ff5c` /
   `7934ac27...d676`; Linux/Windows pass 876 tests. No forecast,
   counterfactual, or action authority is added.
-- The next fixed G5 gate is the default-off derived-pattern source shadow in
-  `G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`. Connected IDA xrefs
-  show that existing bullets can call the same pattern emitter through
-  `bullet_apply_next_transform @ 0x43077E`. The retained wave's ten groups of
-  three, split by native age across two frames, is compatible with that path
-  but does not prove it. The new observer must reuse the existing pool blob,
-  materialize only ready parent candidates, pass the unchanged combined
-  `0.20/0.40/2.00 ms` p95/p99/max gate, and remain trace-only.
+- The first nonspell source hypothesis is now physically rejected under
+  `G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`. Lunatic Stage-5
+  run `20260728_150827` completed 11,801 decisions over frames `2..42172`
+  with 12 hits, hard no-Bomb, `route_complete`, exact cleanup, and no
+  residual process. All schema-v10 source scans validated but returned zero
+  ready-parent candidates, including reproduced 30-bullet waves at frames
+  13861 and 13879. The tested predicate therefore cannot attribute the wave;
+  between-capture transforms remain unresolved. Combined birth/source
+  p95/p99/max `0.2633/0.4982/9.0368 ms` also fails the fixed gate. The run
+  inherited `gil-released`, so its extreme native-call tail is not comparable
+  to the accepted GIL-held B4 workload, but the second pass's roughly
+  0.05-ms p95 cost is still ineligible. CE-0161 isolates the failed shadow
+  behind `--trace-derived-pattern-sources`; ordinary birth tracing stays
+  schema v9 and pays no added scan. The deterministic report/raw SHA-256 are
+  `a08f1370...c9bda` / `9081e3ed...565b`.
+  Isolated Linux/Windows source reports pass, native libraries build for both
+  targets, and complete Linux/Windows discovery passes 889 tests.
+- The next G5 source contract starts with ordinary nonspell enemy main VMs.
+  Only after that class is falsified should work proceed to auxiliary VMs,
+  callbacks/interrupts, deferred enemy state, and non-ECL native sources.
+  Do not fuse or publish the zero-signal ready-parent class. Earlier
+  viability preservation under CE-0158 and general performance attribution
+  remain parallel work; roadmap candidates are not a ceiling.
 - The latest harder-workload physical checkpoint is
   `lunatic_route2_stage5_unattended_20260728_133633`. It completed 13,304
   decisions over frames `1..44822` with 23 hits, hard no-Bomb, two successful
@@ -1373,7 +1388,7 @@ override the authority table above.
 | Workload | Bundle | Purpose |
 | --- | --- | --- |
 | Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor. |
-| Lunatic Route-2 Stage 5 | `124930`, `133633` | Birth-observer performance transfer, realized hit provenance, and exact G3/G4 capsule bracket. |
+| Lunatic Route-2 Stage 5 | `124930`, `133633`, `150827` | Birth performance/provenance, exact G3/G4 capsule bracket, and rejected derived-source gate. |
 | Hard Route-2 Stage 1 | `175049`, `144128`, `153821` | Zero-hit native/local and refactor gates; G1 trace/pickup gate with one survival failure. |
 | Hard Route-2 full route | `184942` | Complete route, 39-hit feasibility diagnosis; one-bundle evidence only. |
 | Hard Route-2 Stage 4A | `202439`, `211210`, `212756` | Capsule audit and fresh/global issue transaction; `211210/212756` form the newest compatible no-audit floor. |
@@ -1389,6 +1404,9 @@ Compact benchmark evidence:
 - `artifacts/benchmarks/hard_supplemental_exact_async_final_direct_root_contention_windows_20260726.json`
 - `artifacts/benchmarks/th08_semantic_differential_gate_20260726.json`
 - `artifacts/benchmarks/th08_semantic_differential_research_20260726.json`
+- `artifacts/benchmarks/derived_pattern_source_observer_native_linux_20260728.json`
+- `artifacts/benchmarks/derived_pattern_source_observer_native_windows_20260728.json`
+- `artifacts/viability_audit/g5_derived_source_stage5_20260728_150827.json`
 
 Raw replay bundles remain local and ignored. Do not delete an older workload
 bundle until the two-newer-compatible-bundle rule in `AGENTS.md` is satisfied.
@@ -1487,11 +1505,24 @@ Practice:
 The current explicit trace-only native birth-observer gate adds:
 
 ```bash
-  --trace-bullet-births --bullet-birth-backend native
+  --trace-bullet-births --bullet-birth-backend native \
+  --bullet-birth-native-call-mode gil-held
 ```
 
 Do not infer this backend from library availability; schema-v5 provenance and
-the physical gate require the explicit selector.
+the physical gate require the explicit selector. The accepted B4 comparison
+boundary is GIL-held; the parser default remains GIL-released for historical
+compatibility and must not be inherited by a B4 experiment.
+
+The rejected derived-parent experiment additionally requires:
+
+```bash
+  --trace-derived-pattern-sources
+```
+
+It emits schema v10 and is retained only for reproduction. Ordinary
+birth-observer runs omit this flag, remain schema v9, and do not pay the
+second pool scan.
 
 Continuous Hard Route-2, leaving the accepted game alive for manual replay
 save:

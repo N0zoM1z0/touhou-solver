@@ -45,6 +45,23 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
 禁止 big-bang rewrite。任何「搬檔 + 改 recurrence + 做效能優化」的混合提交都
 應拆開。
 
+### 2026-07-28 execution checkpoint
+
+- G5 realized birth-to-hit provenance and the first nonspell source
+  hypothesis are complete as action-free research checkpoints.
+- The visible ready derived-parent hypothesis failed physically with zero
+  candidates over 11,801 Stage-5 observations, including reproduced
+  30-bullet waves. The separate second pool pass also failed the fixed
+  combined performance gate.
+- The failed observer is now independently opt-in and cannot add overhead to
+  ordinary schema-v9 birth traces. This follows the roadmap rule that
+  performance is continuous and failed experimental work must not silently
+  become baseline cost.
+- Next G5 source work begins with ordinary nonspell enemy main VMs, then
+  auxiliary/callback/deferred/native sources. Parallel survival work remains
+  the earlier viability-loss problem; zero derived-source signal does not
+  reduce CE-0158.
+
 ## 2. 審閱材料與證據邊界
 
 本次綜合了兩個外部審閱包：

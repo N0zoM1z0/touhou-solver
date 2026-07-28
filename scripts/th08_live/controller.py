@@ -103,6 +103,13 @@ from th08_live.birth_contention import (
     BirthObserverContention,
     capture_birth_observer_future_states,
 )
+from th08_live.derived_pattern_source import (
+    DerivedPatternSourceObservation,
+    observe_derived_pattern_sources,
+)
+from th08_live.derived_pattern_source_native import (
+    NativeDerivedPatternSourceObserver,
+)
 from th08_live.bullet_birth import (
     BulletBirthObservation,
     BulletBirthTracker,
@@ -1374,6 +1381,13 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
             "library is unavailable"
         )
     if (
+        getattr(args, "trace_derived_pattern_sources", False)
+        and not getattr(args, "trace_bullet_births", False)
+    ):
+        raise ValueError(
+            "derived-pattern source tracing requires bullet-birth tracing"
+        )
+    if (
         args.stage_transition_timeout <= 0.0
         or args.terminal_inactive_grace <= 0.0
     ):
@@ -1388,6 +1402,43 @@ def run(args: argparse.Namespace) -> int:
         target_exe=TARGET_EXE,
     ) as session:
         return _run_live_session(args, session)
+
+
+def _build_birth_trace_observers(
+    *,
+    trace_bullet_births: bool,
+    trace_derived_pattern_sources: bool,
+    backend: str,
+    native_call_mode: str,
+) -> tuple[
+    BulletBirthTracker | NativeBulletBirthTracker | None,
+    NativeDerivedPatternSourceObserver | None,
+]:
+    if trace_derived_pattern_sources and not trace_bullet_births:
+        raise ValueError(
+            "derived-pattern source tracing requires bullet-birth tracing"
+        )
+    tracker = (
+        (
+            NativeBulletBirthTracker(native_call_mode=native_call_mode)
+            if backend == "native"
+            else BulletBirthTracker()
+        )
+        if trace_bullet_births
+        else None
+    )
+    source = (
+        (
+            NativeDerivedPatternSourceObserver(
+                native_call_mode=native_call_mode,
+            )
+            if backend == "native"
+            else None
+        )
+        if trace_derived_pattern_sources
+        else None
+    )
+    return tracker, source
 
 
 def _run_live_session(
@@ -1480,6 +1531,9 @@ def _run_live_session(
     trace_bullet_births = bool(
         getattr(args, "trace_bullet_births", False)
     )
+    trace_derived_pattern_sources = bool(
+        getattr(args, "trace_derived_pattern_sources", False)
+    )
     bullet_birth_backend = getattr(
         args,
         "bullet_birth_backend",
@@ -1490,16 +1544,14 @@ def _run_live_session(
         "bullet_birth_native_call_mode",
         NATIVE_CALL_MODE_GIL_RELEASED,
     )
-    bullet_birth_tracker = (
-        (
-            NativeBulletBirthTracker(
-                native_call_mode=bullet_birth_native_call_mode,
-            )
-            if bullet_birth_backend == "native"
-            else BulletBirthTracker()
-        )
-        if trace_bullet_births
-        else None
+    (
+        bullet_birth_tracker,
+        derived_pattern_source_observer,
+    ) = _build_birth_trace_observers(
+        trace_bullet_births=trace_bullet_births,
+        trace_derived_pattern_sources=trace_derived_pattern_sources,
+        backend=bullet_birth_backend,
+        native_call_mode=bullet_birth_native_call_mode,
     )
     previous_birth_trace_emit_ms: float | None = None
     previous_iteration_ms: float | None = None
@@ -2397,6 +2449,12 @@ def _run_live_session(
             ) = None
             bullet_birth_observation_ms = 0.0
             bullet_birth_observation_cpu_ms = 0.0
+            derived_source_observation: (
+                DerivedPatternSourceObservation | None
+            ) = None
+            derived_source_observation_error: str | None = None
+            derived_source_observation_ms = 0.0
+            derived_source_diagnostics: dict[str, object] | None = None
             ecl_vm_snapshot: EclVmSnapshot | None = None
             ecl_lookahead: EclLookaheadResult | None = None
             tagged_velocity_toggles: tuple[TaggedVelocityToggle, ...] = ()
@@ -3670,6 +3728,51 @@ def _run_live_session(
                     birth_contention_before,
                     birth_contention_after,
                 )
+                if trace_derived_pattern_sources:
+                    derived_source_started = time.perf_counter()
+                    try:
+                        if derived_pattern_source_observer is not None:
+                            derived_source_observation = (
+                                derived_pattern_source_observer.observe(
+                                    bullet_blob,
+                                    frame_before=bullet_frame_before,
+                                    frame_after=bullet_frame_after,
+                                )
+                            )
+                        else:
+                            derived_source_observation = (
+                                observe_derived_pattern_sources(
+                                    bullet_blob,
+                                    frame_before=bullet_frame_before,
+                                    frame_after=bullet_frame_after,
+                                )
+                            )
+                    except (
+                        RuntimeError,
+                        TypeError,
+                        ValueError,
+                        struct.error,
+                    ) as error:
+                        derived_source_observation_error = (
+                            f"{type(error).__name__}: {error}"
+                        )
+                    derived_source_observation_ms = (
+                        time.perf_counter() - derived_source_started
+                    ) * 1000.0
+                    if (
+                        derived_pattern_source_observer is not None
+                        and derived_source_observation is not None
+                        and derived_source_observation_error is None
+                    ):
+                        derived_source_diagnostics = (
+                            derived_pattern_source_observer
+                            .diagnostics()
+                            .record(
+                                observation_ms=(
+                                    derived_source_observation_ms
+                                ),
+                            )
+                        )
                 if ecl_vm_snapshot is not None:
                     ecl_birth_intent_started = time.perf_counter()
                     try:
@@ -3762,6 +3865,18 @@ def _run_live_session(
                                 is not None
                                 else None
                             ),
+                            derived_source_observation=(
+                                derived_source_observation
+                            ),
+                            derived_source_error=(
+                                derived_source_observation_error
+                            ),
+                            derived_source_ms=(
+                                derived_source_observation_ms
+                            ),
+                            derived_source_diagnostics=(
+                                derived_source_diagnostics
+                            ),
                     )
                 )
                 birth_trace_build_ms = (
@@ -3772,6 +3887,7 @@ def _run_live_session(
                 birth_trace_timing["build"] = birth_trace_build_ms
                 birth_trace_timing["pre_emit_total"] = (
                     bullet_birth_observation_ms
+                    + derived_source_observation_ms
                     + ecl_birth_intent_ms
                     + birth_trace_build_ms
                 )
@@ -3782,6 +3898,9 @@ def _run_live_session(
                             bullet_birth_observation_error
                         ),
                         intent_error=ecl_birth_intent_error,
+                        derived_source_error=(
+                            derived_source_observation_error
+                        ),
                     ),
                     measure=True,
                 )
@@ -4431,6 +4550,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "select the explicit retrospective birth observer backend; "
             "used only with --trace-bullet-births"
+        ),
+    )
+    parser.add_argument(
+        "--trace-derived-pattern-sources",
+        action="store_true",
+        help=(
+            "add the failed-gate ready-parent transform shadow to an "
+            "explicit bullet-birth trace; diagnostic only"
         ),
     )
     parser.add_argument(

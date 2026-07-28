@@ -4826,3 +4826,39 @@ offline join corrected, G5 source coverage open
   `711e9e7fe86b65ee7f6993e3081df9f5d25bdb9bf32721ee222ce8402b630965`.
 - **Authority:** Evidence and offline analysis only. No planner, recurrence,
   actuator, cadence, or live action changed.
+
+## CE-0161: A ready-parent transform shadow had zero signal and broke its combined budget
+
+Status: observed physical source and performance counterexample; source
+hypothesis rejected and observer isolated behind a separate explicit opt-in
+
+- **Observed workload:** Lunatic Stage-5 run `20260728_150827` completed
+  11,801 decisions over frames `2..42172` with 12 hits, hard no-Bomb,
+  `route_complete`, exact cleanup, and no residual process.
+- **Source falsifier:** All 11,801 native source scans validated without
+  error, but candidate rows and candidate sightings were both zero. The
+  repeating 30-bullet nonspell wave was reproduced at frames 13861 and 13879
+  with the same two-age, ten-groups-of-three shape and no previously observed
+  ready parent.
+- **Bounded conclusion:** The exact readiness predicate cannot attribute the
+  target wave. This does not exclude a derived transform that becomes ready
+  and executes entirely inside a controller capture gap.
+- **Performance falsifier:** Combined birth-plus-source p50/p95/p99/p99.9/max
+  was `0.1346/0.2633/0.4982/3.7388/9.0368 ms`, failing the fixed
+  `0.20/0.40/2.00 ms` gate. The separate source pass contributed p95
+  `0.0474 ms`. Its max was a `gil-released` native-call wall tail, so the
+  scheduler cause remains inferred rather than observed.
+- **Correction:** Source scanning now requires the separate
+  `--trace-derived-pattern-sources` opt-in. Ordinary birth tracing retains
+  schema v9 and does not pay the rejected second pool pass; the explicit
+  source experiment alone emits schema v10.
+- **Rejected next action:** Do not fuse or publish this zero-signal source
+  class merely to make its benchmark pass. Reopen fusion only if a new
+  source contract has physical signal that justifies the contention budget.
+  Follow the fixed stop-rule source order.
+- **Evidence:** Deterministic audit/file SHA-256
+  `a08f137081e51b70994125f7c4a2d165541d936e61a924bde8d58a4f6f0c9bda`;
+  raw trace SHA-256
+  `9081e3ed9ea337016ecfd5fdf4cc8d2a17591b1416ec19060233ade6e3e6565b`.
+- **Authority:** Negative source/performance evidence only. No planner,
+  recurrence, actuator, cadence, future geometry, or action authority changed.

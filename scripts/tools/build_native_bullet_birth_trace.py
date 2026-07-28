@@ -12,7 +12,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 NATIVE_ROOT = ROOT / "native"
-SOURCE = NATIVE_ROOT / "src" / "trace" / "bullet_birth.cpp"
+SOURCES = (
+    NATIVE_ROOT / "src" / "trace" / "bullet_birth.cpp",
+    NATIVE_ROOT / "src" / "trace" / "derived_pattern_source.cpp",
+)
 
 
 def _build(*, compiler: str, output: Path, windows: bool) -> None:
@@ -25,7 +28,7 @@ def _build(*, compiler: str, output: Path, windows: bool) -> None:
         "-shared",
         "-I",
         str(NATIVE_ROOT),
-        str(SOURCE),
+        *(str(source) for source in SOURCES),
         "-o",
         str(output),
     ]

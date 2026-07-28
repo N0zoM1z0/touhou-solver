@@ -249,6 +249,36 @@ def _audit(
                 "allocator_and_page_faults",
             ],
         }
+    if schema_version >= 10:
+        record["derived_source_observation"] = {
+            "schema_version": 1,
+            "role": "trace_only_no_action_authority",
+            "frame_before": frame,
+            "frame_after": frame,
+            "capture_span": 0,
+            "active_count": 1,
+            "candidate_count": 0,
+            "candidates": [],
+            "coverage": {
+                "source_class": (
+                    "ready_visible_parent_bullet_transform_only"
+                ),
+                "future_hazard_coverage": "unknown",
+                "physical_action_authority": "none",
+            },
+        }
+        record["derived_source_error"] = None
+        record["derived_source_diagnostics"] = {
+            "native_segments_ms": {
+                "prepare": 0.001,
+                "native_call": 0.004,
+                "materialize": 0.003,
+                "controller_residual": 0.002,
+            },
+        }
+        record["timing_ms"]["derived_source_observation"] = 0.01
+        record["timing_ms"]["combined_pool_observation"] = 0.04
+        record["timing_ms"]["pre_emit_total"] = 0.10
     return record
 
 
@@ -778,6 +808,44 @@ class BulletBirthAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 BulletBirthAuditError,
                 "omitted sources",
+            ):
+                analyze_trace(trace)
+
+    def test_schema_v10_requires_and_budgets_derived_source_shadow(
+        self,
+    ) -> None:
+        with TemporaryDirectory() as directory:
+            trace = self._trace(directory, schema_version=10)
+            report = analyze_trace(trace)
+            self.assertEqual(
+                report["derived_pattern_source"]["schema_v10_rows"],
+                4,
+            )
+            self.assertEqual(
+                report["derived_pattern_source"]["candidate_sightings"],
+                0,
+            )
+            self.assertEqual(
+                report["gates"]["observer_limits_ms"]["boundary"],
+                "combined_birth_and_derived_source",
+            )
+            self.assertEqual(
+                report["timing_ms"]["combined_pool_observation"]["p95"],
+                0.04,
+            )
+
+            records = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            records[0].pop("derived_source_observation")
+            trace.write_text(
+                "".join(json.dumps(record) + "\n" for record in records),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                BulletBirthAuditError,
+                "derived-source observation",
             ):
                 analyze_trace(trace)
 

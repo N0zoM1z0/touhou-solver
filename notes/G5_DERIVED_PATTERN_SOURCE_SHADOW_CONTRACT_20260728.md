@@ -2,10 +2,10 @@
 
 Date: 2026-07-28
 
-Status: fixed before implementation. This contract authorizes one default-off,
-trace-only observation of already resident TH08 bullet transform state. It
-adds no future-hazard coverage, planner, publication, issue, or physical action
-authority.
+Status: fixed before implementation; the physical source and performance
+gates both failed. The implementation is retained behind a separate explicit
+opt-in for reproducibility only. It adds no future-hazard coverage, planner,
+publication, issue, or physical action authority.
 
 This follows
 `G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md` and CE-0160.
@@ -231,3 +231,51 @@ If the wave matches, the next contract may model only the observed
 derived-pattern transition class. Enemy source coverage remains open, and the
 canonical first hit's much earlier bullet still requires parallel
 viability-preservation work.
+
+## Physical Outcome
+
+The normal-priority Lunatic Stage-5 workload
+`lunatic_route2_stage5_unattended_20260728_150827` completed 11,801 decisions
+over frames `2..42172`, with 12 hits, hard no-Bomb, `route_complete`, exact
+key release, supervisor exit zero, and no residual game/controller process.
+It used native schema v10. The pre-split experiment automatically enabled the
+source shadow whenever birth tracing was enabled; the retained compact session
+file now states that provenance explicitly.
+
+**Observed source falsifier:** all 11,801 source observations succeeded, but
+there were zero ready-parent candidate sightings. The repeating 30-bullet
+nonspell waves were reproduced at frames including 13861 and 13879. Each
+retained the same `15 age-two + 15 age-one` shape and zero candidate sources.
+Therefore no target wave can be joined to a previously observed parent that
+satisfies the fixed readiness predicate. This rejects the hypothesis tested
+by this contract. It does not prove that no derived transform executed
+between controller observations.
+
+**Observed performance falsifier:** the combined two-pass observer reported
+p50/p95/p99/p99.9/max
+`0.1346/0.2633/0.4982/3.7388/9.0368 ms`, failing every fixed percentile or
+maximum limit. The source-only segment was
+`0.0288/0.0474/0.1011/0.9905/6.9528 ms`. The run used the inherited
+`gil-released` default rather than the accepted GIL-held B4 comparison
+boundary, so its extreme native-call tails cannot be compared directly to
+the retained GIL-held Stage-5 pass. The approximately 0.05-ms source p95
+increment is nevertheless real and already makes a separate second pass
+ineligible near the existing birth-observer budget.
+
+The source observer is now disabled unless
+`--trace-derived-pattern-sources` accompanies
+`--trace-bullet-births`. Ordinary birth traces remain schema v9; only the
+explicit failed-gate experiment emits schema v10. A fused scan remains the
+only reviewed performance candidate if this exact source class is ever
+reopened, but zero physical candidate sightings make that work lower priority
+than the stop-rule sequence: ordinary nonspell enemy main VMs, auxiliary VMs,
+callbacks/interrupts, deferred enemy state, then non-ECL native sources.
+
+The deterministic residual/source-join report is
+`artifacts/viability_audit/g5_derived_source_stage5_20260728_150827.json`,
+SHA-256
+`a08f137081e51b70994125f7c4a2d165541d936e61a924bde8d58a4f6f0c9bda`.
+It regenerates byte-identically and records empty-edge digest
+`4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945`.
+The immutable raw trace SHA-256 is
+`9081e3ed9ea337016ecfd5fdf4cc8d2a17591b1416ec19060233ade6e3e6565b`.

@@ -13,6 +13,7 @@ from th08_ecl_birth import (
     observe_deferred_fire_state,
 )
 from th08_live.birth_trace import (
+    BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION,
     BULLET_BIRTH_INTENT_SCOPE,
     BULLET_BIRTH_POOL_SCOPE,
     BULLET_BIRTH_TRACE_ROLE,
@@ -32,6 +33,10 @@ from th08_live.birth_contention import (
     BirthObserverContention,
     BirthObserverFutureStates,
 )
+from th08_live.derived_pattern_source import (
+    DerivedPatternSourceObservation,
+)
+from th08_live.controller import _build_birth_trace_observers
 
 
 def _trace_input(
@@ -77,6 +82,13 @@ def _trace_input(
             future_states,
             future_states,
         ),
+        derived_source_observation=DerivedPatternSourceObservation(
+            frame_before=117,
+            frame_after=118,
+            active_count=1,
+            candidates=(),
+        ),
+        derived_source_ms=0.009,
     )
 
 
@@ -135,6 +147,54 @@ def _intent() -> EclBirthLookaheadResult:
 
 
 class BulletBirthTraceTests(unittest.TestCase):
+    def test_source_opt_in_does_not_disable_base_birth_tracker(self) -> None:
+        tracker, source = _build_birth_trace_observers(
+            trace_bullet_births=True,
+            trace_derived_pattern_sources=False,
+            backend="python",
+            native_call_mode="gil-released",
+        )
+        self.assertIsNotNone(tracker)
+        self.assertIsNone(source)
+
+        tracker, source = _build_birth_trace_observers(
+            trace_bullet_births=False,
+            trace_derived_pattern_sources=False,
+            backend="python",
+            native_call_mode="gil-released",
+        )
+        self.assertIsNone(tracker)
+        self.assertIsNone(source)
+
+        with self.assertRaisesRegex(ValueError, "requires"):
+            _build_birth_trace_observers(
+                trace_bullet_births=False,
+                trace_derived_pattern_sources=True,
+                backend="python",
+                native_call_mode="gil-released",
+            )
+
+    def test_base_trace_stays_schema_v9_without_failed_source_shadow(
+        self,
+    ) -> None:
+        record = build_bullet_birth_trace_record(
+            replace(
+                _trace_input(),
+                derived_source_observation=None,
+                derived_source_ms=0.0,
+            )
+        )
+        self.assertEqual(
+            record["schema_version"],
+            BULLET_BIRTH_BASE_TRACE_SCHEMA_VERSION,
+        )
+        self.assertNotIn("derived_source_observation", record)
+        self.assertNotIn("ready_derived_sources", record["counts"])
+        self.assertNotIn(
+            "combined_pool_observation",
+            record["timing_ms"],
+        )
+
     def test_only_errors_require_a_predecision_flush(self) -> None:
         self.assertFalse(
             birth_trace_requires_immediate_flush(
@@ -170,6 +230,15 @@ class BulletBirthTraceTests(unittest.TestCase):
         self.assertIsNone(record["observation_diagnostics"])
         self.assertEqual(record["counts"]["observed_evidence"], 1)
         self.assertEqual(record["counts"]["visible_intents"], 1)
+        self.assertEqual(record["counts"]["ready_derived_sources"], 0)
+        self.assertEqual(
+            record["derived_source_observation"]["schema_version"],
+            1,
+        )
+        self.assertEqual(
+            record["timing_ms"]["combined_pool_observation"],
+            0.04,
+        )
         self.assertEqual(
             record["observation"]["evidence"]["format"],
             "columnar_v1",
@@ -234,9 +303,17 @@ class BulletBirthTraceTests(unittest.TestCase):
             observation_backend="native",
             native_call_mode="gil-held",
             observation_diagnostics=diagnostics,
+            derived_source_diagnostics={
+                "native_segments_ms": {
+                    "prepare": 0.001,
+                    "native_call": 0.003,
+                    "materialize": 0.002,
+                    "controller_residual": 0.003,
+                },
+            },
         )
         record = build_bullet_birth_trace_record(trace_input)
-        self.assertEqual(record["schema_version"], 9)
+        self.assertEqual(record["schema_version"], 10)
         self.assertEqual(record["native_call_mode"], "gil-held")
         self.assertEqual(record["observation_diagnostics"], diagnostics)
 

@@ -1,0 +1,56 @@
+{
+  "authority": "offline trace-shadow performance only",
+  "gate": {
+    "max_limit_ms": 2.0,
+    "max_pass": true,
+    "p95_limit_ms": 0.2,
+    "p95_pass": true,
+    "p99_limit_ms": 0.4,
+    "p99_pass": true,
+    "passed": true
+  },
+  "parity": {
+    "candidate_count": 5,
+    "passed": true,
+    "record_sha256": "dbf0e2ce249c2d725662983bbcb817fb88257882b2f3272972844f659377192c"
+  },
+  "passed": true,
+  "report_digest": "cec2c3b342e7266a555c98049f0767061f9f1dec84bf29482a4c819dff3616c0",
+  "schema": "th08-derived-pattern-source-benchmark-v1",
+  "timing_ms": {
+    "materialize": {
+      "count": 10000,
+      "max": 0.37835800321772695,
+      "mean": 0.029729113895155024,
+      "p50": 0.02882399712689221,
+      "p95": 0.036773898318642695,
+      "p99": 0.05249244321021253,
+      "p99_9": 0.09200342773692691
+    },
+    "native_call": {
+      "count": 10000,
+      "max": 0.07316499250009656,
+      "mean": 0.007682105913409032,
+      "p50": 0.007287992048077285,
+      "p95": 0.009769055759534238,
+      "p99": 0.014760009071324043,
+      "p99_9": 0.036916286582709346
+    },
+    "observe_total": {
+      "count": 10000,
+      "max": 0.39226900844369084,
+      "mean": 0.039543772226898,
+      "p50": 0.03826100146397948,
+      "p95": 0.04854608996538445,
+      "p99": 0.06819549016654494,
+      "p99_9": 0.10550701642932836
+    }
+  },
+  "workload": {
+    "active_count": 422,
+    "iterations": 10000,
+    "native_call_mode": "gil-held",
+    "source_count": 5,
+    "warmup": 500
+  }
+}

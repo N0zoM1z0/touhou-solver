@@ -90,6 +90,26 @@ class AgentHotkeyTests(unittest.TestCase):
             "gil-held",
         )
 
+        derived_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_bullet_births=True,
+            trace_derived_pattern_sources=True,
+        )
+        derived_parsed = build_parser().parse_args(derived_arguments)
+        self.assertTrue(derived_parsed.trace_derived_pattern_sources)
+
+        with self.assertRaisesRegex(ValueError, "requires"):
+            build_long_run_arguments(
+                output=Path("trial.jsonl"),
+                stop_file=Path("trial.stop"),
+                pid=1234,
+                difficulty=3,
+                trace_derived_pattern_sources=True,
+            )
+
     def test_full_route_can_extend_the_worker_deadline(self) -> None:
         arguments = build_long_run_arguments(
             output=Path("trial.jsonl"),

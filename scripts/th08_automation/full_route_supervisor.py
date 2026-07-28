@@ -203,6 +203,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "safety_value_horizon": 0,
         "trace_transform_runtime": False,
         "trace_bullet_births": args.trace_bullet_births,
+        "trace_derived_pattern_sources": (
+            args.trace_derived_pattern_sources
+        ),
         "bullet_birth_backend": args.bullet_birth_backend,
         "bullet_birth_native_call_mode": (
             args.bullet_birth_native_call_mode
@@ -226,6 +229,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             expected_stage=0,
             terminal_stage=None,
             trace_bullet_births=args.trace_bullet_births,
+            trace_derived_pattern_sources=(
+                args.trace_derived_pattern_sources
+            ),
             bullet_birth_backend=args.bullet_birth_backend,
             bullet_birth_native_call_mode=(
                 args.bullet_birth_native_call_mode
@@ -467,6 +473,14 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("python", "native"),
         default="python",
         help="explicit trace-only hostile-bullet birth observer backend",
+    )
+    parser.add_argument(
+        "--trace-derived-pattern-sources",
+        action="store_true",
+        help=(
+            "add the failed-gate ready-parent transform shadow to an "
+            "explicit bullet-birth trace; diagnostic only"
+        ),
     )
     parser.add_argument(
         "--bullet-birth-native-call-mode",

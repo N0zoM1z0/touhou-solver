@@ -60,6 +60,7 @@ def build_long_run_arguments(
     terminal_stage: int | None = None,
     trace_transform_runtime: bool = False,
     trace_bullet_births: bool = False,
+    trace_derived_pattern_sources: bool = False,
     bullet_birth_backend: str = "python",
     bullet_birth_native_call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
     safety_value_horizon: int = 0,
@@ -96,6 +97,10 @@ def build_long_run_arguments(
         raise ValueError("unknown bullet birth backend")
     if bullet_birth_native_call_mode not in NATIVE_CALL_MODES:
         raise ValueError("unknown native bullet birth call mode")
+    if trace_derived_pattern_sources and not trace_bullet_births:
+        raise ValueError(
+            "derived-pattern source tracing requires bullet-birth tracing"
+        )
     arguments = [
         str(output),
         "--pid",
@@ -137,6 +142,8 @@ def build_long_run_arguments(
                 bullet_birth_native_call_mode,
             )
         )
+    if trace_derived_pattern_sources:
+        arguments.append("--trace-derived-pattern-sources")
     if safety_value_horizon:
         arguments.extend(
             ("--safety-value-horizon", str(safety_value_horizon))

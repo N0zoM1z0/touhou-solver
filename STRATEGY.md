@@ -478,6 +478,17 @@ comparison.
    contract, while earlier viability preservation remains a parallel problem.
    It does not authorize a future envelope, causal blame for the hit, or any
    live action.
+   The first nonspell topology hypothesis is now rejected. Stage-5 run
+   `20260728_150827` reproduced the 30-bullet two-age wave but found zero
+   ready derived-parent candidates across all 11,801 rows. Its separate
+   second pool pass also failed the combined B4 boundary at
+   `0.2633/0.4982/9.0368 ms` p95/p99/max. The observer remains reproducible
+   only behind `--trace-derived-pattern-sources`; ordinary schema-v9 birth
+   tracing pays no added scan. This is a rejected source strategy and
+   performance boundary, not evidence against between-capture transforms.
+   Continue source coverage with ordinary nonspell enemy main VMs before
+   auxiliary/callback/native sources. Retain a fused scan as a candidate only
+   after a new source class demonstrates physical signal.
    The projection auditor now separates universal `core` gates from the
    default Stage-4A spell workload gates. Stage 5 passes all core gates over
    4,871 callback rows; spell 115 remains fail-closed on 1,220

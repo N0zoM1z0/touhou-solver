@@ -12,11 +12,15 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
+from analysis.derived_pattern_source_join import (
+    build_derived_pattern_source_join,
+)
 
-SCHEMA = "th08-bullet-birth-residual-audit-v7"
+
+SCHEMA = "th08-bullet-birth-residual-audit-v8"
 TRACE_KIND = "bullet_birth_audit"
 TRACE_ROLE = "trace_only_no_action_authority"
-TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5, 6, 7, 8, 9))
+TRACE_SCHEMA_VERSIONS = frozenset((1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
 NATIVE_CALL_MODES = frozenset(("gil-released", "gil-held"))
 NATIVE_PHASES = ("prepare", "native_call", "materialize")
 THREAD_CYCLE_SOURCE_WINDOWS = "windows_query_thread_cycle_time"
@@ -395,6 +399,181 @@ def _validate_intent_coverage(
         )
 
 
+def _validate_derived_source_observation(
+    record: dict[str, Any],
+    *,
+    line_number: int,
+) -> None:
+    observation = record.get("derived_source_observation")
+    error = record.get("derived_source_error")
+    diagnostics = record.get("derived_source_diagnostics")
+    backend = record.get("observation_backend")
+    timing = record.get("timing_ms")
+    if error is not None:
+        if not isinstance(error, str) or observation is not None:
+            raise BulletBirthAuditError(
+                f"line {line_number}: invalid derived-source failure"
+            )
+        if diagnostics is not None:
+            raise BulletBirthAuditError(
+                f"line {line_number}: failed derived-source scan publishes "
+                "diagnostics"
+            )
+        return
+    if not isinstance(observation, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: schema-v10 row omits derived-source observation"
+        )
+    if (
+        observation.get("schema_version") != 1
+        or observation.get("role") != TRACE_ROLE
+    ):
+        raise BulletBirthAuditError(
+            f"line {line_number}: invalid derived-source schema or role"
+        )
+    active_count = observation.get("active_count")
+    candidate_count = observation.get("candidate_count")
+    candidates = observation.get("candidates")
+    if (
+        type(active_count) is not int
+        or not 0 <= active_count <= 1536
+        or type(candidate_count) is not int
+        or not 0 <= candidate_count <= active_count
+        or not isinstance(candidates, list)
+        or len(candidates) != candidate_count
+    ):
+        raise BulletBirthAuditError(
+            f"line {line_number}: invalid derived-source counts"
+        )
+    for candidate in candidates:
+        if (
+            not isinstance(candidate, dict)
+            or candidate.get("classification")
+            != "derived_pattern_ready_candidate"
+            or candidate.get("authority") != "trace_only"
+            or type(candidate.get("slot")) is not int
+            or not 0 <= candidate["slot"] < 1536
+            or type(candidate.get("geometry_finite")) is not bool
+        ):
+            raise BulletBirthAuditError(
+                f"line {line_number}: invalid derived-source candidate"
+            )
+        position = candidate.get("position")
+        if candidate["geometry_finite"]:
+            if (
+                not isinstance(position, list)
+                or len(position) != 2
+                or any(
+                    isinstance(value, bool)
+                    or not isinstance(value, (int, float))
+                    or not math.isfinite(value)
+                    for value in position
+                )
+            ):
+                raise BulletBirthAuditError(
+                    f"line {line_number}: invalid derived-source position"
+                )
+        elif position is not None:
+            raise BulletBirthAuditError(
+                f"line {line_number}: nonfinite source publishes geometry"
+            )
+        for field in ("first_words", "second_words"):
+            words = candidate.get(field)
+            if (
+                not isinstance(words, list)
+                or len(words) != 6
+                or any(
+                    type(value) is not int or not 0 <= value <= 0xFFFFFFFF
+                    for value in words
+                )
+            ):
+                raise BulletBirthAuditError(
+                    f"line {line_number}: invalid derived-source record words"
+                )
+        pattern = candidate.get("pattern")
+        if not isinstance(pattern, dict):
+            raise BulletBirthAuditError(
+                f"line {line_number}: derived-source pattern is missing"
+            )
+        count_1 = pattern.get("count_1")
+        count_2 = pattern.get("count_2")
+        predicted = pattern.get("predicted_child_count")
+        if (
+            type(count_1) is not int
+            or type(count_2) is not int
+            or type(predicted) is not int
+            or predicted != max(0, count_1) * max(0, count_2)
+        ):
+            raise BulletBirthAuditError(
+                f"line {line_number}: inconsistent derived-source child count"
+            )
+    if not isinstance(timing, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: derived-source timing is missing"
+        )
+    source_ms = timing.get("derived_source_observation")
+    combined_ms = timing.get("combined_pool_observation")
+    birth_ms = timing.get("observation")
+    if any(
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        or value < 0.0
+        for value in (source_ms, combined_ms, birth_ms)
+    ) or not math.isclose(
+        float(combined_ms),
+        float(source_ms) + float(birth_ms),
+        rel_tol=1e-9,
+        abs_tol=1e-6,
+    ):
+        raise BulletBirthAuditError(
+            f"line {line_number}: derived-source timing does not reconcile"
+        )
+    if backend == "python":
+        if diagnostics is not None:
+            raise BulletBirthAuditError(
+                f"line {line_number}: Python derived-source scan fabricates "
+                "native diagnostics"
+            )
+        return
+    if not isinstance(diagnostics, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: native derived-source diagnostics are missing"
+        )
+    segments = diagnostics.get("native_segments_ms")
+    if not isinstance(segments, dict):
+        raise BulletBirthAuditError(
+            f"line {line_number}: derived-source diagnostics omit segments"
+        )
+    total = 0.0
+    for field in (
+        "prepare",
+        "native_call",
+        "materialize",
+        "controller_residual",
+    ):
+        value = segments.get(field)
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or value < 0.0
+        ):
+            raise BulletBirthAuditError(
+                f"line {line_number}: invalid derived-source segment {field}"
+            )
+        total += float(value)
+    if not math.isclose(
+        total,
+        float(source_ms),
+        rel_tol=1e-9,
+        abs_tol=1e-6,
+    ):
+        raise BulletBirthAuditError(
+            f"line {line_number}: derived-source segments do not reconcile"
+        )
+
+
 def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
     if not isinstance(record, dict):
         raise BulletBirthAuditError(
@@ -409,13 +588,13 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             f"line {line_number}: audit role is not trace-only"
         )
     if (
-        record.get("schema_version") in {5, 6, 7, 8, 9}
+        record.get("schema_version") in {5, 6, 7, 8, 9, 10}
         and record.get("observation_backend") not in {"python", "native"}
     ):
         raise BulletBirthAuditError(
             f"line {line_number}: audit omits a valid observation backend"
         )
-    if record.get("schema_version") in {7, 8, 9}:
+    if record.get("schema_version") in {7, 8, 9, 10}:
         backend = record.get("observation_backend")
         native_call_mode = record.get("native_call_mode")
         if backend == "native" and native_call_mode not in NATIVE_CALL_MODES:
@@ -426,7 +605,7 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
             raise BulletBirthAuditError(
                 f"line {line_number}: Python audit fabricates a native call mode"
             )
-    if record.get("schema_version") in {6, 7, 8, 9}:
+    if record.get("schema_version") in {6, 7, 8, 9, 10}:
         backend = record.get("observation_backend")
         diagnostics = record.get("observation_diagnostics")
         if backend == "python":
@@ -445,20 +624,25 @@ def _validated_audit(record: Any, *, line_number: int) -> dict[str, Any]:
                 diagnostics,
                 timing=record.get("timing_ms"),
                 line_number=line_number,
-                require_thread_cycles=record.get("schema_version") == 9,
+                require_thread_cycles=record.get("schema_version") in {9, 10},
             )
         elif diagnostics is not None:
             raise BulletBirthAuditError(
                 f"line {line_number}: failed native audit publishes "
                 "diagnostics"
             )
-    if record.get("schema_version") in {8, 9}:
+    if record.get("schema_version") in {8, 9, 10}:
         intent = record.get("intent")
         if isinstance(intent, dict):
             _validate_intent_coverage(intent, line_number=line_number)
-    if record.get("schema_version") == 9:
+    if record.get("schema_version") in {9, 10}:
         _validate_observer_contention(
             record.get("observer_contention"),
+            line_number=line_number,
+        )
+    if record.get("schema_version") == 10:
+        _validate_derived_source_observation(
+            record,
             line_number=line_number,
         )
     for field in ("frame", "snapshot_frame", "gameplay_epoch"):
@@ -862,7 +1046,7 @@ def _intent_events(
                 f"velocity_lookahead_lowering:{velocity_lowering}"
             ] += 1
         if (
-            audit["schema_version"] in {8, 9}
+            audit["schema_version"] in {8, 9, 10}
             and pointer
             and not scope.get("velocity_lookahead_metadata_valid")
         ):
@@ -1041,6 +1225,7 @@ def _intent_events(
 
 def analyze_trace(trace_path: Path) -> dict[str, object]:
     audits, decisions, trace_sha256, trace_bytes = _read_trace(trace_path)
+    derived_source_join = build_derived_pattern_source_join(audits)
     (
         events,
         intent_statuses,
@@ -1063,6 +1248,8 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     by_phase: defaultdict[str, Counter[str]] = defaultdict(Counter)
     observation_ms: list[float] = []
     observation_cpu_ms: list[float] = []
+    derived_source_ms: list[float] = []
+    combined_pool_observation_ms: list[float] = []
     intent_ms: list[float] = []
     build_ms: list[float] = []
     pre_emit_total_ms: list[float] = []
@@ -1072,6 +1259,9 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     unmatched_samples: list[dict[str, object]] = []
     ambiguous_samples: list[dict[str, object]] = []
     observation_errors = 0
+    derived_source_errors = 0
+    derived_source_candidate_rows = 0
+    derived_source_candidates = 0
     intent_errors = 0
     active_spell_scope_rows = 0
     omitted_sources: set[str] = set()
@@ -1106,11 +1296,17 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     ] = defaultdict(lambda: defaultdict(list))
     native_cycle_attribution_rows = 0
     schema_v9_native_success_rows = 0
+    schema_v10_rows = 0
+    derived_source_native_segment_ms: defaultdict[str, list[float]] = (
+        defaultdict(list)
+    )
     observer_contention_classes: Counter[str] = Counter()
     observer_contention_patterns: Counter[str] = Counter()
     previous_evidence_count: int | None = None
 
     for audit in audits:
+        if audit["schema_version"] == 10:
+            schema_v10_rows += 1
         trace_schema_versions[int(audit["schema_version"])] += 1
         observation_backends[
             str(
@@ -1161,6 +1357,35 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             deferred_state_values["unknown"] += 1
         if audit.get("observation_error") is not None:
             observation_errors += 1
+        if audit.get("derived_source_error") is not None:
+            derived_source_errors += 1
+        derived_source_observation = audit.get(
+            "derived_source_observation"
+        )
+        if isinstance(derived_source_observation, dict):
+            candidate_count = int(
+                derived_source_observation.get("candidate_count", 0)
+            )
+            derived_source_candidates += candidate_count
+            if candidate_count:
+                derived_source_candidate_rows += 1
+        derived_source_diagnostics = audit.get(
+            "derived_source_diagnostics"
+        )
+        if isinstance(derived_source_diagnostics, dict):
+            source_segments = derived_source_diagnostics.get(
+                "native_segments_ms"
+            )
+            if isinstance(source_segments, dict):
+                for field in (
+                    "prepare",
+                    "native_call",
+                    "materialize",
+                    "controller_residual",
+                ):
+                    derived_source_native_segment_ms[field].append(
+                        float(source_segments[field])
+                    )
         if audit.get("intent_error") is not None:
             intent_errors += 1
         timing = audit.get("timing_ms")
@@ -1169,6 +1394,11 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             for field, target in (
                 ("observation", observation_ms),
                 ("observation_cpu", observation_cpu_ms),
+                ("derived_source_observation", derived_source_ms),
+                (
+                    "combined_pool_observation",
+                    combined_pool_observation_ms,
+                ),
                 ("intent", intent_ms),
                 ("build", build_ms),
                 ("pre_emit_total", pre_emit_total_ms),
@@ -1195,7 +1425,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         row_contention_class: str | None = None
         row_contention_names: list[str] = []
         if (
-            audit["schema_version"] in {6, 7, 8, 9}
+            audit["schema_version"] in {6, 7, 8, 9, 10}
             and isinstance(diagnostics, dict)
         ):
             segments = diagnostics["native_segments_ms"]
@@ -1213,7 +1443,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             }
             for field, value in numeric_segments.items():
                 native_segment_ms[field].append(value)
-            if audit["schema_version"] == 9:
+            if audit["schema_version"] in {9, 10}:
                 schema_v9_native_success_rows += 1
                 raw_cycles = diagnostics.get("thread_cycles")
                 assert isinstance(raw_cycles, dict)
@@ -1396,14 +1626,26 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
     unique_temporal = classifications["exact"] + classifications["support"]
     matched_temporal = unique_temporal + classifications["ambiguous"]
     observation_timing = _distribution(observation_ms)
-    validation_passed = observation_errors == 0 and intent_errors == 0
+    combined_observation_timing = _distribution(
+        combined_pool_observation_ms
+    )
+    budget_timing = (
+        combined_observation_timing
+        if schema_v10_rows
+        else observation_timing
+    )
+    validation_passed = (
+        observation_errors == 0
+        and derived_source_errors == 0
+        and intent_errors == 0
+    )
     observer_budget_passed = bool(
-        observation_timing["p95"] is not None
-        and observation_timing["p99"] is not None
-        and observation_timing["max"] is not None
-        and observation_timing["p95"] <= OBSERVER_P95_LIMIT_MS
-        and observation_timing["p99"] <= OBSERVER_P99_LIMIT_MS
-        and observation_timing["max"] <= OBSERVER_MAX_LIMIT_MS
+        budget_timing["p95"] is not None
+        and budget_timing["p99"] is not None
+        and budget_timing["max"] is not None
+        and budget_timing["p95"] <= OBSERVER_P95_LIMIT_MS
+        and budget_timing["p99"] <= OBSERVER_P99_LIMIT_MS
+        and budget_timing["max"] <= OBSERVER_MAX_LIMIT_MS
     )
     cycle_attribution_required = schema_v9_native_success_rows > 0
     cycle_attribution_available = (
@@ -1456,6 +1698,11 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             "cycle_attribution_required": cycle_attribution_required,
             "cycle_attribution_available": cycle_attribution_available,
             "observer_limits_ms": {
+                "boundary": (
+                    "combined_birth_and_derived_source"
+                    if schema_v10_rows
+                    else "birth_observation"
+                ),
                 "p95": OBSERVER_P95_LIMIT_MS,
                 "p99": OBSERVER_P99_LIMIT_MS,
                 "max": OBSERVER_MAX_LIMIT_MS,
@@ -1471,6 +1718,7 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             "decision_scopes": len(decisions),
             "active_spell_main_vm_rows": active_spell_scope_rows,
             "observation_errors": observation_errors,
+            "derived_source_errors": derived_source_errors,
             "intent_errors": intent_errors,
             "trace_schema_versions": _counter(trace_schema_versions),
             "observation_backends": _counter(observation_backends),
@@ -1489,6 +1737,20 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
             "evidence_per_row": _distribution(evidence_per_row),
             "age": _distribution(ages),
         },
+        "derived_pattern_source": {
+            "schema_v10_rows": schema_v10_rows,
+            "candidate_rows": derived_source_candidate_rows,
+            "candidate_sightings": derived_source_candidates,
+            "authority": "trace_only",
+            "future_hazard_coverage": "unknown",
+            "native_segments_ms": {
+                field: _distribution(values)
+                for field, values in sorted(
+                    derived_source_native_segment_ms.items()
+                )
+            },
+        },
+        "derived_pattern_source_join": derived_source_join,
         "intent": {
             "status_sightings": _counter(intent_statuses),
             "stop_reasons": _counter(stop_reasons),
@@ -1559,6 +1821,10 @@ def analyze_trace(trace_path: Path) -> dict[str, object]:
         "timing_ms": {
             "observation": observation_timing,
             "observation_cpu": _distribution(observation_cpu_ms),
+            "derived_source_observation": _distribution(
+                derived_source_ms
+            ),
+            "combined_pool_observation": combined_observation_timing,
             "intent": _distribution(intent_ms),
             "build": _distribution(build_ms),
             "pre_emit_total": _distribution(pre_emit_total_ms),

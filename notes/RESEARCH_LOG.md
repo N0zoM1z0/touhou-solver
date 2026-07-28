@@ -7885,3 +7885,45 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - **Decision:** Record CE-0160 and contract nonspell source topology next.
   Continue earlier viability-preservation and performance work in parallel.
   This checkpoint changes no live path and grants no action authority.
+
+## 2026-07-28 — Rejected the ready derived-parent source hypothesis physically
+
+- Implemented an independent scalar readiness oracle, bounded allocation-free
+  native scanner, reusable candidate-only wrapper, schema-v10 trace fields,
+  strict residual validation, and a modular next-observation source join.
+  Randomized full-pool layouts and all declared readiness boundaries have
+  scalar/native parity.
+- Retained isolated five-source/422-active Linux and Windows reports over
+  10,000 observations. Total p95/p99/max is
+  `0.0485/0.0682/0.3923 ms` on Linux and
+  `0.0565/0.0978/0.3129 ms` on Windows. Both isolated gates pass, with
+  identical scalar/native record digest
+  `dbf0e2ce249c2d725662983bbcb817fb88257882b2f3272972844f659377192c`.
+- **Observed physical source failure:** Lunatic Stage-5 run
+  `lunatic_route2_stage5_unattended_20260728_150827` completed frames
+  `2..42172`, 11,801 decisions, 12 hits, hard no-Bomb, accepted automatic
+  transitions, `route_complete`, exact key release, supervisor exit zero,
+  and no residual process. All 11,801 source scans succeeded and all returned
+  zero candidates. Reproduced 30-bullet waves at frames 13861 and 13879 have
+  the retained two-age shape and no ready parent.
+- **Observed physical performance failure:** Combined birth/source
+  p50/p95/p99/p99.9/max is
+  `0.1346/0.2633/0.4982/3.7388/9.0368 ms`; validation, timed intent, and
+  Windows cycle attribution pass, but the fixed observer budget fails. The
+  run inherited `gil-released`; that provenance prevents comparison of its
+  extreme tails to the accepted GIL-held B4 workload but does not erase the
+  second pass's p95 cost.
+- The failed source shadow now has a separate
+  `--trace-derived-pattern-sources` opt-in. Ordinary bullet-birth traces stay
+  schema v9 and no longer scan twice. Only the explicit failed-gate experiment
+  emits schema v10.
+- Ruff, both native builds, and complete Linux/Windows discovery pass 889
+  tests. Windows retains its existing platform skips.
+- The residual/source-join report regenerates byte-identically at SHA-256
+  `a08f137081e51b70994125f7c4a2d165541d936e61a924bde8d58a4f6f0c9bda`;
+  raw trace SHA-256 is
+  `9081e3ed9ea337016ecfd5fdf4cc8d2a17591b1416ec19060233ade6e3e6565b`.
+- **Decision:** Record CE-0161 and reject the tested ready-parent source
+  strategy. Do not spend a fused scan on a zero-signal class. Follow the
+  contract stop order, beginning with ordinary nonspell enemy main VMs, while
+  continuing viability-preservation and general performance work.

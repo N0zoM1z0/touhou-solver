@@ -7572,3 +7572,45 @@ local regression, not native runtime parity. Static pipeline Evidence remains
   the same order as the physical `0.0059 ms` p95 miss, but B4 remains open.
   No model, callback coverage, geometry, cadence, worker, input, or action
   authority changes.
+
+## 2026-07-28 — Retained the failed optimized B4 physical gate
+
+- Fresh normal-priority GIL-held Stage-4A run
+  `lunatic_route2_stage4a_unattended_20260728_121028` completed frames
+  `1..44270` over 14,066 decisions with ten hits, hard no-Bomb,
+  `route_complete`, accepted artifacts, key release, supervisor/game
+  termination, and no residual process.
+- All ten contacts follow global viability exhaustion. The count is
+  descriptively below the immediately preceding 14-contact projection run
+  but above an earlier nine-contact GIL-held run. Because RNG, phase timing,
+  densities, and post-death resources differ, no survival improvement or
+  regression is inferred.
+- **Observed B4 result:** Observation p50/p95/p99/p99.9/max is
+  `0.0983/0.1986/0.3400/0.5439/8.3269 ms`. P95 and p99 pass; maximum fails.
+  Frame 11969 spends `8.2328 ms` in four-row materialization with ordinary
+  same-cohort current-thread cycles and no Future endpoint transition.
+  Frame 38043 spends `4.9519 ms` in 48-row materialization, has the run-wide
+  maximum materialization cycle count, and coincides with corridor
+  `inflight -> done`. No completed GC overlaps either row.
+- **Decision:** Retain the cycle-delta optimization, do not reopen the
+  rejected priority intervention, and keep B4 open. A validation shortcut or
+  process isolation requires a separate invariant/causal contract. Birth audit
+  SHA-256 is
+  `c4a715c0e50f6af8b0d712cfe36ae1a2697173aec49369b3dd93601b91382e9d`.
+- All 5,663 VM projections pass; projection audit SHA-256 is
+  `bf3126b0259e2a9a0e60238fe843cf731cc6e4043db796b1ac6bda2bc2ae964d`.
+- Static ECL replay finds its first retained-file/runtime-image mapping
+  failure at spell-73 frame 44212. The old row-local error handling then
+  accepted plausible stale bytes at frames 44216/44246/44266 and reported
+  three false unknown-to-complete transitions.
+- The auditor now invalidates the static mapping after its first decode/read
+  failure. It conservatively excludes all 27 later callback rows, reports
+  zero unknown-to-complete transitions, and still fails the all-row and
+  no-unknown-exclusion gates. A deterministic test retains the
+  invalid-header/valid-later-bytes falsifier. Corrected audit SHA-256 is
+  `b8b8695fcf710c693201a87ecb99840c33e569fbf68e8236653e7b213142d839`.
+- **Authority:** The live scanner remained fail-closed throughout. This
+  checkpoint changes only offline evidence accounting and retains physical
+  failure evidence; no callback, geometry, survival, or action authority is
+  added. Ruff and complete Linux/Windows suites pass 851 tests in
+  `9.398/16.771 s`, with three existing Windows skips.

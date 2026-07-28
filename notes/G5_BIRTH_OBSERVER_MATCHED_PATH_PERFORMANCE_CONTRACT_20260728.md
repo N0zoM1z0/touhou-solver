@@ -242,3 +242,69 @@ existing skips. The improvement is similar in scale to the physical
 `0.0059 ms` p95 miss, but offline timing cannot establish the result under
 game/worker contention. B4 remains open pending one fresh unchanged
 normal-priority Stage-4A trace.
+
+## Fresh Physical Gate And Static-Mapping Correction
+
+Fresh normal-priority GIL-held Stage-4A run
+`lunatic_route2_stage4a_unattended_20260728_121028` completed frames
+`1..44270` over 14,066 decisions with hard no-Bomb, accepted route
+completion, key release, supervisor/game cleanup, and no residual process.
+All rows retain schema-v9 native/GIL-held provenance.
+
+The optimization improves the fixed physical percentile but does not close
+B4:
+
+- observation p50/p95/p99/p99.9/max is
+  `0.0983/0.1986/0.3400/0.5439/8.3269 ms`;
+- prepare/native/materialize/controller-residual p95 is
+  `0.0071/0.0593/0.0852/0.0675 ms`;
+- frame 11969 spends `8.2328 ms` of `8.3269 ms` in materialization for four
+  evidence rows while its materialization cycle count is ordinary for that
+  cohort; and
+- frame 38043 spends `4.9519 ms` of `5.0455 ms` in materialization for 48
+  evidence rows, has the run-wide maximum materialization cycle count
+  (`681916`), and coincides with a corridor Future
+  `inflight -> done` transition.
+
+No completed GC overlaps either tail. The first row supports external
+descheduling/contention; the second supports a mixture of executed work and
+Future-completion/GIL handoff. Neither identifies one removable owner.
+Therefore the fixed p95/p99 limits pass but the `2.00 ms` maximum fails.
+B4 remains open. The rejected corridor-priority intervention stays rejected.
+Dropping native-output validation or moving work outside the measured
+interval requires a separate invariant/failure contract; process isolation
+requires its own causal delivery experiment.
+
+The same run has ten physical contacts at
+`[4280, 11544, 12158, 12645, 13476, 22354, 22941, 37188, 38358, 43150]`.
+All follow global viability exhaustion. This is descriptively fewer than the
+immediately preceding projection run's 14 contacts, but earlier same-stage
+GIL-held evidence includes a nine-contact run. RNG, phase timing, density,
+and post-death resources differ, so there is no survival-regression or
+improvement claim.
+
+The VM projection audit passes all 5,663 callback rows. Static control replay
+encounters its first decoded-file/runtime-image mismatch at frame 44212.
+Because the trace retained neither raw instruction bytes nor a replacement
+image identity, the auditor now invalidates that static mapping for every
+later callback row. It conservatively excludes 27 late spell-73 rows, reports
+no `unknown -> complete` transition, and still fails its all-rows and
+no-unknown-exclusion gates. This is a correction to evidence accounting, not
+additional ECL coverage.
+
+Evidence SHA-256 values are:
+
+- raw local JSONL:
+  `e15fc270fdb2afe188987aa8f22798f36cbc6da8e07192a2c4af0aed132fe43d`;
+- birth audit:
+  `c4a715c0e50f6af8b0d712cfe36ae1a2697173aec49369b3dd93601b91382e9d`;
+- projection audit:
+  `bf3126b0259e2a9a0e60238fe843cf731cc6e4043db796b1ac6bda2bc2ae964d`;
+  and
+- corrected static control audit:
+  `b8b8695fcf710c693201a87ecb99840c33e569fbf68e8236653e7b213142d839`.
+
+The three compact audits regenerate byte-identically. This checkpoint changes
+neither live callback interpretation nor action authority. Ruff and complete
+Linux/Windows suites pass 851 tests in `9.398/16.771 s`; Windows retains three
+existing skips.

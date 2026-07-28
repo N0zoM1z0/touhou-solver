@@ -44,7 +44,26 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ## Exact Checkpoint
 
 - Repository branch: `main`.
+- The latest unchanged physical performance gate is
+  `lunatic_route2_stage4a_unattended_20260728_121028`. It completed 14,066
+  decisions with ten hits, hard no-Bomb, accepted route completion, and exact
+  cleanup. The cycle-delta optimization moves observer p95 below the fixed
+  limit (`0.1986 ms`) and p99 also passes (`0.3400 ms`), but materialization
+  tails at frames 11969/38043 produce `8.3269/5.0455 ms` observations.
+  Therefore B4 remains open on its `2.00 ms` maximum. No completed GC overlaps
+  either tail; one has ordinary same-cohort cycles and the other has the
+  run-wide maximum materialization cycles plus corridor
+  `inflight -> done`. CE-0156 forbids claiming a physical pass or reviving
+  the rejected priority intervention.
+- The same run validates all 5,663 VM projections. Its static ECL replay
+  proves a retained-file/runtime-image mismatch at frame 44212. CE-0157
+  corrects the auditor so this first failure invalidates all later static
+  mappings: 27 late spell-73 rows are conservatively excluded, no
+  unknown-to-complete transition remains, and the all-row gate stays failed.
+  Recovering those rows requires retained raw instruction bytes or immutable
+  runtime image identity; live coverage and action authority are unchanged.
 - Latest G5 observation/performance checkpoints:
+  `Retain failed optimized B4 physical gate`,
   `Verify physical ECL loop transitions offline`,
   `Add exact offline ECL loop shadow`,
   `Validate ECL local projection physically`,

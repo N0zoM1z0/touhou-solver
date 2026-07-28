@@ -1,0 +1,1766 @@
+{
+  "by_phase_at_capture": {
+    "stage_3:nonspell": {
+      "activation_edges": 38163,
+      "all_evidence": 38441,
+      "evidence_kind:bootstrap_recent": 259,
+      "evidence_kind:invalid_timer": 2,
+      "evidence_kind:timer_regression": 17,
+      "unmatched": 38163
+    },
+    "stage_3:spell_57": {
+      "activation_edges": 8437,
+      "all_evidence": 8438,
+      "evidence_kind:invalid_timer": 1,
+      "unmatched": 8437
+    },
+    "stage_3:spell_61": {
+      "activation_edges": 11759,
+      "all_evidence": 11760,
+      "evidence_kind:timer_regression": 1,
+      "support": 3134,
+      "unmatched": 8625
+    },
+    "stage_3:spell_65": {
+      "activation_edges": 13300,
+      "all_evidence": 13401,
+      "evidence_kind:invalid_timer": 1,
+      "evidence_kind:timer_regression": 100,
+      "unmatched": 13300
+    },
+    "stage_3:spell_69": {
+      "activation_edges": 5956,
+      "all_evidence": 5956,
+      "ambiguous": 25,
+      "support": 2908,
+      "unmatched": 3023
+    },
+    "stage_3:spell_73": {
+      "activation_edges": 11083,
+      "all_evidence": 11084,
+      "evidence_kind:timer_regression": 1,
+      "unmatched": 11083
+    }
+  },
+  "by_phase_at_intent": {
+    "stage_3:nonspell": {
+      "audit_rows": 8403,
+      "intent_result_absent": 8403,
+      "no_active_main_vm_rows": 8403,
+      "velocity_instructions_scanned": 0
+    },
+    "stage_3:spell_57": {
+      "active_main_vm_rows": 1305,
+      "audit_rows": 1305,
+      "classified_rows": 1305,
+      "stop:horizon": 12,
+      "stop:unsupported_auxiliary_or_callback": 70,
+      "stop:unsupported_control_flow": 1223,
+      "velocity_instructions_scanned": 3040,
+      "velocity_lookahead_coverage:unknown": 1305,
+      "velocity_lookahead_lowering:incomplete_prefix_not_lowered": 1305,
+      "velocity_lookahead_stop:unsupported_control_flow": 1305
+    },
+    "stage_3:spell_61": {
+      "active_main_vm_rows": 1257,
+      "audit_rows": 1257,
+      "classified_rows": 1257,
+      "deduplicated_timed_events": 15,
+      "status:deferred": 3,
+      "status:dynamic_parameter": 414,
+      "stop:horizon": 2,
+      "stop:source_topology_change": 417,
+      "stop:unsupported_auxiliary_or_callback": 36,
+      "stop:unsupported_control_flow": 802,
+      "timed_event_sightings": 414,
+      "timed_sightings": 414,
+      "untimed_sightings": 3,
+      "velocity_instructions_scanned": 10505,
+      "velocity_lookahead_coverage:unknown": 1257,
+      "velocity_lookahead_lowering:incomplete_prefix_not_lowered": 1257,
+      "velocity_lookahead_stop:unsupported_control_flow": 1257
+    },
+    "stage_3:spell_65": {
+      "active_main_vm_rows": 686,
+      "audit_rows": 686,
+      "classified_rows": 686,
+      "stop:horizon": 76,
+      "stop:source_topology_change": 317,
+      "stop:unsupported_auxiliary_or_callback": 38,
+      "stop:unsupported_control_flow": 254,
+      "stop:unsupported_emission_state_mutation": 1,
+      "velocity_instructions_scanned": 5033,
+      "velocity_lookahead_coverage:complete": 37,
+      "velocity_lookahead_coverage:unknown": 649,
+      "velocity_lookahead_lowering:complete_schedule_lowered": 37,
+      "velocity_lookahead_lowering:incomplete_prefix_not_lowered": 649,
+      "velocity_lookahead_stop:horizon": 37,
+      "velocity_lookahead_stop:unsupported_control_flow": 649
+    },
+    "stage_3:spell_69": {
+      "active_main_vm_rows": 1315,
+      "audit_rows": 1315,
+      "classified_rows": 1315,
+      "deduplicated_timed_events": 66,
+      "status:deferred": 24,
+      "status:dynamic_parameter": 1624,
+      "stop:horizon": 1279,
+      "stop:source_topology_change": 36,
+      "timed_event_sightings": 1624,
+      "timed_sightings": 1624,
+      "untimed_sightings": 24,
+      "velocity_instructions_scanned": 32317,
+      "velocity_lookahead_coverage:complete": 1315,
+      "velocity_lookahead_lowering:complete_schedule_lowered": 1315,
+      "velocity_lookahead_stop:horizon": 1315
+    },
+    "stage_3:spell_73": {
+      "active_main_vm_rows": 1100,
+      "audit_rows": 1100,
+      "classified_rows": 1100,
+      "stop:horizon": 101,
+      "stop:source_topology_change": 35,
+      "stop:unsupported_auxiliary_or_callback": 36,
+      "stop:unsupported_control_flow": 928,
+      "velocity_instructions_scanned": 6370,
+      "velocity_lookahead_coverage:complete": 91,
+      "velocity_lookahead_coverage:unknown": 1009,
+      "velocity_lookahead_lowering:complete_schedule_lowered": 91,
+      "velocity_lookahead_lowering:incomplete_prefix_not_lowered": 1009,
+      "velocity_lookahead_stop:horizon": 91,
+      "velocity_lookahead_stop:unsupported_control_flow": 1009
+    }
+  },
+  "callback_lookahead": {
+    "coverage_status_rows": {
+      "complete": 1443,
+      "unknown": 4220
+    },
+    "incomplete_tagged_max": 1359,
+    "incomplete_tagged_rows": 1552,
+    "lowered_events": 0,
+    "lowering_status_rows": {
+      "complete_schedule_lowered": 1443,
+      "incomplete_prefix_not_lowered": 4220
+    },
+    "prefix_events": 0,
+    "semantics": {
+      "complete": "events cover the declared main-VM horizon",
+      "incomplete_lowering": "no prefix tuple is consumed as complete",
+      "legacy_declared_complete": "schema-v1-v7 declared horizon coverage without an enforced lowering interface",
+      "legacy_declared_unknown": "schema-v1-v7 incomplete prefix was exposed through the old schedule interface",
+      "unknown": "events are prefix evidence only"
+    }
+  },
+  "gates": {
+    "cycle_attribution_available": true,
+    "cycle_attribution_required": true,
+    "observer_budget_passed": false,
+    "observer_limits_ms": {
+      "max": 2.0,
+      "p95": 0.2,
+      "p99": 0.4
+    },
+    "timed_intent_available": true,
+    "validation_passed": true
+  },
+  "input": {
+    "active_spell_main_vm_rows": 5663,
+    "audit_rows": 14066,
+    "decision_scopes": 14066,
+    "deferred_fire_state_statuses": {
+      "aligned_complete": 5595,
+      "capture_misaligned": 67,
+      "enemy_flags_unavailable": 3297,
+      "enemy_pointer_mismatch": 5107
+    },
+    "deferred_fire_state_values": {
+      "disabled": 5595,
+      "unknown": 8471
+    },
+    "intent_errors": 0,
+    "native_call_modes": {
+      "gil-held": 14066
+    },
+    "observation_backends": {
+      "native": 14066
+    },
+    "observation_errors": 0,
+    "trace_schema_versions": {
+      "9": 14066
+    }
+  },
+  "intent": {
+    "deduplicated_timed_events": 81,
+    "dependency_sightings": {
+      "bullet_template_geometry": 2065,
+      "deferred_state": 27,
+      "emission_origin": 2065,
+      "minimum_fire_distance": 2065,
+      "player_aim_at_emission": 2065,
+      "pool_capacity": 2065,
+      "transform_program": 2065,
+      "vm_parameter:angle1": 1648,
+      "vm_parameter:count1": 417,
+      "vm_parameter:speed1": 417
+    },
+    "status_sightings": {
+      "deferred": 27,
+      "dynamic_parameter": 2038
+    },
+    "stop_reasons": {
+      "horizon": 1470,
+      "source_topology_change": 805,
+      "unsupported_auxiliary_or_callback": 180,
+      "unsupported_control_flow": 3207,
+      "unsupported_emission_state_mutation": 1
+    },
+    "timed_event_sightings": 2038,
+    "untimed_intent_signatures": 2
+  },
+  "join": {
+    "activation_edges": 88698,
+    "ambiguous_samples": [
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 898
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 899
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 900
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 901
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 902
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 903
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 904
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 905
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 906
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 907
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 908
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 909
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 910
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 911
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 912
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 913
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 914
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 915
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 916
+      },
+      {
+        "activation_support": [
+          37248,
+          37251
+        ],
+        "age": 0,
+        "candidate_count": 2,
+        "candidate_event_supports": [
+          [
+            37248,
+            37248
+          ],
+          [
+            37251,
+            37251
+          ]
+        ],
+        "frame": 37251,
+        "gameplay_epoch": 3,
+        "phase": "stage_3:spell_69",
+        "slot": 917
+      }
+    ],
+    "any_temporal_matches": 6067,
+    "classification": {
+      "ambiguous": 25,
+      "support": 6042,
+      "unmatched": 82631
+    },
+    "residual_reasons": {
+      "active_spell_main_vm_absent": 38163,
+      "evidence_kind:bootstrap_recent": 259,
+      "evidence_kind:invalid_timer": 4,
+      "evidence_kind:timer_regression": 119,
+      "intent_dependency:bullet_template_geometry": 6042,
+      "intent_dependency:emission_origin": 6042,
+      "intent_dependency:minimum_fire_distance": 6042,
+      "intent_dependency:player_aim_at_emission": 6042,
+      "intent_dependency:pool_capacity": 6042,
+      "intent_dependency:transform_program": 6042,
+      "intent_dependency:vm_parameter:angle1": 2908,
+      "intent_dependency:vm_parameter:count1": 3134,
+      "intent_dependency:vm_parameter:speed1": 3134,
+      "multiple_temporal_intents": 25,
+      "no_temporally_overlapping_timed_intent": 44468,
+      "observation_status:capture_spanned": 88698,
+      "omitted_source_competition": 6042,
+      "temporal_support_not_point": 6042
+    },
+    "semantics": {
+      "ambiguous": "multiple intent intervals overlap",
+      "causal_authority": "none",
+      "exact": "one point intent equals one point observation",
+      "support": "one intent interval overlaps the observation",
+      "unmatched": "no timed main-VM intent interval overlaps"
+    },
+    "unique_temporal_fraction": 0.068119,
+    "unique_temporal_matches": 6042,
+    "unmatched_samples": [
+      {
+        "activation_support": [
+          399,
+          401
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 403,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 0
+      },
+      {
+        "activation_support": [
+          399,
+          401
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 403,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 1
+      },
+      {
+        "activation_support": [
+          399,
+          401
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 403,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 2
+      },
+      {
+        "activation_support": [
+          399,
+          401
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 403,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 3
+      },
+      {
+        "activation_support": [
+          409,
+          411
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 412,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 4
+      },
+      {
+        "activation_support": [
+          409,
+          411
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 412,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 5
+      },
+      {
+        "activation_support": [
+          409,
+          411
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 412,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 6
+      },
+      {
+        "activation_support": [
+          409,
+          411
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 412,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 7
+      },
+      {
+        "activation_support": [
+          409,
+          411
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 412,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 8
+      },
+      {
+        "activation_support": [
+          409,
+          411
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 412,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 9
+      },
+      {
+        "activation_support": [
+          409,
+          411
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 412,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 10
+      },
+      {
+        "activation_support": [
+          409,
+          411
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 412,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 11
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 12
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 13
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 14
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 15
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 16
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 17
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 18
+      },
+      {
+        "activation_support": [
+          419,
+          421
+        ],
+        "age": 0,
+        "candidate_count": 0,
+        "candidate_event_supports": [],
+        "frame": 422,
+        "gameplay_epoch": 0,
+        "phase": "stage_3:nonspell",
+        "slot": 19
+      }
+    ]
+  },
+  "native_diagnostics": {
+    "gc_completed": {
+      "materialize:generation_0": 0,
+      "materialize:generation_1": 0,
+      "materialize:generation_2": 0,
+      "native_call:generation_0": 0,
+      "native_call:generation_1": 0,
+      "native_call:generation_2": 0,
+      "prepare:generation_0": 0,
+      "prepare:generation_1": 0,
+      "prepare:generation_2": 0
+    },
+    "observation_ms_by_gc_overlap": {
+      "without_gc": {
+        "count": 14066,
+        "max": 8.3269,
+        "p50": 0.0983,
+        "p95": 0.1986,
+        "p99": 0.34,
+        "p99_9": 0.5439
+      }
+    },
+    "observer_contention": {
+      "classifications": {
+        "ambiguous_endpoint_overlap": 1,
+        "definite_known_future_overlap": 6168,
+        "no_known_future_overlap": 7897
+      },
+      "endpoint_patterns": {
+        "corridor_future:absent->absent|survival_future:absent->absent|enemy_future:absent->absent": 3722,
+        "corridor_future:absent->absent|survival_future:absent->absent|enemy_future:done->done": 3421,
+        "corridor_future:absent->absent|survival_future:absent->absent|enemy_future:inflight->inflight": 4,
+        "corridor_future:done->done|survival_future:absent->absent|enemy_future:absent->absent": 315,
+        "corridor_future:done->done|survival_future:absent->absent|enemy_future:done->done": 439,
+        "corridor_future:done->done|survival_future:absent->absent|enemy_future:inflight->inflight": 12,
+        "corridor_future:inflight->done|survival_future:absent->absent|enemy_future:absent->absent": 1,
+        "corridor_future:inflight->inflight|survival_future:absent->absent|enemy_future:absent->absent": 3062,
+        "corridor_future:inflight->inflight|survival_future:absent->absent|enemy_future:done->done": 2807,
+        "corridor_future:inflight->inflight|survival_future:absent->absent|enemy_future:inflight->done": 2,
+        "corridor_future:inflight->inflight|survival_future:absent->absent|enemy_future:inflight->inflight": 281
+      },
+      "semantics": {
+        "ambiguous_endpoint_overlap": "one known future changed to or from inflight",
+        "causal_authority": "none",
+        "definite_known_future_overlap": "one known future was inflight at both endpoints",
+        "no_known_future_overlap": "none of the three known futures overlapped both endpoints"
+      }
+    },
+    "over_budget_dominant_segments": {
+      "materialize": 2
+    },
+    "over_budget_samples": [
+      {
+        "evidence_count": 4,
+        "frame": 11969,
+        "gc_completed": {
+          "materialize": [
+            0,
+            0,
+            0
+          ],
+          "native_call": [
+            0,
+            0,
+            0
+          ],
+          "prepare": [
+            0,
+            0,
+            0
+          ]
+        },
+        "known_future_overlap": {
+          "classification": "definite_known_future_overlap",
+          "futures": [
+            "corridor_future"
+          ]
+        },
+        "observation_ms": 8.326900016982108,
+        "observer_contention": {
+          "corridor_future": {
+            "after": "inflight",
+            "before": "inflight"
+          },
+          "enemy_future": {
+            "after": "done",
+            "before": "done"
+          },
+          "omitted_sources": [
+            "game_process",
+            "os_scheduler_and_other_processes",
+            "native_internal_workers_after_endpoint_ambiguity",
+            "candidate_supplemental_and_prewarm_services",
+            "allocator_and_page_faults"
+          ],
+          "survival_future": {
+            "after": "absent",
+            "before": "absent"
+          }
+        },
+        "segments_ms": {
+          "controller_residual": 0.052499992307275534,
+          "materialize": 8.232799998950213,
+          "native_call": 0.03789999755099416,
+          "prepare": 0.003700028173625469
+        },
+        "thread_cycles": {
+          "materialize": 373734,
+          "native_call": 112046,
+          "prepare": 12772,
+          "source": "windows_query_thread_cycle_time"
+        }
+      },
+      {
+        "evidence_count": 48,
+        "frame": 38043,
+        "gc_completed": {
+          "materialize": [
+            0,
+            0,
+            0
+          ],
+          "native_call": [
+            0,
+            0,
+            0
+          ],
+          "prepare": [
+            0,
+            0,
+            0
+          ]
+        },
+        "known_future_overlap": {
+          "classification": "ambiguous_endpoint_overlap",
+          "futures": [
+            "corridor_future"
+          ]
+        },
+        "observation_ms": 5.045500001870096,
+        "observer_contention": {
+          "corridor_future": {
+            "after": "done",
+            "before": "inflight"
+          },
+          "enemy_future": {
+            "after": "absent",
+            "before": "absent"
+          },
+          "omitted_sources": [
+            "game_process",
+            "os_scheduler_and_other_processes",
+            "native_internal_workers_after_endpoint_ambiguity",
+            "candidate_supplemental_and_prewarm_services",
+            "allocator_and_page_faults"
+          ],
+          "survival_future": {
+            "after": "absent",
+            "before": "absent"
+          }
+        },
+        "segments_ms": {
+          "controller_residual": 0.054500007536262274,
+          "materialize": 4.951899987645447,
+          "native_call": 0.03570003900676966,
+          "prepare": 0.0033999676816165447
+        },
+        "thread_cycles": {
+          "materialize": 681916,
+          "native_call": 105698,
+          "prepare": 13118,
+          "source": "windows_query_thread_cycle_time"
+        }
+      }
+    ],
+    "rows": 14066,
+    "rows_with_gc": 0,
+    "segments_ms": {
+      "controller_residual": {
+        "count": 14066,
+        "max": 0.5567,
+        "p50": 0.0393,
+        "p95": 0.0675,
+        "p99": 0.0987,
+        "p99_9": 0.3734
+      },
+      "materialize": {
+        "count": 14066,
+        "max": 8.2328,
+        "p50": 0.0083,
+        "p95": 0.0852,
+        "p99": 0.1198,
+        "p99_9": 0.3399
+      },
+      "native_call": {
+        "count": 14066,
+        "max": 0.4921,
+        "p50": 0.0375,
+        "p95": 0.0593,
+        "p99": 0.0853,
+        "p99_9": 0.3328
+      },
+      "prepare": {
+        "count": 14066,
+        "max": 0.0562,
+        "p50": 0.0036,
+        "p95": 0.0071,
+        "p99": 0.0091,
+        "p99_9": 0.0214
+      }
+    },
+    "thread_cycle_attribution_rows": 14066,
+    "thread_cycle_sources": {
+      "windows_query_thread_cycle_time": 14066
+    },
+    "thread_cycles": {
+      "materialize": {
+        "count": 14066,
+        "max": 681916.0,
+        "p50": 25328.0,
+        "p95": 250870.0,
+        "p99": 345480.0,
+        "p99_9": 471692.0
+      },
+      "native_call": {
+        "count": 14066,
+        "max": 314898.0,
+        "p50": 110670.0,
+        "p95": 169690.0,
+        "p99": 214136.0,
+        "p99_9": 266254.0
+      },
+      "prepare": {
+        "count": 14066,
+        "max": 164862.0,
+        "p50": 14142.0,
+        "p95": 27254.0,
+        "p99": 39776.0,
+        "p99_9": 110900.0
+      }
+    },
+    "thread_cycles_by_evidence_count": {
+      "materialize": {
+        "0": {
+          "count": 9777,
+          "max": 160534.0,
+          "p50": 22242.0,
+          "p95": 42036.0,
+          "p99": 57404.0,
+          "p99_9": 112328.0
+        },
+        "1_8": {
+          "count": 1315,
+          "max": 650948.0,
+          "p50": 200582.0,
+          "p95": 331284.0,
+          "p99": 419730.0,
+          "p99_9": 536068.0
+        },
+        "321_plus": {
+          "count": 12,
+          "max": 350736.0,
+          "p50": 198538.0,
+          "p95": 350736.0,
+          "p99": 350736.0,
+          "p99_9": 350736.0
+        },
+        "33_64": {
+          "count": 584,
+          "max": 681916.0,
+          "p50": 189632.0,
+          "p95": 299332.0,
+          "p99": 382128.0,
+          "p99_9": 681916.0
+        },
+        "65_320": {
+          "count": 144,
+          "max": 494744.0,
+          "p50": 193688.0,
+          "p95": 331174.0,
+          "p99": 382352.0,
+          "p99_9": 494744.0
+        },
+        "9_32": {
+          "count": 2234,
+          "max": 603816.0,
+          "p50": 197478.0,
+          "p95": 325176.0,
+          "p99": 405458.0,
+          "p99_9": 504024.0
+        }
+      },
+      "native_call": {
+        "0": {
+          "count": 9777,
+          "max": 314898.0,
+          "p50": 109886.0,
+          "p95": 169676.0,
+          "p99": 213316.0,
+          "p99_9": 273598.0
+        },
+        "1_8": {
+          "count": 1315,
+          "max": 293606.0,
+          "p50": 110732.0,
+          "p95": 168728.0,
+          "p99": 216216.0,
+          "p99_9": 256764.0
+        },
+        "321_plus": {
+          "count": 12,
+          "max": 229188.0,
+          "p50": 130996.0,
+          "p95": 229188.0,
+          "p99": 229188.0,
+          "p99_9": 229188.0
+        },
+        "33_64": {
+          "count": 584,
+          "max": 245088.0,
+          "p50": 117528.0,
+          "p95": 172874.0,
+          "p99": 214904.0,
+          "p99_9": 245088.0
+        },
+        "65_320": {
+          "count": 144,
+          "max": 253958.0,
+          "p50": 116432.0,
+          "p95": 167926.0,
+          "p99": 213566.0,
+          "p99_9": 253958.0
+        },
+        "9_32": {
+          "count": 2234,
+          "max": 271720.0,
+          "p50": 111196.0,
+          "p95": 170174.0,
+          "p99": 210400.0,
+          "p99_9": 253780.0
+        }
+      },
+      "prepare": {
+        "0": {
+          "count": 9777,
+          "max": 164862.0,
+          "p50": 14190.0,
+          "p95": 27412.0,
+          "p99": 41946.0,
+          "p99_9": 116182.0
+        },
+        "1_8": {
+          "count": 1315,
+          "max": 97170.0,
+          "p50": 14238.0,
+          "p95": 27116.0,
+          "p99": 43218.0,
+          "p99_9": 92858.0
+        },
+        "321_plus": {
+          "count": 12,
+          "max": 26796.0,
+          "p50": 13640.0,
+          "p95": 26796.0,
+          "p99": 26796.0,
+          "p99_9": 26796.0
+        },
+        "33_64": {
+          "count": 584,
+          "max": 76276.0,
+          "p50": 13538.0,
+          "p95": 24268.0,
+          "p99": 31122.0,
+          "p99_9": 76276.0
+        },
+        "65_320": {
+          "count": 144,
+          "max": 35000.0,
+          "p50": 13794.0,
+          "p95": 27336.0,
+          "p99": 34888.0,
+          "p99_9": 35000.0
+        },
+        "9_32": {
+          "count": 2234,
+          "max": 125078.0,
+          "p50": 14058.0,
+          "p95": 26728.0,
+          "p99": 35516.0,
+          "p99_9": 88594.0
+        }
+      }
+    }
+  },
+  "observation": {
+    "age": {
+      "count": 89080,
+      "max": 8.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "p99_9": 2.0
+    },
+    "capture_spans": {
+      "0": 13447,
+      "1": 619
+    },
+    "evidence_kinds": {
+      "activation_edge": 88698,
+      "bootstrap_recent": 259,
+      "invalid_timer": 4,
+      "timer_regression": 119
+    },
+    "evidence_per_row": {
+      "count": 14066,
+      "max": 592.0,
+      "p50": 0.0,
+      "p95": 33.0,
+      "p99": 73.0,
+      "p99_9": 320.0
+    },
+    "observation_statuses": {
+      "capture_spanned": 88957,
+      "invalid_timer": 4,
+      "slot_reuse_ambiguous": 119
+    }
+  },
+  "passed": false,
+  "schema": "th08-bullet-birth-residual-audit-v7",
+  "scope": {
+    "future_geometry_authority": "none",
+    "hazard_coverage_authority": "none",
+    "intent_source": "active_spell_enemy_main_vm_only",
+    "omitted_sources": [
+      "callback_or_interrupt_source",
+      "child_enemy_or_auxiliary_vm",
+      "deferred_emission_runtime_state",
+      "non_ecl_native_source",
+      "non_spell_enemy_main_vm"
+    ],
+    "physical_action_authority": "none"
+  },
+  "source": {
+    "trace_bytes": 488464125,
+    "trace_name": "lunatic_route2_stage4a_unattended_20260728_121028.jsonl",
+    "trace_sha256": "e15fc270fdb2afe188987aa8f22798f36cbc6da8e07192a2c4af0aed132fe43d"
+  },
+  "timing_by_evidence_count": {
+    "build": {
+      "0": {
+        "count": 9777,
+        "max": 0.4771,
+        "p50": 0.045,
+        "p95": 0.0729,
+        "p99": 0.0966,
+        "p99_9": 0.2022
+      },
+      "1_8": {
+        "count": 1315,
+        "max": 0.4338,
+        "p50": 0.0779,
+        "p95": 0.127,
+        "p99": 0.1588,
+        "p99_9": 0.3641
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 0.5303,
+        "p50": 0.1774,
+        "p95": 0.5303,
+        "p99": 0.5303,
+        "p99_9": 0.5303
+      },
+      "33_64": {
+        "count": 584,
+        "max": 0.3919,
+        "p50": 0.084,
+        "p95": 0.1312,
+        "p99": 0.1843,
+        "p99_9": 0.3919
+      },
+      "65_320": {
+        "count": 144,
+        "max": 0.304,
+        "p50": 0.1007,
+        "p95": 0.1761,
+        "p99": 0.2702,
+        "p99_9": 0.304
+      },
+      "9_32": {
+        "count": 2234,
+        "max": 0.5078,
+        "p50": 0.0794,
+        "p95": 0.1293,
+        "p99": 0.1713,
+        "p99_9": 0.4114
+      }
+    },
+    "observation": {
+      "0": {
+        "count": 9777,
+        "max": 0.5792,
+        "p50": 0.0876,
+        "p95": 0.1468,
+        "p99": 0.2175,
+        "p99_9": 0.461
+      },
+      "1_8": {
+        "count": 1315,
+        "max": 8.3269,
+        "p50": 0.1497,
+        "p95": 0.2533,
+        "p99": 0.4345,
+        "p99_9": 0.7404
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 0.2653,
+        "p50": 0.1543,
+        "p95": 0.2653,
+        "p99": 0.2653,
+        "p99_9": 0.2653
+      },
+      "33_64": {
+        "count": 584,
+        "max": 5.0455,
+        "p50": 0.1451,
+        "p95": 0.2406,
+        "p99": 0.4221,
+        "p99_9": 5.0455
+      },
+      "65_320": {
+        "count": 144,
+        "max": 0.4542,
+        "p50": 0.1492,
+        "p95": 0.2521,
+        "p99": 0.4205,
+        "p99_9": 0.4542
+      },
+      "9_32": {
+        "count": 2234,
+        "max": 0.7253,
+        "p50": 0.1476,
+        "p95": 0.2592,
+        "p99": 0.4183,
+        "p99_9": 0.5441
+      }
+    },
+    "observation_cpu": {
+      "0": {
+        "count": 9777,
+        "max": 31.25,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 15.625
+      },
+      "1_8": {
+        "count": 1315,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 0.0
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 15.625,
+        "p99": 15.625,
+        "p99_9": 15.625
+      },
+      "33_64": {
+        "count": 584,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 15.625
+      },
+      "65_320": {
+        "count": 144,
+        "max": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 0.0
+      },
+      "9_32": {
+        "count": 2234,
+        "max": 15.625,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "p99_9": 15.625
+      }
+    },
+    "pre_emit_total": {
+      "0": {
+        "count": 9777,
+        "max": 0.8068,
+        "p50": 0.1448,
+        "p95": 0.2579,
+        "p99": 0.3882,
+        "p99_9": 0.5649
+      },
+      "1_8": {
+        "count": 1315,
+        "max": 8.4307,
+        "p50": 0.2385,
+        "p95": 0.41,
+        "p99": 0.5639,
+        "p99_9": 0.8352
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 0.7956,
+        "p50": 0.3851,
+        "p95": 0.7956,
+        "p99": 0.7956,
+        "p99_9": 0.7956
+      },
+      "33_64": {
+        "count": 584,
+        "max": 5.2978,
+        "p50": 0.252,
+        "p95": 0.4119,
+        "p99": 0.5858,
+        "p99_9": 5.2978
+      },
+      "65_320": {
+        "count": 144,
+        "max": 0.7006,
+        "p50": 0.2725,
+        "p95": 0.4549,
+        "p99": 0.585,
+        "p99_9": 0.7006
+      },
+      "9_32": {
+        "count": 2234,
+        "max": 0.891,
+        "p50": 0.2452,
+        "p95": 0.432,
+        "p99": 0.5615,
+        "p99_9": 0.6944
+      }
+    },
+    "previous_emit": {
+      "0": {
+        "count": 9776,
+        "max": 0.4129,
+        "p50": 0.0638,
+        "p95": 0.1033,
+        "p99": 0.1373,
+        "p99_9": 0.3474
+      },
+      "1_8": {
+        "count": 1315,
+        "max": 0.3443,
+        "p50": 0.083,
+        "p95": 0.1366,
+        "p99": 0.1707,
+        "p99_9": 0.2404
+      },
+      "321_plus": {
+        "count": 12,
+        "max": 4.491,
+        "p50": 2.3356,
+        "p95": 4.491,
+        "p99": 4.491,
+        "p99_9": 4.491
+      },
+      "33_64": {
+        "count": 584,
+        "max": 7.7342,
+        "p50": 0.8671,
+        "p95": 1.3445,
+        "p99": 1.603,
+        "p99_9": 7.7342
+      },
+      "65_320": {
+        "count": 144,
+        "max": 4.0874,
+        "p50": 1.2298,
+        "p95": 1.959,
+        "p99": 3.3854,
+        "p99_9": 4.0874
+      },
+      "9_32": {
+        "count": 2234,
+        "max": 0.4631,
+        "p50": 0.1193,
+        "p95": 0.2016,
+        "p99": 0.2796,
+        "p99_9": 0.4171
+      }
+    },
+    "semantics": {
+      "observation_build_pre_emit": "bucketed by the current audit evidence count",
+      "previous_emit": "bucketed by the preceding audit evidence count"
+    }
+  },
+  "timing_ms": {
+    "build": {
+      "count": 14066,
+      "max": 0.5303,
+      "p50": 0.0509,
+      "p95": 0.1045,
+      "p99": 0.145,
+      "p99_9": 0.3494
+    },
+    "intent": {
+      "count": 14066,
+      "max": 0.3722,
+      "p50": 0.0,
+      "p95": 0.0789,
+      "p99": 0.1102,
+      "p99_9": 0.1908
+    },
+    "observation": {
+      "count": 14066,
+      "max": 8.3269,
+      "p50": 0.0983,
+      "p95": 0.1986,
+      "p99": 0.34,
+      "p99_9": 0.5439
+    },
+    "observation_cpu": {
+      "count": 14066,
+      "max": 31.25,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "p99_9": 15.625
+    },
+    "pre_emit_total": {
+      "count": 14066,
+      "max": 8.4307,
+      "p50": 0.176,
+      "p95": 0.336,
+      "p99": 0.4759,
+      "p99_9": 0.6761
+    },
+    "previous_emit": {
+      "count": 14065,
+      "max": 7.7342,
+      "p50": 0.0711,
+      "p95": 0.2091,
+      "p99": 1.2411,
+      "p99_9": 2.1782
+    }
+  },
+  "velocity_lookahead_read_ms_by_phase": {
+    "stage_3:nonspell": {
+      "count": 8403,
+      "max": 0.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "p99_9": 0.0
+    },
+    "stage_3:spell_57": {
+      "count": 1305,
+      "max": 9.4916,
+      "p50": 0.0879,
+      "p95": 0.2011,
+      "p99": 0.4577,
+      "p99_9": 2.0416
+    },
+    "stage_3:spell_61": {
+      "count": 1257,
+      "max": 2.2622,
+      "p50": 0.0988,
+      "p95": 0.2286,
+      "p99": 0.4548,
+      "p99_9": 1.8683
+    },
+    "stage_3:spell_65": {
+      "count": 686,
+      "max": 1.7174,
+      "p50": 0.0986,
+      "p95": 0.1991,
+      "p99": 0.6814,
+      "p99_9": 1.7174
+    },
+    "stage_3:spell_69": {
+      "count": 1315,
+      "max": 2.8792,
+      "p50": 0.1123,
+      "p95": 0.2419,
+      "p99": 0.6457,
+      "p99_9": 1.6036
+    },
+    "stage_3:spell_73": {
+      "count": 1100,
+      "max": 1.6263,
+      "p50": 0.0913,
+      "p95": 0.2628,
+      "p99": 0.7134,
+      "p99_9": 1.3448
+    }
+  }
+}

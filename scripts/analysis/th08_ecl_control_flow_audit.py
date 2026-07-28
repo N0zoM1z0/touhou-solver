@@ -117,6 +117,7 @@ def audit_trace(
     replayed_rows = 0
     mapping_exclusion_count = 0
     mapping_exclusions: list[dict[str, object]] = []
+    mapping_invalidation: dict[str, object] | None = None
     unknown_to_complete: list[dict[str, object]] = []
     transition_counts: Counter[str] = Counter()
     old_stop_counts: Counter[str] = Counter()
@@ -157,6 +158,22 @@ def audit_trace(
             spell = _spell_key(decision)
             old_status = _coverage_status(lookahead)
             old_reason = str(lookahead["stop_reason"])
+            if mapping_invalidation is not None:
+                mapping_exclusion_count += 1
+                if len(mapping_exclusions) < 20:
+                    mapping_exclusions.append(
+                        {
+                            "frame": frame,
+                            "spell": spell,
+                            "old_status": old_status,
+                            "old_reason": old_reason,
+                            "error": (
+                                "static mapping invalidated by earlier "
+                                "runtime-image mismatch"
+                            ),
+                        }
+                    )
+                continue
             try:
                 replay, stop_instruction = _replay(
                     lookahead,
@@ -166,6 +183,11 @@ def audit_trace(
                     active_difficulty_mask=active_difficulty_mask,
                 )
             except (KeyError, OSError, RuntimeError, ValueError) as error:
+                mapping_invalidation = {
+                    "frame": frame,
+                    "spell": spell,
+                    "error": f"{type(error).__name__}: {error}",
+                }
                 mapping_exclusion_count += 1
                 if len(mapping_exclusions) < 20:
                     mapping_exclusions.append(
@@ -330,10 +352,12 @@ def audit_trace(
         },
         "mapping_exclusions": {
             "count": mapping_exclusion_count,
+            "invalidation": mapping_invalidation,
             "reason": (
-                "late runtime instruction image is not byte-aligned with "
-                "the retained decoded Stage-4A file; no raw instruction "
-                "bytes were retained"
+                "the first decode/read failure invalidates the static "
+                "runtime-to-file mapping for every later callback row; "
+                "no raw instruction bytes or replacement image identity "
+                "were retained"
             ),
             "samples": mapping_exclusions,
         },

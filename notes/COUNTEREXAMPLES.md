@@ -4602,3 +4602,70 @@ validated, survival and performance failures remain open
   `cbfb75db83988e48b1c5305124a31383218c426df3bcde18e9a6d3f34ed09b3e`,
   `aedbe0fece76b7cf4bfe8722babd1093694e07b4e6ee4da33547157bd97166ba`,
   and `91c25c9594e8a5711bb5cf742765bd5b46741436ef55ae96d204dde198d0cccb`.
+
+## CE-0156: Cycle bookkeeping reduction passed p95 but not physical B4 maximum
+
+Status: observed physical performance counterexample; optimization retained,
+B4 open
+
+- **Observed physical gate:** Fresh unchanged normal-priority GIL-held
+  Stage-4A run `20260728_121028` completed 14,066 decisions with hard no-Bomb,
+  accepted route completion, and exact cleanup.
+- **Mixed result:** Observation p50/p95/p99/p99.9/max is
+  `0.0983/0.1986/0.3400/0.5439/8.3269 ms`. The optimized path now passes the
+  fixed `0.20/0.40 ms` p95/p99 limits, but two materialization tails exceed
+  the `2.00 ms` maximum.
+- **First tail:** Frame 11969 uses `8.2328/8.3269 ms` in materialization for
+  four evidence rows. Its `373734` materialization cycles are ordinary for
+  the 1–8 evidence cohort; corridor remains `inflight -> inflight`, and no GC
+  completes. This supports descheduling/contention rather than output-size or
+  executed-cycle growth.
+- **Second tail:** Frame 38043 uses `4.9519/5.0455 ms` in materialization for
+  48 evidence rows. Its `681916` materialization cycles are the run maximum
+  and the corridor Future changes `inflight -> done`. This supports executed
+  completion/GIL-handoff work in addition to wall scheduling.
+- **Rejected inference:** The offline Windows p95 improvement and fresh
+  physical p95 pass do not establish bounded maximum latency. Conversely,
+  these two mixed tails do not identify one worker or justify re-enabling the
+  rejected priority intervention.
+- **Correction boundary:** Retain the exact cycle-delta optimization. Keep
+  B4 open. Any native-output validation shortcut needs a separate invariant
+  gate; any process isolation or publication-worker change needs a
+  precommitted causal delivery experiment with unchanged correctness,
+  cadence, and fallback gates.
+- **Evidence:** Birth audit SHA-256 is
+  `c4a715c0e50f6af8b0d712cfe36ae1a2697173aec49369b3dd93601b91382e9d`;
+  raw local trace SHA-256 is
+  `e15fc270fdb2afe188987aa8f22798f36cbc6da8e07192a2c4af0aed132fe43d`.
+
+## CE-0157: A stale ECL file mapping can decode plausible later instructions
+
+Status: observed offline evidence-accounting counterexample; conservative
+mapping-epoch correction implemented
+
+- **Observed trigger:** Static replay of physical run `20260728_121028`
+  encounters an invalid instruction size at spell-73 frame 44212, proving
+  that the retained decoded Stage-4A file is no longer byte-aligned with the
+  late runtime instruction image.
+- **Old failure:** The auditor treated each later row independently. At
+  frames 44216, 44246, and 44266, the stale file bytes at the reused runtime
+  addresses happened to form valid instructions and produced three false
+  `unknown:unsupported_control_flow -> complete:horizon` transitions.
+- **Minimal falsifier:** Place an invalid header before a later byte-aligned,
+  syntactically valid future instruction in one retained static image. After
+  the first mapping failure, independently replaying the later address can
+  manufacture a complete result from a mapping already disproved by the
+  trace.
+- **Correction:** The first decode/read failure now invalidates the static
+  runtime-to-file mapping for all later callback rows. The corrected audit
+  excludes 27 late rows, reports zero unknown-to-complete transitions, and
+  deliberately still fails its all-rows and no-unknown-exclusion gates.
+- **Required future evidence:** Retain raw instruction bytes or an immutable
+  runtime image/version identity at the callback capture before attempting
+  to recover these late rows. Do not infer validity from a plausible static
+  decode.
+- **Evidence:** Corrected deterministic audit SHA-256 is
+  `b8b8695fcf710c693201a87ecb99840c33e569fbf68e8236653e7b213142d839`.
+- **Authority:** This only prevents optimistic offline evidence. The live
+  scanner already remained fail-closed; no schedule, geometry, or action
+  authority changes.

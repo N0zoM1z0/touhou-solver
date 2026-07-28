@@ -84,6 +84,55 @@ class EclControlFlowAuditTests(unittest.TestCase):
             1,
         )
 
+    def test_mapping_failure_invalidates_later_plausible_bytes(self) -> None:
+        base = 0x500000
+        invalid_header = struct.pack(
+            "<iHHBBH",
+            0,
+            0,
+            0,
+            0,
+            0xFF,
+            0,
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            ecl_path = root / "fixture.ecl"
+            trace_path = root / "trace.jsonl"
+            ecl_path.write_bytes(
+                invalid_header
+                + _instruction(300, 0x00)
+            )
+            rows = (
+                _decision(1, base, 73),
+                _decision(2, base + len(invalid_header), 73),
+            )
+            trace_path.write_text(
+                "".join(json.dumps(row) + "\n" for row in rows),
+                encoding="utf-8",
+            )
+            report = audit_trace(
+                trace_path,
+                ecl_path=ecl_path,
+                runtime_base=base,
+            )
+
+        self.assertFalse(report["passed"])
+        self.assertEqual(report["counts"]["replayed_rows"], 0)
+        self.assertEqual(report["mapping_exclusions"]["count"], 2)
+        self.assertEqual(
+            report["mapping_exclusions"]["invalidation"]["frame"],
+            1,
+        )
+        self.assertIn(
+            "invalidated by earlier runtime-image mismatch",
+            report["mapping_exclusions"]["samples"][1]["error"],
+        )
+        self.assertEqual(
+            report["violations"]["unknown_to_complete"],
+            [],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

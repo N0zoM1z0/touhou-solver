@@ -416,6 +416,17 @@ comparison.
    Windows maximum controller-path p95 improves
    `0.04872 -> 0.04680 ms`, repeated at `0.04410 ms`; Linux remains
    effectively flat. B4 stays open until the unchanged fresh physical gate.
+   That gate `20260728_121028` now passes p95/p99 at
+   `0.1986/0.3400 ms` but fails maximum at `8.3269 ms`; two materialization
+   tails combine an ordinary-cycle descheduling witness and a
+   maximum-cycle corridor-completion witness. B4 therefore remains open and
+   the rejected priority experiment stays rejected. Its ten hits are
+   descriptively below the preceding run's 14 but above an earlier
+   same-stage run's nine; all follow global exhaustion, so no survival effect
+   is inferred. The same trace also exposes CE-0157: once static replay proves
+   a runtime/file mapping mismatch at frame 44212, plausible later bytes must
+   not be decoded independently. The auditor now excludes all 27 later rows
+   and remains failed; live coverage is unchanged.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

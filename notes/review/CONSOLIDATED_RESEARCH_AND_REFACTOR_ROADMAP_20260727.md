@@ -1211,6 +1211,20 @@ parity 當成每個 nature tie field 的逐 bit equality。
   remains flat. Because physical B4 missed by only `0.0059 ms`, run one fresh
   unchanged normal-priority Stage-4A gate before considering more invasive
   batch-validation or worker changes;
+- that physical gate `20260728_121028` now passes p95/p99 at
+  `0.1986/0.3400 ms` but fails the unchanged `2.00 ms` maximum with
+  `8.3269 ms`. Both over-budget rows are materialization intervals: one has
+  ordinary same-cohort current-thread cycles, while one has the run-wide
+  maximum cycles and a corridor `inflight -> done` transition. Keep B4 open,
+  retain the narrow optimization, and do not retry the rejected priority
+  intervention. Before dropping batch validation, fix a native-output
+  invariant/failure contract; before process isolation, fix a causal
+  delivery/contamination experiment;
+- the same trace adds a static-replay evidence rule: after the first
+  decoded-file/runtime-image mismatch, all later rows are mapping-unknown
+  even if stale bytes decode plausibly. The corrected auditor excludes 27
+  late spell-73 rows and deliberately remains failed. Recover them only with
+  retained raw instruction bytes or immutable runtime-image identity;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

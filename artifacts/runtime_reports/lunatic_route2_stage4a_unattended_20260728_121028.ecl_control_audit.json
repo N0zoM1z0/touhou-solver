@@ -1,0 +1,289 @@
+{
+  "counts": {
+    "callback_rows": 5663,
+    "control_boundaries": {
+      "spell=57,opcode=0x05,offset=0x3510": 862,
+      "spell=57,opcode=0x05,offset=0x35B8": 443,
+      "spell=61,opcode=0x05,offset=0x3F44": 625,
+      "spell=61,opcode=0x05,offset=0x3FD4": 218,
+      "spell=61,opcode=0x34,offset=0x3D54": 414,
+      "spell=65,opcode=0x05,offset=0x46DC": 509,
+      "spell=65,opcode=0x34,offset=0x4768": 25,
+      "spell=65,opcode=0x34,offset=0x479C": 25,
+      "spell=65,opcode=0x34,offset=0x47D0": 23,
+      "spell=65,opcode=0x34,offset=0x4804": 24,
+      "spell=65,opcode=0x34,offset=0x4838": 23,
+      "spell=65,opcode=0x34,offset=0x486C": 20,
+      "spell=73,opcode=0x33,offset=0x7100": 983
+    },
+    "decision_rows": 14066,
+    "instruction_reduction_percent": 0.0,
+    "new_instructions": 56771,
+    "new_prefix_events": 0,
+    "new_stop_counts": {
+      "horizon": 1442,
+      "unsupported_control_flow": 4194
+    },
+    "old_instructions": 56771,
+    "old_stop_counts": {
+      "horizon": 1442,
+      "unsupported_control_flow": 4194
+    },
+    "replayed_rows": 5636,
+    "transitions": {
+      "complete:horizon->complete:horizon": 1442,
+      "unknown:unsupported_control_flow->unknown:unsupported_control_flow": 4194
+    }
+  },
+  "gates": {
+    "all_callback_rows_accounted": true,
+    "all_callback_rows_replayed": false,
+    "decoded_mapping_covers_at_least_99_percent": true,
+    "no_unknown_rows_excluded_by_static_mapping": false,
+    "no_unknown_to_complete": true,
+    "spell57_inspects_fewer_than_64_instructions": true,
+    "spell57_stops_at_unsupported_control": true,
+    "spell73_dynamic_control_boundary_observed": true
+  },
+  "mapping_exclusions": {
+    "count": 27,
+    "invalidation": {
+      "error": "ValueError: invalid live ECL instruction size 1132",
+      "frame": 44212,
+      "spell": "73"
+    },
+    "reason": "the first decode/read failure invalidates the static runtime-to-file mapping for every later callback row; no raw instruction bytes or replacement image identity were retained",
+    "samples": [
+      {
+        "error": "ValueError: invalid live ECL instruction size 1132",
+        "frame": 44212,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44216,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44219,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44222,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44223,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44225,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44227,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44229,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44231,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44233,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44235,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44237,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44240,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44242,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44244,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44246,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44248,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44251,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44253,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      },
+      {
+        "error": "static mapping invalidated by earlier runtime-image mismatch",
+        "frame": 44255,
+        "old_reason": "unsupported_control_flow",
+        "old_status": "unknown",
+        "spell": "73"
+      }
+    ]
+  },
+  "model": {
+    "active_difficulty_mask": 8,
+    "callback_angle_speed_source": "unavailable_in_trace_zeroed_for_control_coverage_replay",
+    "coverage_control_replay_claimed": true,
+    "horizon_frames": 256,
+    "schedule_value_parity_claimed": false
+  },
+  "passed": false,
+  "per_spell": {
+    "57": {
+      "instruction_reduction_percent": 0.0,
+      "new_instructions": 3040,
+      "new_max_instructions": 26,
+      "new_stop_counts": {
+        "unsupported_control_flow": 1305
+      },
+      "old_instructions": 3040,
+      "rows": 1305,
+      "transitions": {
+        "unknown:unsupported_control_flow->unknown:unsupported_control_flow": 1305
+      }
+    },
+    "61": {
+      "instruction_reduction_percent": 0.0,
+      "new_instructions": 10505,
+      "new_max_instructions": 21,
+      "new_stop_counts": {
+        "unsupported_control_flow": 1257
+      },
+      "old_instructions": 10505,
+      "rows": 1257,
+      "transitions": {
+        "unknown:unsupported_control_flow->unknown:unsupported_control_flow": 1257
+      }
+    },
+    "65": {
+      "instruction_reduction_percent": 0.0,
+      "new_instructions": 5033,
+      "new_max_instructions": 30,
+      "new_stop_counts": {
+        "horizon": 37,
+        "unsupported_control_flow": 649
+      },
+      "old_instructions": 5033,
+      "rows": 686,
+      "transitions": {
+        "complete:horizon->complete:horizon": 37,
+        "unknown:unsupported_control_flow->unknown:unsupported_control_flow": 649
+      }
+    },
+    "69": {
+      "instruction_reduction_percent": 0.0,
+      "new_instructions": 32317,
+      "new_max_instructions": 62,
+      "new_stop_counts": {
+        "horizon": 1315
+      },
+      "old_instructions": 32317,
+      "rows": 1315,
+      "transitions": {
+        "complete:horizon->complete:horizon": 1315
+      }
+    },
+    "73": {
+      "instruction_reduction_percent": 0.0,
+      "new_instructions": 5876,
+      "new_max_instructions": 34,
+      "new_stop_counts": {
+        "horizon": 90,
+        "unsupported_control_flow": 983
+      },
+      "old_instructions": 5876,
+      "rows": 1073,
+      "transitions": {
+        "complete:horizon->complete:horizon": 90,
+        "unknown:unsupported_control_flow->unknown:unsupported_control_flow": 983
+      }
+    }
+  },
+  "schema": "th08-ecl-control-flow-audit-v1",
+  "source": {
+    "ecl_name": "ecldata4asp.ecl",
+    "ecl_sha256": "9ac983ec5a34fd607b73891d5ba95a19caadb493565b8986320c04d0de8a8df3",
+    "runtime_base": "0x0B1D1430",
+    "trace_name": "lunatic_route2_stage4a_unattended_20260728_121028.jsonl",
+    "trace_sha256": "e15fc270fdb2afe188987aa8f22798f36cbc6da8e07192a2c4af0aed132fe43d"
+  },
+  "violations": {
+    "unknown_to_complete": []
+  }
+}

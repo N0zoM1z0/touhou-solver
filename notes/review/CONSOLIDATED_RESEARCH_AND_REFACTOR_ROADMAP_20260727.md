@@ -1185,7 +1185,19 @@ parity 當成每個 nature tie field 的逐 bit equality。
   detection. Shipped spell-57 integration resolves one `0x05`, then stops
   before direct-fire or RNG. Float add/normalize remains deliberately unknown
   until its rounding path has an independent oracle. No live import or
-  authority changed; retained-trace replay is next;
+  authority changed;
+- retained physical replay of `20260728_110438` now accounts for all 3,117
+  in-scope unknown spell-57/61/65 rows and keeps the 1,008 dynamic spell-73
+  rows excluded. It observes 1,730 initial `0x05` rows, canonicalizes them to
+  108 unique physical one-step cases, and agrees with the independent oracle
+  on every transition. Zero unknown row becomes a verified complete
+  schedule. The deterministic replay/fixture hashes are `b280467b...920f`
+  and `6c34d097...ab3c`; isolated Linux/Windows one-step p50 is about
+  `8.51/10.08 us`. This closes implementation parity for that one
+  instruction only, not B4, callback completeness, future-hazard coverage,
+  survival, or action authority. Next perform matched live-path attribution
+  and establish an independent binary32 oracle before adding float
+  add/normalization;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

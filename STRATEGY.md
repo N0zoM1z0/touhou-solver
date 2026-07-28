@@ -395,9 +395,16 @@ comparison.
    Phase-B1 now has an offline-only exact signed-int32 `0x05` shadow and an
    independent raw-tuple/plain-dict scalar oracle. It stops before shipped
    direct-fire, RNG, float arithmetic/normalization, call, and dynamic
-   branches. This is proposed evidence infrastructure only; retained
-   candidate replay and float-rounding gates remain before any shadow
-   completion claim.
+   branches. Retained replay of physical run `20260728_110438` decodes all
+   3,117 in-scope unknown spell-57/61/65 rows; 1,730 begin at `0x05` and
+   canonicalize to 108 unique physical one-step cases. Every case agrees
+   with the independent oracle, while zero unknown rows become a verified
+   complete schedule. The 1,008 dynamic spell-73 rows remain excluded.
+   Linux/Windows isolated one-step p50 is approximately
+   `0.0085/0.0101 ms`; it does not close the physical B4 observer gate.
+   This remains offline evidence infrastructure only. Matched live-path
+   attribution and an independent float32 rounding oracle are next; direct
+   fire, RNG, dynamic state, calls, and interrupts remain `UNKNOWN`.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

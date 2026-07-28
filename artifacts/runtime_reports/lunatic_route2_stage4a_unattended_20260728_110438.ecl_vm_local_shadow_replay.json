@@ -1,0 +1,103 @@
+{
+  "authority": {
+    "candidate_completion": "none_verified",
+    "live_callback_schedule": "unchanged",
+    "physical_action": "none_added",
+    "scope": "offline_shadow_only"
+  },
+  "counts": {
+    "candidate_unknown_rows": 3117,
+    "decision_rows": 13525,
+    "decode_errors": 0,
+    "decoded_rows": 3117,
+    "excluded_dynamic_unknown_rows": 1008,
+    "initial_op05_rows": 1730,
+    "initial_opcode_rows": {
+      "0x0000": 158,
+      "0x0004": 616,
+      "0x0005": 1730,
+      "0x0034": 125,
+      "0x003e": 409,
+      "0x0051": 79
+    },
+    "op05_one_step_failures": 0,
+    "shadow_stop_reason_rows": {
+      "unsupported_control_flow": 512,
+      "unsupported_float_assignment": 188,
+      "unsupported_opcode_0018": 174,
+      "unsupported_opcode_003b": 47,
+      "unsupported_opcode_003e": 758,
+      "unsupported_opcode_0043": 11,
+      "unsupported_opcode_0051": 79,
+      "unsupported_opcode_005b": 96,
+      "unsupported_opcode_0063": 1038,
+      "unsupported_opcode_008b": 204,
+      "unsupported_timer_reset": 10
+    },
+    "unique_op05_cases": 108,
+    "unknown_rows": 4125,
+    "unverified_new_complete_rows": 0
+  },
+  "gates": {
+    "all_candidate_rows_decoded": true,
+    "all_op05_one_step_transitions_exact": true,
+    "candidate_unknown_rows_present": true,
+    "capture_aligned_op05_rows_present": true,
+    "no_unverified_new_completion": true
+  },
+  "passed": true,
+  "per_spell": {
+    "57": {
+      "candidate_rows": 1296,
+      "initial:0x0000": 47,
+      "initial:0x0005": 1212,
+      "initial:0x0051": 37,
+      "shadow_stop:unsupported_opcode_0018": 174,
+      "shadow_stop:unsupported_opcode_003b": 47,
+      "shadow_stop:unsupported_opcode_0051": 37,
+      "shadow_stop:unsupported_opcode_0063": 1038
+    },
+    "61": {
+      "candidate_rows": 1224,
+      "initial:0x0004": 378,
+      "initial:0x0005": 412,
+      "initial:0x003e": 398,
+      "initial:0x0051": 36,
+      "shadow_stop:unsupported_control_flow": 387,
+      "shadow_stop:unsupported_float_assignment": 188,
+      "shadow_stop:unsupported_opcode_003e": 398,
+      "shadow_stop:unsupported_opcode_0043": 11,
+      "shadow_stop:unsupported_opcode_0051": 36,
+      "shadow_stop:unsupported_opcode_008b": 204
+    },
+    "65": {
+      "candidate_rows": 597,
+      "initial:0x0000": 111,
+      "initial:0x0004": 238,
+      "initial:0x0005": 106,
+      "initial:0x0034": 125,
+      "initial:0x003e": 11,
+      "initial:0x0051": 6,
+      "shadow_stop:unsupported_control_flow": 125,
+      "shadow_stop:unsupported_opcode_003e": 360,
+      "shadow_stop:unsupported_opcode_0051": 6,
+      "shadow_stop:unsupported_opcode_005b": 96,
+      "shadow_stop:unsupported_timer_reset": 10
+    },
+    "73": {
+      "excluded_dynamic_rows": 1008
+    }
+  },
+  "schema": "th08-ecl-vm-local-shadow-replay-v1",
+  "source": {
+    "ecl_name": "ecldata4asp.ecl",
+    "ecl_sha256": "9ac983ec5a34fd607b73891d5ba95a19caadb493565b8986320c04d0de8a8df3",
+    "runtime_base": 186455088,
+    "trace_name": "lunatic_route2_stage4a_unattended_20260728_110438.jsonl",
+    "trace_sha256": "aa86ba40f2b2141ff5212ffca7374d27d73ca6680c21cad22e09a9520ad1cf9e"
+  },
+  "violations": {
+    "decode_error_samples": [],
+    "unverified_complete_samples": []
+  }
+}

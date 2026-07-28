@@ -44,6 +44,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
 
 - Repository branch: `main`.
 - Latest G5 observation/performance checkpoints:
+  `Verify physical ECL loop transitions offline`,
+  `Add exact offline ECL loop shadow`,
+  `Validate ECL local projection physically`,
+  `Capture ECL VM locals without widening authority`,
+  `Define capture-aligned ECL local shadow`,
   `Retain physical ECL control-flow gate`,
   `Fail closed on hidden ECL control branches`,
   `Define fail-closed ECL control boundary`,
@@ -326,7 +331,23 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Synthetic counter, wrap, visited-state, and shipped spell-57 boundary tests
   pass. Float add/normalize remains unknown pending a rounding oracle; no
   live module imports the shadow. Complete Linux/Windows suites now pass 844
-  tests. Next run retained-trace candidate replay and matched-path timing.
+  tests. Retained replay of physical run `20260728_110438` now accounts for
+  all 3,117 in-scope unknown spell-57/61/65 rows; the 1,008 dynamic spell-73
+  rows remain explicitly excluded. It decodes every in-scope row, observes
+  1,730 initial `0x05` rows, reduces them to 108 unique physical one-step
+  cases, and agrees with the independent oracle with zero failures. No
+  unknown row becomes a verified complete schedule. Two generations of the
+  deterministic replay and fixture are byte-identical at SHA-256
+  `b280467bb51ee2cc3c52343b8acf8fdcead5d4db46cbdc3f29192a68a8ae920f`
+  and
+  `6c34d09752abb7805c84e537b8df52ad24a1aea90614c8b5a2687d730d73ab3c`.
+  Isolated one-step Linux/Windows p50 is approximately
+  `0.0085/0.0101 ms`; this is an offline implementation baseline, not the
+  open physical B4 observer boundary. Complete Linux/Windows suites pass 848
+  tests, with three existing Windows skips. Next profile the matched live
+  path and independently fix float32 add/normalization semantics before
+  widening the shadow. Direct fire, RNG, dynamic state, calls, and
+  interrupts remain unknown and live promotion remains forbidden.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

@@ -33,6 +33,9 @@ def oracle_interpret(
     *,
     start: int,
     counter: int,
+    timer_fraction: float = 0.0,
+    timer_elapsed: int = 0,
+    time_scale: float = 1.0,
     horizon_frames: int = 20,
     max_instructions: int = 64,
 ) -> dict[str, object]:
@@ -40,7 +43,7 @@ def oracle_interpret(
 
     variables = {10036: counter}
     pc = start
-    timer = 0.0
+    timer = timer_elapsed + timer_fraction
     physical_frame = 0
     scanned = 0
     visited: set[tuple[int, float, int, tuple[tuple[int, int], ...]]] = set()
@@ -56,14 +59,14 @@ def oracle_interpret(
         if time_value > timer:
             delta = max(
                 1,
-                math.ceil((time_value - timer) / 1.0 - 1e-9),
+                math.ceil((time_value - timer) / time_scale - 1e-9),
             )
             if physical_frame + delta > horizon_frames:
                 physical_frame = horizon_frames
                 reason = "horizon"
                 break
             physical_frame += delta
-            timer += delta
+            timer += delta * time_scale
         if 0x08 & difficulty != 0x08:
             pc += size
             continue

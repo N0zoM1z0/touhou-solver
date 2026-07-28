@@ -351,3 +351,56 @@ rounding is independently checked by native/physical replay. Phase B1 may
 produce synthetic complete results, but no retained candidate witness or
 live callback schedule is published. Ruff and complete Linux/Windows suites
 pass 844 tests; Windows retains three existing platform skips.
+
+## Phase-B1 Retained Physical Replay Checkpoint
+
+The deterministic audit
+`scripts/analysis/th08_ecl_vm_local_shadow_replay.py` replays the retained
+physical Stage-4A trace `20260728_110438` against the exact decoded
+`ecldata4asp.ecl` image. The runtime base `0x0B1D1430` is inferred from the
+captured physical PC and shipped decoded instruction offset, then checked by
+successful instruction decoding across every in-scope row.
+
+**Observed:**
+
+- the trace contains 4,125 fail-closed unknown callback rows;
+- 3,117 spell-57/61/65 rows are inside the declared local-loop scope and all
+  3,117 decode without error;
+- the 1,008 spell-73 rows depend on dynamic state and remain explicitly
+  excluded rather than reclassified;
+- 1,730 in-scope rows begin at opcode `0x05`;
+- those rows canonicalize to 108 unique captured one-step cases;
+- production and the structurally independent raw-tuple/plain-dict oracle
+  agree on all 108 PC, timer, frame, and signed-int32 counter transitions;
+  and
+- zero previously unknown row becomes a verified complete schedule.
+
+The compact fixture is
+`artifacts/ecl_reports/stage4a_vm_local_op05_cases_20260728_110438.json`.
+The replay report and fixture regenerate byte-identically at SHA-256
+`b280467bb51ee2cc3c52343b8acf8fdcead5d4db46cbdc3f29192a68a8ae920f`
+and
+`6c34d09752abb7805c84e537b8df52ad24a1aea90614c8b5a2687d730d73ab3c`.
+An attempted audit against the differently encoded extracted file fails all
+3,117 decode rows; the all-row gate therefore rejects an ECL image-identity
+mismatch instead of silently accepting address arithmetic.
+
+Separate timed reports execute 324,000 exact one-step transitions on each
+platform. Linux p50/p95/p99/max is
+`8.509/9.035/9.210/9.210 us`; Windows is
+`10.080/10.432/10.441/10.441 us`. Both reports preserve all exact-result
+gates. Python 3.13 and 3.12 emit different bytecode, so their opcode counts
+are platform-interpreter baselines rather than cross-version work parity.
+Report SHA-256 values are
+`d08971b7646754f26fd20299e20e23d926958045bbda1ec5d8ca101378fba061`
+and
+`ed8c0b10d53f7641ab4055c45ade4f99001291cd40979ee29488b3203139a908`.
+
+**Authority:** this closes only the retained physical one-step `0x05`
+implementation/parity gate. It does not complete a callback schedule, lower
+a new event, alter a live action, or close B4. Direct fire, RNG-derived
+assignment, float add/normalization, dynamic values, calls, interrupts, and
+spell 73 remain unknown. The next semantic gate is an independent
+binary32-rounding oracle for the exact shipped float path; the parallel
+performance gate is matched live-path attribution under the unchanged B4
+limits.

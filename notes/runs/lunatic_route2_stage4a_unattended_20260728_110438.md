@@ -120,3 +120,23 @@ Treat policy delivery, delay-support coverage, and viability exhaustion as separ
   `cbfb75db83988e48b1c5305124a31383218c426df3bcde18e9a6d3f34ed09b3e`,
   `aedbe0fece76b7cf4bfe8722babd1093694e07b4e6ee4da33547157bd97166ba`,
   and `91c25c9594e8a5711bb5cf742765bd5b46741436ef55ae96d204dde198d0cccb`.
+
+## Offline ECL Integer-Loop Replay
+
+- **Observed:** all 3,117 in-scope unknown spell-57/61/65 callback rows
+  decode against the exact decoded ECL image. The 1,008 dynamic spell-73
+  rows remain excluded.
+- **Observed:** 1,730 rows start at opcode `0x05`; they canonicalize to 108
+  unique captured one-step cases. Production and the independent scalar
+  oracle agree on every PC, timer, stop-frame, and signed-int32 counter
+  transition.
+- Zero unknown row becomes a verified complete callback schedule. Direct
+  fire, RNG, float arithmetic/normalization, dynamic values, calls, and
+  interrupts remain unknown.
+- The deterministic replay and compact fixture regenerate byte-identically
+  at SHA-256
+  `b280467bb51ee2cc3c52343b8acf8fdcead5d4db46cbdc3f29192a68a8ae920f`
+  and
+  `6c34d09752abb7805c84e537b8df52ad24a1aea90614c8b5a2687d730d73ab3c`.
+- **Authority:** offline one-step implementation/parity evidence only. No
+  callback, survival, or physical action authority is added.

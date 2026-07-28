@@ -7454,3 +7454,46 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - Ruff and complete Linux/Windows suites pass 844 tests; Windows retains
   three existing skips. Retained-trace replay and matched-path performance
   attribution are the next gates. No candidate or live authority is added.
+
+## 2026-07-28 — Verified physical ECL integer-loop transitions offline
+
+- Added a deterministic retained-trace replay tool and a compact physical
+  one-step fixture. The audit consumes the local projection captured by
+  Stage-4A run `20260728_110438`; it does not import or modify live control.
+- **Observed:** 4,125 callback rows were already fail-closed unknown. The
+  declared spell-57/61/65 local-loop scope contains 3,117 rows, all of which
+  decode against decoded `ecldata4asp.ecl`. The 1,008 spell-73 rows remain
+  excluded because their control depends on dynamic state.
+- **Observed:** 1,730 in-scope rows begin at opcode `0x05`. They reduce to
+  108 unique captured one-step cases. Production agrees with the independent
+  raw-tuple/plain-dict oracle on every PC, timer, stop-frame, and signed-int32
+  counter transition. There are zero one-step failures and zero unverified
+  new complete rows.
+- **Identity failure retained in the process record:** an initial dry run
+  used the differently encoded extracted ECL (`f2f01bca...568cfb`) and
+  correctly failed all 3,117 decode rows with invalid instruction sizes.
+  Replaying the exact decoded image named by the prior evidence
+  (`9ac983ec...8df3`) closes every decode gate. This demonstrates that the
+  report fails closed on a mismatched program image.
+- The correctness report deliberately contains no wall-clock samples. Two
+  generations of the replay and fixture are byte-identical at SHA-256
+  `b280467bb51ee2cc3c52343b8acf8fdcead5d4db46cbdc3f29192a68a8ae920f`
+  and
+  `6c34d09752abb7805c84e537b8df52ad24a1aea90614c8b5a2687d730d73ab3c`.
+- A separate benchmark executes 324,000 exact one-step transitions per
+  platform. Linux p50/p95/p99/max is
+  `8.509/9.035/9.210/9.210 us`; Windows is
+  `10.080/10.432/10.441/10.441 us`. Both exact-result gates pass. Python
+  3.13/3.12 bytecode counts differ and are not treated as cross-version work
+  parity. Report SHA-256 values are
+  `d08971b7646754f26fd20299e20e23d926958045bbda1ec5d8ca101378fba061`
+  and
+  `ed8c0b10d53f7641ab4055c45ade4f99001291cd40979ee29488b3203139a908`.
+- Ruff and focused tests pass; complete Linux and Windows suites pass
+  848/848 in `9.677/16.855 s`, with three existing Windows skips.
+- **Decision:** the captured physical `0x05` implementation/parity gate is
+  closed, but no callback completion, future event, survival, or live action
+  authority is added. Direct fire, RNG, float add/normalization, dynamic
+  values, calls, interrupts, and spell 73 stay unknown. Next independently
+  establish shipped binary32 rounding while separately profiling the matched
+  live B4 path.

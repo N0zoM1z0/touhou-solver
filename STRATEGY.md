@@ -392,6 +392,12 @@ comparison.
    at 1,490 complete / 4,125 unknown. B4 remains failed at `0.2059 ms` p95,
    so phase B is limited to the independent offline oracle and performance
    attribution; live interpretation remains unpromoted.
+   Phase-B1 now has an offline-only exact signed-int32 `0x05` shadow and an
+   independent raw-tuple/plain-dict scalar oracle. It stops before shipped
+   direct-fire, RNG, float arithmetic/normalization, call, and dynamic
+   branches. This is proposed evidence infrastructure only; retained
+   candidate replay and float-rounding gates remain before any shadow
+   completion claim.
    Separately choose a proved repeated-state scheduler, a conservative
    containing envelope, or explicit certificate unavailability before
    treating Stage-5/6 evidence as promotable. Hard Stage-5/6 runs may still

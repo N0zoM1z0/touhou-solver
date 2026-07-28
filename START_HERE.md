@@ -321,6 +321,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   still over budget at `0.2059 ms`. Proceed only to the independent offline
   scalar oracle and matched-path performance attribution; live promotion
   remains forbidden. Post-audit Linux/Windows suites pass 834 tests.
+  The phase-B1 integer-loop shadow and structurally independent test oracle
+  are now implemented under `scripts/th08_ecl_shadow/` and `tests/`.
+  Synthetic counter, wrap, visited-state, and shipped spell-57 boundary tests
+  pass. Float add/normalize remains unknown pending a rounding oracle; no
+  live module imports the shadow. Complete Linux/Windows suites now pass 844
+  tests. Next run retained-trace candidate replay and matched-path timing.
   See `notes/G5_BULLET_BIRTH_PHYSICAL_GATE_20260728.md` and
   `notes/G5_NATIVE_BULLET_BIRTH_EXTRACTION_CONTRACT_20260728.md`, plus
   `notes/G5_NATIVE_BIRTH_GIL_BOUNDARY_EXPERIMENT_20260728.md` and

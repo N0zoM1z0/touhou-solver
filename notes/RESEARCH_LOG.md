@@ -7426,3 +7426,31 @@ local regression, not native runtime parity. Static pipeline Evidence remains
 - The projection auditor shares coverage/spell/percentile helpers with the
   prior control-flow auditor rather than duplicating them. Ruff and complete
   Linux/Windows suites pass 834 tests; Windows retains three existing skips.
+
+## 2026-07-28 — Added the exact offline ECL integer-loop shadow
+
+- `scripts/th08_ecl_shadow/` separates result model, mutable working
+  registers, and interpreter. It is offline-only and absent from every live
+  import/publication path.
+- Exact phase-B1 operations are no-op, terminate, literal jump, projected
+  literal int/raw-finite-float assignment, callback 12, and opcode `0x05`
+  with parameter mask exactly `0x0004` and a captured projected int lvalue.
+  The signed post-decrement wraps at 32 bits. The visited key includes the
+  complete local projection.
+- The structurally independent oracle in
+  `tests/th08_ecl_vm_local_oracle.py` uses raw tuples and a plain dict. It
+  shares no production resolver, transition, result, or interpreter.
+  Counters 0/1/2/7, int32 wrap, timer/PC/final locals, and local-aware
+  repeated-state behavior agree.
+- **Observed deterministic shipped integration:** at spell-57 offset
+  `0x3510`, counter 2 selects `0x34C0` and stops before direct-fire `0x63`;
+  counter 1 falls through, applies the literal reset to 4, and stops before
+  RNG-derived `0x18`. Same-old-field snapshots with counter 1/2 are therefore
+  not successor-equivalent.
+- **Conservative boundary:** missing locals, literal-lvalue `0x05`,
+  unprojected writes, calls, dynamic conditionals, non-finite float writes,
+  float add, and angle normalization remain unknown. `+/-pi` tests explicitly
+  preserve the captured bits and stop before normalize.
+- Ruff and complete Linux/Windows suites pass 844 tests; Windows retains
+  three existing skips. Retained-trace replay and matched-path performance
+  attribution are the next gates. No candidate or live authority is added.

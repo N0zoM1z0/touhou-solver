@@ -1179,6 +1179,13 @@ parity 當成每個 nature tie field 的逐 bit equality。
   spells 57/61/65. Coverage remains 1,490 complete / 4,125 unknown. B4 still
   fails at `0.2059 ms` p95, so next build only the independent offline scalar
   oracle while separately attributing matched-path performance;
+- the phase-B1 shadow is now modularized under `scripts/th08_ecl_shadow/`.
+  An independent test-only raw-tuple/plain-dict oracle agrees on signed-int32
+  loop counters, wrap, timer/PC/final locals, and local-aware repeated-state
+  detection. Shipped spell-57 integration resolves one `0x05`, then stops
+  before direct-fire or RNG. Float add/normalize remains deliberately unknown
+  until its rounding path has an independent oracle. No live import or
+  authority changed; retained-trace replay is next;
 - 這只完成 coverage plumbing，不代表以下任何 event class 已建模。
 
 逐事件類做，不建立一個未驗證的萬能 ECL simulator：

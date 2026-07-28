@@ -4,8 +4,9 @@ Date: 2026-07-28
 
 Status: phase A capture/trace projection is implemented, Linux/Windows
 offline-validated, and validated on one fresh complete physical Stage-4A
-workload. The independent phase-B oracle is still pending. No local
-interpretation or live coverage change is authorized.
+workload. Phase-B1's smallest integer-loop shadow and independent scalar
+oracle are implemented and offline-validated; retained-trace candidate replay
+is pending. No local interpretation reaches live coverage or lowering.
 
 This follows
 `G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`.
@@ -309,3 +310,44 @@ offline exact opcode-`0x05` subset. The parallel performance checkpoint is
 matched-path attribution of the remaining ECL/B4 cost; neither changes live
 authority. Post-audit Linux and Windows suites pass 834 tests; Windows
 retains three existing platform skips.
+
+## Phase-B1 Minimal Integer-Loop Checkpoint
+
+The offline-only implementation is split into
+`scripts/th08_ecl_shadow/{model,registers,interpreter}.py`. Nothing in the
+live capture, analyzer, lowering, controller, or publication path imports it.
+It supports:
+
+- no-op, terminate, and literal jump;
+- exact signed-int32 projected literal assignment;
+- exact raw finite-float literal assignment;
+- opcode `0x05` only with parameter mask exactly `0x0004` and a projected
+  integer lvalue; and
+- the already modeled literal callback-12 event.
+
+The loop decrement wraps as one 32-bit write, tests the signed
+post-decrement value, and then selects its encoded target. The visited-state
+key contains PC, timer, physical frame, and the complete frozen local
+projection. Every other opcode or operand stops before execution with an
+explicit unknown reason.
+
+The independent oracle lives in `tests/th08_ecl_vm_local_oracle.py`. It
+operates on raw instruction tuples and a plain variable dictionary and does
+not import production registers, resolvers, transitions, result types, or the
+interpreter. Deterministic comparisons cover counters 0/1/2/7, int32 wrap,
+timer/PC/final-state parity, and the local-state visited key. Two snapshots
+with identical old fields and `10036=1/2` scan different successors.
+
+The shipped spell-57 bytes provide a bounded integration case. Starting at
+opcode `0x05` with counter 2 branches to direct-fire and stops before opcode
+`0x63`; counter 1 falls through, applies the literal counter reset, and stops
+before RNG-derived opcode `0x18`. Missing projections, literal-lvalue loops,
+unprojected writes, calls, dynamic conditional branches, NaN writes, and
+`+/-pi` angle normalization all remain unknown.
+
+This deliberately stages the earlier proposed float arithmetic subset.
+Opcode `0x0F` add and `0x25` normalization are not exact until shipped
+rounding is independently checked by native/physical replay. Phase B1 may
+produce synthetic complete results, but no retained candidate witness or
+live callback schedule is published. Ruff and complete Linux/Windows suites
+pass 844 tests; Windows retains three existing platform skips.

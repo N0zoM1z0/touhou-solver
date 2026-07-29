@@ -541,7 +541,7 @@ def _finalb_scale_delivery_complete(
         resolution is not None
         and resolution.planner_scale_authority
         and resolution.frame_offset is not None
-        and resolution.frame_offset >= 240
+        and resolution.frame_offset > 0
         and resolution.schedule.root_scale_bits
         == TH08_UNIT_TIME_SCALE_BITS
     )

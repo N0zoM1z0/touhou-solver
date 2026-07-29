@@ -72,21 +72,27 @@ All of the following must pass:
 - exact executable, patch, route, difficulty, stage, foreground, and runtime
   ECL identities;
 - exactly one Bomb-zero, coherent 480-slot plus spell-owner source capture
-  at spell 190 whose capture frame equals the controller root;
+  at spell 190. The transaction may complete at the controller root manager
+  frame or exactly one later manager frame; later capture is rejected and no
+  authority may be backfilled before the captured source frame;
 - one observed predeath baseline stable inside the source transaction and
   unchanged through the exact scope. Baseline zero is clean; nonzero residue
   is retained contamination and grants no clean-player authority;
-- offset-zero exact live authority with the 300-frame schedule;
+- sampled exact live authority begins at a nonnegative offset from the
+  captured source. An asynchronous one-frame capture may therefore have its
+  first consumed row at offset 1 rather than an unsampleable offset 0;
 - every exact consumed row has one immutable
   gameplay/route/difficulty/stage/spell/source identity, the expected native
   root, complete remaining horizon, the same predeath baseline, and
   `live_exact_rebase` provenance;
 - non-unit/varying exact coverage never enters the unsupported corridor;
-- a sampled quarter row before relative frame 240 and a sampled unit row at
-  or after 240, with callback 18 restoring `0.25 -> 1.0` at relative frame
-  240 and no callback-28/29 bullet-velocity side effect;
-- zero fresh hit edges and zero Bomb masks from exact offset zero through the
-  first unit row;
+- a sampled quarter row before the callback-18 restore derived from the
+  accepted schedule, plus physical observation of the unit root in the exact
+  scope. A terminal-unload unit root is accepted only at the restore or
+  following manager frame and only when a same-frame
+  `scene_inactive/status=terminal_unload` record closes the bracket; and
+- zero fresh hit edges and zero Bomb masks from the first sampled exact row
+  through the restore observation;
 - every pre-target decision is explicitly labeled experimental and every
   decision in the whole trial is no-Bomb;
 - no exact-scope authority fallback, context/root/source mismatch, runtime
@@ -110,7 +116,7 @@ artifacts/runtime_reports/lunatic_route2_stage6b_finalb_scale_delivery_TIMESTAMP
 ```
 
 The strict report schema is
-`th08-finalb-scale-live-delivery-physical-report-v3`. Raw JSONL remains local
+`th08-finalb-scale-live-delivery-physical-report-v4`. Raw JSONL remains local
 and ignored; retain its SHA-256, the compact strict report, normal summary,
 first-hit attribution, resources/Power, timing, and cleanup state.
 
@@ -160,7 +166,7 @@ never entered 182/186/190; every root remained unit scale. The strict report
 therefore correctly has zero authority rows and fails. No replay was created.
 CE-0189 retains the gate-coverage failure separately from stage survival.
 
-The next authorized C5-2 trial uses the same command above and the same
+The authorized C5-2 trial used the same command above and the same
 original-game whole Stage-6B launch. It:
 
 - requires no THPRAC, precise-spell selection, or operator-time feature
@@ -176,3 +182,45 @@ original-game whole Stage-6B launch. It:
 The whole-stage auto-stop correction and dossier-v4 coverage report pass
 complete Linux/Windows discovery: 1,140 tests in 13.404/29.833 seconds, with
 the three existing Windows skips.
+
+## Observed C5-2 result
+
+Run `lunatic_route2_stage6b_finalb_scale_delivery_20260730_020015`
+completed the full stage over frames `1..76050` with 18,332 decisions, 22 hit
+edges, zero Bomb masks, normal `route_complete`, and exact cleanup. The
+canonical fresh-attempt failure is nonspell frame 7,412. This is not a clean
+Stage-6B result.
+
+Inside that failed whole-stage history, the nested exact C5 scope passed:
+
+- one coherent spell-190/sub44 source was captured at manager frame 75,811,
+  one frame after the controller decision/expected frame 75,810;
+- the first sampled exact authority row is offset 1; 111 decisions consume
+  exact quarter-scale authority through offset 238 with no fallback, hit, or
+  Bomb;
+- source player phase is 3 and predeath baseline is 7, so the result is
+  explicitly contaminated and grants no normal-player survival authority;
+- callback 18 schedules the unit restore at offset 239; controller cadence
+  skips that frame, and offset 240 observes the unit root together with
+  native terminal unload; and
+- strict v4 passes all 20 checks. Raw JSONL SHA-256 is
+  `cbad986f0bb627d88135e2a4ae31c48389b6e030657ad77e557b882585aedcfc`;
+  strict v4 report SHA-256 is
+  `53cddd1162769010dbc467bf9d295e90e5389db3ffb4fce3d1c73c42076b08ec`.
+
+The original Windows-CRLF strict v3 render hashes to
+`b1aa5a0c27082303a19c7d90f7aba42661006c5892e351b68c3e0a80f65aa2b5`;
+the tracked LF-normalized v3 artifact hashes to
+`9d3652466596f3a49cd67d0ff317f31685c92d23a6640bdf5ed9d47bd9d5dca7`.
+It failed because it required an exact sampled offset-zero row and an active
+unit-scale restore row. CE-0190 records why that report contract was
+noncausal for an asynchronous transaction ending at native terminal unload.
+
+`SEM-SCALE-C5` is complete only for this exact live-delivery contract. Do not
+repeat C5 or infer clean Final-B survival, pre-target correctness, another
+RNG/resource history, Extra, or NMNB. Continue the roadmap at `SEM-MODE`.
+
+Focused scale-authority/report discovery passes 13/10 tests. Complete Linux
+discovery passes 1,143 tests in 13.481 seconds; exact Windows UNC discovery
+passes 1,143 in 29.925 seconds with the three existing skips. A fresh v4
+render from the ignored raw trace is byte-identical to the retained report.

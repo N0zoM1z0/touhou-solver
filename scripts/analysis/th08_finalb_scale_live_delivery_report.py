@@ -30,7 +30,7 @@ from th08_time_scale import (  # noqa: E402
 )
 
 
-REPORT_SCHEMA = "th08-finalb-scale-live-delivery-physical-report-v3"
+REPORT_SCHEMA = "th08-finalb-scale-live-delivery-physical-report-v4"
 
 
 def _records(path: Path) -> Iterable[dict[str, object]]:
@@ -65,6 +65,7 @@ def build_report(path: Path) -> dict[str, object]:
     source_traces: list[dict[str, object]] = []
     authority_rows: list[dict[str, object]] = []
     decisions: list[dict[str, object]] = []
+    inactive_rows: list[dict[str, object]] = []
     pretarget_decision_count = 0
     pretarget_transport_labeled = True
     all_decisions_no_bomb = True
@@ -112,6 +113,8 @@ def build_report(path: Path) -> dict[str, object]:
                         "experimental_pretarget_unit_transport"
                     )
                 )
+        elif kind == "scene_inactive":
+            inactive_rows.append(record)
         elif kind == "time_scale_authority_unknown":
             unknown_rows.append(record)
         elif kind == "runtime_error":
@@ -125,6 +128,17 @@ def build_report(path: Path) -> dict[str, object]:
         if record.get("status") == "accepted_complete_source_trace"
     ]
     source_trace = accepted_sources[0] if len(accepted_sources) == 1 else None
+    source_schedule = (
+        source_trace.get("schedule")
+        if source_trace is not None
+        and isinstance(source_trace.get("schedule"), dict)
+        else None
+    )
+    origin_frame = (
+        _integer(source_schedule, "source_frame")
+        if source_schedule is not None
+        else None
+    )
     accepted_authority = [
         record
         for record in authority_rows
@@ -133,17 +147,6 @@ def build_report(path: Path) -> dict[str, object]:
             and record.get("planner_scale_schedule_authority") is True
         )
     ]
-    origin_rows = [
-        record
-        for record in accepted_authority
-        if _integer(record, "frame_offset") == 0
-    ]
-    origin_row = origin_rows[0] if len(origin_rows) == 1 else None
-    origin_frame = (
-        _integer(origin_row, "origin_source_frame")
-        if origin_row is not None
-        else None
-    )
     scoped_authority = [
         record
         for record in accepted_authority
@@ -157,6 +160,11 @@ def build_report(path: Path) -> dict[str, object]:
         for record in scoped_authority
         if _integer(record, "current_source_frame") is not None
     }
+    authority_offsets = [
+        offset
+        for record in scoped_authority
+        if (offset := _integer(record, "frame_offset")) is not None
+    ]
     quarter_offsets = [
         offset
         for record in scoped_authority
@@ -173,46 +181,6 @@ def build_report(path: Path) -> dict[str, object]:
             and record.get("root_scale_bits") == TH08_UNIT_TIME_SCALE_BITS
         )
     ]
-    restore_row = (
-        min(
-            (
-                record
-                for record in scoped_authority
-                if (
-                    (_integer(record, "frame_offset") or -1) >= 240
-                    and record.get("root_scale_bits")
-                    == TH08_UNIT_TIME_SCALE_BITS
-                )
-            ),
-            key=lambda record: _integer(record, "frame_offset") or 0,
-            default=None,
-        )
-        if origin_frame is not None
-        else None
-    )
-    restore_offset = (
-        _integer(restore_row, "frame_offset")
-        if restore_row is not None
-        else None
-    )
-    scoped_decisions = [
-        record
-        for record in decisions
-        if (
-            origin_frame is not None
-            and restore_offset is not None
-            and isinstance(record.get("time_scale"), dict)
-            and origin_frame
-            <= int(record["time_scale"].get("source_frame", -1))
-            <= origin_frame + restore_offset
-        )
-    ]
-    source_schedule = (
-        source_trace.get("schedule")
-        if source_trace is not None
-        and isinstance(source_trace.get("schedule"), dict)
-        else None
-    )
     source_capture = (
         source_trace.get("source_capture")
         if source_trace is not None
@@ -230,15 +198,161 @@ def build_report(path: Path) -> dict[str, object]:
         if source_schedule is not None
         else []
     )
-    supported_restore = any(
-        isinstance(write, dict)
-        and write.get("frame") == 240
-        and write.get("callback_index") == 18
-        and write.get("scale_bits_before") == FINAL_B_QUARTER_SCALE_BITS
-        and write.get("scale_bits_after") == TH08_UNIT_TIME_SCALE_BITS
-        and write.get("scales_active_bullet_velocity") is False
+    restore_writes = [
+        write
         for write in writes
+        if (
+            isinstance(write, dict)
+            and write.get("callback_index") == 18
+            and write.get("scale_bits_before") == FINAL_B_QUARTER_SCALE_BITS
+            and write.get("scale_bits_after") == TH08_UNIT_TIME_SCALE_BITS
+            and write.get("scales_active_bullet_velocity") is False
+        )
+    ]
+    scheduled_restore_offset = (
+        _integer(restore_writes[0], "frame")
+        if len(restore_writes) == 1
+        else None
     )
+    source_player_scales = (
+        source_schedule.get("player_scale_bits")
+        if source_schedule is not None
+        and isinstance(source_schedule.get("player_scale_bits"), list)
+        else None
+    )
+    source_laser_scales = (
+        source_schedule.get("laser_scale_bits")
+        if source_schedule is not None
+        and isinstance(source_schedule.get("laser_scale_bits"), list)
+        else None
+    )
+    first_unit_root_offset = None
+    if (
+        source_schedule is not None
+        and source_laser_scales is not None
+        and source_schedule.get("root_scale_bits")
+        == FINAL_B_QUARTER_SCALE_BITS
+    ):
+        first_unit_root_offset = next(
+            (
+                offset
+                for offset, scale_bits in enumerate(
+                    source_laser_scales,
+                    1,
+                )
+                if scale_bits == TH08_UNIT_TIME_SCALE_BITS
+            ),
+            None,
+        )
+    supported_restore = (
+        scheduled_restore_offset is not None
+        and scheduled_restore_offset == first_unit_root_offset
+        and source_player_scales is not None
+        and first_unit_root_offset is not None
+        and first_unit_root_offset < len(source_player_scales)
+        and source_player_scales[first_unit_root_offset]
+        == TH08_UNIT_TIME_SCALE_BITS
+    )
+    active_restore_row = min(
+        (
+            record
+            for record in scoped_authority
+            if (
+                first_unit_root_offset is not None
+                and (_integer(record, "frame_offset") or -1)
+                >= first_unit_root_offset
+                and record.get("root_scale_bits")
+                == TH08_UNIT_TIME_SCALE_BITS
+            )
+        ),
+        key=lambda record: _integer(record, "frame_offset") or 0,
+        default=None,
+    )
+    terminal_context_rows = [
+        record
+        for record in authority_rows
+        if (
+            record.get("status") == "root_only_context_mismatch"
+            and record.get("reason") == "immutable_context_mismatch"
+            and origin_frame is not None
+            and _integer(record, "origin_source_frame") == origin_frame
+            and record.get("root_scale_bits") == TH08_UNIT_TIME_SCALE_BITS
+        )
+    ]
+    terminal_context_by_frame = {
+        current_frame: record
+        for record in terminal_context_rows
+        if (current_frame := _integer(record, "current_source_frame"))
+        is not None
+    }
+    terminal_inactive_frames = {
+        frame
+        for record in inactive_rows
+        if (
+            record.get("status") == "terminal_unload"
+            and (frame := _integer(record, "frame")) is not None
+        )
+    }
+    terminal_restore_row = min(
+        (
+            record
+            for current_frame, record in terminal_context_by_frame.items()
+            if (
+                origin_frame is not None
+                and first_unit_root_offset is not None
+                and current_frame in terminal_inactive_frames
+                and first_unit_root_offset
+                <= current_frame - origin_frame
+                <= first_unit_root_offset + 1
+            )
+        ),
+        key=lambda record: _integer(record, "current_source_frame") or 0,
+        default=None,
+    )
+    restore_row = active_restore_row or terminal_restore_row
+    restore_offset = (
+        _integer(active_restore_row, "frame_offset")
+        if active_restore_row is not None
+        else (
+            (
+                _integer(terminal_restore_row, "current_source_frame")
+                - origin_frame
+            )
+            if (
+                terminal_restore_row is not None
+                and origin_frame is not None
+                and _integer(
+                    terminal_restore_row,
+                    "current_source_frame",
+                )
+                is not None
+            )
+            else None
+        )
+    )
+    restore_observation = (
+        "active_exact_root"
+        if active_restore_row is not None
+        else (
+            "terminal_unload_root"
+            if terminal_restore_row is not None
+            else None
+        )
+    )
+    scoped_decisions = [
+        record
+        for record in decisions
+        if (
+            origin_frame is not None
+            and restore_offset is not None
+            and isinstance(record.get("time_scale"), dict)
+            and origin_frame
+            <= int(record["time_scale"].get("source_frame", -1))
+            <= origin_frame + restore_offset
+            and int(record["time_scale"].get("source_frame", -1))
+            in authority_by_frame
+        )
+    ]
 
     decisions_clean = bool(scoped_decisions) and all(
         record.get("hit_started") is False
@@ -346,10 +460,10 @@ def build_report(path: Path) -> dict[str, object]:
         == FINAL_B_QUARTER_SCALE_BITS
         and source_schedule.get("source_frame") == origin_frame
         and source_schedule.get("complete_horizon") == 300
-        and isinstance(source_schedule.get("player_scale_bits"), list)
-        and len(source_schedule["player_scale_bits"]) == 300
-        and isinstance(source_schedule.get("laser_scale_bits"), list)
-        and len(source_schedule["laser_scale_bits"]) == 300
+        and source_player_scales is not None
+        and len(source_player_scales) == 300
+        and source_laser_scales is not None
+        and len(source_laser_scales) == 300
     )
     summary = summaries[-1] if len(summaries) == 1 else None
     delivery_auto_stop = (
@@ -386,12 +500,37 @@ def build_report(path: Path) -> dict[str, object]:
         ),
         "source_frame_coherence": (
             source_trace is not None
-            and source_trace.get("decision_frame")
-            == source_trace.get("expected_manager_frame")
-            and source_trace.get("capture_manager_frame")
-            == source_trace.get("expected_manager_frame")
+            and origin_frame is not None
+            and (
+                decision_frame := _integer(
+                    source_trace,
+                    "decision_frame",
+                )
+            )
+            is not None
+            and (
+                expected_frame := _integer(
+                    source_trace,
+                    "expected_manager_frame",
+                )
+            )
+            is not None
+            and (
+                capture_frame := _integer(
+                    source_trace,
+                    "capture_manager_frame",
+                )
+            )
+            is not None
+            and decision_frame == expected_frame
+            and capture_frame == origin_frame
+            and capture_frame - expected_frame in {0, 1}
             and source_capture is not None
             and source_capture.get("coherent") is True
+            and _integer(source_capture, "manager_frame_before")
+            == capture_frame
+            and _integer(source_capture, "manager_frame_after")
+            == capture_frame
         ),
         "exact_finalb_scope": source_scope_exact,
         "stable_predeath_baseline": stable_player_root,
@@ -403,15 +542,27 @@ def build_report(path: Path) -> dict[str, object]:
             and supported_restore
         ),
         "single_live_origin": (
-            origin_row is not None
+            origin_frame is not None
+            and bool(scoped_authority)
             and len(scoped_authority) == len(accepted_authority)
+        ),
+        "nonretroactive_sampled_authority": (
+            bool(authority_offsets)
+            and min(authority_offsets) >= 0
         ),
         "exact_authority_rebase": authority_rows_exact,
         "physical_restore_bracket": (
             bool(quarter_offsets)
-            and max(quarter_offsets) < 240
-            and bool(unit_offsets)
-            and min(unit_offsets) >= 240
+            and first_unit_root_offset is not None
+            and max(quarter_offsets) < first_unit_root_offset
+            and (
+                (
+                    bool(unit_offsets)
+                    and min(unit_offsets) >= first_unit_root_offset
+                    and active_restore_row is not None
+                )
+                or terminal_restore_row is not None
+            )
             and restore_row is not None
         ),
         "decision_scale_delivery": decision_scale_complete,
@@ -458,6 +609,9 @@ def build_report(path: Path) -> dict[str, object]:
             "source_player_phase": source_player_phase,
             "pretarget_decision_count": pretarget_decision_count,
             "authority_row_count": len(scoped_authority),
+            "first_authority_offset": (
+                min(authority_offsets) if authority_offsets else None
+            ),
             "decision_count": len(scoped_decisions),
             "last_quarter_offset": (
                 max(quarter_offsets) if quarter_offsets else None
@@ -466,6 +620,26 @@ def build_report(path: Path) -> dict[str, object]:
                 min(unit_offsets) if unit_offsets else None
             ),
             "restore_observation_offset": restore_offset,
+            "scheduled_restore_offset": scheduled_restore_offset,
+            "restore_observation": restore_observation,
+            "capture_frame_delta": (
+                _integer(source_trace, "capture_manager_frame")
+                - _integer(source_trace, "expected_manager_frame")
+                if (
+                    source_trace is not None
+                    and _integer(
+                        source_trace,
+                        "capture_manager_frame",
+                    )
+                    is not None
+                    and _integer(
+                        source_trace,
+                        "expected_manager_frame",
+                    )
+                    is not None
+                )
+                else None
+            ),
             "hit_count": sum(
                 record.get("hit_started") is True
                 for record in scoped_decisions

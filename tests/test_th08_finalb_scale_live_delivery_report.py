@@ -120,6 +120,8 @@ def _fixture() -> list[dict[str, object]]:
             },
             "source_capture": {
                 "coherent": True,
+                "manager_frame_before": ORIGIN,
+                "manager_frame_after": ORIGIN,
                 "phase_before": {
                     "route_id": 2,
                     "difficulty_index": 3,
@@ -139,8 +141,14 @@ def _fixture() -> list[dict[str, object]]:
                 "root_scale_bits": FINAL_B_QUARTER_SCALE_BITS,
                 "source_frame": ORIGIN,
                 "complete_horizon": 300,
-                "player_scale_bits": [FINAL_B_QUARTER_SCALE_BITS] * 300,
-                "laser_scale_bits": [FINAL_B_QUARTER_SCALE_BITS] * 300,
+                "player_scale_bits": (
+                    [FINAL_B_QUARTER_SCALE_BITS] * 240
+                    + [TH08_UNIT_TIME_SCALE_BITS] * 60
+                ),
+                "laser_scale_bits": (
+                    [FINAL_B_QUARTER_SCALE_BITS] * 239
+                    + [TH08_UNIT_TIME_SCALE_BITS] * 61
+                ),
                 "writes": [
                     {
                         "frame": 240,
@@ -164,6 +172,73 @@ def _fixture() -> list[dict[str, object]]:
             "hit_count": 3,
         },
     ]
+
+
+def _terminal_unload_fixture() -> list[dict[str, object]]:
+    records = _fixture()
+    records[1]["finalb_scale_delivery_auto_stop"] = False
+    source = records[3]
+    source["decision_frame"] = ORIGIN - 1
+    source["expected_manager_frame"] = ORIGIN - 1
+    source["capture_manager_frame"] = ORIGIN
+    source_capture = source["source_capture"]
+    source_capture["manager_frame_before"] = ORIGIN
+    source_capture["manager_frame_after"] = ORIGIN
+    source_capture["phase_before"]["player_predeath_counter"] = 7
+    source_capture["phase_before"]["player_phase"] = 3
+    schedule = source["schedule"]
+    schedule["player_scale_bits"] = (
+        [FINAL_B_QUARTER_SCALE_BITS] * 239
+        + [TH08_UNIT_TIME_SCALE_BITS] * 61
+    )
+    schedule["laser_scale_bits"] = (
+        [FINAL_B_QUARTER_SCALE_BITS] * 238
+        + [TH08_UNIT_TIME_SCALE_BITS] * 62
+    )
+    schedule["writes"][0]["frame"] = 239
+    exact_rows = [
+        _authority(1, FINAL_B_QUARTER_SCALE_BITS),
+        _decision(1, FINAL_B_QUARTER_SCALE_BITS),
+        _authority(238, FINAL_B_QUARTER_SCALE_BITS),
+        _decision(238, FINAL_B_QUARTER_SCALE_BITS),
+    ]
+    for record in exact_rows:
+        if record["kind"] == "finalb_live_scale_schedule_authority":
+            record["baseline_predeath_counter"] = 7
+            record["source_player_phase"] = 3
+    records[4:] = [
+        *exact_rows,
+        {
+            "kind": "finalb_live_scale_schedule_authority",
+            "schema": FINAL_B_LIVE_SCALE_AUTHORITY_SCHEMA,
+            "status": "root_only_context_mismatch",
+            "reason": "immutable_context_mismatch",
+            "planner_scale_schedule_authority": False,
+            "experimental_pretarget_transport": False,
+            "hard_action_authority": False,
+            "origin_source_frame": ORIGIN,
+            "current_source_frame": ORIGIN + 240,
+            "frame_offset": 240,
+            "baseline_predeath_counter": 7,
+            "source_player_phase": 3,
+            "root_scale_bits": TH08_UNIT_TIME_SCALE_BITS,
+            "coverage": "root_only",
+        },
+        {
+            "kind": "scene_inactive",
+            "frame": ORIGIN + 240,
+            "stage_route_index": 7,
+            "transition_from_stage": 7,
+            "expected_stage": None,
+            "status": "terminal_unload",
+        },
+        {
+            "kind": "run_summary",
+            "termination_reason": "route_complete",
+            "hit_count": 22,
+        },
+    ]
+    return records
 
 
 class FinalBScaleLiveDeliveryReportTests(unittest.TestCase):
@@ -248,6 +323,34 @@ class FinalBScaleLiveDeliveryReportTests(unittest.TestCase):
         report = self._report(records)
 
         self.assertTrue(report["gate"]["passed"])
+
+    def test_terminal_unload_can_physically_bracket_restore(self) -> None:
+        report = self._report(_terminal_unload_fixture())
+
+        self.assertTrue(report["gate"]["passed"])
+        self.assertEqual(report["observed"]["capture_frame_delta"], 1)
+        self.assertEqual(report["observed"]["first_authority_offset"], 1)
+        self.assertEqual(report["observed"]["scheduled_restore_offset"], 239)
+        self.assertEqual(report["observed"]["restore_observation_offset"], 240)
+        self.assertEqual(
+            report["observed"]["restore_observation"],
+            "terminal_unload_root",
+        )
+        self.assertEqual(report["observed"]["source_player_phase"], 3)
+        self.assertEqual(report["observed"]["baseline_predeath_counter"], 7)
+
+    def test_terminal_restore_requires_matching_native_unload(self) -> None:
+        records = [
+            record
+            for record in _terminal_unload_fixture()
+            if record.get("kind") != "scene_inactive"
+        ]
+
+        report = self._report(records)
+
+        self.assertFalse(
+            report["gate"]["checks"]["physical_restore_bracket"]
+        )
 
     def test_hit_bomb_predeath_and_authority_fallback_fail(self) -> None:
         cases = {

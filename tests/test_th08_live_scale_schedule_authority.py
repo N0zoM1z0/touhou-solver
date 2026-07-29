@@ -280,6 +280,9 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
         )
         self.assertFalse(changed.planner_scale_authority)
         self.assertEqual(changed.reason, "immutable_context_mismatch")
+        self.assertEqual(changed.origin_source_frame, 100)
+        self.assertEqual(changed.frame_offset, 1)
+        self.assertEqual(changed.source_player_phase, 0)
 
     def test_stable_predeath_residue_can_bind_but_change_cannot(self) -> None:
         service = _TraceService(_origin(), captured_predeath=7)
@@ -408,6 +411,29 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
                 )
             )
         )
+
+    def test_delivery_completion_uses_the_captured_restore_not_legacy_240(
+        self,
+    ) -> None:
+        origin = _origin()
+        authority = FinalBScaleScheduleAuthority(_TraceService(origin))
+        source = origin.source_frame
+        assert source is not None
+
+        still_scaled = _resolve(
+            authority,
+            source_frame=source + 1,
+            scale_bits=QUARTER_SCALE_BITS,
+        )
+        self.assertFalse(_finalb_scale_delivery_complete(still_scaled))
+
+        restored = _resolve(
+            authority,
+            source_frame=source + 2,
+            scale_bits=TH08_UNIT_TIME_SCALE_BITS,
+        )
+        self.assertTrue(restored.planner_scale_authority)
+        self.assertTrue(_finalb_scale_delivery_complete(restored))
 
 
 if __name__ == "__main__":

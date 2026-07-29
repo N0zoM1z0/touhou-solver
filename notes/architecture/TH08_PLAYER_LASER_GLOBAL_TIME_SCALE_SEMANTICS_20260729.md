@@ -1,6 +1,6 @@
 # TH08 Player/Laser Global Time-Scale Semantics
 
-Status: **SEM-SCALE-C4 physical source passed; C5-1 rejected the phase-0 trigger; corrected full route preserved evidence but did not reach spell 190; whole-stage C5-2 pending**
+Status: **SEM-SCALE-C5 exact live delivery passed physically inside a 22-hit whole Stage-6B workload; clean survival and stage-wide source authority remain open**
 
 Date: 2026-07-29
 
@@ -648,18 +648,74 @@ The dossier-v4 coverage correction and complete-stage no-auto-stop supervisor
 pass 1,140 Linux tests in 13.404 seconds and 1,140 Windows tests in 29.833
 seconds, with the three existing Windows skips.
 
+Observed SEM-SCALE-C5 physical delivery result:
+
+- whole-stage run
+  `lunatic_route2_stage6b_finalb_scale_delivery_20260730_020015` completed
+  original-game Lunatic Stage 6B over frames `1..76050` with 18,332
+  decisions, 22 hit edges, zero Bomb masks, normal `route_complete`, and
+  exact game/controller cleanup;
+- the one complete source transaction captured manager frame 75,811 while
+  the controller decision/expected frame was 75,810. This one-frame
+  asynchronous capture is causal: no authority is backfilled at offset zero;
+  the first sampled exact row is offset 1;
+- the source is exact spell 190/sub44, quarter scale, Bomb zero, one
+  out-of-pool spell owner, no ordinary-pool source, player phase 3, and stable
+  predeath baseline 7. Phase/predeath contamination is reported and grants no
+  clean-player authority;
+- 111 sampled decisions consume the immutable exact schedule from offsets
+  1 through 238, all with quarter-scale roots, no fallback, no fresh hit, and
+  no Bomb;
+- the captured schedule's sole callback-18 write restores unit scale at
+  relative offset 239. The controller cadence does not sample that frame;
+  offset 240 observes the unit root simultaneously with
+  `scene_inactive=status=terminal_unload`. This terminal bracket is physical
+  restore evidence, not an active gameplay action row;
+- strict report schema v4 passes all 20 checks. The raw JSONL SHA-256 is
+  `cbad986f0bb627d88135e2a4ae31c48389b6e030657ad77e557b882585aedcfc`;
+  the corrected strict report SHA-256 is
+  `53cddd1162769010dbc467bf9d295e90e5389db3ffb4fce3d1c73c42076b08ec`;
+  and
+- schema v3 is retained separately. Its original Windows-CRLF render hashes
+  to
+  `b1aa5a0c27082303a19c7d90f7aba42661006c5892e351b68c3e0a80f65aa2b5`;
+  the tracked LF-normalized artifact hashes to
+  `9d3652466596f3a49cd67d0ff317f31685c92d23a6640bdf5ed9d47bd9d5dca7`.
+  It incorrectly required sampled exact rows at both offset zero and an
+  active restore row. CE-0190 preserves the falsified report assumption.
+
+The delivery-complete helper now recognizes the unit root at the restore
+offset derived from the captured schedule instead of hard-coding legacy
+offset 240. Connected IDA revalidation confirms that
+`enemy_manager_update` increments the manager counter before per-enemy ECL
+execution, while priority-9 `player_update` precedes priority-11
+enemy/ECL execution. IDA now names `0x017CE758`
+`g_game_timing_state` with type `Th08GameTimingState`; the evidence comment at
+`0x00424FB4` records the physical C5-2 asynchronous-capture/terminal-restore
+bracket.
+
+Focused scale-authority/report discovery passes 13/10 tests. Complete Linux
+discovery passes 1,143 tests in 13.481 seconds; the exact Windows UNC suite
+passes 1,143 in 29.925 seconds with the three existing skips. Regenerating
+strict v4 from the ignored raw JSONL is byte-identical to the retained report.
+
+This closes only the declared C5 exact schedule-delivery slice. The canonical
+fresh Stage-6B hit is nonspell frame 7,412, all 22 contacts follow global
+viability exhaustion, and the source occurs in contaminated phase 3 after
+earlier hits. The result does not prove clean Final-B survival, pre-target
+transport correctness, a normal Power-0 late-spell history, stage-wide source
+coverage, Extra, or Lunatic NMNB. The ordered roadmap therefore advances to
+`SEM-MODE`; it does not repeat C5 or the unchanged full route.
+
 No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
 acceptance, global optimality, or complete future-source coverage.
 
 ## Current stopping rule
 
-The C4 trace gate passes; C5-1 rejects the old phase trigger; and the corrected
-full route proves non-aborting continuation without reaching the target.
-Run one complete original-game Stage-6B C5-2 trial with restore auto-stop
-disabled. It must begin at the stage boundary and operate without THPRAC,
-precise-spell selection, or operator-time activation. A scale mismatch fails
-the nested C5 claim but must not discard later stage evidence; process
-identity, foreground, or input-release safety failures still stop and clean
-up. Any incomplete scale coverage consumed as exact, cross-version cache hit,
-unsupported corridor use, or live non-unit hard certificate without the
-complete schedule remains a durable counterexample and stops promotion.
+C5-2 closes the declared source-local exact-delivery gate. Stop additional C5
+or unchanged full-route repetition. Keep incomplete scale coverage consumed
+as exact, cross-version cache hits, unsupported corridor use, or a live
+non-unit hard certificate without the complete schedule as durable
+counterexamples. Continue at `SEM-MODE`; any later physical falsifier remains
+a whole-stage original-game workload without THPRAC, precise-spell selection,
+or operator-time feature activation.

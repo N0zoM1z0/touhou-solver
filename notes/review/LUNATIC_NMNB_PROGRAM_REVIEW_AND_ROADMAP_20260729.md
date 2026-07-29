@@ -753,14 +753,12 @@ Execution progress on 2026-07-29:
   `UNKNOWN`. Complete Linux/Windows discovery passes 1,087 tests; Windows
   keeps three existing skips.
 - **Authority boundary:** SEM-SCALE-A/B and isolated-source C1/C2/C3 pass
-  their declared offline/retained slices only. C4 now has one accepted
-  complete-source physical replay row, but no live schedule consumer or
-  action authority. The root-only live daemon therefore still records
-  `time_scale_authority_unknown`, terminates, and releases keys before
-  corridor submission or local issue. SEM-SCALE-C must integrate and
-  dual-platform gate exact-version schedule delivery before the focused
-  physical falsifier. No strategy promotion is authorized by trace-only
-  source acceptance.
+  their declared offline/retained slices; C4 passes one read-only physical
+  complete-source row. C5 now physically passes exact live schedule delivery
+  for one contaminated spell-190 restore interval, but this authority is
+  version- and source-local. It does not establish clean player state,
+  pre-target transport, stage-wide source completeness, corridor support for
+  varying scale, survival, or strategy promotion.
 - **Observed SEM-SCALE-C1 root capsule:** checkpoint `1f639ef` binds the
   three existing Final-B raw sessions and retains 68/78/84 spell-190 rows at
   binary32 scale `0.25`. All 230 read-lag horizons are zero or one, so root
@@ -833,13 +831,15 @@ Execution progress on 2026-07-29:
   horizon mismatch through the existing terminate/release fallback. Since
   only whole-stage original Practice Start is available, pre-target unit
   roots use an explicitly unknown-direction transport schedule with no hard
-  scale authority; non-unit unknown rows wait. Non-unit/varying exact
-  schedules remain outside corridor authority and feed only the exact local
-  path. The retained C4
+  scale authority; non-unit unknown rows wait. A source/root/context/horizon
+  mismatch waits without a new write and preserves the rest of the stage
+  evidence; process, foreground, and key-release failures still stop and
+  clean up. Non-unit/varying exact schedules remain outside corridor
+  authority and feed only the exact local path. The retained C4
   artifact crosses the relative-239 player/laser phase split and relative-240
   unit restore under this recurrence. Linux/Windows discovery passes 1,132
-  tests in 13.596/29.764 seconds with three existing Windows skips. No game
-  was launched; the single next physical scope is fixed in
+  tests in 13.596/29.764 seconds with three existing Windows skips. At that
+  implementation checkpoint no game was launched; its next physical scope was fixed in
   `notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`.
   Spell 190 remains only the smallest causal falsifier. The research and
   promotion unit is a complete stage: after this gate, source-authority
@@ -854,12 +854,11 @@ Execution progress on 2026-07-29:
   captures source player phase, treats phase 3 as contamination rather than
   normal-player authority, and continues evidence collection without new
   input writes instead of exiting on scale-authority loss.
-- The next physical unit is no longer another spell-190 or Stage-6B-only
-  retry. After dual-platform validation, run original Game Start Lunatic
-  Sakuya/Remilia from Power 0 through the complete route. Retain stage/phase
+- The next physical unit was expanded first to original Game Start Lunatic
+  Sakuya/Remilia from Power 0 through the complete route, with stage/phase
   hits, Bombs, lives, Power/items, combat progress, transitions, and C5
-  exact-delivery as separate conclusions. The full-route controller must not
-  auto-stop at the restore.
+  exact-delivery retained as separate conclusions. The full-route controller
+  did not auto-stop at the restore.
 - **Observed full-route result:** run
   `lunatic_route2_fullrun_unattended_20260730_002115` completed the original
   Power-0 Game Start route with 60,877 decisions, 74 hits, zero Bomb masks,
@@ -869,11 +868,29 @@ Execution progress on 2026-07-29:
   recorded 299 decisions in spell 174, 311 in 178, and zero in
   182/186/190, with unit scale throughout. CE-0189 rejects treating route
   completion or a zero spell-hit count as proof of live spell coverage.
-- **Next C5 physical unit:** run the corrected observer over the complete
-  original-game Stage-6B workload. Do not use THPRAC, precise-spell
-  selection, or operator-time activation. Restore auto-stop is disabled so
-  the research unit remains the whole stage. Exact delivery, whole-stage
-  survival/resources, and spell reachability remain separate conclusions.
+- **Observed SEM-SCALE-C5-2 physical gate:** whole-stage run
+  `lunatic_route2_stage6b_finalb_scale_delivery_20260730_020015` completed
+  frames `1..76050` with 18,332 decisions, 22 hits, zero Bomb masks, normal
+  route unload, and exact cleanup. One coherent spell-190/sub44 source was
+  captured at manager frame 75,811, one frame after controller
+  decision/expected frame 75,810; no authority is backfilled before the
+  capture. The first sampled exact row is offset 1. All 111 exact decisions
+  through offset 238 use the accepted quarter-scale schedule with zero
+  fallback, fresh hit, or Bomb. Callback 18 schedules unit restore at offset
+  239; cadence skips that frame and offset 240 observes the unit root
+  together with `terminal_unload`. Strict report v4 passes all 20 checks.
+  Source phase 3/predeath 7 remains explicit contamination. Raw/report
+  SHA-256 values are
+  `cbad986f0bb627d88135e2a4ae31c48389b6e030657ad77e557b882585aedcfc`
+  and
+  `53cddd1162769010dbc467bf9d295e90e5389db3ffb4fce3d1c73c42076b08ec`.
+  CE-0190 rejects v3's noncausal requirement for sampled offset-zero and
+  active restore rows.
+- **Promotion boundary and next slice:** C5 exact delivery is observed, but
+  the whole-stage survival result fails at 22 hits; the canonical hit is
+  nonspell frame 7,412 and every contact follows global viability
+  exhaustion. Do not repeat C5 or the unchanged full route. Continue at
+  `SEM-MODE`, then `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in order.
 
 #### 1C. Action-conditioned player/enemy mode
 
@@ -1134,12 +1151,12 @@ After that baseline, the next correction checkpoints should be:
    hits. It confirms live version integration only on the
    zero-fraction/unit-scale slice, fails survival authority, and supplies no
    timer-causal rollback target;
-2. `SEM-SCALE`: C1 roots and C2/C3 isolated causal Final-B/Extra schedules
-   pass; C4's read-only complete-source trace passes physically. C5-1 rejects
-   the phase-0 trigger; the corrected Power-0 full route preserves evidence
-   but never reaches spell 190. Run one complete original-game Stage-6B C5-2
-   falsifier with no restore auto-stop, then either retain its exact delivery
-   pass or its first causal mismatch before promotion;
+2. `SEM-SCALE`: complete for its declared C1–C5 delivery program. C5-1
+   rejects the phase-0 trigger, the corrected Power-0 full route preserves
+   evidence but never reaches spell 190, and whole-stage C5-2 physically
+   passes one exact contaminated restore interval while separately failing
+   Stage-6B survival at 22 hits. Do not repeat it or generalize it to clean
+   survival, stage-wide source authority, Extra, or NMNB;
 3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
    enemy contact/damage eligibility;
 4. `SEM-GEOM`: exact player/laser geometry, bullet lifecycle/suppression, and
@@ -1269,6 +1286,23 @@ baseline and the ordered dependency chain above are part of the result.
 - The dossier-v4/whole-stage-C5-2 correction passes focused Ruff and
   supervisor/report tests. Complete Linux/Windows discovery passes 1,140
   tests in 13.404/29.833 seconds, with the three existing Windows skips.
+- Whole-stage C5-2
+  `lunatic_route2_stage6b_finalb_scale_delivery_20260730_020015` completes
+  frames `1..76050` with 18,332 decisions, 22 hits, zero Bomb masks,
+  `route_complete`, and exact cleanup. The ignored raw JSONL is 634,344,375
+  bytes and
+  hashes to
+  `cbad986f0bb627d88135e2a4ae31c48389b6e030657ad77e557b882585aedcfc`.
+  Strict schema v4 passes all 20 checks over a one-frame causal capture lag,
+  111 exact sampled decisions, callback-18 restore at offset 239, and a
+  unit-root/terminal-unload bracket at offset 240. The source phase
+  3/predeath 7 and whole-stage hits remain contamination. CE-0190 preserves
+  the rejected v3 report contract. The checkpoint containing this handoff
+  adds one schedule-derived completion regression. Focused authority/report
+  discovery passes 13/10 tests; complete Linux discovery passes 1,143 tests
+  in 13.481 seconds and the exact Windows UNC suite passes 1,143 in 29.925
+  seconds with the three existing skips. A regenerated v4 report is
+  byte-identical to the retained compact artifact.
 - No matching TH08 gameplay, controller, practice-supervisor, or
   full-route-supervisor process is left running.
 - The original documentation-only checkpoint did not rerun Windows tests;
@@ -1277,4 +1311,6 @@ baseline and the ordered dependency chain above are part of the result.
   Phase 1 evidence-backed IDB changes are now retained: scale/ECL field and
   scheduler comments, spell-state renames/comments, replay-menu function
   rename `title_replay_menu_update`, and compact-selection/launch-state
-  comments.
+  comments. C5-2 additionally renames/types `0x017CE758` as
+  `g_game_timing_state: Th08GameTimingState` and comments the physical
+  asynchronous-capture/terminal-restore evidence at `0x00424FB4`.

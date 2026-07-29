@@ -491,8 +491,29 @@ entered only through spell 178: active decision counts for
 exact authority origin existed. CE-0189 rejects treating route completion or
 a zero per-spell hit count as proof of target coverage. Dossier v4 now records
 active-spell decisions separately from hits. No strategy is promoted. The
-next C5 falsifier is a complete original-game Stage-6B run with restore
-auto-stop disabled; C5 remains a nested mechanics gate inside that stage.
+then-authorized next C5 falsifier was a complete original-game Stage-6B run
+with restore auto-stop disabled; C5 remained a nested mechanics gate inside
+that stage.
+
+**2026-07-30 SEM-SCALE-C5-2 physical delivery result:** original-game
+whole-Stage-6B run
+`lunatic_route2_stage6b_finalb_scale_delivery_20260730_020015` completed
+18,332 decisions with 22 hit edges, zero Bomb masks, normal route unload, and
+exact cleanup. One coherent spell-190/sub44 source captured manager frame
+75,811, one frame after controller decision/expected frame 75,810. Causal
+sampled authority begins at offset 1; 111 exact decisions consume the
+accepted quarter-scale schedule through offset 238 with no fallback, fresh
+hit, or Bomb. Callback 18 restores unit scale at offset 239, cadence skips
+that frame, and offset 240 observes the unit root together with terminal
+unload. Strict schema v4 passes all 20 checks.
+
+This promotes only the declared `SEM-SCALE-C5` source-local exact-delivery
+mechanics from proposed to observed. Source phase 3/predeath 7, experimental
+pre-target transport, and the stage's 22 hits forbid clean-player, survival,
+stage-wide source, Extra, or NMNB authority. CE-0190 rejects strict v3's
+noncausal offset-zero/active-restore assumptions. No live strategy is
+promoted. Do not repeat C5 or the unchanged full route; continue at
+`SEM-MODE`, then `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST`.
 
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those

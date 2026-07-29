@@ -320,20 +320,27 @@ class FinalBScaleScheduleAuthority:
                 ),
             )
         if self._binding is not None and binding != self._binding:
+            origin_source_frame = (
+                self._origin_schedule.source_frame
+                if self._origin_schedule is not None
+                else None
+            )
             return self._root_only(
                 scale_bits=observed_root_scale_bits,
                 source_frame=source_frame,
                 provenance="live_scale_context_mismatch",
                 status="root_only_context_mismatch",
                 reason="immutable_context_mismatch",
-                origin_source_frame=(
-                    self._origin_schedule.source_frame
-                    if self._origin_schedule is not None
+                origin_source_frame=origin_source_frame,
+                frame_offset=(
+                    source_frame - origin_source_frame
+                    if origin_source_frame is not None
                     else None
                 ),
                 baseline_predeath_counter=(
                     self._baseline_predeath_counter
                 ),
+                source_player_phase=self._source_player_phase,
             )
 
         trace_record: dict[str, object] | None = None

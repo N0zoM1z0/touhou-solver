@@ -183,6 +183,23 @@ class Th08RuntimeAgentTests(unittest.TestCase):
         self.assertEqual(state["enemy_pointer"], 0x12345678)
         self.assertEqual(state["spell_id"], 145)
         self.assertEqual(state["name"], "禁薬「蓬莱の薬」")
+        self.assertIsNone(state["timer_elapsed"])
+
+    def test_decode_spell_state_exposes_ecl_variable_10100_timer(self) -> None:
+        blob = bytearray(th08_runtime_agent.SPELL_STATE_CAPTURE_SIZE)
+        struct.pack_into("<III", blob, 0, 0x825, 0x12345678, 190)
+        struct.pack_into(
+            "<i",
+            blob,
+            th08_runtime_agent.SPELL_STATE_TIMER_ELAPSED_OFFSET,
+            577,
+        )
+
+        state = th08_runtime_agent.decode_spell_state(bytes(blob))
+
+        self.assertEqual(state["flags"], 0x825)
+        self.assertEqual(state["timer_elapsed"], 577)
+        self.assertEqual(th08_runtime_agent.SPELL_STATE_CAPTURE_SIZE, 0x114)
 
     def test_decode_spell_state_rejects_truncated_prefix(self) -> None:
         with self.assertRaisesRegex(ValueError, "requires 68 bytes"):

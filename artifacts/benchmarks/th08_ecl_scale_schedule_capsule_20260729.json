@@ -1,0 +1,274 @@
+{
+  "aggregate": {
+    "exact_observed_restore_transitions": 1,
+    "historical_sources": 3,
+    "right_censored_sources": 2,
+    "static_workloads": 2,
+    "static_workloads_passed": 2
+  },
+  "authority": {
+    "continuation": "Final-B's 10099 path is valid only for the declared no-hit, no-Bomb continuation; losing histories are not promoted.",
+    "inferred": "Historical VM counter 10036=6 is inferred from the literal set at 0x5c6c and the first observed PC at 0x5c90.",
+    "not_proved": "No historical row proves complete live main/auxiliary writer inventory, installed-callback absence, clean survival, laser side-effect parity, or NMNB.",
+    "observed": "The shipped ECL bytes and historical physical trace supply PC/timer/scale/flags plus one exact 0.25-to-1.0 transition."
+  },
+  "capsule_payload_sha256": "77ff84d3d8fa8ae9dd5c076edd8881a0a6101457ec8603ba103ea4f55e2ba380",
+  "gate": {
+    "name": "SEM-SCALE-C2/C3 causal schedule and static Extra capsule",
+    "passed": true,
+    "scope": "isolated-source product/oracle parity, shipped Final-B/Extra ECL, and one exact historical physical transition"
+  },
+  "historical_physical_transitions": [
+    {
+      "authority": "Observed shipped-runtime PC/timer/root/transition evidence joined to a statically inferred literal loop counter. The old trace did not capture a complete scale-writer inventory or VM locals.",
+      "isolated_source_prediction": {
+        "censoring": null,
+        "counter_evidence": "Shipped Final-B sub44 sets VM int 10036 to 6 at offset 0x5c6c before the observed first-cycle PC 0x5c90.",
+        "exact_observed_unit_transition": true,
+        "inferred_loop_counter": 6,
+        "predicted_restore_ecl_frame": 75027,
+        "product_oracle_parity": {
+          "external_variables": true,
+          "final_vm": true,
+          "instructions_scanned": true,
+          "laser_scale_bits": true,
+          "player_scale_bits": true,
+          "stop": true,
+          "writes": true
+        },
+        "restore_relative_frame": 237,
+        "runtime_base": "0xb1d0048"
+      },
+      "observed": {
+        "first_later_unit_ecl_frame": 75027,
+        "first_later_unit_snapshot_frame": 75026,
+        "first_quarter_root": {
+          "decision_frame": 74791,
+          "ecl_frame_after": 74790,
+          "ecl_frame_before": 74790,
+          "instruction_offset": "0x5c90",
+          "instruction_pointer": 186473688,
+          "line": 12641,
+          "scale_bits": "0x3e800000",
+          "snapshot_frame": 74789,
+          "spell_flags": "0x00000825",
+          "timer_elapsed": 1,
+          "timer_fraction_bits": "0x00000000"
+        },
+        "last_manager_frame": 75028,
+        "last_quarter_snapshot_frame": 75023,
+        "quarter_scale_rows": 68,
+        "scene_inactive_frame": 75028,
+        "spell_190_scale_rows": 569
+      },
+      "source": {
+        "bytes": 323061590,
+        "lines": 12744,
+        "path": "artifacts/runtime_reports/lunatic_route2_stage6b_unattended_20260726_004142.jsonl",
+        "sha256": "2ba795ee89354fb2f02935a7de81f079f24845275b27e09379c593808171cdf0"
+      }
+    },
+    {
+      "authority": "Observed shipped-runtime PC/timer/root/transition evidence joined to a statically inferred literal loop counter. The old trace did not capture a complete scale-writer inventory or VM locals.",
+      "isolated_source_prediction": {
+        "censoring": "The historical trace stopped ECL scale capture at spell finish/scene freeze before a later unit row was retained.",
+        "counter_evidence": "Shipped Final-B sub44 sets VM int 10036 to 6 at offset 0x5c6c before the observed first-cycle PC 0x5c90.",
+        "exact_observed_unit_transition": false,
+        "inferred_loop_counter": 6,
+        "predicted_restore_ecl_frame": 74962,
+        "product_oracle_parity": {
+          "external_variables": true,
+          "final_vm": true,
+          "instructions_scanned": true,
+          "laser_scale_bits": true,
+          "player_scale_bits": true,
+          "stop": true,
+          "writes": true
+        },
+        "restore_relative_frame": 239,
+        "runtime_base": "0xb1d0048"
+      },
+      "observed": {
+        "first_later_unit_ecl_frame": null,
+        "first_later_unit_snapshot_frame": null,
+        "first_quarter_root": {
+          "decision_frame": 74726,
+          "ecl_frame_after": 74723,
+          "ecl_frame_before": 74723,
+          "instruction_offset": "0x5c90",
+          "instruction_pointer": 186473688,
+          "line": 14678,
+          "scale_bits": "0x3e800000",
+          "snapshot_frame": 74723,
+          "spell_flags": "0x00000825",
+          "timer_elapsed": 0,
+          "timer_fraction_bits": "0x3f000000"
+        },
+        "last_manager_frame": 74963,
+        "last_quarter_snapshot_frame": 74960,
+        "quarter_scale_rows": 78,
+        "scene_inactive_frame": 74963,
+        "spell_190_scale_rows": 656
+      },
+      "source": {
+        "bytes": 384027287,
+        "lines": 14791,
+        "path": "artifacts/runtime_reports/lunatic_route2_stage6b_unattended_20260726_011639.jsonl",
+        "sha256": "d9075e4e2946d74cc3337d6e2a99a8680ee85c730f7f850b6a03e06c87a1524a"
+      }
+    },
+    {
+      "authority": "Observed shipped-runtime PC/timer/root/transition evidence joined to a statically inferred literal loop counter. The old trace did not capture a complete scale-writer inventory or VM locals.",
+      "isolated_source_prediction": {
+        "censoring": "The historical trace stopped ECL scale capture at spell finish/scene freeze before a later unit row was retained.",
+        "counter_evidence": "Shipped Final-B sub44 sets VM int 10036 to 6 at offset 0x5c6c before the observed first-cycle PC 0x5c90.",
+        "exact_observed_unit_transition": false,
+        "inferred_loop_counter": 6,
+        "predicted_restore_ecl_frame": 73584,
+        "product_oracle_parity": {
+          "external_variables": true,
+          "final_vm": true,
+          "instructions_scanned": true,
+          "laser_scale_bits": true,
+          "player_scale_bits": true,
+          "stop": true,
+          "writes": true
+        },
+        "restore_relative_frame": 240,
+        "runtime_base": "0xb1d0048"
+      },
+      "observed": {
+        "first_later_unit_ecl_frame": null,
+        "first_later_unit_snapshot_frame": null,
+        "first_quarter_root": {
+          "decision_frame": 73345,
+          "ecl_frame_after": 73344,
+          "ecl_frame_before": 73344,
+          "instruction_offset": "0x5c90",
+          "instruction_pointer": 186473688,
+          "line": 15936,
+          "scale_bits": "0x3e800000",
+          "snapshot_frame": 73343,
+          "spell_flags": "0x00000025",
+          "timer_elapsed": 0,
+          "timer_fraction_bits": "0x3e800000"
+        },
+        "last_manager_frame": 73585,
+        "last_quarter_snapshot_frame": 73583,
+        "quarter_scale_rows": 84,
+        "scene_inactive_frame": 73585,
+        "spell_190_scale_rows": 708
+      },
+      "source": {
+        "bytes": 459012741,
+        "lines": 16054,
+        "path": "artifacts/runtime_reports/lunatic_route2_stage6b_unattended_20260726_163501.jsonl",
+        "sha256": "b7384a0c7708f401c24abd80fe5e15f4370914bf10bf4e9e06967591adc355a2"
+      }
+    }
+  ],
+  "schema": "th08-ecl-scale-schedule-capsule-v1",
+  "semantics": {
+    "oracle": "th08-ecl-scale-schedule-raw-oracle-v1-player-ecl-laser",
+    "phase_schedule": "th08-player-laser-phase-scale-v1-0044ba67-00431bc9",
+    "product": "th08-ecl-scale-schedule-v1-post-update-player-ecl-laser"
+  },
+  "static_workloads": [
+    {
+      "authority": "Exact only for the declared isolated single-writer ECL workload; this does not prove a complete live enemy/auxiliary source inventory.",
+      "ecl": {
+        "bytes": 67324,
+        "path": "artifacts/decoded/ecldata7.ecl",
+        "sha256": "20b35dca3820438f0b90ae44e3362a7af27d2fc1ac7ae5888c477dc1c89a3734"
+      },
+      "name": "lunatic_final_b_spell_190_isolated_source",
+      "passed": true,
+      "product_oracle_parity": {
+        "external_variables": true,
+        "final_vm": true,
+        "instructions_scanned": true,
+        "laser_scale_bits": true,
+        "player_scale_bits": true,
+        "stop": true,
+        "writes": true
+      },
+      "result": {
+        "bullet_velocity_rescale_frames": [],
+        "consumed_external_variables": [
+          10099
+        ],
+        "coverage": "complete",
+        "expected_restore_offset": "0x6018",
+        "horizon": 300,
+        "instructions_scanned": 202,
+        "quarter_laser_frames": 240,
+        "quarter_player_frames": 241,
+        "stop_reason": "horizon",
+        "writes": [
+          {
+            "callback_index": 18,
+            "frame": 241,
+            "instruction_offset": "0x6018",
+            "scale_bits_after": "0x3f800000",
+            "scale_bits_before": "0x3e800000",
+            "scales_active_bullet_velocity": false
+          }
+        ]
+      },
+      "root": {
+        "instruction_offset": "0x5c58",
+        "scale_bits": "0x3e800000",
+        "spell_flags": "0x00000825",
+        "timer_elapsed": 0,
+        "timer_fraction_bits": "0x00000000"
+      }
+    },
+    {
+      "authority": "Exact only for the declared isolated single-writer ECL workload; this does not prove a complete live enemy/auxiliary source inventory.",
+      "ecl": {
+        "bytes": 90468,
+        "path": "artifacts/decoded/ecldata8.ecl",
+        "sha256": "a4da962f3621ef626a62fd01c3d1607f11e5706f3ab45480d3e36ac5b7b67741"
+      },
+      "name": "extra_spell_222_isolated_source",
+      "passed": true,
+      "product_oracle_parity": {
+        "external_variables": true,
+        "final_vm": true,
+        "instructions_scanned": true,
+        "laser_scale_bits": true,
+        "player_scale_bits": true,
+        "stop": true,
+        "writes": true
+      },
+      "result": {
+        "bullet_velocity_rescale_frames": [],
+        "consumed_external_variables": [],
+        "coverage": "complete",
+        "expected_restore_offset": "0x8b58",
+        "horizon": 300,
+        "instructions_scanned": 201,
+        "quarter_laser_frames": 240,
+        "quarter_player_frames": 241,
+        "stop_reason": "horizon",
+        "writes": [
+          {
+            "callback_index": 18,
+            "frame": 241,
+            "instruction_offset": "0x8b58",
+            "scale_bits_after": "0x3f800000",
+            "scale_bits_before": "0x3e800000",
+            "scales_active_bullet_velocity": false
+          }
+        ]
+      },
+      "root": {
+        "instruction_offset": "0x87e8",
+        "scale_bits": "0x3e800000",
+        "spell_flags": "0x00000825",
+        "timer_elapsed": 0,
+        "timer_fraction_bits": "0x00000000"
+      }
+    }
+  ]
+}

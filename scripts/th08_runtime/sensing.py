@@ -38,7 +38,9 @@ from th08_runtime.game_state import (
     RUN_STATE_LIVES_OFFSET,
     RUN_STATE_POWER_OFFSET,
     SPELL_STATE_ACTIVE_FLAG,
+    SPELL_STATE_CAPTURE_SIZE,
     SPELL_STATE_PREFIX_SIZE,
+    SPELL_STATE_TIMER_ELAPSED_OFFSET,
 )
 
 
@@ -92,6 +94,11 @@ def decode_spell_state(blob: bytes) -> dict[str, object]:
         "enemy_pointer": enemy_pointer,
         "spell_id": spell_id,
         "name": encoded_name.decode("shift_jis", errors="replace"),
+        "timer_elapsed": (
+            struct.unpack_from("<i", blob, SPELL_STATE_TIMER_ELAPSED_OFFSET)[0]
+            if len(blob) >= SPELL_STATE_CAPTURE_SIZE
+            else None
+        ),
     }
 
 
@@ -282,7 +289,7 @@ def observe_state(reader: StateReader) -> dict[str, object]:
         "rng_state": reader.u16(ADDR_GAMEPLAY_RNG),
         "rng_calls": reader.u32(ADDR_GAMEPLAY_RNG + 4),
         "spell": decode_spell_state(
-            reader.read(ADDR_SPELL_CARD_STATE, SPELL_STATE_PREFIX_SIZE)
+            reader.read(ADDR_SPELL_CARD_STATE, SPELL_STATE_CAPTURE_SIZE)
         ),
         "player": {
             "phase": reader.u8(ADDR_PLAYER),

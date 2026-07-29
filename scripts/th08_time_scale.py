@@ -65,6 +65,20 @@ def canonical_time_scale_bits(value: float) -> int:
     return bits
 
 
+def reciprocal_int32_time_scale_bits(divisor: int) -> int:
+    """Round callback 18/28's positive integer reciprocal to float32.
+
+    The shipped callbacks execute ``1.0 / int32`` and store the result to the
+    global float32 scale. Nonpositive divisors are outside hard authority.
+    """
+
+    if type(divisor) is not int or not -(1 << 31) <= divisor < (1 << 31):
+        raise ValueError("time-scale divisor must be a signed int32")
+    if divisor <= 0:
+        raise ValueError("time-scale divisor must be positive")
+    return canonical_time_scale_bits(1.0 / divisor)
+
+
 def _validate_horizon(horizon: int, *, field: str) -> None:
     if type(horizon) is not int or horizon < 0:
         raise ValueError(f"{field} horizon must be a nonnegative integer")
@@ -266,5 +280,6 @@ __all__ = [
     "TH08_UNIT_TIME_SCALE_BITS",
     "Th08TimeScaleSchedule",
     "canonical_time_scale_bits",
+    "reciprocal_int32_time_scale_bits",
     "validate_time_scale_bits",
 ]

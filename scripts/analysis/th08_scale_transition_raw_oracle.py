@@ -159,6 +159,14 @@ def _divide_fraction_to_bits(numerator: Fraction, denominator: int) -> int:
     return _fraction_to_bits(numerator / denominator)
 
 
+def oracle_reciprocal_int32_bits(divisor: int) -> int:
+    """Independent exact-rational callback 18/28 reciprocal."""
+
+    if type(divisor) is not int or not -(1 << 31) <= divisor < (1 << 31):
+        raise ValueError("oracle divisor must be a signed int32")
+    return _divide_fraction_to_bits(Fraction(1), divisor)
+
+
 def _negate_bits(bits: int) -> int:
     return bits ^ 0x80000000
 
@@ -466,6 +474,7 @@ __all__ = [
     "ORACLE_SEMANTICS_VERSION",
     "RawLaserState",
     "RawLaserStep",
+    "oracle_reciprocal_int32_bits",
     "oracle_step_laser_raw",
     "oracle_step_route2_movement_raw",
 ]

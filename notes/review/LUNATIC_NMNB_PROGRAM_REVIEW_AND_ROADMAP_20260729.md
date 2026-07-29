@@ -27,9 +27,11 @@ the first six hits, so no timer rollback is causally justified. Checkpoint
 `225ccc8` subsequently passes the `SEM-SCALE-A` exact primitive gate on
 Linux and Windows. Checkpoint `6a71ac1` passes the `SEM-SCALE-B` offline
 identity/consumer authority gate and makes root-only live coverage terminate
-as explicit `UNKNOWN`; `SEM-SCALE-C` schedule synthesis,
-retained/trace/physical falsifiers remain open. No scale-sensitive strategy
-or physical scene is promoted.
+as explicit `UNKNOWN`. Checkpoint `1f639ef` passes the `SEM-SCALE-C1`
+retained Final-B physical-root/conditional-player-replay gate over 230
+quarter-scale rows; causal schedule synthesis, static Extra, laser-phase,
+trace-only, and focused physical falsifiers remain open. No scale-sensitive
+strategy or physical scene is promoted.
 
 Companion native audit:
 `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
@@ -749,9 +751,21 @@ Execution progress on 2026-07-29:
   No causal live future phase-schedule producer exists, so a root-only live
   daemon records `time_scale_authority_unknown`, terminates, and releases
   keys before corridor submission or local issue. SEM-SCALE-C must build and
-  independently validate that producer, retain Final-B/static-Extra
-  workloads, and pass trace-only then focused physical falsifiers. No game
-  launch or strategy promotion is authorized by SEM-SCALE-A/B.
+  independently validate that producer, retain the static-Extra workload
+  after the now-complete Final-B C1 capsule, and pass trace-only then focused
+  physical falsifiers. No game launch or strategy promotion is authorized by
+  SEM-SCALE-A/B/C1.
+- **Observed SEM-SCALE-C1 root capsule:** checkpoint `1f639ef` binds the
+  three existing Final-B raw sessions and retains 68/78/84 spell-190 rows at
+  binary32 scale `0.25`. All 230 read-lag horizons are zero or one, so root
+  scale covers that conditional replay; 113 old unit-scale projected
+  positions change and maximum delta is `3.000020432` pixels. All selected
+  rows have zero active lasers and no Bomb emission. The reconstructed
+  historical movement input is an inference, not native active-input proof;
+  repeated-root multi-frame control output is explicitly noncausal. This
+  completes only the compact Final-B root and conditional player-position
+  slice. Action certificates, laser parity, future schedule completeness,
+  static Extra, trace-only, and physical survival remain open.
 
 #### 1C. Action-conditioned player/enemy mode
 

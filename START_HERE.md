@@ -91,7 +91,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest executable code checkpoint: `6a71ac1`
+- Latest repository research checkpoint: `1f639ef`
+  (`Retain Final-B quarter-scale root capsule`).
+- Latest executable/live code checkpoint: `6a71ac1`
   (`Complete SEM-SCALE-B authority propagation`).
 - There is no promoted physical-action candidate at `6a71ac1`: a live
   root-only scale observation now records explicit `UNKNOWN`, terminates, and
@@ -148,6 +150,19 @@ complete non-unit or varying corridor schedules are explicitly unsupported
 `UNKNOWN`. No live complete future phase schedule exists, so this checkpoint
 has no physical action or survival authority.
 
+Checkpoint `1f639ef` passes only the `SEM-SCALE-C1` retained Final-B root
+capsule gate. It binds three existing shipped-game raw sessions by SHA-256
+and retains all 230 spell-190 decision rows whose observed root scale is
+binary32 `0.25`. All 230 read-lag horizons are zero or one frame and therefore
+covered by root scale; 113 legacy unit-scale projected positions change, with
+maximum delta `3.000020432` pixels. All selected rows have zero active lasers
+and no Bomb emission. The corrected replay holds the reconstructed historical
+movement input fixed, so it isolates scale semantics but is not active-input,
+laser, future-schedule, survival, or NMNB authority. Linux and Windows parse
+the three raw bundles to identical aggregates/source hashes; complete
+discovery passes 1,089 tests on both platforms, with three existing Windows
+skips.
+
 ### Native-semantic review
 
 The 2026-07-29 native-to-solver audit was moved from `/tmp/ths_analysis.md`
@@ -178,9 +193,10 @@ identity. The fixed observer-off Stage-5 falsifier is retained at 12 hits:
 its timer-aware consumer begins after the first six hits, and all physical
 timer rows are zero-fraction/unit-scale. It therefore fails survival authority
 without supplying a timer-causal rollback target. `SEM-SCALE-A/B` now repair
-the exact primitives and offline consumer authority boundary; causal live
-schedule synthesis, retained Final-B/Extra capsules, and non-unit physical
-evidence remain open under `SEM-SCALE-C`.
+the exact primitives and offline consumer authority boundary. `SEM-SCALE-C1`
+retains the Final-B non-unit physical roots and conditional player replay;
+causal live schedule synthesis, laser-phase evidence, the static Extra
+workload, and trace/physical falsifiers remain open.
 
 This review does not establish a cause for the original 18-hit Stage-5
 aggregate and does not authorize rollback. Observer-off run `154229`
@@ -297,15 +313,16 @@ Do not resume broad G5 work first.
 2. `SEM-TIMER` passes its offline semantic gate but its one fixed physical
    falsifier failed at 12 hits. The canonical failure predates the live
    consumer, so retain the failure without rollback or survival promotion.
-3. Continue `SEM-SCALE-C`: retain the compact Final-B `0.25` root capsule,
-   implement and independently validate a causal phase-schedule producer
-   through read-lag/issue/local/laser horizons, then take a trace-only gate.
-   Only after that may the preregistered focused Final-B transition physical
-   falsifier run. Retain static Extra separately from future physical Extra
-   evidence. Then continue `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and
-   `SEM-ROBUST` in roadmap order, one correction/checkpoint at a time.
-   Evidence-backed IDB renames/types/comments are authorized; record every
-   material database change in the current daily shard.
+3. Continue `SEM-SCALE-C` from retained C1 checkpoint `1f639ef`: implement
+   and independently validate a causal phase-schedule producer through
+   read-lag/issue/local/laser horizons without extending a root beyond proof.
+   Retain the shipped static Extra scale workload separately, then take a
+   trace-only gate. Only after those pass may the preregistered focused
+   Final-B transition physical falsifier run. Then continue `SEM-MODE`,
+   `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order, one
+   correction/checkpoint at a time. Evidence-backed IDB
+   renames/types/comments are authorized; record every material database
+   change in the current daily shard.
 4. After each applicable slice, take only the smallest causal Stage-5
    physical falsification. Restart the two-consecutive observer-off
    `<=10` gate only for an immutable corrected model version.

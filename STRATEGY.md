@@ -393,6 +393,18 @@ without a causal complete future schedule, the daemon terminates and releases
 keys before publishing corridor or local action authority. SEM-SCALE-C and
 CE-0175/CE-0184 continue to block physical expansion.
 
+**2026-07-29 SEM-SCALE-C1 retained physical-root evidence:** checkpoint
+`1f639ef` binds three existing Lunatic Final-B raw sessions and retains all
+230 spell-190 rows with observed binary32 scale `0.25`. Conditional replay of
+the corrected player primitive changes 113 historical read-lag projections,
+with maximum positional delta `3.000020432` pixels. Every selected row has
+zero active lasers and no Bomb emission. This is **offline analysis of
+physical roots**, not a live or shadow strategy: the reconstructed historical
+movement input is held fixed, root coverage proves no future laser phase, and
+the multi-frame repeated-root result is explicitly noncausal. No strategy is
+promoted; the causal schedule producer, static Extra workload, trace-only
+gate, and focused Final-B falsifier remain required.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

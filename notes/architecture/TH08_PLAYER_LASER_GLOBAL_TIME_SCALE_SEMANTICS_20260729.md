@@ -1,12 +1,13 @@
 # TH08 Player/Laser Global Time-Scale Semantics
 
-Status: **SEM-SCALE-B offline authority gate passed; live schedule synthesis pending**
+Status: **SEM-SCALE-C1 Final-B root capsule passed; live schedule synthesis pending**
 
 Date: 2026-07-29
 
 Roadmap item: `SEM-SCALE`
 
-Executable/offline checkpoint: `225ccc8`
+Executable/offline checkpoints: `225ccc8`, `6a71ac1`; retained C1 evidence:
+`1f639ef`
 
 This note is the physical/model contract for roadmap Phase 1B. It repairs the
 current live and offline assumption that player movement and laser lifecycle
@@ -259,10 +260,29 @@ during spell 190 and no active laser on the non-unit rows:
   frames `73345..73585`.
 
 These are **observed root-scale capsules**, not complete action-history or
-future-schedule parity. The old controller overestimated player reachability
-by a factor of four on those rows. Their raw JSONL remains local/ignored; a
-compact deterministic capsule and provenance digest must be retained before
-the offline exit.
+future-schedule parity. Checkpoint `1f639ef` retains all 230 selected rows in
+`artifacts/benchmarks/th08_finalb_scale_root_capsule_20260729.json`, SHA-256
+`d0b48a68c883a00f6c0b73636461ebac09985bf8a935677f799c8671131a82e4`;
+its canonical payload digest is
+`e841ea9ecc3f2a03abe786305474bf407421e7348c6c1608d40a9c4f987656ab`.
+The three bound raw SHA-256 values are
+`2ba795ee89354fb2f02935a7de81f079f24845275b27e09379c593808171cdf0`,
+`d9075e4e2946d74cc3337d6e2a99a8680ee85c730f7f850b6a03e06c87a1524a`,
+and
+`b7384a0c7708f401c24abd80fe5e15f4370914bf10bf4e9e06967591adc355a2`.
+
+All selected read-lag horizons are zero or one, so root scale covers their
+input-conditional corrected player replay. The old unit-scale projection
+changes on 113 rows, with mean/p95/maximum delta
+`1.157934983/3.000009642/3.000020432` pixels. A native one-player-phase
+unit-versus-quarter comparison changes on 180 rows and reaches
+`3.000024815` pixels. This isolates scale semantics while holding the
+reconstructed historical desired movement state fixed; it does not prove the
+native active/pending input history. Repeating the root over the old
+multi-frame control-delay horizon is retained only as a noncausal diagnostic
+and reaches `12.000081728` pixels. Every selected row has zero active lasers
+and no Bomb emission, so this is neither laser evidence nor survival
+acceptance. The raw JSONL remains local and ignored.
 
 No retained Extra physical trace exists. Shipped Extra ECL provides a static
 scale-transition workload, but static reachability is not physical evidence.
@@ -410,12 +430,35 @@ physical action authority remains blocked.
   Final-B transition trial. Stage 3/4A/5 expansion remains blocked by
   CE-0184 until its own ordered gates permit it.
 
+Observed SEM-SCALE-C1 result:
+
+- checkpoint `1f639ef` implements a streaming raw-hash/selection/replay tool,
+  a deterministic capsule, and fail-closed coverage checks;
+- the three physical sessions reproduce the same aggregate and source hashes
+  on Linux and Windows;
+- all 230 selected rows replay the historical unit helper exactly before the
+  corrected primitive is compared at the observed root bits;
+- root coverage is complete for every retained zero/one-frame read-lag
+  comparison, but no selected row contains an active laser and no root is
+  extended into causal future coverage;
+- complete Linux discovery passes 1,089 tests in 13.735 seconds; complete
+  Windows UNC discovery passes 1,089 in 28.586 seconds with the three
+  existing skips; and
+- no game was launched, no live solver path changed, no strategy was
+  promoted, and no IDA database mutation was needed for C1.
+
+C1 completes the first bullet and only the player-position part of the second
+bullet. Action-certificate replay needs the causal complete schedule and
+remains blocked. The next implementation slice is the independently checked
+phase-schedule producer, followed by static Extra and trace-only gates.
+
 No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
 acceptance, global optimality, or complete future-source coverage.
 
 ## Current stopping rule
 
-Do not launch another game while SEM-SCALE-A/B is incomplete. Any test
-mismatch, incomplete scale coverage consumed as exact, cross-version cache
-hit, or live non-unit hard certificate is a durable counterexample and stops
-physical promotion.
+Do not launch another game before the causal SEM-SCALE-C schedule producer,
+static Extra workload, and trace-only gate pass. Any test mismatch,
+incomplete scale coverage consumed as exact, cross-version cache hit, or live
+non-unit hard certificate is a durable counterexample and stops physical
+promotion.

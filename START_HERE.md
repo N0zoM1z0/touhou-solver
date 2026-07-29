@@ -92,10 +92,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `31f92eb`
-  (`Retain SEM-MODE-B atomic capture preflight`).
-- Latest pre-trial repository/live code checkpoint: `31f92eb`
-  (`Retain SEM-MODE-B atomic capture preflight`).
+- Latest retained research checkpoint: `60ae5b9`
+  (`Retain CE-0191 diagnostic scale continuation`).
+- Latest pre-trial repository/live code checkpoint: `60ae5b9`
+  (`Retain CE-0191 diagnostic scale continuation`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
@@ -106,6 +106,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   complete original-game Practice Start hard-no-Bomb Stage-6B trace with one
   accepted contaminated C5 restore interval, not clean stage survival, a
   Power-0 route, or NMNB.
+- Latest physical attempt:
+  `lunatic_route2_stage5_unattended_20260730_035718`. It selected the correct
+  Lunatic route/stage and entered gameplay, but CE-0191's default root-only
+  scale fail-close terminated at frame 1 before any decision. The compact
+  session/run note are retained; this is neither a completed workload nor a
+  survival/mode-transition sample.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -146,6 +152,17 @@ authority. Latent geometry remains conservative, unfocused combat remains
 disabled, and no physical or survival authority is added. Run the complete
 original-game Stage-5 observer gate next, then continue the causal recurrence
 and differential gates.
+
+Checkpoint `60ae5b9` corrects CE-0191 without weakening default hard
+authority. A second default-off flag is accepted only beside the whole-stage
+enemy-mode observer. It repeats each freshly observed root scale over the
+finite 120-frame consumer horizon with explicit
+`unknown_direction_no_authority` provenance, conflicts with exact Final-B
+scale-source authority, preserves hard no-Bomb and `stop-after-hits=0`, and
+is audited by the compact mode report. Complete Linux/Windows discovery
+passes 1,167 tests in 14.404/30.150 seconds with three existing Windows
+skips. Any physical result under this proxy has diagnostic occurrence
+authority only, never survival/certificate authority.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -503,10 +520,11 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Complete `SEM-MODE-B` physical observation from checkpoint `31f92eb`.
+2. Complete `SEM-MODE-B` physical observation from checkpoint `60ae5b9`.
    Run one original-game Lunatic Stage 5 with
-   `--trace-enemy-mode-transitions` active from stage entry. Do not
-   fail-close or stop after hits. Retain the raw/session/summary bundle,
+   `--trace-enemy-mode-transitions` and the scoped
+   `--diagnostic-continue-root-only-scale` active from stage entry. Do not
+   stop after hits. Retain the raw/session/summary bundle,
    compact source-hashed report, resources/hits/Bombs, contamination and
    cleanup state, and every coherent secondary/body transition. If the game
    writes a compatible native replay, use it afterward to reproduce and test
@@ -2382,13 +2400,14 @@ The current SEM-MODE-B whole-stage observer gate is:
 /mnt/c/Windows/System32/cmd.exe /d /c call \
   '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
   --stage 5 --status-seconds 15 --stall-timeout 120 \
-  --trace-enemy-mode-transitions
+  --trace-enemy-mode-transitions \
+  --diagnostic-continue-root-only-scale
 ```
 
 It keeps `stop-after-hits=0` and hard no-Bomb, starts the observer at stage
-entry, and never selects an exact spell. The extra reads/retries can perturb
-cadence, so this is diagnostic physical evidence rather than an observer-off
-survival comparator.
+entry, and never selects an exact spell. The scale proxy and extra
+reads/retries are unknown-direction and can perturb cadence, so this is
+diagnostic physical evidence rather than an observer-off survival comparator.
 
 The current explicit trace-only native birth-observer gate adds:
 

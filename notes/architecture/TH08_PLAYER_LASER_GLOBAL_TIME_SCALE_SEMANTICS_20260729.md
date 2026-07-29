@@ -334,8 +334,9 @@ schedules.
 
 Observed SEM-SCALE-B result:
 
-- baseline: branch `main`, handoff checkpoint `c19ffb0`, executable/offline
-  primitive checkpoint `225ccc8`; the shipped executable remains SHA-256
+- implementation checkpoint `6a71ac1`, from branch `main` handoff
+  `c19ffb0`; executable/offline primitive checkpoint `225ccc8`; the shipped
+  executable remains SHA-256
   `330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924`;
 - live capture now reads the raw scale dword between two
   `enemy_manager_frame` reads. An unstable bracket is discarded. A stable

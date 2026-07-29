@@ -25,9 +25,11 @@ failed its `<=10` physical threshold. CE-0184 retains the failure and its
 canonical first-hit audit; the timer-aware live consumer begins only after
 the first six hits, so no timer rollback is causally justified. Checkpoint
 `225ccc8` subsequently passes the `SEM-SCALE-A` exact primitive gate on
-Linux and Windows. `SEM-SCALE-B` live propagation and `SEM-SCALE-C`
-retained/physical falsifiers remain open; no scale-sensitive strategy or
-physical scene is promoted.
+Linux and Windows. Checkpoint `6a71ac1` passes the `SEM-SCALE-B` offline
+identity/consumer authority gate and makes root-only live coverage terminate
+as explicit `UNKNOWN`; `SEM-SCALE-C` schedule synthesis,
+retained/trace/physical falsifiers remain open. No scale-sensitive strategy
+or physical scene is promoted.
 
 Companion native audit:
 `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
@@ -733,11 +735,23 @@ Execution progress on 2026-07-29:
   covers 4,096 player and 2,048 laser cases with zero mismatch. Complete
   Linux/Windows discovery passes 1,084 tests; Windows has the three existing
   skips.
-- **Authority boundary:** this passes only the exact primitive sub-gate.
-  Live state/snapshot/certificate propagation, optimized/scalar masks,
-  retained Final-B and static Extra capsules, and the trace/physical
-  falsifiers remain open. No game launch or strategy promotion is authorized
-  by SEM-SCALE-A.
+- **Observed SEM-SCALE-B gate:** checkpoint `6a71ac1` carries immutable
+  schedule identity through live capture, local/issue requests,
+  committed-prefix and beam stepping, robust certificates, laser lowering,
+  corridor artifacts/versions, traces, and audit capsules. Complete
+  constant non-unit Python/native local-beam outputs and optimized/scalar
+  certificate safe-action/CVaR labels agree. Root-only/short local and
+  corridor schedules are explicit incomplete `UNKNOWN`; the current coarse
+  corridor also reports complete non-unit or varying schedules as unsupported
+  `UNKNOWN`. Complete Linux/Windows discovery passes 1,087 tests; Windows
+  keeps three existing skips.
+- **Authority boundary:** SEM-SCALE-A/B pass their offline sub-gates only.
+  No causal live future phase-schedule producer exists, so a root-only live
+  daemon records `time_scale_authority_unknown`, terminates, and releases
+  keys before corridor submission or local issue. SEM-SCALE-C must build and
+  independently validate that producer, retain Final-B/static-Extra
+  workloads, and pass trace-only then focused physical falsifiers. No game
+  launch or strategy promotion is authorized by SEM-SCALE-A/B.
 
 #### 1C. Action-conditioned player/enemy mode
 

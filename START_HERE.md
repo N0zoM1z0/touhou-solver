@@ -91,14 +91,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest executable code checkpoint: `225ccc8`
-  (`Correct player and laser time-scale primitives`).
-- Latest physical-code candidate: `225ccc8`; its exact laser primitive is
-  reachable from existing live projection paths, but SEM-SCALE-B identity and
-  consumer propagation are incomplete and it has not been physically
-  exercised. Latest physically exercised code remains `e309c81`, whose fixed
-  Stage-5 falsifier failed the `<=10` survival threshold.
-- Latest native-semantic correction checkpoint: `225ccc8`. The original
+- Latest executable code checkpoint: `6a71ac1`
+  (`Complete SEM-SCALE-B authority propagation`).
+- There is no promoted physical-action candidate at `6a71ac1`: a live
+  root-only scale observation now records explicit `UNKNOWN`, terminates, and
+  releases keys before corridor submission or local issue. Latest physically
+  exercised code remains `e309c81`, whose fixed Stage-5 falsifier failed the
+  `<=10` survival threshold.
+- Latest native-semantic correction checkpoint: `6a71ac1`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest accepted complete physical workload:
   `lunatic_route2_stage5_unattended_20260729_173957`.
@@ -137,6 +137,17 @@ existing platform skips. This checkpoint does not supply a live future-scale
 schedule, does not authorize the corridor or a scale-sensitive hard
 certificate, and has no physical survival authority.
 
+Checkpoint `6a71ac1` passes the `SEM-SCALE-B` offline identity/consumer gate:
+frame-bracketed root capture, immutable local/issue/corridor/trace/capsule
+identity, exact repeated player movement, robust certificate scale schedules,
+laser lowering, and bounded historical unit compatibility are implemented.
+The retained Linux/Windows reports pass eight authority/parity checks;
+complete discovery passes 1,087 tests on both platforms, with three existing
+Windows skips. Root-only/short schedules are explicitly incomplete, while
+complete non-unit or varying corridor schedules are explicitly unsupported
+`UNKNOWN`. No live complete future phase schedule exists, so this checkpoint
+has no physical action or survival authority.
+
 ### Native-semantic review
 
 The 2026-07-29 native-to-solver audit was moved from `/tmp/ths_analysis.md`
@@ -166,10 +177,10 @@ versions; decision traces retain fraction bits, scale bits, and timer
 identity. The fixed observer-off Stage-5 falsifier is retained at 12 hits:
 its timer-aware consumer begins after the first six hits, and all physical
 timer rows are zero-fraction/unit-scale. It therefore fails survival authority
-without supplying a timer-causal rollback target. `SEM-SCALE-A` now repairs
-the exact offline player/laser primitives; live propagation, retained
-Final-B/Extra capsules, and non-unit physical evidence remain open under
-`SEM-SCALE-B/C`.
+without supplying a timer-causal rollback target. `SEM-SCALE-A/B` now repair
+the exact primitives and offline consumer authority boundary; causal live
+schedule synthesis, retained Final-B/Extra capsules, and non-unit physical
+evidence remain open under `SEM-SCALE-C`.
 
 This review does not establish a cause for the original 18-hit Stage-5
 aggregate and does not authorize rollback. Observer-off run `154229`
@@ -177,7 +188,7 @@ returned to the ten-hit band once, but unchanged follow-up `161313` returned
 to 18. CE-0183 resets the sequence and takes the roadmap's causal-failure
 exit. The versioned SEM-TIMER falsifier then took 12; CE-0184 stops its
 same-version repetition and broader scene expansion. Continue the ordered
-native-semantic correction series at `SEM-SCALE-B`, then `SEM-SCALE-C`,
+native-semantic correction series at `SEM-SCALE-C`,
 before broad G5 expansion or local-beam performance work.
 
 ### Latest physical conclusion
@@ -201,7 +212,7 @@ control flow. Per-session affine inference maps all 33 roots at Stage-5 base
 `0x0B1D0048`: 3,835 are future and 105 equal, with no past or unmapped root.
 Every physical fraction is zero and scale is `1.0`, so the run validates
 integration only on that slice. CE-0184 is the authoritative stopping
-counterexample; `SEM-SCALE-B/C` and nonunit-scale physical evidence remain
+counterexample; `SEM-SCALE-C` and nonunit-scale physical evidence remain
 open.
 
 Observer-off pass 2 `161313`, launched from repository checkpoint `39366f2`
@@ -286,10 +297,13 @@ Do not resume broad G5 work first.
 2. `SEM-TIMER` passes its offline semantic gate but its one fixed physical
    falsifier failed at 12 hits. The canonical failure predates the live
    consumer, so retain the failure without rollback or survival promotion.
-3. Complete `SEM-SCALE-B` live identity/consumer propagation and
-   `SEM-SCALE-C` retained Final-B/Extra plus trace/physical falsifiers. Then
-   continue `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in
-   roadmap order, one correction/checkpoint at a time.
+3. Continue `SEM-SCALE-C`: retain the compact Final-B `0.25` root capsule,
+   implement and independently validate a causal phase-schedule producer
+   through read-lag/issue/local/laser horizons, then take a trace-only gate.
+   Only after that may the preregistered focused Final-B transition physical
+   falsifier run. Retain static Extra separately from future physical Extra
+   evidence. Then continue `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and
+   `SEM-ROBUST` in roadmap order, one correction/checkpoint at a time.
    Evidence-backed IDB renames/types/comments are authorized; record every
    material database change in the current daily shard.
 4. After each applicable slice, take only the smallest causal Stage-5
@@ -1826,7 +1840,7 @@ measurement, and a `STRATEGY.md` status change.
 Until the physical floor is restored, the immediate ordering in
 `Immediate Handoff — 2026-07-29` overrides research expansion:
 `PHYS-BASE-RING` is stopped at CE-0183, and the fixed SEM-TIMER physical
-falsifier is stopped at CE-0184. Continue at `SEM-SCALE-B`; the remaining
+falsifier is stopped at CE-0184. Continue at `SEM-SCALE-C`; the remaining
 ordered native-semantic corrections precede any new Stage-5/Stage-3
 expansion. V6 delivery, nonspell combat, Power, and unfocused-shot work remain
 separately contracted follow-ups.

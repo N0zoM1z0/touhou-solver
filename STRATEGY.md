@@ -380,6 +380,19 @@ strategy promotion. Live propagation, Final-B/Extra capsules, and physical
 non-unit evidence remain pending; CE-0175 and CE-0184 continue to block broad
 physical expansion.
 
+**2026-07-29 SEM-SCALE-B offline authority correction:** checkpoint
+`6a71ac1` propagates the immutable phase schedule through live capture,
+local/issue hard requests, exact repeated movement, robust certificates,
+laser lowerers, corridor/pipeline versions, traces, and capsules. A stable
+root remains one player-phase observation and no laser-phase observation.
+Root-only/short schedules now fail closed; complete non-unit or varying
+corridor schedules are also explicit `UNKNOWN` until that coarse recurrence
+has exact scaled action semantics. Linux/Windows optimized/scalar and
+Python/native offline gates pass. This is not a live strategy promotion:
+without a causal complete future schedule, the daemon terminates and releases
+keys before publishing corridor or local action authority. SEM-SCALE-C and
+CE-0175/CE-0184 continue to block physical expansion.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

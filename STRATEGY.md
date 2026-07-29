@@ -515,6 +515,19 @@ noncausal offset-zero/active-restore assumptions. No live strategy is
 promoted. Do not repeat C5 or the unchanged full route; continue at
 `SEM-MODE`, then `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST`.
 
+**2026-07-30 SEM-MODE-A offline/shadow checkpoint:** connected-IDA
+revalidation confirms the delayed player `+3/+5/+8` transition, active enemy
+bit-`0x100 -> 0x800` synchronization, and separate contact `0x04` versus
+player-shot-damage `0x40` gates. First-64 sensing now retains active geometry
+blocked by bit `0x800`; a pure projection and diagnostic mode fields pass
+exhaustive adversarial-history/scalar tests plus complete 1,152-test
+Linux/Windows suites. This closes only the decoder-loss subproblem of
+CE-0176. The mode observation is not yet one frame-bracketed player/enemy
+transaction and the projection is not live hazard authority. Latent geometry
+remains conservative, unfocused combat remains disabled, and no strategy or
+survival claim is promoted. Continue with `SEM-MODE-B` atomic observation,
+then causal recurrence/differential/whole-stage gates.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

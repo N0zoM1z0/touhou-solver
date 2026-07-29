@@ -156,6 +156,13 @@ def build_decision_control_trace_fields(
             "phase": player["phase"],
             "phase_at_action": trace_input.phase_at_action,
             "predeath_at_action": trace_input.predeath_at_action,
+            "focus_logic": player.get("focus_logic"),
+            "secondary_character_active": player.get(
+                "secondary_character_active"
+            ),
+            "focus_transition_counter": player.get(
+                "focus_transition_counter"
+            ),
         },
         "damage_objective": {
             "role": "shadow",

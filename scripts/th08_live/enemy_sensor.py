@@ -175,13 +175,11 @@ def decode_enemy_bodies(
             blob,
             base + ENEMY_FLAGS_OFFSET,
         )[0]
-        if (
-            not flags & ENEMY_ACTIVE_FLAG
-            or flags & ENEMY_CONTACT_BLOCKING_FLAGS
-            or (
-                not include_contact_disabled
-                and not flags & ENEMY_CONTACT_ENABLED_FLAG
-            )
+        if not flags & ENEMY_ACTIVE_FLAG:
+            continue
+        if not include_contact_disabled and (
+            flags & ENEMY_CONTACT_BLOCKING_FLAGS
+            or not flags & ENEMY_CONTACT_ENABLED_FLAG
         ):
             continue
         internal_vx, internal_vy = struct.unpack_from(

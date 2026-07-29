@@ -904,6 +904,16 @@ Exit gate: the retained frame `10065 -> 10075` transition and adversarial
 focus toggles match native state/body sets; every action-conditioned branch is
 causal.
 
+2026-07-30 `SEM-MODE-A` checkpoint: the decoder now retains active geometry
+blocked by enemy bit `0x800`; a pure projection separates contact and
+player-shot damage eligibility; native player `+3/+5/+8` are exposed
+diagnostically; and exhaustive adversarial focus histories match an
+independent scalar recurrence. This is offline/shadow evidence only. The exit
+gate remains open until a frame-bracketed mode/enemy observation, causal
+pickup/cadence recurrence, exact-version publication, body-set differential,
+and whole-stage physical gate pass. See
+`../architecture/TH08_ACTION_CONDITIONED_PLAYER_ENEMY_MODE_SEMANTICS_20260730.md`.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

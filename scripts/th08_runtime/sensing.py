@@ -31,8 +31,11 @@ from th08_runtime.game_state import (
     PLAYER_BOMB_INDEX_OFFSET,
     PLAYER_BOMB_LOCKOUT_OFFSET,
     PLAYER_BOMB_TIMER_OFFSET,
+    PLAYER_FOCUS_LOGIC_OFFSET,
+    PLAYER_FOCUS_TRANSITION_COUNTER_OFFSET,
     PLAYER_POSITION_OFFSET,
     PLAYER_PREDEATH_COUNTER_OFFSET,
+    PLAYER_SECONDARY_CHARACTER_ACTIVE_OFFSET,
     PLAYER_VELOCITY_OFFSET,
     RUN_STATE_BOMBS_OFFSET,
     RUN_STATE_LIVES_OFFSET,
@@ -293,9 +296,21 @@ def observe_state(reader: StateReader) -> dict[str, object]:
         ),
         "player": {
             "phase": reader.u8(ADDR_PLAYER),
-            "focus_logic": reader.u8(ADDR_PLAYER + 3),
+            "focus_logic": reader.u8(
+                ADDR_PLAYER + PLAYER_FOCUS_LOGIC_OFFSET
+            ),
             "deathbomb": reader.u8(ADDR_PLAYER + 4),
+            "secondary_character_active": bool(
+                reader.u8(
+                    ADDR_PLAYER
+                    + PLAYER_SECONDARY_CHARACTER_ACTIVE_OFFSET
+                )
+                & 1
+            ),
             "forced_bomb": reader.u8(ADDR_PLAYER + 6),
+            "focus_transition_counter": reader.i32(
+                ADDR_PLAYER + PLAYER_FOCUS_TRANSITION_COUNTER_OFFSET
+            ),
             "x": reader.f32(ADDR_PLAYER + PLAYER_POSITION_OFFSET),
             "y": reader.f32(ADDR_PLAYER + PLAYER_POSITION_OFFSET + 4),
             "bomb_active": reader.u32(

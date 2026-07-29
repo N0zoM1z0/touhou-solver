@@ -135,7 +135,14 @@ class DecisionControlTraceTests(unittest.TestCase):
             item_objectives_enabled=True,
             corridor_context_changed=False,
             policy_guidance=guidance,
-            player={"x": 10.0, "y": 20.0, "phase": 1},
+            player={
+                "x": 10.0,
+                "y": 20.0,
+                "phase": 1,
+                "focus_logic": 0,
+                "secondary_character_active": True,
+                "focus_transition_counter": 4,
+            },
             projected_player_x=11.0,
             projected_player_y=21.0,
             control_origin_x=12.0,
@@ -167,6 +174,9 @@ class DecisionControlTraceTests(unittest.TestCase):
         )
         self.assertEqual(fields["planner_guidance"]["repair_volumes"], {"right": 7})
         self.assertEqual(fields["player"]["projected_x"], 11.0)
+        self.assertEqual(fields["player"]["focus_logic"], 0)
+        self.assertTrue(fields["player"]["secondary_character_active"])
+        self.assertEqual(fields["player"]["focus_transition_counter"], 4)
         self.assertEqual(
             fields["local_pipeline_timing"]["issue_recertificate"],
             {"source": "issue"},

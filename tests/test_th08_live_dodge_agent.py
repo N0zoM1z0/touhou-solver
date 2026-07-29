@@ -579,6 +579,49 @@ class LiveDodgeAgentTests(unittest.TestCase):
         snapshot = capture_enemy_pool_prefix_contiguous(Reader())
         self.assertEqual(snapshot.bodies, latent)
 
+    def test_ce_0176_prefix_retains_character_blocked_mode_body(self) -> None:
+        blob = bytearray(ENEMY_LOCAL_PREFIX_SIZE * ENEMY_STRIDE)
+        slot = 15
+        base = slot * ENEMY_STRIDE
+        struct.pack_into(
+            "<ff",
+            blob,
+            base + ENEMY_CONTACT_SIZE_OFFSET,
+            24.0,
+            24.0,
+        )
+        struct.pack_into(
+            "<ff",
+            blob,
+            base + ENEMY_POSITION_OFFSET,
+            192.0,
+            300.0,
+        )
+        struct.pack_into(
+            "<I",
+            blob,
+            base + ENEMY_FLAGS_OFFSET,
+            0x0100194D,
+        )
+        self.assertEqual(
+            decode_enemy_bodies(
+                bytes(blob),
+                pool_size=ENEMY_LOCAL_PREFIX_SIZE,
+            ),
+            (),
+        )
+        latent = decode_enemy_bodies(
+            bytes(blob),
+            pool_size=ENEMY_LOCAL_PREFIX_SIZE,
+            include_contact_disabled=True,
+        )
+        self.assertEqual(len(latent), 1)
+        self.assertEqual(latent[0].flags, 0x0100194D)
+        self.assertEqual(
+            latent[0].pointer,
+            ENEMY_POOL_BASE + slot * ENEMY_STRIDE,
+        )
+
     def test_ce_0094_contact_toggle_is_a_mode_change_not_a_respawn(self) -> None:
         disabled = EnemyBody(
             ENEMY_POOL_BASE + 18 * ENEMY_STRIDE,

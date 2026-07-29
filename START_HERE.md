@@ -91,8 +91,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest repository/live checkpoint: `19fa70b`
-  (`Adapt Final-B scale gate to original stage launch`).
+- Latest repository/live checkpoint: `20732c8`
+  (`Retain C5 phase-gate physical counterexample`).
 - The code at `19fa70b` was physically exercised by the complete Stage-6B
   workload below. Its C5 exact-delivery gate failed before source capture; it
   has no scale-delivery or survival promotion.

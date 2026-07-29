@@ -1,0 +1,4 @@
+interface:
+  display_name: "TH08 Native-to-Solver Audit"
+  short_description: "Audit IDA semantics against Python and native solver code"
+  default_prompt: "Use $th08-audit-native-solver-semantics to perform a read-only IDA-to-Python/C/C++ semantic, authority, robustness, and performance audit."

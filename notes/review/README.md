@@ -7,6 +7,9 @@
 - [delivery-aware strategy reassessment](DELIVERY_AWARE_STRATEGY_REASSESSMENT_20260724.md)
 - [model/solver maintenance audit](MODEL_SOLVER_MAINTENANCE_AUDIT_20260724.md)
 - [public release and test-suite audit](PUBLIC_RELEASE_AND_TEST_SUITE_AUDIT_20260727.md)
+- [launch and UNC workflow audit](LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md)
+- [runtime report retention and emission audit](RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md)
+- [reusable agent skills](REUSABLE_AGENT_SKILLS_20260729.md)
 
 Reviews propose or consolidate work. `START_HERE.md`, `STRATEGY.md`, active
 formal contracts, retained physical evidence, and counterexamples determine

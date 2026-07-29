@@ -71,11 +71,130 @@ located; it does not change the authority order below.
 58. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_PREFLIGHT_20260729.md`
 59. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_CONTRACT_20260729.md`
 60. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_PREFLIGHT_20260729.md`
-61. the relevant recent run note and counterexample rows before live work
+61. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_STAGE5_FAILURE_20260729.md`
+62. `notes/research/g5/STAGE5_EIGHT_HIT_CHECKPOINT_REGRESSION_AUDIT_20260729.md`
+63. `notes/review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md`
+64. `notes/review/RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md`
+65. `notes/review/REUSABLE_AGENT_SKILLS_20260729.md`
+66. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
 describe the same decision. Python/C++ parity is not physical correctness.
+
+## Immediate Handoff — 2026-07-29
+
+### Exact state
+
+- Branch: `main`.
+- Latest executable code checkpoint: `e4e266f`
+  (`Avoid duplicate runtime dossier Markdown`).
+- Latest physical-code checkpoint: `3f02ff1`
+  (`Coalesce auxiliary evidence publication`).
+- Latest accepted complete physical workload:
+  `lunatic_route2_stage5_unattended_20260729_125453`.
+- No TH08, controller, practice supervisor, full-route supervisor, or test
+  process is intentionally left running.
+- `audits/` is untracked user input. Never stage it.
+- Six TH08-specific repo skills are installed under `.agents/skills/`: five
+  handoff workflows for physical-trial retention, isolated dual-platform
+  gates, research checkpoint retention, physical-regression audit, and
+  bounded IDA/runtime semantic revalidation, plus a concurrently present
+  comprehensive read-only native-to-solver audit. All pass the OpenAI
+  `skill-creator` structural validator. A fresh Codex `0.144.6`
+  `skills/list(forceReload=true)` reports every skill as enabled repo scope
+  with interface metadata. The physical skill was not forward-tested during
+  this no-more-experiments handoff.
+
+Checkpoint `e4e266f` has no survival authority. It changes only compact
+artifact placement: practice/full-route dossier Markdown is generated
+directly as the durable `notes/runs/` note instead of first creating a
+duplicate runtime-report Markdown. The underlying `d85cca1` launch preflight
+still validates immutable ECL path/read/file/SHA before any game/process side
+effect; repo BATs use `%~dp0`; two Windows tools restore direct UNC imports.
+Complete isolated Linux/Windows discovery passes 1,057 tests in
+13.844/29.961 seconds, with three existing Windows skips. Do not run Linux
+and Windows performance gates concurrently.
+
+### Latest physical conclusion
+
+V6 run `125453` completed hard no-Bomb Stage 5 with exact cleanup but took
+18 hits: nonspell/103/107/111/115 = `6/2/4/2/4`.
+
+Observed accepted sub-evidence:
+
+- 186 ordered coalesced envelopes;
+- zero standalone auxiliary-batch writes;
+- 5,250/5,250 independent request replays complete, zero unknown;
+- exact cache parity;
+- pack, size, combined transaction, all-decision emit, cadence, no-Bomb,
+  completion, and cleanup gates pass.
+
+Rejected or unresolved:
+
+- replay compact p95/max is `0.535/8.388 ms`, above fixed limits;
+- the report's bearing-emit failure compares spell-107-only rows to an
+  all-stage baseline and is not a control-equivalent regression test;
+- the historical report remains failed and must not be relabeled;
+- survival is outside the ten-hit boundary and contributes no consecutive
+  pass.
+
+CE-0174 and the V6 result note are authoritative. Fix a new phase- and
+workload-matched report contract before another delivery claim.
+
+### Eight-hit comparison
+
+The retained eight-hit checkpoints are:
+
+- `faed791`, run `20260727_212624`, hits `4/1/2/0/1`;
+- `3adad09`, run `20260728_171633`, hits `3/2/1/1/1`.
+
+From `3adad09` to current code there is no changed planner, recurrence,
+native-pipeline, action-ranking, or issued-mask algorithm. The issue stage was
+extracted and optional post-issue observers were added. Current run
+`125453` takes its canonical first hit at frame 731 in nonspell, before every
+spell-107 envelope; the eight-hit runs take their first hits after frame
+11,500. Therefore no single code checkpoint has been shown to cause the
+18-hit result, and rollback is not justified by aggregate samples alone.
+Later deaths are coupled through respawn, Power, position, damage, and route
+timing.
+
+### Next useful gate
+
+Do not resume broad G5 work first.
+
+1. Run current code on Lunatic Stage 5 with every optional observer off.
+2. Retain every outcome and use the canonical first hit for causality.
+3. Require two consecutive corrected Stage-5 results at no more than ten
+   hits.
+4. Run a fresh independent Lunatic Stage-3 baseline.
+5. Check other retained Lunatic stages for material regression.
+6. Run one complete hard no-Bomb Lunatic Route 2.
+7. Only then resume a matched V6 report/compact-tail correction or a
+   separately contracted nonspell combat, Power, or unfocused-shot
+   experiment.
+
+The exact one-shot observer-off command is in
+`notes/review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md` and repeated in the
+physical-command section below. Do not mix the first control with
+Focus/unfocused, targeting, Power, or planner changes.
+
+### Raw evidence retention
+
+Keep the two newest complete replay-capable Stage-5 raw bundles locally,
+including `20260729_120859` and `20260729_125453`, until two newer compatible
+bundles plus tracked compact reports exist. The newest raw trace SHA-256 is
+`bee834257bc577299d1ca684383bcc8c0591e3fcc02a8b0e43bf39932fc2a2ca`.
+Raw JSONL and launch logs remain ignored and must not be committed.
+
+`artifacts/runtime_reports/` currently uses 27 GiB, of which 26.126 GiB is
+ignored raw JSONL and only 81.137 MiB is tracked/staged compact history. The
+retention/emission audit identifies eight exact-compatible, compact-backed,
+non-raw-path-referenced deletion candidates totaling 2.711 GiB; none was
+deleted in this checkpoint. Obtain explicit approval and retain a
+path/size/SHA-256 removal manifest first. New practice/full-route trials no
+longer create a duplicate artifact dossier Markdown; the generator writes
+the durable `notes/runs/` note directly.
 
 ## Exact Checkpoint
 
@@ -180,9 +299,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
   repeats and independently replays 21,190 requests with zero unknown.
   Windows pack p95/p99/max is `0.667/0.833/1.580 ms`; maximum base64 payload
   is 7,196 bytes. Complete 1,052-test suites pass on both platforms, and V1,
-  V4, and V5 reports remain byte-identical. Run one fresh V6 Stage-5 physical
-  gate next. Do not loosen V5's historical gates or combine the delivery
-  correction with a combat intervention.
+  V4, and V5 reports remain byte-identical.
+  Physical run `20260729_125453` then accepts exact coalesced semantics,
+  independent replay, and zero-standalone-write composition, but rejects the
+  full gate: replay compact p95/max is `0.535/8.388 ms`, the run takes 18
+  hits, and CE-0174 rejects the all-stage baseline used for spell-107-only
+  bearing emit. Preserve that report as failed. Restore observer-off Stage-5
+  survival before a newly contracted matched delivery report; do not loosen
+  historical gates or combine the control with a combat intervention.
   Unsupported emission, source-life, dynamic parameter, transform,
   realized-birth, geometry, and action dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model
@@ -1543,6 +1667,12 @@ measurement, and a `STRATEGY.md` status change.
 
 ## Open Problems In Priority Order
 
+Until the physical floor is restored, the immediate ordering in
+`Immediate Handoff — 2026-07-29` overrides research expansion: observer-off
+Stage 5 twice at `<=10`, independent Lunatic Stage 3, other-stage checks, and
+full Lunatic Route 2. V6 delivery, nonspell combat, Power, and unfocused-shot
+work remain separately contracted follow-ups.
+
 ### P0 — Preserve global feasibility and define post-loss authority
 
 Current Hard failures overwhelmingly follow finite-kernel exhaustion.
@@ -1714,7 +1844,7 @@ CE-0164. Historical notes do not override the authority table above.
 | Workload | Bundle | Purpose |
 | --- | --- | --- |
 | Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor. |
-| Lunatic Route-2 Stage 5 | `124930`, `155426`, `171633` | Birth provenance, ordinary main/auxiliary source mapping, and newest schema-12 pointer-density gate. |
+| Lunatic Route-2 Stage 5 | `171633`, `120859`, `125453` | Eight-hit reference, newest separate-publication V5 raw bundle, and newest coalesced V6 failure; keep the last two raw bundles local. |
 | Lunatic Route-2 Stage 3 | pending fresh baseline | Independent harder-workload baseline: historical deaths, Power-0 resources, phase/first-hit and source coverage; do not transfer Stage-5 profiles. |
 | Hard Route-2 Stage 1 | `175049`, `144128`, `153821` | Zero-hit native/local and refactor gates; G1 trace/pickup gate with one survival failure. |
 | Hard Route-2 full route | `184942` | Complete route, 39-hit feasibility diagnosis; one-bundle evidence only. |
@@ -1841,8 +1971,11 @@ Practice:
 ```bash
 /mnt/c/Windows/System32/cmd.exe /d /c call \
   '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
-  --stage 4a --status-seconds 15 --stall-timeout 120
+  --stage 5 --status-seconds 15 --stall-timeout 120
 ```
+
+This is the next observer-off survival control. Do not add any trace, combat,
+Power, Focus/unfocused, or planner flag to its first two acceptance attempts.
 
 The current explicit trace-only native birth-observer gate adds:
 
@@ -1876,19 +2009,18 @@ It is independent of bullet-birth tracing, reuses the existing first-64
 enemy-prefix capture, and emits only post-issue trace records. Do not combine
 its first physical gate with another observer.
 
-Continuous Hard Route-2, leaving the accepted game alive for manual replay
-save:
+Complete Lunatic Route-2 after the focused acceptance sequence:
 
 ```bash
 /mnt/c/Windows/System32/cmd.exe /d /c call \
   '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_full_route_agent.bat' \
-  --difficulty hard --leave-game-running \
-  --status-seconds 30 --stall-timeout 120
+  --difficulty lunatic --status-seconds 30 --stall-timeout 120
 ```
 
-Omit `--leave-game-running` for identity-scoped automatic cleanup. The switch
-never chooses save/no-save and cannot preserve a failed run. Route-2 practice
-stages are `1 2 3 4a 5 6b`; 4B and 6A are route-locked.
+Add `--leave-game-running` only for an accepted run that must remain for
+manual replay save and while the agent remains present. The switch never
+chooses save/no-save and cannot preserve a failed run. Route-2 practice stages
+are `1 2 3 4a 5 6b`; 4B and 6A are route-locked.
 
 Operational rules:
 

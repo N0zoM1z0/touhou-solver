@@ -17,6 +17,12 @@ This is the navigation index for repository evidence. It does not replace
   agreed research/refactor order.
 - [Notes migration plan](review/NOTES_INFORMATION_ARCHITECTURE_AND_MIGRATION_PLAN_20260728.md):
   topology rationale, preservation digests, and migration gates.
+- [Launch and UNC audit](review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md):
+  verified one-shot commands, preflight, quoting, and cleanup boundaries.
+- [Runtime report retention and emission audit](review/RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md):
+  required outputs, duplicate suppression, and reviewed raw-cleanup candidates.
+- [Reusable agent skills](review/REUSABLE_AGENT_SKILLS_20260729.md):
+  installed repo-scoped workflows and authority boundaries.
 
 ## Responsibility Directories
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "TH08 Physical Regression Audit"
+  short_description: "Diagnose TH08 physical hit regressions"
+  default_prompt: "Use $th08-audit-physical-regression to compare this run with the retained physical baseline."

@@ -634,9 +634,23 @@ comparison.
    independently replayed requests per platform. Windows pack p95/p99/max is
    `0.667/0.833/1.580 ms`; maximum base64 payload is 7,196 bytes. Complete
    1,052-test suites pass on both platforms, and immutable V1/V4/V5 reports
-   remain exact. It must not loosen or relabel V5's failed gate. Fresh
-   physical combined-publication timing is next; survival remains a
-   separately versioned correction.
+   remain exact.
+   Fresh physical V6 run `20260729_125453` then proves exact coalesced
+   semantics and one-write composition over 186 envelopes and 5,250 requests
+   with zero unknown or standalone auxiliary write. It still fails replay
+   compact p95/max at `0.535/8.388 ms`, takes 18 hits
+   (`6/2/4/2/4`), and uses an invalid all-stage comparator for
+   spell-107-only bearing emit. CE-0174 preserves the failed report and
+   requires a new phase/workload-matched contract. The frame-731 canonical
+   nonspell hit precedes every auxiliary envelope.
+   Comparing eight-hit checkpoint `3adad09` with current code finds no change
+   to planner, recurrence, native pipeline, ranking, or issued-mask
+   semantics; the 18-hit sample does not identify a code checkpoint to
+   revert. Restore survival first with current code and all optional
+   observers off. Require two consecutive `<=10` Stage-5 runs before Stage 3,
+   other-stage, or full-Lunatic acceptance.
+   It must not loosen or relabel V5/V6 failed gates. Delivery correction and
+   survival remain separately versioned.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the

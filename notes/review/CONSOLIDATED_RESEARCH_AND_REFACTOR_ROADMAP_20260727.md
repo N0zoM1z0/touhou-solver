@@ -180,9 +180,43 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   platform independently replays 21,190 requests with zero unknown and exact
   cache parity. Windows pack p95/p99/max is `0.667/0.833/1.580 ms`, and the
   maximum base64 payload is 7,196 bytes. Complete 1,052-test suites pass on
-  both platforms; V1/V4/V5 reports remain byte-identical. The next gate is a
-  fresh action-neutral Stage-5 physical run measuring the actual coalesced
-  decision publication.
+  both platforms; V1/V4/V5 reports remain byte-identical.
+- Fresh V6 physical run `20260729_125453` accepts exact coalesced semantics
+  and one-write composition: 186 ordered envelopes, zero standalone
+  auxiliary writes, and 5,250 independently replayed requests with zero
+  unknown. It rejects full delivery and survival. Replay-compact p95/max is
+  `0.535/8.388 ms`; the run takes 18 hits (`6/2/4/2/4`).
+- CE-0174 rejects the V6 bearing-emit comparison because it uses an all-stage
+  baseline for spell-107-only envelope rows. Preserve the failed report and
+  write a new phase/workload-matched contract before another delivery claim.
+  This is not permission to loosen compact-tail gates.
+- Comparing eight-hit checkpoints `faed791`/`3adad09` to current code finds
+  no planner, native pipeline, recurrence, ranking, or issued-mask algorithm
+  change after `3adad09`. The current canonical frame-731 nonspell hit occurs
+  before every envelope; the aggregate result does not identify a checkpoint
+  to revert. First run current code with all optional observers off.
+- Launch-only checkpoint `d85cca1` validates immutable ECL path and SHA before
+  any game/process side effect, makes repo BATs self-relative, and restores
+  direct-UNC imports for two tools. Isolated Linux/Windows complete suites
+  pass 1,055 tests; do not run platform performance gates concurrently.
+- Handoff order is fixed: two consecutive observer-off/current Stage-5 runs
+  at `<=10`, fresh independent Lunatic Stage 3, other retained stage checks,
+  then one complete Lunatic Route 2. Only after that resume matched V6
+  delivery or separately contracted nonspell combat/Power/unfocused-shot
+  experiments.
+- Six TH08-specific workflows and their authority boundaries are available as
+  repo-scoped OpenAI skills under `.agents/skills/`, documented in
+  `REUSABLE_AGENT_SKILLS_20260729.md`, structurally validated, and discovered
+  by a fresh Codex app-server as enabled repo scope. Five are handoff
+  workflows; the sixth is a concurrently present comprehensive read-only
+  native-to-solver audit. Volatile strategy remains in repository authority
+  documents rather than the skills.
+- Runtime-report emission and retention are audited in
+  `RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md`. Raw replay
+  geometry remains required and retention-bounded; checkpoint `e4e266f`
+  removes the proven duplicate artifact/run-note Markdown write. Eight
+  exact-compatible reviewed raw candidates total 2.711 GiB, but deletion
+  remains a separately approved, manifested action.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

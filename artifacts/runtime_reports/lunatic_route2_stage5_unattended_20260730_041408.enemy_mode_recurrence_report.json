@@ -1,0 +1,512 @@
+{
+  "schema": "th08-enemy-mode-recurrence-report-v1",
+  "source": {
+    "path": "/home/pentester/coding/codex_ida/th08/artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260730_041408.jsonl",
+    "bytes": 482944752,
+    "sha256": "773cbdb322dc5e15f80da4800ce82bcd0f41c1e6f82826812087edc9a328dca9"
+  },
+  "scope": {
+    "classification": "observed_physical_posthoc_recurrence",
+    "eligible_interval_contract": "adjacent coherent captures with no intervening non-decision trace record, in the same stage/epoch and player phase other than native suppressed phases 1/2, with no Bomb and captured active, held desired, pending, and newly dispatched target masks that all preserve one effective-focus value",
+    "manager_delta_interpretation": "tested update count only inside each eligible interval",
+    "manager_frame_universal_physical_clock_authority": false,
+    "action_authority": false,
+    "hard_survival_authority": false,
+    "physical_survival_authority": false
+  },
+  "rows": {
+    "total": 11990,
+    "decision": 11879,
+    "capture": 11879,
+    "coherent": 11763
+  },
+  "intervals": {
+    "adjacent_coherent": 11708,
+    "eligible": 9839,
+    "matched": 9839,
+    "mismatched": 0,
+    "excluded": 1869,
+    "exclusion_counts": {
+      "active_mask_focus_mismatch": 47,
+      "dispatch_target_focus_mismatch": 142,
+      "effective_focus_changed": 1411,
+      "held_desired_mask_focus_mismatch": 28,
+      "intervening_nondecision_trace_record": 20,
+      "mode_update_suppressed_player_phase": 171,
+      "player_phase_changed": 50
+    },
+    "manager_delta_counts": {
+      "1": 558,
+      "2": 4884,
+      "3": 3805,
+      "4": 537,
+      "5": 52,
+      "6": 2,
+      "10": 1
+    },
+    "intervening_nondecision_kind_counts": {
+      "action_epoch_discontinuity": 2,
+      "auto_confirm_wall_pulse": 85,
+      "scene_inactive": 1,
+      "sensor_epoch_discontinuity": 1,
+      "summary": 1,
+      "time_scale_authority_unknown": 9,
+      "time_scale_root_unstable": 8
+    }
+  },
+  "retained_clock_boundary_intervals": [
+    {
+      "previous_line": 2758,
+      "line": 2761,
+      "previous_frame": 7774,
+      "frame": 9580,
+      "previous_enemy_frame": 7773,
+      "enemy_frame": 9578,
+      "manager_delta": 1805,
+      "intervening_kind_counts": {
+        "action_epoch_discontinuity": 1,
+        "time_scale_authority_unknown": 1
+      },
+      "initial_state": [
+        0,
+        true,
+        2
+      ],
+      "observed_state": [
+        1,
+        true,
+        4
+      ]
+    },
+    {
+      "previous_line": 4257,
+      "line": 4259,
+      "previous_frame": 13070,
+      "frame": 13073,
+      "previous_enemy_frame": 13069,
+      "enemy_frame": 13072,
+      "manager_delta": 3,
+      "intervening_kind_counts": {
+        "time_scale_root_unstable": 1
+      },
+      "initial_state": [
+        1,
+        false,
+        6
+      ],
+      "observed_state": [
+        1,
+        true,
+        9
+      ]
+    },
+    {
+      "previous_line": 4649,
+      "line": 4654,
+      "previous_frame": 14088,
+      "frame": 15888,
+      "previous_enemy_frame": 14088,
+      "enemy_frame": 15888,
+      "manager_delta": 1800,
+      "intervening_kind_counts": {
+        "auto_confirm_wall_pulse": 4
+      },
+      "initial_state": [
+        1,
+        false,
+        1
+      ],
+      "observed_state": [
+        1,
+        true,
+        80
+      ]
+    },
+    {
+      "previous_line": 4654,
+      "line": 4673,
+      "previous_frame": 15888,
+      "frame": 17688,
+      "previous_enemy_frame": 15888,
+      "enemy_frame": 17688,
+      "manager_delta": 1800,
+      "intervening_kind_counts": {
+        "auto_confirm_wall_pulse": 18
+      },
+      "initial_state": [
+        1,
+        true,
+        80
+      ],
+      "observed_state": [
+        1,
+        true,
+        408
+      ]
+    },
+    {
+      "previous_line": 4673,
+      "line": 4704,
+      "previous_frame": 17688,
+      "frame": 19490,
+      "previous_enemy_frame": 17688,
+      "enemy_frame": 19489,
+      "manager_delta": 1801,
+      "intervening_kind_counts": {
+        "auto_confirm_wall_pulse": 30
+      },
+      "initial_state": [
+        1,
+        true,
+        408
+      ],
+      "observed_state": [
+        1,
+        true,
+        961
+      ]
+    },
+    {
+      "previous_line": 5264,
+      "line": 5266,
+      "previous_frame": 20768,
+      "frame": 20771,
+      "previous_enemy_frame": 20766,
+      "enemy_frame": 20770,
+      "manager_delta": 4,
+      "intervening_kind_counts": {
+        "time_scale_root_unstable": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        16
+      ],
+      "observed_state": [
+        1,
+        true,
+        20
+      ]
+    },
+    {
+      "previous_line": 5746,
+      "line": 5748,
+      "previous_frame": 21889,
+      "frame": 21892,
+      "previous_enemy_frame": 21888,
+      "enemy_frame": 21890,
+      "manager_delta": 2,
+      "intervening_kind_counts": {
+        "time_scale_authority_unknown": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        18
+      ],
+      "observed_state": [
+        1,
+        true,
+        20
+      ]
+    },
+    {
+      "previous_line": 6348,
+      "line": 6351,
+      "previous_frame": 23569,
+      "frame": 25373,
+      "previous_enemy_frame": 23567,
+      "enemy_frame": 25372,
+      "manager_delta": 1805,
+      "intervening_kind_counts": {
+        "action_epoch_discontinuity": 1,
+        "time_scale_authority_unknown": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        246
+      ],
+      "observed_state": [
+        1,
+        true,
+        251
+      ]
+    },
+    {
+      "previous_line": 6943,
+      "line": 6945,
+      "previous_frame": 26874,
+      "frame": 26878,
+      "previous_enemy_frame": 26872,
+      "enemy_frame": 26876,
+      "manager_delta": 4,
+      "intervening_kind_counts": {
+        "time_scale_root_unstable": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        18
+      ],
+      "observed_state": [
+        1,
+        true,
+        22
+      ]
+    },
+    {
+      "previous_line": 7451,
+      "line": 7453,
+      "previous_frame": 28179,
+      "frame": 28183,
+      "previous_enemy_frame": 28177,
+      "enemy_frame": 28181,
+      "manager_delta": 4,
+      "intervening_kind_counts": {
+        "time_scale_root_unstable": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        1
+      ],
+      "observed_state": [
+        1,
+        true,
+        0
+      ]
+    },
+    {
+      "previous_line": 7529,
+      "line": 7531,
+      "previous_frame": 28371,
+      "frame": 28374,
+      "previous_enemy_frame": 28370,
+      "enemy_frame": 28372,
+      "manager_delta": 2,
+      "intervening_kind_counts": {
+        "time_scale_authority_unknown": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        9
+      ],
+      "observed_state": [
+        0,
+        true,
+        1
+      ]
+    },
+    {
+      "previous_line": 7758,
+      "line": 7760,
+      "previous_frame": 28970,
+      "frame": 28974,
+      "previous_enemy_frame": 28968,
+      "enemy_frame": 28972,
+      "manager_delta": 4,
+      "intervening_kind_counts": {
+        "time_scale_root_unstable": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        557
+      ],
+      "observed_state": [
+        1,
+        true,
+        561
+      ]
+    },
+    {
+      "previous_line": 8254,
+      "line": 8257,
+      "previous_frame": 30890,
+      "frame": 32694,
+      "previous_enemy_frame": 30888,
+      "enemy_frame": 32692,
+      "manager_delta": 1804,
+      "intervening_kind_counts": {
+        "sensor_epoch_discontinuity": 1,
+        "time_scale_authority_unknown": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        27
+      ],
+      "observed_state": [
+        1,
+        true,
+        31
+      ]
+    },
+    {
+      "previous_line": 8481,
+      "line": 8483,
+      "previous_frame": 33221,
+      "frame": 33225,
+      "previous_enemy_frame": 33220,
+      "enemy_frame": 33223,
+      "manager_delta": 3,
+      "intervening_kind_counts": {
+        "time_scale_root_unstable": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        42
+      ],
+      "observed_state": [
+        1,
+        true,
+        45
+      ]
+    },
+    {
+      "previous_line": 9408,
+      "line": 9410,
+      "previous_frame": 35468,
+      "frame": 35471,
+      "previous_enemy_frame": 35467,
+      "enemy_frame": 35470,
+      "manager_delta": 3,
+      "intervening_kind_counts": {
+        "time_scale_root_unstable": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        35
+      ],
+      "observed_state": [
+        1,
+        true,
+        38
+      ]
+    },
+    {
+      "previous_line": 9744,
+      "line": 9746,
+      "previous_frame": 36291,
+      "frame": 36293,
+      "previous_enemy_frame": 36290,
+      "enemy_frame": 36292,
+      "manager_delta": 2,
+      "intervening_kind_counts": {
+        "time_scale_authority_unknown": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        38
+      ],
+      "observed_state": [
+        1,
+        true,
+        40
+      ]
+    },
+    {
+      "previous_line": 10824,
+      "line": 10826,
+      "previous_frame": 39322,
+      "frame": 39325,
+      "previous_enemy_frame": 39320,
+      "enemy_frame": 39323,
+      "manager_delta": 3,
+      "intervening_kind_counts": {
+        "time_scale_authority_unknown": 1
+      },
+      "initial_state": [
+        0,
+        true,
+        2
+      ],
+      "observed_state": [
+        1,
+        true,
+        2
+      ]
+    },
+    {
+      "previous_line": 10863,
+      "line": 10865,
+      "previous_frame": 39401,
+      "frame": 39403,
+      "previous_enemy_frame": 39400,
+      "enemy_frame": 39402,
+      "manager_delta": 2,
+      "intervening_kind_counts": {
+        "time_scale_authority_unknown": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        79
+      ],
+      "observed_state": [
+        1,
+        true,
+        81
+      ]
+    },
+    {
+      "previous_line": 11379,
+      "line": 11381,
+      "previous_frame": 40807,
+      "frame": 40810,
+      "previous_enemy_frame": 40806,
+      "enemy_frame": 40809,
+      "manager_delta": 3,
+      "intervening_kind_counts": {
+        "time_scale_root_unstable": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        48
+      ],
+      "observed_state": [
+        1,
+        true,
+        51
+      ]
+    },
+    {
+      "previous_line": 11952,
+      "line": 11954,
+      "previous_frame": 42461,
+      "frame": 42462,
+      "previous_enemy_frame": 42460,
+      "enemy_frame": 42462,
+      "manager_delta": 2,
+      "intervening_kind_counts": {
+        "time_scale_authority_unknown": 1
+      },
+      "initial_state": [
+        1,
+        true,
+        19
+      ],
+      "observed_state": [
+        1,
+        true,
+        21
+      ]
+    }
+  ],
+  "retained_mismatches": [],
+  "integrity": {
+    "passed": true,
+    "errors": {
+      "capture_action_authority_true_or_missing_lines": [],
+      "capture_non_diagnostic_role_lines": [],
+      "recurrence_mismatch_count": 0,
+      "eligible_interval_count_zero": 0
+    }
+  }
+}

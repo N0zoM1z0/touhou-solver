@@ -421,6 +421,63 @@ publication. The existing live viability/local-certificate consumers are
 unchanged. Damage-body identities are diagnostic output only and do not
 affect hard viability or unfocused combat selection.
 
+## Retained Physical Post-Hoc Recurrence Audit
+
+`scripts/analysis/th08_enemy_mode_recurrence_report.py` streams the retained
+482,944,752-byte Stage-5 JSONL, hashes the complete source, and replays the
+pure mode recurrence between adjacent coherent captures. It accepts an
+interval only when:
+
+- no non-decision trace record intervenes;
+- stage, gameplay epoch, and player phase remain equal;
+- the phase is not native-suppressed `1` or `2`, and no Bomb is active;
+- effective focus is unchanged; and
+- captured active, held desired, optional pending, newly dispatched target,
+  and `input_current` focus bits agree with that effective value.
+
+The result is **observed physical post-hoc recurrence evidence**:
+
+- 9,839/9,839 eligible intervals reproduce native player
+  `(focus_logic, secondary_character_active, transition_counter)` exactly;
+- eligible manager deltas are 1 through 10;
+- 1,869 adjacent coherent intervals are explicitly excluded, including 1,411
+  focus changes, 171 same-phase native suppressions, 50 phase changes, and 20
+  intervening non-decision boundaries; and
+- no capture claims action authority or a role other than
+  `diagnostic_shadow`.
+
+Connected-IDA revalidation supplies the native phase boundary:
+`player_update` at `0x0044C390` reaches the relevant update call at
+`0x0044C4CB` only when phase byte `+0`, tested at `0x0044C4C6`, is neither
+`1` nor `2`. A material comment at `0x0044C4C6` records the static gate and
+the 9,839/9,839 retained result.
+
+The same report preserves why this result cannot promote manager-frame clock
+authority. Three auto-confirm intervals have manager deltas
+`1800/1800/1801` but observed transition-counter increments `79/328/553`.
+Those apparent mismatches disappear only by honoring the explicit
+non-decision boundary; they strengthen CE-0120 rather than falsifying the
+local recurrence.
+
+The compact artifact is
+`artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260730_041408.enemy_mode_recurrence_report.json`,
+SHA-256
+`da13e633dd11b65e837062b9286b736ee5dce618f57ba9bb1930d8c8c0315a66`.
+Its source JSONL hashes to
+`773cbdb322dc5e15f80da4800ce82bcd0f41c1e6f82826812087edc9a328dca9`.
+The report declares manager-frame universal-clock, action, hard-survival, and
+physical-survival authority false.
+
+Six focused report tests, deterministic full-source regeneration, Ruff,
+format, `py_compile`, and `git diff --check` pass. Complete discovery passes
+1,181 tests in 14.647 seconds on Linux and 30.388 seconds through the exact
+Windows UNC loader; Windows retains the three existing platform skips.
+
+This closes a physical falsifier for the pure recurrence inside a strict
+ordinary-update boundary. It does not provide the future body/flag/geometry
+schedule required by the next decision, and therefore cannot yet be wired
+into hard survival or unfocused-combat authority.
+
 ## Remaining Implementation And Promotion Plan
 
 1. **SEM-MODE-C integration — exact hazard/version recurrence:** connect the

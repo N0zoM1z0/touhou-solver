@@ -341,6 +341,51 @@ These runs validate only Stage-4A shadow selectivity and tracker segmentation.
 They do not validate neutralization latency, next-phase entry state, one-reset
 semantics, `-2`, pauses, other workloads, or side-effect-free delivery.
 
+## Stage-5 Mode-Counter Physical Revalidation — 2026-07-30
+
+A streaming, source-hashed post-hoc audit reuses complete original-game
+Lunatic Stage-5 run
+`lunatic_route2_stage5_unattended_20260730_041408`; it does not launch a new
+game or substitute THPRAC. The audit composes each captured native
+`focus_logic`, `secondary_character_active`, and transition-counter tuple with
+the revalidated Route-2 recurrence.
+
+The eligible interval contract is deliberately strict: adjacent coherent
+captures, no intervening non-decision trace record, the same stage/epoch and
+player phase, phase other than native-suppressed `1/2`, no Bomb, unchanged
+effective focus, and captured active/held/pending/dispatched focus state that
+agrees with that effective value. Under that contract:
+
+- **Observed:** 9,839 of 9,839 eligible intervals exactly match the native
+  `+3/+5/+8` recurrence; manager deltas range from 1 through 10.
+- **Observed:** 1,869 adjacent coherent intervals are excluded, including 20
+  with an intervening non-decision trace record, 171 in native-suppressed
+  phases `1/2`, and 50 that change player phase.
+- **Observed static evidence:** `player_update` at
+  `0x0044C390` tests phase byte `+0` at `0x0044C4C6` and calls the relevant
+  update at `0x0044C4CB` only when phase is neither `1` nor `2`. IDA
+  instruction `0x0044C4C6` now records this revalidation and the retained
+  physical result.
+- **Observed boundary evidence:** the three retained auto-confirm gaps
+  `14088 -> 15888`, `15888 -> 17688`, and `17688 -> 19490` have manager
+  deltas `1800`, `1800`, and `1801`, but transition-counter increments `79`,
+  `328`, and `553`. Treating those manager deltas as player-update counts
+  would produce three apparent mismatches. Excluding every interval with an
+  intervening non-decision record makes the boundary causal and explicit.
+
+The compact report is
+`artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260730_041408.enemy_mode_recurrence_report.json`,
+SHA-256
+`da13e633dd11b65e837062b9286b736ee5dce618f57ba9bb1930d8c8c0315a66`.
+Its 482,944,752-byte ignored source JSONL hashes to
+`773cbdb322dc5e15f80da4800ce82bcd0f41c1e6f82826812087edc9a328dca9`.
+
+This is **observed physical post-hoc recurrence evidence** inside the declared
+ordinary-interval boundary. It is not a proof that
+`enemy_manager_frame` is a universal physical clock, nor action, hard
+survival, or live-publication authority. It strengthens CE-0120 and validates
+the local SEM-MODE-C recurrence without closing the actuator boundary.
+
 ## Formal Review
 
 1. **State equivalence:** manager frame, cell, and input alone do not identify

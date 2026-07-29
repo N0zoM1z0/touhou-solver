@@ -581,6 +581,25 @@ whole-stage falsifier remain open. No live strategy or survival claim is
 promoted, and unfocused combat remains disabled. Continue SEM-MODE-C
 integration, not another unchanged Stage-5 observer run.
 
+**2026-07-30 SEM-MODE-C physical post-hoc recurrence checkpoint:** a
+source-hashed streaming audit of the retained complete Stage-5 trace matches
+the pure player-mode recurrence on 9,839/9,839 eligible ordinary intervals.
+The accepted boundary requires coherent adjacent captures, stable
+stage/epoch/non-suppressed player phase, no Bomb or focus edge, complete local
+pipeline focus agreement, and no intervening non-decision trace record.
+Connected IDA revalidation confirms player phases `1/2` suppress the relevant
+update call.
+
+Status remains **Offline/physical-post-hoc**. The three auto-confirm gaps with
+manager deltas `1800/1800/1801` but transition-counter increments
+`79/328/553` strengthen CE-0120: manager-frame delta is not an unconditional
+player-update count. No live action, hard-survival, universal-clock, or
+unfocused-combat authority is promoted. Six focused tests, deterministic
+full-source regeneration, and complete 1,181-test Linux/Windows suites pass
+in 14.647/30.388 seconds, with three existing Windows skips. Continue
+SEM-MODE-C with an exact, immutable future body/flag/geometry producer and
+body-set differential; do not repeat the unchanged observer workload.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

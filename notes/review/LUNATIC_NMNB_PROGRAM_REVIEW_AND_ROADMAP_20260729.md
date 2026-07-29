@@ -976,6 +976,34 @@ publication path, and its separated damage-body output cannot influence hard
 viability. Continue with SEM-MODE-C integration, then SEM-MODE-D/E; do not
 run another unchanged physical observer trial.
 
+2026-07-30 `SEM-MODE-C` physical post-hoc recurrence checkpoint: a
+source-hashed streaming audit replays the accepted pure recurrence over the
+complete retained Stage-5 trace. It matches 9,839/9,839 eligible adjacent
+coherent intervals. Eligibility excludes focus transitions, Bomb, crossed
+captures, player phase `1/2`, phase changes, local input-pipeline
+disagreement, and every intervening non-decision record. Connected IDA
+revalidation confirms `player_update` calls this update only when phase byte
+`+0` is neither `1` nor `2`.
+
+This result simultaneously preserves the unresolved clock boundary. Three
+auto-confirm gaps have manager-frame deltas `1800/1800/1801`, while the
+native transition counter advances only `79/328/553`. They are retained
+CE-0120 boundary evidence, not recurrence failures. The compact report at
+`artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260730_041408.enemy_mode_recurrence_report.json`
+hashes to
+`da13e633dd11b65e837062b9286b736ee5dce618f57ba9bb1930d8c8c0315a66`.
+Six focused tests and deterministic full-source regeneration pass. Complete
+Linux/Windows discovery passes 1,181 tests in 14.647/30.388 seconds, with the
+three existing Windows skips.
+
+Status remains **Offline/physical-post-hoc**. The checkpoint validates the
+local recurrence inside its strict ordinary-update contract but provides no
+exact future body/flag/geometry producer, universal physical clock, action,
+hard-survival, or live-publication authority. The next SEM-MODE-C gate is to
+produce or conservatively version a complete future body/flag/geometry
+schedule and compare projected body sets before any hard-survival wiring. Do
+not launch another unchanged Stage-5 observer workload.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

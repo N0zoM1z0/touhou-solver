@@ -33,6 +33,14 @@ _COVERAGE_VALUES = frozenset(
 )
 
 
+class IncompleteTimeScaleScheduleError(ValueError):
+    """A hard consumer requested phase coverage that is not proven."""
+
+
+class UnsupportedTimeScaleScheduleError(ValueError):
+    """Coverage is complete, but this consumer lacks exact semantics."""
+
+
 def validate_time_scale_bits(bits: int, *, field: str = "time scale") -> float:
     """Decode one finite, nonnegative native float32 scale."""
 
@@ -211,7 +219,7 @@ class Th08TimeScaleSchedule:
     def require_player_horizon(self, horizon: int) -> tuple[int, ...]:
         _validate_horizon(horizon, field="player scale")
         if len(self.player_scale_bits) < horizon:
-            raise ValueError(
+            raise IncompleteTimeScaleScheduleError(
                 "player time-scale schedule does not cover the requested horizon"
             )
         return self.player_scale_bits[:horizon]
@@ -219,7 +227,7 @@ class Th08TimeScaleSchedule:
     def require_laser_horizon(self, horizon: int) -> tuple[int, ...]:
         _validate_horizon(horizon, field="laser scale")
         if len(self.laser_scale_bits) < horizon:
-            raise ValueError(
+            raise IncompleteTimeScaleScheduleError(
                 "laser time-scale schedule does not cover the requested horizon"
             )
         return self.laser_scale_bits[:horizon]
@@ -230,7 +238,7 @@ class Th08TimeScaleSchedule:
             self.coverage != SCALE_COVERAGE_COMPLETE
             or self.complete_horizon < horizon
         ):
-            raise ValueError(
+            raise IncompleteTimeScaleScheduleError(
                 "phase time-scale schedule is incomplete for the requested horizon"
             )
 
@@ -251,6 +259,8 @@ __all__ = [
     "SCALE_COVERAGE_COMPLETE",
     "SCALE_COVERAGE_PARTIAL",
     "SCALE_COVERAGE_ROOT_ONLY",
+    "IncompleteTimeScaleScheduleError",
+    "UnsupportedTimeScaleScheduleError",
     "TH08_GLOBAL_TIME_SCALE_ADDRESS",
     "TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION",
     "TH08_UNIT_TIME_SCALE_BITS",

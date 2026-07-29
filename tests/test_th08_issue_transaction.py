@@ -11,6 +11,10 @@ from th08_local_planner import (
     IssueTransaction,
     LocalProposal,
 )
+from th08_time_scale import (
+    TH08_UNIT_TIME_SCALE_BITS,
+    Th08TimeScaleSchedule,
+)
 
 
 def _certificates(
@@ -69,6 +73,11 @@ class IssueTransactionTests(unittest.TestCase):
             "lasers": (),
             "enemy_bodies": (),
             "snapshot_lag": 0,
+            "time_scale_schedule": Th08TimeScaleSchedule.constant(
+                TH08_UNIT_TIME_SCALE_BITS,
+                horizon=7,
+                provenance="issue_transaction_test_fixture",
+            ),
             "allowed_first_actions": ("up_fast", "left", "right"),
             "viability_repair_volumes": (
                 ("up_fast", 1),

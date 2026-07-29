@@ -14,6 +14,11 @@ from th08_live.sensing_trace import (
 from th08_ecl_vm_state import EclVmLocalProjection
 from th08_ecl_runtime import ECL_LOOKAHEAD_SEMANTICS_VERSION
 from th08_native_timer import TH08_NATIVE_TIMER_SEMANTICS_VERSION
+from th08_time_scale import (
+    TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+    TH08_UNIT_TIME_SCALE_BITS,
+    Th08TimeScaleSchedule,
+)
 
 
 class SensingTraceTests(unittest.TestCase):
@@ -41,6 +46,17 @@ class SensingTraceTests(unittest.TestCase):
             callback_aux_state=1,
         )
         issue = SimpleNamespace(
+            capture=SimpleNamespace(
+                source_time_scale_bits=TH08_UNIT_TIME_SCALE_BITS,
+                time_scale_schedule=(
+                    Th08TimeScaleSchedule.root_observation(
+                        TH08_UNIT_TIME_SCALE_BITS,
+                        source_frame=103,
+                        provenance="sensing_trace_test_fixture",
+                    )
+                ),
+                player_projection_authority="exact_source_root_one_step",
+            ),
             pre_issue_action="stay",
             pre_issue_mask=0x01,
             post_guard_action="right",
@@ -150,6 +166,11 @@ class SensingTraceTests(unittest.TestCase):
         )
 
         self.assertEqual(fields["boss_phase"]["frame"], 10)
+        self.assertEqual(
+            fields["time_scale"]["semantics_version"],
+            TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+        )
+        self.assertFalse(fields["time_scale"]["hard_authority"])
         self.assertEqual(
             fields["boss_phase_progress"]["damage_per_second_60hz"],
             120.0,

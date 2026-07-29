@@ -6,6 +6,7 @@ import unittest
 import numpy as np
 
 import th08_live_dodge_agent as live
+from th08_time_scale import Th08TimeScaleSchedule
 from touhou_control import native_backend
 
 
@@ -578,6 +579,19 @@ class NativeLocalBeamTests(unittest.TestCase):
                     "preloss_continuation_preference": bool(case % 2),
                     "preloss_supplemental_beam_width": (
                         1 + case % 12 if case % 2 else 0
+                    ),
+                    "time_scale_schedule": (
+                        Th08TimeScaleSchedule.constant(
+                            (
+                                0x3F000000
+                                if case % 2
+                                else 0x3FC00000
+                            ),
+                            horizon=64,
+                            provenance=(
+                                "native_local_beam_nonunit_parity_fixture"
+                            ),
+                        )
                     ),
                 }
                 live._configure_local_beam_reducer("python")

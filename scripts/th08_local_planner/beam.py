@@ -46,6 +46,7 @@ class BaselineBeamContext:
     recovery_reserve_distance: float
     diagonal_speed: float
     cardinal_speed: float
+    player_scale_bits: tuple[int, ...]
 
 
 def run_baseline_beam(
@@ -54,6 +55,7 @@ def run_baseline_beam(
     boundary_risk: Callable[[float, float], float],
     directions_opposed: Callable[[int, int], bool],
     project_item: Callable[[Any, int], tuple[float, float, float]],
+    advance_action: Callable[..., tuple[float, float]],
     hazard_query: Callable[..., tuple[np.ndarray, np.ndarray, np.ndarray]],
     pruning_key: Callable[..., tuple[object, ...]],
     native_reducer: Callable[..., np.ndarray | None],
@@ -85,13 +87,11 @@ def run_baseline_beam(
                     action for action in actions if action.name in allowed
                 )
             for action in actions:
-                x = min(
-                    context.playfield_right,
-                    max(context.playfield_left, node.x + action.dx),
-                )
-                y = min(
-                    context.playfield_bottom,
-                    max(context.playfield_top, node.y + action.dy),
+                x, y = advance_action(
+                    node.x,
+                    node.y,
+                    action,
+                    time_scale_bits=context.player_scale_bits[step - 1],
                 )
                 transition_risk = boundary_risk(x, y)
                 if action.direction != node.last_action.direction:

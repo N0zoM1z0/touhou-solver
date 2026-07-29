@@ -169,6 +169,7 @@ def scalar_local_pipeline_certificates(
     bounds: tuple[float, float, float, float],
     hazard_sample: ScalarHazardSample,
     boundary_risk: ScalarBoundaryRisk,
+    movement_scales: tuple[float, ...] | None = None,
 ) -> dict[str, ScalarLocalPipelineCertificate]:
     """Evaluate every selected action using scalar branch-by-branch loops."""
 
@@ -190,6 +191,10 @@ def scalar_local_pipeline_certificates(
     left, right, top, bottom = bounds
     if not left <= start_x <= right or not top <= start_y <= bottom:
         raise ValueError("local pipeline root is outside the supplied bounds")
+    if movement_scales is not None and len(movement_scales) < horizon_frames:
+        raise ValueError(
+            "movement scale schedule does not cover the oracle horizon"
+        )
 
     certificates: dict[str, ScalarLocalPipelineCertificate] = {}
     for selected_action in selected_actions:
@@ -213,8 +218,13 @@ def scalar_local_pipeline_certificates(
                 start=1,
             ):
                 velocity_x, velocity_y = action_velocities[active_action]
-                x = min(right, max(left, x + velocity_x))
-                y = min(bottom, max(top, y + velocity_y))
+                scale = (
+                    1.0
+                    if movement_scales is None
+                    else movement_scales[step - 1]
+                )
+                x = min(right, max(left, x + velocity_x * scale))
+                y = min(bottom, max(top, y + velocity_y * scale))
                 hazard_risk, hazard_collisions, hazard_clearance = (
                     hazard_sample(x, y, step)
                 )

@@ -20,12 +20,14 @@ class _InputClockReader:
         manager_frames: tuple[int, int] = (123, 123),
         x_positions: tuple[float, float] = (10.0, 11.0),
         current_inputs: tuple[int, int] = (0x40, 0x40),
+        time_scale_bits: int = 0x3F800000,
     ) -> None:
         self.pointer = pointer
         self.msg_states = list(msg_states)
         self.manager_frames = list(manager_frames)
         self.x_positions = list(x_positions)
         self.current_inputs = list(current_inputs)
+        self.time_scale_bits = time_scale_bits
 
     @staticmethod
     def _take(values: list[int] | list[float]) -> int | float:
@@ -34,6 +36,8 @@ class _InputClockReader:
     def u32(self, address: int) -> int:
         if address == th08_runtime_agent.ADDR_ENEMY_MANAGER_FRAME:
             return int(self._take(self.manager_frames))
+        if address == th08_runtime_agent.ADDR_GAMEPLAY_TIME_SCALE:
+            return self.time_scale_bits
         if address == th08_runtime_agent.ADDR_FRSCREEN_UPDATE_SERIAL:
             return 500
         if address == th08_runtime_agent.ADDR_FRSCREEN_IMPL_POINTER:
@@ -97,6 +101,23 @@ class _InputClockReader:
 
 
 class Th08RuntimeAgentTests(unittest.TestCase):
+    def test_time_scale_root_capture_is_frame_bracketed(self) -> None:
+        stable = th08_runtime_agent.capture_time_scale_root(
+            _InputClockReader(
+                manager_frames=(123, 123),
+                time_scale_bits=0x3F000000,
+            )
+        )
+        self.assertTrue(stable.stable)
+        self.assertEqual(stable.frame_before, 123)
+        self.assertEqual(stable.frame_after, 123)
+        self.assertEqual(stable.scale_bits, 0x3F000000)
+
+        unstable = th08_runtime_agent.capture_time_scale_root(
+            _InputClockReader(manager_frames=(123, 124))
+        )
+        self.assertFalse(unstable.stable)
+
     def test_process_reader_reuses_exact_read_buffer_without_copy(self) -> None:
         payloads = [b"abcd", b"WXYZ"]
 

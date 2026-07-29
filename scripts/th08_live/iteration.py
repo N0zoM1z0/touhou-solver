@@ -13,6 +13,10 @@ from dataclasses import dataclass
 
 from th08_laser_runtime import Laser
 from th08_local_planner import Decision, LocalProposal
+from th08_time_scale import (
+    Th08TimeScaleSchedule,
+    validate_time_scale_bits,
+)
 from touhou_control.delay import DelayEstimate
 from touhou_control.epochs import ActionIssueAlignment, HazardEpochAlignment
 
@@ -36,6 +40,9 @@ class CapturedIteration:
     context_key: tuple[int, int, int | None]
     source_frame: int
     snapshot_frame: int
+    source_time_scale_bits: int
+    time_scale_schedule: Th08TimeScaleSchedule
+    player_projection_authority: str
     player_x: float
     player_y: float
     projected_player_x: float
@@ -77,6 +84,20 @@ class CapturedIteration:
             raise ValueError("source frame must match hazard alignment")
         if self.snapshot_lag != self.snapshot_frame - self.source_frame:
             raise ValueError("snapshot lag does not match capture frames")
+        validate_time_scale_bits(
+            self.source_time_scale_bits,
+            field="captured source time scale",
+        )
+        if self.time_scale_schedule.source_frame != self.snapshot_frame:
+            raise ValueError(
+                "time-scale schedule source frame must match capture frame"
+            )
+        if self.player_projection_authority not in {
+            "exact_zero_lag",
+            "exact_source_root_one_step",
+            "unknown_incomplete_source_schedule",
+        }:
+            raise ValueError("unknown player projection authority")
         if self.player_to_hazard_lag != self.hazard_alignment.source_to_hazard_lag:
             raise ValueError("player-to-hazard lag does not match alignment")
         if self.hazard_snapshot_age != self.hazard_alignment.hazard_age:

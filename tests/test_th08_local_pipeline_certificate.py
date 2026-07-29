@@ -5,6 +5,7 @@ import unittest
 
 import numpy as np
 
+from th08_ecl_vm_state import float32_from_bits
 from th08_trace_replay import local_pipeline_root_from_trace
 from th08_live_dodge_agent import (
     Bullet,
@@ -33,6 +34,11 @@ from touhou_control.local_pipeline_oracle import (
     LocalPipelineRoot,
     scalar_local_pipeline_certificates,
 )
+from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
+
+
+def _unit_scale_bits(horizon: int) -> tuple[int, ...]:
+    return (TH08_UNIT_TIME_SCALE_BITS,) * horizon
 
 
 class Th08LocalPipelineCertificateTests(unittest.TestCase):
@@ -55,6 +61,8 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             lasers=(),
             enemy_bodies=(),
             snapshot_lag=0,
+            player_scale_bits=_unit_scale_bits(4),
+            laser_scale_bits=_unit_scale_bits(4),
             pipeline_root=root,
             timing_accumulator=timing,
         )
@@ -93,6 +101,8 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             lasers=(),
             enemy_bodies=(),
             snapshot_lag=0,
+            player_scale_bits=_unit_scale_bits(4),
+            laser_scale_bits=_unit_scale_bits(4),
         )
         self.assertEqual(
             shadow["role"],
@@ -236,8 +246,14 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
         player_x: float,
         player_y: float,
         snapshot_lag: int = 0,
+        player_scale_bits: tuple[int, ...] | None = None,
     ):
         horizon = action_hold_frames + max(delay_frames)
+        player_scale_bits = (
+            _unit_scale_bits(horizon)
+            if player_scale_bits is None
+            else player_scale_bits
+        )
         bullet_frames = _build_bullet_frames(
             bullets,
             horizon=horizon,
@@ -246,6 +262,7 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
         laser_frames = _build_packed_laser_collision_frames(
             (),
             horizon=horizon,
+            time_scale_schedule_bits=_unit_scale_bits(horizon),
         )
 
         def sample(
@@ -291,6 +308,9 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             ),
             hazard_sample=sample,
             boundary_risk=_boundary_risk,
+            movement_scales=tuple(
+                float32_from_bits(bits) for bits in player_scale_bits
+            ),
         )
 
     def test_unfocused_stay_is_a_distinct_write_identity(self) -> None:
@@ -313,6 +333,8 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             "lasers": (),
             "enemy_bodies": (),
             "snapshot_lag": 0,
+            "player_scale_bits": _unit_scale_bits(5),
+            "laser_scale_bits": _unit_scale_bits(5),
         }
         packed = _robust_action_certificates(
             **common,
@@ -389,6 +411,8 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             lasers=(),
             enemy_bodies=enemy_bodies,
             snapshot_lag=arguments["snapshot_lag"],
+            player_scale_bits=_unit_scale_bits(8),
+            laser_scale_bits=_unit_scale_bits(8),
             pipeline_root=root,
         )
 
@@ -482,6 +506,16 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             )
             delay_frames = (1, 2, 3)
             action_hold_frames = 3
+            scale_choices = (
+                TH08_UNIT_TIME_SCALE_BITS,
+                0x3F000000,
+                0x3FC00000,
+                0x00000000,
+            )
+            player_scale_bits = tuple(
+                scale_choices[(seed + step) % len(scale_choices)]
+                for step in range(action_hold_frames + max(delay_frames))
+            )
             expected = self.scalar_certificates(
                 root=root,
                 bullets=bullets,
@@ -490,6 +524,7 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
                 action_hold_frames=action_hold_frames,
                 player_x=player_x,
                 player_y=player_y,
+                player_scale_bits=player_scale_bits,
             )
             actual = _robust_action_certificates(
                 player_x=player_x,
@@ -502,6 +537,8 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
                 lasers=(),
                 enemy_bodies=enemy_bodies,
                 snapshot_lag=0,
+                player_scale_bits=player_scale_bits,
+                laser_scale_bits=_unit_scale_bits(len(player_scale_bits)),
                 pipeline_root=root,
             )
             for action in _PLANNER_ACTIONS:
@@ -539,6 +576,8 @@ class Th08LocalPipelineCertificateTests(unittest.TestCase):
             lasers=(),
             enemy_bodies=(),
             snapshot_lag=0,
+            player_scale_bits=_unit_scale_bits(7),
+            laser_scale_bits=_unit_scale_bits(7),
         )
 
         legacy = _legacy_robust_action_certificates(**common)

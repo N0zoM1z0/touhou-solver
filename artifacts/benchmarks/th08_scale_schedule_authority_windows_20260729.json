@@ -1,0 +1,39 @@
+{
+  "certificate": {
+    "action_count": 17,
+    "cvar_parity_within_1e_4": true,
+    "maximum_cvar_delta": 0.0,
+    "safe_action_mask_parity": true
+  },
+  "checks": {
+    "certificate_cvar_parity": true,
+    "certificate_safe_action_mask_parity": true,
+    "corridor_nonunit_unknown": true,
+    "corridor_root_only_unknown": true,
+    "corridor_unit_identity": true,
+    "corridor_varying_unknown": true,
+    "local_root_only_unknown": true,
+    "native_local_beam_nonunit_parity": true
+  },
+  "corridor": {
+    "complete_nonunit_unknown": true,
+    "complete_unit_accepted": true,
+    "complete_varying_unknown": true,
+    "root_only_unknown": true,
+    "unit_policy_reachable": true
+  },
+  "native_local_beam": {
+    "action": "down_fast",
+    "complete_constant_nonunit_parity": true,
+    "native_available": true
+  },
+  "passed": true,
+  "platform": {
+    "machine": "AMD64",
+    "python": "3.12.10",
+    "release": "11",
+    "system": "Windows"
+  },
+  "schema": "th08-sem-scale-b-authority-report-v1",
+  "semantics_version": "th08-player-laser-phase-scale-v1-0044ba67-00431bc9"
+}

@@ -24,6 +24,7 @@ from th08_trace_replay import (
     hazards_from_trace,
     local_pipeline_root_from_trace,
 )
+from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
 from touhou_control.local_pipeline_oracle import LocalPipelineRoot
 
 
@@ -376,6 +377,10 @@ def _audit_trace(
     for index, reconstructed in enumerate(sampled):
         row = reconstructed.row
         bullets, lasers, enemy_bodies = hazards_from_trace(row)
+        certificate_horizon = (
+            int(row["action_hold_frames"])
+            + max(int(value) for value in row["control_delay_candidates"])
+        )
         common = {
             "player_x": float(row["player"]["x"]),
             "player_y": float(row["player"]["y"]),
@@ -389,6 +394,15 @@ def _audit_trace(
             "lasers": lasers,
             "enemy_bodies": enemy_bodies,
             "snapshot_lag": int(row["snapshot_lag"]),
+            # Historical retained traces predate SEM-SCALE-A capture. This
+            # finite unit schedule is compatibility-only and must not be
+            # interpreted as evidence about frames beyond this certificate.
+            "player_scale_bits": (
+                TH08_UNIT_TIME_SCALE_BITS,
+            ) * certificate_horizon,
+            "laser_scale_bits": (
+                TH08_UNIT_TIME_SCALE_BITS,
+            ) * certificate_horizon,
         }
         order = (
             ("legacy", "packed", "pipeline")

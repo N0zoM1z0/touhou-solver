@@ -190,10 +190,16 @@ def run_baseline_stage(
             ),
             diagonal_speed=dependencies.unfocused_diagonal_speed,
             cardinal_speed=dependencies.unfocused_cardinal_speed,
+            player_scale_bits=(
+                request.physical.time_scale_schedule.require_player_horizon(
+                    actuator.control_delay_frames + config.horizon
+                )[actuator.control_delay_frames:]
+            ),
         ),
         boundary_risk=dependencies.boundary_risk,
         directions_opposed=dependencies.directions_opposed,
         project_item=dependencies.project_item,
+        advance_action=dependencies.advance_planner_action,
         hazard_query=dependencies.hazards_for_positions,
         pruning_key=pruning_key,
         native_reducer=native_backend.reduce_local_beam,

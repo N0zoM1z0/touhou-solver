@@ -35,6 +35,11 @@ from th08_corridor_prewarm import (
     corridor_pipeline_prewarm_retarget,
     start_corridor_pipeline_prewarm,
 )
+from th08_time_scale import (
+    TH08_UNIT_TIME_SCALE_BITS,
+    Th08TimeScaleSchedule,
+    UnsupportedTimeScaleScheduleError,
+)
 from touhou_control import native_backend
 from touhou_control.background_priority import (
     lower_current_thread_priority,
@@ -151,12 +156,35 @@ def solve_corridor(
     pipeline_prewarm_shadow: bool = False,
     background_low_priority: bool = False,
     native_viability_worker_limit: int | None = None,
+    time_scale_schedule: Th08TimeScaleSchedule,
 ) -> CorridorSolution:
     if (
         native_viability_worker_limit is not None
         and not 1 <= native_viability_worker_limit <= 4
     ):
         raise ValueError("native viability worker limit must be 1..4")
+    scale_horizon = (
+        max(0, snapshot_lag)
+        + max(0, forecast_lead_frames)
+        + TH08_CORRIDOR_CONFIG.horizon_frames
+        + 1
+    )
+    time_scale_schedule.require_complete_horizon(scale_horizon)
+    player_scale_bits = time_scale_schedule.require_player_horizon(
+        scale_horizon
+    )
+    laser_scale_bits = time_scale_schedule.require_laser_horizon(
+        scale_horizon
+    )
+    if any(
+        bits != TH08_UNIT_TIME_SCALE_BITS
+        for bits in (*player_scale_bits, *laser_scale_bits)
+    ):
+        raise UnsupportedTimeScaleScheduleError(
+            "corridor recurrence supports only an exact complete unit-scale "
+            "schedule; nonunit or varying coverage is UNKNOWN"
+        )
+    time_scale_identity = time_scale_schedule.serialized_identity
     background_priority_lowered = (
         lower_current_thread_priority()
         if background_low_priority
@@ -177,6 +205,7 @@ def solve_corridor(
         snapshot_lag=snapshot_lag,
         forecast_frames=forecast_lead_frames,
         horizon_frames=TH08_CORRIDOR_CONFIG.horizon_frames,
+        laser_time_scale_bits=laser_scale_bits,
     )
     prewarm_service = None
     prewarm_start_error: str | None = None
@@ -184,6 +213,7 @@ def solve_corridor(
         source_frame,
         snapshot_frame,
         context_key,
+        time_scale_identity,
     )
 
     try:
@@ -253,6 +283,7 @@ def solve_corridor(
         ),
         plan_reachable=plan.reachable,
         hazards=hazards,
+        time_scale_identity=time_scale_identity,
     )
     return CorridorSolution(
         artifact=CorridorPolicyArtifact(
@@ -274,6 +305,7 @@ def solve_corridor(
             native_viability_worker_limit_applied=(
                 native_worker_limit_applied
             ),
+            time_scale_identity=time_scale_identity,
         ),
         publication=CorridorPublication(
             audit_capsule=audit.capsule,
@@ -424,15 +456,12 @@ def corridor_postpublished_survival_query(
 
 def _pipeline_policy_version(
     solution: CorridorSolution,
-) -> tuple[
-    int,
-    int | None,
-    tuple[int, int, int | None] | None,
-]:
+) -> tuple[object, ...]:
     return (
         solution.source_frame,
         solution.snapshot_frame,
         solution.context_key,
+        solution.time_scale_identity,
     )
 
 

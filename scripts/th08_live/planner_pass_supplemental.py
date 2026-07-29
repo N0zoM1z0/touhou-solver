@@ -146,6 +146,7 @@ def _supplemental_identity(
         tuple(guidance.viability_recovery_distances),
         tuple(guidance.viability_safety_actions),
         tuple(guidance.viability_survival_actions),
+        request.physical.time_scale_schedule.serialized_identity,
     )
 
 

@@ -131,6 +131,11 @@ def prepare_local_hazards(
     laser_timeline = build_laser_timeline(
         physical.lasers,
         horizon=laser_timeline_horizon,
+        time_scale_schedule_bits=(
+            physical.time_scale_schedule.require_laser_horizon(
+                laser_timeline_horizon
+            )
+        ),
     )
     timing_accumulator.shared_laser_projection_ms += (
         time.perf_counter_ns() - started_ns
@@ -192,6 +197,16 @@ def run_hard_preflight(
             lasers=physical.lasers,
             enemy_bodies=physical.enemy_bodies,
             snapshot_lag=physical.snapshot_lag,
+            player_scale_bits=(
+                physical.time_scale_schedule.require_player_horizon(
+                    prepared.certificate_horizon
+                )
+            ),
+            laser_scale_bits=(
+                physical.time_scale_schedule.require_laser_horizon(
+                    prepared.certificate_horizon
+                )
+            ),
             laser_frames=prepared.laser_timeline[
                 : prepared.certificate_horizon
             ],
@@ -254,6 +269,16 @@ def run_hard_preflight(
                 lasers=physical.lasers,
                 enemy_bodies=physical.enemy_bodies,
                 snapshot_lag=physical.snapshot_lag,
+                player_scale_bits=(
+                    physical.time_scale_schedule.require_player_horizon(
+                        prepared.certificate_horizon
+                    )
+                ),
+                laser_scale_bits=(
+                    physical.time_scale_schedule.require_laser_horizon(
+                        prepared.certificate_horizon
+                    )
+                ),
                 laser_frames=prepared.laser_timeline[
                     : prepared.certificate_horizon
                 ],

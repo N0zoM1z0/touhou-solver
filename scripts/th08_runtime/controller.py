@@ -27,6 +27,7 @@ from th08_runtime.game_state import (  # noqa: F401
     ADDR_FRSCREEN_IMPL_POINTER,
     ADDR_FRSCREEN_UPDATE_SERIAL,
     ADDR_GAMEPLAY_RNG,
+    ADDR_GAMEPLAY_TIME_SCALE,
     ADDR_NO_LIFE_DECREMENT_PATCH,
     ADDR_PLAYER,
     ADDR_PREVIOUS_INPUT,
@@ -57,6 +58,7 @@ from th08_runtime.game_state import (  # noqa: F401
 )
 from th08_runtime.sensing import (  # noqa: F401
     capture_input_clock_shadow,
+    capture_time_scale_root,
     decode_spell_state,
     frscreen_blocks_enemy_clock,
     observe_state,

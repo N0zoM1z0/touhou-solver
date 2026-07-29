@@ -89,6 +89,18 @@ def validate_local_planner_request(
             )
     if actuator.action_hold_frames <= 0:
         raise ValueError("action hold must be positive")
+    maximum_delay = (
+        max(delay_candidates)
+        if delay_candidates is not None
+        else actuator.control_delay_frames
+    )
+    required_scale_horizon = max(
+        actuator.control_delay_frames + threat_horizon,
+        maximum_delay + actuator.action_hold_frames,
+    )
+    physical.time_scale_schedule.require_complete_horizon(
+        required_scale_horizon
+    )
     if (
         not math.isfinite(guidance.viability_position_error)
         or guidance.viability_position_error < 0.0

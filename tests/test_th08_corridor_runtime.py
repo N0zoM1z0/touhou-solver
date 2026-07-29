@@ -37,9 +37,57 @@ from touhou_control.viability import (
     RobustViabilityPolicy,
     ViabilityConfig,
 )
+from th08_time_scale import (
+    IncompleteTimeScaleScheduleError,
+    TH08_UNIT_TIME_SCALE_BITS,
+    Th08TimeScaleSchedule,
+    UnsupportedTimeScaleScheduleError,
+)
+
+
+_UNIT_SCALE = Th08TimeScaleSchedule.constant(
+    TH08_UNIT_TIME_SCALE_BITS,
+    horizon=128,
+    provenance="corridor_runtime_test_fixture",
+)
 
 
 class Th08CorridorRuntimeTests(unittest.TestCase):
+    def test_scale_coverage_and_nonunit_corridor_are_explicit_unknown(self) -> None:
+        common = {
+            "source_frame": 100,
+            "snapshot_frame": 90,
+            "forecast_lead_frames": 10,
+            "player_x": 192.0,
+            "player_y": 400.0,
+            "bullets": (),
+            "lasers": (),
+            "enemy_bodies": (),
+            "snapshot_lag": 0,
+            "control_delay_candidates": (1, 2),
+            "nominal_control_delay": 1,
+            "active_action": "stay",
+        }
+        with self.assertRaises(IncompleteTimeScaleScheduleError):
+            solve_corridor(
+                **common,
+                time_scale_schedule=(
+                    Th08TimeScaleSchedule.root_observation(
+                        TH08_UNIT_TIME_SCALE_BITS,
+                        source_frame=90,
+                    )
+                ),
+            )
+        with self.assertRaises(UnsupportedTimeScaleScheduleError):
+            solve_corridor(
+                **common,
+                time_scale_schedule=Th08TimeScaleSchedule.constant(
+                    0x3F000000,
+                    horizon=128,
+                    provenance="complete_nonunit_test_fixture",
+                ),
+            )
+
     def test_requested_background_priority_fails_loud(self) -> None:
         class Solution:
             background_priority_lowered = False
@@ -148,6 +196,7 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
             control_delay_candidates=(1, 2),
             nominal_control_delay=1,
             active_action="stay",
+            time_scale_schedule=_UNIT_SCALE,
         )
         self.assertIsNotNone(solution.plan.viability_policy)
         self.assertIsInstance(solution.artifact, CorridorPolicyArtifact)
@@ -160,6 +209,10 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
             CorridorRuntimeHandles,
         )
         self.assertIs(solution.plan, solution.artifact.plan)
+        self.assertEqual(
+            solution.time_scale_identity,
+            _UNIT_SCALE.serialized_identity,
+        )
         self.assertFalse(
             hasattr(solution.artifact, "pipeline_prewarm_service")
         )
@@ -302,6 +355,7 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
                 control_delay_candidates=(1, 2),
                 nominal_control_delay=1,
                 active_action="stay",
+                time_scale_schedule=_UNIT_SCALE,
                 pipeline_prewarm_shadow=True,
             )
 
@@ -335,6 +389,7 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
                 control_delay_candidates=(1, 2),
                 nominal_control_delay=1,
                 active_action="stay",
+                time_scale_schedule=_UNIT_SCALE,
                 audit_capsule_dir=Path("/tmp/audit"),
             )
 
@@ -373,6 +428,7 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
                 control_delay_candidates=(1, 2),
                 nominal_control_delay=1,
                 active_action="stay",
+                time_scale_schedule=_UNIT_SCALE,
                 background_low_priority=True,
                 native_viability_worker_limit=2,
             )
@@ -399,6 +455,7 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
                 control_delay_candidates=(1, 2),
                 nominal_control_delay=1,
                 active_action="stay",
+                time_scale_schedule=_UNIT_SCALE,
             )
 
         priority.assert_not_called()
@@ -420,6 +477,7 @@ class Th08CorridorRuntimeTests(unittest.TestCase):
                 nominal_control_delay=1,
                 active_action="stay",
                 native_viability_worker_limit=0,
+                time_scale_schedule=_UNIT_SCALE,
             )
 
 if __name__ == "__main__":

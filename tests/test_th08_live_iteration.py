@@ -20,6 +20,10 @@ from touhou_control.epochs import (
     FrameWindow,
     HazardEpochAlignment,
 )
+from th08_time_scale import (
+    TH08_UNIT_TIME_SCALE_BITS,
+    Th08TimeScaleSchedule,
+)
 
 
 class LiveIterationContractTests(unittest.TestCase):
@@ -46,6 +50,15 @@ class LiveIterationContractTests(unittest.TestCase):
             context_key=(3, 1, 7),
             source_frame=10,
             snapshot_frame=12,
+            source_time_scale_bits=TH08_UNIT_TIME_SCALE_BITS,
+            time_scale_schedule=Th08TimeScaleSchedule.root_observation(
+                TH08_UNIT_TIME_SCALE_BITS,
+                source_frame=12,
+                provenance="live_iteration_test_fixture",
+            ),
+            player_projection_authority=(
+                "unknown_incomplete_source_schedule"
+            ),
             player_x=100.0,
             player_y=200.0,
             projected_player_x=101.0,

@@ -10,6 +10,10 @@ from typing import Any
 from th08_ecl_runtime import ECL_LOOKAHEAD_SEMANTICS_VERSION
 from th08_live.iteration import FreshIssueResult
 from th08_native_timer import TH08_NATIVE_TIMER_SEMANTICS_VERSION
+from th08_time_scale import (
+    SCALE_COVERAGE_COMPLETE,
+    TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+)
 
 
 @dataclass(frozen=True)
@@ -79,6 +83,7 @@ def build_sensing_trace_fields(
     enemy_prefix = trace_input.enemy_prefix_snapshot
     issue_prefix = trace_input.issue_enemy_prefix_snapshot
     issue = trace_input.issue
+    time_scale_schedule = issue.capture.time_scale_schedule
 
     ecl_tagged_bullets = (
         tuple(
@@ -101,6 +106,32 @@ def build_sensing_trace_fields(
     )
 
     return {
+        "time_scale": {
+            "semantics_version": (
+                TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION
+            ),
+            "source_time_scale_bits": (
+                issue.capture.source_time_scale_bits
+            ),
+            "root_scale_bits": time_scale_schedule.root_scale_bits,
+            "player_scale_bits": list(
+                time_scale_schedule.player_scale_bits
+            ),
+            "laser_scale_bits": list(
+                time_scale_schedule.laser_scale_bits
+            ),
+            "coverage": time_scale_schedule.coverage,
+            "provenance": time_scale_schedule.provenance,
+            "source_frame": time_scale_schedule.source_frame,
+            "complete_horizon": time_scale_schedule.complete_horizon,
+            "player_projection_authority": (
+                issue.capture.player_projection_authority
+            ),
+            "hard_authority": (
+                time_scale_schedule.coverage
+                == SCALE_COVERAGE_COMPLETE
+            ),
+        },
         "resources": trace_input.resources,
         "stage_route_index": trace_input.stage_route_index,
         "spell": trace_input.spell,

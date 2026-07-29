@@ -91,6 +91,7 @@ class PlannerPassDependencies:
     minimum_travel_frames: Callable[..., float]
     node_key: Callable[..., tuple[object, ...]]
     project_item: Callable[..., tuple[float, float, float]]
+    advance_planner_action: Callable[..., tuple[float, float]]
     project_player_for_read_lag: Callable[..., tuple[float, float]]
     robust_action_certificates: Callable[..., Any]
     terminal_threat_scores: Callable[..., Any]

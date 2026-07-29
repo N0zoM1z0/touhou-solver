@@ -28,6 +28,7 @@ from th08_live.planner_pass_types import (
     PlannerModeTransition,
     PlannerPassDependencies,
 )
+from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
 
 
 def _run_local_planner_pass(
@@ -125,6 +126,14 @@ def _run_local_planner_pass(
         preloss_continuation_preference_active
         and preloss_supplemental_beam_width > 0
         and not selected_items
+        and all(
+            bits == TH08_UNIT_TIME_SCALE_BITS
+            for bits in (
+                physical.time_scale_schedule.require_player_horizon(
+                    control_delay_frames + config.horizon
+                )[control_delay_frames:]
+            )
+        )
     )
     effective_threat_horizon = potential_threat_horizon
     control_prefix_started_ns = time.perf_counter_ns()
@@ -137,6 +146,16 @@ def _run_local_planner_pass(
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         frames=control_delay_frames,
+        player_scale_bits=(
+            physical.time_scale_schedule.require_player_horizon(
+                control_delay_frames
+            )
+        ),
+        laser_scale_bits=(
+            physical.time_scale_schedule.require_laser_horizon(
+                control_delay_frames
+            )
+        ),
         laser_frames=laser_timeline[:control_delay_frames],
     )
     _certificate_timing_accumulator.control_prefix_ms += (
@@ -147,6 +166,11 @@ def _run_local_planner_pass(
         player_y,
         delayed_mask,
         control_delay_frames,
+        player_scale_bits=(
+            physical.time_scale_schedule.require_player_horizon(
+                control_delay_frames
+            )
+        ),
     )
     planning_projection_started_ns = time.perf_counter_ns()
     bullet_frames = _build_bullet_frames(

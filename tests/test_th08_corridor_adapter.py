@@ -166,18 +166,17 @@ class Th08CorridorAdapterTests(unittest.TestCase):
             ),
             timer=4,
         )
+        laser = Laser(
+            12.0,
+            34.0,
+            0.0,
+            0.0,
+            80.0,
+            4.0,
+            state,
+        )
         trajectory = lower_lasers(
-            (
-                Laser(
-                    12.0,
-                    34.0,
-                    0.0,
-                    0.0,
-                    80.0,
-                    4.0,
-                    state,
-                ),
-            ),
+            (laser,),
             snapshot_lag=0,
             horizon_frames=2,
         )[0]
@@ -186,6 +185,13 @@ class Th08CorridorAdapterTests(unittest.TestCase):
         self.assertIsNotNone(enabled)
         assert enabled is not None
         self.assertLess(enabled.head - enabled.tail, 10.0)
+        frozen = lower_lasers(
+            (laser,),
+            snapshot_lag=0,
+            horizon_frames=2,
+            time_scale_schedule_bits=(0, 0, 0),
+        )
+        self.assertEqual(frozen, ())
 
     def test_state_backed_laser_does_not_invent_horizon_drift(self) -> None:
         state = replace(

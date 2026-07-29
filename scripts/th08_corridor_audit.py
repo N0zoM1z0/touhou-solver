@@ -70,6 +70,7 @@ def submit_corridor_audit(
     enemy_pointers: tuple[int, ...],
     plan_reachable: bool,
     hazards: LoweredCorridorHazards,
+    time_scale_identity: tuple[object, ...] | None = None,
 ) -> CorridorAuditSubmission:
     """Submit one optional diagnostic write and return separated state."""
 
@@ -102,6 +103,7 @@ def submit_corridor_audit(
         "laser_slots": list(laser_slots),
         "enemy_pointers": list(enemy_pointers),
         "plan_reachable": plan_reachable,
+        "time_scale_identity": time_scale_identity,
     }
     writer_arguments = {
         "capsule_path": capsule_path,

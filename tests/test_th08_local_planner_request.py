@@ -14,9 +14,45 @@ from th08_local_planner import (
     PhysicalHazardSnapshot,
     PlannerConfig,
 )
+from th08_time_scale import (
+    IncompleteTimeScaleScheduleError,
+    TH08_UNIT_TIME_SCALE_BITS,
+    Th08TimeScaleSchedule,
+)
+
+
+_UNIT_SCALE = Th08TimeScaleSchedule.constant(
+    TH08_UNIT_TIME_SCALE_BITS,
+    horizon=64,
+    provenance="historical_unit_test_fixture",
+)
 
 
 class LocalPlannerRequestTests(unittest.TestCase):
+    def test_root_only_scale_cannot_acquire_hard_planner_authority(self) -> None:
+        request = LocalPlannerRequest(
+            physical=PhysicalHazardSnapshot(
+                player_x=192.0,
+                player_y=400.0,
+                bullets=(),
+                lasers=(),
+                time_scale_schedule=(
+                    Th08TimeScaleSchedule.root_observation(
+                        TH08_UNIT_TIME_SCALE_BITS,
+                        source_frame=10,
+                    )
+                ),
+            ),
+            actuator=ActuatorPipeline(
+                previous_direction=0,
+                can_bomb=False,
+            ),
+            config=PlannerConfig(horizon=3, beam_width=8),
+        )
+
+        with self.assertRaises(IncompleteTimeScaleScheduleError):
+            live.choose_action_request(request)
+
     def test_request_groups_are_immutable(self) -> None:
         request = LocalPlannerRequest(
             physical=PhysicalHazardSnapshot(
@@ -24,6 +60,7 @@ class LocalPlannerRequestTests(unittest.TestCase):
                 player_y=400.0,
                 bullets=(),
                 lasers=(),
+                time_scale_schedule=_UNIT_SCALE,
             ),
             actuator=ActuatorPipeline(
                 previous_direction=0,
@@ -40,6 +77,7 @@ class LocalPlannerRequestTests(unittest.TestCase):
             player_y=399.0,
             bullets=("bullet",),
             lasers=("laser",),
+            time_scale_schedule=_UNIT_SCALE,
             enemy_bodies=("enemy",),
             items=("item",),
             snapshot_lag=3,
@@ -160,6 +198,7 @@ class LocalPlannerRequestTests(unittest.TestCase):
                 beam_dedup_mode="first_action",
                 relax_stale_viability_contradiction=True,
                 enforce_fresh_viability_intersection=False,
+                time_scale_schedule=_UNIT_SCALE,
             )
 
         self.assertIs(result, sentinel)
@@ -172,6 +211,7 @@ class LocalPlannerRequestTests(unittest.TestCase):
                 player_y=400.0,
                 bullets=(),
                 lasers=(),
+                time_scale_schedule=_UNIT_SCALE,
             ),
             actuator=ActuatorPipeline(
                 previous_direction=0,
@@ -190,6 +230,7 @@ class LocalPlannerRequestTests(unittest.TestCase):
             can_bomb=False,
             horizon=3,
             beam_width=8,
+            time_scale_schedule=_UNIT_SCALE,
         )
 
         self.assertEqual(
@@ -211,6 +252,7 @@ class LocalPlannerRequestTests(unittest.TestCase):
                 player_y=400.0,
                 bullets=(),
                 lasers=(),
+                time_scale_schedule=_UNIT_SCALE,
             ),
             actuator=ActuatorPipeline(
                 previous_direction=0,

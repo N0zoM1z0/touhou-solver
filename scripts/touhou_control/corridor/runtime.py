@@ -27,6 +27,7 @@ class CorridorPolicyArtifact:
     background_priority_lowered: bool = False
     native_viability_worker_limit: int | None = None
     native_viability_worker_limit_applied: bool = False
+    time_scale_identity: tuple[object, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -89,6 +90,7 @@ class CorridorSolution:
         background_priority_lowered: bool = False,
         native_viability_worker_limit: int | None = None,
         native_viability_worker_limit_applied: bool = False,
+        time_scale_identity: tuple[object, ...] | None = None,
         *,
         artifact: CorridorPolicyArtifact | None = None,
         publication: CorridorPublication | None = None,
@@ -118,6 +120,7 @@ class CorridorSolution:
                 native_viability_worker_limit_applied=(
                     native_viability_worker_limit_applied
                 ),
+                time_scale_identity=time_scale_identity,
             )
             publication = CorridorPublication(
                 audit_capsule=audit_capsule,
@@ -186,6 +189,10 @@ class CorridorSolution:
     @property
     def snapshot_frame(self) -> int | None:
         return self.artifact.snapshot_frame
+
+    @property
+    def time_scale_identity(self) -> tuple[object, ...] | None:
+        return self.artifact.time_scale_identity
 
     @property
     def forecast_lead_frames(self) -> int:

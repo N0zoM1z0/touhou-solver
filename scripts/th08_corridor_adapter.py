@@ -27,6 +27,7 @@ from th08_laser_model import (
     laser_collision_geometry_frames,
 )
 from th08_movement_model import ROUTE2_MOVEMENT_PROFILE
+from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
 from touhou_control.corridor import (
     PreparedCorridorProblem,
     prepare_corridor_problem,
@@ -259,11 +260,21 @@ def lower_lasers(
     snapshot_lag: int,
     forecast_frames: int = 0,
     horizon_frames: int = TH08_CORRIDOR_CONFIG.horizon_frames,
+    time_scale_schedule_bits: tuple[int, ...] | None = None,
 ) -> tuple[SegmentTrajectoryHazard, ...]:
     lag = max(0, snapshot_lag)
     forecast = max(0, forecast_frames)
     if horizon_frames < 0:
         raise ValueError("laser trajectory horizon cannot be negative")
+    total_frames = lag + forecast + horizon_frames + 1
+    if time_scale_schedule_bits is None:
+        time_scale_schedule_bits = (
+            TH08_UNIT_TIME_SCALE_BITS,
+        ) * total_frames
+    if len(time_scale_schedule_bits) < total_frames:
+        raise ValueError(
+            "laser time-scale schedule does not cover corridor lowering"
+        )
     trajectories: list[SegmentTrajectoryHazard] = []
     for laser in lasers:
         state = laser.state
@@ -288,7 +299,10 @@ def lower_lasers(
             continue
         geometry_frames = laser_collision_geometry_frames(
             state,
-            frame_count=lag + forecast + horizon_frames + 1,
+            frame_count=total_frames,
+            time_scale_schedule_bits=(
+                time_scale_schedule_bits[:total_frames]
+            ),
         )[lag + forecast:]
         per_frame = [
             tuple(
@@ -332,6 +346,7 @@ def lower_lasers_packed(
     snapshot_lag: int,
     forecast_frames: int = 0,
     horizon_frames: int = TH08_CORRIDOR_CONFIG.horizon_frames,
+    time_scale_schedule_bits: tuple[int, ...] | None = None,
 ) -> PackedSegmentFrames:
     """Lower laser geometry directly into the native frame-major contract."""
 
@@ -339,6 +354,15 @@ def lower_lasers_packed(
         raise ValueError("laser trajectory horizon cannot be negative")
     lag = max(0, snapshot_lag)
     forecast = max(0, forecast_frames)
+    total_frames = lag + forecast + horizon_frames + 1
+    if time_scale_schedule_bits is None:
+        time_scale_schedule_bits = (
+            TH08_UNIT_TIME_SCALE_BITS,
+        ) * total_frames
+    if len(time_scale_schedule_bits) < total_frames:
+        raise ValueError(
+            "laser time-scale schedule does not cover packed corridor lowering"
+        )
     frames: list[list[tuple[float, ...]]] = [
         [] for _ in range(horizon_frames + 1)
     ]
@@ -364,7 +388,10 @@ def lower_lasers_packed(
             continue
         geometry_frames = laser_collision_geometry_frames(
             state,
-            frame_count=lag + forecast + horizon_frames + 1,
+            frame_count=total_frames,
+            time_scale_schedule_bits=(
+                time_scale_schedule_bits[:total_frames]
+            ),
         )[lag + forecast:]
         for frame_rows, geometry in zip(frames, geometry_frames):
             frame_rows.extend(
@@ -418,6 +445,7 @@ def lower_th08_corridor_hazards(
     snapshot_lag: int = 0,
     forecast_frames: int = 0,
     horizon_frames: int = TH08_CORRIDOR_CONFIG.horizon_frames,
+    laser_time_scale_bits: tuple[int, ...] | None = None,
 ) -> LoweredCorridorHazards:
     """Lower one TH08 sensor epoch without constructing a planner policy."""
 
@@ -446,6 +474,7 @@ def lower_th08_corridor_hazards(
             snapshot_lag=snapshot_lag,
             forecast_frames=forecast_frames,
             horizon_frames=horizon_frames,
+            time_scale_schedule_bits=laser_time_scale_bits,
         ),
     )
 

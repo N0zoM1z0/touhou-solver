@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import struct
 import time
+from dataclasses import dataclass
 from typing import Protocol
 
 from th08_runtime.game_state import (
@@ -14,6 +15,7 @@ from th08_runtime.game_state import (
     ADDR_FRSCREEN_IMPL_POINTER,
     ADDR_FRSCREEN_UPDATE_SERIAL,
     ADDR_GAMEPLAY_RNG,
+    ADDR_GAMEPLAY_TIME_SCALE,
     ADDR_PLAYER,
     ADDR_PREVIOUS_INPUT,
     ADDR_RAW_INPUT,
@@ -52,6 +54,29 @@ class StateReader(Protocol):
     def i32(self, address: int) -> int: ...
 
     def f32(self, address: int) -> float: ...
+
+
+@dataclass(frozen=True)
+class TimeScaleRootCapture:
+    """One scale dword bracketed by the native enemy-manager frame."""
+
+    frame_before: int
+    scale_bits: int
+    frame_after: int
+
+    @property
+    def stable(self) -> bool:
+        return self.frame_before == self.frame_after
+
+
+def capture_time_scale_root(reader: StateReader) -> TimeScaleRootCapture:
+    """Bind a raw global-scale observation to one stable manager frame."""
+
+    return TimeScaleRootCapture(
+        frame_before=reader.u32(ADDR_ENEMY_MANAGER_FRAME),
+        scale_bits=reader.u32(ADDR_GAMEPLAY_TIME_SCALE),
+        frame_after=reader.u32(ADDR_ENEMY_MANAGER_FRAME),
+    )
 
 
 def decode_spell_state(blob: bytes) -> dict[str, object]:
@@ -245,6 +270,7 @@ def observe_state(reader: StateReader) -> dict[str, object]:
     return {
         "wall_time_ns": time.time_ns(),
         "enemy_manager_frame": reader.u32(ADDR_ENEMY_MANAGER_FRAME),
+        "time_scale_bits": reader.u32(ADDR_GAMEPLAY_TIME_SCALE),
         "engine_flags": engine_flags,
         "gameplay_active": bool(engine_flags & 0x04),
         "route_id": reader.u8(ADDR_ROUTE_ID),

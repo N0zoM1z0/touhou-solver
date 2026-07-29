@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from movement_model import MovementBounds
+from th08_movement_model import step_route2_movement
 from th08_local_planner import PlannerAction
 
 SHOT = 0x01
@@ -23,6 +25,12 @@ FOCUSED_CARDINAL_SPEED = 2.299999952316284
 FOCUSED_DIAGONAL_SPEED = 1.6263456344604492
 UNFOCUSED_CARDINAL_SPEED = 4.0
 UNFOCUSED_DIAGONAL_SPEED = 2.8284270763397217
+_LIVE_MOVEMENT_BOUNDS = MovementBounds(
+    PLAYFIELD_LEFT,
+    PLAYFIELD_TOP,
+    PLAYFIELD_RIGHT,
+    PLAYFIELD_BOTTOM,
+)
 
 
 def _action(
@@ -126,44 +134,52 @@ def project_player_for_read_lag(
     y: float,
     input_mask: int,
     frames: int,
+    *,
+    player_scale_bits: tuple[int, ...],
 ) -> tuple[float, float]:
     """Project held physical input through an already committed frame prefix."""
 
-    direction = input_mask & (UP | DOWN | LEFT | RIGHT)
-    if not direction or frames <= 0:
-        return x, y
-    horizontal = (-1 if direction & LEFT else 0) + (
-        1 if direction & RIGHT else 0
-    )
-    vertical = (-1 if direction & UP else 0) + (
-        1 if direction & DOWN else 0
-    )
-    if horizontal == 0 and vertical == 0:
-        return x, y
-    focused = bool(input_mask & FOCUS)
-    diagonal = horizontal != 0 and vertical != 0
-    if focused:
-        speed = (
-            FOCUSED_DIAGONAL_SPEED
-            if diagonal
-            else FOCUSED_CARDINAL_SPEED
+    if frames < 0:
+        raise ValueError("movement projection frames cannot be negative")
+    if len(player_scale_bits) < frames:
+        raise ValueError(
+            "player time-scale schedule does not cover movement projection"
         )
-    else:
-        speed = (
-            UNFOCUSED_DIAGONAL_SPEED
-            if diagonal
-            else UNFOCUSED_CARDINAL_SPEED
+    if frames == 0:
+        return x, y
+    current_x = x
+    current_y = y
+    for scale_bits in player_scale_bits[:frames]:
+        movement = step_route2_movement(
+            x=current_x,
+            y=current_y,
+            input_mask=input_mask,
+            time_scale_bits=scale_bits,
+            bounds=_LIVE_MOVEMENT_BOUNDS,
         )
-    return (
-        min(
-            PLAYFIELD_RIGHT,
-            max(PLAYFIELD_LEFT, x + horizontal * speed * frames),
-        ),
-        min(
-            PLAYFIELD_BOTTOM,
-            max(PLAYFIELD_TOP, y + vertical * speed * frames),
-        ),
+        current_x = movement.x
+        current_y = movement.y
+    return current_x, current_y
+
+
+def advance_planner_action(
+    x: float,
+    y: float,
+    action: PlannerAction,
+    *,
+    time_scale_bits: int,
+) -> tuple[float, float]:
+    """Apply one exact native-order movement step for a planner action."""
+
+    input_mask = action.direction | (FOCUS if action.focused else 0)
+    movement = step_route2_movement(
+        x=x,
+        y=y,
+        input_mask=input_mask,
+        time_scale_bits=time_scale_bits,
+        bounds=_LIVE_MOVEMENT_BOUNDS,
     )
+    return movement.x, movement.y
 
 
 def minimum_travel_frames(
@@ -278,6 +294,7 @@ __all__ = [
     "UNFOCUSED_DIAGONAL_SPEED",
     "UP",
     "action_name_from_mask",
+    "advance_planner_action",
     "boundary_control_reserve_deficit",
     "boundary_risk",
     "boundary_risk_for_positions",

@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Any, Callable
 
+from th08_time_scale import Th08TimeScaleSchedule
+
 from .models import (
     IssueRecertification,
     IssuedDecision,
@@ -24,6 +26,7 @@ class IssueRequest:
     lasers: tuple[Any, ...]
     enemy_bodies: tuple[Any, ...]
     snapshot_lag: int
+    time_scale_schedule: Th08TimeScaleSchedule
     pipeline_root: Any | None = None
     allowed_first_actions: tuple[str, ...] | None = None
     viability_repair_volumes: tuple[tuple[str, int], ...] = ()
@@ -64,6 +67,9 @@ class IssueTransaction:
         request = self._request
         adapter = self._adapter
         timing = adapter.timing_factory()
+        certificate_horizon = (
+            request.action_hold_frames + max(request.delay_frames)
+        )
         certificates = adapter.certificate_provider(
             player_x=request.player_x,
             player_y=request.player_y,
@@ -75,6 +81,16 @@ class IssueTransaction:
             lasers=request.lasers,
             enemy_bodies=request.enemy_bodies,
             snapshot_lag=request.snapshot_lag,
+            player_scale_bits=(
+                request.time_scale_schedule.require_player_horizon(
+                    certificate_horizon
+                )
+            ),
+            laser_scale_bits=(
+                request.time_scale_schedule.require_laser_horizon(
+                    certificate_horizon
+                )
+            ),
             pipeline_root=request.pipeline_root,
             timing_accumulator=timing,
         )

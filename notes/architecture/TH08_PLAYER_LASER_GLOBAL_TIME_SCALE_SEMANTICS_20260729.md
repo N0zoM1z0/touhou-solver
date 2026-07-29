@@ -1,6 +1,6 @@
 # TH08 Player/Laser Global Time-Scale Semantics
 
-Status: **SEM-SCALE-A offline gate passed; live propagation pending**
+Status: **SEM-SCALE-B offline authority gate passed; live schedule synthesis pending**
 
 Date: 2026-07-29
 
@@ -332,11 +332,77 @@ Gate: optimized/scalar viable-state and safe-action-mask parity under complete
 constant schedules, plus explicit `UNKNOWN` on incomplete or varying corridor
 schedules.
 
+Observed SEM-SCALE-B result:
+
+- baseline: branch `main`, handoff checkpoint `c19ffb0`, executable/offline
+  primitive checkpoint `225ccc8`; the shipped executable remains SHA-256
+  `330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924`;
+- live capture now reads the raw scale dword between two
+  `enemy_manager_frame` reads. An unstable bracket is discarded. A stable
+  root is retained as exactly one future player phase and zero future laser
+  phases; it is never expanded into a constant schedule;
+- `CapturedIteration`, `PhysicalHazardSnapshot`, local issue requests,
+  supplemental versions, corridor artifacts/pipeline versions, sensing
+  traces, and corridor audit metadata now carry the immutable schedule or its
+  serialized identity;
+- read-lag and committed-prefix projection, the Python baseline beam, robust
+  local certificates, and issue-time certificates consume explicit
+  player-phase bits. Player updates are repeated native-order float32 steps,
+  not `speed * frames`. Native beam reduction receives those already-scaled
+  positions;
+- laser timelines and corridor laser lowering consume explicit laser-phase
+  bits. The independent scalar local-pipeline oracle accepts a generic
+  per-step movement schedule and remains independent of the vectorized
+  product;
+- local hard validation requires complete player/laser coverage through the
+  longest control-delay, planning, threat, or certificate consumer. A
+  root-only schedule raises `IncompleteTimeScaleScheduleError`;
+- the current corridor recurrence is exact only for a complete unit schedule.
+  Root-only/short schedules are `IncompleteTimeScaleScheduleError`, and
+  complete non-unit or varying schedules are
+  `UnsupportedTimeScaleScheduleError`/`UNKNOWN`. No policy or cache identity
+  is published for either case;
+- historical flat planner and issue wrappers construct only the finite unit
+  prefix required by that call and label it
+  `historical_*_unit_assumption`. Historical replay/audit code uses the same
+  bounded compatibility label; it does not establish future completeness;
+- because no live future phase schedule producer exists yet, the live daemon
+  reaches `time_scale_authority_unknown` on root-only coverage, records the
+  exact bits/coverage/projection status, terminates, and relies on the
+  existing finalizer to release injected keys. It does not submit a corridor
+  solve or issue a local hard action;
+- the deterministic authority report passes all eight checks on Linux and
+  Windows: root-only local/corridor rejection, non-unit/varying corridor
+  rejection, complete-unit corridor identity, optimized/scalar certificate
+  safe-action/CVaR parity, and Python/native local-beam parity under a
+  complete constant non-unit schedule;
+- retained Linux report
+  `artifacts/benchmarks/th08_scale_schedule_authority_linux_20260729.json`
+  has SHA-256
+  `bc2ff09955e12bd9ffc629b20dfd93dc7ecbc46f35a4d29407859c042e5ea966`;
+- retained Windows report
+  `artifacts/benchmarks/th08_scale_schedule_authority_windows_20260729.json`
+  has SHA-256
+  `8a202bdd7c51f05bc7d59368c054333d19f2944ae2c09fda8d14a972d472f891`;
+  and
+- complete Linux and Windows discovery pass 1,087 tests in 11.752 and
+  25.138 seconds. Windows retains the three existing platform skips.
+
+This is an **observed offline authority-boundary result**. It is not observed
+live schedule completeness, physical survival, or a physical slowdown
+transition. No game was launched, no physical artifact was created, and no
+new IDA mutation was needed for B. SEM-SCALE-C must first supply compact
+Final-B root evidence and a causal complete-schedule producer/trace-only gate;
+physical action authority remains blocked.
+
 ### SEM-SCALE-C — retained and physical falsifiers
 
 - retain compact Final-B `0.25` root observations with raw provenance;
 - replay them through the corrected player primitive and quantify every
   changed projected position/action certificate;
+- implement and independently validate a causal phase-schedule producer that
+  covers read-lag, issue delay, local planning, certificate, and laser
+  horizons without repeating a root past its proof;
 - retain a static Extra scale workload separately from physical evidence;
 - take a trace-only scale metadata gate before live action authority; and
 - only after offline and trace gates, preregister the smallest focused

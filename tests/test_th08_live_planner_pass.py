@@ -7,7 +7,7 @@ import th08_live_dodge_agent as live
 
 
 class PlannerPassDecisionParityTests(unittest.TestCase):
-    """Freeze complete planner outputs before the staged module split."""
+    """Freeze complete outputs with native-order float32 movement stores."""
 
     def test_five_complete_decisions_match_characterized_outputs(self) -> None:
         cases = {
@@ -46,8 +46,8 @@ class PlannerPassDecisionParityTests(unittest.TestCase):
                 },
                 "action": "down_fast",
                 "digest": (
-                    "d824645217bee842cc382b38ff9d9f193457dc091bbffe384"
-                    "664a7668800db85"
+                    "fc2ce312de18f2de7f41cad2b13483ba24406048739443a"
+                    "03de4327dfadcc7cd"
                 ),
             },
             "multi_delay": {
@@ -95,8 +95,8 @@ class PlannerPassDecisionParityTests(unittest.TestCase):
                 },
                 "action": "left",
                 "digest": (
-                    "35ed83852c3244a56033ca9e05894ebf9b57be78c54f7c08"
-                    "71c58f119f462160"
+                    "cc4deb10ba64725313af4ff3ab6077913793a2f8338b62559"
+                    "1735ca42e84fd06"
                 ),
             },
             "supplemental_lane": {
@@ -124,8 +124,8 @@ class PlannerPassDecisionParityTests(unittest.TestCase):
                 },
                 "action": "right",
                 "digest": (
-                    "f815c2062de9a53ffd864f0d4fd1f8e8af815130e0c8249c"
-                    "35c663062a912d41"
+                    "7a9f2438a3015b13bb549a1eedaa78b22a56dca6feea4f50"
+                    "9f9bc1cbd49f3c73"
                 ),
             },
         }

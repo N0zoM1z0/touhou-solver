@@ -27,6 +27,7 @@ from th08_semantic_cases import (
     generate_cases,
     shrink_case,
 )
+from th08_time_scale import TH08_UNIT_TIME_SCALE_BITS
 from touhou_control import native_backend
 from touhou_control.supplemental_local_beam import (
     SupplementalAction,
@@ -116,6 +117,9 @@ def _supplemental_inputs(
     delayed_mask = case.previous_direction | (
         live.FOCUS if case.previous_focused else 0
     )
+    unit_scale_bits = (
+        TH08_UNIT_TIME_SCALE_BITS,
+    ) * case.control_delay_frames
     prefix = live._control_prefix_hazards(
         player_x=case.player_x,
         player_y=case.player_y,
@@ -125,12 +129,15 @@ def _supplemental_inputs(
         enemy_bodies=case.enemy_bodies,
         snapshot_lag=0,
         frames=case.control_delay_frames,
+        player_scale_bits=unit_scale_bits,
+        laser_scale_bits=unit_scale_bits,
     )
     initial_x, initial_y = live._project_player_for_read_lag(
         case.player_x,
         case.player_y,
         delayed_mask,
         case.control_delay_frames,
+        player_scale_bits=unit_scale_bits,
     )
     initial = SupplementalNode(
         initial_x,

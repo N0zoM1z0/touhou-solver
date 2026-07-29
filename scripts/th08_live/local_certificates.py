@@ -13,6 +13,7 @@ from th08_laser_runtime import (
     PackedLaserFrame as _PackedLaserFrame,
     build_packed_laser_collision_frames as _build_packed_laser_collision_frames,
 )
+from th08_ecl_vm_state import float32_from_bits
 from th08_live.local_hazards import _build_bullet_frames
 from th08_live.models import Bullet, EnemyBody
 from th08_live.movement import (
@@ -45,12 +46,18 @@ def control_prefix_hazards(
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
     frames: int,
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
     laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
 ) -> tuple[float, int, float]:
     """Evaluate motion already committed before a new decision can take effect."""
 
     if frames <= 0:
         return 0.0, 0, math.inf
+    if len(player_scale_bits) < frames or len(laser_scale_bits) < frames:
+        raise ValueError(
+            "time-scale schedules do not cover the control prefix"
+        )
     bullet_frames = _build_bullet_frames(
         bullets,
         horizon=frames,
@@ -60,18 +67,22 @@ def control_prefix_hazards(
         laser_frames = _build_packed_laser_collision_frames(
             lasers,
             horizon=frames,
+            time_scale_schedule_bits=laser_scale_bits[:frames],
         )
     if len(laser_frames) < frames:
         raise ValueError("laser timeline does not cover the control prefix")
     risk = 0.0
     collisions = 0
     minimum = math.inf
+    x = player_x
+    y = player_y
     for step in range(1, frames + 1):
         x, y = _project_player_for_read_lag(
-            player_x,
-            player_y,
+            x,
+            y,
             input_mask,
-            step,
+            1,
+            player_scale_bits=(player_scale_bits[step - 1],),
         )
         hazard_risk, hazard_collisions, hazard_clearance = hazards_for_positions(
             np.asarray([x], dtype=np.float32),
@@ -100,6 +111,8 @@ def legacy_robust_action_certificates(
     lasers: tuple[Laser, ...],
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
     laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
 ) -> dict[str, RobustActionCertificate]:
     """Legacy last-desired-as-active certificate retained for differential."""
@@ -107,6 +120,13 @@ def legacy_robust_action_certificates(
     if not actions or not delay_frames:
         return {}
     maximum_step = action_hold_frames + max(delay_frames)
+    if (
+        len(player_scale_bits) < maximum_step
+        or len(laser_scale_bits) < maximum_step
+    ):
+        raise ValueError(
+            "time-scale schedules do not cover robust certificates"
+        )
     bullet_frames = _build_bullet_frames(
         bullets,
         horizon=maximum_step,
@@ -116,6 +136,7 @@ def legacy_robust_action_certificates(
         laser_frames = _build_packed_laser_collision_frames(
             lasers,
             horizon=maximum_step,
+            time_scale_schedule_bits=laser_scale_bits[:maximum_step],
         )
     if len(laser_frames) < maximum_step:
         raise ValueError("laser timeline does not cover robust certificates")
@@ -131,10 +152,11 @@ def legacy_robust_action_certificates(
         prefix_y = player_y
         for step in range(1, delay + 1):
             prefix_x, prefix_y = _project_player_for_read_lag(
-                player_x,
-                player_y,
+                prefix_x,
+                prefix_y,
                 previous_mask,
-                step,
+                1,
+                player_scale_bits=(player_scale_bits[step - 1],),
             )
             hazard_risk, hazard_collisions, hazard_clearance = (
                 hazards_for_positions(
@@ -149,28 +171,32 @@ def legacy_robust_action_certificates(
             risks += _boundary_risk(prefix_x, prefix_y) + float(hazard_risk[0])
             collisions += int(hazard_collisions[0])
             minimum = np.minimum(minimum, float(hazard_clearance[0]))
+        positions_x = np.full(action_count, prefix_x, dtype=np.float32)
+        positions_y = np.full(action_count, prefix_y, dtype=np.float32)
+        action_dx = np.fromiter(
+            (action.dx for action in actions),
+            dtype=np.float32,
+            count=action_count,
+        )
+        action_dy = np.fromiter(
+            (action.dy for action in actions),
+            dtype=np.float32,
+            count=action_count,
+        )
         for step in range(delay + 1, maximum_step + 1):
-            action_step = step - delay
-            positions_x = np.fromiter(
-                (
-                    min(
-                        PLAYFIELD_RIGHT,
-                        max(PLAYFIELD_LEFT, prefix_x + action.dx * action_step),
-                    )
-                    for action in actions
-                ),
-                dtype=np.float32,
+            scale = np.float32(
+                float32_from_bits(player_scale_bits[step - 1])
             )
-            positions_y = np.fromiter(
-                (
-                    min(
-                        PLAYFIELD_BOTTOM,
-                        max(PLAYFIELD_TOP, prefix_y + action.dy * action_step),
-                    )
-                    for action in actions
-                ),
-                dtype=np.float32,
-            )
+            positions_x = np.clip(
+                positions_x + action_dx * scale,
+                PLAYFIELD_LEFT,
+                PLAYFIELD_RIGHT,
+            ).astype(np.float32, copy=False)
+            positions_y = np.clip(
+                positions_y + action_dy * scale,
+                PLAYFIELD_TOP,
+                PLAYFIELD_BOTTOM,
+            ).astype(np.float32, copy=False)
             hazard_risk, hazard_collisions, hazard_clearance = (
                 hazards_for_positions(
                     positions_x,
@@ -245,6 +271,8 @@ def robust_action_certificates(
     lasers: tuple[Laser, ...],
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
     laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
     pipeline_root: LocalPipelineRoot | None = None,
     timing_accumulator: _LocalCertificateTimingAccumulator | None = None,
@@ -281,6 +309,13 @@ def robust_action_certificates(
     validation_finished_ns = time.perf_counter_ns()
     projection_started_ns = validation_finished_ns
     maximum_step = action_hold_frames + max(delay_frames)
+    if (
+        len(player_scale_bits) < maximum_step
+        or len(laser_scale_bits) < maximum_step
+    ):
+        raise ValueError(
+            "time-scale schedules do not cover robust certificates"
+        )
     bullet_frames = _build_bullet_frames(
         bullets,
         horizon=maximum_step,
@@ -290,6 +325,7 @@ def robust_action_certificates(
         laser_frames = _build_packed_laser_collision_frames(
             lasers,
             horizon=maximum_step,
+            time_scale_schedule_bits=laser_scale_bits[:maximum_step],
         )
     if len(laser_frames) < maximum_step:
         raise ValueError("laser timeline does not cover robust certificates")
@@ -397,13 +433,16 @@ def robust_action_certificates(
             selected_dy,
             np.where(pending_active, pending.dy, active.dy),
         )
+        scale = np.float32(
+            float32_from_bits(player_scale_bits[step - 1])
+        )
         positions_x = np.clip(
-            positions_x + motion_x,
+            positions_x + motion_x * scale,
             PLAYFIELD_LEFT,
             PLAYFIELD_RIGHT,
         ).astype(np.float32, copy=False)
         positions_y = np.clip(
-            positions_y + motion_y,
+            positions_y + motion_y * scale,
             PLAYFIELD_TOP,
             PLAYFIELD_BOTTOM,
         ).astype(np.float32, copy=False)

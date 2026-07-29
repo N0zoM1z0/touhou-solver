@@ -287,6 +287,7 @@ from th08_live.movement import (
     UNFOCUSED_DIAGONAL_SPEED,
     UP,
     action_name_from_mask as _action_name_from_mask,
+    advance_planner_action as _advance_planner_action,
     boundary_control_reserve_deficit as _boundary_control_reserve_deficit,
     boundary_risk as _boundary_risk,
     boundary_risk_for_positions as _boundary_risk_for_positions,  # noqa: F401
@@ -298,6 +299,12 @@ from th08_live.movement import (
 from th08_live.sensing_trace import (
     SensingTraceInput,
     build_sensing_trace_fields,
+)
+from th08_time_scale import (
+    SCALE_COVERAGE_COMPLETE,
+    TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+    TH08_UNIT_TIME_SCALE_BITS,
+    Th08TimeScaleSchedule,
 )
 from th08_live.enemy_sensor import (  # noqa: F401
     ENEMY_ACTIVE_FLAG,
@@ -387,6 +394,7 @@ from th08_runtime_agent import (
     TARGET_EXE,
     _require_foreground,
     capture_input_clock_shadow,
+    capture_time_scale_root,
     observe_state,
     send_scan_key,
     verify_target,
@@ -619,9 +627,16 @@ def commit_local_proposal_for_fresh_hazards(
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_safety_actions: tuple[str, ...] = (),
     viability_survival_actions: tuple[str, ...] = (),
+    time_scale_schedule: Th08TimeScaleSchedule | None = None,
 ) -> IssuedDecision:
     """Commit a proposal against fresh hazards and retained global authority."""
 
+    if time_scale_schedule is None:
+        time_scale_schedule = Th08TimeScaleSchedule.constant(
+            TH08_UNIT_TIME_SCALE_BITS,
+            horizon=action_hold_frames + max(delay_frames),
+            provenance="historical_issue_wrapper_unit_assumption",
+        )
     return IssueTransaction(
         proposal,
         IssueRequest(
@@ -634,6 +649,7 @@ def commit_local_proposal_for_fresh_hazards(
             lasers=lasers,
             enemy_bodies=enemy_bodies,
             snapshot_lag=snapshot_lag,
+            time_scale_schedule=time_scale_schedule,
             pipeline_root=pipeline_root,
             allowed_first_actions=allowed_first_actions,
             viability_repair_volumes=viability_repair_volumes,
@@ -672,6 +688,7 @@ def issue_transaction_for_fresh_hazards(
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_safety_actions: tuple[str, ...] = (),
     viability_survival_actions: tuple[str, ...] = (),
+    time_scale_schedule: Th08TimeScaleSchedule | None = None,
 ) -> IssuedDecision:
     """Compatibility adapter from a flat decision to a proposal."""
 
@@ -692,6 +709,7 @@ def issue_transaction_for_fresh_hazards(
         viability_recovery_distances=viability_recovery_distances,
         viability_safety_actions=viability_safety_actions,
         viability_survival_actions=viability_survival_actions,
+        time_scale_schedule=time_scale_schedule,
     )
 
 
@@ -713,6 +731,7 @@ def recertify_action_for_fresh_hazards(
     viability_recovery_distances: tuple[tuple[str, float], ...] = (),
     viability_safety_actions: tuple[str, ...] = (),
     viability_survival_actions: tuple[str, ...] = (),
+    time_scale_schedule: Th08TimeScaleSchedule | None = None,
 ) -> Decision:
     """Compatibility wrapper for the explicit issue transaction."""
 
@@ -733,6 +752,7 @@ def recertify_action_for_fresh_hazards(
         viability_recovery_distances=viability_recovery_distances,
         viability_safety_actions=viability_safety_actions,
         viability_survival_actions=viability_survival_actions,
+        time_scale_schedule=time_scale_schedule,
     ).decision
 
 
@@ -829,6 +849,8 @@ def _control_prefix_hazards(
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
     frames: int,
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
     laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
 ) -> tuple[float, int, float]:
     return _control_prefix_hazards_impl(
@@ -841,6 +863,8 @@ def _control_prefix_hazards(
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
         frames=frames,
+        player_scale_bits=player_scale_bits,
+        laser_scale_bits=laser_scale_bits,
         laser_frames=laser_frames,
     )
 
@@ -857,6 +881,8 @@ def _legacy_robust_action_certificates(
     lasers: tuple[Laser, ...],
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
     laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
 ) -> dict[str, RobustActionCertificate]:
     return _legacy_robust_action_certificates_impl(
@@ -871,6 +897,8 @@ def _legacy_robust_action_certificates(
         lasers=lasers,
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
+        player_scale_bits=player_scale_bits,
+        laser_scale_bits=laser_scale_bits,
         laser_frames=laser_frames,
     )
 
@@ -887,6 +915,8 @@ def _robust_action_certificates(
     lasers: tuple[Laser, ...],
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
     laser_frames: tuple[_PackedLaserFrame, ...] | None = None,
     pipeline_root: LocalPipelineRoot | None = None,
     timing_accumulator: _LocalCertificateTimingAccumulator | None = None,
@@ -903,6 +933,8 @@ def _robust_action_certificates(
         lasers=lasers,
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
+        player_scale_bits=player_scale_bits,
+        laser_scale_bits=laser_scale_bits,
         laser_frames=laser_frames,
         pipeline_root=pipeline_root,
         timing_accumulator=timing_accumulator,
@@ -921,6 +953,8 @@ def _direct_root_certificate_shadow(
     lasers: tuple[Laser, ...],
     enemy_bodies: tuple[EnemyBody, ...],
     snapshot_lag: int,
+    player_scale_bits: tuple[int, ...],
+    laser_scale_bits: tuple[int, ...],
     authoritative_certificates: tuple[
         RobustActionCertificate, ...
     ] = (),
@@ -940,6 +974,8 @@ def _direct_root_certificate_shadow(
         lasers=lasers,
         enemy_bodies=enemy_bodies,
         snapshot_lag=snapshot_lag,
+        player_scale_bits=player_scale_bits,
+        laser_scale_bits=laser_scale_bits,
         pipeline_root=root,
         timing_accumulator=timing_accumulator,
     )
@@ -1071,6 +1107,7 @@ def _planner_pass_dependencies() -> PlannerPassDependencies:
         minimum_travel_frames=_minimum_travel_frames,
         node_key=_node_key,
         project_item=_project_item,
+        advance_planner_action=_advance_planner_action,
         project_player_for_read_lag=_project_player_for_read_lag,
         robust_action_certificates=_robust_action_certificates,
         terminal_threat_scores=_terminal_threat_scores,
@@ -1228,8 +1265,28 @@ def choose_action(
     beam_dedup_mode: str = "quantized",
     relax_stale_viability_contradiction: bool = False,
     enforce_fresh_viability_intersection: bool = True,
+    time_scale_schedule: Th08TimeScaleSchedule | None = None,
 ) -> Decision:
-    """Compatibility wrapper for callers not yet migrated to grouped input."""
+    """Compatibility wrapper for callers not yet migrated to grouped input.
+
+    Omitting ``time_scale_schedule`` preserves historical unit-scale fixtures
+    only for this request's finite horizon. Live grouped callers must carry
+    observed phase-specific coverage instead.
+    """
+
+    if time_scale_schedule is None:
+        maximum_delay = max(
+            control_delay_candidates or (control_delay_frames,)
+        )
+        required_scale_horizon = max(
+            control_delay_frames + (threat_horizon or horizon),
+            maximum_delay + action_hold_frames,
+        )
+        time_scale_schedule = Th08TimeScaleSchedule.constant(
+            TH08_UNIT_TIME_SCALE_BITS,
+            horizon=required_scale_horizon,
+            provenance="historical_flat_wrapper_unit_assumption",
+        )
 
     return choose_action_request(
         LocalPlannerRequest(
@@ -1238,6 +1295,7 @@ def choose_action(
                 player_y=player_y,
                 bullets=bullets,
                 lasers=lasers,
+                time_scale_schedule=time_scale_schedule,
                 enemy_bodies=enemy_bodies,
                 items=items,
                 snapshot_lag=snapshot_lag,
@@ -2711,11 +2769,30 @@ def _run_live_session(
                 enemy_bodies,
                 spell_enemy_body_guard,
             )
-            counter_after_read = reader.u32(0x0164D30C)
+            time_scale_root_capture = capture_time_scale_root(reader)
+            counter_after_read = time_scale_root_capture.frame_after
             hazard_read_bookkeeping_ms = (
                 time.perf_counter() - hazard_read_bookkeeping_started
             ) * 1000.0
             read_ms = (time.perf_counter() - read_started) * 1000.0
+            if not time_scale_root_capture.stable:
+                gaps += 1
+                trace_sink.emit(
+                    {
+                        "kind": "time_scale_root_unstable",
+                        "source_frame": state["enemy_manager_frame"],
+                        "frame_before": (
+                            time_scale_root_capture.frame_before
+                        ),
+                        "frame_after": time_scale_root_capture.frame_after,
+                        "scale_bits": time_scale_root_capture.scale_bits,
+                        "semantics_version": (
+                            TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION
+                        ),
+                    },
+                    flush=True,
+                )
+                continue
             if (
                 enemy_prefix_snapshot.frame_after
                 < enemy_prefix_snapshot.frame_before
@@ -2900,24 +2977,58 @@ def _run_live_session(
                 and resources["bombs"] > 0
                 and counter_after_read - last_bomb_counter > 30
             )
-            projected_player_x, projected_player_y = _project_player_for_read_lag(
-                float(player["x"]),
-                float(player["y"]),
-                previous_mask,
-                snapshot_lag,
+            source_time_scale_bits = int(state["time_scale_bits"])
+            time_scale_schedule = Th08TimeScaleSchedule.root_observation(
+                time_scale_root_capture.scale_bits,
+                source_frame=counter_after_read,
+                provenance="live_stable_enemy_frame_bracket",
             )
+            if snapshot_lag == 0:
+                projected_player_x = float(player["x"])
+                projected_player_y = float(player["y"])
+                player_projection_authority = "exact_zero_lag"
+            elif snapshot_lag == 1:
+                projected_player_x, projected_player_y = (
+                    _project_player_for_read_lag(
+                        float(player["x"]),
+                        float(player["y"]),
+                        previous_mask,
+                        1,
+                        player_scale_bits=(source_time_scale_bits,),
+                    )
+                )
+                player_projection_authority = (
+                    "exact_source_root_one_step"
+                )
+            else:
+                projected_player_x = float(player["x"])
+                projected_player_y = float(player["y"])
+                player_projection_authority = (
+                    "unknown_incomplete_source_schedule"
+                )
             delay_estimate = delay_estimator.estimate(
                 frame=counter_after_read,
                 default=args.control_delay_frames,
             )
             input_clock_delay_support = tuple(delay_estimate.support)
             control_delay_frames = delay_estimate.nominal
-            control_origin_x, control_origin_y = _project_player_for_read_lag(
-                float(player["x"]),
-                float(player["y"]),
-                previous_mask,
-                control_delay_frames,
-            )
+            if control_delay_frames <= 1:
+                control_origin_x, control_origin_y = (
+                    _project_player_for_read_lag(
+                        projected_player_x,
+                        projected_player_y,
+                        previous_mask,
+                        control_delay_frames,
+                        player_scale_bits=(
+                            time_scale_schedule.require_player_horizon(
+                                control_delay_frames
+                            )
+                        ),
+                    )
+                )
+            else:
+                control_origin_x = projected_player_x
+                control_origin_y = projected_player_y
             held_desired_mask = previous_mask & SUPPORTED_INPUT_MASK
             captured_iteration = CapturedIteration(
                 gameplay_epoch=gameplay_epoch,
@@ -2930,6 +3041,11 @@ def _run_live_session(
                 context_key=corridor_context,
                 source_frame=int(state["enemy_manager_frame"]),
                 snapshot_frame=counter_after_read,
+                source_time_scale_bits=source_time_scale_bits,
+                time_scale_schedule=time_scale_schedule,
+                player_projection_authority=(
+                    player_projection_authority
+                ),
                 player_x=float(player["x"]),
                 player_y=float(player["y"]),
                 projected_player_x=projected_player_x,
@@ -2952,6 +3068,44 @@ def _run_live_session(
                 control_delay_frames=control_delay_frames,
                 context_changed=corridor_context_changed,
             )
+            if (
+                captured_iteration.time_scale_schedule.coverage
+                != SCALE_COVERAGE_COMPLETE
+            ):
+                trace_sink.emit(
+                    {
+                        "kind": "time_scale_authority_unknown",
+                        "frame": captured_iteration.snapshot_frame,
+                        "source_frame": captured_iteration.source_frame,
+                        "semantics_version": (
+                            TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION
+                        ),
+                        "coverage": (
+                            captured_iteration.time_scale_schedule.coverage
+                        ),
+                        "root_scale_bits": (
+                            captured_iteration.time_scale_schedule
+                            .root_scale_bits
+                        ),
+                        "player_scale_bits": list(
+                            captured_iteration.time_scale_schedule
+                            .player_scale_bits
+                        ),
+                        "laser_scale_bits": list(
+                            captured_iteration.time_scale_schedule
+                            .laser_scale_bits
+                        ),
+                        "player_projection_authority": (
+                            captured_iteration
+                            .player_projection_authority
+                        ),
+                        "hard_authority": False,
+                        "fallback": "terminate_and_release_keys",
+                    },
+                    flush=True,
+                )
+                termination_reason = "time_scale_authority_unknown"
+                break
             corridor_started = time.perf_counter()
             corridor_updated = False
             if (
@@ -3044,6 +3198,10 @@ def _run_live_session(
                 corridor_executor is not None
                 and corridor_future is None
                 and corridor_pending_solution is None
+                and (
+                    captured_iteration.player_projection_authority
+                    != "unknown_incomplete_source_schedule"
+                )
                 and _corridor_submit_due(
                     current_frame=counter_after_read,
                     last_submit_frame=corridor_last_submit,
@@ -3059,10 +3217,16 @@ def _run_live_session(
                 )
                 forecast_player_x, forecast_player_y = (
                     _project_player_for_read_lag(
-                        float(player["x"]),
-                        float(player["y"]),
+                        captured_iteration.projected_player_x,
+                        captured_iteration.projected_player_y,
                         previous_mask,
-                        snapshot_lag + forecast_lead_frames,
+                        forecast_lead_frames,
+                        player_scale_bits=(
+                            captured_iteration.time_scale_schedule
+                            .require_player_horizon(
+                                forecast_lead_frames
+                            )
+                        ),
                     )
                 )
                 corridor_future = corridor_executor.submit(
@@ -3101,6 +3265,9 @@ def _run_live_session(
                     ),
                     native_viability_worker_limit=(
                         args.corridor_native_workers
+                    ),
+                    time_scale_schedule=(
+                        captured_iteration.time_scale_schedule
                     ),
                 )
                 corridor_last_submit = counter_after_read
@@ -3329,6 +3496,9 @@ def _run_live_session(
                         ),
                         bullets=published_guidance.capture.bullets,
                         lasers=published_guidance.capture.lasers,
+                        time_scale_schedule=(
+                            published_guidance.capture.time_scale_schedule
+                        ),
                         enemy_bodies=(
                             published_guidance.capture.enemy_bodies
                         ),
@@ -3457,6 +3627,9 @@ def _run_live_session(
                         ),
                         viability_survival_actions=(
                             policy_guidance.survival_actions
+                        ),
+                        time_scale_schedule=(
+                            captured_iteration.time_scale_schedule
                         ),
                     )
                 ),
@@ -3836,6 +4009,20 @@ def _run_live_session(
                             lasers=lasers,
                             enemy_bodies=issue_enemy_bodies_for_shadow,
                             snapshot_lag=player_to_hazard_lag,
+                            player_scale_bits=(
+                                captured_iteration.time_scale_schedule
+                                .require_player_horizon(
+                                    action_hold_frames
+                                    + max(delay_estimate.support)
+                                )
+                            ),
+                            laser_scale_bits=(
+                                captured_iteration.time_scale_schedule
+                                .require_laser_horizon(
+                                    action_hold_frames
+                                    + max(delay_estimate.support)
+                                )
+                            ),
                             authoritative_certificates=(
                                 decision.issue_action_certificates
                             ),

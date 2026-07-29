@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+from th08_time_scale import Th08TimeScaleSchedule
+
 
 class PlannerMode(Enum):
     """Explicit planner pass mode; modes are not recursive call flags."""
@@ -25,6 +27,7 @@ class PhysicalHazardSnapshot:
     player_y: float
     bullets: tuple[Any, ...]
     lasers: tuple[Any, ...]
+    time_scale_schedule: Th08TimeScaleSchedule
     enemy_bodies: tuple[Any, ...] = ()
     items: tuple[Any, ...] = ()
     snapshot_lag: int = 0

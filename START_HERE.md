@@ -202,13 +202,36 @@ SHA-256
 The replay has zero Bomb presses, but the captured predeath counter is 7.
 Therefore this is observed complete-source semantics plus an inferred
 no-new-hit/no-Bomb schedule, not a clean player root, live action authority,
-survival, or NMNB. The live daemon remains root-only fail-closed until the
-accepted schedule is integrated and independently gated.
+survival, or NMNB. At the C4 checkpoint the live daemon remained root-only;
+the default-off C5 integration below is still unpromoted until its independent
+physical gate passes.
 
 The native replay physical falsification protocol is retained at
 `notes/operations/NATIVE_REPLAY_PHYSICAL_FALSIFICATION.md`. Use it to
 reproduce late shipped-runtime phases and test native hypotheses while
 preserving replay/resource contamination and action-authority boundaries.
+
+The current `SEM-SCALE-C5` implementation connects that accepted source to
+the live controller behind explicit
+`--enable-finalb-scale-source-authority`. It requires Lunatic stage 7, exact
+runtime ECL identity, and hard no-Bomb. One clean-predeath capture is bound to
+an immutable gameplay/route/difficulty/stage/spell/source version; later
+manager frames rebase only by slicing the accepted player/laser schedule and
+checking the observed post-ECL root. Fresh hit, Bomb, predeath, context,
+source-frame, root, or horizon mismatch returns root-only and uses the
+existing terminate/release fallback. Unit-scale pre-target spell rows may
+wait read-only and issue no input. Non-unit/varying coverage remains
+unsupported by the corridor and is consumed only by the exact local path.
+The retained physical C4 schedule itself crosses the callback-18 restore
+correctly under this delivery recurrence. Complete Linux/Windows discovery
+passes 1,130 tests in 13.357/29.909 seconds, with three existing Windows
+skips. No input-injecting C5 physical row exists yet.
+
+The sole authorized next physical launch is preregistered at
+`notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`. Its prewarmed
+one-shot entry point is `run_th08_finalb_scale_live_hotkey.bat`; the strict
+post-run report is
+`scripts/analysis/th08_finalb_scale_live_delivery_report.py`.
 
 ### Native-semantic review
 
@@ -364,15 +387,16 @@ Do not resume broad G5 work first.
 2. `SEM-TIMER` passes its offline semantic gate but its one fixed physical
    falsifier failed at 12 hits. The canonical failure predates the live
    consumer, so retain the failure without rollback or survival promotion.
-3. Continue `SEM-SCALE-C` from accepted physical replay trace
-   `20260729_215613`. Integrate the exact-version complete schedule into live
-   capture/delivery while retaining root-only fail-closed fallback on every
-   identity, source, callback, auxiliary, phase, schedule, or publication
-   miss. Prove focused Linux/Windows parity and deadline behavior before the
-   preregistered smallest Final-B transition physical falsifier. Do not treat
-   the replay's predeath-7 root as clean survival evidence. After that gate,
-   continue `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap
-   order, one correction/checkpoint at a time.
+3. Continue `SEM-SCALE-C` from the dual-platform C5 live-delivery
+   implementation. Run only the preregistered clean-predeath, hard no-Bomb
+   Final-B spell-190 transition gate in
+   `notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`; retain its raw
+   hash, strict compact report, first-hit/Bomb fields, timing, and cleanup.
+   Any source/root/context/horizon mismatch remains a fail-closed
+   counterexample. Do not treat the replay's predeath-7 C4 root as survival
+   evidence. After a physical C5 pass, continue `SEM-MODE`, `SEM-GEOM`,
+   `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order, one
+   correction/checkpoint at a time.
 4. After each applicable slice, take only the smallest causal Stage-5
    physical falsification. Restart the two-consecutive observer-off
    `<=10` gate only for an immutable corrected model version.

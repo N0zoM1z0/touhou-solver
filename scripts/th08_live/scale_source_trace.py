@@ -1,11 +1,11 @@
 """Default-off complete-source trace gate for TH08 time-scale schedules.
 
-This module never issues input and never publishes a schedule to live action
-authority.  It binds one exact shipped runtime ECL image, captures the full
-480-slot ordinary-enemy pool plus an out-of-pool spell owner in one stable
+This module never issues input and does not itself publish a schedule to live
+action authority.  It binds one exact shipped runtime ECL image, captures the
+full 480-slot ordinary-enemy pool plus an out-of-pool spell owner in one stable
 phase transaction, inventories installed callbacks and auxiliary contexts,
-and runs the causal scale producer only when the deliberately narrow
-Final-B spell-190 source contract is complete.
+and runs the causal scale producer only when the deliberately narrow Final-B
+spell-190 source contract is complete.
 """
 
 from __future__ import annotations
@@ -72,6 +72,7 @@ from th08_runtime.game_state import (
 )
 from th08_time_scale import (
     TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+    Th08TimeScaleSchedule,
     validate_time_scale_bits,
 )
 
@@ -609,10 +610,23 @@ class FinalBScaleSourceTraceService:
         self._ecl = ecl
         self._clock = clock
         self._attempted = False
+        self._accepted_schedule: Th08TimeScaleSchedule | None = None
 
     @property
     def attempted(self) -> bool:
         return self._attempted
+
+    @property
+    def accepted_schedule(self) -> Th08TimeScaleSchedule | None:
+        """Return the typed schedule from the accepted one-shot capture."""
+
+        return self._accepted_schedule
+
+    def reset(self) -> None:
+        """Rearm after an explicit physical gameplay-epoch reset."""
+
+        self._attempted = False
+        self._accepted_schedule = None
 
     def _trigger_matches(
         self,
@@ -719,6 +733,12 @@ class FinalBScaleSourceTraceService:
             "accepted_complete_source_trace"
             if not reasons and schedule_result is not None
             else "unknown"
+        )
+        self._accepted_schedule = (
+            schedule_result.schedule
+            if status == "accepted_complete_source_trace"
+            and schedule_result is not None
+            else None
         )
         return {
             "kind": "finalb_scale_source_trace",

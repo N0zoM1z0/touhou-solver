@@ -28,6 +28,9 @@ This is the navigation index for repository evidence. It does not replace
 - [Native replay physical falsification](operations/NATIVE_REPLAY_PHYSICAL_FALSIFICATION.md):
   repeatable shipped-runtime hypothesis checks, evidence boundaries, and
   retention/cleanup protocol.
+- [Final-B SEM-SCALE live delivery gate](operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md):
+  preregistered clean-predeath transition scope, strict report, and stop
+  conditions.
 - [Runtime report retention and emission audit](review/RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md):
   required outputs, duplicate suppression, and reviewed raw-cleanup candidates.
 - [Reusable agent skills](review/REUSABLE_AGENT_SKILLS_20260729.md):

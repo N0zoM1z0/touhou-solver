@@ -375,6 +375,15 @@ def build_live_parser(
         help="required immutable SHA-256 for --runtime-ecl-static-image",
     )
     parser.add_argument(
+        "--enable-finalb-scale-source-authority",
+        action="store_true",
+        help=(
+            "enable the exact Final-B spell-190 complete-source schedule "
+            "consumer; requires Lunatic stage 7, hard no-Bomb, and exact "
+            "runtime ECL identity"
+        ),
+    )
+    parser.add_argument(
         "--bullet-birth-native-call-mode",
         choices=defaults.native_call_modes,
         default=defaults.native_call_mode_gil_released,

@@ -13,6 +13,7 @@ from th08_agent_hotkey import (
     one_shot_trial_finished,
     read_runtime_summary,
 )
+from th08_live.controller import _prepare_live_run
 from th08_live_dodge_agent import build_parser
 
 
@@ -42,6 +43,7 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertFalse(parsed.trace_enemy_combat_progress)
         self.assertFalse(parsed.trace_auxiliary_vm_batches)
         self.assertFalse(parsed.trace_auxiliary_ecl_events)
+        self.assertFalse(parsed.enable_finalb_scale_source_authority)
         self.assertIsNone(parsed.runtime_ecl_static_image)
         self.assertIsNone(parsed.runtime_ecl_static_sha256)
         self.assertEqual(parsed.safety_value_horizon, 0)
@@ -189,6 +191,94 @@ class AgentHotkeyTests(unittest.TestCase):
         parsed = build_parser().parse_args(arguments)
         self.assertEqual(parsed.runtime_ecl_static_image, image)
         self.assertEqual(parsed.runtime_ecl_static_sha256, digest)
+
+        finalb = build_parser().parse_args(
+            [
+                "--armed",
+                "--pid",
+                "1234",
+                "--difficulty",
+                "3",
+                "--expected-stage",
+                "7",
+                "--no-bomb",
+                "--runtime-ecl-static-image",
+                "artifacts/decoded/ecldata7.ecl",
+                "--runtime-ecl-static-sha256",
+                "2" * 64,
+                "--enable-finalb-scale-source-authority",
+                "trial.jsonl",
+            ]
+        )
+        self.assertTrue(finalb.enable_finalb_scale_source_authority)
+        self.assertTrue(finalb.no_bomb)
+
+        finalb_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            expected_stage=7,
+            runtime_ecl_static_image=Path(
+                "artifacts/decoded/ecldata7.ecl"
+            ),
+            runtime_ecl_static_sha256="2" * 64,
+            enable_finalb_scale_source_authority=True,
+        )
+        self.assertIn(
+            "--enable-finalb-scale-source-authority",
+            finalb_arguments,
+        )
+        self.assertTrue(
+            build_parser()
+            .parse_args(finalb_arguments)
+            .enable_finalb_scale_source_authority
+        )
+        with self.assertRaisesRegex(ValueError, "Lunatic stage 7"):
+            build_long_run_arguments(
+                output=Path("trial.jsonl"),
+                stop_file=Path("trial.stop"),
+                pid=1234,
+                difficulty=3,
+                expected_stage=5,
+                runtime_ecl_static_image=Path(
+                    "artifacts/decoded/ecldata5.ecl"
+                ),
+                runtime_ecl_static_sha256="2" * 64,
+                enable_finalb_scale_source_authority=True,
+            )
+
+        def authority_args(*extra: str):
+            return build_parser().parse_args(
+                [
+                    "--armed",
+                    "--pid",
+                    "1234",
+                    "--difficulty",
+                    "3",
+                    "--expected-stage",
+                    "7",
+                    "--runtime-ecl-static-image",
+                    "artifacts/decoded/ecldata7.ecl",
+                    "--runtime-ecl-static-sha256",
+                    "2" * 64,
+                    "--enable-finalb-scale-source-authority",
+                    *extra,
+                    "trial.jsonl",
+                ]
+            )
+
+        with self.assertRaisesRegex(ValueError, "hard no-Bomb"):
+            _prepare_live_run(authority_args())
+        wrong_stage = authority_args("--no-bomb")
+        wrong_stage.expected_stage = 5
+        with self.assertRaisesRegex(ValueError, "Lunatic stage 7"):
+            _prepare_live_run(wrong_stage)
+        missing_identity = authority_args("--no-bomb")
+        missing_identity.runtime_ecl_static_image = None
+        missing_identity.runtime_ecl_static_sha256 = None
+        with self.assertRaisesRegex(ValueError, "exact runtime ECL"):
+            _prepare_live_run(missing_identity)
 
         with self.assertRaisesRegex(ValueError, "both"):
             build_long_run_arguments(

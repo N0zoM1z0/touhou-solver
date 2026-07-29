@@ -1,13 +1,13 @@
 # TH08 Player/Laser Global Time-Scale Semantics
 
-Status: **SEM-SCALE-C1 Final-B root capsule passed; live schedule synthesis pending**
+Status: **SEM-SCALE-C4 physical source passed; C5 live delivery awaits its focused physical gate**
 
 Date: 2026-07-29
 
 Roadmap item: `SEM-SCALE`
 
-Executable/offline checkpoints: `225ccc8`, `6a71ac1`; retained C1 evidence:
-`1f639ef`
+Executable/offline checkpoints: `225ccc8`, `6a71ac1`, `555bbf8`;
+retained C1/C4 evidence: `1f639ef`, `f63b7ce`
 
 This note is the physical/model contract for roadmap Phase 1B. It repairs the
 current live and offline assumption that player movement and laser lifecycle
@@ -587,16 +587,55 @@ Connected IDA was also updated for reproducibility: `0x0046E136` is renamed
 entry indexing, and `0x0046ED45` records the replay-mode/route/difficulty/stage
 launch state.
 
+Observed SEM-SCALE-C5 implementation result:
+
+- `FinalBScaleSourceTraceService` retains the typed schedule only after its
+  one-shot physical transaction is accepted; an explicit gameplay-epoch
+  reset rearms it;
+- `FinalBScaleScheduleAuthority` binds that schedule to exact
+  gameplay/route/difficulty/stage/spell identity. At current offset `d=0`,
+  the observed root must equal the captured root. At `d>0`, it must equal
+  original laser-phase scale `d-1`; the current future schedule is exactly
+  the original player/laser tuples sliced from `d`;
+- live use additionally requires predeath zero both before and inside the
+  complete-source transaction. Fresh hit, Bomb, predeath, context, root,
+  source-frame, or horizon mismatch publishes root-only status and triggers
+  terminate/release;
+- pre-target unit-scale spell rows can wait with
+  `finalb_scale_source_wait`, which sends no input. The acceptance scope
+  begins only at clean offset-zero authority;
+- the consumer is default-off and CLI/hotkey plumbing requires explicit
+  Lunatic stage 7, hard no-Bomb, and exact `ecldata7.ecl` identity;
+- the corridor precheck refuses incomplete, non-unit, or varying schedules,
+  preserving its declared `UNKNOWN` boundary. The synchronous local
+  planner, issue transaction, certificates, and sensing trace consume the
+  exact complete schedule directly;
+- the retained C4 artifact is an executable regression: at offset 239 the
+  next player phase remains quarter while the next laser phase is unit; at
+  offset 240 the observed root and both remaining phase schedules are unit;
+- the prewarmed one-shot hotkey entry point and strict streaming physical
+  report are
+  `run_th08_finalb_scale_live_hotkey.bat` and
+  `scripts/analysis/th08_finalb_scale_live_delivery_report.py`; and
+- complete Linux discovery passes 1,130 tests in 13.357 seconds. The exact
+  Windows UNC suite passes 1,130 in 29.909 seconds with three existing skips.
+  A first Windows attempt exposed only locale-dependent fixture decoding;
+  fixing the retained UTF-8 artifact read removes it on the complete rerun.
+
+No game was launched for C5 and no action/survival authority is promoted.
+The exact physical scope and stop conditions are preregistered in
+`notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`.
+
 No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
 acceptance, global optimality, or complete future-source coverage.
 
 ## Current stopping rule
 
-The SEM-SCALE-C trace-only complete-source gate has passed only for the
-retained Final-B replay root. Do not launch an input-injecting solver trial
-until exact-version schedule capture/delivery is integrated, Linux/Windows
-parity and deadline/fallback gates pass, and the focused Final-B trial is
-preregistered. The physical trial must stop on any identity/source/schedule
-miss and release keys. Any test mismatch, incomplete scale coverage consumed
-as exact, cross-version cache hit, or live non-unit hard certificate without
-the complete schedule is a durable counterexample and stops promotion.
+The C4 trace gate and C5 exact-version delivery/dual-platform implementation
+gates pass. Launch no input-injecting scope except the one preregistered
+focused Final-B transition gate. It must stop on any
+identity/source/schedule/root/context/predeath/deadline miss and release keys.
+Any test mismatch, incomplete scale coverage consumed as exact, cross-version
+cache hit, unsupported corridor use, or live non-unit hard certificate
+without the complete schedule is a durable counterexample and stops
+promotion.

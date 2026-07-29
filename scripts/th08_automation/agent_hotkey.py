@@ -80,6 +80,7 @@ class AgentHotkey:
         ),
         runtime_ecl_static_image: Path | None = None,
         runtime_ecl_static_sha256: str | None = None,
+        enable_finalb_scale_source_authority: bool = False,
         bullet_birth_backend: str = "python",
         bullet_birth_native_call_mode: str = (
             NATIVE_CALL_MODE_GIL_RELEASED
@@ -164,6 +165,20 @@ class AgentHotkey:
             raise ValueError(
                 "runtime ECL identity requires an explicit expected stage"
             )
+        if enable_finalb_scale_source_authority and (
+            expected_difficulty != 3 or expected_stage != 7
+        ):
+            raise ValueError(
+                "Final-B scale-source authority requires Lunatic stage 7"
+            )
+        if enable_finalb_scale_source_authority and (
+            runtime_ecl_static_image is None
+            or runtime_ecl_static_sha256 is None
+        ):
+            raise ValueError(
+                "Final-B scale-source authority requires exact runtime ECL "
+                "identity"
+            )
         if trace_auxiliary_ecl_events and not trace_auxiliary_vm_batches:
             raise ValueError(
                 "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
@@ -196,6 +211,9 @@ class AgentHotkey:
         )
         self.runtime_ecl_static_image = runtime_ecl_static_image
         self.runtime_ecl_static_sha256 = runtime_ecl_static_sha256
+        self.enable_finalb_scale_source_authority = (
+            enable_finalb_scale_source_authority
+        )
         self.bullet_birth_backend = bullet_birth_backend
         self.bullet_birth_native_call_mode = bullet_birth_native_call_mode
         self.safety_value_horizon = safety_value_horizon
@@ -372,6 +390,9 @@ class AgentHotkey:
                 ),
                 runtime_ecl_static_sha256=(
                     self.runtime_ecl_static_sha256
+                ),
+                enable_finalb_scale_source_authority=(
+                    self.enable_finalb_scale_source_authority
                 ),
                 bullet_birth_backend=self.bullet_birth_backend,
                 bullet_birth_native_call_mode=(

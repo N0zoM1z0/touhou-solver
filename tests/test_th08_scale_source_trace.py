@@ -360,6 +360,7 @@ class ScaleSourceTraceTests(unittest.TestCase):
             )
         )
         self.assertTrue(service.attempted)
+        self.assertIsNotNone(service.accepted_schedule)
         self.assertIsNone(
             service.observe_if_due(
                 reader,
@@ -374,6 +375,9 @@ class ScaleSourceTraceTests(unittest.TestCase):
                 observed_player_bomb_active=0,
             )
         )
+        service.reset()
+        self.assertFalse(service.attempted)
+        self.assertIsNone(service.accepted_schedule)
 
     def test_decoder_retains_installed_callback_record(self) -> None:
         source = decode_scale_vm_source(

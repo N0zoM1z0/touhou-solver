@@ -113,6 +113,13 @@ from th08_live.runtime_ecl_identity import (
     RuntimeEclIdentityService,
     RuntimeEclPhysicalProvenance,
 )
+from th08_live.scale_schedule_authority import (
+    FinalBScaleScheduleAuthority,
+)
+from th08_live.scale_source_trace import (
+    FinalBScaleSourceTraceConfiguration,
+    FinalBScaleSourceTraceService,
+)
 from th08_live.auxiliary_vm import (
     AuxiliaryVmBatchTraceService,
     native_auxiliary_vm_batch_available,
@@ -505,6 +512,25 @@ ROUTE2_STAGE_SUCCESSORS = {
     5: 7,
 }
 
+
+def _corridor_scale_schedule_supported(
+    schedule: Th08TimeScaleSchedule,
+    *,
+    horizon: int,
+) -> bool:
+    if (
+        horizon <= 0
+        or schedule.coverage != SCALE_COVERAGE_COMPLETE
+        or schedule.complete_horizon < horizon
+    ):
+        return False
+    return all(
+        bits == TH08_UNIT_TIME_SCALE_BITS
+        for bits in (
+            *schedule.player_scale_bits[:horizon],
+            *schedule.laser_scale_bits[:horizon],
+        )
+    )
 
 
 def _local_certificate_timing_record(
@@ -1496,6 +1522,26 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
             "the contracted auxiliary ECL event service is limited to "
             "Lunatic Stage 5"
         )
+    enable_finalb_scale_source_authority = bool(
+        getattr(args, "enable_finalb_scale_source_authority", False)
+    )
+    if enable_finalb_scale_source_authority and (
+        args.difficulty != 3 or args.expected_stage != 7
+    ):
+        raise ValueError(
+            "Final-B scale-source authority requires Lunatic stage 7"
+        )
+    if enable_finalb_scale_source_authority and not args.no_bomb:
+        raise ValueError(
+            "Final-B scale-source authority requires explicit hard no-Bomb"
+        )
+    if enable_finalb_scale_source_authority and (
+        runtime_ecl_static_image is None
+        or runtime_ecl_static_sha256 is None
+    ):
+        raise ValueError(
+            "Final-B scale-source authority requires exact runtime ECL identity"
+        )
     _configure_local_hazard_backend(args.local_hazard_backend)
     _configure_local_beam_reducer(args.local_beam_reducer)
     _configure_local_bullet_decoder(args.bullet_decode_backend)
@@ -1703,11 +1749,15 @@ def _run_live_session(
     )
     runtime_ecl_identity_service: RuntimeEclIdentityService | None = None
     auxiliary_ecl_event_service: AuxiliaryEclEventTraceService | None = None
+    finalb_scale_schedule_authority: (
+        FinalBScaleScheduleAuthority | None
+    ) = None
     runtime_ecl_static_image = getattr(
         args,
         "runtime_ecl_static_image",
         None,
     )
+    runtime_ecl_static_path: Path | None = None
     if runtime_ecl_static_image is not None:
         runtime_ecl_static_path = runtime_ecl_static_image
         if not runtime_ecl_static_path.is_absolute():
@@ -1731,6 +1781,22 @@ def _run_live_session(
                     expected_route_id=2,
                     expected_difficulty_index=args.difficulty,
                     expected_stage_route_index=args.expected_stage,
+                )
+            )
+        if getattr(args, "enable_finalb_scale_source_authority", False):
+            finalb_scale_schedule_authority = (
+                FinalBScaleScheduleAuthority(
+                    FinalBScaleSourceTraceService(
+                        FinalBScaleSourceTraceConfiguration(
+                            static_path=runtime_ecl_static_path,
+                            expected_static_sha256=(
+                                args.runtime_ecl_static_sha256
+                            ),
+                            expected_route_id=2,
+                            expected_difficulty_index=args.difficulty,
+                            expected_stage_route_index=args.expected_stage,
+                        )
+                    )
                 )
             )
     auxiliary_vm_batch_service = (
@@ -1943,6 +2009,18 @@ def _run_live_session(
                         "frscreen_msg_state_ge_0_or_eq_minus_2"
                         if args.input_clock_boundary_shadow
                         else "disabled"
+                    ),
+                    "finalb_scale_source_authority": bool(
+                        getattr(
+                            args,
+                            "enable_finalb_scale_source_authority",
+                            False,
+                        )
+                    ),
+                    "runtime_ecl_static_sha256": getattr(
+                        args,
+                        "runtime_ecl_static_sha256",
+                        None,
                     ),
                     "local_hazard_backend": args.local_hazard_backend,
                     "local_hazard_backend_authority": (
@@ -2257,6 +2335,8 @@ def _run_live_session(
                 continue
             if scene_decision.status == "resumed":
                 gameplay_epoch += 1
+                if finalb_scale_schedule_authority is not None:
+                    finalb_scale_schedule_authority.reset()
                 boss_phase_tracker.reset()
                 trace_sink.emit(
                     {
@@ -2852,6 +2932,8 @@ def _run_live_session(
             ):
                 gaps += 1
                 gameplay_epoch += 1
+                if finalb_scale_schedule_authority is not None:
+                    finalb_scale_schedule_authority.reset()
                 safe_mask = previous_mask & SHOT
                 issue_controller.dispatch(
                     previous_mask,
@@ -2978,11 +3060,60 @@ def _run_live_session(
                 and counter_after_read - last_bomb_counter > 30
             )
             source_time_scale_bits = int(state["time_scale_bits"])
-            time_scale_schedule = Th08TimeScaleSchedule.root_observation(
-                time_scale_root_capture.scale_bits,
-                source_frame=counter_after_read,
-                provenance="live_stable_enemy_frame_bracket",
-            )
+            scale_authority_resolution = None
+            if finalb_scale_schedule_authority is not None:
+                scale_authority_resolution = (
+                    finalb_scale_schedule_authority.resolve(
+                        reader,
+                        decision_frame=counter_after_read,
+                        source_frame=counter_after_read,
+                        gameplay_epoch=gameplay_epoch,
+                        route_id=int(state["route_id"]),
+                        difficulty_index=int(
+                            state["difficulty_index"]
+                        ),
+                        stage_route_index=int(
+                            state["stage_route_index"]
+                        ),
+                        spell_id=(
+                            int(spell_state["spell_id"])
+                            if spell_state["active"]
+                            else None
+                        ),
+                        observed_root_scale_bits=(
+                            time_scale_root_capture.scale_bits
+                        ),
+                        observed_player_bomb_active=int(
+                            bool(player["bomb_active"])
+                        ),
+                        player_predeath_counter=int(
+                            player["predeath_counter"]
+                        ),
+                        hit_started=(
+                            int(player["phase"]) == 2
+                            and previous_action_phase != 2
+                        ),
+                    )
+                )
+                if scale_authority_resolution.trace_record is not None:
+                    trace_sink.emit(
+                        scale_authority_resolution.trace_record,
+                        flush=True,
+                    )
+                trace_sink.emit(
+                    scale_authority_resolution.compact_record()
+                )
+                time_scale_schedule = (
+                    scale_authority_resolution.schedule
+                )
+            else:
+                time_scale_schedule = (
+                    Th08TimeScaleSchedule.root_observation(
+                        time_scale_root_capture.scale_bits,
+                        source_frame=counter_after_read,
+                        provenance="live_stable_enemy_frame_bracket",
+                    )
+                )
             if snapshot_lag == 0:
                 projected_player_x = float(player["x"])
                 projected_player_y = float(player["y"])
@@ -3072,6 +3203,35 @@ def _run_live_session(
                 captured_iteration.time_scale_schedule.coverage
                 != SCALE_COVERAGE_COMPLETE
             ):
+                if (
+                    scale_authority_resolution is not None
+                    and scale_authority_resolution.status
+                    == "root_only_complete_source_not_due"
+                ):
+                    trace_sink.emit(
+                        {
+                            "kind": "finalb_scale_source_wait",
+                            "frame": captured_iteration.snapshot_frame,
+                            "source_frame": captured_iteration.source_frame,
+                            "gameplay_epoch": gameplay_epoch,
+                            "stage_route_index": (
+                                captured_iteration.stage_route_index
+                            ),
+                            "spell_id": captured_iteration.spell_id,
+                            "root_scale_bits": (
+                                captured_iteration.time_scale_schedule
+                                .root_scale_bits
+                            ),
+                            "native_active_mask": (
+                                captured_iteration.native_active_mask
+                            ),
+                            "changes_input": False,
+                            "status": "waiting_for_quarter_scale_source",
+                        },
+                        flush=True,
+                    )
+                    time.sleep(args.poll_ms / 1000.0)
+                    continue
                 trace_sink.emit(
                     {
                         "kind": "time_scale_authority_unknown",
@@ -3100,6 +3260,16 @@ def _run_live_session(
                             .player_projection_authority
                         ),
                         "hard_authority": False,
+                        "scale_authority_status": (
+                            scale_authority_resolution.status
+                            if scale_authority_resolution is not None
+                            else "disabled"
+                        ),
+                        "scale_authority_reason": (
+                            scale_authority_resolution.reason
+                            if scale_authority_resolution is not None
+                            else None
+                        ),
                         "fallback": "terminate_and_release_keys",
                     },
                     flush=True,
@@ -3201,6 +3371,15 @@ def _run_live_session(
                 and (
                     captured_iteration.player_projection_authority
                     != "unknown_incomplete_source_schedule"
+                )
+                and _corridor_scale_schedule_supported(
+                    captured_iteration.time_scale_schedule,
+                    horizon=(
+                        max(0, hazard_snapshot_age)
+                        + max(0, corridor_policy_lead.frames)
+                        + TH08_CORRIDOR_CONFIG.horizon_frames
+                        + 1
+                    ),
                 )
                 and _corridor_submit_due(
                     current_frame=counter_after_read,
@@ -3675,6 +3854,8 @@ def _run_live_session(
             ):
                 gaps += 1
                 gameplay_epoch += 1
+                if finalb_scale_schedule_authority is not None:
+                    finalb_scale_schedule_authority.reset()
                 safe_mask = previous_mask & SHOT
                 issue_controller.dispatch(
                     previous_mask,

@@ -31,10 +31,12 @@ as explicit `UNKNOWN`. Checkpoint `1f639ef` passes the `SEM-SCALE-C1`
 retained Final-B physical-root/conditional-player-replay gate over 230
 quarter-scale rows. Checkpoint `555bbf8` passes the isolated-source
 `SEM-SCALE-C2/C3` causal Final-B/static-Extra product-oracle gate plus one
-exact historical restore transition. Complete live writer/callback/phase
-trace-only evidence, callback-28 hazard-side-effect authority, and the fresh
-focused physical falsifier remain open. No scale-sensitive strategy or
-physical scene is promoted.
+exact historical restore transition. Checkpoint `f63b7ce` retains a passing
+native-replay C4 complete-source capture for the narrow Final-B spell-190
+scene; its source has no callback-28/29 side effect. The default-off C5 live
+delivery implementation passes its Linux/Windows gates, but its fresh focused
+physical falsifier and broader callback-28 hazard-side-effect authority
+remain open. No scale-sensitive strategy or physical scene is promoted.
 
 Companion native audit:
 `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
@@ -822,6 +824,20 @@ Execution progress on 2026-07-29:
   CE-0186/0187 retain the two rejected assumptions, and
   `notes/operations/NATIVE_REPLAY_PHYSICAL_FALSIFICATION.md` makes the
   shipped-replay hypothesis-check method reusable.
+- **Observed SEM-SCALE-C5 implementation gate:** the default-off live
+  consumer requires explicit Lunatic stage 7, hard no-Bomb, and exact runtime
+  ECL identity. It binds the accepted source to immutable
+  gameplay/route/difficulty/stage/spell identity, causally slices the exact
+  player/laser tuples at each manager-frame offset, and rejects fresh hit,
+  Bomb, nonzero predeath, context, source-frame, observed-root, or horizon
+  mismatch through the existing terminate/release fallback. Unit-scale
+  pre-target rows wait read-only. Non-unit/varying schedules remain outside
+  corridor authority and feed only the exact local path. The retained C4
+  artifact crosses the relative-239 player/laser phase split and relative-240
+  unit restore under this recurrence. Linux/Windows discovery passes 1,130
+  tests in 13.357/29.909 seconds with three existing Windows skips. No game
+  was launched; the single next physical scope is fixed in
+  `notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`.
 
 #### 1C. Action-conditioned player/enemy mode
 
@@ -1191,6 +1207,13 @@ baseline and the ordered dependency chain above are part of the result.
   explicit and grants no clean-survival or NMNB authority. CE-0186/0187,
   the replay-method note, compact artifacts, hashes, and IDA replay-menu
   annotations are retained.
+- For SEM-SCALE-C5 live delivery, focused authority/hotkey/report tests and
+  complete Linux/Windows discovery pass 1,130 tests. A Windows default-GBK
+  fixture-read failure was reproduced and corrected with explicit UTF-8; the
+  complete Windows rerun passes with only the three existing skips. The
+  retained physical C4 schedule is exercised across its phase-asymmetric
+  restore. No physical input trial has run, so the implementation adds no
+  hit-free or survival sample.
 - No matching TH08 gameplay, controller, practice-supervisor, or
   full-route-supervisor process is left running.
 - The original documentation-only checkpoint did not rerun Windows tests;

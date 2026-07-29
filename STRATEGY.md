@@ -445,6 +445,20 @@ The daemon remains fail-closed while exact-version schedule delivery is
 integrated; only then may the separately preregistered focused Final-B
 falsifier run.
 
+**2026-07-29 SEM-SCALE-C5 live-delivery implementation:** the default-off
+consumer now binds one physically complete source to an immutable
+gameplay/route/difficulty/stage/spell/source version and rebases it only after
+checking each observed native root. Clean-predeath, no-new-hit, and no-Bomb
+are mandatory for live use; every mismatch returns to the existing
+terminate/release fallback. Pre-target unit-scale rows can wait read-only
+without input. The varying/non-unit schedule is deliberately excluded from
+the unsupported corridor recurrence and reaches only the exact local
+planner/certificate path. The retained physical C4 schedule crosses its
+quarter-player/unit-laser transition and unit restore correctly in
+Linux/Windows tests. This is an offline live-path implementation, not a
+strategy promotion or physical action result. Only the fixed
+`FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md` trial is proposed next.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

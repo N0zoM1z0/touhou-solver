@@ -171,6 +171,22 @@ class _Reader:
         return blob[:size]
 
 
+class _BufferedReader(_Reader):
+    def __init__(self) -> None:
+        super().__init__()
+        self.allocated_sizes: list[int] = []
+        self.read_into_calls = 0
+
+    def allocate_buffer(self, size: int) -> bytearray:
+        self.allocated_sizes.append(size)
+        return bytearray(size)
+
+    def read_into(self, address: int, buffer: bytearray) -> bytearray:
+        self.read_into_calls += 1
+        buffer[:] = self.read(address, len(buffer))
+        return buffer
+
+
 class ScaleSourceTraceTests(unittest.TestCase):
     def _service(self) -> FinalBScaleSourceTraceService:
         return FinalBScaleSourceTraceService(
@@ -190,6 +206,9 @@ class ScaleSourceTraceTests(unittest.TestCase):
             difficulty_index=3,
             stage_route_index=7,
             spell_id=190,
+            observed_root_scale_bits=FINAL_B_QUARTER_SCALE_BITS,
+            observed_player_bomb_active=0,
+            observed_player_predeath_counter=0,
         )
         assert record is not None
         return record
@@ -230,6 +249,20 @@ class ScaleSourceTraceTests(unittest.TestCase):
             ],
             [(237, 18, 0x3F800000)],
         )
+
+    def test_runtime_pool_buffer_is_allocated_once_and_reused(self) -> None:
+        reader = _BufferedReader()
+        record = self._observe(reader)
+
+        self.assertEqual(
+            record["status"],
+            "accepted_complete_source_trace",
+        )
+        self.assertEqual(
+            reader.allocated_sizes,
+            [ENEMY_POOL_SIZE * ENEMY_STRIDE],
+        )
+        self.assertEqual(reader.read_into_calls, 1)
 
     def test_installed_scale_callback_fails_closed(self) -> None:
         record = self._observe(
@@ -290,10 +323,13 @@ class ScaleSourceTraceTests(unittest.TestCase):
                 difficulty_index=3,
                 stage_route_index=7,
                 spell_id=189,
+                observed_root_scale_bits=FINAL_B_QUARTER_SCALE_BITS,
+                observed_player_bomb_active=0,
+                observed_player_predeath_counter=0,
             )
         )
         self.assertFalse(service.attempted)
-        self.assertIsNotNone(
+        self.assertIsNone(
             service.observe_if_due(
                 reader,
                 decision_frame=2,
@@ -303,10 +339,13 @@ class ScaleSourceTraceTests(unittest.TestCase):
                 difficulty_index=3,
                 stage_route_index=7,
                 spell_id=190,
+                observed_root_scale_bits=0x3F800000,
+                observed_player_bomb_active=0,
+                observed_player_predeath_counter=0,
             )
         )
-        self.assertTrue(service.attempted)
-        self.assertIsNone(
+        self.assertFalse(service.attempted)
+        self.assertIsNotNone(
             service.observe_if_due(
                 reader,
                 decision_frame=3,
@@ -316,6 +355,25 @@ class ScaleSourceTraceTests(unittest.TestCase):
                 difficulty_index=3,
                 stage_route_index=7,
                 spell_id=190,
+                observed_root_scale_bits=FINAL_B_QUARTER_SCALE_BITS,
+                observed_player_bomb_active=0,
+                observed_player_predeath_counter=0,
+            )
+        )
+        self.assertTrue(service.attempted)
+        self.assertIsNone(
+            service.observe_if_due(
+                reader,
+                decision_frame=4,
+                expected_manager_frame=100,
+                gameplay_epoch=0,
+                route_id=2,
+                difficulty_index=3,
+                stage_route_index=7,
+                spell_id=190,
+                observed_root_scale_bits=FINAL_B_QUARTER_SCALE_BITS,
+                observed_player_bomb_active=0,
+                observed_player_predeath_counter=0,
             )
         )
 

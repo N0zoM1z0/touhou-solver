@@ -166,6 +166,13 @@ def _observe(
             difficulty_index=int(state["difficulty_index"]),
             stage_route_index=int(state["stage_route_index"]),
             spell_id=active_spell_id,
+            observed_root_scale_bits=int(state["time_scale_bits"]),
+            observed_player_bomb_active=int(
+                state["player"]["bomb_active"]
+            ),
+            observed_player_predeath_counter=int(
+                state["player"]["predeath_counter"]
+            ),
         )
         if record is not None:
             return record

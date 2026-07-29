@@ -178,7 +178,8 @@ def build_report(path: Path) -> dict[str, object]:
             "checks": checks,
         },
         "observed": {
-            "manager_frame": record.get("expected_manager_frame"),
+            "manager_frame": record.get("capture_manager_frame"),
+            "trigger_manager_frame": record.get("expected_manager_frame"),
             "gameplay_epoch": record.get("gameplay_epoch"),
             "runtime_ecl_capture": record.get("runtime_ecl_capture"),
             "source_count": (

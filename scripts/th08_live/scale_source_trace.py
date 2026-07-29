@@ -433,6 +433,14 @@ def capture_complete_scale_sources(
         raise ValueError("scale-source capture attempts must be positive")
     started = clock()
     selected: CompleteScaleSourceCapture | None = None
+    pool_read_size = ENEMY_POOL_SIZE * ENEMY_STRIDE
+    allocate_buffer = getattr(reader, "allocate_buffer", None)
+    read_into = getattr(reader, "read_into", None)
+    pool_buffer = (
+        allocate_buffer(pool_read_size)
+        if callable(allocate_buffer) and callable(read_into)
+        else None
+    )
     for attempt in range(1, maximum_attempts + 1):
         read_count = 0
         read_bytes = 0
@@ -443,6 +451,16 @@ def capture_complete_scale_sources(
             read_count += 1
             read_bytes += size
             return blob
+
+        def read_pool() -> bytes | memoryview:
+            nonlocal read_count, read_bytes
+            if pool_buffer is None:
+                return read(ENEMY_POOL_BASE, pool_read_size)
+            assert callable(read_into)
+            read_into(ENEMY_POOL_BASE, pool_buffer)
+            read_count += 1
+            read_bytes += pool_read_size
+            return memoryview(pool_buffer).cast("B")
 
         manager_before = struct.unpack(
             "<I",
@@ -455,7 +473,7 @@ def capture_complete_scale_sources(
 
         counting_reader = _CountingReader()
         phase_before = ScaleSourcePhaseIdentity.capture(counting_reader)
-        pool = read(ENEMY_POOL_BASE, ENEMY_POOL_SIZE * ENEMY_STRIDE)
+        pool = read_pool()
         spell_pointer = phase_before.spell_enemy_pointer
         owner_in_pool = _pointer_in_ordinary_pool(spell_pointer)
         external_owner = (
@@ -504,8 +522,6 @@ def capture_complete_scale_sources(
 
         if manager_before != manager_after:
             status = "manager_frame_changed"
-        elif manager_before != expected_manager_frame:
-            status = "unexpected_manager_frame"
         elif phase_before != phase_after:
             status = "phase_identity_changed"
         elif (
@@ -626,12 +642,21 @@ class FinalBScaleSourceTraceService:
         difficulty_index: int,
         stage_route_index: int,
         spell_id: int | None,
+        observed_root_scale_bits: int,
+        observed_player_bomb_active: int,
+        observed_player_predeath_counter: int,
     ) -> dict[str, object] | None:
         if self._attempted or not self._trigger_matches(
             route_id=route_id,
             difficulty_index=difficulty_index,
             stage_route_index=stage_route_index,
             spell_id=spell_id,
+        ):
+            return None
+        if (
+            observed_root_scale_bits != FINAL_B_QUARTER_SCALE_BITS
+            or observed_player_bomb_active != 0
+            or observed_player_predeath_counter != 0
         ):
             return None
         self._attempted = True
@@ -670,7 +695,7 @@ class FinalBScaleSourceTraceService:
                 schedule_result = self._synthesize(
                     source_capture,
                     runtime_base=runtime_capture.runtime_base,
-                    source_frame=expected_manager_frame,
+                    source_frame=source_capture.manager_frame_before,
                 )
                 if not schedule_result.horizon_covered:
                     reasons.append(
@@ -706,6 +731,11 @@ class FinalBScaleSourceTraceService:
             "changes_input": False,
             "decision_frame": decision_frame,
             "expected_manager_frame": expected_manager_frame,
+            "capture_manager_frame": (
+                source_capture.manager_frame_before
+                if source_capture is not None
+                else None
+            ),
             "gameplay_epoch": gameplay_epoch,
             "route_id": route_id,
             "difficulty_index": difficulty_index,

@@ -6,11 +6,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import math
 import struct
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from analysis.th08_ecl_timer_raw_oracle import (
+    ORACLE_SEMANTICS_VERSION,
+    oracle_advance_timer_raw,
+    oracle_preserve_fraction_on_branch,
+)
 from analysis.th08_ecl_trace_support import spell_key
 from th08_ecl_runtime import (
     ECL_OP_LOOP_DECREMENT_JUMP,
@@ -18,16 +22,21 @@ from th08_ecl_runtime import (
     EclVmSnapshot,
     RuntimeEclInstruction,
 )
-from th08_ecl_shadow import interpret_vm_local_shadow
+from th08_ecl_shadow import (
+    ECL_VM_LOCAL_SHADOW_SEMANTICS_VERSION,
+    interpret_vm_local_shadow,
+)
 from th08_ecl_vm_state import (
     ECL_VM_LOCAL_PROJECTION_LAYOUT,
     EclVmLocalProjection,
+    float32_bits,
     float32_from_bits,
 )
+from th08_native_timer import TH08_NATIVE_TIMER_SEMANTICS_VERSION
 
 
-SCHEMA = "th08-ecl-vm-local-shadow-replay-v1"
-CASE_SCHEMA = "th08-ecl-vm-local-op05-cases-v1"
+SCHEMA = "th08-ecl-vm-local-shadow-replay-v2"
+CASE_SCHEMA = "th08-ecl-vm-local-op05-cases-v2"
 LOCAL_LOOP_SPELLS = frozenset(("57", "61", "65"))
 
 
@@ -116,34 +125,31 @@ def _case_record(
     counter = projection.integer_value(variable)
     if counter is None:
         raise ValueError("opcode 0x05 lvalue is outside the projection")
-    execution_timer = snapshot.timer_value
+    expected_elapsed = snapshot.timer_elapsed
+    expected_fraction_bits = snapshot.timer_fraction_bits
+    time_scale_bits = snapshot.time_scale_bits
     expected_stop_frame = 0
-    if instruction.time > execution_timer:
-        delta = max(
-            1,
-            int(
-                math.ceil(
-                    (instruction.time - execution_timer)
-                    / snapshot.time_scale
-                    - 1e-9
-                )
-            ),
-        )
-        if delta > 256:
+    while instruction.time != expected_elapsed:
+        if expected_stop_frame >= 256:
             raise ValueError("opcode 0x05 is outside the replay horizon")
-        expected_stop_frame = delta
-        execution_timer += delta * snapshot.time_scale
+        expected_elapsed, expected_fraction_bits = oracle_advance_timer_raw(
+            expected_elapsed,
+            expected_fraction_bits,
+            time_scale_bits,
+        )
+        expected_stop_frame += 1
     post_decrement = _signed_int32(counter - 1)
     expected_pc = (
         instruction.address + relative_offset
         if post_decrement > 0
         else instruction.address + instruction.size
     )
-    expected_timer = (
-        float(target_time)
-        if post_decrement > 0
-        else execution_timer
-    )
+    if post_decrement > 0:
+        expected_elapsed, expected_fraction_bits = oracle_preserve_fraction_on_branch(
+            target_time,
+            expected_fraction_bits,
+        )
+    expected_timer = expected_elapsed + float32_from_bits(expected_fraction_bits)
     result = interpret_vm_local_shadow(
         snapshot,
         instruction_at=lambda _address: instruction,
@@ -157,7 +163,8 @@ def _case_record(
         and result.stop_reason == "instruction_limit"
         and result.instructions_scanned == 1
         and result.final_instruction_pointer == expected_pc
-        and result.final_timer_value == expected_timer
+        and result.final_timer_elapsed == expected_elapsed
+        and result.final_timer_fraction_bits == expected_fraction_bits
         and result.stop_frame == expected_stop_frame
         and final_projection.integer_value(variable) == post_decrement
     )
@@ -170,13 +177,17 @@ def _case_record(
             "parameter_mask": instruction.parameter_mask,
             "arguments": list(arguments),
             "timer_fraction": snapshot.timer_fraction,
+            "timer_fraction_bits": f"{snapshot.timer_fraction_bits:#010x}",
             "timer_elapsed": snapshot.timer_elapsed,
             "time_scale": snapshot.time_scale,
+            "time_scale_bits": f"{snapshot.time_scale_bits:#010x}",
             "variable": variable,
             "counter_before": counter,
             "counter_after": post_decrement,
             "expected_pc_offset": expected_pc - runtime_base,
             "expected_timer": expected_timer,
+            "expected_timer_elapsed": expected_elapsed,
+            "expected_timer_fraction_bits": (f"{expected_fraction_bits:#010x}"),
             "expected_stop_frame": expected_stop_frame,
         },
         passed,
@@ -262,15 +273,11 @@ def audit_vm_local_shadow_replay(
                 result = interpret_vm_local_shadow(
                     snapshot,
                     instruction_at=instruction_at,
-                    horizon_frames=int(
-                        lookahead["requested_horizon_frames"]
-                    ),
+                    horizon_frames=int(lookahead["requested_horizon_frames"]),
                     active_difficulty_mask=0x08,
                 )
                 shadow_stop_reasons[result.stop_reason] += 1
-                per_spell_rows[spell][
-                    f"shadow_stop:{result.stop_reason}"
-                ] += 1
+                per_spell_rows[spell][f"shadow_stop:{result.stop_reason}"] += 1
                 if result.horizon_covered:
                     new_complete_rows += 1
                     if len(complete_samples) < 20:
@@ -279,9 +286,7 @@ def audit_vm_local_shadow_replay(
                                 "frame": decision.get("frame"),
                                 "spell": spell,
                                 "initial_opcode": opcode_key,
-                                "instructions_scanned": (
-                                    result.instructions_scanned
-                                ),
+                                "instructions_scanned": (result.instructions_scanned),
                                 "stop_reason": result.stop_reason,
                                 "event_count": len(result.events),
                             }
@@ -317,6 +322,12 @@ def audit_vm_local_shadow_replay(
     )
     cases = {
         "schema": CASE_SCHEMA,
+        "semantics": {
+            "product_shadow": ECL_VM_LOCAL_SHADOW_SEMANTICS_VERSION,
+            "native_timer": TH08_NATIVE_TIMER_SEMANTICS_VERSION,
+            "independent_oracle": ORACLE_SEMANTICS_VERSION,
+            "timer_identity": "signed_elapsed_plus_float32_fraction_bits",
+        },
         "source": {
             "trace_name": trace_path.name,
             "trace_sha256": trace_digest.hexdigest(),
@@ -327,6 +338,18 @@ def audit_vm_local_shadow_replay(
         "rows": {
             "initial_op05_rows": initial_op05_rows,
             "unique_cases": len(case_records),
+            "nonzero_fraction_cases": sum(
+                int(case["timer_fraction_bits"], 0) != 0 for case in case_records
+            ),
+            "nonunit_scale_cases": sum(
+                int(case["time_scale_bits"], 0) != float32_bits(1.0)
+                for case in case_records
+            ),
+        },
+        "authority": {
+            "scope": "retained_zero_fraction_observed_scale_slice",
+            "general_native_timer_exactness": "separate_differential_gate",
+            "historical_v1_fixture": "immutable",
         },
         "cases": case_records,
     }
@@ -341,9 +364,7 @@ def audit_vm_local_shadow_replay(
             "decoded_rows": decoded_rows,
             "decode_errors": decode_errors,
             "initial_opcode_rows": dict(sorted(initial_opcodes.items())),
-            "shadow_stop_reason_rows": dict(
-                sorted(shadow_stop_reasons.items())
-            ),
+            "shadow_stop_reason_rows": dict(sorted(shadow_stop_reasons.items())),
             "initial_op05_rows": initial_op05_rows,
             "unique_op05_cases": len(case_records),
             "op05_one_step_failures": one_step_failures,
@@ -361,6 +382,8 @@ def audit_vm_local_shadow_replay(
         "passed": all(gates.values()),
         "authority": {
             "scope": "offline_shadow_only",
+            "timer_semantics": TH08_NATIVE_TIMER_SEMANTICS_VERSION,
+            "retained_timer_slice": "zero_fraction_observed_scale",
             "candidate_completion": "none_verified",
             "live_callback_schedule": "unchanged",
             "physical_action": "none_added",

@@ -17,13 +17,15 @@ from types import FrameType
 
 from th08_ecl_runtime import EclVmSnapshot, RuntimeEclInstruction
 from th08_ecl_shadow import (
+    ECL_VM_LOCAL_SHADOW_SEMANTICS_VERSION,
     EclVmLocalShadowResult,
     interpret_vm_local_shadow,
 )
-from th08_ecl_vm_state import EclVmLocalProjection
+from th08_ecl_vm_state import EclVmLocalProjection, float32_from_bits
+from th08_native_timer import TH08_NATIVE_TIMER_SEMANTICS_VERSION
 
 
-SCHEMA = "th08-ecl-vm-local-shadow-benchmark-v1"
+SCHEMA = "th08-ecl-vm-local-shadow-benchmark-v2"
 
 
 def _percentile(values: list[float], fraction: float) -> float:
@@ -65,12 +67,12 @@ def _workload(
     )
     snapshot = EclVmSnapshot(
         address,
-        float(case["timer_fraction"]),
+        float32_from_bits(int(str(case["timer_fraction_bits"]), 0)),
         int(case["timer_elapsed"]),
         16,
         0.0,
         0.0,
-        float(case["time_scale"]),
+        float32_from_bits(int(str(case["time_scale_bits"]), 0)),
         projection,
     )
     return snapshot, instruction
@@ -100,7 +102,9 @@ def _result_matches(
         and result.stop_reason == "instruction_limit"
         and result.final_instruction_pointer
         == int(case["runtime_base"]) + int(case["expected_pc_offset"])
-        and result.final_timer_value == float(case["expected_timer"])
+        and result.final_timer_elapsed == int(case["expected_timer_elapsed"])
+        and result.final_timer_fraction_bits
+        == int(str(case["expected_timer_fraction_bits"]), 0)
         and result.stop_frame == int(case["expected_stop_frame"])
         and projection.integer_value(int(case["variable"]))
         == int(case["counter_after"])
@@ -146,20 +150,15 @@ def run_benchmark(
     source = fixture["source"]
     runtime_base = int(source["runtime_base"])
     cases = fixture["cases"]
-    workloads = [
-        _workload(case, runtime_base=runtime_base) for case in cases
-    ]
-    augmented_cases = [
-        {**case, "runtime_base": runtime_base} for case in cases
-    ]
+    workloads = [_workload(case, runtime_base=runtime_base) for case in cases]
+    augmented_cases = [{**case, "runtime_base": runtime_base} for case in cases]
     references = [_run_one(workload) for workload in workloads]
     exact = all(
         _result_matches(case, result)
         for case, result in zip(augmented_cases, references, strict=True)
     )
     bytecode_ops = [
-        float(_count_shadow_bytecode_ops(workload))
-        for workload in workloads
+        float(_count_shadow_bytecode_ops(workload)) for workload in workloads
     ]
 
     samples_ns: list[float] = []
@@ -167,17 +166,13 @@ def run_benchmark(
     for _ in range(batches):
         started = time.perf_counter_ns()
         for _ in range(iterations_per_batch):
-            last_results = [
-                _run_one(workload) for workload in workloads
-            ]
+            last_results = [_run_one(workload) for workload in workloads]
         elapsed = time.perf_counter_ns() - started
-        samples_ns.append(
-            elapsed / (iterations_per_batch * len(workloads))
-        )
+        samples_ns.append(elapsed / (iterations_per_batch * len(workloads)))
     stable = last_results == references
     gates = {
         "fixture_schema_valid": (
-            fixture.get("schema") == "th08-ecl-vm-local-op05-cases-v1"
+            fixture.get("schema") == "th08-ecl-vm-local-op05-cases-v2"
         ),
         "all_108_unique_cases_loaded": len(cases) == 108,
         "all_reference_results_exact": exact,
@@ -188,6 +183,11 @@ def run_benchmark(
     }
     return {
         "schema": SCHEMA,
+        "semantics": {
+            "shadow": ECL_VM_LOCAL_SHADOW_SEMANTICS_VERSION,
+            "timer": TH08_NATIVE_TIMER_SEMANTICS_VERSION,
+            "timer_identity": "signed_elapsed_plus_float32_fraction_bits",
+        },
         "environment": {
             "platform": platform.platform(),
             "machine": platform.machine(),
@@ -199,9 +199,7 @@ def run_benchmark(
             "unique_cases": len(cases),
             "batches": batches,
             "iterations_per_batch": iterations_per_batch,
-            "total_transitions": (
-                len(cases) * batches * iterations_per_batch
-            ),
+            "total_transitions": (len(cases) * batches * iterations_per_batch),
         },
         "logical_work": {
             "vm_instructions_per_transition": 1,
@@ -231,12 +229,15 @@ def main() -> int:
         batches=arguments.batches,
         iterations_per_batch=arguments.iterations_per_batch,
     )
-    encoded = json.dumps(
-        report,
-        indent=2,
-        sort_keys=True,
-        allow_nan=False,
-    ) + "\n"
+    encoded = (
+        json.dumps(
+            report,
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n"
+    )
     if arguments.output is None:
         print(encoded, end="")
     else:

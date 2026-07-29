@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-import math
 import struct
 
+from analysis.th08_ecl_timer_raw_oracle import (
+    oracle_advance_timer_raw,
+    oracle_preserve_fraction_on_branch,
+)
 from th08_ecl_runtime import RuntimeEclInstruction
 
 
@@ -43,30 +46,41 @@ def oracle_interpret(
 
     variables = {10036: counter}
     pc = start
-    timer = timer_elapsed + timer_fraction
+    timer_fraction_bits = struct.unpack(
+        "<I",
+        struct.pack("<f", timer_fraction),
+    )[0]
+    time_scale_bits = struct.unpack("<I", struct.pack("<f", time_scale))[0]
     physical_frame = 0
     scanned = 0
-    visited: set[tuple[int, float, int, tuple[tuple[int, int], ...]]] = set()
+    visited: set[tuple[int, int, int, int, tuple[tuple[int, int], ...]]] = set()
     reason = "instruction_limit"
     for _ in range(max_instructions):
-        state = (pc, timer, physical_frame, tuple(sorted(variables.items())))
+        state = (
+            pc,
+            timer_elapsed,
+            timer_fraction_bits,
+            physical_frame,
+            tuple(sorted(variables.items())),
+        )
         if state in visited:
             reason = "repeated_state"
             break
         visited.add(state)
         time_value, opcode, size, difficulty, mask, arguments = instructions[pc]
         scanned += 1
-        if time_value > timer:
-            delta = max(
-                1,
-                math.ceil((time_value - timer) / time_scale - 1e-9),
-            )
-            if physical_frame + delta > horizon_frames:
-                physical_frame = horizon_frames
+        while time_value != timer_elapsed:
+            if physical_frame >= horizon_frames:
                 reason = "horizon"
                 break
-            physical_frame += delta
-            timer += delta * time_scale
+            timer_elapsed, timer_fraction_bits = oracle_advance_timer_raw(
+                timer_elapsed,
+                timer_fraction_bits,
+                time_scale_bits,
+            )
+            physical_frame += 1
+        if reason == "horizon":
+            break
         if 0x08 & difficulty != 0x08:
             pc += size
             continue
@@ -79,7 +93,10 @@ def oracle_interpret(
         if opcode == 0x04 and mask == 0 and len(arguments) == 2:
             target_time, relative = arguments
             pc += relative
-            timer = float(target_time)
+            timer_elapsed, timer_fraction_bits = oracle_preserve_fraction_on_branch(
+                target_time,
+                timer_fraction_bits,
+            )
             continue
         if opcode == 0x05 and mask == 0x04 and len(arguments) == 3:
             target_time, relative, variable = arguments
@@ -92,7 +109,10 @@ def oracle_interpret(
             variables[variable] = post
             if post > 0:
                 pc += relative
-                timer = float(target_time)
+                timer_elapsed, timer_fraction_bits = oracle_preserve_fraction_on_branch(
+                    target_time,
+                    timer_fraction_bits,
+                )
                 continue
             pc += size
             continue
@@ -110,7 +130,13 @@ def oracle_interpret(
         "reason": reason,
         "scanned": scanned,
         "pc": pc,
-        "timer": timer,
+        "timer": timer_elapsed
+        + struct.unpack(
+            "<f",
+            struct.pack("<I", timer_fraction_bits),
+        )[0],
+        "timer_elapsed": timer_elapsed,
+        "timer_fraction_bits": timer_fraction_bits,
         "physical_frame": physical_frame,
         "variables": variables,
     }

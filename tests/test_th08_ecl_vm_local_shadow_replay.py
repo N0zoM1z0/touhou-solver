@@ -58,6 +58,14 @@ class EclVmLocalShadowReplayTests(unittest.TestCase):
             )
 
         self.assertTrue(report["passed"])
+        self.assertEqual(
+            report["schema"],
+            "th08-ecl-vm-local-shadow-replay-v2",
+        )
+        self.assertEqual(
+            cases["schema"],
+            "th08-ecl-vm-local-op05-cases-v2",
+        )
         self.assertEqual(report["counts"]["initial_op05_rows"], 2)
         self.assertEqual(report["counts"]["unique_op05_cases"], 2)
         self.assertEqual(
@@ -66,6 +74,8 @@ class EclVmLocalShadowReplayTests(unittest.TestCase):
         )
         self.assertEqual(cases["cases"][0]["counter_before"], 1)
         self.assertEqual(cases["cases"][1]["counter_before"], 2)
+        self.assertEqual(cases["rows"]["nonzero_fraction_cases"], 0)
+        self.assertEqual(cases["rows"]["nonunit_scale_cases"], 0)
 
     def test_missing_projection_fails_the_decode_gate(self) -> None:
         row = _row(2)

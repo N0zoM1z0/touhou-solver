@@ -15,6 +15,11 @@ from th08_ecl_runtime import (
     EclVmSnapshot,
     RuntimeEclInstruction,
 )
+from th08_native_timer import (
+    TH08_NATIVE_TIMER_SEMANTICS_VERSION,
+    Th08TimerState,
+    advance_until_elapsed,
+)
 
 
 ECL_OP_TERMINATE = 0x01
@@ -66,6 +71,9 @@ INTENT_PLAYER_AIM = "player_aim"
 INTENT_RNG = "rng"
 INTENT_DEFERRED = "deferred"
 INTENT_CURRENT_PATTERN = "current_pattern"
+ECL_BIRTH_LOOKAHEAD_SEMANTICS_VERSION = (
+    "th08-ecl-birth-lookahead-v2-native-timer-components"
+)
 
 
 @dataclass(frozen=True)
@@ -113,15 +121,9 @@ def observe_deferred_fire_state(
 
     status = "aligned_complete"
     active: bool | None = None
-    if (
-        observed_enemy_pointer is None
-        or enemy_flags is None
-    ):
+    if observed_enemy_pointer is None or enemy_flags is None:
         status = "enemy_flags_unavailable"
-    elif (
-        spell_enemy_pointer <= 0
-        or observed_enemy_pointer != spell_enemy_pointer
-    ):
+    elif spell_enemy_pointer <= 0 or observed_enemy_pointer != spell_enemy_pointer:
         status = "enemy_pointer_mismatch"
     elif any(
         value is None
@@ -133,12 +135,7 @@ def observe_deferred_fire_state(
         )
     ):
         status = "capture_frames_unavailable"
-    elif not (
-        frame_before
-        == frame_after
-        == ecl_frame_before
-        == ecl_frame_after
-    ):
+    elif not (frame_before == frame_after == ecl_frame_before == ecl_frame_after):
         status = "capture_misaligned"
     else:
         active = bool(enemy_flags & ENEMY_DEFERRED_FIRE_FLAG)
@@ -170,9 +167,7 @@ class DirectFireArguments:
     @classmethod
     def decode(cls, payload: bytes) -> DirectFireArguments:
         if len(payload) != DIRECT_FIRE_ARGUMENT_SIZE:
-            raise ValueError(
-                "direct-fire payload must contain exactly 32 bytes"
-            )
+            raise ValueError("direct-fire payload must contain exactly 32 bytes")
         (
             bullet_type,
             color,
@@ -245,9 +240,7 @@ class EclBirthIntent:
             "parameter_mask": self.parameter_mask,
             "intent_status": self.intent_status,
             "arguments": (
-                self.arguments.record()
-                if self.arguments is not None
-                else None
+                self.arguments.record() if self.arguments is not None else None
             ),
             "requested_bullets": self.requested_bullets,
             "dependencies": list(self.dependencies),
@@ -284,6 +277,14 @@ class EclBirthLookaheadResult:
         )
 
     @property
+    def semantics_version(self) -> str:
+        return ECL_BIRTH_LOOKAHEAD_SEMANTICS_VERSION
+
+    @property
+    def timer_semantics_version(self) -> str:
+        return TH08_NATIVE_TIMER_SEMANTICS_VERSION
+
+    @property
     def covered_through_frame(self) -> int:
         if self.horizon_covered:
             return self.requested_horizon_frames
@@ -298,6 +299,8 @@ class EclBirthLookaheadResult:
     def record(self) -> dict[str, object]:
         return {
             "role": "trace_only_no_action_authority",
+            "semantics_version": self.semantics_version,
+            "timer_semantics_version": self.timer_semantics_version,
             "intents": [intent.record() for intent in self.intents],
             "instructions_scanned": self.instructions_scanned,
             "stop_reason": self.stop_reason,
@@ -309,9 +312,7 @@ class EclBirthLookaheadResult:
                 "covered_through_frame": self.covered_through_frame,
                 "unknown_from_frame": self.unknown_from_frame,
                 "result_kind": (
-                    "complete_schedule"
-                    if self.horizon_covered
-                    else "prefix_only"
+                    "complete_schedule" if self.horizon_covered else "prefix_only"
                 ),
             },
         }
@@ -373,9 +374,7 @@ def _direct_fire_intent(
 ) -> EclBirthIntent:
     arguments = DirectFireArguments.decode(instruction.payload)
     mode = instruction.opcode - ECL_OP_FIRST_DIRECT_FIRE
-    dependencies = list(
-        _parameter_dependencies(instruction.parameter_mask)
-    )
+    dependencies = list(_parameter_dependencies(instruction.parameter_mask))
     literal_floats = (
         (0x10, arguments.speed1),
         (0x20, arguments.speed2),
@@ -397,10 +396,7 @@ def _direct_fire_intent(
         dependencies.append("rank_adjustment")
     if minimum_fire_distance_clear is not True:
         dependencies.append("minimum_fire_distance")
-    if (
-        arguments.transform_flags & (0x8000 | 0x10000)
-        and fire_filter_clear is not True
-    ):
+    if arguments.transform_flags & (0x8000 | 0x10000) and fire_filter_clear is not True:
         dependencies.append("route_or_enemy_fire_filter")
     if not template_geometry_resolved:
         dependencies.append("bullet_template_geometry")
@@ -499,18 +495,31 @@ def analyze_ecl_birth_intents(
         raise ValueError("active difficulty mask must be positive")
     if max_instructions <= 0:
         raise ValueError("instruction limit must be positive")
-    if (
-        available_slots is not None
-        and not 0 <= available_slots <= 1536
-    ):
+    if available_slots is not None and not 0 <= available_slots <= 1536:
         raise ValueError("available slots must be in the native pool range")
 
     pc = snapshot.instruction_pointer
-    timer_value = snapshot.timer_value
+    try:
+        timer = Th08TimerState(
+            snapshot.timer_elapsed,
+            snapshot.timer_fraction_bits,
+        )
+        time_scale_bits = snapshot.time_scale_bits
+        if not math.isfinite(snapshot.time_scale) or snapshot.time_scale <= 0.0:
+            raise ValueError("unsupported live ECL time scale")
+    except (OverflowError, struct.error, ValueError):
+        return EclBirthLookaheadResult(
+            intents=(),
+            instructions_scanned=0,
+            stop_reason="unsupported_native_timer_state",
+            horizon_covered=False,
+            requested_horizon_frames=horizon_frames,
+            stop_frame=0,
+        )
     physical_frame = 0
     deferred = deferred_fire_active
     intents: list[EclBirthIntent] = []
-    visited: set[tuple[int, int, int, bool | None]] = set()
+    visited: set[tuple[int, int, int, int, bool | None]] = set()
     instructions_scanned = 0
     stop_reason = "instruction_limit"
     horizon_covered = False
@@ -518,7 +527,8 @@ def analyze_ecl_birth_intents(
     for _ in range(max_instructions):
         state = (
             pc,
-            int(math.floor(timer_value * 256.0)),
+            timer.elapsed,
+            timer.fraction_bits,
             physical_frame,
             deferred,
         )
@@ -529,21 +539,21 @@ def analyze_ecl_birth_intents(
 
         instruction = instruction_at(pc)
         instructions_scanned += 1
-        if instruction.time > timer_value:
-            delta = int(
-                math.ceil(
-                    (instruction.time - timer_value) / snapshot.time_scale
-                    - 1e-9
-                )
+        try:
+            timer, delta, reached = advance_until_elapsed(
+                timer,
+                target_elapsed=instruction.time,
+                time_scale_bits=time_scale_bits,
+                max_physical_frames=horizon_frames - physical_frame,
             )
-            delta = max(delta, 1)
-            if physical_frame + delta > horizon_frames:
-                stop_reason = "horizon"
-                horizon_covered = True
-                physical_frame = horizon_frames
-                break
-            physical_frame += delta
-            timer_value += delta * snapshot.time_scale
+        except ValueError:
+            stop_reason = "unsupported_native_timer_transition"
+            break
+        physical_frame += delta
+        if not reached:
+            stop_reason = "horizon"
+            horizon_covered = True
+            break
 
         eligible = _eligible(instruction, active_difficulty_mask)
         if not eligible:
@@ -562,25 +572,21 @@ def analyze_ecl_birth_intents(
                 break
             target_time, relative_offset = target
             pc = instruction.address + relative_offset
-            timer_value = float(target_time)
+            timer = timer.with_elapsed_preserving_fraction(target_time)
             continue
         if opcode == ECL_OP_RESET_TIMER:
             stop_reason = "unsupported_timer_reset"
             break
         if (
             opcode == ECL_OP_LOOP_DECREMENT_JUMP
-            or ECL_OP_FIRST_CONDITIONAL_JUMP
-            <= opcode
-            <= ECL_OP_LAST_CONDITIONAL_JUMP
+            or ECL_OP_FIRST_CONDITIONAL_JUMP <= opcode <= ECL_OP_LAST_CONDITIONAL_JUMP
             or opcode in (ECL_OP_CALL_SUBROUTINE, ECL_OP_RETURN_SUBROUTINE)
         ):
             stop_reason = "unsupported_control_flow"
             break
         if (
             opcode == ECL_OP_CALL_SUBROUTINE_WITH_ENEMY
-            or ECL_OP_FIRST_CHILD_SOURCE
-            <= opcode
-            <= ECL_OP_LAST_CHILD_SOURCE
+            or ECL_OP_FIRST_CHILD_SOURCE <= opcode <= ECL_OP_LAST_CHILD_SOURCE
         ):
             stop_reason = "source_topology_change"
             break
@@ -615,9 +621,7 @@ def analyze_ecl_birth_intents(
                     physical_frame=physical_frame,
                     deferred_fire_active=deferred,
                     spell_active=spell_active,
-                    minimum_fire_distance_clear=(
-                        minimum_fire_distance_clear
-                    ),
+                    minimum_fire_distance_clear=(minimum_fire_distance_clear),
                     fire_filter_clear=fire_filter_clear,
                     available_slots=available_slots,
                     template_geometry_resolved=template_geometry_resolved,
@@ -652,6 +656,7 @@ def analyze_ecl_birth_intents(
 __all__ = [
     "DIRECT_FIRE_ARGUMENT_SIZE",
     "DIRECT_FIRE_PARAMETER_NAMES",
+    "ECL_BIRTH_LOOKAHEAD_SEMANTICS_VERSION",
     "DirectFireArguments",
     "EclBirthIntent",
     "EclBirthLookaheadResult",

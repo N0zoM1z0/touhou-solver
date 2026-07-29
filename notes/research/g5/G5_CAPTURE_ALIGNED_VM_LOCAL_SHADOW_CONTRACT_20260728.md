@@ -4,11 +4,11 @@ Date: 2026-07-28
 
 Status: phase A capture/trace projection is implemented, Linux/Windows
 offline-validated, and validated on one fresh complete physical Stage-4A
-workload. Phase-B1's smallest integer-loop shadow and scalar comparison are
-implemented and replayed over the retained trace, but the 2026-07-29 native
-semantic audit below narrows their exactness authority to the observed
-zero-fraction timer slice. No local interpretation reaches live coverage or
-lowering.
+workload. Phase-B1's smallest integer-loop shadow is now corrected to native
+elapsed/fraction component semantics and replayed over the retained trace.
+The historical V1 fixture remains only the observed zero-fraction timer
+slice; the component transition has separate independent-oracle/native-probe
+authority. No local interpretation reaches live coverage or lowering.
 
 ## 2026-07-29 Native Timer Authority Correction
 
@@ -40,6 +40,39 @@ This correction is retained as CE-0175 and detailed in
 `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`. It does not
 relabel the historical replay report as failed; it narrows what that report
 proved.
+
+## 2026-07-29 SEM-TIMER implementation
+
+**Observed and revalidated:** the native helper at `0x00447421`, its direct
+caller at `0x00406660`, the exact-integer ECL time gate at `0x004185AF`, and
+the shared opcode-`0x04`/taken-`0x05` branch write at `0x004186F1` establish
+the component recurrence and fraction-preserving branch behavior recorded in
+`notes/architecture/TH08_NATIVE_ECL_TIMER_SEMANTICS_20260729.md`.
+
+The V2 shadow now:
+
+- keeps signed elapsed and raw float32 fraction bits as separate state and
+  repeated-state identity;
+- applies the bit-versioned native transition once per physical frame;
+- executes an instruction only when integer elapsed equals instruction time;
+- preserves fraction on opcode `0x04` and taken opcode `0x05`; and
+- fails closed on invalid timer state or transition.
+
+The production implementation, a raw-bit independent Python oracle, and
+Linux/Windows native x87 probes agree on all 17 deterministic/adversarial
+cases. The component-versioned Stage-4A replay still has 3,117 in-scope rows,
+1,730 opcode-`0x05` roots, 108 unique cases, zero failures, and zero new
+completion. Its retained physical rows contain zero fraction and unit scale,
+so they do not independently exercise the new general component cases.
+
+Historical V1 fixture SHA-256 remains
+`6c34d09752abb7805c84e537b8df52ad24a1aea90614c8b5a2687d730d73ab3c`.
+The V2 fixture and replay SHA-256 values are
+`112e58b4866faed7a1bed76b91e489aea9e627a8216b7c1ce0a2f17921788e6a`
+and
+`b52eeb18cbe1d53e7ba773f3d5c0dfea8e73ce5478a6382c359d934cce9466ce`.
+These replace the general timer-transition claim, not the immutable
+historical bytes.
 
 This follows
 `notes/research/g5/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`.
@@ -429,13 +462,13 @@ Report SHA-256 values are
 and
 `ed8c0b10d53f7641ab4055c45ade4f99001291cd40979ee29488b3203139a908`.
 
-**Authority, corrected 2026-07-29:** this closes the retained physical
-one-step opcode-`0x05` PC/counter parity gate only for the observed
-zero-fraction timer slice. It does not establish general native timer parity,
-complete a callback schedule, lower a new event, alter a live action, or
-close B4. Direct fire, RNG-derived assignment, float add/normalization,
-dynamic values, calls, interrupts, and spell 73 remain unknown. The next
-semantic gate is an independent native elapsed/fraction plus
-binary32-rounding oracle for the exact shipped timer/float path; the parallel
-performance gate remains matched live-path attribution under the unchanged B4
-limits.
+**Authority, corrected 2026-07-29:** the historical physical one-step
+opcode-`0x05` PC/counter fixture remains only the observed zero-fraction
+slice. General supported timer-component transition parity now comes from the
+separate raw Python oracle and native x87 probes, with the V2 state/version
+boundary. This still does not complete a callback schedule, lower a new event
+from the offline shadow, grant action authority, or close B4. Direct fire,
+RNG-derived assignment, dynamic values, calls, interrupts, and spell 73
+remain unknown. Player/laser time scale remains the next semantic gate, and
+matched live-path attribution remains the parallel performance gate under the
+unchanged B4 limits.

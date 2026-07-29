@@ -292,7 +292,9 @@ class EclBirthIntentTests(unittest.TestCase):
         self.assertIn("current_emission_descriptor", intent.dependencies)
         self.assertIsNone(intent.arguments)
 
-    def test_rank_distance_template_pool_and_transform_dependencies_remain(self) -> None:
+    def test_rank_distance_template_pool_and_transform_dependencies_remain(
+        self,
+    ) -> None:
         fire = _instruction(
             BASE,
             time=0,
@@ -378,6 +380,68 @@ class EclBirthIntentTests(unittest.TestCase):
         )
         result = _analyze((jump, fire, terminate))
         self.assertEqual(result.intents[0].instruction_frame, 2)
+
+    def test_literal_jump_preserves_nonzero_fraction_for_birth_timing(self) -> None:
+        target = BASE + 0x80
+        jump = _instruction(
+            BASE,
+            time=0,
+            opcode=0x04,
+            payload=struct.pack("<ii", 3, target - BASE),
+        )
+        fire = _instruction(
+            target,
+            time=4,
+            opcode=0x61,
+            payload=_fire_payload(),
+        )
+        terminate = _instruction(
+            fire.address + fire.size,
+            time=4,
+            opcode=0x01,
+        )
+        by_address = {
+            instruction.address: instruction for instruction in (jump, fire, terminate)
+        }
+        result = analyze_ecl_birth_intents(
+            _snapshot(timer_fraction=0.5, time_scale=0.75),
+            instruction_at=by_address.__getitem__,
+            horizon_frames=3,
+            active_difficulty_mask=1,
+            deferred_fire_active=False,
+            spell_active=True,
+            minimum_fire_distance_clear=True,
+            fire_filter_clear=True,
+            available_slots=1536,
+            template_geometry_resolved=True,
+            emission_origin_resolved=True,
+        )
+        self.assertEqual(result.stop_reason, "terminate")
+        self.assertEqual(result.intents[0].instruction_frame, 1)
+        self.assertIn("native-timer-components", result.semantics_version)
+        self.assertEqual(
+            result.record()["timer_semantics_version"],
+            result.timer_semantics_version,
+        )
+
+    def test_past_birth_instruction_time_waits_for_exact_equality(self) -> None:
+        fire = _instruction(
+            BASE,
+            time=4,
+            opcode=0x61,
+            payload=_fire_payload(),
+        )
+        result = analyze_ecl_birth_intents(
+            _snapshot(timer_elapsed=5),
+            instruction_at={BASE: fire}.__getitem__,
+            horizon_frames=3,
+            active_difficulty_mask=1,
+            deferred_fire_active=False,
+            max_instructions=1,
+        )
+        self.assertEqual(result.stop_reason, "horizon")
+        self.assertEqual(result.stop_frame, 3)
+        self.assertEqual(result.intents, ())
 
     def test_unsupported_control_or_source_topology_stops_before_fire(self) -> None:
         for opcode, reason in (

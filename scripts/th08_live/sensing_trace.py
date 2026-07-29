@@ -7,7 +7,9 @@ from collections.abc import Callable, Collection, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
+from th08_ecl_runtime import ECL_LOOKAHEAD_SEMANTICS_VERSION
 from th08_live.iteration import FreshIssueResult
+from th08_native_timer import TH08_NATIVE_TIMER_SEMANTICS_VERSION
 
 
 @dataclass(frozen=True)
@@ -130,8 +132,17 @@ def build_sensing_trace_fields(
             {
                 "instruction_pointer": ecl_snapshot.instruction_pointer,
                 "timer_fraction": ecl_snapshot.timer_fraction,
+                "timer_fraction_bits": ecl_snapshot.timer_fraction_bits,
                 "timer_elapsed": ecl_snapshot.timer_elapsed,
                 "time_scale": ecl_snapshot.time_scale,
+                "time_scale_bits": ecl_snapshot.time_scale_bits,
+                "timer_identity": {
+                    "semantics_version": (TH08_NATIVE_TIMER_SEMANTICS_VERSION),
+                    "elapsed": ecl_snapshot.timer_elapsed,
+                    "fraction_bits": ecl_snapshot.timer_fraction_bits,
+                    "time_scale_bits": ecl_snapshot.time_scale_bits,
+                },
+                "lookahead_semantics_version": (ECL_LOOKAHEAD_SEMANTICS_VERSION),
                 "tag_mask": ecl_snapshot.tag_mask,
                 "vm_local_projection": (
                     projection.trace_record()
@@ -151,9 +162,7 @@ def build_sensing_trace_fields(
                     else 0
                 ),
                 "stop_reason": (
-                    ecl_lookahead.stop_reason
-                    if ecl_lookahead is not None
-                    else None
+                    ecl_lookahead.stop_reason if ecl_lookahead is not None else None
                 ),
                 "horizon_covered": (
                     ecl_lookahead.horizon_covered
@@ -171,9 +180,7 @@ def build_sensing_trace_fields(
                     else None
                 ),
                 "stop_frame": (
-                    ecl_lookahead.stop_frame
-                    if ecl_lookahead is not None
-                    else None
+                    ecl_lookahead.stop_frame if ecl_lookahead is not None else None
                 ),
                 "covered_through_frame": (
                     ecl_lookahead.covered_through_frame
@@ -181,9 +188,7 @@ def build_sensing_trace_fields(
                     else 0
                 ),
                 "unknown_from_frame": (
-                    ecl_lookahead.unknown_from_frame
-                    if ecl_lookahead is not None
-                    else 1
+                    ecl_lookahead.unknown_from_frame if ecl_lookahead is not None else 1
                 ),
                 "result_kind": (
                     (
@@ -203,9 +208,7 @@ def build_sensing_trace_fields(
                         event.alternate_velocity_y,
                     ]
                     for event in (
-                        ecl_lookahead.events
-                        if ecl_lookahead is not None
-                        else ()
+                        ecl_lookahead.events if ecl_lookahead is not None else ()
                     )
                 ],
                 "events": [
@@ -220,10 +223,7 @@ def build_sensing_trace_fields(
                 ],
                 "lowering_status": (
                     "complete_schedule_lowered"
-                    if (
-                        ecl_lookahead is not None
-                        and ecl_lookahead.horizon_covered
-                    )
+                    if (ecl_lookahead is not None and ecl_lookahead.horizon_covered)
                     else "incomplete_prefix_not_lowered"
                 ),
                 "attached_bullets": sum(
@@ -231,14 +231,11 @@ def build_sensing_trace_fields(
                 ),
                 "tagged_bullets": len(ecl_tagged_bullets),
                 "stopped_tagged_bullets": sum(
-                    bullet.callback_phase_state == 0
-                    and bullet.callback_aux_state == 1
+                    bullet.callback_phase_state == 0 and bullet.callback_aux_state == 1
                     for bullet in ecl_tagged_bullets
                 ),
                 "event_frame_offset": trace_input.ecl_event_frame_offset,
-                "event_frame_uncertainty": (
-                    trace_input.ecl_event_frame_uncertainty
-                ),
+                "event_frame_uncertainty": (trace_input.ecl_event_frame_uncertainty),
                 "error": trace_input.ecl_lookahead_error,
             }
             if ecl_snapshot is not None
@@ -253,13 +250,11 @@ def build_sensing_trace_fields(
         "active_items": len(trace_input.items),
         "active_enemy_bodies": len(enemy_bodies),
         "enemy_body_contact_enabled_count": sum(
-            body.pointer not in dormant
-            and enemy_body_contact_enabled(body)
+            body.pointer not in dormant and enemy_body_contact_enabled(body)
             for body in enemy_bodies
         ),
         "enemy_body_anticipatory_count": sum(
-            body.pointer not in dormant
-            and not enemy_body_contact_enabled(body)
+            body.pointer not in dormant and not enemy_body_contact_enabled(body)
             for body in enemy_bodies
         ),
         "enemy_body_dormant_count": sum(
@@ -273,13 +268,11 @@ def build_sensing_trace_fields(
             "enemy_prefix_body_count": len(trace_input.enemy_prefix_bodies),
             "enemy_prefix_observed_body_count": len(enemy_prefix.bodies),
             "enemy_prefix_contact_enabled_count": sum(
-                body.pointer not in dormant
-                and enemy_body_contact_enabled(body)
+                body.pointer not in dormant and enemy_body_contact_enabled(body)
                 for body in trace_input.enemy_prefix_bodies
             ),
             "enemy_prefix_anticipatory_count": sum(
-                body.pointer not in dormant
-                and not enemy_body_contact_enabled(body)
+                body.pointer not in dormant and not enemy_body_contact_enabled(body)
                 for body in trace_input.enemy_prefix_bodies
             ),
             "enemy_prefix_dormant_count": len(dormant),
@@ -307,12 +300,9 @@ def build_sensing_trace_fields(
                 enemy_body_contact_enabled(body) for body in issue_prefix.bodies
             ),
             "anticipatory_count": sum(
-                not enemy_body_contact_enabled(body)
-                for body in issue_prefix.bodies
+                not enemy_body_contact_enabled(body) for body in issue_prefix.bodies
             ),
-            "dormant_count": len(
-                trace_input.issue_dormant_enemy_body_pointers
-            ),
+            "dormant_count": len(trace_input.issue_dormant_enemy_body_pointers),
             "attempts": issue_prefix.attempts,
             "stable": issue_prefix.stable,
             "changes": list(trace_input.issue_enemy_changes),
@@ -333,9 +323,7 @@ def build_sensing_trace_fields(
                 "body": serialize_enemy_bodies(
                     (trace_input.spell_enemy_body_guard.body,)
                 )[0],
-                "contact_enabled": (
-                    trace_input.spell_enemy_body_guard.contact_enabled
-                ),
+                "contact_enabled": (trace_input.spell_enemy_body_guard.contact_enabled),
                 "anticipatory": (
                     not trace_input.spell_enemy_body_guard.contact_enabled
                 ),

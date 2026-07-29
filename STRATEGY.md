@@ -344,6 +344,17 @@ rollback remains unjustified. The full dependency and Lunatic NMNB acceptance
 ladder are in
 `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`.
 
+**2026-07-29 SEM-TIMER offline correction:** the revalidated elapsed/fraction
+component recurrence now passes independent raw-Python and Linux/Windows
+native-probe parity, and the affected shadow/live-lookahead identities are
+versioned. The offline VM-local shadow remains **offline** and gains no
+coverage or action authority. The existing velocity lookahead remains part of
+the **live** sensing stack with corrected timing semantics; this is a
+native-correctness fix, not a strategy promotion. Its fixed observer-off
+Stage-5 physical falsifier is pending, so it has no new survival claim.
+CE-0175 remains open for that physical rebaseline and for the separate
+player/laser `SEM-SCALE` omission.
+
 The amendment and CE-0183 override the numbered historical backlog below
 until the semantic correction/model-version gate is complete. Those rows
 retain evidence/status history; they are not permission to resume G5 first.

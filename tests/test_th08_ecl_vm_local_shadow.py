@@ -13,6 +13,7 @@ from th08_ecl_runtime import (
     ECL_OP_CALL_SUBROUTINE,
     ECL_OP_FIRST_CONDITIONAL_JUMP,
     ECL_OP_INVOKE_CALLBACK,
+    ECL_OP_JUMP,
     ECL_OP_LOOP_DECREMENT_JUMP,
     ECL_OP_SET_FLOAT,
     ECL_OP_TERMINATE,
@@ -54,6 +55,9 @@ def _snapshot(
     *,
     angle_bits: int = 0,
     speed_bits: int = 0,
+    timer_fraction: float = 0.0,
+    timer_elapsed: int = 0,
+    time_scale: float = 1.0,
 ) -> EclVmSnapshot:
     projection = EclVmLocalProjection(
         (16, 1, 2, 3, 4, 5, 6, 7),
@@ -64,12 +68,12 @@ def _snapshot(
     speed = struct.unpack("<f", struct.pack("<I", speed_bits))[0]
     return EclVmSnapshot(
         instruction_pointer,
-        0.0,
-        0,
+        timer_fraction,
+        timer_elapsed,
         16,
         angle,
         speed,
-        1.0,
+        time_scale,
         projection,
     )
 
@@ -132,6 +136,14 @@ class EclVmLocalShadowTests(unittest.TestCase):
                     oracle["pc"],
                 )
                 self.assertEqual(result.final_timer_value, oracle["timer"])
+                self.assertEqual(
+                    result.final_timer_elapsed,
+                    oracle["timer_elapsed"],
+                )
+                self.assertEqual(
+                    result.final_timer_fraction_bits,
+                    oracle["timer_fraction_bits"],
+                )
                 self.assertEqual(result.stop_frame, oracle["physical_frame"])
                 self.assertEqual(
                     result.final_projection.scratch_integers[0],
@@ -168,6 +180,144 @@ class EclVmLocalShadowTests(unittest.TestCase):
         self.assertEqual(two.instructions_scanned, 3)
         self.assertEqual(one.stop_reason, "terminate")
         self.assertEqual(two.stop_reason, "terminate")
+
+    def test_jump_preserves_fraction_and_crosses_threshold_in_one_tick(
+        self,
+    ) -> None:
+        base = 0x515000
+        jump = _instruction(
+            base,
+            ECL_OP_JUMP,
+            4,
+            20,
+            time=10,
+        )
+        terminate = _instruction(base + 20, ECL_OP_TERMINATE, time=5)
+        instructions = {base: jump, terminate.address: terminate}
+        raw = {
+            address: raw_instruction(instruction)
+            for address, instruction in instructions.items()
+        }
+        snapshot = _snapshot(
+            base,
+            1,
+            timer_elapsed=10,
+            timer_fraction=0.75,
+            time_scale=0.5,
+        )
+
+        result = interpret_vm_local_shadow(
+            snapshot,
+            instruction_at=instructions.__getitem__,
+            horizon_frames=4,
+            active_difficulty_mask=0x08,
+        )
+        oracle = oracle_interpret(
+            raw,
+            start=base,
+            counter=1,
+            timer_elapsed=10,
+            timer_fraction=0.75,
+            time_scale=0.5,
+            horizon_frames=4,
+        )
+
+        self.assertEqual(result.stop_reason, "terminate")
+        self.assertEqual(result.stop_frame, 1)
+        self.assertEqual(result.final_timer_elapsed, 5)
+        self.assertEqual(
+            result.final_timer_fraction_bits,
+            struct.unpack("<I", struct.pack("<f", 0.25))[0],
+        )
+        self.assertEqual(
+            (
+                result.final_timer_elapsed,
+                result.final_timer_fraction_bits,
+            ),
+            (
+                oracle["timer_elapsed"],
+                oracle["timer_fraction_bits"],
+            ),
+        )
+
+    def test_taken_op05_preserves_nonzero_fraction(self) -> None:
+        base = 0x516000
+        loop = _instruction(
+            base,
+            ECL_OP_LOOP_DECREMENT_JUMP,
+            4,
+            24,
+            10036,
+            time=10,
+            parameter_mask=0x04,
+        )
+        terminate = _instruction(base + 24, ECL_OP_TERMINATE, time=5)
+        instructions = {base: loop, terminate.address: terminate}
+        result = interpret_vm_local_shadow(
+            _snapshot(
+                base,
+                2,
+                timer_elapsed=10,
+                timer_fraction=0.75,
+                time_scale=0.5,
+            ),
+            instruction_at=instructions.__getitem__,
+            horizon_frames=4,
+            active_difficulty_mask=0x08,
+        )
+
+        self.assertEqual(result.stop_reason, "terminate")
+        self.assertEqual(result.stop_frame, 1)
+        self.assertEqual(result.final_timer_elapsed, 5)
+        self.assertEqual(
+            result.final_timer_fraction_bits,
+            struct.unpack("<I", struct.pack("<f", 0.25))[0],
+        )
+        assert result.final_projection is not None
+        self.assertEqual(result.final_projection.scratch_integers[0], 1)
+
+    def test_past_instruction_time_waits_to_horizon(self) -> None:
+        base = 0x517000
+        terminate = _instruction(base, ECL_OP_TERMINATE, time=4)
+        result = interpret_vm_local_shadow(
+            _snapshot(
+                base,
+                1,
+                timer_elapsed=5,
+                timer_fraction=0.25,
+                time_scale=1.0,
+            ),
+            instruction_at={base: terminate}.__getitem__,
+            horizon_frames=3,
+            active_difficulty_mask=0x08,
+        )
+
+        self.assertEqual(result.stop_reason, "horizon")
+        self.assertEqual(result.stop_frame, 3)
+        self.assertEqual(result.final_timer_elapsed, 8)
+        self.assertEqual(
+            result.final_timer_fraction_bits,
+            struct.unpack("<I", struct.pack("<f", 0.25))[0],
+        )
+
+    def test_nonfinite_time_scale_fails_closed_before_execution(self) -> None:
+        base = 0x518000
+        terminate = _instruction(base, ECL_OP_TERMINATE)
+        for time_scale in (math.nan, 1e100):
+            with self.subTest(time_scale=time_scale):
+                result = interpret_vm_local_shadow(
+                    _snapshot(base, 1, time_scale=time_scale),
+                    instruction_at={base: terminate}.__getitem__,
+                    horizon_frames=3,
+                    active_difficulty_mask=0x08,
+                )
+
+                self.assertEqual(
+                    result.stop_reason,
+                    "unsupported_native_timer_state",
+                )
+                self.assertEqual(result.instructions_scanned, 0)
+                self.assertFalse(result.horizon_covered)
 
     def test_missing_and_literal_loop_state_remain_unknown(self) -> None:
         base = 0x520000

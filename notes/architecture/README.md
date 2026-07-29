@@ -14,6 +14,7 @@ authority.
 - [physical-issue stage refactor](LIVE_PHYSICAL_ISSUE_STAGE_REFACTOR_20260728.md)
 - [bullet-birth stage refactor](LIVE_BULLET_BIRTH_STAGE_REFACTOR_20260728.md)
 - [live CLI schema refactor](LIVE_CLI_SCHEMA_REFACTOR_20260728.md)
+- [native ECL timer semantics](TH08_NATIVE_ECL_TIMER_SEMANTICS_20260729.md)
 
 Current code placement rules remain in `../../AGENTS.md` and the consolidated
 roadmap.

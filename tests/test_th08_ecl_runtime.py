@@ -72,9 +72,7 @@ class _Memory:
 class EclRuntimeTests(unittest.TestCase):
     def test_cached_instruction_never_performs_a_cold_read(self) -> None:
         address = 0x410000
-        memory = _Memory(
-            {address: _instruction(0, ECL_OP_TERMINATE)}
-        )
+        memory = _Memory({address: _instruction(0, ECL_OP_TERMINATE)})
         cache = EclInstructionCache()
         with self.assertRaisesRegex(RuntimeError, "absent from the warm cache"):
             cache.cached_instruction(address)
@@ -269,6 +267,87 @@ class EclRuntimeTests(unittest.TestCase):
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0].frame, 60)
 
+    def test_jump_preserves_nonzero_fraction_for_successor_timing(self) -> None:
+        jump_address = 0x610000
+        callback_address = jump_address + 0x80
+        memory = _Memory(
+            {
+                jump_address: _instruction(
+                    0,
+                    ECL_OP_JUMP,
+                    3,
+                    callback_address - jump_address,
+                ),
+                callback_address: b"".join(
+                    (
+                        _instruction(
+                            4,
+                            ECL_OP_INVOKE_CALLBACK,
+                            12,
+                            0,
+                        ),
+                        _instruction(4, ECL_OP_TERMINATE),
+                    )
+                ),
+            }
+        )
+        cache = EclInstructionCache()
+        result = analyze_tagged_velocity_toggles(
+            EclVmSnapshot(
+                jump_address,
+                0.5,
+                0,
+                0x100000,
+                0.0,
+                0.0,
+                0.75,
+            ),
+            instruction_at=lambda address: cache.instruction(
+                memory.read,
+                address,
+            ),
+            horizon_frames=3,
+            active_difficulty_mask=0x08,
+        )
+        self.assertEqual(result.stop_reason, "terminate")
+        self.assertEqual([event.frame for event in result.events], [1])
+        self.assertIn("native-timer-components", result.semantics_version)
+        self.assertIn("native-timer-components", result.timer_semantics_version)
+
+    def test_past_instruction_time_is_not_executed_as_eligible(self) -> None:
+        base = 0x620000
+        memory = _Memory(
+            {
+                base: _instruction(
+                    4,
+                    ECL_OP_INVOKE_CALLBACK,
+                    12,
+                    0,
+                )
+            }
+        )
+        cache = EclInstructionCache()
+        result = analyze_tagged_velocity_toggles(
+            EclVmSnapshot(
+                base,
+                0.0,
+                5,
+                0x100000,
+                0.0,
+                0.0,
+                1.0,
+            ),
+            instruction_at=lambda address: cache.instruction(
+                memory.read,
+                address,
+            ),
+            horizon_frames=3,
+            active_difficulty_mask=0x08,
+        )
+        self.assertEqual(result.stop_reason, "horizon")
+        self.assertEqual(result.stop_frame, 3)
+        self.assertEqual(result.events, ())
+
     def test_real_spell111_sub63_loop_predicts_stop_and_resume(self) -> None:
         path = (
             Path(__file__).resolve().parents[1]
@@ -334,9 +413,7 @@ class EclRuntimeTests(unittest.TestCase):
                 )
                 memory = _Memory(
                     {
-                        base: branch
-                        + _instruction(10, ECL_OP_TERMINATE)
-                        + callback,
+                        base: branch + _instruction(10, ECL_OP_TERMINATE) + callback,
                     }
                 )
                 cache = EclInstructionCache()

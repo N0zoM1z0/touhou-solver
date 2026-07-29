@@ -12,7 +12,9 @@ from benchmarks.th08_ecl_vm_local_shadow_benchmark import run_benchmark
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = (
     ROOT
-    / "artifacts/ecl_reports/stage4a_vm_local_op05_cases_20260728_110438.json"
+    / "artifacts"
+    / "ecl_reports"
+    / "stage4a_vm_local_op05_cases_sem_timer_v2_20260729.json"
 )
 
 
@@ -31,9 +33,7 @@ class EclVmLocalShadowBenchmarkTests(unittest.TestCase):
             1,
         )
         self.assertGreater(
-            report["logical_work"][
-                "python_bytecode_ops_per_transition"
-            ]["p50"],
+            report["logical_work"]["python_bytecode_ops_per_transition"]["p50"],
             0,
         )
 

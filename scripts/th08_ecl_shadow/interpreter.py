@@ -31,8 +31,10 @@ from th08_ecl_shadow.registers import (
 )
 from th08_ecl_vm_state import (
     EclVmLocalProjection,
+    float32_bits,
     float32_from_bits,
 )
+from th08_native_timer import Th08TimerState, advance_until_elapsed
 
 
 ECL_OP_NOP = 0x00
@@ -63,8 +65,7 @@ def _unknown_reason(instruction: RuntimeEclInstruction) -> str:
         ECL_OP_FIRST_CONDITIONAL_JUMP
         <= instruction.opcode
         <= ECL_OP_LAST_CONDITIONAL_JUMP
-        or instruction.opcode
-        in (ECL_OP_CALL_SUBROUTINE, ECL_OP_RETURN_SUBROUTINE)
+        or instruction.opcode in (ECL_OP_CALL_SUBROUTINE, ECL_OP_RETURN_SUBROUTINE)
     ):
         return "unsupported_control_flow"
     return f"unsupported_opcode_{instruction.opcode:04x}"
@@ -100,25 +101,49 @@ def interpret_vm_local_shadow(
             requested_horizon_frames=horizon_frames,
             stop_frame=0,
             final_instruction_pointer=snapshot.instruction_pointer,
-            final_timer_value=snapshot.timer_value,
+            final_timer_elapsed=snapshot.timer_elapsed,
+            final_timer_fraction_bits=snapshot.timer_fraction_bits,
             final_projection=None,
         )
 
     locals_state = LocalRegisters(projection)
     pc = snapshot.instruction_pointer
-    timer_value = snapshot.timer_value
+    try:
+        timer = Th08TimerState(
+            snapshot.timer_elapsed,
+            snapshot.timer_fraction_bits,
+        )
+        time_scale_bits = float32_bits(snapshot.time_scale)
+        if not math.isfinite(float32_from_bits(time_scale_bits)):
+            raise ValueError("non-finite native time scale")
+    except (OverflowError, struct.error, ValueError):
+        return EclVmLocalShadowResult(
+            events=(),
+            instructions_scanned=0,
+            stop_reason="unsupported_native_timer_state",
+            horizon_covered=False,
+            requested_horizon_frames=horizon_frames,
+            stop_frame=0,
+            final_instruction_pointer=snapshot.instruction_pointer,
+            final_timer_elapsed=snapshot.timer_elapsed,
+            final_timer_fraction_bits=snapshot.timer_fraction_bits,
+            final_projection=locals_state.freeze(),
+        )
     physical_frame = 0
     events: list[TaggedVelocityToggle] = []
-    visited: set[
-        tuple[int, float, int, EclVmLocalProjection]
-    ] = set()
+    visited: set[tuple[int, int, int, int, EclVmLocalProjection]] = set()
     instructions_scanned = 0
     stop_reason = "instruction_limit"
     horizon_covered = False
-
     for _ in range(max_instructions):
         frozen = locals_state.freeze()
-        state = (pc, timer_value, physical_frame, frozen)
+        state = (
+            pc,
+            timer.elapsed,
+            timer.fraction_bits,
+            physical_frame,
+            frozen,
+        )
         if state in visited:
             stop_reason = "repeated_state"
             break
@@ -126,21 +151,21 @@ def interpret_vm_local_shadow(
 
         instruction = instruction_at(pc)
         instructions_scanned += 1
-        if instruction.time > timer_value:
-            delta = int(
-                math.ceil(
-                    (instruction.time - timer_value) / snapshot.time_scale
-                    - 1e-9
-                )
+        try:
+            timer, delta, reached = advance_until_elapsed(
+                timer,
+                target_elapsed=instruction.time,
+                time_scale_bits=time_scale_bits,
+                max_physical_frames=horizon_frames - physical_frame,
             )
-            delta = max(delta, 1)
-            if physical_frame + delta > horizon_frames:
-                stop_reason = "horizon"
-                horizon_covered = True
-                physical_frame = horizon_frames
-                break
-            physical_frame += delta
-            timer_value += delta * snapshot.time_scale
+        except ValueError:
+            stop_reason = "unsupported_native_timer_transition"
+            break
+        physical_frame += delta
+        if not reached:
+            stop_reason = "horizon"
+            horizon_covered = True
+            break
 
         if not _eligible(instruction, active_difficulty_mask):
             pc = instruction.address + instruction.size
@@ -163,7 +188,7 @@ def interpret_vm_local_shadow(
                 break
             target_time, relative_offset = arguments
             pc = instruction.address + relative_offset
-            timer_value = float(target_time)
+            timer = timer.with_elapsed_preserving_fraction(target_time)
             continue
         elif instruction.opcode == ECL_OP_LOOP_DECREMENT_JUMP:
             arguments = _integer_arguments(instruction, 3)
@@ -185,7 +210,7 @@ def interpret_vm_local_shadow(
             assert locals_state.write_integer(variable, post_decrement)
             if post_decrement > 0:
                 pc = instruction.address + relative_offset
-                timer_value = float(target_time)
+                timer = timer.with_elapsed_preserving_fraction(target_time)
                 continue
         elif instruction.opcode == ECL_OP_SET_INT:
             arguments = _integer_arguments(instruction, 2)
@@ -225,8 +250,7 @@ def interpret_vm_local_shadow(
             callback_angle = float32_from_bits(frozen.float_local_bits[0])
             callback_speed = float32_from_bits(frozen.float_local_bits[1])
             if not all(
-                math.isfinite(value)
-                for value in (callback_angle, callback_speed)
+                math.isfinite(value) for value in (callback_angle, callback_speed)
             ):
                 stop_reason = "unsupported_nonfinite_callback"
                 break
@@ -256,7 +280,8 @@ def interpret_vm_local_shadow(
         requested_horizon_frames=horizon_frames,
         stop_frame=physical_frame,
         final_instruction_pointer=pc,
-        final_timer_value=timer_value,
+        final_timer_elapsed=timer.elapsed,
+        final_timer_fraction_bits=timer.fraction_bits,
         final_projection=locals_state.freeze(),
     )
 

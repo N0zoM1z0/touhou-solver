@@ -21,6 +21,11 @@ from th08_ecl_vm_state import (
     EclVmLocalProjection,
     float32_bits,
 )
+from th08_native_timer import (
+    TH08_NATIVE_TIMER_SEMANTICS_VERSION,
+    Th08TimerState,
+    advance_until_elapsed,
+)
 
 
 GAMEPLAY_TIME_SCALE_ADDRESS = 0x017CE8E0
@@ -55,6 +60,9 @@ ECL_FLOAT_CALLBACK_SPEED = 10017
 CALLBACK_TOGGLE_TAGGED_BULLET = 12
 LOOKAHEAD_COVERAGE_COMPLETE = "complete"
 LOOKAHEAD_COVERAGE_UNKNOWN = "unknown"
+ECL_LOOKAHEAD_SEMANTICS_VERSION = (
+    "th08-ecl-velocity-lookahead-v2-native-timer-components"
+)
 
 
 class ProcessMemoryReader(Protocol):
@@ -79,17 +87,27 @@ class EclVmSnapshot:
         if self.tag_mask != projection.integer_locals[0] & 0xFFFFFFFF:
             raise ValueError("ECL tag mask disagrees with its local projection")
         if float32_bits(self.callback_angle) != projection.float_local_bits[0]:
-            raise ValueError(
-                "ECL callback angle disagrees with its local projection"
-            )
+            raise ValueError("ECL callback angle disagrees with its local projection")
         if float32_bits(self.callback_speed) != projection.float_local_bits[1]:
-            raise ValueError(
-                "ECL callback speed disagrees with its local projection"
-            )
+            raise ValueError("ECL callback speed disagrees with its local projection")
 
     @property
     def timer_value(self) -> float:
+        """Diagnostic sum only; native timer identity is component-wise."""
+
         return self.timer_elapsed + self.timer_fraction
+
+    @property
+    def timer_fraction_bits(self) -> int:
+        return float32_bits(self.timer_fraction)
+
+    @property
+    def time_scale_bits(self) -> int:
+        return float32_bits(self.time_scale)
+
+    @property
+    def timer_identity(self) -> tuple[int, int]:
+        return self.timer_elapsed, self.timer_fraction_bits
 
 
 @dataclass(frozen=True)
@@ -132,9 +150,7 @@ class EclLookaheadResult:
             raise ValueError("lookahead stop frame is outside its horizon")
         complete_stop = self.stop_reason in {"horizon", "terminate"}
         if self.horizon_covered != complete_stop:
-            raise ValueError(
-                "lookahead completeness disagrees with its stop reason"
-            )
+            raise ValueError("lookahead completeness disagrees with its stop reason")
 
     @property
     def coverage_status(self) -> str:
@@ -143,6 +159,14 @@ class EclLookaheadResult:
             if self.horizon_covered
             else LOOKAHEAD_COVERAGE_UNKNOWN
         )
+
+    @property
+    def semantics_version(self) -> str:
+        return ECL_LOOKAHEAD_SEMANTICS_VERSION
+
+    @property
+    def timer_semantics_version(self) -> str:
+        return TH08_NATIVE_TIMER_SEMANTICS_VERSION
 
     @property
     def covered_through_frame(self) -> int:
@@ -335,40 +359,61 @@ def analyze_tagged_velocity_toggles(
     if max_instructions <= 0:
         raise ValueError("instruction limit must be positive")
     pc = snapshot.instruction_pointer
-    timer_value = snapshot.timer_value
+    try:
+        timer = Th08TimerState(
+            snapshot.timer_elapsed,
+            snapshot.timer_fraction_bits,
+        )
+        time_scale_bits = snapshot.time_scale_bits
+        if not math.isfinite(snapshot.time_scale) or snapshot.time_scale <= 0.0:
+            raise ValueError("unsupported live ECL time scale")
+    except (OverflowError, struct.error, ValueError):
+        return EclLookaheadResult(
+            events=(),
+            instructions_scanned=0,
+            stop_reason="unsupported_native_timer_state",
+            horizon_covered=False,
+            requested_horizon_frames=horizon_frames,
+            stop_frame=0,
+        )
     physical_frame = 0
     tag_mask = snapshot.tag_mask
     callback_angle = snapshot.callback_angle
     callback_speed = snapshot.callback_speed
     events: list[TaggedVelocityToggle] = []
-    visited: set[tuple[int, int, int]] = set()
+    visited: set[tuple[int, int, int, int]] = set()
     instructions_scanned = 0
     stop_reason = "instruction_limit"
     horizon_covered = False
 
     for _ in range(max_instructions):
-        state = (pc, int(math.floor(timer_value * 256.0)), physical_frame)
+        state = (
+            pc,
+            timer.elapsed,
+            timer.fraction_bits,
+            physical_frame,
+        )
         if state in visited:
             stop_reason = "repeated_state"
             break
         visited.add(state)
         instruction = instruction_at(pc)
         instructions_scanned += 1
-        if instruction.time > timer_value:
-            delta = int(
-                math.ceil(
-                    (instruction.time - timer_value) / snapshot.time_scale
-                    - 1e-9
-                )
+        try:
+            timer, delta, reached = advance_until_elapsed(
+                timer,
+                target_elapsed=instruction.time,
+                time_scale_bits=time_scale_bits,
+                max_physical_frames=horizon_frames - physical_frame,
             )
-            delta = max(delta, 1)
-            if physical_frame + delta > horizon_frames:
-                stop_reason = "horizon"
-                horizon_covered = True
-                physical_frame = horizon_frames
-                break
-            physical_frame += delta
-            timer_value += delta * snapshot.time_scale
+        except ValueError:
+            stop_reason = "unsupported_native_timer_transition"
+            break
+        physical_frame += delta
+        if not reached:
+            stop_reason = "horizon"
+            horizon_covered = True
+            break
 
         eligible = _eligible(instruction, active_difficulty_mask)
         if eligible and instruction.opcode == ECL_OP_TERMINATE:
@@ -382,7 +427,7 @@ def analyze_tagged_velocity_toggles(
                 break
             target_time, relative_offset = pair
             pc = instruction.address + relative_offset
-            timer_value = float(target_time)
+            timer = timer.with_elapsed_preserving_fraction(target_time)
             continue
         if eligible and instruction.opcode == ECL_OP_RESET_TIMER:
             stop_reason = "unsupported_timer_reset"
@@ -392,8 +437,7 @@ def analyze_tagged_velocity_toggles(
             or ECL_OP_FIRST_CONDITIONAL_JUMP
             <= instruction.opcode
             <= ECL_OP_LAST_CONDITIONAL_JUMP
-            or instruction.opcode
-            in (ECL_OP_CALL_SUBROUTINE, ECL_OP_RETURN_SUBROUTINE)
+            or instruction.opcode in (ECL_OP_CALL_SUBROUTINE, ECL_OP_RETURN_SUBROUTINE)
         ):
             stop_reason = "unsupported_control_flow"
             break
@@ -445,8 +489,7 @@ def analyze_tagged_velocity_toggles(
                 and physical_frame > 0
                 and tag_mask
                 and all(
-                    math.isfinite(value)
-                    for value in (callback_angle, callback_speed)
+                    math.isfinite(value) for value in (callback_angle, callback_speed)
                 )
             ):
                 speed = callback_speed * snapshot.time_scale
@@ -508,7 +551,5 @@ def velocity_changes_for_tagged_bullet(
             speed = base_speed * time_scale
             velocity_x = math.cos(base_angle) * speed
             velocity_y = math.sin(base_angle) * speed
-        changes.append(
-            VelocityChange(toggle.frame, velocity_x, velocity_y)
-        )
+        changes.append(VelocityChange(toggle.frame, velocity_x, velocity_y))
     return tuple(changes)

@@ -78,7 +78,8 @@ located; it does not change the authority order below.
 65. `notes/review/REUSABLE_AGENT_SKILLS_20260729.md`
 66. `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
 67. `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`
-68. the relevant recent run note and counterexample rows before live work
+68. `notes/architecture/TH08_NATIVE_ECL_TIMER_SEMANTICS_20260729.md`
+69. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -142,6 +143,14 @@ and incomplete callback/RNG source semantics. Player radius, fade-state, and
 collision-suppression omissions are conservative in the observed dimension
 but can compress viability. Existing zero-fraction/unit-scale/proxy evidence
 is preserved under its declared model version rather than erased.
+
+`SEM-TIMER` now passes its offline gate. The revalidated component timer,
+independent raw-bit Python oracle, and Linux/Windows native x87 probes agree
+on 17/17 cases per platform. The offline shadow, existing live velocity
+lookahead, and trace-only birth lookahead have distinct component-semantics
+versions; decision traces retain fraction bits, scale bits, and timer
+identity. The fixed observer-off Stage-5 physical falsifier remains pending,
+and player/laser time scale remains open under `SEM-SCALE`.
 
 This review does not establish a cause for the original 18-hit Stage-5
 aggregate and does not authorize rollback. Observer-off run `154229`
@@ -231,11 +240,12 @@ Do not resume broad G5 work first.
 
 1. Keep the physical ring stopped at CE-0183. Do not launch Stage 3 or a
    third unchanged Stage-5 repeat.
-2. Start `SEM-TIMER`: revalidate the shipped elapsed/fraction transition in
-   IDA and callers, write the independent raw-state oracle, correct the
-   product model, version it, and recertify focused scalar/Python/native
-   parity.
-3. Continue `SEM-SCALE`, `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and
+2. `SEM-TIMER` passes its offline semantic gate. Fix its clean immutable
+   source checkpoint, then run exactly one observer-off Stage-5 physical
+   falsifier. Above ten hits stops for canonical first-hit audit; at or below
+   ten begins the corrected two-consecutive sequence.
+3. Only after that falsifier's stopping rule permits it, continue
+   `SEM-SCALE`, `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and
    `SEM-ROBUST` in roadmap order, one falsifier/checkpoint at a time.
    Evidence-backed IDB renames/types/comments are authorized; record every
    material database change in the current daily shard.
@@ -944,6 +954,14 @@ writes the durable `notes/runs/` note directly.
   independent oracle before float add/normalization or shadow widening.
   Direct fire, RNG, dynamic state, calls, and interrupts remain unknown and
   live promotion remains forbidden.
+  The 2026-07-29 `SEM-TIMER` correction now supplies a distinct V2 component
+  state and independent raw-Python/Linux/Windows-native transition gate.
+  The immutable V1 fixture remains its zero-fraction historical slice; the
+  V2 replay retains all 3,117 scoped rows, 108 unique cases, zero mismatches,
+  and zero new completion. This closes the timer-component offline
+  correctness gate only. It does not close B4, widen shadow coverage, or
+  establish physical survival; the corrected existing live velocity
+  lookahead requires the fixed observer-off Stage-5 falsifier.
   The parallel B4 checkpoint is now fixed in
   `notes/research/g5/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`.
   Regrouping the same physical rows shows zero/nonzero-evidence p95

@@ -644,6 +644,32 @@ Exit gate: product, independent Python oracle, and a tiny native probe agree
 bitwise over deterministic and adversarial cases. Old Phase-B1 authority is
 explicitly tagged as the zero-fraction slice.
 
+Execution progress on 2026-07-29:
+
+- **Observed native contract:** IDA revalidation confirms the component
+  helper at `0x00447421`, exact integer-time equality at `0x004185AF`, and
+  fraction-preserving opcode-`0x04`/taken-`0x05` write at `0x004186F1`.
+  Evidence-backed function/type/comments are persisted in the IDB and logged.
+- **Observed offline gate:** versioned product, structurally independent
+  raw-bit Python oracle, and Linux/Windows x87 probes agree on 17/17
+  deterministic/adversarial cases per platform. Complete Linux and repeated
+  complete Windows discovery pass 1,075 tests; the initial Windows
+  CE-0166-compatible timing-tail failure is retained as a failed first
+  attempt rather than hidden.
+- **Observed retained replay:** the immutable V1 108-case fixture remains the
+  zero-fraction/unit-scale historical slice. The V2 component replay decodes
+  all 3,117 in-scope Stage-4A rows, preserves 108 unique cases with zero
+  mismatch, and grants no new completion.
+- **Propagation:** the offline VM-local shadow, existing live velocity
+  lookahead, and trace-only birth lookahead now share exact component timer
+  state under distinct immutable semantics versions. Decision traces include
+  fraction bits, scale bits, and component identity.
+- **Exit taken:** the Phase-1A offline semantic gate passes. Because an
+  existing live hazard consumer changed, fix this code checkpoint and run
+  the exact observer-off Stage-5 physical falsifier before beginning
+  `SEM-SCALE`. One accepted result does not establish NMNB or timer causality;
+  a result above ten stops and opens a first-hit audit.
+
 #### 1B. Player and laser time scale
 
 - add observed scale to immutable model identity;
@@ -912,9 +938,9 @@ incomplete ring as route authority.
 
 After that baseline, the next correction checkpoints should be:
 
-1. `SEM-TIMER`: native elapsed/fraction timer contract, oracle, fixtures, and
-   correction of the Phase-B1 authority statement plus reviewed IDB
-   annotations;
+1. `SEM-TIMER`: offline semantic gate complete; fix its immutable code
+   checkpoint and take the prescribed observer-off Stage-5 physical
+   falsifier before advancing;
 2. `SEM-SCALE`: player/laser global-time-scale transitions and model identity;
 3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
    enemy contact/damage eligibility;

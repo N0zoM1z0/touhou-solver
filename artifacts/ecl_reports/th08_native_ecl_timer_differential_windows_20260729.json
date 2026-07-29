@@ -1,0 +1,407 @@
+{
+  "cases": [
+    {
+      "input": {
+        "elapsed": 0,
+        "fraction_bits": "0x3f400000",
+        "ticks": 1,
+        "time_scale_bits": "0x3f800000"
+      },
+      "label": "unit_fast_preserves_fraction",
+      "native_probe": {
+        "elapsed": 1,
+        "fraction_bits": "0x3f400000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 1,
+        "fraction_bits": "0x3f400000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 1,
+        "fraction_bits": "0x3f400000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 10,
+        "fraction_bits": "0x3f400000",
+        "ticks": 1,
+        "time_scale_bits": "0x3f000000"
+      },
+      "label": "nonunit_carry",
+      "native_probe": {
+        "elapsed": 11,
+        "fraction_bits": "0x3e800000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 11,
+        "fraction_bits": "0x3e800000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 11,
+        "fraction_bits": "0x3e800000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": -10,
+        "fraction_bits": "0x3e000000",
+        "ticks": 1,
+        "time_scale_bits": "0x3e800000"
+      },
+      "label": "nonunit_no_carry",
+      "native_probe": {
+        "elapsed": -10,
+        "fraction_bits": "0x3ec00000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": -10,
+        "fraction_bits": "0x3ec00000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": -10,
+        "fraction_bits": "0x3ec00000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 7,
+        "fraction_bits": "0x3e000000",
+        "ticks": 1,
+        "time_scale_bits": "0x3f7d70a4"
+      },
+      "label": "threshold_exact",
+      "native_probe": {
+        "elapsed": 8,
+        "fraction_bits": "0x3deb8520"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 8,
+        "fraction_bits": "0x3deb8520"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 8,
+        "fraction_bits": "0x3deb8520"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 7,
+        "fraction_bits": "0x3e000000",
+        "ticks": 1,
+        "time_scale_bits": "0x3f7d70a5"
+      },
+      "label": "threshold_next_float",
+      "native_probe": {
+        "elapsed": 8,
+        "fraction_bits": "0x3e000000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 8,
+        "fraction_bits": "0x3e000000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 8,
+        "fraction_bits": "0x3e000000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 4,
+        "fraction_bits": "0x3f400000",
+        "ticks": 1,
+        "time_scale_bits": "0xbf000000"
+      },
+      "label": "negative_scale",
+      "native_probe": {
+        "elapsed": 4,
+        "fraction_bits": "0x3e800000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 4,
+        "fraction_bits": "0x3e800000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 4,
+        "fraction_bits": "0x3e800000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 2147483647,
+        "fraction_bits": "0x3f000000",
+        "ticks": 1,
+        "time_scale_bits": "0x3f800000"
+      },
+      "label": "signed_wrap",
+      "native_probe": {
+        "elapsed": -2147483648,
+        "fraction_bits": "0x3f000000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": -2147483648,
+        "fraction_bits": "0x3f000000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": -2147483648,
+        "fraction_bits": "0x3f000000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": -2147483648,
+        "fraction_bits": "0x3f400000",
+        "ticks": 1,
+        "time_scale_bits": "0x3f000000"
+      },
+      "label": "signed_min",
+      "native_probe": {
+        "elapsed": -2147483647,
+        "fraction_bits": "0x3e800000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": -2147483647,
+        "fraction_bits": "0x3e800000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": -2147483647,
+        "fraction_bits": "0x3e800000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 1,
+        "fraction_bits": "0x00000001",
+        "ticks": 1,
+        "time_scale_bits": "0x00000001"
+      },
+      "label": "positive_subnormals",
+      "native_probe": {
+        "elapsed": 1,
+        "fraction_bits": "0x00000002"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 1,
+        "fraction_bits": "0x00000002"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 1,
+        "fraction_bits": "0x00000002"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 1,
+        "fraction_bits": "0x80000000",
+        "ticks": 1,
+        "time_scale_bits": "0x00000000"
+      },
+      "label": "negative_zero_plus_zero",
+      "native_probe": {
+        "elapsed": 1,
+        "fraction_bits": "0x00000000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 1,
+        "fraction_bits": "0x00000000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 1,
+        "fraction_bits": "0x00000000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 20,
+        "fraction_bits": "0x3f19999a",
+        "ticks": 1,
+        "time_scale_bits": "0x3ecccccd"
+      },
+      "label": "rounded_carry",
+      "native_probe": {
+        "elapsed": 21,
+        "fraction_bits": "0x00000000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 21,
+        "fraction_bits": "0x00000000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 21,
+        "fraction_bits": "0x00000000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 20,
+        "fraction_bits": "0xbe800000",
+        "ticks": 1,
+        "time_scale_bits": "0x40000000"
+      },
+      "label": "fast_scale_two",
+      "native_probe": {
+        "elapsed": 21,
+        "fraction_bits": "0xbe800000"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 21,
+        "fraction_bits": "0xbe800000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 21,
+        "fraction_bits": "0xbe800000"
+      }
+    },
+    {
+      "input": {
+        "elapsed": 3,
+        "fraction_bits": "0x3dcccccd",
+        "ticks": 9,
+        "time_scale_bits": "0x3e4ccccd"
+      },
+      "label": "repeated_slow_ticks",
+      "native_probe": {
+        "elapsed": 4,
+        "fraction_bits": "0x3f666666"
+      },
+      "operation": "advance",
+      "oracle": {
+        "elapsed": 4,
+        "fraction_bits": "0x3f666666"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 4,
+        "fraction_bits": "0x3f666666"
+      }
+    },
+    {
+      "input": {
+        "fraction_bits": "0x3f400000",
+        "target_elapsed": 4
+      },
+      "label": "op04_op05_preserve_nonzero_fraction",
+      "native_probe": {
+        "elapsed": 4,
+        "fraction_bits": "0x3f400000"
+      },
+      "operation": "branch",
+      "oracle": {
+        "elapsed": 4,
+        "fraction_bits": "0x3f400000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": 4,
+        "fraction_bits": "0x3f400000"
+      }
+    },
+    {
+      "input": {
+        "fraction_bits": "0x80000000",
+        "target_elapsed": -1
+      },
+      "label": "branch_preserves_negative_zero",
+      "native_probe": {
+        "elapsed": -1,
+        "fraction_bits": "0x80000000"
+      },
+      "operation": "branch",
+      "oracle": {
+        "elapsed": -1,
+        "fraction_bits": "0x80000000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": -1,
+        "fraction_bits": "0x80000000"
+      }
+    },
+    {
+      "input": {
+        "target_elapsed": -1
+      },
+      "label": "reset_signed_minus_one",
+      "native_probe": {
+        "elapsed": -1,
+        "fraction_bits": "0x00000000"
+      },
+      "operation": "reset",
+      "oracle": {
+        "elapsed": -1,
+        "fraction_bits": "0x00000000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": -1,
+        "fraction_bits": "0x00000000"
+      }
+    },
+    {
+      "input": {
+        "target_elapsed": -2147483648
+      },
+      "label": "reset_signed_min",
+      "native_probe": {
+        "elapsed": -2147483648,
+        "fraction_bits": "0x00000000"
+      },
+      "operation": "reset",
+      "oracle": {
+        "elapsed": -2147483648,
+        "fraction_bits": "0x00000000"
+      },
+      "passed": true,
+      "product": {
+        "elapsed": -2147483648,
+        "fraction_bits": "0x00000000"
+      }
+    }
+  ],
+  "counts": {
+    "cases": 17,
+    "failed": 0,
+    "passed": 17
+  },
+  "gates": {
+    "all_product_oracle_native_bitwise_equal": true,
+    "branch_and_reset_present": true,
+    "nonunit_scale_present": true,
+    "nonzero_fraction_present": true
+  },
+  "native_probe": {
+    "name": "th08_ecl_timer_probe.exe",
+    "rounding": "FE_TONEAREST",
+    "sha256": "be4699f03ee5695060f870b65ea9616292a975ea80041cc953f1c9e69895ef11",
+    "size": 2487323,
+    "slow_path": "x87_fadd_fsub_with_fstp_dword"
+  },
+  "oracle_semantics_version": "th08-ecl-timer-raw-oracle-v2-exact-integer-rounding",
+  "passed": true,
+  "product_semantics_version": "th08-native-timer-components-v1-00447421",
+  "schema": "th08-native-ecl-timer-differential-v1"
+}

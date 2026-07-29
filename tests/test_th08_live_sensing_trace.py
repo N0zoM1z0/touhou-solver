@@ -12,6 +12,8 @@ from th08_live.sensing_trace import (
     build_sensing_trace_fields,
 )
 from th08_ecl_vm_state import EclVmLocalProjection
+from th08_ecl_runtime import ECL_LOOKAHEAD_SEMANTICS_VERSION
+from th08_native_timer import TH08_NATIVE_TIMER_SEMANTICS_VERSION
 
 
 class SensingTraceTests(unittest.TestCase):
@@ -55,8 +57,10 @@ class SensingTraceTests(unittest.TestCase):
         ecl_snapshot = SimpleNamespace(
             instruction_pointer=0x5000,
             timer_fraction=0.5,
+            timer_fraction_bits=0x3F000000,
             timer_elapsed=20,
             time_scale=1.0,
+            time_scale_bits=0x3F800000,
             tag_mask=0x10,
             local_projection=EclVmLocalProjection(
                 (0x10, 1, 2, 3, 4, 5, 6, 7),
@@ -159,6 +163,19 @@ class SensingTraceTests(unittest.TestCase):
             "complete",
         )
         self.assertEqual(
+            fields["bullet_velocity_lookahead"]["lookahead_semantics_version"],
+            ECL_LOOKAHEAD_SEMANTICS_VERSION,
+        )
+        self.assertEqual(
+            fields["bullet_velocity_lookahead"]["timer_identity"],
+            {
+                "semantics_version": TH08_NATIVE_TIMER_SEMANTICS_VERSION,
+                "elapsed": 20,
+                "fraction_bits": 0x3F000000,
+                "time_scale_bits": 0x3F800000,
+            },
+        )
+        self.assertEqual(
             fields["bullet_velocity_lookahead"]["prefix_events"],
             fields["bullet_velocity_lookahead"]["events"],
         )
@@ -196,9 +213,7 @@ class SensingTraceTests(unittest.TestCase):
             fields["issue_time_enemy_guard"]["transaction"],
             {"value": "transaction"},
         )
-        self.assertTrue(
-            fields["spell_enemy_body_guard"]["covered_by_async_pool"]
-        )
+        self.assertTrue(fields["spell_enemy_body_guard"]["covered_by_async_pool"])
 
         incomplete = SimpleNamespace(
             instructions_scanned=256,

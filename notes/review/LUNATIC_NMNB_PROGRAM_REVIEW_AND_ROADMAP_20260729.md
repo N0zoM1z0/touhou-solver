@@ -935,6 +935,26 @@ grants no survival/certificate authority even if the physical run is clean.
 It exists to preserve a whole-stage native observation unit instead of losing
 all evidence at the first root-only frame.
 
+2026-07-30 `SEM-MODE-B` physical gate: original-game run
+`lunatic_route2_stage5_unattended_20260730_041408` reaches
+`route_complete` across frames `1..42463` with 11,879 decisions, hard
+no-Bomb, and no mid-hit stop. Of those decisions, 11,763 have coherent
+frame-bracketed mode/enemy captures; 116 crossed observations are explicitly
+excluded. The retained 299 secondary-character transitions include stable
+body sets whose raw flags change only by enemy bit `0x800` in both
+directions. This closes shipped-runtime occurrence for SEM-MODE-B.
+
+It does not close the Phase-1C exit gate. The diagnostic constant-root proxy
+and capture overhead have unknown-direction timing effects; all ten hit edges
+remain CE-0192, and no action/hard/survival authority is promoted. No
+compatible native replay was generated because the supervisor selected
+no-save. Continue at SEM-MODE-C with one stage-neutral causal recurrence:
+carry active/pending input pickup, player `+3/+5/+8`, and projected
+per-frame contact body sets through every cadence/delay history; merge hidden
+histories before the next controller choice when their observations are
+identical. Retain SEM-MODE-D damage separation and SEM-MODE-E independent
+body-set differential before any whole-stage SEM-MODE-F promotion.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

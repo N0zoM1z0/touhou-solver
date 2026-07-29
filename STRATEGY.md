@@ -551,6 +551,19 @@ exact Final-B scale-source authority. Complete 1,167-test Linux/Windows
 suites pass. This is a data-collection strategy only: hits, clean completion,
 and certificates under the proxy cannot promote survival or NMNB.
 
+**2026-07-30 SEM-MODE-B physical observation retained:** original-game
+Lunatic Stage-5 run `lunatic_route2_stage5_unattended_20260730_041408`
+reaches `route_complete` with 11,879 decisions and hard no-Bomb. Its compact
+report passes integrity with 11,763 coherent captures, 299 adjacent
+secondary-character transitions, and stable enemy bodies whose raw flags
+change by exactly bit `0x800` in both directions. This closes only
+shipped-runtime mode occurrence. The diagnostic root-scale proxy, capture
+cost, and ten CE-0192 hit edges grant no survival authority and cannot be
+compared as an observer-off improvement. Do not repeat this diagnostic run.
+Continue at `SEM-MODE-C` causal pickup/cadence recurrence, then damage
+separation, independent body-set differential, and a new whole-stage physical
+gate. Unfocused combat remains disabled.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

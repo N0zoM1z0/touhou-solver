@@ -99,7 +99,8 @@ def _no_bomb_verification(
         "bomb_flag_violation_frames": flag_violations,
         "bomb_action_violation_frames": action_violations,
         "resource_note": (
-            "Bomb stock changes after a hit are thprac respawn-state changes, "
+            "Bomb stock changes after a hit are practice-mode respawn-state "
+            "changes, "
             "not Bomb input; the mask, decision flag, and action are the "
             "controller evidence."
         ),
@@ -281,8 +282,8 @@ def build_dossier(
             ),
             "later_samples": (
                 "Later hits remain useful discovery evidence, but death and "
-                "thprac respawn mutate position, projectile state, Bomb stock, "
-                "and Power."
+                "practice-mode respawn mutate position, projectile state, "
+                "Bomb stock, and Power."
             ),
         },
         "totals": {

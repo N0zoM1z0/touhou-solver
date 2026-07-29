@@ -285,27 +285,64 @@ evidence. The trace is consumed by no mode-conditioned planner branch, but
 its read/retry cost can perturb controller cadence. The physical Stage-5
 observer gate therefore remains mandatory.
 
+## Retained Checkpoint: SEM-MODE-B Physical Observation
+
+Original-game run
+`lunatic_route2_stage5_unattended_20260730_041408` physically exercises code
+checkpoint `60ae5b9` across complete Lunatic Sakuya/Remilia Stage 5:
+
+- **Observed:** the supervisor selected Stage 5, retained frames `1..42463`
+  and 11,879 decisions, reached `route_complete`, verified hard no-Bomb, and
+  continued through all ten native hit edges instead of fail-closing.
+- **Observed:** 11,763 captures are coherent (`99.023%`). The 116 excluded
+  captures are 70 `enemy_mode_sync_mismatch`, 43
+  `player_or_input_changed`, and 3 `enemy_frame_unstable`; 571 decisions
+  required the bounded second attempt.
+- **Observed:** the compact report retains 1,455 focus-input edges, 299
+  adjacent coherent secondary-character transitions, and 308 unique
+  bit-`0x100` pointer/raw-flags pairs. Frames `394 -> 397` change 13 stable
+  bodies from `0x11003B49` to `0x11003349`, and frames `444 -> 447` change 12
+  stable bodies in the reverse direction. The changed flag bit is exactly
+  `0x800`, matching the revalidated native synchronization rule.
+- **Observed:** capture read time is 2.238 ms mean, 4.599 ms p95, and
+  10.965 ms maximum. Extra reads and retries are therefore a real cadence
+  perturbation, not a side-effect-free observer.
+- **Observed:** ten root-only scale observations use the explicit
+  `diagnostic_constant_current_root_unknown_direction` proxy. The report
+  passes its integrity checks and marks `action_authority=false`,
+  `hard_authority=false`, and `physical_survival_authority=false`.
+- **Observed:** the supervisor selected no-save and no compatible new native
+  replay was found. The ignored 482,944,752-byte JSONL remains local with
+  SHA-256
+  `773cbdb322dc5e15f80da4800ce82bcd0f41c1e6f82826812087edc9a328dca9`;
+  the compact mode report hashes to
+  `545677cead65e312942408cbaa977694be6416b7afbaea663802462c0775dfd9`.
+  Cleanup released keys and left no gameplay/control process.
+- **Inferred:** the stable player `+5` state and observed enemy `0x800` state
+  are synchronized at the captured physical instant. The transaction does
+  not identify that instant as an unconditional post-player callback root,
+  nor does it prove how a pending desired input changes mode before the next
+  observation.
+
+This closes the SEM-MODE-B shipped-runtime occurrence gate. It does not close
+SEM-MODE-C, validate the ten-hit survival policy, prove observer-off timing,
+or promote unfocused combat. The canonical first hit is nonspell frame 3,519
+after the modeled committed prefix already has clearance `-2.766`; all ten
+hits remain routed through CE-0192.
+
 ## Remaining Implementation And Promotion Plan
 
-1. **SEM-MODE-B — physical observation:** run one original-game Lunatic
-   Stage-5 workload with the observer enabled from stage entry. Retain the raw
-   bundle, compact report, resources/hits/Bombs, transition/body evidence,
-   contamination status, and cleanup. Complete the stage even after hits.
-   Because CE-0191 shows the default scale-authority fallback terminates
-   before the first decision, pair the observer with the scoped
-   `--diagnostic-continue-root-only-scale` proxy. Mark the entire run
-   unknown-direction and without survival authority.
-2. **SEM-MODE-C — causal hazard recurrence:** carry the mode key through
+1. **SEM-MODE-C — causal hazard recurrence:** carry the mode key through
    pickup/cadence histories, project per-frame enemy contact body sets after
    the player update, and merge only observation-compatible branches.
-3. **SEM-MODE-D — damage separation:** apply the same projected gate to the
+2. **SEM-MODE-D — damage separation:** apply the same projected gate to the
    shadow damage objective without letting damage affect hard viability.
    Keep unfocused combat selection disabled.
-4. **SEM-MODE-E — differential gates:** compare independent scalar, optimized
+3. **SEM-MODE-E — differential gates:** compare independent scalar, optimized
    Python, and any native kernel for every action/history, no-write/pending
    edge, and retained `10065 -> 10075` capsule. Publish viable-state and
    safe-action-mask diffs.
-5. **SEM-MODE-F — physical gate:** use an original-game whole-stage script,
+4. **SEM-MODE-F — physical gate:** use an original-game whole-stage script,
    with the observer active from stage entry and no exact-spell/operator-time
    switch. Stage 5 is the first focused workload because it contains the
    retained witness. Do not fail-close or auto-stop mid-stage; preserve the

@@ -767,6 +767,19 @@ complete-schedule rejection, provenance, and no-Bomb/no-stop-after-hit
 preservation. Complete Linux/Windows discovery passes 1,167 tests in
 14.404/30.150 seconds with three existing Windows skips.
 
+Original-game run
+`lunatic_route2_stage5_unattended_20260730_041408` physically revalidates the
+scoped continuation behavior. Ten root-only observations use unit scale bits
+`1065353216` and
+`diagnostic_constant_current_root_unknown_direction`; every one retains
+`hard_authority=false`, and the complete Stage-5 controller reaches
+`route_complete` instead of terminating at frame 1. The result validates only
+diagnostic continuation and explicit provenance. The run has ten hits,
+extra mode-observer cost, no future scale-writer coverage, and
+`physical_survival_authority=false`; it cannot validate physical survival,
+an exact schedule, or a hard certificate. The default flag-off fail-close
+remains unchanged.
+
 ## Current stopping rule
 
 C5-2 closes the declared source-local exact-delivery gate. Stop additional C5

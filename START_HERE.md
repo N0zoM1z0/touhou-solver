@@ -145,6 +145,11 @@ describe the same decision. Python/C++ parity is not physical correctness.
   skips, and the failed V1 report remains byte-identical. This is isolated
   trace-only evidence; the fresh schema-v7 physical Stage-5 gate is next.
   All physical timing and survival limits remain unchanged.
+  The first schema-v7 attempt `20260729_112743` then lost TH08 foreground at
+  summary frame 2,736, before spell 107 or any auxiliary batch. The
+  controller failed closed and exact cleanup passed. CE-0171 retains this
+  external contamination; the attempt is excluded from V4 delivery and
+  consecutive survival counts. Retry the unchanged checkpoint.
   Before handoff retain every run and require two consecutive corrected
   Stage-5 results at no more than ten hits plus cross-stage regression
   checks. Schemas v4/v5 have no physical delivery authority. The old

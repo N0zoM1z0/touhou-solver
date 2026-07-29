@@ -91,6 +91,15 @@ These tracks do not conflict. The observer-off gate diagnoses the current
 is required even if that control gate recovers the historical eight-to-ten
 hit range.
 
+Physical evidence is a promotion requirement, not a final ceremonial check.
+Every behavior-changing semantic, planner, combat, resource, or actuation
+intervention needs a fresh focused physical falsification gate on the workload
+that exercises it. Before integrated full-route promotion, the corrected
+stack must also pass the four mandatory Lunatic scenes: Stage 3, Stage 4A,
+Stage 5, and Final B. A tiny implementation checkpoint does not need four
+game launches when one scene is the only causal workload; the integrated
+model version does.
+
 ## 3. Program And Binary Identity
 
 ### 3.1 Connected IDA database
@@ -126,7 +135,11 @@ or laser structures.
 
 Therefore all inherited names, pseudocode variables, and comments remain
 hypotheses until instruction/dataflow and runtime evidence revalidate them.
-This review made no IDA rename, type, or comment change.
+This review made no IDA rename, type, or comment change. That sentence records
+the completed read-only audit checkpoint; it is not a prohibition on the
+correction program below. During an authorized fix/implementation phase,
+strong revalidated conclusions should be renamed, typed, and commented in the
+IDB, with misleading annotations corrected and material changes logged.
 
 ## 4. Current Live System And Authority
 
@@ -397,6 +410,35 @@ and phase exposure change the future hazard history. These are constraints
 and subordinate objectives inside the viable set, not generic aggression
 weights.
 
+“Stage-3 Power-0 baseline” must be interpreted carefully. A route-faithful
+run starts Stage 1 at Power 0 and reaches Stage 3 with whatever Power was
+actually collected in Stages 1–2. Artificially setting Stage 3 itself to zero
+or using max-Power practice answers a different question. Both practice and
+route-prefix evidence are useful, but they have separate authority.
+
+The retained evidence supports the following scoped judgments:
+
+- **Observed:** all ten retained complete Stage-5 practices have a nonspell
+  canonical first hit at Power 128. Nonspell contributes 60/128 hits over
+  82,588/125,088 decisions; its absolute burden is high, but its hit rate per
+  decision is below the combined spell rate.
+- **Inferred:** opening and middle nonspell are a clean-route barrier worth
+  isolating; the data do not establish that every nonspell decision is more
+  dangerous.
+- **Hypothesized:** some ordinary enemies have a kill-before-saturation
+  deadline. Earlier verified kills may prevent later tracking/homing
+  emissions.
+- **Hypothesized:** spellcards remain survival-first, but “damage only affects
+  bonus” is too strong. Scoring bonus is irrelevant to NMNB, while verified
+  boss damage can shorten dangerous exposure. Phase compression is therefore
+  a survival-equivalent tie-break, not a chase-through-pattern objective.
+- **Hypothesized:** releasing Focus outside fine-dodge windows may use
+  Sakuya's wider shot coverage to kill distributed nonspell enemies sooner.
+  This cannot be promoted until focus-transition contact/damage gates and
+  action-dependent RNG are modeled.
+- **Observed boundary:** post-death Power recovery is useful diagnosis but
+  cannot support the clean pre-loss NMNB policy.
+
 ### 8.7 Acceptance-evidence gap
 
 The project has not yet retained one uncontaminated complete Lunatic Route-2
@@ -410,6 +452,84 @@ must preserve exact model/version identity, retain a falsifier, run the
 smallest focused tests while iterating, and pass required Linux/Windows gates
 before physical promotion.
 
+### Physical evidence policy
+
+Use two non-interchangeable physical layers:
+
+1. **mechanics-focused practice:** starts from the practice workload's
+   configured resources, isolates geometry/timing/phase behavior, and is the
+   right first falsifier for one narrow intervention;
+2. **route-faithful prefix or full route:** starts Stage 1 at Power 0,
+   preserves earned items/Power, damage, position, RNG, and transition
+   history, and is the only resource/route authority.
+
+No offline or shadow result gains live authority without the focused physical
+layer. No integrated model version proceeds to full-route NMNB acceptance
+until all four mandatory scene families below have fresh compatible evidence.
+
+| Workload | Why it is mandatory | Mechanics-focused gate | Route-faithful gate |
+| --- | --- | --- | --- |
+| Lunatic Stage 3 | Historical practice still has eight hits, with nonspell boundary pressure and spell-50 laser/action-lag failures. It is the first hard cross-stage and early-resource workload. | Fresh complete practice for geometry, cadence, delay, nonspell, and laser regression. Practice Power is not route authority. | Start Stage 1 at Power 0; retain every item/Power transition through Stage-3 entry and completion. |
+| Lunatic Stage 4A | Reimu workloads expose dense bullets, ECL callbacks, enemy bodies, dialogue/frozen-manager behavior, and CE-0120/0121 actuator boundaries. | Fresh complete practice after timer/ECL/body/clock changes, with transitions and first-hit attribution. | Preserve the actual Stage-1–4A route state, earned Power, RNG, and dialogue history. |
+| Lunatic Stage 5 | Current 18-hit control boundary and the canonical nonspell combat/Power/unfocused research workload. | First restore two observer-off controls at `<=10`; later test one preregistered nonspell intervention at a time. | Enter from the normal Power-0 route and retain source lifetime, kills/despawns, drops, pickups, Power, and first-hit history. |
+| Lunatic Final B | Historical focused practice has 37 hits, 8,292/16,813 empty queries, nine laser overlaps, and strong boundary/funnel pressure. It directly exercises time scale, laser geometry, long-horizon viability, and phase transitions. | Fresh dominant-spell and complete Final-B practice after scaled movement/laser and geometry correction. | A complete compatible Route-2 run reaching and clearing Final B with accumulated resources is required for NMNB. |
+
+Stage 1 and Stage 6B remain useful supporting regressions. They do not replace
+any of the four mandatory scenes.
+
+### Diagnostic and dynamic-debugging ladder
+
+Dynamic debugging is needed selectively, not as the default gameplay method.
+Use the least contaminating level that can answer the exact semantic question:
+
+1. shipped instructions/dataflow in IDA plus current source;
+2. deterministic Python/native oracle, retained replay, and adversarial
+   capsule;
+3. default-off, read-only, manager-frame-bracketed runtime probe with no live
+   action consumer;
+4. isolated controlled debugger session for one unresolved update-order,
+   transition, callback, RNG, kill/despawn, item pickup, or time-scale fact;
+5. clean focused physical A/B after the probe/debugger is removed.
+
+Debugger stepping, breakpoints, Windows CLI focus theft, or instrumentation
+that changes cadence makes that run diagnostic-only. It cannot satisfy a
+survival or timing gate. Prefer bounded native tracing over interactive
+single-stepping when timing/order can be observed without stopping the game.
+Record executable/model identity, exact address/field, trigger, pre/post
+state, thread/frame context, and whether the observation is static, probed, or
+debugger-contaminated.
+
+### External reverse-engineering references
+
+A bounded GitHub search identified and locally cloned two useful candidates
+outside this repository:
+
+- `thpatch/thtk` at commit
+  `892114a0fcaa0bbdaaecf3cb4ad56f758683fb40`, under
+  `/home/pentester/coding/codex_ida/external/thtk`;
+- `Priw8/eclmap` at commit
+  `f146162e330c27d1b0a8880c3a41884615147a11`, under
+  `/home/pentester/coding/codex_ida/external/eclmap`.
+
+**Observed:** thtk supports TH08 archive and ECL/MSG/STD disassembly and
+reassembly. Its `thecl/thecl06.c` contains a TH08 opcode parameter-format
+table. The companion `th08.eclm` supplies community mnemonic candidates for
+TH08 ECL and timeline instructions. No complete TH08 executable
+decompilation was found in this bounded search; the prominent decompilation
+project found was for TH06.
+
+Use these repositories as hypothesis generators and independent file-format
+or script-disassembly aids, not native authority. In `SEM-SOURCE` and
+`COMBAT-GEN`, decompile owned TH08 stage ECL, diff opcode/signature coverage
+against the current parser, and turn disagreements into targeted IDA
+instruction/dataflow/caller/callee checks and bounded probes. Do not import
+mnemonic meanings, callback semantics, update order, kill/despawn behavior,
+or executable structure without revalidation against this exact shipped
+build. The cloned `eclmap` snapshot exposes no license file, so do not copy
+its mapping content into this repository; record only independently
+revalidated facts. Neither external project was built or executed in this
+planning checkpoint.
+
 ### Phase 0 — Preserve the current causal baseline
 
 Do this before source changes:
@@ -417,18 +537,33 @@ Do this before source changes:
 1. run current code on Lunatic Stage 5 with every optional observer off;
 2. retain the complete outcome and canonical first-hit dossier;
 3. require two consecutive runs at `<=10` hits;
-4. if either run materially fails, compare the first clean hit against the
+4. after Stage 5 passes, take one fresh current-code observer-off
+   mechanics-focused control each for Lunatic Stage 3, Stage 4A, and Final B;
+   record their practice resource initialization and do not treat it as
+   route-faithful Power evidence;
+5. if any control materially fails, compare the first clean hit against the
    eight-hit checkpoints by exact physical state, geometry, viability age,
    cadence, delay root, action, and phase—not aggregate count;
-5. do not mix Focus/unfocused, targeting, Power, G5 delivery, worker,
+6. if the four-scene current-code ring is stable enough for characterization,
+   run one complete Lunatic Route-2 hard no-Bomb control from Power 0;
+7. do not mix Focus/unfocused, targeting, Power, G5 delivery, worker,
    priority, affinity, or planner changes into this control.
 
 Exit gate: two consecutive accepted observer-off Stage-5 controls at no more
-than ten hits, or a retained causal counterexample that names the failing
-state/contract. The latter opens a correction; it does not authorize
-threshold weakening.
+than ten hits, fresh compatible Stage-3/4A/Final-B characterization, and one
+route-faithful full-run control; or a retained causal counterexample that
+names the first failing state/contract. A failure opens a correction; it does
+not authorize threshold weakening or uncontrolled expansion.
 
 ### Phase 1 — Freeze and repair native transition semantics
+
+This phase is correction work, not investigation-only review. For each strong
+native conclusion, update the IDB rename/type/comment after checking
+instructions, dataflow, relevant callers/callees, and available runtime
+evidence. Record exact material IDB changes in the daily research shard and
+keep inherited, revalidated, corrected, and unresolved labels distinct. Do
+not bulk-apply inferred structs or let a convenient annotation substitute for
+native evidence.
 
 #### 1A. Native timer contract
 
@@ -503,7 +638,11 @@ Therefore:
 - reject cross-version cache/publication lookup;
 - regenerate exact scalar/Python/native parity;
 - replay retained Stage-5 and Final/Extra capsules in shadow;
-- take a fresh trace-only physical metadata gate before live action changes.
+- take a fresh trace-only physical metadata gate before live action changes;
+- map every changed primitive to its first focused physical falsifier:
+  Stage 3 for early nonspell/laser and resource-prefix behavior, Stage 4A for
+  ECL/body/clock behavior, Stage 5 for nonspell/future-source behavior, and
+  Final B for non-unit-scale/laser/funnel behavior.
 
 Exit gate: no artifact is silently interpreted under the new model; every
 current live consumer either matches the exact version or falls back to the
@@ -572,34 +711,61 @@ gates pass. A faster proxy with changed semantics fails.
 
 ### Phase 7 — Add route, combat, and resource progress inside survival
 
-In parallel trace-only work, then one intervention at a time:
+Run trace-only work in parallel when it cannot contend with the live control;
+then test one intervention at a time:
 
-- establish enemy generation/end and kill-versus-despawn semantics;
-- test the specific Stage-5 nonspell kill-before-saturation hypothesis;
-- measure phase exposure and damage only among survival-equivalent actions;
-- establish a fresh Lunatic Stage-3 Power-0 baseline;
-- model collection and Power as route resources;
-- keep post-death recovery as a diagnostic, never no-miss authority;
-- promote unfocused shooting only after Phase 1C and action-dependent RNG
-  coverage.
+1. establish enemy generation/end and distinguish verified kill, timeout,
+   scripted despawn, transition, and unknown;
+2. join source lifetime to realized bullet births and define a measurable
+   kill-before-saturation deadline for one Stage-5 nonspell segment;
+3. retain player Shot/focus/option state, damage, target coverage, clearance,
+   viable alternatives, emission exposure, drops, item motion/pickup, and
+   Power delta;
+4. build a trace-only target shadow that ranks only actions already proved
+   viable and issue-safe;
+5. compare focused versus unfocused target coverage only after Phase 1C and
+   action-dependent RNG/source coverage. The focus transition is a delayed
+   physical mode change, not a free shot-width toggle;
+6. test one opening Stage-5 nonspell segment over repeated RNG-distinct
+   samples. Earlier verified kill must reduce later exposure/emissions without
+   worsening first-hit survival, clearance, reserve, cadence, or deadline;
+7. treat spell damage only as a survival-equivalent phase-compression
+   tie-break and test it per spell, not as a universal aggression weight;
+8. model Power and item collection as resource-constrained route state.
+   Collection is eligible only inside the viable/issue-safe set and must show
+   a verified pickup plus useful downstream damage or survival benefit;
+9. obtain route-faithful prefixes by starting Stage 1 at Power 0. Do not call
+   a max-Power Stage-3/4A/5 practice a Power strategy gate;
+10. keep every post-death collection/recovery analysis in a separately
+    labeled diagnostic history.
 
 Exit gate: a combat/resource action is considered only inside the same
 verified viable and issue-safe set and improves a preregistered physical
-phase metric without degrading first-hit survival or deadlines.
+phase metric over repeated physical samples without degrading first-hit
+survival, clearance/reserve, cadence, deadlines, or later mandatory scenes.
+Absence of survival-equivalent choices is a valid null result.
 
 ### Phase 8 — Physical acceptance ladder
 
 Use focused trials and repeat clean phase passes before expanding scope:
 
 1. two consecutive observer-off Lunatic Stage-5 controls at `<=10` hits;
-2. fresh Lunatic Stage-3 Power-0 baseline;
-3. focused regressions for Stage 1, Stage 4A, Stage 6B, and Final;
-4. repeated clean passes for every unresolved canonical first-hit phase;
-5. one complete Lunatic Route-2 hard no-Bomb run;
-6. progressively eliminate the first clean miss, restarting causal analysis
+2. complete the corrected-model mechanics ring: fresh compatible Lunatic
+   Stage 3, Stage 4A, Stage 5, and Final B practices, with the exact semantic
+   fields and deadlines each change claims;
+3. complete a route-faithful Power/resource prefix from Stage 1 at Power 0
+   through Stage 3, then extend the same evidence boundary through Stage 4A
+   and Stage 5;
+4. require a compatible complete route reaching and clearing Final B; a
+   Final-B practice clear cannot substitute for inherited route state;
+5. run Stage 1 and Stage 6B supporting regressions where the changed
+   primitive applies;
+6. repeat clean passes for every unresolved canonical first-hit phase;
+7. run one complete Lunatic Route-2 hard no-Bomb attempt;
+8. progressively eliminate the first clean miss, restarting causal analysis
    from the new first miss after every success;
-7. retain the first complete zero-hit, zero-Bomb run as **NMNB-1**;
-8. separately establish repeatability with additional RNG-distinct complete
+9. retain the first complete zero-hit, zero-Bomb run as **NMNB-1**;
+10. separately establish repeatability with additional RNG-distinct complete
    zero-hit, zero-Bomb runs as **NMNB-R**.
 
 The first physical NMNB is the requested milestone. Repeatability is a
@@ -613,6 +779,8 @@ The first accepted NMNB run must satisfy all of the following:
 
 - Sakuya/Remilia, Lunatic, Route 2, normal full-route start from Power 0;
 - complete route and every required dialogue/stage transition;
+- route-faithful Stage-3/4A/5/Final-B evidence must derive from that same
+  accumulated history rather than practice-mode resource injection;
 - zero native hit edges from start through route completion;
 - zero Bomb actions and no observed Bomb bit `0x02`;
 - no manual `Z`, foreground loss, debugger/CLI contamination, or unrecorded
@@ -672,11 +840,16 @@ a candidate pass.
 
 ## 13. Immediate Implementation Backlog
 
-After the already-authorized observer-off physical gate is complete, the next
-code checkpoints should be:
+Complete `PHYS-BASE-RING` before source correction: two accepted observer-off
+Stage-5 controls at `<=10`, then fresh current-code Stage-3/4A/Final-B
+mechanics controls and one route-faithful Power-0 full-route characterization,
+or stop on the first retained causal failure.
+
+After that baseline, the next correction checkpoints should be:
 
 1. `SEM-TIMER`: native elapsed/fraction timer contract, oracle, fixtures, and
-   correction of the Phase-B1 authority statement;
+   correction of the Phase-B1 authority statement plus reviewed IDB
+   annotations;
 2. `SEM-SCALE`: player/laser global-time-scale transitions and model identity;
 3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
    enemy contact/damage eligibility;
@@ -688,7 +861,19 @@ code checkpoints should be:
    plus incremental IDA typing;
 7. `MODEL-VNEXT`: cross-version invalidation, differential replay, and
    trace-only physical metadata;
-8. return to G5/viability/performance in Phases 4–6.
+8. `PHYS-MODEL-RING`: take the smallest causal scene after each slice, then
+   require fresh compatible Stage-3/4A/5/Final-B evidence before integrated
+   promotion;
+9. `COMBAT-GEN`: establish generation/end, kill/despawn, target, shot mode,
+   damage, drop, pickup, and Power telemetry without action authority;
+10. `COMBAT-SHADOW`: preregister and test one Stage-5
+    kill-before-saturation or survival-equivalent phase-compression
+    hypothesis at a time;
+11. `POWER-ROUTE`: retain route prefixes from Stage 1 Power 0 and test item
+    collection/unfocused coverage only inside the unchanged viable and
+    issue-safe set;
+12. return to G5/viability/performance in Phases 4–6 when their semantic and
+    physical dependencies are satisfied.
 
 Each label is a program slice, not permission to batch every bullet into one
 commit. The implementation agent should split a slice further whenever one
@@ -696,13 +881,18 @@ counterexample, formal contract, or physical gate can be isolated.
 
 ## 14. Review Deliverables And Remaining Uncertainty
 
-This review changed repository documentation only. It moved the original
-temporary audit into `notes/review/`, retained its original digest, recorded
-new durable counterexamples, narrowed the affected G5 exactness claim, and
-aligned the volatile handoff/strategy/roadmap indexes.
+The original review changed repository documentation only. The later physical
+workload refinement also updated the audit/revalidation repo-skill
+instructions and pinned two external reference clones outside this Git
+repository. It moved the original temporary audit into `notes/review/`,
+retained its original digest, recorded new durable counterexamples, narrowed
+the affected G5 exactness claim, and aligned the volatile
+handoff/strategy/roadmap indexes.
 
 No source, executable, raw capture, retained report, test oracle, live
-strategy, physical policy, or IDA annotation was changed.
+strategy, physical policy, or IDA annotation was changed in these review and
+planning checkpoints. This historical non-action does not restrict
+evidence-backed IDB correction during the authorized implementation phases.
 
 Remaining high-value runtime uncertainties are:
 
@@ -723,12 +913,13 @@ baseline and the ordered dependency chain above are part of the result.
 
 ## 15. Checkpoint Validation
 
-- Complete Linux discovery:
+- At the original audit checkpoint, complete Linux discovery:
   `PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_*.py'`
   passes 1,057 tests in 13.557 seconds.
-- `git diff --check` passes.
-- LeanToken parses the roadmap, moved audit, handoff, strategy, G5 correction,
-  and CE shard completely with structurally complete Markdown headings.
+- For the later planning refinement, `git diff --check` passes; both modified
+  repo skills pass the skill-creator `quick_validate.py`; and LeanToken
+  reconciles every changed Markdown file as parse-complete and structurally
+  complete.
 - Every newly referenced retained artifact/authority path checked by the
   review exists.
 - `/tmp/ths_analysis.md` no longer exists; the durable audit is under
@@ -738,4 +929,6 @@ baseline and the ordered dependency chain above are part of the result.
 - Windows tests were not rerun because this checkpoint changes documentation
   only. Earlier isolated Windows results are historical evidence, not a new
   validation claim.
-- No physical trial was run and no IDA database change was made.
+- No physical trial or IDA mutation occurred during these documentation
+  checkpoints. Phase 1 explicitly authorizes and expects evidence-backed IDB
+  renames/types/comments.

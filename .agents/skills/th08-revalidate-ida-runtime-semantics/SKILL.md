@@ -8,6 +8,12 @@ description: Revalidate TH08 native fields, offsets, functions, ECL behavior, bu
 Treat every inherited database annotation as a hypothesis until the shipped
 instructions, dataflow, callers, and available runtime evidence support it.
 
+This skill is correction-capable when the user asks to fix, implement, or
+execute an accepted roadmap. In that mode, evidence-backed IDA
+renames/types/comments within scope need no separate IDB permission.
+Investigation-only requests remain read-only, and physical trials still
+require their own authorization.
+
 ## Establish The Question
 
 1. Read `AGENTS.md`, `START_HERE.md`, the affected formal/design note, and the

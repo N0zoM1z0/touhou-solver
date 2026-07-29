@@ -198,12 +198,32 @@ Do not resume broad G5 work first.
 2. Retain every outcome and use the canonical first hit for causality.
 3. Require two consecutive corrected Stage-5 results at no more than ten
    hits.
-4. Run a fresh independent Lunatic Stage-3 baseline.
-5. Check other retained Lunatic stages for material regression.
-6. Run one complete hard no-Bomb Lunatic Route 2.
-7. Only then resume a matched V6 report/compact-tail correction or a
+4. Run one fresh current-code observer-off mechanics control each for
+   Lunatic Stage 3, Stage 4A, and Final B. Record practice resource
+   initialization; it is not route-faithful Power authority.
+5. Run one complete hard no-Bomb Lunatic Route 2 from the normal Power-0
+   start, retaining earned item/Power state through Stage 3, Stage 4A,
+   Stage 5, and Final B.
+6. Use Stage 1 and Stage 6B as supporting regressions when the changed
+   primitive reaches them.
+7. Only then begin the native-semantic correction series. Before integrated
+   promotion, rerun fresh compatible Stage-3/4A/5/Final-B physical gates.
+   These correction checkpoints may and should update evidence-backed IDB
+   renames/types/comments; record every material database change in the
+   current daily shard.
+8. Resume a matched V6 report/compact-tail correction or a
    separately contracted nonspell combat, Power, or unfocused-shot
-   experiment.
+   experiment only after its semantic dependencies and separate physical
+   contract are satisfied.
+
+Pinned external hypothesis sources live outside this Git repository at
+`/home/pentester/coding/codex_ida/external/thtk` commit
+`892114a0fcaa0bbdaaecf3cb4ad56f758683fb40` and
+`/home/pentester/coding/codex_ida/external/eclmap` commit
+`f146162e330c27d1b0a8880c3a41884615147a11`. Use them only for TH08
+file-format/ECL coverage hypotheses and revalidate every adopted fact in the
+shipped IDB/runtime; do not copy the unlicensed eclmap content into this
+repository.
 
 The exact one-shot observer-off command is in
 `notes/review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md` and repeated in the
@@ -1881,9 +1901,10 @@ CE-0164. Historical notes do not override the authority table above.
 
 | Workload | Bundle | Purpose |
 | --- | --- | --- |
-| Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor. |
+| Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor; pending fresh current-code observer-off mechanics control. |
 | Lunatic Route-2 Stage 5 | `171633`, `120859`, `125453` | Eight-hit reference, newest separate-publication V5 raw bundle, and newest coalesced V6 failure; keep the last two raw bundles local. |
-| Lunatic Route-2 Stage 3 | pending fresh baseline | Independent harder-workload baseline: historical deaths, Power-0 resources, phase/first-hit and source coverage; do not transfer Stage-5 profiles. |
+| Lunatic Route-2 Stage 3 | pending fresh baseline | Historical practice is mechanics-only; fresh current-code control plus a route prefix starting Stage 1 at Power 0 are required. Stage-3 entry Power is accumulated, not forced to zero. |
+| Lunatic Route-2 Final B | historical `234414`; pending fresh baseline | Historical 37-hit focused practice accepted epoch/cache delivery, not survival. Fresh scaled-movement/laser/funnel mechanics and route-faithful evidence are required. |
 | Hard Route-2 Stage 1 | `175049`, `144128`, `153821` | Zero-hit native/local and refactor gates; G1 trace/pickup gate with one survival failure. |
 | Hard Route-2 full route | `184942` | Complete route, 39-hit feasibility diagnosis; one-bundle evidence only. |
 | Hard Route-2 Stage 4A | `202439`, `211210`, `212756` | Capsule audit and fresh/global issue transaction; `211210/212756` form the newest compatible no-audit floor. |

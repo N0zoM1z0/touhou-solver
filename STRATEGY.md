@@ -675,8 +675,8 @@ ladder are in
    to planner, recurrence, native pipeline, ranking, or issued-mask
    semantics; the 18-hit sample does not identify a code checkpoint to
    revert. Restore survival first with current code and all optional
-   observers off. Require two consecutive `<=10` Stage-5 runs before Stage 3,
-   other-stage, or full-Lunatic acceptance.
+   observers off. Require two consecutive `<=10` Stage-5 runs before fresh
+   Stage-3, Stage-4A, Final-B, or full-Lunatic acceptance.
    It must not loosen or relabel V5/V6 failed gates. Delivery correction and
    survival remain separately versioned.
    Emission, shared transform state, source life, geometry, and action
@@ -1017,8 +1017,10 @@ ladder are in
   deadline: verified earlier removal prevents later dense tracking/homing
   emissions and reduces exposure. Spellcards remain survival-first unless
   survival-equivalent boss alignment measurably compresses the phase.
-  Normal-route Power collection begins from Power 0 and may help only inside
-  viability; post-death recovery is a separate diagnostic.
+  Scoring bonus is irrelevant to NMNB, but earlier boss-phase completion can
+  still reduce dangerous exposure. Normal-route Power collection begins with
+  Stage 1 at Power 0 and may help only inside viability; post-death recovery
+  is a separate diagnostic.
 - **Unfocused-width hypothesis:** when no precise micro-dodge is required and
   hard survival margin is unchanged, releasing Focus/Shift may use Sakuya's
   wider unfocused shot coverage to remove distributed nonspell enemies
@@ -1031,11 +1033,25 @@ ladder are in
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
   only actions already viable and issue-safe under the unchanged live
   certificate.
-- **Workloads:** add Lunatic Stage 3 as a separate later baseline because
-  historical attempts had many deaths. Begin from normal-route Power 0 and
-  retain stage/phase, first-hit, resources, item/Power, and event/source
-  coverage. Do not transfer Stage-5 target mix, phase profile, or strategy
-  promotion to Stage 3 without its own evidence.
+- **Workloads:** Stage 3, Stage 4A, Stage 5, and Final B form the mandatory
+  Lunatic physical promotion ring. Each needs a fresh mechanics-focused
+  practice after relevant model changes; the integrated stack also needs
+  route-faithful evidence starting Stage 1 at Power 0 and carrying earned
+  resources/history forward. Stage-3 entry Power is accumulated route state,
+  not artificially zero. Practice-mode max Power has mechanics authority
+  only. Do not transfer target mix, phase profile, or strategy promotion
+  across stages without their own evidence.
+- **Dynamic-debug boundary:** use IDA, deterministic probes/replay, then
+  default-off runtime tracing before an isolated debugger session. Any
+  breakpoint/step/focus/cadence-contaminated run is diagnostic-only and
+  cannot satisfy survival, deadline, or physical promotion.
+- **External-reference boundary:** locally pinned `thpatch/thtk`
+  (`892114a0fcaa0bbdaaecf3cb4ad56f758683fb40`) and `Priw8/eclmap`
+  (`f146162e330c27d1b0a8880c3a41884615147a11`) may generate TH08 ECL
+  opcode/signature/mnemonic hypotheses. They provide no executable,
+  lifecycle, update-order, or action authority; revalidate every adopted fact
+  in the shipped IDB/runtime. Do not copy the unlicensed eclmap snapshot into
+  this repository.
 - **Falsifiers:** no exposure reduction after earlier verified kill, no HP
   delta from alignment, no eligible survival-equivalent choices, or any
   clearance/reserve/cadence regression.

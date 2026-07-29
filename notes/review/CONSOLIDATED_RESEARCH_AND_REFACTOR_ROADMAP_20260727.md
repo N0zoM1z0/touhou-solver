@@ -36,6 +36,39 @@ action-conditioned hazards cannot support hard physical authority.
 Performance work such as persistent local-beam SoA/fused stepping follows
 semantic stabilization.
 
+Physical evidence is required throughout the correction program. A narrow
+semantic or policy change first uses the smallest focused physical falsifier;
+the integrated model version must then pass fresh Lunatic Stage-3, Stage-4A,
+Stage-5, and Final-B evidence before full-route promotion. Practice evidence
+has mechanics authority only. Resource/route authority starts Stage 1 at
+Power 0 and carries earned Power, items, position, RNG, damage, and transition
+history forward; Stage-3 entry Power is accumulated rather than artificially
+zero.
+
+The proposed Stage-5 combat/resource line remains trace-only until native
+enemy lifetime, kill/despawn, shot/focus, target/damage, item pickup, and
+action-dependent RNG semantics are established. Nonspell
+kill-before-saturation, survival-equivalent spell phase compression, and
+unfocused-width are falsifiable hypotheses, not live strategy authority.
+Power is a resource constraint inside viability, and post-death recovery is
+diagnostic-only for NMNB. Use IDA and bounded tracing before isolated dynamic
+debugging; any breakpoint, stepping, focus, or cadence contamination makes a
+run diagnostic-only.
+
+The prior audit's “no IDA database change” statement is historical, not a
+program-wide restriction. Authorized correction checkpoints should rename,
+type, and comment strong revalidated conclusions in IDA, correct misleading
+annotations, and log each material database change. Investigation-only work
+remains read-only.
+
+Two external hypothesis sources are pinned outside the repository:
+`thpatch/thtk@892114a0fcaa0bbdaaecf3cb4ad56f758683fb40` and
+`Priw8/eclmap@f146162e330c27d1b0a8880c3a41884615147a11`. Use them to
+disassemble owned TH08 ECL and enumerate candidate opcode signatures or
+mnemonics during `SEM-SOURCE`/`COMBAT-GEN`. They do not replace shipped-IDB
+revalidation, and the eclmap snapshot has no visible license file, so do not
+copy its contents into this repository.
+
 ## 1. 結論先行
 
 接下來的核心任務不是「再做一個更快的躲彈 heuristic」，也不是把整個 agent

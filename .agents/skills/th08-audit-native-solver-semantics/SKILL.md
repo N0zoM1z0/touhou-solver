@@ -1,6 +1,6 @@
 ---
 name: th08-audit-native-solver-semantics
-description: Perform a comprehensive TH08 native-to-solver audit using the connected IDA Pro database as the shipped-program baseline. Use when reviewing whether inherited IDA analysis, renames, types, comments, offsets, ECL or callback semantics are accurate; whether Touhou Solver Python, C, or C++ decoders, models, projections, or planners preserve those semantics; whether important native routines or state gates were omitted; or where correctness-preserving performance improvements exist. Default to read-only investigation unless the user explicitly asks for fixes.
+description: Perform a comprehensive TH08 native-to-solver audit using the connected IDA Pro database as the shipped-program baseline. Use when reviewing whether inherited IDA analysis, renames, types, comments, offsets, ECL or callback semantics are accurate; whether Touhou Solver Python, C, or C++ decoders, models, projections, or planners preserve those semantics; whether important native routines or state gates were omitted; or where correctness-preserving performance improvements exist. Use read-only mode for investigation-only requests; when the user asks to fix, implement, or execute an accepted roadmap, permit evidence-backed source, note, and IDA database corrections within that scope.
 ---
 
 # Audit TH08 Native-To-Solver Semantics
@@ -15,9 +15,10 @@ evidence to check, never as substitutes for the native program.
   below completely before starting IDA or source analysis.
 - For one field, function, or offset, read the IDA, evidence, and reporting
   references. Also consult `$th08-revalidate-ida-runtime-semantics` when
-  available, but keep this skill's read-only boundary: skip that skill's IDA,
-  source, note, and checkpoint mutation steps unless the user explicitly
-  authorizes fixes.
+  available. Keep investigation-only requests read-only. For a fix,
+  implementation, or accepted-roadmap execution request, use that skill's
+  evidence-backed IDA, source, note, and checkpoint correction steps within
+  the authorized scope.
 - For one solver/model path, read the IDA, solver-traceability, evidence, and
   reporting references.
 - For a native robustness or performance review, read the native-performance,
@@ -38,9 +39,12 @@ References:
    handoff, and the current daily/counterexample shards relevant to the audit.
 2. Follow the repository prohibition on REA. Use IDA Pro MCP for new binary
    static analysis and retained/native probes for runtime evidence.
-3. Interpret “audit”, “review”, “investigate”, or “check” as read-only. Do not
-   rename, retype, comment, patch, edit source, promote a strategy, or run a
-   physical trial unless the user explicitly authorizes that action.
+3. Interpret a request that only says “audit”, “review”, “investigate”, or
+   “check” as read-only. Do not infer mutation authority from those words.
+   Conversely, a request to fix, correct, implement, or execute an accepted
+   roadmap authorizes evidence-backed IDA renames/types/comments and
+   repository corrections needed by that scope; it does not independently
+   authorize strategy promotion or a physical trial.
 4. Preserve unrelated and concurrent worktree changes. Record the audit HEAD,
    branch, dirty-state caveat, IDB identity, executable identity, and evidence
    cutoff.
@@ -164,8 +168,10 @@ Follow the native robustness and performance reference.
    backlog, minimal verification matrix, commands/results actually run, and
    explicit non-actions.
 4. Remove “in progress” language and stale checklist items.
-5. Verify the report is readable, record its size and hash when useful, and
-   confirm no repository or IDA mutation occurred in read-only mode.
+5. Verify the report is readable and record its size and hash when useful. In
+   read-only mode, confirm no repository or IDA mutation occurred. In
+   correction mode, enumerate the exact source, note, and IDA mutations and
+   the evidence supporting each one.
 
 Do not declare completion until the reporting reference’s final checklist
 passes.

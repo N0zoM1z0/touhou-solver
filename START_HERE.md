@@ -92,8 +92,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `7133404`
-  (`Retain SEM-MODE-C causal transition primitive`).
+- Latest retained research checkpoint: `7bf72a6`
+  (`Retain SEM-MODE-C physical recurrence audit`).
 - Latest pre-trial repository/live code checkpoint: `60ae5b9`
   (`Retain CE-0191 diagnostic scale continuation`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
@@ -191,6 +191,26 @@ the shipped image. This checkpoint has offline transition authority only:
 body/flag schedules remain exogenous and global survival recurrence,
 physical-update clock, immutable hazard-version integration, optimized/native
 differentials, and live publication remain open.
+
+Checkpoint `7bf72a6` retains a source-hashed physical post-hoc recurrence
+audit of the same complete Stage-5 trace. All 9,839 eligible adjacent coherent
+ordinary intervals exactly reproduce native player `+3/+5/+8`. The strict
+contract excludes focus edges, Bomb, crossed captures, player phases `1/2`,
+phase changes, local pipeline disagreement, and every intervening
+non-decision record. Revalidated `player_update` instructions
+`0x0044C4C6..0x0044C4CB` confirm the phase `1/2` suppression boundary; IDA
+instruction `0x0044C4C6` records the result.
+
+This checkpoint also strengthens CE-0120. Three retained auto-confirm gaps
+have manager deltas `1800/1800/1801` but transition-counter increments
+`79/328/553`; manager-frame delta is therefore not an unconditional
+player-update count. The deterministic compact report hashes to
+`da13e633dd11b65e837062b9286b736ee5dce618f57ba9bb1930d8c8c0315a66`.
+Six focused tests and complete Linux/Windows discovery pass 1,181 tests in
+14.647/30.388 seconds with three existing Windows skips. This is
+offline/physical-post-hoc recurrence authority only: exact future
+body/flag/geometry production, universal physical clock, global survival,
+live publication, and unfocused combat remain open.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -548,14 +568,17 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-C` from checkpoint `7133404`. Bind the accepted pure
-   transition to an exact immutable body/flag/geometry schedule and verified
-   physical-update clock, then integrate it into the finite survival
-   recurrence without granting live action authority. Preserve the
-   independent scalar oracle and publish body-set, viable-state, and
-   safe-action-mask differentials. Then complete SEM-MODE-D damage-objective
-   separation and SEM-MODE-E optimized/native parity. Keep unfocused-combat
-   promotion disabled.
+2. Continue `SEM-MODE-C` from checkpoint `7bf72a6`. The local recurrence now
+   passes physical post-hoc falsification over 9,839 ordinary Stage-5
+   intervals, while the retained dialogue gaps reject manager frame as a
+   universal physical clock.
+   Build or conservatively version an exact future body/flag/geometry
+   producer before survival integration; do not substitute the current
+   `future hazard events unseen` trace snapshot. Preserve the independent
+   scalar oracle and publish body-set, viable-state, and safe-action-mask
+   differentials without granting live action authority. Then complete
+   SEM-MODE-D damage-objective separation and SEM-MODE-E optimized/native
+   parity. Keep unfocused-combat promotion disabled.
 3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed

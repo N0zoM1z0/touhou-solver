@@ -845,6 +845,21 @@ Execution progress on 2026-07-29:
   promotion unit is a complete stage: after this gate, source-authority
   generalization must be stage-wide and may not depend on enabling a feature
   only when one hand-picked spell is reached.
+- `SEM-SCALE-C5-1` then physically ran the whole original-game Stage 6B:
+  17,282 decisions, 19 hits, zero Bomb masks, and route completion. It failed
+  exact delivery because the spell-190 hit at frame 73,477 left the player in
+  phase 3/predeath 7 across the entire quarter-scale source window. The old
+  phase-0 gate waited until unit scale returned and never captured a source.
+  CE-0188 retains the raw hash and causal witness. The corrected proposal
+  captures source player phase, treats phase 3 as contamination rather than
+  normal-player authority, and continues evidence collection without new
+  input writes instead of exiting on scale-authority loss.
+- The next physical unit is no longer another spell-190 or Stage-6B-only
+  retry. After dual-platform validation, run original Game Start Lunatic
+  Sakuya/Remilia from Power 0 through the complete route. Retain stage/phase
+  hits, Bombs, lives, Power/items, combat progress, transitions, and C5
+  exact-delivery as separate conclusions. The full-route controller must not
+  auto-stop at the restore.
 
 #### 1C. Action-conditioned player/enemy mode
 
@@ -1214,13 +1229,15 @@ baseline and the ordered dependency chain above are part of the result.
   explicit and grants no clean-survival or NMNB authority. CE-0186/0187,
   the replay-method note, compact artifacts, hashes, and IDA replay-menu
   annotations are retained.
-- For SEM-SCALE-C5 live delivery, focused authority/supervisor/report tests
-  and complete Linux/Windows discovery pass 1,132 tests. A Windows default-GBK
-  fixture-read failure was reproduced and corrected with explicit UTF-8; the
-  complete Windows rerun passes with only the three existing skips. The
-  retained physical C4 schedule is exercised across its phase-asymmetric
-  restore. No physical input trial has run, so the implementation adds no
-  hit-free or survival sample.
+- For SEM-SCALE-C5 live delivery, C5-1 physically completed Stage 6B with
+  17,282 decisions, 19 hits, and zero Bomb masks but accepted no exact source;
+  CE-0188 retains the phase-0 trigger failure and raw hash. The corrected
+  player-phase evidence boundary, native-summary parser, non-aborting
+  continuation, focused/full-route auto-stop split, and original Game Start
+  transport pass focused Ruff/tests. Complete Linux/Windows discovery pass
+  1,137 tests in 13.612/30.825 seconds, with the three existing Windows
+  skips. This adds a physical counterexample, not a hit-free or survival
+  sample.
 - No matching TH08 gameplay, controller, practice-supervisor, or
   full-route-supervisor process is left running.
 - The original documentation-only checkpoint did not rerun Windows tests;

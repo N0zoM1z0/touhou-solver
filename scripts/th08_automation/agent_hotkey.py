@@ -81,6 +81,7 @@ class AgentHotkey:
         runtime_ecl_static_image: Path | None = None,
         runtime_ecl_static_sha256: str | None = None,
         enable_finalb_scale_source_authority: bool = False,
+        finalb_scale_delivery_auto_stop: bool = False,
         bullet_birth_backend: str = "python",
         bullet_birth_native_call_mode: str = (
             NATIVE_CALL_MODE_GIL_RELEASED
@@ -166,10 +167,11 @@ class AgentHotkey:
                 "runtime ECL identity requires an explicit expected stage"
             )
         if enable_finalb_scale_source_authority and (
-            expected_difficulty != 3 or expected_stage != 7
+            expected_difficulty != 3 or expected_stage not in {0, 7}
         ):
             raise ValueError(
-                "Final-B scale-source authority requires Lunatic stage 7"
+                "Final-B scale-source authority requires Lunatic full route "
+                "or stage 7"
             )
         if enable_finalb_scale_source_authority and (
             runtime_ecl_static_image is None
@@ -178,6 +180,13 @@ class AgentHotkey:
             raise ValueError(
                 "Final-B scale-source authority requires exact runtime ECL "
                 "identity"
+            )
+        if (
+            finalb_scale_delivery_auto_stop
+            and not enable_finalb_scale_source_authority
+        ):
+            raise ValueError(
+                "Final-B scale-delivery auto-stop requires source authority"
             )
         if trace_auxiliary_ecl_events and not trace_auxiliary_vm_batches:
             raise ValueError(
@@ -213,6 +222,9 @@ class AgentHotkey:
         self.runtime_ecl_static_sha256 = runtime_ecl_static_sha256
         self.enable_finalb_scale_source_authority = (
             enable_finalb_scale_source_authority
+        )
+        self.finalb_scale_delivery_auto_stop = (
+            finalb_scale_delivery_auto_stop
         )
         self.bullet_birth_backend = bullet_birth_backend
         self.bullet_birth_native_call_mode = bullet_birth_native_call_mode
@@ -393,6 +405,9 @@ class AgentHotkey:
                 ),
                 enable_finalb_scale_source_authority=(
                     self.enable_finalb_scale_source_authority
+                ),
+                finalb_scale_delivery_auto_stop=(
+                    self.finalb_scale_delivery_auto_stop
                 ),
                 bullet_birth_backend=self.bullet_birth_backend,
                 bullet_birth_native_call_mode=(

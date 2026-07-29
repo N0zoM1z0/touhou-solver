@@ -384,6 +384,14 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
+        "--finalb-scale-delivery-auto-stop",
+        action="store_true",
+        help=(
+            "stop after the exact Final-B unit restore; focused gate only, "
+            "disabled for complete-route evidence"
+        ),
+    )
+    parser.add_argument(
         "--bullet-birth-native-call-mode",
         choices=defaults.native_call_modes,
         default=defaults.native_call_mode_gil_released,

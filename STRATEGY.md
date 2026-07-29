@@ -465,6 +465,19 @@ Spell 190 is only a causal mechanics checkpoint: subsequent source-authority
 work and promotion must use a whole-stage profile and must not require an
 operator or runtime service to enable policy logic at one hand-picked spell.
 
+**2026-07-29 SEM-SCALE-C5-1 physical failure:** original-game Stage 6B
+completed with 17,282 decisions, 19 hits, and zero Bomb masks, but no exact
+source was accepted. A spell-190 hit at frame 73,477 left player phase 3 and
+predeath 7 across the quarter-scale source interval; the phase-0-only gate
+waited until the root had already restored to unit. CE-0188 rejects that
+trigger, not the retained C4 schedule. The corrected proposal records source
+player phase, permits contaminated phase-3 delivery without normal-player
+authority, and continues physical evidence collection without new input
+writes on scale-authority loss. Focused restore auto-stop remains available,
+but the next physical unit is the complete original Game Start Lunatic route
+from Power 0 with auto-stop disabled. This is not a strategy or survival
+promotion.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

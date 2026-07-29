@@ -13,6 +13,9 @@ from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
+from analysis.th08_finalb_scale_live_delivery_report import (
+    build_report as build_finalb_scale_delivery_report,
+)
 from th08_agent_hotkey import AgentHotkey
 from th08_live.bullet_birth_native import (
     NATIVE_CALL_MODES,
@@ -56,10 +59,12 @@ from th08_practice_supervisor import (
     focus_target_window,
     launch_patch_batch,
     monitor_trial,
+    resolve_runtime_ecl_static_image,
     terminate_exact_target,
     wait_for_patched_target,
     wait_for_title_menu,
 )
+from th08_live.scale_source_trace import FINAL_B_ECL_STATIC_SHA256
 from th08_runtime_agent import TARGET_EXE, Win32, release_injected_keys
 
 
@@ -175,6 +180,10 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
     game_dir = args.game_dir.resolve()
     expected_exe = game_dir / TARGET_EXE
     launch_bat = args.launch_bat or game_dir / DEFAULT_LAUNCH_BAT
+    runtime_ecl_static_image = resolve_runtime_ecl_static_image(
+        args.runtime_ecl_static_image,
+        args.runtime_ecl_static_sha256,
+    )
     if args.kill_existing:
         if terminate_exact_target(api, expected_exe):
             print("terminated previous verified TH08 process", flush=True)
@@ -201,6 +210,15 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "route_id": 2,
         "expected_stage_sequence": list(EXPECTED_ROUTE_STAGES),
         "hard_no_bomb": True,
+        "finalb_scale_source_authority": (
+            args.enable_finalb_scale_source_authority
+        ),
+        "runtime_ecl_static_image": (
+            str(runtime_ecl_static_image)
+            if runtime_ecl_static_image is not None
+            else None
+        ),
+        "runtime_ecl_static_sha256": args.runtime_ecl_static_sha256,
         "safety_value_horizon": 0,
         "trace_transform_runtime": False,
         "trace_bullet_births": args.trace_bullet_births,
@@ -268,6 +286,12 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             corridor_background_low_priority=(
                 args.corridor_background_low_priority
             ),
+            runtime_ecl_static_image=runtime_ecl_static_image,
+            runtime_ecl_static_sha256=args.runtime_ecl_static_sha256,
+            enable_finalb_scale_source_authority=(
+                args.enable_finalb_scale_source_authority
+            ),
+            finalb_scale_delivery_auto_stop=False,
             safety_value_horizon=0,
             duration_seconds=args.agent_duration,
             detailed_summary=False,
@@ -382,6 +406,26 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             stall_timeout_seconds=args.stall_timeout,
         )
         session["agent_summary"] = agent.last_summary
+        if args.enable_finalb_scale_source_authority:
+            scale_report = build_finalb_scale_delivery_report(trace)
+            scale_report_path = (
+                RUNTIME_REPORT_DIR
+                / f"{run_id}.scale_delivery_report.json"
+            )
+            scale_report_path.write_text(
+                json.dumps(
+                    scale_report,
+                    ensure_ascii=False,
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            session["scale_delivery_report"] = {
+                "path": str(scale_report_path),
+                "passed": scale_report["gate"]["passed"],
+            }
         accepted = bool(
             isinstance(agent.last_summary, dict)
             and agent.last_summary.get("termination_reason")
@@ -560,6 +604,23 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--runtime-ecl-static-image",
+        type=Path,
+        help="decoded ecldata7 image for the Final-B scale-source gate",
+    )
+    parser.add_argument(
+        "--runtime-ecl-static-sha256",
+        help="required immutable SHA-256 for --runtime-ecl-static-image",
+    )
+    parser.add_argument(
+        "--enable-finalb-scale-source-authority",
+        action="store_true",
+        help=(
+            "carry the default-off Final-B exact source experiment through "
+            "the complete original Game Start route"
+        ),
+    )
+    parser.add_argument(
         "--difficulty",
         type=parse_practice_difficulty,
         default=parse_practice_difficulty("lunatic"),
@@ -608,6 +669,15 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("supervisor timing arguments must be positive")
     if args.trial_timeout <= args.agent_duration:
         raise ValueError("trial timeout must exceed the agent duration")
+    if args.enable_finalb_scale_source_authority and (
+        args.difficulty.menu_index != 3
+        or args.runtime_ecl_static_image is None
+        or args.runtime_ecl_static_sha256 != FINAL_B_ECL_STATIC_SHA256
+    ):
+        raise ValueError(
+            "full-route Final-B scale delivery requires Lunatic and the "
+            "exact ecldata7 identity"
+        )
     api = Win32()
     _configure_supervisor_api(api)
     run_id = run_trial(args, api=api)

@@ -108,7 +108,7 @@ artifacts/runtime_reports/lunatic_route2_stage6b_finalb_scale_delivery_TIMESTAMP
 ```
 
 The strict report schema is
-`th08-finalb-scale-live-delivery-physical-report-v2`. Raw JSONL remains local
+`th08-finalb-scale-live-delivery-physical-report-v3`. Raw JSONL remains local
 and ignored; retain its SHA-256, the compact strict report, normal summary,
 first-hit attribution, resources/Power, timing, and cleanup state.
 
@@ -116,3 +116,36 @@ A strict pass observes exact schedule delivery and no fresh hit/Bomb across
 one physical restore interval. It does not prove the pre-target transport,
 clean Final-B survival, another RNG/resource history, Stage 3/4A/5, a normal
 Power-0 route, Extra, or Lunatic NMNB.
+
+## Observed C5-1 result and correction
+
+The 2026-07-29 run
+`lunatic_route2_stage6b_finalb_scale_delivery_20260729_233720`
+completed Stage 6B but failed the exact gate:
+
+- 17,282 decisions, 19 hits, zero Bomb masks;
+- canonical fresh-attempt hit at nonspell frame 8,085;
+- final hit at spell-190 frame 73,477;
+- first quarter-scale wait at frame 73,600; and
+- route unload at frame 74,080 without an accepted complete source.
+
+The player was phase 3 with predeath residue 7 immediately before the
+quarter window and returned to phase 0 only after the native root restored to
+unit. CE-0188 therefore rejects the old phase-0-only trigger. Raw JSONL
+SHA-256 is
+`11ba10fb1ac771e138627cff0e6faf7855e0858c5cf70b88c0fa2c9966e52b8a`.
+The post-close strict v3 report SHA-256 is
+`18f26f3f2d27234ae2b419aa01966fd3c646b0268419e4af76c7ac60398ca0a6`.
+No replay was created.
+
+The corrected gate captures `player_phase` in the coherent source
+transaction and permits phase-3 delivery as explicit contamination. It does
+not promote that row to normal-player survival. An incomplete or mismatched
+C5 schedule now waits without a new input write and continues the physical
+run; it still fails the strict report. Focused Stage-6B runs may auto-stop
+after the unit restore, but the next authorized physical gate is the original
+Game Start full Lunatic route through `run_th08_full_route_agent.bat`, with
+auto-stop disabled.
+
+Focused Ruff/tests and complete Linux/Windows discovery pass 1,137 tests in
+13.612/30.825 seconds, with three existing Windows skips.

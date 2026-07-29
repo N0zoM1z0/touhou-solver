@@ -39,6 +39,7 @@ def _authority(offset: int, scale_bits: int) -> dict[str, object]:
         "current_source_frame": ORIGIN + offset,
         "frame_offset": offset,
         "baseline_predeath_counter": 0,
+        "source_player_phase": 0,
         "root_scale_bits": scale_bits,
         "coverage": SCALE_COVERAGE_COMPLETE,
         "complete_horizon": 300 - offset,
@@ -98,6 +99,7 @@ def _fixture() -> list[dict[str, object]]:
             "finalb_scale_pretarget_transport": (
                 "experimental_unit_unknown_direction"
             ),
+            "finalb_scale_delivery_auto_stop": True,
             "runtime_ecl_static_sha256": FINAL_B_ECL_STATIC_SHA256,
         },
         _transport_decision(),
@@ -126,6 +128,7 @@ def _fixture() -> list[dict[str, object]]:
                     "scale_bits": FINAL_B_QUARTER_SCALE_BITS,
                     "player_bomb_active": 0,
                     "player_predeath_counter": 0,
+                    "player_phase": 0,
                 },
             },
             "schedule": {
@@ -187,6 +190,7 @@ class FinalBScaleLiveDeliveryReportTests(unittest.TestCase):
         self.assertEqual(report["observed"]["hit_count"], 0)
         self.assertEqual(report["observed"]["bomb_decision_count"], 0)
         self.assertEqual(report["observed"]["entire_trial_hit_count"], 3)
+        self.assertEqual(report["observed"]["source_player_phase"], 0)
 
     def test_stable_predeath_residue_is_reported_without_becoming_clean(
         self,
@@ -203,6 +207,47 @@ class FinalBScaleLiveDeliveryReportTests(unittest.TestCase):
 
         self.assertTrue(report["gate"]["passed"])
         self.assertEqual(report["observed"]["baseline_predeath_counter"], 7)
+
+    def test_phase_three_source_is_explicit_contamination_not_rejection(
+        self,
+    ) -> None:
+        records = _fixture()
+        records[3]["source_capture"]["phase_before"]["player_phase"] = 3
+        for record in records:
+            if record.get("kind") == "finalb_live_scale_schedule_authority":
+                record["source_player_phase"] = 3
+
+        report = self._report(records)
+
+        self.assertTrue(report["gate"]["passed"])
+        self.assertEqual(report["observed"]["source_player_phase"], 3)
+        self.assertIn(
+            "normal player-phase",
+            report["authority"]["not_proved"],
+        )
+
+    def test_native_summary_kind_is_consumed(self) -> None:
+        records = _fixture()
+        records[-1]["kind"] = "summary"
+
+        report = self._report(records)
+
+        self.assertTrue(report["gate"]["passed"])
+        self.assertEqual(
+            report["observed"]["termination_reason"],
+            "finalb_scale_delivery_complete",
+        )
+
+    def test_complete_route_can_retain_the_exact_gate_without_auto_stop(
+        self,
+    ) -> None:
+        records = _fixture()
+        records[1]["finalb_scale_delivery_auto_stop"] = False
+        records[-1]["termination_reason"] = "route_complete"
+
+        report = self._report(records)
+
+        self.assertTrue(report["gate"]["passed"])
 
     def test_hit_bomb_predeath_and_authority_fallback_fail(self) -> None:
         cases = {

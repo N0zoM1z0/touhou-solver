@@ -1,6 +1,6 @@
 # TH08 Player/Laser Global Time-Scale Semantics
 
-Status: **SEM-SCALE-C4 physical source passed; C5 live delivery awaits its focused physical gate**
+Status: **SEM-SCALE-C4 physical source passed; C5-1 physically rejected the phase-0 trigger; corrected full-route revalidation pending**
 
 Date: 2026-07-29
 
@@ -597,18 +597,20 @@ Observed SEM-SCALE-C5 implementation result:
   the observed root must equal the captured root. At `d>0`, it must equal
   original laser-phase scale `d-1`; the current future schedule is exactly
   the original player/laser tuples sliced from `d`;
-- exact live use binds the predeath value stable inside the complete-source
-  transaction. Fresh hit, Bomb, predeath-baseline change, context, root,
-  source-frame, or horizon mismatch publishes root-only status and triggers
-  terminate/release. A nonzero baseline remains explicit contamination;
+- exact live use binds both player phase and predeath inside the
+  complete-source transaction. A nonzero phase or baseline remains explicit
+  contamination. Fresh hit, Bomb, predeath-baseline change, context, root,
+  source-frame, or horizon mismatch publishes root-only status. During an
+  explicit physical evidence run it waits without a new input write and
+  continues collecting the stage/route instead of terminating;
 - because original Practice Start selects only a stage, unit-scale rows
   before the target source receive a 256-frame
   `experimental_pretarget_unit_transport_unknown_direction` schedule. It can
   move the controller but has `hard_authority=false`; a non-unit unknown row
   waits without input;
 - the consumer is default-off and CLI/original-game supervisor plumbing
-  requires explicit Lunatic stage 7, hard no-Bomb, and exact
-  `ecldata7.ecl` identity;
+  requires explicit Lunatic focused stage 7 or a full route beginning at
+  stage 0, hard no-Bomb, and exact `ecldata7.ecl` identity;
 - the corridor precheck refuses incomplete, non-unit, or varying schedules,
   preserving its declared `UNKNOWN` boundary. The synchronous local
   planner, issue transaction, certificates, and sensing trace consume the
@@ -620,25 +622,31 @@ Observed SEM-SCALE-C5 implementation result:
   report are
   `run_th08_finalb_scale_live_trial.bat` and
   `scripts/analysis/th08_finalb_scale_live_delivery_report.py`; and
-- complete Linux discovery passes 1,132 tests in 13.596 seconds. The exact
-  Windows UNC suite passes 1,132 in 29.764 seconds with three existing skips.
+- complete Linux discovery passes 1,137 tests in 13.612 seconds. The exact
+  Windows UNC suite passes 1,137 in 30.825 seconds with three existing skips.
   A first Windows attempt exposed only locale-dependent fixture decoding;
   fixing the retained UTF-8 artifact read removes it on the complete rerun.
 
-No game was launched for C5 and no action/survival authority is promoted.
-The exact physical scope and stop conditions are preregistered in
-`notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`.
+C5-1 physically completed Stage 6B with 17,282 decisions, 19 hits, and zero
+Bomb masks. Its spell-190 hit at frame 73,477 left phase 3/predeath 7 across
+the quarter-scale source window, so the old phase-0 gate accepted no source.
+CE-0188 and
+`lunatic_route2_stage6b_finalb_scale_delivery_20260729_233720`
+retain the failure. This rejects the trigger, not the C4 schedule, and grants
+no action/survival authority.
 
 No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
 acceptance, global optimality, or complete future-source coverage.
 
 ## Current stopping rule
 
-The C4 trace gate and C5 exact-version delivery/dual-platform implementation
-gates pass. Launch no input-injecting scope except the one preregistered
-focused Final-B transition gate. It must stop on any
-identity/source/schedule/root/context/predeath/deadline miss and release keys.
-Any test mismatch, incomplete scale coverage consumed as exact, cross-version
-cache hit, unsupported corridor use, or live non-unit hard certificate
-without the complete schedule is a durable counterexample and stops
-promotion.
+The C4 trace gate passes; C5-1 rejects the old live trigger. Validate the
+phase-contaminated source identity, native-summary report, non-aborting
+evidence continuation, and explicit auto-stop mode on Linux and Windows.
+Then run only the original Game Start full Lunatic route from Power 0 with
+C5 observation and restore auto-stop disabled. A scale mismatch fails the C5
+claim but must not discard later stage evidence; process identity,
+foreground, or input-release safety failures still stop and clean up. Any
+incomplete scale coverage consumed as exact, cross-version cache hit,
+unsupported corridor use, or live non-unit hard certificate without the
+complete schedule remains a durable counterexample and stops promotion.

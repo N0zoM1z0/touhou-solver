@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 from th08_automation import full_route_artifacts
 from th08_automation.practice_menu import parse_practice_difficulty
+from th08_live.scale_source_trace import FINAL_B_ECL_STATIC_SHA256
 from th08_full_route_supervisor import (
     _terminal_scene_record,
     build_parser,
@@ -33,6 +34,9 @@ class FullRouteSupervisorTests(unittest.TestCase):
             r"\\wsl.localhost\ubuntu\home\pentester",
             wrapper,
         )
+        self.assertIn("--enable-finalb-scale-source-authority", wrapper)
+        self.assertIn(FINAL_B_ECL_STATIC_SHA256, wrapper)
+        self.assertIn(r"artifacts\decoded\ecldata7.ecl", wrapper)
 
     def test_parser_preserves_lunatic_default_and_accepts_hard(self) -> None:
         self.assertEqual(build_parser().parse_args([]).difficulty.key, "lunatic")
@@ -50,6 +54,23 @@ class FullRouteSupervisorTests(unittest.TestCase):
 
         self.assertFalse(default_args.corridor_background_low_priority)
         self.assertTrue(enabled_args.corridor_background_low_priority)
+
+    def test_full_route_scale_source_contract_is_explicit(self) -> None:
+        args = build_parser().parse_args(
+            [
+                "--runtime-ecl-static-image",
+                "artifacts/decoded/ecldata7.ecl",
+                "--runtime-ecl-static-sha256",
+                FINAL_B_ECL_STATIC_SHA256,
+                "--enable-finalb-scale-source-authority",
+            ]
+        )
+
+        self.assertTrue(args.enable_finalb_scale_source_authority)
+        self.assertEqual(
+            args.runtime_ecl_static_sha256,
+            FINAL_B_ECL_STATIC_SHA256,
+        )
 
     def test_enemy_combat_progress_is_explicitly_opt_in(self) -> None:
         default_args = build_parser().parse_args([])

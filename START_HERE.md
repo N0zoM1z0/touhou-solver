@@ -91,19 +91,17 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest repository research checkpoint: `555bbf8`
-  (`Add causal ECL scale schedule producer`).
-- Latest executable/live code checkpoint: `6a71ac1`
-  (`Complete SEM-SCALE-B authority propagation`).
-- There is no promoted physical-action candidate at `6a71ac1`: a live
-  root-only scale observation now records explicit `UNKNOWN`, terminates, and
-  releases keys before corridor submission or local issue. Latest physically
-  exercised code remains `e309c81`, whose fixed Stage-5 falsifier failed the
-  `<=10` survival threshold.
+- Latest repository/live checkpoint: `19fa70b`
+  (`Adapt Final-B scale gate to original stage launch`).
+- The code at `19fa70b` was physically exercised by the complete Stage-6B
+  workload below. Its C5 exact-delivery gate failed before source capture; it
+  has no scale-delivery or survival promotion.
 - Latest native-semantic correction checkpoint: `555bbf8`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
-- Latest accepted complete physical workload:
-  `lunatic_route2_stage5_unattended_20260729_173957`.
+- Latest complete physical workload:
+  `lunatic_route2_stage6b_finalb_scale_delivery_20260729_233720`. It is a
+  complete hard-no-Bomb stage trace, not an accepted C5 exact-delivery or
+  clean-survival result.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -211,34 +209,46 @@ The native replay physical falsification protocol is retained at
 reproduce late shipped-runtime phases and test native hypotheses while
 preserving replay/resource contamination and action-authority boundaries.
 
-The current `SEM-SCALE-C5` implementation connects that accepted source to
+The `SEM-SCALE-C5` implementation connects that accepted source to
 the live controller behind explicit
-`--enable-finalb-scale-source-authority`. It requires Lunatic stage 7, exact
-runtime ECL identity, and hard no-Bomb. One stable captured predeath baseline
-is bound to an immutable gameplay/route/difficulty/stage/spell/source
-version; later manager frames rebase only by slicing the accepted
-player/laser schedule and checking the observed post-ECL root. Fresh hit,
-Bomb, predeath-baseline change, context, source-frame, root, or horizon
-mismatch returns root-only and uses the existing terminate/release fallback.
+`--enable-finalb-scale-source-authority`. It permits either an original
+Lunatic Game Start route or focused stage 7, requires exact runtime ECL
+identity and hard no-Bomb, and records both the captured player phase and
+predeath baseline. One coherent source is bound to an immutable
+gameplay/route/difficulty/stage/spell/source version; later manager frames
+rebase only by slicing the accepted player/laser schedule and checking the
+observed post-ECL root. A nonzero player phase/predeath root is explicit
+contamination and grants no normal-player or survival authority.
 Non-unit/varying exact coverage remains unsupported by the corridor and is
 consumed only by the exact local path.
 Because THPRAC is unavailable, the original-game Stage-6B supervisor now
 reaches spell 190 from the stage start. Its pre-target constant-unit schedule
 is explicitly unknown-direction experimental transport with
 `hard_authority=false`; C5 acceptance begins only at the coherent exact
-quarter-scale source. A stable nonzero predeath baseline is retained as
-contamination rather than rejected or called clean.
+quarter-scale source. In a physical evidence run, an incomplete/mismatched
+C5 schedule now waits without issuing a new input and continues collecting
+stage/route evidence instead of terminating the game. Focused restore
+auto-stop is explicit; complete-route delivery disables it.
 
-The retained physical C4 schedule itself crosses the callback-18 restore
-correctly under this delivery recurrence. Complete Linux/Windows discovery
-passes 1,132 tests in 13.596/29.764 seconds, with three existing Windows
-skips. No input-injecting C5 physical row exists yet.
+The first input-injecting C5 attempt at `19fa70b` completed original-game
+Stage 6B with 17,282 decisions, 19 hits, and zero Bomb masks. The canonical
+fresh-attempt hit is nonspell frame 8,085. A spell-190 hit at frame 73,477
+left player phase 3/predeath 7 across the quarter-scale source window; the
+old phase-0 trigger therefore never captured a source, and the strict C5
+report failed. Raw JSONL SHA-256 is
+`11ba10fb1ac771e138627cff0e6faf7855e0858c5cf70b88c0fa2c9966e52b8a`;
+CE-0188 and the retained run note contain the causal disposition. No replay
+was created. This physically rejects the old trigger, not the C4 schedule.
+The corrected implementation passes focused Ruff/tests and complete
+Linux/Windows discovery: 1,137 tests in 13.612/30.825 seconds, with the three
+existing Windows skips.
 
-The sole authorized next physical launch is preregistered at
-`notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`. Its prewarmed
-original-game entry point is `run_th08_finalb_scale_live_trial.bat`; the strict
-post-run report is
-`scripts/analysis/th08_finalb_scale_live_delivery_report.py`.
+After focused and complete Linux/Windows gates plus a clean checkpoint, the
+next physical launch is the original `run_th08_full_route_agent.bat` Game
+Start path: Lunatic Sakuya/Remilia from Power 0 through the complete route.
+It carries the default-off C5 observer, never auto-stops at spell 190, and
+retains C5 delivery separately from full-route hits/Bombs/resources. Do not
+repeat the failed Stage-6B version.
 
 ### Native-semantic review
 

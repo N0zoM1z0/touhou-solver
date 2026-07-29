@@ -50,6 +50,7 @@ class FinalBScaleScheduleResolution:
     origin_source_frame: int | None
     frame_offset: int | None
     baseline_predeath_counter: int | None
+    source_player_phase: int | None
 
     @property
     def planner_scale_authority(self) -> bool:
@@ -83,6 +84,7 @@ class FinalBScaleScheduleResolution:
             "current_source_frame": self.schedule.source_frame,
             "frame_offset": self.frame_offset,
             "baseline_predeath_counter": self.baseline_predeath_counter,
+            "source_player_phase": self.source_player_phase,
             "root_scale_bits": self.schedule.root_scale_bits,
             "coverage": self.schedule.coverage,
             "complete_horizon": self.schedule.complete_horizon,
@@ -109,6 +111,7 @@ class FinalBScaleScheduleAuthority:
         self._origin_schedule: Th08TimeScaleSchedule | None = None
         self._binding: tuple[int, int, int, int, int | None] | None = None
         self._baseline_predeath_counter: int | None = None
+        self._source_player_phase: int | None = None
 
     @property
     def origin_schedule(self) -> Th08TimeScaleSchedule | None:
@@ -118,6 +121,7 @@ class FinalBScaleScheduleAuthority:
         self._origin_schedule = None
         self._binding = None
         self._baseline_predeath_counter = None
+        self._source_player_phase = None
         self._trace_service.reset()
 
     @staticmethod
@@ -132,6 +136,7 @@ class FinalBScaleScheduleAuthority:
         origin_source_frame: int | None = None,
         frame_offset: int | None = None,
         baseline_predeath_counter: int | None = None,
+        source_player_phase: int | None = None,
     ) -> FinalBScaleScheduleResolution:
         return FinalBScaleScheduleResolution(
             schedule=Th08TimeScaleSchedule.root_observation(
@@ -145,6 +150,7 @@ class FinalBScaleScheduleAuthority:
             origin_source_frame=origin_source_frame,
             frame_offset=frame_offset,
             baseline_predeath_counter=baseline_predeath_counter,
+            source_player_phase=source_player_phase,
         )
 
     @staticmethod
@@ -167,6 +173,7 @@ class FinalBScaleScheduleAuthority:
             origin_source_frame=None,
             frame_offset=None,
             baseline_predeath_counter=None,
+            source_player_phase=None,
         )
 
     def _rebase(
@@ -193,6 +200,7 @@ class FinalBScaleScheduleAuthority:
                 baseline_predeath_counter=(
                     self._baseline_predeath_counter
                 ),
+                source_player_phase=self._source_player_phase,
             )
         expected_root = (
             origin.root_scale_bits
@@ -212,6 +220,7 @@ class FinalBScaleScheduleAuthority:
                 baseline_predeath_counter=(
                     self._baseline_predeath_counter
                 ),
+                source_player_phase=self._source_player_phase,
             )
         return FinalBScaleScheduleResolution(
             schedule=Th08TimeScaleSchedule.explicit(
@@ -231,6 +240,7 @@ class FinalBScaleScheduleAuthority:
             origin_source_frame=origin.source_frame,
             frame_offset=frame_offset,
             baseline_predeath_counter=self._baseline_predeath_counter,
+            source_player_phase=self._source_player_phase,
         )
 
     def resolve(
@@ -266,7 +276,6 @@ class FinalBScaleScheduleAuthority:
         if self._origin_schedule is None and (
             not target_context
             or observed_root_scale_bits != FINAL_B_QUARTER_SCALE_BITS
-            or player_phase != 0
             or hit_started
             or observed_player_bomb_active != 0
         ):
@@ -365,6 +374,8 @@ class FinalBScaleScheduleAuthority:
                 or type(phase_before.get("player_predeath_counter")) is not int
                 or phase_before.get("player_predeath_counter")
                 != player_predeath_counter
+                or type(phase_before.get("player_phase")) is not int
+                or phase_before.get("player_phase") != player_phase
             ):
                 return self._root_only(
                     scale_bits=observed_root_scale_bits,
@@ -377,6 +388,7 @@ class FinalBScaleScheduleAuthority:
             self._origin_schedule = accepted
             self._binding = binding
             self._baseline_predeath_counter = player_predeath_counter
+            self._source_player_phase = player_phase
 
         return self._rebase(
             source_frame=source_frame,

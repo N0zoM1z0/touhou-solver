@@ -133,6 +133,7 @@ class ScaleSourcePhaseIdentity:
     spell_blob: bytes
     ecl_context: bytes
     scale_bits: int
+    player_phase: int
     player_bomb_active: int
     player_predeath_counter: int
 
@@ -150,6 +151,7 @@ class ScaleSourcePhaseIdentity:
             ),
             ecl_context=_read_exact(reader, ECL_FILE_CONTEXT_ADDRESS, 8),
             scale_bits=_u32(reader, ADDR_GAMEPLAY_TIME_SCALE),
+            player_phase=_read_exact(reader, ADDR_PLAYER, 1)[0],
             player_bomb_active=_u32(
                 reader,
                 ADDR_PLAYER + PLAYER_BOMB_ACTIVE_OFFSET,
@@ -207,6 +209,7 @@ class ScaleSourcePhaseIdentity:
             "runtime_ecl_base": runtime_base,
             "runtime_ecl_subroutine_table": subroutine_table,
             "scale_bits": self.scale_bits,
+            "player_phase": self.player_phase,
             "player_bomb_active": self.player_bomb_active,
             "player_predeath_counter": self.player_predeath_counter,
         }

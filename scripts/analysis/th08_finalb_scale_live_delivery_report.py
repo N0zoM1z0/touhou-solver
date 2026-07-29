@@ -30,7 +30,7 @@ from th08_time_scale import (  # noqa: E402
 )
 
 
-REPORT_SCHEMA = "th08-finalb-scale-live-delivery-physical-report-v2"
+REPORT_SCHEMA = "th08-finalb-scale-live-delivery-physical-report-v3"
 
 
 def _records(path: Path) -> Iterable[dict[str, object]]:
@@ -116,7 +116,7 @@ def build_report(path: Path) -> dict[str, object]:
             unknown_rows.append(record)
         elif kind == "runtime_error":
             runtime_errors.append(record)
-        elif kind == "run_summary":
+        elif kind in {"run_summary", "summary"}:
             summaries.append(record)
 
     accepted_sources = [
@@ -299,6 +299,11 @@ def build_report(path: Path) -> dict[str, object]:
         if source_phase is not None
         else None
     )
+    source_player_phase = (
+        _integer(source_phase, "player_phase")
+        if source_phase is not None
+        else None
+    )
     stable_player_root = (
         baseline_predeath_counter is not None
         and source_phase is not None
@@ -307,6 +312,15 @@ def build_report(path: Path) -> dict[str, object]:
         and all(
             _integer(record, "baseline_predeath_counter")
             == baseline_predeath_counter
+            for record in scoped_authority
+        )
+    )
+    captured_player_phase_reported = (
+        source_player_phase is not None
+        and bool(scoped_authority)
+        and all(
+            _integer(record, "source_player_phase")
+            == source_player_phase
             for record in scoped_authority
         )
     )
@@ -338,6 +352,11 @@ def build_report(path: Path) -> dict[str, object]:
         and len(source_schedule["laser_scale_bits"]) == 300
     )
     summary = summaries[-1] if len(summaries) == 1 else None
+    delivery_auto_stop = (
+        configuration.get("finalb_scale_delivery_auto_stop", True)
+        if configuration is not None
+        else None
+    )
     checks = {
         "executable_identity": (
             identity is not None
@@ -351,6 +370,7 @@ def build_report(path: Path) -> dict[str, object]:
             == "experimental_unit_unknown_direction"
             and configuration.get("runtime_ecl_static_sha256")
             == FINAL_B_ECL_STATIC_SHA256
+            and type(delivery_auto_stop) is bool
         ),
         "single_accepted_complete_source": source_trace is not None,
         "complete_source_schema": (
@@ -375,6 +395,9 @@ def build_report(path: Path) -> dict[str, object]:
         ),
         "exact_finalb_scope": source_scope_exact,
         "stable_predeath_baseline": stable_player_root,
+        "captured_player_phase_reported": (
+            captured_player_phase_reported
+        ),
         "supported_restore_schedule": (
             source_schedule_exact
             and supported_restore
@@ -401,8 +424,18 @@ def build_report(path: Path) -> dict[str, object]:
         "no_scale_authority_fallback": not unknown_rows,
         "clean_supervised_termination": (
             summary is not None
-            and summary.get("termination_reason")
-            == "finalb_scale_delivery_complete"
+            and (
+                (
+                    delivery_auto_stop is True
+                    and summary.get("termination_reason")
+                    == "finalb_scale_delivery_complete"
+                )
+                or (
+                    delivery_auto_stop is False
+                    and summary.get("termination_reason")
+                    == "route_complete"
+                )
+            )
             and not runtime_errors
         ),
     }
@@ -422,6 +455,7 @@ def build_report(path: Path) -> dict[str, object]:
         "observed": {
             "origin_source_frame": origin_frame,
             "baseline_predeath_counter": baseline_predeath_counter,
+            "source_player_phase": source_player_phase,
             "pretarget_decision_count": pretarget_decision_count,
             "authority_row_count": len(scoped_authority),
             "decision_count": len(scoped_decisions),
@@ -464,8 +498,9 @@ def build_report(path: Path) -> dict[str, object]:
             ),
             "not_proved": (
                 "Clean Final-B practice survival, pre-target time-scale "
-                "authority, another RNG/resource history, full-route "
-                "Lunatic NMNB, or Extra."
+                "authority, normal player-phase delivery when the captured "
+                "phase is contaminated, another RNG/resource history, "
+                "full-route Lunatic NMNB, or Extra."
             ),
         },
     }

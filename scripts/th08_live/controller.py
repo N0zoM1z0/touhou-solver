@@ -1540,10 +1540,11 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         getattr(args, "enable_finalb_scale_source_authority", False)
     )
     if enable_finalb_scale_source_authority and (
-        args.difficulty != 3 or args.expected_stage != 7
+        args.difficulty != 3 or args.expected_stage not in {0, 7}
     ):
         raise ValueError(
-            "Final-B scale-source authority requires Lunatic stage 7"
+            "Final-B scale-source authority requires Lunatic full route or "
+            "stage 7"
         )
     if enable_finalb_scale_source_authority and not args.no_bomb:
         raise ValueError(
@@ -1555,6 +1556,13 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
     ):
         raise ValueError(
             "Final-B scale-source authority requires exact runtime ECL identity"
+        )
+    if (
+        getattr(args, "finalb_scale_delivery_auto_stop", False)
+        and not enable_finalb_scale_source_authority
+    ):
+        raise ValueError(
+            "Final-B scale-delivery auto-stop requires source authority"
         )
     _configure_local_hazard_backend(args.local_hazard_backend)
     _configure_local_beam_reducer(args.local_beam_reducer)
@@ -2039,6 +2047,13 @@ def _run_live_session(
                             False,
                         )
                         else "disabled"
+                    ),
+                    "finalb_scale_delivery_auto_stop": bool(
+                        getattr(
+                            args,
+                            "finalb_scale_delivery_auto_stop",
+                            False,
+                        )
                     ),
                     "runtime_ecl_static_sha256": getattr(
                         args,
@@ -3227,11 +3242,7 @@ def _run_live_session(
                 captured_iteration.time_scale_schedule.coverage
                 != SCALE_COVERAGE_COMPLETE
             ):
-                if (
-                    scale_authority_resolution is not None
-                    and scale_authority_resolution.status
-                    == "root_only_complete_source_not_due"
-                ):
+                if scale_authority_resolution is not None:
                     trace_sink.emit(
                         {
                             "kind": "finalb_scale_source_wait",
@@ -3250,7 +3261,11 @@ def _run_live_session(
                                 captured_iteration.native_active_mask
                             ),
                             "changes_input": False,
-                            "status": "waiting_for_quarter_scale_source",
+                            "status": (
+                                "waiting_without_write_after_scale_"
+                                f"authority_{scale_authority_resolution.status}"
+                            ),
+                            "reason": scale_authority_resolution.reason,
                         },
                         flush=True,
                     )
@@ -4673,8 +4688,15 @@ def _run_live_session(
             previous_power = current_power
             previous_action_phase = phase_now
             previous_counter = counter_at_action
-            if _finalb_scale_delivery_complete(
-                scale_authority_resolution
+            if (
+                getattr(
+                    args,
+                    "finalb_scale_delivery_auto_stop",
+                    False,
+                )
+                and _finalb_scale_delivery_complete(
+                    scale_authority_resolution
+                )
             ):
                 termination_reason = "finalb_scale_delivery_complete"
                 break

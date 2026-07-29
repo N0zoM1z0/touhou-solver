@@ -72,6 +72,7 @@ def build_long_run_arguments(
     runtime_ecl_static_image: Path | None = None,
     runtime_ecl_static_sha256: str | None = None,
     enable_finalb_scale_source_authority: bool = False,
+    finalb_scale_delivery_auto_stop: bool = False,
     bullet_birth_backend: str = "python",
     bullet_birth_native_call_mode: str = NATIVE_CALL_MODE_GIL_RELEASED,
     safety_value_horizon: int = 0,
@@ -128,10 +129,11 @@ def build_long_run_arguments(
             "runtime ECL identity requires an explicit expected stage"
         )
     if enable_finalb_scale_source_authority and (
-        difficulty != 3 or expected_stage != 7
+        difficulty != 3 or expected_stage not in {0, 7}
     ):
         raise ValueError(
-            "Final-B scale-source authority requires Lunatic stage 7"
+            "Final-B scale-source authority requires Lunatic full route or "
+            "stage 7"
         )
     if enable_finalb_scale_source_authority and (
         runtime_ecl_static_image is None
@@ -139,6 +141,13 @@ def build_long_run_arguments(
     ):
         raise ValueError(
             "Final-B scale-source authority requires exact runtime ECL identity"
+        )
+    if (
+        finalb_scale_delivery_auto_stop
+        and not enable_finalb_scale_source_authority
+    ):
+        raise ValueError(
+            "Final-B scale-delivery auto-stop requires source authority"
         )
     if trace_auxiliary_ecl_events and not trace_auxiliary_vm_batches:
         raise ValueError(
@@ -240,6 +249,8 @@ def build_long_run_arguments(
         )
     if enable_finalb_scale_source_authority:
         arguments.append("--enable-finalb-scale-source-authority")
+    if finalb_scale_delivery_auto_stop:
+        arguments.append("--finalb-scale-delivery-auto-stop")
     if safety_value_horizon:
         arguments.extend(
             ("--safety-value-horizon", str(safety_value_horizon))

@@ -36,11 +36,13 @@ class _TraceService:
         due: bool = True,
         accepted: bool = True,
         captured_predeath: int = 0,
+        captured_player_phase: int = 0,
     ) -> None:
         self._schedule = schedule
         self.due = due
         self.accepted = accepted
         self.captured_predeath = captured_predeath
+        self.captured_player_phase = captured_player_phase
         self.calls = 0
         self.resets = 0
 
@@ -66,6 +68,7 @@ class _TraceService:
             "source_capture": {
                 "phase_before": {
                     "player_predeath_counter": self.captured_predeath,
+                    "player_phase": self.captured_player_phase,
                 }
             },
         }
@@ -292,6 +295,28 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
         )
         self.assertFalse(changed.planner_scale_authority)
         self.assertEqual(changed.reason, "predeath_baseline_changed")
+
+    def test_contaminated_phase_three_can_bind_scale_delivery(self) -> None:
+        service = _TraceService(
+            _origin(),
+            captured_predeath=7,
+            captured_player_phase=3,
+        )
+        authority = FinalBScaleScheduleAuthority(service)
+
+        accepted = _resolve(
+            authority,
+            player_phase=3,
+            predeath_counter=7,
+        )
+
+        self.assertTrue(accepted.planner_scale_authority)
+        self.assertEqual(accepted.baseline_predeath_counter, 7)
+        self.assertEqual(accepted.source_player_phase, 3)
+        self.assertEqual(
+            accepted.compact_record()["source_player_phase"],
+            3,
+        )
 
     def test_explicit_reset_rearms_the_physical_service(self) -> None:
         service = _TraceService(_origin())

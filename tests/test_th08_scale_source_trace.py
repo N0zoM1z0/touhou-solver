@@ -147,6 +147,7 @@ class _Reader:
                 "<I",
                 FINAL_B_QUARTER_SCALE_BITS,
             ),
+            ADDR_PLAYER: b"\x03",
             ADDR_PLAYER + PLAYER_BOMB_ACTIVE_OFFSET: struct.pack("<I", 0),
             ADDR_PLAYER + PLAYER_PREDEATH_COUNTER_OFFSET: struct.pack(
                 "<i",

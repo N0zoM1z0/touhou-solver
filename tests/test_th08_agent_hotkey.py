@@ -234,7 +234,24 @@ class AgentHotkeyTests(unittest.TestCase):
             .parse_args(finalb_arguments)
             .enable_finalb_scale_source_authority
         )
-        with self.assertRaisesRegex(ValueError, "Lunatic stage 7"):
+        full_route_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            expected_stage=0,
+            runtime_ecl_static_image=Path(
+                "artifacts/decoded/ecldata7.ecl"
+            ),
+            runtime_ecl_static_sha256="2" * 64,
+            enable_finalb_scale_source_authority=True,
+        )
+        self.assertIn(
+            "--enable-finalb-scale-source-authority",
+            full_route_arguments,
+        )
+
+        with self.assertRaisesRegex(ValueError, "full route or stage 7"):
             build_long_run_arguments(
                 output=Path("trial.jsonl"),
                 stop_file=Path("trial.stop"),
@@ -272,7 +289,7 @@ class AgentHotkeyTests(unittest.TestCase):
             _prepare_live_run(authority_args())
         wrong_stage = authority_args("--no-bomb")
         wrong_stage.expected_stage = 5
-        with self.assertRaisesRegex(ValueError, "Lunatic stage 7"):
+        with self.assertRaisesRegex(ValueError, "full route or stage 7"):
             _prepare_live_run(wrong_stage)
         missing_identity = authority_args("--no-bomb")
         missing_identity.runtime_ecl_static_image = None

@@ -352,6 +352,9 @@ def run_trial(
             enable_finalb_scale_source_authority=(
                 args.enable_finalb_scale_source_authority
             ),
+            finalb_scale_delivery_auto_stop=(
+                args.enable_finalb_scale_source_authority
+            ),
             bullet_birth_backend=args.bullet_birth_backend,
             bullet_birth_native_call_mode=(
                 args.bullet_birth_native_call_mode

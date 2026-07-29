@@ -80,7 +80,8 @@ located; it does not change the authority order below.
 67. `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`
 68. `notes/architecture/TH08_NATIVE_ECL_TIMER_SEMANTICS_20260729.md`
 69. `notes/architecture/TH08_PLAYER_LASER_GLOBAL_TIME_SCALE_SEMANTICS_20260729.md`
-70. the relevant recent run note and counterexample rows before live work
+70. `notes/architecture/TH08_ACTION_CONDITIONED_PLAYER_ENEMY_MODE_SEMANTICS_20260730.md`
+71. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -91,14 +92,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `fbc5e52`
-  (`Retain physical SEM-SCALE-C5 delivery gate`).
+- Latest retained research checkpoint: `e376557`
+  (`Retain SEM-MODE-A native gate semantics`).
 - Latest pre-trial repository/live code checkpoint: `3f0e56f`
   (`Retain Power-0 Lunatic route reachability evidence`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
-- Latest native-semantic correction checkpoint: `555bbf8`. The original
+- Latest native-semantic correction checkpoint: `e376557`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest complete physical workload:
   `lunatic_route2_stage6b_finalb_scale_delivery_20260730_020015`. It is a
@@ -119,6 +120,24 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `154229`, `161313`, and `173957`; each exact preflight, supervision,
   cleanup, and retention contract completed without leaving a gameplay
   process.
+
+Checkpoint `e376557` passes the offline/shadow `SEM-MODE-A` gate. Connected
+IDA revalidation confirms player focus byte `+3`, delayed
+secondary-character byte `+5`, transition counter `+8`, enemy
+bit-`0x100 -> 0x800` synchronization, and separate contact `0x04` versus
+player-shot-damage `0x40` eligibility. First-64 sensing now retains active
+geometry blocked by bit `0x800`; the pure projection, diagnostic native
+fields, retained `10065 -> 10075` fixture, and exhaustive adversarial focus
+histories pass complete Linux/Windows discovery: 1,152 tests in
+13.467/29.934 seconds, with the three existing Windows skips. IDA names and
+comments are retained in the current daily log and mode-semantics note.
+
+This closes only the decoder-loss part of CE-0176. The broad diagnostic read
+is not one frame-bracketed player-mode/enemy-prefix transaction and the
+projection is not live hazard authority. Latent geometry remains
+conservative, unfocused combat remains disabled, and no physical or survival
+authority is added. Continue at `SEM-MODE-B` atomic observation, then the
+causal recurrence, differential, and whole-stage gates.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -476,11 +495,14 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE`: revalidate focus/secondary-character transition
-   state and native delay, then model action-conditioned enemy `0x800`
-   contact/damage eligibility. The retained frame `10065 -> 10075` transition
-   and adversarial focus toggles are the exact exit workloads. Keep
-   unfocused-combat promotion disabled.
+2. Continue `SEM-MODE-B`: `SEM-MODE-A` has revalidated the transition,
+   retained bit-`0x800` geometry, separated contact/damage projection, and
+   passed adversarial offline parity. Next capture player `+3/+5/+8`, active
+   input, and the enemy prefix in one stable native-update bracket (or retain
+   every one-callback ambiguity branch), then carry that immutable mode key
+   through pickup/cadence histories. The retained frame `10065 -> 10075`
+   transition remains the exact body-set workload. Keep unfocused-combat
+   promotion disabled.
 3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed

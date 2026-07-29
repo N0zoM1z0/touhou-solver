@@ -228,6 +228,7 @@ def previous_full_dossier(
             in {
                 "th08-lunatic-run-dossier-v2",
                 "th08-route-run-dossier-v3",
+                "th08-route-run-dossier-v4",
             }
             and verification.get("passed")
             and summary

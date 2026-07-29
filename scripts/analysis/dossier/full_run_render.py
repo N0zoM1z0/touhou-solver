@@ -265,8 +265,11 @@ def render_markdown(dossier: dict[str, object]) -> str:
             "## Spell Inventory And Runtime Coverage",
             "",
             f"Every spell below is statically reachable for route 2 {difficulty} "
-            "Final B. `unresolved` means this run did not persist the live "
-            "spell ID; it does not mean the spell was absent.",
+            "Final B. Observed decisions count only rows whose live spell state "
+            "reported that active spell ID. Zero decisions therefore means the "
+            "run did not enter that spell; zero hits with nonzero decisions "
+            "means it entered cleanly. `unresolved` means the trace schema did "
+            "not persist enough live spell state.",
             "",
         ]
     )
@@ -280,14 +283,26 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"{len(stage['observed_counter_jump_markers'])}/"
                 f"{len(stage['expected_reachable_phase_markers'])}.",
                 "",
-                "| ID | Name | Owner | Emits | Transforms | Lasers | Runtime |",
-                "| ---: | --- | --- | ---: | ---: | ---: | --- |",
+                "| ID | Name | Owner | Emits | Transforms | Lasers | "
+                "Observed | Decisions | Hits |",
+                "| ---: | --- | --- | ---: | ---: | ---: | --- | ---: | ---: |",
             ]
         )
         for spell in stage["spells"]:
             features = spell["feature_counts"]
             runtime = spell["runtime_attribution"]
-            runtime_value = (
+            observed_decision_count = runtime.get("observed_decision_count")
+            observed_value = (
+                "yes"
+                if runtime.get("observed") is True
+                else ("no" if runtime.get("observed") is False else "unresolved")
+            )
+            decision_value = (
+                str(observed_decision_count)
+                if observed_decision_count is not None
+                else "unresolved"
+            )
+            hit_value = (
                 str(runtime["hit_count"])
                 if runtime["hit_count"] is not None
                 else "unresolved"
@@ -296,7 +311,8 @@ def render_markdown(dossier: dict[str, object]) -> str:
                 f"| {spell['spell_id']} | {spell['name']} | "
                 f"{spell['owner']} | {features['bullet_emit']} | "
                 f"{features['transform_define']} | "
-                f"{features['laser_spawn']} | {runtime_value} |"
+                f"{features['laser_spawn']} | {observed_value} | "
+                f"{decision_value} | {hit_value} |"
             )
         lines.append("")
 

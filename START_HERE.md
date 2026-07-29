@@ -86,22 +86,23 @@ Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
 describe the same decision. Python/C++ parity is not physical correctness.
 
-## Immediate Handoff — 2026-07-29
+## Immediate Handoff — 2026-07-30
 
 ### Exact state
 
 - Branch: `main`.
-- Latest repository/live checkpoint: `20732c8`
-  (`Retain C5 phase-gate physical counterexample`).
-- The code at `19fa70b` was physically exercised by the complete Stage-6B
-  workload below. Its C5 exact-delivery gate failed before source capture; it
-  has no scale-delivery or survival promotion.
+- Latest pre-trial repository/live code checkpoint: `266f186`
+  (`Update handoff for corrected C5 full-route gate`).
+- The code at `266f186` was physically exercised by the complete Power-0
+  Lunatic Game Start workload below. Its non-aborting evidence continuation
+  completed the route, but its C5 exact-delivery gate was never due because
+  the failed route history did not reach spell 190.
 - Latest native-semantic correction checkpoint: `555bbf8`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest complete physical workload:
-  `lunatic_route2_stage6b_finalb_scale_delivery_20260729_233720`. It is a
-  complete hard-no-Bomb stage trace, not an accepted C5 exact-delivery or
-  clean-survival result.
+  `lunatic_route2_fullrun_unattended_20260730_002115`. It is a complete
+  original Game Start hard-no-Bomb route trace from Power 0, not an accepted
+  C5 exact-delivery, clean-survival, or NMNB result.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -243,12 +244,28 @@ The corrected implementation passes focused Ruff/tests and complete
 Linux/Windows discovery: 1,137 tests in 13.612/30.825 seconds, with the three
 existing Windows skips.
 
-After focused and complete Linux/Windows gates plus a clean checkpoint, the
-next physical launch is the original `run_th08_full_route_agent.bat` Game
-Start path: Lunatic Sakuya/Remilia from Power 0 through the complete route.
-It carries the default-off C5 observer, never auto-stops at spell 190, and
-retains C5 delivery separately from full-route hits/Bombs/resources. Do not
-repeat the failed Stage-6B version.
+The corrected full-route launch
+`lunatic_route2_fullrun_unattended_20260730_002115` then completed frames
+`1..229992` with 60,877 decisions, 74 hits, zero Bomb masks, no foreground
+interruption, and exact cleanup. Stage hit counts were `3/4/6/21/17/23` for
+Stage 1/2/3/4A/5/Final B; Stage 4A is the largest physical failure workload.
+The canonical first hit is Stage-1 nonspell frame 2,022. The ignored
+2,009,399,974-byte raw JSONL hashes to
+`ffe52f97e959a92ec0adb06e418c17e2a97c8e2209f0978a1249f1b66e8a69d0`.
+No replay was created.
+
+The run proves that C5 mismatch/absence no longer discards later route
+evidence, but it does not pass C5: Final B observed spells 174 and 178 for
+299/311 active decisions and never observed 182/186/190. All native roots
+remained unit scale, so the strict report correctly contains zero exact
+authority rows. CE-0189 retains this target-reachability counterexample.
+Dossier schema v4 now records active-spell decision coverage separately from
+hit count, so a cleanly observed spell can no longer be confused with an
+absent one.
+
+The dossier-v4 and whole-stage-C5-2 supervisor corrections pass focused Ruff
+and tests. Complete Linux/Windows discovery passes 1,140 tests in
+13.404/29.833 seconds, with the three existing Windows skips.
 
 ### Native-semantic review
 
@@ -399,27 +416,30 @@ respawn, Power, position, damage, and route timing.
 
 Do not resume broad G5 work first.
 
-1. Keep physical expansion stopped at CE-0184. Do not repeat the current
-   Stage-5 version or launch Stage 3, Stage 4A, or Final B.
-2. `SEM-TIMER` passes its offline semantic gate but its one fixed physical
-   falsifier failed at 12 hits. The canonical failure predates the live
-   consumer, so retain the failure without rollback or survival promotion.
-3. Continue `SEM-SCALE-C` from the dual-platform C5 live-delivery
-   implementation. Run only the preregistered original-game, hard no-Bomb
-   Stage-6B-to-spell-190 transition gate in
-   `notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`; retain its raw
-   hash, strict compact report, first-hit/Bomb fields, timing, and cleanup.
-   Any source/root/context/horizon mismatch remains a fail-closed
-   counterexample. Do not treat the replay's predeath-7 C4 root as survival
-   evidence. After a physical C5 pass, continue `SEM-MODE`, `SEM-GEOM`,
-   `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order, one
-   correction/checkpoint at a time.
-4. After each applicable slice, take only the smallest causal Stage-5
-   physical falsification. Restart the two-consecutive observer-off
-   `<=10` gate only for an immutable corrected model version.
-5. Only after that gate passes, run fresh compatible Stage-3/4A/Final-B
-   mechanics controls and one complete hard no-Bomb Lunatic Route 2 from the
-   normal Power-0 start, retaining earned item/Power state.
+1. Do not repeat the unchanged 74-hit full route. It already supplies the
+   Power-0 stage ordering, resource-contaminated continuation, non-aborting
+   behavior, and target-reachability counterexample.
+2. Continue only `SEM-SCALE-C5-2`: run the preregistered original-game
+   complete Stage-6B workload in
+   `notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`. THPRAC and
+   precise-spell selection are unavailable and unnecessary; the observer is
+   armed from stage start. Restore auto-stop is disabled so an exact pass or
+   mismatch remains nested inside a complete stage trial.
+3. Retain the raw hash, strict compact report, actual live spell-decision
+   coverage, first hit, Bomb/resources, timing, route unload, and cleanup.
+   A source/root/context/horizon mismatch fails C5 but waits without a new
+   input write and must not discard later stage evidence. Process identity,
+   foreground ownership, or key-release failure still stops and cleans up.
+4. After a physical C5-2 pass or one new causal counterexample, continue
+   `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
+   Take the smallest whole-stage falsifier applicable to each immutable model
+   version. Stage 4A is the current highest-hit physical workload, followed
+   by Final B and Stage 5; this prioritizes analysis but does not bypass
+   semantic dependencies.
+5. Restart the two-consecutive observer-off `<=10` Stage-5 gate only for an
+   immutable corrected model version. Require fresh compatible Stage-3,
+   Stage-4A, Stage-5, and Final-B stage evidence before another complete
+   Power-0 route.
 6. Resume a matched V6 report/compact-tail correction or a
    separately contracted nonspell combat, Power, or unfocused-shot
    experiment only after its semantic dependencies and separate physical
@@ -448,6 +468,14 @@ bundle is removed in this checkpoint. The newest raw trace is 550,969,744
 bytes with SHA-256
 `50e8924ba23da9e703b887d8dfd320a025f044754625b66b2939c858ba357ba5`.
 Raw JSONL and launch logs remain ignored and must not be committed.
+
+Also keep the two current Final-B/full-route evidence bundles
+`lunatic_route2_stage6b_finalb_scale_delivery_20260729_233720` and
+`lunatic_route2_fullrun_unattended_20260730_002115`. The latter raw trace is
+2,009,399,974 bytes with SHA-256
+`ffe52f97e959a92ec0adb06e418c17e2a97c8e2209f0978a1249f1b66e8a69d0`.
+Neither run created a native replay. Do not delete either before two newer
+compatible compact-backed bundles exist.
 
 After explicit approval, the eight exact-compatible, compact-backed,
 non-raw-path-referenced candidates were permanently removed. The retained

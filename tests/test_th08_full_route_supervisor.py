@@ -240,6 +240,43 @@ class FullRouteSupervisorTests(unittest.TestCase):
                 (runtime_reports / f"{run_id}.dossier.md").exists()
             )
 
+    def test_dossier_v4_is_eligible_as_completed_route_baseline(self) -> None:
+        with TemporaryDirectory() as temporary:
+            runtime_reports = Path(temporary)
+            current = runtime_reports / (
+                "lunatic_route2_fullrun_unattended_current.dossier.json"
+            )
+            current.write_text("{}\n", encoding="utf-8")
+            candidate = runtime_reports / (
+                "lunatic_route2_fullrun_unattended_previous.dossier.json"
+            )
+            candidate.write_text(
+                json.dumps(
+                    {
+                        "schema": "th08-route-run-dossier-v4",
+                        "control_policy": {
+                            "no_bomb_verification": {"passed": True}
+                        },
+                        "provenance": [
+                            {
+                                "summary": {
+                                    "termination_reason": "route_complete"
+                                }
+                            }
+                        ],
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            selected = full_route_artifacts.previous_full_dossier(
+                current,
+                runtime_report_dir=runtime_reports,
+            )
+
+            self.assertEqual(selected, candidate)
+
 
 if __name__ == "__main__":
     unittest.main()

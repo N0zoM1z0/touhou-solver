@@ -860,6 +860,20 @@ Execution progress on 2026-07-29:
   hits, Bombs, lives, Power/items, combat progress, transitions, and C5
   exact-delivery as separate conclusions. The full-route controller must not
   auto-stop at the restore.
+- **Observed full-route result:** run
+  `lunatic_route2_fullrun_unattended_20260730_002115` completed the original
+  Power-0 Game Start route with 60,877 decisions, 74 hits, zero Bomb masks,
+  and exact cleanup. Stage hits were `3/4/6/21/17/23`; Stage 4A is the largest
+  single-stage failure. Non-aborting C5 evidence continuation passed its
+  behavioral requirement, but exact delivery remained unexercised: Final B
+  recorded 299 decisions in spell 174, 311 in 178, and zero in
+  182/186/190, with unit scale throughout. CE-0189 rejects treating route
+  completion or a zero spell-hit count as proof of live spell coverage.
+- **Next C5 physical unit:** run the corrected observer over the complete
+  original-game Stage-6B workload. Do not use THPRAC, precise-spell
+  selection, or operator-time activation. Restore auto-stop is disabled so
+  the research unit remains the whole stage. Exact delivery, whole-stage
+  survival/resources, and spell reachability remain separate conclusions.
 
 #### 1C. Action-conditioned player/enemy mode
 
@@ -1121,9 +1135,11 @@ After that baseline, the next correction checkpoints should be:
    zero-fraction/unit-scale slice, fails survival authority, and supplies no
    timer-causal rollback target;
 2. `SEM-SCALE`: C1 roots and C2/C3 isolated causal Final-B/Extra schedules
-   pass; C4's read-only complete-source implementation passes offline. Retain
-   its physical spell-190 trace, then integrate only the accepted schedule
-   path and run the focused Final-B physical falsifier before promotion;
+   pass; C4's read-only complete-source trace passes physically. C5-1 rejects
+   the phase-0 trigger; the corrected Power-0 full route preserves evidence
+   but never reaches spell 190. Run one complete original-game Stage-6B C5-2
+   falsifier with no restore auto-stop, then either retain its exact delivery
+   pass or its first causal mismatch before promotion;
 3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
    enemy contact/damage eligibility;
 4. `SEM-GEOM`: exact player/laser geometry, bullet lifecycle/suppression, and
@@ -1238,6 +1254,21 @@ baseline and the ordered dependency chain above are part of the result.
   1,137 tests in 13.612/30.825 seconds, with the three existing Windows
   skips. This adds a physical counterexample, not a hit-free or survival
   sample.
+- The corrected original Game Start full route
+  `lunatic_route2_fullrun_unattended_20260730_002115` completes frames
+  `1..229992` with 60,877 decisions, 74 hits, zero Bomb masks, no foreground
+  interruption, no JSON decode errors, and exact game/controller cleanup. Its
+  ignored 2,009,399,974-byte raw JSONL hashes to
+  `ffe52f97e959a92ec0adb06e418c17e2a97c8e2209f0978a1249f1b66e8a69d0`.
+  Stage hit counts are `3/4/6/21/17/23`; the first canonical hit is Stage-1
+  nonspell frame 2,022. The strict C5 report correctly fails with zero
+  authority rows because active spell-decision counts for
+  174/178/182/186/190 are `299/311/0/0/0` and scale remains unit. No replay
+  was created. CE-0189 and dossier schema v4 retain target reachability
+  separately from hit attribution.
+- The dossier-v4/whole-stage-C5-2 correction passes focused Ruff and
+  supervisor/report tests. Complete Linux/Windows discovery passes 1,140
+  tests in 13.404/29.833 seconds, with the three existing Windows skips.
 - No matching TH08 gameplay, controller, practice-supervisor, or
   full-route-supervisor process is left running.
 - The original documentation-only checkpoint did not rerun Windows tests;

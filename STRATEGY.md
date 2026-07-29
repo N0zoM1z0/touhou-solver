@@ -450,7 +450,10 @@ consumer now binds one physically complete source to an immutable
 gameplay/route/difficulty/stage/spell/source version and rebases it only after
 checking each observed native root. A stable captured predeath baseline,
 no-new-hit, and no-Bomb are mandatory after exact offset zero; every mismatch
-returns to the existing terminate/release fallback. Since THPRAC cannot
+rejects the exact gate. In an explicit physical evidence run the controller
+waits without a new input write and continues the stage/route, while
+process/foreground/input-release failures still stop and clean up. Since
+THPRAC cannot
 select spell 190, original-game Stage-6B launch uses an explicitly
 unknown-direction constant-unit pre-target transport schedule whose trace has
 no hard scale authority. The varying/non-unit exact schedule is deliberately
@@ -477,6 +480,19 @@ writes on scale-authority loss. Focused restore auto-stop remains available,
 but the next physical unit is the complete original Game Start Lunatic route
 from Power 0 with auto-stop disabled. This is not a strategy or survival
 promotion.
+
+**2026-07-30 C5 full-route reachability counterexample:** original Game Start
+run `lunatic_route2_fullrun_unattended_20260730_002115` completed Power-0
+Lunatic Route 2 with 60,877 decisions, 74 hits, zero Bomb masks, and exact
+cleanup. Stage hits were `3/4/6/21/17/23`; Stage 4A is the largest physical
+failure workload. The non-aborting C5 continuation worked, but Final B
+entered only through spell 178: active decision counts for
+174/178/182/186/190 were `299/311/0/0/0`, every root was unit scale, and no
+exact authority origin existed. CE-0189 rejects treating route completion or
+a zero per-spell hit count as proof of target coverage. Dossier v4 now records
+active-spell decisions separately from hits. No strategy is promoted. The
+next C5 falsifier is a complete original-game Stage-6B run with restore
+auto-stop disabled; C5 remains a nested mechanics gate inside that stage.
 
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those

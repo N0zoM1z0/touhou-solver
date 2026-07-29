@@ -1,6 +1,6 @@
 # TH08 Player/Laser Global Time-Scale Semantics
 
-Status: **SEM-SCALE-C4 physical source passed; C5-1 physically rejected the phase-0 trigger; corrected full-route revalidation pending**
+Status: **SEM-SCALE-C4 physical source passed; C5-1 rejected the phase-0 trigger; corrected full route preserved evidence but did not reach spell 190; whole-stage C5-2 pending**
 
 Date: 2026-07-29
 
@@ -635,18 +635,31 @@ CE-0188 and
 retain the failure. This rejects the trigger, not the C4 schedule, and grants
 no action/survival authority.
 
+The corrected original Game Start run
+`lunatic_route2_fullrun_unattended_20260730_002115` then completed from Power
+0 through Final B with 60,877 decisions, 74 hits, zero Bomb masks, and exact
+cleanup. It physically validates the non-aborting evidence continuation, but
+not C5 delivery: Final B observed spells 174/178 for 299/311 decisions and
+never observed 182/186/190. All root scales remained unit and the strict C5
+report contains zero authority rows. CE-0189 separates late-spell
+reachability from source-capture correctness. No replay was created.
+
+The dossier-v4 coverage correction and complete-stage no-auto-stop supervisor
+pass 1,140 Linux tests in 13.404 seconds and 1,140 Windows tests in 29.833
+seconds, with the three existing Windows skips.
+
 No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
 acceptance, global optimality, or complete future-source coverage.
 
 ## Current stopping rule
 
-The C4 trace gate passes; C5-1 rejects the old live trigger. Validate the
-phase-contaminated source identity, native-summary report, non-aborting
-evidence continuation, and explicit auto-stop mode on Linux and Windows.
-Then run only the original Game Start full Lunatic route from Power 0 with
-C5 observation and restore auto-stop disabled. A scale mismatch fails the C5
-claim but must not discard later stage evidence; process identity,
-foreground, or input-release safety failures still stop and clean up. Any
-incomplete scale coverage consumed as exact, cross-version cache hit,
+The C4 trace gate passes; C5-1 rejects the old phase trigger; and the corrected
+full route proves non-aborting continuation without reaching the target.
+Run one complete original-game Stage-6B C5-2 trial with restore auto-stop
+disabled. It must begin at the stage boundary and operate without THPRAC,
+precise-spell selection, or operator-time activation. A scale mismatch fails
+the nested C5 claim but must not discard later stage evidence; process
+identity, foreground, or input-release safety failures still stop and clean
+up. Any incomplete scale coverage consumed as exact, cross-version cache hit,
 unsupported corridor use, or live non-unit hard certificate without the
 complete schedule remains a durable counterexample and stops promotion.

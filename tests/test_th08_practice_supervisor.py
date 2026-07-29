@@ -20,6 +20,7 @@ from th08_automation.practice_menu import (
     parse_practice_stage,
 )
 from th08_practice_supervisor import (
+    FINALB_SCALE_DELIVERY_AUTO_STOP,
     ROOT,
     _progress_text,
     build_patch_batch_command,
@@ -31,6 +32,9 @@ from th08_practice_supervisor import (
 
 
 class PracticeSupervisorTests(unittest.TestCase):
+    def test_finalb_scale_delivery_keeps_whole_stage_scope(self) -> None:
+        self.assertFalse(FINALB_SCALE_DELIVERY_AUTO_STOP)
+
     def test_stage_menu_order_matches_original_practice_screen(self) -> None:
         expected = {
             "1": (0, 0),

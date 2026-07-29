@@ -250,6 +250,7 @@ def _spell_inventory(
     manifest: dict[str, object],
     phase_markers: dict[int, list[dict[str, int]]],
     deaths: list[dict[str, object]],
+    decisions: list[dict[str, object]],
     *,
     spell_schema_complete: bool,
 ) -> dict[int, dict[str, object]]:
@@ -263,6 +264,22 @@ def _spell_inventory(
         if death["spell_attribution"]["status"]
         == "resolved_live_spell_state"
     )
+    observed_decisions: Counter[tuple[int, int]] = Counter()
+    first_observed_frame: dict[tuple[int, int], int] = {}
+    last_observed_frame: dict[tuple[int, int], int] = {}
+    if spell_schema_complete:
+        for decision in decisions:
+            spell = decision["spell"]
+            if not bool(spell.get("active")):
+                continue
+            spell_id = int(spell.get("spell_id", 0))
+            if spell_id <= 0:
+                continue
+            key = (int(decision["stage_route_index"]), spell_id)
+            frame = int(decision["frame"])
+            observed_decisions[key] += 1
+            first_observed_frame.setdefault(key, frame)
+            last_observed_frame[key] = frame
     inventory = {}
     for stage in manifest["stages"]:
         stage_index = int(stage["internal_stage_index"])
@@ -288,6 +305,9 @@ def _spell_inventory(
         spells = []
         for spell in stage["reachable_spell_occurrences"]:
             spell_id = int(spell["spell_id"])
+            runtime_key = (stage_index, spell_id)
+            observed_decision_count = observed_decisions[runtime_key]
+            runtime_observed = observed_decision_count > 0
             spells.append(
                 {
                     "spell_id": spell_id,
@@ -297,17 +317,46 @@ def _spell_inventory(
                     "feature_counts": spell["feature_counts"],
                     "runtime_attribution": {
                         "status": (
-                            "resolved_live_spell_state"
+                            (
+                                "observed_live_spell_state"
+                                if runtime_observed
+                                else "not_observed_in_trace"
+                            )
                             if spell_schema_complete
                             else "unresolved_current_trace_schema"
                         ),
+                        "observed": (
+                            runtime_observed if spell_schema_complete else None
+                        ),
+                        "observed_decision_count": (
+                            observed_decision_count
+                            if spell_schema_complete
+                            else None
+                        ),
+                        "first_decision_frame": (
+                            first_observed_frame.get(runtime_key)
+                            if spell_schema_complete
+                            else None
+                        ),
+                        "last_decision_frame": (
+                            last_observed_frame.get(runtime_key)
+                            if spell_schema_complete
+                            else None
+                        ),
                         "hit_count": (
-                            attributed_hits[(stage_index, spell_id)]
+                            attributed_hits[runtime_key]
                             if spell_schema_complete
                             else None
                         ),
                         "reason": (
-                            None
+                            (
+                                None
+                                if runtime_observed
+                                else (
+                                    "No decision in this run reported this "
+                                    "active spell ID."
+                                )
+                            )
                             if spell_schema_complete
                             else (
                                 "The live decision schema did not record "
@@ -357,6 +406,7 @@ def build_dossier(
         manifest,
         phase_markers,
         deaths,
+        decisions,
         spell_schema_complete=spell_schema_complete,
     )
     by_stage: dict[int, list[dict[str, object]]] = defaultdict(list)
@@ -484,7 +534,7 @@ def build_dossier(
         for factor in death["contributing_factors"]
     )
     return {
-        "schema": "th08-route-run-dossier-v3",
+        "schema": "th08-route-run-dossier-v4",
         "run_id": run_id,
         "acceptance_target": {
             "difficulty": difficulty,

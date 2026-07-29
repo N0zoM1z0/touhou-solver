@@ -3,8 +3,9 @@
 This is the preregistered original-game `SEM-SCALE-C5` falsifier after the
 read-only C4 native-replay gate. THPRAC is not available. The existing
 unattended Practice Start supervisor selects the whole Lunatic Final B
-(`6b`) stage and runs until native spell ID 190. The controller stops
-automatically after the predicted quarter-to-unit restore.
+(`6b`) stage. The controller observes spell ID 190 automatically if the
+stage reaches it, but exact delivery no longer stops the trial: the physical
+research unit is the complete stage through native route unload.
 
 This gate separates two scopes:
 
@@ -90,8 +91,9 @@ All of the following must pass:
   decision in the whole trial is no-Bomb;
 - no exact-scope authority fallback, context/root/source mismatch, runtime
   error, or foreground loss; and
-- automatic `finalb_scale_delivery_complete` termination plus exact
-  supervisor/game cleanup.
+- normal `route_complete` termination after the complete stage plus exact
+  supervisor/game cleanup. Exact restore completion remains a nested report
+  gate and does not shrink the physical workload.
 
 The first fresh hit after offset zero is the canonical C5 failure witness.
 Any mismatch stops promotion and is routed through
@@ -142,10 +144,35 @@ The corrected gate captures `player_phase` in the coherent source
 transaction and permits phase-3 delivery as explicit contamination. It does
 not promote that row to normal-player survival. An incomplete or mismatched
 C5 schedule now waits without a new input write and continues the physical
-run; it still fails the strict report. Focused Stage-6B runs may auto-stop
-after the unit restore, but the next authorized physical gate is the original
-Game Start full Lunatic route through `run_th08_full_route_agent.bat`, with
-auto-stop disabled.
+run; it still fails the strict report.
 
 Focused Ruff/tests and complete Linux/Windows discovery pass 1,137 tests in
 13.612/30.825 seconds, with three existing Windows skips.
+
+## Observed full-route reachability result and C5-2 scope
+
+The 2026-07-30 original Game Start run
+`lunatic_route2_fullrun_unattended_20260730_002115` exercised the corrected
+non-aborting continuation from Power 0 through `route_complete`: 60,877
+decisions, 74 hits, zero Bomb masks, and exact cleanup. It did not exercise an
+exact C5 source. Final B entered spells 174/178 for 299/311 decisions but
+never entered 182/186/190; every root remained unit scale. The strict report
+therefore correctly has zero authority rows and fails. No replay was created.
+CE-0189 retains the gate-coverage failure separately from stage survival.
+
+The next authorized C5-2 trial uses the same command above and the same
+original-game whole Stage-6B launch. It:
+
+- requires no THPRAC, precise-spell selection, or operator-time feature
+  activation;
+- carries the corrected phase-contamination source contract from stage start;
+- keeps restore auto-stop disabled and retains the whole stage even after an
+  exact pass or mismatch;
+- treats the first post-source hit or exact identity mismatch as the C5
+  witness without discarding later stage evidence; and
+- reports exact delivery, whole-stage hits/Bombs/resources, and spell
+  reachability as separate conclusions.
+
+The whole-stage auto-stop correction and dossier-v4 coverage report pass
+complete Linux/Windows discovery: 1,140 tests in 13.404/29.833 seconds, with
+the three existing Windows skips.

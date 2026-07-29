@@ -21,6 +21,7 @@ from analysis.th08_run_dossier import (
     _robust_control_unsafe,
     _robust_viability_summary,
     _spell_attribution,
+    _spell_inventory,
     _viability_action_set_empty,
     render_markdown,
 )
@@ -72,6 +73,54 @@ class Th08RunDossierTests(unittest.TestCase):
         self.assertIn("Sakuya/Remilia, Hard, Final B", rendered)
         self.assertIn("reachable Hard route inventory", rendered)
         self.assertNotIn("Lunatic", rendered)
+
+    def test_spell_inventory_distinguishes_cleanly_observed_from_absent(
+        self,
+    ) -> None:
+        root = Path(__file__).resolve().parents[1]
+        manifest = json.loads(
+            (
+                root
+                / "artifacts"
+                / "route_manifests"
+                / "sakuya_remilia_lunatic_final_b.json"
+            ).read_text(encoding="utf-8")
+        )
+        decisions = [
+            {
+                "frame": frame,
+                "stage_route_index": 7,
+                "spell": {
+                    "active": True,
+                    "spell_id": 178,
+                },
+            }
+            for frame in (100, 101)
+        ]
+
+        inventory = _spell_inventory(
+            manifest,
+            {},
+            [],
+            decisions,
+            spell_schema_complete=True,
+        )
+        spells = {
+            int(spell["spell_id"]): spell["runtime_attribution"]
+            for spell in inventory[7]["spells"]
+        }
+
+        self.assertEqual(spells[178]["status"], "observed_live_spell_state")
+        self.assertTrue(spells[178]["observed"])
+        self.assertEqual(spells[178]["observed_decision_count"], 2)
+        self.assertEqual(spells[178]["first_decision_frame"], 100)
+        self.assertEqual(spells[178]["last_decision_frame"], 101)
+        self.assertEqual(spells[178]["hit_count"], 0)
+        self.assertEqual(spells[190]["status"], "not_observed_in_trace")
+        self.assertFalse(spells[190]["observed"])
+        self.assertEqual(spells[190]["observed_decision_count"], 0)
+        self.assertIsNone(spells[190]["first_decision_frame"])
+        self.assertIsNone(spells[190]["last_decision_frame"])
 
     def test_explicit_missing_enemy_snapshot_does_not_abort_dossier(
         self,

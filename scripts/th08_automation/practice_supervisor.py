@@ -84,6 +84,7 @@ from th08_live.scale_source_trace import FINAL_B_ECL_STATIC_SHA256
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME_REPORT_DIR = ROOT / "artifacts" / "runtime_reports"
 RUN_NOTE_DIR = ROOT / "notes" / "runs"
+FINALB_SCALE_DELIVERY_AUTO_STOP = False
 DEFAULT_GAME_DIR = (
     Path("D:/Entertainment/Game/Touhou")
     / "[th08] \u4e1c\u65b9\u6c38\u591c\u6284 (\u65e5\u6587\u7248)"
@@ -352,8 +353,10 @@ def run_trial(
             enable_finalb_scale_source_authority=(
                 args.enable_finalb_scale_source_authority
             ),
+            # Retain C5 as a nested gate without shrinking the physical
+            # research workload below the complete Stage-6B unit.
             finalb_scale_delivery_auto_stop=(
-                args.enable_finalb_scale_source_authority
+                FINALB_SCALE_DELIVERY_AUTO_STOP
             ),
             bullet_birth_backend=args.bullet_birth_backend,
             bullet_birth_native_call_mode=(

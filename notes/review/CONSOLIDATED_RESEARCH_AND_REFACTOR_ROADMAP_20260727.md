@@ -169,10 +169,12 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   the 15,453-byte maximum, but rejects the separate synchronous publication:
   replay-compact p95/max is `0.507/8.452 ms` and previous emit p95 is
   `1.412 ms`. It takes 14 hits (`5/1/5/2/1`). CE-0173 changes the next
-  delivery problem from field compaction to publication composition. Before
-  implementation, fix an independently reversible same-iteration envelope
-  contract that restores exact V5 evidence inside the existing decision
-  publication and eliminates the second OS write. Keep old failed gates
+  delivery problem from field compaction to publication composition. The
+  fixed V6 contract uses canonical JSON, zlib-6/base64, exact length/hash
+  checks, and sequence/frame/epoch/snapshot/stage binding to restore exact V5
+  evidence inside the existing same-iteration decision publication and
+  eliminate the second OS write. Independent decoding, pack/combined-emit
+  limits, and next-decision causal timing are required. Keep old failed gates
   immutable and survival separate.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,

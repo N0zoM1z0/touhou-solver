@@ -624,11 +624,13 @@ comparison.
    over 154 batches and 4,238 requests, but rejects the still-separate
    synchronous publication: replay-compact p95/max is `0.507/8.452 ms` and
    previous emit p95 is `1.412 ms`. It also takes 14 hits
-   (`5/1/5/2/1`). CE-0173 retains the failure. The next delivery proposal
-   must eliminate the second OS write by coalescing an independently
-   reversible exact-V5 envelope into the same-iteration decision publication;
-   it must not loosen or relabel V5's failed gate. Survival remains a
-   separately versioned correction.
+   (`5/1/5/2/1`). CE-0173 retains the failure. The fixed V6 proposal
+   eliminates the second OS write by coalescing an independently reversible
+   canonical-V5 envelope into the same-iteration decision publication.
+   Sequence/frame/epoch/snapshot/stage bindings and next-decision causal
+   publication timing fail closed; pack and combined-emit limits are fixed
+   before code. It must not loosen or relabel V5's failed gate. Survival
+   remains a separately versioned correction.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the

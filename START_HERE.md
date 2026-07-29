@@ -69,7 +69,8 @@ located; it does not change the authority order below.
 56. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_STAGE5_FAILURE_20260729.md`
 57. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_CONTRACT_20260729.md`
 58. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_PREFLIGHT_20260729.md`
-59. the relevant recent run note and counterexample rows before live work
+59. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_CONTRACT_20260729.md`
+60. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -170,10 +171,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   synchronous publication and survival. Physical line p95/max is
   `14899/15453` bytes, while replay-compact p95/max is `0.507/8.452 ms` and
   previous emit p95 is `1.412 ms`; the run takes 14 hits
-  (`5/1/5/2/1`). CE-0173 requires a separately contracted same-iteration
-  coalesced envelope that independently restores exact V5 evidence inside
-  the existing decision publication and eliminates the second OS write.
-  Do not loosen V5's historical gates or combine the delivery correction
+  (`5/1/5/2/1`). CE-0173 requires the now-fixed V6 same-iteration
+  coalesced-envelope contract: independently restore exact canonical V5
+  evidence inside the existing decision publication, eliminate the second OS
+  write, and measure pack plus the next-decision causal publication timing.
+  Implement its independent decoder/tamper gates before a fresh physical
+  run. Do not loosen V5's historical gates or combine the delivery correction
   with a combat intervention.
   Unsupported emission, source-life, dynamic parameter, transform,
   realized-birth, geometry, and action dependencies remain `UNKNOWN`.

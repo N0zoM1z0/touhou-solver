@@ -91,8 +91,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest repository research checkpoint: `1f639ef`
-  (`Retain Final-B quarter-scale root capsule`).
+- Latest repository research checkpoint: `555bbf8`
+  (`Add causal ECL scale schedule producer`).
 - Latest executable/live code checkpoint: `6a71ac1`
   (`Complete SEM-SCALE-B authority propagation`).
 - There is no promoted physical-action candidate at `6a71ac1`: a live
@@ -100,7 +100,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   releases keys before corridor submission or local issue. Latest physically
   exercised code remains `e309c81`, whose fixed Stage-5 falsifier failed the
   `<=10` survival threshold.
-- Latest native-semantic correction checkpoint: `6a71ac1`. The original
+- Latest native-semantic correction checkpoint: `555bbf8`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest accepted complete physical workload:
   `lunatic_route2_stage5_unattended_20260729_173957`.
@@ -163,6 +163,27 @@ the three raw bundles to identical aggregates/source hashes; complete
 discovery passes 1,089 tests on both platforms, with three existing Windows
 skips.
 
+Checkpoint `555bbf8` passes the isolated-source `SEM-SCALE-C2/C3` offline
+gate. The causal producer records player scale before ECL, executes the
+supported ready VM prefix, records laser scale after ECL, and advances the VM
+timer with the post-write scale. It requires explicit complete writer
+inventory, scheduler order, installed-callback, phase, post-update, and
+external-state authority; otherwise it returns root-only/partial coverage.
+Final-B sub44 and Extra sub86 independently match a structurally separate
+raw-byte/raw-timer oracle: both restore `0.25 -> 1.0` on future frame 241,
+where player still sees `0.25` and laser sees `1.0`. Final-B consumes ECL
+variable 10099 under a declared no-hit/no-Bomb continuation; Extra consumes
+no external ECL variable. One historical Final-B physical transition matches
+exactly at ECL frame `75027`; two other sources are explicitly right
+censored. The retained capsule SHA-256 is
+`2c6cedcc5b30b4e9f805ff19cc7cbcd465f6123df2ccfda63e2fac21a8777d27`,
+with canonical payload digest
+`77ff84d3d8fa8ae9dd5c076edd8881a0a6101457ec8603ba103ea4f55e2ba380`.
+Linux/Windows render identical report bytes. Complete discovery passes 1,096
+tests in 14.353/29.889 seconds; Windows retains three existing skips.
+This is not complete live source inventory, callback-28 bullet-side-effect
+authority, clean survival, or live action promotion.
+
 ### Native-semantic review
 
 The 2026-07-29 native-to-solver audit was moved from `/tmp/ths_analysis.md`
@@ -195,8 +216,11 @@ timer rows are zero-fraction/unit-scale. It therefore fails survival authority
 without supplying a timer-causal rollback target. `SEM-SCALE-A/B` now repair
 the exact primitives and offline consumer authority boundary. `SEM-SCALE-C1`
 retains the Final-B non-unit physical roots and conditional player replay;
-causal live schedule synthesis, laser-phase evidence, the static Extra
-workload, and trace/physical falsifiers remain open.
+`SEM-SCALE-C2/C3` add the causal isolated-source producer, static Extra
+workload, and one exact historical restore transition. Complete live writer
+inventory, installed-callback/phase coherence, callback-28 bullet side
+effects, trace-only delivery, and the fresh focused physical falsifier remain
+open.
 
 This review does not establish a cause for the original 18-hit Stage-5
 aggregate and does not authorize rollback. Observer-off run `154229`
@@ -313,11 +337,12 @@ Do not resume broad G5 work first.
 2. `SEM-TIMER` passes its offline semantic gate but its one fixed physical
    falsifier failed at 12 hits. The canonical failure predates the live
    consumer, so retain the failure without rollback or survival promotion.
-3. Continue `SEM-SCALE-C` from retained C1 checkpoint `1f639ef`: implement
-   and independently validate a causal phase-schedule producer through
-   read-lag/issue/local/laser horizons without extending a root beyond proof.
-   Retain the shipped static Extra scale workload separately, then take a
-   trace-only gate. Only after those pass may the preregistered focused
+3. Continue `SEM-SCALE-C` from isolated-source C2/C3 checkpoint `555bbf8`.
+   Integrate a default-off trace-only producer that derives and records the
+   complete main/auxiliary writer inventory, installed scale-callback state,
+   scheduler order, post-update coherence, phase/continuation contract, and
+   callback-28 bullet-side-effect requirement without changing input.
+   Only after that trace-only gate passes may the preregistered focused
    Final-B transition physical falsifier run. Then continue `SEM-MODE`,
    `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order, one
    correction/checkpoint at a time. Evidence-backed IDB
@@ -1857,10 +1882,11 @@ measurement, and a `STRATEGY.md` status change.
 Until the physical floor is restored, the immediate ordering in
 `Immediate Handoff — 2026-07-29` overrides research expansion:
 `PHYS-BASE-RING` is stopped at CE-0183, and the fixed SEM-TIMER physical
-falsifier is stopped at CE-0184. Continue at `SEM-SCALE-C`; the remaining
-ordered native-semantic corrections precede any new Stage-5/Stage-3
-expansion. V6 delivery, nonspell combat, Power, and unfocused-shot work remain
-separately contracted follow-ups.
+falsifier is stopped at CE-0184. Continue at the SEM-SCALE-C default-off
+complete-source trace-only join after C2/C3; the remaining ordered
+native-semantic corrections precede any new Stage-5/Stage-3 expansion. V6
+delivery, nonspell combat, Power, and unfocused-shot work remain separately
+contracted follow-ups.
 
 ### P0 — Preserve global feasibility and define post-loss authority
 

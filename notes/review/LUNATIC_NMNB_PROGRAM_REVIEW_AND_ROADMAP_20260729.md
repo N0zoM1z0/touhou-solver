@@ -29,9 +29,12 @@ Linux and Windows. Checkpoint `6a71ac1` passes the `SEM-SCALE-B` offline
 identity/consumer authority gate and makes root-only live coverage terminate
 as explicit `UNKNOWN`. Checkpoint `1f639ef` passes the `SEM-SCALE-C1`
 retained Final-B physical-root/conditional-player-replay gate over 230
-quarter-scale rows; causal schedule synthesis, static Extra, laser-phase,
-trace-only, and focused physical falsifiers remain open. No scale-sensitive
-strategy or physical scene is promoted.
+quarter-scale rows. Checkpoint `555bbf8` passes the isolated-source
+`SEM-SCALE-C2/C3` causal Final-B/static-Extra product-oracle gate plus one
+exact historical restore transition. Complete live writer/callback/phase
+trace-only evidence, callback-28 hazard-side-effect authority, and the fresh
+focused physical falsifier remain open. No scale-sensitive strategy or
+physical scene is promoted.
 
 Companion native audit:
 `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
@@ -747,14 +750,14 @@ Execution progress on 2026-07-29:
   corridor also reports complete non-unit or varying schedules as unsupported
   `UNKNOWN`. Complete Linux/Windows discovery passes 1,087 tests; Windows
   keeps three existing skips.
-- **Authority boundary:** SEM-SCALE-A/B pass their offline sub-gates only.
-  No causal live future phase-schedule producer exists, so a root-only live
-  daemon records `time_scale_authority_unknown`, terminates, and releases
-  keys before corridor submission or local issue. SEM-SCALE-C must build and
-  independently validate that producer, retain the static-Extra workload
-  after the now-complete Final-B C1 capsule, and pass trace-only then focused
-  physical falsifiers. No game launch or strategy promotion is authorized by
-  SEM-SCALE-A/B/C1.
+- **Authority boundary:** SEM-SCALE-A/B and isolated-source C1/C2/C3 pass
+  their declared offline/retained slices only. No complete live
+  main/auxiliary writer and installed-callback/phase-coherence join exists,
+  so the root-only live daemon still records `time_scale_authority_unknown`,
+  terminates, and releases keys before corridor submission or local issue.
+  SEM-SCALE-C must pass default-off trace-only complete-source evidence and
+  then the focused physical falsifier. No game launch or strategy promotion
+  is authorized by SEM-SCALE-A/B/C1/C2/C3 alone.
 - **Observed SEM-SCALE-C1 root capsule:** checkpoint `1f639ef` binds the
   three existing Final-B raw sessions and retains 68/78/84 spell-190 rows at
   binary32 scale `0.25`. All 230 read-lag horizons are zero or one, so root
@@ -764,8 +767,28 @@ Execution progress on 2026-07-29:
   historical movement input is an inference, not native active-input proof;
   repeated-root multi-frame control output is explicitly noncausal. This
   completes only the compact Final-B root and conditional player-position
-  slice. Action certificates, laser parity, future schedule completeness,
-  static Extra, trace-only, and physical survival remain open.
+  slice. Action certificates, complete live source coverage, trace-only, and
+  physical survival remain open.
+- **Observed SEM-SCALE-C2/C3 isolated-source gate:** checkpoint `555bbf8`
+  implements the causal player-before-ECL/laser-after-ECL producer, explicit
+  complete-source authority record, supported literal loop/integer branch/
+  callback-18/28/29 semantics, spell-finish flag projection, and a separate
+  raw-byte/raw-timer oracle. Missing writer inventory, scheduler order,
+  installed-callback state, phase stability, post-update capture, coherent
+  external state, or supported control flow truncates to root-only/partial
+  coverage. Shipped Final-B sub44 and Extra sub86 have bitwise product/oracle
+  parity over 300 future frames and both restore on frame 241; player sees
+  quarter scale on that frame and laser sees unit scale. Final-B consumes
+  10099 under the no-hit/no-Bomb continuation; Extra consumes none.
+  Historical session `004142` predicts and observes the unit restore at ECL
+  frame 75027 exactly; sessions `011639`/`163501` are right censored at
+  finish/freeze. The retained report SHA-256 is
+  `2c6cedcc5b30b4e9f805ff19cc7cbcd465f6123df2ccfda63e2fac21a8777d27`;
+  Linux/Windows bytes agree and full suites pass 1,096 tests in
+  14.353/29.889 seconds with three existing Windows skips. This proves only
+  the declared isolated source plus one historical transition, not complete
+  live main/auxiliary inventory, callback-28 bullet rescaling in hazards,
+  clean survival, or action authority.
 
 #### 1C. Action-conditioned player/enemy mode
 
@@ -1026,7 +1049,10 @@ After that baseline, the next correction checkpoints should be:
    hits. It confirms live version integration only on the
    zero-fraction/unit-scale slice, fails survival authority, and supplies no
    timer-causal rollback target;
-2. `SEM-SCALE`: player/laser global-time-scale transitions and model identity;
+2. `SEM-SCALE`: C1 roots and C2/C3 isolated causal Final-B/Extra schedules
+   pass; complete the default-off live writer/installed-callback/phase
+   trace-only gate, callback-28 hazard-side-effect boundary, and focused
+   Final-B physical falsifier before promotion;
 3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
    enemy contact/damage eligibility;
 4. `SEM-GEOM`: exact player/laser geometry, bullet lifecycle/suppression, and

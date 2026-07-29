@@ -405,6 +405,24 @@ the multi-frame repeated-root result is explicitly noncausal. No strategy is
 promoted; the causal schedule producer, static Extra workload, trace-only
 gate, and focused Final-B falsifier remain required.
 
+**2026-07-29 SEM-SCALE-C2/C3 isolated-source correction:** checkpoint
+`555bbf8` adds a causal player/ECL/laser schedule producer and a structurally
+independent raw-byte/raw-timer oracle. Under an explicitly declared isolated
+single-writer workload, shipped Final-B sub44 and Extra sub86 both restore
+`0.25 -> 1.0` on future frame 241: that frame's player phase still sees
+`0.25`, while its laser phase sees `1.0`. Final-B's finish branch consumes
+ECL variable 10099 only under a no-hit/no-Bomb continuation; Extra consumes
+no external variable. One existing shipped-runtime Final-B trace observes
+the predicted restore exactly at ECL frame 75027; two other traces stop scale
+capture at spell-finish/scene-freeze and remain right censored. This is
+**offline mechanics evidence**, not live/shadow promotion. Incomplete writer
+inventory, scheduler order, installed-callback state, phase coherence, or
+post-update capture still returns root-only/partial authority. Callback 28/29
+bullet-velocity side effects are recorded but not yet consumed by live hazard
+authority. The daemon therefore retains its existing fail-closed behavior;
+the default-off trace-only complete-source gate and fresh focused Final-B
+falsifier remain required.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

@@ -449,16 +449,85 @@ Observed SEM-SCALE-C1 result:
 
 C1 completes the first bullet and only the player-position part of the second
 bullet. Action-certificate replay needs the causal complete schedule and
-remains blocked. The next implementation slice is the independently checked
-phase-schedule producer, followed by static Extra and trace-only gates.
+remains blocked.
+
+Observed SEM-SCALE-C2/C3 result:
+
+- checkpoint `555bbf8` adds
+  `th08-ecl-scale-schedule-v1-post-update-player-ecl-laser`;
+- each future update records the root/current player scale, executes all
+  supported ECL instructions ready at the current integer timer, records the
+  post-ECL laser scale, then advances the ECL timer using that post-write
+  scale;
+- the producer supports the literal VM-local loop and integer branch subset
+  needed by shipped Final-B sub44 and Extra sub86, callback 18/28 reciprocal
+  writes, callback 29 restore, and the control-relevant flag writes of
+  `spell_card_finish`;
+- a complete result requires an exact singleton scale-writer source set,
+  complete writer inventory and scheduler ordering, absence of installed
+  scale callbacks, absence of unmodeled phase transitions, coherent
+  post-update capture/external state, and supported control flow. Failure of
+  any requirement returns root-only or partial coverage;
+- ECL variable 10099 is evaluated from `g_spell_card_state` flags: active
+  state selects bit 2 and inactive state selects bit 9. Variable 10100 is the
+  integer current at spell-state `+0x110`; the runtime spell read now captures
+  that field in the same process-memory read. Future 10100 branches require an
+  explicit per-frame external schedule and are otherwise unknown;
+- `spell_card_finish` clears active bit 0, sets bit 9 only on the supported
+  active/capturable path, and clears transition bit `0x800`. Because a future
+  hit or Bomb can invalidate capture, using this branch requires the declared
+  no-hit/no-Bomb continuation. Losing histories do not gain a favorable
+  restore branch;
+- callback 28 and 29 writes retain explicit
+  `scales_active_bullet_velocity` metadata. The scale schedule can be exact
+  while live hazard authority remains blocked until those bullet side effects
+  are consumed;
+- the independent
+  `th08-ecl-scale-schedule-raw-oracle-v1-player-ecl-laser` decodes raw
+  instruction bytes itself, uses the separate exact timer oracle, and rounds
+  callback reciprocals from exact rational arithmetic;
+- isolated Final-B sub44 and Extra sub86 both restore `0.25 -> 1.0` at
+  future frame 241. Each has 241 quarter-scale player phases but only 240
+  quarter-scale laser phases. Final-B consumes 10099; Extra consumes no
+  external ECL variable;
+- historical Final-B session `004142` starts from stable ECL frame 74790,
+  PC offset `0x5c90`, elapsed 1, fraction zero, and quarter scale. The shipped
+  literal set at `0x5c6c` supplies inferred counter 6. Product and oracle
+  predict restore 237 updates later at ECL frame 75027, exactly the first
+  observed unit-scale row. Sessions `011639` and `163501` stop scale capture
+  at finish/freeze immediately around their predictions and are retained as
+  right censored, not passes;
+- retained report
+  `artifacts/benchmarks/th08_ecl_scale_schedule_capsule_20260729.json` has
+  SHA-256
+  `2c6cedcc5b30b4e9f805ff19cc7cbcd465f6123df2ccfda63e2fac21a8777d27`
+  and canonical payload digest
+  `77ff84d3d8fa8ae9dd5c076edd8881a0a6101457ec8603ba103ea4f55e2ba380`.
+  Linux/Windows renders are byte-identical; and
+- complete Linux discovery passes 1,096 tests in 14.353 seconds. The verified
+  Windows UNC loader passes 1,096 in 29.889 seconds with three existing
+  skips.
+
+IDA revalidation for C2/C3 renamed `0x004178A0`
+`spell_state_active_flag`, `0x0041FD90`
+`spell_state_active_and_flag_bit2`, `0x00405260`
+`spell_state_flag_bit9`, and `0x0041FDD0`
+`spell_state_timer_elapsed`. Comments at `0x0041FB4D`, `0x0041FB7C`, and
+`0x0041FDD0` record the 10099/10100 dataflow and `+0x110` current field.
+
+C2/C3 complete the isolated causal producer and static Extra bullets only.
+The next implementation slice is a default-off trace-only join that proves or
+rejects the complete main/auxiliary writer inventory, installed callback
+state, scheduler order, post-update coherence, phase continuation, and
+callback-28 bullet-side-effect boundary before any live consumer is enabled.
 
 No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
 acceptance, global optimality, or complete future-source coverage.
 
 ## Current stopping rule
 
-Do not launch another game before the causal SEM-SCALE-C schedule producer,
-static Extra workload, and trace-only gate pass. Any test mismatch,
+Do not launch another game before the SEM-SCALE-C trace-only complete-source
+gate passes. Any test mismatch,
 incomplete scale coverage consumed as exact, cross-version cache hit, or live
 non-unit hard certificate is a durable counterexample and stops physical
 promotion.

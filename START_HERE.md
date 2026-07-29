@@ -92,8 +92,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `60ae5b9`
-  (`Retain CE-0191 diagnostic scale continuation`).
+- Latest retained research checkpoint: `10d35a4`
+  (`Retain SEM-MODE-B Stage 5 physical evidence`).
 - Latest pre-trial repository/live code checkpoint: `60ae5b9`
   (`Retain CE-0191 diagnostic scale continuation`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
@@ -102,16 +102,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Latest native-semantic correction checkpoint: `e376557`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest complete physical workload:
-  `lunatic_route2_stage6b_finalb_scale_delivery_20260730_020015`. It is a
-  complete original-game Practice Start hard-no-Bomb Stage-6B trace with one
-  accepted contaminated C5 restore interval, not clean stage survival, a
-  Power-0 route, or NMNB.
+  `lunatic_route2_stage5_unattended_20260730_041408`. It is a complete
+  original-game hard-no-Bomb Lunatic Sakuya/Remilia Stage-5 diagnostic trace:
+  frames `1..42463`, 11,879 decisions, `route_complete`, and ten CE-0192
+  hit edges. It is not observer-off survival, a Power-0 route, or NMNB.
 - Latest physical attempt:
-  `lunatic_route2_stage5_unattended_20260730_035718`. It selected the correct
-  Lunatic route/stage and entered gameplay, but CE-0191's default root-only
-  scale fail-close terminated at frame 1 before any decision. The compact
-  session/run note are retained; this is neither a completed workload nor a
-  survival/mode-transition sample.
+  `lunatic_route2_stage5_unattended_20260730_041408`. It closes the
+  SEM-MODE-B shipped-runtime occurrence gate with 11,763 coherent captures,
+  299 secondary-character transitions, and stable enemy bodies changing
+  exactly bit `0x800` in both directions. Its diagnostic root-scale proxy and
+  capture cost grant no hard or physical-survival authority.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -145,13 +145,10 @@ Linux/Windows discovery passes 1,162 tests in 12.964/30.139 seconds, with the
 three existing Windows skips.
 
 This closes only the decoder-loss and atomic-capture implementation parts of
-CE-0176. No shipped-runtime Stage-5 transition has yet been retained, the
-capture covers only valid geometry in the first 64 slots, diagnostic
-reads/retries may perturb cadence, and the projection is not live hazard
-authority. Latent geometry remains conservative, unfocused combat remains
-disabled, and no physical or survival authority is added. Run the complete
-original-game Stage-5 observer gate next, then continue the causal recurrence
-and differential gates.
+CE-0176. The capture covers only valid geometry in the first 64 slots,
+diagnostic reads/retries may perturb cadence, and the projection is not live
+hazard authority. Latent geometry remains conservative and unfocused combat
+remains disabled.
 
 Checkpoint `60ae5b9` corrects CE-0191 without weakening default hard
 authority. A second default-off flag is accepted only beside the whole-stage
@@ -163,6 +160,17 @@ is audited by the compact mode report. Complete Linux/Windows discovery
 passes 1,167 tests in 14.404/30.150 seconds with three existing Windows
 skips. Any physical result under this proxy has diagnostic occurrence
 authority only, never survival/certificate authority.
+
+Checkpoint `10d35a4` retains the complete SEM-MODE-B Stage-5 physical gate.
+The compact report passes integrity with 11,763/11,879 coherent captures;
+116 crossed observations are explicitly excluded. Frames `394 -> 397` and
+`444 -> 447` retain stable body sets changing exactly native enemy bit
+`0x800` in opposite directions. The 482,944,752-byte raw JSONL stays local,
+its SHA-256 and all compact artifacts are retained, and deterministic report
+regeneration is byte-identical. The supervisor selected no-save, so there is
+no compatible replay to inspect. Hard no-Bomb and cleanup pass. All ten hits
+are CE-0192; the diagnostic comparison is explicitly non-authoritative.
+Continue at SEM-MODE-C, not another unchanged physical run.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -520,17 +528,14 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Complete `SEM-MODE-B` physical observation from checkpoint `60ae5b9`.
-   Run one original-game Lunatic Stage 5 with
-   `--trace-enemy-mode-transitions` and the scoped
-   `--diagnostic-continue-root-only-scale` active from stage entry. Do not
-   stop after hits. Retain the raw/session/summary bundle,
-   compact source-hashed report, resources/hits/Bombs, contamination and
-   cleanup state, and every coherent secondary/body transition. If the game
-   writes a compatible native replay, use it afterward to reproduce and test
-   hypotheses; do not introduce THPRAC. Then carry the immutable mode key
-   through pickup/cadence histories. Keep unfocused-combat promotion
-   disabled.
+2. Implement `SEM-MODE-C` from checkpoint `10d35a4`. Carry the immutable
+   player/enemy mode key through every active/pending input pickup and
+   cadence/delay history. Project per-frame contact body sets at the declared
+   native update phase and merge hidden histories before the next controller
+   maximization when their observations agree. Keep the independent scalar
+   oracle separate, retain no-write/pending and `10065 -> 10075` capsules,
+   and publish body-set/viable-state/safe-action-mask differentials before
+   any live consumption. Keep unfocused-combat promotion disabled.
 3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed
@@ -2394,7 +2399,7 @@ another unchanged launch now; reuse it only after an immutable correction
 contract, without adding trace, combat, Power, Focus/unfocused, or planner
 flags.
 
-The current SEM-MODE-B whole-stage observer gate is:
+The retained SEM-MODE-B whole-stage observer command was:
 
 ```bash
 /mnt/c/Windows/System32/cmd.exe /d /c call \
@@ -2408,6 +2413,9 @@ It keeps `stop-after-hits=0` and hard no-Bomb, starts the observer at stage
 entry, and never selects an exact spell. The scale proxy and extra
 reads/retries are unknown-direction and can perturb cadence, so this is
 diagnostic physical evidence rather than an observer-off survival comparator.
+Run `041408` closes this occurrence gate; do not repeat it unchanged. There is
+currently no authorized SEM-MODE-C physical command because causal recurrence
+and differential gates come first.
 
 The current explicit trace-only native birth-observer gate adds:
 

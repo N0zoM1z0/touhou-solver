@@ -4,8 +4,14 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
+import sys
 
-from th08_boss_phase import (
+SCRIPTS_ROOT = Path(__file__).resolve().parents[1]
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_ROOT))
+
+from th08_boss_phase import (  # noqa: E402
     BOSS_REGISTRY_ADDRESS,
     BOSS_REGISTRY_SLOTS,
     ENEMY_CURRENT_HEALTH_OFFSET,
@@ -14,7 +20,12 @@ from th08_boss_phase import (
     capture_boss_phase_snapshot,
     serialize_boss_phase_snapshot,
 )
-from th08_runtime_agent import ProcessReader, TARGET_EXE, Win32, observe_state
+from th08_runtime_agent import (  # noqa: E402
+    ProcessReader,
+    TARGET_EXE,
+    Win32,
+    observe_state,
+)
 
 
 def main() -> int:

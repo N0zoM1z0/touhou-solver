@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import tempfile
@@ -24,6 +25,7 @@ from th08_practice_supervisor import (
     build_parser,
     practice_stage_available,
     read_last_json_record,
+    resolve_runtime_ecl_static_image,
 )
 
 
@@ -188,6 +190,31 @@ class PracticeSupervisorTests(unittest.TestCase):
         )
         self.assertEqual(args.runtime_ecl_static_sha256, "1" * 64)
         self.assertTrue(args.trace_auxiliary_ecl_events)
+
+    def test_runtime_ecl_identity_is_validated_before_launch(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            image = Path(directory) / "data5.ecl"
+            payload = b"exact-static-ecl"
+            image.write_bytes(payload)
+            expected = hashlib.sha256(payload).hexdigest()
+
+            self.assertEqual(
+                resolve_runtime_ecl_static_image(image, expected),
+                image.resolve(),
+            )
+            with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+                resolve_runtime_ecl_static_image(image, "0" * 64)
+            with self.assertRaisesRegex(ValueError, "not readable"):
+                resolve_runtime_ecl_static_image(
+                    image.with_name("missing.ecl"),
+                    expected,
+                )
+
+    def test_runtime_ecl_identity_requires_path_and_hash_together(self) -> None:
+        with self.assertRaisesRegex(ValueError, "requires both"):
+            resolve_runtime_ecl_static_image(Path("data5.ecl"), None)
+        with self.assertRaisesRegex(ValueError, "requires both"):
+            resolve_runtime_ecl_static_image(None, "0" * 64)
 
     def test_enemy_combat_progress_is_explicitly_opt_in(self) -> None:
         default_args = build_parser().parse_args([])
@@ -382,6 +409,14 @@ class PracticeSupervisorTests(unittest.TestCase):
         )
         self.assertIn(r"%LOCALAPPDATA%\Microsoft\WindowsApps\python.exe", wrapper)
         self.assertIn('-c "import numpy"', wrapper)
+        self.assertIn(
+            r"%~dp0scripts\th08_practice_supervisor.py",
+            wrapper,
+        )
+        self.assertNotIn(
+            r"\\wsl.localhost\ubuntu\home\pentester",
+            wrapper,
+        )
         self.assertNotIn(r"IDA Pro 9.3\python311\python.exe", wrapper)
 
     def test_ce_0051_patch_batch_path_is_not_nested_in_one_cmd_argument(

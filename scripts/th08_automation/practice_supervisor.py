@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import subprocess
@@ -84,6 +85,39 @@ DEFAULT_GAME_DIR = (
     / "[th08] \u4e1c\u65b9\u6c38\u591c\u6284 (\u65e5\u6587\u7248)"
 )
 DEFAULT_LAUNCH_BAT = "run_th08_no_life_decrement_attach.bat"
+
+
+def resolve_runtime_ecl_static_image(
+    path: Path | None,
+    expected_sha256: str | None,
+) -> Path | None:
+    """Validate immutable ECL input before any game or process side effect."""
+
+    if (path is None) != (expected_sha256 is None):
+        raise ValueError(
+            "runtime ECL identity requires both a static image and SHA-256"
+        )
+    if path is None:
+        return None
+    try:
+        resolved = path.resolve(strict=True)
+    except OSError as exc:
+        raise ValueError(
+            f"runtime ECL static image is not readable: {path}"
+        ) from exc
+    if not resolved.is_file():
+        raise ValueError(
+            f"runtime ECL static image is not a file: {resolved}"
+        )
+    actual_sha256 = hashlib.sha256(resolved.read_bytes()).hexdigest()
+    assert expected_sha256 is not None
+    if actual_sha256 != expected_sha256.lower():
+        raise ValueError(
+            "runtime ECL static image SHA-256 mismatch: "
+            f"expected {expected_sha256.lower()}, observed {actual_sha256}"
+        )
+    return resolved
+
 
 def select_no_save_before_termination(
     api: Win32,
@@ -174,6 +208,10 @@ def run_trial(
     stage: PracticeStage,
     iteration: int,
 ) -> TrialArtifacts:
+    runtime_ecl_static_image = resolve_runtime_ecl_static_image(
+        args.runtime_ecl_static_image,
+        args.runtime_ecl_static_sha256,
+    )
     game_dir = args.game_dir.resolve()
     expected_exe = game_dir / TARGET_EXE
     launch_bat = args.launch_bat or game_dir / DEFAULT_LAUNCH_BAT
@@ -228,8 +266,8 @@ def run_trial(
             args.auxiliary_vm_native_call_mode
         ),
         "runtime_ecl_static_image": (
-            str(args.runtime_ecl_static_image)
-            if args.runtime_ecl_static_image is not None
+            str(runtime_ecl_static_image)
+            if runtime_ecl_static_image is not None
             else None
         ),
         "runtime_ecl_static_sha256": (
@@ -295,7 +333,7 @@ def run_trial(
             auxiliary_vm_native_call_mode=(
                 args.auxiliary_vm_native_call_mode
             ),
-            runtime_ecl_static_image=args.runtime_ecl_static_image,
+            runtime_ecl_static_image=runtime_ecl_static_image,
             runtime_ecl_static_sha256=args.runtime_ecl_static_sha256,
             bullet_birth_backend=args.bullet_birth_backend,
             bullet_birth_native_call_mode=(

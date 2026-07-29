@@ -7,8 +7,13 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import sys
 
-from touhou_control.viability_audit_capsule import (
+SCRIPTS_ROOT = Path(__file__).resolve().parents[1]
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_ROOT))
+
+from touhou_control.viability_audit_capsule import (  # noqa: E402
     read_viability_audit_capsule,
 )
 

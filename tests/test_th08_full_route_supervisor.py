@@ -18,6 +18,20 @@ from th08_full_route_supervisor import (
 
 
 class FullRouteSupervisorTests(unittest.TestCase):
+    def test_wrapper_resolves_supervisor_relative_to_itself(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        wrapper = (root / "run_th08_full_route_agent.bat").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            r"%~dp0scripts\th08_full_route_supervisor.py",
+            wrapper,
+        )
+        self.assertNotIn(
+            r"\\wsl.localhost\ubuntu\home\pentester",
+            wrapper,
+        )
+
     def test_parser_preserves_lunatic_default_and_accepts_hard(self) -> None:
         self.assertEqual(build_parser().parse_args([]).difficulty.key, "lunatic")
         args = build_parser().parse_args(

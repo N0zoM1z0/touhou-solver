@@ -159,6 +159,13 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   nonspell. CE-0172 fixes a transport-only V5 columnar correction before code:
   preserve every proof/raw field, remove repeated record/request keys, and
   keep all limits unchanged. Combat changes remain a separate experiment.
+- Schema v8/event v5 implements that correction behind a dedicated columnar
+  projection module and independent strict decoder. Five Linux/Windows
+  repeats replay 19,150 requests with zero unknown and exact cache parity.
+  Maximum line size is `13743/13741` bytes; derive/compact/JSON p95 is
+  `0.190/0.236/0.100 ms` and `0.280/0.390/0.149 ms`. A structural projection
+  of the failed fresh V4 distribution tops out at 14,038 bytes. Physical
+  contention and survival remain open and must be tested separately.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

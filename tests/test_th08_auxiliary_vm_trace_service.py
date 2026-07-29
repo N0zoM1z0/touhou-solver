@@ -500,7 +500,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         self.assertIsNotNone(records[0]["active_vm_sha256"])
         self.assertEqual(len(records[0]["saved_frame_sha256"]), 1)
 
-    def test_event_v7_projects_usable_capture_and_bundles_state(self) -> None:
+    def test_event_v8_projects_usable_capture_and_bundles_state(self) -> None:
         active_vm = b"\x01" * 0x228
         saved_frame = b"\x02" * 0x228
         captured = AuxiliaryVmBatchRecord(
@@ -562,7 +562,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         )
 
         assert record is not None
-        self.assertEqual(record["schema_version"], 7)
+        self.assertEqual(record["schema_version"], 8)
         self.assertEqual(record["event_derivation"], {"status": "derived"})
         self.assertEqual(len(capture.calls), 1)
         self.assertEqual(len(event_service.calls), 1)
@@ -572,22 +572,50 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         self.assertEqual(event_call["stage_route_index"], 5)
         observation = record["observation"]
         assert isinstance(observation, dict)
-        records = observation["records"]
-        assert isinstance(records, list)
+        self.assertNotIn("records", observation)
         self.assertEqual(observation["record_count"], 2)
-        self.assertEqual(len(records), 1)
-        self.assertEqual(records[0]["source_record_index"], 0)
+        projection = observation["record_projection"]
+        assert isinstance(projection, dict)
         self.assertEqual(
-            observation["record_projection"],
-            {
-                "schema": (
-                    "th08-auxiliary-vm-usable-record-projection-v1"
-                ),
-                "record_status_bits": {"0": 1, "1": 1},
-            },
+            projection["schema"],
+            "th08-auxiliary-vm-usable-record-projection-v2",
         )
-        self.assertNotIn("active_vm_hex", records[0])
-        self.assertNotIn("saved_frame_hex", records[0])
+        self.assertEqual(
+            projection["record_status_bits"],
+            {"0": 1, "1": 1},
+        )
+        self.assertEqual(
+            projection["columns"],
+            [
+                "source_record_index",
+                "slot",
+                "auxiliary_index",
+                "enemy_pointer",
+                "context_pointer",
+                "context_pointer_after",
+                "enemy_flags_before",
+                "enemy_flags_after",
+                "status_bits",
+                "target_subroutine",
+                "call_depth",
+                "auxiliary_marker",
+                "active_vm_sha256",
+                "saved_frame_sha256",
+            ],
+        )
+        rows = projection["rows"]
+        assert isinstance(rows, list)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0][0], 0)
+        self.assertEqual(rows[0][8], 0)
+        self.assertEqual(
+            rows[0][12],
+            hashlib.sha256(active_vm).hexdigest(),
+        )
+        self.assertEqual(
+            rows[0][13],
+            [hashlib.sha256(saved_frame).hexdigest()],
+        )
         bundle = observation["replay_state_bundle"]
         assert isinstance(bundle, dict)
         self.assertEqual(
@@ -617,7 +645,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         self.assertIn("event_derive", timing)
         self.assertEqual(record["process_read_count"], 5)
 
-    def test_event_v7_native_error_has_explicit_unavailable_result(self) -> None:
+    def test_event_v8_native_error_has_explicit_unavailable_result(self) -> None:
         event_service = _EventService()
         record = AuxiliaryVmBatchTraceService(
             capture=_FailingCapture(),
@@ -632,7 +660,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         )
 
         assert record is not None
-        self.assertEqual(record["schema_version"], 7)
+        self.assertEqual(record["schema_version"], 8)
         self.assertEqual(record["status"], "native_transaction_failed")
         self.assertEqual(
             record["event_derivation"],

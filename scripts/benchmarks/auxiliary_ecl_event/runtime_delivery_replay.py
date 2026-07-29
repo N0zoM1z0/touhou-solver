@@ -1,4 +1,4 @@
-"""Replay retained raw-state batches through compact epoch-safe V4 delivery."""
+"""Replay retained raw-state batches through epoch-safe delivery transports."""
 
 from __future__ import annotations
 
@@ -14,9 +14,23 @@ from analysis.auxiliary_ecl_event.physical_gate_support import (
     trace_event_rows,
     within,
 )
+from analysis.auxiliary_ecl_event.cache_oracle import IndependentIntentLru
+from analysis.auxiliary_ecl_event.physical_replay import (
+    ReplayProgram,
+    audit_event_batch_v4,
+)
+from analysis.auxiliary_ecl_event.physical_replay_v5 import (
+    audit_event_batch_v5,
+)
+from th08_ecl_tool.core import parse_ecl
 from th08_live.auxiliary_vm.event_service import (
     AuxiliaryEclEventConfiguration,
     AuxiliaryEclEventTraceService,
+)
+from th08_live.auxiliary_vm.columnar_projection import (
+    REQUEST_COLUMNS,
+    REQUEST_PROJECTION_SCHEMA,
+    compact_usable_observation,
 )
 from th08_live.auxiliary_vm.model import (
     AUXILIARY_VM_BATCH_LAYOUT_V2,
@@ -241,13 +255,36 @@ def _observation(
     )
 
 
-def benchmark_runtime_delivery_v4(
+def _legacy_event_v4(event: dict[str, object]) -> dict[str, object]:
+    projection = _mapping(
+        event.get("request_projection"),
+        "event.request_projection",
+    )
+    if (
+        projection.get("schema") != REQUEST_PROJECTION_SCHEMA
+        or projection.get("columns") != list(REQUEST_COLUMNS)
+    ):
+        raise ValueError("V5 request projection is invalid")
+    rows = _array(projection.get("rows"), "event.request_projection.rows")
+    legacy = dict(event)
+    legacy["schema"] = "th08-auxiliary-ecl-event-derivation-v4"
+    legacy["request_projection"] = [
+        dict(zip(REQUEST_COLUMNS, _array(row, "request_projection.row")))
+        for row in rows
+    ]
+    return legacy
+
+
+def _benchmark_runtime_delivery(
     trace_path: Path,
     static_path: Path,
     *,
     expected_static_sha256: str,
     repeats: int,
+    transport_version: int,
 ) -> dict[str, object]:
+    if transport_version not in (4, 5):
+        raise ValueError("runtime delivery transport version is invalid")
     if repeats <= 0:
         raise ValueError("runtime delivery repeats must be positive")
     rows, trace_sha256, trace_bytes = trace_event_rows(trace_path)
@@ -259,6 +296,12 @@ def benchmark_runtime_delivery_v4(
     observations = tuple(
         _observation(row, context=f"batch[{index}]")
         for index, row in enumerate(rows)
+    )
+    image = static_path.read_bytes()
+    program = ReplayProgram.from_ecl(
+        parse_ecl(static_path),
+        image,
+        runtime_base=version.runtime_base,
     )
     shells = tuple(
         {
@@ -279,7 +322,11 @@ def benchmark_runtime_delivery_v4(
     serialized_bytes: list[int] = []
     epoch_provenance_valid = True
     preparation_shape_valid = True
+    independent_cache_parity = True
+    replay_counts: Counter[str] = Counter()
+    first_target_counts: Counter[int] = Counter()
     for repeat in range(repeats):
+        independent_cache = IndependentIntentLru(512)
         started = time.perf_counter()
         service = AuxiliaryEclEventTraceService(
             AuxiliaryEclEventConfiguration(
@@ -301,7 +348,9 @@ def benchmark_runtime_delivery_v4(
             snapshot_frame=version.snapshot_frame,
         )
         if preparation is None or preparation["status"] != "success":
-            raise ValueError("V4 runtime preparation failed")
+            raise ValueError(
+                f"V{transport_version} runtime preparation failed"
+            )
         preparation_timing = _mapping(
             preparation.get("timing_ms"),
             "preparation.timing_ms",
@@ -357,18 +406,56 @@ def benchmark_runtime_delivery_v4(
                     }
                 )
             started = time.perf_counter()
-            compact = observation.compact_record(
-                include_replay_bundle=True,
-                usable_projection=True,
+            compact = (
+                compact_usable_observation(observation)
+                if transport_version == 5
+                else observation.compact_record(
+                    include_replay_bundle=True,
+                    usable_projection=True,
+                )
             )
             compact_ms.append((time.perf_counter() - started) * 1000.0)
             output_row = {
                 **shell,
-                "schema_version": 7,
+                "schema_version": 8 if transport_version == 5 else 7,
                 "gameplay_epoch": observation_epoch,
                 "observation": compact,
-                "event_derivation": event,
+                "event_derivation": (
+                    event
+                    if transport_version == 5
+                    else _legacy_event_v4(event)
+                ),
             }
+            replay = (
+                audit_event_batch_v5
+                if transport_version == 5
+                else audit_event_batch_v4
+            )(
+                output_row,
+                expected_runtime_version=version.record(),
+                program=program,
+                context=f"repeat[{repeat}].batch[{index}]",
+            )
+            expected_cache = independent_cache.observe(
+                replay.intent_keys
+            ).record()
+            independent_cache_parity = bool(
+                independent_cache_parity
+                and event.get("cache") == expected_cache
+            )
+            replay_counts.update(
+                {
+                    "request_count": replay.request_count,
+                    "lowerable_count": replay.lowerable_count,
+                    "complete_count": replay.complete_count,
+                    "unknown_count": replay.unknown_count,
+                    "replayable_record_count": (
+                        replay.replayable_record_count
+                    ),
+                }
+            )
+            if repeat == 0:
+                first_target_counts.update(dict(replay.target_counts))
             started = time.perf_counter()
             encoded = json.dumps(
                 output_row,
@@ -386,7 +473,10 @@ def benchmark_runtime_delivery_v4(
     serialize_distribution = distribution(serialize_ms)
     preparation_distribution = distribution(preparation_ms)
     report: dict[str, object] = {
-        "schema": "th08-auxiliary-ecl-event-v4-replay-benchmark-v1",
+        "schema": (
+            "th08-auxiliary-ecl-event-"
+            f"v{transport_version}-replay-benchmark-v1"
+        ),
         "authority": "isolated_replay_not_physical_delivery_authority",
         "source": {
             "trace": str(trace_path),
@@ -414,6 +504,13 @@ def benchmark_runtime_delivery_v4(
         "static_prevalidation_ms": distribution(static_prevalidation_ms),
         "preparation_ms": preparation_distribution,
         "cache_first_repeat": dict(sorted(first_cache_totals.items())),
+        "independent_replay": {
+            **dict(sorted(replay_counts.items())),
+            "target_counts_first_repeat": {
+                str(key): value
+                for key, value in sorted(first_target_counts.items())
+            },
+        },
         "timing_ms": {
             "event_derive": derive_distribution,
             "replay_compact": compact_distribution,
@@ -458,6 +555,16 @@ def benchmark_runtime_delivery_v4(
                 and first_cache_totals["persistent_hits"] > 0
                 and first_cache_totals["evictions"] == 0
             ),
+            "independent_oracle_parity": bool(
+                replay_counts["request_count"]
+                == 3830 * repeats
+                and replay_counts["request_count"]
+                == replay_counts["lowerable_count"]
+                == replay_counts["complete_count"]
+                == replay_counts["replayable_record_count"]
+                and replay_counts["unknown_count"] == 0
+            ),
+            "independent_cache_parity": independent_cache_parity,
             "event_derive_timing": within(
                 derive_distribution,
                 EVENT_DERIVE_LIMIT_MS,
@@ -482,6 +589,38 @@ def benchmark_runtime_delivery_v4(
     return report
 
 
+def benchmark_runtime_delivery_v4(
+    trace_path: Path,
+    static_path: Path,
+    *,
+    expected_static_sha256: str,
+    repeats: int,
+) -> dict[str, object]:
+    return _benchmark_runtime_delivery(
+        trace_path,
+        static_path,
+        expected_static_sha256=expected_static_sha256,
+        repeats=repeats,
+        transport_version=4,
+    )
+
+
+def benchmark_runtime_delivery_v5(
+    trace_path: Path,
+    static_path: Path,
+    *,
+    expected_static_sha256: str,
+    repeats: int,
+) -> dict[str, object]:
+    return _benchmark_runtime_delivery(
+        trace_path,
+        static_path,
+        expected_static_sha256=expected_static_sha256,
+        repeats=repeats,
+        transport_version=5,
+    )
+
+
 def benchmark_runtime_delivery(
     trace_path: Path,
     static_path: Path,
@@ -491,7 +630,7 @@ def benchmark_runtime_delivery(
 ) -> dict[str, object]:
     """Compatibility alias for the current retained-trace benchmark."""
 
-    return benchmark_runtime_delivery_v4(
+    return benchmark_runtime_delivery_v5(
         trace_path,
         static_path,
         expected_static_sha256=expected_static_sha256,
@@ -520,4 +659,5 @@ __all__ = [
     "benchmark_runtime_delivery",
     "benchmark_runtime_delivery_v3",
     "benchmark_runtime_delivery_v4",
+    "benchmark_runtime_delivery_v5",
 ]

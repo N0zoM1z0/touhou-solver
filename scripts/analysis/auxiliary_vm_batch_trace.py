@@ -23,6 +23,7 @@ from th08_live.auxiliary_vm.trace_service import (  # noqa: E402
     AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
     AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
     AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
+    AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION,
     AUXILIARY_VM_BATCH_TRACE_ROLE,
     AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
 )
@@ -131,6 +132,25 @@ _RETRYABLE_RECORD_BITS = (
 )
 _MAXIMUM_ATTEMPT_READS = 837
 _MAXIMUM_TRANSACTION_READS = 3 * _MAXIMUM_ATTEMPT_READS
+_COLUMNAR_RECORD_SCHEMA = (
+    "th08-auxiliary-vm-usable-record-projection-v2"
+)
+_COLUMNAR_RECORD_COLUMNS = [
+    "source_record_index",
+    "slot",
+    "auxiliary_index",
+    "enemy_pointer",
+    "context_pointer",
+    "context_pointer_after",
+    "enemy_flags_before",
+    "enemy_flags_after",
+    "status_bits",
+    "target_subroutine",
+    "call_depth",
+    "auxiliary_marker",
+    "active_vm_sha256",
+    "saved_frame_sha256",
+]
 
 
 def _status_histogram(
@@ -161,6 +181,46 @@ def _status_histogram(
             )
         result[bits] += raw_count
     return result
+
+
+def _observation_records(
+    observation: dict[str, object],
+    *,
+    schema_version: int,
+    context: str,
+) -> list[dict[str, object]]:
+    if schema_version != AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION:
+        records = observation.get("records")
+        if not isinstance(records, list):
+            raise ValueError(f"{context}: records is not an array")
+        if any(not isinstance(record, dict) for record in records):
+            raise ValueError(f"{context}: record is not an object")
+        return records
+    if "records" in observation:
+        raise ValueError(f"{context}: legacy records are present")
+    projection = observation.get("record_projection")
+    if not isinstance(projection, dict):
+        raise ValueError(f"{context}: record projection is absent")
+    if (
+        set(projection)
+        != {"schema", "record_status_bits", "columns", "rows"}
+        or projection.get("schema") != _COLUMNAR_RECORD_SCHEMA
+        or projection.get("columns") != _COLUMNAR_RECORD_COLUMNS
+    ):
+        raise ValueError(f"{context}: columnar projection is invalid")
+    rows = projection.get("rows")
+    if not isinstance(rows, list):
+        raise ValueError(f"{context}: columnar rows are not an array")
+    records: list[dict[str, object]] = []
+    for row_index, row in enumerate(rows):
+        if not isinstance(row, list) or len(row) != len(
+            _COLUMNAR_RECORD_COLUMNS
+        ):
+            raise ValueError(
+                f"{context}: columnar row {row_index} has invalid arity"
+            )
+        records.append(dict(zip(_COLUMNAR_RECORD_COLUMNS, row)))
+    return records
 
 
 def _attempt_retryable(
@@ -335,11 +395,14 @@ def _audit_v3_attempts(
                         f"{context}: selected attempt/observation "
                         f"{key} mismatch"
                     )
-            observation_records = observation.get("records")
-            if not isinstance(observation_records, list):
-                scan.validation_errors.append(
-                    f"{context}: selected observation records not an array"
+            try:
+                observation_records = _observation_records(
+                    observation,
+                    schema_version=int(row["schema_version"]),
+                    context=f"{context}.observation",
                 )
+            except ValueError as error:
+                scan.validation_errors.append(str(error))
             else:
                 selected_histogram = _status_histogram(
                     selected_attempt.get("record_status_bits"),
@@ -349,11 +412,6 @@ def _audit_v3_attempts(
                 for record_index, record in enumerate(
                     observation_records
                 ):
-                    if not isinstance(record, dict):
-                        raise ValueError(
-                            f"{context}.observation.records"
-                            f"[{record_index}]: not an object"
-                        )
                     bits = record.get("status_bits")
                     if not isinstance(bits, int) or isinstance(bits, bool):
                         raise ValueError(
@@ -361,9 +419,9 @@ def _audit_v3_attempts(
                             f"[{record_index}]: invalid status"
                         )
                     observation_histogram[bits] += 1
-                if (
-                    row.get("schema_version")
-                    == AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION
+                if row.get("schema_version") in (
+                    AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
+                    AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION,
                 ):
                     projection = observation.get("record_projection")
                     if not isinstance(projection, dict):
@@ -373,8 +431,13 @@ def _audit_v3_attempts(
                     if (
                         projection.get("schema")
                         != (
-                            "th08-auxiliary-vm-usable-record-"
-                            "projection-v1"
+                            _COLUMNAR_RECORD_SCHEMA
+                            if row.get("schema_version")
+                            == AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION
+                            else (
+                                "th08-auxiliary-vm-usable-record-"
+                                "projection-v1"
+                            )
                         )
                     ):
                         scan.validation_errors.append(
@@ -463,6 +526,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
+        AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION,
     ):
         raise ValueError(f"{context}: unexpected schema version")
     assert isinstance(schema_version, int)
@@ -487,6 +551,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
+        AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION,
     ):
         _audit_v3_attempts(scan, row, context=context, timing=timing)
 
@@ -505,6 +570,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
             AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
             AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
             AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
+            AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION,
         )
         else f"th08-auxiliary-vm-batch-v{schema_version}"
     )
@@ -588,6 +654,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
                     AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
                     AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
                     AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
+                    AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION,
                 )
                 else observation
             ),
@@ -595,18 +662,16 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
             context=context,
         )
     )
-    records = observation.get("records")
-    if not isinstance(records, list):
-        raise ValueError(f"{context}: records is not an array")
+    records = _observation_records(
+        observation,
+        schema_version=schema_version,
+        context=f"{context}.observation",
+    )
     observed_record_statuses: Counter[int] = Counter()
     active_owner_slots: set[int] = set()
     non_null_contexts = 0
     source_record_indices: list[int] = []
     for record_index, record in enumerate(records):
-        if not isinstance(record, dict):
-            raise ValueError(
-                f"{context}.records[{record_index}] is not an object"
-            )
         slot = record.get("slot")
         context_pointer = record.get("context_pointer")
         if (
@@ -628,7 +693,10 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         observed_record_statuses[bits] += 1
         if (
             schema_version
-            == AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION
+            in (
+                AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
+                AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION,
+            )
         ):
             source_index = record.get("source_record_index")
             if (
@@ -651,7 +719,10 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
                 scan.active_vm_hashes.add(active_hash)
     if (
         schema_version
-        == AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION
+        in (
+            AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
+            AUXILIARY_VM_BATCH_EVENT_V5_TRACE_SCHEMA_VERSION,
+        )
     ):
         projection = observation.get("record_projection")
         if not isinstance(projection, dict):

@@ -614,6 +614,13 @@ comparison.
    fixed V5 columnar transport correction may remove repeated JSON keys
    without changing sensing, recurrence, planning, or actions; all limits
    remain unchanged.
+   Schema-v8/event-v5 now passes that isolated correction on Linux and
+   Windows. Five repeats per platform independently replay 19,150 requests
+   with exact cache parity and zero unknown. Maximum line size is
+   `13743/13741` bytes; derive/compact/JSON p95 is
+   `0.190/0.236/0.100 ms` and `0.280/0.390/0.149 ms`. This remains
+   default-off trace-only evidence until a fresh physical Stage-5 gate;
+   survival changes are deliberately excluded from that first run.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the

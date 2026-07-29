@@ -1,0 +1,126 @@
+{
+  "authority": "isolated_replay_not_physical_delivery_authority",
+  "cache_first_repeat": {
+    "evictions": 0,
+    "misses": 46,
+    "persistent_hits": 1797,
+    "request_local_hits": 1987
+  },
+  "gates": {
+    "all_rows_classified": true,
+    "cross_epoch_program_reuse": true,
+    "event_derive_timing": true,
+    "exact_cache_workload": true,
+    "independent_cache_parity": true,
+    "independent_oracle_parity": true,
+    "json_serialize_timing": true,
+    "preparation_timing": true,
+    "projected_json_line_size": true,
+    "replay_compact_timing": true,
+    "target_closure_prevalidated_and_bound": true
+  },
+  "independent_replay": {
+    "complete_count": 19150,
+    "lowerable_count": 19150,
+    "replayable_record_count": 19150,
+    "request_count": 19150,
+    "target_counts_first_repeat": {
+      "69": 950,
+      "72": 965,
+      "73": 1915
+    },
+    "unknown_count": 0
+  },
+  "limits_bytes": {
+    "projected_json_line_maximum": 24576
+  },
+  "limits_ms": {
+    "event_derive_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ],
+    "json_serialize_p95_p99_max": [
+      0.25,
+      0.5,
+      1.5
+    ],
+    "preparation_maximum": 1.0,
+    "replay_compact_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ]
+  },
+  "passed": true,
+  "preparation_ms": {
+    "count": 5,
+    "max": 0.07660000119358301,
+    "mean": 0.04326000344008207,
+    "p50": 0.03729993477463722,
+    "p95": 0.06910001393407583,
+    "p99": 0.07510000374168158
+  },
+  "schema": "th08-auxiliary-ecl-event-v5-replay-benchmark-v1",
+  "source": {
+    "static_image": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\decoded\\ecldata5.ecl",
+    "static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "trace": "\\\\wsl.localhost\\ubuntu\\home\\pentester\\coding\\codex_ida\\th08\\artifacts\\runtime_reports\\lunatic_route2_stage5_unattended_20260729_014125.jsonl",
+    "trace_bytes": 497850128,
+    "trace_sha256": "6d779046155d8c36fce9581d1a91389bf6a199212171e813f2766b55cf03c872"
+  },
+  "static_prevalidation_ms": {
+    "count": 5,
+    "max": 48.33560006227344,
+    "mean": 39.672199985943735,
+    "p50": 37.658900022506714,
+    "p95": 46.62994004320353,
+    "p99": 47.99446805845946
+  },
+  "timing_ms": {
+    "event_derive": {
+      "count": 710,
+      "max": 0.7698999252170324,
+      "mean": 0.18304493376644146,
+      "p50": 0.179499969817698,
+      "p95": 0.28003998450003564,
+      "p99": 0.5021469283383316
+    },
+    "json_serialize_without_write": {
+      "count": 710,
+      "max": 0.22559997159987688,
+      "mean": 0.12186985515372854,
+      "p50": 0.12630003038793802,
+      "p95": 0.14906497090123594,
+      "p99": 0.17534694867208594
+    },
+    "replay_compact": {
+      "count": 710,
+      "max": 0.7251999340951443,
+      "mean": 0.31756605513551284,
+      "p50": 0.34234998747706413,
+      "p95": 0.3898799419403075,
+      "p99": 0.4357119521591811
+    }
+  },
+  "workload": {
+    "accepted_gameplay_epoch": 0,
+    "batch_count": 142,
+    "observation_gameplay_epochs_first_repeat": {
+      "1": 48,
+      "2": 47,
+      "3": 47
+    },
+    "repeats": 5,
+    "sample_count": 710,
+    "serialized_bytes_first_repeat": {
+      "maximum": 13741,
+      "minimum": 4190,
+      "total": 1696160
+    },
+    "status_counts": {
+      "empty_complete": 30,
+      "success": 680
+    }
+  }
+}

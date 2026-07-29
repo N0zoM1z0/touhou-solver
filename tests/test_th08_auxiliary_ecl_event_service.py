@@ -230,7 +230,7 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(
             result["schema"],
-            "th08-auxiliary-ecl-event-derivation-v4",
+            "th08-auxiliary-ecl-event-derivation-v5",
         )
         self.assertEqual(result["authority"], "trace_only_no_action_authority")
         self.assertEqual(result["active_difficulty_mask"], 0x08)
@@ -253,14 +253,24 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
                 "capacity": 512,
             },
         )
-        requests = result["request_projection"]
+        projection = result["request_projection"]
+        assert isinstance(projection, dict)
+        self.assertEqual(
+            projection["schema"],
+            "th08-auxiliary-ecl-request-projection-v1",
+        )
+        self.assertEqual(
+            projection["columns"],
+            ["source_record_index", "status", "result_index"],
+        )
+        requests = projection["rows"]
         assert isinstance(requests, list)
         self.assertEqual(
-            [request["source_record_index"] for request in requests],
+            [request[0] for request in requests],
             [0, 1, 2],
         )
         self.assertEqual(
-            [request["status"] for request in requests],
+            [request[1] for request in requests],
             ["complete", "complete", "complete"],
         )
         commitment = result["lowering_commitment"]
@@ -427,10 +437,12 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
         self.assertEqual(result["request_count"], 5)
         self.assertEqual(result["complete_count"], 0)
         self.assertEqual(result["unknown_count"], 5)
-        requests = result["request_projection"]
+        projection = result["request_projection"]
+        assert isinstance(projection, dict)
+        requests = projection["rows"]
         assert isinstance(requests, list)
         self.assertEqual(
-            [request["status"] for request in requests[:4]],
+            [request[1] for request in requests[:4]],
             [
                 "unsupported_call_depth",
                 "unsupported_target",
@@ -438,7 +450,7 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
                 "target_pc_mismatch",
             ],
         )
-        self.assertTrue(str(requests[4]["status"]).startswith("invalid_state:"))
+        self.assertTrue(str(requests[4][1]).startswith("invalid_state:"))
         commitment = result["lowering_commitment"]
         assert isinstance(commitment, dict)
         self.assertEqual(commitment["request_count"], 0)
@@ -467,6 +479,18 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
         )
         self.assertEqual(empty["status"], "empty_complete")
         self.assertEqual(empty["request_count"], 0)
+        self.assertEqual(
+            empty["request_projection"],
+            {
+                "schema": "th08-auxiliary-ecl-request-projection-v1",
+                "columns": [
+                    "source_record_index",
+                    "status",
+                    "result_index",
+                ],
+                "rows": [],
+            },
+        )
         commitment = empty["lowering_commitment"]
         assert isinstance(commitment, dict)
         self.assertEqual(commitment["request_count"], 0)

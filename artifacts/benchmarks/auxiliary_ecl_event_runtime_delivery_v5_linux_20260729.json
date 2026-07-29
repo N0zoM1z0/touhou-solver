@@ -1,0 +1,126 @@
+{
+  "authority": "isolated_replay_not_physical_delivery_authority",
+  "cache_first_repeat": {
+    "evictions": 0,
+    "misses": 46,
+    "persistent_hits": 1797,
+    "request_local_hits": 1987
+  },
+  "gates": {
+    "all_rows_classified": true,
+    "cross_epoch_program_reuse": true,
+    "event_derive_timing": true,
+    "exact_cache_workload": true,
+    "independent_cache_parity": true,
+    "independent_oracle_parity": true,
+    "json_serialize_timing": true,
+    "preparation_timing": true,
+    "projected_json_line_size": true,
+    "replay_compact_timing": true,
+    "target_closure_prevalidated_and_bound": true
+  },
+  "independent_replay": {
+    "complete_count": 19150,
+    "lowerable_count": 19150,
+    "replayable_record_count": 19150,
+    "request_count": 19150,
+    "target_counts_first_repeat": {
+      "69": 950,
+      "72": 965,
+      "73": 1915
+    },
+    "unknown_count": 0
+  },
+  "limits_bytes": {
+    "projected_json_line_maximum": 24576
+  },
+  "limits_ms": {
+    "event_derive_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ],
+    "json_serialize_p95_p99_max": [
+      0.25,
+      0.5,
+      1.5
+    ],
+    "preparation_maximum": 1.0,
+    "replay_compact_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ]
+  },
+  "passed": true,
+  "preparation_ms": {
+    "count": 5,
+    "max": 0.03473099786788225,
+    "mean": 0.029407197143882513,
+    "p50": 0.02984100137837231,
+    "p95": 0.03454979741945863,
+    "p99": 0.03469475777819753
+  },
+  "schema": "th08-auxiliary-ecl-event-v5-replay-benchmark-v1",
+  "source": {
+    "static_image": "artifacts/decoded/ecldata5.ecl",
+    "static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_014125.jsonl",
+    "trace_bytes": 497850128,
+    "trace_sha256": "6d779046155d8c36fce9581d1a91389bf6a199212171e813f2766b55cf03c872"
+  },
+  "static_prevalidation_ms": {
+    "count": 5,
+    "max": 9.230219991877675,
+    "mean": 7.866444002138451,
+    "p50": 7.603781996294856,
+    "p95": 9.063366195186973,
+    "p99": 9.196849232539535
+  },
+  "timing_ms": {
+    "event_derive": {
+      "count": 710,
+      "max": 0.8585370087530464,
+      "mean": 0.14119333395747546,
+      "p50": 0.1394474966218695,
+      "p95": 0.1898246948258019,
+      "p99": 0.2998683814075775
+    },
+    "json_serialize_without_write": {
+      "count": 710,
+      "max": 0.1650189806241542,
+      "mean": 0.08205121459314783,
+      "p50": 0.08503699791617692,
+      "p95": 0.09997005690820514,
+      "p99": 0.13176591426599765
+    },
+    "replay_compact": {
+      "count": 710,
+      "max": 0.44468799023889005,
+      "mean": 0.180743794156973,
+      "p50": 0.19251549383625388,
+      "p95": 0.23602044238941738,
+      "p99": 0.2698550207423977
+    }
+  },
+  "workload": {
+    "accepted_gameplay_epoch": 0,
+    "batch_count": 142,
+    "observation_gameplay_epochs_first_repeat": {
+      "1": 48,
+      "2": 47,
+      "3": 47
+    },
+    "repeats": 5,
+    "sample_count": 710,
+    "serialized_bytes_first_repeat": {
+      "maximum": 13743,
+      "minimum": 4191,
+      "total": 1696240
+    },
+    "status_counts": {
+      "empty_complete": 30,
+      "success": 680
+    }
+  }
+}

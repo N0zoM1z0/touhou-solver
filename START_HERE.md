@@ -160,6 +160,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `1.366 ms`; the run takes 14 hits (`8/2/3/1/0`). CE-0172 fixes a
   transport-only V5 columnar correction before implementation. Do not loosen
   gates or combine it with a combat change.
+  Schema-v8/event-v5 now passes the isolated Linux/Windows gate: each
+  platform independently replays 19,150 requests with zero unknown and exact
+  cache parity. Maximum line size is `13743/13741` bytes; physical-V4
+  structural projection tops out at 14,038 bytes. Complete 1,038-test suites
+  pass. Run one fresh V5 Stage-5 physical delivery gate next, without a
+  combat intervention; retain every result.
   Unsupported emission, source-life, dynamic parameter, transform,
   realized-birth, geometry, and action dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model

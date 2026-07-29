@@ -19,10 +19,16 @@ from .event_program import (
     BoundAuxiliaryEclProgram,
 )
 from .event_commitment import AuxiliaryLiteralFireResultCommitter
+from .columnar_projection import (
+    REQUEST_RESULT_INDEX,
+    REQUEST_STATUS_INDEX,
+    empty_request_projection,
+    request_projection,
+)
 from .model import AuxiliaryVmBatchObservation
 
 
-AUXILIARY_ECL_EVENT_SCHEMA = "th08-auxiliary-ecl-event-derivation-v4"
+AUXILIARY_ECL_EVENT_SCHEMA = "th08-auxiliary-ecl-event-derivation-v5"
 AUXILIARY_ECL_EVENT_PREPARATION_SCHEMA = (
     "th08-auxiliary-ecl-event-preparation-v2"
 )
@@ -84,7 +90,7 @@ class AuxiliaryEclEventTraceService:
             "request_count": 0,
             "complete_count": 0,
             "unknown_count": 0,
-            "request_projection": [],
+            "request_projection": empty_request_projection(),
             "lowering_commitment": None,
             "cache": None,
             "timing_ms": {
@@ -255,26 +261,22 @@ class AuxiliaryEclEventTraceService:
                 total_ms=(self._clock() - total_started) * 1000.0,
             )
         decode_started = self._clock()
-        request_projection: list[dict[str, object]] = []
+        request_rows: list[list[object]] = []
         requests: list[AuxiliaryLiteralFireRequest] = []
         pending_projection_indices: list[int] = []
         unknown_count = 0
         for record_index, record in enumerate(observation.records):
             if not record.usable:
                 continue
-            request_record: dict[str, object] = {
-                "source_record_index": record_index,
-                "status": None,
-                "result_index": None,
-            }
+            request_row: list[object] = [record_index, None, None]
             try:
                 state = AuxiliaryEclTimerState.from_active_vm(
                     record.active_vm
                 )
             except ValueError as error:
-                request_record["status"] = f"invalid_state:{error}"
+                request_row[REQUEST_STATUS_INDEX] = f"invalid_state:{error}"
                 unknown_count += 1
-                request_projection.append(request_record)
+                request_rows.append(request_row)
                 continue
             target = record.target_subroutine
             if record.call_depth != 0:
@@ -290,13 +292,13 @@ class AuxiliaryEclEventTraceService:
                 status = "target_pc_mismatch"
             else:
                 status = "pending"
-            request_record["status"] = status
-            request_projection.append(request_record)
+            request_row[REQUEST_STATUS_INDEX] = status
+            request_rows.append(request_row)
             if status != "pending":
                 unknown_count += 1
                 continue
             pending_projection_indices.append(
-                len(request_projection) - 1
+                len(request_rows) - 1
             )
             requests.append(
                 AuxiliaryLiteralFireRequest(
@@ -316,13 +318,13 @@ class AuxiliaryEclEventTraceService:
         ):
             result = batch.results[request_index]
             result_index = batch.result_indices[request_index]
-            request_record = request_projection[projection_index]
-            request_record["result_index"] = result_index
+            request_row = request_rows[projection_index]
+            request_row[REQUEST_RESULT_INDEX] = result_index
             if result.horizon_covered:
-                request_record["status"] = "complete"
+                request_row[REQUEST_STATUS_INDEX] = "complete"
                 complete_count += 1
             else:
-                request_record["status"] = (
+                request_row[REQUEST_STATUS_INDEX] = (
                     f"lowering_unknown:{result.stop_reason}"
                 )
                 unknown_count += 1
@@ -330,7 +332,7 @@ class AuxiliaryEclEventTraceService:
         compact_started = self._clock()
         commitment = committer.commit(batch)
         compact_ms = (self._clock() - compact_started) * 1000.0
-        if not request_projection:
+        if not request_rows:
             status = "empty_complete"
         elif unknown_count == 0:
             status = "success"
@@ -362,10 +364,10 @@ class AuxiliaryEclEventTraceService:
                     self._program.target_horizons.items()
                 )
             },
-            "request_count": len(request_projection),
+            "request_count": len(request_rows),
             "complete_count": complete_count,
             "unknown_count": unknown_count,
-            "request_projection": request_projection,
+            "request_projection": request_projection(request_rows),
             "lowering_commitment": commitment,
             "cache": cached_batch.cache.record(),
             "timing_ms": {

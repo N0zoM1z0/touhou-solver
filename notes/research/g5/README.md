@@ -24,12 +24,16 @@ themselves grant future-geometry, planner, or action authority.
 16. [failed Stage-5 runtime delivery result](G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_STAGE5_RESULT_20260729.md)
 17. [corrected V2 delivery contract](G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_CONTRACT_20260729.md)
 18. [V2 isolated replay preflight](G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_PREFLIGHT_20260729.md)
+19. [failed V2 Stage-5 result](G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_STAGE5_FAILURE_20260729.md)
+20. [epoch-safe low-contention V3 contract](G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_CONTRACT_20260729.md)
 
 The corresponding `*_RESULT_*`, `*_GATE_*`, attribution, rejection, and
 performance-experiment notes retain the evidence for each transition. The
 current G5 offline lowerer/oracle and Linux/Windows timing gate pass. The
 schema-v4 replay-capable physical run proved exact replay parity but failed
-its empty-status and live timing gates. The separately contracted schema-v5
-bounded-cache/compact-replay correction passes Linux and Windows isolated
-replay preflight; its focused physical gate remains pending. Neither version
-is a general source-completeness, future-geometry, or action-authority claim.
+its empty-status and live timing gates. Schema-v5 bounded-cache/compact-replay
+passed isolated preflight but its first physical run exposed a controller
+epoch/program-identity conflation: all 142 rows failed closed before
+lowering. Schema-v6/event-v3 is now fixed before implementation to separate
+those identities and reduce cold preparation. No version is a general
+source-completeness, future-geometry, or action-authority claim.

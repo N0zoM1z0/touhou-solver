@@ -573,13 +573,19 @@ comparison.
    zero unknown, but six initial zero-context batches violate the fixed
    all-success status gate, and event-derive, replay-compact maximum, and
    synchronous-emit timing fail. CE-0168 retains the immutable failure.
-   The separately contracted schema-v5 correction now implements a visible
-   exact-version preparation, 512-entry exact LRU, compact hash-addressed
-   replay bundle, and independently checked empty-prefix semantics. Five
-   retained-trace repeats pass fixed isolated Linux and Windows timing gates;
-   the first repeat has exactly 46 misses and 3,784 exact reuse hits. This is
-   preflight only. The unchanged focused Stage-5 spell-107 physical gate is
-   next, and no physical delivery authority exists before it passes.
+   The separately contracted schema-v5 correction implemented a visible
+   preparation, 512-entry exact LRU, compact hash-addressed replay bundle, and
+   independently checked empty-prefix semantics. It passed isolated preflight
+   but failed its first physical run `20260729_095849`: the accepted program
+   was at controller epoch 0, every selected batch was at epoch 3, and all
+   142 failed closed before lowering. The 20-hit outcome is physically poor
+   but not attributable to cache work that never ran; a 5.317-ms frame-2
+   preparation effect remains unresolved. CE-0169 rejects schema v5.
+   Schema-v6/event-v3 is fixed to use the accepted program-equivalence fields
+   rather than controller observation epoch and to prevalidate the target
+   closure before gameplay. Handoff requires two consecutive corrected
+   Stage-5 runs at no more than ten hits plus cross-stage regression checks.
+   No physical delivery authority exists before the new gate passes.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the

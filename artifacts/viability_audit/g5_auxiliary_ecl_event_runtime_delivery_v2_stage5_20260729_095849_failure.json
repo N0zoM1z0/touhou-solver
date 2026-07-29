@@ -1,0 +1,122 @@
+{
+  "authority": "physical_trace_failure_no_delivery_or_action_authority",
+  "batch": {
+    "count": 142,
+    "event_statuses": {
+      "runtime_identity_mismatch": 142
+    },
+    "gameplay_epochs": {
+      "3": 142
+    },
+    "schema_versions": {
+      "5": 142
+    },
+    "validation_errors": []
+  },
+  "failure": {
+    "accepted_version_gameplay_epoch": 0,
+    "classification": "controller_epoch_conflated_with_runtime_program_identity",
+    "first_batch_gameplay_epoch": 3,
+    "independent_replay_request_count": 0,
+    "lowering_request_count": 0
+  },
+  "physical": {
+    "decision_count": 11342,
+    "first_frame": 2,
+    "hard_no_bomb": true,
+    "hit_count": 20,
+    "hit_frames": [
+      1423,
+      2119,
+      7943,
+      11145,
+      12293,
+      13853,
+      14262,
+      14654,
+      23818,
+      25339,
+      29734,
+      30810,
+      33601,
+      35022,
+      35769,
+      37404,
+      38151,
+      38889,
+      40646,
+      41266
+    ],
+    "last_frame": 42834,
+    "phase_hits": {
+      "103": 2,
+      "107": 2,
+      "111": 3,
+      "115": 2,
+      "nonspell": 11
+    },
+    "route_complete": true,
+    "trial_accepted": true
+  },
+  "preparation": {
+    "count": 1,
+    "decision_frame": 2,
+    "gameplay_epoch": 0,
+    "program_bind_ms": 5.25069993454963,
+    "schema": "th08-auxiliary-ecl-event-preparation-v1",
+    "status": "success",
+    "total_ms": 5.316699971444905
+  },
+  "provenance": {
+    "code_commit": "5ad2bb1",
+    "executable_sha256": "330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924",
+    "run_id": "lunatic_route2_stage5_unattended_20260729_095849",
+    "session": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_095849.session.json",
+    "static_ecl_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "trace_bytes": 438162039,
+    "trace_sha256": "793ca124d43f1cd543ce4309a79b734e1ce7e6237e8f05f660564f870a858b6f"
+  },
+  "schema": "th08-g5-auxiliary-ecl-event-v2-physical-failure-v1",
+  "timing_ms": {
+    "decision_frame_delta": {
+      "count": 11338,
+      "max": 1804.0,
+      "mean": 3.2997883224554596,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 6.0
+    },
+    "event_derive_unavailable_path": {
+      "count": 142,
+      "max": 0.042500090785324574,
+      "mean": 0.01685140723310096,
+      "p50": 0.014949997421354055,
+      "p95": 0.02866998547688126,
+      "p99": 0.034797963453456766
+    },
+    "previous_trace_emit": {
+      "count": 141,
+      "max": 3.01939994096756,
+      "mean": 1.1295957436309534,
+      "p50": 1.1325000086799264,
+      "p95": 1.6199999954551458,
+      "p99": 1.9065199652686706
+    },
+    "replay_compact": {
+      "count": 142,
+      "max": 0.8980000857263803,
+      "mean": 0.40498309650681386,
+      "p50": 0.388299988117069,
+      "p95": 0.6775599438697093,
+      "p99": 0.7524700043722988
+    },
+    "transaction_total": {
+      "count": 142,
+      "max": 4.0059000020846725,
+      "mean": 1.6935197111796325,
+      "p50": 1.5685000107623637,
+      "p95": 2.630904904799536,
+      "p99": 3.328852948034182
+    }
+  }
+}

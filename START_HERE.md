@@ -63,7 +63,9 @@ located; it does not change the authority order below.
 50. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_STAGE5_RESULT_20260729.md`
 51. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_CONTRACT_20260729.md`
 52. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_PREFLIGHT_20260729.md`
-53. the relevant recent run note and counterexample rows before live work
+53. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_STAGE5_FAILURE_20260729.md`
+54. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_CONTRACT_20260729.md`
+55. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -107,9 +109,20 @@ describe the same decision. Python/C++ parity is not physical correctness.
   1,987 request-local hits, and zero eviction. Windows event-derive,
   replay-compact, and no-write JSON p95 are `0.408/0.433/0.626 ms`. Complete
   Linux/Windows suites pass 1,020 tests. This is not live contention
-  authority: the next exact checkpoint is the focused schema-v5 Stage-5
-  spell-107 physical gate. Schema v4 has no physical delivery authority. The
-  old spell-107 trace's 3,214 contexts remain unreplayable.
+  authority. Physical run `20260729_095849` then rejected schema v5: the
+  accepted program/preparation was at controller epoch 0, all 142 selected
+  batches were at epoch 3, and all failed closed as
+  `runtime_identity_mismatch` before lowering. The run also had 20 hits, 11
+  nonspell, although retained Stage-5 results already span 8–23 and the first
+  ten hits preceded the selected batch window. CE-0169 retains both the
+  program-version bug and the unresolved one-time 5.317-ms preparation
+  effect. Schema-v6/event-v3 is fixed before implementation: separate
+  immutable program identity from controller observation epoch, prevalidate
+  the exact target closure before gameplay, and bind online within 1.000 ms.
+  Before handoff retain every run and require two consecutive corrected
+  Stage-5 results at no more than ten hits plus cross-stage regression
+  checks. Schemas v4/v5 have no physical delivery authority. The old
+  spell-107 trace's 3,214 contexts remain unreplayable.
   Unsupported emission, source-life, dynamic parameter, transform,
   realized-birth, geometry, and action dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model

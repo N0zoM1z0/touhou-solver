@@ -121,9 +121,15 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   exact-version caching, visible pre-bind, hash-addressed compact replay, and
   independently verified empty-prefix semantics. Five retained-trace repeats
   pass the fixed isolated gates on both Linux and Windows; the first repeat
-  has 46 misses and 3,784 exact reuse hits. This remains preflight only:
-  unchanged per-batch timing and cadence gates require a fresh focused
-  physical run.
+  has 46 misses and 3,784 exact reuse hits. Physical run `20260729_095849`
+  rejected schema v5 before lowering: program acceptance remained at
+  controller epoch 0 while all 142 selected batches occurred at epoch 3.
+  The same run had 20 hits, including 11 nonspell. CE-0169 separates the
+  controller observation epoch from immutable ECL program identity and fixes
+  a schema-v6/event-v3 correction with pre-game target validation and a
+  1.000-ms online-preparation cap. Retain all follow-up runs; before handoff
+  require two consecutive corrected Stage-5 runs at no more than ten hits
+  and verify other Lunatic stages have not obviously regressed.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

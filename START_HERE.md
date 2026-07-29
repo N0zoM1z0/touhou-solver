@@ -92,8 +92,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `7bf72a6`
-  (`Retain SEM-MODE-C physical recurrence audit`).
+- Latest retained research checkpoint: `092a35b`
+  (`Retain ordered partial-mask pickup counterexample`).
 - Latest pre-trial repository/live code checkpoint: `60ae5b9`
   (`Retain CE-0191 diagnostic scale continuation`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
@@ -211,6 +211,30 @@ Six focused tests and complete Linux/Windows discovery pass 1,181 tests in
 offline/physical-post-hoc recurrence authority only: exact future
 body/flag/geometry production, universal physical clock, global survival,
 live publication, and unfocused combat remain open.
+
+Checkpoint `092a35b` retains CE-0193 and rejects atomic complete-mask pickup
+as physical actuator authority. In the same Stage-5 trace, recorded issue
+transaction `0x65 -> 0x61 -> 0x41` is followed by coherent native active mask
+`0x61` while held/pending final desired mask is `0x41`. The
+action-conditioned report finds 381 such atomic-model counterexamples across
+141 transaction/observed-mask signatures; 148 directly involve Focus timing.
+
+The report audits 7,162 strict endpoints: 3,835 have a compatible branch,
+381 are direct ordered-partial witnesses, and 2,946 remain
+unknown-direction manager/player/issue phase-decomposition mismatches rather
+than independent recurrence claims. Its deterministic SHA-256 is
+`db411650de15a050c5ffb815f0f075c538b4ec16cbc01f2fa0f47e403f678464`.
+The older pickup audit now publishes a matching live-promotion blocker.
+Seven focused body-set tests, five focused pickup-audit tests, and complete
+1,189-test Linux/Windows discovery pass in 14.485/30.602 seconds; Windows
+retains three existing skips.
+
+The pure 9,839/9,839 stable-focus recurrence result remains valid inside its
+earlier strict boundary. The atomic actuator submodel does not. Before future
+body/flag/geometry integration, model one controller-selected complete mask
+as an ordered per-key transaction whose prefixes nature may expose at the
+revalidated player/input update phase. Preserve complete-mask no-write and
+observation-compatible merging. No physical rerun is authorized yet.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -568,17 +592,22 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-C` from checkpoint `7bf72a6`. The local recurrence now
-   passes physical post-hoc falsification over 9,839 ordinary Stage-5
-   intervals, while the retained dialogue gaps reject manager frame as a
-   universal physical clock.
-   Build or conservatively version an exact future body/flag/geometry
-   producer before survival integration; do not substitute the current
-   `future hazard events unseen` trace snapshot. Preserve the independent
-   scalar oracle and publish body-set, viable-state, and safe-action-mask
-   differentials without granting live action authority. Then complete
-   SEM-MODE-D damage-objective separation and SEM-MODE-E optimized/native
-   parity. Keep unfocused-combat promotion disabled.
+2. Continue `SEM-MODE-C` from checkpoint `092a35b`. CE-0193 physically
+   rejects atomic complete-mask pickup: implement an ordered key-transition
+   transaction state and revalidate its player/input update phase before
+   future hazard integration. Nature may expose transaction prefix masks,
+   but the controller still chooses only one final complete mask. Preserve
+   exact complete-mask no-write, older pending state, and
+   observation-compatible merging.
+   After independent scalar/optimized parity for multi-release/press,
+   reversal, Focus, Shot, overwrite, and no-write cases, build or
+   conservatively version an exact future body/flag/geometry producer before
+   survival integration; do not substitute the current
+   `future hazard events unseen` trace snapshot. Publish body-set,
+   viable-state, and safe-action-mask differentials without granting live
+   action authority. Then complete SEM-MODE-D damage-objective separation
+   and SEM-MODE-E optimized/native parity. Keep unfocused-combat promotion
+   disabled.
 3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed

@@ -306,6 +306,30 @@ comparison.
 
 ### Priority
 
+**2026-07-29 native-semantic amendment:** the read-only native-to-solver
+audit and bounded IDA recheck do not promote, reject, or roll back any
+strategy. The live stack and the immediate observer-off Stage-5 control gate
+remain unchanged. They add a correctness dependency before broad G5 or S15
+performance work:
+
+- restore native elapsed/fraction timer semantics and global-time-scale
+  player/laser transitions;
+- add action-conditioned focus/secondary-character enemy contact/damage
+  eligibility;
+- separate exact player/laser/bullet geometry and lifecycle from explicit
+  conservative sampling margins and use physical clamp bounds;
+- close callback, bounded ECL-control, and action-dependent RNG source
+  semantics; and
+- issue a new immutable model version and recertify scalar/Python/native
+  parity before physical promotion.
+
+CE-0175–CE-0181 retain the concrete failures. Existing zero-fraction,
+unit-scale, and conservative-proxy evidence keeps only its declared slice.
+The audit does not prove that any finding caused run `125453`, so aggregate
+rollback remains unjustified. The full dependency and Lunatic NMNB acceptance
+ladder are in
+`notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`.
+
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
    passes; continue G5 future-event coverage one event class at a time,
    beginning with bullet birth. B1–B3 and the default-off trace seam are
@@ -402,19 +426,23 @@ comparison.
    at 1,490 complete / 4,125 unknown. B4 remains failed at `0.2059 ms` p95,
    so phase B is limited to the independent offline oracle and performance
    attribution; live interpretation remains unpromoted.
-   Phase-B1 now has an offline-only exact signed-int32 `0x05` shadow and an
-   independent raw-tuple/plain-dict scalar oracle. It stops before shipped
+   Phase-B1 now has an offline-only signed-int32 `0x05` shadow and a
+   structurally separate raw-tuple/plain-dict scalar oracle. The 2026-07-29
+   audit finds that both share a reduced scalar timer and narrows exactness to
+   the retained zero-fraction slice. It stops before shipped
    direct-fire, RNG, float arithmetic/normalization, call, and dynamic
    branches. Retained replay of physical run `20260728_110438` decodes all
    3,117 in-scope unknown spell-57/61/65 rows; 1,730 begin at `0x05` and
-   canonicalize to 108 unique physical one-step cases. Every case agrees
-   with the independent oracle, while zero unknown rows become a verified
-   complete schedule. The 1,008 dynamic spell-73 rows remain excluded.
+   canonicalize to 108 unique physical one-step cases. Every case agrees on
+   PC/counter/observed zero-fraction transitions, while zero unknown rows
+   become a verified complete schedule. The 1,008 dynamic spell-73 rows
+   remain excluded.
    Linux/Windows isolated one-step p50 is approximately
    `0.0085/0.0101 ms`; it does not close the physical B4 observer gate.
-   This remains offline evidence infrastructure only. Matched live-path
-   attribution and an independent float32 rounding oracle are next; direct
-   fire, RNG, dynamic state, calls, and interrupts remain `UNKNOWN`.
+   This remains offline evidence infrastructure only. Native
+   elapsed/fraction timer repair, a genuinely independent scaled-float32
+   oracle, and matched live-path attribution are next; direct fire, RNG,
+   dynamic state, calls, and interrupts remain `UNKNOWN`.
    The parallel B4 performance contract is now fixed. Same-run physical
    cohorts report p95 `0.1553/0.2516 ms` for zero/nonzero evidence and
    `0.2015/0.2112 ms` for no-known/definite-known-future overlap. This points

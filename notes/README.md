@@ -15,6 +15,12 @@ This is the navigation index for repository evidence. It does not replace
   to the current CE range routed there.
 - [Consolidated roadmap](review/CONSOLIDATED_RESEARCH_AND_REFACTOR_ROADMAP_20260727.md):
   agreed research/refactor order.
+- [Native-to-solver audit](review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md):
+  shipped-IDB/source semantic findings, reproductions, and bounded
+  performance review.
+- [Lunatic NMNB review and roadmap](review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md):
+  reconciled current status, authority impact, implementation dependencies,
+  and physical acceptance ladder.
 - [Notes migration plan](review/NOTES_INFORMATION_ARCHITECTURE_AND_MIGRATION_PLAN_20260728.md):
   topology rationale, preservation digests, and migration gates.
 - [Launch and UNC audit](review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md):

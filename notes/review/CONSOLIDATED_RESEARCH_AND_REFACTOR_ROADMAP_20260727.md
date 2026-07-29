@@ -7,6 +7,35 @@
 文件性質：已定下來的執行路線；不改變 `STRATEGY.md` 的 live/shadow/proposed/rejected
 狀態，也不替代既有 formal contracts。
 
+## 2026-07-29 Native-Semantic Amendment
+
+`notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md` and the
+reviewed
+`notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md` add one
+ordering constraint to this roadmap.
+
+The already-fixed observer-off Stage-5 control gate remains first because it
+preserves the causal baseline for the current 18-hit result. After that gate,
+repair the shared physical model before broad G5 expansion or planner
+performance work:
+
+1. native elapsed/fraction timer and global-time-scale player/laser
+   transitions;
+2. action-conditioned focus/secondary-character enemy contact/damage gates;
+3. exact player/laser geometry, bullet lifecycle/suppression, and physical
+   clamp;
+4. callback, bounded ECL-control, and action-dependent RNG source coverage;
+5. native arithmetic fail-closed boundaries and incremental IDA typing;
+6. immutable model-version reset and scalar/Python/native recertification.
+
+The audit does not promote a strategy and does not causally attribute the
+Stage-5 18-hit aggregate. It narrows old certificates: unit-scale and
+zero-fraction results retain their declared slice; conservative proxy
+geometry remains historical evidence; non-unit-scale reachability and omitted
+action-conditioned hazards cannot support hard physical authority.
+Performance work such as persistent local-beam SoA/fused stepping follows
+semantic stabilization.
+
 ## 1. 結論先行
 
 接下來的核心任務不是「再做一個更快的躲彈 heuristic」，也不是把整個 agent
@@ -1372,24 +1401,27 @@ parity 當成每個 nature tie field 的逐 bit equality。
   fails at `0.2059 ms` p95, so next build only the independent offline scalar
   oracle while separately attributing matched-path performance;
 - the phase-B1 shadow is now modularized under `scripts/th08_ecl_shadow/`.
-  An independent test-only raw-tuple/plain-dict oracle agrees on signed-int32
-  loop counters, wrap, timer/PC/final locals, and local-aware repeated-state
-  detection. Shipped spell-57 integration resolves one `0x05`, then stops
+  A structurally separate test-only raw-tuple/plain-dict oracle agrees on
+  signed-int32 loop counters, wrap, PC/final locals, and local-aware
+  repeated-state detection. The 2026-07-29 audit finds that both use the same
+  reduced scalar timer and narrows timer exactness to the retained
+  zero-fraction slice. Shipped spell-57 integration resolves one `0x05`, then stops
   before direct-fire or RNG. Float add/normalize remains deliberately unknown
   until its rounding path has an independent oracle. No live import or
   authority changed;
 - retained physical replay of `20260728_110438` now accounts for all 3,117
   in-scope unknown spell-57/61/65 rows and keeps the 1,008 dynamic spell-73
   rows excluded. It observes 1,730 initial `0x05` rows, canonicalizes them to
-  108 unique physical one-step cases, and agrees with the independent oracle
-  on every transition. Zero unknown row becomes a verified complete
+  108 unique physical one-step cases, and agrees on every retained
+  PC/counter/observed zero-fraction transition. Zero unknown row becomes a verified complete
   schedule. The deterministic replay/fixture hashes are `b280467b...920f`
   and `6c34d097...ab3c`; isolated Linux/Windows one-step p50 is about
   `8.51/10.08 us`. This closes implementation parity for that one
-  instruction only, not B4, callback completeness, future-hazard coverage,
-  survival, or action authority. Next perform matched live-path attribution
-  and establish an independent binary32 oracle before adding float
-  add/normalization;
+  zero-fraction instruction slice only, not general native timer semantics,
+  B4, callback completeness, future-hazard coverage, survival, or action
+  authority. Next restore native elapsed/fraction and scaled-float32 timer
+  semantics with a genuinely independent oracle before matched-path
+  attribution or float add/normalization;
 - the parallel B4 line now has a fixed matched-path performance contract.
   Regrouping the same 13,525 physical rows gives zero/nonzero-evidence p95
   `0.1553/0.2516 ms` and no-known/definite-known-future-overlap p95

@@ -76,7 +76,9 @@ located; it does not change the authority order below.
 63. `notes/review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md`
 64. `notes/review/RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md`
 65. `notes/review/REUSABLE_AGENT_SKILLS_20260729.md`
-66. the relevant recent run note and counterexample rows before live work
+66. `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
+67. `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`
+68. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -91,6 +93,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   (`Avoid duplicate runtime dossier Markdown`).
 - Latest physical-code checkpoint: `3f02ff1`
   (`Coalesce auxiliary evidence publication`).
+- Latest native-semantic review baseline:
+  `f28e13ca853280acec585f6296d947aafcabcaad`. The enclosing documentation
+  checkpoint changes no executable code or live authority.
 - Latest accepted complete physical workload:
   `lunatic_route2_stage5_unattended_20260729_125453`.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
@@ -115,6 +120,32 @@ effect; repo BATs use `%~dp0`; two Windows tools restore direct UNC imports.
 Complete isolated Linux/Windows discovery passes 1,057 tests in
 13.844/29.961 seconds, with three existing Windows skips. Do not run Linux
 and Windows performance gates concurrently.
+
+### Native-semantic review
+
+The 2026-07-29 native-to-solver audit was moved from `/tmp/ths_analysis.md`
+to
+`notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`; its
+pre-move SHA-256 is
+`6e5a81f41ef4866c294ef0ab5db937efe614de2b8a3179a559fc878b4a65cb21`.
+A bounded current-source and connected-IDA recheck confirms the material
+findings at the review baseline. CE-0175–CE-0181 retain the concrete failures,
+and
+`notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md` gives the
+dependency-ordered route to physical Lunatic NMNB.
+
+Observed corrections that can invalidate hard authority include native
+elapsed/fraction timers, global-time-scale player/laser movement,
+action-conditioned enemy contact/damage eligibility, physical clamp bounds,
+and incomplete callback/RNG source semantics. Player radius, fade-state, and
+collision-suppression omissions are conservative in the observed dimension
+but can compress viability. Existing zero-fraction/unit-scale/proxy evidence
+is preserved under its declared model version rather than erased.
+
+This review does not establish a cause for the 18-hit Stage-5 aggregate and
+does not authorize rollback. Complete the observer-off control gate below
+before source changes. After that gate, repair/version the shared native
+semantics before broad G5 expansion or local-beam performance work.
 
 ### Latest physical conclusion
 
@@ -829,8 +860,11 @@ writes the durable `notes/runs/` note directly.
   still over budget at `0.2059 ms`. Proceed only to the independent offline
   scalar oracle and matched-path performance attribution; live promotion
   remains forbidden. Post-audit Linux/Windows suites pass 834 tests.
-  The phase-B1 integer-loop shadow and structurally independent test oracle
-  are now implemented under `scripts/th08_ecl_shadow/` and `tests/`.
+  The phase-B1 integer-loop shadow and structurally separate test oracle
+  are now implemented under `scripts/th08_ecl_shadow/` and `tests/`. The
+  2026-07-29 audit corrects their timer authority: both use the same reduced
+  scalar representation and are not independent for native
+  elapsed/fraction semantics.
   Synthetic counter, wrap, visited-state, and shipped spell-57 boundary tests
   pass. Float add/normalize remains unknown pending a rounding oracle; no
   live module imports the shadow. Complete Linux/Windows suites now pass 844
@@ -838,8 +872,9 @@ writes the durable `notes/runs/` note directly.
   all 3,117 in-scope unknown spell-57/61/65 rows; the 1,008 dynamic spell-73
   rows remain explicitly excluded. It decodes every in-scope row, observes
   1,730 initial `0x05` rows, reduces them to 108 unique physical one-step
-  cases, and agrees with the independent oracle with zero failures. No
-  unknown row becomes a verified complete schedule. Two generations of the
+  cases, and agrees on PC/counter/observed zero-fraction transitions with
+  zero failures. No unknown row becomes a verified complete schedule. Two
+  generations of the
   deterministic replay and fixture are byte-identical at SHA-256
   `b280467bb51ee2cc3c52343b8acf8fdcead5d4db46cbdc3f29192a68a8ae920f`
   and
@@ -847,10 +882,11 @@ writes the durable `notes/runs/` note directly.
   Isolated one-step Linux/Windows p50 is approximately
   `0.0085/0.0101 ms`; this is an offline implementation baseline, not the
   open physical B4 observer boundary. Complete Linux/Windows suites pass 848
-  tests, with three existing Windows skips. Next profile the matched live
-  path and independently fix float32 add/normalization semantics before
-  widening the shadow. Direct fire, RNG, dynamic state, calls, and
-  interrupts remain unknown and live promotion remains forbidden.
+  tests, with three existing Windows skips. Next restore native
+  elapsed/fraction and scaled float32 timer semantics with a genuinely
+  independent oracle before float add/normalization or shadow widening.
+  Direct fire, RNG, dynamic state, calls, and interrupts remain unknown and
+  live promotion remains forbidden.
   The parallel B4 checkpoint is now fixed in
   `notes/research/g5/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`.
   Regrouping the same physical rows shows zero/nonzero-evidence p95

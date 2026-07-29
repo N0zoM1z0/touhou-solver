@@ -1,0 +1,741 @@
+# TH08 Lunatic NMNB Program Review And Roadmap
+
+Date: 2026-07-29 (Asia/Singapore)
+
+Workspace: `/home/pentester/coding/codex_ida/th08`
+
+Review baseline: branch `main`, pre-documentation HEAD
+`f28e13ca853280acec585f6296d947aafcabcaad`
+
+Latest executable-code checkpoint at review time: `e4e266f`
+
+Latest physical-code checkpoint at review time: `3f02ff1`
+
+Latest retained complete physical workload:
+`lunatic_route2_stage5_unattended_20260729_125453`
+
+Companion native audit:
+`notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
+
+Document role: a reviewed implementation and evidence program. It does not
+silently promote any shadow/proposed strategy, replace a formal contract, or
+reinterpret a failed physical gate as passed.
+
+Authorized mutations in this checkpoint: documentation, indexes, authority
+corrections, and counterexample retention only.
+
+Explicit non-actions: no game launch, input injection, physical trial, solver
+implementation change, strategy promotion, or IDA database mutation.
+
+## 1. Evidence Labels And Review Boundary
+
+- **Observed** means directly visible in shipped instructions/dataflow,
+  current source, a deterministic reproduction, or retained runtime evidence.
+- **Inferred** means supported by multiple observed facts but not directly
+  proved by a controlled physical comparison.
+- **Hypothesized** means plausible and worth testing, but missing a decisive
+  fact.
+
+The review read the complete current handoff and strategy ledger, the formal
+chain named by `START_HERE.md`, the recent G3–G5, delivery, combat, run, and
+counterexample notes, current implementation paths and tests, and the moved
+native audit. Selected high-impact native claims were rechecked against the
+connected IDA database and current source.
+
+The audit was originally made against code checkpoint `d85cca1`. The diff
+from `d85cca1` through the review baseline changes launch/report retention,
+repo skills, documentation, and supervisor artifact placement, but no
+solver-semantic path implicated by F-001–F-020. Therefore the semantic
+findings remain current at `f28e13c`; they are not stale findings from an
+obsolete solver.
+
+## 2. Executive Verdict
+
+The project is a serious, evidence-rich control system, not an early
+prototype. It already has:
+
+- native process sensing and packed hazard decode;
+- a hard no-Bomb actuation policy;
+- explicit cadence, pickup-delay, held/pending/no-write semantics;
+- versioned publication and fail-closed issue-time checks;
+- native/Python differential oracles;
+- coarse robust viability plus exact restricted lower-witness work;
+- retained physical traces, compact reports, first-hit attribution, and
+  cleanup supervision; and
+- a disciplined distinction between live, shadow, proposed, and rejected
+  work.
+
+But the current system is not yet close enough to claim Lunatic NMNB
+readiness. The latest complete Stage-5 run has 18 native hit edges and zero
+Bombs. More importantly, the finite model still commonly loses all global
+viability before contact, while several native semantics used by movement,
+hazard, and future-event projection are either incomplete or wrong.
+
+The main conclusion is:
+
+> The next leap is not a larger beam, a generic learned policy, or more G5
+> delivery plumbing. It is a controlled recovery of physical-model
+> authority, followed by earlier preservation of viable space and only then
+> performance and route/resource optimization.
+
+There are two immediate tracks, in this order:
+
+1. preserve the current uncontaminated physical baseline by completing the
+   already-fixed observer-off Stage-5 control gate;
+2. before broad G5 or planner optimization, repair the model semantics that
+   can make a certificate optimistic, version the corrected model, and
+   revalidate its offline and physical authority one change at a time.
+
+These tracks do not conflict. The observer-off gate diagnoses the current
+18-hit regression without changing the system. The semantic repair program
+is required even if that control gate recovers the historical eight-to-ten
+hit range.
+
+## 3. Program And Binary Identity
+
+### 3.1 Connected IDA database
+
+**Observed:**
+
+- loaded program: `th08.exe`;
+- IDA image base: `0x00400000`;
+- input size reported by IDA: `840704` bytes;
+- IDA metadata MD5:
+  `454c96e08fe3c14df7064d104c26accf`;
+- IDA metadata SHA-256:
+  `ec101fcff80b77e717d43b54e326375487af19661bb7c8d11a19ee5e0fbf928b`;
+- the database image has the known no-life-decrement patch at
+  `0x0044D0FA`: byte `0x00`;
+- the clean WSL executable has byte `0xFF` at raw offset `0x4CEFA`,
+  size `840704`, and SHA-256
+  `330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924`.
+
+IDA's input-file hash is provenance metadata, not a hash of every current
+database byte. The bounded patch comparison and the companion audit establish
+the intended database baseline: shipped TH08 plus the single known
+no-life-decrement instrumentation byte. No analysis conclusion here treats
+that patch as permission to ignore hits; every native hit edge remains a
+failed no-miss attempt.
+
+### 3.2 IDA quality boundary
+
+**Observed:** the local-type catalog contains only `_SCOPETABLE_ENTRY`.
+Useful inherited function names and comments exist, but the database does not
+contain a complete typed representation of the ECL VM, enemy, player, bullet,
+or laser structures.
+
+Therefore all inherited names, pseudocode variables, and comments remain
+hypotheses until instruction/dataflow and runtime evidence revalidate them.
+This review made no IDA rename, type, or comment change.
+
+## 4. Current Live System And Authority
+
+The current live decision path is:
+
+```text
+native game state
+  -> packed bullet/laser/enemy sensing
+  -> hazard projection and coarse Boolean viability
+  -> native local beam proposal
+  -> fresh issue-time local collision certificate
+  -> fresh/global action transaction
+  -> complete-mask issue or exact no-write
+```
+
+The controller is hard no-Bomb. Bomb bit `0x02` is not authorized.
+
+| Surface | Current authority | Important limit |
+| --- | --- | --- |
+| Native sensing and packed decode | Live | Native fields are not all semantically complete. |
+| Input cadence/delay/no-write recurrence | Formal and tested | CE-0120 still blocks a complete physical clock boundary. |
+| Four-worker coarse Boolean viability | Live | 16-pixel lattice, 8-frame layer, 80-frame horizon; `empty` is a finite proxy. |
+| Native local beam | Live proposal path | Accelerates the current model; does not prove it physically complete. |
+| Fresh issue-time local certificate | Live safety check | Only as sound as sensed/projected geometry and transitions. |
+| Exact stationary/partial witnesses | Offline/trace-only | Restricted policy classes and future coverage `UNKNOWN`; no live authority. |
+| G5 future-event observers | Trace-only | Source, callback, RNG, geometry, and delivery coverage incomplete. |
+| Supplemental V1–V6 delivery | Rejected/failed physical gates | Some exact sub-evidence retained; no survival or publication authority. |
+| Combat/Power/unfocused work | Telemetry/proposed | Must rank only inside a proved viable and issue-safe set. |
+
+Python/C++ parity currently proves implementation parity for the declared
+proxy. It does not prove that the proxy answers the physical TH08 survival
+question.
+
+## 5. Physical Status Versus NMNB
+
+### 5.1 Latest retained evidence
+
+**Observed:** Stage-5 run `20260729_125453` completed with 12,039 decisions,
+frames `2..44053`, 18 hits, zero Bombs, accepted completion, and cleanup.
+The hit split is:
+
+| Phase | Hits |
+| --- | ---: |
+| nonspell | 6 |
+| spell 103 | 2 |
+| spell 107 | 4 |
+| spell 111 | 2 |
+| spell 115 | 4 |
+
+The canonical first hit is frame 731 at player position `(376, 432)`, before
+any selected spell-107 auxiliary envelope. It follows global viability
+exhaustion and has positive current pipeline clearance. Four retained contacts
+have bullet overlap, none have laser overlap, and none has exact same-epoch
+enemy-body overlap. Those labels are model diagnostics, not proof that the
+remaining contacts are impossible physical collisions.
+
+The run has 7,827 queried decisions with an empty action set. All 18 hit
+windows occur after global-kernel exhaustion. Local planning timing remains
+roughly `11.813/24.257 ms` at median/p95, and observed cadence is
+`2/4` frames at median/p95.
+
+### 5.2 What this proves
+
+**Observed:**
+
+- hard no-Bomb enforcement works for this completed workload;
+- capture, report, completion, and cleanup paths are usable;
+- viability loss is an excellent diagnostic boundary;
+- current full-horizon/coarse authority is unavailable for a large part of
+  Stage 5.
+
+**Not proved:**
+
+- that viability exhaustion is the unique cause of every hit;
+- that the 18-hit result was caused by V6 code;
+- that rolling back post-`3adad09` observer/refactor changes improves
+  survival;
+- that current empty roots are physically losing;
+- that any one stage/RNG sample predicts a full-route NMNB rate.
+
+The retained eight-hit checkpoints first contact after frame 11,500, whereas
+the current first contact is frame 731. No planner, recurrence, ranking, or
+issued-mask change between those checkpoints and current code isolates the
+aggregate difference. A rollback is therefore not causally justified.
+
+## 6. Bounded Recheck Of The Native Audit
+
+### 6.1 Overall assessment
+
+The moved audit is substantially accurate. Every high-impact finding selected
+for recheck is still present in current source and agrees with shipped
+instruction/dataflow. The audit should be treated as the detailed evidence
+record; this section supplies the authority and implementation disposition.
+
+Two wording refinements are important:
+
+1. F-011's retained focus/unfocus transition proves an omitted
+   action-conditioned body-eligibility gate, but does not prove it caused a
+   retained hit.
+2. F-020 is genuine undefined behavior. Which single beam state survives an
+   extreme-value reproduction is not stable evidence; the durable fact is
+   that native code merges/drops states for values whose quantized key cannot
+   be represented as `int64`, while Python arbitrary-precision keys remain
+   distinct.
+
+### 6.2 Revalidated native paths
+
+The following were rechecked in the connected IDA database:
+
+- `sub_447421`: ECL timer advance uses a fractional component and float32
+  scaled addition, rather than a scalar integer timer;
+- `0x004186F1`: opcode `0x05` writes elapsed time and preserves the
+  fractional timer component;
+- `sub_42C420`: enemy contact/damage gating writes enemy flag `0x800` from
+  player secondary-character state;
+- player focus transition at `0x0044B1D9`/`0x0044B42C`;
+- player movement at `0x0044BA6A` onward multiplies displacement by
+  `g_gameplay_time_scale`;
+- the SHT player hitbox header is divided by two before storing player
+  half-extents;
+- laser motion at `0x00431BC9` multiplies speed by global gameplay time
+  scale;
+- bullet collision checks honor per-bullet suppression at `+0x10B4`;
+- callback code at `0x00424ADE`/`0x00424B59` toggles that suppression and
+  scales velocity.
+
+Current source independently confirms the corresponding omissions:
+
+- player and local-beam transitions use `speed * frames` without time scale;
+- laser projection steps without global time scale;
+- ECL product and test oracle both reduce timer state to one scalar;
+- enemy-body decode removes every `flags & 0x830` body before action-dependent
+  projection;
+- `PLAYER_RADIUS` is `2.0`;
+- every nonzero bullet state is treated as active/lethal;
+- offline movement bounds are `0..384 x 0..448`;
+- decoded callback auxiliary state is not consumed as a collision schedule;
+- native trace cursor increment and extreme beam quantization lack safe
+  arithmetic boundaries.
+
+### 6.3 Finding disposition
+
+| ID | Recheck result | Direction/authority effect | Ordered disposition |
+| --- | --- | --- | --- |
+| F-001 | Confirmed | Database baseline is usable with the declared instrumentation caveat. | Keep identity and patch verification in every physical preflight. |
+| F-002 | Confirmed | ECL locals `10036..10039` map to `+0x58..+0x64`. | Preserve offsets; add types only after full structure validation. |
+| F-003 | Confirmed | Variable `10050` is a three-component Euclidean norm. | Keep dynamic and fail-closed until its observation-time inputs are modeled. |
+| F-004 | Confirmed | IDA type coverage is inadequate. | Add reviewed structs/enums incrementally; never bulk-apply inferred types. |
+| F-005 | Confirmed | Opcode `0x87` replaces an auxiliary VM; it is not an interrupt. Shipped inputs stay within observed limits. | Correct terminology and add bounds/single-evaluation tests before extending it. |
+| F-006 | Confirmed | Native ECL call depth 15 drops the caller rather than providing unbounded stack semantics. | Model the exact bounded stack or stop before overflow; retain an adversarial case. |
+| F-007 | Confirmed, high | Product and alleged independent oracle share the same timer-fraction defect. Existing 108 cases all have fraction zero. | Replace state with native elapsed/fraction semantics and a genuinely independent oracle. Narrow the old exactness claim. |
+| F-008 | Confirmed | Callback catalog omits custom/global/lethal effects. Direction is unknown. | Inventory callers and effects; unknown callbacks remain unavailable to hard coverage. |
+| F-009 | Offsets confirmed; semantics incomplete | HP/damage telemetry is valid, but damageable/transition state is not complete. | Keep S18 telemetry-only; model transition state before kill/end authority. |
+| F-010 | Confirmed, high | Laser projection without time scale is non-authoritative when scale differs from one. | Thread observed/versioned scale through native-equivalent float32 laser transitions. |
+| V-001 | Confirmed | Runtime ECL normalization is correct for its declared input. | Retain. |
+| F-011 | Confirmed, high | Focus/secondary-character history changes which enemy bodies can collide or receive damage; current future sensing can be optimistic. | Add action-conditioned player-mode state and body eligibility before unfocused action promotion. |
+| F-012 | Confirmed | Native lethal player half-extent is `1.0`; solver radius `2.0` is conservative but compresses viability. | Separate exact physical hitbox from lattice/sampling margin and recertify. |
+| F-013 | Confirmed, severe | Player reachability can be optimistic by multiples when time scale is below one. Final/Extra reach such states. | Correct before any full-route physical-model certificate. |
+| F-014 | Confirmed | Native laser collision is a rotated local AABB, not the solver capsule. Observed error is mostly overblocking, but global direction is not certified. | Implement an independent scalar rectangle oracle and native-equivalent projection. |
+| V-002 | Confirmed | Four native death-caller families are visible. | Use them to close the callback inventory; do not infer omitted custom effects harmless. |
+| F-015 | Confirmed | Bullet fade state 5 is nonlethal; treating all nonzero states as lethal is conservative. | Model lifecycle explicitly and recertify safe masks/viable states. |
+| F-016 | Confirmed | Offline bounds admit physically unreachable edge positions. This can be optimistic. | Unify the physical clamp `x=8..376`, `y=16..432` across all oracles. |
+| F-017 | Confirmed native mechanism; route impact inferred | Route-2 focus/shot callbacks consume shared gameplay RNG, so actions can alter future births. | Capture/version RNG and callback state or branch conservatively before future-birth authority. |
+| F-018 | Confirmed by deterministic crash | `INT_MAX + 1` in native derived observation produces signed-overflow behavior and a child `SIGSEGV` in the current build. | Validate before increment; fail closed; add sanitizer/boundary tests. |
+| F-019 | Confirmed | Bullet collision suppression is observed but absent from collision projection, currently causing conservative false hazards. | Carry per-frame suppression state/schedule into the bullet model. |
+| F-020 | Confirmed undefined behavior | Extreme finite quantization can merge/drop distinct beam states; normal live coordinates are currently bounded. | Check representability before conversion and keep a Python-key differential case. |
+| V-003 | Confirmed for the declared default | Narrow player-shot model and boss-width rescaling agree with shipped behavior. | Retain, but do not generalize it to complete targeting/combat authority. |
+| P-001 | Confirmed as the largest visible local-beam optimization target | Python marshals about 190 buffers for a 10-step request. | Optimize only after semantic version stabilization. |
+| P-002 | Confirmed risk | Native scratch-vector reuse can reduce allocation tails but is reentrancy-sensitive. | Use owned workspace state and explicit concurrency tests. |
+| P-003 | Confirmed | The full enemy-sensor tail carries useful state. | Keep sparse full-tail capture; do not truncate it for a small average saving. |
+
+## 7. Effect On Existing Evidence And Certificates
+
+The review does not erase earlier work. It narrows what each artifact proves.
+
+### 7.1 Evidence that remains valid
+
+- Retained physical hit/Bomb/resource/timing observations remain observations
+  of the actual run.
+- Input-pipeline cadence, delay-support, no-write, version, and causal
+  quantifier counterexamples remain valid unless their own declared state is
+  changed.
+- Python/native parity remains valid as implementation parity for the exact
+  model version tested.
+- Radius-`2.0`, fade-lethal, and missing-suppression models are conservative
+  in the identified dimensions. A verified winning witness under only those
+  overapproximations is not invalidated by the true smaller hazard alone.
+- The Phase-A ECL raw capture and local projection remain valid observations.
+- The 108 retained opcode-`0x05` cases remain useful zero-fraction fixtures.
+
+### 7.2 Evidence whose authority is narrowed
+
+- Phase-B1 opcode-`0x05` “exact” parity is exact only for the retained
+  zero-fraction, observed-scale slice. Its product and scalar oracle are not
+  independent with respect to native timer representation.
+- Any player/laser certificate that assumes unit time scale is not a
+  physical certificate for a non-unit-scale history.
+- Any future enemy-body or damage claim that ignores the focus transition is
+  incomplete for actions that can change secondary-character state.
+- Offline witnesses using `0..384 x 0..448` include unreachable roots and
+  must be regenerated under the physical clamp.
+- Future-hazard completeness cannot include action-dependent RNG, omitted
+  callback effects, or bullet suppression/lifecycle until they are explicit.
+
+### 7.3 No blanket rollback
+
+The high-severity time-scale findings do not explain Stage-5 frame 731 unless
+the retained state shows non-unit scale there; current evidence does not.
+The conservative hitbox/lifecycle findings may explain unnecessary viability
+loss, but not an unsafe collision. F-011 proves a missing action-conditioned
+gate, but no retained hit has been causally assigned to it.
+
+Therefore the correct response is model-version repair and controlled
+revalidation, not deletion of history or speculative source rollback.
+
+## 8. Gap To Lunatic NMNB
+
+### 8.1 Survival gap
+
+The immediate numerical gap is 18 Stage-5 hits to zero full-route hits.
+Aggregate hit count understates the challenge: one early miss changes Power,
+position, invulnerability, phase timing, and later hazard history. The
+canonical first hit of each fresh attempt is the clean causal witness.
+
+### 8.2 Physical-model gap
+
+The solver does not yet preserve native:
+
+- elapsed/fractional ECL timer evolution;
+- global time-scale player and laser transitions;
+- action-conditioned enemy contact/damage eligibility;
+- exact player and laser hit geometry;
+- bullet state/collision-suppression lifecycle;
+- physical clamp bounds; and
+- complete callback/RNG-conditioned future sources.
+
+Some errors are conservative and destroy usable space. Others are optimistic
+and prevent hard physical authority. Both must be fixed.
+
+### 8.3 Viability gap
+
+The coarse 16-pixel/8-frame/80-frame kernel frequently becomes empty. G3/G4
+show that some Boolean-empty roots still have exact restricted full or
+partial witnesses, but future coverage becomes `UNKNOWN`. This proves that
+`empty` overloads discretization, horizon, uncertainty, and source-coverage
+failures. It does not prove unrestricted physical loss.
+
+### 8.4 Future-hazard gap
+
+The G5 chain has excellent observation and provenance infrastructure, but no
+complete all-source future-birth model. Main VM, auxiliary VM, callbacks,
+native/deferred sources, source lifetime, transforms, action-dependent RNG,
+and emission geometry must meet at one versioned causal boundary.
+
+### 8.5 Delivery gap
+
+Exact supplemental work has repeatedly failed Windows/live delivery despite
+passing isolated semantics. V6 proves coalesced one-write composition and
+exact replay for one event class, but fails compact tails, a
+control-equivalent comparator, and survival. The issue thread cannot start
+cold expansion.
+
+### 8.6 Route/resource gap
+
+Stage practice commonly starts at max Power. A real Lunatic Route-2 NMNB
+attempt begins at Power 0. Damage, enemy kill/end timing, Power collection,
+and phase exposure change the future hazard history. These are constraints
+and subordinate objectives inside the viable set, not generic aggression
+weights.
+
+### 8.7 Acceptance-evidence gap
+
+The project has not yet retained one uncontaminated complete Lunatic Route-2
+run with zero hit edges and zero Bombs. A planned route or offline witness is
+not NMNB acceptance.
+
+## 9. Ordered Program Toward NMNB
+
+Every implementation phase below is a separate focused checkpoint. A phase
+must preserve exact model/version identity, retain a falsifier, run the
+smallest focused tests while iterating, and pass required Linux/Windows gates
+before physical promotion.
+
+### Phase 0 — Preserve the current causal baseline
+
+Do this before source changes:
+
+1. run current code on Lunatic Stage 5 with every optional observer off;
+2. retain the complete outcome and canonical first-hit dossier;
+3. require two consecutive runs at `<=10` hits;
+4. if either run materially fails, compare the first clean hit against the
+   eight-hit checkpoints by exact physical state, geometry, viability age,
+   cadence, delay root, action, and phase—not aggregate count;
+5. do not mix Focus/unfocused, targeting, Power, G5 delivery, worker,
+   priority, affinity, or planner changes into this control.
+
+Exit gate: two consecutive accepted observer-off Stage-5 controls at no more
+than ten hits, or a retained causal counterexample that names the failing
+state/contract. The latter opens a correction; it does not authorize
+threshold weakening.
+
+### Phase 1 — Freeze and repair native transition semantics
+
+#### 1A. Native timer contract
+
+- represent ECL time as native elapsed integer plus float32 fraction;
+- specify float32 rounding, scaled addition, carry, branch/reset behavior,
+  and serialized identity;
+- build an independent raw-transition oracle that does not share product
+  timer representation;
+- add nonzero-fraction, non-unit-scale, carry, negative/edge, and opcode
+  `0x05` preservation fixtures;
+- regenerate the 108 retained cases without changing their historical blob.
+
+Exit gate: product, independent Python oracle, and a tiny native probe agree
+bitwise over deterministic and adversarial cases. Old Phase-B1 authority is
+explicitly tagged as the zero-fraction slice.
+
+#### 1B. Player and laser time scale
+
+- add observed scale to immutable model identity;
+- implement native-equivalent float32 player and laser stepping;
+- distinguish “scale observed constant over the declared horizon” from
+  unobserved future scale changes;
+- fail closed or branch over supported future scale transitions; never
+  silently hold the root value forever;
+- compare current optimized paths to independent scalar recurrences.
+
+Exit gate: zero mismatch over unit/non-unit scales, stop/resume, direction
+change, laser phase change, and retained Final/Extra scale capsules. No
+full-route certificate uses the old transition.
+
+#### 1C. Action-conditioned player/enemy mode
+
+- include focus/secondary-character transition state and its native delay;
+- project enemy `0x800` contact/damage eligibility per action/history;
+- distinguish contact eligibility from damage eligibility;
+- preserve observation-compatible branch merging;
+- keep unfocused combat promotion disabled.
+
+Exit gate: the retained frame `10065 -> 10075` transition and adversarial
+focus toggles match native state/body sets; every action-conditioned branch is
+causal.
+
+### Phase 2 — Repair collision geometry and lifecycle
+
+Implement as small, separately reviewable changes:
+
+1. exact player half-extent `1.0`, with lattice/sampling error represented as
+   a separate explicit clearance term;
+2. native rotated local-AABB laser collision and float32 phase evolution;
+3. explicit bullet lethal/fade states;
+4. per-frame bullet collision-suppression state/schedule;
+5. physical player clamp `x=8..376`, `y=16..432` in every oracle and planner.
+
+For each change, retain viable-state and safe-action-mask diffs, classify
+every delta as expected or unresolved, and never combine a geometry fix with
+ranking changes.
+
+Exit gate: independent scalar, optimized Python, and native kernels agree for
+stop/resume/redirect/reversal, laser head/tail/rotation, fade/suppression,
+boundary, dense-pool, and retained capsule cases. Unknown-direction
+mismatches block live authority.
+
+### Phase 3 — Reset model versions and recertify
+
+The Phase-1/2 changes alter physical state equivalence and transitions.
+Therefore:
+
+- issue a new immutable hazard/model version;
+- publish an invalidation matrix for old fixtures, witnesses, caches, reports,
+  and physical claims;
+- preserve old artifacts under their original version and SHA;
+- reject cross-version cache/publication lookup;
+- regenerate exact scalar/Python/native parity;
+- replay retained Stage-5 and Final/Extra capsules in shadow;
+- take a fresh trace-only physical metadata gate before live action changes.
+
+Exit gate: no artifact is silently interpreted under the new model; every
+current live consumer either matches the exact version or falls back to the
+existing Boolean policy plus fresh local hard certificate.
+
+### Phase 4 — Complete native source and action semantics
+
+Continue G5 one event class at a time only after the base transitions are
+sound:
+
+1. close ECL call-depth and opcode-`0x87` semantics;
+2. inventory all callback/custom/global/lethal effects from callers and
+   runtime evidence;
+3. capture source generation/lifetime/transform identity;
+4. model main and auxiliary VM composition;
+5. add shared gameplay RNG and Route-2 shot/focus consumption;
+6. make bullet suppression/lifecycle part of emitted hazard schedules;
+7. keep unsupported branches `UNKNOWN`.
+
+Exit gate for one event class: shipped instruction identity, independent
+oracle parity, complete source identity, exact geometry, bounded deadline,
+exact-version lookup, replayable witness, and fresh trace-only physical
+metadata all pass. No single class implies all-source completeness.
+
+### Phase 5 — Preserve viability earlier
+
+Use the corrected model to attack the dominant survival boundary:
+
+- retain exact first-loss dossiers for the first clean failure of each
+  workload;
+- decompose empty into coarsening, horizon, uncertainty, forecast/source,
+  route/tube, and unresolved categories;
+- extend exact causal stationary/partial witnesses only as attainable lower
+  bounds for declared policy classes;
+- build pre-loss continuation/interior reserve from an earlier immutable
+  version;
+- use proof-backed query-local sparse refinement, dominance, and admissible
+  bounds;
+- require future coverage before a lower witness reaches physical authority.
+
+Do not replace this with beam-width growth, Monte Carlo, MCTS, learned
+ranking, or unproved pruning. Those methods may be shadow proposals but
+cannot certify hard survival.
+
+Exit gate: on retained first-loss roots, the controller either publishes a
+completed causal witness before issue time or returns an explicit unresolved
+class. It never labels timeout/unvisited work losing and never consumes an
+unknown-direction approximation.
+
+### Phase 6 — Optimize only the corrected recurrence
+
+Profile after semantic/version stabilization:
+
+1. replace repeated Python marshalling of roughly 190 local-beam buffers with
+   a persistent owned SoA workspace and fused native step;
+2. reuse scratch storage only with explicit ownership, cancellation,
+   reentrancy, and newest-version tests;
+3. keep the sparse full enemy-sensor tail;
+4. measure decode, lower, pack, induction, publication, and issue
+   separately;
+5. run Linux and Windows performance gates in isolation, never concurrently.
+
+Exit gate: exact hard-mask, selected-action, viable-state, and witness parity
+are unchanged; Windows deadline, cadence, RSS, cancellation, and stale-version
+gates pass. A faster proxy with changed semantics fails.
+
+### Phase 7 — Add route, combat, and resource progress inside survival
+
+In parallel trace-only work, then one intervention at a time:
+
+- establish enemy generation/end and kill-versus-despawn semantics;
+- test the specific Stage-5 nonspell kill-before-saturation hypothesis;
+- measure phase exposure and damage only among survival-equivalent actions;
+- establish a fresh Lunatic Stage-3 Power-0 baseline;
+- model collection and Power as route resources;
+- keep post-death recovery as a diagnostic, never no-miss authority;
+- promote unfocused shooting only after Phase 1C and action-dependent RNG
+  coverage.
+
+Exit gate: a combat/resource action is considered only inside the same
+verified viable and issue-safe set and improves a preregistered physical
+phase metric without degrading first-hit survival or deadlines.
+
+### Phase 8 — Physical acceptance ladder
+
+Use focused trials and repeat clean phase passes before expanding scope:
+
+1. two consecutive observer-off Lunatic Stage-5 controls at `<=10` hits;
+2. fresh Lunatic Stage-3 Power-0 baseline;
+3. focused regressions for Stage 1, Stage 4A, Stage 6B, and Final;
+4. repeated clean passes for every unresolved canonical first-hit phase;
+5. one complete Lunatic Route-2 hard no-Bomb run;
+6. progressively eliminate the first clean miss, restarting causal analysis
+   from the new first miss after every success;
+7. retain the first complete zero-hit, zero-Bomb run as **NMNB-1**;
+8. separately establish repeatability with additional RNG-distinct complete
+   zero-hit, zero-Bomb runs as **NMNB-R**.
+
+The first physical NMNB is the requested milestone. Repeatability is a
+stronger claim and must be reported separately. The repository's eventual
+acceptance target also includes Extra, but Extra work must not be conflated
+with completion of the Lunatic milestone.
+
+## 10. Lunatic NMNB Acceptance Contract
+
+The first accepted NMNB run must satisfy all of the following:
+
+- Sakuya/Remilia, Lunatic, Route 2, normal full-route start from Power 0;
+- complete route and every required dialogue/stage transition;
+- zero native hit edges from start through route completion;
+- zero Bomb actions and no observed Bomb bit `0x02`;
+- no manual `Z`, foreground loss, debugger/CLI contamination, or unrecorded
+  intervention during gameplay;
+- verified executable, route, difficulty, team, foreground, gameplay state,
+  and no-life-decrement instrumentation;
+- exact cleanup with every injected key released and no unattended controller;
+- compact tracked report containing frames, hits/Bombs, resources, Power/items,
+  phase attribution, cadence, deadline, viability, model version, and source
+  provenance;
+- one replay-capable raw bundle retained locally under the active two-newest
+  policy.
+
+The no-life-decrement patch is instrumentation only. It cannot convert a hit
+into a pass: any native hit edge rejects NMNB.
+
+`NMNB-1` means one uncontaminated complete accepted run. `NMNB-R` should
+require at least two further complete RNG-distinct accepted runs, with at
+least two consecutive successes among the validation set. Do not call
+`NMNB-1` a robust success rate.
+
+## 11. Stop Rules
+
+Stop and retain a counterexample when:
+
+- optimized/native output differs from an independent scalar oracle;
+- a previously conservative error changes direction or becomes unknown;
+- model identity omits time scale, timer fraction, player mode, RNG, source,
+  geometry, cadence, delay, or clamp state used by the recurrence;
+- a consumer accepts a stale, partial, wrong-version, or unknown-coverage
+  publication;
+- Linux/Windows performance is measured concurrently;
+- optional work delays authoritative publication or changes issued input;
+- a physical run has a hit, unexpected Bomb, missed transition, foreground
+  loss, or cleanup failure;
+- an aggregate comparison lacks a control-equivalent workload;
+- timeout, exhaustion, or unvisited actions are relabeled as losing;
+- a strategy objective ranks outside the viable and issue-safe set.
+
+Do not weaken a test, clearance, deadline, coverage, or hit threshold to make
+a candidate pass.
+
+## 12. Explicitly Not Next
+
+- Do not roll back `3f02ff1` or later documentation/retention checkpoints on
+  the evidence currently available.
+- Do not rerun V6 unchanged or relabel its failed report.
+- Do not optimize Python/native local-beam marshalling before Phase 1/2 model
+  stabilization.
+- Do not promote Focus/unfocused, targeting, damage, Power, item, or graze
+  objectives from one trace.
+- Do not interpret global-kernel empty as physical loss.
+- Do not expand G5 source classes while the shared timer/movement/hazard
+  primitives are known wrong.
+- Do not change recurrence and performance architecture in one checkpoint.
+- Do not run a physical trial unless explicitly authorized.
+
+## 13. Immediate Implementation Backlog
+
+After the already-authorized observer-off physical gate is complete, the next
+code checkpoints should be:
+
+1. `SEM-TIMER`: native elapsed/fraction timer contract, oracle, fixtures, and
+   correction of the Phase-B1 authority statement;
+2. `SEM-SCALE`: player/laser global-time-scale transitions and model identity;
+3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
+   enemy contact/damage eligibility;
+4. `SEM-GEOM`: exact player/laser geometry, bullet lifecycle/suppression, and
+   physical clamp;
+5. `SEM-SOURCE`: callback inventory, bounded call semantics, and
+   action-dependent RNG;
+6. `SEM-ROBUST`: derived-observer cursor and beam-quantization boundaries,
+   plus incremental IDA typing;
+7. `MODEL-VNEXT`: cross-version invalidation, differential replay, and
+   trace-only physical metadata;
+8. return to G5/viability/performance in Phases 4–6.
+
+Each label is a program slice, not permission to batch every bullet into one
+commit. The implementation agent should split a slice further whenever one
+counterexample, formal contract, or physical gate can be isolated.
+
+## 14. Review Deliverables And Remaining Uncertainty
+
+This review changed repository documentation only. It moved the original
+temporary audit into `notes/review/`, retained its original digest, recorded
+new durable counterexamples, narrowed the affected G5 exactness claim, and
+aligned the volatile handoff/strategy/roadmap indexes.
+
+No source, executable, raw capture, retained report, test oracle, live
+strategy, physical policy, or IDA annotation was changed.
+
+Remaining high-value runtime uncertainties are:
+
+- the actual time-scale histories in retained first-hit windows;
+- whether conservative hitbox/lifecycle corrections materially recover
+  viable space;
+- exact player-mode/contact transitions across all Route-2 phase boundaries;
+- complete callback and action-dependent RNG source coverage;
+- which component first causes corrected-model viability loss;
+- whether the observer-off Stage-5 baseline returns to the retained
+  eight-to-ten hit band;
+- the first clean full-route bottleneck after Stage 5 is controlled.
+
+The next agent must start from `START_HERE.md`, this roadmap, the companion
+audit, CE-0175 onward, and the corrected G5 timer authority note. It must not
+start implementation from the severity list alone: the Phase-0 causal
+baseline and the ordered dependency chain above are part of the result.
+
+## 15. Checkpoint Validation
+
+- Complete Linux discovery:
+  `PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_*.py'`
+  passes 1,057 tests in 13.557 seconds.
+- `git diff --check` passes.
+- LeanToken parses the roadmap, moved audit, handoff, strategy, G5 correction,
+  and CE shard completely with structurally complete Markdown headings.
+- Every newly referenced retained artifact/authority path checked by the
+  review exists.
+- `/tmp/ths_analysis.md` no longer exists; the durable audit is under
+  `notes/review/`.
+- No matching TH08 gameplay, controller, practice-supervisor, or
+  full-route-supervisor process is left running.
+- Windows tests were not rerun because this checkpoint changes documentation
+  only. Earlier isolated Windows results are historical evidence, not a new
+  validation claim.
+- No physical trial was run and no IDA database change was made.

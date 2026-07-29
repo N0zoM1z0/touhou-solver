@@ -4,9 +4,42 @@ Date: 2026-07-28
 
 Status: phase A capture/trace projection is implemented, Linux/Windows
 offline-validated, and validated on one fresh complete physical Stage-4A
-workload. Phase-B1's smallest integer-loop shadow and independent scalar
-oracle are implemented and offline-validated; retained-trace candidate replay
-is pending. No local interpretation reaches live coverage or lowering.
+workload. Phase-B1's smallest integer-loop shadow and scalar comparison are
+implemented and replayed over the retained trace, but the 2026-07-29 native
+semantic audit below narrows their exactness authority to the observed
+zero-fraction timer slice. No local interpretation reaches live coverage or
+lowering.
+
+## 2026-07-29 Native Timer Authority Correction
+
+**Observed:** shipped ECL timer state is not the single scalar represented by
+both the Phase-B1 product and its test oracle. Native `sub_447421` advances an
+elapsed integer plus a float32 fractional component under
+`g_gameplay_time_scale`; opcode `0x05` writes elapsed while preserving the
+fraction. All 108 retained one-step cases have fractional timer zero, so their
+PC/counter/observed-timer parity does not falsify the shared reduction.
+
+Consequences:
+
+- Phase A raw capture, local projections, layout/read-count evidence, and
+  physical workload distributions remain valid.
+- The 108 immutable fixtures remain valid observations of a zero-fraction
+  slice and retain their original SHA-256.
+- Calling the Phase-B1 test oracle independent for timer semantics is
+  corrected: it is structurally separate code, but shares the product's
+  reduced timer representation.
+- Phase-B1 no longer has general exact native timer-transition authority.
+  This changes no live policy because Phase-B1 never reached live coverage,
+  lowering, ranking, or publication.
+- The next semantic gate is elapsed-int32 plus fractional-float32 state,
+  native float32 scaled addition/carry and opcode-`0x05` preservation, checked
+  by an oracle that does not reuse the product representation. Deterministic
+  fixtures must include nonzero fraction and non-unit time scale.
+
+This correction is retained as CE-0175 and detailed in
+`notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`. It does not
+relabel the historical replay report as failed; it narrows what that report
+proved.
 
 This follows
 `notes/research/g5/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`.
@@ -396,11 +429,13 @@ Report SHA-256 values are
 and
 `ed8c0b10d53f7641ab4055c45ade4f99001291cd40979ee29488b3203139a908`.
 
-**Authority:** this closes only the retained physical one-step `0x05`
-implementation/parity gate. It does not complete a callback schedule, lower
-a new event, alter a live action, or close B4. Direct fire, RNG-derived
-assignment, float add/normalization, dynamic values, calls, interrupts, and
-spell 73 remain unknown. The next semantic gate is an independent
-binary32-rounding oracle for the exact shipped float path; the parallel
-performance gate is matched live-path attribution under the unchanged B4
+**Authority, corrected 2026-07-29:** this closes the retained physical
+one-step opcode-`0x05` PC/counter parity gate only for the observed
+zero-fraction timer slice. It does not establish general native timer parity,
+complete a callback schedule, lower a new event, alter a live action, or
+close B4. Direct fire, RNG-derived assignment, float add/normalization,
+dynamic values, calls, interrupts, and spell 73 remain unknown. The next
+semantic gate is an independent native elapsed/fraction plus
+binary32-rounding oracle for the exact shipped timer/float path; the parallel
+performance gate remains matched live-path attribution under the unchanged B4
 limits.

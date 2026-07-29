@@ -90,13 +90,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest executable code checkpoint: `e4e266f`
-  (`Avoid duplicate runtime dossier Markdown`).
-- Latest physical-code checkpoint: `3f02ff1`
-  (`Coalesce auxiliary evidence publication`).
-- Latest native-semantic review baseline:
-  `f28e13ca853280acec585f6296d947aafcabcaad`. The enclosing documentation
-  checkpoint changes no executable code or live authority.
+- Latest executable code checkpoint: `e309c81`
+  (`Correct native ECL timer semantics`).
+- Latest physical-code checkpoint: `e309c81`; it corrects an existing live
+  callback-lookahead consumer but has not yet passed its physical falsifier.
+- Latest native-semantic correction checkpoint: `e309c81`. The original
+  review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest accepted complete physical workload:
   `lunatic_route2_stage5_unattended_20260729_161313`.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
@@ -113,15 +112,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `154229` and `161313`; both exact preflight, supervision, cleanup, and
   retention contracts completed without leaving a gameplay process.
 
-Checkpoint `e4e266f` has no survival authority. It changes only compact
-artifact placement: practice/full-route dossier Markdown is generated
-directly as the durable `notes/runs/` note instead of first creating a
-duplicate runtime-report Markdown. The underlying `d85cca1` launch preflight
-still validates immutable ECL path/read/file/SHA before any game/process side
-effect; repo BATs use `%~dp0`; two Windows tools restore direct UNC imports.
-Complete isolated Linux/Windows discovery passes 1,057 tests in
-13.844/29.961 seconds, with three existing Windows skips. Do not run Linux
-and Windows performance gates concurrently.
+Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
+product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
+4,096-case exact raw-bit sweep, component-versioned V2 retained replay, and
+complete 1,075-test Linux/Windows suites. It has no survival authority until
+the fixed observer-off Stage-5 falsifier is retained. The existing launch
+preflight still validates immutable ECL path/read/file/SHA before any
+game/process side effect; repo BATs use `%~dp0`; two Windows tools restore
+direct UNC imports. Do not run Linux and Windows performance gates
+concurrently.
 
 ### Native-semantic review
 

@@ -4,6 +4,8 @@ Status: **offline semantic gate passed; focused physical rebaseline pending**
 
 Date: 2026-07-29
 
+Executable/physical-code checkpoint: `e309c81`
+
 This note is the implementation and evidence contract for roadmap item
 `SEM-TIMER`. It corrects the reduced timer abstraction used by the offline
 Phase-B1 ECL shadow and the same reduction in the existing live callback and

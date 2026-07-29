@@ -665,10 +665,10 @@ Execution progress on 2026-07-29:
   state under distinct immutable semantics versions. Decision traces include
   fraction bits, scale bits, and component identity.
 - **Exit taken:** the Phase-1A offline semantic gate passes. Because an
-  existing live hazard consumer changed, fix this code checkpoint and run
-  the exact observer-off Stage-5 physical falsifier before beginning
-  `SEM-SCALE`. One accepted result does not establish NMNB or timer causality;
-  a result above ten stops and opens a first-hit audit.
+  existing live hazard consumer changed, executable/physical code is fixed at
+  `e309c81`. Run the exact observer-off Stage-5 physical falsifier before
+  beginning `SEM-SCALE`. One accepted result does not establish NMNB or timer
+  causality; a result above ten stops and opens a first-hit audit.
 
 #### 1B. Player and laser time scale
 

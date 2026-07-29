@@ -629,8 +629,14 @@ comparison.
    canonical-V5 envelope into the same-iteration decision publication.
    Sequence/frame/epoch/snapshot/stage bindings and next-decision causal
    publication timing fail closed; pack and combined-emit limits are fixed
-   before code. It must not loosen or relabel V5's failed gate. Survival
-   remains a separately versioned correction.
+   before code.
+   V6 now passes isolated Linux/Windows preflight over five repeats and 21,190
+   independently replayed requests per platform. Windows pack p95/p99/max is
+   `0.667/0.833/1.580 ms`; maximum base64 payload is 7,196 bytes. Complete
+   1,052-test suites pass on both platforms, and immutable V1/V4/V5 reports
+   remain exact. It must not loosen or relabel V5's failed gate. Fresh
+   physical combined-publication timing is next; survival remains a
+   separately versioned correction.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the

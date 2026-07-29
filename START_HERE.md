@@ -70,7 +70,8 @@ located; it does not change the authority order below.
 57. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_CONTRACT_20260729.md`
 58. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_PREFLIGHT_20260729.md`
 59. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_CONTRACT_20260729.md`
-60. the relevant recent run note and counterexample rows before live work
+60. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_PREFLIGHT_20260729.md`
+61. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -175,9 +176,13 @@ describe the same decision. Python/C++ parity is not physical correctness.
   coalesced-envelope contract: independently restore exact canonical V5
   evidence inside the existing decision publication, eliminate the second OS
   write, and measure pack plus the next-decision causal publication timing.
-  Implement its independent decoder/tamper gates before a fresh physical
-  run. Do not loosen V5's historical gates or combine the delivery correction
-  with a combat intervention.
+  V6 now passes isolated Linux/Windows preflight: each platform performs five
+  repeats and independently replays 21,190 requests with zero unknown.
+  Windows pack p95/p99/max is `0.667/0.833/1.580 ms`; maximum base64 payload
+  is 7,196 bytes. Complete 1,052-test suites pass on both platforms, and V1,
+  V4, and V5 reports remain byte-identical. Run one fresh V6 Stage-5 physical
+  gate next. Do not loosen V5's historical gates or combine the delivery
+  correction with a combat intervention.
   Unsupported emission, source-life, dynamic parameter, transform,
   realized-birth, geometry, and action dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model

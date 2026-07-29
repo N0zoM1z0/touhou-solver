@@ -117,6 +117,10 @@ from th08_live.auxiliary_vm import (
     AuxiliaryVmBatchTraceService,
     native_auxiliary_vm_batch_available,
 )
+from th08_live.auxiliary_vm.coalesced_envelope import (
+    COALESCED_ENVELOPE_FIELD,
+    pack_auxiliary_vm_batch,
+)
 from th08_live.auxiliary_vm.event_service import (
     AuxiliaryEclEventConfiguration,
     AuxiliaryEclEventTraceService,
@@ -1681,7 +1685,7 @@ def _run_live_session(
         if trace_auxiliary_vm_batches
         else None
     )
-    previous_auxiliary_vm_batch_emit_ms: float | None = None
+    auxiliary_vm_batch_envelope_sequence = 0
     previous_enemy_combat_progress_emit_ms: float | None = None
     bullet_birth_backend = getattr(
         args,
@@ -3765,6 +3769,7 @@ def _run_live_session(
                         auxiliary_ecl_event_preparation,
                         flush=True,
                     )
+            auxiliary_vm_batch_envelope: dict[str, object] | None = None
             if auxiliary_vm_batch_service is not None:
                 current_spell_id = (
                     int(spell_state["spell_id"])
@@ -3791,21 +3796,19 @@ def _run_live_session(
                     )
                 )
                 if auxiliary_vm_batch_record is not None:
-                    timing = auxiliary_vm_batch_record.get("timing_ms")
-                    if isinstance(timing, dict):
-                        timing["previous_emit"] = (
-                            previous_auxiliary_vm_batch_emit_ms
-                        )
-                    previous_auxiliary_vm_batch_emit_ms = (
-                        trace_sink.emit(
-                            auxiliary_vm_batch_record,
-                            flush=(
-                                auxiliary_vm_batch_record["status"]
-                                != "success"
-                            ),
-                            measure=True,
-                        )
+                    auxiliary_vm_batch_envelope = pack_auxiliary_vm_batch(
+                        auxiliary_vm_batch_record,
+                        sequence=auxiliary_vm_batch_envelope_sequence,
+                        decision_frame=counter_at_action,
+                        gameplay_epoch=gameplay_epoch,
+                        snapshot_frame=int(
+                            state["enemy_manager_frame"]
+                        ),
+                        stage_route_index=int(
+                            state["stage_route_index"]
+                        ),
                     )
+                    auxiliary_vm_batch_envelope_sequence += 1
             local_pipeline_certificate_shadow: (
                 dict[str, object] | None
             ) = None
@@ -4201,6 +4204,10 @@ def _run_live_session(
                 )
                 if candidate_record is not None:
                     record["candidate_verifier_shadow"] = candidate_record
+                if auxiliary_vm_batch_envelope is not None:
+                    record[COALESCED_ENVELOPE_FIELD] = (
+                        auxiliary_vm_batch_envelope
+                    )
                 if hit_contact_observation is not None:
                     record["hit_contact_observation"] = (
                         hit_contact_observation

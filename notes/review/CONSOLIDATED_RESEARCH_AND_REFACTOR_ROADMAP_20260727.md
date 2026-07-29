@@ -176,6 +176,13 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   eliminate the second OS write. Independent decoding, pack/combined-emit
   limits, and next-decision causal timing are required. Keep old failed gates
   immutable and survival separate.
+- V6 now passes five-repeat Linux/Windows retained-trace preflight. Each
+  platform independently replays 21,190 requests with zero unknown and exact
+  cache parity. Windows pack p95/p99/max is `0.667/0.833/1.580 ms`, and the
+  maximum base64 payload is 7,196 bytes. Complete 1,052-test suites pass on
+  both platforms; V1/V4/V5 reports remain byte-identical. The next gate is a
+  fresh action-neutral Stage-5 physical run measuring the actual coalesced
+  decision publication.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

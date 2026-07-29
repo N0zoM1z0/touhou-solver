@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Callable
+from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
@@ -51,6 +52,57 @@ TRACE_EMIT_LIMIT_MS = (1.00, 2.00, 6.00)
 TRANSACTION_TOTAL_LIMIT_MS = (3.00, 5.00, 15.00)
 PREPARATION_MAXIMUM_MS = 8.0
 CACHE_CAPACITY = 512
+
+
+@dataclass(frozen=True)
+class DeliveryTraceData:
+    """Version-neutral physical rows and independently scanned transport."""
+
+    rows: list[dict[str, Any]]
+    preparations: list[dict[str, Any]]
+    trace_sha256: str
+    trace_bytes: int
+    batch_count: int
+    batch_schema_versions: Counter[int]
+    batch_statuses: Counter[str]
+    validation_errors: list[str]
+    process_reads: list[float]
+    decision_deltas: list[float]
+    batch_line_bytes: list[float]
+
+
+def standalone_delivery_trace_data(
+    trace_path: Path,
+    *,
+    include_batch_line_bytes: bool,
+) -> DeliveryTraceData:
+    """Load the historical top-level auxiliary-batch transport."""
+
+    scan = scan_trace(trace_path, audit_batches=True)
+    rows, preparations, trace_sha256, trace_bytes = trace_delivery_rows(
+        trace_path
+    )
+    if scan.sha256 != trace_sha256 or scan.byte_count != trace_bytes:
+        raise AuxiliaryEclEventPhysicalAuditError(
+            "independent trace digests disagree"
+        )
+    return DeliveryTraceData(
+        rows=rows,
+        preparations=preparations,
+        trace_sha256=trace_sha256,
+        trace_bytes=trace_bytes,
+        batch_count=scan.batch_count,
+        batch_schema_versions=scan.batch_schema_versions,
+        batch_statuses=scan.batch_statuses,
+        validation_errors=scan.validation_errors,
+        process_reads=scan.process_reads,
+        decision_deltas=scan.decision_deltas,
+        batch_line_bytes=(
+            trace_batch_line_bytes(trace_path)
+            if include_batch_line_bytes
+            else []
+        ),
+    )
 
 
 def _preparation_record(
@@ -231,6 +283,10 @@ def build_delivery_physical_report(
     survival_hit_maximum: int | None = None,
     empty_row_valid: Callable[[dict[str, Any]], bool] = _empty_row_valid,
     batch_line_maximum: int | None = None,
+    trace_data: DeliveryTraceData | None = None,
+    trace_emit_limits: tuple[float, float, float] | None = (
+        TRACE_EMIT_LIMIT_MS
+    ),
 ) -> dict[str, object]:
     image = ecl_path.read_bytes()
     actual_ecl_sha256 = hashlib.sha256(image).hexdigest()
@@ -262,20 +318,20 @@ def build_delivery_physical_report(
         runtime_base=runtime_base,
     )
 
-    scan = scan_trace(trace_path, audit_batches=True)
     baseline = scan_trace(baseline_path, audit_batches=False)
-    rows, preparations, trace_sha256, trace_bytes = trace_delivery_rows(
-        trace_path
-    )
-    batch_line_bytes = (
-        trace_batch_line_bytes(trace_path)
-        if batch_line_maximum is not None
-        else []
-    )
-    if scan.sha256 != trace_sha256 or scan.byte_count != trace_bytes:
-        raise AuxiliaryEclEventPhysicalAuditError(
-            "independent trace digests disagree"
+    delivery = (
+        standalone_delivery_trace_data(
+            trace_path,
+            include_batch_line_bytes=batch_line_maximum is not None,
         )
+        if trace_data is None
+        else trace_data
+    )
+    rows = delivery.rows
+    preparations = delivery.preparations
+    trace_sha256 = delivery.trace_sha256
+    trace_bytes = delivery.trace_bytes
+    batch_line_bytes = delivery.batch_line_bytes
     session, session_pass = session_record(session_path)
     first_batch_frame = rows[0].get("frame") if rows else -1
     if isinstance(first_batch_frame, bool) or not isinstance(
@@ -425,14 +481,14 @@ def build_delivery_physical_report(
     compact_distribution = distribution(compact_ms)
     emit_distribution = distribution(previous_emit_ms)
     total_distribution = distribution(total_ms)
-    cadence = distribution(scan.decision_deltas)
+    cadence = distribution(delivery.decision_deltas)
     baseline_cadence = distribution(baseline.decision_deltas)
     expected_statuses = Counter({"success": len(rows) - len(empty_frames)})
     if empty_frames:
         expected_statuses["empty_complete"] = len(empty_frames)
-    gates = {
+    gates: dict[str, bool] = {
         f"schema_v{batch_schema_version}_rows_present": bool(rows)
-        and scan.batch_schema_versions
+        and delivery.batch_schema_versions
         == Counter(
             {
                 batch_schema_version: len(rows)
@@ -440,8 +496,8 @@ def build_delivery_physical_report(
         ),
         "preparation_exact_and_bounded": preparation_pass,
         "transport_success_and_coherent": bool(rows)
-        and scan.batch_statuses == Counter({"success": len(rows)})
-        and not scan.validation_errors,
+        and delivery.batch_statuses == Counter({"success": len(rows)})
+        and not delivery.validation_errors,
         "exact_runtime_version_on_every_batch": bool(rows),
         "empty_prefix_valid": bool(seen_nonempty and empty_prefix_valid),
         "event_status_success_or_empty": event_statuses
@@ -459,7 +515,7 @@ def build_delivery_physical_report(
         "contracted_targets_only": bool(targets)
         and set(targets).issubset({69, 72, 73}),
         "no_added_process_reads_in_event_layer": bool(rows)
-        and not scan.validation_errors,
+        and not delivery.validation_errors,
         "event_derive_timing": within(
             event_distribution,
             EVENT_DERIVE_LIMIT_MS,
@@ -467,10 +523,6 @@ def build_delivery_physical_report(
         "replay_compact_timing": within(
             compact_distribution,
             REPLAY_COMPACT_LIMIT_MS,
-        ),
-        "trace_emit_timing": within(
-            emit_distribution,
-            TRACE_EMIT_LIMIT_MS,
         ),
         "transaction_total_timing": within(
             total_distribution,
@@ -486,6 +538,11 @@ def build_delivery_physical_report(
         ),
         "accepted_session_cleanup": session_pass,
     }
+    if trace_emit_limits is not None:
+        gates["trace_emit_timing"] = within(
+            emit_distribution,
+            trace_emit_limits,
+        )
     if batch_line_maximum is not None:
         gates["projected_batch_line_maximum"] = bool(
             batch_line_bytes
@@ -546,16 +603,16 @@ def build_delivery_physical_report(
         "preparation": preparation,
         "session": session,
         "transport": {
-            "batch_count": scan.batch_count,
+            "batch_count": delivery.batch_count,
             "schema_versions": {
                 str(key): value
                 for key, value in sorted(
-                    scan.batch_schema_versions.items()
+                    delivery.batch_schema_versions.items()
                 )
             },
-            "statuses": dict(sorted(scan.batch_statuses.items())),
-            "validation_errors": scan.validation_errors,
-            "process_read_count": distribution(scan.process_reads),
+            "statuses": dict(sorted(delivery.batch_statuses.items())),
+            "validation_errors": delivery.validation_errors,
+            "process_read_count": distribution(delivery.process_reads),
         },
         "replay": {
             "event_statuses": dict(sorted(event_statuses.items())),
@@ -589,7 +646,6 @@ def build_delivery_physical_report(
             "replay_compact_p95_p99_max": list(
                 REPLAY_COMPACT_LIMIT_MS
             ),
-            "trace_emit_p95_p99_max": list(TRACE_EMIT_LIMIT_MS),
             "transaction_total_p95_p99_max": list(
                 TRANSACTION_TOTAL_LIMIT_MS
             ),
@@ -609,6 +665,10 @@ def build_delivery_physical_report(
             "physical_action": "none",
         },
     }
+    if trace_emit_limits is not None:
+        limits_ms = report["limits_ms"]
+        assert isinstance(limits_ms, dict)
+        limits_ms["trace_emit_p95_p99_max"] = list(trace_emit_limits)
     if batch_line_maximum is not None:
         report["transport"]["batch_line_bytes"] = distribution(
             batch_line_bytes
@@ -663,6 +723,7 @@ def write_report_v2(report: dict[str, object], path: Path) -> None:
 __all__ = [
     "AuxiliaryEclEventPhysicalAuditError",
     "CACHE_CAPACITY",
+    "DeliveryTraceData",
     "EVENT_DERIVE_LIMIT_MS",
     "PREPARATION_MAXIMUM_MS",
     "REPLAY_COMPACT_LIMIT_MS",
@@ -672,5 +733,6 @@ __all__ = [
     "TRANSACTION_TOTAL_LIMIT_MS",
     "build_delivery_physical_report",
     "build_physical_report_v2",
+    "standalone_delivery_trace_data",
     "write_report_v2",
 ]

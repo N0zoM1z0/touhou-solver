@@ -21,11 +21,12 @@ from .event_program import (
 from .model import AuxiliaryVmBatchObservation
 
 
-AUXILIARY_ECL_EVENT_SCHEMA = "th08-auxiliary-ecl-event-derivation-v2"
+AUXILIARY_ECL_EVENT_SCHEMA = "th08-auxiliary-ecl-event-derivation-v3"
 AUXILIARY_ECL_EVENT_PREPARATION_SCHEMA = (
-    "th08-auxiliary-ecl-event-preparation-v1"
+    "th08-auxiliary-ecl-event-preparation-v2"
 )
 AUXILIARY_ECL_EVENT_AUTHORITY = "trace_only_no_action_authority"
+OBSERVATION_EPOCH_SEMANTICS = "provenance_not_program_mutation"
 
 
 class AuxiliaryEclEventTraceService:
@@ -49,6 +50,7 @@ class AuxiliaryEclEventTraceService:
         reason: str,
         *,
         runtime_version: RuntimeEclAcceptedVersion | None = None,
+        observation_gameplay_epoch: int | None = None,
         total_ms: float = 0.0,
     ) -> dict[str, object]:
         return {
@@ -57,6 +59,23 @@ class AuxiliaryEclEventTraceService:
             "status": reason,
             "runtime_version": (
                 runtime_version.record()
+                if runtime_version is not None
+                else None
+            ),
+            "accepted_gameplay_epoch": (
+                runtime_version.gameplay_epoch
+                if runtime_version is not None
+                else None
+            ),
+            "observation_gameplay_epoch": observation_gameplay_epoch,
+            "observation_epoch_semantics": OBSERVATION_EPOCH_SEMANTICS,
+            "program_identity": (
+                self._program.program_identity_record(runtime_version)
+                if runtime_version is not None
+                else None
+            ),
+            "program_identity_key": (
+                self._program.program_identity_key(runtime_version)
                 if runtime_version is not None
                 else None
             ),
@@ -89,11 +108,7 @@ class AuxiliaryEclEventTraceService:
         if runtime_version is None:
             return None
         version_key = self._program.version_key(runtime_version)
-        attempt = (
-            *version_key,
-            gameplay_epoch,
-            stage_route_index,
-        )
+        attempt = (*version_key, stage_route_index)
         if (
             self._prepared_version_key == version_key
             or self._preparation_attempt == attempt
@@ -106,7 +121,6 @@ class AuxiliaryEclEventTraceService:
         bind_ms = 0.0
         if not self._program.version_matches(
             runtime_version,
-            gameplay_epoch=gameplay_epoch,
             stage_route_index=stage_route_index,
         ):
             status = "runtime_identity_mismatch"
@@ -143,10 +157,27 @@ class AuxiliaryEclEventTraceService:
             "status": status,
             "error": error,
             "runtime_version": runtime_version.record(),
+            "accepted_gameplay_epoch": runtime_version.gameplay_epoch,
+            "observation_gameplay_epoch": gameplay_epoch,
+            "observation_epoch_semantics": OBSERVATION_EPOCH_SEMANTICS,
+            "program_identity": self._program.program_identity_record(
+                runtime_version
+            ),
+            "program_identity_key": self._program.program_identity_key(
+                runtime_version
+            ),
             "gameplay_epoch": gameplay_epoch,
             "stage_route_index": stage_route_index,
             "decision_frame": decision_frame,
             "snapshot_frame": snapshot_frame,
+            "prevalidated_instruction_count": (
+                self._program.prevalidated_instruction_count
+            ),
+            "bound_instruction_count": (
+                self._bound_program.bound_instruction_count
+                if self._bound_program is not None
+                else 0
+            ),
             "configuration": {
                 "active_difficulty_mask": (
                     1 << configuration.expected_difficulty_index
@@ -184,21 +215,23 @@ class AuxiliaryEclEventTraceService:
             return self.unavailable_record(
                 "auxiliary_batch_unavailable",
                 runtime_version=runtime_version,
+                observation_gameplay_epoch=gameplay_epoch,
                 total_ms=(self._clock() - total_started) * 1000.0,
             )
         if runtime_version is None:
             return self.unavailable_record(
                 "runtime_identity_unavailable",
+                observation_gameplay_epoch=gameplay_epoch,
                 total_ms=(self._clock() - total_started) * 1000.0,
             )
         if not self._program.version_matches(
             runtime_version,
-            gameplay_epoch=gameplay_epoch,
             stage_route_index=stage_route_index,
         ):
             return self.unavailable_record(
                 "runtime_identity_mismatch",
                 runtime_version=runtime_version,
+                observation_gameplay_epoch=gameplay_epoch,
                 total_ms=(self._clock() - total_started) * 1000.0,
             )
 
@@ -213,6 +246,7 @@ class AuxiliaryEclEventTraceService:
             return self.unavailable_record(
                 "runtime_program_unprepared",
                 runtime_version=runtime_version,
+                observation_gameplay_epoch=gameplay_epoch,
                 total_ms=(self._clock() - total_started) * 1000.0,
             )
         decode_started = self._clock()
@@ -311,6 +345,15 @@ class AuxiliaryEclEventTraceService:
             "authority": AUXILIARY_ECL_EVENT_AUTHORITY,
             "status": status,
             "runtime_version": runtime_version.record(),
+            "accepted_gameplay_epoch": runtime_version.gameplay_epoch,
+            "observation_gameplay_epoch": gameplay_epoch,
+            "observation_epoch_semantics": OBSERVATION_EPOCH_SEMANTICS,
+            "program_identity": self._program.program_identity_record(
+                runtime_version
+            ),
+            "program_identity_key": self._program.program_identity_key(
+                runtime_version
+            ),
             "active_difficulty_mask": (
                 1 << self._program.configuration.expected_difficulty_index
             ),
@@ -342,4 +385,5 @@ __all__ = [
     "AuxiliaryEclEventConfiguration",
     "AuxiliaryEclEventTraceService",
     "DEFAULT_TARGET_HORIZONS",
+    "OBSERVATION_EPOCH_SEMANTICS",
 ]

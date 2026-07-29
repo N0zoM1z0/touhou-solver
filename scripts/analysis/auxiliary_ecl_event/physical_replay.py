@@ -26,6 +26,8 @@ from .replay_oracle import ReplayProgram, oracle_core, production_core
 
 
 EVENT_SCHEMA_V2 = "th08-auxiliary-ecl-event-derivation-v2"
+EVENT_SCHEMA_V3 = "th08-auxiliary-ecl-event-derivation-v3"
+OBSERVATION_EPOCH_SEMANTICS = "provenance_not_program_mutation"
 
 
 @dataclass(frozen=True, slots=True)
@@ -399,16 +401,91 @@ def audit_event_batch_v2(
     )
 
 
+def audit_event_batch_v3(
+    row: dict[str, Any],
+    *,
+    expected_runtime_version: dict[str, object],
+    program: ReplayProgram,
+    context: str,
+) -> BatchReplaySummary:
+    """Replay schema-v6 delivery with explicit program/epoch separation."""
+
+    event = mapping(row.get("event_derivation"), f"{context}.event")
+    expected_program_identity = {
+        key: expected_runtime_version[key]
+        for key in (
+            "runtime_base",
+            "image_length",
+            "relocated_sha256",
+            "normalized_sha256",
+            "static_sha256",
+            "route_id",
+            "difficulty_index",
+            "stage_route_index",
+        )
+    }
+    if event.get("program_identity") != expected_program_identity:
+        raise AuxiliaryEclEventReplayError(
+            f"{context} program identity differs from exact acceptance"
+        )
+    if event.get("program_identity_key") != [
+        expected_program_identity[key]
+        for key in (
+            "runtime_base",
+            "image_length",
+            "relocated_sha256",
+            "normalized_sha256",
+            "static_sha256",
+            "route_id",
+            "difficulty_index",
+            "stage_route_index",
+        )
+    ]:
+        raise AuxiliaryEclEventReplayError(
+            f"{context} program identity key differs from exact acceptance"
+        )
+    if (
+        event.get("accepted_gameplay_epoch")
+        != expected_runtime_version["gameplay_epoch"]
+        or event.get("observation_gameplay_epoch")
+        != row.get("gameplay_epoch")
+        or event.get("observation_epoch_semantics")
+        != OBSERVATION_EPOCH_SEMANTICS
+    ):
+        raise AuxiliaryEclEventReplayError(
+            f"{context} observation epoch provenance is invalid"
+        )
+    observation = mapping(
+        row.get("observation"),
+        f"{context}.observation",
+    )
+    replay_blobs = decode_replay_bundle(
+        observation,
+        context=f"{context}.observation",
+    )
+    return _audit_event_batch(
+        row,
+        expected_runtime_version=expected_runtime_version,
+        program=program,
+        context=context,
+        event_schema=EVENT_SCHEMA_V3,
+        empty_status="empty_complete",
+        replay_blobs=replay_blobs,
+    )
+
+
 __all__ = [
     "ACCEPTED_VERSION_SCHEMA",
     "ACTIVE_VM_BYTES",
     "AuxiliaryEclEventReplayError",
     "BatchReplaySummary",
     "EVENT_SCHEMA_V2",
+    "EVENT_SCHEMA_V3",
     "EVENT_AUTHORITY",
     "EVENT_SCHEMA",
     "ReplayProgram",
     "TARGET_HORIZONS",
     "audit_event_batch",
     "audit_event_batch_v2",
+    "audit_event_batch_v3",
 ]

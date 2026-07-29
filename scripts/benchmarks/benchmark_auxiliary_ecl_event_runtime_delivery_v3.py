@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compatibility entry point for the current V3 retained-trace benchmark."""
+"""Benchmark epoch-safe V3 delivery on retained physical raw state."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from benchmarks.auxiliary_ecl_event.runtime_delivery_replay import (  # noqa: E402
-    benchmark_runtime_delivery,
+    benchmark_runtime_delivery_v3,
 )
 
 
@@ -30,7 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    report = benchmark_runtime_delivery(
+    report = benchmark_runtime_delivery_v3(
         args.trace,
         args.ecl,
         expected_static_sha256=args.expected_ecl_sha256,

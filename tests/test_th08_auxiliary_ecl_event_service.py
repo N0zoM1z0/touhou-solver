@@ -17,6 +17,10 @@ from th08_live.auxiliary_vm.event_service import (
     AuxiliaryEclEventConfiguration,
     AuxiliaryEclEventTraceService,
 )
+from th08_live.auxiliary_vm.event_program import (
+    AuxiliaryEclEventProgram,
+    _RelativeInstruction,
+)
 from th08_live.auxiliary_vm.model import (
     ACTIVE_VM_AUXILIARY_MARKER_OFFSET,
     ACTIVE_VM_BYTES,
@@ -173,7 +177,34 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
             self.assertEqual(preparation["status"], "success")
             self.assertEqual(
                 preparation["schema"],
-                "th08-auxiliary-ecl-event-preparation-v1",
+                "th08-auxiliary-ecl-event-preparation-v2",
+            )
+            self.assertEqual(
+                preparation["observation_epoch_semantics"],
+                "provenance_not_program_mutation",
+            )
+            self.assertEqual(preparation["accepted_gameplay_epoch"], 7)
+            self.assertEqual(preparation["observation_gameplay_epoch"], 7)
+            self.assertEqual(preparation["prevalidated_instruction_count"], 1664)
+            self.assertEqual(preparation["bound_instruction_count"], 9)
+            program_identity = preparation["program_identity"]
+            assert isinstance(program_identity, dict)
+            self.assertNotIn("gameplay_epoch", program_identity)
+            self.assertEqual(
+                preparation["program_identity_key"],
+                [
+                    program_identity[key]
+                    for key in (
+                        "runtime_base",
+                        "image_length",
+                        "relocated_sha256",
+                        "normalized_sha256",
+                        "static_sha256",
+                        "route_id",
+                        "difficulty_index",
+                        "stage_route_index",
+                    )
+                ],
             )
             self.assertEqual(preparation["decision_frame"], 1)
             self.assertEqual(preparation["snapshot_frame"], 1)
@@ -200,7 +231,7 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(
             result["schema"],
-            "th08-auxiliary-ecl-event-derivation-v2",
+            "th08-auxiliary-ecl-event-derivation-v3",
         )
         self.assertEqual(result["authority"], "trace_only_no_action_authority")
         self.assertEqual(result["active_difficulty_mask"], 0x08)
@@ -278,12 +309,6 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
                 "runtime_identity_mismatch",
             ),
             (
-                self._version(gameplay_epoch=6),
-                7,
-                5,
-                "runtime_identity_mismatch",
-            ),
-            (
                 self._version(stage_route_index=4),
                 7,
                 5,
@@ -307,6 +332,37 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
                         result["runtime_version"],
                         version.record(),
                     )
+
+    def test_same_program_crosses_observation_epochs_and_reuses_cache(
+        self,
+    ) -> None:
+        service = self._service()
+        observation = self._observation((self._record(),))
+        first = service.derive(
+            observation,
+            runtime_version=self._version(gameplay_epoch=7),
+            gameplay_epoch=8,
+            stage_route_index=5,
+        )
+        second = service.derive(
+            observation,
+            runtime_version=self._version(gameplay_epoch=7),
+            gameplay_epoch=10,
+            stage_route_index=5,
+        )
+
+        self.assertEqual(first["status"], "success")
+        self.assertEqual(second["status"], "success")
+        self.assertEqual(first["accepted_gameplay_epoch"], 7)
+        self.assertEqual(first["observation_gameplay_epoch"], 8)
+        self.assertEqual(second["accepted_gameplay_epoch"], 7)
+        self.assertEqual(second["observation_gameplay_epoch"], 10)
+        self.assertEqual(second["cache"]["persistent_hits"], 1)
+        self.assertEqual(second["cache"]["misses"], 0)
+        self.assertEqual(
+            first["program_identity_key"],
+            second["program_identity_key"],
+        )
 
     def test_invalid_accepted_runtime_base_fails_closed(self) -> None:
         version = self._version()
@@ -431,6 +487,23 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
                     expected_difficulty_index=3,
                     expected_stage_route_index=5,
                 )
+            )
+
+    def test_prevalidated_target_closure_rejects_escape(self) -> None:
+        escaping = _RelativeInstruction(
+            offset=0x100,
+            time=0,
+            opcode=99,
+            size=44,
+            difficulty_mask=0xFF,
+            parameter_mask=0,
+            payload=b"\x00" * 32,
+            owner=69,
+        )
+        with self.assertRaisesRegex(ValueError, "escaping successor"):
+            AuxiliaryEclEventProgram._validate_target_closure(
+                [escaping],
+                active_difficulty_mask=0x08,
             )
 
 

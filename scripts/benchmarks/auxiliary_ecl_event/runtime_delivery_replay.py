@@ -1,4 +1,4 @@
-"""Replay schema-v4 physical batches through the V2 delivery implementation."""
+"""Replay retained schema-v4 batches through epoch-safe V3 delivery."""
 
 from __future__ import annotations
 
@@ -31,6 +31,7 @@ from th08_live.runtime_ecl_identity import RuntimeEclAcceptedVersion
 EVENT_DERIVE_LIMIT_MS = (0.50, 1.00, 3.00)
 REPLAY_COMPACT_LIMIT_MS = (0.50, 1.00, 3.00)
 SERIALIZE_LIMIT_MS = (1.00, 2.00, 6.00)
+PREPARATION_MAXIMUM_MS = 1.0
 
 
 def _integer(value: object, context: str) -> int:
@@ -239,7 +240,7 @@ def _observation(
     )
 
 
-def benchmark_runtime_delivery(
+def benchmark_runtime_delivery_v3(
     trace_path: Path,
     static_path: Path,
     *,
@@ -269,11 +270,16 @@ def benchmark_runtime_delivery(
     derive_ms: list[float] = []
     compact_ms: list[float] = []
     serialize_ms: list[float] = []
+    static_prevalidation_ms: list[float] = []
     preparation_ms: list[float] = []
     status_counts: Counter[str] = Counter()
+    observation_epochs: Counter[int] = Counter()
     first_cache_totals: Counter[str] = Counter()
     serialized_bytes: list[int] = []
+    epoch_provenance_valid = True
+    preparation_shape_valid = True
     for repeat in range(repeats):
+        started = time.perf_counter()
         service = AuxiliaryEclEventTraceService(
             AuxiliaryEclEventConfiguration(
                 static_path=static_path,
@@ -283,6 +289,9 @@ def benchmark_runtime_delivery(
                 expected_stage_route_index=5,
             )
         )
+        static_prevalidation_ms.append(
+            (time.perf_counter() - started) * 1000.0
+        )
         preparation = service.prepare_if_needed(
             version,
             gameplay_epoch=version.gameplay_epoch,
@@ -291,24 +300,49 @@ def benchmark_runtime_delivery(
             snapshot_frame=version.snapshot_frame,
         )
         if preparation is None or preparation["status"] != "success":
-            raise ValueError("V2 runtime preparation failed")
+            raise ValueError("V3 runtime preparation failed")
         preparation_timing = _mapping(
             preparation.get("timing_ms"),
             "preparation.timing_ms",
         )
         preparation_ms.append(float(preparation_timing["total"]))
+        preparation_shape_valid = bool(
+            preparation_shape_valid
+            and preparation.get("prevalidated_instruction_count") == 1664
+            and preparation.get("bound_instruction_count") == 9
+            and preparation.get("accepted_gameplay_epoch")
+            == version.gameplay_epoch
+            and preparation.get("observation_gameplay_epoch")
+            == version.gameplay_epoch
+        )
         for index, (observation, shell) in enumerate(
             zip(observations, shells)
         ):
+            observation_epoch = (
+                version.gameplay_epoch
+                + 1
+                + min(2, (index * 3) // len(observations))
+            )
+            if repeat == 0:
+                observation_epochs[observation_epoch] += 1
             started = time.perf_counter()
             event = service.derive(
                 observation,
                 runtime_version=version,
-                gameplay_epoch=version.gameplay_epoch,
+                gameplay_epoch=observation_epoch,
                 stage_route_index=version.stage_route_index,
             )
             derive_ms.append((time.perf_counter() - started) * 1000.0)
             status_counts[str(event["status"])] += 1
+            epoch_provenance_valid = bool(
+                epoch_provenance_valid
+                and event.get("accepted_gameplay_epoch")
+                == version.gameplay_epoch
+                and event.get("observation_gameplay_epoch")
+                == observation_epoch
+                and event.get("observation_epoch_semantics")
+                == "provenance_not_program_mutation"
+            )
             cache = _mapping(event.get("cache"), f"batch[{index}].cache")
             if repeat == 0:
                 first_cache_totals.update(
@@ -328,7 +362,8 @@ def benchmark_runtime_delivery(
             compact_ms.append((time.perf_counter() - started) * 1000.0)
             output_row = {
                 **shell,
-                "schema_version": 5,
+                "schema_version": 6,
+                "gameplay_epoch": observation_epoch,
                 "observation": compact,
                 "event_derivation": event,
             }
@@ -347,8 +382,9 @@ def benchmark_runtime_delivery(
     derive_distribution = distribution(derive_ms)
     compact_distribution = distribution(compact_ms)
     serialize_distribution = distribution(serialize_ms)
+    preparation_distribution = distribution(preparation_ms)
     return {
-        "schema": "th08-auxiliary-ecl-event-v2-replay-benchmark-v1",
+        "schema": "th08-auxiliary-ecl-event-v3-replay-benchmark-v1",
         "authority": "isolated_replay_not_physical_delivery_authority",
         "source": {
             "trace": str(trace_path),
@@ -362,13 +398,19 @@ def benchmark_runtime_delivery(
             "repeats": repeats,
             "sample_count": len(rows) * repeats,
             "status_counts": dict(sorted(status_counts.items())),
+            "accepted_gameplay_epoch": version.gameplay_epoch,
+            "observation_gameplay_epochs_first_repeat": {
+                str(key): value
+                for key, value in sorted(observation_epochs.items())
+            },
             "serialized_bytes_first_repeat": {
                 "total": sum(serialized_bytes),
                 "minimum": min(serialized_bytes),
                 "maximum": max(serialized_bytes),
             },
         },
-        "preparation_ms": distribution(preparation_ms),
+        "static_prevalidation_ms": distribution(static_prevalidation_ms),
+        "preparation_ms": preparation_distribution,
         "cache_first_repeat": dict(sorted(first_cache_totals.items())),
         "timing_ms": {
             "event_derive": derive_distribution,
@@ -376,6 +418,7 @@ def benchmark_runtime_delivery(
             "json_serialize_without_write": serialize_distribution,
         },
         "limits_ms": {
+            "preparation_maximum": PREPARATION_MAXIMUM_MS,
             "event_derive_p95_p99_max": list(EVENT_DERIVE_LIMIT_MS),
             "replay_compact_p95_p99_max": list(
                 REPLAY_COMPACT_LIMIT_MS
@@ -383,8 +426,28 @@ def benchmark_runtime_delivery(
             "json_serialize_p95_p99_max": list(SERIALIZE_LIMIT_MS),
         },
         "gates": {
-            "all_rows_classified": sum(status_counts.values())
-            == len(rows) * repeats,
+            "all_rows_classified": bool(
+                sum(status_counts.values()) == len(rows) * repeats
+                and set(status_counts).issubset(
+                    {"success", "empty_complete"}
+                )
+            ),
+            "target_closure_prevalidated_and_bound": (
+                preparation_shape_valid
+            ),
+            "cross_epoch_program_reuse": bool(
+                epoch_provenance_valid
+                and len(observation_epochs) == 3
+                and all(
+                    epoch != version.gameplay_epoch
+                    for epoch in observation_epochs
+                )
+            ),
+            "preparation_timing": bool(
+                preparation_distribution is not None
+                and preparation_distribution["max"]
+                <= PREPARATION_MAXIMUM_MS
+            ),
             "exact_cache_workload": bool(
                 first_cache_totals["misses"] == 46
                 and first_cache_totals["persistent_hits"] > 0
@@ -406,4 +469,24 @@ def benchmark_runtime_delivery(
     }
 
 
-__all__ = ["benchmark_runtime_delivery"]
+def benchmark_runtime_delivery(
+    trace_path: Path,
+    static_path: Path,
+    *,
+    expected_static_sha256: str,
+    repeats: int,
+) -> dict[str, object]:
+    """Compatibility alias for the current V3 retained-trace benchmark."""
+
+    return benchmark_runtime_delivery_v3(
+        trace_path,
+        static_path,
+        expected_static_sha256=expected_static_sha256,
+        repeats=repeats,
+    )
+
+
+__all__ = [
+    "benchmark_runtime_delivery",
+    "benchmark_runtime_delivery_v3",
+]

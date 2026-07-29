@@ -1,6 +1,6 @@
 # Touhou Solver Strategy Ledger
 
-Last updated: 2026-07-28.
+Last updated: 2026-07-29.
 
 This file records strategy identity and promotion status. It is not a
 chronological log. Derivations and measurements live in design notes,
@@ -581,11 +581,17 @@ comparison.
    142 failed closed before lowering. The 20-hit outcome is physically poor
    but not attributable to cache work that never ran; a 5.317-ms frame-2
    preparation effect remains unresolved. CE-0169 rejects schema v5.
-   Schema-v6/event-v3 is fixed to use the accepted program-equivalence fields
-   rather than controller observation epoch and to prevalidate the target
-   closure before gameplay. Handoff requires two consecutive corrected
-   Stage-5 runs at no more than ten hits plus cross-stage regression checks.
-   No physical delivery authority exists before the new gate passes.
+   Schema-v6/event-v3 now implements the fixed correction. All 1,664 exact
+   instructions and the nine-instruction same-owner target closure are
+   prevalidated before gameplay; the ordered program key excludes controller
+   epoch and acceptance frames. Five-repeat retained-trace gates cross
+   observation epochs 1/2/3 under one accepted epoch-0 program and pass on
+   Linux/Windows. Online preparation maximum is `0.044/0.073 ms`, and exact
+   cache statistics remain 46 misses, 1,797 persistent hits, 1,987
+   request-local hits, and zero eviction. This remains isolated, default-off,
+   trace-only evidence. Handoff requires two consecutive corrected Stage-5
+   runs at no more than ten hits plus cross-stage regression checks. No
+   physical delivery authority exists before the new gate passes.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the
@@ -926,6 +932,13 @@ comparison.
   survival-equivalent boss alignment measurably compresses the phase.
   Normal-route Power collection begins from Power 0 and may help only inside
   viability; post-death recovery is a separate diagnostic.
+- **Unfocused-width hypothesis:** when no precise micro-dodge is required and
+  hard survival margin is unchanged, releasing Focus/Shift may use Sakuya's
+  wider unfocused shot coverage to remove distributed nonspell enemies
+  earlier. Re-enter focused control before dense geometry or margin loss.
+  First verify native team/shot state, target coverage, damage/kill timing,
+  and survival-equivalent eligibility; do not encode this as an unconditional
+  focus toggle.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank

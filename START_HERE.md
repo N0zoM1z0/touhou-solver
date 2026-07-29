@@ -65,7 +65,8 @@ located; it does not change the authority order below.
 52. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_PREFLIGHT_20260729.md`
 53. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_STAGE5_FAILURE_20260729.md`
 54. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_CONTRACT_20260729.md`
-55. the relevant recent run note and counterexample rows before live work
+55. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_PREFLIGHT_20260729.md`
+56. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -116,9 +117,15 @@ describe the same decision. Python/C++ parity is not physical correctness.
   nonspell, although retained Stage-5 results already span 8–23 and the first
   ten hits preceded the selected batch window. CE-0169 retains both the
   program-version bug and the unresolved one-time 5.317-ms preparation
-  effect. Schema-v6/event-v3 is fixed before implementation: separate
-  immutable program identity from controller observation epoch, prevalidate
-  the exact target closure before gameplay, and bind online within 1.000 ms.
+  effect. Schema-v6/event-v3 now implements the fixed correction: immutable
+  program identity excludes controller observation epoch, all 1,664
+  instructions and the nine-instruction same-owner target closure are
+  prevalidated before gameplay, and only those nine descriptors bind online.
+  Five-repeat retained-trace gates cross epochs 0/1/2/3 and pass on Linux and
+  Windows. Online preparation maximum is `0.044/0.073 ms`; event-derive p95
+  is `0.366/0.436 ms`. Complete suites pass 1,027 tests on both platforms,
+  with three Windows skips, and the failed V1 report remains byte-identical.
+  This is isolated evidence, not live contention or survival authority.
   Before handoff retain every run and require two consecutive corrected
   Stage-5 results at no more than ten hits plus cross-stage regression
   checks. Schemas v4/v5 have no physical delivery authority. The old

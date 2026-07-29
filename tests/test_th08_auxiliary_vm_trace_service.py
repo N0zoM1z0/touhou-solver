@@ -500,7 +500,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         self.assertIsNotNone(records[0]["active_vm_sha256"])
         self.assertEqual(len(records[0]["saved_frame_sha256"]), 1)
 
-    def test_event_v5_reuses_capture_and_bundles_replay_state(self) -> None:
+    def test_event_v6_reuses_capture_and_bundles_replay_state(self) -> None:
         active_vm = b"\x01" * 0x228
         saved_frame = b"\x02" * 0x228
         captured = AuxiliaryVmBatchRecord(
@@ -547,7 +547,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         )
 
         assert record is not None
-        self.assertEqual(record["schema_version"], 5)
+        self.assertEqual(record["schema_version"], 6)
         self.assertEqual(record["event_derivation"], {"status": "derived"})
         self.assertEqual(len(capture.calls), 1)
         self.assertEqual(len(event_service.calls), 1)
@@ -590,7 +590,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         self.assertIn("event_derive", timing)
         self.assertEqual(record["process_read_count"], 5)
 
-    def test_event_v5_native_error_has_explicit_unavailable_result(self) -> None:
+    def test_event_v6_native_error_has_explicit_unavailable_result(self) -> None:
         event_service = _EventService()
         record = AuxiliaryVmBatchTraceService(
             capture=_FailingCapture(),
@@ -605,7 +605,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         )
 
         assert record is not None
-        self.assertEqual(record["schema_version"], 5)
+        self.assertEqual(record["schema_version"], 6)
         self.assertEqual(record["status"], "native_transaction_failed")
         self.assertEqual(
             record["event_derivation"],

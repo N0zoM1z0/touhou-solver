@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Callable
 import hashlib
+import json
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +34,7 @@ from .physical_gate_support import (
 )
 from .physical_replay import (
     AuxiliaryEclEventReplayError,
+    BatchReplaySummary,
     ReplayProgram,
     audit_event_batch_v2,
 )
@@ -54,6 +57,9 @@ def _preparation_record(
     *,
     expected_version: dict[str, object],
     first_batch_frame: int,
+    preparation_schema: str = PREPARATION_SCHEMA,
+    preparation_maximum_ms: float = PREPARATION_MAXIMUM_MS,
+    require_epoch_separation: bool = False,
 ) -> tuple[dict[str, object], bool]:
     if len(rows) != 1:
         return (
@@ -77,9 +83,69 @@ def _preparation_record(
         row.get("configuration"),
         "preparation.configuration",
     )
+    expected_program_identity = {
+        key: expected_version[key]
+        for key in (
+            "runtime_base",
+            "image_length",
+            "relocated_sha256",
+            "normalized_sha256",
+            "static_sha256",
+            "route_id",
+            "difficulty_index",
+            "stage_route_index",
+        )
+    }
+    version_specific_pass = True
+    version_specific_record: dict[str, object] = {}
+    if require_epoch_separation:
+        version_specific_pass = bool(
+            row.get("accepted_gameplay_epoch")
+            == expected_version["gameplay_epoch"]
+            and row.get("observation_gameplay_epoch")
+            == row.get("gameplay_epoch")
+            and row.get("observation_epoch_semantics")
+            == "provenance_not_program_mutation"
+            and row.get("program_identity") == expected_program_identity
+            and row.get("program_identity_key")
+            == [
+                expected_program_identity[key]
+                for key in (
+                    "runtime_base",
+                    "image_length",
+                    "relocated_sha256",
+                    "normalized_sha256",
+                    "static_sha256",
+                    "route_id",
+                    "difficulty_index",
+                    "stage_route_index",
+                )
+            ]
+            and row.get("prevalidated_instruction_count") == 1664
+            and row.get("bound_instruction_count") == 9
+        )
+        version_specific_record = {
+            "accepted_gameplay_epoch": row.get(
+                "accepted_gameplay_epoch"
+            ),
+            "observation_gameplay_epoch": row.get(
+                "observation_gameplay_epoch"
+            ),
+            "observation_epoch_semantics": row.get(
+                "observation_epoch_semantics"
+            ),
+            "program_identity": row.get("program_identity"),
+            "program_identity_key": row.get("program_identity_key"),
+            "prevalidated_instruction_count": row.get(
+                "prevalidated_instruction_count"
+            ),
+            "bound_instruction_count": row.get(
+                "bound_instruction_count"
+            ),
+        }
     passed = bool(
         row.get("kind") == "auxiliary_ecl_event_preparation"
-        and row.get("schema") == PREPARATION_SCHEMA
+        and row.get("schema") == preparation_schema
         and row.get("authority") == "trace_only_no_action_authority"
         and row.get("status") == "success"
         and row.get("error") is None
@@ -99,7 +165,8 @@ def _preparation_record(
             "target_horizons": {"69": 16, "72": 16, "73": 60},
         }
         and bind_ms <= total_ms
-        and total_ms <= PREPARATION_MAXIMUM_MS
+        and total_ms <= preparation_maximum_ms
+        and version_specific_pass
     )
     return (
         {
@@ -108,10 +175,11 @@ def _preparation_record(
             "decision_frame": row.get("decision_frame"),
             "snapshot_frame": row.get("snapshot_frame"),
             "configuration": configuration,
+            **version_specific_record,
             "timing_ms": {
                 "program_bind": bind_ms,
                 "total": total_ms,
-                "maximum": PREPARATION_MAXIMUM_MS,
+                "maximum": preparation_maximum_ms,
             },
         },
         passed,
@@ -144,13 +212,22 @@ def _empty_row_valid(row: dict[str, Any]) -> bool:
     )
 
 
-def build_physical_report_v2(
+def build_delivery_physical_report(
     trace_path: Path,
     baseline_path: Path,
     session_path: Path,
     ecl_path: Path,
     *,
     expected_ecl_sha256: str = STAGE5_STATIC_SHA256,
+    report_schema: str = REPORT_SCHEMA,
+    batch_schema_version: int = (
+        AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION
+    ),
+    preparation_schema: str = PREPARATION_SCHEMA,
+    preparation_maximum_ms: float = PREPARATION_MAXIMUM_MS,
+    require_same_gameplay_epoch: bool = True,
+    audit_batch: Callable[..., BatchReplaySummary] = audit_event_batch_v2,
+    survival_hit_maximum: int | None = None,
 ) -> dict[str, object]:
     image = ecl_path.read_bytes()
     actual_ecl_sha256 = hashlib.sha256(image).hexdigest()
@@ -204,6 +281,9 @@ def build_physical_report_v2(
         preparations,
         expected_version=expected_version,
         first_batch_frame=first_batch_frame,
+        preparation_schema=preparation_schema,
+        preparation_maximum_ms=preparation_maximum_ms,
+        require_epoch_separation=not require_same_gameplay_epoch,
     )
 
     event_statuses: Counter[str] = Counter()
@@ -222,19 +302,24 @@ def build_physical_report_v2(
     total_ms: list[float] = []
     cache_oracle = IndependentIntentLru(CACHE_CAPACITY)
     cache_totals: Counter[str] = Counter()
+    batch_gameplay_epochs: Counter[int] = Counter()
     for index, row in enumerate(rows):
         context = f"batch[{index}]"
         if (
             row.get("schema_version")
-            != AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION
+            != batch_schema_version
             or row.get("status") != "success"
             or row.get("stage_route_index") != 5
             or row.get("spell_id") != 107
-            or row.get("gameplay_epoch")
-            != expected_version["gameplay_epoch"]
+            or (
+                require_same_gameplay_epoch
+                and row.get("gameplay_epoch")
+                != expected_version["gameplay_epoch"]
+            )
         ):
             raise AuxiliaryEclEventPhysicalAuditError(
-                f"{context} differs from the fixed schema-v5 workload"
+                f"{context} differs from the fixed schema-v"
+                f"{batch_schema_version} workload"
             )
         timing = mapping(row.get("timing_ms"), f"{context}.timing")
         derive_ms.append(
@@ -264,7 +349,7 @@ def build_physical_report_v2(
                 )
             )
         try:
-            replay = audit_event_batch_v2(
+            replay = audit_batch(
                 row,
                 expected_runtime_version=expected_version,
                 program=program,
@@ -273,6 +358,12 @@ def build_physical_report_v2(
         except AuxiliaryEclEventReplayError as error:
             raise AuxiliaryEclEventPhysicalAuditError(str(error)) from error
         event = mapping(row.get("event_derivation"), f"{context}.event")
+        batch_epoch = row.get("gameplay_epoch")
+        if isinstance(batch_epoch, bool) or not isinstance(batch_epoch, int):
+            raise AuxiliaryEclEventPhysicalAuditError(
+                f"{context} gameplay epoch is invalid"
+            )
+        batch_gameplay_epochs[batch_epoch] += 1
         cache = mapping(event.get("cache"), f"{context}.cache")
         expected_cache = cache_oracle.observe(replay.intent_keys).record()
         if cache != expected_cache:
@@ -332,13 +423,11 @@ def build_physical_report_v2(
     if empty_frames:
         expected_statuses["empty_complete"] = len(empty_frames)
     gates = {
-        "schema_v5_rows_present": bool(rows)
+        f"schema_v{batch_schema_version}_rows_present": bool(rows)
         and scan.batch_schema_versions
         == Counter(
             {
-                AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION: len(
-                    rows
-                )
+                batch_schema_version: len(rows)
             }
         ),
         "preparation_exact_and_bounded": preparation_pass,
@@ -389,8 +478,30 @@ def build_physical_report_v2(
         ),
         "accepted_session_cleanup": session_pass,
     }
+    survival_hit_count: int | None = None
+    if survival_hit_maximum is not None:
+        raw_session = json.loads(session_path.read_text(encoding="utf-8"))
+        raw_summary = (
+            raw_session.get("agent_summary")
+            if isinstance(raw_session, dict)
+            else None
+        )
+        raw_hit_frames = (
+            raw_summary.get("hit_frames")
+            if isinstance(raw_summary, dict)
+            else None
+        )
+        if isinstance(raw_hit_frames, list) and all(
+            isinstance(item, int) and not isinstance(item, bool)
+            for item in raw_hit_frames
+        ):
+            survival_hit_count = len(raw_hit_frames)
+        gates["stage5_survival_regression_boundary"] = bool(
+            survival_hit_count is not None
+            and survival_hit_count <= survival_hit_maximum
+        )
     report: dict[str, object] = {
-        "schema": REPORT_SCHEMA,
+        "schema": report_schema,
         "authority": REPORT_AUTHORITY,
         "source": {
             "trace": str(trace_path),
@@ -406,6 +517,19 @@ def build_physical_report_v2(
             "sha256": actual_ecl_sha256,
         },
         "runtime_version": expected_version,
+        "observation_epochs": {
+            "accepted_gameplay_epoch": expected_version[
+                "gameplay_epoch"
+            ],
+            "batch_gameplay_epochs": {
+                str(key): value
+                for key, value in sorted(batch_gameplay_epochs.items())
+            },
+            "cross_epoch_observed": any(
+                key != expected_version["gameplay_epoch"]
+                for key in batch_gameplay_epochs
+            ),
+        },
         "preparation": preparation,
         "session": session,
         "transport": {
@@ -447,7 +571,7 @@ def build_physical_report_v2(
             "baseline_decision_frame_delta": baseline_cadence,
         },
         "limits_ms": {
-            "preparation_maximum": PREPARATION_MAXIMUM_MS,
+            "preparation_maximum": preparation_maximum_ms,
             "event_derive_p95_p99_max": list(EVENT_DERIVE_LIMIT_MS),
             "replay_compact_p95_p99_max": list(
                 REPLAY_COMPACT_LIMIT_MS
@@ -472,8 +596,32 @@ def build_physical_report_v2(
             "physical_action": "none",
         },
     }
+    if survival_hit_maximum is not None:
+        report["survival_regression_boundary"] = {
+            "hit_count": survival_hit_count,
+            "maximum": survival_hit_maximum,
+            "single_run_only": True,
+            "consecutive_run_requirement": 2,
+        }
     report["report_digest"] = digest(report)
     return report
+
+
+def build_physical_report_v2(
+    trace_path: Path,
+    baseline_path: Path,
+    session_path: Path,
+    ecl_path: Path,
+    *,
+    expected_ecl_sha256: str = STAGE5_STATIC_SHA256,
+) -> dict[str, object]:
+    return build_delivery_physical_report(
+        trace_path,
+        baseline_path,
+        session_path,
+        ecl_path,
+        expected_ecl_sha256=expected_ecl_sha256,
+    )
 
 
 def write_report_v2(report: dict[str, object], path: Path) -> None:
@@ -502,6 +650,7 @@ __all__ = [
     "REPORT_SCHEMA",
     "TRACE_EMIT_LIMIT_MS",
     "TRANSACTION_TOTAL_LIMIT_MS",
+    "build_delivery_physical_report",
     "build_physical_report_v2",
     "write_report_v2",
 ]

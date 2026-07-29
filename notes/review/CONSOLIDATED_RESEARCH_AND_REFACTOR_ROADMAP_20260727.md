@@ -130,11 +130,24 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   1.000-ms online-preparation cap. Retain all follow-up runs; before handoff
   require two consecutive corrected Stage-5 runs at no more than ten hits
   and verify other Lunatic stages have not obviously regressed.
+- Schema v6/event v3 now passes its isolated implementation gate. The exact
+  image and nine-instruction same-owner target closure are prevalidated
+  before gameplay; one epoch-0 program replays all retained transactions
+  across observation epochs 1/2/3 on Linux and Windows. Online preparation
+  maximum is `0.044/0.073 ms`, complete suites pass 1,027 tests, and the V1
+  historical report remains byte-identical. Physical contention, delivery,
+  and the consecutive `<=10`-hit requirement remain open.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without
   Stage-3 evidence. Normal-route testing starts from Power 0 and attributes
   phase, resource, and first-hit provenance.
+- Add one survival-filtered nonspell firing-mode experiment: when precise
+  micro-dodge is unnecessary, releasing Shift may use Sakuya's wider
+  unfocused shot coverage to kill distributed enemies sooner. Verify native
+  team/shot mode plus damage, kill-time, exposure, and survival-margin
+  effects first; dense patterns or reduced margin must return to focused
+  control, and no unconditional toggle is authorized.
 
 ## 2. 審閱材料與證據邊界
 

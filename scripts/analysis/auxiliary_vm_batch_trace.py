@@ -21,6 +21,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 from th08_live.auxiliary_vm.trace_service import (  # noqa: E402
     AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
     AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
+    AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
     AUXILIARY_VM_BATCH_TRACE_ROLE,
     AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
 )
@@ -423,6 +424,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
+        AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
     ):
         raise ValueError(f"{context}: unexpected schema version")
     assert isinstance(schema_version, int)
@@ -445,6 +447,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
+        AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
     ):
         _audit_v3_attempts(scan, row, context=context, timing=timing)
 
@@ -461,6 +464,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
             AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
             AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
             AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
+            AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
         )
         else f"th08-auxiliary-vm-batch-v{schema_version}"
     )
@@ -542,6 +546,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
                     AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
                     AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
                     AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
+                    AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
                 )
                 else observation
             ),

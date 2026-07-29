@@ -285,6 +285,9 @@ class AuxiliaryEclEventPhysicalReportV2Tests(unittest.TestCase):
             gameplay_epoch=0,
             stage_route_index=5,
         )
+        preparation["schema"] = "th08-auxiliary-ecl-event-preparation-v1"
+        empty_event["schema"] = "th08-auxiliary-ecl-event-derivation-v2"
+        nonempty_event["schema"] = "th08-auxiliary-ecl-event-derivation-v2"
         return (
             preparation,
             _batch_row(

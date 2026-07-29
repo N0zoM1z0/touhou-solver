@@ -91,6 +91,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
+- Latest retained research checkpoint: `fbc5e52`
+  (`Retain physical SEM-SCALE-C5 delivery gate`).
 - Latest pre-trial repository/live code checkpoint: `3f0e56f`
   (`Retain Power-0 Lunatic route reachability evidence`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2

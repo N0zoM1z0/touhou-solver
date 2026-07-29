@@ -92,10 +92,10 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `e376557`
-  (`Retain SEM-MODE-A native gate semantics`).
-- Latest pre-trial repository/live code checkpoint: `3f0e56f`
-  (`Retain Power-0 Lunatic route reachability evidence`).
+- Latest retained research checkpoint: `31f92eb`
+  (`Retain SEM-MODE-B atomic capture preflight`).
+- Latest pre-trial repository/live code checkpoint: `31f92eb`
+  (`Retain SEM-MODE-B atomic capture preflight`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
@@ -121,23 +121,31 @@ describe the same decision. Python/C++ parity is not physical correctness.
   cleanup, and retention contract completed without leaving a gameplay
   process.
 
-Checkpoint `e376557` passes the offline/shadow `SEM-MODE-A` gate. Connected
+Checkpoint `31f92eb` passes the code/offline `SEM-MODE-B` preflight on top of
+the `e376557` `SEM-MODE-A` native-semantic gate. Connected
 IDA revalidation confirms player focus byte `+3`, delayed
 secondary-character byte `+5`, transition counter `+8`, enemy
 bit-`0x100 -> 0x800` synchronization, and separate contact `0x04` versus
 player-shot-damage `0x40` eligibility. First-64 sensing now retains active
 geometry blocked by bit `0x800`; the pure projection, diagnostic native
 fields, retained `10065 -> 10075` fixture, and exhaustive adversarial focus
-histories pass complete Linux/Windows discovery: 1,152 tests in
-13.467/29.934 seconds, with the three existing Windows skips. IDA names and
-comments are retained in the current daily log and mode-semantics note.
+histories now feed a bounded diagnostic transaction around the existing
+first-64 enemy-prefix read. Crossed player/enemy updates retry twice;
+exhaustion is recorded without fail-close. The default-off flag threads
+through original-game practice and full-route supervisors from stage entry,
+and a streaming compact report retains raw SHA-256, coherence/timing counts,
+secondary transitions, and pointer/raw-flags body sets. Complete
+Linux/Windows discovery passes 1,162 tests in 12.964/30.139 seconds, with the
+three existing Windows skips.
 
-This closes only the decoder-loss part of CE-0176. The broad diagnostic read
-is not one frame-bracketed player-mode/enemy-prefix transaction and the
-projection is not live hazard authority. Latent geometry remains
-conservative, unfocused combat remains disabled, and no physical or survival
-authority is added. Continue at `SEM-MODE-B` atomic observation, then the
-causal recurrence, differential, and whole-stage gates.
+This closes only the decoder-loss and atomic-capture implementation parts of
+CE-0176. No shipped-runtime Stage-5 transition has yet been retained, the
+capture covers only valid geometry in the first 64 slots, diagnostic
+reads/retries may perturb cadence, and the projection is not live hazard
+authority. Latent geometry remains conservative, unfocused combat remains
+disabled, and no physical or survival authority is added. Run the complete
+original-game Stage-5 observer gate next, then continue the causal recurrence
+and differential gates.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -495,14 +503,16 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-B`: `SEM-MODE-A` has revalidated the transition,
-   retained bit-`0x800` geometry, separated contact/damage projection, and
-   passed adversarial offline parity. Next capture player `+3/+5/+8`, active
-   input, and the enemy prefix in one stable native-update bracket (or retain
-   every one-callback ambiguity branch), then carry that immutable mode key
-   through pickup/cadence histories. The retained frame `10065 -> 10075`
-   transition remains the exact body-set workload. Keep unfocused-combat
-   promotion disabled.
+2. Complete `SEM-MODE-B` physical observation from checkpoint `31f92eb`.
+   Run one original-game Lunatic Stage 5 with
+   `--trace-enemy-mode-transitions` active from stage entry. Do not
+   fail-close or stop after hits. Retain the raw/session/summary bundle,
+   compact source-hashed report, resources/hits/Bombs, contamination and
+   cleanup state, and every coherent secondary/body transition. If the game
+   writes a compatible native replay, use it afterward to reproduce and test
+   hypotheses; do not introduce THPRAC. Then carry the immutable mode key
+   through pickup/cadence histories. Keep unfocused-combat promotion
+   disabled.
 3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed
@@ -2365,6 +2375,20 @@ This is the canonical observer-off Stage-5 rebaseline command. CE-0183 blocks
 another unchanged launch now; reuse it only after an immutable correction
 contract, without adding trace, combat, Power, Focus/unfocused, or planner
 flags.
+
+The current SEM-MODE-B whole-stage observer gate is:
+
+```bash
+/mnt/c/Windows/System32/cmd.exe /d /c call \
+  '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
+  --stage 5 --status-seconds 15 --stall-timeout 120 \
+  --trace-enemy-mode-transitions
+```
+
+It keeps `stop-after-hits=0` and hard no-Bomb, starts the observer at stage
+entry, and never selects an exact spell. The extra reads/retries can perturb
+cadence, so this is diagnostic physical evidence rather than an observer-off
+survival comparator.
 
 The current explicit trace-only native birth-observer gate adds:
 

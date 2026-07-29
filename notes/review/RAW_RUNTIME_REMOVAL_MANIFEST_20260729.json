@@ -1,0 +1,111 @@
+{
+  "schema": "th08-raw-runtime-report-removal-manifest-v1",
+  "created_at": "2026-07-29T14:26:19+08:00",
+  "status": "deletion-completed",
+  "authority": {
+    "basis": "Explicit user approval after the bounded retention and emission audit",
+    "audit": "notes/review/RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md",
+    "rule": "Delete only an older raw bundle with two newer accepted signature-compatible successors and complete tracked compact evidence"
+  },
+  "directory_bytes_before": 28138096705,
+  "total_files": 8,
+  "total_bytes": 2910858360,
+  "total_gib": 2.710948102,
+  "compact_evidence_preserved_per_run": [
+    ".session.json",
+    ".dossier.json",
+    ".summary.json",
+    ".regressions.json",
+    ".deaths.csv",
+    "notes/runs/<run-id>.md"
+  ],
+  "files": [
+    {
+      "path": "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_153821.jsonl",
+      "bytes": 157257634,
+      "sha256": "1cc423641141a6c884907754eed8742865f472ae40a1f1c77d47f4b916ab931e",
+      "signature_group": "hard-stage1-compatible-group-1",
+      "newer_accepted_compatible_successors": [
+        "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_181119.jsonl",
+        "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_182434.jsonl"
+      ]
+    },
+    {
+      "path": "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_173735.jsonl",
+      "bytes": 157614858,
+      "sha256": "80cc9f7b4927c076f6f6db1b51cb8a3455ca54d41371cb5f7f8c71ae33fe668c",
+      "signature_group": "hard-stage1-compatible-group-1",
+      "newer_accepted_compatible_successors": [
+        "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_181119.jsonl",
+        "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_182434.jsonl"
+      ]
+    },
+    {
+      "path": "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_175715.jsonl",
+      "bytes": 151586776,
+      "sha256": "3e0f5f89abd533b0d8f6d2420c71eca3f869fd4f6f4b371dad686b71f1cea83d",
+      "signature_group": "hard-stage1-compatible-group-1",
+      "newer_accepted_compatible_successors": [
+        "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_181119.jsonl",
+        "artifacts/runtime_reports/hard_route2_stage1_unattended_20260727_182434.jsonl"
+      ]
+    },
+    {
+      "path": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_031127.jsonl",
+      "bytes": 489082159,
+      "sha256": "7788114afb988536c9152fe0c9473379d28c59864e86cac4c3ee9b2a829922e5",
+      "signature_group": "lunatic-stage4a-compatible-group-1",
+      "newer_accepted_compatible_successors": [
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_043724.jsonl",
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_050305.jsonl"
+      ]
+    },
+    {
+      "path": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_040144.jsonl",
+      "bytes": 492656459,
+      "sha256": "c8d25c8b638794db93c1490a07829658d42bc707d1b65f8c674ec499458dec83",
+      "signature_group": "lunatic-stage4a-compatible-group-1",
+      "newer_accepted_compatible_successors": [
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_043724.jsonl",
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_050305.jsonl"
+      ]
+    },
+    {
+      "path": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_065316.jsonl",
+      "bytes": 483745822,
+      "sha256": "65e71da8369fb54007dda7ea8a4b93f1f0ecff76033120268e98a6879fa2fce9",
+      "signature_group": "lunatic-stage4a-compatible-group-2",
+      "newer_accepted_compatible_successors": [
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_075455.jsonl",
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_083433.jsonl"
+      ]
+    },
+    {
+      "path": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_070838.jsonl",
+      "bytes": 498842901,
+      "sha256": "ee7b1f1048746a690bf9a6445297d0f8d517975547edbc78ee693e6193335f12",
+      "signature_group": "lunatic-stage4a-compatible-group-2",
+      "newer_accepted_compatible_successors": [
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_075455.jsonl",
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_083433.jsonl"
+      ]
+    },
+    {
+      "path": "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_101804.jsonl",
+      "bytes": 480071751,
+      "sha256": "ad7e4da69eeee28adb6abad683598cbf26d9aa8d3f5e671c869e1394d357e885",
+      "signature_group": "lunatic-stage4a-compatible-group-3",
+      "newer_accepted_compatible_successors": [
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_110438.jsonl",
+        "artifacts/runtime_reports/lunatic_route2_stage4a_unattended_20260728_121028.jsonl"
+      ]
+    }
+  ],
+  "deletion_completed_at": "2026-07-29T14:27:15+08:00",
+  "directory_bytes_after": 25227238345,
+  "verification": {
+    "all_listed_raw_paths_absent": true,
+    "all_successor_raw_paths_present": true,
+    "all_compact_evidence_present_and_tracked": true
+  }
+}

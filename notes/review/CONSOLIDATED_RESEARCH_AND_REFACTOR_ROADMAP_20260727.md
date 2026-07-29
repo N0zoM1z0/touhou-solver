@@ -215,8 +215,10 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   `RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md`. Raw replay
   geometry remains required and retention-bounded; checkpoint `e4e266f`
   removes the proven duplicate artifact/run-note Markdown write. Eight
-  exact-compatible reviewed raw candidates total 2.711 GiB, but deletion
-  remains a separately approved, manifested action.
+  exact-compatible reviewed raw candidates totaling 2.711 GiB were later
+  explicitly approved and permanently deleted with pre-deletion path, size,
+  SHA-256, compact-evidence, and successor checks retained in
+  `RAW_RUNTIME_REMOVAL_MANIFEST_20260729.json`.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

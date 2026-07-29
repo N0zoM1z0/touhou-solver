@@ -2,8 +2,8 @@
 
 Date: 2026-07-29
 
-Status: emission correction implemented; historical raw cleanup audited but
-not executed
+Status: emission correction implemented; explicitly approved bounded raw
+cleanup completed
 
 ## Scope
 
@@ -14,7 +14,9 @@ This audit answers two separate questions:
 2. which files are duplicate output or old local raw data that may be removed
    under the bounded-retention rule in `AGENTS.md`.
 
-No historical raw bundle was deleted in this checkpoint.
+The cleanup execution below permanently removed only the eight audited raw
+bundles after recording their exact paths, byte sizes, SHA-256 digests,
+tracked compact evidence, and two newer compatible successors.
 
 ## Observed Inventory
 
@@ -120,11 +122,27 @@ The remaining eight exact-compatible, non-raw-path-referenced candidates are:
 - `lunatic_route2_stage4a_unattended_20260728_101804.jsonl`.
 
 Together they occupy `2.711 GiB`. They satisfy the repository's mechanical
-two-newer-compatible-plus-compact condition, but this checkpoint does not
-delete them because the user asked for an audit, not destructive cleanup.
-Before removal, produce a file-level path/size/SHA-256 manifest, recheck the
-two successors, obtain explicit deletion approval, and record the material
-removal in the current daily shard.
+two-newer-compatible-plus-compact condition.
+
+## Approved Cleanup Execution
+
+After explicit user approval, all eight listed raw files were permanently
+deleted at `2026-07-29T14:27:15+08:00`. Before deletion:
+
+- every path was hashed and sized;
+- all six compact evidence files per run were rechecked as present and
+  tracked;
+- all eight named successor raw files were rechecked as present; and
+- every successor session was rechecked as `completed` and accepted.
+
+The exact removal manifest is
+`RAW_RUNTIME_REMOVAL_MANIFEST_20260729.json`. It records `2,910,858,360`
+bytes (`2.710948102 GiB`) removed. `artifacts/runtime_reports/` decreased
+from `28,138,096,705` to `25,227,238,345` bytes (`27G` to `24G` by
+`du -sh`); 58 raw JSONL files remain, totaling `23.415450004 GiB`.
+The eight removed raw files are not recoverable from Git. Their compact
+reports remain tracked, and their compatible replay-capable successors
+remain local.
 
 The other roughly 16 GiB above this strict set must not be bulk-deleted yet.
 Most are older observer/schema families or unique/singleton workloads. They

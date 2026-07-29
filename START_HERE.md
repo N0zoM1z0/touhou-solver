@@ -187,14 +187,16 @@ bundles plus tracked compact reports exist. The newest raw trace SHA-256 is
 `bee834257bc577299d1ca684383bcc8c0591e3fcc02a8b0e43bf39932fc2a2ca`.
 Raw JSONL and launch logs remain ignored and must not be committed.
 
-`artifacts/runtime_reports/` currently uses 27 GiB, of which 26.126 GiB is
-ignored raw JSONL and only 81.137 MiB is tracked/staged compact history. The
-retention/emission audit identifies eight exact-compatible, compact-backed,
-non-raw-path-referenced deletion candidates totaling 2.711 GiB; none was
-deleted in this checkpoint. Obtain explicit approval and retain a
-path/size/SHA-256 removal manifest first. New practice/full-route trials no
-longer create a duplicate artifact dossier Markdown; the generator writes
-the durable `notes/runs/` note directly.
+After explicit approval, the eight exact-compatible, compact-backed,
+non-raw-path-referenced candidates were permanently removed. The retained
+path/size/SHA-256 manifest is
+`notes/review/RAW_RUNTIME_REMOVAL_MANIFEST_20260729.json`; it records
+2,910,858,360 bytes (`2.710948102 GiB`) reclaimed. The directory now uses
+24G (`25,227,238,345` bytes), with 58 ignored raw JSONL files totaling
+`23.415450004 GiB`. Do not bulk-delete the remaining legacy/schema/singleton
+families without another explicit retention decision. New practice/full-route
+trials no longer create a duplicate artifact dossier Markdown; the generator
+writes the durable `notes/runs/` note directly.
 
 ## Exact Checkpoint
 

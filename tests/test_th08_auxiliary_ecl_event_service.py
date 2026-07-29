@@ -147,9 +147,12 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
             snapshot_frame=1,
         )
 
-    @staticmethod
-    def _service() -> AuxiliaryEclEventTraceService:
-        return AuxiliaryEclEventTraceService(
+    def _service(
+        self,
+        *,
+        prepare: bool = True,
+    ) -> AuxiliaryEclEventTraceService:
+        service = AuxiliaryEclEventTraceService(
             AuxiliaryEclEventConfiguration(
                 static_path=_ECL_PATH,
                 expected_static_sha256=_ECL_SHA256,
@@ -158,6 +161,32 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
                 expected_stage_route_index=5,
             )
         )
+        if prepare:
+            preparation = service.prepare_if_needed(
+                self._version(),
+                gameplay_epoch=7,
+                stage_route_index=5,
+                decision_frame=1,
+                snapshot_frame=1,
+            )
+            assert preparation is not None
+            self.assertEqual(preparation["status"], "success")
+            self.assertEqual(
+                preparation["schema"],
+                "th08-auxiliary-ecl-event-preparation-v1",
+            )
+            self.assertEqual(preparation["decision_frame"], 1)
+            self.assertEqual(preparation["snapshot_frame"], 1)
+            self.assertIsNone(
+                service.prepare_if_needed(
+                    self._version(),
+                    gameplay_epoch=7,
+                    stage_route_index=5,
+                    decision_frame=2,
+                    snapshot_frame=2,
+                )
+            )
+        return service
 
     def test_exact_runtime_version_lowers_all_supported_cycles(self) -> None:
         records = tuple(self._record(target) for target in (69, 72, 73))
@@ -169,6 +198,10 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
         )
 
         self.assertEqual(result["status"], "success")
+        self.assertEqual(
+            result["schema"],
+            "th08-auxiliary-ecl-event-derivation-v2",
+        )
         self.assertEqual(result["authority"], "trace_only_no_action_authority")
         self.assertEqual(result["active_difficulty_mask"], 0x08)
         self.assertEqual(
@@ -178,6 +211,18 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
         self.assertEqual(result["request_count"], 3)
         self.assertEqual(result["complete_count"], 3)
         self.assertEqual(result["unknown_count"], 0)
+        self.assertEqual(
+            result["cache"],
+            {
+                "request_count": 3,
+                "request_local_hits": 0,
+                "persistent_hits": 0,
+                "misses": 3,
+                "evictions": 0,
+                "entries_after": 3,
+                "capacity": 512,
+            },
+        )
         requests = result["requests"]
         assert isinstance(requests, list)
         self.assertEqual(
@@ -199,6 +244,22 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
                 for item in lowering["unique_results"]
             )
         )
+        repeated = self._service()
+        first = repeated.derive(
+            self._observation(records),
+            runtime_version=self._version(),
+            gameplay_epoch=7,
+            stage_route_index=5,
+        )
+        second = repeated.derive(
+            self._observation(records),
+            runtime_version=self._version(),
+            gameplay_epoch=7,
+            stage_route_index=5,
+        )
+        self.assertEqual(first["lowering"], second["lowering"])
+        self.assertEqual(second["cache"]["persistent_hits"], 3)
+        self.assertEqual(second["cache"]["misses"], 0)
 
     def test_missing_or_mismatched_runtime_identity_fails_closed(self) -> None:
         observation = self._observation((self._record(),))
@@ -262,13 +323,26 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
             decision_frame=version.decision_frame,
             snapshot_frame=version.snapshot_frame,
         )
-        result = self._service().derive(
+        service = self._service(prepare=False)
+        preparation = service.prepare_if_needed(
+            invalid,
+            gameplay_epoch=7,
+            stage_route_index=5,
+            decision_frame=1,
+            snapshot_frame=1,
+        )
+        assert preparation is not None
+        self.assertEqual(
+            preparation["status"],
+            "runtime_program_bind_failed",
+        )
+        result = service.derive(
             self._observation((self._record(),)),
             runtime_version=invalid,
             gameplay_epoch=7,
             stage_route_index=5,
         )
-        self.assertEqual(result["status"], "runtime_program_bind_failed")
+        self.assertEqual(result["status"], "runtime_program_unprepared")
         self.assertEqual(result["runtime_version"], invalid.record())
         self.assertEqual(result["request_count"], 0)
 
@@ -329,11 +403,23 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
             gameplay_epoch=7,
             stage_route_index=5,
         )
-        self.assertEqual(empty["status"], "no_usable_contexts")
+        self.assertEqual(empty["status"], "empty_complete")
         self.assertEqual(empty["request_count"], 0)
         lowering = empty["lowering"]
         assert isinstance(lowering, dict)
         self.assertEqual(lowering["request_count"], 0)
+        self.assertEqual(
+            empty["cache"],
+            {
+                "request_count": 0,
+                "request_local_hits": 0,
+                "persistent_hits": 0,
+                "misses": 0,
+                "evictions": 0,
+                "entries_after": 0,
+                "capacity": 512,
+            },
+        )
 
     def test_static_digest_is_checked_before_service_use(self) -> None:
         with self.assertRaisesRegex(ValueError, "digest"):

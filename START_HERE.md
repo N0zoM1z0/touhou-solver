@@ -61,7 +61,9 @@ located; it does not change the authority order below.
 48. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
 49. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
 50. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_STAGE5_RESULT_20260729.md`
-51. the relevant recent run note and counterexample rows before live work
+51. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_CONTRACT_20260729.md`
+52. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_PREFLIGHT_20260729.md`
+53. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -96,11 +98,18 @@ describe the same decision. Python/C++ parity is not physical correctness.
   initial zero-context batches violate the fixed all-success status gate;
   event-derive p95 is `0.879 ms`, replay-compact maximum is `11.335 ms`, and
   synchronous-emit p95 is `2.871 ms`. CE-0168 retains the failure. The next
-  G5 gate requires a separately contracted bounded exact-version cache,
-  visible pre-bind, compact hash-addressed replay bundle, and independently
-  verified empty-prefix semantics under unchanged per-batch timing/cadence
-  limits. Schema v4 has no physical delivery authority. The old spell-107
-  trace's 3,214 contexts remain unreplayable.
+  corrected schema-v5 implementation is now fixed by the V2 contract. It uses
+  a visible exact-version preparation, 512-entry exact LRU, compact
+  hash-addressed replay bundle, and independently verified empty-prefix
+  semantics under unchanged per-batch timing/cadence limits. Replaying the
+  retained 142 physical transactions five times passes all isolated gates on
+  Linux and Windows: the first repeat has 46 misses, 1,797 persistent hits,
+  1,987 request-local hits, and zero eviction. Windows event-derive,
+  replay-compact, and no-write JSON p95 are `0.408/0.433/0.626 ms`. Complete
+  Linux/Windows suites pass 1,020 tests. This is not live contention
+  authority: the next exact checkpoint is the focused schema-v5 Stage-5
+  spell-107 physical gate. Schema v4 has no physical delivery authority. The
+  old spell-107 trace's 3,214 contexts remain unreplayable.
   Unsupported emission, source-life, dynamic parameter, transform,
   realized-birth, geometry, and action dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model
@@ -1658,6 +1667,8 @@ Compact benchmark evidence:
 - `artifacts/benchmarks/auxiliary_ecl_event_windows_repeat_20260728.json`
 - `artifacts/benchmarks/auxiliary_ecl_event_windows_request_allocation_failure_20260728.json`
 - `artifacts/benchmarks/auxiliary_ecl_event_windows_prebuilt_max_failure_20260728.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_runtime_delivery_v2_linux_20260729.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_runtime_delivery_v2_windows_20260729.json`
 - `artifacts/viability_audit/g5_auxiliary_ecl_event_inventory_stage5_20260728_200739.json`
 - `artifacts/viability_audit/g5_derived_source_stage5_20260728_150827.json`
 - `artifacts/viability_audit/g5_auxiliary_pointer_density_stage5_20260728_171633.json`

@@ -18,7 +18,14 @@ from .replay_evidence import (
     mapping,
     validate_replay_record,
 )
+from .replay_bundle_evidence import (
+    decode_replay_bundle,
+    validate_bundled_replay_record,
+)
 from .replay_oracle import ReplayProgram, oracle_core, production_core
+
+
+EVENT_SCHEMA_V2 = "th08-auxiliary-ecl-event-derivation-v2"
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,6 +36,7 @@ class BatchReplaySummary:
     unknown_count: int
     replayable_record_count: int
     target_counts: tuple[tuple[int, int], ...]
+    intent_keys: tuple[tuple[int, int, int, int, int], ...]
 
 
 def _classify_request(
@@ -217,15 +225,18 @@ def _validate_canonical_results(
     return complete_count, lowering_unknown_count
 
 
-def audit_event_batch(
+def _audit_event_batch(
     row: dict[str, Any],
     *,
     expected_runtime_version: dict[str, object],
     program: ReplayProgram,
     context: str,
+    event_schema: str,
+    empty_status: str,
+    replay_blobs: dict[str, bytes] | None,
 ) -> BatchReplaySummary:
     event = mapping(row.get("event_derivation"), f"{context}.event")
-    if event.get("schema") != EVENT_SCHEMA:
+    if event.get("schema") != event_schema:
         raise AuxiliaryEclEventReplayError(
             f"{context} event schema is invalid"
         )
@@ -265,9 +276,17 @@ def audit_event_batch(
             raw_record,
             f"{context}.observation.records[{index}]",
         )
-        active_vm = validate_replay_record(
-            record,
-            context=f"{context}.observation.records[{index}]",
+        active_vm = (
+            validate_replay_record(
+                record,
+                context=f"{context}.observation.records[{index}]",
+            )
+            if replay_blobs is None
+            else validate_bundled_replay_record(
+                record,
+                replay_blobs,
+                context=f"{context}.observation.records[{index}]",
+            )
         )
         if active_vm is not None:
             replayable += 1
@@ -309,7 +328,7 @@ def audit_event_batch(
                 f"{context} event {key} mismatch"
             )
     expected_status = (
-        "no_usable_contexts"
+        empty_status
         if not requests
         else (
             "success"
@@ -328,6 +347,55 @@ def audit_event_batch(
         unknown_count=unknown_count,
         replayable_record_count=replayable,
         target_counts=tuple(sorted(target_counts.items())),
+        intent_keys=tuple(item[3] for item in pending),
+    )
+
+
+def audit_event_batch(
+    row: dict[str, Any],
+    *,
+    expected_runtime_version: dict[str, object],
+    program: ReplayProgram,
+    context: str,
+) -> BatchReplaySummary:
+    """Reproduce the immutable schema-v4 hexadecimal replay gate."""
+
+    return _audit_event_batch(
+        row,
+        expected_runtime_version=expected_runtime_version,
+        program=program,
+        context=context,
+        event_schema=EVENT_SCHEMA,
+        empty_status="no_usable_contexts",
+        replay_blobs=None,
+    )
+
+
+def audit_event_batch_v2(
+    row: dict[str, Any],
+    *,
+    expected_runtime_version: dict[str, object],
+    program: ReplayProgram,
+    context: str,
+) -> BatchReplaySummary:
+    """Independently decode and replay one schema-v5 bundled transaction."""
+
+    observation = mapping(
+        row.get("observation"),
+        f"{context}.observation",
+    )
+    replay_blobs = decode_replay_bundle(
+        observation,
+        context=f"{context}.observation",
+    )
+    return _audit_event_batch(
+        row,
+        expected_runtime_version=expected_runtime_version,
+        program=program,
+        context=context,
+        event_schema=EVENT_SCHEMA_V2,
+        empty_status="empty_complete",
+        replay_blobs=replay_blobs,
     )
 
 
@@ -336,9 +404,11 @@ __all__ = [
     "ACTIVE_VM_BYTES",
     "AuxiliaryEclEventReplayError",
     "BatchReplaySummary",
+    "EVENT_SCHEMA_V2",
     "EVENT_AUTHORITY",
     "EVENT_SCHEMA",
     "ReplayProgram",
     "TARGET_HORIZONS",
     "audit_event_batch",
+    "audit_event_batch_v2",
 ]

@@ -156,20 +156,27 @@ def expected_runtime_version(
     }
 
 
-def trace_event_rows(
+def trace_delivery_rows(
     path: Path,
-) -> tuple[list[dict[str, Any]], str, int]:
-    rows: list[dict[str, Any]] = []
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str, int]:
+    batch_rows: list[dict[str, Any]] = []
+    preparation_rows: list[dict[str, Any]] = []
     trace_digest = hashlib.sha256()
     byte_count = 0
     with path.open("rb") as source:
         for line_number, raw_line in enumerate(source, 1):
             trace_digest.update(raw_line)
             byte_count += len(raw_line)
-            if (
-                b'"kind":"auxiliary_vm_batch"' not in raw_line[:512]
-                and b'"kind": "auxiliary_vm_batch"' not in raw_line[:512]
-            ):
+            prefix = raw_line[:512]
+            is_batch = (
+                b'"kind":"auxiliary_vm_batch"' in prefix
+                or b'"kind": "auxiliary_vm_batch"' in prefix
+            )
+            is_preparation = (
+                b'"kind":"auxiliary_ecl_event_preparation"' in prefix
+                or b'"kind": "auxiliary_ecl_event_preparation"' in prefix
+            )
+            if not is_batch and not is_preparation:
                 continue
             try:
                 row = json.loads(raw_line)
@@ -181,8 +188,23 @@ def trace_event_rows(
                 raise AuxiliaryEclEventPhysicalAuditError(
                     f"trace line {line_number} is not an object"
                 )
-            rows.append(row)
-    return rows, trace_digest.hexdigest(), byte_count
+            if is_batch:
+                batch_rows.append(row)
+            else:
+                preparation_rows.append(row)
+    return (
+        batch_rows,
+        preparation_rows,
+        trace_digest.hexdigest(),
+        byte_count,
+    )
+
+
+def trace_event_rows(
+    path: Path,
+) -> tuple[list[dict[str, Any]], str, int]:
+    rows, _, trace_sha256, byte_count = trace_delivery_rows(path)
+    return rows, trace_sha256, byte_count
 
 
 __all__ = [
@@ -192,6 +214,7 @@ __all__ = [
     "expected_runtime_version",
     "finite_nonnegative",
     "session_record",
+    "trace_delivery_rows",
     "trace_event_rows",
     "within",
 ]

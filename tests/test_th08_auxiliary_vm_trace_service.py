@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import base64
+import hashlib
 import unittest
+import zlib
 
 from th08_live.auxiliary_vm import (
     AuxiliaryVmBatchObservation,
@@ -497,7 +500,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         self.assertIsNotNone(records[0]["active_vm_sha256"])
         self.assertEqual(len(records[0]["saved_frame_sha256"]), 1)
 
-    def test_event_v4_reuses_capture_and_retains_replay_state(self) -> None:
+    def test_event_v5_reuses_capture_and_bundles_replay_state(self) -> None:
         active_vm = b"\x01" * 0x228
         saved_frame = b"\x02" * 0x228
         captured = AuxiliaryVmBatchRecord(
@@ -544,7 +547,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         )
 
         assert record is not None
-        self.assertEqual(record["schema_version"], 4)
+        self.assertEqual(record["schema_version"], 5)
         self.assertEqual(record["event_derivation"], {"status": "derived"})
         self.assertEqual(len(capture.calls), 1)
         self.assertEqual(len(event_service.calls), 1)
@@ -556,14 +559,38 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         assert isinstance(observation, dict)
         records = observation["records"]
         assert isinstance(records, list)
-        self.assertEqual(records[0]["active_vm_hex"], active_vm.hex())
-        self.assertEqual(records[0]["saved_frame_hex"], [saved_frame.hex()])
+        self.assertNotIn("active_vm_hex", records[0])
+        self.assertNotIn("saved_frame_hex", records[0])
+        bundle = observation["replay_state_bundle"]
+        assert isinstance(bundle, dict)
+        self.assertEqual(
+            bundle["schema"],
+            "th08-auxiliary-vm-replay-bundle-v1",
+        )
+        self.assertEqual(bundle["encoding"], "zlib-base64")
+        self.assertEqual(bundle["blob_bytes"], 0x228)
+        self.assertEqual(bundle["blob_count"], 2)
+        self.assertEqual(
+            bundle["blob_sha256"],
+            [
+                hashlib.sha256(active_vm).hexdigest(),
+                hashlib.sha256(saved_frame).hexdigest(),
+            ],
+        )
+        payload = zlib.decompress(
+            base64.b64decode(bundle["payload_base64"])
+        )
+        self.assertEqual(payload, active_vm + saved_frame)
+        self.assertEqual(
+            bundle["uncompressed_sha256"],
+            hashlib.sha256(payload).hexdigest(),
+        )
         timing = record["timing_ms"]
         assert isinstance(timing, dict)
         self.assertIn("event_derive", timing)
         self.assertEqual(record["process_read_count"], 5)
 
-    def test_event_v4_native_error_has_explicit_unavailable_result(self) -> None:
+    def test_event_v5_native_error_has_explicit_unavailable_result(self) -> None:
         event_service = _EventService()
         record = AuxiliaryVmBatchTraceService(
             capture=_FailingCapture(),
@@ -578,7 +605,7 @@ class AuxiliaryVmBatchTraceServiceTests(unittest.TestCase):
         )
 
         assert record is not None
-        self.assertEqual(record["schema_version"], 4)
+        self.assertEqual(record["schema_version"], 5)
         self.assertEqual(record["status"], "native_transaction_failed")
         self.assertEqual(
             record["event_derivation"],

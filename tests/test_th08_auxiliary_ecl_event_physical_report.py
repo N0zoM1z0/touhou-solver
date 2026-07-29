@@ -159,12 +159,23 @@ def _batch() -> dict[str, object]:
             expected_stage_route_index=5,
         )
     )
+    preparation = event_service.prepare_if_needed(
+        _version(),
+        gameplay_epoch=0,
+        stage_route_index=5,
+        decision_frame=101,
+        snapshot_frame=101,
+    )
+    assert preparation is not None
+    assert preparation["status"] == "success"
     event = event_service.derive(
         observation,
         runtime_version=_version(),
         gameplay_epoch=0,
         stage_route_index=5,
     )
+    event["schema"] = "th08-auxiliary-ecl-event-derivation-v1"
+    event.pop("cache")
     return {
         "kind": "auxiliary_vm_batch",
         "schema_version": 4,

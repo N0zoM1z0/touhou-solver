@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from enum import IntFlag
 import hashlib
 
+from .replay_bundle import encode_replay_bundle
+
 
 MAXIMUM_OWNERS = 64
 AUXILIARY_POINTERS_PER_OWNER = 4
@@ -163,7 +165,16 @@ class AuxiliaryVmBatchObservation:
         self,
         *,
         include_replay_state: bool = False,
+        include_replay_bundle: bool = False,
     ) -> dict[str, object]:
+        if include_replay_state and include_replay_bundle:
+            raise ValueError("replay state encodings are mutually exclusive")
+        compact_records = [
+            batch_record.compact_record(
+                include_replay_state=include_replay_state
+            )
+            for batch_record in self.records
+        ]
         record: dict[str, object] = {
             "layout": self.layout,
             "authority": "trace_only_no_action_authority",
@@ -175,13 +186,40 @@ class AuxiliaryVmBatchObservation:
             "usable_context_count": self.usable_context_count,
             "process_read_count": self.process_read_count,
             "state_payload_bytes": self.state_payload_bytes,
-            "records": [
-                record.compact_record(
-                    include_replay_state=include_replay_state
-                )
-                for record in self.records
-            ],
+            "records": compact_records,
         }
+        if include_replay_bundle:
+            referenced_blobs: list[tuple[str, bytes]] = []
+            seen: set[str] = set()
+            for source, compact_source in zip(
+                self.records,
+                compact_records,
+            ):
+                active_sha256 = compact_source["active_vm_sha256"]
+                if (
+                    source.active_vm
+                    and isinstance(active_sha256, str)
+                    and active_sha256 not in seen
+                ):
+                    seen.add(active_sha256)
+                    referenced_blobs.append(
+                        (active_sha256, source.active_vm)
+                    )
+                saved_sha256 = compact_source["saved_frame_sha256"]
+                assert isinstance(saved_sha256, list)
+                for saved_hash, saved_frame in zip(
+                    saved_sha256,
+                    source.saved_frames,
+                ):
+                    assert isinstance(saved_hash, str)
+                    if saved_hash in seen:
+                        continue
+                    seen.add(saved_hash)
+                    referenced_blobs.append((saved_hash, saved_frame))
+            record["replay_state_bundle"] = encode_replay_bundle(
+                referenced_blobs,
+                blob_bytes=SAVED_FRAME_BYTES,
+            )
         if self.layout == AUXILIARY_VM_BATCH_LAYOUT_V1:
             record.update(
                 {

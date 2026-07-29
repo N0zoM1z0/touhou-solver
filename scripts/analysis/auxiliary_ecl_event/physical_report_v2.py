@@ -1,0 +1,507 @@
+"""Strict physical report for schema-v5 cached/bundled event delivery."""
+
+from __future__ import annotations
+
+from collections import Counter
+import hashlib
+from pathlib import Path
+from typing import Any
+
+from analysis.auxiliary_vm_batch_trace import scan_trace
+from analysis.th08_runtime_ecl_identity_audit import (
+    STAGE5_STATIC_LABEL,
+    STAGE5_STATIC_LENGTH,
+    STAGE5_STATIC_SHA256,
+    audit as audit_runtime_ecl_identity,
+)
+from th08_ecl_tool.core import parse_ecl
+from th08_live.auxiliary_vm.trace_service import (
+    AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
+)
+
+from .cache_oracle import IndependentIntentLru
+from .physical_gate_support import (
+    AuxiliaryEclEventPhysicalAuditError,
+    digest,
+    distribution,
+    expected_runtime_version,
+    finite_nonnegative,
+    session_record,
+    trace_delivery_rows,
+    within,
+)
+from .physical_replay import (
+    AuxiliaryEclEventReplayError,
+    ReplayProgram,
+    audit_event_batch_v2,
+)
+from .replay_evidence import array, mapping
+
+
+REPORT_SCHEMA = "th08-g5-auxiliary-ecl-event-physical-gate-v2"
+REPORT_AUTHORITY = "physical_trace_only_no_action_authority"
+PREPARATION_SCHEMA = "th08-auxiliary-ecl-event-preparation-v1"
+EVENT_DERIVE_LIMIT_MS = (0.50, 1.00, 3.00)
+REPLAY_COMPACT_LIMIT_MS = (0.50, 1.00, 3.00)
+TRACE_EMIT_LIMIT_MS = (1.00, 2.00, 6.00)
+TRANSACTION_TOTAL_LIMIT_MS = (3.00, 5.00, 15.00)
+PREPARATION_MAXIMUM_MS = 8.0
+CACHE_CAPACITY = 512
+
+
+def _preparation_record(
+    rows: list[dict[str, Any]],
+    *,
+    expected_version: dict[str, object],
+    first_batch_frame: int,
+) -> tuple[dict[str, object], bool]:
+    if len(rows) != 1:
+        return (
+            {
+                "count": len(rows),
+                "status": "missing_or_multiple",
+            },
+            False,
+        )
+    row = rows[0]
+    timing = mapping(row.get("timing_ms"), "preparation.timing_ms")
+    bind_ms = finite_nonnegative(
+        timing.get("program_bind"),
+        "preparation.program_bind",
+    )
+    total_ms = finite_nonnegative(
+        timing.get("total"),
+        "preparation.total",
+    )
+    configuration = mapping(
+        row.get("configuration"),
+        "preparation.configuration",
+    )
+    passed = bool(
+        row.get("kind") == "auxiliary_ecl_event_preparation"
+        and row.get("schema") == PREPARATION_SCHEMA
+        and row.get("authority") == "trace_only_no_action_authority"
+        and row.get("status") == "success"
+        and row.get("error") is None
+        and row.get("runtime_version") == expected_version
+        and row.get("gameplay_epoch")
+        == expected_version["gameplay_epoch"]
+        and row.get("stage_route_index") == 5
+        and isinstance(row.get("decision_frame"), int)
+        and row["decision_frame"] < first_batch_frame
+        and row.get("snapshot_frame") is not None
+        and configuration
+        == {
+            "active_difficulty_mask": 0x08,
+            "maximum_instructions": 64,
+            "maximum_physical_steps": 65536,
+            "cache_capacity": CACHE_CAPACITY,
+            "target_horizons": {"69": 16, "72": 16, "73": 60},
+        }
+        and bind_ms <= total_ms
+        and total_ms <= PREPARATION_MAXIMUM_MS
+    )
+    return (
+        {
+            "count": 1,
+            "status": row.get("status"),
+            "decision_frame": row.get("decision_frame"),
+            "snapshot_frame": row.get("snapshot_frame"),
+            "configuration": configuration,
+            "timing_ms": {
+                "program_bind": bind_ms,
+                "total": total_ms,
+                "maximum": PREPARATION_MAXIMUM_MS,
+            },
+        },
+        passed,
+    )
+
+
+def _empty_row_valid(row: dict[str, Any]) -> bool:
+    observation = mapping(row.get("observation"), "empty.observation")
+    event = mapping(row.get("event_derivation"), "empty.event")
+    lowering = mapping(event.get("lowering"), "empty.lowering")
+    bundle = mapping(
+        observation.get("replay_state_bundle"),
+        "empty.replay_state_bundle",
+    )
+    return bool(
+        observation.get("record_count") == 0
+        and observation.get("non_null_context_count") == 0
+        and observation.get("usable_context_count") == 0
+        and observation.get("state_payload_bytes") == 0
+        and array(observation.get("records"), "empty.records") == []
+        and bundle.get("blob_count") == 0
+        and bundle.get("uncompressed_bytes") == 0
+        and event.get("status") == "empty_complete"
+        and event.get("request_count") == 0
+        and event.get("complete_count") == 0
+        and event.get("unknown_count") == 0
+        and array(event.get("requests"), "empty.requests") == []
+        and lowering.get("request_count") == 0
+        and lowering.get("unique_result_count") == 0
+    )
+
+
+def build_physical_report_v2(
+    trace_path: Path,
+    baseline_path: Path,
+    session_path: Path,
+    ecl_path: Path,
+    *,
+    expected_ecl_sha256: str = STAGE5_STATIC_SHA256,
+) -> dict[str, object]:
+    image = ecl_path.read_bytes()
+    actual_ecl_sha256 = hashlib.sha256(image).hexdigest()
+    if (
+        expected_ecl_sha256 != STAGE5_STATIC_SHA256
+        or actual_ecl_sha256 != expected_ecl_sha256
+        or len(image) != STAGE5_STATIC_LENGTH
+    ):
+        raise AuxiliaryEclEventPhysicalAuditError(
+            "static Stage-5 ECL identity is invalid"
+        )
+    ecl = parse_ecl(ecl_path)
+    if ecl.sha256 != actual_ecl_sha256:
+        raise AuxiliaryEclEventPhysicalAuditError(
+            "parsed ECL identity differs from exact bytes"
+        )
+    identity = audit_runtime_ecl_identity(
+        trace_path,
+        expected_static_label=STAGE5_STATIC_LABEL,
+        expected_static_length=STAGE5_STATIC_LENGTH,
+        expected_static_sha256=STAGE5_STATIC_SHA256,
+    )
+    expected_version = expected_runtime_version(identity)
+    runtime_base = expected_version["runtime_base"]
+    assert isinstance(runtime_base, int)
+    program = ReplayProgram.from_ecl(
+        ecl,
+        image,
+        runtime_base=runtime_base,
+    )
+
+    scan = scan_trace(trace_path, audit_batches=True)
+    baseline = scan_trace(baseline_path, audit_batches=False)
+    rows, preparations, trace_sha256, trace_bytes = trace_delivery_rows(
+        trace_path
+    )
+    if scan.sha256 != trace_sha256 or scan.byte_count != trace_bytes:
+        raise AuxiliaryEclEventPhysicalAuditError(
+            "independent trace digests disagree"
+        )
+    session, session_pass = session_record(session_path)
+    first_batch_frame = rows[0].get("frame") if rows else -1
+    if isinstance(first_batch_frame, bool) or not isinstance(
+        first_batch_frame,
+        int,
+    ):
+        raise AuxiliaryEclEventPhysicalAuditError(
+            "first batch frame is invalid"
+        )
+    preparation, preparation_pass = _preparation_record(
+        preparations,
+        expected_version=expected_version,
+        first_batch_frame=first_batch_frame,
+    )
+
+    event_statuses: Counter[str] = Counter()
+    targets: Counter[int] = Counter()
+    request_count = 0
+    complete_count = 0
+    unknown_count = 0
+    replayable_record_count = 0
+    replay_blob_count = 0
+    empty_frames: list[int] = []
+    seen_nonempty = False
+    empty_prefix_valid = True
+    derive_ms: list[float] = []
+    compact_ms: list[float] = []
+    previous_emit_ms: list[float] = []
+    total_ms: list[float] = []
+    cache_oracle = IndependentIntentLru(CACHE_CAPACITY)
+    cache_totals: Counter[str] = Counter()
+    for index, row in enumerate(rows):
+        context = f"batch[{index}]"
+        if (
+            row.get("schema_version")
+            != AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION
+            or row.get("status") != "success"
+            or row.get("stage_route_index") != 5
+            or row.get("spell_id") != 107
+            or row.get("gameplay_epoch")
+            != expected_version["gameplay_epoch"]
+        ):
+            raise AuxiliaryEclEventPhysicalAuditError(
+                f"{context} differs from the fixed schema-v5 workload"
+            )
+        timing = mapping(row.get("timing_ms"), f"{context}.timing")
+        derive_ms.append(
+            finite_nonnegative(
+                timing.get("event_derive"),
+                f"{context}.event_derive",
+            )
+        )
+        compact_ms.append(
+            finite_nonnegative(
+                timing.get("compact"),
+                f"{context}.compact",
+            )
+        )
+        total_ms.append(
+            finite_nonnegative(
+                timing.get("total"),
+                f"{context}.total",
+            )
+        )
+        previous_emit = timing.get("previous_emit")
+        if previous_emit is not None:
+            previous_emit_ms.append(
+                finite_nonnegative(
+                    previous_emit,
+                    f"{context}.previous_emit",
+                )
+            )
+        try:
+            replay = audit_event_batch_v2(
+                row,
+                expected_runtime_version=expected_version,
+                program=program,
+                context=context,
+            )
+        except AuxiliaryEclEventReplayError as error:
+            raise AuxiliaryEclEventPhysicalAuditError(str(error)) from error
+        event = mapping(row.get("event_derivation"), f"{context}.event")
+        cache = mapping(event.get("cache"), f"{context}.cache")
+        expected_cache = cache_oracle.observe(replay.intent_keys).record()
+        if cache != expected_cache:
+            raise AuxiliaryEclEventPhysicalAuditError(
+                f"{context} cache statistics differ from independent LRU"
+            )
+        cache_totals.update(
+            {
+                "request_local_hits": expected_cache[
+                    "request_local_hits"
+                ],
+                "persistent_hits": expected_cache["persistent_hits"],
+                "misses": expected_cache["misses"],
+                "evictions": expected_cache["evictions"],
+            }
+        )
+        observation = mapping(
+            row.get("observation"),
+            f"{context}.observation",
+        )
+        bundle = mapping(
+            observation.get("replay_state_bundle"),
+            f"{context}.bundle",
+        )
+        blob_count = bundle.get("blob_count")
+        if isinstance(blob_count, bool) or not isinstance(blob_count, int):
+            raise AuxiliaryEclEventPhysicalAuditError(
+                f"{context} replay blob count is invalid"
+            )
+        replay_blob_count += blob_count
+        event_status = str(event.get("status"))
+        event_statuses[event_status] += 1
+        if replay.request_count == 0:
+            frame = row.get("frame")
+            assert isinstance(frame, int)
+            empty_frames.append(frame)
+            empty_prefix_valid = (
+                empty_prefix_valid
+                and not seen_nonempty
+                and _empty_row_valid(row)
+            )
+        else:
+            seen_nonempty = True
+        request_count += replay.request_count
+        complete_count += replay.complete_count
+        unknown_count += replay.unknown_count
+        replayable_record_count += replay.replayable_record_count
+        targets.update(dict(replay.target_counts))
+
+    event_distribution = distribution(derive_ms)
+    compact_distribution = distribution(compact_ms)
+    emit_distribution = distribution(previous_emit_ms)
+    total_distribution = distribution(total_ms)
+    cadence = distribution(scan.decision_deltas)
+    baseline_cadence = distribution(baseline.decision_deltas)
+    expected_statuses = Counter({"success": len(rows) - len(empty_frames)})
+    if empty_frames:
+        expected_statuses["empty_complete"] = len(empty_frames)
+    gates = {
+        "schema_v5_rows_present": bool(rows)
+        and scan.batch_schema_versions
+        == Counter(
+            {
+                AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION: len(
+                    rows
+                )
+            }
+        ),
+        "preparation_exact_and_bounded": preparation_pass,
+        "transport_success_and_coherent": bool(rows)
+        and scan.batch_statuses == Counter({"success": len(rows)})
+        and not scan.validation_errors,
+        "exact_runtime_version_on_every_batch": bool(rows),
+        "empty_prefix_valid": bool(seen_nonempty and empty_prefix_valid),
+        "event_status_success_or_empty": event_statuses
+        == expected_statuses,
+        "replay_bundle_present": replay_blob_count > 0,
+        "independent_oracle_parity": request_count > 0
+        and complete_count == request_count
+        and unknown_count == 0,
+        "independent_cache_parity": request_count
+        == (
+            cache_totals["request_local_hits"]
+            + cache_totals["persistent_hits"]
+            + cache_totals["misses"]
+        ),
+        "contracted_targets_only": bool(targets)
+        and set(targets).issubset({69, 72, 73}),
+        "no_added_process_reads_in_event_layer": bool(rows)
+        and not scan.validation_errors,
+        "event_derive_timing": within(
+            event_distribution,
+            EVENT_DERIVE_LIMIT_MS,
+        ),
+        "replay_compact_timing": within(
+            compact_distribution,
+            REPLAY_COMPACT_LIMIT_MS,
+        ),
+        "trace_emit_timing": within(
+            emit_distribution,
+            TRACE_EMIT_LIMIT_MS,
+        ),
+        "transaction_total_timing": within(
+            total_distribution,
+            TRANSACTION_TOTAL_LIMIT_MS,
+        ),
+        "decision_cadence_p95_regression_at_most_one_frame": bool(
+            cadence is not None
+            and baseline_cadence is not None
+            and cadence["p95"] <= baseline_cadence["p95"] + 1.0
+        ),
+        "hard_no_bomb_route_complete": bool(
+            identity["physical_scope"]["hard_no_bomb_passed"]
+        ),
+        "accepted_session_cleanup": session_pass,
+    }
+    report: dict[str, object] = {
+        "schema": REPORT_SCHEMA,
+        "authority": REPORT_AUTHORITY,
+        "source": {
+            "trace": str(trace_path),
+            "trace_bytes": trace_bytes,
+            "trace_sha256": trace_sha256,
+            "baseline": str(baseline_path),
+            "baseline_sha256": baseline.sha256,
+            "session": str(session_path),
+        },
+        "static_ecl": {
+            "path": str(ecl_path),
+            "bytes": len(image),
+            "sha256": actual_ecl_sha256,
+        },
+        "runtime_version": expected_version,
+        "preparation": preparation,
+        "session": session,
+        "transport": {
+            "batch_count": scan.batch_count,
+            "schema_versions": {
+                str(key): value
+                for key, value in sorted(
+                    scan.batch_schema_versions.items()
+                )
+            },
+            "statuses": dict(sorted(scan.batch_statuses.items())),
+            "validation_errors": scan.validation_errors,
+            "process_read_count": distribution(scan.process_reads),
+        },
+        "replay": {
+            "event_statuses": dict(sorted(event_statuses.items())),
+            "empty_prefix_frames": empty_frames,
+            "request_count": request_count,
+            "complete_count": complete_count,
+            "unknown_count": unknown_count,
+            "replayable_record_count": replayable_record_count,
+            "replay_blob_count": replay_blob_count,
+            "target_subroutines": {
+                str(key): value for key, value in sorted(targets.items())
+            },
+            "physical_timing": "unavailable_timer_domain_only",
+        },
+        "cache": {
+            **dict(sorted(cache_totals.items())),
+            "entries_after": cache_oracle.observe(()).entries_after,
+            "capacity": CACHE_CAPACITY,
+        },
+        "timing_ms": {
+            "event_derive": event_distribution,
+            "replay_compact": compact_distribution,
+            "previous_trace_emit": emit_distribution,
+            "transaction_total": total_distribution,
+            "decision_frame_delta": cadence,
+            "baseline_decision_frame_delta": baseline_cadence,
+        },
+        "limits_ms": {
+            "preparation_maximum": PREPARATION_MAXIMUM_MS,
+            "event_derive_p95_p99_max": list(EVENT_DERIVE_LIMIT_MS),
+            "replay_compact_p95_p99_max": list(
+                REPLAY_COMPACT_LIMIT_MS
+            ),
+            "trace_emit_p95_p99_max": list(TRACE_EMIT_LIMIT_MS),
+            "transaction_total_p95_p99_max": list(
+                TRANSACTION_TOTAL_LIMIT_MS
+            ),
+            "cadence_p95_regression_frames": 1.0,
+        },
+        "gates": gates,
+        "passed": all(gates.values()),
+        "authority_boundary": {
+            "runtime_instruction_bytes": "exact_for_this_immutable_image",
+            "auxiliary_literal_fire_timer_schedule": (
+                "independently_replayed_for_observed_contexts"
+            ),
+            "physical_frame_timing": "none",
+            "source_lifetime": "none",
+            "realized_birth_geometry": "none",
+            "planner": "none",
+            "physical_action": "none",
+        },
+    }
+    report["report_digest"] = digest(report)
+    return report
+
+
+def write_report_v2(report: dict[str, object], path: Path) -> None:
+    import json
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            report,
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+__all__ = [
+    "AuxiliaryEclEventPhysicalAuditError",
+    "CACHE_CAPACITY",
+    "EVENT_DERIVE_LIMIT_MS",
+    "PREPARATION_MAXIMUM_MS",
+    "REPLAY_COMPACT_LIMIT_MS",
+    "REPORT_AUTHORITY",
+    "REPORT_SCHEMA",
+    "TRACE_EMIT_LIMIT_MS",
+    "TRANSACTION_TOTAL_LIMIT_MS",
+    "build_physical_report_v2",
+    "write_report_v2",
+]

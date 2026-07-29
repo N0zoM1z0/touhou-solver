@@ -3743,6 +3743,28 @@ def _run_live_session(
                         ),
                     ),
                 )
+            if (
+                auxiliary_ecl_event_service is not None
+                and runtime_ecl_identity_service is not None
+            ):
+                auxiliary_ecl_event_preparation = (
+                    auxiliary_ecl_event_service.prepare_if_needed(
+                        runtime_ecl_identity_service.accepted_version,
+                        gameplay_epoch=gameplay_epoch,
+                        stage_route_index=int(
+                            state["stage_route_index"]
+                        ),
+                        decision_frame=counter_at_action,
+                        snapshot_frame=int(
+                            state["enemy_manager_frame"]
+                        ),
+                    )
+                )
+                if auxiliary_ecl_event_preparation is not None:
+                    trace_sink.emit(
+                        auxiliary_ecl_event_preparation,
+                        flush=True,
+                    )
             if auxiliary_vm_batch_service is not None:
                 current_spell_id = (
                     int(spell_state["spell_id"])

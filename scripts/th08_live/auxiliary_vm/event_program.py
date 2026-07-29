@@ -24,6 +24,8 @@ class AuxiliaryEclEventConfiguration:
     expected_stage_route_index: int
     target_horizons: tuple[tuple[int, int], ...] = DEFAULT_TARGET_HORIZONS
     maximum_instructions: int = 64
+    maximum_physical_steps: int = 65536
+    cache_capacity: int = 512
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +48,14 @@ class AuxiliaryEclEventProgram:
         if configuration.maximum_instructions <= 0:
             raise ValueError(
                 "auxiliary event instruction limit must be positive"
+            )
+        if configuration.maximum_physical_steps <= 0:
+            raise ValueError(
+                "auxiliary event physical-step limit must be positive"
+            )
+        if configuration.cache_capacity <= 0:
+            raise ValueError(
+                "auxiliary event cache capacity must be positive"
             )
         target_horizons = dict(configuration.target_horizons)
         if (
@@ -78,7 +88,7 @@ class AuxiliaryEclEventProgram:
         self._bound: BoundAuxiliaryEclProgram | None = None
 
     @staticmethod
-    def _version_key(
+    def version_key(
         version: RuntimeEclAcceptedVersion,
     ) -> tuple[object, ...]:
         return (
@@ -117,7 +127,7 @@ class AuxiliaryEclEventProgram:
         self,
         version: RuntimeEclAcceptedVersion,
     ) -> BoundAuxiliaryEclProgram:
-        key = self._version_key(version)
+        key = self.version_key(version)
         if self._bound is not None and self._bound.version_key == key:
             return self._bound
         instruction_index = build_exact_runtime_instruction_index(

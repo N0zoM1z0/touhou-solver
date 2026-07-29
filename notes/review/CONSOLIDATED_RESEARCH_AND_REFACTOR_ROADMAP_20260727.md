@@ -117,10 +117,13 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   six initial zero-context rows fail the fixed all-success status gate, event
   derivation p95 is `0.879 ms`, replay compact maximum is `11.335 ms`, and
   synchronous emit p95 is `2.871 ms`. CE-0168 fixes this failure in history.
-  The next G5 delivery version must contract bounded exact-version caching,
-  visible pre-bind, hash-addressed compact replay, and independently verified
-  empty-prefix semantics before implementation; unchanged per-batch timing
-  and cadence gates require a fresh physical run.
+  The separately contracted schema-v5 correction now implements bounded
+  exact-version caching, visible pre-bind, hash-addressed compact replay, and
+  independently verified empty-prefix semantics. Five retained-trace repeats
+  pass the fixed isolated gates on both Linux and Windows; the first repeat
+  has 46 misses and 3,784 exact reuse hits. This remains preflight only:
+  unchanged per-batch timing and cadence gates require a fresh focused
+  physical run.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

@@ -164,8 +164,16 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   repeats replay 19,150 requests with zero unknown and exact cache parity.
   Maximum line size is `13743/13741` bytes; derive/compact/JSON p95 is
   `0.190/0.236/0.100 ms` and `0.280/0.390/0.149 ms`. A structural projection
-  of the failed fresh V4 distribution tops out at 14,038 bytes. Physical
-  contention and survival remain open and must be tested separately.
+  of the failed fresh V4 distribution tops out at 14,038 bytes.
+- Fresh physical V5 run `20260729_120859` accepts exact columnar semantics and
+  the 15,453-byte maximum, but rejects the separate synchronous publication:
+  replay-compact p95/max is `0.507/8.452 ms` and previous emit p95 is
+  `1.412 ms`. It takes 14 hits (`5/1/5/2/1`). CE-0173 changes the next
+  delivery problem from field compaction to publication composition. Before
+  implementation, fix an independently reversible same-iteration envelope
+  contract that restores exact V5 evidence inside the existing decision
+  publication and eliminates the second OS write. Keep old failed gates
+  immutable and survival separate.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

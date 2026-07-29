@@ -164,8 +164,17 @@ describe the same decision. Python/C++ parity is not physical correctness.
   platform independently replays 19,150 requests with zero unknown and exact
   cache parity. Maximum line size is `13743/13741` bytes; physical-V4
   structural projection tops out at 14,038 bytes. Complete 1,038-test suites
-  pass. Run one fresh V5 Stage-5 physical delivery gate next, without a
-  combat intervention; retain every result.
+  pass.
+  Fresh physical run `20260729_120859` then accepts V5's exact semantics and
+  size correction over 154 batches and 4,238 requests, but rejects separate
+  synchronous publication and survival. Physical line p95/max is
+  `14899/15453` bytes, while replay-compact p95/max is `0.507/8.452 ms` and
+  previous emit p95 is `1.412 ms`; the run takes 14 hits
+  (`5/1/5/2/1`). CE-0173 requires a separately contracted same-iteration
+  coalesced envelope that independently restores exact V5 evidence inside
+  the existing decision publication and eliminates the second OS write.
+  Do not loosen V5's historical gates or combine the delivery correction
+  with a combat intervention.
   Unsupported emission, source-life, dynamic parameter, transform,
   realized-birth, geometry, and action dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model

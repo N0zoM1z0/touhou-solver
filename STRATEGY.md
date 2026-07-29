@@ -619,8 +619,16 @@ comparison.
    with exact cache parity and zero unknown. Maximum line size is
    `13743/13741` bytes; derive/compact/JSON p95 is
    `0.190/0.236/0.100 ms` and `0.280/0.390/0.149 ms`. This remains
-   default-off trace-only evidence until a fresh physical Stage-5 gate;
-   survival changes are deliberately excluded from that first run.
+   default-off trace-only evidence.
+   Fresh physical run `20260729_120859` accepts V5 semantics and line size
+   over 154 batches and 4,238 requests, but rejects the still-separate
+   synchronous publication: replay-compact p95/max is `0.507/8.452 ms` and
+   previous emit p95 is `1.412 ms`. It also takes 14 hits
+   (`5/1/5/2/1`). CE-0173 retains the failure. The next delivery proposal
+   must eliminate the second OS write by coalescing an independently
+   reversible exact-V5 envelope into the same-iteration decision publication;
+   it must not loosen or relabel V5's failed gate. Survival remains a
+   separately versioned correction.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the

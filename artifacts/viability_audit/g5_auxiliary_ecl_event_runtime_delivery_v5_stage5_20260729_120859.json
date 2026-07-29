@@ -1,0 +1,274 @@
+{
+  "authority": "physical_trace_only_no_action_authority",
+  "authority_boundary": {
+    "auxiliary_literal_fire_timer_schedule": "independently_replayed_for_observed_contexts",
+    "physical_action": "none",
+    "physical_frame_timing": "none",
+    "planner": "none",
+    "realized_birth_geometry": "none",
+    "runtime_instruction_bytes": "exact_for_this_immutable_image",
+    "source_lifetime": "none"
+  },
+  "cache": {
+    "capacity": 512,
+    "entries_after": 46,
+    "evictions": 0,
+    "misses": 46,
+    "persistent_hits": 1970,
+    "request_local_hits": 2222
+  },
+  "gates": {
+    "accepted_session_cleanup": true,
+    "contracted_targets_only": true,
+    "decision_cadence_p95_regression_at_most_one_frame": true,
+    "empty_prefix_valid": true,
+    "event_derive_timing": true,
+    "event_status_success_or_empty": true,
+    "exact_runtime_version_on_every_batch": true,
+    "hard_no_bomb_route_complete": true,
+    "independent_cache_parity": true,
+    "independent_oracle_parity": true,
+    "no_added_process_reads_in_event_layer": true,
+    "preparation_exact_and_bounded": true,
+    "projected_batch_line_maximum": true,
+    "replay_bundle_present": true,
+    "replay_compact_timing": false,
+    "schema_v8_rows_present": true,
+    "stage5_survival_regression_boundary": false,
+    "trace_emit_timing": false,
+    "transaction_total_timing": true,
+    "transport_success_and_coherent": true
+  },
+  "limits_bytes": {
+    "projected_batch_line_maximum": 24576
+  },
+  "limits_ms": {
+    "cadence_p95_regression_frames": 1.0,
+    "event_derive_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ],
+    "preparation_maximum": 1.0,
+    "replay_compact_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ],
+    "trace_emit_p95_p99_max": [
+      1.0,
+      2.0,
+      6.0
+    ],
+    "transaction_total_p95_p99_max": [
+      3.0,
+      5.0,
+      15.0
+    ]
+  },
+  "observation_epochs": {
+    "accepted_gameplay_epoch": 0,
+    "batch_gameplay_epochs": {
+      "2": 154
+    },
+    "cross_epoch_observed": true
+  },
+  "passed": false,
+  "preparation": {
+    "accepted_gameplay_epoch": 0,
+    "bound_instruction_count": 9,
+    "configuration": {
+      "active_difficulty_mask": 8,
+      "cache_capacity": 512,
+      "maximum_instructions": 64,
+      "maximum_physical_steps": 65536,
+      "target_horizons": {
+        "69": 16,
+        "72": 16,
+        "73": 60
+      }
+    },
+    "count": 1,
+    "decision_frame": 2,
+    "observation_epoch_semantics": "provenance_not_program_mutation",
+    "observation_gameplay_epoch": 0,
+    "prevalidated_instruction_count": 1664,
+    "program_identity": {
+      "difficulty_index": 3,
+      "image_length": 47224,
+      "normalized_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      "relocated_sha256": "125df0614c08e6e8791f37105e3d2a77a26e211859c95e2a4fb072ecdc17fd40",
+      "route_id": 2,
+      "runtime_base": 186449992,
+      "stage_route_index": 5,
+      "static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19"
+    },
+    "program_identity_key": [
+      186449992,
+      47224,
+      "125df0614c08e6e8791f37105e3d2a77a26e211859c95e2a4fb072ecdc17fd40",
+      "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      2,
+      3,
+      5
+    ],
+    "snapshot_frame": 1,
+    "status": "success",
+    "timing_ms": {
+      "maximum": 1.0,
+      "program_bind": 0.07420009933412075,
+      "total": 0.09510002564638853
+    }
+  },
+  "replay": {
+    "complete_count": 4238,
+    "empty_prefix_frames": [
+      28443,
+      28460,
+      28477,
+      28493,
+      28510,
+      28528
+    ],
+    "event_statuses": {
+      "empty_complete": 6,
+      "success": 148
+    },
+    "physical_timing": "unavailable_timer_domain_only",
+    "replay_blob_count": 4238,
+    "replayable_record_count": 4238,
+    "request_count": 4238,
+    "target_subroutines": {
+      "69": 1046,
+      "72": 1073,
+      "73": 2119
+    },
+    "unknown_count": 0
+  },
+  "report_digest": "e880cefa96d659115a8fbf46ff80765aae5dd08610a9357afc81d03535cc7610",
+  "runtime_version": {
+    "decision_frame": 2,
+    "difficulty_index": 3,
+    "gameplay_epoch": 0,
+    "image_length": 47224,
+    "normalized_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "relocated_sha256": "125df0614c08e6e8791f37105e3d2a77a26e211859c95e2a4fb072ecdc17fd40",
+    "route_id": 2,
+    "runtime_base": 186449992,
+    "schema": "th08-runtime-ecl-accepted-version-v1",
+    "snapshot_frame": 1,
+    "stage_route_index": 5,
+    "static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19"
+  },
+  "schema": "th08-g5-auxiliary-ecl-event-physical-gate-v5",
+  "session": {
+    "auxiliary_vm_batch_spell_id": 107,
+    "hard_no_bomb": true,
+    "hit_count": null,
+    "passed": true,
+    "path": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_120859.session.json",
+    "run_id": "lunatic_route2_stage5_unattended_20260729_120859",
+    "runtime_ecl_static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "status": "completed",
+    "termination_reason": "route_complete",
+    "trace_auxiliary_ecl_events": true,
+    "trace_auxiliary_vm_batches": true,
+    "trial_accepted": true
+  },
+  "source": {
+    "baseline": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_200739.jsonl",
+    "baseline_sha256": "953a5c3cb4bef84a809c9d2681aedcc081f67cc7f8dc39aa942bc42f0da779e9",
+    "session": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_120859.session.json",
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_120859.jsonl",
+    "trace_bytes": 496065829,
+    "trace_sha256": "4f2505ff84753e07fa5bf827dc71f770c8190e4aafc01e536819d87b23d50088"
+  },
+  "static_ecl": {
+    "bytes": 47224,
+    "path": "artifacts/decoded/ecldata5.ecl",
+    "sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19"
+  },
+  "survival_regression_boundary": {
+    "consecutive_run_requirement": 2,
+    "hit_count": 14,
+    "maximum": 10,
+    "single_run_only": true
+  },
+  "timing_ms": {
+    "baseline_decision_frame_delta": {
+      "count": 13094,
+      "max": 1803.0,
+      "mean": 3.0206965022147547,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 4.0
+    },
+    "decision_frame_delta": {
+      "count": 11743,
+      "max": 1804.0,
+      "mean": 3.330665077067189,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 5.0
+    },
+    "event_derive": {
+      "count": 154,
+      "max": 0.6757999071851373,
+      "mean": 0.253851945790184,
+      "p50": 0.24465000024065375,
+      "p95": 0.3817050310317425,
+      "p99": 0.49058801028877497
+    },
+    "previous_trace_emit": {
+      "count": 153,
+      "max": 1.5959000447764993,
+      "mean": 1.0007045816118811,
+      "p50": 1.0294000385329127,
+      "p95": 1.4118800172582269,
+      "p99": 1.5681959548965096
+    },
+    "replay_compact": {
+      "count": 154,
+      "max": 8.451799978502095,
+      "mean": 0.38921688804281995,
+      "p50": 0.3358999965712428,
+      "p95": 0.5072449799627065,
+      "p99": 0.5926829867530614
+    },
+    "transaction_total": {
+      "count": 154,
+      "max": 9.469899930991232,
+      "mean": 1.7511558434744547,
+      "p50": 1.6689500189386308,
+      "p95": 2.46188499731943,
+      "p99": 3.1256359489634633
+    }
+  },
+  "transport": {
+    "batch_count": 154,
+    "batch_line_bytes": {
+      "count": 154,
+      "max": 15453.0,
+      "mean": 13150.402597402597,
+      "p50": 13935.5,
+      "p95": 14899.1,
+      "p99": 14982.470000000001
+    },
+    "process_read_count": {
+      "count": 154,
+      "max": 248.0,
+      "mean": 108.25974025974025,
+      "p50": 117.0,
+      "p95": 135.35,
+      "p99": 142.0
+    },
+    "schema_versions": {
+      "8": 154
+    },
+    "statuses": {
+      "success": 154
+    },
+    "validation_errors": []
+  }
+}

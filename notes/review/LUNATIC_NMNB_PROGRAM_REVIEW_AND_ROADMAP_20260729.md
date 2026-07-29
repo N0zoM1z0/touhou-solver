@@ -751,13 +751,14 @@ Execution progress on 2026-07-29:
   `UNKNOWN`. Complete Linux/Windows discovery passes 1,087 tests; Windows
   keeps three existing skips.
 - **Authority boundary:** SEM-SCALE-A/B and isolated-source C1/C2/C3 pass
-  their declared offline/retained slices only. C4 now implements a complete
-  main/auxiliary writer and installed-callback/phase-coherence observer, but
-  has no accepted physical row. The root-only live daemon therefore still
-  records `time_scale_authority_unknown`, terminates, and releases keys
-  before corridor submission or local issue. SEM-SCALE-C must pass the
-  default-off trace-only physical evidence and then the focused physical
-  falsifier. No strategy promotion is authorized by implementation alone.
+  their declared offline/retained slices only. C4 now has one accepted
+  complete-source physical replay row, but no live schedule consumer or
+  action authority. The root-only live daemon therefore still records
+  `time_scale_authority_unknown`, terminates, and releases keys before
+  corridor submission or local issue. SEM-SCALE-C must integrate and
+  dual-platform gate exact-version schedule delivery before the focused
+  physical falsifier. No strategy promotion is authorized by trace-only
+  source acceptance.
 - **Observed SEM-SCALE-C1 root capsule:** checkpoint `1f639ef` binds the
   three existing Final-B raw sessions and retains 68/78/84 spell-190 rows at
   binary32 scale `0.25`. All 230 read-lag horizons are zero or one, so root
@@ -801,9 +802,26 @@ Execution progress on 2026-07-29:
   corrected the installed fields to selected ECL VM `+0x10/+0x14` (main
   enemy `+0x808/+0x80C`) and confirmed main VM -> auxiliary 0..3 -> enemy
   motion order. Linux/Windows discovery passes 1,107 tests in
-  13.728/29.427 seconds with three existing Windows skips. No game was
-  launched; this proves implementation and fail-closed parity, not the C4
-  physical trace, live schedule delivery, survival, or NMNB.
+  13.728/29.427 seconds with three existing Windows skips.
+- **Observed SEM-SCALE-C4 physical gate:** corrected checkpoints `88b8c14`
+  and `0c33645` first defer capture to the quarter-scale root, reduce the
+  full-pool transaction from 36.834 ms to 7.734 ms, and separate stable
+  replay/no-life-patch predeath residue from a fresh semantic-root hit.
+  Native replay attempt `20260729_215613` then passes every strict check at
+  manager frame 74787: exact executable/runtime-ECL identity, all ordinary
+  slots plus spell owner, one valid main VM, zero auxiliary contexts,
+  installed callback zero, scale `0.25`, Bomb zero, complete 300-frame
+  schedule, one callback-18 unit restore at relative frame 240, and no
+  callback-28/29 bullet side effect. Capture/report SHA-256 values are
+  `22e3d69d249b512f6c73e3816e3206373c89776b53f183fc0ebf7e1d71a2e48d`
+  and
+  `d4aa9b9c065bde6de3ba899ff95e4ff3eea10f166714e561c00743100d4e138a`.
+  The replay has zero Bomb presses, but the physical root retains predeath 7.
+  Thus the complete-source semantics are accepted; clean player state,
+  schedule delivery, action authority, survival, and NMNB remain open.
+  CE-0186/0187 retain the two rejected assumptions, and
+  `notes/operations/NATIVE_REPLAY_PHYSICAL_FALSIFICATION.md` makes the
+  shipped-replay hypothesis-check method reusable.
 
 #### 1C. Action-conditioned player/enemy mode
 
@@ -1163,10 +1181,22 @@ baseline and the ordered dependency chain above are part of the result.
   Stage-5 roots mapped at base `0x0B1D0048`, zero past/unmapped roots, and
   only zero-fraction/unit-scale physical states. CE-0184 preserves the failed
   threshold without misattributing the pre-consumer canonical hit.
+- For SEM-SCALE-C4, three exact native-replay attempts are retained. The first
+  fails the quarter-root/frame-coherence gate, the second falsifies a
+  zero-predeath source-semantic requirement, and `20260729_215613` passes the
+  strict physical complete-source report. The accepted capture is 26,627
+  bytes, has exact executable/runtime-ECL/replay scope, manager frame 74787,
+  7.734-ms capture, one main source, no auxiliary/installed callback, and a
+  complete callback-18 restore schedule. Its predeath-7 contamination is
+  explicit and grants no clean-survival or NMNB authority. CE-0186/0187,
+  the replay-method note, compact artifacts, hashes, and IDA replay-menu
+  annotations are retained.
 - No matching TH08 gameplay, controller, practice-supervisor, or
   full-route-supervisor process is left running.
 - The original documentation-only checkpoint did not rerun Windows tests;
   the two later physical preflights above did. Keep those scopes distinct.
-- No IDA mutation has occurred in the review or Phase-0 physical checkpoints.
-  Phase 1 explicitly authorizes and expects evidence-backed IDB
-  renames/types/comments.
+- No IDA mutation occurred in the review or Phase-0 physical checkpoints.
+  Phase 1 evidence-backed IDB changes are now retained: scale/ECL field and
+  scheduler comments, spell-state renames/comments, replay-menu function
+  rename `title_replay_menu_update`, and compact-selection/launch-state
+  comments.

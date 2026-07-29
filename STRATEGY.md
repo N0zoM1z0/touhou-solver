@@ -434,10 +434,16 @@ auxiliary context, unknown/scale installed callback, invalid VM, source
 multiplicity, identity drift, incomplete schedule, or callback-28/29 bullet
 side effect is explicit `UNKNOWN`. Revalidation corrects the installed
 callback fields from the inherited enemy-base label to current ECL VM
-`+0x10/+0x14` (main enemy `+0x808/+0x80C`). Linux/Windows tests pass, but no
-game was launched and no physical C4 row exists. This is not live schedule
-delivery or strategy promotion; the daemon remains fail-closed until C4
-physical acceptance and the separate focused Final-B falsifier.
+`+0x10/+0x14` (main enemy `+0x808/+0x80C`). Linux/Windows tests pass.
+Native replay trace `20260729_215613` now physically accepts this
+complete-source join at Final-B spell 190: stable manager frame 74787, exact
+runtime ECL, one main VM, no auxiliary/installed callback, quarter scale,
+Bomb zero, and a complete callback-18 restore schedule. Its predeath counter
+is 7, so this promotes only `SEM-SCALE-C4` source semantics from proposed to
+observed. It is not a live/shadow strategy, clean survival, or NMNB result.
+The daemon remains fail-closed while exact-version schedule delivery is
+integrated; only then may the separately preregistered focused Final-B
+falsifier run.
 
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those

@@ -1,0 +1,308 @@
+{
+  "executable_identity": {
+    "image_path": "D:\\Entertainment\\Game\\Touhou\\[th08] 东方永夜抄 (日文版)\\th08.exe",
+    "pid": 68412,
+    "runtime_patch": {
+      "address": 4509946,
+      "byte": 0,
+      "no_life_decrement": true
+    },
+    "sha256": "330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924"
+  },
+  "finished_at": "2026-07-29T21:50:26.867623+08:00",
+  "gameplay_input": "native_replay_only",
+  "initial_gameplay_state": {
+    "difficulty_index": 3,
+    "enemy_manager_frame": 1,
+    "engine_flags": 98316,
+    "gameplay_active": true,
+    "input_current": 0,
+    "input_previous": 0,
+    "input_raw": 0,
+    "player": {
+      "bomb_active": 0,
+      "bomb_index": 0,
+      "bomb_lockout": 0,
+      "bomb_timer": 0,
+      "deathbomb": 0,
+      "focus_logic": 0,
+      "forced_bomb": 0,
+      "phase": 3,
+      "predeath_counter": 10,
+      "x": 192.0,
+      "y": 384.0
+    },
+    "resources": {
+      "bombs": 3.0,
+      "lives": 8.0,
+      "power": 128.0
+    },
+    "rng_calls": 92,
+    "rng_state": 58564,
+    "route_id": 2,
+    "spell": {
+      "active": false,
+      "enemy_pointer": 0,
+      "flags": 0,
+      "name": "",
+      "spell_id": 0,
+      "timer_elapsed": -1
+    },
+    "stage_route_index": 7,
+    "time_scale_bits": 1065353216,
+    "wall_time_ns": 1785332174099994500
+  },
+  "menu_input_scope": "pre_gameplay_only",
+  "menu_trace": [
+    {
+      "label": "replay_main_entry_selected",
+      "state": {
+        "cursor": 4,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186952680,
+        "mode": 0,
+        "practice_stage_availability_mask": 1,
+        "route_id": 0,
+        "screen_age": 91,
+        "stage_route_index": 0,
+        "substate": 1
+      },
+      "taps": [
+        {
+          "key": "down",
+          "purpose": "select Replay feedback step 1",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select Replay feedback step 2",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select Replay feedback step 3",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select Replay feedback step 4",
+          "wait_after_ms": 180
+        }
+      ]
+    },
+    {
+      "label": "replay_list_entered",
+      "state": {
+        "cursor": 0,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186952680,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 0,
+        "replay_selected_stage": 0,
+        "route_id": 0,
+        "screen_age": 39,
+        "stage_route_index": 0,
+        "substate": 1
+      },
+      "taps": [
+        {
+          "key": "confirm",
+          "purpose": "enter Replay",
+          "wait_after_ms": 700
+        }
+      ]
+    },
+    {
+      "label": "replay_entry_selected",
+      "state": {
+        "cursor": 12,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186952680,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 12,
+        "replay_selected_stage": 0,
+        "route_id": 0,
+        "screen_age": 224,
+        "stage_route_index": 0,
+        "substate": 1
+      },
+      "taps": [
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 1",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 2",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 3",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 4",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 5",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 6",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 7",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 8",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 9",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 10",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 11",
+          "wait_after_ms": 180
+        },
+        {
+          "key": "down",
+          "purpose": "select fixed replay slot 13 feedback step 12",
+          "wait_after_ms": 180
+        }
+      ]
+    },
+    {
+      "label": "replay_stage_list_entered",
+      "state": {
+        "cursor": 7,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186952680,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 12,
+        "replay_selected_stage": 7,
+        "route_id": 0,
+        "screen_age": 271,
+        "stage_route_index": 0,
+        "substate": 2
+      },
+      "taps": [
+        {
+          "key": "confirm",
+          "purpose": "open fixed replay slot 13",
+          "wait_after_ms": 700
+        }
+      ]
+    },
+    {
+      "label": "replay_stage_selected",
+      "state": {
+        "cursor": 7,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186952680,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 12,
+        "replay_selected_stage": 7,
+        "route_id": 0,
+        "screen_age": 271,
+        "stage_route_index": 0,
+        "substate": 2
+      },
+      "taps": []
+    },
+    {
+      "label": "replay_confirmation_entered",
+      "state": {
+        "cursor": 0,
+        "difficulty_cursor": 3,
+        "difficulty_index": 0,
+        "manager": 186952680,
+        "mode": 7,
+        "practice_stage_availability_mask": 1,
+        "replay_entry_count": 15,
+        "replay_selected_entry": 12,
+        "replay_selected_stage": 7,
+        "route_id": 0,
+        "screen_age": 318,
+        "stage_route_index": 0,
+        "substate": 3
+      },
+      "taps": [
+        {
+          "key": "confirm",
+          "purpose": "open replay confirmation",
+          "wait_after_ms": 700
+        }
+      ]
+    },
+    {
+      "label": "replay_launch_confirmed",
+      "state": {
+        "replay_selected_entry": 12,
+        "replay_selected_stage": 7
+      },
+      "taps": [
+        {
+          "key": "confirm",
+          "purpose": "start native-verified Final-B replay",
+          "wait_after_ms": 700
+        }
+      ]
+    }
+  ],
+  "observer": "scripts/tools/th08_finalb_scale_source_replay_trial.py",
+  "pid": 68412,
+  "record": {
+    "authority": "trace_only_no_action_authority",
+    "changes_input": false,
+    "hard_action_authority": false,
+    "kind": "finalb_scale_source_trace",
+    "status": "gameplay_ended_before_target",
+    "target_spell_id": 190,
+    "target_stage_route_index": 7
+  },
+  "replay_contract": {
+    "compact_index": 12,
+    "difficulty_index": 3,
+    "path": "D:/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)/replay/th8_13.rpy",
+    "route_id": 2,
+    "sha256": "1026289ffec9f3dd1858378e81bbbbb84f568f041047a401dd86f74211c4a7f2",
+    "slot": 13,
+    "stage_bomb_press_frames": [],
+    "stage_frame_count": 51711,
+    "stage_input_sha256": "90c75156cf36a1c1576f082b2fe2b435cec8395af09014a1ad6c10c02e7a060e",
+    "stage_route_index": 7
+  },
+  "schema": "th08-finalb-scale-source-replay-trial-v1",
+  "started_at": "2026-07-29T21:36:00.489052+08:00"
+}

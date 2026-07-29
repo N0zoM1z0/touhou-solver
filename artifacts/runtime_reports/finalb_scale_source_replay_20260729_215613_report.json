@@ -1,0 +1,62 @@
+{
+  "authority": {
+    "inferred": "The causal schedule is the supported no-hit/no-Bomb target continuation from the captured native VM state.",
+    "not_proved": "This trace changes no input and proves neither action authority, a clean zero-predeath player root, clean survival, callback-28 hazard consumption, nor NMNB.",
+    "observed": "Exact executable/runtime-ECL identity and one coherent physical complete-source transaction, when every check passes."
+  },
+  "gate": {
+    "checks": {
+      "accepted_status": true,
+      "complete_schedule": true,
+      "complete_source_capture": true,
+      "configuration_identity": true,
+      "executable_identity": true,
+      "no_internal_incomplete_reason": true,
+      "runtime_ecl_identity": true,
+      "scope_identity": true,
+      "source_callback_auxiliary_absence": true,
+      "stable_quarter_no_bomb_root": true,
+      "supported_restore_write": true,
+      "trace_only": true
+    },
+    "name": "SEM-SCALE-C4 default-off physical complete-source trace",
+    "passed": true
+  },
+  "observed": {
+    "capture_ms": 7.73389998357743,
+    "gameplay_epoch": 1,
+    "manager_frame": 74787,
+    "player_predeath_counter": 7,
+    "process_read_bytes": 10312710,
+    "process_read_count": 22,
+    "runtime_ecl_capture": {
+      "capture_ms": 0.920899910852313,
+      "image_length": 67324,
+      "normalized_sha256": "20b35dca3820438f0b90ae44e3362a7af27d2fc1ac7ae5888c477dc1c89a3734",
+      "read_count": 4,
+      "relocated_sha256": "38cf257dd903426930a978f32019879d9753ea6150228d135c0ecf49dcc0d47f",
+      "runtime_base": 186720032,
+      "schema": "th08-runtime-ecl-image-capture-v1",
+      "subroutine_count": 89,
+      "timeline_count": 1
+    },
+    "schedule_stop_frame": 300,
+    "source_count": 1,
+    "trigger_manager_frame": 74787,
+    "writes": [
+      {
+        "callback_index": 18,
+        "frame": 240,
+        "instruction_address": 186744632,
+        "scale_bits_after": 1065353216,
+        "scale_bits_before": 1048576000,
+        "scales_active_bullet_velocity": false
+      }
+    ]
+  },
+  "schema": "th08-finalb-scale-source-physical-report-v1",
+  "source": {
+    "path": "artifacts/runtime_reports/finalb_scale_source_replay_20260729_215613.json",
+    "sha256": "22e3d69d249b512f6c73e3816e3206373c89776b53f183fc0ebf7e1d71a2e48d"
+  }
+}

@@ -185,21 +185,30 @@ This is not complete live source inventory, callback-28 bullet-side-effect
 authority, clean survival, or live action promotion.
 
 Checkpoint `ead1f21` implements the default-off `SEM-SCALE-C4` physical
-complete-source observer and strict report gate, but has not yet produced an
-accepted physical row. The read-only tool waits for Lunatic Final-B spell
-190, binds the runtime image exactly to shipped `ecldata7.ecl`, and brackets
-one full 480-slot ordinary pool plus any out-of-pool spell owner with manager
-frame, route/difficulty/stage, spell bytes, ECL context, root scale, Bomb, and
-predeath identity. It accepts only one active main-VM source, no auxiliary
-context, no installed scale callback, a clean binary32-quarter root, exact
-sub44 ownership, a complete 300-frame schedule, and no callback-28/29 bullet
-velocity side effect. An IDA recheck corrected the inherited installed
-callback location: it is selected ECL VM `+0x10/+0x14`, hence main enemy
-`+0x808/+0x80C`, not enemy base `+0x10/+0x14`. Linux and Windows discovery
-pass 1,107 tests in 13.728/29.427 seconds, with three existing Windows skips.
-This is implementation/parity evidence only; no game was launched, the
-observer never changes input, the live daemon remains root-only fail-closed,
-and C4 physical acceptance plus the focused Final-B falsifier remain open.
+complete-source observer and strict report gate. Corrections `88b8c14` and
+`0c33645` defer the one-shot to a quarter-scale root, make the full-pool read
+fit one manager-frame bracket, and separate stable replay/death-patch residue
+from a fresh semantic-root hit. Native replay trial `20260729_215613`
+physically passes the C4 gate at manager frame 74787: exact executable and
+runtime `ecldata7.ecl` identities, all 480 ordinary slots plus the out-of-pool
+spell owner, one valid main VM, zero auxiliary contexts, installed callback
+zero, binary32 scale `0.25`, Bomb zero, a complete 300-frame/199-instruction
+sub44 schedule, one callback-18 restore at relative frame 240, and no
+callback-28/29 bullet side effect. The stable capture took 7.734 ms. The
+strict report is
+`artifacts/runtime_reports/finalb_scale_source_replay_20260729_215613_report.json`,
+SHA-256
+`d4aa9b9c065bde6de3ba899ff95e4ff3eea10f166714e561c00743100d4e138a`.
+The replay has zero Bomb presses, but the captured predeath counter is 7.
+Therefore this is observed complete-source semantics plus an inferred
+no-new-hit/no-Bomb schedule, not a clean player root, live action authority,
+survival, or NMNB. The live daemon remains root-only fail-closed until the
+accepted schedule is integrated and independently gated.
+
+The native replay physical falsification protocol is retained at
+`notes/operations/NATIVE_REPLAY_PHYSICAL_FALSIFICATION.md`. Use it to
+reproduce late shipped-runtime phases and test native hypotheses while
+preserving replay/resource contamination and action-authority boundaries.
 
 ### Native-semantic review
 
@@ -355,17 +364,15 @@ Do not resume broad G5 work first.
 2. `SEM-TIMER` passes its offline semantic gate but its one fixed physical
    falsifier failed at 12 hits. The canonical failure predates the live
    consumer, so retain the failure without rollback or survival promotion.
-3. Continue `SEM-SCALE-C` from complete-source observer implementation
-   checkpoint `ead1f21`. Run only the read-only Final-B spell-190 observer
-   against an already driven physical scene or replay and retain its strict
-   report. It changes no input and must prove exact executable/runtime-ECL
-   identity, all 480 ordinary slots plus the spell owner, one valid main VM,
-   zero auxiliary contexts, no installed scale callback, stable
-   phase/root/Bomb state, complete sub44 schedule, and no callback-28/29
-   bullet side effect. Only an accepted result authorizes integration into
-   live schedule delivery and the preregistered focused Final-B transition
-   physical falsifier. Then continue `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`,
-   and `SEM-ROBUST` in roadmap order, one correction/checkpoint at a time.
+3. Continue `SEM-SCALE-C` from accepted physical replay trace
+   `20260729_215613`. Integrate the exact-version complete schedule into live
+   capture/delivery while retaining root-only fail-closed fallback on every
+   identity, source, callback, auxiliary, phase, schedule, or publication
+   miss. Prove focused Linux/Windows parity and deadline behavior before the
+   preregistered smallest Final-B transition physical falsifier. Do not treat
+   the replay's predeath-7 root as clean survival evidence. After that gate,
+   continue `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap
+   order, one correction/checkpoint at a time.
 4. After each applicable slice, take only the smallest causal Stage-5
    physical falsification. Restart the two-consecutive observer-off
    `<=10` gate only for an immutable corrected model version.

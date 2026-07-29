@@ -1,0 +1,53 @@
+{
+  "authority": {
+    "inferred": "The causal schedule is the supported no-hit/no-Bomb target continuation from the captured native VM state.",
+    "not_proved": "This trace changes no input and proves neither action authority, a clean zero-predeath player root, clean survival, callback-28 hazard consumption, nor NMNB.",
+    "observed": "Exact executable/runtime-ECL identity and one coherent physical complete-source transaction, when every check passes."
+  },
+  "gate": {
+    "checks": {
+      "accepted_status": false,
+      "complete_schedule": false,
+      "complete_source_capture": false,
+      "configuration_identity": true,
+      "executable_identity": true,
+      "no_internal_incomplete_reason": false,
+      "runtime_ecl_identity": true,
+      "scope_identity": true,
+      "source_callback_auxiliary_absence": true,
+      "stable_quarter_no_bomb_root": false,
+      "supported_restore_write": false,
+      "trace_only": true
+    },
+    "name": "SEM-SCALE-C4 default-off physical complete-source trace",
+    "passed": false
+  },
+  "observed": {
+    "capture_ms": 36.83420002926141,
+    "gameplay_epoch": 1,
+    "manager_frame": null,
+    "player_predeath_counter": 7,
+    "process_read_bytes": 10312710,
+    "process_read_count": 22,
+    "runtime_ecl_capture": {
+      "capture_ms": 0.4459000192582607,
+      "image_length": 67324,
+      "normalized_sha256": "20b35dca3820438f0b90ae44e3362a7af27d2fc1ac7ae5888c477dc1c89a3734",
+      "read_count": 4,
+      "relocated_sha256": "6571734f9a8bd59cc28e4f4eca657f11ae7ccb3cab554415e98cf953eaf3c1ce",
+      "runtime_base": 186654496,
+      "schema": "th08-runtime-ecl-image-capture-v1",
+      "subroutine_count": 89,
+      "timeline_count": 1
+    },
+    "schedule_stop_frame": null,
+    "source_count": 1,
+    "trigger_manager_frame": 72987,
+    "writes": null
+  },
+  "schema": "th08-finalb-scale-source-physical-report-v1",
+  "source": {
+    "path": "artifacts/runtime_reports/finalb_scale_source_replay_20260729_211715.json",
+    "sha256": "4686ee59f655345d9bf22c6b247418dc980e0e2298b0a843835e09488238c36c"
+  }
+}

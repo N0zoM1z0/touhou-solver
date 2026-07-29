@@ -535,27 +535,68 @@ Checkpoint `ead1f21` implements the next default-off trace-only join:
 - the main VM completes before auxiliary indices 0 through 3, and enemy
   motion at `0x0041ECA7` follows all selected VMs. IDA comments at
   `0x0041E852` and `0x0041EBBC` retain this correction/order;
-- exact quarter scale, no current Bomb/predeath, sub44 ownership, complete
-  300-frame causal synthesis, and absence of callback-28/29 bullet velocity
-  rescaling are mandatory. Any failure is `UNKNOWN`; and
+- exact quarter scale, no current Bomb, stable retained predeath state, sub44
+  ownership, complete 300-frame causal synthesis, and absence of
+  callback-28/29 bullet velocity rescaling are mandatory. Any failure is
+  `UNKNOWN`; predeath contamination narrows clean-player/survival authority
+  instead of falsifying source semantics; and
 - the strict report tool independently rejects an incomplete source,
   identity, schedule, or bullet-side-effect record.
 
 The implementation passes 1,107 Linux tests in 13.728 seconds and 1,107
-Windows tests in 29.427 seconds with the three existing skips. This is not the
-trace-only physical gate itself: no game was launched and no observed
-complete-source row exists. The live daemon still consumes only its root
-observation and fails closed. A physical read-only C4 observation must pass
-before live delivery or the focused Final-B transition falsifier.
+Windows tests in 29.427 seconds with the three existing skips.
+
+Observed SEM-SCALE-C4 physical result:
+
+- exact native replay `th8_13.rpy` is bound by SHA-256
+  `1026289ffec9f3dd1858378e81bbbbb84f568f041047a401dd86f74211c4a7f2`;
+  its offline parse is Route 2/Lunatic/Final B, 51,711 input records, input
+  digest
+  `90c75156cf36a1c1576f082b2fe2b435cec8395af09014a1ad6c10c02e7a060e`,
+  and zero Bomb presses;
+- attempt `20260729_211715` rejects the first spell-190 unit-scale root and a
+  36.834-ms capture that crossed manager frames; CE-0186 preserves the
+  invalid trigger/allocation assumptions;
+- attempt `20260729_213600` reaches the target but rejects the assumption that
+  stable replay/no-life-patch predeath residue must be zero; CE-0187
+  preserves the evidence-authority correction;
+- accepted attempt `20260729_215613` brackets manager frame 74787 in
+  7.734 ms with exact executable and runtime/static ECL identities, one valid
+  out-of-pool spell-owner main VM, zero active ordinary sources, zero
+  auxiliary contexts, installed callback zero, quarter scale, and Bomb zero;
+- the captured VM produces all 300 requested future frames and 199
+  instructions. Its only scale write is callback 18 at relative frame 240,
+  changing `0.25 -> 1.0`; callback 28/29 active-bullet velocity side effects
+  are absent; and
+- the strict report passes every identity, completeness, source, root,
+  schedule, restore, side-effect, and trace-only check. Capture/report
+  SHA-256 values are
+  `22e3d69d249b512f6c73e3816e3206373c89776b53f183fc0ebf7e1d71a2e48d`
+  and
+  `d4aa9b9c065bde6de3ba899ff95e4ff3eea10f166714e561c00743100d4e138a`.
+
+The accepted root retains predeath counter 7. Historical frame 74791 in
+session `004142` shows the same residue with no fresh hit edge and no Bomb;
+the no-life-decrement patch does not clear every death/predeath field. C4
+therefore observes a coherent complete scale source and infers the declared
+no-new-hit/no-Bomb continuation. It does not prove a clean zero-predeath
+root, live solver action, clean survival, or NMNB.
+
+Connected IDA was also updated for reproducibility: `0x0046E136` is renamed
+`title_replay_menu_update`; comments at `0x0046E29C` record compacted replay
+entry indexing, and `0x0046ED45` records the replay-mode/route/difficulty/stage
+launch state.
 
 No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
 acceptance, global optimality, or complete future-source coverage.
 
 ## Current stopping rule
 
-Do not launch an input-injecting solver trial before the SEM-SCALE-C
-trace-only complete-source gate passes. One read-only C4 observer may attach
-to an already driven physical scene or replay; it must not send input or
-change foreground ownership. Any test mismatch, incomplete scale coverage
-consumed as exact, cross-version cache hit, or live non-unit hard certificate
-is a durable counterexample and stops physical promotion.
+The SEM-SCALE-C trace-only complete-source gate has passed only for the
+retained Final-B replay root. Do not launch an input-injecting solver trial
+until exact-version schedule capture/delivery is integrated, Linux/Windows
+parity and deadline/fallback gates pass, and the focused Final-B trial is
+preregistered. The physical trial must stop on any identity/source/schedule
+miss and release keys. Any test mismatch, incomplete scale coverage consumed
+as exact, cross-version cache hit, or live non-unit hard certificate without
+the complete schedule is a durable counterexample and stops promotion.

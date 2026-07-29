@@ -2,7 +2,8 @@
 
 Date: 2026-07-29
 
-Status: causal source review complete; no single code regression established
+Status: causal source review complete; observer-off recovery pass 1 retained;
+no single code regression established
 
 ## Question
 
@@ -17,9 +18,12 @@ and current checkpoint `3f02ff1` caused the 18-hit result
 | `20260727_212624` | `faed791` | `4/1/2/0/1` | 11504 | `2/3` |
 | `20260728_171633` | `3adad09` | `3/2/1/1/1` | 12324 | `2/4` |
 | `20260729_125453` | `3f02ff1` | `6/2/4/2/4` | 731 | `2/4` |
+| `20260729_154229` | `e4e266f` | `5/2/1/1/1` | 10740 | `2/4` |
 
-All three completed hard no-Bomb Stage 5 with accepted artifacts and cleanup.
-They are distinct game histories, not same-seed paired trials.
+All four completed hard no-Bomb Stage 5 with accepted artifacts and cleanup.
+They are distinct game histories, not same-seed paired trials. The final run
+was launched from repository checkpoint `b34f905`; changes after executable
+checkpoint `e4e266f` were documentation only.
 
 ## Source-Diff Finding
 
@@ -78,6 +82,19 @@ failure class exists at the eight-hit checkpoints.
 viability/sensing/route problem; it does not reveal a newly introduced mask
 selection bug.
 
+### Observer-off recovery is one accepted control, not causality
+
+**Observed:** run `20260729_154229` disabled every optional observer and
+returned to the accepted ten-hit boundary. Its first hit moved to frame
+10,740 and was an exact same-epoch enemy-body overlap; the body was already
+present in the causal and action snapshots. All ten contacts still followed
+global viability exhaustion. CE-0182 retains the exact first-hit state.
+
+**Inferred:** this is evidence that current code can still realize the
+historical eight-to-ten band without rollback. It does not isolate optional
+observer contention because the physical history and RNG were unmatched, and
+it does not close a two-consecutive-run gate.
+
 ### Optional observer contention remains plausible only in scope
 
 **Observed:** V6 adds post-issue auxiliary capture, derivation, compaction,
@@ -103,18 +120,21 @@ a controlled A/B.
 
 ## Next Causal Gate
 
-The next agent should keep current code and isolate workload before changing
-strategy:
+Keep current code and the identical workload before changing strategy:
 
-1. run one fresh Lunatic Stage-5 control with every optional observer off;
-2. if the first hit remains very early or repeated controls remain high,
+1. repeat the exact observer-off Lunatic Stage-5 control for consecutive pass
+   2;
+2. if it exceeds ten hits, reset the consecutive sequence, stop expansion,
+   and compare its canonical first hit against CE-0182 and the two eight-hit
+   checkpoints;
+3. if the first hit is very early or repeated controls remain high,
    investigate the retained nonspell first-hit geometry and issue/policy
    timing rather than reverting trace commits;
-3. if controls return to the historical range, rerun only one independently
+4. if two controls return to the historical range, rerun only one independently
    contracted observer with phase-matched publication metrics;
-4. accept recovery only after two consecutive Stage-5 runs at no more than
+5. accept recovery only after two consecutive Stage-5 runs at no more than
    ten hits; and
-5. then verify Stage 3, retained other stages, and a complete Lunatic route.
+6. then verify Stage 3, retained other stages, and a complete Lunatic route.
 
 The proposed nonspell damage/Power/unfocused-shot work is a separate
 survival-filtered experiment. It must not be mixed into the first control.

@@ -304,13 +304,24 @@ Spell-57 callback traversal also has p95/max `0.5460/10.3328 ms`. All 16
 hits follow global viability exhaustion and do not establish a survival
 comparison.
 
+**Observed observer-off Stage-5 recovery pass 1:** Current-code run
+`20260729_154229` completed frames `2..42335`, 11,710 decisions, hard
+no-Bomb, accepted artifacts, and cleanup with ten hits
+(`5/2/1/1/1` by nonspell/103/107/111/115). Every optional observer and
+pipeline shadow was disabled. The canonical hit moved to frame 10,740 and is
+an exact same-epoch enemy-body overlap after global viability exhaustion; the
+body was present in the causal and action snapshots. This is one accepted
+baseline-band control and CE-0182 evidence. It neither closes the required
+two-consecutive-run gate nor proves observer causality, rollback benefit,
+SEM-MODE causality, or NMNB survival.
+
 ### Priority
 
 **2026-07-29 native-semantic amendment:** the read-only native-to-solver
 audit and bounded IDA recheck do not promote, reject, or roll back any
-strategy. The live stack and the immediate observer-off Stage-5 control gate
-remain unchanged. They add a correctness dependency before broad G5 or S15
-performance work:
+strategy. Observer-off Stage-5 pass 1 is now retained; the live stack remains
+unchanged and the identical pass-2 control is the immediate gate. The audit
+adds a correctness dependency before broad G5 or S15 performance work:
 
 - restore native elapsed/fraction timer semantics and global-time-scale
   player/laser transitions;
@@ -323,7 +334,7 @@ performance work:
 - issue a new immutable model version and recertify scalar/Python/native
   parity before physical promotion.
 
-CE-0175–CE-0181 retain the concrete failures. Existing zero-fraction,
+CE-0175–CE-0182 retain the concrete failures. Existing zero-fraction,
 unit-scale, and conservative-proxy evidence keeps only its declared slice.
 The audit does not prove that any finding caused run `125453`, so aggregate
 rollback remains unjustified. The full dependency and Lunatic NMNB acceptance

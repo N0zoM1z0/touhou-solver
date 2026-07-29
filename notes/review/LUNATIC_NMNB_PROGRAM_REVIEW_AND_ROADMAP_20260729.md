@@ -11,8 +11,12 @@ Latest executable-code checkpoint at review time: `e4e266f`
 
 Latest physical-code checkpoint at review time: `3f02ff1`
 
-Latest retained complete physical workload:
+Latest retained complete physical workload at review time:
 `lunatic_route2_stage5_unattended_20260729_125453`
+
+Current execution progress:
+`lunatic_route2_stage5_unattended_20260729_154229` is accepted observer-off
+Stage-5 pass 1 of 2 at ten hits.
 
 Companion native audit:
 `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
@@ -66,10 +70,13 @@ prototype. It already has:
   work.
 
 But the current system is not yet close enough to claim Lunatic NMNB
-readiness. The latest complete Stage-5 run has 18 native hit edges and zero
-Bombs. More importantly, the finite model still commonly loses all global
-viability before contact, while several native semantics used by movement,
-hazard, and future-event projection are either incomplete or wrong.
+readiness. The review baseline Stage-5 run had 18 native hit edges and zero
+Bombs. The first post-review observer-off control returned to the ten-hit
+boundary, but one threshold pass is not two consecutive passes and is still
+ten misses away from NMNB. More importantly, the finite model still commonly
+loses all global viability before contact, while several native semantics
+used by movement, hazard, and future-event projection are either incomplete
+or wrong.
 
 The main conclusion is:
 
@@ -175,11 +182,26 @@ question.
 
 ## 5. Physical Status Versus NMNB
 
-### 5.1 Latest retained evidence
+### 5.1 Current observer-off control and previous comparator
 
-**Observed:** Stage-5 run `20260729_125453` completed with 12,039 decisions,
-frames `2..44053`, 18 hits, zero Bombs, accepted completion, and cleanup.
-The hit split is:
+**Observed:** Stage-5 run `20260729_154229` completed with 11,710 decisions,
+frames `2..42335`, ten hits, zero Bombs, accepted completion, and cleanup.
+All optional observers and pipeline shadows were disabled. Phase hits
+nonspell/103/107/111/115 were `5/2/1/1/1`, so this is pass 1 of the required
+two consecutive controls at `<=10`, not NMNB acceptance.
+
+The canonical first hit is frame 10,740 at player
+`(349.070,383.773)`, active `up_fast`, Power 128, 883 bullets, and zero
+lasers. It is an exact same-epoch enemy-body overlap with signed AABB
+clearance `-12.270`; the body was present in the causal, hit-decision, and
+action snapshots. Global viability was exhausted nine frames before contact,
+and robust/pipeline warning lead was two frames. All ten hits followed global
+viability exhaustion. CE-0182 retains the causal boundary without attributing
+it to optional observers or CE-0176.
+
+For comparison, previous V6 Stage-5 run `20260729_125453` completed with
+12,039 decisions, frames `2..44053`, 18 hits, zero Bombs, accepted completion,
+and cleanup. The hit split is:
 
 | Phase | Hits |
 | --- | ---: |
@@ -220,8 +242,9 @@ roughly `11.813/24.257 ms` at median/p95, and observed cadence is
 - that current empty roots are physically losing;
 - that any one stage/RNG sample predicts a full-route NMNB rate.
 
-The retained eight-hit checkpoints first contact after frame 11,500, whereas
-the current first contact is frame 731. No planner, recurrence, ranking, or
+The retained eight-hit checkpoints first contact after frame 11,500; the
+observer-off control first contacts at frame 10,740, whereas the previous V6
+sample first contacted at frame 731. No planner, recurrence, ranking, or
 issued-mask change between those checkpoints and current code isolates the
 aggregate difference. A rollback is therefore not causally justified.
 
@@ -555,6 +578,20 @@ route-faithful full-run control; or a retained causal counterexample that
 names the first failing state/contract. A failure opens a correction; it does
 not authorize threshold weakening or uncontrolled expansion.
 
+Execution progress on 2026-07-29:
+
+- **Observed:** `20260729_154229` completed the exact observer-off contract at
+  ten hits, hard no-Bomb, accepted artifacts, and cleanup. This is
+  consecutive pass 1 of 2.
+- **Observed:** the canonical first hit is CE-0182, an enemy-body overlap
+  after global viability exhaustion; it does not establish observer or
+  focus-mode causality.
+- **Next gate:** repeat the identical Stage-5 command with no source,
+  strategy, observer, Focus, combat, Power, worker, or planner change. A
+  result above ten resets the consecutive sequence and stops expansion for
+  first-hit analysis. A second accepted result at `<=10` advances to the
+  Stage-3 mechanics control.
+
 ### Phase 1 — Freeze and repair native transition semantics
 
 This phase is correction work, not investigation-only review. For each strong
@@ -840,10 +877,11 @@ a candidate pass.
 
 ## 13. Immediate Implementation Backlog
 
-Complete `PHYS-BASE-RING` before source correction: two accepted observer-off
-Stage-5 controls at `<=10`, then fresh current-code Stage-3/4A/Final-B
-mechanics controls and one route-faithful Power-0 full-route characterization,
-or stop on the first retained causal failure.
+Complete `PHYS-BASE-RING` before source correction: one of two required
+observer-off Stage-5 controls is retained at ten hits; repeat the identical
+control for consecutive pass 2, then take fresh current-code
+Stage-3/4A/Final-B mechanics controls and one route-faithful Power-0
+full-route characterization, or stop on the first retained causal failure.
 
 After that baseline, the next correction checkpoints should be:
 
@@ -902,8 +940,8 @@ Remaining high-value runtime uncertainties are:
 - exact player-mode/contact transitions across all Route-2 phase boundaries;
 - complete callback and action-dependent RNG source coverage;
 - which component first causes corrected-model viability loss;
-- whether the observer-off Stage-5 baseline returns to the retained
-  eight-to-ten hit band;
+- whether the observer-off Stage-5 baseline repeats consecutively in the
+  retained eight-to-ten hit band;
 - the first clean full-route bottleneck after Stage 5 is controlled.
 
 The next agent must start from `START_HERE.md`, this roadmap, the companion
@@ -924,6 +962,12 @@ baseline and the ordered dependency chain above are part of the result.
   review exists.
 - `/tmp/ths_analysis.md` no longer exists; the durable audit is under
   `notes/review/`.
+- For observer-off Stage-5 pass 1, focused supervisor discovery passed 28/28
+  on Linux and 28/28 on Windows before launch, and the post-run Linux repeat
+  passed 28/28. The accepted session, summary, dossier, comparison,
+  regressions, deaths CSV, raw hash, hard no-Bomb fields, ignore rules,
+  cleanup state, Markdown structure, and staged whitespace were revalidated
+  before retention.
 - No matching TH08 gameplay, controller, practice-supervisor, or
   full-route-supervisor process is left running.
 - Windows tests were not rerun because this checkpoint changes documentation

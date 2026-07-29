@@ -97,7 +97,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `f28e13ca853280acec585f6296d947aafcabcaad`. The enclosing documentation
   checkpoint changes no executable code or live authority.
 - Latest accepted complete physical workload:
-  `lunatic_route2_stage5_unattended_20260729_125453`.
+  `lunatic_route2_stage5_unattended_20260729_154229`.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -108,8 +108,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   comprehensive read-only native-to-solver audit. All pass the OpenAI
   `skill-creator` structural validator. A fresh Codex `0.144.6`
   `skills/list(forceReload=true)` reports every skill as enabled repo scope
-  with interface metadata. The physical skill was not forward-tested during
-  this no-more-experiments handoff.
+  with interface metadata. The physical-trial workflow was exercised by run
+  `154229`; its exact preflight, supervision, cleanup, and retention contract
+  completed without leaving a gameplay process.
 
 Checkpoint `e4e266f` has no survival authority. It changes only compact
 artifact placement: practice/full-route dossier Markdown is generated
@@ -143,16 +144,35 @@ but can compress viability. Existing zero-fraction/unit-scale/proxy evidence
 is preserved under its declared model version rather than erased.
 
 This review does not establish a cause for the 18-hit Stage-5 aggregate and
-does not authorize rollback. Complete the observer-off control gate below
-before source changes. After that gate, repair/version the shared native
-semantics before broad G5 expansion or local-beam performance work.
+does not authorize rollback. Observer-off run `154229` has since returned to
+the ten-hit band once, but one unmatched sample does not establish observer
+causality. Complete the identical second control below before source changes.
+After that gate, repair/version the shared native semantics before broad G5
+expansion or local-beam performance work.
 
 ### Latest physical conclusion
+
+Observer-off run `154229`, launched from repository checkpoint `b34f905`
+with executable checkpoint `e4e266f` and unchanged physical code
+`3f02ff1`, completed hard no-Bomb Stage 5 with exact cleanup and ten hits:
+nonspell/103/107/111/115 = `5/2/1/1/1`. Every optional observer and pipeline
+shadow was disabled. It is accepted pass 1 of the required two consecutive
+controls at `<=10`; it is not NMNB acceptance.
+
+Its canonical fresh hit is frame 10,740 at `(349.070,383.773)`, active
+`up_fast`, Power 128, with 883 bullets and zero lasers. An exact same-epoch
+enemy body overlaps the lethal AABB and is present in the causal and action
+snapshots. Global viability was exhausted nine frames before contact;
+robust/pipeline warning lead is two frames. All ten contacts follow global
+viability exhaustion. CE-0182 retains this without claiming observer or
+SEM-MODE causality.
+
+The previous V6 run remains a failed diagnostic comparator:
 
 V6 run `125453` completed hard no-Bomb Stage 5 with exact cleanup but took
 18 hits: nonspell/103/107/111/115 = `6/2/4/2/4`.
 
-Observed accepted sub-evidence:
+Observed V6 sub-evidence:
 
 - 186 ordered coalesced envelopes;
 - zero standalone auxiliary-batch writes;
@@ -182,22 +202,24 @@ The retained eight-hit checkpoints are:
 
 From `3adad09` to current code there is no changed planner, recurrence,
 native-pipeline, action-ranking, or issued-mask algorithm. The issue stage was
-extracted and optional post-issue observers were added. Current run
-`125453` takes its canonical first hit at frame 731 in nonspell, before every
-spell-107 envelope; the eight-hit runs take their first hits after frame
-11,500. Therefore no single code checkpoint has been shown to cause the
-18-hit result, and rollback is not justified by aggregate samples alone.
-Later deaths are coupled through respawn, Power, position, damage, and route
-timing.
+extracted and optional post-issue observers were added. V6 run `125453`
+takes its canonical first hit at frame 731 in nonspell, before every
+spell-107 envelope; observer-off run `154229` first contacts at frame 10,740,
+and the eight-hit runs first contact after frame 11,500. Therefore no single
+code checkpoint has been shown to cause the 18-hit result, and rollback is
+not justified by aggregate samples alone. Later deaths are coupled through
+respawn, Power, position, damage, and route timing.
 
 ### Next useful gate
 
 Do not resume broad G5 work first.
 
-1. Run current code on Lunatic Stage 5 with every optional observer off.
-2. Retain every outcome and use the canonical first hit for causality.
-3. Require two consecutive corrected Stage-5 results at no more than ten
-   hits.
+1. Repeat current code on Lunatic Stage 5 with every optional observer off;
+   `154229` is consecutive pass 1 of 2.
+2. Retain the complete outcome and canonical first hit. A result above ten
+   resets the sequence and stops expansion for causal analysis.
+3. Advance only if the unchanged second run also completes at no more than
+   ten hits.
 4. Run one fresh current-code observer-off mechanics control each for
    Lunatic Stage 3, Stage 4A, and Final B. Record practice resource
    initialization; it is not route-faithful Power authority.
@@ -227,25 +249,27 @@ repository.
 
 The exact one-shot observer-off command is in
 `notes/review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md` and repeated in the
-physical-command section below. Do not mix the first control with
+physical-command section below. Do not mix the remaining control with
 Focus/unfocused, targeting, Power, or planner changes.
 
 ### Raw evidence retention
 
-Keep the two newest complete replay-capable Stage-5 raw bundles locally,
-including `20260729_120859` and `20260729_125453`, until two newer compatible
-bundles plus tracked compact reports exist. The newest raw trace SHA-256 is
-`bee834257bc577299d1ca684383bcc8c0591e3fcc02a8b0e43bf39932fc2a2ca`.
+Keep the current Stage-5 raw bundles `20260729_120859`, `20260729_125453`,
+and `20260729_154229` locally; do not remove either older bundle until the
+two-newer-compatible rule is unambiguously satisfied. The newest raw trace is
+477,619,552 bytes with SHA-256
+`fef21b64bfa6c906cb3dcd73b5c08f5ea1fdd00f6ea8e67d3a8466519c533e72`.
 Raw JSONL and launch logs remain ignored and must not be committed.
 
 After explicit approval, the eight exact-compatible, compact-backed,
 non-raw-path-referenced candidates were permanently removed. The retained
 path/size/SHA-256 manifest is
 `notes/review/RAW_RUNTIME_REMOVAL_MANIFEST_20260729.json`; it records
-2,910,858,360 bytes (`2.710948102 GiB`) reclaimed. The directory now uses
-24G (`25,227,238,345` bytes), with 58 ignored raw JSONL files totaling
-`23.415450004 GiB`. Do not bulk-delete the remaining legacy/schema/singleton
-families without another explicit retention decision. New practice/full-route
+2,910,858,360 bytes (`2.710948102 GiB`) reclaimed. After the newest retained
+run, the directory uses 24G (`25,705,363,580` bytes), with 59 ignored raw
+JSONL files totaling `23.860267875 GiB`. Do not bulk-delete the remaining
+legacy/schema/singleton families without another explicit retention decision.
+New practice/full-route
 trials no longer create a duplicate artifact dossier Markdown; the generator
 writes the durable `notes/runs/` note directly.
 
@@ -1726,10 +1750,11 @@ measurement, and a `STRATEGY.md` status change.
 ## Open Problems In Priority Order
 
 Until the physical floor is restored, the immediate ordering in
-`Immediate Handoff — 2026-07-29` overrides research expansion: observer-off
-Stage 5 twice at `<=10`, independent Lunatic Stage 3, other-stage checks, and
-full Lunatic Route 2. V6 delivery, nonspell combat, Power, and unfocused-shot
-work remain separately contracted follow-ups.
+`Immediate Handoff — 2026-07-29` overrides research expansion: one unchanged
+observer-off Stage-5 pass remains to complete two consecutive runs at
+`<=10`, followed by independent Lunatic Stage 3, other-stage checks, and full
+Lunatic Route 2. V6 delivery, nonspell combat, Power, and unfocused-shot work
+remain separately contracted follow-ups.
 
 ### P0 — Preserve global feasibility and define post-loss authority
 
@@ -1902,7 +1927,7 @@ CE-0164. Historical notes do not override the authority table above.
 | Workload | Bundle | Purpose |
 | --- | --- | --- |
 | Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor; pending fresh current-code observer-off mechanics control. |
-| Lunatic Route-2 Stage 5 | `171633`, `120859`, `125453` | Eight-hit reference, newest separate-publication V5 raw bundle, and newest coalesced V6 failure; keep the last two raw bundles local. |
+| Lunatic Route-2 Stage 5 | `171633`, `120859`, `125453`, `154229` | Eight-hit reference, separate-publication V5 raw bundle, coalesced V6 failure, and observer-off baseline pass 1 of 2 at ten hits; keep all three current raw bundles local. |
 | Lunatic Route-2 Stage 3 | pending fresh baseline | Historical practice is mechanics-only; fresh current-code control plus a route prefix starting Stage 1 at Power 0 are required. Stage-3 entry Power is accumulated, not forced to zero. |
 | Lunatic Route-2 Final B | historical `234414`; pending fresh baseline | Historical 37-hit focused practice accepted epoch/cache delivery, not survival. Fresh scaled-movement/laser/funnel mechanics and route-faithful evidence are required. |
 | Hard Route-2 Stage 1 | `175049`, `144128`, `153821` | Zero-hit native/local and refactor gates; G1 trace/pickup gate with one survival failure. |
@@ -2033,8 +2058,8 @@ Practice:
   --stage 5 --status-seconds 15 --stall-timeout 120
 ```
 
-This is the next observer-off survival control. Do not add any trace, combat,
-Power, Focus/unfocused, or planner flag to its first two acceptance attempts.
+This is the unchanged observer-off survival control for consecutive pass 2.
+Do not add any trace, combat, Power, Focus/unfocused, or planner flag.
 
 The current explicit trace-only native birth-observer gate adds:
 

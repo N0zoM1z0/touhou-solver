@@ -1,4 +1,10 @@
-"""TH08 enemy contact and shot-damage gates conditioned on player mode."""
+"""TH08 enemy contact and shot-damage gates conditioned on player mode.
+
+The original ``LocalPipelineRoot`` APIs remain as a restricted atomic-pickup
+baseline.  CE-0193 rejects that abstraction for multi-key physical writes.
+The ordered-input decision APIs below preserve per-key transaction prefixes
+and the native priority-9-before-priority-17 publication order.
+"""
 
 from __future__ import annotations
 
@@ -10,6 +16,13 @@ from touhou_control.local_pipeline_oracle import (
     LocalPipelineBranch,
     LocalPipelineRoot,
     enumerate_local_pipeline_branches,
+)
+from touhou_control.ordered_input_transaction_oracle import (
+    OrderedInputBelief,
+    OrderedInputExactState,
+    OrderedInputIssueBranch,
+    advance_ordered_input_state,
+    issue_ordered_input_belief,
 )
 
 ENEMY_ACTIVE_FLAG = 0x00000001
@@ -116,6 +129,53 @@ class Route2ModeDecisionObservationClass:
     key: Route2ModeObservationKey
     successor_pipeline_root: LocalPipelineRoot
     hidden_branches: tuple[Route2ModeDecisionBranch, ...]
+
+
+@dataclass(frozen=True)
+class Route2OrderedModeHazardBranch:
+    """One exact ordered-input publication and causal mode/body history."""
+
+    issue_branch: OrderedInputIssueBranch
+    frames: tuple[Route2ModeHazardFrame, ...]
+    input_states_after_publication: tuple[OrderedInputExactState, ...]
+
+
+@dataclass(frozen=True)
+class Route2OrderedModeDecisionBranch:
+    """One ordered-input/cadence branch at the next controller observation."""
+
+    cadence_frames: int
+    hazard_branch: Route2OrderedModeHazardBranch
+    successor_input_state: OrderedInputExactState
+    successor_mode_state: Route2EnemyModeStateKey
+
+
+@dataclass(frozen=True)
+class Route2OrderedModeObservationKey:
+    """Observed actuator masks and native mode fields after one cadence."""
+
+    base_observation: Hashable
+    physical_step: int
+    active_mask: int
+    held_desired_mask: int
+    mode_state: Route2EnemyModeStateKey
+
+
+@dataclass(frozen=True)
+class Route2OrderedModeDecisionObservationClass:
+    """Hidden ordered transaction states merged before the next choice."""
+
+    key: Route2OrderedModeObservationKey
+    successor_input_belief: OrderedInputBelief
+    hidden_branches: tuple[Route2OrderedModeDecisionBranch, ...]
+
+
+@dataclass(frozen=True)
+class _Route2OrderedPartial:
+    mode_state: Route2EnemyModeStateKey
+    input_state: OrderedInputExactState
+    frames: tuple[Route2ModeHazardFrame, ...]
+    input_states_after_publication: tuple[OrderedInputExactState, ...]
 
 
 def route2_enemy_mode_state_key(
@@ -243,13 +303,19 @@ def project_route2_mode_pipeline_branches(
     initial_mode_state: Route2EnemyModeStateKey,
     enemy_flag_frames: tuple[tuple[Route2EnemyModeBody, ...], ...],
 ) -> tuple[Route2ModeHazardBranch, ...]:
-    """Compose exact pickup histories with priority-9/11 mode/body updates.
+    """Compose restricted atomic pickup histories with mode/body updates.
 
     ``enemy_flag_frames`` is the exogenous predicted body/flag schedule at
     each contact-gate epoch.  For active bit-0x100 bodies, bit 0x800 is
     overwritten by the post-player mode state exactly as in the shipped
     priority-11 callback.  This function does not project positions, births,
     ECL flags, damage, cadence, or future controller decisions.
+
+    This API is retained for old differential fixtures.  It treats one
+    complete-mask issue as one atomic old/final transition and therefore has
+    no physical authority for multi-key writes after CE-0193.  Use
+    ``project_route2_ordered_mode_decision_branches`` for the corrected
+    ordered transaction primitive.
     """
 
     state = _validate_route2_enemy_mode_state_key(initial_mode_state)
@@ -415,12 +481,14 @@ def project_route2_mode_decision_branches(
     initial_mode_state: Route2EnemyModeStateKey,
     enemy_flag_frames: tuple[tuple[Route2EnemyModeBody, ...], ...],
 ) -> tuple[Route2ModeDecisionBranch, ...]:
-    """Enumerate one exact recursive-cadence transition primitive.
+    """Enumerate the restricted atomic recursive-cadence primitive.
 
     Each returned branch ends at one possible next controller observation.
     Calling this function again with an observation class's merged successor
     root is the recursive construction; cadence is sampled again on every
-    call.  The body schedule must cover the largest cadence branch.
+    call.  The body schedule must cover the largest cadence branch.  CE-0193
+    rejects this API for physical multi-key pickup authority; it remains an
+    explicit baseline for historical scalar/native fixtures.
     """
 
     if (
@@ -456,6 +524,268 @@ def project_route2_mode_decision_branches(
                 )
             )
     return tuple(branches)
+
+
+def _ordered_action_masks(
+    action_masks: Mapping[str, int],
+    *,
+    supported_mask: int,
+) -> tuple[dict[str, int], dict[int, str]]:
+    if type(supported_mask) is not int or not 0 <= supported_mask <= 0xFFFF:
+        raise ValueError("supported input mask must fit in one u16 word")
+    normalized: dict[str, int] = {}
+    inverse: dict[int, str] = {}
+    for action, mask in action_masks.items():
+        if not action or type(mask) is not int or not 0 <= mask <= 0xFFFF:
+            raise ValueError("action masks require nonempty names and u16 masks")
+        if mask & ~supported_mask:
+            raise ValueError(f"action {action!r} contains unsupported input bits")
+        if mask & BOMB_INPUT_BIT:
+            raise ValueError("route-2 mode projection requires hard no-Bomb masks")
+        if mask in inverse:
+            raise ValueError("ordered complete-mask action mapping must be injective")
+        normalized[action] = mask
+        inverse[mask] = action
+    if not normalized:
+        raise ValueError("at least one action mask is required")
+    return normalized, inverse
+
+
+def _validate_enemy_flag_frames(
+    enemy_flag_frames: tuple[tuple[Route2EnemyModeBody, ...], ...],
+) -> None:
+    for frame in enemy_flag_frames:
+        identities = tuple(body.identity for body in frame)
+        if len(set(identities)) != len(identities):
+            raise ValueError("enemy identities must be unique within one frame")
+
+
+def _ordered_mode_hazard_frame(
+    *,
+    physical_step: int,
+    active_action: str,
+    active_mask: int,
+    mode_state: Route2EnemyModeStateKey,
+    bodies: tuple[Route2EnemyModeBody, ...],
+) -> tuple[Route2ModeHazardFrame, Route2EnemyModeStateKey]:
+    after = step_route2_enemy_mode_state(
+        mode_state,
+        focused=bool(active_mask & FOCUS_INPUT_BIT),
+    )
+    projections = tuple(
+        Route2ModeBodyProjection(
+            identity=body.identity,
+            projection=project_enemy_mode(
+                body.raw_flags,
+                secondary_character_active=after[1],
+            ),
+        )
+        for body in bodies
+    )
+    return (
+        Route2ModeHazardFrame(
+            physical_step=physical_step,
+            active_action=active_action,
+            active_mask=active_mask,
+            mode_state_before=mode_state,
+            mode_state_after=after,
+            body_projections=projections,
+            contact_body_ids=tuple(
+                body.identity
+                for body in projections
+                if body.projection.contact_eligible
+            ),
+            player_shot_damage_body_ids=tuple(
+                body.identity
+                for body in projections
+                if body.projection.player_shot_damage_eligible
+            ),
+        ),
+        after,
+    )
+
+
+def project_route2_ordered_mode_decision_branches(
+    *,
+    input_belief: OrderedInputBelief,
+    selected_action: str,
+    action_masks: Mapping[str, int],
+    supported_mask: int,
+    delay_frames: tuple[int, ...],
+    decision_frame_support: tuple[int, ...],
+    initial_mode_state: Route2EnemyModeStateKey,
+    enemy_flag_frames: tuple[tuple[Route2EnemyModeBody, ...], ...],
+) -> tuple[Route2OrderedModeDecisionBranch, ...]:
+    """Compose ordered input pickup with priority-9/11 mode/body semantics.
+
+    One controller choice is issued uniformly across the input belief.
+    During each physical update, priority 9 consumes the currently published
+    active mask and advances the delayed player mode; priority 11 projects
+    the enemy body gates; only then does the priority-17 publication boundary
+    expose one nature-selected ordered transaction prefix for the next
+    update.  The body schedule is exogenous and must cover every cadence.
+
+    Nature may stutter or advance through any non-final ordered prefix until
+    the declared final-completion deadline.  Because the exact Win32
+    queue/poll phase and its mapping to physical frames remain unbounded, this
+    primitive is conservative offline evidence and has no live authority.
+    """
+
+    state = _validate_route2_enemy_mode_state_key(initial_mode_state)
+    if (
+        not decision_frame_support
+        or tuple(sorted(set(decision_frame_support))) != decision_frame_support
+        or decision_frame_support[0] <= 0
+    ):
+        raise ValueError("decision-frame support must be sorted, unique, and positive")
+    if len(enemy_flag_frames) < decision_frame_support[-1]:
+        raise ValueError("body schedule does not cover cadence support")
+    _validate_enemy_flag_frames(enemy_flag_frames)
+    normalized_masks, inverse_masks = _ordered_action_masks(
+        action_masks,
+        supported_mask=supported_mask,
+    )
+    try:
+        selected_mask = normalized_masks[selected_action]
+    except KeyError as error:
+        raise ValueError(
+            f"missing selected action mask: {selected_action!r}"
+        ) from error
+
+    issue_branches = issue_ordered_input_belief(
+        input_belief,
+        selected_mask=selected_mask,
+        delay_support=delay_frames,
+        supported_mask=supported_mask,
+        forbidden_mask=BOMB_INPUT_BIT,
+    )
+    for issue_branch in issue_branches:
+        successor = issue_branch.successor_state
+        required_masks = (
+            issue_branch.source_state.active_mask,
+            issue_branch.source_state.held_desired_mask,
+            *issue_branch.source_state.queued_masks,
+            successor.active_mask,
+            successor.held_desired_mask,
+            *successor.queued_masks,
+        )
+        missing_masks = tuple(
+            sorted({mask for mask in required_masks if mask not in inverse_masks})
+        )
+        if missing_masks:
+            formatted = ", ".join(f"{mask:#06x}" for mask in missing_masks)
+            raise ValueError(
+                "ordered transaction reached complete masks without action "
+                f"identities: {formatted}"
+            )
+    results: list[Route2OrderedModeDecisionBranch] = []
+    for cadence_frames in decision_frame_support:
+        for issue_branch in issue_branches:
+            partials = (
+                _Route2OrderedPartial(
+                    mode_state=state,
+                    input_state=issue_branch.successor_state,
+                    frames=(),
+                    input_states_after_publication=(),
+                ),
+            )
+            for physical_step in range(1, cadence_frames + 1):
+                next_partials: list[_Route2OrderedPartial] = []
+                bodies = enemy_flag_frames[physical_step - 1]
+                for partial in partials:
+                    try:
+                        active_action = inverse_masks[partial.input_state.active_mask]
+                    except KeyError as error:
+                        raise ValueError(
+                            "ordered transaction reached a complete mask without "
+                            f"an action identity: "
+                            f"{partial.input_state.active_mask:#06x}"
+                        ) from error
+                    frame, next_mode_state = _ordered_mode_hazard_frame(
+                        physical_step=physical_step,
+                        active_action=active_action,
+                        active_mask=partial.input_state.active_mask,
+                        mode_state=partial.mode_state,
+                        bodies=bodies,
+                    )
+                    for next_input_state in advance_ordered_input_state(
+                        partial.input_state
+                    ):
+                        next_partials.append(
+                            _Route2OrderedPartial(
+                                mode_state=next_mode_state,
+                                input_state=next_input_state,
+                                frames=partial.frames + (frame,),
+                                input_states_after_publication=(
+                                    partial.input_states_after_publication
+                                    + (next_input_state,)
+                                ),
+                            )
+                        )
+                partials = tuple(next_partials)
+
+            for partial in partials:
+                hazard_branch = Route2OrderedModeHazardBranch(
+                    issue_branch=issue_branch,
+                    frames=partial.frames,
+                    input_states_after_publication=(
+                        partial.input_states_after_publication
+                    ),
+                )
+                results.append(
+                    Route2OrderedModeDecisionBranch(
+                        cadence_frames=cadence_frames,
+                        hazard_branch=hazard_branch,
+                        successor_input_state=partial.input_state,
+                        successor_mode_state=partial.mode_state,
+                    )
+                )
+    return tuple(results)
+
+
+def merge_route2_ordered_mode_decision_observation_classes(
+    branches: tuple[Route2OrderedModeDecisionBranch, ...],
+    *,
+    base_observation: Callable[
+        [Route2OrderedModeDecisionBranch, Route2ModeHazardFrame],
+        Hashable,
+    ],
+) -> tuple[Route2OrderedModeDecisionObservationClass, ...]:
+    """Merge hidden queue/deadline states by the full next observation."""
+
+    if not branches:
+        raise ValueError("at least one ordered decision branch is required")
+    grouped: dict[
+        Route2OrderedModeObservationKey,
+        list[Route2OrderedModeDecisionBranch],
+    ] = {}
+    for branch in branches:
+        frame = branch.hazard_branch.frames[-1]
+        base = base_observation(branch, frame)
+        try:
+            hash(base)
+        except TypeError as error:
+            raise ValueError("base observation must be hashable") from error
+        successor = branch.successor_input_state
+        key = Route2OrderedModeObservationKey(
+            base_observation=base,
+            physical_step=branch.cadence_frames,
+            active_mask=successor.active_mask,
+            held_desired_mask=successor.held_desired_mask,
+            mode_state=branch.successor_mode_state,
+        )
+        grouped.setdefault(key, []).append(branch)
+
+    return tuple(
+        Route2OrderedModeDecisionObservationClass(
+            key=key,
+            successor_input_belief=OrderedInputBelief.from_states(
+                branch.successor_input_state for branch in hidden
+            ),
+            hidden_branches=tuple(hidden),
+        )
+        for key, hidden in grouped.items()
+    )
 
 
 def merge_route2_mode_observation_classes(
@@ -596,12 +926,18 @@ __all__ = [
     "Route2ModeHazardFrame",
     "Route2ModeObservationClass",
     "Route2ModeObservationKey",
+    "Route2OrderedModeDecisionBranch",
+    "Route2OrderedModeDecisionObservationClass",
+    "Route2OrderedModeHazardBranch",
+    "Route2OrderedModeObservationKey",
+    "merge_route2_ordered_mode_decision_observation_classes",
     "merge_route2_mode_observation_classes",
     "merge_route2_mode_decision_observation_classes",
     "project_enemy_mode",
     "project_route2_enemy_mode",
     "project_route2_mode_pipeline_branches",
     "project_route2_mode_decision_branches",
+    "project_route2_ordered_mode_decision_branches",
     "route2_enemy_mode_state_key",
     "step_route2_enemy_mode_state",
 ]

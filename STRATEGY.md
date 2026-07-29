@@ -623,6 +623,27 @@ hard survival, damage ranking, and unfocused combat disabled. The retained
 report SHA-256 is
 `db411650de15a050c5ffb815f0f075c538b4ec16cbc01f2fa0f47e403f678464`.
 
+**2026-07-30 CE-0193 offline actuator correction:** the independent scalar
+ordered-transaction state and TH08 priority-9/11/17 composition are now
+implemented. One controller choice expands into deterministic releases then
+presses; nature may expose monotone non-final prefixes until final is forced
+at the declared publication deadline. No-write preserves the older queue and
+samples no delay; overwrite appends after the older suffix; hidden states
+merge only under the complete next observation.
+
+Connected IDA revalidation records that priority 9 reads current input at
+`0x0044AEE8` before priority 17 publishes raw into current at `0x00452347`.
+The corrected SEM-MODE primitive honors that within-cycle order and keeps the
+atomic APIs as restricted baselines. Nine game-neutral, four TH08 ordered,
+and fifteen prior SEM-MODE tests pass; complete 1,202-test Linux/Windows
+suites pass in 14.611/30.759 seconds, with three Windows skips.
+
+Strategy remains unchanged. This is **Offline/conservative**, not live:
+asynchronous capture/issue phase, physical publication-delay support,
+optimized/native parity, immutable future body/geometry, and physical
+falsification remain open. Do not reconnect damage/unfocused combat or launch
+an unchanged Stage-5 run.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

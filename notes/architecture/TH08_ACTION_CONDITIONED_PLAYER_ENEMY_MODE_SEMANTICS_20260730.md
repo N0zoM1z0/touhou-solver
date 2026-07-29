@@ -553,12 +553,76 @@ Until this correction passes, the current atomic recurrence is an offline
 restricted model. It cannot support a hard certificate, live publication,
 unfocused combat, or physical-survival claim.
 
+## Implemented Ordered Transaction Offline Primitive
+
+The first CE-0193 correction checkpoint is now implemented without changing
+live authority.
+
+The independent game-neutral scalar state is
+`(active_mask, held_desired_mask, queued_masks, completion_remaining)`.
+Queued masks are the remaining single-key-edge endpoints, ending at held
+final desired input. One final complete-mask choice is applied uniformly
+across every hidden state. Real writes append release-in-bit-order then
+press-in-bit-order paths after any older unobserved suffix and sample a new
+positive final-completion delay. Complete-mask no-write preserves the old
+queue/deadline and samples no new delay. Before the deadline nature may
+stutter or expose any monotone non-final prefix; at the deadline it must
+settle on final desired input. Exact hidden states merge before the next
+choice only after active and held masks agree.
+
+This scalar abstraction reproduces CE-0193: issuing `0x41` from settled
+`0x65` creates queue `(0x61, 0x41)`. With completion delay two, the first
+publication may retain `0x65` or expose `0x61`, but cannot expose final
+`0x41`; the second forces `0x41`.
+
+Connected IDA revalidation establishes the callback order used by the TH08
+composition:
+
+- `player_update_input_movement` priority 9 reads `g_input_current` at
+  `0x0044AEE8`;
+- priority-17 replay-record/input publication copies current to previous at
+  `0x00452339`; and
+- it then copies `g_input_raw` into `g_input_current` at `0x00452347`.
+
+Material comments at `0x0044AEE8` and `0x00452347` record that an ordered
+prefix published by priority 17 is consumed by the next priority-9 player
+update and can therefore affect direction, Focus, player `+3/+5/+8`, and
+priority-11 enemy gates.
+
+The new ordered SEM-MODE decision primitive starts at an explicitly declared
+post-priority-17 publication boundary. On each physical step, priority 9
+consumes current active mask, the player-mode recurrence advances, priority
+11 projects contact/damage body sets, and only then does priority 17 publish
+a hidden transaction successor for the next step. The next observation
+contains published active mask, held final mask, and the native mode tuple;
+hidden queue/deadline states are merged only inside that complete
+observation class. The prior atomic APIs remain unchanged but are explicitly
+restricted baselines.
+
+Nine game-neutral ordered-transaction tests and four TH08 composition tests
+pass. They cover CE-0193, single-edge reduction, multi-release/press order,
+deadline forcing, no-write, overwrite, non-clairvoyant merging, unsupported
+and Bomb bits, priority-9-before-priority-17, mode divergence caused by
+intermediate Focus, and missing intermediate action identities. The previous
+fifteen SEM-MODE tests continue to pass. Complete discovery passes 1,202
+tests in 14.611 seconds on Linux and 30.759 seconds through the exact Windows
+UNC loader, with three existing Windows skips.
+
+Authority remains **offline/conservative**. The prefix/stutter set
+overapproximates unknown Win32 queue/poll timing, and the input root assumes a
+post-priority-17 boundary. Mapping asynchronous capture and controller issue
+to that boundary, proving physical completion-delay support, producing exact
+immutable future body/flag/geometry, integrating movement/collision, and
+optimized/native differential parity all remain open. No live planner,
+actuator, cadence, damage objective, unfocused combat, or strategy changed.
+
 ## Remaining Implementation And Promotion Plan
 
-1. **SEM-MODE-C actuator correction:** replace atomic complete-mask pickup
-   with an ordered transition/pickup recurrence aligned to a revalidated
-   player/input update phase. Retain the atomic implementation only as a
-   rejected differential baseline.
+1. **SEM-MODE-C phase/differential closure:** the independent ordered scalar
+   state and priority-9/11/17 composition are implemented. Revalidate the
+   asynchronous capture/issue-to-publication phase and physical delay mapping,
+   then build an optimized implementation and exact scalar differential.
+   Retain the atomic implementation only as a rejected baseline.
 2. **SEM-MODE-C integration — exact hazard/version recurrence:** connect the
    corrected primitive to a complete immutable body/flag/geometry schedule
    and exact physical-update clock without changing live action authority.

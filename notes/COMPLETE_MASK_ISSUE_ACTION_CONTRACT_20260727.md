@@ -145,11 +145,21 @@ Consequently:
 - the current atomic old/final pickup recurrence is rejected for hard,
   publication, or live authority.
 
-The exact player/input update phase that samples the Win32 edge sequence is
-still open. Manager-frame delta is not a substitute. The correction gate
-must use an independent scalar ordered-transaction oracle and cover
-multi-release, multi-press, reversal, Focus, Shot, older-pending overwrite,
-and no-write histories before reconnecting geometry or damage objectives.
+The independent scalar correction now represents
+`(active, held_final, remaining_ordered_masks, completion_remaining)`.
+Before the final deadline, nature may stutter or expose any monotone
+non-final prefix; at the deadline final held input is forced. A new write
+appends its deterministic release-then-press path after the older suffix.
+Selecting held final input remains true no-write and preserves that suffix
+and deadline. Observation-compatible hidden states merge on active and held
+mask before the next controller choice.
+
+Connected IDA revalidation closes the callback order inside one native
+update: priority-9 player processing reads the current word at `0x0044AEE8`;
+priority-17 then copies raw input into current at `0x00452347`. It does not
+close where an asynchronous capture/issue falls relative to that callback
+pair, nor prove the scalar completion deadline against a native publication
+clock. Manager-frame delta remains invalid as a substitute.
 
 ## Uncertainty And Transitions
 
@@ -266,3 +276,18 @@ Checkpoint B passes as an offline native solver capability. The legacy
 32-bit ABI smoke, exact export manifest, Linux/Windows builds, and action bits
 above 31 pass. Until the remaining G1 blockers close, the corrected
 recurrence remains offline/shadow only.
+
+Checkpoint C adds the independent ordered-transaction oracle and composes it
+with the TH08 SEM-MODE priority-9/11 body-gate transition at a declared
+post-priority-17 root boundary. The old atomic SEM-MODE APIs remain available
+only as rejected differential baselines. Nine game-neutral and four TH08
+ordered regressions pass, including CE-0193, no-write, overwrite, hidden
+deadline merging, priority-9-before-priority-17, and fail-closed intermediate
+action identity. Complete Linux/Windows discovery passes 1,202 tests in
+14.611/30.759 seconds; Windows retains three existing skips.
+
+Checkpoint C is offline conservative model evidence. It changes no live
+planner, actuator, input cadence, publication, damage objective, or strategy.
+Capture/issue-to-publication phase, physical delay support, optimized/native
+parity, immutable future body/geometry versions, and a whole-stage physical
+falsifier remain open.

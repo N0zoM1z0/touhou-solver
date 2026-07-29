@@ -1045,6 +1045,32 @@ body/flag/geometry producer and proceed to SEM-MODE-D/E. Status remains
 **Rejected atomic submodel / offline investigation**. No strategy, action,
 hard-survival, unfocused-combat, or NMNB authority is promoted.
 
+2026-07-30 `SEM-MODE-C` ordered actuator checkpoint: an independent
+game-neutral scalar oracle now carries active native mask, held final mask,
+remaining ordered edge endpoints, and final-completion deadline. It preserves
+no-write and older suffixes, appends overwrite transactions, forces final
+only at the deadline, and merges hidden queue/deadline states by the complete
+actuator observation. CE-0193 is a direct regression:
+`0x65 -> (0x65 or 0x61) -> 0x41`.
+
+Connected IDA revalidation establishes the native callback order.
+Priority-9 player movement reads current input at `0x0044AEE8`; priority-17
+later publishes raw into current at `0x00452347`. The corrected TH08 decision
+primitive therefore consumes current mask for priority-9/11 mode/body gates
+before publishing the next ordered prefix. The old atomic APIs remain only as
+restricted historical baselines. Nine game-neutral plus four TH08 ordered
+tests pass; the previous fifteen SEM-MODE tests remain green. Complete
+Linux/Windows discovery passes 1,202 tests in 14.611/30.759 seconds, with
+three existing Windows skips.
+
+This closes the independent state/no-write/overwrite/observation and native
+within-cycle callback-order portions of items 1, 3, and 4 above. It does not
+close asynchronous capture/issue phase, physical completion-delay support,
+optimized/native parity, exact future body/flag/geometry versions, movement
+or collision composition, or a physical stage falsifier. Status is
+**Offline/conservative ordered primitive**; no live, survival, combat, or
+NMNB authority is promoted.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:
@@ -1298,10 +1324,10 @@ After that baseline, the next correction checkpoints should be:
    passes one exact contaminated restore interval while separately failing
    Stage-6B survival at 22 hits. Do not repeat it or generalize it to clean
    survival, stage-wide source authority, Extra, or NMNB;
-3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
-   enemy contact/damage eligibility. CE-0193 now requires ordered per-key
-   pickup and player/input phase correction before exact future body/version
-   integration;
+3. `SEM-MODE`: the independent CE-0193 ordered state and native
+   priority-9-before-priority-17 composition are complete offline. Close
+   asynchronous capture/issue phase and physical delay support, then
+   optimized/native parity, before exact future body/version integration;
 4. `SEM-GEOM`: exact player/laser geometry, bullet lifecycle/suppression, and
    physical clamp;
 5. `SEM-SOURCE`: callback inventory, bounded call semantics, and

@@ -171,18 +171,41 @@ evidence observes an intermediate prefix of that list:
 ```
 
 The next coherent native `input_current` is `0x61` while controller-held and
-pending final desired mask is `0x41`. Therefore the hidden actuator state
-required by a successor recurrence is at least:
+pending final desired mask is `0x41`. The implemented independent scalar
+oracle now uses the exact hidden transaction state:
 
 ```text
-h' = (t, q, a, g, transaction, older_pending, uncertainty)
-transaction = (ordered edge list, delivered/sampled prefix information)
+z = (a, g, Q, r)
+
+a = currently published native active mask
+g = held final desired mask
+Q = remaining masks after each ordered single-key edge
+r = positive remaining final-completion publication deadline
 ```
 
-The exact finite uncertainty set for edge delivery versus native
-player/input update phase is not yet revalidated. Until it is, every
-unobserved intermediate prefix is unknown-direction and outside hard
-authority. A corrected recurrence must:
+`Q[-1] == g`; adjacent entries from `a` through `Q` differ by exactly one
+bit. `Q` empty means settled `a == g` and no deadline. A nonempty queue may
+still have `a == g`: an overwrite can temporarily return to the selected
+mask before traversing an older suffix and the appended new transaction.
+
+For a real write `u != g`, the actuator appends the deterministic ordered
+path from the old held mask `g` to `u` after the remaining older queue,
+updates held final desired to `u`, and nature samples a new positive
+final-completion delay. For no-write `u == g`, it appends nothing, samples no
+delay, and preserves the entire older queue/deadline.
+
+At one abstract input-publication step:
+
+- if `r == 1`, nature must publish final `g` and settle;
+- if `r > 1`, nature may stutter or consume any monotone non-final prefix of
+  `Q`, then decrements `r`; and
+- the final mask cannot be published before the declared deadline.
+
+This prefix/stutter set is a conservative abstraction of the observed
+ordered transaction, not a measured Win32 queue scheduler. The exact finite
+uncertainty set for edge delivery versus asynchronous capture/issue phase is
+still not revalidated. Until it is, unobserved intermediate timing is
+unknown-direction and outside hard authority. The corrected recurrence now:
 
 - allow every physically attainable ordered prefix mask at the appropriate
   native input/player-update phase;
@@ -196,9 +219,10 @@ authority. A corrected recurrence must:
 CE-0193 is not permission to treat each key edge as an independent controller
 choice. The controller chooses one final complete mask before nature exposes
 transaction timing; all intermediate masks belong to that one issue's hidden
-physical transition. The pre-amendment one-token recurrence remains an
-offline restricted baseline until this ordered transaction state is
-implemented and independently verified.
+physical transition. Hidden queue/deadline states are merged before the next
+controller maximization exactly when observed active mask and held final mask
+agree. The pre-amendment one-token recurrence remains an offline restricted
+baseline after CE-0193.
 
 This conditional issue rule is not cosmetic.  A retained three-frame
 counterexample starts from `stay` with `left` pending at remaining delay two.
@@ -290,6 +314,20 @@ Passing claim 1 does not establish claims 2--4.
   recursively branch cadence, and merge indistinguishable remaining-delay
   supports before continuation maximization.  Another 128 retained randomized
   cases have zero scalar/native failures.
+- `ordered_input_transaction_oracle.py` independently implements the CE-0193
+  ordered state above. Nine focused tests cover deterministic release/press
+  order, the physical `0x65 -> 0x61 -> 0x41` witness, single-edge reduction,
+  final-deadline forcing, no-write, overwrite, observation merging, uniform
+  controller choice, unsupported bits, and Bomb.
+- `th08_enemy_mode.py` retains its atomic APIs as an explicitly restricted
+  baseline and adds an ordered SEM-MODE decision primitive. At its declared
+  post-priority-17 root boundary, each physical step has priority 9 consume
+  current active input, priority 11 project body gates, and priority 17
+  publish a nature-selected transaction prefix for the next step.
+- Connected IDA revalidation records this native order at `0x0044AEE8` and
+  `0x00452347`: priority-9 player movement consumes the previously published
+  `g_input_current`; priority-17 later copies `g_input_raw` into
+  `g_input_current`.
 - Lookup-only version/root checks are exact.  In the first physical shadow,
   every root that was both covered and completed was consumed; miss delivery,
   not lookup corruption, caused the low hit rate.
@@ -303,6 +341,12 @@ Passing claim 1 does not establish claims 2--4.
   belief merging are all necessary.  Separate minimized counterexamples flip
   winning classification for the first two and add a false best action for
   hidden-delay clairvoyance.
+- Ordered prefix masks are physically necessary model states, but the
+  current prefix/stutter support is conservative and its publication deadline
+  is exact only relative to the oracle's abstract publication clock.
+- Mapping an asynchronous controller capture and issue to the declared
+  post-priority-17 root boundary remains open. Enemy-manager frame cannot
+  supply that mapping.
 - Replacing recursive cadence by one robust public transition followed by a
   fixed interval has unknown direction.  It matched one small cohort but was
   optimistic on a retained wider ten-frame counterexample; “use only maximum

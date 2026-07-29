@@ -68,7 +68,8 @@ located; it does not change the authority order below.
 55. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_PREFLIGHT_20260729.md`
 56. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_STAGE5_FAILURE_20260729.md`
 57. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_CONTRACT_20260729.md`
-58. the relevant recent run note and counterexample rows before live work
+58. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_PREFLIGHT_20260729.md`
+59. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -133,10 +134,17 @@ describe the same decision. Python/C++ parity is not physical correctness.
   preparation was `0.121 ms`. Delivery still failed event-derive,
   replay-compact, and previous-emit p95 at `0.620/0.564/2.862 ms`, and the
   run took 11 hits (`4/0/1/4/2` by nonspell/103/107/111/115). CE-0170
-  retains the failure. Schema-v7/event-v4 is fixed before implementation to
-  preserve every usable raw byte and source index while omitting proved-null
-  record dictionaries and committing repeated derived results by independently
-  reconstructed canonical hashes. All timing and survival limits remain.
+  retains the failure. Schema-v7/event-v4 now implements the fixed compact
+  correction: every usable raw byte and source index remains, proved-null
+  dictionaries are omitted, and repeated results use independently
+  reconstructible recurrence-core commitments. Five retained-trace repeats
+  cross observation epochs 1/2/3 and pass on Linux/Windows. Projected maximum
+  line size is `23495/23494` bytes; derive, compact, and no-write JSON p95 are
+  `0.251/0.290/0.185 ms` on Linux and `0.277/0.387/0.191 ms` on Windows.
+  Complete suites pass 1,032 tests on both platforms, with three Windows
+  skips, and the failed V1 report remains byte-identical. This is isolated
+  trace-only evidence; the fresh schema-v7 physical Stage-5 gate is next.
+  All physical timing and survival limits remain unchanged.
   Before handoff retain every run and require two consecutive corrected
   Stage-5 results at no more than ten hits plus cross-stage regression
   checks. Schemas v4/v5 have no physical delivery authority. The old
@@ -1700,6 +1708,10 @@ Compact benchmark evidence:
 - `artifacts/benchmarks/auxiliary_ecl_event_windows_prebuilt_max_failure_20260728.json`
 - `artifacts/benchmarks/auxiliary_ecl_event_runtime_delivery_v2_linux_20260729.json`
 - `artifacts/benchmarks/auxiliary_ecl_event_runtime_delivery_v2_windows_20260729.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_runtime_delivery_v3_linux_20260729.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_runtime_delivery_v3_windows_20260729.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_runtime_delivery_v4_linux_20260729.json`
+- `artifacts/benchmarks/auxiliary_ecl_event_runtime_delivery_v4_windows_20260729.json`
 - `artifacts/viability_audit/g5_auxiliary_ecl_event_inventory_stage5_20260728_200739.json`
 - `artifacts/viability_audit/g5_derived_source_stage5_20260728_150827.json`
 - `artifacts/viability_audit/g5_auxiliary_pointer_density_stage5_20260728_171633.json`

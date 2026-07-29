@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import IntFlag
 import hashlib
+from collections import Counter
 
 from .replay_bundle import encode_replay_bundle
 
@@ -34,6 +35,9 @@ MAXIMUM_RUNTIME_ADDRESS = 0x7FFFFFFF
 UNOBSERVED_MANAGER_FRAME = -(1 << 31)
 AUXILIARY_VM_BATCH_LAYOUT_V1 = "th08-auxiliary-vm-batch-v1"
 AUXILIARY_VM_BATCH_LAYOUT_V2 = "th08-auxiliary-vm-batch-v2"
+AUXILIARY_VM_USABLE_RECORD_PROJECTION_SCHEMA = (
+    "th08-auxiliary-vm-usable-record-projection-v1"
+)
 
 
 class BatchStatus(IntFlag):
@@ -166,15 +170,23 @@ class AuxiliaryVmBatchObservation:
         *,
         include_replay_state: bool = False,
         include_replay_bundle: bool = False,
+        usable_projection: bool = False,
     ) -> dict[str, object]:
         if include_replay_state and include_replay_bundle:
             raise ValueError("replay state encodings are mutually exclusive")
-        compact_records = [
-            batch_record.compact_record(
+        selected_records = [
+            (index, batch_record)
+            for index, batch_record in enumerate(self.records)
+            if not usable_projection or batch_record.usable
+        ]
+        compact_records = []
+        for source_record_index, batch_record in selected_records:
+            compact_record = batch_record.compact_record(
                 include_replay_state=include_replay_state
             )
-            for batch_record in self.records
-        ]
+            if usable_projection:
+                compact_record["source_record_index"] = source_record_index
+            compact_records.append(compact_record)
         record: dict[str, object] = {
             "layout": self.layout,
             "authority": "trace_only_no_action_authority",
@@ -188,11 +200,20 @@ class AuxiliaryVmBatchObservation:
             "state_payload_bytes": self.state_payload_bytes,
             "records": compact_records,
         }
+        if usable_projection:
+            statuses = Counter(int(item.status) for item in self.records)
+            record["record_projection"] = {
+                "schema": AUXILIARY_VM_USABLE_RECORD_PROJECTION_SCHEMA,
+                "record_status_bits": {
+                    str(key): value
+                    for key, value in sorted(statuses.items())
+                },
+            }
         if include_replay_bundle:
             referenced_blobs: list[tuple[str, bytes]] = []
             seen: set[str] = set()
             for source, compact_source in zip(
-                self.records,
+                (item for _, item in selected_records),
                 compact_records,
             ):
                 active_sha256 = compact_source["active_vm_sha256"]
@@ -252,6 +273,7 @@ __all__ = [
     "ACTIVE_VM_BYTES",
     "AUXILIARY_VM_BATCH_LAYOUT_V1",
     "AUXILIARY_VM_BATCH_LAYOUT_V2",
+    "AUXILIARY_VM_USABLE_RECORD_PROJECTION_SCHEMA",
     "AUXILIARY_POINTERS_PER_OWNER",
     "AuxiliaryVmBatchObservation",
     "AuxiliaryVmBatchRecord",

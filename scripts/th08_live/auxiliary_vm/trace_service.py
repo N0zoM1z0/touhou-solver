@@ -34,6 +34,7 @@ AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION = 3
 AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION = 4
 AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION = 5
 AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION = 6
+AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION = 7
 AUXILIARY_VM_BATCH_TRACE_ROLE = "trace_only_no_action_authority"
 AUXILIARY_VM_BATCH_MAXIMUM_ATTEMPTS = 3
 _RETRYABLE_BATCH_BITS = (
@@ -278,7 +279,8 @@ class AuxiliaryVmBatchTraceService:
         compact_started = time.perf_counter()
         compact = (
             selected.compact_record(
-                include_replay_bundle=self.event_service is not None
+                include_replay_bundle=self.event_service is not None,
+                usable_projection=self.event_service is not None,
             )
             if selected is not None
             else None
@@ -288,7 +290,7 @@ class AuxiliaryVmBatchTraceService:
         record: dict[str, object] = {
             "kind": "auxiliary_vm_batch",
             "schema_version": (
-                AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION
+                AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION
                 if self.event_service is not None
                 else AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION
             ),
@@ -365,7 +367,7 @@ class AuxiliaryVmBatchTraceService:
         record: dict[str, object] = {
             "kind": "auxiliary_vm_batch",
             "schema_version": (
-                AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION
+                AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION
                 if self.event_service is not None
                 else AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION
             ),
@@ -418,6 +420,7 @@ __all__ = [
     "AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION",
     "AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION",
     "AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION",
+    "AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION",
     "AUXILIARY_VM_BATCH_MAXIMUM_ATTEMPTS",
     "AUXILIARY_VM_BATCH_TRACE_ROLE",
     "AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION",

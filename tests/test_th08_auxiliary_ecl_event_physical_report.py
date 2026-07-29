@@ -20,7 +20,6 @@ from analysis.th08_runtime_ecl_identity_audit import (
 from th08_ecl_tool.core import parse_ecl
 from th08_live.auxiliary_vm.event_service import (
     AuxiliaryEclEventConfiguration,
-    AuxiliaryEclEventTraceService,
 )
 from th08_live.auxiliary_vm.model import (
     ACTIVE_VM_AUXILIARY_MARKER_OFFSET,
@@ -33,6 +32,9 @@ from th08_live.auxiliary_vm.model import (
 )
 from th08_live.runtime_ecl_identity import RuntimeEclAcceptedVersion
 from th08_runtime.game_state import EXPECTED_EXE_SHA256
+from th08_auxiliary_ecl_event_legacy_fixture import (
+    LegacyAuxiliaryEclEventTraceService,
+)
 
 
 _ROOT = Path(__file__).resolve().parents[1]
@@ -150,7 +152,7 @@ def _batch() -> dict[str, object]:
         owner_manager_frame_after=102,
         owner_blob_bytes=64 * 0x53D0,
     )
-    event_service = AuxiliaryEclEventTraceService(
+    event_service = LegacyAuxiliaryEclEventTraceService(
         AuxiliaryEclEventConfiguration(
             static_path=_ECL,
             expected_static_sha256=STAGE5_STATIC_SHA256,

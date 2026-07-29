@@ -21,6 +21,7 @@ from .image import build_exact_runtime_instruction_index
 from .lowerer import lower_auxiliary_literal_fire_cycle
 from .model import (
     AuxiliaryDirectFireIntent,
+    AuxiliaryEclTimerState,
     AuxiliaryEclVmState,
     AuxiliaryLiteralFireResult,
     LiteralTransformDefinition,
@@ -28,6 +29,7 @@ from .model import (
 
 __all__ = [
     "AuxiliaryDirectFireIntent",
+    "AuxiliaryEclTimerState",
     "AuxiliaryEclVmState",
     "AuxiliaryLiteralFireBatch",
     "AuxiliaryLiteralFireBatchLowerer",

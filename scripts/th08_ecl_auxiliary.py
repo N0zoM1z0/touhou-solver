@@ -11,6 +11,7 @@ from th08_ecl_auxiliary_core import (
     PHYSICAL_TIMING_INVALID,
     PHYSICAL_TIMING_UNAVAILABLE,
     AuxiliaryDirectFireIntent,
+    AuxiliaryEclTimerState,
     AuxiliaryEclVmState,
     AuxiliaryLiteralFireBatch,
     AuxiliaryLiteralFireBatchLowerer,
@@ -27,6 +28,7 @@ from th08_ecl_auxiliary_core import (
 
 __all__ = [
     "AuxiliaryDirectFireIntent",
+    "AuxiliaryEclTimerState",
     "AuxiliaryEclVmState",
     "AuxiliaryLiteralFireBatch",
     "AuxiliaryLiteralFireBatchLowerer",

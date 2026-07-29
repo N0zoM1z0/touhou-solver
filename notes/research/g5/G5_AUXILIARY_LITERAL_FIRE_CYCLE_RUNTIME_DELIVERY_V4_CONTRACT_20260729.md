@@ -112,11 +112,27 @@ For each request, event v4 retains:
 (source_record_index, classification_status, result_index)
 ```
 
-For each unique production result it retains SHA-256 of:
+For each unique production result it retains SHA-256 of a fixed canonical
+recurrence core:
 
 ```text
 json.dumps(
-  result.record(),
+  {
+    events: [
+      (timer_tick_offset, physical_frame_offset,
+       instruction_address, opcode, parameter_mask)
+    ],
+    transforms: [
+      (timer_tick_offset, physical_frame_offset,
+       instruction_address, index)
+    ],
+    instructions_scanned,
+    stop_reason,
+    horizon_covered,
+    requested_timer_tick_horizon,
+    stop_timer_tick,
+    physical_timing_status
+  },
   sort_keys=True,
   separators=(",", ":"),
   allow_nan=False
@@ -129,9 +145,13 @@ the lifetime of the same immutable program/lowerer environment.
 
 The independent auditor reconstructs every request from raw bytes, executes
 the independent raw-byte oracle regardless of production cache status,
-reconstructs the complete canonical results, and compares every hash and
-index. A hash match is implementation-parity evidence for the retained raw
-input, not physical-model validity.
+reconstructs the complete canonical recurrence cores, and compares every
+hash and index. This commitment deliberately excludes descriptive fire
+arguments and transform literals that the independent oracle does not
+reconstruct and this proxy does not consume. Those fields gain no authority
+from V4; the exact VM and ECL bytes remain retained for a future richer
+oracle. A hash match is implementation-parity evidence for the declared
+recurrence on the retained raw input, not physical-model validity.
 
 ### Actions, Uncertainty, And Transitions
 

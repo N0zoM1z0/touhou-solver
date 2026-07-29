@@ -32,7 +32,7 @@ from .constants import (
 from .descriptor import decode_fire, decode_transform
 from .model import (
     AuxiliaryDirectFireIntent,
-    AuxiliaryEclVmState,
+    AuxiliaryEclTimerState,
     AuxiliaryLiteralFireResult,
     LiteralTransformDefinition,
 )
@@ -83,7 +83,7 @@ def _stop(
 
 
 def lower_auxiliary_literal_fire_cycle(
-    state: AuxiliaryEclVmState,
+    state: AuxiliaryEclTimerState,
     *,
     instruction_at: Callable[[int], RuntimeEclInstruction],
     timer_tick_horizon: int,

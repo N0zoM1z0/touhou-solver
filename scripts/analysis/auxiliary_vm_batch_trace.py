@@ -22,6 +22,7 @@ from th08_live.auxiliary_vm.trace_service import (  # noqa: E402
     AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
     AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
     AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
+    AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
     AUXILIARY_VM_BATCH_TRACE_ROLE,
     AUXILIARY_VM_BATCH_TRACE_SCHEMA_VERSION,
 )
@@ -360,7 +361,43 @@ def _audit_v3_attempts(
                             f"[{record_index}]: invalid status"
                         )
                     observation_histogram[bits] += 1
-                if selected_histogram != observation_histogram:
+                if (
+                    row.get("schema_version")
+                    == AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION
+                ):
+                    projection = observation.get("record_projection")
+                    if not isinstance(projection, dict):
+                        raise ValueError(
+                            f"{context}: missing record projection"
+                        )
+                    if (
+                        projection.get("schema")
+                        != (
+                            "th08-auxiliary-vm-usable-record-"
+                            "projection-v1"
+                        )
+                    ):
+                        scan.validation_errors.append(
+                            f"{context}: invalid record projection schema"
+                        )
+                    projected_histogram = _status_histogram(
+                        projection.get("record_status_bits"),
+                        context=f"{context}.record_projection",
+                    )
+                    if selected_histogram != projected_histogram:
+                        scan.validation_errors.append(
+                            f"{context}: selected attempt/observation "
+                            "record-status histogram mismatch"
+                        )
+                    if (
+                        observation_histogram
+                        != Counter({0: selected_histogram[0]})
+                    ):
+                        scan.validation_errors.append(
+                            f"{context}: projection contains non-usable "
+                            "records"
+                        )
+                elif selected_histogram != observation_histogram:
                     scan.validation_errors.append(
                         f"{context}: selected attempt/observation "
                         "record-status histogram mismatch"
@@ -425,6 +462,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
+        AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
     ):
         raise ValueError(f"{context}: unexpected schema version")
     assert isinstance(schema_version, int)
@@ -448,6 +486,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
         AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
         AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
+        AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
     ):
         _audit_v3_attempts(scan, row, context=context, timing=timing)
 
@@ -465,6 +504,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
             AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
             AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
             AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
+            AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
         )
         else f"th08-auxiliary-vm-batch-v{schema_version}"
     )
@@ -547,6 +587,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
                     AUXILIARY_VM_BATCH_EVENT_TRACE_SCHEMA_VERSION,
                     AUXILIARY_VM_BATCH_EVENT_V2_TRACE_SCHEMA_VERSION,
                     AUXILIARY_VM_BATCH_EVENT_V3_TRACE_SCHEMA_VERSION,
+                    AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION,
                 )
                 else observation
             ),
@@ -560,6 +601,7 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
     observed_record_statuses: Counter[int] = Counter()
     active_owner_slots: set[int] = set()
     non_null_contexts = 0
+    source_record_indices: list[int] = []
     for record_index, record in enumerate(records):
         if not isinstance(record, dict):
             raise ValueError(
@@ -584,7 +626,22 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
                 f"{context}.records[{record_index}] status is not integer"
             )
         observed_record_statuses[bits] += 1
-        scan.record_status_bits[bits] += 1
+        if (
+            schema_version
+            == AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION
+        ):
+            source_index = record.get("source_record_index")
+            if (
+                not isinstance(source_index, int)
+                or isinstance(source_index, bool)
+            ):
+                raise ValueError(
+                    f"{context}.records[{record_index}] source index "
+                    "is invalid"
+                )
+            source_record_indices.append(source_index)
+        else:
+            scan.record_status_bits[bits] += 1
         if context_pointer != 0:
             depth = record.get("call_depth")
             if isinstance(depth, int) and not isinstance(depth, bool):
@@ -592,18 +649,76 @@ def _audit_batch(scan: TraceScan, row: dict[str, object]) -> None:
             active_hash = record.get("active_vm_sha256")
             if isinstance(active_hash, str):
                 scan.active_vm_hashes.add(active_hash)
-    semantic_success = (
-        batch_bits == 0
-        and all(bits in (0, 1) for bits in observed_record_statuses)
-    )
-    expected_counts = {
-        "record_count": len(records),
-        "active_owner_count": len(active_owner_slots),
-        "non_null_context_count": non_null_contexts,
-        "usable_context_count": (
-            observed_record_statuses[0] if semantic_success else 0
-        ),
-    }
+    if (
+        schema_version
+        == AUXILIARY_VM_BATCH_EVENT_V4_TRACE_SCHEMA_VERSION
+    ):
+        projection = observation.get("record_projection")
+        if not isinstance(projection, dict):
+            raise ValueError(f"{context}: record projection is absent")
+        full_statuses = _status_histogram(
+            projection.get("record_status_bits"),
+            context=f"{context}.record_projection",
+        )
+        scan.record_status_bits.update(full_statuses)
+        record_count = observation.get("record_count")
+        if (
+            not isinstance(record_count, int)
+            or isinstance(record_count, bool)
+            or record_count < 0
+        ):
+            raise ValueError(f"{context}: record count is invalid")
+        semantic_success = (
+            batch_bits == 0
+            and all(bits in (0, 1) for bits in full_statuses)
+        )
+        if sum(full_statuses.values()) != record_count:
+            scan.validation_errors.append(
+                f"{context}: projected status count mismatch"
+            )
+        if observed_record_statuses != Counter({0: full_statuses[0]}):
+            scan.validation_errors.append(
+                f"{context}: projected records differ from usable count"
+            )
+        if (
+            source_record_indices != sorted(source_record_indices)
+            or len(source_record_indices) != len(set(source_record_indices))
+            or any(
+                index < 0 or index >= record_count
+                for index in source_record_indices
+            )
+        ):
+            scan.validation_errors.append(
+                f"{context}: projected source indices are invalid"
+            )
+        active_owner_count = observation.get("active_owner_count")
+        if (
+            not isinstance(active_owner_count, int)
+            or isinstance(active_owner_count, bool)
+            or active_owner_count < len(active_owner_slots)
+        ):
+            scan.validation_errors.append(
+                f"{context}: projected active-owner count is invalid"
+            )
+        expected_counts = {
+            "non_null_context_count": len(records),
+            "usable_context_count": (
+                full_statuses[0] if semantic_success else 0
+            ),
+        }
+    else:
+        semantic_success = (
+            batch_bits == 0
+            and all(bits in (0, 1) for bits in observed_record_statuses)
+        )
+        expected_counts = {
+            "record_count": len(records),
+            "active_owner_count": len(active_owner_slots),
+            "non_null_context_count": non_null_contexts,
+            "usable_context_count": (
+                observed_record_statuses[0] if semantic_success else 0
+            ),
+        }
     for key, expected in expected_counts.items():
         if observation.get(key) != expected:
             scan.validation_errors.append(

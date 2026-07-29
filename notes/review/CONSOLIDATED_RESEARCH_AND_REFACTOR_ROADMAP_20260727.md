@@ -144,6 +144,14 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   byte, native status proof, and source index while removing proved-null
   dictionaries and replacing reconstructible repeated results with canonical
   commitments. Keep all physical timing and `<=10` survival thresholds.
+- Schema v7/event v4 now passes its isolated Linux/Windows gate. It projects
+  only usable native records with exact source indices, preserves full raw
+  replay bytes and native status proof, and commits only the independently
+  reconstructible recurrence core. Five repeats cross observation epochs
+  1/2/3; projected maximum line size is below 24 KiB and derive/compact/JSON
+  p95 meets the unchanged limits on both platforms. Complete suites pass
+  1,032 tests. Physical delivery and survival remain open; run a fresh
+  retained Stage-5 gate before any handoff claim.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

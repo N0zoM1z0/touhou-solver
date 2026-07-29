@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from th08_ecl_runtime import RuntimeEclInstruction
 
 from .lowerer import lower_auxiliary_literal_fire_cycle
-from .model import AuxiliaryEclVmState, AuxiliaryLiteralFireResult
+from .model import AuxiliaryEclTimerState, AuxiliaryLiteralFireResult
 
 
 BATCH_RECORD_SCHEMA = "th08-auxiliary-literal-fire-batch-v1"
@@ -16,7 +16,7 @@ BATCH_RECORD_SCHEMA = "th08-auxiliary-literal-fire-batch-v1"
 
 @dataclass(frozen=True)
 class AuxiliaryLiteralFireRequest:
-    state: AuxiliaryEclVmState
+    state: AuxiliaryEclTimerState
     timer_tick_horizon: int
 
     def intent_equivalence_key(self) -> tuple[int, int, int, int, int]:

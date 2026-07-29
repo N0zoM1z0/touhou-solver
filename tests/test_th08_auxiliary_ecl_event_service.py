@@ -5,7 +5,6 @@ from pathlib import Path
 import struct
 import unittest
 
-from th08_ecl_auxiliary import PHYSICAL_TIMING_UNAVAILABLE
 from th08_ecl_tool.core import EclFile, parse_ecl
 from th08_live.auxiliary_vm import (
     AuxiliaryVmBatchObservation,
@@ -231,7 +230,7 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(
             result["schema"],
-            "th08-auxiliary-ecl-event-derivation-v3",
+            "th08-auxiliary-ecl-event-derivation-v4",
         )
         self.assertEqual(result["authority"], "trace_only_no_action_authority")
         self.assertEqual(result["active_difficulty_mask"], 0x08)
@@ -254,25 +253,29 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
                 "capacity": 512,
             },
         )
-        requests = result["requests"]
+        requests = result["request_projection"]
         assert isinstance(requests, list)
         self.assertEqual(
-            [request["observation_record_index"] for request in requests],
+            [request["source_record_index"] for request in requests],
             [0, 1, 2],
         )
         self.assertEqual(
             [request["status"] for request in requests],
             ["complete", "complete", "complete"],
         )
-        lowering = result["lowering"]
-        assert isinstance(lowering, dict)
-        self.assertEqual(lowering["request_count"], 3)
-        self.assertEqual(lowering["unique_result_count"], 3)
+        commitment = result["lowering_commitment"]
+        assert isinstance(commitment, dict)
+        self.assertEqual(
+            commitment["schema"],
+            "th08-auxiliary-literal-fire-result-commitment-v1",
+        )
+        self.assertEqual(commitment["request_count"], 3)
+        self.assertEqual(commitment["unique_result_count"], 3)
+        self.assertEqual(commitment["result_indices"], [0, 1, 2])
         self.assertTrue(
             all(
-                item["physical_timing_status"]
-                == PHYSICAL_TIMING_UNAVAILABLE
-                for item in lowering["unique_results"]
+                isinstance(item, str) and len(item) == 64
+                for item in commitment["unique_result_sha256"]
             )
         )
         repeated = self._service()
@@ -288,7 +291,10 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
             gameplay_epoch=7,
             stage_route_index=5,
         )
-        self.assertEqual(first["lowering"], second["lowering"])
+        self.assertEqual(
+            first["lowering_commitment"],
+            second["lowering_commitment"],
+        )
         self.assertEqual(second["cache"]["persistent_hits"], 3)
         self.assertEqual(second["cache"]["misses"], 0)
 
@@ -326,7 +332,7 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
                 )
                 self.assertEqual(result["status"], status)
                 self.assertEqual(result["request_count"], 0)
-                self.assertIsNone(result["lowering"])
+                self.assertIsNone(result["lowering_commitment"])
                 if version is not None:
                     self.assertEqual(
                         result["runtime_version"],
@@ -421,7 +427,7 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
         self.assertEqual(result["request_count"], 5)
         self.assertEqual(result["complete_count"], 0)
         self.assertEqual(result["unknown_count"], 5)
-        requests = result["requests"]
+        requests = result["request_projection"]
         assert isinstance(requests, list)
         self.assertEqual(
             [request["status"] for request in requests[:4]],
@@ -433,9 +439,9 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
             ],
         )
         self.assertTrue(str(requests[4]["status"]).startswith("invalid_state:"))
-        lowering = result["lowering"]
-        assert isinstance(lowering, dict)
-        self.assertEqual(lowering["request_count"], 0)
+        commitment = result["lowering_commitment"]
+        assert isinstance(commitment, dict)
+        self.assertEqual(commitment["request_count"], 0)
 
     def test_unusable_batch_and_empty_success_are_distinct(self) -> None:
         service = self._service()
@@ -461,9 +467,9 @@ class AuxiliaryEclEventTraceServiceTests(unittest.TestCase):
         )
         self.assertEqual(empty["status"], "empty_complete")
         self.assertEqual(empty["request_count"], 0)
-        lowering = empty["lowering"]
-        assert isinstance(lowering, dict)
-        self.assertEqual(lowering["request_count"], 0)
+        commitment = empty["lowering_commitment"]
+        assert isinstance(commitment, dict)
+        self.assertEqual(commitment["request_count"], 0)
         self.assertEqual(
             empty["cache"],
             {

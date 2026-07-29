@@ -6,7 +6,7 @@ import time
 from collections.abc import Callable
 
 from th08_ecl_auxiliary import (
-    AuxiliaryEclVmState,
+    AuxiliaryEclTimerState,
     AuxiliaryLiteralFireBatchLowerer,
     AuxiliaryLiteralFireRequest,
 )
@@ -18,10 +18,11 @@ from .event_program import (
     AuxiliaryEclEventProgram,
     BoundAuxiliaryEclProgram,
 )
+from .event_commitment import AuxiliaryLiteralFireResultCommitter
 from .model import AuxiliaryVmBatchObservation
 
 
-AUXILIARY_ECL_EVENT_SCHEMA = "th08-auxiliary-ecl-event-derivation-v3"
+AUXILIARY_ECL_EVENT_SCHEMA = "th08-auxiliary-ecl-event-derivation-v4"
 AUXILIARY_ECL_EVENT_PREPARATION_SCHEMA = (
     "th08-auxiliary-ecl-event-preparation-v2"
 )
@@ -42,6 +43,7 @@ class AuxiliaryEclEventTraceService:
         self._clock = clock
         self._bound_program: BoundAuxiliaryEclProgram | None = None
         self._lowerer: AuxiliaryLiteralFireBatchLowerer | None = None
+        self._committer: AuxiliaryLiteralFireResultCommitter | None = None
         self._prepared_version_key: tuple[object, ...] | None = None
         self._preparation_attempt: tuple[object, ...] | None = None
 
@@ -82,8 +84,8 @@ class AuxiliaryEclEventTraceService:
             "request_count": 0,
             "complete_count": 0,
             "unknown_count": 0,
-            "requests": [],
-            "lowering": None,
+            "request_projection": [],
+            "lowering_commitment": None,
             "cache": None,
             "timing_ms": {
                 "program_bind": 0.0,
@@ -147,6 +149,7 @@ class AuxiliaryEclEventTraceService:
                     ),
                     cache_capacity=configuration.cache_capacity,
                 )
+                self._committer = AuxiliaryLiteralFireResultCommitter()
                 self._prepared_version_key = version_key
         total_ms = (self._clock() - total_started) * 1000.0
         configuration = self._program.configuration
@@ -238,9 +241,11 @@ class AuxiliaryEclEventTraceService:
         version_key = self._program.version_key(runtime_version)
         program = self._bound_program
         lowerer = self._lowerer
+        committer = self._committer
         if (
             program is None
             or lowerer is None
+            or committer is None
             or self._prepared_version_key != version_key
         ):
             return self.unavailable_record(
@@ -250,35 +255,27 @@ class AuxiliaryEclEventTraceService:
                 total_ms=(self._clock() - total_started) * 1000.0,
             )
         decode_started = self._clock()
-        request_records: list[dict[str, object]] = []
+        request_projection: list[dict[str, object]] = []
         requests: list[AuxiliaryLiteralFireRequest] = []
-        request_record_indices: list[int] = []
+        pending_projection_indices: list[int] = []
         unknown_count = 0
         for record_index, record in enumerate(observation.records):
             if not record.usable:
                 continue
             request_record: dict[str, object] = {
-                "observation_record_index": record_index,
-                "target_subroutine": record.target_subroutine,
-                "call_depth": record.call_depth,
-                "auxiliary_marker": record.auxiliary_marker,
+                "source_record_index": record_index,
                 "status": None,
                 "result_index": None,
             }
             try:
-                state = AuxiliaryEclVmState.from_active_vm(record.active_vm)
+                state = AuxiliaryEclTimerState.from_active_vm(
+                    record.active_vm
+                )
             except ValueError as error:
                 request_record["status"] = f"invalid_state:{error}"
                 unknown_count += 1
-                request_records.append(request_record)
+                request_projection.append(request_record)
                 continue
-            request_record["state"] = {
-                "instruction_pointer": state.instruction_pointer,
-                "timer_previous": state.timer_previous,
-                "timer_fraction_bits": state.timer_fraction_bits,
-                "timer_elapsed": state.timer_elapsed,
-                "auxiliary_marker": state.auxiliary_marker,
-            }
             target = record.target_subroutine
             if record.call_depth != 0:
                 status = "unsupported_call_depth"
@@ -294,11 +291,13 @@ class AuxiliaryEclEventTraceService:
             else:
                 status = "pending"
             request_record["status"] = status
-            request_records.append(request_record)
+            request_projection.append(request_record)
             if status != "pending":
                 unknown_count += 1
                 continue
-            request_record_indices.append(len(request_records) - 1)
+            pending_projection_indices.append(
+                len(request_projection) - 1
+            )
             requests.append(
                 AuxiliaryLiteralFireRequest(
                     state=state,
@@ -312,12 +311,12 @@ class AuxiliaryEclEventTraceService:
         batch = cached_batch.batch
         lower_ms = (self._clock() - lower_started) * 1000.0
         complete_count = 0
-        for request_index, request_record_index in enumerate(
-            request_record_indices
+        for request_index, projection_index in enumerate(
+            pending_projection_indices
         ):
             result = batch.results[request_index]
             result_index = batch.result_indices[request_index]
-            request_record = request_records[request_record_index]
+            request_record = request_projection[projection_index]
             request_record["result_index"] = result_index
             if result.horizon_covered:
                 request_record["status"] = "complete"
@@ -329,9 +328,9 @@ class AuxiliaryEclEventTraceService:
                 unknown_count += 1
 
         compact_started = self._clock()
-        compact = batch.compact_record()
+        commitment = committer.commit(batch)
         compact_ms = (self._clock() - compact_started) * 1000.0
-        if not request_records:
+        if not request_projection:
             status = "empty_complete"
         elif unknown_count == 0:
             status = "success"
@@ -363,11 +362,11 @@ class AuxiliaryEclEventTraceService:
                     self._program.target_horizons.items()
                 )
             },
-            "request_count": len(request_records),
+            "request_count": len(request_projection),
             "complete_count": complete_count,
             "unknown_count": unknown_count,
-            "requests": request_records,
-            "lowering": compact,
+            "request_projection": request_projection,
+            "lowering_commitment": commitment,
             "cache": cached_batch.cache.record(),
             "timing_ms": {
                 "state_decode": state_decode_ms,

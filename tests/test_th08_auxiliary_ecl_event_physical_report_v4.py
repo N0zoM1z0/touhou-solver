@@ -6,17 +6,17 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from analysis.auxiliary_ecl_event.physical_report_v3 import (
+from analysis.auxiliary_ecl_event.physical_report_v4 import (
     AuxiliaryEclEventPhysicalAuditError,
-    build_physical_report_v3,
+    build_physical_report_v4,
 )
 from analysis.th08_runtime_ecl_identity_audit import (
     STAGE5_STATIC_LABEL,
     STAGE5_STATIC_SHA256,
 )
-from th08_live.auxiliary_vm.event_service import AuxiliaryEclEventConfiguration
-from th08_auxiliary_ecl_event_legacy_fixture import (
-    LegacyAuxiliaryEclEventTraceService,
+from th08_live.auxiliary_vm.event_service import (
+    AuxiliaryEclEventConfiguration,
+    AuxiliaryEclEventTraceService,
 )
 
 from test_th08_auxiliary_ecl_event_physical_report_v2 import (
@@ -39,11 +39,11 @@ def _epoch_decision(frame: int, epoch: int) -> dict[str, object]:
     return row
 
 
-class AuxiliaryEclEventPhysicalReportV3Tests(unittest.TestCase):
+class AuxiliaryEclEventPhysicalReportV4Tests(unittest.TestCase):
     def _rows(
         self,
     ) -> tuple[dict[str, object], list[dict[str, object]]]:
-        service = LegacyAuxiliaryEclEventTraceService(
+        service = AuxiliaryEclEventTraceService(
             AuxiliaryEclEventConfiguration(
                 static_path=_ECL,
                 expected_static_sha256=STAGE5_STATIC_SHA256,
@@ -81,8 +81,9 @@ class AuxiliaryEclEventPhysicalReportV3Tests(unittest.TestCase):
                 event,
                 frame=frame,
                 previous_emit_ms=None if index == 0 else 0.2,
+                usable_projection=True,
             )
-            batch["schema_version"] = 6
+            batch["schema_version"] = 7
             batch["gameplay_epoch"] = epoch
             batches.append(batch)
         return preparation, batches
@@ -140,7 +141,7 @@ class AuxiliaryEclEventPhysicalReportV3Tests(unittest.TestCase):
         session.write_text(
             json.dumps(
                 {
-                    "run_id": "synthetic-v3",
+                    "run_id": "synthetic-v4",
                     "status": "completed",
                     "trial_accepted": True,
                     "hard_no_bomb": True,
@@ -159,100 +160,90 @@ class AuxiliaryEclEventPhysicalReportV3Tests(unittest.TestCase):
         )
         return trace, baseline, session
 
-    def test_cross_epoch_delivery_cache_and_survival_gate_pass(self) -> None:
+    def test_cross_epoch_compact_delivery_passes(self) -> None:
         with TemporaryDirectory() as temporary:
             trace, baseline, session = self._fixture(Path(temporary))
-            report = build_physical_report_v3(
+            report = build_physical_report_v4(
                 trace,
                 baseline,
                 session,
                 _ECL,
             )
-
         self.assertTrue(report["passed"])
+        self.assertTrue(all(report["gates"].values()))
         self.assertEqual(
             report["observation_epochs"]["batch_gameplay_epochs"],
             {"1": 2, "2": 1, "3": 1},
         )
-        self.assertTrue(
-            report["observation_epochs"]["cross_epoch_observed"]
-        )
-        self.assertEqual(report["cache"]["misses"], 1)
-        self.assertEqual(report["cache"]["persistent_hits"], 2)
-        self.assertEqual(
-            report["survival_regression_boundary"]["hit_count"],
-            8,
-        )
-        self.assertTrue(all(report["gates"].values()))
+        line_bytes = report["transport"]["batch_line_bytes"]
+        self.assertLessEqual(line_bytes["max"], 24576)
 
-    def test_epoch_provenance_tamper_fails_closed(self) -> None:
-        preparation, batches = self._rows()
-        tampered = copy.deepcopy(batches)
-        event = tampered[2]["event_derivation"]
-        assert isinstance(event, dict)
-        event["observation_gameplay_epoch"] = 99
+    def _assert_tamper_rejected(
+        self,
+        batches: list[dict[str, object]],
+        pattern: str,
+    ) -> None:
         with TemporaryDirectory() as temporary:
             trace, baseline, session = self._fixture(
                 Path(temporary),
-                preparation=preparation,
-                batches=tampered,
+                batches=batches,
             )
             with self.assertRaisesRegex(
                 AuxiliaryEclEventPhysicalAuditError,
-                "epoch provenance",
+                pattern,
             ):
-                build_physical_report_v3(
+                build_physical_report_v4(
                     trace,
                     baseline,
                     session,
                     _ECL,
                 )
 
-    def test_program_identity_key_tamper_fails_closed(self) -> None:
-        preparation, batches = self._rows()
-        tampered = copy.deepcopy(batches)
-        event = tampered[1]["event_derivation"]
+    def test_source_index_and_histogram_tamper_fail_closed(self) -> None:
+        _preparation, batches = self._rows()
+        source_tamper = copy.deepcopy(batches)
+        observation = source_tamper[1]["observation"]
+        assert isinstance(observation, dict)
+        records = observation["records"]
+        assert isinstance(records, list)
+        records[0]["source_record_index"] = 999
+        self._assert_tamper_rejected(source_tamper, "source indices")
+
+        histogram_tamper = copy.deepcopy(batches)
+        observation = histogram_tamper[1]["observation"]
+        assert isinstance(observation, dict)
+        projection = observation["record_projection"]
+        assert isinstance(projection, dict)
+        projection["record_status_bits"] = {"0": 2}
+        self._assert_tamper_rejected(
+            histogram_tamper,
+            "record-status histogram mismatch|status proof",
+        )
+
+    def test_bundle_and_commitment_tamper_fail_closed(self) -> None:
+        _preparation, batches = self._rows()
+        bundle_tamper = copy.deepcopy(batches)
+        observation = bundle_tamper[1]["observation"]
+        assert isinstance(observation, dict)
+        bundle = observation["replay_state_bundle"]
+        assert isinstance(bundle, dict)
+        bundle["payload_base64"] = "AAAA"
+        self._assert_tamper_rejected(bundle_tamper, "bundle|payload")
+
+        commitment_tamper = copy.deepcopy(batches)
+        event = commitment_tamper[1]["event_derivation"]
         assert isinstance(event, dict)
-        key = event["program_identity_key"]
-        assert isinstance(key, list)
-        key[0] = int(key[0]) + 4
-        with TemporaryDirectory() as temporary:
-            trace, baseline, session = self._fixture(
-                Path(temporary),
-                preparation=preparation,
-                batches=tampered,
-            )
-            with self.assertRaisesRegex(
-                AuxiliaryEclEventPhysicalAuditError,
-                "identity key",
-            ):
-                build_physical_report_v3(
-                    trace,
-                    baseline,
-                    session,
-                    _ECL,
-                )
+        commitment = event["lowering_commitment"]
+        assert isinstance(commitment, dict)
+        hashes = commitment["unique_result_sha256"]
+        assert isinstance(hashes, list)
+        hashes[0] = "0" * 64
+        self._assert_tamper_rejected(
+            commitment_tamper,
+            "commitment differs",
+        )
 
-    def test_survival_boundary_rejects_eleven_hits(self) -> None:
-        with TemporaryDirectory() as temporary:
-            trace, baseline, session = self._fixture(
-                Path(temporary),
-                hit_count=11,
-            )
-            report = build_physical_report_v3(
-                trace,
-                baseline,
-                session,
-                _ECL,
-            )
-
-        self.assertFalse(report["passed"])
-        failed = [
-            key for key, passed in report["gates"].items() if not passed
-        ]
-        self.assertEqual(failed, ["stage5_survival_regression_boundary"])
-
-    def test_slow_preparation_rejects_delivery_gate(self) -> None:
+    def test_slow_preparation_and_eleven_hits_are_rejected(self) -> None:
         preparation, batches = self._rows()
         slow = copy.deepcopy(preparation)
         timing = slow["timing_ms"]
@@ -263,17 +254,18 @@ class AuxiliaryEclEventPhysicalReportV3Tests(unittest.TestCase):
                 Path(temporary),
                 preparation=slow,
                 batches=batches,
+                hit_count=11,
             )
-            report = build_physical_report_v3(
+            report = build_physical_report_v4(
                 trace,
                 baseline,
                 session,
                 _ECL,
             )
-
         self.assertFalse(report["passed"])
+        self.assertFalse(report["gates"]["preparation_exact_and_bounded"])
         self.assertFalse(
-            report["gates"]["preparation_exact_and_bounded"]
+            report["gates"]["stage5_survival_regression_boundary"]
         )
 
 

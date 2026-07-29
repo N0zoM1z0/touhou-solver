@@ -11,6 +11,7 @@ from th08_ecl_auxiliary import (
     PHYSICAL_TIMING_AVAILABLE,
     PHYSICAL_TIMING_BUDGET_EXHAUSTED,
     PHYSICAL_TIMING_UNAVAILABLE,
+    AuxiliaryEclTimerState,
     AuxiliaryEclVmState,
     AuxiliaryLiteralFireRequest,
     build_exact_runtime_instruction_index,
@@ -202,6 +203,23 @@ def _core_record(result: object) -> dict[str, object]:
 
 
 class AuxiliaryEclStateTests(unittest.TestCase):
+    def test_timer_state_exposes_only_recurrence_fields(self) -> None:
+        raw = _active_vm(_ROOT, elapsed=7, fraction=0.25, marker=3)
+        state = AuxiliaryEclTimerState.from_active_vm(raw)
+        self.assertEqual(
+            state.record(),
+            {
+                "instruction_pointer": _ROOT,
+                "instruction_pointer_hex": f"{_ROOT:#010x}",
+                "timer_previous": 6,
+                "timer_fraction_bits": 0x3E800000,
+                "timer_fraction_bits_hex": "0x3e800000",
+                "timer_elapsed": 7,
+                "auxiliary_marker": 3,
+            },
+        )
+        self.assertFalse(hasattr(state, "local_projection"))
+
     def test_active_vm_preserves_timer_bits_locals_and_marker(self) -> None:
         raw = _active_vm(_ROOT, elapsed=7, fraction=0.25, marker=3)
         state = AuxiliaryEclVmState.from_active_vm(raw)

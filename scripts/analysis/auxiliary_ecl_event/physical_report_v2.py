@@ -29,6 +29,7 @@ from .physical_gate_support import (
     expected_runtime_version,
     finite_nonnegative,
     session_record,
+    trace_batch_line_bytes,
     trace_delivery_rows,
     within,
 )
@@ -228,6 +229,8 @@ def build_delivery_physical_report(
     require_same_gameplay_epoch: bool = True,
     audit_batch: Callable[..., BatchReplaySummary] = audit_event_batch_v2,
     survival_hit_maximum: int | None = None,
+    empty_row_valid: Callable[[dict[str, Any]], bool] = _empty_row_valid,
+    batch_line_maximum: int | None = None,
 ) -> dict[str, object]:
     image = ecl_path.read_bytes()
     actual_ecl_sha256 = hashlib.sha256(image).hexdigest()
@@ -263,6 +266,11 @@ def build_delivery_physical_report(
     baseline = scan_trace(baseline_path, audit_batches=False)
     rows, preparations, trace_sha256, trace_bytes = trace_delivery_rows(
         trace_path
+    )
+    batch_line_bytes = (
+        trace_batch_line_bytes(trace_path)
+        if batch_line_maximum is not None
+        else []
     )
     if scan.sha256 != trace_sha256 or scan.byte_count != trace_bytes:
         raise AuxiliaryEclEventPhysicalAuditError(
@@ -403,7 +411,7 @@ def build_delivery_physical_report(
             empty_prefix_valid = (
                 empty_prefix_valid
                 and not seen_nonempty
-                and _empty_row_valid(row)
+                and empty_row_valid(row)
             )
         else:
             seen_nonempty = True
@@ -478,6 +486,11 @@ def build_delivery_physical_report(
         ),
         "accepted_session_cleanup": session_pass,
     }
+    if batch_line_maximum is not None:
+        gates["projected_batch_line_maximum"] = bool(
+            batch_line_bytes
+            and max(batch_line_bytes) <= batch_line_maximum
+        )
     survival_hit_count: int | None = None
     if survival_hit_maximum is not None:
         raw_session = json.loads(session_path.read_text(encoding="utf-8"))
@@ -596,6 +609,13 @@ def build_delivery_physical_report(
             "physical_action": "none",
         },
     }
+    if batch_line_maximum is not None:
+        report["transport"]["batch_line_bytes"] = distribution(
+            batch_line_bytes
+        )
+        report["limits_bytes"] = {
+            "projected_batch_line_maximum": batch_line_maximum,
+        }
     if survival_hit_maximum is not None:
         report["survival_regression_boundary"] = {
             "hit_count": survival_hit_count,

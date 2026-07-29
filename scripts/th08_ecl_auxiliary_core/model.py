@@ -22,18 +22,17 @@ from .constants import STOP_HORIZON, STOP_TERMINATE
 
 
 @dataclass(frozen=True)
-class AuxiliaryEclVmState:
-    """Capture-derived state needed by the bounded auxiliary lowerer."""
+class AuxiliaryEclTimerState:
+    """Exact capture fields consumed by the bounded timer recurrence."""
 
     instruction_pointer: int
     timer_previous: int
     timer_fraction_bits: int
     timer_elapsed: int
     auxiliary_marker: int
-    local_projection: EclVmLocalProjection
 
     @classmethod
-    def from_active_vm(cls, active_vm: bytes) -> AuxiliaryEclVmState:
+    def from_active_vm(cls, active_vm: bytes) -> AuxiliaryEclTimerState:
         if len(active_vm) != ACTIVE_VM_BYTES:
             raise ValueError(
                 "auxiliary active VM must contain exactly "
@@ -69,7 +68,6 @@ class AuxiliaryEclVmState:
             timer_fraction_bits=timer_fraction_bits,
             timer_elapsed=timer_elapsed,
             auxiliary_marker=auxiliary_marker,
-            local_projection=EclVmLocalProjection.from_vm_bytes(active_vm),
         )
 
     @property
@@ -85,6 +83,30 @@ class AuxiliaryEclVmState:
             "timer_fraction_bits_hex": f"{self.timer_fraction_bits:#010x}",
             "timer_elapsed": self.timer_elapsed,
             "auxiliary_marker": self.auxiliary_marker,
+        }
+
+
+@dataclass(frozen=True)
+class AuxiliaryEclVmState(AuxiliaryEclTimerState):
+    """Full capture-derived state retained by general VM-state callers."""
+
+    local_projection: EclVmLocalProjection
+
+    @classmethod
+    def from_active_vm(cls, active_vm: bytes) -> AuxiliaryEclVmState:
+        timer = AuxiliaryEclTimerState.from_active_vm(active_vm)
+        return cls(
+            instruction_pointer=timer.instruction_pointer,
+            timer_previous=timer.timer_previous,
+            timer_fraction_bits=timer.timer_fraction_bits,
+            timer_elapsed=timer.timer_elapsed,
+            auxiliary_marker=timer.auxiliary_marker,
+            local_projection=EclVmLocalProjection.from_vm_bytes(active_vm),
+        )
+
+    def record(self) -> dict[str, object]:
+        return {
+            **super().record(),
             "local_projection": self.local_projection.trace_record(),
         }
 

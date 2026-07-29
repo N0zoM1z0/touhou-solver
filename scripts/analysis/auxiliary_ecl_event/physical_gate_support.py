@@ -207,6 +207,21 @@ def trace_event_rows(
     return rows, trace_sha256, byte_count
 
 
+def trace_batch_line_bytes(path: Path) -> list[float]:
+    """Return exact encoded line sizes for auxiliary batch transactions."""
+
+    result: list[float] = []
+    with path.open("rb") as source:
+        for raw_line in source:
+            prefix = raw_line[:512]
+            if (
+                b'"kind":"auxiliary_vm_batch"' in prefix
+                or b'"kind": "auxiliary_vm_batch"' in prefix
+            ):
+                result.append(float(len(raw_line)))
+    return result
+
+
 __all__ = [
     "AuxiliaryEclEventPhysicalAuditError",
     "digest",
@@ -215,6 +230,7 @@ __all__ = [
     "finite_nonnegative",
     "session_record",
     "trace_delivery_rows",
+    "trace_batch_line_bytes",
     "trace_event_rows",
     "within",
 ]

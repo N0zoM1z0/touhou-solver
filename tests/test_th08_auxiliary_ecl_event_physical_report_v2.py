@@ -17,10 +17,7 @@ from analysis.th08_runtime_ecl_identity_audit import (
     STAGE5_STATIC_SHA256,
 )
 from th08_ecl_tool.core import parse_ecl
-from th08_live.auxiliary_vm.event_service import (
-    AuxiliaryEclEventConfiguration,
-    AuxiliaryEclEventTraceService,
-)
+from th08_live.auxiliary_vm.event_service import AuxiliaryEclEventConfiguration
 from th08_live.auxiliary_vm.model import (
     ACTIVE_VM_AUXILIARY_MARKER_OFFSET,
     ACTIVE_VM_BYTES,
@@ -32,6 +29,9 @@ from th08_live.auxiliary_vm.model import (
 )
 from th08_live.runtime_ecl_identity import RuntimeEclAcceptedVersion
 from th08_runtime.game_state import EXPECTED_EXE_SHA256
+from th08_auxiliary_ecl_event_legacy_fixture import (
+    LegacyAuxiliaryEclEventTraceService,
+)
 
 
 _ROOT = Path(__file__).resolve().parents[1]
@@ -167,6 +167,7 @@ def _batch_row(
     *,
     frame: int,
     previous_emit_ms: float | None,
+    usable_projection: bool = False,
 ) -> dict[str, object]:
     return {
         "kind": "auxiliary_vm_batch",
@@ -221,7 +222,8 @@ def _batch_row(
         "manager_frame_after": frame,
         "process_read_count": 5,
         "observation": observation.compact_record(
-            include_replay_bundle=True
+            include_replay_bundle=True,
+            usable_projection=usable_projection,
         ),
         "event_derivation": event,
         "timing_ms": {
@@ -254,7 +256,7 @@ class AuxiliaryEclEventPhysicalReportV2Tests(unittest.TestCase):
         dict[str, object],
         dict[str, object],
     ]:
-        service = AuxiliaryEclEventTraceService(
+        service = LegacyAuxiliaryEclEventTraceService(
             AuxiliaryEclEventConfiguration(
                 static_path=_ECL,
                 expected_static_sha256=STAGE5_STATIC_SHA256,

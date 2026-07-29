@@ -593,10 +593,15 @@ comparison.
    3,384/3,384 requests but fails physical component timing: event derive,
    replay compact, and previous emit p95 are `0.620/0.564/2.862 ms`. It also
    takes 11 hits, one above the regression boundary. CE-0170 rejects
-   delivery/survival acceptance. Schema-v7/event-v4 is fixed to project only
-   usable records with exact source indices and preserve raw replay bytes
-   while replacing redundant result JSON with independent canonical
-   commitments. This remains default-off and trace-only. Handoff requires two
+   delivery/survival acceptance. Schema-v7/event-v4 now projects only usable
+   records with exact source indices, preserves raw replay bytes, and replaces
+   redundant result JSON with independent recurrence-core commitments. Five
+   retained-trace repeats pass the fixed isolated gate on Linux/Windows across
+   observation epochs 1/2/3. Maximum projected line size is `23495/23494`
+   bytes; derive/compact/JSON p95 is `0.251/0.290/0.185 ms` on Linux and
+   `0.277/0.387/0.191 ms` on Windows. Complete 1,032-test suites pass on both
+   platforms. This remains default-off and trace-only until the fresh
+   physical gate. Handoff requires two
    consecutive corrected Stage-5 runs at no more than ten hits plus
    cross-stage regression checks. No physical delivery authority exists
    before the new gate passes.

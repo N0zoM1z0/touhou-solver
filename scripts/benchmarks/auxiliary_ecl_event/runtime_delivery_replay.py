@@ -1,4 +1,4 @@
-"""Replay retained schema-v4 batches through epoch-safe V3 delivery."""
+"""Replay retained raw-state batches through compact epoch-safe V4 delivery."""
 
 from __future__ import annotations
 
@@ -30,8 +30,9 @@ from th08_live.runtime_ecl_identity import RuntimeEclAcceptedVersion
 
 EVENT_DERIVE_LIMIT_MS = (0.50, 1.00, 3.00)
 REPLAY_COMPACT_LIMIT_MS = (0.50, 1.00, 3.00)
-SERIALIZE_LIMIT_MS = (1.00, 2.00, 6.00)
+SERIALIZE_LIMIT_MS = (0.25, 0.50, 1.50)
 PREPARATION_MAXIMUM_MS = 1.0
+PROJECTED_LINE_MAXIMUM = 24576
 
 
 def _integer(value: object, context: str) -> int:
@@ -240,7 +241,7 @@ def _observation(
     )
 
 
-def benchmark_runtime_delivery_v3(
+def benchmark_runtime_delivery_v4(
     trace_path: Path,
     static_path: Path,
     *,
@@ -300,7 +301,7 @@ def benchmark_runtime_delivery_v3(
             snapshot_frame=version.snapshot_frame,
         )
         if preparation is None or preparation["status"] != "success":
-            raise ValueError("V3 runtime preparation failed")
+            raise ValueError("V4 runtime preparation failed")
         preparation_timing = _mapping(
             preparation.get("timing_ms"),
             "preparation.timing_ms",
@@ -357,12 +358,13 @@ def benchmark_runtime_delivery_v3(
                 )
             started = time.perf_counter()
             compact = observation.compact_record(
-                include_replay_bundle=True
+                include_replay_bundle=True,
+                usable_projection=True,
             )
             compact_ms.append((time.perf_counter() - started) * 1000.0)
             output_row = {
                 **shell,
-                "schema_version": 6,
+                "schema_version": 7,
                 "gameplay_epoch": observation_epoch,
                 "observation": compact,
                 "event_derivation": event,
@@ -383,8 +385,8 @@ def benchmark_runtime_delivery_v3(
     compact_distribution = distribution(compact_ms)
     serialize_distribution = distribution(serialize_ms)
     preparation_distribution = distribution(preparation_ms)
-    return {
-        "schema": "th08-auxiliary-ecl-event-v3-replay-benchmark-v1",
+    report: dict[str, object] = {
+        "schema": "th08-auxiliary-ecl-event-v4-replay-benchmark-v1",
         "authority": "isolated_replay_not_physical_delivery_authority",
         "source": {
             "trace": str(trace_path),
@@ -424,6 +426,9 @@ def benchmark_runtime_delivery_v3(
                 REPLAY_COMPACT_LIMIT_MS
             ),
             "json_serialize_p95_p99_max": list(SERIALIZE_LIMIT_MS),
+        },
+        "limits_bytes": {
+            "projected_json_line_maximum": PROJECTED_LINE_MAXIMUM,
         },
         "gates": {
             "all_rows_classified": bool(
@@ -465,8 +470,16 @@ def benchmark_runtime_delivery_v3(
                 serialize_distribution,
                 SERIALIZE_LIMIT_MS,
             ),
+            "projected_json_line_size": bool(
+                serialized_bytes
+                and max(serialized_bytes) <= PROJECTED_LINE_MAXIMUM
+            ),
         },
     }
+    gates = report["gates"]
+    assert isinstance(gates, dict)
+    report["passed"] = all(gates.values())
+    return report
 
 
 def benchmark_runtime_delivery(
@@ -476,9 +489,26 @@ def benchmark_runtime_delivery(
     expected_static_sha256: str,
     repeats: int,
 ) -> dict[str, object]:
-    """Compatibility alias for the current V3 retained-trace benchmark."""
+    """Compatibility alias for the current retained-trace benchmark."""
 
-    return benchmark_runtime_delivery_v3(
+    return benchmark_runtime_delivery_v4(
+        trace_path,
+        static_path,
+        expected_static_sha256=expected_static_sha256,
+        repeats=repeats,
+    )
+
+
+def benchmark_runtime_delivery_v3(
+    trace_path: Path,
+    static_path: Path,
+    *,
+    expected_static_sha256: str,
+    repeats: int,
+) -> dict[str, object]:
+    """Deprecated command alias; emits the current V4 benchmark schema."""
+
+    return benchmark_runtime_delivery_v4(
         trace_path,
         static_path,
         expected_static_sha256=expected_static_sha256,
@@ -489,4 +519,5 @@ def benchmark_runtime_delivery(
 __all__ = [
     "benchmark_runtime_delivery",
     "benchmark_runtime_delivery_v3",
+    "benchmark_runtime_delivery_v4",
 ]

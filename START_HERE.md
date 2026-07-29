@@ -92,8 +92,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `10d35a4`
-  (`Retain SEM-MODE-B Stage 5 physical evidence`).
+- Latest retained research checkpoint: `7133404`
+  (`Retain SEM-MODE-C causal transition primitive`).
 - Latest pre-trial repository/live code checkpoint: `60ae5b9`
   (`Retain CE-0191 diagnostic scale continuation`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
@@ -170,7 +170,27 @@ its SHA-256 and all compact artifacts are retained, and deterministic report
 regeneration is byte-identical. The supervisor selected no-save, so there is
 no compatible replay to inspect. Hard no-Bomb and cleanup pass. All ten hits
 are CE-0192; the diagnostic comparison is explicitly non-authoritative.
-Continue at SEM-MODE-C, not another unchanged physical run.
+It is the physical predecessor for SEM-MODE-C, not permission for another
+unchanged physical run.
+
+Checkpoint `7133404` retains the stage-neutral SEM-MODE-C offline transition
+primitive. It composes exact active/held/pending pickup histories with the
+priority-9 player `+3/+5/+8` recurrence, priority-11 enemy bit-`0x800`
+projection, recursive cadence successors, and observation-compatible hidden
+remaining-delay merging. No-write preserves the old pending command; Bomb
+masks and incomplete complete-mask maps fail closed. Contact and damage body
+identities remain separate. Fifteen focused tests and complete 1,175-test
+Linux/Windows suites pass in 14.858/30.329 seconds, with three existing
+Windows skips.
+
+The connected IDB provenance is now explicit: its input differs from the
+shipped disk executable only at research no-life-decrement byte
+`0x0044D0FA`; instruction `0x0044D0F9` records the two hashes, exact
+single-byte proof, and warning. Revalidated SEM-MODE code ranges byte-match
+the shipped image. This checkpoint has offline transition authority only:
+body/flag schedules remain exogenous and global survival recurrence,
+physical-update clock, immutable hazard-version integration, optimized/native
+differentials, and live publication remain open.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -528,14 +548,14 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Implement `SEM-MODE-C` from checkpoint `10d35a4`. Carry the immutable
-   player/enemy mode key through every active/pending input pickup and
-   cadence/delay history. Project per-frame contact body sets at the declared
-   native update phase and merge hidden histories before the next controller
-   maximization when their observations agree. Keep the independent scalar
-   oracle separate, retain no-write/pending and `10065 -> 10075` capsules,
-   and publish body-set/viable-state/safe-action-mask differentials before
-   any live consumption. Keep unfocused-combat promotion disabled.
+2. Continue `SEM-MODE-C` from checkpoint `7133404`. Bind the accepted pure
+   transition to an exact immutable body/flag/geometry schedule and verified
+   physical-update clock, then integrate it into the finite survival
+   recurrence without granting live action authority. Preserve the
+   independent scalar oracle and publish body-set, viable-state, and
+   safe-action-mask differentials. Then complete SEM-MODE-D damage-objective
+   separation and SEM-MODE-E optimized/native parity. Keep unfocused-combat
+   promotion disabled.
 3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed
@@ -2414,8 +2434,8 @@ entry, and never selects an exact spell. The scale proxy and extra
 reads/retries are unknown-direction and can perturb cadence, so this is
 diagnostic physical evidence rather than an observer-off survival comparator.
 Run `041408` closes this occurrence gate; do not repeat it unchanged. There is
-currently no authorized SEM-MODE-C physical command because causal recurrence
-and differential gates come first.
+currently no authorized SEM-MODE-C physical command because exact
+body/version integration and differential gates come first.
 
 The current explicit trace-only native birth-observer gate adds:
 

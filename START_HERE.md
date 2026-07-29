@@ -66,7 +66,9 @@ located; it does not change the authority order below.
 53. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_STAGE5_FAILURE_20260729.md`
 54. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_CONTRACT_20260729.md`
 55. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_PREFLIGHT_20260729.md`
-56. the relevant recent run note and counterexample rows before live work
+56. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_STAGE5_FAILURE_20260729.md`
+57. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_CONTRACT_20260729.md`
+58. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -125,7 +127,16 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Windows. Online preparation maximum is `0.044/0.073 ms`; event-derive p95
   is `0.366/0.436 ms`. Complete suites pass 1,027 tests on both platforms,
   with three Windows skips, and the failed V1 report remains byte-identical.
-  This is isolated evidence, not live contention or survival authority.
+  Physical V3 run `20260729_104222` then observed the corrected semantics:
+  127/127 batches crossed accepted epoch 0 to observation epoch 2 and
+  3,384/3,384 independent requests completed with zero unknown; online
+  preparation was `0.121 ms`. Delivery still failed event-derive,
+  replay-compact, and previous-emit p95 at `0.620/0.564/2.862 ms`, and the
+  run took 11 hits (`4/0/1/4/2` by nonspell/103/107/111/115). CE-0170
+  retains the failure. Schema-v7/event-v4 is fixed before implementation to
+  preserve every usable raw byte and source index while omitting proved-null
+  record dictionaries and committing repeated derived results by independently
+  reconstructed canonical hashes. All timing and survival limits remain.
   Before handoff retain every run and require two consecutive corrected
   Stage-5 results at no more than ten hits plus cross-stage regression
   checks. Schemas v4/v5 have no physical delivery authority. The old

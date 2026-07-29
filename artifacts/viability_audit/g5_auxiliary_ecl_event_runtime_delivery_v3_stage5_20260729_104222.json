@@ -1,0 +1,262 @@
+{
+  "authority": "physical_trace_only_no_action_authority",
+  "authority_boundary": {
+    "auxiliary_literal_fire_timer_schedule": "independently_replayed_for_observed_contexts",
+    "physical_action": "none",
+    "physical_frame_timing": "none",
+    "planner": "none",
+    "realized_birth_geometry": "none",
+    "runtime_instruction_bytes": "exact_for_this_immutable_image",
+    "source_lifetime": "none"
+  },
+  "cache": {
+    "capacity": 512,
+    "entries_after": 46,
+    "evictions": 0,
+    "misses": 46,
+    "persistent_hits": 1592,
+    "request_local_hits": 1746
+  },
+  "gates": {
+    "accepted_session_cleanup": true,
+    "contracted_targets_only": true,
+    "decision_cadence_p95_regression_at_most_one_frame": true,
+    "empty_prefix_valid": true,
+    "event_derive_timing": false,
+    "event_status_success_or_empty": true,
+    "exact_runtime_version_on_every_batch": true,
+    "hard_no_bomb_route_complete": true,
+    "independent_cache_parity": true,
+    "independent_oracle_parity": true,
+    "no_added_process_reads_in_event_layer": true,
+    "preparation_exact_and_bounded": true,
+    "replay_bundle_present": true,
+    "replay_compact_timing": false,
+    "schema_v6_rows_present": true,
+    "stage5_survival_regression_boundary": false,
+    "trace_emit_timing": false,
+    "transaction_total_timing": true,
+    "transport_success_and_coherent": true
+  },
+  "limits_ms": {
+    "cadence_p95_regression_frames": 1.0,
+    "event_derive_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ],
+    "preparation_maximum": 1.0,
+    "replay_compact_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ],
+    "trace_emit_p95_p99_max": [
+      1.0,
+      2.0,
+      6.0
+    ],
+    "transaction_total_p95_p99_max": [
+      3.0,
+      5.0,
+      15.0
+    ]
+  },
+  "observation_epochs": {
+    "accepted_gameplay_epoch": 0,
+    "batch_gameplay_epochs": {
+      "2": 127
+    },
+    "cross_epoch_observed": true
+  },
+  "passed": false,
+  "preparation": {
+    "accepted_gameplay_epoch": 0,
+    "bound_instruction_count": 9,
+    "configuration": {
+      "active_difficulty_mask": 8,
+      "cache_capacity": 512,
+      "maximum_instructions": 64,
+      "maximum_physical_steps": 65536,
+      "target_horizons": {
+        "69": 16,
+        "72": 16,
+        "73": 60
+      }
+    },
+    "count": 1,
+    "decision_frame": 1,
+    "observation_epoch_semantics": "provenance_not_program_mutation",
+    "observation_gameplay_epoch": 0,
+    "prevalidated_instruction_count": 1664,
+    "program_identity": {
+      "difficulty_index": 3,
+      "image_length": 47224,
+      "normalized_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      "relocated_sha256": "ccded436441675b6f5324c2492e5ecd4e0da513eb0dae79d7d010404301ad8b9",
+      "route_id": 2,
+      "runtime_base": 186384456,
+      "stage_route_index": 5,
+      "static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19"
+    },
+    "program_identity_key": [
+      186384456,
+      47224,
+      "ccded436441675b6f5324c2492e5ecd4e0da513eb0dae79d7d010404301ad8b9",
+      "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      2,
+      3,
+      5
+    ],
+    "snapshot_frame": 1,
+    "status": "success",
+    "timing_ms": {
+      "maximum": 1.0,
+      "program_bind": 0.08999998681247234,
+      "total": 0.12089998926967382
+    }
+  },
+  "replay": {
+    "complete_count": 3384,
+    "empty_prefix_frames": [
+      27978,
+      27996,
+      28013,
+      28031,
+      28048,
+      28065
+    ],
+    "event_statuses": {
+      "empty_complete": 6,
+      "success": 121
+    },
+    "physical_timing": "unavailable_timer_domain_only",
+    "replay_blob_count": 3384,
+    "replayable_record_count": 3384,
+    "request_count": 3384,
+    "target_subroutines": {
+      "69": 840,
+      "72": 852,
+      "73": 1692
+    },
+    "unknown_count": 0
+  },
+  "report_digest": "c452f4e01783291bc9cd9cac5f8fabed441d23ee3ef4e2b1bd10d98ae5f24f0b",
+  "runtime_version": {
+    "decision_frame": 1,
+    "difficulty_index": 3,
+    "gameplay_epoch": 0,
+    "image_length": 47224,
+    "normalized_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "relocated_sha256": "ccded436441675b6f5324c2492e5ecd4e0da513eb0dae79d7d010404301ad8b9",
+    "route_id": 2,
+    "runtime_base": 186384456,
+    "schema": "th08-runtime-ecl-accepted-version-v1",
+    "snapshot_frame": 1,
+    "stage_route_index": 5,
+    "static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19"
+  },
+  "schema": "th08-g5-auxiliary-ecl-event-physical-gate-v3",
+  "session": {
+    "auxiliary_vm_batch_spell_id": 107,
+    "hard_no_bomb": true,
+    "hit_count": null,
+    "passed": true,
+    "path": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_104222.session.json",
+    "run_id": "lunatic_route2_stage5_unattended_20260729_104222",
+    "runtime_ecl_static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "status": "completed",
+    "termination_reason": "route_complete",
+    "trace_auxiliary_ecl_events": true,
+    "trace_auxiliary_vm_batches": true,
+    "trial_accepted": true
+  },
+  "source": {
+    "baseline": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_200739.jsonl",
+    "baseline_sha256": "953a5c3cb4bef84a809c9d2681aedcc081f67cc7f8dc39aa942bc42f0da779e9",
+    "session": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_104222.session.json",
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_104222.jsonl",
+    "trace_bytes": 444980473,
+    "trace_sha256": "365aaee1c9a328b45b538510536bb5736a0ed66f699058e50b93a6a80882eee4"
+  },
+  "static_ecl": {
+    "bytes": 47224,
+    "path": "artifacts/decoded/ecldata5.ecl",
+    "sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19"
+  },
+  "survival_regression_boundary": {
+    "consecutive_run_requirement": 2,
+    "hit_count": 11,
+    "maximum": 10,
+    "single_run_only": true
+  },
+  "timing_ms": {
+    "baseline_decision_frame_delta": {
+      "count": 13094,
+      "max": 1803.0,
+      "mean": 3.0206965022147547,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 4.0
+    },
+    "decision_frame_delta": {
+      "count": 11054,
+      "max": 1803.0,
+      "mean": 3.1558711778541704,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 5.0
+    },
+    "event_derive": {
+      "count": 127,
+      "max": 0.887200003489852,
+      "mean": 0.44141181718968736,
+      "p50": 0.4409999819472432,
+      "p95": 0.6200899835675955,
+      "p99": 0.8347720187157389
+    },
+    "previous_trace_emit": {
+      "count": 126,
+      "max": 3.2143000280484557,
+      "mean": 1.8752753893504777,
+      "p50": 1.8878999981097877,
+      "p95": 2.862374938558787,
+      "p99": 3.097825014265254
+    },
+    "replay_compact": {
+      "count": 127,
+      "max": 0.8328000549226999,
+      "mean": 0.384514172392802,
+      "p50": 0.3804001025855541,
+      "p95": 0.56370998499915,
+      "p99": 0.7870559790171676
+    },
+    "transaction_total": {
+      "count": 127,
+      "max": 4.392500035464764,
+      "mean": 1.940672445352974,
+      "p50": 1.9511999562382698,
+      "p95": 2.8925099410116673,
+      "p99": 3.683789989445355
+    }
+  },
+  "transport": {
+    "batch_count": 127,
+    "process_read_count": {
+      "count": 127,
+      "max": 236.0,
+      "mean": 105.33070866141732,
+      "p50": 117.0,
+      "p95": 135.0,
+      "p99": 142.0
+    },
+    "schema_versions": {
+      "6": 127
+    },
+    "statuses": {
+      "success": 127
+    },
+    "validation_errors": []
+  }
+}

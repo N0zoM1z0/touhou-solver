@@ -137,6 +137,13 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   maximum is `0.044/0.073 ms`, complete suites pass 1,027 tests, and the V1
   historical report remains byte-identical. Physical contention, delivery,
   and the consecutive `<=10`-hit requirement remain open.
+- Physical V3 run `20260729_104222` proves cross-epoch semantics for
+  3,384/3,384 requests but fails component delivery p95 at
+  `0.620/0.564/2.862 ms` for derive/compact/emit and takes 11 hits. CE-0170
+  retains the result. The fixed V4 correction preserves every usable raw
+  byte, native status proof, and source index while removing proved-null
+  dictionaries and replacing reconstructible repeated results with canonical
+  commitments. Keep all physical timing and `<=10` survival thresholds.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

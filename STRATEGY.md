@@ -588,10 +588,18 @@ comparison.
    observation epochs 1/2/3 under one accepted epoch-0 program and pass on
    Linux/Windows. Online preparation maximum is `0.044/0.073 ms`, and exact
    cache statistics remain 46 misses, 1,797 persistent hits, 1,987
-   request-local hits, and zero eviction. This remains isolated, default-off,
-   trace-only evidence. Handoff requires two consecutive corrected Stage-5
-   runs at no more than ten hits plus cross-stage regression checks. No
-   physical delivery authority exists before the new gate passes.
+   request-local hits, and zero eviction. Physical V3 run
+   `20260729_104222` then proves cross-epoch semantic delivery for
+   3,384/3,384 requests but fails physical component timing: event derive,
+   replay compact, and previous emit p95 are `0.620/0.564/2.862 ms`. It also
+   takes 11 hits, one above the regression boundary. CE-0170 rejects
+   delivery/survival acceptance. Schema-v7/event-v4 is fixed to project only
+   usable records with exact source indices and preserve raw replay bytes
+   while replacing redundant result JSON with independent canonical
+   commitments. This remains default-off and trace-only. Handoff requires two
+   consecutive corrected Stage-5 runs at no more than ten hits plus
+   cross-stage regression checks. No physical delivery authority exists
+   before the new gate passes.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the

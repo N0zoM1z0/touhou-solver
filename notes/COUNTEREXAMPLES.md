@@ -22,7 +22,7 @@ Status: observed | inferred | unknown | fixed
 
 Historical entries are preserved verbatim in range shards. Append a new
 counterexample to the current range, presently
-[`counterexamples/CE-0140-0165.md`](counterexamples/CE-0140-0165.md), and add a
+[`counterexamples/CE-0170-0219.md`](counterexamples/CE-0170-0219.md), and add a
 new 50-entry range when the current range reaches its boundary. Do not append
 CE bodies to this index.
 
@@ -32,6 +32,7 @@ CE bodies to this index.
 | [CE-0050–CE-0099](counterexamples/CE-0050-0099.md) | 50 |
 | [CE-0100–CE-0139](counterexamples/CE-0100-0139.md) | 40 |
 | [CE-0140–CE-0169](counterexamples/CE-0140-0165.md) | 30 |
+| [CE-0170–CE-0219](counterexamples/CE-0170-0219.md) | 1 |
 
 The pre-shard file had SHA-256
 `2267928c8b59e4704dfb1cd7c7219d4ee42f2d12f50677c333ec23231fe1cab0`.

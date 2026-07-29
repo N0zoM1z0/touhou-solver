@@ -270,6 +270,8 @@ are also recorded chronologically in the 2026-07-29 research-log shard.
 - [x] Pass focused Linux and Windows gates.
 - [x] Reconcile Phase-B1 authority, CE-0175, roadmap, strategy, handoff, and
       chronological evidence.
+- [x] Run and retain the fixed observer-off Stage-5 physical falsifier,
+      including component-version telemetry and canonical first-hit audit.
 
 ## Exit gate
 
@@ -277,7 +279,28 @@ Product, structurally independent Python oracle, and a tiny native probe must
 agree bitwise over deterministic and adversarial supported cases. The retained
 Phase-B1 fixtures remain explicitly a zero-fraction, observed-scale slice.
 This offline gate is passed. Because the corrected existing velocity
-lookahead is a live hazard consumer, the fixed observer-off Stage-5 trial is
-the next physical falsifier. A hit or accepted pass is evidence about that
-whole physical history, not proof that timer rows were active; component
-trace telemetry must state whether the corrected path was exercised.
+lookahead is a live hazard consumer, the program required one fixed
+observer-off Stage-5 physical falsifier. A hit or accepted pass is evidence
+about that whole physical history, not proof that timer rows were active;
+component trace telemetry must state whether the corrected path was
+exercised.
+
+The physical falsifier is now retained as
+`lunatic_route2_stage5_unattended_20260729_173957`. It completed hard
+no-Bomb but took 12 hits, failing the preregistered `<=10` survival threshold.
+The canonical frame-2,069 hit and the first six hits precede the first
+timer-aware consumer row at frame 21,751, so the failure does not causally
+reject or justify rollback of the component timer.
+
+The 3,940 consumer rows all carry the expected product/lookahead versions and
+component identity, with zero identity disagreement or runtime error. Fresh
+per-session affine normalization selects Stage-5 runtime base `0x0B1D0048`
+and maps all 33 unique roots; 3,835 roots are before their instruction
+threshold and 105 are at exact equality, with zero past or unmapped roots.
+This is consistent with the native equality predicate. However, every
+physical fraction is zero and every scale is `1.0`, so the run physically
+exercises integration and only the historical unit-scale slice. Nonzero
+fraction, carry, and nonunit-scale correctness retains offline authority
+until an appropriate Final/Extra or bounded native-runtime workload observes
+those states. CE-0184 records the failed physical threshold and stopping
+decision; the ordered correction program continues at `SEM-SCALE`.

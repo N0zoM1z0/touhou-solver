@@ -93,11 +93,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Latest executable code checkpoint: `e309c81`
   (`Correct native ECL timer semantics`).
 - Latest physical-code checkpoint: `e309c81`; it corrects an existing live
-  callback-lookahead consumer but has not yet passed its physical falsifier.
+  callback-lookahead consumer. Its fixed physical falsifier is retained but
+  failed the `<=10` survival threshold.
 - Latest native-semantic correction checkpoint: `e309c81`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest accepted complete physical workload:
-  `lunatic_route2_stage5_unattended_20260729_161313`.
+  `lunatic_route2_stage5_unattended_20260729_173957`.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -109,17 +110,19 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `skill-creator` structural validator. A fresh Codex `0.144.6`
   `skills/list(forceReload=true)` reports every skill as enabled repo scope
   with interface metadata. The physical-trial workflow was exercised by runs
-  `154229` and `161313`; both exact preflight, supervision, cleanup, and
-  retention contracts completed without leaving a gameplay process.
+  `154229`, `161313`, and `173957`; each exact preflight, supervision,
+  cleanup, and retention contract completed without leaving a gameplay
+  process.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
 4,096-case exact raw-bit sweep, component-versioned V2 retained replay, and
-complete 1,075-test Linux/Windows suites. It has no survival authority until
-the fixed observer-off Stage-5 falsifier is retained. The existing launch
-preflight still validates immutable ECL path/read/file/SHA before any
-game/process side effect; repo BATs use `%~dp0`; two Windows tools restore
-direct UNC imports. Do not run Linux and Windows performance gates
+complete 1,075-test Linux/Windows suites. It has no survival authority. Its
+required observer-off Stage-5 falsifier is now retained as CE-0184 after 12
+hits and grants no survival authority. The existing launch preflight still
+validates immutable ECL path/read/file/SHA
+before any game/process side effect; repo BATs use `%~dp0`; two Windows tools
+restore direct UNC imports. Do not run Linux and Windows performance gates
 concurrently.
 
 ### Native-semantic review
@@ -130,7 +133,7 @@ to
 pre-move SHA-256 is
 `6e5a81f41ef4866c294ef0ab5db937efe614de2b8a3179a559fc878b4a65cb21`.
 A bounded current-source and connected-IDA recheck confirms the material
-findings at the review baseline. CE-0175–CE-0183 retain the concrete failures,
+findings at the review baseline. CE-0175–CE-0184 retain the concrete failures,
 and
 `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md` gives the
 dependency-ordered route to physical Lunatic NMNB.
@@ -148,18 +151,43 @@ independent raw-bit Python oracle, and Linux/Windows native x87 probes agree
 on 17/17 cases per platform. The offline shadow, existing live velocity
 lookahead, and trace-only birth lookahead have distinct component-semantics
 versions; decision traces retain fraction bits, scale bits, and timer
-identity. The fixed observer-off Stage-5 physical falsifier remains pending,
-and player/laser time scale remains open under `SEM-SCALE`.
+identity. The fixed observer-off Stage-5 falsifier is retained at 12 hits:
+its timer-aware consumer begins after the first six hits, and all physical
+timer rows are zero-fraction/unit-scale. It therefore fails survival authority
+without supplying a timer-causal rollback target. Player/laser time scale
+remains open under `SEM-SCALE`.
 
 This review does not establish a cause for the original 18-hit Stage-5
 aggregate and does not authorize rollback. Observer-off run `154229`
 returned to the ten-hit band once, but unchanged follow-up `161313` returned
 to 18. CE-0183 resets the sequence and takes the roadmap's causal-failure
-exit. Do not launch Stage 3 or a third uncontrolled repeat; begin the ordered
-native-semantic correction series before broad G5 expansion or local-beam
-performance work.
+exit. The versioned SEM-TIMER falsifier then took 12; CE-0184 stops its
+same-version repetition and broader scene expansion. Continue the ordered
+native-semantic correction series at `SEM-SCALE` before broad G5 expansion or
+local-beam performance work.
 
 ### Latest physical conclusion
+
+SEM-TIMER falsifier `173957`, launched from repository checkpoint `55ec4ee`
+with physical code `e309c81`, completed hard no-Bomb Stage 5 with accepted
+artifacts and exact cleanup but took 12 hits:
+nonspell/103/107/111/115 = `7/2/2/0/1`. It fails the fixed `<=10` threshold
+and stops same-version repetition and Stage-3/4A/Final-B expansion.
+
+Its canonical hit is frame 2,069 at `(376,424)`, active `up`, Power 128, with
+663 bullets and zero lasers. It is a modeled committed-prefix collision.
+Global viability was exhausted at frame 1,829, robust actions at 2,063, and
+usable pipeline warning led by two frames. The timer-aware velocity consumer
+does not appear until frame 21,751, after this and the first six hits, so the
+first-hit audit identifies no timer-causal rollback target.
+
+Across 3,940 timer-aware rows, expected component/version identities agree;
+2,794 schedules are complete and 1,146 stop explicitly on unsupported
+control flow. Per-session affine inference maps all 33 roots at Stage-5 base
+`0x0B1D0048`: 3,835 are future and 105 equal, with no past or unmapped root.
+Every physical fraction is zero and scale is `1.0`, so the run validates
+integration only on that slice. CE-0184 is the authoritative stopping
+counterexample; nonunit-scale physical evidence and `SEM-SCALE` remain open.
 
 Observer-off pass 2 `161313`, launched from repository checkpoint `39366f2`
 with the same executable/physical code and exact controller config as pass 1,
@@ -228,24 +256,23 @@ extracted and optional post-issue observers were added. V6 run `125453`
 takes its canonical first hit at frame 731 in nonspell, before every
 spell-107 envelope; observer-off run `154229` first contacts at frame 10,740,
 unchanged observer-off follow-up `161313` at frame 2,524, and the eight-hit
-runs after frame 11,500. Therefore no single code checkpoint has been shown
-to cause the 18-hit result, and rollback is not justified by aggregate
-samples alone. Later deaths are coupled through respawn, Power, position,
-damage, and route timing.
+runs after frame 11,500. SEM-TIMER run `173957` first contacts at frame 2,069,
+before its timer-aware consumer begins. Therefore no single code checkpoint
+has been shown to cause the poor aggregate results, and rollback is not
+justified by aggregate samples alone. Later deaths are coupled through
+respawn, Power, position, damage, and route timing.
 
 ### Next useful gate
 
 Do not resume broad G5 work first.
 
-1. Keep the physical ring stopped at CE-0183. Do not launch Stage 3 or a
-   third unchanged Stage-5 repeat.
-2. `SEM-TIMER` passes its offline semantic gate. Fix its clean immutable
-   source checkpoint, then run exactly one observer-off Stage-5 physical
-   falsifier. Above ten hits stops for canonical first-hit audit; at or below
-   ten begins the corrected two-consecutive sequence.
-3. Only after that falsifier's stopping rule permits it, continue
-   `SEM-SCALE`, `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and
-   `SEM-ROBUST` in roadmap order, one falsifier/checkpoint at a time.
+1. Keep physical expansion stopped at CE-0184. Do not repeat the current
+   Stage-5 version or launch Stage 3, Stage 4A, or Final B.
+2. `SEM-TIMER` passes its offline semantic gate but its one fixed physical
+   falsifier failed at 12 hits. The canonical failure predates the live
+   consumer, so retain the failure without rollback or survival promotion.
+3. Continue `SEM-SCALE`, then `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and
+   `SEM-ROBUST` in roadmap order, one correction/checkpoint at a time.
    Evidence-backed IDB renames/types/comments are authorized; record every
    material database change in the current daily shard.
 4. After each applicable slice, take only the smallest causal Stage-5
@@ -1781,10 +1808,11 @@ measurement, and a `STRATEGY.md` status change.
 
 Until the physical floor is restored, the immediate ordering in
 `Immediate Handoff — 2026-07-29` overrides research expansion:
-`PHYS-BASE-RING` is stopped at CE-0183, so `SEM-TIMER` and the ordered
-native-semantic corrections precede any new Stage-5/Stage-3 expansion. V6
-delivery, nonspell combat, Power, and unfocused-shot work remain separately
-contracted follow-ups.
+`PHYS-BASE-RING` is stopped at CE-0183, and the fixed SEM-TIMER physical
+falsifier is stopped at CE-0184. Continue at `SEM-SCALE`; the remaining
+ordered native-semantic corrections precede any new Stage-5/Stage-3
+expansion. V6 delivery, nonspell combat, Power, and unfocused-shot work remain
+separately contracted follow-ups.
 
 ### P0 — Preserve global feasibility and define post-loss authority
 

@@ -337,7 +337,7 @@ roadmap's ordered native-semantic correction series, beginning with
 - issue a new immutable model version and recertify scalar/Python/native
   parity before physical promotion.
 
-CE-0175–CE-0183 retain the concrete failures. Existing zero-fraction,
+CE-0175–CE-0184 retain the concrete failures. Existing zero-fraction,
 unit-scale, and conservative-proxy evidence keeps only its declared slice.
 The audit does not prove that any finding caused run `125453`, so aggregate
 rollback remains unjustified. The full dependency and Lunatic NMNB acceptance
@@ -351,13 +351,26 @@ versioned. The offline VM-local shadow remains **offline** and gains no
 coverage or action authority. The existing velocity lookahead remains part of
 the **live** sensing stack with corrected timing semantics; this is a
 native-correctness fix, not a strategy promotion. Its fixed observer-off
-Stage-5 physical falsifier is pending, so it has no new survival claim.
-CE-0175 remains open for that physical rebaseline and for the separate
-player/laser `SEM-SCALE` omission.
+Stage-5 falsifier is retained below and does not grant a survival claim.
+CE-0175 remains open for the separate player/laser `SEM-SCALE` omission and
+later nonunit-scale physical evidence.
 
-The amendment and CE-0183 override the numbered historical backlog below
-until the semantic correction/model-version gate is complete. Those rows
-retain evidence/status history; they are not permission to resume G5 first.
+**2026-07-29 SEM-TIMER physical falsifier:** observer-off Stage-5 run
+`20260729_173957` completed hard no-Bomb with 12 hits and therefore fails the
+fixed `<=10` survival threshold. The timer-aware live consumer first appears
+at frame 21,751; the canonical frame-2,069 hit and the first six hits precede
+it. All 3,940 consumer rows carry the expected component versions, but every
+fraction is zero and every scale is `1.0`. Fresh Stage-5 base inference maps
+33/33 roots at `0x0B1D0048` as 3,835 future and 105 equal, with no past or
+unmapped root. CE-0184 stops same-version physical repetition and broader
+scene expansion. The failed aggregate does not provide a timer-causal
+rollback target or survival authority; the ordered correction series
+continues at `SEM-SCALE`.
+
+The amendment and CE-0183/0184 override the numbered historical backlog
+below until the semantic correction/model-version gate is complete. Those
+rows retain evidence/status history; they are not permission to resume G5
+first.
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
    passes; continue G5 future-event coverage one event class at a time,

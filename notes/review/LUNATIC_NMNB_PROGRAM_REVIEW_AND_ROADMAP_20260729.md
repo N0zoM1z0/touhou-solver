@@ -18,7 +18,12 @@ Current execution progress:
 `lunatic_route2_stage5_unattended_20260729_154229` passed the first
 observer-off Stage-5 threshold at ten hits, but unchanged consecutive run
 `lunatic_route2_stage5_unattended_20260729_161313` took 18. CE-0183 resets
-the sequence and stops `PHYS-BASE-RING` before Stage 3.
+the sequence and stops `PHYS-BASE-RING` before Stage 3. The later fixed
+`SEM-TIMER` falsifier
+`lunatic_route2_stage5_unattended_20260729_173957` took 12 hits and therefore
+failed its `<=10` physical threshold. CE-0184 retains the failure and its
+canonical first-hit audit; the timer-aware live consumer begins only after
+the first six hits, so no timer rollback is causally justified.
 
 Companion native audit:
 `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
@@ -666,9 +671,30 @@ Execution progress on 2026-07-29:
   fraction bits, scale bits, and component identity.
 - **Exit taken:** the Phase-1A offline semantic gate passes. Because an
   existing live hazard consumer changed, executable/physical code is fixed at
-  `e309c81`. Run the exact observer-off Stage-5 physical falsifier before
-  beginning `SEM-SCALE`. One accepted result does not establish NMNB or timer
-  causality; a result above ten stops and opens a first-hit audit.
+  `e309c81`. The program therefore required the exact observer-off Stage-5
+  physical falsifier before `SEM-SCALE`. One accepted result would not
+  establish NMNB or timer causality; a result above ten stops and opens a
+  first-hit audit.
+- **Observed physical failure:** fixed observer-off run
+  `20260729_173957` completed hard no-Bomb Stage 5 with 12 hits
+  (`7/2/2/0/1` by nonspell/103/107/111/115), accepted artifacts, and exact
+  cleanup. It fails the preregistered `<=10` threshold, so no Stage-3/4A/
+  Final-B expansion or same-version repeat is permitted.
+- **Observed causal boundary:** the canonical committed-prefix hit at frame
+  2,069 follows global viability exhaustion at 1,829 and robust-action
+  exhaustion at 2,063. The timer-aware consumer first appears at frame
+  21,751; the canonical and first six hits precede it. Aggregate failure
+  therefore does not causally reject or justify rollback of SEM-TIMER.
+- **Observed integration slice:** all 3,940 timer-aware rows carry the
+  expected component/lookahead versions. Per-session affine inference selects
+  Stage-5 runtime base `0x0B1D0048`, maps all 33 unique roots, and yields
+  3,835 future plus 105 equal roots with zero past/unmapped roots. Every
+  physical fraction is zero and scale is `1.0`, so nonzero-fraction/nonunit
+  scale physical authority remains open.
+- **Exit taken:** CE-0184 retains the failed physical threshold and stops
+  repetition. With no timer-causal rollback target, continue the ordered
+  correction program at `SEM-SCALE`; do not promote SEM-TIMER to survival
+  authority.
 
 #### 1B. Player and laser time scale
 
@@ -938,9 +964,11 @@ incomplete ring as route authority.
 
 After that baseline, the next correction checkpoints should be:
 
-1. `SEM-TIMER`: offline semantic gate complete; fix its immutable code
-   checkpoint and take the prescribed observer-off Stage-5 physical
-   falsifier before advancing;
+1. `SEM-TIMER`: offline semantic gate complete and immutable code fixed; its
+   prescribed observer-off Stage-5 falsifier is retained as CE-0184 after 12
+   hits. It confirms live version integration only on the
+   zero-fraction/unit-scale slice, fails survival authority, and supplies no
+   timer-causal rollback target;
 2. `SEM-SCALE`: player/laser global-time-scale transitions and model identity;
 3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
    enemy contact/damage eligibility;
@@ -1027,6 +1055,16 @@ baseline and the ordered dependency chain above are part of the result.
   CSV, raw provenance/hash, hard no-Bomb fields, ignore rules, process
   cleanup, Markdown structure, and whitespace checks pass. CE-0183 preserves
   the failed threshold without relabeling it.
+- For the SEM-TIMER falsifier, focused supervisor discovery passed 28/28 on
+  Linux and Windows before launch. Run `20260729_173957` completed 11,597
+  decisions over frames `1..42021`, hard no-Bomb, accepted artifacts, exact
+  cleanup, and 12 hits. Its ignored 477,436,227-byte raw JSONL hashes to
+  `e0b32ee0e042056079d7159f1055aa2ad289447d03efc078d2c2d73f98585367`.
+  Compact reports parse and the 12-row deaths CSV is consistent. A
+  stream-based component audit finds 3,940 expected-version rows, 33/33
+  Stage-5 roots mapped at base `0x0B1D0048`, zero past/unmapped roots, and
+  only zero-fraction/unit-scale physical states. CE-0184 preserves the failed
+  threshold without misattributing the pre-consumer canonical hit.
 - No matching TH08 gameplay, controller, practice-supervisor, or
   full-route-supervisor process is left running.
 - The original documentation-only checkpoint did not rerun Windows tests;

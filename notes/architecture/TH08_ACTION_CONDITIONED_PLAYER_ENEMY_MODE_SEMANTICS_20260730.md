@@ -291,6 +291,10 @@ observer gate therefore remains mandatory.
    Stage-5 workload with the observer enabled from stage entry. Retain the raw
    bundle, compact report, resources/hits/Bombs, transition/body evidence,
    contamination status, and cleanup. Complete the stage even after hits.
+   Because CE-0191 shows the default scale-authority fallback terminates
+   before the first decision, pair the observer with the scoped
+   `--diagnostic-continue-root-only-scale` proxy. Mark the entire run
+   unknown-direction and without survival authority.
 2. **SEM-MODE-C — causal hazard recurrence:** carry the mode key through
    pickup/cadence histories, project per-frame enemy contact body sets after
    the player update, and merge only observation-compatible branches.

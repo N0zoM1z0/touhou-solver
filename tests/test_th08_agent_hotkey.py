@@ -203,6 +203,30 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.stop_after_hits, 0)
         self.assertTrue(parsed.no_bomb)
 
+    def test_enemy_mode_diagnostic_scale_continuation_is_scoped(self) -> None:
+        arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_enemy_mode_transitions=True,
+            diagnostic_continue_root_only_scale=True,
+        )
+        parsed = build_parser().parse_args(arguments)
+        self.assertTrue(parsed.trace_enemy_mode_transitions)
+        self.assertTrue(parsed.diagnostic_continue_root_only_scale)
+        self.assertEqual(parsed.stop_after_hits, 0)
+        self.assertTrue(parsed.no_bomb)
+
+        with self.assertRaisesRegex(ValueError, "enemy-mode observer"):
+            build_long_run_arguments(
+                output=Path("trial.jsonl"),
+                stop_file=Path("trial.stop"),
+                pid=1234,
+                difficulty=3,
+                diagnostic_continue_root_only_scale=True,
+            )
+
     def test_runtime_ecl_identity_is_explicit_and_bound_to_stage(self) -> None:
         image = Path("artifacts/decoded/ecldata5.ecl")
         digest = "1" * 64

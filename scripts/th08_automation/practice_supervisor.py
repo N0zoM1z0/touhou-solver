@@ -269,6 +269,9 @@ def run_trial(
         "trace_enemy_mode_transitions": (
             args.trace_enemy_mode_transitions
         ),
+        "diagnostic_continue_root_only_scale": (
+            args.diagnostic_continue_root_only_scale
+        ),
         "trace_auxiliary_vm_batches": (
             args.trace_auxiliary_vm_batches
         ),
@@ -340,6 +343,9 @@ def run_trial(
             ),
             trace_enemy_mode_transitions=(
                 args.trace_enemy_mode_transitions
+            ),
+            diagnostic_continue_root_only_scale=(
+                args.diagnostic_continue_root_only_scale
             ),
             trace_auxiliary_vm_batches=(
                 args.trace_auxiliary_vm_batches
@@ -756,6 +762,14 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--diagnostic-continue-root-only-scale",
+        action="store_true",
+        help=(
+            "continue a whole-stage diagnostic under an explicitly "
+            "unknown-direction constant-current-root time-scale proxy"
+        ),
+    )
+    parser.add_argument(
         "--trace-auxiliary-vm-batches",
         action="store_true",
         help="record bounded post-issue auxiliary ECL VM batches",
@@ -987,6 +1001,8 @@ def main(argv: list[str] | None = None) -> int:
             args.trace_derived_pattern_sources,
             args.trace_nonspell_main_vms,
             args.trace_enemy_combat_progress,
+            args.trace_enemy_mode_transitions,
+            args.diagnostic_continue_root_only_scale,
             args.trace_auxiliary_vm_batches,
             args.trace_auxiliary_ecl_events,
             args.safety_value_horizon != 0,
@@ -1002,6 +1018,14 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError(
             "Final-B scale delivery cannot be combined with another "
             "experiment flag"
+        )
+    if (
+        args.diagnostic_continue_root_only_scale
+        and not args.trace_enemy_mode_transitions
+    ):
+        raise ValueError(
+            "diagnostic root-only scale continuation is scoped to the "
+            "whole-stage enemy-mode observer"
         )
     if min(
         args.cooldown,

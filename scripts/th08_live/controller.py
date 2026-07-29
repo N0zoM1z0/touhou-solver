@@ -310,6 +310,7 @@ from th08_live.sensing_trace import (
 )
 from th08_time_scale import (
     SCALE_COVERAGE_COMPLETE,
+    SCALE_COVERAGE_ROOT_ONLY,
     TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
     TH08_UNIT_TIME_SCALE_BITS,
     Th08TimeScaleSchedule,
@@ -469,6 +470,9 @@ MAX_SENSOR_EPOCH_EXTENT_FRAMES = 8
 # before input issue without mislabeling an ordinary 7..20-frame overrun as a
 # new gameplay epoch.
 MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES = 120
+DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON = (
+    MAX_ACTION_CONTIGUOUS_ADVANCE_FRAMES
+)
 # Below this active-pool density, consolidated scalar unpacking is faster
 # than allocating NumPy gather arrays. Retained synthetic sweeps place the
 # crossover between 400 and 600 records on the current host.
@@ -532,6 +536,25 @@ def _corridor_scale_schedule_supported(
             *schedule.player_scale_bits[:horizon],
             *schedule.laser_scale_bits[:horizon],
         )
+    )
+
+
+def _diagnostic_constant_root_time_scale(
+    schedule: Th08TimeScaleSchedule,
+) -> Th08TimeScaleSchedule:
+    """Build an explicit unknown-direction physical-observer proxy."""
+
+    if schedule.coverage != SCALE_COVERAGE_ROOT_ONLY:
+        raise ValueError(
+            "diagnostic scale fallback requires root-only coverage"
+        )
+    return Th08TimeScaleSchedule.constant(
+        schedule.root_scale_bits,
+        horizon=DIAGNOSTIC_ROOT_ONLY_SCALE_HORIZON,
+        provenance=(
+            "diagnostic_constant_current_root_unknown_direction_no_authority"
+        ),
+        source_frame=schedule.source_frame,
     )
 
 
@@ -1684,6 +1707,7 @@ def _run_live_session(
     last_bomb_counter = -10000
     gaps = 0
     iterations = 0
+    diagnostic_scale_fallback_key: tuple[object, ...] | None = None
     hit_count = 0
     stop_after_frame: int | None = None
     gameplay_armed = False
@@ -1766,6 +1790,13 @@ def _run_live_session(
     )
     trace_enemy_mode_transitions = bool(
         getattr(args, "trace_enemy_mode_transitions", False)
+    )
+    diagnostic_continue_root_only_scale = bool(
+        getattr(
+            args,
+            "diagnostic_continue_root_only_scale",
+            False,
+        )
     )
     trace_auxiliary_vm_batches = bool(
         getattr(args, "trace_auxiliary_vm_batches", False)
@@ -2058,6 +2089,14 @@ def _run_live_session(
                             "finalb_scale_delivery_auto_stop",
                             False,
                         )
+                    ),
+                    "diagnostic_continue_root_only_scale": (
+                        diagnostic_continue_root_only_scale
+                    ),
+                    "diagnostic_root_only_scale_semantics": (
+                        "constant_current_root_unknown_direction_no_authority"
+                        if diagnostic_continue_root_only_scale
+                        else "disabled"
                     ),
                     "runtime_ecl_static_sha256": getattr(
                         args,
@@ -3294,50 +3333,82 @@ def _run_live_session(
                     )
                     time.sleep(args.poll_ms / 1000.0)
                     continue
-                trace_sink.emit(
-                    {
-                        "kind": "time_scale_authority_unknown",
-                        "frame": captured_iteration.snapshot_frame,
-                        "source_frame": captured_iteration.source_frame,
-                        "semantics_version": (
-                            TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION
-                        ),
-                        "coverage": (
-                            captured_iteration.time_scale_schedule.coverage
-                        ),
-                        "root_scale_bits": (
+                unknown_record = {
+                    "kind": "time_scale_authority_unknown",
+                    "frame": captured_iteration.snapshot_frame,
+                    "source_frame": captured_iteration.source_frame,
+                    "gameplay_epoch": gameplay_epoch,
+                    "stage_route_index": (
+                        captured_iteration.stage_route_index
+                    ),
+                    "spell_id": captured_iteration.spell_id,
+                    "semantics_version": (
+                        TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION
+                    ),
+                    "coverage": (
+                        captured_iteration.time_scale_schedule.coverage
+                    ),
+                    "root_scale_bits": (
+                        captured_iteration.time_scale_schedule.root_scale_bits
+                    ),
+                    "player_scale_bits": list(
+                        captured_iteration.time_scale_schedule.player_scale_bits
+                    ),
+                    "laser_scale_bits": list(
+                        captured_iteration.time_scale_schedule.laser_scale_bits
+                    ),
+                    "player_projection_authority": (
+                        captured_iteration.player_projection_authority
+                    ),
+                    "hard_authority": False,
+                    "scale_authority_status": "disabled",
+                    "scale_authority_reason": None,
+                }
+                if diagnostic_continue_root_only_scale:
+                    diagnostic_schedule = (
+                        _diagnostic_constant_root_time_scale(
                             captured_iteration.time_scale_schedule
-                            .root_scale_bits
-                        ),
-                        "player_scale_bits": list(
-                            captured_iteration.time_scale_schedule
-                            .player_scale_bits
-                        ),
-                        "laser_scale_bits": list(
-                            captured_iteration.time_scale_schedule
-                            .laser_scale_bits
-                        ),
-                        "player_projection_authority": (
-                            captured_iteration
-                            .player_projection_authority
-                        ),
-                        "hard_authority": False,
-                        "scale_authority_status": (
-                            scale_authority_resolution.status
-                            if scale_authority_resolution is not None
-                            else "disabled"
-                        ),
-                        "scale_authority_reason": (
-                            scale_authority_resolution.reason
-                            if scale_authority_resolution is not None
-                            else None
-                        ),
-                        "fallback": "terminate_and_release_keys",
-                    },
-                    flush=True,
-                )
-                termination_reason = "time_scale_authority_unknown"
-                break
+                        )
+                    )
+                    fallback_key = (
+                        gameplay_epoch,
+                        captured_iteration.stage_route_index,
+                        captured_iteration.spell_id,
+                        diagnostic_schedule.root_scale_bits,
+                    )
+                    if fallback_key != diagnostic_scale_fallback_key:
+                        trace_sink.emit(
+                            {
+                                **unknown_record,
+                                "fallback": (
+                                    "diagnostic_constant_current_root_"
+                                    "unknown_direction"
+                                ),
+                                "diagnostic_schedule_horizon": (
+                                    diagnostic_schedule.complete_horizon
+                                ),
+                                "diagnostic_schedule_provenance": (
+                                    diagnostic_schedule.provenance
+                                ),
+                            },
+                            flush=True,
+                        )
+                        diagnostic_scale_fallback_key = fallback_key
+                    time_scale_schedule = diagnostic_schedule
+                    captured_iteration = replace(
+                        captured_iteration,
+                        time_scale_schedule=diagnostic_schedule,
+                    )
+                else:
+                    trace_sink.emit(
+                        {
+                            **unknown_record,
+                            "fallback": "terminate_and_release_keys",
+                        },
+                        flush=True,
+                    )
+                    termination_reason = "time_scale_authority_unknown"
+                    break
             corridor_started = time.perf_counter()
             corridor_updated = False
             if (

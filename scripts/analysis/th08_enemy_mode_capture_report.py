@@ -108,6 +108,11 @@ def build_report(path: Path) -> dict[str, object]:
     authority_violations: list[int] = []
     role_violations: list[int] = []
     coherent_sync_mismatch_rows: list[int] = []
+    diagnostic_scale_config: bool | None = None
+    scale_unknown_rows = 0
+    scale_fallback_counts: Counter[str] = Counter()
+    scale_root_bits_counts: Counter[str] = Counter()
+    scale_hard_authority_lines: list[int] = []
     first_capture_frame: int | None = None
     last_capture_frame: int | None = None
     previous_coherent: dict[str, object] | None = None
@@ -115,7 +120,24 @@ def build_report(path: Path) -> dict[str, object]:
 
     for line_number, record in _records(path):
         total_rows += 1
-        if record.get("kind") != "decision":
+        kind = record.get("kind")
+        if kind == "controller_config":
+            configured = record.get(
+                "diagnostic_continue_root_only_scale"
+            )
+            if isinstance(configured, bool):
+                diagnostic_scale_config = configured
+        elif kind == "time_scale_authority_unknown":
+            scale_unknown_rows += 1
+            scale_fallback_counts[
+                str(record.get("fallback", "missing"))
+            ] += 1
+            scale_root_bits_counts[
+                str(record.get("root_scale_bits", "missing"))
+            ] += 1
+            if record.get("hard_authority") is not False:
+                scale_hard_authority_lines.append(line_number)
+        if kind != "decision":
             continue
         decision_rows += 1
         capture = record.get("player_enemy_mode_capture")
@@ -207,6 +229,9 @@ def build_report(path: Path) -> dict[str, object]:
         "action_authority_true_or_missing_lines": authority_violations,
         "non_diagnostic_role_lines": role_violations,
         "coherent_rows_with_sync_mismatches": coherent_sync_mismatch_rows,
+        "scale_unknown_rows_with_hard_authority": (
+            scale_hard_authority_lines
+        ),
     }
     integrity_passed = bool(
         capture_rows
@@ -257,6 +282,16 @@ def build_report(path: Path) -> dict[str, object]:
             [pointer, flags]
             for pointer, flags in sorted(unique_body_pairs)
         ],
+        "diagnostic_time_scale_fallback": {
+            "configured": diagnostic_scale_config,
+            "unknown_rows": scale_unknown_rows,
+            "fallback_counts": dict(sorted(scale_fallback_counts.items())),
+            "root_scale_bits_counts": dict(
+                sorted(scale_root_bits_counts.items())
+            ),
+            "hard_authority": False,
+            "physical_survival_authority": False,
+        },
         "integrity": {
             "passed": integrity_passed,
             "errors": integrity_errors,

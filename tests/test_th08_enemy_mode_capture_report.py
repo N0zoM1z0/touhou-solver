@@ -49,6 +49,18 @@ class EnemyModeCaptureReportTests(unittest.TestCase):
     def test_report_retains_adjacent_secondary_transition_body_sets(self) -> None:
         rows = [
             {"kind": "wait_ready"},
+            {
+                "kind": "controller_config",
+                "diagnostic_continue_root_only_scale": True,
+            },
+            {
+                "kind": "time_scale_authority_unknown",
+                "root_scale_bits": 0x3F800000,
+                "hard_authority": False,
+                "fallback": (
+                    "diagnostic_constant_current_root_unknown_direction"
+                ),
+            },
             _capture(secondary=True, input_current=0x04, frame=10065),
             _capture(secondary=True, input_current=0x00, frame=10069),
             _capture(secondary=False, input_current=0x00, frame=10075),
@@ -76,6 +88,10 @@ class EnemyModeCaptureReportTests(unittest.TestCase):
             transitions[0]["mode_sensitive_bodies_after"],
             [[0x4B8A80, 0x0100114D]],
         )
+        scale = report["diagnostic_time_scale_fallback"]
+        self.assertTrue(scale["configured"])
+        self.assertEqual(scale["unknown_rows"], 1)
+        self.assertFalse(scale["physical_survival_authority"])
 
     def test_incoherent_row_breaks_transition_adjacency(self) -> None:
         rows = [

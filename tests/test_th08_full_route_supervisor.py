@@ -90,6 +90,18 @@ class FullRouteSupervisorTests(unittest.TestCase):
         self.assertFalse(default_args.trace_enemy_mode_transitions)
         self.assertTrue(enabled_args.trace_enemy_mode_transitions)
 
+    def test_enemy_mode_scale_continuation_is_explicit(self) -> None:
+        enabled_args = build_parser().parse_args(
+            [
+                "--trace-enemy-mode-transitions",
+                "--diagnostic-continue-root-only-scale",
+            ]
+        )
+        self.assertTrue(enabled_args.trace_enemy_mode_transitions)
+        self.assertTrue(
+            enabled_args.diagnostic_continue_root_only_scale
+        )
+
     def test_team_preconfirm_uses_selected_difficulty_cursor(self) -> None:
         import th08_full_route_supervisor as supervisor
         from unittest.mock import patch

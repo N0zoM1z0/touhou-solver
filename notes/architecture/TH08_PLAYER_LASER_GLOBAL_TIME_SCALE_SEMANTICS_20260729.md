@@ -710,6 +710,63 @@ coverage, Extra, or Lunatic NMNB. The ordered roadmap therefore advances to
 No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
 acceptance, global optimality, or complete future-source coverage.
 
+## Scoped diagnostic continuation for SEM-MODE physical evidence
+
+CE-0191 records that the first SEM-MODE-B physical attempt terminated at
+gameplay frame 1 on root-only time-scale coverage, before any decision or
+mode observation. That hard-authority behavior remains the default. A
+separate default-off exception is now permitted only when the complete
+whole-stage enemy-mode observer is also explicitly enabled.
+
+Its contract is:
+
+- **physical objective:** retain an uninterrupted original-game stage trace
+  for native player/enemy mode transitions, even after hits; it does not
+  establish hard survival;
+- **state and observations:** at each decision, use only the stable current
+  root scale, its source frame, current native state, and normal causal
+  sensing. No future ECL write is observed or guessed;
+- **actions and issue:** the ordinary hard-no-Bomb controller continues
+  issuing complete masks. The exception changes only scale availability and
+  never authorizes Bomb;
+- **uncertainty/transition:** the current root is repeated for the finite
+  120-frame consumer horizon. Omitted same-horizon ECL scale writes make this
+  an explicitly unknown-direction approximation. A fresh root is rebuilt at
+  the next decision; no proxy is cached across source frames or versions;
+- **safety/resources:** `stop-after-hits=0` preserves the whole-stage
+  research unit. Hits, clean completion, and planner certificates under this
+  proxy have no NMNB survival authority;
+- **deadline/fallback:** no cold source expansion occurs. The constant proxy
+  is built synchronously from one integer root. Without the explicit flag,
+  the existing `time_scale_authority_unknown -> terminate_and_release_keys`
+  path remains unchanged.
+
+Required model questions:
+
+1. Histories merge only when their observed root, source frame, and ordinary
+   controller observations agree; unobserved future writes are collapsed
+   optimistically or conservatively in an unknown direction, not proved
+   equivalent.
+2. The proxy contains no clairvoyant branch, but omits all future writer
+   branches rather than universally quantifying them.
+3. An exact solve answers only the declared constant-current-root proxy, not
+   the physical future-scale question.
+4. Any native scale change inside a consumed horizon falsifies the proxy for
+   that decision. The next observation can detect the change only
+   retrospectively.
+5. The proxy is available before issue, but diagnostic sensing and trace
+   publication may perturb cadence. The compact mode report therefore marks
+   `hard_authority=false` and `physical_survival_authority=false`.
+
+The launcher requires both
+`--trace-enemy-mode-transitions` and
+`--diagnostic-continue-root-only-scale`; it rejects combination with exact
+Final-B scale-source authority. Deterministic tests cover scoped flag
+delivery, rejection without the mode observer, root-only expansion,
+complete-schedule rejection, provenance, and no-Bomb/no-stop-after-hit
+preservation. Complete Linux/Windows discovery passes 1,167 tests in
+14.404/30.150 seconds with three existing Windows skips.
+
 ## Current stopping rule
 
 C5-2 closes the declared source-local exact-delivery gate. Stop additional C5

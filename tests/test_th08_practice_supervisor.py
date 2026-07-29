@@ -259,6 +259,18 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertTrue(enabled_args.trace_enemy_mode_transitions)
         self.assertFalse(FINALB_SCALE_DELIVERY_AUTO_STOP)
 
+    def test_enemy_mode_scale_continuation_is_explicit(self) -> None:
+        enabled_args = build_parser().parse_args(
+            [
+                "--trace-enemy-mode-transitions",
+                "--diagnostic-continue-root-only-scale",
+            ]
+        )
+        self.assertTrue(enabled_args.trace_enemy_mode_transitions)
+        self.assertTrue(
+            enabled_args.diagnostic_continue_root_only_scale
+        )
+
     def test_parser_accepts_normal_and_hard_practice_difficulties(
         self,
     ) -> None:

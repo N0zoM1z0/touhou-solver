@@ -331,6 +331,16 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
+        "--diagnostic-continue-root-only-scale",
+        action="store_true",
+        help=(
+            "do not terminate a diagnostic whole-stage run when only the "
+            "observed root time scale is known; assume that root constant "
+            "for the finite planner horizon with unknown-direction and no "
+            "hard scale authority"
+        ),
+    )
+    parser.add_argument(
         "--trace-auxiliary-vm-batches",
         action="store_true",
         help=(

@@ -232,6 +232,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "trace_enemy_mode_transitions": (
             args.trace_enemy_mode_transitions
         ),
+        "diagnostic_continue_root_only_scale": (
+            args.diagnostic_continue_root_only_scale
+        ),
         "trace_auxiliary_vm_batches": (
             args.trace_auxiliary_vm_batches
         ),
@@ -274,6 +277,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             ),
             trace_enemy_mode_transitions=(
                 args.trace_enemy_mode_transitions
+            ),
+            diagnostic_continue_root_only_scale=(
+                args.diagnostic_continue_root_only_scale
             ),
             trace_auxiliary_vm_batches=(
                 args.trace_auxiliary_vm_batches
@@ -587,6 +593,14 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--diagnostic-continue-root-only-scale",
+        action="store_true",
+        help=(
+            "continue a whole-route diagnostic under an explicitly "
+            "unknown-direction constant-current-root time-scale proxy"
+        ),
+    )
+    parser.add_argument(
         "--trace-auxiliary-vm-batches",
         action="store_true",
         help="record bounded post-issue auxiliary ECL VM batches",
@@ -692,6 +706,22 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError(
             "full-route Final-B scale delivery requires Lunatic and the "
             "exact ecldata7 identity"
+        )
+    if (
+        args.diagnostic_continue_root_only_scale
+        and not args.trace_enemy_mode_transitions
+    ):
+        raise ValueError(
+            "diagnostic root-only scale continuation is scoped to the "
+            "whole-route enemy-mode observer"
+        )
+    if (
+        args.diagnostic_continue_root_only_scale
+        and args.enable_finalb_scale_source_authority
+    ):
+        raise ValueError(
+            "diagnostic root-only scale continuation conflicts with exact "
+            "Final-B scale-source authority"
         )
     api = Win32()
     _configure_supervisor_api(api)

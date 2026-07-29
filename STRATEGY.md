@@ -540,6 +540,17 @@ are not consumed by action selection, diagnostic cost may perturb cadence,
 and no shipped-runtime Stage-5 transition has yet been retained. Next run the
 whole Stage-5 physical observer gate, then continue the causal recurrence.
 
+**2026-07-30 CE-0191 scoped non-fail-close correction:** the first physical
+SEM-MODE-B attempt selected the correct Lunatic Stage 5 and entered gameplay,
+but the default root-only time-scale authority boundary terminated at frame 1
+before any decision. Default live hard authority is unchanged. A second
+default-off flag, accepted only beside the whole-stage enemy-mode observer,
+now repeats each freshly observed root over the finite consumer horizon with
+explicit unknown-direction/no-authority provenance. It cannot combine with
+exact Final-B scale-source authority. Complete 1,167-test Linux/Windows
+suites pass. This is a data-collection strategy only: hits, clean completion,
+and certificates under the proxy cannot promote survival or NMNB.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

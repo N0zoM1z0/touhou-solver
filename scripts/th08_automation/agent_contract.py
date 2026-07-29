@@ -65,6 +65,7 @@ def build_long_run_arguments(
     trace_nonspell_main_vms: bool = False,
     trace_enemy_combat_progress: bool = False,
     trace_enemy_mode_transitions: bool = False,
+    diagnostic_continue_root_only_scale: bool = False,
     trace_auxiliary_vm_batches: bool = False,
     trace_auxiliary_ecl_events: bool = False,
     auxiliary_vm_batch_every: int = 16,
@@ -150,6 +151,22 @@ def build_long_run_arguments(
         raise ValueError(
             "Final-B scale-delivery auto-stop requires source authority"
         )
+    if (
+        diagnostic_continue_root_only_scale
+        and enable_finalb_scale_source_authority
+    ):
+        raise ValueError(
+            "diagnostic root-only scale continuation conflicts with exact "
+            "Final-B scale-source authority"
+        )
+    if (
+        diagnostic_continue_root_only_scale
+        and not trace_enemy_mode_transitions
+    ):
+        raise ValueError(
+            "diagnostic root-only scale continuation is scoped to the "
+            "whole-stage enemy-mode observer"
+        )
     if trace_auxiliary_ecl_events and not trace_auxiliary_vm_batches:
         raise ValueError(
             "auxiliary ECL event tracing requires auxiliary-VM batch tracing"
@@ -222,6 +239,8 @@ def build_long_run_arguments(
         arguments.append("--trace-enemy-combat-progress")
     if trace_enemy_mode_transitions:
         arguments.append("--trace-enemy-mode-transitions")
+    if diagnostic_continue_root_only_scale:
+        arguments.append("--diagnostic-continue-root-only-scale")
     if trace_auxiliary_vm_batches:
         arguments.extend(
             (

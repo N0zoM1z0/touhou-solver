@@ -925,6 +925,16 @@ cost may perturb cadence. The exit gate remains open pending the original-game
 whole-Stage-5 observation, causal pickup/cadence recurrence, exact-version
 publication, and body-set differential.
 
+CE-0191 correction: the first physical attempt reached gameplay frame 1 but
+the default root-only scale-authority fail-close terminated before any
+decision. The default hard boundary remains unchanged. For the SEM-MODE-B
+whole-stage observer only, an additional explicit flag may repeat the current
+root over the finite consumer horizon so the stage completes. This proxy is
+unknown-direction, cannot combine with exact Final-B scale authority, and
+grants no survival/certificate authority even if the physical run is clean.
+It exists to preserve a whole-stage native observation unit instead of losing
+all evidence at the first root-only frame.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

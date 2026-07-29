@@ -605,6 +605,15 @@ comparison.
    consecutive corrected Stage-5 runs at no more than ten hits plus
    cross-stage regression checks. No physical delivery authority exists
    before the new gate passes.
+   Fresh physical run `20260729_113124` then passes all semantic/oracle/cache
+   and component-compute gates over 184 batches and 5,124 requests, but
+   rejects V4 delivery: physical 34-record rows reach 25,296 bytes and
+   previous synchronous emit p95 is `1.366 ms`. It also takes 14 hits
+   (`8/2/3/1/0` by nonspell/103/107/111/115). CE-0172 preserves the exact
+   semantic evidence but rejects delivery/survival authority. A separately
+   fixed V5 columnar transport correction may remove repeated JSON keys
+   without changing sensing, recurrence, planning, or actions; all limits
+   remain unchanged.
    Emission, shared transform state, source life, geometry, and action
    authority remain unresolved.
    The projection auditor now separates universal `core` gates from the

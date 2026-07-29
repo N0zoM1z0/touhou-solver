@@ -154,6 +154,12 @@ describe the same decision. Python/C++ parity is not physical correctness.
   Stage-5 results at no more than ten hits plus cross-stage regression
   checks. Schemas v4/v5 have no physical delivery authority. The old
   spell-107 trace's 3,214 contexts remain unreplayable.
+  The uncontaminated retry `20260729_113124` completed but rejects V4:
+  all 184 batches and 5,124 requests replay exactly with zero unknown, while
+  physical line p95/max is `24142/25296` bytes and synchronous emit p95 is
+  `1.366 ms`; the run takes 14 hits (`8/2/3/1/0`). CE-0172 fixes a
+  transport-only V5 columnar correction before implementation. Do not loosen
+  gates or combine it with a combat change.
   Unsupported emission, source-life, dynamic parameter, transform,
   realized-birth, geometry, and action dependencies remain `UNKNOWN`.
 - The evidence topology is now responsibility-based without changing model

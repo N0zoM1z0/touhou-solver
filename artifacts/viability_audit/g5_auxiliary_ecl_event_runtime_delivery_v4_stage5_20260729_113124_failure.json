@@ -1,0 +1,274 @@
+{
+  "authority": "physical_trace_only_no_action_authority",
+  "authority_boundary": {
+    "auxiliary_literal_fire_timer_schedule": "independently_replayed_for_observed_contexts",
+    "physical_action": "none",
+    "physical_frame_timing": "none",
+    "planner": "none",
+    "realized_birth_geometry": "none",
+    "runtime_instruction_bytes": "exact_for_this_immutable_image",
+    "source_lifetime": "none"
+  },
+  "cache": {
+    "capacity": 512,
+    "entries_after": 46,
+    "evictions": 0,
+    "misses": 46,
+    "persistent_hits": 2381,
+    "request_local_hits": 2697
+  },
+  "gates": {
+    "accepted_session_cleanup": true,
+    "contracted_targets_only": true,
+    "decision_cadence_p95_regression_at_most_one_frame": true,
+    "empty_prefix_valid": true,
+    "event_derive_timing": true,
+    "event_status_success_or_empty": true,
+    "exact_runtime_version_on_every_batch": true,
+    "hard_no_bomb_route_complete": true,
+    "independent_cache_parity": true,
+    "independent_oracle_parity": true,
+    "no_added_process_reads_in_event_layer": true,
+    "preparation_exact_and_bounded": true,
+    "projected_batch_line_maximum": false,
+    "replay_bundle_present": true,
+    "replay_compact_timing": true,
+    "schema_v7_rows_present": true,
+    "stage5_survival_regression_boundary": false,
+    "trace_emit_timing": false,
+    "transaction_total_timing": true,
+    "transport_success_and_coherent": true
+  },
+  "limits_bytes": {
+    "projected_batch_line_maximum": 24576
+  },
+  "limits_ms": {
+    "cadence_p95_regression_frames": 1.0,
+    "event_derive_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ],
+    "preparation_maximum": 1.0,
+    "replay_compact_p95_p99_max": [
+      0.5,
+      1.0,
+      3.0
+    ],
+    "trace_emit_p95_p99_max": [
+      1.0,
+      2.0,
+      6.0
+    ],
+    "transaction_total_p95_p99_max": [
+      3.0,
+      5.0,
+      15.0
+    ]
+  },
+  "observation_epochs": {
+    "accepted_gameplay_epoch": 0,
+    "batch_gameplay_epochs": {
+      "3": 184
+    },
+    "cross_epoch_observed": true
+  },
+  "passed": false,
+  "preparation": {
+    "accepted_gameplay_epoch": 0,
+    "bound_instruction_count": 9,
+    "configuration": {
+      "active_difficulty_mask": 8,
+      "cache_capacity": 512,
+      "maximum_instructions": 64,
+      "maximum_physical_steps": 65536,
+      "target_horizons": {
+        "69": 16,
+        "72": 16,
+        "73": 60
+      }
+    },
+    "count": 1,
+    "decision_frame": 1,
+    "observation_epoch_semantics": "provenance_not_program_mutation",
+    "observation_gameplay_epoch": 0,
+    "prevalidated_instruction_count": 1664,
+    "program_identity": {
+      "difficulty_index": 3,
+      "image_length": 47224,
+      "normalized_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      "relocated_sha256": "125df0614c08e6e8791f37105e3d2a77a26e211859c95e2a4fb072ecdc17fd40",
+      "route_id": 2,
+      "runtime_base": 186449992,
+      "stage_route_index": 5,
+      "static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19"
+    },
+    "program_identity_key": [
+      186449992,
+      47224,
+      "125df0614c08e6e8791f37105e3d2a77a26e211859c95e2a4fb072ecdc17fd40",
+      "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+      2,
+      3,
+      5
+    ],
+    "snapshot_frame": 1,
+    "status": "success",
+    "timing_ms": {
+      "maximum": 1.0,
+      "program_bind": 0.05639996379613876,
+      "total": 0.07850001566112041
+    }
+  },
+  "replay": {
+    "complete_count": 5124,
+    "empty_prefix_frames": [
+      28553,
+      28569,
+      28585,
+      28602,
+      28617,
+      28633
+    ],
+    "event_statuses": {
+      "empty_complete": 6,
+      "success": 178
+    },
+    "physical_timing": "unavailable_timer_domain_only",
+    "replay_blob_count": 5124,
+    "replayable_record_count": 5124,
+    "request_count": 5124,
+    "target_subroutines": {
+      "69": 1262,
+      "72": 1300,
+      "73": 2562
+    },
+    "unknown_count": 0
+  },
+  "report_digest": "14f3ebd2b56e10261c11c11ae75bc65ce6d16ba777b7f1cb64a0605f05dc47eb",
+  "runtime_version": {
+    "decision_frame": 1,
+    "difficulty_index": 3,
+    "gameplay_epoch": 0,
+    "image_length": 47224,
+    "normalized_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "relocated_sha256": "125df0614c08e6e8791f37105e3d2a77a26e211859c95e2a4fb072ecdc17fd40",
+    "route_id": 2,
+    "runtime_base": 186449992,
+    "schema": "th08-runtime-ecl-accepted-version-v1",
+    "snapshot_frame": 1,
+    "stage_route_index": 5,
+    "static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19"
+  },
+  "schema": "th08-g5-auxiliary-ecl-event-physical-gate-v4",
+  "session": {
+    "auxiliary_vm_batch_spell_id": 107,
+    "hard_no_bomb": true,
+    "hit_count": null,
+    "passed": true,
+    "path": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_113124.session.json",
+    "run_id": "lunatic_route2_stage5_unattended_20260729_113124",
+    "runtime_ecl_static_sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19",
+    "status": "completed",
+    "termination_reason": "route_complete",
+    "trace_auxiliary_ecl_events": true,
+    "trace_auxiliary_vm_batches": true,
+    "trial_accepted": true
+  },
+  "source": {
+    "baseline": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_200739.jsonl",
+    "baseline_sha256": "953a5c3cb4bef84a809c9d2681aedcc081f67cc7f8dc39aa942bc42f0da779e9",
+    "session": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_113124.session.json",
+    "trace": "artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260729_113124.jsonl",
+    "trace_bytes": 503762582,
+    "trace_sha256": "9385f9dcc9859e44fc9256df3bac811aec1973d38e86e63605f951290bb4fe8c"
+  },
+  "static_ecl": {
+    "bytes": 47224,
+    "path": "artifacts/decoded/ecldata5.ecl",
+    "sha256": "3148f45faf78bd8211a956edcdc353be73d2781995d3dadd36bdca8132f8fe19"
+  },
+  "survival_regression_boundary": {
+    "consecutive_run_requirement": 2,
+    "hit_count": 14,
+    "maximum": 10,
+    "single_run_only": true
+  },
+  "timing_ms": {
+    "baseline_decision_frame_delta": {
+      "count": 13094,
+      "max": 1803.0,
+      "mean": 3.0206965022147547,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 4.0
+    },
+    "decision_frame_delta": {
+      "count": 11792,
+      "max": 1802.0,
+      "mean": 3.0278154681139755,
+      "p50": 2.0,
+      "p95": 4.0,
+      "p99": 5.0
+    },
+    "event_derive": {
+      "count": 184,
+      "max": 0.5296999588608742,
+      "mean": 0.25308043847832346,
+      "p50": 0.2452000044286251,
+      "p95": 0.3616850764956325,
+      "p99": 0.4434859810862688
+    },
+    "previous_trace_emit": {
+      "count": 183,
+      "max": 1.9156999187543988,
+      "mean": 1.0480863338621342,
+      "p50": 1.0579000227153301,
+      "p95": 1.3662699493579566,
+      "p99": 1.6498839925043296
+    },
+    "replay_compact": {
+      "count": 184,
+      "max": 2.8107999823987484,
+      "mean": 0.35042446119326126,
+      "p50": 0.3501499886624515,
+      "p95": 0.42446498991921544,
+      "p99": 0.4747130232863118
+    },
+    "transaction_total": {
+      "count": 184,
+      "max": 3.9203999331220984,
+      "mean": 1.7060429343710775,
+      "p50": 1.691900019068271,
+      "p95": 2.298824943136424,
+      "p99": 2.8296490351203762
+    }
+  },
+  "transport": {
+    "batch_count": 184,
+    "batch_line_bytes": {
+      "count": 184,
+      "max": 25296.0,
+      "mean": 21620.021739130436,
+      "p50": 22963.5,
+      "p95": 24141.85,
+      "p99": 25230.09
+    },
+    "process_read_count": {
+      "count": 184,
+      "max": 265.0,
+      "mean": 110.10326086956522,
+      "p50": 117.0,
+      "p95": 135.0,
+      "p99": 151.3499999999993
+    },
+    "schema_versions": {
+      "7": 184
+    },
+    "statuses": {
+      "success": 184
+    },
+    "validation_errors": []
+  }
+}

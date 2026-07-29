@@ -152,6 +152,13 @@ Linux/Windows/physical 對照；通過後仍持續尋找下一個可證偽瓶頸
   p95 meets the unchanged limits on both platforms. Complete suites pass
   1,032 tests. Physical delivery and survival remain open; run a fresh
   retained Stage-5 gate before any handoff claim.
+- The completed physical V4 run `20260729_113124` accepts exact semantics but
+  rejects delivery and survival. All 184 batches and 5,124 requests replay
+  with zero unknown, while fresh 34-record rows reach 25,296 bytes and
+  synchronous emit p95 reaches `1.366 ms`; the run takes 14 hits, eight in
+  nonspell. CE-0172 fixes a transport-only V5 columnar correction before code:
+  preserve every proof/raw field, remove repeated record/request keys, and
+  keep all limits unchanged. Combat changes remain a separate experiment.
 - Add Lunatic Stage 3 to the later physical matrix as an independent workload.
   Historical deaths justify a fresh baseline, but Stage-5 phase/source,
   nonspell, Power, and strategy conclusions must not be transferred without

@@ -7,7 +7,9 @@ import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
+from th08_automation import full_route_artifacts
 from th08_automation.practice_menu import parse_practice_difficulty
 from th08_full_route_supervisor import (
     _terminal_scene_record,
@@ -126,6 +128,96 @@ class FullRouteSupervisorTests(unittest.TestCase):
             completion = _terminal_scene_record(trace)
         self.assertEqual(completion["frame"], 226864)
         self.assertEqual(completion["engine_flags"], 109072)
+
+    def test_materializer_writes_one_markdown_run_note(self) -> None:
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            runtime_reports = root / "runtime_reports"
+            run_notes = root / "runs"
+            run_id = "lunatic_route2_fullrun_unattended_20260729_130000"
+            captured_argv: list[str] = []
+            dossier = {
+                "acceptance_target": {
+                    "difficulty_index": 3,
+                    "difficulty": "lunatic",
+                },
+                "stages": [
+                    {"stage_route_index": stage}
+                    for stage in full_route_artifacts.EXPECTED_ROUTE_STAGES
+                ],
+                "control_policy": {
+                    "no_bomb_verification": {"passed": True}
+                },
+                "provenance": [
+                    {"summary": {"termination_reason": "route_complete"}}
+                ],
+            }
+
+            def fake_dossier(argv: list[str]) -> None:
+                captured_argv.extend(argv)
+                json_output = Path(argv[argv.index("--json-output") + 1])
+                markdown = Path(
+                    argv[argv.index("--markdown-output") + 1]
+                )
+                json_output.parent.mkdir(parents=True, exist_ok=True)
+                json_output.write_text(
+                    json.dumps(dossier) + "\n",
+                    encoding="utf-8",
+                )
+                markdown.parent.mkdir(parents=True, exist_ok=True)
+                markdown.write_text("# retained route\n", encoding="utf-8")
+
+            with (
+                patch.object(
+                    full_route_artifacts,
+                    "build_run_dossier",
+                    side_effect=fake_dossier,
+                ),
+                patch.object(
+                    full_route_artifacts,
+                    "write_compact_full_route_summary",
+                ),
+                patch.object(
+                    full_route_artifacts,
+                    "load_and_validate",
+                    return_value=object(),
+                ),
+                patch.object(
+                    full_route_artifacts,
+                    "asdict",
+                    return_value={},
+                ),
+                patch.object(
+                    full_route_artifacts,
+                    "previous_full_dossier",
+                    return_value=None,
+                ),
+            ):
+                artifacts = full_route_artifacts.materialize_artifacts(
+                    run_id=run_id,
+                    trace=runtime_reports / f"{run_id}.jsonl",
+                    completion={"frame": 100, "engine_flags": 1},
+                    root=root,
+                    runtime_report_dir=runtime_reports,
+                    run_note_dir=run_notes,
+                )
+
+            run_note = run_notes / f"{run_id}.md"
+            self.assertEqual(
+                captured_argv[
+                    captured_argv.index("--markdown-output") + 1
+                ],
+                str(run_note),
+            )
+            self.assertEqual(artifacts["dossier_markdown"], str(run_note))
+            self.assertEqual(artifacts["run_note"], str(run_note))
+            self.assertEqual(
+                run_note.read_text(encoding="utf-8"),
+                "# retained route\n",
+            )
+            self.assertFalse(
+                (runtime_reports / f"{run_id}.dossier.md").exists()
+            )
 
 
 if __name__ == "__main__":

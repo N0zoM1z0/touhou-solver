@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 from dataclasses import asdict
 from pathlib import Path
 
@@ -300,10 +299,12 @@ def materialize_artifacts(
 ) -> dict[str, object]:
     prefix = runtime_report_dir / run_id
     dossier_json = prefix.with_suffix(".dossier.json")
-    dossier_markdown = prefix.with_suffix(".dossier.md")
     deaths_csv = prefix.with_suffix(".deaths.csv")
     regressions_json = prefix.with_suffix(".regressions.json")
     comparison_json = prefix.with_suffix(".comparison.json")
+    run_note_dir.mkdir(parents=True, exist_ok=True)
+    run_note = run_note_dir / f"{run_id}.md"
+    dossier_markdown = run_note
     build_run_dossier(
         [
             "--run-id",
@@ -383,9 +384,6 @@ def materialize_artifacts(
     else:
         comparison_json = None
 
-    run_note_dir.mkdir(parents=True, exist_ok=True)
-    run_note = run_note_dir / f"{run_id}.md"
-    shutil.copyfile(dossier_markdown, run_note)
     return {
         "dossier_json": str(dossier_json),
         "dossier_markdown": str(dossier_markdown),

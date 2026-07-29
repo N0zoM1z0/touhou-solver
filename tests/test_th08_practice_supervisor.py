@@ -12,6 +12,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import th08_practice_supervisor as supervisor
+from th08_automation import practice_artifacts
 from th08_automation.practice_menu import (
     build_practice_menu_plan,
     forward_menu_steps,
@@ -498,6 +499,61 @@ class PracticeSupervisorTests(unittest.TestCase):
                     current,
                 )
             self.assertEqual(baseline, accepted)
+
+    def test_materializer_writes_one_markdown_run_note(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            runtime_reports = root / "runtime_reports"
+            run_notes = root / "runs"
+            run_id = "lunatic_route2_stage5_unattended_20260729_130000"
+            captured_argv: list[str] = []
+
+            def fake_dossier(argv: list[str]) -> None:
+                captured_argv.extend(argv)
+                markdown = Path(
+                    argv[argv.index("--markdown-output") + 1]
+                )
+                markdown.parent.mkdir(parents=True, exist_ok=True)
+                markdown.write_text("# retained run\n", encoding="utf-8")
+
+            with (
+                patch.object(
+                    practice_artifacts,
+                    "build_practice_dossier",
+                    side_effect=fake_dossier,
+                ),
+                patch.object(
+                    practice_artifacts,
+                    "previous_dossier",
+                    return_value=None,
+                ),
+            ):
+                artifacts = practice_artifacts.materialize_artifacts(
+                    run_id=run_id,
+                    stage=parse_practice_stage("5"),
+                    difficulty=parse_practice_difficulty("lunatic"),
+                    trace=runtime_reports / f"{run_id}.jsonl",
+                    session_json=runtime_reports / f"{run_id}.session.json",
+                    runtime_report_dir=runtime_reports,
+                    run_note_dir=run_notes,
+                )
+
+            run_note = run_notes / f"{run_id}.md"
+            self.assertEqual(
+                captured_argv[
+                    captured_argv.index("--markdown-output") + 1
+                ],
+                str(run_note),
+            )
+            self.assertEqual(artifacts.dossier_markdown, run_note)
+            self.assertEqual(artifacts.run_note, run_note)
+            self.assertEqual(
+                run_note.read_text(encoding="utf-8"),
+                "# retained run\n",
+            )
+            self.assertFalse(
+                (runtime_reports / f"{run_id}.dossier.md").exists()
+            )
 
 
 if __name__ == "__main__":

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -84,9 +83,11 @@ def materialize_artifacts(
 ) -> TrialArtifacts:
     prefix = runtime_report_dir / run_id
     dossier_json = prefix.with_suffix(".dossier.json")
-    dossier_markdown = prefix.with_suffix(".dossier.md")
     death_csv = prefix.with_suffix(".deaths.csv")
     regressions_json = prefix.with_suffix(".regressions.json")
+    run_note_dir.mkdir(parents=True, exist_ok=True)
+    run_note = run_note_dir / f"{run_id}.md"
+    dossier_markdown = run_note
     build_practice_dossier(
         [
             "--run-id",
@@ -124,9 +125,6 @@ def materialize_artifacts(
             + "\n",
             encoding="utf-8",
         )
-    run_note_dir.mkdir(parents=True, exist_ok=True)
-    run_note = run_note_dir / f"{run_id}.md"
-    shutil.copyfile(dossier_markdown, run_note)
     return TrialArtifacts(
         run_id=run_id,
         trace=trace,

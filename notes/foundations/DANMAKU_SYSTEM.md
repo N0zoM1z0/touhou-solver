@@ -710,11 +710,15 @@ ECL oracle and are not yet phase-exact.
 
 ## Built-In ECL Callbacks
 
-**Observed**: opcode `0x88` invokes one entry immediately from a 32-entry native
-function table. Opcode `0x89` installs the same indexed function at enemy-object
-offset `+0x10`, retains the ECL record pointer at `+0x14`, or clears the callback
-when the index is negative. The installed function runs once per enemy VM
-update before the following enemy position/object synchronization block.
+**Observed and revalidated**: opcode `0x88` invokes one entry immediately from
+a 32-entry native function table. Opcode `0x89` installs the same indexed
+function in the currently selected ECL VM at VM `+0x10`, retains the ECL
+record pointer at VM `+0x14`, or clears the callback when the index is
+negative. The main VM is enemy `+0x7F8`, so its fields are enemy
+`+0x808/+0x80C`; each auxiliary context instead selects its active VM at
+context `+0x08`. The installed function runs once per selected VM update
+before the following VM-local synchronization block. The main VM completes
+before the four auxiliary contexts, and enemy motion follows all five.
 
 The route manifests now include every reachable callback occurrence, including
 nonspell and phase-transition subs:

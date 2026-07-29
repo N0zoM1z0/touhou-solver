@@ -92,14 +92,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `092a35b`
-  (`Retain ordered partial-mask pickup counterexample`).
+- Latest retained research checkpoint: `b15fa53`
+  (`Implement ordered input transaction oracle`).
 - Latest pre-trial repository/live code checkpoint: `60ae5b9`
   (`Retain CE-0191 diagnostic scale continuation`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
-- Latest native-semantic correction checkpoint: `e376557`. The original
+- Latest native-semantic correction checkpoint: `b15fa53`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest complete physical workload:
   `lunatic_route2_stage5_unattended_20260730_041408`. It is a complete
@@ -230,11 +230,35 @@ Seven focused body-set tests, five focused pickup-audit tests, and complete
 retains three existing skips.
 
 The pure 9,839/9,839 stable-focus recurrence result remains valid inside its
-earlier strict boundary. The atomic actuator submodel does not. Before future
-body/flag/geometry integration, model one controller-selected complete mask
-as an ordered per-key transaction whose prefixes nature may expose at the
-revalidated player/input update phase. Preserve complete-mask no-write and
-observation-compatible merging. No physical rerun is authorized yet.
+earlier strict boundary. The atomic actuator submodel does not. CE-0193
+therefore requires one controller-selected complete mask to remain one action
+while nature exposes possible ordered transaction prefixes; complete-mask
+no-write and observation-compatible merging remain mandatory.
+
+Checkpoint `b15fa53` implements the independent CE-0193 ordered transaction
+state. It carries active native mask, held final desired mask, remaining
+single-key-edge endpoints, and a positive final-completion publication
+deadline. Real writes append deterministic releases then presses after an
+older suffix; complete-mask no-write samples no delay and preserves the exact
+queue/deadline. Nature may stutter or expose a monotone non-final prefix
+before final is forced at the deadline. Hidden states merge by active/held
+observation before the next controller choice.
+
+The TH08 SEM-MODE decision primitive now honors the revalidated native
+within-cycle order: priority 9 reads current input at `0x0044AEE8`, priority
+11 applies mode-conditioned body gates, and priority 17 publishes raw into
+current at `0x00452347` for the next step. Both IDA addresses have material
+CE-0193 comments. The old atomic APIs remain only as restricted baselines.
+Nine game-neutral, four TH08 ordered, and fifteen prior SEM-MODE tests pass;
+complete Linux/Windows discovery passes 1,202 tests in 14.611/30.759 seconds,
+with three existing Windows skips.
+
+This checkpoint is offline/conservative only. Its root is explicitly
+post-priority-17; asynchronous capture/issue-to-publication phase, physical
+completion-delay support, optimized/native parity, exact immutable future
+body/flag/geometry, movement/collision integration, and a scoped whole-stage
+falsifier remain open. Live planner, actuator, cadence, damage objective,
+strategy, and gameplay are unchanged. No physical rerun is authorized yet.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -592,17 +616,15 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-C` from checkpoint `092a35b`. CE-0193 physically
-   rejects atomic complete-mask pickup: implement an ordered key-transition
-   transaction state and revalidate its player/input update phase before
-   future hazard integration. Nature may expose transaction prefix masks,
-   but the controller still chooses only one final complete mask. Preserve
-   exact complete-mask no-write, older pending state, and
-   observation-compatible merging.
-   After independent scalar/optimized parity for multi-release/press,
-   reversal, Focus, Shot, overwrite, and no-write cases, build or
-   conservatively version an exact future body/flag/geometry producer before
-   survival integration; do not substitute the current
+2. Continue `SEM-MODE-C` from checkpoint `b15fa53`. The independent ordered
+   transaction state and native priority-9-before-priority-17 composition are
+   complete offline. Close asynchronous capture/issue-to-publication phase
+   and physical completion-delay support without using manager frame as an
+   input clock. Then build an optimized implementation and run exact
+   scalar/optimized parity for multi-release/press, reversal, Focus, Shot,
+   overwrite, no-write, and every intermediate action identity. After that,
+   build or conservatively version an exact future body/flag/geometry
+   producer before survival integration; do not substitute the current
    `future hazard events unseen` trace snapshot. Publish body-set,
    viable-state, and safe-action-mask differentials without granting live
    action authority. Then complete SEM-MODE-D damage-objective separation

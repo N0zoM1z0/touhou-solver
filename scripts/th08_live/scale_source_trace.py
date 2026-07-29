@@ -644,7 +644,6 @@ class FinalBScaleSourceTraceService:
         spell_id: int | None,
         observed_root_scale_bits: int,
         observed_player_bomb_active: int,
-        observed_player_predeath_counter: int,
     ) -> dict[str, object] | None:
         if self._attempted or not self._trigger_matches(
             route_id=route_id,
@@ -656,7 +655,6 @@ class FinalBScaleSourceTraceService:
         if (
             observed_root_scale_bits != FINAL_B_QUARTER_SCALE_BITS
             or observed_player_bomb_active != 0
-            or observed_player_predeath_counter != 0
         ):
             return None
         self._attempted = True
@@ -750,7 +748,7 @@ class FinalBScaleSourceTraceService:
                     self.configuration.maximum_capture_attempts
                 ),
                 "continuation": (
-                    "no_hit_no_bomb_target_branch_not_future_observation"
+                    "no_new_hit_no_bomb_scale_target_not_future_observation"
                 ),
                 "scheduler_order": (
                     "player_priority_9_enemy_ecl_11_laser_bullet_14"
@@ -820,8 +818,6 @@ class FinalBScaleSourceTraceService:
             reasons.append("spell_identity")
         if phase.player_bomb_active:
             reasons.append("bomb_active")
-        if phase.player_predeath_counter:
-            reasons.append("player_predeath")
         try:
             validate_time_scale_bits(
                 phase.scale_bits,

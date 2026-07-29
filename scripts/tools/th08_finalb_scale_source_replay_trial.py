@@ -170,9 +170,6 @@ def _observe(
             observed_player_bomb_active=int(
                 state["player"]["bomb_active"]
             ),
-            observed_player_predeath_counter=int(
-                state["player"]["predeath_counter"]
-            ),
         )
         if record is not None:
             return record

@@ -150,7 +150,7 @@ class _Reader:
             ADDR_PLAYER + PLAYER_BOMB_ACTIVE_OFFSET: struct.pack("<I", 0),
             ADDR_PLAYER + PLAYER_PREDEATH_COUNTER_OFFSET: struct.pack(
                 "<i",
-                0,
+                7,
             ),
         }
 
@@ -208,7 +208,6 @@ class ScaleSourceTraceTests(unittest.TestCase):
             spell_id=190,
             observed_root_scale_bits=FINAL_B_QUARTER_SCALE_BITS,
             observed_player_bomb_active=0,
-            observed_player_predeath_counter=0,
         )
         assert record is not None
         return record
@@ -231,6 +230,9 @@ class ScaleSourceTraceTests(unittest.TestCase):
         self.assertTrue(capture["ordinary_pool_complete"])
         self.assertEqual(capture["ordinary_pool_slots_scanned"], 480)
         self.assertEqual(capture["source_count"], 1)
+        phase = capture["phase_before"]
+        assert isinstance(phase, dict)
+        self.assertEqual(phase["player_predeath_counter"], 7)
         schedule = record["schedule"]
         assert isinstance(schedule, dict)
         self.assertEqual(schedule["complete_horizon"], 300)
@@ -325,7 +327,6 @@ class ScaleSourceTraceTests(unittest.TestCase):
                 spell_id=189,
                 observed_root_scale_bits=FINAL_B_QUARTER_SCALE_BITS,
                 observed_player_bomb_active=0,
-                observed_player_predeath_counter=0,
             )
         )
         self.assertFalse(service.attempted)
@@ -341,7 +342,6 @@ class ScaleSourceTraceTests(unittest.TestCase):
                 spell_id=190,
                 observed_root_scale_bits=0x3F800000,
                 observed_player_bomb_active=0,
-                observed_player_predeath_counter=0,
             )
         )
         self.assertFalse(service.attempted)
@@ -357,7 +357,6 @@ class ScaleSourceTraceTests(unittest.TestCase):
                 spell_id=190,
                 observed_root_scale_bits=FINAL_B_QUARTER_SCALE_BITS,
                 observed_player_bomb_active=0,
-                observed_player_predeath_counter=0,
             )
         )
         self.assertTrue(service.attempted)
@@ -373,7 +372,6 @@ class ScaleSourceTraceTests(unittest.TestCase):
                 spell_id=190,
                 observed_root_scale_bits=FINAL_B_QUARTER_SCALE_BITS,
                 observed_player_bomb_active=0,
-                observed_player_predeath_counter=0,
             )
         )
 

@@ -59,7 +59,7 @@ def _envelope() -> dict[str, object]:
                 "phase_before": {
                     "scale_bits": FINAL_B_QUARTER_SCALE_BITS,
                     "player_bomb_active": 0,
-                    "player_predeath_counter": 0,
+                    "player_predeath_counter": 7,
                 },
                 "sources": [
                     {

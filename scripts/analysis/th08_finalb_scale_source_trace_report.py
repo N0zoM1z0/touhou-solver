@@ -129,11 +129,12 @@ def build_report(path: Path) -> dict[str, object]:
         if isinstance(source_capture, dict)
         else None
     )
-    checks["clean_quarter_root"] = bool(
+    checks["stable_quarter_no_bomb_root"] = bool(
         isinstance(phase, dict)
         and phase.get("scale_bits") == FINAL_B_QUARTER_SCALE_BITS
         and phase.get("player_bomb_active") == 0
-        and phase.get("player_predeath_counter") == 0
+        and isinstance(phase.get("player_predeath_counter"), int)
+        and phase.get("player_predeath_counter") >= 0
     )
     schedule = record.get("schedule")
     writes = schedule.get("writes") if isinstance(schedule, dict) else None
@@ -208,6 +209,11 @@ def build_report(path: Path) -> dict[str, object]:
                 else None
             ),
             "writes": writes,
+            "player_predeath_counter": (
+                phase.get("player_predeath_counter")
+                if isinstance(phase, dict)
+                else None
+            ),
         },
         "authority": {
             "observed": (
@@ -221,8 +227,8 @@ def build_report(path: Path) -> dict[str, object]:
             ),
             "not_proved": (
                 "This trace changes no input and proves neither action "
-                "authority, clean survival, callback-28 hazard consumption, "
-                "nor NMNB."
+                "authority, a clean zero-predeath player root, clean "
+                "survival, callback-28 hazard consumption, nor NMNB."
             ),
         },
     }

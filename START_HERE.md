@@ -92,14 +92,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `b15fa53`
-  (`Implement ordered input transaction oracle`).
+- Latest retained research checkpoint: `f737996`
+  (`Retain ordered input publication phase audit`).
 - Latest pre-trial repository/live code checkpoint: `60ae5b9`
   (`Retain CE-0191 diagnostic scale continuation`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
-- Latest native-semantic correction checkpoint: `b15fa53`. The original
+- Latest native-semantic correction checkpoint: `f737996`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest complete physical workload:
   `lunatic_route2_stage5_unattended_20260730_041408`. It is a complete
@@ -259,6 +259,26 @@ completion-delay support, optimized/native parity, exact immutable future
 body/flag/geometry, movement/collision integration, and a scoped whole-stage
 falsifier remain open. Live planner, actuator, cadence, damage objective,
 strategy, and gameplay are unchanged. No physical rerun is authorized yet.
+
+Checkpoint `f737996` exhausts what the accepted Stage-5 trace can identify
+about ordered publication phase. The new source-hashed report validates
+6,423 real writes and 5,456 no-writes, observes 677 latest-transaction
+intermediate masks, and retains 2,760 corroborated sequential edge pairs. Its
+canonical CE-0193 record is lines `297 -> 298`, issue frame 386 / captured
+manager frame 387: `0x65 -> 0x61` at edge 1/2 toward final `0x41`.
+
+The report claims zero atomic native edge captures. `input_raw/current/previous`
+are separate reads, capture is asynchronous, and the trace has no priority-17
+callback serial. Existing `control_delay_candidates` are
+enemy-manager-frame snapshot-to-observed-final-input supports; the ordered
+oracle deadline counts post-issue abstract publication steps. They have no
+validated adapter. The compact report SHA-256 is
+`c8f1722587c4514c6ab538f66e73a0b13566b7aac96474805e12bcef16e0152a`;
+the raw source SHA-256 remains
+`773cbdb322dc5e15f80da4800ce82bcd0f41c1e6f82826812087edc9a328dca9`.
+Five focused tests and complete 1,207-test Linux/Windows suites pass in
+14.280/30.116 seconds, with three existing Windows skips. No gameplay or live
+authority changed.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -616,11 +636,16 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-C` from checkpoint `b15fa53`. The independent ordered
+2. Continue `SEM-MODE-C` from checkpoint `f737996`. The independent ordered
    transaction state and native priority-9-before-priority-17 composition are
-   complete offline. Close asynchronous capture/issue-to-publication phase
-   and physical completion-delay support without using manager frame as an
-   input clock. Then build an optimized implementation and run exact
+   complete offline. The retained post-hoc audit exhausts the current trace
+   and proves exact publication deadline unidentifiable from it. Implement a
+   default-off bounded priority-17 serial/event ring plus pre/post-dispatch
+   serial brackets; overflow/read failure must mark only the interval unknown
+   and continue the stage. Use that evidence to close asynchronous
+   capture/issue phase and physical completion-delay support without using
+   manager frame as an input clock. Then build an optimized implementation
+   and run exact
    scalar/optimized parity for multi-release/press, reversal, Focus, Shot,
    overwrite, no-write, and every intermediate action identity. After that,
    build or conservatively version an exact future body/flag/geometry
@@ -667,6 +692,15 @@ bundle is removed in this checkpoint. The newest raw trace is 550,969,744
 bytes with SHA-256
 `50e8924ba23da9e703b887d8dfd320a025f044754625b66b2939c858ba357ba5`.
 Raw JSONL and launch logs remain ignored and must not be committed.
+
+Also keep the complete diagnostic Stage-5 source
+`lunatic_route2_stage5_unattended_20260730_041408.jsonl` locally. It is
+482,944,752 bytes with SHA-256
+`773cbdb322dc5e15f80da4800ce82bcd0f41c1e6f82826812087edc9a328dca9`
+and is the raw source of the retained mode, body-set, recurrence, and ordered
+publication-phase reports. The supervisor selected no-save, so it is not
+replay-compatible. Do not remove it until the SEM-MODE physical evidence it
+supports has two newer compatible raw/compact-backed replacements.
 
 Also keep the three current Final-B/full-route evidence bundles
 `lunatic_route2_stage6b_finalb_scale_delivery_20260729_233720` and

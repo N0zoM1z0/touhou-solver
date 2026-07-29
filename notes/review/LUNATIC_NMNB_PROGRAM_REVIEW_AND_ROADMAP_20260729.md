@@ -1000,9 +1000,50 @@ Status remains **Offline/physical-post-hoc**. The checkpoint validates the
 local recurrence inside its strict ordinary-update contract but provides no
 exact future body/flag/geometry producer, universal physical clock, action,
 hard-survival, or live-publication authority. The next SEM-MODE-C gate is to
-produce or conservatively version a complete future body/flag/geometry
-schedule and compare projected body sets before any hard-survival wiring. Do
-not launch another unchanged Stage-5 observer workload.
+audit action-conditioned endpoints before producing or conservatively
+versioning a complete future body/flag/geometry schedule. Do not launch
+another unchanged Stage-5 observer workload.
+
+2026-07-30 `SEM-MODE-C` action-conditioned endpoint falsifier: the retained
+Stage-5 trace directly rejects atomic complete-mask pickup. At trace line
+297 / controller frame 386 / captured manager frame 384, native active and
+held mask is `0x65`. The recorded ordered dispatch releases Focus and then
+Down, producing `0x65 -> 0x61 -> 0x41`. At adjacent line 298 / controller
+frame 389 / captured manager frame 387, native active mask is the
+intermediate `0x61`, while held/pending final mask is `0x41` with remaining
+support `[1]`. Native mode counter advances `378 -> 381`; every declared
+atomic delay branch matches the mode/body endpoint, but none can produce that
+successor active mask.
+
+The deterministic report audits 7,162 strict action-conditioned intervals:
+3,835 have at least one compatible branch, 381 directly observe an ordered
+dispatch intermediate mask outside the atomic model, and 2,946 have other
+unknown-direction manager/player/issue phase-decomposition mismatches. The
+latter are not promoted to independent recurrence counterexamples. The
+report intentionally fails its strict gate and hashes to
+`db411650de15a050c5ffb815f0f075c538b4ec16cbc01f2fa0f47e403f678464`.
+CE-0193 retains the canonical witness. Seven focused body-set tests, five
+focused pickup-audit tests, deterministic regeneration, and complete
+Linux/Windows discovery pass; the full suites run 1,189 tests in
+14.485/30.602 seconds, with the three existing Windows skips.
+
+This changes the next-gate order. Before future body/flag/geometry
+integration, SEM-MODE-C must:
+
+1. model one complete-mask issue as an ordered per-key transition
+   transaction whose intermediate masks may be sampled by native input;
+2. revalidate the player/input update phase and stop treating manager-frame
+   delta as its unconditional clock;
+3. carry desired final mask, remaining ordered edges, older pending state,
+   and observed native active mask without clairvoyant branching;
+4. preserve exact complete-mask no-write semantics; and
+5. pass independent scalar/optimized differentials for Focus, Shot,
+   reversal, multi-edge acquire/release, overwrite, and no-write histories.
+
+Only then may the corrected recurrence receive a complete immutable
+body/flag/geometry producer and proceed to SEM-MODE-D/E. Status remains
+**Rejected atomic submodel / offline investigation**. No strategy, action,
+hard-survival, unfocused-combat, or NMNB authority is promoted.
 
 ### Phase 2 — Repair collision geometry and lifecycle
 
@@ -1258,7 +1299,9 @@ After that baseline, the next correction checkpoints should be:
    Stage-6B survival at 22 hits. Do not repeat it or generalize it to clean
    survival, stage-wide source authority, Extra, or NMNB;
 3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
-   enemy contact/damage eligibility;
+   enemy contact/damage eligibility. CE-0193 now requires ordered per-key
+   pickup and player/input phase correction before exact future body/version
+   integration;
 4. `SEM-GEOM`: exact player/laser geometry, bullet lifecycle/suppression, and
    physical clamp;
 5. `SEM-SOURCE`: callback inventory, bounded call semantics, and

@@ -600,6 +600,29 @@ in 14.647/30.388 seconds, with three existing Windows skips. Continue
 SEM-MODE-C with an exact, immutable future body/flag/geometry producer and
 body-set differential; do not repeat the unchanged observer workload.
 
+**2026-07-30 CE-0193 atomic-pickup rejection:** a second source-hashed
+post-hoc audit composes recorded issues with adjacent coherent native
+pipeline/mode/body endpoints. It finds 3,835 compatible intervals among
+7,162 strict candidates, but 381 directly observe an ordered dispatch's
+intermediate mask with no compatible atomic complete-mask successor. The
+canonical physical witness is
+`0x65 -> 0x61 -> 0x41`: native next active input is intermediate `0x61`
+while held/pending final desired input is `0x41`.
+
+The current atomic SEM-MODE-C actuator submodel is therefore **Rejected** for
+physical pickup authority. The pure stable-focus `+3/+5/+8` recurrence
+evidence remains valid inside its earlier strict boundary; this rejection
+does not erase it. Another 2,946 endpoint mismatches remain
+unknown-direction manager/player/issue phase-decomposition evidence rather
+than independent model counterexamples.
+
+No live strategy is promoted. Correct ordered per-key transaction pickup and
+the player/input update phase before future body/flag/geometry integration.
+Preserve complete-mask no-write and observation-compatible merging; keep
+hard survival, damage ranking, and unfocused combat disabled. The retained
+report SHA-256 is
+`db411650de15a050c5ffb815f0f075c538b4ec16cbc01f2fa0f47e403f678464`.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

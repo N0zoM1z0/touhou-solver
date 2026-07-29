@@ -122,6 +122,35 @@ is the sole pending desired token if it is still unseen. “Last write wins”
 refers to held desired identity, not retroactive cancellation of a pickup that
 has already advanced far enough to become observable.
 
+### CE-0193 correction to atomic pickup
+
+“Emit the complete ordered key transaction” does not mean that the shipped
+game observes one atomic complete-mask change. The runtime orders all
+releases by ascending bit, then all presses by ascending bit, and sends the
+edge array in one Win32 batch. Physical Stage-5 trace evidence observes
+native active mask `0x61` between the two release edges of
+`0x65 -> 0x61 -> 0x41`, while the actuator already remembers final desired
+mask `0x41`.
+
+Consequently:
+
+- the 36-token alphabet remains the controller action alphabet and final
+  desired identity;
+- one token issue expands into one ordered transaction, not multiple
+  controller decisions;
+- native active identity may temporarily be an ordered prefix mask distinct
+  from old, older-pending, and final tokens;
+- the transaction suffix/prefix uncertainty must be part of the physical
+  information state; and
+- the current atomic old/final pickup recurrence is rejected for hard,
+  publication, or live authority.
+
+The exact player/input update phase that samples the Win32 edge sequence is
+still open. Manager-frame delta is not a substitute. The correction gate
+must use an independent scalar ordered-transaction oracle and cover
+multi-release, multi-press, reversal, Focus, Shot, older-pending overwrite,
+and no-write histories before reconnecting geometry or damage objectives.
+
 ## Uncertainty And Transitions
 
 The action correction changes only action identity. It preserves:

@@ -386,6 +386,45 @@ ordinary-interval boundary. It is not a proof that
 survival, or live-publication authority. It strengthens CE-0120 and validates
 the local SEM-MODE-C recurrence without closing the actuator boundary.
 
+## Ordered Dispatch Pickup Further Rejects Manager-Frame Actuator Timing
+
+A subsequent action-conditioned audit of the same retained Stage-5 trace
+tests a deliberately explicit but non-authoritative timing hypothesis:
+advance from capture to issue by `action_lag` manager updates, then advance
+the recorded issue to the next capture by the remaining manager delta.
+
+The hypothesis is not physically complete:
+
+- 3,835 of 7,162 strict endpoint intervals admit at least one branch;
+- 381 intervals directly observe an ordered dispatch's intermediate mask
+  outside the atomic complete-mask pickup model;
+- 85 fail the mode/body endpoint under the manager-frame decomposition;
+- 2,858 fail its pipeline endpoint; and
+- 3 have compatible mode/body and pipeline branches, but not the same hidden
+  branch.
+
+Only the 381 ordered-partial cases are promoted to the standalone CE-0193
+claim. The canonical trace transaction is
+`0x65 -> 0x61 -> 0x41`; native active input at the next coherent capture is
+`0x61`, while final held/pending desired input is `0x41`. This is direct
+physical evidence that the Windows dispatcher's ordered per-key writes may
+be sampled between edges.
+
+The other 2,946 failures remain **unknown-direction phase evidence**. They
+can arise because controller issue, native input sampling, priority-9 player
+update, and enemy-manager frame do not share the assumed boundary. They do
+not prove 2,946 separate recurrence errors, and they cannot be removed by
+declaring manager-frame delta a physical input clock.
+
+The compact diagnostic report is
+`artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260730_041408.enemy_mode_bodyset_report.json`,
+SHA-256
+`db411650de15a050c5ffb815f0f075c538b4ec16cbc01f2fa0f47e403f678464`.
+It intentionally fails its strict gate and grants no action or survival
+authority. The next model must carry ordered transition suffix and native
+active-mask observation on a revalidated player/input phase clock while
+preserving complete-mask no-write.
+
 ## Formal Review
 
 1. **State equivalence:** manager frame, cell, and input alone do not identify

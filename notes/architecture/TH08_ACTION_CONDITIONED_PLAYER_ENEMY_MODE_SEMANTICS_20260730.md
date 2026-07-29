@@ -478,19 +478,98 @@ ordinary-update boundary. It does not provide the future body/flag/geometry
 schedule required by the next decision, and therefore cannot yet be wired
 into hard survival or unfocused-combat authority.
 
+## Rejected Atomic Complete-Mask Pickup At The Physical Endpoint
+
+The next post-hoc audit deliberately widened from stable-focus intervals to
+recorded action issues. It preserves the injective 36-token no-Bomb
+complete-mask alphabet, advances the capture-to-issue prefix without a new
+write, then applies the recorded issue to the next coherent capture. An exact
+hidden branch counts as compatible with the next estimator belief when its
+active/held/pending identities agree and its singleton remaining delay is a
+member of the observed support; whole-root equality is reported separately.
+
+The retained Stage-5 trace rejects the remaining atomic issue assumption.
+The canonical CE-0193 witness is:
+
+1. line 297, controller frame 386, captured manager frame 384:
+   active/held mask `0x65`;
+2. ordered dispatch to `0x41`:
+   release Focus (`0x04`) to reach `0x61`, then release Down (`0x20`) to
+   reach `0x41`;
+3. line 298, controller frame 389, captured manager frame 387:
+   native active mask `0x61`, held/pending final mask `0x41`, remaining
+   support `[1]`; and
+4. native mode counter `378 -> 381` with a body endpoint compatible with all
+   four declared atomic delay branches, while no atomic successor root can
+   contain active `0x61`.
+
+This is **observed physical evidence** that one Windows complete-mask issue is
+not necessarily one native atomic active-mask transition. The ordered
+per-key transaction can be sampled between edges. The strict report finds
+381 eligible intervals with that signature and no compatible atomic
+successor. They span 141 distinct complete transaction/observed-mask
+signatures: 307 are observed after edge 1, 62 after edge 2, 10 after edge 3,
+and 2 after edge 4. Focus is directly involved in 148 witnesses
+(`0->0->1`: 48, `0->1->1`: 25, `1->0->0`: 75); all 381 retain Shot.
+
+The same report must not be overread as a universal-clock proof. Of 7,162
+strict candidate intervals, 3,835 have a compatible causal branch and 3,327
+fail the diagnostic manager-frame decomposition. Besides the 381 direct
+ordered-partial witnesses, 2,946 failures are labeled only as
+manager/player/issue phase-alignment mismatches. They can reflect when native
+input and priority-9 player updates occur relative to controller issue and
+enemy-manager frame; they are not independently claimed recurrence
+counterexamples.
+
+The deterministic compact artifact is
+`artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260730_041408.enemy_mode_bodyset_report.json`,
+SHA-256
+`db411650de15a050c5ffb815f0f075c538b4ec16cbc01f2fa0f47e403f678464`.
+Its ignored source JSONL remains the 482,944,752-byte file with SHA-256
+`773cbdb322dc5e15f80da4800ce82bcd0f41c1e6f82826812087edc9a328dca9`.
+The report has diagnostic/post-hoc authority only and intentionally fails its
+strict model gate.
+
+Seven focused body-set-report tests and five focused pipeline-pickup-audit
+tests pass. Ruff, format, `py_compile`, `git diff --check`, and byte-identical
+full-source regeneration pass. Complete discovery passes 1,189 tests in
+14.485 seconds on Linux and 30.602 seconds through the exact Windows UNC
+loader; Windows retains three existing skips.
+
+The model correction order changes:
+
+1. revalidate and represent the ordered transition transaction and the
+   player/input update phase that may sample it;
+2. retain desired final mask, remaining ordered edges, native active mask,
+   older pending transaction, and observation-compatible uncertainty;
+3. preserve complete-mask no-write without emitting a transaction or
+   replacing older pending state;
+4. prove scalar/optimized parity over multi-edge releases/acquires,
+   reversals, Focus, Shot, overwrite, and no-write cases; and only then
+5. bind exact future body/flag/geometry versions and proceed to the body-set
+   differential.
+
+Until this correction passes, the current atomic recurrence is an offline
+restricted model. It cannot support a hard certificate, live publication,
+unfocused combat, or physical-survival claim.
+
 ## Remaining Implementation And Promotion Plan
 
-1. **SEM-MODE-C integration — exact hazard/version recurrence:** connect the
-   offline primitive to a complete immutable body/flag/geometry schedule and
-   exact physical-update clock without changing live action authority.
-2. **SEM-MODE-D — damage separation:** apply the projected damage body set to
+1. **SEM-MODE-C actuator correction:** replace atomic complete-mask pickup
+   with an ordered transition/pickup recurrence aligned to a revalidated
+   player/input update phase. Retain the atomic implementation only as a
+   rejected differential baseline.
+2. **SEM-MODE-C integration — exact hazard/version recurrence:** connect the
+   corrected primitive to a complete immutable body/flag/geometry schedule
+   and exact physical-update clock without changing live action authority.
+3. **SEM-MODE-D — damage separation:** apply the projected damage body set to
    shadow damage objective without letting damage affect hard viability.
    Keep unfocused combat selection disabled.
-3. **SEM-MODE-E — differential gates:** compare independent scalar, optimized
+4. **SEM-MODE-E — differential gates:** compare independent scalar, optimized
    Python, and any native kernel for every action/history, no-write/pending
-   edge, and retained `10065 -> 10075` capsule. Publish viable-state and
-   safe-action-mask diffs.
-4. **SEM-MODE-F — physical gate:** use an original-game whole-stage script,
+   edge, CE-0193 ordered transaction, and retained `10065 -> 10075` capsule.
+   Publish viable-state and safe-action-mask diffs.
+5. **SEM-MODE-F — physical gate:** use an original-game whole-stage script,
    with the observer active from stage entry and no exact-spell/operator-time
    switch. Stage 5 is the first focused workload because it contains the
    retained witness. Do not fail-close or auto-stop mid-stage; preserve the

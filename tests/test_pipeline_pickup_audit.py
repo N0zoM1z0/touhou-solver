@@ -173,6 +173,44 @@ class PipelinePickupAuditTests(unittest.TestCase):
             report["promotion_blockers"],
         )
 
+    def test_ordered_partial_mask_pickup_blocks_atomic_model_promotion(
+        self,
+    ) -> None:
+        rows = [
+            _row(
+                frame=10,
+                active=0x65,
+                held=0x65,
+                target=0x41,
+                pending=None,
+                delay_support=(1, 2),
+            ),
+            _row(
+                frame=11,
+                active=0x61,
+                held=0x41,
+                target=0x41,
+                pending=PendingCommandEstimate(
+                    expected_mask=0x41,
+                    remaining_frames=(1,),
+                    snapshot_age=1,
+                    issue_age=1,
+                    overdue=False,
+                ),
+                delay_support=(1, 2),
+            ),
+        ]
+
+        report = audit_rows(rows, supported_mask=SUPPORTED)
+
+        self.assertTrue(report["passed"], report["failures"])
+        self.assertEqual(report["counts"]["ordered_partial_pickups"], 1)
+        self.assertFalse(report["live_pipeline_promotion_ready"])
+        self.assertIn(
+            "ordered_partial_transition_pickup_requires_expanded_root",
+            report["promotion_blockers"],
+        )
+
     def test_missing_unknown_coverage_fails_closed(self) -> None:
         row = _row(
             frame=10,

@@ -121,6 +121,28 @@ The one-pending last-write-wins model is acceptable only while trace evidence
 shows that every new complete-mask write replaces the estimator's previous
 pending intent and that no second hidden edge can later reappear.
 
+CE-0193 falsifies the stronger atomic-mask part of this root. The retained
+native trace observes the first edge of ordered transaction
+`0x65 -> 0x61 -> 0x41` as active `0x61`, while held/pending final desired is
+already `0x41`. Thus
+
+```text
+(a, g, p, R)
+```
+
+is not a complete physical root for a multi-edge issue unless it also carries
+the ordered transaction's delivered/sampled prefix or a conservative finite
+support over every attainable prefix. Existing canonical identities with
+model component `issue_semantics=complete-mask-no-write` identify only the
+old atomic finite model; they must not be silently interpreted as the
+corrected ordered-transaction version.
+
+No-write remains unchanged: selecting `u == g` emits no edge transaction and
+must preserve any older pending transaction. The controller still chooses
+one complete mask, not each intermediate prefix. Exact transaction timing
+relative to native player/input update remains unresolved and therefore
+`UNKNOWN` for hard authority.
+
 ### Uncertainty and transition
 
 The scalar belief oracle remains the independent recurrence authority for:

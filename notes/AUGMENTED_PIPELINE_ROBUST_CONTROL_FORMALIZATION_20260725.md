@@ -154,6 +154,52 @@ carries remaining delay `d-k`; otherwise `u` becomes observed and no longer
 remains pending.  For hold/no-write, `p` either becomes active when
 `rho <= k`, or remains pending with `rho-k`.
 
+### CE-0193 amendment: a write is an ordered transition transaction
+
+The transition above remains exact for a single-key issue or for a runtime
+that exposes only the old/final complete masks. It is **rejected as physical
+authority for a multi-key TH08 issue**.
+
+The actuator constructs a deterministic ordered edge list: releases in
+ascending supported-bit order, followed by presses in ascending order, and
+submits the list in one `SendInput` batch. Retained original-game Stage-5
+evidence observes an intermediate prefix of that list:
+
+```text
+0x65 --release Focus 0x04--> 0x61
+     --release Down  0x20--> 0x41
+```
+
+The next coherent native `input_current` is `0x61` while controller-held and
+pending final desired mask is `0x41`. Therefore the hidden actuator state
+required by a successor recurrence is at least:
+
+```text
+h' = (t, q, a, g, transaction, older_pending, uncertainty)
+transaction = (ordered edge list, delivered/sampled prefix information)
+```
+
+The exact finite uncertainty set for edge delivery versus native
+player/input update phase is not yet revalidated. Until it is, every
+unobserved intermediate prefix is unknown-direction and outside hard
+authority. A corrected recurrence must:
+
+- allow every physically attainable ordered prefix mask at the appropriate
+  native input/player-update phase;
+- distinguish final desired `g` from currently observed intermediate `a`;
+- retain older pending state and causal overwrite/order semantics;
+- merge only histories indistinguishable under the complete next-decision
+  observation; and
+- preserve `u == g` as a true no-write that emits no edge, samples no new
+  delay, and does not erase older pending state.
+
+CE-0193 is not permission to treat each key edge as an independent controller
+choice. The controller chooses one final complete mask before nature exposes
+transaction timing; all intermediate masks belong to that one issue's hidden
+physical transition. The pre-amendment one-token recurrence remains an
+offline restricted baseline until this ordered transaction state is
+implemented and independently verified.
+
 This conditional issue rule is not cosmetic.  A retained three-frame
 counterexample starts from `stay` with `left` pending at remaining delay two.
 Holding `left` lets it become active in time and wins.  The legacy recurrence

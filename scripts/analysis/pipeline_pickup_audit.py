@@ -76,6 +76,18 @@ def _ordered_transitions(
     return releases + presses
 
 
+def _transition_masks(
+    previous_mask: int,
+    transitions: tuple[tuple[int, bool], ...],
+) -> tuple[int, ...]:
+    mask = previous_mask
+    masks: list[int] = []
+    for bit, pressed in transitions:
+        mask = (mask | bit) if pressed else (mask & ~bit)
+        masks.append(mask)
+    return tuple(masks)
+
+
 def _identity_digest(identity: dict[str, object]) -> str:
     payload = {
         key: value
@@ -507,6 +519,12 @@ def _audit_continuity(
         if write:
             if pending is not None:
                 counts["last_write_wins_replacements"] += 1
+            transition_masks = _transition_masks(
+                held,
+                _ordered_transitions(held, target),
+            )
+            if next_active in transition_masks[:-1]:
+                counts["ordered_partial_pickups"] += 1
             if next_active == target:
                 if next_pending is not None:
                     raise ValueError(
@@ -603,6 +621,7 @@ def audit_rows(
         "multikey_transactions",
         "no_writes",
         "observed_pickups",
+        "ordered_partial_pickups",
         "overdue_roots",
         "pending_no_write_carries",
         "pending_projected_action_reissues",
@@ -657,6 +676,10 @@ def audit_rows(
         promotion_blockers.append(
             "complete_mask_write_collapses_to_held_movement_action"
         )
+    if counts["ordered_partial_pickups"]:
+        promotion_blockers.append(
+            "ordered_partial_transition_pickup_requires_expanded_root"
+        )
     if counts["model_unknown_roots"]:
         promotion_blockers.append("future_hazard_coverage_is_model_unknown")
     promotion_blockers.append("ce0120_physical_clock_boundary_is_open")
@@ -684,6 +707,10 @@ def audit_rows(
             "preexisting_target_matches": (
                 "target already matched native active input, so the write "
                 "cannot prove a new physical pickup"
+            ),
+            "ordered_partial_pickups": (
+                "native active input matched a non-final prefix of the "
+                "recorded ordered key transaction"
             ),
             "model_unknown": (
                 "unseen future hazard events truncate coverage and are not "

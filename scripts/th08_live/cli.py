@@ -322,6 +322,15 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
+        "--trace-enemy-mode-transitions",
+        action="store_true",
+        help=(
+            "capture active input and player +3/+5/+8 around the existing "
+            "first-64 enemy-prefix read; mode fields have no action "
+            "authority, while diagnostic reads/retries may perturb cadence"
+        ),
+    )
+    parser.add_argument(
         "--trace-auxiliary-vm-batches",
         action="store_true",
         help=(

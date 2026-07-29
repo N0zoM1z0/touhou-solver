@@ -528,6 +528,18 @@ remains conservative, unfocused combat remains disabled, and no strategy or
 survival claim is promoted. Continue with `SEM-MODE-B` atomic observation,
 then causal recurrence/differential/whole-stage gates.
 
+**2026-07-30 SEM-MODE-B preflight:** the original-game supervisors now expose
+one default-off whole-stage/whole-route diagnostic flag that frame-brackets
+active input, player `+3/+5/+8`, Bomb state, and the existing first-64
+enemy-prefix capture. Crossed updates retry twice; exhausted reads remain
+explicitly incoherent without fail-close. Raw pointer/flags evidence and a
+source-hashed compact report retain adjacent secondary-character
+transitions. Linux/Windows discovery passes 1,162 tests; the Windows suite
+retains three existing skips. This does not promote a strategy: mode fields
+are not consumed by action selection, diagnostic cost may perturb cadence,
+and no shipped-runtime Stage-5 transition has yet been retained. Next run the
+whole Stage-5 physical observer gate, then continue the causal recurrence.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

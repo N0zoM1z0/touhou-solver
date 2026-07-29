@@ -914,6 +914,17 @@ pickup/cadence recurrence, exact-version publication, body-set differential,
 and whole-stage physical gate pass. See
 `../architecture/TH08_ACTION_CONDITIONED_PLAYER_ENEMY_MODE_SEMANTICS_20260730.md`.
 
+2026-07-30 `SEM-MODE-B` preflight: a bounded transaction now brackets active
+input, player `+3/+5/+8`, Bomb state, and the existing first-64 enemy-prefix
+read. Crossed updates retry twice; exhausted or flag-incoherent reads are
+retained diagnostically and never fail-close gameplay. A default-off
+whole-stage/whole-route flag, compact source-hashed report, raw body identity
+evidence, and deterministic `10065 -> 10075` fixture pass complete 1,162-test
+Linux/Windows suites. The mode record has no action authority and its runtime
+cost may perturb cadence. The exit gate remains open pending the original-game
+whole-Stage-5 observation, causal pickup/cadence recurrence, exact-version
+publication, and body-set differential.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

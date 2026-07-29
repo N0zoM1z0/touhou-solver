@@ -352,6 +352,7 @@ from th08_live.enemy_sensor import (  # noqa: F401
     read_spell_enemy_bodies,
     read_spell_enemy_body_guard,
 )
+from th08_live.enemy_mode_capture import capture_player_enemy_mode_prefix
 from th08_live.planner_pass import (
     LocalCertificateTimingAccumulator as _LocalCertificateTimingAccumulator,
     PlannerModeTransition as _PlannerModeTransition,
@@ -1763,6 +1764,9 @@ def _run_live_session(
     trace_enemy_combat_progress = bool(
         getattr(args, "trace_enemy_combat_progress", False)
     )
+    trace_enemy_mode_transitions = bool(
+        getattr(args, "trace_enemy_mode_transitions", False)
+    )
     trace_auxiliary_vm_batches = bool(
         getattr(args, "trace_auxiliary_vm_batches", False)
     )
@@ -2727,11 +2731,30 @@ def _run_live_session(
                 time.perf_counter() - enemy_background_started
             ) * 1000.0
             enemy_prefix_capture_started = time.perf_counter()
-            enemy_prefix_snapshot = capture_enemy_pool_prefix_contiguous(
-                reader,
-                include_main_ecl_vms=trace_nonspell_main_vms,
-                include_combat_progress=trace_enemy_combat_progress,
-            )
+            enemy_mode_prefix_capture = None
+            if trace_enemy_mode_transitions:
+                enemy_mode_prefix_capture = (
+                    capture_player_enemy_mode_prefix(
+                        reader,
+                        include_main_ecl_vms=trace_nonspell_main_vms,
+                        include_combat_progress=(
+                            trace_enemy_combat_progress
+                        ),
+                    )
+                )
+                enemy_prefix_snapshot = (
+                    enemy_mode_prefix_capture.enemy_snapshot
+                )
+            else:
+                enemy_prefix_snapshot = (
+                    capture_enemy_pool_prefix_contiguous(
+                        reader,
+                        include_main_ecl_vms=trace_nonspell_main_vms,
+                        include_combat_progress=(
+                            trace_enemy_combat_progress
+                        ),
+                    )
+                )
             enemy_prefix_capture_ms = (
                 time.perf_counter() - enemy_prefix_capture_started
             ) * 1000.0
@@ -4402,6 +4425,7 @@ def _run_live_session(
             trace_ms = 0.0
             if (
                 trace_bullet_births
+                or trace_enemy_mode_transitions
                 or trace_auxiliary_vm_batches
                 or iterations % args.log_every == 0
                 or decision.bomb
@@ -4422,6 +4446,10 @@ def _run_live_session(
                     "snapshot_lag": snapshot_lag,
                     "action_lag": counter_at_action - int(state["enemy_manager_frame"]),
                 }
+                if enemy_mode_prefix_capture is not None:
+                    record["player_enemy_mode_capture"] = (
+                        enemy_mode_prefix_capture.compact_record()
+                    )
                 sensing_trace_fields = build_sensing_trace_fields(
                     SensingTraceInput(
                         resources=resources,

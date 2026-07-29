@@ -71,6 +71,7 @@ class AgentHotkey:
         trace_derived_pattern_sources: bool = False,
         trace_nonspell_main_vms: bool = False,
         trace_enemy_combat_progress: bool = False,
+        trace_enemy_mode_transitions: bool = False,
         trace_auxiliary_vm_batches: bool = False,
         trace_auxiliary_ecl_events: bool = False,
         auxiliary_vm_batch_every: int = 16,
@@ -211,6 +212,7 @@ class AgentHotkey:
         self.trace_derived_pattern_sources = trace_derived_pattern_sources
         self.trace_nonspell_main_vms = trace_nonspell_main_vms
         self.trace_enemy_combat_progress = trace_enemy_combat_progress
+        self.trace_enemy_mode_transitions = trace_enemy_mode_transitions
         self.trace_auxiliary_vm_batches = trace_auxiliary_vm_batches
         self.trace_auxiliary_ecl_events = trace_auxiliary_ecl_events
         self.auxiliary_vm_batch_every = auxiliary_vm_batch_every
@@ -383,6 +385,9 @@ class AgentHotkey:
                 trace_nonspell_main_vms=self.trace_nonspell_main_vms,
                 trace_enemy_combat_progress=(
                     self.trace_enemy_combat_progress
+                ),
+                trace_enemy_mode_transitions=(
+                    self.trace_enemy_mode_transitions
                 ),
                 trace_auxiliary_vm_batches=(
                     self.trace_auxiliary_vm_batches

@@ -64,6 +64,7 @@ def build_long_run_arguments(
     trace_derived_pattern_sources: bool = False,
     trace_nonspell_main_vms: bool = False,
     trace_enemy_combat_progress: bool = False,
+    trace_enemy_mode_transitions: bool = False,
     trace_auxiliary_vm_batches: bool = False,
     trace_auxiliary_ecl_events: bool = False,
     auxiliary_vm_batch_every: int = 16,
@@ -219,6 +220,8 @@ def build_long_run_arguments(
         arguments.append("--trace-nonspell-main-vms")
     if trace_enemy_combat_progress:
         arguments.append("--trace-enemy-combat-progress")
+    if trace_enemy_mode_transitions:
+        arguments.append("--trace-enemy-mode-transitions")
     if trace_auxiliary_vm_batches:
         arguments.extend(
             (

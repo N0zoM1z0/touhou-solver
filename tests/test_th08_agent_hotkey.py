@@ -176,6 +176,33 @@ class AgentHotkeyTests(unittest.TestCase):
         parsed = build_parser().parse_args(arguments)
         self.assertTrue(parsed.trace_enemy_combat_progress)
 
+    def test_enemy_mode_transition_capture_is_diagnostic_opt_in(self) -> None:
+        default_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+        )
+        enabled_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_enemy_mode_transitions=True,
+        )
+        self.assertNotIn(
+            "--trace-enemy-mode-transitions",
+            default_arguments,
+        )
+        self.assertIn(
+            "--trace-enemy-mode-transitions",
+            enabled_arguments,
+        )
+        parsed = build_parser().parse_args(enabled_arguments)
+        self.assertTrue(parsed.trace_enemy_mode_transitions)
+        self.assertEqual(parsed.stop_after_hits, 0)
+        self.assertTrue(parsed.no_bomb)
+
     def test_runtime_ecl_identity_is_explicit_and_bound_to_stage(self) -> None:
         image = Path("artifacts/decoded/ecldata5.ecl")
         digest = "1" * 64

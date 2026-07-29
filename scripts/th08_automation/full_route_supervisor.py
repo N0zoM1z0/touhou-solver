@@ -229,6 +229,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
         "trace_enemy_combat_progress": (
             args.trace_enemy_combat_progress
         ),
+        "trace_enemy_mode_transitions": (
+            args.trace_enemy_mode_transitions
+        ),
         "trace_auxiliary_vm_batches": (
             args.trace_auxiliary_vm_batches
         ),
@@ -268,6 +271,9 @@ def run_trial(args: argparse.Namespace, *, api: Win32) -> str:
             trace_nonspell_main_vms=args.trace_nonspell_main_vms,
             trace_enemy_combat_progress=(
                 args.trace_enemy_combat_progress
+            ),
+            trace_enemy_mode_transitions=(
+                args.trace_enemy_mode_transitions
             ),
             trace_auxiliary_vm_batches=(
                 args.trace_auxiliary_vm_batches
@@ -569,6 +575,15 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "record first-64 raw ordinary-enemy HP/damage fields from the "
             "existing prefix capture; trace only"
+        ),
+    )
+    parser.add_argument(
+        "--trace-enemy-mode-transitions",
+        action="store_true",
+        help=(
+            "frame-bracket player mode and first-64 enemy flags for the "
+            "complete route; no mode-conditioned action authority, but "
+            "trace cost may perturb cadence"
         ),
     )
     parser.add_argument(

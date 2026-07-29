@@ -3,8 +3,8 @@
 Date: 2026-07-30  
 Roadmap item: `SEM-MODE` / Phase 1C  
 Current authority: native semantics revalidated; decoder retention, pure
-projection, and diagnostic sensing implemented; live hazard authority not
-promoted
+projection, frame-bracketed diagnostic capture, and compact reporting
+implemented; live hazard authority not promoted
 
 ## Decision
 
@@ -117,11 +117,19 @@ The new runtime diagnostic fields are:
 - `player.secondary_character_active` from `ADDR_PLAYER + 0x05`;
 - `player.focus_transition_counter` from `ADDR_PLAYER + 0x08`.
 
-The current broad `observe_state` read is not a frame-bracketed mode/enemy
-transaction. These fields are therefore diagnostic observations, not yet an
-exact live policy root. The promoted capture must either bracket player mode
-and enemy-prefix reads by a stable native update identity or include every
-one-callback ordering branch.
+The broad `observe_state` read remains diagnostic only. `SEM-MODE-B` adds a
+separate bounded transaction around the existing first-64 enemy-prefix read:
+active input, player `+0..+11`, Bomb active/index, stable manager frame, and
+the same player/input/Bomb fields are read in that order. An accepted
+transaction additionally requires every retained active bit-`0x100` body to
+mirror the delayed secondary-character byte in bit `0x800`. Two exhausted
+attempts are retained as an explicit unstable observation; they never
+fail-close the stage.
+
+This bracket establishes coherence only for active, finite,
+nonnegative-geometry bodies retained in the first 64 native slots. It does
+not prove absent or invalid-geometry slots, the remaining native pool, or
+future action-conditioned mode histories.
 
 ### Actions and issue semantics
 
@@ -214,13 +222,15 @@ cold expansion or remove a body on a guessed mode history.
    and scheduler counterexamples remain in later roadmap phases.
 4. **What bounds the approximation, and what falsifies it?** The present
    decoder change is conservative because it retains extra latent geometry.
-   The pure projection is shadow-only. A native capture where player
-   `+3/+5/+8`, active input, or enemy bit `0x800` disagrees with the recurrence
-   falsifies it.
-5. **Can the result be consumed before issue time?** Not yet. The diagnostic
-   sensor is unbracketed and the live hazard recurrence lacks the mode key.
-   Live consumption remains forbidden until exact-version publication and
-   timing gates pass.
+   The pure projection is shadow-only. A coherent native capture where player
+   `+3/+5/+8`, active input, or an observed bit-`0x100` enemy's `0x800` state
+   disagrees with the recurrence falsifies it. Persistent incoherence is an
+   unresolved observation failure, not evidence for either mode.
+5. **Can the result be consumed before issue time?** Not yet. The bracketed
+   capture has diagnostic authority only, its extra reads/retries may perturb
+   cadence, and the live hazard recurrence lacks the mode key. Live
+   consumption remains forbidden until causal recurrence, exact-version
+   publication, differential, timing, and physical gates pass.
 
 ## Implemented Checkpoint: SEM-MODE-A
 
@@ -245,12 +255,42 @@ This closes the “decoder permanently loses latent `0x800` geometry” part of
 CE-0176. It does not close the action-conditioned live recurrence or the
 physical exit gate.
 
+## Implemented Checkpoint: SEM-MODE-B Preflight
+
+The whole-stage diagnostic path is now implemented and dual-platform gated:
+
+- `scripts/th08_live/enemy_mode_capture.py` brackets the existing first-64
+  prefix capture with active input, player mode, and Bomb state. It retries
+  crossed player/enemy updates at most twice and explicitly reports
+  `enemy_frame_unstable`, `player_or_input_changed`, or
+  `enemy_mode_sync_mismatch` instead of terminating gameplay.
+- accepted records retain raw pointer/flags pairs for every observed
+  bit-`0x100` body, both player observations, frame bracket, attempts, read
+  time, and an explicit `action_authority=false` marker;
+- `--trace-enemy-mode-transitions` is default-off and threads through the
+  original-game practice and full-route supervisors. When enabled it is
+  active from stage/route entry, never at an operator-selected spell;
+- `scripts/analysis/th08_enemy_mode_capture_report.py` streams raw JSONL,
+  preserves source SHA-256, coherence/status/timing counts, adjacent
+  secondary-character transitions and before/after body sets, and fails its
+  integrity gate if mode records claim action authority;
+- deterministic tests cover a coherent raw `0x0100114D` body, crossed
+  player/enemy updates, retry exhaustion, Bomb callback focus override, and a
+  synthetic `10065 -> 10075` report transition;
+- Linux discovery passes 1,162 tests in 12.964 seconds. The exact Windows UNC
+  suite passes 1,162 tests in 30.139 seconds with three existing skips.
+
+This is implementation evidence, not shipped-runtime occurrence or survival
+evidence. The trace is consumed by no mode-conditioned planner branch, but
+its read/retry cost can perturb controller cadence. The physical Stage-5
+observer gate therefore remains mandatory.
+
 ## Remaining Implementation And Promotion Plan
 
-1. **SEM-MODE-B — atomic observation:** add a bounded player-mode/enemy-prefix
-   capture bracket. Retain a deterministic fixture containing raw player
-   mode, active input, raw enemy flags, and body identities across an entire
-   transition.
+1. **SEM-MODE-B — physical observation:** run one original-game Lunatic
+   Stage-5 workload with the observer enabled from stage entry. Retain the raw
+   bundle, compact report, resources/hits/Bombs, transition/body evidence,
+   contamination status, and cleanup. Complete the stage even after hits.
 2. **SEM-MODE-C — causal hazard recurrence:** carry the mode key through
    pickup/cadence histories, project per-frame enemy contact body sets after
    the player update, and merge only observation-compatible branches.

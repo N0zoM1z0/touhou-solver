@@ -230,6 +230,11 @@ def issue_ordered_input_belief(
     sampled and every hidden queue/deadline is preserved.  A real write
     appends its ordered edge path after any older unobserved suffix and
     replaces the final-completion deadline with the newly sampled delay.
+
+    ``delay_support`` is measured in post-issue native publication steps in
+    this oracle. TH08's current ``AdaptiveControlDelay`` values instead use a
+    snapshot-to-observed-final-input enemy-manager-frame coordinate and must
+    not be passed here without a separately validated phase adapter.
     """
 
     _validate_mask(selected_mask, name="selected mask")

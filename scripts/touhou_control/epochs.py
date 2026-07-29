@@ -89,9 +89,11 @@ class ActionIssueAlignment:
     """Validate a planned action at the instant it would be issued.
 
     Sensor capture can be internally consistent and still become stale while
-    the planner is running.  ``delay_support`` is the modeled
-    snapshot-to-visible-input support, so the snapshot-to-issue lag is already
-    a lower bound on the eventual actuation lag.
+    the planner is running.  ``delay_support`` is the controller's modeled
+    enemy-manager-frame snapshot-to-observed-final-input support, so the
+    snapshot-to-issue lag is already a lower bound in that estimator
+    coordinate.  It is not a post-issue native priority-17 callback deadline;
+    converting it to one requires a separately validated phase adapter.
     """
 
     source_frame: int
@@ -111,9 +113,7 @@ class ActionIssueAlignment:
             or tuple(sorted(set(self.delay_support))) != self.delay_support
             or self.delay_support[0] < 0
         ):
-            raise ValueError(
-                "delay support must be sorted, unique, and nonnegative"
-            )
+            raise ValueError("delay support must be sorted, unique, and nonnegative")
 
     @property
     def action_lag(self) -> int:

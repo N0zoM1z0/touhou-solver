@@ -616,13 +616,65 @@ immutable future body/flag/geometry, integrating movement/collision, and
 optimized/native differential parity all remain open. No live planner,
 actuator, cadence, damage objective, unfocused combat, or strategy changed.
 
+## Retained Post-Hoc Publication-Phase Audit
+
+The complete accepted Stage-5 trace now has a separate source-hashed ordered
+input phase report:
+
+`artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260730_041408.ordered_input_phase_report.json`
+
+It validates 6,423 real ordered dispatches, including 3,823 multi-edge writes,
+and 5,456 exact no-writes. Before the next real write, 5,357 transactions have
+their final desired mask observed, 1,034 are right-censored by replacement,
+29 by a manager gap beyond the bounded audit range, and three by an explicit
+trace discontinuity. It observes 677 intermediate masks from the latest
+transaction.
+
+The report also records 2,760 **corroborated sequential** edge witnesses. For
+each, separately read native `previous -> current` matches a consecutive edge
+of the latest outstanding ordered dispatch, `raw == current`, and the later
+manager-frame-bracketed mode capture retains the same current mask. The
+canonical CE-0193 witness is lines `297 -> 298`: issue frame 386, captured
+manager frame 387, and `0x65 -> 0x61` at edge 1/2 on the way to `0x41`.
+
+This evidence deliberately claims zero native atomic edge captures. Runtime
+state reads `raw`, `current`, and `previous` separately; controller capture is
+asynchronous; and the trace contains no priority-17 callback serial. The
+existing `control_delay_candidates` also cannot fill that gap:
+`AdaptiveControlDelay` measures enemy-manager-frame
+snapshot-to-observed-final-input lag and conditions remaining support by
+snapshot age. The ordered scalar oracle's completion deadline instead counts
+post-issue abstract publication steps. The 120 final masks first observed
+outside their issued estimator support are first-capture observations, not
+proof of late native publication.
+
+The compact report SHA-256 is
+`c8f1722587c4514c6ab538f66e73a0b13566b7aac96474805e12bcef16e0152a`;
+its raw source is 482,944,752 bytes with SHA-256
+`773cbdb322dc5e15f80da4800ce82bcd0f41c1e6f82826812087edc9a328dca9`.
+Five focused tests cover CE-0193, sequential-read downgrade, replacement
+censoring, ordered-dispatch integrity, and Bomb rejection. Complete discovery
+passes 1,207 tests in 14.280 seconds on Linux and 30.116 seconds through the
+exact Windows UNC loader, with the three existing Windows skips.
+
+The minimum remaining phase probe is now explicit: a default-off,
+trace-only, bounded native ring must record a monotone priority-17 serial,
+raw, old current, new current, and contemporaneous manager frame. Each
+controller issue must bracket dispatch with pre/post publication serials and
+retain the ordered transaction identity. Overflow or read failure marks only
+that interval unknown and must never stop a stage. This probe is required
+before mapping live estimator support into the oracle deadline.
+
 ## Remaining Implementation And Promotion Plan
 
 1. **SEM-MODE-C phase/differential closure:** the independent ordered scalar
-   state and priority-9/11/17 composition are implemented. Revalidate the
-   asynchronous capture/issue-to-publication phase and physical delay mapping,
-   then build an optimized implementation and exact scalar differential.
-   Retain the atomic implementation only as a rejected baseline.
+   state and priority-9/11/17 composition are implemented. The retained
+   post-hoc audit closes what the current trace can identify and proves that
+   exact publication deadline is not identifiable from it. Implement and
+   validate the bounded priority-17 serial probe above, derive the physical
+   delay adapter, then build an optimized implementation and exact scalar
+   differential. Retain the atomic implementation only as a rejected
+   baseline.
 2. **SEM-MODE-C integration — exact hazard/version recurrence:** connect the
    corrected primitive to a complete immutable body/flag/geometry schedule
    and exact physical-update clock without changing live action authority.

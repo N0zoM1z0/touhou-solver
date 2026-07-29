@@ -38,7 +38,11 @@ class _PendingActuation:
 
 @dataclass(frozen=True)
 class PendingCommandEstimate:
-    """Conditioned remaining-delay support for an unobserved desired input."""
+    """Conditioned estimator support for an unobserved final desired input.
+
+    Remaining frames use the enemy-manager snapshot coordinate. They are not
+    native input-publication callback counts.
+    """
 
     expected_mask: int
     remaining_frames: tuple[int, ...]
@@ -48,7 +52,12 @@ class PendingCommandEstimate:
 
 
 class AdaptiveControlDelay:
-    """Learn snapshot-to-visible-input delay from censored live observations."""
+    """Learn snapshot-to-visible-final-input delay from live observations.
+
+    This controller estimator timestamps asynchronous captures with the
+    enemy-manager frame. It does not identify the priority-17 callback in
+    which an ordered intermediate or final input was published.
+    """
 
     def __init__(
         self,
@@ -141,16 +150,18 @@ class AdaptiveControlDelay:
         *,
         frame: int,
     ) -> PendingCommandEstimate | None:
-        """Return delay support conditioned on the command still being unseen."""
+        """Return estimator support conditioned on final input still unseen.
+
+        The subtraction is from ``snapshot_frame`` by construction. Consumers
+        must not reinterpret the result as a post-issue publication deadline.
+        """
 
         pending = self.pending
         if pending is None:
             return None
         snapshot_age = max(0, frame - pending.snapshot_frame)
         remaining = tuple(
-            delay - snapshot_age
-            for delay in pending.support
-            if delay > snapshot_age
+            delay - snapshot_age for delay in pending.support if delay > snapshot_age
         )
         overdue = not remaining
         if overdue:
@@ -190,12 +201,8 @@ class AdaptiveControlDelay:
             computation = tuple(self.computation_lags)
             pickup = tuple(self.pickup_lags) or (self.default_pickup_frames,)
             low = _nearest_rank(computation, 0.10) + _nearest_rank(pickup, 0.10)
-            nominal = _nearest_rank(computation, 0.75) + _nearest_rank(
-                pickup, 0.50
-            )
-            high = _nearest_rank(computation, 0.95) + _nearest_rank(
-                pickup, 0.95
-            )
+            nominal = _nearest_rank(computation, 0.75) + _nearest_rank(pickup, 0.50)
+            high = _nearest_rank(computation, 0.95) + _nearest_rank(pickup, 0.95)
             high = max(high, nominal + 1)
         else:
             low = default

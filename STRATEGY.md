@@ -644,6 +644,28 @@ optimized/native parity, immutable future body/geometry, and physical
 falsification remain open. Do not reconnect damage/unfocused combat or launch
 an unchanged Stage-5 run.
 
+**2026-07-30 retained publication-phase audit:** the full accepted Stage-5
+source now validates 6,423 ordered writes and 5,456 no-writes. It observes 677
+intermediate latest-transaction masks and 2,760 corroborated sequential
+`previous -> current` edge pairs; the canonical lines `297 -> 298` retain
+`0x65 -> 0x61` on the two-edge path to `0x41`.
+
+This does not promote the oracle deadline. Native input fields are separate
+process-memory reads, capture is asynchronous, and no priority-17 callback
+serial exists. The live delay estimator uses enemy-manager-frame
+snapshot-to-observed-final-input support, not post-issue publication steps.
+The report therefore claims zero atomic edge captures and explicitly rejects
+an estimator-to-oracle adapter. Its SHA-256 is
+`c8f1722587c4514c6ab538f66e73a0b13566b7aac96474805e12bcef16e0152a`.
+Five focused tests and complete 1,207-test Linux/Windows discovery pass in
+14.280/30.116 seconds, with three existing Windows skips.
+
+Strategy remains **Offline/conservative**. The next admissible SEM-MODE-C
+step is a default-off bounded priority-17 serial/event ring plus
+pre/post-dispatch serial brackets. Probe overflow or read failure must mark
+only the interval unknown and continue the stage. Another unchanged Stage-5
+run or a manager-frame-only deadline inference is rejected.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

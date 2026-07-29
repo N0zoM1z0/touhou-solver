@@ -216,6 +216,24 @@ unknown-direction and outside hard authority. The corrected recurrence now:
 - preserve `u == g` as a true no-write that emits no edge, samples no new
   delay, and does not erase older pending state.
 
+The current live delay estimator does **not** instantiate `r`. Its
+`control_delay_candidates` are enemy-manager-frame
+snapshot-to-observed-final-input values. `pending_estimate` subtracts
+snapshot age, while the issue-time manager frame is read before dispatch.
+The oracle's `r` instead counts abstract post-issue native publication steps.
+No adapter between these coordinates currently has authority.
+
+The retained Stage-5 phase audit makes this separation reproducible. Among
+6,423 real writes it observes 677 intermediate latest-transaction masks and
+2,760 sequential `previous -> current` edge pairs that also have
+`raw == current` and a later coherent current-mask confirmation. The
+canonical CE-0193 pair is trace lines `297 -> 298`, `0x65 -> 0x61`, before
+final `0x41` is first observed. These are physical, post-hoc observations of
+ordered publication behavior. They are not atomic native edge captures:
+`raw/current/previous` are separate reads, decision capture is asynchronous,
+and no priority-17 callback serial exists. The same report has zero atomic
+publication-edge witnesses by construction and leaves `r` unidentified.
+
 CE-0193 is not permission to treat each key edge as an independent controller
 choice. The controller chooses one final complete mask before nature exposes
 transaction timing; all intermediate masks belong to that one issue's hidden
@@ -328,6 +346,14 @@ Passing claim 1 does not establish claims 2--4.
   `0x00452347`: priority-9 player movement consumes the previously published
   `g_input_current`; priority-17 later copies `g_input_raw` into
   `g_input_current`.
+- `th08_ordered_input_phase_report.py` audits the complete retained Stage-5
+  source. It source-hashes the raw trace, validates all 6,423 ordered
+  dispatches, brackets first observed final masks, censors discontinuities
+  and large manager gaps, and explicitly reports that the estimator-to-native
+  publication adapter is unavailable. It finds 677 intermediate-mask
+  observations and retains the CE-0193 `0x65 -> 0x61` edge. The 120 final
+  masks first observed outside their issued snapshot support are capture
+  observations, not measured deadline violations.
 - Lookup-only version/root checks are exact.  In the first physical shadow,
   every root that was both covered and completed was consumed; miss delivery,
   not lookup corruption, caused the low hit rate.
@@ -398,6 +424,10 @@ Before any losing-state value gains action authority:
 9. Keep model-fidelity counterexamples separate from recurrence bugs.
 10. Keep physical action authority gated by current policy version, exact
    observable root, deadline, and fresh issue-time local certificate.
+11. Before the ordered oracle consumes a physical delay support, identify
+    priority-17 publications with a bounded native serial/event probe and
+    derive a conservative post-issue callback-step support. A manager-frame
+    residual or first later capture is not that support.
 
 ## 8. Performance Problem
 

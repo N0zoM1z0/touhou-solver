@@ -1071,6 +1071,38 @@ or collision composition, or a physical stage falsifier. Status is
 **Offline/conservative ordered primitive**; no live, survival, combat, or
 NMNB authority is promoted.
 
+2026-07-30 `SEM-MODE-C` retained publication-phase audit: a new deterministic
+report validates every ordered dispatch in the complete accepted Stage-5
+source. Across 6,423 real writes it finds 3,823 multi-edge writes, 5,456
+no-writes, 677 observations of an intermediate latest-transaction mask, and
+2,760 corroborated sequential publication-edge witnesses. The canonical
+CE-0193 edge is retained at lines `297 -> 298`, issue frame 386 / captured
+manager frame 387: `previous/current/raw = 0x65/0x61/0x61`, with the later
+coherent mode capture still at current `0x61`.
+
+The report also closes an important negative result. It claims zero native
+atomic edge captures and cannot identify a priority-17 deadline: input
+`raw/current/previous` are separate reads, captures are asynchronous, and no
+native callback serial exists. Existing `control_delay_candidates` are
+snapshot-to-observed-final-input supports in enemy-manager-frame coordinates;
+they are not post-issue publication-step supports. Of 6,423 writes, 5,357
+have final first observed before replacement, 1,034 are replacement-censored,
+29 manager-gap-censored, and three trace-discontinuity-censored. The 120 final
+masks first observed outside their issued support are observation gaps, not
+measured deadline violations.
+
+The compact report SHA-256 is
+`c8f1722587c4514c6ab538f66e73a0b13566b7aac96474805e12bcef16e0152a`;
+it retains raw source SHA-256
+`773cbdb322dc5e15f80da4800ce82bcd0f41c1e6f82826812087edc9a328dca9`.
+Five focused tests and complete 1,207-test Linux/Windows discovery pass in
+14.280/30.116 seconds, with the three existing Windows skips. The next phase
+gate is no longer another analysis of the same trace: implement a default-off
+bounded priority-17 serial/event ring and pre/post-dispatch serial bracket.
+Overflow/read failure must produce unknown trace evidence without stopping
+the whole stage. Only that probe may justify an estimator-to-publication
+deadline adapter.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:
@@ -1325,8 +1357,10 @@ After that baseline, the next correction checkpoints should be:
    Stage-6B survival at 22 hits. Do not repeat it or generalize it to clean
    survival, stage-wide source authority, Extra, or NMNB;
 3. `SEM-MODE`: the independent CE-0193 ordered state and native
-   priority-9-before-priority-17 composition are complete offline. Close
-   asynchronous capture/issue phase and physical delay support, then
+   priority-9-before-priority-17 composition are complete offline. The
+   source-hashed post-hoc audit exhausts the current trace and proves exact
+   deadline unidentifiable. Implement the bounded priority-17 serial probe,
+   close asynchronous capture/issue phase and physical delay support, then
    optimized/native parity, before exact future body/version integration;
 4. `SEM-GEOM`: exact player/laser geometry, bullet lifecycle/suppression, and
    physical clamp;

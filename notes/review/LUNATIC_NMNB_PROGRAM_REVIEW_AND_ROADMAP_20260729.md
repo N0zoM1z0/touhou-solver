@@ -23,7 +23,11 @@ the sequence and stops `PHYS-BASE-RING` before Stage 3. The later fixed
 `lunatic_route2_stage5_unattended_20260729_173957` took 12 hits and therefore
 failed its `<=10` physical threshold. CE-0184 retains the failure and its
 canonical first-hit audit; the timer-aware live consumer begins only after
-the first six hits, so no timer rollback is causally justified.
+the first six hits, so no timer rollback is causally justified. Checkpoint
+`225ccc8` subsequently passes the `SEM-SCALE-A` exact primitive gate on
+Linux and Windows. `SEM-SCALE-B` live propagation and `SEM-SCALE-C`
+retained/physical falsifiers remain open; no scale-sensitive strategy or
+physical scene is promoted.
 
 Companion native audit:
 `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
@@ -32,11 +36,12 @@ Document role: a reviewed implementation and evidence program. It does not
 silently promote any shadow/proposed strategy, replace a formal contract, or
 reinterpret a failed physical gate as passed.
 
-Authorized mutations in this checkpoint: documentation, indexes, authority
-corrections, and counterexample retention only.
-
-Explicit non-actions: no game launch, input injection, physical trial, solver
-implementation change, strategy promotion, or IDA database mutation.
+The original review checkpoint changed documentation, indexes, authority, and
+counterexample retention only. Subsequent dated execution entries implement
+the accepted roadmap and may include solver corrections, retained evidence,
+and evidence-backed IDA names/comments. They still do not silently authorize
+strategy promotion, input injection, or a physical trial outside the current
+gate.
 
 ## 1. Evidence Labels And Review Boundary
 

@@ -6,6 +6,8 @@ Date: 2026-07-29
 
 Roadmap item: `SEM-SCALE`
 
+Executable/offline checkpoint: `225ccc8`
+
 This note is the physical/model contract for roadmap Phase 1B. It repairs the
 current live and offline assumption that player movement and laser lifecycle
 always advance at scale `1.0`. It does not promote source completeness,

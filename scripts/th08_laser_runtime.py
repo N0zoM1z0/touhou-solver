@@ -14,6 +14,10 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from th08_laser_model import LaserState, laser_collision_geometry_frames
+from th08_time_scale import (
+    TH08_UNIT_TIME_SCALE_BITS,
+    validate_time_scale_bits,
+)
 
 
 PLAYER_RADIUS = 2.0
@@ -105,6 +109,8 @@ def build_laser_collision_frames(
     *,
     horizon: int,
     snapshot_lag: int = 0,
+    time_scale_bits: int = TH08_UNIT_TIME_SCALE_BITS,
+    time_scale_schedule_bits: tuple[int, ...] = (),
 ) -> tuple[tuple[Laser, ...], ...]:
     """Project allocated records into the lethal segments for each update."""
 
@@ -112,6 +118,14 @@ def build_laser_collision_frames(
         raise ValueError("laser projection horizon and lag cannot be negative")
     frames: list[list[Laser]] = [[] for _ in range(horizon)]
     total_frames = snapshot_lag + horizon
+    validate_time_scale_bits(time_scale_bits)
+    if time_scale_schedule_bits:
+        if len(time_scale_schedule_bits) < total_frames:
+            raise ValueError(
+                "laser time-scale schedule does not cover projection horizon"
+            )
+        for bits in time_scale_schedule_bits[:total_frames]:
+            validate_time_scale_bits(bits)
     for laser in lasers:
         state = laser.state
         if state is None:
@@ -121,6 +135,8 @@ def build_laser_collision_frames(
         geometry_frames = laser_collision_geometry_frames(
             state,
             frame_count=total_frames,
+            time_scale_bits=time_scale_bits,
+            time_scale_schedule_bits=time_scale_schedule_bits,
         )[snapshot_lag:]
         for projected, geometry in zip(frames, geometry_frames):
             projected.extend(
@@ -212,6 +228,8 @@ def build_packed_laser_collision_frames(
     *,
     horizon: int,
     snapshot_lag: int = 0,
+    time_scale_bits: int = TH08_UNIT_TIME_SCALE_BITS,
+    time_scale_schedule_bits: tuple[int, ...] = (),
 ) -> tuple[PackedLaserFrame, ...]:
     """Fuse lifecycle projection and numeric packing without Laser objects."""
 
@@ -219,6 +237,14 @@ def build_packed_laser_collision_frames(
         raise ValueError("laser projection horizon and lag cannot be negative")
     packed_values: list[list[float]] = [[] for _ in range(horizon)]
     total_frames = snapshot_lag + horizon
+    validate_time_scale_bits(time_scale_bits)
+    if time_scale_schedule_bits:
+        if len(time_scale_schedule_bits) < total_frames:
+            raise ValueError(
+                "laser time-scale schedule does not cover projection horizon"
+            )
+        for bits in time_scale_schedule_bits[:total_frames]:
+            validate_time_scale_bits(bits)
     for laser in lasers:
         state = laser.state
         cosine = math.cos(laser.angle)
@@ -240,6 +266,8 @@ def build_packed_laser_collision_frames(
         geometry_frames = laser_collision_geometry_frames(
             state,
             frame_count=total_frames,
+            time_scale_bits=time_scale_bits,
+            time_scale_schedule_bits=time_scale_schedule_bits,
         )[snapshot_lag:]
         for frame_values, geometry in zip(
             packed_values,

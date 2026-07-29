@@ -11,6 +11,7 @@ from th08_laser_model import (
     laser_overlaps_player,
     step_laser,
 )
+from th08_time_scale import canonical_time_scale_bits, validate_time_scale_bits
 
 
 PLAYER_NORMAL = 0
@@ -83,6 +84,7 @@ def step_laser_pool(
     player_half_height: float,
     player_state: int,
     time_scale: float = 1.0,
+    time_scale_bits: int | None = None,
 ) -> LaserPoolStep:
     """Spawn and scan lasers once in ascending native slot order.
 
@@ -112,8 +114,18 @@ def step_laser_pool(
     contacts: list[LaserContact] = []
     released: list[int] = []
     effective_player_state = player_state
+    if time_scale_bits is None:
+        time_scale_bits = canonical_time_scale_bits(time_scale)
+    elif time_scale != 1.0:
+        raise ValueError(
+            "specify either time_scale or time_scale_bits, not both"
+        )
+    validate_time_scale_bits(time_scale_bits)
     for index in tuple(sorted(slots)):
-        result = step_laser(slots[index], time_scale=time_scale)
+        result = step_laser(
+            slots[index],
+            time_scale_bits=time_scale_bits,
+        )
         for check in result.checks:
             direct = laser_overlaps_player(
                 check.collision_box,

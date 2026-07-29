@@ -367,6 +367,19 @@ scene expansion. The failed aggregate does not provide a timer-causal
 rollback target or survival authority; the ordered correction series
 continues at `SEM-SCALE`.
 
+**2026-07-29 SEM-SCALE-A offline correction:** shipped priority and dataflow
+revalidation proves that one ECL callback can execute after player motion and
+before laser motion, so one scalar per physical frame is not a valid
+transition identity. The new immutable schedule keeps exact player- and
+laser-phase float32 prefixes separate and treats a post-update root as one
+next-player observation, not an unbounded future constant. Product,
+independent raw-bit Python oracle, and Linux/Windows explicit-x87 probes agree
+on every retained deterministic transition; the separate 6,144-case seeded
+product/oracle sweep has zero mismatch. This is a mechanics correction, not a
+strategy promotion. Live propagation, Final-B/Extra capsules, and physical
+non-unit evidence remain pending; CE-0175 and CE-0184 continue to block broad
+physical expansion.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

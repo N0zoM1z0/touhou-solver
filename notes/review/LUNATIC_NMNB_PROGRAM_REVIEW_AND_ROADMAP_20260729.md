@@ -710,6 +710,30 @@ Exit gate: zero mismatch over unit/non-unit scales, stop/resume, direction
 change, laser phase change, and retained Final/Extra scale capsules. No
 full-route certificate uses the old transition.
 
+Execution progress on 2026-07-29:
+
+- **Observed native contract:** revalidated player stores at
+  `0x0044B641/0x0044BA67/0x0044BAA8`, laser motion/timer order at
+  `0x00431BC9..0x004320ED`, callback writers `0x00424F90`,
+  `0x004251B0`, and `0x00425290`, and priority order
+  player 9 -> enemy/ECL 11 -> laser/bullet 14. A same-update ECL write can
+  therefore change the laser scale after player motion.
+- **Corrected model boundary:** immutable schedules carry separate exact
+  player- and laser-phase float32 prefixes. A post-update root observation
+  proves one next-player value and no next-laser value; it is never repeated
+  silently across a certificate horizon.
+- **Observed SEM-SCALE-A gate:** product, independent raw-bit Python oracle,
+  and explicit-x87 Linux/Windows probes agree bitwise on 17/17 deterministic
+  cases per platform (36 player and 44 laser steps). A separate seeded sweep
+  covers 4,096 player and 2,048 laser cases with zero mismatch. Complete
+  Linux/Windows discovery passes 1,084 tests; Windows has the three existing
+  skips.
+- **Authority boundary:** this passes only the exact primitive sub-gate.
+  Live state/snapshot/certificate propagation, optimized/scalar masks,
+  retained Final-B and static Extra capsules, and the trace/physical
+  falsifiers remain open. No game launch or strategy promotion is authorized
+  by SEM-SCALE-A.
+
 #### 1C. Action-conditioned player/enemy mode
 
 - include focus/secondary-character transition state and its native delay;

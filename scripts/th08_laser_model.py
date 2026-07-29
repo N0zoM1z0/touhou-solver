@@ -13,9 +13,20 @@ including the flag-selected alpha/width ramp and the two fallthrough calls.
 from __future__ import annotations
 
 import math
+import struct
 from dataclasses import dataclass, replace
 from enum import IntEnum
 from functools import lru_cache
+
+from numeric_model import binary32_store
+from th08_ecl_vm_state import float32_bits, float32_from_bits
+from th08_native_timer import Th08TimerState, advance_scaled_timer
+from th08_time_scale import (
+    TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+    TH08_UNIT_TIME_SCALE_BITS,
+    canonical_time_scale_bits,
+    validate_time_scale_bits,
+)
 
 
 LASER_POOL_SIZE = 256
@@ -23,6 +34,9 @@ LASER_RECORD_SIZE = 0x59C
 LASER_GRAZE_EXPANSION = 48.0
 LASER_GRAZE_PERIOD = 20
 LASER_TAIL_CULL_DISTANCE = 640.0
+TH08_LASER_SCALE_SEMANTICS_VERSION = (
+    f"{TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION}:laser-lifecycle"
+)
 
 
 class LaserPhase(IntEnum):
@@ -52,6 +66,23 @@ class LaserState:
     timer: int = 0
     timer_fraction: float = 0.0
     active: bool = True
+
+    @property
+    def timer_fraction_bits(self) -> int:
+        return float32_bits(self.timer_fraction)
+
+    @property
+    def serialized_scale_identity(self) -> tuple[object, ...]:
+        return (
+            TH08_LASER_SCALE_SEMANTICS_VERSION,
+            float32_bits(self.tail_distance),
+            float32_bits(self.head_distance),
+            float32_bits(self.current_width),
+            int(self.phase),
+            self.timer,
+            self.timer_fraction_bits,
+            self.active,
+        )
 
 
 @dataclass(frozen=True)
@@ -83,11 +114,23 @@ class LaserStepResult:
 def _cached_collision_geometry_frames(
     laser: LaserState,
     frame_count: int,
+    constant_time_scale_bits: int = TH08_UNIT_TIME_SCALE_BITS,
+    time_scale_schedule_bits: tuple[int, ...] = (),
 ) -> tuple[tuple[tuple[float, float, float], ...], ...]:
+    validate_time_scale_bits(constant_time_scale_bits)
+    if time_scale_schedule_bits and len(time_scale_schedule_bits) < frame_count:
+        raise ValueError("laser time-scale schedule does not cover frame count")
     frames: list[tuple[tuple[float, float, float], ...]] = []
     state = laser
-    for _ in range(frame_count):
-        result = step_laser(state)
+    for frame in range(frame_count):
+        result = step_laser(
+            state,
+            time_scale_bits=(
+                time_scale_schedule_bits[frame]
+                if time_scale_schedule_bits
+                else constant_time_scale_bits
+            ),
+        )
         state = result.laser
         seen: set[tuple[float, float, float]] = set()
         geometry: list[tuple[float, float, float]] = []
@@ -111,18 +154,33 @@ def laser_collision_geometry_frames(
     laser: LaserState,
     *,
     frame_count: int,
+    time_scale_bits: int = TH08_UNIT_TIME_SCALE_BITS,
+    time_scale_schedule_bits: tuple[int, ...] = (),
 ) -> tuple[tuple[tuple[float, float, float], ...], ...]:
     """Project collision geometry while sharing translated/rotated templates."""
 
     if frame_count < 0:
         raise ValueError("laser projection frame count cannot be negative")
+    validate_time_scale_bits(time_scale_bits)
+    if time_scale_schedule_bits:
+        if len(time_scale_schedule_bits) < frame_count:
+            raise ValueError(
+                "laser time-scale schedule does not cover projection horizon"
+            )
+        for bits in time_scale_schedule_bits[:frame_count]:
+            validate_time_scale_bits(bits)
     normalized = replace(
         laser,
         origin_x=0.0,
         origin_y=0.0,
         angle=0.0,
     )
-    return _cached_collision_geometry_frames(normalized, frame_count)
+    return _cached_collision_geometry_frames(
+        normalized,
+        frame_count,
+        time_scale_bits,
+        time_scale_schedule_bits[:frame_count],
+    )
 
 
 def spawn_laser_state(
@@ -235,16 +293,37 @@ def laser_overlaps_player(
     )
 
 
-def _advance_timer(timer: int, fraction: float, time_scale: float) -> tuple[int, float]:
-    if time_scale > 0.99000001:
-        return timer + 1, fraction
-    fraction += time_scale
-    if fraction >= 1.0:
-        return timer + 1, fraction - 1.0
-    return timer, fraction
+def _advance_timer(
+    timer: int,
+    fraction: float,
+    *,
+    time_scale_bits: int,
+) -> tuple[int, float]:
+    """Delegate to the revalidated native timer component recurrence."""
+
+    advanced = advance_scaled_timer(
+        Th08TimerState(timer, float32_bits(fraction)),
+        time_scale_bits=time_scale_bits,
+    )
+    return advanced.elapsed, advanced.fraction
 
 
-def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult:
+def _stored_float32(value: float, *, field: str) -> float:
+    try:
+        stored = binary32_store(value)
+    except (OverflowError, struct.error) as exc:
+        raise ValueError(f"{field} is outside finite float32") from exc
+    if not math.isfinite(stored):
+        raise ValueError(f"{field} became non-finite")
+    return stored
+
+
+def step_laser(
+    laser: LaserState,
+    *,
+    time_scale: float = 1.0,
+    time_scale_bits: int | None = None,
+) -> LaserStepResult:
     """Advance one manager call and list collision calls in execution order.
 
     Phase transitions intentionally fall through: the last warmup update also
@@ -252,15 +331,28 @@ def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult
     execute the fade collision branch.
     """
 
-    if time_scale < 0.0 or not math.isfinite(time_scale):
-        raise ValueError("time scale must be finite and non-negative")
+    if time_scale_bits is None:
+        time_scale_bits = canonical_time_scale_bits(time_scale)
+    elif time_scale != 1.0:
+        raise ValueError(
+            "specify either time_scale or time_scale_bits, not both"
+        )
+    time_scale = validate_time_scale_bits(time_scale_bits)
     if not laser.active:
         return LaserStepResult(laser, laser_collision_box(laser), ())
 
-    head = laser.head_distance + laser.speed * time_scale
+    # 0x431BC9..0x431BE1 performs the multiply/add on x87 and stores only the
+    # final head field to dword.
+    head = _stored_float32(
+        laser.head_distance + laser.speed * time_scale,
+        field="laser head",
+    )
     tail = laser.tail_distance
     if head - tail > laser.maximum_length:
-        tail = head - laser.maximum_length
+        tail = _stored_float32(
+            head - laser.maximum_length,
+            field="laser tail",
+        )
     if tail < 0.0:
         tail = 0.0
     current = replace(laser, head_distance=head, tail_distance=tail)
@@ -274,12 +366,13 @@ def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult
             ramp_frames = min(current.warmup_frames, 30)
             ramp_start = current.warmup_frames - ramp_frames
             if ramp_start >= current.timer:
-                current_width = 1.2
+                current_width = float32_from_bits(0x3F99999A)
             elif current.warmup_frames:
-                current_width = (
+                current_width = _stored_float32(
                     (current.timer + current.timer_fraction)
                     * current.width
-                    / current.warmup_frames
+                    / current.warmup_frames,
+                    field="laser warmup width",
                 )
             else:
                 current_width = current.width
@@ -294,7 +387,9 @@ def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult
             )
         if current.timer < current.warmup_frames:
             timer, fraction = _advance_timer(
-                current.timer, current.timer_fraction, time_scale
+                current.timer,
+                current.timer_fraction,
+                time_scale_bits=time_scale_bits,
             )
             current = replace(current, timer=timer, timer_fraction=fraction)
             if current.tail_distance >= LASER_TAIL_CULL_DISTANCE:
@@ -319,7 +414,9 @@ def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult
         )
         if current.timer < current.active_frames:
             timer, fraction = _advance_timer(
-                current.timer, current.timer_fraction, time_scale
+                current.timer,
+                current.timer_fraction,
+                time_scale_bits=time_scale_bits,
             )
             current = replace(current, timer=timer, timer_fraction=fraction)
             if current.tail_distance >= LASER_TAIL_CULL_DISTANCE:
@@ -332,13 +429,16 @@ def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult
     if current.flags & 1:
         phase_box = box
     else:
-        current_width = (
-            current.width
-            - (current.timer + current.timer_fraction)
-            * current.width
-            / current.fade_frames
-            if current.fade_frames > 0
-            else 0.0
+        current_width = _stored_float32(
+            (
+                current.width
+                - (current.timer + current.timer_fraction)
+                * current.width
+                / current.fade_frames
+                if current.fade_frames > 0
+                else 0.0
+            ),
+            field="laser fade width",
         )
         current = replace(current, current_width=max(current_width, 0.0))
         phase_box = laser_collision_box(
@@ -355,7 +455,11 @@ def step_laser(laser: LaserState, *, time_scale: float = 1.0) -> LaserStepResult
             phase_box,
             tuple(checks),
         )
-    timer, fraction = _advance_timer(current.timer, current.timer_fraction, time_scale)
+    timer, fraction = _advance_timer(
+        current.timer,
+        current.timer_fraction,
+        time_scale_bits=time_scale_bits,
+    )
     current = replace(current, timer=timer, timer_fraction=fraction)
     if current.tail_distance >= LASER_TAIL_CULL_DISTANCE:
         current = replace(current, active=False)

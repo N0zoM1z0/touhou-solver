@@ -11,7 +11,13 @@ from movement_model import (
     step_axis_aligned_movement,
 )
 from numeric_model import binary32_store
+from th08_ecl_vm_state import float32_from_bits
 from th08_sht import ShtHeader
+from th08_time_scale import (
+    TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+    canonical_time_scale_bits,
+    validate_time_scale_bits,
+)
 
 
 INPUT_SHOT = 0x01
@@ -89,9 +95,24 @@ def step_route2_movement(
     axis_scale_x: float = 1.0,
     axis_scale_y: float = 1.0,
     time_scale: float = 1.0,
+    time_scale_bits: int | None = None,
     bounds: MovementBounds = TH08_PLAYFIELD_BOUNDS,
     profile: MovementProfile = ROUTE2_MOVEMENT_PROFILE,
 ) -> MovementStep:
+    """Apply one native-order Route-2 movement update.
+
+    ``time_scale_bits`` is the preferred exact interface. The float argument
+    remains for compatibility and is rounded once to the native float32
+    global before use.
+    """
+
+    if time_scale_bits is None:
+        time_scale_bits = canonical_time_scale_bits(time_scale)
+    elif time_scale != 1.0:
+        raise ValueError(
+            "specify either time_scale or time_scale_bits, not both"
+        )
+    validate_time_scale_bits(time_scale_bits)
     return step_axis_aligned_movement(
         x=x,
         y=y,
@@ -105,6 +126,71 @@ def step_route2_movement(
         bounds=bounds,
         axis_scale_x=axis_scale_x,
         axis_scale_y=axis_scale_y,
-        time_scale=time_scale,
+        time_scale=float32_from_bits(time_scale_bits),
         store=binary32_store,
     )
+
+
+def project_route2_movement_schedule(
+    *,
+    x: float,
+    y: float,
+    input_masks: tuple[int, ...],
+    player_scale_bits: tuple[int, ...],
+    bomb_active: bool = False,
+    bomb_callback_index: int = 0,
+    axis_scale_x: float = 1.0,
+    axis_scale_y: float = 1.0,
+    bounds: MovementBounds = TH08_PLAYFIELD_BOUNDS,
+    profile: MovementProfile = ROUTE2_MOVEMENT_PROFILE,
+) -> tuple[MovementStep, ...]:
+    """Repeat the one-frame primitive over an explicit player-phase schedule."""
+
+    if len(input_masks) != len(player_scale_bits):
+        raise ValueError(
+            "movement input and player time-scale schedules must have equal length"
+        )
+    current_x = x
+    current_y = y
+    steps: list[MovementStep] = []
+    for input_mask, scale_bits in zip(input_masks, player_scale_bits):
+        step = step_route2_movement(
+            x=current_x,
+            y=current_y,
+            input_mask=input_mask,
+            bomb_active=bomb_active,
+            bomb_callback_index=bomb_callback_index,
+            axis_scale_x=axis_scale_x,
+            axis_scale_y=axis_scale_y,
+            time_scale_bits=scale_bits,
+            bounds=bounds,
+            profile=profile,
+        )
+        steps.append(step)
+        current_x = step.x
+        current_y = step.y
+    return tuple(steps)
+
+
+TH08_ROUTE2_MOVEMENT_SCALE_SEMANTICS_VERSION = (
+    f"{TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION}:route2-movement"
+)
+
+
+__all__ = [
+    "INPUT_BOMB",
+    "INPUT_DOWN",
+    "INPUT_FOCUS",
+    "INPUT_LEFT",
+    "INPUT_RIGHT",
+    "INPUT_SHOT",
+    "INPUT_UP",
+    "ROUTE2_MOVEMENT_PROFILE",
+    "TH08_PLAYFIELD_BOUNDS",
+    "TH08_ROUTE2_MOVEMENT_SCALE_SEMANTICS_VERSION",
+    "decode_th08_direction",
+    "movement_profile_from_sht",
+    "project_route2_movement_schedule",
+    "route2_effective_focus",
+    "step_route2_movement",
+]

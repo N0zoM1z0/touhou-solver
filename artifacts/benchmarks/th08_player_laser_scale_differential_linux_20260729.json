@@ -1,0 +1,2677 @@
+{
+  "cases": [
+    {
+      "initial": {
+        "axis_scale_x_bits": "0x3f800000",
+        "axis_scale_y_bits": "0x3f800000",
+        "x_bits": "0x43402000",
+        "y_bits": "0x43c82000"
+      },
+      "label": "unit_focused_cardinal",
+      "operation": "movement",
+      "passed": true,
+      "steps": [
+        {
+          "input_mask": "0x00000084",
+          "native_probe": [
+            "0x43426ccd",
+            "0x43c82000",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x43426ccd",
+            "0x43c82000",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43426ccd",
+            "0x43c82000",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3f800000"
+        },
+        {
+          "input_mask": "0x00000084",
+          "native_probe": [
+            "0x4344b99a",
+            "0x43c82000",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x4344b99a",
+            "0x43c82000",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x4344b99a",
+            "0x43c82000",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3f800000"
+        },
+        {
+          "input_mask": "0x00000084",
+          "native_probe": [
+            "0x43470667",
+            "0x43c82000",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x43470667",
+            "0x43c82000",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43470667",
+            "0x43c82000",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3f800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "axis_scale_x_bits": "0x3f800000",
+        "axis_scale_y_bits": "0x3f800000",
+        "x_bits": "0x43400000",
+        "y_bits": "0x43c80000"
+      },
+      "label": "finalb_quarter_unfocused_right_four",
+      "operation": "movement",
+      "passed": true,
+      "steps": [
+        {
+          "input_mask": "0x00000080",
+          "native_probe": [
+            "0x43410000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x43410000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43410000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "input_mask": "0x00000080",
+          "native_probe": [
+            "0x43420000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x43420000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43420000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "input_mask": "0x00000080",
+          "native_probe": [
+            "0x43430000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x43430000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43430000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "input_mask": "0x00000080",
+          "native_probe": [
+            "0x43440000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x43440000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43440000",
+            "0x43c80000",
+            "0x3f800000",
+            "0x00000000"
+          ],
+          "step": 4,
+          "time_scale_bits": "0x3e800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "axis_scale_x_bits": "0x3f800000",
+        "axis_scale_y_bits": "0x3f800000",
+        "x_bits": "0x4320c000",
+        "y_bits": "0x43a04000"
+      },
+      "label": "one_third_direction_and_focus_changes",
+      "operation": "movement",
+      "passed": true,
+      "steps": [
+        {
+          "input_mask": "0x00000080",
+          "native_probe": [
+            "0x43221555",
+            "0x43a04000",
+            "0x3faaaaab",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x43221555",
+            "0x43a04000",
+            "0x3faaaaab",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43221555",
+            "0x43a04000",
+            "0x3faaaaab",
+            "0x00000000"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "input_mask": "0x000000a4",
+          "native_probe": [
+            "0x4322a01d",
+            "0x43a08564",
+            "0x3f0ac810",
+            "0x3f0ac810"
+          ],
+          "oracle": [
+            "0x4322a01d",
+            "0x43a08564",
+            "0x3f0ac810",
+            "0x3f0ac810"
+          ],
+          "passed": true,
+          "product": [
+            "0x4322a01d",
+            "0x43a08564",
+            "0x3f0ac810",
+            "0x3f0ac810"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "input_mask": "0x00000054",
+          "native_probe": [
+            "0x43221555",
+            "0x43a04000",
+            "0xbf0ac810",
+            "0xbf0ac810"
+          ],
+          "oracle": [
+            "0x43221555",
+            "0x43a04000",
+            "0xbf0ac810",
+            "0xbf0ac810"
+          ],
+          "passed": true,
+          "product": [
+            "0x43221555",
+            "0x43a04000",
+            "0xbf0ac810",
+            "0xbf0ac810"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "input_mask": "0x00000020",
+          "native_probe": [
+            "0x43221555",
+            "0x43a0eaab",
+            "0x00000000",
+            "0x3faaaaab"
+          ],
+          "oracle": [
+            "0x43221555",
+            "0x43a0eaab",
+            "0x00000000",
+            "0x3faaaaab"
+          ],
+          "passed": true,
+          "product": [
+            "0x43221555",
+            "0x43a0eaab",
+            "0x00000000",
+            "0x3faaaaab"
+          ],
+          "step": 4,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "input_mask": "0x00000000",
+          "native_probe": [
+            "0x43221555",
+            "0x43a0eaab",
+            "0x00000000",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x43221555",
+            "0x43a0eaab",
+            "0x00000000",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43221555",
+            "0x43a0eaab",
+            "0x00000000",
+            "0x00000000"
+          ],
+          "step": 5,
+          "time_scale_bits": "0x3eaaaaab"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "axis_scale_x_bits": "0x3f800000",
+        "axis_scale_y_bits": "0x3f800000",
+        "x_bits": "0x43480000",
+        "y_bits": "0x43960000"
+      },
+      "label": "stop_resume_and_quarter_transition",
+      "operation": "movement",
+      "passed": true,
+      "steps": [
+        {
+          "input_mask": "0x00000010",
+          "native_probe": [
+            "0x43480000",
+            "0x43940000",
+            "0x00000000",
+            "0xc0800000"
+          ],
+          "oracle": [
+            "0x43480000",
+            "0x43940000",
+            "0x00000000",
+            "0xc0800000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43480000",
+            "0x43940000",
+            "0x00000000",
+            "0xc0800000"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3f800000"
+        },
+        {
+          "input_mask": "0x00000010",
+          "native_probe": [
+            "0x43480000",
+            "0x43940000",
+            "0x00000000",
+            "0x80000000"
+          ],
+          "oracle": [
+            "0x43480000",
+            "0x43940000",
+            "0x00000000",
+            "0x80000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43480000",
+            "0x43940000",
+            "0x00000000",
+            "0x80000000"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x00000000"
+        },
+        {
+          "input_mask": "0x00000090",
+          "native_probe": [
+            "0x43480000",
+            "0x43940000",
+            "0x00000000",
+            "0x80000000"
+          ],
+          "oracle": [
+            "0x43480000",
+            "0x43940000",
+            "0x00000000",
+            "0x80000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x43480000",
+            "0x43940000",
+            "0x00000000",
+            "0x80000000"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x00000000"
+        },
+        {
+          "input_mask": "0x00000094",
+          "native_probe": [
+            "0x43486816",
+            "0x4393cbf5",
+            "0x3ed02c18",
+            "0xbed02c18"
+          ],
+          "oracle": [
+            "0x43486816",
+            "0x4393cbf5",
+            "0x3ed02c18",
+            "0xbed02c18"
+          ],
+          "passed": true,
+          "product": [
+            "0x43486816",
+            "0x4393cbf5",
+            "0x3ed02c18",
+            "0xbed02c18"
+          ],
+          "step": 4,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "input_mask": "0x00000084",
+          "native_probe": [
+            "0x434ab4e3",
+            "0x4393cbf5",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x434ab4e3",
+            "0x4393cbf5",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x434ab4e3",
+            "0x4393cbf5",
+            "0x40133333",
+            "0x00000000"
+          ],
+          "step": 5,
+          "time_scale_bits": "0x3f800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "axis_scale_x_bits": "0x3f800000",
+        "axis_scale_y_bits": "0x3f800000",
+        "x_bits": "0x42c90000",
+        "y_bits": "0x42c90000"
+      },
+      "label": "one_twelfth_diagonal",
+      "operation": "movement",
+      "passed": true,
+      "steps": [
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42c978ae",
+            "0x42c978ae",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42c978ae",
+            "0x42c978ae",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42c978ae",
+            "0x42c978ae",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42c9f15c",
+            "0x42c9f15c",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42c9f15c",
+            "0x42c9f15c",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42c9f15c",
+            "0x42c9f15c",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42ca6a0a",
+            "0x42ca6a0a",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42ca6a0a",
+            "0x42ca6a0a",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42ca6a0a",
+            "0x42ca6a0a",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42cae2b8",
+            "0x42cae2b8",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42cae2b8",
+            "0x42cae2b8",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42cae2b8",
+            "0x42cae2b8",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 4,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42cb5b66",
+            "0x42cb5b66",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42cb5b66",
+            "0x42cb5b66",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42cb5b66",
+            "0x42cb5b66",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 5,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42cbd414",
+            "0x42cbd414",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42cbd414",
+            "0x42cbd414",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42cbd414",
+            "0x42cbd414",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 6,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42cc4cc2",
+            "0x42cc4cc2",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42cc4cc2",
+            "0x42cc4cc2",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42cc4cc2",
+            "0x42cc4cc2",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 7,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42ccc570",
+            "0x42ccc570",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42ccc570",
+            "0x42ccc570",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42ccc570",
+            "0x42ccc570",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 8,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42cd3e1e",
+            "0x42cd3e1e",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42cd3e1e",
+            "0x42cd3e1e",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42cd3e1e",
+            "0x42cd3e1e",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 9,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42cdb6cc",
+            "0x42cdb6cc",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42cdb6cc",
+            "0x42cdb6cc",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42cdb6cc",
+            "0x42cdb6cc",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 10,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42ce2f7a",
+            "0x42ce2f7a",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42ce2f7a",
+            "0x42ce2f7a",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42ce2f7a",
+            "0x42ce2f7a",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 11,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "input_mask": "0x000000a0",
+          "native_probe": [
+            "0x42cea828",
+            "0x42cea828",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "oracle": [
+            "0x42cea828",
+            "0x42cea828",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "passed": true,
+          "product": [
+            "0x42cea828",
+            "0x42cea828",
+            "0x3e715bef",
+            "0x3e715bef"
+          ],
+          "step": 12,
+          "time_scale_bits": "0x3daaaaab"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "axis_scale_x_bits": "0x3f400000",
+        "axis_scale_y_bits": "0x3fa00000",
+        "x_bits": "0x42f61000",
+        "y_bits": "0x435e1000"
+      },
+      "label": "axis_scale_and_float32_store",
+      "operation": "movement",
+      "passed": true,
+      "steps": [
+        {
+          "input_mask": "0x00000054",
+          "native_probe": [
+            "0x42f4d7be",
+            "0x435d0bc9",
+            "0xbf1c2112",
+            "0xbf821b8f"
+          ],
+          "oracle": [
+            "0x42f4d7be",
+            "0x435d0bc9",
+            "0xbf1c2112",
+            "0xbf821b8f"
+          ],
+          "passed": true,
+          "product": [
+            "0x42f4d7be",
+            "0x435d0bc9",
+            "0xbf1c2112",
+            "0xbf821b8f"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3f000000"
+        },
+        {
+          "input_mask": "0x00000094",
+          "native_probe": [
+            "0x42f573df",
+            "0x435c89ad",
+            "0x3e9c2112",
+            "0xbf021b8f"
+          ],
+          "oracle": [
+            "0x42f573df",
+            "0x435c89ad",
+            "0x3e9c2112",
+            "0xbf021b8f"
+          ],
+          "passed": true,
+          "product": [
+            "0x42f573df",
+            "0x435c89ad",
+            "0x3e9c2112",
+            "0xbf021b8f"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "input_mask": "0x00000064",
+          "native_probe": [
+            "0x42f3035b",
+            "0x435e921b",
+            "0xbf9c2112",
+            "0x40021b8f"
+          ],
+          "oracle": [
+            "0x42f3035b",
+            "0x435e921b",
+            "0xbf9c2112",
+            "0x40021b8f"
+          ],
+          "passed": true,
+          "product": [
+            "0x42f3035b",
+            "0x435e921b",
+            "0xbf9c2112",
+            "0x40021b8f"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3f800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "axis_scale_x_bits": "0x3f800000",
+        "axis_scale_y_bits": "0x3f800000",
+        "x_bits": "0x43480000",
+        "y_bits": "0x43480000"
+      },
+      "label": "contradictory_direction_native_priority",
+      "operation": "movement",
+      "passed": true,
+      "steps": [
+        {
+          "input_mask": "0x000000f4",
+          "native_probe": [
+            "0x43472fd4",
+            "0x43472fd4",
+            "0xbf502c18",
+            "0xbf502c18"
+          ],
+          "oracle": [
+            "0x43472fd4",
+            "0x43472fd4",
+            "0xbf502c18",
+            "0xbf502c18"
+          ],
+          "passed": true,
+          "product": [
+            "0x43472fd4",
+            "0x43472fd4",
+            "0xbf502c18",
+            "0xbf502c18"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3f000000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "axis_scale_x_bits": "0x3f800000",
+        "axis_scale_y_bits": "0x3f800000",
+        "x_bits": "0x43bbe000",
+        "y_bits": "0x41820000"
+      },
+      "label": "physical_clamp_each_store",
+      "operation": "movement",
+      "passed": true,
+      "steps": [
+        {
+          "input_mask": "0x00000094",
+          "native_probe": [
+            "0x43bc0000",
+            "0x41800000",
+            "0x3fd02c18",
+            "0xbfd02c18"
+          ],
+          "oracle": [
+            "0x43bc0000",
+            "0x41800000",
+            "0x3fd02c18",
+            "0xbfd02c18"
+          ],
+          "passed": true,
+          "product": [
+            "0x43bc0000",
+            "0x41800000",
+            "0x3fd02c18",
+            "0xbfd02c18"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3f800000"
+        },
+        {
+          "input_mask": "0x00000094",
+          "native_probe": [
+            "0x43bc0000",
+            "0x41800000",
+            "0x3f502c18",
+            "0xbf502c18"
+          ],
+          "oracle": [
+            "0x43bc0000",
+            "0x41800000",
+            "0x3f502c18",
+            "0xbf502c18"
+          ],
+          "passed": true,
+          "product": [
+            "0x43bc0000",
+            "0x41800000",
+            "0x3f502c18",
+            "0xbf502c18"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3f000000"
+        },
+        {
+          "input_mask": "0x00000094",
+          "native_probe": [
+            "0x43bc0000",
+            "0x41800000",
+            "0x3ed02c18",
+            "0xbed02c18"
+          ],
+          "oracle": [
+            "0x43bc0000",
+            "0x41800000",
+            "0x3ed02c18",
+            "0xbed02c18"
+          ],
+          "passed": true,
+          "product": [
+            "0x43bc0000",
+            "0x41800000",
+            "0x3ed02c18",
+            "0xbed02c18"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3e800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "head_bits": "0x41220000",
+        "phase": 1,
+        "tail_bits": "0x00000000",
+        "timer": 1,
+        "timer_fraction_bits": "0x00000000"
+      },
+      "label": "unit_active_motion",
+      "operation": "laser",
+      "passed": true,
+      "steps": [
+        {
+          "native_probe": [
+            "0x3f600000",
+            "0x41560000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "oracle": [
+            "0x3f600000",
+            "0x41560000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "passed": true,
+          "product": [
+            "0x3f600000",
+            "0x41560000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3f800000"
+        },
+        {
+          "native_probe": [
+            "0x40840000",
+            "0x41850000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000003",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "oracle": [
+            "0x40840000",
+            "0x41850000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000003",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "passed": true,
+          "product": [
+            "0x40840000",
+            "0x41850000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000003",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3f800000"
+        },
+        {
+          "native_probe": [
+            "0x40ec0000",
+            "0x419f0000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000004",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "oracle": [
+            "0x40ec0000",
+            "0x419f0000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000004",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "passed": true,
+          "product": [
+            "0x40ec0000",
+            "0x419f0000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000004",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3f800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "head_bits": "0x41500000",
+        "phase": 1,
+        "tail_bits": "0x40000000",
+        "timer": 1,
+        "timer_fraction_bits": "0x3f400000"
+      },
+      "label": "quarter_fractional_timer_and_length_clamp",
+      "operation": "laser",
+      "passed": true,
+      "steps": [
+        {
+          "native_probe": [
+            "0x40000000",
+            "0x415d0000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "oracle": [
+            "0x40000000",
+            "0x415d0000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "passed": true,
+          "product": [
+            "0x40000000",
+            "0x415d0000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "native_probe": [
+            "0x40080000",
+            "0x416a0000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "oracle": [
+            "0x40080000",
+            "0x416a0000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "passed": true,
+          "product": [
+            "0x40080000",
+            "0x416a0000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "native_probe": [
+            "0x403c0000",
+            "0x41770000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "oracle": [
+            "0x403c0000",
+            "0x41770000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "passed": true,
+          "product": [
+            "0x403c0000",
+            "0x41770000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "native_probe": [
+            "0x40700000",
+            "0x41820000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x3f400000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "oracle": [
+            "0x40700000",
+            "0x41820000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x3f400000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "passed": true,
+          "product": [
+            "0x40700000",
+            "0x41820000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000002",
+            "0x3f400000",
+            "0x00000001",
+            "0x00000011"
+          ],
+          "step": 4,
+          "time_scale_bits": "0x3e800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "head_bits": "0x41220000",
+        "phase": 0,
+        "tail_bits": "0x00000000",
+        "timer": 0,
+        "timer_fraction_bits": "0x00000000"
+      },
+      "label": "stop_resume_warmup",
+      "operation": "laser",
+      "passed": true,
+      "steps": [
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x41220000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x41220000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x41220000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x00000000"
+        },
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x41220000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x41220000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x41220000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x00000000"
+        },
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x413c0000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x413c0000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x413c0000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3f000000"
+        },
+        {
+          "native_probe": [
+            "0x3f600000",
+            "0x41560000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x3f600000",
+            "0x41560000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x3f600000",
+            "0x41560000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 4,
+          "time_scale_bits": "0x3f000000"
+        },
+        {
+          "native_probe": [
+            "0x40840000",
+            "0x41850000",
+            "0x40800000",
+            "0x00000000",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "oracle": [
+            "0x40840000",
+            "0x41850000",
+            "0x40800000",
+            "0x00000000",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "passed": true,
+          "product": [
+            "0x40840000",
+            "0x41850000",
+            "0x40800000",
+            "0x00000000",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "step": 5,
+          "time_scale_bits": "0x3f800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "head_bits": "0x41220000",
+        "phase": 0,
+        "tail_bits": "0x00000000",
+        "timer": 3,
+        "timer_fraction_bits": "0x3f400000"
+      },
+      "label": "warmup_same_update_active_fallthrough",
+      "operation": "laser",
+      "passed": true,
+      "steps": [
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x412f0000",
+            "0x41800000",
+            "0x00000001",
+            "0x00000000",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000502"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x412f0000",
+            "0x41800000",
+            "0x00000001",
+            "0x00000000",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000502"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x412f0000",
+            "0x41800000",
+            "0x00000001",
+            "0x00000000",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000502"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "native_probe": [
+            "0x3fd80000",
+            "0x41630000",
+            "0x41800000",
+            "0x00000001",
+            "0x00000001",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000051"
+          ],
+          "oracle": [
+            "0x3fd80000",
+            "0x41630000",
+            "0x41800000",
+            "0x00000001",
+            "0x00000001",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000051"
+          ],
+          "passed": true,
+          "product": [
+            "0x3fd80000",
+            "0x41630000",
+            "0x41800000",
+            "0x00000001",
+            "0x00000001",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000051"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3f800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "head_bits": "0x41220000",
+        "phase": 1,
+        "tail_bits": "0x00000000",
+        "timer": 4,
+        "timer_fraction_bits": "0x3f000000"
+      },
+      "label": "active_same_update_fade_fallthrough",
+      "operation": "laser",
+      "passed": true,
+      "steps": [
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x413c0000",
+            "0x41800000",
+            "0x00000002",
+            "0x00000000",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000212"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x413c0000",
+            "0x41800000",
+            "0x00000002",
+            "0x00000000",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000212"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x413c0000",
+            "0x41800000",
+            "0x00000002",
+            "0x00000000",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000212"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3f000000"
+        },
+        {
+          "native_probe": [
+            "0x3f600000",
+            "0x41560000",
+            "0x41555555",
+            "0x00000002",
+            "0x00000001",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "oracle": [
+            "0x3f600000",
+            "0x41560000",
+            "0x41555555",
+            "0x00000002",
+            "0x00000001",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "passed": true,
+          "product": [
+            "0x3f600000",
+            "0x41560000",
+            "0x41555555",
+            "0x00000002",
+            "0x00000001",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3f000000"
+        },
+        {
+          "native_probe": [
+            "0x40840000",
+            "0x41850000",
+            "0x412aaaab",
+            "0x00000002",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "oracle": [
+            "0x40840000",
+            "0x41850000",
+            "0x412aaaab",
+            "0x00000002",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "passed": true,
+          "product": [
+            "0x40840000",
+            "0x41850000",
+            "0x412aaaab",
+            "0x00000002",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3f800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "head_bits": "0x41220000",
+        "phase": 2,
+        "tail_bits": "0x00000000",
+        "timer": 0,
+        "timer_fraction_bits": "0x3f2aaaab"
+      },
+      "label": "one_third_fade_width_and_disable",
+      "operation": "laser",
+      "passed": true,
+      "steps": [
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x41335555",
+            "0x41555555",
+            "0x00000002",
+            "0x00000001",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x41335555",
+            "0x41555555",
+            "0x00000002",
+            "0x00000001",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x41335555",
+            "0x41555555",
+            "0x00000002",
+            "0x00000001",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x4144aaaa",
+            "0x41400000",
+            "0x00000002",
+            "0x00000001",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x4144aaaa",
+            "0x41400000",
+            "0x00000002",
+            "0x00000001",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x4144aaaa",
+            "0x41400000",
+            "0x00000002",
+            "0x00000001",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "native_probe": [
+            "0x3f5ffff0",
+            "0x4155ffff",
+            "0x412aaaab",
+            "0x00000002",
+            "0x00000001",
+            "0x3f2aaaab",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "oracle": [
+            "0x3f5ffff0",
+            "0x4155ffff",
+            "0x412aaaab",
+            "0x00000002",
+            "0x00000001",
+            "0x3f2aaaab",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "passed": true,
+          "product": [
+            "0x3f5ffff0",
+            "0x4155ffff",
+            "0x412aaaab",
+            "0x00000002",
+            "0x00000001",
+            "0x3f2aaaab",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "native_probe": [
+            "0x3ffaaaa0",
+            "0x41675554",
+            "0x41155555",
+            "0x00000002",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "oracle": [
+            "0x3ffaaaa0",
+            "0x41675554",
+            "0x41155555",
+            "0x00000002",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "passed": true,
+          "product": [
+            "0x3ffaaaa0",
+            "0x41675554",
+            "0x41155555",
+            "0x00000002",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000021"
+          ],
+          "step": 4,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "native_probe": [
+            "0x4042aaa4",
+            "0x4178aaa9",
+            "0x41000000",
+            "0x00000002",
+            "0x00000002",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x4042aaa4",
+            "0x4178aaa9",
+            "0x41000000",
+            "0x00000002",
+            "0x00000002",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x4042aaa4",
+            "0x4178aaa9",
+            "0x41000000",
+            "0x00000002",
+            "0x00000002",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 5,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "native_probe": [
+            "0x4083fffc",
+            "0x4184ffff",
+            "0x40d55555",
+            "0x00000002",
+            "0x00000002",
+            "0x3f2aaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x4083fffc",
+            "0x4184ffff",
+            "0x40d55555",
+            "0x00000002",
+            "0x00000002",
+            "0x3f2aaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x4083fffc",
+            "0x4184ffff",
+            "0x40d55555",
+            "0x00000002",
+            "0x00000002",
+            "0x3f2aaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 6,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "native_probe": [
+            "0x40a6aaa8",
+            "0x418daaaa",
+            "0x40aaaaaa",
+            "0x00000002",
+            "0x00000003",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x40a6aaa8",
+            "0x418daaaa",
+            "0x40aaaaaa",
+            "0x00000002",
+            "0x00000003",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x40a6aaa8",
+            "0x418daaaa",
+            "0x40aaaaaa",
+            "0x00000002",
+            "0x00000003",
+            "0x00000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 7,
+          "time_scale_bits": "0x3eaaaaab"
+        },
+        {
+          "native_probe": [
+            "0x40c95554",
+            "0x41965555",
+            "0x40800000",
+            "0x00000002",
+            "0x00000003",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x40c95554",
+            "0x41965555",
+            "0x40800000",
+            "0x00000002",
+            "0x00000003",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x40c95554",
+            "0x41965555",
+            "0x40800000",
+            "0x00000002",
+            "0x00000003",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 8,
+          "time_scale_bits": "0x3eaaaaab"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "head_bits": "0x41220000",
+        "phase": 0,
+        "tail_bits": "0x00000000",
+        "timer": 1,
+        "timer_fraction_bits": "0x00000000"
+      },
+      "label": "alpha_flag_keeps_width",
+      "operation": "laser",
+      "passed": true,
+      "steps": [
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x412f0000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x412f0000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x412f0000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x413c0000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x413c0000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x413c0000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "native_probe": [
+            "0x3d800000",
+            "0x41490000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3f400000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "oracle": [
+            "0x3d800000",
+            "0x41490000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3f400000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "passed": true,
+          "product": [
+            "0x3d800000",
+            "0x41490000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3f400000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "native_probe": [
+            "0x3f600000",
+            "0x41560000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "oracle": [
+            "0x3f600000",
+            "0x41560000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "passed": true,
+          "product": [
+            "0x3f600000",
+            "0x41560000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000002",
+            "0x00000000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "step": 4,
+          "time_scale_bits": "0x3e800000"
+        },
+        {
+          "native_probe": [
+            "0x3fd80000",
+            "0x41630000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000002",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "oracle": [
+            "0x3fd80000",
+            "0x41630000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000002",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "passed": true,
+          "product": [
+            "0x3fd80000",
+            "0x41630000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000002",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000001"
+          ],
+          "step": 5,
+          "time_scale_bits": "0x3e800000"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "head_bits": "0x41220000",
+        "phase": 0,
+        "tail_bits": "0x00000000",
+        "timer": 0,
+        "timer_fraction_bits": "0x00000000"
+      },
+      "label": "one_twelfth_head_and_timer",
+      "operation": "laser",
+      "passed": true,
+      "steps": [
+        {
+          "native_probe": [
+            "0x00000000",
+            "0x4138d555",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3daaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x00000000",
+            "0x4138d555",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3daaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x00000000",
+            "0x4138d555",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3daaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x3ef55540",
+            "0x414faaaa",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3e2aaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x3ef55540",
+            "0x414faaaa",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3e2aaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x3ef55540",
+            "0x414faaaa",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3e2aaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 2,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x3ff3fff8",
+            "0x41667fff",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x3ff3fff8",
+            "0x41667fff",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x3ff3fff8",
+            "0x41667fff",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3e800000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 3,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x40555550",
+            "0x417d5554",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x40555550",
+            "0x417d5554",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x40555550",
+            "0x417d5554",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3eaaaaab",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 4,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x40985554",
+            "0x418a1555",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3ed55556",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x40985554",
+            "0x418a1555",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3ed55556",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x40985554",
+            "0x418a1555",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3ed55556",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 5,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x40c60000",
+            "0x41958000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x40c60000",
+            "0x41958000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x40c60000",
+            "0x41958000",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f000000",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 6,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x40f3aaac",
+            "0x41a0eaab",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f155555",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x40f3aaac",
+            "0x41a0eaab",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f155555",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x40f3aaac",
+            "0x41a0eaab",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f155555",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 7,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x4110aaac",
+            "0x41ac5556",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f2aaaaa",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x4110aaac",
+            "0x41ac5556",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f2aaaaa",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x4110aaac",
+            "0x41ac5556",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f2aaaaa",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 8,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x41278002",
+            "0x41b7c001",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f3fffff",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x41278002",
+            "0x41b7c001",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f3fffff",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x41278002",
+            "0x41b7c001",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f3fffff",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 9,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x413e5558",
+            "0x41c32aac",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f555554",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x413e5558",
+            "0x41c32aac",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f555554",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x413e5558",
+            "0x41c32aac",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f555554",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 10,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x41552aae",
+            "0x41ce9557",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f6aaaa9",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x41552aae",
+            "0x41ce9557",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f6aaaa9",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x41552aae",
+            "0x41ce9557",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f6aaaa9",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 11,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x416c0004",
+            "0x41da0002",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f7ffffe",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x416c0004",
+            "0x41da0002",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f7ffffe",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x416c0004",
+            "0x41da0002",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000000",
+            "0x3f7ffffe",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 12,
+          "time_scale_bits": "0x3daaaaab"
+        },
+        {
+          "native_probe": [
+            "0x41816aad",
+            "0x41e56aad",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3daaaaa0",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "oracle": [
+            "0x41816aad",
+            "0x41e56aad",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3daaaaa0",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "passed": true,
+          "product": [
+            "0x41816aad",
+            "0x41e56aad",
+            "0x3f99999a",
+            "0x00000000",
+            "0x00000001",
+            "0x3daaaaa0",
+            "0x00000001",
+            "0x00000000"
+          ],
+          "step": 13,
+          "time_scale_bits": "0x3daaaaab"
+        }
+      ]
+    },
+    {
+      "initial": {
+        "head_bits": "0x44200000",
+        "phase": 1,
+        "tail_bits": "0x441fe000",
+        "timer": 1,
+        "timer_fraction_bits": "0x00000000"
+      },
+      "label": "tail_cull_after_collision_phase",
+      "operation": "laser",
+      "passed": true,
+      "steps": [
+        {
+          "native_probe": [
+            "0x44202000",
+            "0x44204000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000001",
+            "0x3e800000",
+            "0x00000000",
+            "0x00000011"
+          ],
+          "oracle": [
+            "0x44202000",
+            "0x44204000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000001",
+            "0x3e800000",
+            "0x00000000",
+            "0x00000011"
+          ],
+          "passed": true,
+          "product": [
+            "0x44202000",
+            "0x44204000",
+            "0x3f99999a",
+            "0x00000001",
+            "0x00000001",
+            "0x3e800000",
+            "0x00000000",
+            "0x00000011"
+          ],
+          "step": 1,
+          "time_scale_bits": "0x3e800000"
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "cases": 17,
+    "failed": 0,
+    "laser_steps": 44,
+    "movement_steps": 36,
+    "passed": 17,
+    "seeded_product_oracle_cases": 6144
+  },
+  "gates": {
+    "all_product_oracle_native_bitwise_equal": true,
+    "direction_and_focus_change_present": true,
+    "laser_phase_fallthrough_present": true,
+    "one_third_present": true,
+    "one_twelfth_present": true,
+    "seeded_product_oracle_zero_mismatch": true,
+    "unit_nonunit_stop_present": true
+  },
+  "laser_version": "th08-player-laser-phase-scale-v1-0044ba67-00431bc9:laser-lifecycle",
+  "movement_version": "th08-player-laser-phase-scale-v1-0044ba67-00431bc9:route2-movement",
+  "native_probe": {
+    "name": "th08_scale_transition_probe",
+    "rounding": "FE_TONEAREST",
+    "sha256": "94573324286fcf95994a6dd22c3ff971a5aa7bbf5110fbef5a0b2b0639e163c9",
+    "size": 27736,
+    "stores": "explicit_x87_fstp_dword"
+  },
+  "oracle_version": "th08-scale-transition-raw-oracle-v1",
+  "passed": true,
+  "schema": "th08-player-laser-scale-differential-v1",
+  "seeded_product_oracle_sweep": {
+    "laser_cases": 2048,
+    "laser_mismatches": 0,
+    "movement_cases": 4096,
+    "movement_mismatches": 0,
+    "passed": true,
+    "seed": "0x5ca1e",
+    "sha256": "9cd09a2ed69aba52f4f2c98dee3a7f22d124bfa585975483a87fa92e662a593d"
+  },
+  "semantics_version": "th08-player-laser-phase-scale-v1-0044ba67-00431bc9"
+}

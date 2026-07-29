@@ -751,13 +751,13 @@ Execution progress on 2026-07-29:
   `UNKNOWN`. Complete Linux/Windows discovery passes 1,087 tests; Windows
   keeps three existing skips.
 - **Authority boundary:** SEM-SCALE-A/B and isolated-source C1/C2/C3 pass
-  their declared offline/retained slices only. No complete live
-  main/auxiliary writer and installed-callback/phase-coherence join exists,
-  so the root-only live daemon still records `time_scale_authority_unknown`,
-  terminates, and releases keys before corridor submission or local issue.
-  SEM-SCALE-C must pass default-off trace-only complete-source evidence and
-  then the focused physical falsifier. No game launch or strategy promotion
-  is authorized by SEM-SCALE-A/B/C1/C2/C3 alone.
+  their declared offline/retained slices only. C4 now implements a complete
+  main/auxiliary writer and installed-callback/phase-coherence observer, but
+  has no accepted physical row. The root-only live daemon therefore still
+  records `time_scale_authority_unknown`, terminates, and releases keys
+  before corridor submission or local issue. SEM-SCALE-C must pass the
+  default-off trace-only physical evidence and then the focused physical
+  falsifier. No strategy promotion is authorized by implementation alone.
 - **Observed SEM-SCALE-C1 root capsule:** checkpoint `1f639ef` binds the
   three existing Final-B raw sessions and retains 68/78/84 spell-190 rows at
   binary32 scale `0.25`. All 230 read-lag horizons are zero or one, so root
@@ -789,6 +789,21 @@ Execution progress on 2026-07-29:
   the declared isolated source plus one historical transition, not complete
   live main/auxiliary inventory, callback-28 bullet rescaling in hazards,
   clean survival, or action authority.
+- **Observed SEM-SCALE-C4 implementation gate:** checkpoint `ead1f21` adds a
+  read-only spell-190 observer and strict physical report. It binds exact
+  runtime `ecldata7.ecl`, brackets all 480 ordinary slots plus an out-of-pool
+  spell owner with stable frame/phase/root/Bomb identity, records active main
+  VM state, selected-VM installed callback and four auxiliary pointers, and
+  calls the causal producer only for a singleton valid quarter-scale sub44
+  source. It rejects every auxiliary context, unknown/scale installed
+  callback, invalid/multiple source, identity drift, incomplete schedule, and
+  callback-28/29 bullet velocity side effect. Connected IDA revalidation
+  corrected the installed fields to selected ECL VM `+0x10/+0x14` (main
+  enemy `+0x808/+0x80C`) and confirmed main VM -> auxiliary 0..3 -> enemy
+  motion order. Linux/Windows discovery passes 1,107 tests in
+  13.728/29.427 seconds with three existing Windows skips. No game was
+  launched; this proves implementation and fail-closed parity, not the C4
+  physical trace, live schedule delivery, survival, or NMNB.
 
 #### 1C. Action-conditioned player/enemy mode
 
@@ -1050,9 +1065,9 @@ After that baseline, the next correction checkpoints should be:
    zero-fraction/unit-scale slice, fails survival authority, and supplies no
    timer-causal rollback target;
 2. `SEM-SCALE`: C1 roots and C2/C3 isolated causal Final-B/Extra schedules
-   pass; complete the default-off live writer/installed-callback/phase
-   trace-only gate, callback-28 hazard-side-effect boundary, and focused
-   Final-B physical falsifier before promotion;
+   pass; C4's read-only complete-source implementation passes offline. Retain
+   its physical spell-190 trace, then integrate only the accepted schedule
+   path and run the focused Final-B physical falsifier before promotion;
 3. `SEM-MODE`: focus/secondary-character transition and action-conditioned
    enemy contact/damage eligibility;
 4. `SEM-GEOM`: exact player/laser geometry, bullet lifecycle/suppression, and

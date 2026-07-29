@@ -516,18 +516,46 @@ IDA revalidation for C2/C3 renamed `0x004178A0`
 `0x0041FDD0` record the 10099/10100 dataflow and `+0x110` current field.
 
 C2/C3 complete the isolated causal producer and static Extra bullets only.
-The next implementation slice is a default-off trace-only join that proves or
-rejects the complete main/auxiliary writer inventory, installed callback
-state, scheduler order, post-update coherence, phase continuation, and
-callback-28 bullet-side-effect boundary before any live consumer is enabled.
+Checkpoint `ead1f21` implements the next default-off trace-only join:
+
+- `scripts/tools/th08_finalb_scale_source_observer.py` is a standalone
+  read-only waiter for Lunatic Final-B spell 190. It performs no input or
+  foreground operation;
+- it binds the loaded image exactly to shipped `ecldata7.ecl` SHA-256
+  `20b35dca3820438f0b90ae44e3362a7af27d2fc1ac7ae5888c477dc1c89a3734`;
+- one transaction brackets all 480 ordinary slots and a separate spell owner,
+  if outside that pool, with manager frame, route/difficulty/stage, complete
+  spell bytes, ECL context, root scale, Bomb-active, and predeath identity;
+- every active source retains main-VM PC/timer/locals, selected-VM installed
+  callback/function-record, and four auxiliary pointers. A complete result
+  requires one valid spell-owner main VM and no auxiliary context;
+- the installed callback fields were revalidated at `0x0041E852` as current
+  ECL VM `+0x10/+0x14`, not enemy base `+0x10/+0x14`. The main VM therefore
+  uses enemy `+0x808/+0x80C`; auxiliary active VMs carry their own fields;
+- the main VM completes before auxiliary indices 0 through 3, and enemy
+  motion at `0x0041ECA7` follows all selected VMs. IDA comments at
+  `0x0041E852` and `0x0041EBBC` retain this correction/order;
+- exact quarter scale, no current Bomb/predeath, sub44 ownership, complete
+  300-frame causal synthesis, and absence of callback-28/29 bullet velocity
+  rescaling are mandatory. Any failure is `UNKNOWN`; and
+- the strict report tool independently rejects an incomplete source,
+  identity, schedule, or bullet-side-effect record.
+
+The implementation passes 1,107 Linux tests in 13.728 seconds and 1,107
+Windows tests in 29.427 seconds with the three existing skips. This is not the
+trace-only physical gate itself: no game was launched and no observed
+complete-source row exists. The live daemon still consumes only its root
+observation and fails closed. A physical read-only C4 observation must pass
+before live delivery or the focused Final-B transition falsifier.
 
 No accepted SEM-SCALE result alone establishes Lunatic NMNB, Extra
 acceptance, global optimality, or complete future-source coverage.
 
 ## Current stopping rule
 
-Do not launch another game before the SEM-SCALE-C trace-only complete-source
-gate passes. Any test mismatch,
-incomplete scale coverage consumed as exact, cross-version cache hit, or live
-non-unit hard certificate is a durable counterexample and stops physical
-promotion.
+Do not launch an input-injecting solver trial before the SEM-SCALE-C
+trace-only complete-source gate passes. One read-only C4 observer may attach
+to an already driven physical scene or replay; it must not send input or
+change foreground ownership. Any test mismatch, incomplete scale coverage
+consumed as exact, cross-version cache hit, or live non-unit hard certificate
+is a durable counterexample and stops physical promotion.

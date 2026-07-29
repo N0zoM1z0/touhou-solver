@@ -423,6 +423,22 @@ authority. The daemon therefore retains its existing fail-closed behavior;
 the default-off trace-only complete-source gate and fresh focused Final-B
 falsifier remain required.
 
+**2026-07-29 SEM-SCALE-C4 complete-source observer implementation:**
+checkpoint `ead1f21` adds a standalone read-only Final-B spell-190 observer
+and strict physical report gate. It binds the exact runtime ECL image,
+captures all 480 ordinary enemy slots plus an out-of-pool spell owner under
+one phase/frame identity, inventories each active main VM, its selected-VM
+installed callback, and all four auxiliary pointers, then admits sub44 to the
+causal producer only for a singleton clean quarter-scale source. Any
+auxiliary context, unknown/scale installed callback, invalid VM, source
+multiplicity, identity drift, incomplete schedule, or callback-28/29 bullet
+side effect is explicit `UNKNOWN`. Revalidation corrects the installed
+callback fields from the inherited enemy-base label to current ECL VM
+`+0x10/+0x14` (main enemy `+0x808/+0x80C`). Linux/Windows tests pass, but no
+game was launched and no physical C4 row exists. This is not live schedule
+delivery or strategy promotion; the daemon remains fail-closed until C4
+physical acceptance and the separate focused Final-B falsifier.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

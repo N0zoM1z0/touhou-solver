@@ -8,11 +8,18 @@ import unittest
 
 from th08_enemy_mode import (
     ENEMY_SECONDARY_CHARACTER_BLOCK_FLAG,
+    Route2EnemyModeBody,
+    merge_route2_mode_decision_observation_classes,
+    merge_route2_mode_observation_classes,
     project_enemy_mode,
     project_route2_enemy_mode,
+    project_route2_mode_decision_branches,
+    project_route2_mode_pipeline_branches,
     route2_enemy_mode_state_key,
+    step_route2_enemy_mode_state,
 )
 from th08_option_model import Route2FocusState, step_route2_focus
+from touhou_control.local_pipeline_oracle import LocalPipelineRoot
 
 
 def _oracle_step(
@@ -150,6 +157,13 @@ class EnemyModeTests(unittest.TestCase):
                 model = initial
                 oracle = route2_enemy_mode_state_key(initial)
                 for focused in history:
+                    self.assertEqual(
+                        step_route2_enemy_mode_state(
+                            oracle,
+                            focused=focused,
+                        ),
+                        _oracle_step(oracle, focused),
+                    )
                     model = step_route2_focus(
                         model,
                         focused=focused,
@@ -174,6 +188,311 @@ class EnemyModeTests(unittest.TestCase):
                         projection.player_shot_damage_eligible,
                         expected_contact,
                     )
+
+    def test_pipeline_pickup_delay_changes_mode_conditioned_body_gate(
+        self,
+    ) -> None:
+        body_frames = tuple(
+            (
+                Route2EnemyModeBody(
+                    identity=0x1000,
+                    raw_flags=self.MODE_SENSITIVE_CONTACT_AND_DAMAGE,
+                ),
+            )
+            for _ in range(10)
+        )
+        branches = project_route2_mode_pipeline_branches(
+            pipeline_root=LocalPipelineRoot(
+                active_action="fast",
+                held_desired_action="fast",
+            ),
+            selected_action="focus",
+            action_masks={"fast": 0x01, "focus": 0x05},
+            delay_frames=(0, 2),
+            initial_mode_state=(0, False, 7),
+            enemy_flag_frames=body_frames,
+        )
+        self.assertEqual(
+            tuple(branch.pipeline_branch.new_delay for branch in branches),
+            (0, 2),
+        )
+
+        for branch in branches:
+            oracle = (0, False, 7)
+            for active_action, frame in zip(
+                branch.pipeline_branch.active_actions,
+                branch.frames,
+                strict=True,
+            ):
+                oracle = _oracle_step(
+                    oracle,
+                    bool({"fast": 0x01, "focus": 0x05}[active_action] & 0x04),
+                )
+                self.assertEqual(frame.mode_state_after, oracle)
+                self.assertEqual(
+                    frame.contact_body_ids,
+                    () if oracle[1] else (0x1000,),
+                )
+                self.assertEqual(
+                    frame.player_shot_damage_body_ids,
+                    () if oracle[1] else (0x1000,),
+                )
+
+        delay_zero, delay_two = branches
+        self.assertEqual(
+            tuple(frame.active_action for frame in delay_zero.frames[:3]),
+            ("focus", "focus", "focus"),
+        )
+        self.assertEqual(
+            tuple(frame.active_action for frame in delay_two.frames[:3]),
+            ("fast", "fast", "focus"),
+        )
+        self.assertEqual(delay_zero.frames[7].contact_body_ids, ())
+        self.assertEqual(delay_two.frames[7].contact_body_ids, (0x1000,))
+        self.assertEqual(delay_two.frames[9].contact_body_ids, ())
+
+    def test_no_write_preserves_pending_and_merges_hidden_remaining_delay(
+        self,
+    ) -> None:
+        branches = project_route2_mode_pipeline_branches(
+            pipeline_root=LocalPipelineRoot(
+                active_action="left_fast",
+                held_desired_action="right_fast",
+                pending_action="right_fast",
+                remaining_delay_support=(1, 2),
+            ),
+            selected_action="right_fast",
+            action_masks={"left_fast": 0x01, "right_fast": 0x01},
+            delay_frames=(0, 2),
+            initial_mode_state=(0, False, 0),
+            enemy_flag_frames=((), (), ()),
+        )
+        self.assertEqual(len(branches), 2)
+        self.assertTrue(
+            all(not branch.pipeline_branch.write_required for branch in branches)
+        )
+        self.assertEqual(
+            tuple(branch.pipeline_branch.new_delay for branch in branches),
+            (None, None),
+        )
+        self.assertEqual(
+            tuple(branch.pipeline_branch.older_remaining for branch in branches),
+            (1, 2),
+        )
+
+        classes = merge_route2_mode_observation_classes(
+            branches,
+            physical_step=3,
+            base_observation=lambda _branch, _frame: (
+                "same_position",
+                "same_hazard_version",
+            ),
+        )
+        self.assertEqual(len(classes), 1)
+        self.assertEqual(len(classes[0].hidden_branches), 2)
+        self.assertEqual(classes[0].key.active_action, "right_fast")
+        self.assertEqual(classes[0].key.held_desired_action, "right_fast")
+
+    def test_observation_merge_keeps_different_hidden_mode_states_apart(
+        self,
+    ) -> None:
+        branches = project_route2_mode_pipeline_branches(
+            pipeline_root=LocalPipelineRoot(
+                active_action="fast",
+                held_desired_action="fast",
+            ),
+            selected_action="focus",
+            action_masks={"fast": 0x01, "focus": 0x05},
+            delay_frames=(0, 2),
+            initial_mode_state=(0, False, 0),
+            enemy_flag_frames=((), (), ()),
+        )
+        classes = merge_route2_mode_observation_classes(
+            branches,
+            physical_step=3,
+            base_observation=lambda _branch, _frame: "same_base",
+        )
+        self.assertEqual(len(classes), 2)
+        self.assertEqual(
+            {mode_class.key.active_action for mode_class in classes},
+            {"focus"},
+        )
+        self.assertEqual(
+            {mode_class.key.mode_state for mode_class in classes},
+            {(1, False, 2), (1, False, 0)},
+        )
+        self.assertTrue(
+            all(len(mode_class.hidden_branches) == 1 for mode_class in classes)
+        )
+
+    def test_pipeline_reproduces_ce_0176_release_gate_timing(self) -> None:
+        branches = project_route2_mode_pipeline_branches(
+            pipeline_root=LocalPipelineRoot(
+                active_action="fast",
+                held_desired_action="fast",
+            ),
+            selected_action="fast",
+            action_masks={"fast": 0x01},
+            delay_frames=(0, 2),
+            initial_mode_state=(1, True, 7),
+            enemy_flag_frames=tuple(
+                (
+                    Route2EnemyModeBody(
+                        identity=0x1000,
+                        raw_flags=self.MODE_SENSITIVE_CONTACT_AND_DAMAGE,
+                    ),
+                )
+                for _ in range(8)
+            ),
+        )
+        self.assertEqual(len(branches), 1)
+        self.assertEqual(
+            tuple(bool(frame.contact_body_ids) for frame in branches[0].frames),
+            (False,) * 7 + (True,),
+        )
+
+    def test_decision_transition_branches_recursive_cadence_and_delay(
+        self,
+    ) -> None:
+        branches = project_route2_mode_decision_branches(
+            pipeline_root=LocalPipelineRoot(
+                active_action="fast",
+                held_desired_action="fast",
+            ),
+            selected_action="focus",
+            action_masks={"fast": 0x01, "focus": 0x05},
+            delay_frames=(2,),
+            decision_frame_support=(1, 3),
+            initial_mode_state=(0, False, 0),
+            enemy_flag_frames=((), (), ()),
+        )
+        self.assertEqual(len(branches), 2)
+        early, late = branches
+        self.assertEqual(early.cadence_frames, 1)
+        self.assertEqual(
+            early.successor_pipeline_root,
+            LocalPipelineRoot(
+                active_action="fast",
+                held_desired_action="focus",
+                pending_action="focus",
+                remaining_delay_support=(1,),
+            ),
+        )
+        self.assertEqual(early.successor_mode_state, (0, False, 1))
+        self.assertEqual(late.cadence_frames, 3)
+        self.assertEqual(
+            late.successor_pipeline_root,
+            LocalPipelineRoot(
+                active_action="focus",
+                held_desired_action="focus",
+            ),
+        )
+        self.assertEqual(late.successor_mode_state, (1, False, 0))
+
+    def test_decision_observation_merges_remaining_delay_support(self) -> None:
+        branches = project_route2_mode_decision_branches(
+            pipeline_root=LocalPipelineRoot(
+                active_action="fast",
+                held_desired_action="fast",
+            ),
+            selected_action="focus",
+            action_masks={"fast": 0x01, "focus": 0x05},
+            delay_frames=(3, 4),
+            decision_frame_support=(1,),
+            initial_mode_state=(0, False, 0),
+            enemy_flag_frames=((),),
+        )
+        classes = merge_route2_mode_decision_observation_classes(
+            branches,
+            base_observation=lambda _branch, _frame: (
+                "same_position",
+                "same_hazard_version",
+            ),
+        )
+        self.assertEqual(len(classes), 1)
+        self.assertEqual(len(classes[0].hidden_branches), 2)
+        self.assertEqual(
+            classes[0].successor_pipeline_root,
+            LocalPipelineRoot(
+                active_action="fast",
+                held_desired_action="focus",
+                pending_action="focus",
+                remaining_delay_support=(2, 3),
+            ),
+        )
+        self.assertEqual(classes[0].key.physical_step, 1)
+        self.assertEqual(classes[0].key.mode_state, (0, False, 1))
+
+    def test_decision_successor_can_be_recurred_without_resetting_pending(
+        self,
+    ) -> None:
+        first = project_route2_mode_decision_branches(
+            pipeline_root=LocalPipelineRoot(
+                active_action="fast",
+                held_desired_action="fast",
+            ),
+            selected_action="focus",
+            action_masks={"fast": 0x01, "focus": 0x05},
+            delay_frames=(3, 4),
+            decision_frame_support=(1,),
+            initial_mode_state=(0, False, 0),
+            enemy_flag_frames=((),),
+        )
+        merged = merge_route2_mode_decision_observation_classes(
+            first,
+            base_observation=lambda _branch, _frame: "same_base",
+        )
+        second = project_route2_mode_decision_branches(
+            pipeline_root=merged[0].successor_pipeline_root,
+            selected_action="focus",
+            action_masks={"fast": 0x01, "focus": 0x05},
+            delay_frames=(0,),
+            decision_frame_support=(1,),
+            initial_mode_state=merged[0].key.mode_state,
+            enemy_flag_frames=((),),
+        )
+        self.assertTrue(
+            all(
+                not branch.hazard_branch.pipeline_branch.write_required
+                for branch in second
+            )
+        )
+        self.assertEqual(
+            tuple(
+                branch.hazard_branch.pipeline_branch.older_remaining
+                for branch in second
+            ),
+            (2, 3),
+        )
+        self.assertEqual(
+            tuple(
+                branch.successor_pipeline_root.remaining_delay_support
+                for branch in second
+            ),
+            ((1,), (2,)),
+        )
+
+    def test_pipeline_rejects_bomb_masks_and_incomplete_action_map(self) -> None:
+        common = {
+            "pipeline_root": LocalPipelineRoot(
+                active_action="fast",
+                held_desired_action="fast",
+            ),
+            "selected_action": "focus",
+            "delay_frames": (0,),
+            "initial_mode_state": (0, False, 0),
+            "enemy_flag_frames": ((),),
+        }
+        with self.assertRaisesRegex(ValueError, "hard no-Bomb"):
+            project_route2_mode_pipeline_branches(
+                **common,
+                action_masks={"fast": 0x01, "focus": 0x07},
+            )
+        with self.assertRaisesRegex(ValueError, "missing complete action"):
+            project_route2_mode_pipeline_branches(
+                **common,
+                action_masks={"fast": 0x01},
+            )
 
     def test_mode_state_key_forbids_hidden_counter_merge(self) -> None:
         early = Route2FocusState(

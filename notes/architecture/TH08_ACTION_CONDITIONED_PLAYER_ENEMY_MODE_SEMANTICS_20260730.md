@@ -4,6 +4,7 @@ Date: 2026-07-30
 Roadmap item: `SEM-MODE` / Phase 1C  
 Current authority: native semantics revalidated; decoder retention, pure
 projection, frame-bracketed diagnostic capture, and compact reporting
+implemented; an exact offline pickup/cadence transition primitive is
 implemented; live hazard authority not promoted
 
 ## Decision
@@ -69,6 +70,29 @@ The following IDA database changes record those strong conclusions:
 
 The nouns are intentionally mechanical. `secondary_character` applies across
 routes; “Remilia” is route-2-specific context.
+
+The connected IDB is not a byte-identical shipped executable image. This was
+revalidated rather than hidden behind the inherited database metadata:
+
+- **Observed:** the IDB input SHA-256 is
+  `ec101fcff80b77e717d43b54e326375487af19661bb7c8d11a19ee5e0fbf928b`;
+  the shipped disk image used by the launcher hashes to
+  `330fbdbf58a710829d65277b4f312cfbb38d5448b3df523e79350b879213d924`.
+- **Observed:** replacing only shipped file offset `0x4C4FA`, corresponding
+  to VA `0x0044D0FA`, from `0xFF` to `0x00` reproduces the IDB input hash
+  exactly. This changes `push -1` to research `push 0` before
+  `add_player_lives`, preserving the miss/respawn path without decrementing
+  lives.
+- **Observed:** the critical SEM-MODE byte ranges beginning at
+  `0x0044B1C0`, `0x0044B410`, `0x0042C960`, and `0x0042CF30` match the
+  shipped disk image exactly.
+- **IDA change:** the comment at instruction `0x0044D0F9` now records both
+  hashes, the single-byte proof, the patch purpose, and an explicit warning
+  never to infer shipped life behavior from this byte.
+
+Thus the connected database remains valid static evidence for the rechecked
+SEM-MODE ranges, while the no-life-decrement byte is research instrumentation
+and not shipped-program semantics.
 
 ## Retained Runtime Witness
 
@@ -177,6 +201,13 @@ player_shot_damage_eligible = manager_gate and (flags & 0x40)
 Contact and damage are deliberately separate booleans. Enemy geometry and
 raw flags remain separate from both.
 
+The enemy helper executes before that enemy's ECL and later contact/damage
+gate. Therefore a contact-gate projection may accept a caller-supplied
+per-frame body/flag schedule only if the schedule represents the exact
+mode-independent flags and body identity at that later gate epoch. The mode
+projection overwrites only bit `0x800` for active bit-`0x100` bodies; it does
+not predict births, ECL writes, motion, transforms, or the other flag bits.
+
 ### Uncertainty and branch merging
 
 Nature branches over the already-declared actuator pickup support, recursive
@@ -192,6 +223,12 @@ merely because current focus and secondary-character bytes match.
 Options, their positions, and option timers may be omitted from this
 mode-only key because they do not feed enemy bit `0x800`. They remain required
 for shot geometry/damage objectives elsewhere.
+
+Player mode advances on actual priority-9 player updates. Manager frame is
+not substituted as a universal clock: post-spell/dialogue histories can
+freeze `enemy_manager_frame` while held input continues moving the player.
+Every recurrence consumer must carry a verified physical update schedule or
+remain `UNKNOWN` across that boundary.
 
 ### Horizon, resources, and deadline
 
@@ -330,12 +367,66 @@ or promote unfocused combat. The canonical first hit is nonspell frame 3,519
 after the modeled committed prefix already has clearance `-2.766`; all ten
 hits remain routed through CE-0192.
 
+## Implemented Checkpoint: SEM-MODE-C Offline Transition Primitive
+
+`scripts/th08_enemy_mode.py` now composes the existing independent local
+pipeline enumeration with the exact TH08 player/enemy mode transition:
+
+1. each physical step chooses only the native active complete mask from that
+   branch's old-pending/new-pickup history;
+2. priority 9 advances player `+3/+5/+8`;
+3. priority 11 overwrites bit `0x800` on each supplied active bit-`0x100`
+   body; and
+4. contact and player-shot-damage body identity sets are emitted separately.
+
+The decision-transition form samples every declared next-decision cadence,
+returns an exact successor active/held/pending root, and can be called again
+at the next observation. Selecting the already-held desired action is
+no-write: it preserves the older pending command and decrements its remaining
+support without sampling a new delay. Cadence is resampled on every recursive
+call, not replaced by one root-only or maximum interval.
+
+Successor branches merge only when all of the following agree:
+
+- caller-supplied complete base observation, which must include physical
+  time/position and immutable body/flag/geometry version;
+- elapsed physical update count;
+- native active complete action;
+- held desired complete action; and
+- exact mode tuple `(focus_logic_byte, secondary_character_active,
+  transition_counter)`.
+
+Exact hidden remaining delays are then unioned into one support. They are
+never exposed to the controller key. A different hidden mode counter remains
+a different observation class even when active and desired inputs agree.
+
+The focused offline gate covers:
+
+- all 9-step focus histories from three adversarial initial states against an
+  independent scalar `+3/+5/+8` recurrence;
+- pickup delays that change the `0x800` contact/damage opening frame;
+- pending no-write preservation and hidden remaining-support merging;
+- recursive cadence successors with a second no-write decision; and
+- the retained CE-0176 `10065 -> 10075` seven-update release capsule.
+
+Complete discovery passes 1,175 tests in 14.858 seconds on Linux and 30.329
+seconds on Windows through the exact UNC loader; Windows retains the three
+existing platform skips.
+
+This is the exact stage-neutral SEM-MODE transition/observation primitive,
+not an integrated physical-survival solve. It deliberately omits player
+geometry, enemy births/ECL/motion, recursive hazard-version production,
+bullet/laser collision, scheduler freeze resolution, and exact-version
+publication. The existing live viability/local-certificate consumers are
+unchanged. Damage-body identities are diagnostic output only and do not
+affect hard viability or unfocused combat selection.
+
 ## Remaining Implementation And Promotion Plan
 
-1. **SEM-MODE-C — causal hazard recurrence:** carry the mode key through
-   pickup/cadence histories, project per-frame enemy contact body sets after
-   the player update, and merge only observation-compatible branches.
-2. **SEM-MODE-D — damage separation:** apply the same projected gate to the
+1. **SEM-MODE-C integration — exact hazard/version recurrence:** connect the
+   offline primitive to a complete immutable body/flag/geometry schedule and
+   exact physical-update clock without changing live action authority.
+2. **SEM-MODE-D — damage separation:** apply the projected damage body set to
    shadow damage objective without letting damage affect hard viability.
    Keep unfocused combat selection disabled.
 3. **SEM-MODE-E — differential gates:** compare independent scalar, optimized

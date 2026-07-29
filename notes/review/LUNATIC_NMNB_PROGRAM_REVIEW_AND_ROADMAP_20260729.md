@@ -955,6 +955,27 @@ histories before the next controller choice when their observations are
 identical. Retain SEM-MODE-D damage separation and SEM-MODE-E independent
 body-set differential before any whole-stage SEM-MODE-F promotion.
 
+2026-07-30 `SEM-MODE-C` offline transition checkpoint: the stage-neutral
+pure model now composes exact active/held/pending pickup histories with the
+priority-9 player mode update and priority-11 enemy gate projection. A
+decision-transition layer samples recursive cadence support, returns the
+next observable actuator/mode root, preserves an older pending command under
+no-write, and merges hidden remaining delays only after physical step,
+complete base observation, native active input, held desired input, and
+player `+3/+5/+8` agree. Fifteen focused tests cover independent scalar
+mode parity, delay-shifted body gates, pending/no-write, recursive successor
+construction, non-clairvoyant observation classes, and CE-0176.
+Complete Linux/Windows discovery passes 1,175 tests in 14.858/30.329
+seconds, with the three existing Windows skips.
+
+This checkpoint is offline transition authority only. Its caller-supplied
+body/flag schedule is exogenous and must eventually be bound to exact
+identity, geometry, ECL flag evolution, physical-update clock, and immutable
+version. It is not integrated into the global survival recurrence or live
+publication path, and its separated damage-body output cannot influence hard
+viability. Continue with SEM-MODE-C integration, then SEM-MODE-D/E; do not
+run another unchanged physical observer trial.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

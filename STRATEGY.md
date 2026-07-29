@@ -564,6 +564,23 @@ Continue at `SEM-MODE-C` causal pickup/cadence recurrence, then damage
 separation, independent body-set differential, and a new whole-stage physical
 gate. Unfocused combat remains disabled.
 
+**2026-07-30 SEM-MODE-C offline transition checkpoint:** the pure TH08 mode
+model now composes exact active/held/pending pickup histories with priority-9
+player `+3/+5/+8`, priority-11 enemy bit-`0x800`, and separate contact/damage
+body identity sets. One next-decision transition samples recursive cadence,
+returns a reusable successor pipeline/mode root, preserves no-write pending
+support, and merges only observation-compatible hidden branches. Fifteen
+focused scalar/adversarial tests pass, including CE-0176.
+Complete Linux/Windows discovery passes 1,175 tests in 14.858/30.329
+seconds, with the three existing Windows skips.
+
+Status remains **Offline**. Enemy body/flag schedules are still exogenous;
+physical-update clock, geometry/ECL evolution, immutable version publication,
+global viability integration, optimized/native differentials, and a
+whole-stage falsifier remain open. No live strategy or survival claim is
+promoted, and unfocused combat remains disabled. Continue SEM-MODE-C
+integration, not another unchanged Stage-5 observer run.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

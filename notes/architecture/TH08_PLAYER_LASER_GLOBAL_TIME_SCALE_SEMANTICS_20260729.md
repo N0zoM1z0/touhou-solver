@@ -597,15 +597,18 @@ Observed SEM-SCALE-C5 implementation result:
   the observed root must equal the captured root. At `d>0`, it must equal
   original laser-phase scale `d-1`; the current future schedule is exactly
   the original player/laser tuples sliced from `d`;
-- live use additionally requires predeath zero both before and inside the
-  complete-source transaction. Fresh hit, Bomb, predeath, context, root,
+- exact live use binds the predeath value stable inside the complete-source
+  transaction. Fresh hit, Bomb, predeath-baseline change, context, root,
   source-frame, or horizon mismatch publishes root-only status and triggers
-  terminate/release;
-- pre-target unit-scale spell rows can wait with
-  `finalb_scale_source_wait`, which sends no input. The acceptance scope
-  begins only at clean offset-zero authority;
-- the consumer is default-off and CLI/hotkey plumbing requires explicit
-  Lunatic stage 7, hard no-Bomb, and exact `ecldata7.ecl` identity;
+  terminate/release. A nonzero baseline remains explicit contamination;
+- because original Practice Start selects only a stage, unit-scale rows
+  before the target source receive a 256-frame
+  `experimental_pretarget_unit_transport_unknown_direction` schedule. It can
+  move the controller but has `hard_authority=false`; a non-unit unknown row
+  waits without input;
+- the consumer is default-off and CLI/original-game supervisor plumbing
+  requires explicit Lunatic stage 7, hard no-Bomb, and exact
+  `ecldata7.ecl` identity;
 - the corridor precheck refuses incomplete, non-unit, or varying schedules,
   preserving its declared `UNKNOWN` boundary. The synchronous local
   planner, issue transaction, certificates, and sensing trace consume the
@@ -613,12 +616,12 @@ Observed SEM-SCALE-C5 implementation result:
 - the retained C4 artifact is an executable regression: at offset 239 the
   next player phase remains quarter while the next laser phase is unit; at
   offset 240 the observed root and both remaining phase schedules are unit;
-- the prewarmed one-shot hotkey entry point and strict streaming physical
+- the unattended original-game entry point and strict streaming physical
   report are
-  `run_th08_finalb_scale_live_hotkey.bat` and
+  `run_th08_finalb_scale_live_trial.bat` and
   `scripts/analysis/th08_finalb_scale_live_delivery_report.py`; and
-- complete Linux discovery passes 1,130 tests in 13.357 seconds. The exact
-  Windows UNC suite passes 1,130 in 29.909 seconds with three existing skips.
+- complete Linux discovery passes 1,132 tests in 13.596 seconds. The exact
+  Windows UNC suite passes 1,132 in 29.764 seconds with three existing skips.
   A first Windows attempt exposed only locale-dependent fixture decoding;
   fixing the retained UTF-8 artifact read removes it on the complete rerun.
 

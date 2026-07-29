@@ -7,7 +7,11 @@ import unittest
 from th08_live.scale_schedule_authority import (
     FinalBScaleScheduleAuthority,
 )
-from th08_live.controller import _corridor_scale_schedule_supported
+from th08_live.sensing_trace import _time_scale_schedule_hard_authority
+from th08_live.controller import (
+    _corridor_scale_schedule_supported,
+    _finalb_scale_delivery_complete,
+)
 from th08_time_scale import (
     SCALE_COVERAGE_COMPLETE,
     TH08_UNIT_TIME_SCALE_BITS,
@@ -100,6 +104,7 @@ def _resolve(
     gameplay_epoch: int = 1,
     spell_id: int | None = 190,
     bomb_active: int = 0,
+    player_phase: int = 0,
     predeath_counter: int = 0,
     hit_started: bool = False,
 ):
@@ -114,6 +119,7 @@ def _resolve(
         spell_id=spell_id,
         observed_root_scale_bits=scale_bits,
         observed_player_bomb_active=bomb_active,
+        player_phase=player_phase,
         player_predeath_counter=predeath_counter,
         hit_started=hit_started,
     )
@@ -231,15 +237,23 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
         wrong_target = _resolve(
             FinalBScaleScheduleAuthority(wrong_target_service),
             spell_id=189,
+            scale_bits=TH08_UNIT_TIME_SCALE_BITS,
         )
         self.assertFalse(wrong_target.planner_scale_authority)
-        self.assertEqual(wrong_target.reason, "target_context_not_active")
+        self.assertTrue(wrong_target.experimental_transport)
+        self.assertFalse(
+            _time_scale_schedule_hard_authority(wrong_target.schedule)
+        )
+        self.assertEqual(
+            wrong_target.compact_record()["hard_action_authority"],
+            False,
+        )
         self.assertEqual(wrong_target_service.calls, 0)
 
         for keyword, expected_reason in (
             ({"hit_started": True}, "fresh_hit"),
             ({"bomb_active": 1}, "bomb_active"),
-            ({"predeath_counter": 7}, "predeath_nonzero"),
+            ({"predeath_counter": 7}, "predeath_baseline_changed"),
         ):
             with self.subTest(expected_reason=expected_reason):
                 service = _TraceService(_origin())
@@ -263,6 +277,21 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
         )
         self.assertFalse(changed.planner_scale_authority)
         self.assertEqual(changed.reason, "immutable_context_mismatch")
+
+    def test_stable_predeath_residue_can_bind_but_change_cannot(self) -> None:
+        service = _TraceService(_origin(), captured_predeath=7)
+        authority = FinalBScaleScheduleAuthority(service)
+        accepted = _resolve(authority, predeath_counter=7)
+
+        self.assertTrue(accepted.planner_scale_authority)
+        self.assertEqual(accepted.baseline_predeath_counter, 7)
+        changed = _resolve(
+            authority,
+            source_frame=101,
+            predeath_counter=8,
+        )
+        self.assertFalse(changed.planner_scale_authority)
+        self.assertEqual(changed.reason, "predeath_baseline_changed")
 
     def test_explicit_reset_rearms_the_physical_service(self) -> None:
         service = _TraceService(_origin())
@@ -343,6 +372,7 @@ class FinalBScaleScheduleAuthorityTests(unittest.TestCase):
             scale_bits=TH08_UNIT_TIME_SCALE_BITS,
         )
         self.assertTrue(restored.planner_scale_authority)
+        self.assertTrue(_finalb_scale_delivery_complete(restored))
         self.assertEqual(restored.schedule.complete_horizon, 60)
         self.assertTrue(
             all(

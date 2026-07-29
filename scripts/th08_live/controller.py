@@ -115,6 +115,7 @@ from th08_live.runtime_ecl_identity import (
 )
 from th08_live.scale_schedule_authority import (
     FinalBScaleScheduleAuthority,
+    FinalBScaleScheduleResolution,
 )
 from th08_live.scale_source_trace import (
     FinalBScaleSourceTraceConfiguration,
@@ -530,6 +531,19 @@ def _corridor_scale_schedule_supported(
             *schedule.player_scale_bits[:horizon],
             *schedule.laser_scale_bits[:horizon],
         )
+    )
+
+
+def _finalb_scale_delivery_complete(
+    resolution: FinalBScaleScheduleResolution | None,
+) -> bool:
+    return (
+        resolution is not None
+        and resolution.planner_scale_authority
+        and resolution.frame_offset is not None
+        and resolution.frame_offset >= 240
+        and resolution.schedule.root_scale_bits
+        == TH08_UNIT_TIME_SCALE_BITS
     )
 
 
@@ -2017,6 +2031,15 @@ def _run_live_session(
                             False,
                         )
                     ),
+                    "finalb_scale_pretarget_transport": (
+                        "experimental_unit_unknown_direction"
+                        if getattr(
+                            args,
+                            "enable_finalb_scale_source_authority",
+                            False,
+                        )
+                        else "disabled"
+                    ),
                     "runtime_ecl_static_sha256": getattr(
                         args,
                         "runtime_ecl_static_sha256",
@@ -3086,6 +3109,7 @@ def _run_live_session(
                         observed_player_bomb_active=int(
                             bool(player["bomb_active"])
                         ),
+                        player_phase=int(player["phase"]),
                         player_predeath_counter=int(
                             player["predeath_counter"]
                         ),
@@ -4649,6 +4673,11 @@ def _run_live_session(
             previous_power = current_power
             previous_action_phase = phase_now
             previous_counter = counter_at_action
+            if _finalb_scale_delivery_complete(
+                scale_authority_resolution
+            ):
+                termination_reason = "finalb_scale_delivery_complete"
+                break
             if (
                 stop_after_frame is not None
                 and counter_at_action >= stop_after_frame

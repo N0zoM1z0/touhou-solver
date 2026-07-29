@@ -214,22 +214,29 @@ preserving replay/resource contamination and action-authority boundaries.
 The current `SEM-SCALE-C5` implementation connects that accepted source to
 the live controller behind explicit
 `--enable-finalb-scale-source-authority`. It requires Lunatic stage 7, exact
-runtime ECL identity, and hard no-Bomb. One clean-predeath capture is bound to
-an immutable gameplay/route/difficulty/stage/spell/source version; later
-manager frames rebase only by slicing the accepted player/laser schedule and
-checking the observed post-ECL root. Fresh hit, Bomb, predeath, context,
-source-frame, root, or horizon mismatch returns root-only and uses the
-existing terminate/release fallback. Unit-scale pre-target spell rows may
-wait read-only and issue no input. Non-unit/varying coverage remains
-unsupported by the corridor and is consumed only by the exact local path.
+runtime ECL identity, and hard no-Bomb. One stable captured predeath baseline
+is bound to an immutable gameplay/route/difficulty/stage/spell/source
+version; later manager frames rebase only by slicing the accepted
+player/laser schedule and checking the observed post-ECL root. Fresh hit,
+Bomb, predeath-baseline change, context, source-frame, root, or horizon
+mismatch returns root-only and uses the existing terminate/release fallback.
+Non-unit/varying exact coverage remains unsupported by the corridor and is
+consumed only by the exact local path.
+Because THPRAC is unavailable, the original-game Stage-6B supervisor now
+reaches spell 190 from the stage start. Its pre-target constant-unit schedule
+is explicitly unknown-direction experimental transport with
+`hard_authority=false`; C5 acceptance begins only at the coherent exact
+quarter-scale source. A stable nonzero predeath baseline is retained as
+contamination rather than rejected or called clean.
+
 The retained physical C4 schedule itself crosses the callback-18 restore
 correctly under this delivery recurrence. Complete Linux/Windows discovery
-passes 1,130 tests in 13.357/29.909 seconds, with three existing Windows
+passes 1,132 tests in 13.596/29.764 seconds, with three existing Windows
 skips. No input-injecting C5 physical row exists yet.
 
 The sole authorized next physical launch is preregistered at
 `notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`. Its prewarmed
-one-shot entry point is `run_th08_finalb_scale_live_hotkey.bat`; the strict
+original-game entry point is `run_th08_finalb_scale_live_trial.bat`; the strict
 post-run report is
 `scripts/analysis/th08_finalb_scale_live_delivery_report.py`.
 
@@ -388,8 +395,8 @@ Do not resume broad G5 work first.
    falsifier failed at 12 hits. The canonical failure predates the live
    consumer, so retain the failure without rollback or survival promotion.
 3. Continue `SEM-SCALE-C` from the dual-platform C5 live-delivery
-   implementation. Run only the preregistered clean-predeath, hard no-Bomb
-   Final-B spell-190 transition gate in
+   implementation. Run only the preregistered original-game, hard no-Bomb
+   Stage-6B-to-spell-190 transition gate in
    `notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`; retain its raw
    hash, strict compact report, first-hit/Bomb fields, timing, and cleanup.
    Any source/root/context/horizon mismatch remains a fail-closed

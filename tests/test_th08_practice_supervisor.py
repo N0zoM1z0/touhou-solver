@@ -170,6 +170,7 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertIsNone(args.runtime_ecl_static_image)
         self.assertIsNone(args.runtime_ecl_static_sha256)
         self.assertFalse(args.trace_auxiliary_ecl_events)
+        self.assertFalse(args.enable_finalb_scale_source_authority)
 
     def test_parser_accepts_explicit_runtime_ecl_identity(self) -> None:
         args = build_parser().parse_args(
@@ -191,6 +192,24 @@ class PracticeSupervisorTests(unittest.TestCase):
         )
         self.assertEqual(args.runtime_ecl_static_sha256, "1" * 64)
         self.assertTrue(args.trace_auxiliary_ecl_events)
+
+        finalb = build_parser().parse_args(
+            [
+                "--stage",
+                "6b",
+                "--runtime-ecl-static-image",
+                "artifacts/decoded/ecldata7.ecl",
+                "--runtime-ecl-static-sha256",
+                (
+                    "20b35dca3820438f0b90ae44e3362a7a"
+                    "f27d2fc1ac7ae5888c477dc1c89a3734"
+                ),
+                "--enable-finalb-scale-source-authority",
+                "--armed",
+            ]
+        )
+        self.assertEqual(finalb.stage.route_index, 7)
+        self.assertTrue(finalb.enable_finalb_scale_source_authority)
 
     def test_runtime_ecl_identity_is_validated_before_launch(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -526,7 +545,7 @@ class PracticeSupervisorTests(unittest.TestCase):
                     practice_artifacts,
                     "previous_dossier",
                     return_value=None,
-                ),
+                ) as previous,
             ):
                 artifacts = practice_artifacts.materialize_artifacts(
                     run_id=run_id,
@@ -536,7 +555,9 @@ class PracticeSupervisorTests(unittest.TestCase):
                     session_json=runtime_reports / f"{run_id}.session.json",
                     runtime_report_dir=runtime_reports,
                     run_note_dir=run_notes,
+                    compare_to_baseline=False,
                 )
+            previous.assert_not_called()
 
             run_note = run_notes / f"{run_id}.md"
             self.assertEqual(

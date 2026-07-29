@@ -32,11 +32,13 @@ def _authority(offset: int, scale_bits: int) -> dict[str, object]:
         "status": "complete_exact_source_schedule",
         "reason": None,
         "planner_scale_schedule_authority": True,
+        "experimental_pretarget_transport": False,
         "hard_action_authority": False,
         "semantics_version": TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
         "origin_source_frame": ORIGIN,
         "current_source_frame": ORIGIN + offset,
         "frame_offset": offset,
+        "baseline_predeath_counter": 0,
         "root_scale_bits": scale_bits,
         "coverage": SCALE_COVERAGE_COMPLETE,
         "complete_horizon": 300 - offset,
@@ -64,6 +66,28 @@ def _decision(offset: int, scale_bits: int) -> dict[str, object]:
     }
 
 
+def _transport_decision() -> dict[str, object]:
+    return {
+        "kind": "decision",
+        "frame": ORIGIN - 1,
+        "mask": 0x11,
+        "bomb": False,
+        "hit_started": False,
+        "time_scale": {
+            "semantics_version": TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+            "root_scale_bits": TH08_UNIT_TIME_SCALE_BITS,
+            "coverage": SCALE_COVERAGE_COMPLETE,
+            "provenance": (
+                "experimental_pretarget_unit_transport_unknown_direction"
+            ),
+            "source_frame": ORIGIN - 1,
+            "complete_horizon": 256,
+            "hard_authority": False,
+            "phase_schedule_omitted": True,
+        },
+    }
+
+
 def _fixture() -> list[dict[str, object]]:
     return [
         {"kind": "identity", "sha256": EXPECTED_EXE_SHA256},
@@ -71,8 +95,12 @@ def _fixture() -> list[dict[str, object]]:
             "kind": "controller_config",
             "bomb_policy": "disabled",
             "finalb_scale_source_authority": True,
+            "finalb_scale_pretarget_transport": (
+                "experimental_unit_unknown_direction"
+            ),
             "runtime_ecl_static_sha256": FINAL_B_ECL_STATIC_SHA256,
         },
+        _transport_decision(),
         {
             "kind": "finalb_scale_source_trace",
             "schema": FINAL_B_SCALE_SOURCE_TRACE_SCHEMA,
@@ -129,8 +157,8 @@ def _fixture() -> list[dict[str, object]]:
         _decision(240, TH08_UNIT_TIME_SCALE_BITS),
         {
             "kind": "run_summary",
-            "termination_reason": "external_stop",
-            "hit_count": 0,
+            "termination_reason": "finalb_scale_delivery_complete",
+            "hit_count": 3,
         },
     ]
 
@@ -158,12 +186,29 @@ class FinalBScaleLiveDeliveryReportTests(unittest.TestCase):
         self.assertEqual(report["observed"]["first_unit_offset"], 240)
         self.assertEqual(report["observed"]["hit_count"], 0)
         self.assertEqual(report["observed"]["bomb_decision_count"], 0)
+        self.assertEqual(report["observed"]["entire_trial_hit_count"], 3)
+
+    def test_stable_predeath_residue_is_reported_without_becoming_clean(
+        self,
+    ) -> None:
+        records = _fixture()
+        records[3]["source_capture"]["phase_before"][
+            "player_predeath_counter"
+        ] = 7
+        for record in records:
+            if record.get("kind") == "finalb_live_scale_schedule_authority":
+                record["baseline_predeath_counter"] = 7
+
+        report = self._report(records)
+
+        self.assertTrue(report["gate"]["passed"])
+        self.assertEqual(report["observed"]["baseline_predeath_counter"], 7)
 
     def test_hit_bomb_predeath_and_authority_fallback_fail(self) -> None:
         cases = {
-            "hit": lambda records: records[6].update(hit_started=True),
-            "bomb": lambda records: records[8].update(mask=0x13),
-            "predeath": lambda records: records[2]["source_capture"][
+            "hit": lambda records: records[7].update(hit_started=True),
+            "bomb": lambda records: records[9].update(mask=0x13),
+            "predeath": lambda records: records[3]["source_capture"][
                 "phase_before"
             ].update(player_predeath_counter=7),
             "fallback": lambda records: records.append(
@@ -196,7 +241,7 @@ class FinalBScaleLiveDeliveryReportTests(unittest.TestCase):
 
     def test_wrong_scope_hidden_origin_or_runtime_error_fails(self) -> None:
         cases = {
-            "wrong_spell": lambda records: records[2].update(spell_id=189),
+            "wrong_spell": lambda records: records[3].update(spell_id=189),
             "second_origin": lambda records: records.insert(
                 -1,
                 {

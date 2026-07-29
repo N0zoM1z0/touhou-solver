@@ -30,7 +30,7 @@ from th08_time_scale import (  # noqa: E402
 )
 
 
-REPORT_SCHEMA = "th08-finalb-scale-live-delivery-physical-report-v1"
+REPORT_SCHEMA = "th08-finalb-scale-live-delivery-physical-report-v2"
 
 
 def _records(path: Path) -> Iterable[dict[str, object]]:
@@ -65,6 +65,10 @@ def build_report(path: Path) -> dict[str, object]:
     source_traces: list[dict[str, object]] = []
     authority_rows: list[dict[str, object]] = []
     decisions: list[dict[str, object]] = []
+    pretarget_decision_count = 0
+    pretarget_transport_labeled = True
+    all_decisions_no_bomb = True
+    exact_source_seen = False
     unknown_rows: list[dict[str, object]] = []
     runtime_errors: list[dict[str, object]] = []
     summaries: list[dict[str, object]] = []
@@ -79,10 +83,35 @@ def build_report(path: Path) -> dict[str, object]:
             configuration = record
         elif kind == "finalb_scale_source_trace":
             source_traces.append(record)
+            if record.get("status") == "accepted_complete_source_trace":
+                exact_source_seen = True
         elif kind == "finalb_live_scale_schedule_authority":
-            authority_rows.append(record)
+            if (
+                exact_source_seen
+                or record.get("status")
+                == "complete_exact_source_schedule"
+            ):
+                authority_rows.append(record)
         elif kind == "decision":
-            decisions.append(record)
+            all_decisions_no_bomb = (
+                all_decisions_no_bomb
+                and record.get("bomb") is False
+                and not int(record.get("mask", 0)) & 0x02
+            )
+            if exact_source_seen:
+                decisions.append(record)
+            else:
+                pretarget_decision_count += 1
+                scale = record.get("time_scale")
+                pretarget_transport_labeled = (
+                    pretarget_transport_labeled
+                    and isinstance(scale, dict)
+                    and scale.get("hard_authority") is False
+                    and scale.get("phase_schedule_omitted") is True
+                    and str(scale.get("provenance", "")).startswith(
+                        "experimental_pretarget_unit_transport"
+                    )
+                )
         elif kind == "time_scale_authority_unknown":
             unknown_rows.append(record)
         elif kind == "runtime_error":
@@ -178,7 +207,6 @@ def build_report(path: Path) -> dict[str, object]:
             <= origin_frame + restore_offset
         )
     ]
-
     source_schedule = (
         source_trace.get("schedule")
         if source_trace is not None
@@ -248,6 +276,7 @@ def build_report(path: Path) -> dict[str, object]:
         and record.get("semantics_version")
         == TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION
         and record.get("hard_action_authority") is False
+        and record.get("experimental_pretarget_transport") is False
         and record.get("coverage") == SCALE_COVERAGE_COMPLETE
         and (
             _integer(record, "current_source_frame")
@@ -259,17 +288,27 @@ def build_report(path: Path) -> dict[str, object]:
         )
         for record in scoped_authority
     )
-    clean_player_root = (
-        source_capture is not None
-        and isinstance(source_capture.get("phase_before"), dict)
-        and source_capture["phase_before"].get("player_predeath_counter") == 0
-        and source_capture["phase_before"].get("player_bomb_active") == 0
-    )
     source_phase = (
         source_capture.get("phase_before")
         if source_capture is not None
         and isinstance(source_capture.get("phase_before"), dict)
         else None
+    )
+    baseline_predeath_counter = (
+        _integer(source_phase, "player_predeath_counter")
+        if source_phase is not None
+        else None
+    )
+    stable_player_root = (
+        baseline_predeath_counter is not None
+        and source_phase is not None
+        and source_phase.get("player_bomb_active") == 0
+        and bool(scoped_authority)
+        and all(
+            _integer(record, "baseline_predeath_counter")
+            == baseline_predeath_counter
+            for record in scoped_authority
+        )
     )
     source_scope_exact = (
         source_trace is not None
@@ -308,6 +347,8 @@ def build_report(path: Path) -> dict[str, object]:
             configuration is not None
             and configuration.get("bomb_policy") == "disabled"
             and configuration.get("finalb_scale_source_authority") is True
+            and configuration.get("finalb_scale_pretarget_transport")
+            == "experimental_unit_unknown_direction"
             and configuration.get("runtime_ecl_static_sha256")
             == FINAL_B_ECL_STATIC_SHA256
         ),
@@ -333,7 +374,7 @@ def build_report(path: Path) -> dict[str, object]:
             and source_capture.get("coherent") is True
         ),
         "exact_finalb_scope": source_scope_exact,
-        "clean_zero_predeath_root": clean_player_root,
+        "stable_predeath_baseline": stable_player_root,
         "supported_restore_schedule": (
             source_schedule_exact
             and supported_restore
@@ -351,12 +392,17 @@ def build_report(path: Path) -> dict[str, object]:
             and restore_row is not None
         ),
         "decision_scale_delivery": decision_scale_complete,
-        "clean_no_bomb_survival_scope": decisions_clean,
+        "experimental_pretarget_transport_labeled": (
+            pretarget_decision_count > 0
+            and pretarget_transport_labeled
+        ),
+        "hard_no_bomb_entire_trial": all_decisions_no_bomb,
+        "no_fresh_hit_in_exact_scope": decisions_clean,
         "no_scale_authority_fallback": not unknown_rows,
         "clean_supervised_termination": (
             summary is not None
-            and summary.get("termination_reason") == "external_stop"
-            and summary.get("hit_count") == 0
+            and summary.get("termination_reason")
+            == "finalb_scale_delivery_complete"
             and not runtime_errors
         ),
     }
@@ -375,6 +421,8 @@ def build_report(path: Path) -> dict[str, object]:
         },
         "observed": {
             "origin_source_frame": origin_frame,
+            "baseline_predeath_counter": baseline_predeath_counter,
+            "pretarget_decision_count": pretarget_decision_count,
             "authority_row_count": len(scoped_authority),
             "decision_count": len(scoped_decisions),
             "last_quarter_offset": (
@@ -398,6 +446,11 @@ def build_report(path: Path) -> dict[str, object]:
                 if summary is not None
                 else None
             ),
+            "entire_trial_hit_count": (
+                summary.get("hit_count")
+                if summary is not None
+                else None
+            ),
         },
         "authority": {
             "observed": (
@@ -410,8 +463,9 @@ def build_report(path: Path) -> dict[str, object]:
                 "under the retained no-hit/no-Bomb continuation."
             ),
             "not_proved": (
-                "Full Final-B survival, another RNG/resource history, broad "
-                "stage authority, full-route Lunatic NMNB, or Extra."
+                "Clean Final-B practice survival, pre-target time-scale "
+                "authority, another RNG/resource history, full-route "
+                "Lunatic NMNB, or Extra."
             ),
         },
     }

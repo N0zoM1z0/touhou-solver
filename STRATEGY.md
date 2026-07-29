@@ -448,16 +448,22 @@ falsifier run.
 **2026-07-29 SEM-SCALE-C5 live-delivery implementation:** the default-off
 consumer now binds one physically complete source to an immutable
 gameplay/route/difficulty/stage/spell/source version and rebases it only after
-checking each observed native root. Clean-predeath, no-new-hit, and no-Bomb
-are mandatory for live use; every mismatch returns to the existing
-terminate/release fallback. Pre-target unit-scale rows can wait read-only
-without input. The varying/non-unit schedule is deliberately excluded from
+checking each observed native root. A stable captured predeath baseline,
+no-new-hit, and no-Bomb are mandatory after exact offset zero; every mismatch
+returns to the existing terminate/release fallback. Since THPRAC cannot
+select spell 190, original-game Stage-6B launch uses an explicitly
+unknown-direction constant-unit pre-target transport schedule whose trace has
+no hard scale authority. The varying/non-unit exact schedule is deliberately
+excluded from
 the unsupported corridor recurrence and reaches only the exact local
 planner/certificate path. The retained physical C4 schedule crosses its
 quarter-player/unit-laser transition and unit restore correctly in
 Linux/Windows tests. This is an offline live-path implementation, not a
-strategy promotion or physical action result. Only the fixed
+strategy promotion or physical action result. Only the fixed original-game
 `FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md` trial is proposed next.
+Spell 190 is only a causal mechanics checkpoint: subsequent source-authority
+work and promotion must use a whole-stage profile and must not require an
+operator or runtime service to enable policy logic at one hand-picked spell.
 
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those

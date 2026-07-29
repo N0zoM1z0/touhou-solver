@@ -13,7 +13,19 @@ from th08_native_timer import TH08_NATIVE_TIMER_SEMANTICS_VERSION
 from th08_time_scale import (
     SCALE_COVERAGE_COMPLETE,
     TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
+    Th08TimeScaleSchedule,
 )
+
+
+def _time_scale_schedule_hard_authority(
+    schedule: Th08TimeScaleSchedule,
+) -> bool:
+    return (
+        schedule.coverage == SCALE_COVERAGE_COMPLETE
+        and not schedule.provenance.startswith(
+            "experimental_pretarget_unit_transport"
+        )
+    )
 
 
 @dataclass(frozen=True)
@@ -84,6 +96,9 @@ def build_sensing_trace_fields(
     issue_prefix = trace_input.issue_enemy_prefix_snapshot
     issue = trace_input.issue
     time_scale_schedule = issue.capture.time_scale_schedule
+    phase_schedule_omitted = time_scale_schedule.provenance.startswith(
+        "experimental_pretarget_unit_transport"
+    )
 
     ecl_tagged_bullets = (
         tuple(
@@ -114,12 +129,17 @@ def build_sensing_trace_fields(
                 issue.capture.source_time_scale_bits
             ),
             "root_scale_bits": time_scale_schedule.root_scale_bits,
-            "player_scale_bits": list(
-                time_scale_schedule.player_scale_bits
+            "player_scale_bits": (
+                []
+                if phase_schedule_omitted
+                else list(time_scale_schedule.player_scale_bits)
             ),
-            "laser_scale_bits": list(
-                time_scale_schedule.laser_scale_bits
+            "laser_scale_bits": (
+                []
+                if phase_schedule_omitted
+                else list(time_scale_schedule.laser_scale_bits)
             ),
+            "phase_schedule_omitted": phase_schedule_omitted,
             "coverage": time_scale_schedule.coverage,
             "provenance": time_scale_schedule.provenance,
             "source_frame": time_scale_schedule.source_frame,
@@ -127,9 +147,8 @@ def build_sensing_trace_fields(
             "player_projection_authority": (
                 issue.capture.player_projection_authority
             ),
-            "hard_authority": (
-                time_scale_schedule.coverage
-                == SCALE_COVERAGE_COMPLETE
+            "hard_authority": _time_scale_schedule_hard_authority(
+                time_scale_schedule
             ),
         },
         "resources": trace_input.resources,

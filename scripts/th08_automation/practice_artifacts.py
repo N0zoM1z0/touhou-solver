@@ -80,6 +80,7 @@ def materialize_artifacts(
     session_json: Path,
     runtime_report_dir: Path,
     run_note_dir: Path,
+    compare_to_baseline: bool = True,
 ) -> TrialArtifacts:
     prefix = runtime_report_dir / run_id
     dossier_json = prefix.with_suffix(".dossier.json")
@@ -105,11 +106,15 @@ def materialize_artifacts(
         ]
     )
     comparison_json = None
-    baseline = previous_dossier(
-        stage,
-        dossier_json,
-        runtime_report_dir=runtime_report_dir,
-        difficulty_key=difficulty.key,
+    baseline = (
+        previous_dossier(
+            stage,
+            dossier_json,
+            runtime_report_dir=runtime_report_dir,
+            difficulty_key=difficulty.key,
+        )
+        if compare_to_baseline
+        else None
     )
     if baseline is not None:
         comparison_json = prefix.with_suffix(".comparison.json")

@@ -171,6 +171,7 @@ class SensingTraceTests(unittest.TestCase):
             TH08_PLAYER_LASER_SCALE_SEMANTICS_VERSION,
         )
         self.assertFalse(fields["time_scale"]["hard_authority"])
+        self.assertFalse(fields["time_scale"]["phase_schedule_omitted"])
         self.assertEqual(
             fields["boss_phase_progress"]["damage_per_second_60hz"],
             120.0,

@@ -829,15 +829,22 @@ Execution progress on 2026-07-29:
   ECL identity. It binds the accepted source to immutable
   gameplay/route/difficulty/stage/spell identity, causally slices the exact
   player/laser tuples at each manager-frame offset, and rejects fresh hit,
-  Bomb, nonzero predeath, context, source-frame, observed-root, or horizon
-  mismatch through the existing terminate/release fallback. Unit-scale
-  pre-target rows wait read-only. Non-unit/varying schedules remain outside
-  corridor authority and feed only the exact local path. The retained C4
+  Bomb, predeath-baseline change, context, source-frame, observed-root, or
+  horizon mismatch through the existing terminate/release fallback. Since
+  only whole-stage original Practice Start is available, pre-target unit
+  roots use an explicitly unknown-direction transport schedule with no hard
+  scale authority; non-unit unknown rows wait. Non-unit/varying exact
+  schedules remain outside corridor authority and feed only the exact local
+  path. The retained C4
   artifact crosses the relative-239 player/laser phase split and relative-240
-  unit restore under this recurrence. Linux/Windows discovery passes 1,130
-  tests in 13.357/29.909 seconds with three existing Windows skips. No game
+  unit restore under this recurrence. Linux/Windows discovery passes 1,132
+  tests in 13.596/29.764 seconds with three existing Windows skips. No game
   was launched; the single next physical scope is fixed in
   `notes/operations/FINALB_SEM_SCALE_LIVE_DELIVERY_GATE.md`.
+  Spell 190 remains only the smallest causal falsifier. The research and
+  promotion unit is a complete stage: after this gate, source-authority
+  generalization must be stage-wide and may not depend on enabling a feature
+  only when one hand-picked spell is reached.
 
 #### 1C. Action-conditioned player/enemy mode
 
@@ -1207,8 +1214,8 @@ baseline and the ordered dependency chain above are part of the result.
   explicit and grants no clean-survival or NMNB authority. CE-0186/0187,
   the replay-method note, compact artifacts, hashes, and IDA replay-menu
   annotations are retained.
-- For SEM-SCALE-C5 live delivery, focused authority/hotkey/report tests and
-  complete Linux/Windows discovery pass 1,130 tests. A Windows default-GBK
+- For SEM-SCALE-C5 live delivery, focused authority/supervisor/report tests
+  and complete Linux/Windows discovery pass 1,132 tests. A Windows default-GBK
   fixture-read failure was reproduced and corrected with explicit UTF-8; the
   complete Windows rerun passes with only the three existing skips. The
   retained physical C4 schedule is exercised across its phase-asymmetric

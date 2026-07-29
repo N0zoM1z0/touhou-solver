@@ -15,8 +15,10 @@ Latest retained complete physical workload at review time:
 `lunatic_route2_stage5_unattended_20260729_125453`
 
 Current execution progress:
-`lunatic_route2_stage5_unattended_20260729_154229` is accepted observer-off
-Stage-5 pass 1 of 2 at ten hits.
+`lunatic_route2_stage5_unattended_20260729_154229` passed the first
+observer-off Stage-5 threshold at ten hits, but unchanged consecutive run
+`lunatic_route2_stage5_unattended_20260729_161313` took 18. CE-0183 resets
+the sequence and stops `PHYS-BASE-RING` before Stage 3.
 
 Companion native audit:
 `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
@@ -72,11 +74,11 @@ prototype. It already has:
 But the current system is not yet close enough to claim Lunatic NMNB
 readiness. The review baseline Stage-5 run had 18 native hit edges and zero
 Bombs. The first post-review observer-off control returned to the ten-hit
-boundary, but one threshold pass is not two consecutive passes and is still
-ten misses away from NMNB. More importantly, the finite model still commonly
-loses all global viability before contact, while several native semantics
-used by movement, hazard, and future-event projection are either incomplete
-or wrong.
+boundary, but its unchanged consecutive control returned to 18 and rejected
+stable recovery. More importantly, the finite model still commonly loses all
+global viability before contact, while several native semantics used by
+movement, hazard, and future-event projection are either incomplete or
+wrong.
 
 The main conclusion is:
 
@@ -182,13 +184,28 @@ question.
 
 ## 5. Physical Status Versus NMNB
 
-### 5.1 Current observer-off control and previous comparator
+### 5.1 Consecutive observer-off controls and previous comparator
 
-**Observed:** Stage-5 run `20260729_154229` completed with 11,710 decisions,
+**Observed latest result:** unchanged Stage-5 run `20260729_161313`
+completed with 12,639 decisions, frames `2..45288`, 18 hits, zero Bombs,
+accepted completion, and cleanup. Phase hits nonspell/103/107/111/115 were
+`10/2/5/1/0`.
+
+The two observer-off sessions have exact equal controller config, executable
+identity/patch, physical code, stage/difficulty, native backends, hard
+no-Bomb policy, optional flags, and starting Power/lives/Bomb stock. They are
+not same-seed or same-history paired samples. Pass 2 first contacts at frame
+2,524, player `(371.121,82.873)`, active `down_left`, Power 128, with 267
+bullets and zero lasers. It is a modeled committed-prefix collision:
+global viability was empty for 240 frames, the robust action set was empty
+for eight, and usable pipeline warning arrived only at contact. CE-0183
+retains this earliest failing state and resets the consecutive sequence.
+
+The immediately preceding run `20260729_154229` completed with 11,710 decisions,
 frames `2..42335`, ten hits, zero Bombs, accepted completion, and cleanup.
 All optional observers and pipeline shadows were disabled. Phase hits
-nonspell/103/107/111/115 were `5/2/1/1/1`, so this is pass 1 of the required
-two consecutive controls at `<=10`, not NMNB acceptance.
+nonspell/103/107/111/115 were `5/2/1/1/1`; it was a provisional pass 1, but
+the unchanged follow-up rejects consecutive recovery.
 
 The canonical first hit is frame 10,740 at player
 `(349.070,383.773)`, active `up_fast`, Power 128, 883 bullets, and zero
@@ -230,6 +247,9 @@ roughly `11.813/24.257 ms` at median/p95, and observed cadence is
 - hard no-Bomb enforcement works for this completed workload;
 - capture, report, completion, and cleanup paths are usable;
 - viability loss is an excellent diagnostic boundary;
+- one observer-off run can realize the historical band, but the next
+  unchanged run can return to 18 hits;
+- optional V6 observers are not necessary for an 18-hit realization; and
 - current full-horizon/coarse authority is unavailable for a large part of
   Stage 5.
 
@@ -237,15 +257,16 @@ roughly `11.813/24.257 ms` at median/p95, and observed cadence is
 
 - that viability exhaustion is the unique cause of every hit;
 - that the 18-hit result was caused by V6 code;
+- that optional observers have zero effect in a paired physical history;
 - that rolling back post-`3adad09` observer/refactor changes improves
   survival;
 - that current empty roots are physically losing;
 - that any one stage/RNG sample predicts a full-route NMNB rate.
 
 The retained eight-hit checkpoints first contact after frame 11,500; the
-observer-off control first contacts at frame 10,740, whereas the previous V6
-sample first contacted at frame 731. No planner, recurrence, ranking, or
-issued-mask change between those checkpoints and current code isolates the
+observer-off pair first contacts at frames 10,740 and 2,524, whereas the
+previous V6 sample first contacted at frame 731. No planner, recurrence,
+ranking, or issued-mask change between these observer-off runs isolates the
 aggregate difference. A rollback is therefore not causally justified.
 
 ## 6. Bounded Recheck Of The Native Audit
@@ -582,15 +603,21 @@ Execution progress on 2026-07-29:
 
 - **Observed:** `20260729_154229` completed the exact observer-off contract at
   ten hits, hard no-Bomb, accepted artifacts, and cleanup. This is
-  consecutive pass 1 of 2.
+  the isolated threshold pass.
 - **Observed:** the canonical first hit is CE-0182, an enemy-body overlap
   after global viability exhaustion; it does not establish observer or
   focus-mode causality.
-- **Next gate:** repeat the identical Stage-5 command with no source,
-  strategy, observer, Focus, combat, Power, worker, or planner change. A
-  result above ten resets the consecutive sequence and stops expansion for
-  first-hit analysis. A second accepted result at `<=10` advances to the
-  Stage-3 mechanics control.
+- **Observed failure:** unchanged `20260729_161313` then completed at 18 hits.
+  Its frame-2,524 modeled committed-prefix first hit follows global viability
+  loss by 240 frames and robust-action exhaustion by eight. Equal config,
+  code, flags, and starting resources rule out those variables for the pair;
+  unmatched physical/RNG history prevents a paired causal claim.
+- **Exit taken:** CE-0183 names the earliest failing state, resets the
+  sequence, and stops physical expansion. Do not run Stage 3 or another
+  unchanged Stage-5 repeat now.
+- **Next gate:** begin Phase 1 at `SEM-TIMER`, retain an independent native
+  transition oracle and versioned correction, then take the smallest physical
+  falsifier required by the corrected primitive.
 
 ### Phase 1 — Freeze and repair native transition semantics
 
@@ -877,11 +904,11 @@ a candidate pass.
 
 ## 13. Immediate Implementation Backlog
 
-Complete `PHYS-BASE-RING` before source correction: one of two required
-observer-off Stage-5 controls is retained at ten hits; repeat the identical
-control for consecutive pass 2, then take fresh current-code
-Stage-3/4A/Final-B mechanics controls and one route-faithful Power-0
-full-route characterization, or stop on the first retained causal failure.
+`PHYS-BASE-RING` has taken its causal-failure exit: the first observer-off
+Stage-5 control had ten hits and the unchanged second had 18. CE-0183 stops
+physical expansion before Stage 3. Begin source correction at `SEM-TIMER`;
+do not weaken the threshold, launch a third uncontrolled repeat, or treat the
+incomplete ring as route authority.
 
 After that baseline, the next correction checkpoints should be:
 
@@ -940,8 +967,8 @@ Remaining high-value runtime uncertainties are:
 - exact player-mode/contact transitions across all Route-2 phase boundaries;
 - complete callback and action-dependent RNG source coverage;
 - which component first causes corrected-model viability loss;
-- whether the observer-off Stage-5 baseline repeats consecutively in the
-  retained eight-to-ten hit band;
+- which versioned correction prevents CE-0183's early viability loss and
+  restores a consecutive observer-off Stage-5 baseline;
 - the first clean full-route bottleneck after Stage 5 is controlled.
 
 The next agent must start from `START_HERE.md`, this roadmap, the companion
@@ -968,11 +995,16 @@ baseline and the ordered dependency chain above are part of the result.
   regressions, deaths CSV, raw hash, hard no-Bomb fields, ignore rules,
   cleanup state, Markdown structure, and staged whitespace were revalidated
   before retention.
+- For unchanged pass 2, the same preflight tests passed 28/28 on both
+  platforms and the post-run Linux repeat passed 28/28. Exact controller
+  config/entry-resource comparison, five compact JSON reports, 18-row deaths
+  CSV, raw provenance/hash, hard no-Bomb fields, ignore rules, process
+  cleanup, Markdown structure, and whitespace checks pass. CE-0183 preserves
+  the failed threshold without relabeling it.
 - No matching TH08 gameplay, controller, practice-supervisor, or
   full-route-supervisor process is left running.
-- Windows tests were not rerun because this checkpoint changes documentation
-  only. Earlier isolated Windows results are historical evidence, not a new
-  validation claim.
-- No physical trial or IDA mutation occurred during these documentation
-  checkpoints. Phase 1 explicitly authorizes and expects evidence-backed IDB
+- The original documentation-only checkpoint did not rerun Windows tests;
+  the two later physical preflights above did. Keep those scopes distinct.
+- No IDA mutation has occurred in the review or Phase-0 physical checkpoints.
+  Phase 1 explicitly authorizes and expects evidence-backed IDB
   renames/types/comments.

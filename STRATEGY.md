@@ -304,24 +304,27 @@ Spell-57 callback traversal also has p95/max `0.5460/10.3328 ms`. All 16
 hits follow global viability exhaustion and do not establish a survival
 comparison.
 
-**Observed observer-off Stage-5 recovery pass 1:** Current-code run
-`20260729_154229` completed frames `2..42335`, 11,710 decisions, hard
-no-Bomb, accepted artifacts, and cleanup with ten hits
-(`5/2/1/1/1` by nonspell/103/107/111/115). Every optional observer and
-pipeline shadow was disabled. The canonical hit moved to frame 10,740 and is
-an exact same-epoch enemy-body overlap after global viability exhaustion; the
-body was present in the causal and action snapshots. This is one accepted
-baseline-band control and CE-0182 evidence. It neither closes the required
-two-consecutive-run gate nor proves observer causality, rollback benefit,
-SEM-MODE causality, or NMNB survival.
+**Observed observer-off Stage-5 controls:** Current-code run
+`20260729_154229` completed hard no-Bomb at ten hits (`5/2/1/1/1` by
+nonspell/103/107/111/115), but unchanged consecutive run `20260729_161313`
+returned to 18 (`10/2/5/1/0`). Both have accepted artifacts, exact cleanup,
+the same executable/physical code, equal controller config and entry
+resources, and every optional observer/shadow disabled. Pass 2 first contacts
+at frame 2,524 in a modeled committed-prefix collision after global viability
+had already been empty for 240 frames. The consecutive gate is rejected and
+reset by CE-0183. This shows optional V6 observers are not necessary for an
+18-hit sample; it does not identify one RNG/history mechanism, justify
+rollback, promote a correction, or provide NMNB survival authority.
 
 ### Priority
 
 **2026-07-29 native-semantic amendment:** the read-only native-to-solver
 audit and bounded IDA recheck do not promote, reject, or roll back any
-strategy. Observer-off Stage-5 pass 1 is now retained; the live stack remains
-unchanged and the identical pass-2 control is the immediate gate. The audit
-adds a correctness dependency before broad G5 or S15 performance work:
+strategy. CE-0183 stops `PHYS-BASE-RING` after the unchanged pass-2 control
+failed. The live stack remains unchanged; no Stage-3 expansion or third
+uncontrolled Stage-5 repeat is authorized. The immediate work is the
+roadmap's ordered native-semantic correction series, beginning with
+`SEM-TIMER`, before broad G5 or S15 performance work:
 
 - restore native elapsed/fraction timer semantics and global-time-scale
   player/laser transitions;
@@ -334,12 +337,16 @@ adds a correctness dependency before broad G5 or S15 performance work:
 - issue a new immutable model version and recertify scalar/Python/native
   parity before physical promotion.
 
-CE-0175–CE-0182 retain the concrete failures. Existing zero-fraction,
+CE-0175–CE-0183 retain the concrete failures. Existing zero-fraction,
 unit-scale, and conservative-proxy evidence keeps only its declared slice.
 The audit does not prove that any finding caused run `125453`, so aggregate
 rollback remains unjustified. The full dependency and Lunatic NMNB acceptance
 ladder are in
 `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`.
+
+The amendment and CE-0183 override the numbered historical backlog below
+until the semantic correction/model-version gate is complete. Those rows
+retain evidence/status history; they are not permission to resume G5 first.
 
 1. Preserve global feasibility earlier. CE-0141's physical recheck now
    passes; continue G5 future-event coverage one event class at a time,

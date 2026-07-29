@@ -97,7 +97,7 @@ describe the same decision. Python/C++ parity is not physical correctness.
   `f28e13ca853280acec585f6296d947aafcabcaad`. The enclosing documentation
   checkpoint changes no executable code or live authority.
 - Latest accepted complete physical workload:
-  `lunatic_route2_stage5_unattended_20260729_154229`.
+  `lunatic_route2_stage5_unattended_20260729_161313`.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -108,9 +108,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
   comprehensive read-only native-to-solver audit. All pass the OpenAI
   `skill-creator` structural validator. A fresh Codex `0.144.6`
   `skills/list(forceReload=true)` reports every skill as enabled repo scope
-  with interface metadata. The physical-trial workflow was exercised by run
-  `154229`; its exact preflight, supervision, cleanup, and retention contract
-  completed without leaving a gameplay process.
+  with interface metadata. The physical-trial workflow was exercised by runs
+  `154229` and `161313`; both exact preflight, supervision, cleanup, and
+  retention contracts completed without leaving a gameplay process.
 
 Checkpoint `e4e266f` has no survival authority. It changes only compact
 artifact placement: practice/full-route dossier Markdown is generated
@@ -130,7 +130,7 @@ to
 pre-move SHA-256 is
 `6e5a81f41ef4866c294ef0ab5db937efe614de2b8a3179a559fc878b4a65cb21`.
 A bounded current-source and connected-IDA recheck confirms the material
-findings at the review baseline. CE-0175–CE-0181 retain the concrete failures,
+findings at the review baseline. CE-0175–CE-0183 retain the concrete failures,
 and
 `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md` gives the
 dependency-ordered route to physical Lunatic NMNB.
@@ -143,21 +143,35 @@ collision-suppression omissions are conservative in the observed dimension
 but can compress viability. Existing zero-fraction/unit-scale/proxy evidence
 is preserved under its declared model version rather than erased.
 
-This review does not establish a cause for the 18-hit Stage-5 aggregate and
-does not authorize rollback. Observer-off run `154229` has since returned to
-the ten-hit band once, but one unmatched sample does not establish observer
-causality. Complete the identical second control below before source changes.
-After that gate, repair/version the shared native semantics before broad G5
-expansion or local-beam performance work.
+This review does not establish a cause for the original 18-hit Stage-5
+aggregate and does not authorize rollback. Observer-off run `154229`
+returned to the ten-hit band once, but unchanged follow-up `161313` returned
+to 18. CE-0183 resets the sequence and takes the roadmap's causal-failure
+exit. Do not launch Stage 3 or a third uncontrolled repeat; begin the ordered
+native-semantic correction series before broad G5 expansion or local-beam
+performance work.
 
 ### Latest physical conclusion
+
+Observer-off pass 2 `161313`, launched from repository checkpoint `39366f2`
+with the same executable/physical code and exact controller config as pass 1,
+completed hard no-Bomb Stage 5 with cleanup but took 18 hits:
+nonspell/103/107/111/115 = `10/2/5/1/0`. It rejects consecutive baseline
+recovery and stops `PHYS-BASE-RING` before Stage 3.
+
+Its canonical first hit is frame 2,524 at `(371.121,82.873)`, active
+`down_left`, Power 128, with 267 bullets and zero lasers. It is a modeled
+committed-prefix collision. Global viability was exhausted at frame 2,284,
+the robust action set at frame 2,516, and usable pipeline warning arrived at
+contact. Every hit again follows global viability exhaustion. CE-0183 is the
+authoritative stopping counterexample.
 
 Observer-off run `154229`, launched from repository checkpoint `b34f905`
 with executable checkpoint `e4e266f` and unchanged physical code
 `3f02ff1`, completed hard no-Bomb Stage 5 with exact cleanup and ten hits:
 nonspell/103/107/111/115 = `5/2/1/1/1`. Every optional observer and pipeline
-shadow was disabled. It is accepted pass 1 of the required two consecutive
-controls at `<=10`; it is not NMNB acceptance.
+shadow was disabled. It remains an isolated threshold pass, not a recovered
+baseline or NMNB acceptance.
 
 Its canonical fresh hit is frame 10,740 at `(349.070,383.773)`, active
 `up_fast`, Power 128, with 883 bullets and zero lasers. An exact same-epoch
@@ -205,35 +219,33 @@ native-pipeline, action-ranking, or issued-mask algorithm. The issue stage was
 extracted and optional post-issue observers were added. V6 run `125453`
 takes its canonical first hit at frame 731 in nonspell, before every
 spell-107 envelope; observer-off run `154229` first contacts at frame 10,740,
-and the eight-hit runs first contact after frame 11,500. Therefore no single
-code checkpoint has been shown to cause the 18-hit result, and rollback is
-not justified by aggregate samples alone. Later deaths are coupled through
-respawn, Power, position, damage, and route timing.
+unchanged observer-off follow-up `161313` at frame 2,524, and the eight-hit
+runs after frame 11,500. Therefore no single code checkpoint has been shown
+to cause the 18-hit result, and rollback is not justified by aggregate
+samples alone. Later deaths are coupled through respawn, Power, position,
+damage, and route timing.
 
 ### Next useful gate
 
 Do not resume broad G5 work first.
 
-1. Repeat current code on Lunatic Stage 5 with every optional observer off;
-   `154229` is consecutive pass 1 of 2.
-2. Retain the complete outcome and canonical first hit. A result above ten
-   resets the sequence and stops expansion for causal analysis.
-3. Advance only if the unchanged second run also completes at no more than
-   ten hits.
-4. Run one fresh current-code observer-off mechanics control each for
-   Lunatic Stage 3, Stage 4A, and Final B. Record practice resource
-   initialization; it is not route-faithful Power authority.
-5. Run one complete hard no-Bomb Lunatic Route 2 from the normal Power-0
-   start, retaining earned item/Power state through Stage 3, Stage 4A,
-   Stage 5, and Final B.
-6. Use Stage 1 and Stage 6B as supporting regressions when the changed
-   primitive reaches them.
-7. Only then begin the native-semantic correction series. Before integrated
-   promotion, rerun fresh compatible Stage-3/4A/5/Final-B physical gates.
-   These correction checkpoints may and should update evidence-backed IDB
-   renames/types/comments; record every material database change in the
-   current daily shard.
-8. Resume a matched V6 report/compact-tail correction or a
+1. Keep the physical ring stopped at CE-0183. Do not launch Stage 3 or a
+   third unchanged Stage-5 repeat.
+2. Start `SEM-TIMER`: revalidate the shipped elapsed/fraction transition in
+   IDA and callers, write the independent raw-state oracle, correct the
+   product model, version it, and recertify focused scalar/Python/native
+   parity.
+3. Continue `SEM-SCALE`, `SEM-MODE`, `SEM-GEOM`, `SEM-SOURCE`, and
+   `SEM-ROBUST` in roadmap order, one falsifier/checkpoint at a time.
+   Evidence-backed IDB renames/types/comments are authorized; record every
+   material database change in the current daily shard.
+4. After each applicable slice, take only the smallest causal Stage-5
+   physical falsification. Restart the two-consecutive observer-off
+   `<=10` gate only for an immutable corrected model version.
+5. Only after that gate passes, run fresh compatible Stage-3/4A/Final-B
+   mechanics controls and one complete hard no-Bomb Lunatic Route 2 from the
+   normal Power-0 start, retaining earned item/Power state.
+6. Resume a matched V6 report/compact-tail correction or a
    separately contracted nonspell combat, Power, or unfocused-shot
    experiment only after its semantic dependencies and separate physical
    contract are satisfied.
@@ -249,16 +261,17 @@ repository.
 
 The exact one-shot observer-off command is in
 `notes/review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md` and repeated in the
-physical-command section below. Do not mix the remaining control with
-Focus/unfocused, targeting, Power, or planner changes.
+physical-command section below. It is retained for the next versioned
+rebaseline; do not launch it unchanged now.
 
 ### Raw evidence retention
 
 Keep the current Stage-5 raw bundles `20260729_120859`, `20260729_125453`,
-and `20260729_154229` locally; do not remove either older bundle until the
-two-newer-compatible rule is unambiguously satisfied. The newest raw trace is
-477,619,552 bytes with SHA-256
-`fef21b64bfa6c906cb3dcd73b5c08f5ea1fdd00f6ea8e67d3a8466519c533e72`.
+`20260729_154229`, and `20260729_161313` locally. The two newest
+observer-off bundles are replay-compatible and compact-backed, but no older
+bundle is removed in this checkpoint. The newest raw trace is 550,969,744
+bytes with SHA-256
+`50e8924ba23da9e703b887d8dfd320a025f044754625b66b2939c858ba357ba5`.
 Raw JSONL and launch logs remain ignored and must not be committed.
 
 After explicit approval, the eight exact-compatible, compact-backed,
@@ -266,8 +279,8 @@ non-raw-path-referenced candidates were permanently removed. The retained
 path/size/SHA-256 manifest is
 `notes/review/RAW_RUNTIME_REMOVAL_MANIFEST_20260729.json`; it records
 2,910,858,360 bytes (`2.710948102 GiB`) reclaimed. After the newest retained
-run, the directory uses 24G (`25,705,363,580` bytes), with 59 ignored raw
-JSONL files totaling `23.860267875 GiB`. Do not bulk-delete the remaining
+run, the directory uses 25G (`26,257,096,824` bytes), with 60 ignored raw
+JSONL files totaling `24.373398435 GiB`. Do not bulk-delete the remaining
 legacy/schema/singleton families without another explicit retention decision.
 New practice/full-route
 trials no longer create a duplicate artifact dossier Markdown; the generator
@@ -1750,11 +1763,11 @@ measurement, and a `STRATEGY.md` status change.
 ## Open Problems In Priority Order
 
 Until the physical floor is restored, the immediate ordering in
-`Immediate Handoff — 2026-07-29` overrides research expansion: one unchanged
-observer-off Stage-5 pass remains to complete two consecutive runs at
-`<=10`, followed by independent Lunatic Stage 3, other-stage checks, and full
-Lunatic Route 2. V6 delivery, nonspell combat, Power, and unfocused-shot work
-remain separately contracted follow-ups.
+`Immediate Handoff — 2026-07-29` overrides research expansion:
+`PHYS-BASE-RING` is stopped at CE-0183, so `SEM-TIMER` and the ordered
+native-semantic corrections precede any new Stage-5/Stage-3 expansion. V6
+delivery, nonspell combat, Power, and unfocused-shot work remain separately
+contracted follow-ups.
 
 ### P0 — Preserve global feasibility and define post-loss authority
 
@@ -1927,7 +1940,7 @@ CE-0164. Historical notes do not override the authority table above.
 | Workload | Bundle | Purpose |
 | --- | --- | --- |
 | Lunatic Route-2 Stage 4A | `100451`, `103856` | CE-0120/0121 canonical transition evidence and replay floor; pending fresh current-code observer-off mechanics control. |
-| Lunatic Route-2 Stage 5 | `171633`, `120859`, `125453`, `154229` | Eight-hit reference, separate-publication V5 raw bundle, coalesced V6 failure, and observer-off baseline pass 1 of 2 at ten hits; keep all three current raw bundles local. |
+| Lunatic Route-2 Stage 5 | `171633`, `120859`, `125453`, `154229`, `161313` | Eight-hit reference, V5/V6 bundles, isolated ten-hit observer-off pass, and unchanged 18-hit CE-0183 failure; keep all four current raw bundles local. |
 | Lunatic Route-2 Stage 3 | pending fresh baseline | Historical practice is mechanics-only; fresh current-code control plus a route prefix starting Stage 1 at Power 0 are required. Stage-3 entry Power is accumulated, not forced to zero. |
 | Lunatic Route-2 Final B | historical `234414`; pending fresh baseline | Historical 37-hit focused practice accepted epoch/cache delivery, not survival. Fresh scaled-movement/laser/funnel mechanics and route-faithful evidence are required. |
 | Hard Route-2 Stage 1 | `175049`, `144128`, `153821` | Zero-hit native/local and refactor gates; G1 trace/pickup gate with one survival failure. |
@@ -2058,8 +2071,10 @@ Practice:
   --stage 5 --status-seconds 15 --stall-timeout 120
 ```
 
-This is the unchanged observer-off survival control for consecutive pass 2.
-Do not add any trace, combat, Power, Focus/unfocused, or planner flag.
+This is the canonical observer-off Stage-5 rebaseline command. CE-0183 blocks
+another unchanged launch now; reuse it only after an immutable correction
+contract, without adding trace, combat, Power, Focus/unfocused, or planner
+flags.
 
 The current explicit trace-only native birth-observer gate adds:
 

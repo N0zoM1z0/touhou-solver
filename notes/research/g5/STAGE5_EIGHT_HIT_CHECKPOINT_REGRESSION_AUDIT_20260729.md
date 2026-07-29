@@ -2,8 +2,8 @@
 
 Date: 2026-07-29
 
-Status: causal source review complete; observer-off recovery pass 1 retained;
-no single code regression established
+Status: causal source review complete; consecutive observer-off recovery
+rejected by CE-0183; no single code regression established
 
 ## Question
 
@@ -19,11 +19,13 @@ and current checkpoint `3f02ff1` caused the 18-hit result
 | `20260728_171633` | `3adad09` | `3/2/1/1/1` | 12324 | `2/4` |
 | `20260729_125453` | `3f02ff1` | `6/2/4/2/4` | 731 | `2/4` |
 | `20260729_154229` | `e4e266f` | `5/2/1/1/1` | 10740 | `2/4` |
+| `20260729_161313` | `e4e266f` | `10/2/5/1/0` | 2524 | `2/4` |
 
-All four completed hard no-Bomb Stage 5 with accepted artifacts and cleanup.
+All five completed hard no-Bomb Stage 5 with accepted artifacts and cleanup.
 They are distinct game histories, not same-seed paired trials. The final run
-was launched from repository checkpoint `b34f905`; changes after executable
-checkpoint `e4e266f` were documentation only.
+was launched from repository checkpoint `39366f2`; the two observer-off
+controls differ only by first-run compact evidence/documentation and physical
+history after executable checkpoint `e4e266f`.
 
 ## Source-Diff Finding
 
@@ -95,6 +97,39 @@ historical eight-to-ten band without rollback. It does not isolate optional
 observer contention because the physical history and RNG were unmatched, and
 it does not close a two-consecutive-run gate.
 
+### The unchanged consecutive control rejects stable recovery
+
+**Observed:** run `20260729_161313` used an exactly equal controller config,
+target hash/patch, native backends, hard no-Bomb policy, stage/difficulty, and
+optional-observer/shadow settings. Both observer-off controls entered with
+Power 128, lives 8, and Bomb stock 3. The second run nevertheless took 18
+hits, resetting the sequence.
+
+The fresh histories diverged before any coupled respawn comparison:
+
+- pass 1 first contacted at frame 10,740 near the lower playfield in an
+  exact same-epoch enemy-body overlap, after global loss by nine frames;
+- pass 2 first contacted at frame 2,524 near the upper-right in a modeled
+  committed-prefix bullet collision, after global loss by 240 frames and
+  robust-action exhaustion by eight frames;
+- pass-2 first-hit delay support was `2..6`, versus `2..4` in pass 1.
+
+These are workload/config-matched but not same-seed, same-history, or
+same-first-hit-state trials. CE-0183 retains the earliest failing state.
+
+### Candidate-cause disposition
+
+| Candidate | Disposition | Evidence boundary |
+| --- | --- | --- |
+| Changed planner/recurrence/mask authority | Ruled out for this pair | No executable path changed; both use `e4e266f`/`3f02ff1` and exact equal controller config. |
+| Different optional observer configuration | Ruled out for this pair | Every optional observer and shadow is off in both sessions. |
+| Different practice entry resources | Ruled out | Both start at Power 128, lives 8, Bomb stock 3. |
+| Optional V6 observers as a necessary cause of 18 hits | Ruled out | The observer-off pass itself reaches 18; a smaller observer effect remains unresolved without a paired history. |
+| General cadence regression | Unsupported | Both cadence median/p95 are `2/4`; local-plan p95 changes only from `23.615` to `24.375 ms` observationally. |
+| Different physical/RNG/delay/hazard history | Supported state divergence | First-hit frame, position, hazard class, action, and delay support differ; the causal primitive behind that divergence is unresolved. |
+| Persistent viability/model weakness | Supported | All 28 contacts across the consecutive pair follow global-kernel exhaustion; pass 2 loses it 240 frames before first contact. |
+| Rollback of trace/report commits | Rejected | There is no changed authority path or controlled reproduction tying those commits to the first hit. |
+
 ### Optional observer contention remains plausible only in scope
 
 **Observed:** V6 adds post-issue auxiliary capture, derivation, compaction,
@@ -120,21 +155,18 @@ a controlled A/B.
 
 ## Next Causal Gate
 
-Keep current code and the identical workload before changing strategy:
+The unchanged pass-2 control has failed, so stop physical expansion:
 
-1. repeat the exact observer-off Lunatic Stage-5 control for consecutive pass
-   2;
-2. if it exceeds ten hits, reset the consecutive sequence, stop expansion,
-   and compare its canonical first hit against CE-0182 and the two eight-hit
-   checkpoints;
-3. if the first hit is very early or repeated controls remain high,
-   investigate the retained nonspell first-hit geometry and issue/policy
-   timing rather than reverting trace commits;
-4. if two controls return to the historical range, rerun only one independently
-   contracted observer with phase-matched publication metrics;
-5. accept recovery only after two consecutive Stage-5 runs at no more than
-   ten hits; and
-6. then verify Stage 3, retained other stages, and a complete Lunatic route.
+1. retain CE-0183 and reset the consecutive sequence;
+2. do not launch Stage 3, another unchanged Stage-5 sample, or an observer
+   A/B as a substitute for causal correction;
+3. replay/analyze the frame-2,284 global-loss root and frame-2,516
+   committed-prefix boundary with exact delay/action/hazard state;
+4. begin the roadmap's ordered native-semantic correction series and take the
+   smallest causal Stage-5 falsification after each applicable slice; and
+5. only after a versioned correction restarts the baseline, require two
+   consecutive Stage-5 runs at no more than ten hits before other stages.
 
 The proposed nonspell damage/Power/unfocused-shot work is a separate
-survival-filtered experiment. It must not be mixed into the first control.
+survival-filtered experiment. It remains blocked behind semantic and
+viability authority.

@@ -97,8 +97,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `fc7c021`
-  (`Add immutable future body schedule boundary`).
+- Latest retained research checkpoint: `14b5a84`
+  (`Add causal future body schedule families`).
 - Latest pre-trial repository/live code checkpoint: `b2e1eff`
   (`Fix priority-17 physical preflight`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
@@ -408,7 +408,7 @@ action, collision/viability, damage, or NMNB authority follows.
 Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
 14.286/31.013 seconds, with the three existing Windows skips.
 
-CE-0197 then rejects treating that exogenous schedule as independent of
+Checkpoint `14b5a84` then records CE-0197 and rejects treating that exogenous schedule as independent of
 asynchronous input. Direction changes player position and aimed motion;
 Focus changes enemy mode; Shot/Power changes damage, defeat, and despawn; and
 route-2 player callbacks can change shared gameplay RNG. The new offline

@@ -3,7 +3,9 @@ from __future__ import annotations
 import unittest
 
 from th08_enemy_mode import (
+    merge_route2_async_ordered_mode_decision_observation_classes,
     merge_route2_ordered_mode_decision_observation_classes,
+    project_route2_async_ordered_mode_decision_branches,
     project_route2_ordered_mode_decision_branches,
 )
 from touhou_control.ordered_input_transaction_oracle import (
@@ -27,6 +29,146 @@ def _settled(mask: int) -> OrderedInputBelief:
 
 
 class OrderedEnemyModeDecisionTests(unittest.TestCase):
+    def test_async_issue_callback_consumes_old_mask_before_publication(
+        self,
+    ) -> None:
+        branches = project_route2_async_ordered_mode_decision_branches(
+            input_belief=_settled(0x01),
+            selected_action="focus_shot",
+            action_masks=ACTION_MASKS,
+            supported_mask=SUPPORTED,
+            post_dispatch_delay_frames=(1,),
+            dispatch_callback_count_support=(1,),
+            decision_frame_support=(1,),
+            initial_mode_state=(0, False, 4),
+            enemy_flag_frames=((),),
+        )
+
+        self.assertEqual(len(branches), 2)
+        self.assertEqual(
+            {
+                tuple(
+                    frame.active_mask
+                    for frame in branch.hazard_branch.frames
+                )
+                for branch in branches
+            },
+            {(0x01,)},
+        )
+        self.assertEqual(
+            {branch.successor_input_state.active_mask for branch in branches},
+            {0x01, 0x05},
+        )
+        self.assertEqual(
+            {branch.successor_mode_state for branch in branches},
+            {(0, False, 5)},
+        )
+
+    def test_async_ce0193_partial_affects_next_priority9_step(self) -> None:
+        branches = project_route2_async_ordered_mode_decision_branches(
+            input_belief=_settled(0x65),
+            selected_action="left_shot",
+            action_masks=ACTION_MASKS,
+            supported_mask=SUPPORTED,
+            post_dispatch_delay_frames=(1,),
+            dispatch_callback_count_support=(1,),
+            decision_frame_support=(2,),
+            initial_mode_state=(0, False, 4),
+            enemy_flag_frames=((), ()),
+        )
+        partial = [
+            branch
+            for branch in branches
+            if branch.hazard_branch.issue_branch.publications_during_dispatch
+            == (0x61,)
+        ]
+
+        self.assertEqual(len(partial), 1)
+        branch = partial[0]
+        self.assertEqual(
+            tuple(frame.active_mask for frame in branch.hazard_branch.frames),
+            (0x65, 0x61),
+        )
+        self.assertEqual(branch.successor_input_state.active_mask, 0x41)
+        self.assertEqual(branch.successor_mode_state, (0, False, 0))
+
+    def test_async_dispatch_callbacks_consume_total_cadence(self) -> None:
+        branches = project_route2_async_ordered_mode_decision_branches(
+            input_belief=_settled(0x01),
+            selected_action="focus_shot",
+            action_masks=ACTION_MASKS,
+            supported_mask=SUPPORTED,
+            post_dispatch_delay_frames=(1,),
+            dispatch_callback_count_support=(0, 2),
+            decision_frame_support=(1,),
+            initial_mode_state=(0, False, 4),
+            enemy_flag_frames=((),),
+        )
+
+        self.assertTrue(branches)
+        self.assertEqual(
+            {
+                branch.hazard_branch.issue_branch.dispatch_callback_count
+                for branch in branches
+            },
+            {0},
+        )
+        self.assertTrue(
+            all(len(branch.hazard_branch.frames) == 1 for branch in branches)
+        )
+
+    def test_async_incompatible_issue_and_cadence_support_fails_closed(
+        self,
+    ) -> None:
+        with self.assertRaisesRegex(ValueError, "no compatible history"):
+            project_route2_async_ordered_mode_decision_branches(
+                input_belief=_settled(0x01),
+                selected_action="focus_shot",
+                action_masks=ACTION_MASKS,
+                supported_mask=SUPPORTED,
+                post_dispatch_delay_frames=(1,),
+                dispatch_callback_count_support=(2,),
+                decision_frame_support=(1,),
+                initial_mode_state=(0, False, 4),
+                enemy_flag_frames=((),),
+            )
+
+    def test_async_observation_merges_only_identical_visible_roots(
+        self,
+    ) -> None:
+        branches = project_route2_async_ordered_mode_decision_branches(
+            input_belief=_settled(0x65),
+            selected_action="left_shot",
+            action_masks=ACTION_MASKS,
+            supported_mask=SUPPORTED,
+            post_dispatch_delay_frames=(1, 2),
+            dispatch_callback_count_support=(1,),
+            decision_frame_support=(1,),
+            initial_mode_state=(0, False, 4),
+            enemy_flag_frames=((),),
+        )
+        classes = merge_route2_async_ordered_mode_decision_observation_classes(
+            branches,
+            base_observation=lambda _branch, _frame: "same_base",
+        )
+
+        self.assertGreater(len(branches), len(classes))
+        for mode_class in classes:
+            self.assertEqual(
+                {
+                    state.active_mask
+                    for state in mode_class.successor_input_belief.states
+                },
+                {mode_class.key.active_mask},
+            )
+            self.assertEqual(
+                {
+                    state.held_desired_mask
+                    for state in mode_class.successor_input_belief.states
+                },
+                {mode_class.key.held_desired_mask},
+            )
+
     def test_priority9_consumes_current_before_priority17_publication(self) -> None:
         branches = project_route2_ordered_mode_decision_branches(
             input_belief=_settled(0x01),
@@ -163,6 +305,22 @@ class OrderedEnemyModeDecisionTests(unittest.TestCase):
                 },
                 supported_mask=SUPPORTED,
                 delay_frames=(2,),
+                decision_frame_support=(1,),
+                initial_mode_state=(0, False, 0),
+                enemy_flag_frames=((),),
+            )
+
+        with self.assertRaisesRegex(ValueError, "without action identities"):
+            project_route2_async_ordered_mode_decision_branches(
+                input_belief=_settled(0x65),
+                selected_action="left_shot",
+                action_masks={
+                    "left_down_focus_shot": 0x65,
+                    "left_shot": 0x41,
+                },
+                supported_mask=SUPPORTED,
+                post_dispatch_delay_frames=(1,),
+                dispatch_callback_count_support=(1,),
                 decision_frame_support=(1,),
                 initial_mode_state=(0, False, 0),
                 enemy_flag_frames=((),),

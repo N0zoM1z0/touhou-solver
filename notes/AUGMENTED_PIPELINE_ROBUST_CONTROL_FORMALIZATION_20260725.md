@@ -242,6 +242,34 @@ controller maximization exactly when observed active mask and held final mask
 agree. The pre-amendment one-token recurrence remains an offline restricted
 baseline after CE-0193.
 
+#### Asynchronous dispatch refinement
+
+`ASYNC_ORDERED_INPUT_PUBLICATION_CONTRACT_20260730.md` refines the issue
+boundary using the retained priority-17 serial evidence. For one real write,
+the older suffix and newly appended release/press path form one combined
+suffix. Nature selects a declared in-dispatch callback count. At each such
+callback:
+
+1. the TH08 physical step consumes the active mask that existed before the
+   callback;
+2. priority 9/11 updates player mode and body gates;
+3. priority 17 publishes a stutter or any monotone cut of the remaining
+   suffix; and
+4. the published mask becomes active only for the next physical step.
+
+If the suffix settles during dispatch, no post-dispatch delay is sampled. If
+it remains pending, nature samples a new positive deadline measured from the
+post-dispatch boundary. A newer real write may retain an older unobserved
+suffix while superseding the visibility requirement of its transient held
+target. No-write has no dispatch microphase and preserves the exact state.
+
+The independent scalar and bounded native implementations are exact for this
+declared finite recurrence. The callback-count support, post-dispatch
+deadline support, and their joint relation with recursive cadence remain
+physical hypotheses. The observed `1..5` first-final values are positive
+samples, not a universal support or an adapter from
+`control_delay_candidates`.
+
 This conditional issue rule is not cosmetic.  A retained three-frame
 counterexample starts from `stay` with `left` pending at remaining delay two.
 Holding `left` lets it become active in time and wins.  The legacy recurrence
@@ -333,15 +361,19 @@ Passing claim 1 does not establish claims 2--4.
   supports before continuation maximization.  Another 128 retained randomized
   cases have zero scalar/native failures.
 - `ordered_input_transaction_oracle.py` independently implements the CE-0193
-  ordered state above. Nine focused tests cover deterministic release/press
-  order, the physical `0x65 -> 0x61 -> 0x41` witness, single-edge reduction,
-  final-deadline forcing, no-write, overwrite, observation merging, uniform
-  controller choice, unsupported bits, and Bomb.
+  ordered state and asynchronous issue microphase above. Seventeen focused
+  tests cover deterministic release/press order, the physical
+  `0x65 -> 0x61 -> 0x41` witness, callbacks in dispatch, stutter/multi-edge
+  cuts, final-in-dispatch, final-deadline forcing, no-write, overwrite,
+  observation merging, uniform controller choice, unsupported bits, and
+  Bomb.
 - `th08_enemy_mode.py` retains its atomic APIs as an explicitly restricted
-  baseline and adds an ordered SEM-MODE decision primitive. At its declared
-  post-priority-17 root boundary, each physical step has priority 9 consume
-  current active input, priority 11 project body gates, and priority 17
-  publish a nature-selected transaction prefix for the next step.
+  baseline and adds ordered and asynchronous SEM-MODE decision primitives.
+  The asynchronous primitive accounts for dispatch callbacks inside total
+  cadence: priority 9 consumes current active input, priority 11 projects
+  body gates, and priority 17 publishes a nature-selected transaction prefix
+  for the next step. Nine focused tests cover composition and non-clairvoyant
+  observation merging.
 - Connected IDA revalidation records this native order at `0x0044AEE8` and
   the priority-17 range `0x00452339..0x00452483`: priority-9 player movement
   consumes the previously published `g_input_current`; priority-17 saves
@@ -382,6 +414,14 @@ Passing claim 1 does not establish claims 2--4.
   observed. The physical trace therefore supplies positive support samples
   and replacement censoring, but not a universal finite upper bound for
   `r`.
+- `touhou_async_ordered_input_issue_v1` is an independent bounded C++
+  exact-state enumerator. It adds the 47th checked production ABI symbol but
+  has no live consumer. Linux/Windows retained reports match the scalar
+  oracle on 115 state/action cases and all 2,405 exact branch histories,
+  including the two physical witnesses. The report SHA-256 values are
+  `f9fbe98bac5fe9481e8baf4bc09c51b328b12fb744d724132dd0d7adb7e3e4b0`
+  and
+  `91df49e10f919e4c1681cb617563c311c55902b0500ee2ba5b379a23b391885a`.
 - Lookup-only version/root checks are exact.  In the first physical shadow,
   every root that was both covered and completed was consumed; miss delivery,
   not lookup corruption, caused the low hit rate.
@@ -399,10 +439,10 @@ Passing claim 1 does not establish claims 2--4.
   current prefix/stutter support is conservative and its publication deadline
   is exact only relative to the oracle's abstract publication clock.
 - Callback publication during the asynchronous controller issue is now
-  physically observed. Mapping it into a causal decision transition remains
-  open: the transition must allow callbacks inside an ordered dispatch and
-  must not force a superseded transient target to become callback-visible.
-  Enemy-manager frame cannot supply that mapping.
+  physically observed and represented by an exact finite causal transition.
+  What remains open is the physical completeness of its callback/deadline
+  supports and their joint scheduler/cadence automaton. Enemy-manager frame
+  cannot supply that authority.
 - Replacing recursive cadence by one robust public transition followed by a
   fixed interval has unknown direction.  It matched one small cohort but was
   optimistic on a retained wider ten-frame counterexample; “use only maximum
@@ -454,13 +494,12 @@ Before any losing-state value gains action authority:
 9. Keep model-fidelity counterexamples separate from recurrence bugs.
 10. Keep physical action authority gated by current policy version, exact
    observable root, deadline, and fresh issue-time local certificate.
-11. Before the ordered oracle consumes a physical delay support, identify
-    priority-17 publications with a bounded native serial/event probe and
-    derive a conservative post-issue callback-step support. A manager-frame
-    residual or first later capture is not that support. Retained Stage-5
-    counts establish observed values `1..5`, not an upper bound: explicit
-    replacement censoring and trace gaps must remain branches or unresolved
-    evidence.
+11. Before the ordered oracle consumes a physical delay support, derive a
+    conservative callback-step and joint scheduler/cadence contract across
+    the mandatory Stage-3/4A/5/Final-B workloads. A manager-frame residual or
+    first later capture is not that support. Retained Stage-5 counts establish
+    observed values `1..5`, not an upper bound: explicit replacement
+    censoring and trace gaps must remain branches or unresolved evidence.
 
 ## 8. Performance Problem
 

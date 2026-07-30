@@ -329,3 +329,36 @@ Checkpoint D therefore closes physical existence of ordered publication
 prefixes and the asynchronous issue phase only as observed evidence. The
 causal recurrence, conservative completion-support contract, independent
 optimized parity, future geometry binding, and live authority remain open.
+
+## Checkpoint E Asynchronous Finite Recurrence And Native Parity
+
+The game-neutral scalar recurrence now branches callbacks inside one real
+ordered dispatch. Each callback retains the active mask consumed by the
+physical update separately from the mask published at callback exit. Nature
+may stutter or advance by any monotone suffix cut. Settling during dispatch
+samples no post-dispatch delay; otherwise the latest deadline begins after
+dispatch. No-write preserves the exact older state, and a newer write may
+supersede an unobserved transient target without forcing it visible.
+
+The TH08 composition counts those callbacks as physical cadence steps and
+applies priority 9/11 before priority 17. It rejects any active,
+intermediate, or queued complete mask without an injective action identity.
+The independent native exact-state enumerator
+`touhou_async_ordered_input_issue_v1` adds checked ABI symbol 47. Its explicit
+queue/support/callback/branch caps are bounded implementation scope;
+exhaustion remains unresolved.
+
+Linux and Windows retained reports match the scalar oracle on 115 exact
+state/action cases and all 2,405 complete branch histories. Full histories
+are retained for CE-0193 and the Stage-5 superseded-transient witness. Report
+SHA-256 values are
+`f9fbe98bac5fe9481e8baf4bc09c51b328b12fb744d724132dd0d7adb7e3e4b0`
+and
+`91df49e10f919e4c1681cb617563c311c55902b0500ee2ba5b379a23b391885a`.
+
+Checkpoint E closes bounded causal recurrence and implementation parity only.
+It does not validate physical completeness of callback/deadline support, the
+dispatch/cadence joint automaton, immutable future body/flag/geometry,
+movement/collision integration, publication deadline, or live action. Those
+remain the promotion boundary before a newly versioned whole-stage
+falsifier.

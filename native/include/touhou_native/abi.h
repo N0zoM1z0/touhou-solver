@@ -96,6 +96,56 @@ typedef struct TouhouLocalSupplementalOutputV1 {
     int32_t* count;
 } TouhouLocalSupplementalOutputV1;
 
+typedef struct TouhouAsyncOrderedInputIssueQueryV1 {
+    uint32_t struct_size;
+    uint32_t active_mask;
+    uint32_t held_desired_mask;
+    const uint32_t* queued_masks;
+    int32_t queued_mask_count;
+    int32_t completion_remaining;
+    uint32_t selected_mask;
+    const int32_t* post_dispatch_delay_support;
+    int32_t post_dispatch_delay_count;
+    const int32_t* dispatch_callback_count_support;
+    int32_t dispatch_callback_count;
+    uint32_t supported_mask;
+    uint32_t forbidden_mask;
+} TouhouAsyncOrderedInputIssueQueryV1;
+
+typedef struct TouhouAsyncOrderedInputIssueBranchV1 {
+    uint32_t selected_mask;
+    uint8_t write_required;
+    uint8_t reserved_u8[3];
+    int32_t older_remaining;
+    int32_t new_delay;
+    int32_t dispatch_history_offset;
+    int32_t dispatch_history_count;
+    uint32_t successor_active_mask;
+    uint32_t successor_held_desired_mask;
+    int32_t successor_queue_offset;
+    int32_t successor_queue_count;
+    int32_t successor_completion_remaining;
+} TouhouAsyncOrderedInputIssueBranchV1;
+
+typedef struct TouhouAsyncOrderedInputIssueOutputV1 {
+    uint32_t struct_size;
+    TouhouAsyncOrderedInputIssueBranchV1* branches;
+    int32_t branch_capacity;
+    uint32_t* active_masks_consumed_during_dispatch;
+    uint32_t* publications_during_dispatch;
+    int32_t dispatch_history_capacity;
+    uint32_t* successor_queued_masks;
+    int32_t successor_queue_capacity;
+    int32_t* branch_count;
+    int32_t* dispatch_history_count;
+    int32_t* successor_queue_count;
+} TouhouAsyncOrderedInputIssueOutputV1;
+
+TOUHOU_ABI int touhou_async_ordered_input_issue_v1(
+    const TouhouAsyncOrderedInputIssueQueryV1* query,
+    TouhouAsyncOrderedInputIssueOutputV1* output
+);
+
 TOUHOU_ABI int touhou_clearance_volume_v1(
     float x_start,
     float x_step,

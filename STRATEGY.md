@@ -1,6 +1,6 @@
 # Touhou Solver Strategy Ledger
 
-Last updated: 2026-07-29.
+Last updated: 2026-07-30.
 
 This file records strategy identity and promotion status. It is not a
 chronological log. Derivations and measurements live in design notes,
@@ -766,6 +766,39 @@ The five focused report tests and complete 1,227-test Linux/Windows suites
 pass in 14.858/30.896 seconds, with three existing Windows skips. Fresh
 full-source regeneration is structurally identical to the retained compact
 report.
+
+**2026-07-30 SEM-MODE-C asynchronous scalar/native checkpoint:** the corrected
+stage-neutral issue model now branches zero or more priority-17 callbacks
+inside one real complete-mask dispatch. Every callback consumes the prior
+active mask for priority 9/11 before publishing a monotone ordered-path cut
+for the next step. Overwrite preserves the older suffix but may supersede a
+transient final target; complete-mask no-write preserves the exact hidden
+queue/deadline and samples no issue microphase.
+
+The independent scalar recurrence and TH08 mode/body composition are covered
+by 26 focused tests. A separate bounded C++ enumerator adds production ABI
+symbol 47 solely for offline differential use. Linux and Windows each match
+the scalar oracle on 115 exact state/action cases and all 2,405 branch
+histories with zero mismatch. The corpus retains exact branches for CE-0193
+and the physical superseded-transient witness. Reports hash to
+`f9fbe98bac5fe9481e8baf4bc09c51b328b12fb744d724132dd0d7adb7e3e4b0`
+and
+`91df49e10f919e4c1681cb617563c311c55902b0500ee2ba5b379a23b391885a`
+on Linux/Windows; their finite content is identical apart from platform and
+native-binary identity.
+
+Focused scalar/TH08/native/report/ABI gates, strict compiler warnings, and
+Linux sanitizer execution pass. Complete Linux/Windows discovery passes
+1,247/1,247 in 14.990/30.874 seconds, with three existing Windows skips.
+
+Strategy remains **Offline/shadow only**. Scalar/native agreement is
+implementation parity, not physical support completeness. The observed
+callback support, post-dispatch deadline, dispatch/cadence joint automaton,
+future body/flag/geometry schedule, movement/collision integration, immutable
+publication version, and stage-level physical falsifier remain open. No live
+action, damage/unfocused combat, survival, or NMNB authority is promoted.
+Continue with the complete immutable future producer and independent
+body-set differential; do not repeat the unchanged Stage-5 diagnostic.
 
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those

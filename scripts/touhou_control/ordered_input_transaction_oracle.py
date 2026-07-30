@@ -180,6 +180,71 @@ class OrderedInputIssueBranch:
     successor_state: OrderedInputExactState
 
 
+@dataclass(frozen=True)
+class AsynchronousOrderedInputIssueBranch:
+    """One issue branch including native callbacks during ordered dispatch."""
+
+    source_state: OrderedInputExactState
+    selected_mask: int
+    write_required: bool
+    older_remaining: int | None
+    new_delay: int | None
+    active_masks_consumed_during_dispatch: tuple[int, ...]
+    publications_during_dispatch: tuple[int, ...]
+    successor_state: OrderedInputExactState
+
+    def __post_init__(self) -> None:
+        if len(self.active_masks_consumed_during_dispatch) != len(
+            self.publications_during_dispatch
+        ):
+            raise ValueError(
+                "dispatch consumption/publication histories must have equal length"
+            )
+        if self.successor_state.held_desired_mask != self.selected_mask:
+            raise ValueError("asynchronous issue successor held mask is inconsistent")
+        if not self.write_required:
+            if (
+                self.selected_mask != self.source_state.held_desired_mask
+                or self.new_delay is not None
+                or self.active_masks_consumed_during_dispatch
+                or self.publications_during_dispatch
+                or self.successor_state != self.source_state
+            ):
+                raise ValueError("asynchronous no-write branch is inconsistent")
+            return
+        if self.active_masks_consumed_during_dispatch:
+            if (
+                self.active_masks_consumed_during_dispatch[0]
+                != self.source_state.active_mask
+                or self.active_masks_consumed_during_dispatch[1:]
+                != self.publications_during_dispatch[:-1]
+            ):
+                raise ValueError(
+                    "dispatch callback order does not consume the prior publication"
+                )
+            expected_active = self.publications_during_dispatch[-1]
+        else:
+            expected_active = self.source_state.active_mask
+        if self.successor_state.active_mask != expected_active:
+            raise ValueError(
+                "asynchronous issue successor active mask is inconsistent"
+            )
+        if self.successor_state.settled:
+            if self.new_delay is not None:
+                raise ValueError("settled asynchronous issue sampled a new delay")
+        elif (
+            self.new_delay is None
+            or self.successor_state.completion_remaining != self.new_delay
+        ):
+            raise ValueError(
+                "pending asynchronous issue deadline is inconsistent"
+            )
+
+    @property
+    def dispatch_callback_count(self) -> int:
+        return len(self.publications_during_dispatch)
+
+
 @dataclass(frozen=True, order=True)
 class OrderedInputHistory:
     """One nature-selected sequence of active masks after publications."""
@@ -196,6 +261,23 @@ def _validate_delay_support(delay_support: tuple[int, ...]) -> None:
     ):
         raise ValueError(
             "completion-delay support must be sorted, unique, and positive"
+        )
+
+
+def _validate_dispatch_callback_count_support(
+    callback_count_support: tuple[int, ...],
+) -> None:
+    if (
+        not callback_count_support
+        or tuple(sorted(set(callback_count_support))) != callback_count_support
+        or not all(
+            isinstance(callback_count, int) and callback_count >= 0
+            for callback_count in callback_count_support
+        )
+    ):
+        raise ValueError(
+            "dispatch callback-count support must be sorted, unique, "
+            "and nonnegative"
         )
 
 
@@ -292,6 +374,171 @@ def issue_ordered_input_belief(
                 )
             )
     return tuple(branches)
+
+
+def _dispatch_publication_histories(
+    *,
+    active_mask: int,
+    queued_masks: tuple[int, ...],
+    callback_count: int,
+) -> tuple[
+    tuple[
+        tuple[int, ...],
+        tuple[int, ...],
+        int,
+        tuple[int, ...],
+    ],
+    ...,
+]:
+    """Enumerate monotone suffix cuts made by callbacks during dispatch."""
+
+    histories = {
+        (
+            (),
+            (),
+            active_mask,
+            queued_masks,
+        )
+    }
+    for _ in range(callback_count):
+        successors: set[
+            tuple[
+                tuple[int, ...],
+                tuple[int, ...],
+                int,
+                tuple[int, ...],
+            ]
+        ] = set()
+        for consumed_history, published_history, active, remaining in histories:
+            for consumed_count in range(len(remaining) + 1):
+                if consumed_count == 0:
+                    published = active
+                    successor_remaining = remaining
+                else:
+                    published = remaining[consumed_count - 1]
+                    successor_remaining = remaining[consumed_count:]
+                successors.add(
+                    (
+                        consumed_history + (active,),
+                        published_history + (published,),
+                        published,
+                        successor_remaining,
+                    )
+                )
+        histories = successors
+    return tuple(sorted(histories))
+
+
+def issue_ordered_input_belief_asynchronously(
+    belief: OrderedInputBelief,
+    *,
+    selected_mask: int,
+    post_dispatch_delay_support: tuple[int, ...],
+    dispatch_callback_count_support: tuple[int, ...],
+    supported_mask: int,
+    forbidden_mask: int = 0,
+) -> tuple[AsynchronousOrderedInputIssueBranch, ...]:
+    """Issue uniformly and enumerate priority callbacks during dispatch.
+
+    A real write appends its ordered path after an older unobserved suffix.
+    Native callbacks may consume monotone cuts of that combined suffix while
+    the dispatcher is still executing. Each callback's physical update
+    consumes the active mask before that callback publishes its selected
+    path position. If the latest final mask remains unpublished when dispatch
+    returns, its new deadline is measured from the post-dispatch boundary.
+
+    Complete-mask no-write has no dispatch microphase, samples no new support,
+    and preserves every exact hidden state.
+    """
+
+    _validate_mask(selected_mask, name="selected mask")
+    _validate_scope(
+        (selected_mask,),
+        supported_mask=supported_mask,
+        forbidden_mask=forbidden_mask,
+    )
+    for state in belief.states:
+        _validate_state_scope(
+            state,
+            supported_mask=supported_mask,
+            forbidden_mask=forbidden_mask,
+        )
+
+    write_required = selected_mask != belief.observation.held_desired_mask
+    if not write_required:
+        return tuple(
+            AsynchronousOrderedInputIssueBranch(
+                source_state=state,
+                selected_mask=selected_mask,
+                write_required=False,
+                older_remaining=state.completion_remaining,
+                new_delay=None,
+                active_masks_consumed_during_dispatch=(),
+                publications_during_dispatch=(),
+                successor_state=state,
+            )
+            for state in belief.states
+        )
+
+    _validate_delay_support(post_dispatch_delay_support)
+    _validate_dispatch_callback_count_support(
+        dispatch_callback_count_support
+    )
+    branches: list[AsynchronousOrderedInputIssueBranch] = []
+    for state in belief.states:
+        appended = ordered_mask_path(
+            state.held_desired_mask,
+            selected_mask,
+            supported_mask=supported_mask,
+            forbidden_mask=forbidden_mask,
+        )
+        assert appended
+        combined_suffix = state.queued_masks + appended
+        for callback_count in dispatch_callback_count_support:
+            histories = _dispatch_publication_histories(
+                active_mask=state.active_mask,
+                queued_masks=combined_suffix,
+                callback_count=callback_count,
+            )
+            for consumed, published, active, remaining in histories:
+                if not remaining:
+                    successor = OrderedInputExactState(
+                        active_mask=selected_mask,
+                        held_desired_mask=selected_mask,
+                    )
+                    branches.append(
+                        AsynchronousOrderedInputIssueBranch(
+                            source_state=state,
+                            selected_mask=selected_mask,
+                            write_required=True,
+                            older_remaining=state.completion_remaining,
+                            new_delay=None,
+                            active_masks_consumed_during_dispatch=consumed,
+                            publications_during_dispatch=published,
+                            successor_state=successor,
+                        )
+                    )
+                    continue
+                for new_delay in post_dispatch_delay_support:
+                    successor = OrderedInputExactState(
+                        active_mask=active,
+                        held_desired_mask=selected_mask,
+                        queued_masks=remaining,
+                        completion_remaining=new_delay,
+                    )
+                    branches.append(
+                        AsynchronousOrderedInputIssueBranch(
+                            source_state=state,
+                            selected_mask=selected_mask,
+                            write_required=True,
+                            older_remaining=state.completion_remaining,
+                            new_delay=new_delay,
+                            active_masks_consumed_during_dispatch=consumed,
+                            publications_during_dispatch=published,
+                            successor_state=successor,
+                        )
+                    )
+    return tuple(dict.fromkeys(branches))
 
 
 def merge_observation_equivalent_states(
@@ -399,6 +646,7 @@ def enumerate_ordered_input_histories(
 
 
 __all__ = [
+    "AsynchronousOrderedInputIssueBranch",
     "OrderedInputBelief",
     "OrderedInputExactState",
     "OrderedInputHistory",
@@ -408,6 +656,7 @@ __all__ = [
     "advance_ordered_input_state",
     "belief_after_issue",
     "enumerate_ordered_input_histories",
+    "issue_ordered_input_belief_asynchronously",
     "issue_ordered_input_belief",
     "merge_observation_equivalent_states",
     "ordered_mask_path",

@@ -9,6 +9,7 @@ from touhou_control.ordered_input_transaction_oracle import (
     advance_ordered_input_state,
     belief_after_issue,
     enumerate_ordered_input_histories,
+    issue_ordered_input_belief_asynchronously,
     issue_ordered_input_belief,
     merge_observation_equivalent_states,
     ordered_mask_path,
@@ -168,6 +169,224 @@ class OrderedInputTransactionOracleTests(unittest.TestCase):
         )
         self.assertEqual({state.active_mask for state in third}, {0x84})
         self.assertTrue(all(state.settled for state in third))
+
+    def test_async_ce0193_callback_consumes_old_then_publishes_partial(
+        self,
+    ) -> None:
+        branches = issue_ordered_input_belief_asynchronously(
+            _settled(0x65),
+            selected_mask=0x41,
+            post_dispatch_delay_support=(1, 2),
+            dispatch_callback_count_support=(1,),
+            supported_mask=SUPPORTED,
+            forbidden_mask=FORBIDDEN,
+        )
+
+        partial = [
+            branch
+            for branch in branches
+            if branch.publications_during_dispatch == (0x61,)
+        ]
+        self.assertEqual(len(partial), 2)
+        self.assertEqual(
+            {
+                (
+                    branch.active_masks_consumed_during_dispatch,
+                    branch.successor_state.active_mask,
+                    branch.successor_state.held_desired_mask,
+                    branch.successor_state.queued_masks,
+                    branch.new_delay,
+                )
+                for branch in partial
+            },
+            {
+                ((0x65,), 0x61, 0x41, (0x41,), 1),
+                ((0x65,), 0x61, 0x41, (0x41,), 2),
+            },
+        )
+
+    def test_async_dispatch_publications_are_monotone_path_cuts(self) -> None:
+        branches = issue_ordered_input_belief_asynchronously(
+            _settled(0x41),
+            selected_mask=0x84,
+            post_dispatch_delay_support=(2,),
+            dispatch_callback_count_support=(2,),
+            supported_mask=SUPPORTED,
+            forbidden_mask=FORBIDDEN,
+        )
+        path = (0x41, 0x40, 0x00, 0x04, 0x84)
+        position = {mask: index for index, mask in enumerate(path)}
+
+        self.assertTrue(branches)
+        for branch in branches:
+            self.assertEqual(branch.dispatch_callback_count, 2)
+            self.assertEqual(
+                branch.active_masks_consumed_during_dispatch[0],
+                0x41,
+            )
+            self.assertEqual(
+                branch.active_masks_consumed_during_dispatch[1],
+                branch.publications_during_dispatch[0],
+            )
+            positions = tuple(
+                position[mask]
+                for mask in branch.publications_during_dispatch
+            )
+            self.assertEqual(tuple(sorted(positions)), positions)
+
+    def test_async_final_during_dispatch_settles_without_new_delay(
+        self,
+    ) -> None:
+        branches = issue_ordered_input_belief_asynchronously(
+            _settled(0x65),
+            selected_mask=0x41,
+            post_dispatch_delay_support=(1, 2),
+            dispatch_callback_count_support=(1,),
+            supported_mask=SUPPORTED,
+            forbidden_mask=FORBIDDEN,
+        )
+        final = [
+            branch
+            for branch in branches
+            if branch.publications_during_dispatch == (0x41,)
+        ]
+
+        self.assertEqual(len(final), 1)
+        self.assertIsNone(final[0].new_delay)
+        self.assertTrue(final[0].successor_state.settled)
+        self.assertEqual(final[0].successor_state.active_mask, 0x41)
+
+    def test_async_overwrite_can_skip_a_superseded_transient_target(
+        self,
+    ) -> None:
+        transient = OrderedInputExactState(
+            active_mask=0x05,
+            held_desired_mask=0x04,
+            queued_masks=(0x04,),
+            completion_remaining=2,
+        )
+        branches = issue_ordered_input_belief_asynchronously(
+            OrderedInputBelief.from_states((transient,)),
+            selected_mask=0x05,
+            post_dispatch_delay_support=(1,),
+            dispatch_callback_count_support=(0,),
+            supported_mask=SUPPORTED,
+            forbidden_mask=FORBIDDEN,
+        )
+
+        self.assertEqual(len(branches), 1)
+        issued = branches[0].successor_state
+        self.assertEqual(issued.queued_masks, (0x04, 0x05))
+        self.assertEqual(issued.completion_remaining, 1)
+        completed = advance_ordered_input_state(issued)
+        self.assertEqual(len(completed), 1)
+        self.assertEqual(completed[0].active_mask, 0x05)
+        self.assertTrue(completed[0].settled)
+
+    def test_async_no_write_has_no_dispatch_phase_and_preserves_pending(
+        self,
+    ) -> None:
+        pending = OrderedInputExactState(
+            active_mask=0x61,
+            held_desired_mask=0x41,
+            queued_masks=(0x41,),
+            completion_remaining=1,
+        )
+        branches = issue_ordered_input_belief_asynchronously(
+            OrderedInputBelief.from_states((pending,)),
+            selected_mask=0x41,
+            post_dispatch_delay_support=(),
+            dispatch_callback_count_support=(),
+            supported_mask=SUPPORTED,
+            forbidden_mask=FORBIDDEN,
+        )
+
+        self.assertEqual(len(branches), 1)
+        self.assertFalse(branches[0].write_required)
+        self.assertEqual(branches[0].dispatch_callback_count, 0)
+        self.assertEqual(branches[0].successor_state, pending)
+
+    def test_async_callback_count_support_is_explicit(self) -> None:
+        branches = issue_ordered_input_belief_asynchronously(
+            _settled(0x05),
+            selected_mask=0x04,
+            post_dispatch_delay_support=(1,),
+            dispatch_callback_count_support=(0, 1, 2),
+            supported_mask=SUPPORTED,
+            forbidden_mask=FORBIDDEN,
+        )
+
+        self.assertEqual(
+            {branch.dispatch_callback_count for branch in branches},
+            {0, 1, 2},
+        )
+
+    def test_async_invalid_supports_fail_closed(self) -> None:
+        with self.assertRaisesRegex(ValueError, "callback-count support"):
+            issue_ordered_input_belief_asynchronously(
+                _settled(0x05),
+                selected_mask=0x04,
+                post_dispatch_delay_support=(1,),
+                dispatch_callback_count_support=(1, 0),
+                supported_mask=SUPPORTED,
+                forbidden_mask=FORBIDDEN,
+            )
+        with self.assertRaisesRegex(ValueError, "completion-delay support"):
+            issue_ordered_input_belief_asynchronously(
+                _settled(0x05),
+                selected_mask=0x04,
+                post_dispatch_delay_support=(0,),
+                dispatch_callback_count_support=(0,),
+                supported_mask=SUPPORTED,
+                forbidden_mask=FORBIDDEN,
+            )
+        with self.assertRaisesRegex(ValueError, "forbidden"):
+            issue_ordered_input_belief_asynchronously(
+                _settled(0x01),
+                selected_mask=0x03,
+                post_dispatch_delay_support=(1,),
+                dispatch_callback_count_support=(0,),
+                supported_mask=SUPPORTED,
+                forbidden_mask=FORBIDDEN,
+            )
+
+    def test_async_one_action_is_uniform_across_hidden_deadlines(self) -> None:
+        states = (
+            OrderedInputExactState(
+                active_mask=0x65,
+                held_desired_mask=0x41,
+                queued_masks=(0x61, 0x41),
+                completion_remaining=2,
+            ),
+            OrderedInputExactState(
+                active_mask=0x65,
+                held_desired_mask=0x41,
+                queued_masks=(0x61, 0x41),
+                completion_remaining=3,
+            ),
+        )
+        branches = issue_ordered_input_belief_asynchronously(
+            OrderedInputBelief.from_states(states),
+            selected_mask=0x44,
+            post_dispatch_delay_support=(1, 2),
+            dispatch_callback_count_support=(0,),
+            supported_mask=SUPPORTED,
+            forbidden_mask=FORBIDDEN,
+        )
+
+        self.assertEqual(len(branches), 4)
+        self.assertEqual(
+            {branch.source_state for branch in branches},
+            set(states),
+        )
+        self.assertEqual(
+            {branch.selected_mask for branch in branches},
+            {0x44},
+        )
+        self.assertEqual(
+            {branch.new_delay for branch in branches},
+            {1, 2},
+        )
 
     def test_hidden_deadlines_merge_before_next_controller_choice(self) -> None:
         slow = OrderedInputExactState(

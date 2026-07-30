@@ -15,6 +15,7 @@ NATIVE_ROOT = ROOT / "native"
 SOURCES = (
     NATIVE_ROOT / "src" / "abi" / "geometry_abi.cpp",
     NATIVE_ROOT / "src" / "abi" / "local_abi.cpp",
+    NATIVE_ROOT / "src" / "abi" / "ordered_input_abi.cpp",
     NATIVE_ROOT / "src" / "abi" / "direct_pipeline_abi.cpp",
     NATIVE_ROOT / "src" / "abi" / "belief_pipeline_abi.cpp",
     NATIVE_ROOT / "src" / "abi" / "query_local_abi.cpp",
@@ -27,6 +28,7 @@ SOURCES = (
     NATIVE_ROOT / "src" / "local" / "bullet_decode.cpp",
     NATIVE_ROOT / "src" / "local" / "beam_reduce.cpp",
     NATIVE_ROOT / "src" / "local" / "supplemental_workspace.cpp",
+    NATIVE_ROOT / "src" / "pipeline" / "ordered_input_transaction.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "direct_workspace.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "direct_compat.cpp",
     NATIVE_ROOT / "src" / "pipeline" / "belief_stationary_witness.cpp",

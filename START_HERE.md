@@ -18,70 +18,71 @@ located; it does not change the authority order below.
 5. `notes/AUGMENTED_PIPELINE_ROBUST_CONTROL_FORMALIZATION_20260725.md`
 6. `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`
 7. `notes/COMPLETE_MASK_ISSUE_ACTION_CONTRACT_20260727.md`
-8. `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`
-9. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
-10. `notes/EXACT_AUGMENTED_PARTIAL_SURVIVAL_WITNESS_CONTRACT_20260727.md`
-11. `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
-12. `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`
-13. `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`
-14. `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`
-15. `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`
-16. `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
-17. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
-18. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`
-19. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`
-20. `notes/research/g5/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`
-21. `notes/research/g5/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
-22. `notes/research/g5/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
-23. `notes/research/g5/G5_MATERIALIZATION_TAIL_PHYSICAL_ATTRIBUTION_20260728.md`
-24. `notes/research/g5/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`
-25. `notes/research/g5/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
-26. `notes/research/g5/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`
-27. `notes/research/g5/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`
-28. `notes/research/g5/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
-29. `notes/research/g5/G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`
-30. `notes/research/g5/G5_NONSPELL_MAIN_VM_SOURCE_SHADOW_CONTRACT_20260728.md`
-31. `notes/research/g5/G5_NONSPELL_MAIN_VM_STAGE5_RESULT_20260728.md`
-32. `notes/research/g5/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`
-33. `notes/research/g5/G5_AUXILIARY_POINTER_STAGE5_RESULT_20260728.md`
-34. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`
-35. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_BATCH_STAGE5_RESULT_20260728.md`
-36. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md`
-37. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_STAGE5_RESULT_20260728.md`
-38. `notes/research/g5/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md`
-39. `notes/research/g5/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_STAGE5_RESULT_20260728.md`
-40. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`
-41. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`
-42. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md`
-43. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_OFFLINE_GATE_20260728.md`
-44. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_CONTRACT_20260728.md`
-45. `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
-46. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
-47. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
-48. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
-49. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
-50. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_STAGE5_RESULT_20260729.md`
-51. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_CONTRACT_20260729.md`
-52. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_PREFLIGHT_20260729.md`
-53. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_STAGE5_FAILURE_20260729.md`
-54. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_CONTRACT_20260729.md`
-55. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_PREFLIGHT_20260729.md`
-56. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_STAGE5_FAILURE_20260729.md`
-57. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_CONTRACT_20260729.md`
-58. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_PREFLIGHT_20260729.md`
-59. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_CONTRACT_20260729.md`
-60. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_PREFLIGHT_20260729.md`
-61. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_STAGE5_FAILURE_20260729.md`
-62. `notes/research/g5/STAGE5_EIGHT_HIT_CHECKPOINT_REGRESSION_AUDIT_20260729.md`
-63. `notes/review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md`
-64. `notes/review/RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md`
-65. `notes/review/REUSABLE_AGENT_SKILLS_20260729.md`
-66. `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
-67. `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`
-68. `notes/architecture/TH08_NATIVE_ECL_TIMER_SEMANTICS_20260729.md`
-69. `notes/architecture/TH08_PLAYER_LASER_GLOBAL_TIME_SCALE_SEMANTICS_20260729.md`
-70. `notes/architecture/TH08_ACTION_CONDITIONED_PLAYER_ENEMY_MODE_SEMANTICS_20260730.md`
-71. the relevant recent run note and counterexample rows before live work
+8. `notes/ASYNC_ORDERED_INPUT_PUBLICATION_CONTRACT_20260730.md`
+9. `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`
+10. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
+11. `notes/EXACT_AUGMENTED_PARTIAL_SURVIVAL_WITNESS_CONTRACT_20260727.md`
+12. `notes/FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md`
+13. `notes/HARD_FULL_ROUTE_FEASIBILITY_DIAGNOSIS_20260726.md`
+14. `notes/PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md`
+15. `notes/NATIVE_SUPPLEMENTAL_ROLLOUT_DEADLINE_CONTRACT_20260726.md`
+16. `notes/EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md`
+17. `notes/TH08_SEMANTIC_DIFFERENTIAL_FUZZER_CONTRACT_20260726.md`
+18. `notes/SUPPLEMENTAL_DIRECT_ROOT_WINDOWS_CONTENTION_GATE_20260726.md`
+19. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_CONTRACT_20260728.md`
+20. `notes/STATIONARY_WITNESS_WINDOWS_DELIVERY_GATE_20260728.md`
+21. `notes/research/g5/TH08_FUTURE_BULLET_BIRTH_OBSERVATION_CONTRACT_20260728.md`
+22. `notes/research/g5/G5_CALLBACK_LOOKAHEAD_COMPLETENESS_CONTRACT_20260728.md`
+23. `notes/research/g5/G5_MATERIALIZATION_TAIL_ATTRIBUTION_CONTRACT_20260728.md`
+24. `notes/research/g5/G5_MATERIALIZATION_TAIL_PHYSICAL_ATTRIBUTION_20260728.md`
+25. `notes/research/g5/G5_CORRIDOR_COMPLETION_PRIORITY_EXPERIMENT_20260728.md`
+26. `notes/research/g5/G5_ECL_CONTROL_FLOW_FAIL_CLOSED_PERFORMANCE_CONTRACT_20260728.md`
+27. `notes/research/g5/G5_CAPTURE_ALIGNED_VM_LOCAL_SHADOW_CONTRACT_20260728.md`
+28. `notes/research/g5/G5_BIRTH_OBSERVER_MATCHED_PATH_PERFORMANCE_CONTRACT_20260728.md`
+29. `notes/research/g5/G5_REALIZED_BIRTH_TO_HIT_PROVENANCE_CONTRACT_20260728.md`
+30. `notes/research/g5/G5_DERIVED_PATTERN_SOURCE_SHADOW_CONTRACT_20260728.md`
+31. `notes/research/g5/G5_NONSPELL_MAIN_VM_SOURCE_SHADOW_CONTRACT_20260728.md`
+32. `notes/research/g5/G5_NONSPELL_MAIN_VM_STAGE5_RESULT_20260728.md`
+33. `notes/research/g5/G5_AUXILIARY_VM_RUNTIME_IMAGE_OBSERVATION_CONTRACT_20260728.md`
+34. `notes/research/g5/G5_AUXILIARY_POINTER_STAGE5_RESULT_20260728.md`
+35. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_BATCH_CONTRACT_20260728.md`
+36. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_BATCH_STAGE5_RESULT_20260728.md`
+37. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_CONTRACT_20260728.md`
+38. `notes/research/g5/G5_NATIVE_AUXILIARY_VM_OWNED_COHERENCE_STAGE5_RESULT_20260728.md`
+39. `notes/research/g5/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_CONTRACT_20260728.md`
+40. `notes/research/g5/G5_AUXILIARY_VM_BOUNDED_VISIBLE_RETRY_STAGE5_RESULT_20260728.md`
+41. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_PHYSICAL_CONTRACT_20260728.md`
+42. `notes/research/g5/G5_SHIPPED_RUNTIME_ECL_IDENTITY_STAGE5_RESULT_20260728.md`
+43. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_INTENT_CONTRACT_20260728.md`
+44. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_OFFLINE_GATE_20260728.md`
+45. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_CONTRACT_20260728.md`
+46. `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`
+47. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`
+48. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`
+49. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_PHYSICAL_GATE_PREPARATION_20260728.md`
+50. `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`
+51. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_STAGE5_RESULT_20260729.md`
+52. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_CONTRACT_20260729.md`
+53. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_PREFLIGHT_20260729.md`
+54. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V2_STAGE5_FAILURE_20260729.md`
+55. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_CONTRACT_20260729.md`
+56. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_PREFLIGHT_20260729.md`
+57. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V3_STAGE5_FAILURE_20260729.md`
+58. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_CONTRACT_20260729.md`
+59. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_RUNTIME_DELIVERY_V4_PREFLIGHT_20260729.md`
+60. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_CONTRACT_20260729.md`
+61. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_PREFLIGHT_20260729.md`
+62. `notes/research/g5/G5_AUXILIARY_LITERAL_FIRE_CYCLE_COALESCED_DELIVERY_V6_STAGE5_FAILURE_20260729.md`
+63. `notes/research/g5/STAGE5_EIGHT_HIT_CHECKPOINT_REGRESSION_AUDIT_20260729.md`
+64. `notes/review/LAUNCH_AND_UNC_WORKFLOW_AUDIT_20260729.md`
+65. `notes/review/RUNTIME_REPORT_RETENTION_AND_EMISSION_AUDIT_20260729.md`
+66. `notes/review/REUSABLE_AGENT_SKILLS_20260729.md`
+67. `notes/review/TH08_NATIVE_TO_SOLVER_READ_ONLY_AUDIT_20260729.md`
+68. `notes/review/LUNATIC_NMNB_PROGRAM_REVIEW_AND_ROADMAP_20260729.md`
+69. `notes/architecture/TH08_NATIVE_ECL_TIMER_SEMANTICS_20260729.md`
+70. `notes/architecture/TH08_PLAYER_LASER_GLOBAL_TIME_SCALE_SEMANTICS_20260729.md`
+71. `notes/architecture/TH08_ACTION_CONDITIONED_PLAYER_ENEMY_MODE_SEMANTICS_20260730.md`
+72. the relevant recent run note and counterexample rows before live work
 
 Before trusting a result, verify that the physical problem, formal
 recurrence, implementation, immutable version, and publication deadline still
@@ -350,6 +351,29 @@ complete Linux/Windows discovery pass 1,227 tests in 14.858/30.896 seconds,
 with three existing Windows skips. No unchanged physical repeat is
 authorized; asynchronous issue/publication recurrence and censored support
 come next.
+
+The current working checkpoint implements that asynchronous recurrence
+offline. The independent scalar oracle distinguishes masks consumed by
+priority-9/11 during dispatch from masks published by priority 17, preserves
+older suffixes/no-write, and admits replacement-censored transient targets.
+The TH08 composition carries these histories through explicit total cadence
+and merges only complete next observations. A separate bounded native
+exact-state enumerator adds checked ABI symbol 47 without entering the live
+belief workspace.
+
+Linux and Windows each match the scalar oracle on 115 exact state/action
+cases and all 2,405 branches, including CE-0193 and the physical superseded
+transient witness. Retained report SHA-256 values are
+`f9fbe98bac5fe9481e8baf4bc09c51b328b12fb744d724132dd0d7adb7e3e4b0`
+and
+`91df49e10f919e4c1681cb617563c311c55902b0500ee2ba5b379a23b391885a`;
+finite contents are cross-platform identical after platform/binary identity
+is removed. This is implementation parity only. Observed callback supports,
+the post-dispatch deadline, the dispatch/cadence joint automaton, and all
+future world schedules remain without physical universal authority.
+Focused, strict-compiler, and Linux sanitizer gates pass. Complete
+Linux/Windows discovery passes 1,247/1,247 in 14.990/30.874 seconds, with
+three existing Windows skips.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -707,26 +731,22 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-C` from checkpoint `a998f41`. The physical observer
-   closes existence of callback-in-dispatch publication and rejects manager
-   frame as its universal clock. Do not repeat the probe workload unchanged.
-   First extend the independent scalar transition so callback exits may occur
-   while ordered release/press dispatch is executing. Carry native active
-   input and latest held desired input separately; a newer write may
-   supersede an unobserved transient target. Preserve complete-mask no-write,
-   explicit serial gaps, replacement censoring, and observation-compatible
-   merging. Treat observed callback-step values `1..5` as proposal data, not
-   a universal upper bound or a direct mapping from
-   `control_delay_candidates`. Then build an optimized implementation and
-   run exact scalar/optimized parity for multi-release/press, reversal,
-   Focus, Shot, callbacks during dispatch, overwrite, no-write, and every
-   intermediate action identity. After that, build or conservatively version
-   an exact future body/flag/geometry producer before survival integration;
-   do not substitute the current `future hazard events unseen` trace
-   snapshot. Publish body-set, viable-state, and safe-action-mask
-   differentials without granting live action authority. Then complete
-   SEM-MODE-D damage-objective separation and SEM-MODE-E optimized/native
-   parity. Keep unfocused-combat promotion disabled.
+2. Continue `SEM-MODE-C` after the asynchronous scalar/native checkpoint.
+   Callback-in-dispatch issue, superseded transient targets, no-write, and
+   exact bounded scalar/native parity are now implemented offline. The
+   observed callback-step values `1..5` remain proposal data, not a universal
+   bound or direct mapping from `control_delay_candidates`; the independent
+   callback/cadence supports also lack a verified joint scheduler automaton.
+   Next build or conservatively version a complete immutable future
+   body/flag/geometry producer before survival integration; do not substitute
+   the current `future hazard events unseen` trace snapshot. Publish exact
+   body-set differentials first, then viable-state and safe-action-mask
+   differentials, without granting live action authority. Only after the
+   immutable producer/model version exists may one new whole-stage physical
+   falsifier run without fail-close. Then complete SEM-MODE-D
+   damage-objective separation and SEM-MODE-E whole-model optimized/native
+   parity. Keep unfocused-combat promotion disabled and do not repeat the
+   unchanged priority-17 Stage-5 workload.
 3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed

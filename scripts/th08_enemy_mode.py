@@ -18,10 +18,12 @@ from touhou_control.local_pipeline_oracle import (
     enumerate_local_pipeline_branches,
 )
 from touhou_control.ordered_input_transaction_oracle import (
+    AsynchronousOrderedInputIssueBranch,
     OrderedInputBelief,
     OrderedInputExactState,
     OrderedInputIssueBranch,
     advance_ordered_input_state,
+    issue_ordered_input_belief_asynchronously,
     issue_ordered_input_belief,
 )
 
@@ -168,6 +170,36 @@ class Route2OrderedModeDecisionObservationClass:
     key: Route2OrderedModeObservationKey
     successor_input_belief: OrderedInputBelief
     hidden_branches: tuple[Route2OrderedModeDecisionBranch, ...]
+
+
+@dataclass(frozen=True)
+class Route2AsyncOrderedModeHazardBranch:
+    """One asynchronous issue/cadence history in native callback order."""
+
+    issue_branch: AsynchronousOrderedInputIssueBranch
+    frames: tuple[Route2ModeHazardFrame, ...]
+    post_dispatch_input_states_after_publication: tuple[
+        OrderedInputExactState, ...
+    ]
+
+
+@dataclass(frozen=True)
+class Route2AsyncOrderedModeDecisionBranch:
+    """One asynchronous issue branch at the next controller observation."""
+
+    cadence_frames: int
+    hazard_branch: Route2AsyncOrderedModeHazardBranch
+    successor_input_state: OrderedInputExactState
+    successor_mode_state: Route2EnemyModeStateKey
+
+
+@dataclass(frozen=True)
+class Route2AsyncOrderedModeDecisionObservationClass:
+    """One non-clairvoyant asynchronous successor information set."""
+
+    key: Route2OrderedModeObservationKey
+    successor_input_belief: OrderedInputBelief
+    hidden_branches: tuple[Route2AsyncOrderedModeDecisionBranch, ...]
 
 
 @dataclass(frozen=True)
@@ -743,6 +775,217 @@ def project_route2_ordered_mode_decision_branches(
     return tuple(results)
 
 
+def project_route2_async_ordered_mode_decision_branches(
+    *,
+    input_belief: OrderedInputBelief,
+    selected_action: str,
+    action_masks: Mapping[str, int],
+    supported_mask: int,
+    post_dispatch_delay_frames: tuple[int, ...],
+    dispatch_callback_count_support: tuple[int, ...],
+    decision_frame_support: tuple[int, ...],
+    initial_mode_state: Route2EnemyModeStateKey,
+    enemy_flag_frames: tuple[tuple[Route2EnemyModeBody, ...], ...],
+) -> tuple[Route2AsyncOrderedModeDecisionBranch, ...]:
+    """Compose callbacks during issue with priority-9/11/17 physical order.
+
+    Dispatch callbacks consume physical cadence steps. On each such step,
+    priority 9 consumes the active mask recorded before that callback,
+    priority 11 projects body gates, and only then does priority 17 publish
+    the issue branch's monotone path mask. Remaining cadence steps begin from
+    the exact post-dispatch actuator state.
+
+    Independent callback-count/cadence supports are conservatively combined
+    only when the issue callback count fits within the total cadence. Their
+    physical joint automaton and finite support authority remain open.
+    """
+
+    state = _validate_route2_enemy_mode_state_key(initial_mode_state)
+    if (
+        not decision_frame_support
+        or tuple(sorted(set(decision_frame_support))) != decision_frame_support
+        or decision_frame_support[0] <= 0
+    ):
+        raise ValueError(
+            "decision-frame support must be sorted, unique, and positive"
+        )
+    if len(enemy_flag_frames) < decision_frame_support[-1]:
+        raise ValueError("body schedule does not cover cadence support")
+    _validate_enemy_flag_frames(enemy_flag_frames)
+    normalized_masks, inverse_masks = _ordered_action_masks(
+        action_masks,
+        supported_mask=supported_mask,
+    )
+    try:
+        selected_mask = normalized_masks[selected_action]
+    except KeyError as error:
+        raise ValueError(
+            f"missing selected action mask: {selected_action!r}"
+        ) from error
+
+    issue_branches = issue_ordered_input_belief_asynchronously(
+        input_belief,
+        selected_mask=selected_mask,
+        post_dispatch_delay_support=post_dispatch_delay_frames,
+        dispatch_callback_count_support=dispatch_callback_count_support,
+        supported_mask=supported_mask,
+        forbidden_mask=BOMB_INPUT_BIT,
+    )
+    for issue_branch in issue_branches:
+        source = issue_branch.source_state
+        successor = issue_branch.successor_state
+        required_masks = (
+            source.active_mask,
+            source.held_desired_mask,
+            *source.queued_masks,
+            *issue_branch.active_masks_consumed_during_dispatch,
+            *issue_branch.publications_during_dispatch,
+            successor.active_mask,
+            successor.held_desired_mask,
+            *successor.queued_masks,
+        )
+        missing_masks = tuple(
+            sorted({mask for mask in required_masks if mask not in inverse_masks})
+        )
+        if missing_masks:
+            formatted = ", ".join(
+                f"{mask:#06x}" for mask in missing_masks
+            )
+            raise ValueError(
+                "asynchronous ordered transaction reached complete masks "
+                f"without action identities: {formatted}"
+            )
+
+    results: list[Route2AsyncOrderedModeDecisionBranch] = []
+    for cadence_frames in decision_frame_support:
+        for issue_branch in issue_branches:
+            dispatch_frames = issue_branch.dispatch_callback_count
+            if dispatch_frames > cadence_frames:
+                continue
+            mode_state = state
+            frames: tuple[Route2ModeHazardFrame, ...] = ()
+            for offset, active_mask in enumerate(
+                issue_branch.active_masks_consumed_during_dispatch,
+                start=1,
+            ):
+                frame, mode_state = _ordered_mode_hazard_frame(
+                    physical_step=offset,
+                    active_action=inverse_masks[active_mask],
+                    active_mask=active_mask,
+                    mode_state=mode_state,
+                    bodies=enemy_flag_frames[offset - 1],
+                )
+                frames += (frame,)
+
+            partials = (
+                _Route2OrderedPartial(
+                    mode_state=mode_state,
+                    input_state=issue_branch.successor_state,
+                    frames=frames,
+                    input_states_after_publication=(),
+                ),
+            )
+            for physical_step in range(
+                dispatch_frames + 1,
+                cadence_frames + 1,
+            ):
+                next_partials: list[_Route2OrderedPartial] = []
+                bodies = enemy_flag_frames[physical_step - 1]
+                for partial in partials:
+                    active_mask = partial.input_state.active_mask
+                    frame, next_mode_state = _ordered_mode_hazard_frame(
+                        physical_step=physical_step,
+                        active_action=inverse_masks[active_mask],
+                        active_mask=active_mask,
+                        mode_state=partial.mode_state,
+                        bodies=bodies,
+                    )
+                    for next_input_state in advance_ordered_input_state(
+                        partial.input_state
+                    ):
+                        next_partials.append(
+                            _Route2OrderedPartial(
+                                mode_state=next_mode_state,
+                                input_state=next_input_state,
+                                frames=partial.frames + (frame,),
+                                input_states_after_publication=(
+                                    partial.input_states_after_publication
+                                    + (next_input_state,)
+                                ),
+                            )
+                        )
+                partials = tuple(next_partials)
+
+            for partial in partials:
+                hazard_branch = Route2AsyncOrderedModeHazardBranch(
+                    issue_branch=issue_branch,
+                    frames=partial.frames,
+                    post_dispatch_input_states_after_publication=(
+                        partial.input_states_after_publication
+                    ),
+                )
+                results.append(
+                    Route2AsyncOrderedModeDecisionBranch(
+                        cadence_frames=cadence_frames,
+                        hazard_branch=hazard_branch,
+                        successor_input_state=partial.input_state,
+                        successor_mode_state=partial.mode_state,
+                    )
+                )
+    if not results:
+        raise ValueError(
+            "asynchronous issue/cadence supports have no compatible history"
+        )
+    return tuple(results)
+
+
+def merge_route2_async_ordered_mode_decision_observation_classes(
+    branches: tuple[Route2AsyncOrderedModeDecisionBranch, ...],
+    *,
+    base_observation: Callable[
+        [Route2AsyncOrderedModeDecisionBranch, Route2ModeHazardFrame],
+        Hashable,
+    ],
+) -> tuple[Route2AsyncOrderedModeDecisionObservationClass, ...]:
+    """Merge asynchronous hidden histories by the full next observation."""
+
+    if not branches:
+        raise ValueError(
+            "at least one asynchronous ordered decision branch is required"
+        )
+    grouped: dict[
+        Route2OrderedModeObservationKey,
+        list[Route2AsyncOrderedModeDecisionBranch],
+    ] = {}
+    for branch in branches:
+        frame = branch.hazard_branch.frames[-1]
+        base = base_observation(branch, frame)
+        try:
+            hash(base)
+        except TypeError as error:
+            raise ValueError("base observation must be hashable") from error
+        successor = branch.successor_input_state
+        key = Route2OrderedModeObservationKey(
+            base_observation=base,
+            physical_step=branch.cadence_frames,
+            active_mask=successor.active_mask,
+            held_desired_mask=successor.held_desired_mask,
+            mode_state=branch.successor_mode_state,
+        )
+        grouped.setdefault(key, []).append(branch)
+
+    return tuple(
+        Route2AsyncOrderedModeDecisionObservationClass(
+            key=key,
+            successor_input_belief=OrderedInputBelief.from_states(
+                branch.successor_input_state for branch in hidden
+            ),
+            hidden_branches=tuple(hidden),
+        )
+        for key, hidden in grouped.items()
+    )
+
+
 def merge_route2_ordered_mode_decision_observation_classes(
     branches: tuple[Route2OrderedModeDecisionBranch, ...],
     *,
@@ -917,6 +1160,9 @@ __all__ = [
     "ENEMY_SECONDARY_CHARACTER_SYNC_FLAG",
     "FOCUS_INPUT_BIT",
     "EnemyModeProjection",
+    "Route2AsyncOrderedModeDecisionBranch",
+    "Route2AsyncOrderedModeDecisionObservationClass",
+    "Route2AsyncOrderedModeHazardBranch",
     "Route2EnemyModeBody",
     "Route2EnemyModeStateKey",
     "Route2ModeBodyProjection",
@@ -930,11 +1176,13 @@ __all__ = [
     "Route2OrderedModeDecisionObservationClass",
     "Route2OrderedModeHazardBranch",
     "Route2OrderedModeObservationKey",
+    "merge_route2_async_ordered_mode_decision_observation_classes",
     "merge_route2_ordered_mode_decision_observation_classes",
     "merge_route2_mode_observation_classes",
     "merge_route2_mode_decision_observation_classes",
     "project_enemy_mode",
     "project_route2_enemy_mode",
+    "project_route2_async_ordered_mode_decision_branches",
     "project_route2_mode_pipeline_branches",
     "project_route2_mode_decision_branches",
     "project_route2_ordered_mode_decision_branches",

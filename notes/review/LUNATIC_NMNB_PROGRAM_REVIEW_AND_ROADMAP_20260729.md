@@ -1208,6 +1208,45 @@ pass in 14.858/30.896 seconds, with the three existing Windows skips.
 Regenerating the report from its full raw source is structurally identical to
 the retained JSON.
 
+2026-07-30 `SEM-MODE-C` asynchronous scalar/native checkpoint: one new
+stage-neutral contract now models callbacks inside the complete-mask
+dispatcher. A real write appends the new release/press path after any older
+unobserved suffix; each in-dispatch callback first consumes the previously
+active mask for priority 9/11, then publishes a stutter or monotone suffix
+cut at priority 17. A newer real write can supersede an unobserved transient
+target. Complete-mask no-write has no fictitious dispatch phase and preserves
+the older queue/deadline exactly.
+
+The independent scalar recurrence and TH08 mode/body composition pass 26
+focused tests. A separate C++ exact-state enumerator exposes one new stable
+ABI symbol and has explicit caps rather than reinterpreting exhaustion as
+losing. Linux and Windows each match the scalar oracle on 115 exact
+state/action cases and all 2,405 branch histories, including Focus, Shot,
+direction reversal, multi-release/press, pending overwrite, callbacks during
+dispatch, no-write, CE-0193, and the Stage-5 superseded-transient witness.
+The retained differential reports hash to
+`f9fbe98bac5fe9481e8baf4bc09c51b328b12fb744d724132dd0d7adb7e3e4b0`
+on Linux and
+`91df49e10f919e4c1681cb617563c311c55902b0500ee2ba5b379a23b391885a`
+on Windows; their finite case/history content is identical after removing
+platform/native-binary identity.
+
+Focused scalar/TH08/native/report/ABI gates pass together with strict
+Linux/Windows compiler warnings and Linux sanitizer execution. Complete
+Linux/Windows discovery passes 1,247/1,247 in 14.990/30.874 seconds, with
+three existing Windows skips.
+
+This closes ordered-program items 1, 2, and 4 only for the declared finite
+supports and closes the bounded optimized/native parity portion of item 4.
+It does not make observed callback counts `1..5` a universal upper bound,
+does not justify the independent dispatch/cadence Cartesian product, and
+does not bind movement, collision, or future body/flag/geometry. Status is
+**Offline implementation parity / no live authority**. The next admissible
+SEM-MODE-C work is a complete immutable future body/flag/geometry producer
+and its body-set differential. Only after that new model exists may a
+stage-level physical falsifier run without fail-close; do not repeat the
+unchanged priority-17 Stage-5 diagnostic.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

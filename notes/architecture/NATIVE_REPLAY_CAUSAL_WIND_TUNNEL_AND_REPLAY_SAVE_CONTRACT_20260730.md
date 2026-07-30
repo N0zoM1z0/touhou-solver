@@ -223,8 +223,10 @@ materially reduce wall time.
 
 ## Next Architecture
 
-The next decisive milestone is an **explicit native root executor**, not
-another broad replay-prefix portfolio.
+The **explicit native root executor** milestone is now implemented and passes
+at one canonical Stage-5 root. This closes the first one-tick construction
+gate only; it does not close event-class coverage, longer horizons, external
+effects, or physical authority.
 
 Minimum acceptance order:
 
@@ -245,9 +247,80 @@ Minimum acceptance order:
    as the delivery gate.
 
 A TH08-specific in-process rollback stepper with a dirty-page journal or
-copy-on-write baseline is the preferred proposal. Whole-process restore is
-not accepted without explicit thread, heap, handle, DirectX/audio, timer,
-input, and external-state ownership.
+copy-on-write baseline was the preferred proposal. The retained implementation
+uses a stable same-session byte baseline plus a dirty-page journal. Whole-
+process predictive authority remains rejected without explicit thread, heap,
+handle, DirectX/audio, timer, input, and external-state ownership.
+
+## One-Tick Explicit-Root Result
+
+**Observed:** `scripts/th08_runtime/native_snapshot.py` replaces only the
+fixed call at `0x00441F4D` from the 60 Hz frame pump to
+`update_chain_execute` at `0x0043CA50`. Before calculation at manager frame
+2,129, its injected barrier records the owner thread, stack/frame pointers,
+and FPU/SSE state. Every branch calls the original update chain exactly once
+and stops before render with manager frame 2,130.
+
+The replay action seam is the priority-6 playback callback at `0x00452550`.
+The callback loads the next action word at `0x004525BE` and publishes it at
+`0x004525C1`. The canonical action was `0x05`; action B was `0x15`. A used
+true no-write semantics. B changed exactly one byte in the replay action word
+before calculation. Neither action contains the Bomb bit.
+
+**Observed:** the first broad capture changed the virtual-region
+partitioning while the owner remained in the barrier and every other target
+thread was suspended. A second capture had identical pre/post mapping
+identity and became the root. This is consistent with one-time observation
+of writable copy-on-write image pages; it is not interpreted as a game tick.
+
+The stable root covered 110,141,440 bytes in 248 writable private/image
+regions. Its same-session SHA-256 was
+`b35e595afbd4936630b7536185d95507308ba4935df1d489f6594805e005c3ea`.
+The epoch contained 34 threads: the barrier owner plus 33 suspended threads.
+Frozen non-owner stacks, the barrier allocation, and writable mapped/external
+regions remained outside the byte baseline.
+
+**Observed:** A1 and A2 produced the same captured endpoint SHA-256
+`2c7b220df5e06c6ebf3aac62480a0dcde7cfd12861e7c8073261bda7be25d387`
+and the same revalidated native-root projection SHA-256
+`437e234f907c7f54be1cbd824a826353090690ba37f9ae2726deb83a8e47ef39`.
+Both returned to the exact root stack/frame pointers and advanced manager
+time by one.
+
+**Observed:** B produced a different captured endpoint and changed four
+declared native projection components:
+
+- gameplay RNG and input masks;
+- ordinary-enemy ECL and callback roots;
+- ordinary-enemy template and pool; and
+- player state through resource transitions.
+
+All three branches retained one mapping/thread epoch. Each endpoint dirtied
+896 or 897 pages. Coalesced restore took 10.824--11.816 ms; rereading every
+dirty span took 9.846--11.814 ms; all three restorations matched the same
+baseline. The original calculation took 0.785--0.999 ms, endpoint discovery
+151.671--172.387 ms, and the native projection 16.386--17.535 ms. The current
+inner loop therefore evaluates roughly four to five candidates per second
+after reaching the root once.
+
+The compact retained report is
+`artifacts/runtime_reports/th08_native_snapshot_one_tick_20260730.json`,
+SHA-256
+`6144624093386619d0ac66b69da5bf90c84b88f158d4b4f5529f953d376585a9`.
+Its ignored full source report hashes to
+`bb6d054c69ab79a31741901bfc6314110babcc164ac1e7c5a9130f8b9cabe56f`.
+
+**Inferred:** this executor is suitable for fast same-session, one-tick
+candidate comparison over the retained native projection at this exact root.
+It replaces repeated full-stage/replay-prefix iteration for this scope.
+
+It has no live or physical predictive authority. Forty-two writable regions
+were excluded, external handle/device/audio/timer effects remain unresolved,
+only one event class and one tick were tested, and no survival witness was
+produced. The next gate is repeated A/A/B identity at additional event
+classes, followed by exact horizons `2/4/8/16`. Write-watch or guarded-page
+tracking may remove the remaining 152--172 ms endpoint scan, but is only a
+performance hypothesis.
 
 ## Local Retention
 
@@ -273,7 +346,11 @@ Evidence-backed changes made on 2026-07-30:
   object `+0x46468` back-reference, update-chain insertion, save-state
   offsets, and accepted write point; and
 - corrected both helper calls involving `0x018B8A68` to say that this global
-  is not the `ResultSysInf` object base.
+  is not the `ResultSysInf` object base;
+- commented the revalidated calculation callsite `0x00441F4D` with the
+  one-tick manager `2129 -> 2130` barrier result; and
+- commented replay action load/store `0x004525BE/0x004525C1` with the
+  priority-6 explicit-root A=`0x05`, B=`0x15` evidence and authority limit.
 
 These annotations are native/menu semantics only. They grant no solver action
 or survival authority.

@@ -1038,14 +1038,15 @@ Current semantic correction (2026-07-31):
 - Combat projection v4 now retains and evaluates the complete 192-slot
   damage-region pass. Rolling v7 / causal v5 preserve that immutable identity;
   later character/alternate/spell/Boss/HP scaling remains next.
-- The late arithmetic skeleton is now executable through the final HP value,
-  but its five opaque native predicates are not yet captured or semantically
-  renamed. Keep them explicit until caller/dataflow/runtime evidence closes
-  their physical meaning.
-- Combat projection v5 now captures those raw predicate operands at exact
-  roots and reports supported resolved HP damage. Rolling v8 / causal v6 bind
-  the new identity; cross-target region ordering and runtime generation joins
-  still bound authority.
+- The late arithmetic skeleton is now executable through the final HP value.
+  Its five raw native predicate operands are captured at exact roots, but
+  their inherited physical labels remain unproven. Keep them explicit until
+  caller/dataflow/runtime evidence closes their physical meaning.
+- Combat projection v6 now captures those raw predicate operands at exact
+  roots, reports supported resolved HP damage, and carries nonpiercing-shot
+  plus damage-region mutation through ascending native manager slot order.
+  Rolling v9 / causal v7 bind the new identity; unresolved callbacks/type-4/5
+  mutation and runtime generation joins still bound authority.
 
 Exit gate:
 

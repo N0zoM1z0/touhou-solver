@@ -237,6 +237,40 @@ def _install_damage_region(
     pool[base + 0x3C] = 1
 
 
+def _install_enemy(
+    component: bytearray,
+    slot: int,
+    *,
+    flags: int = 0x49,
+    position: tuple[float, float] = (100.0, 50.0),
+    hitbox: tuple[float, float] = (24.0, 16.0),
+    hitpoints: int = 100,
+) -> None:
+    base = (slot + 1) * ENEMY_STRIDE
+    struct.pack_into("<I", component, base + ENEMY_FLAGS_OFFSET, flags)
+    struct.pack_into("<I", component, base + ENEMY_FLAGS2_OFFSET, 0)
+    struct.pack_into(
+        "<ff",
+        component,
+        base + ENEMY_POSITION_OFFSET,
+        *position,
+    )
+    struct.pack_into(
+        "<ff",
+        component,
+        base + ENEMY_DAMAGE_HITBOX_OFFSET,
+        *hitbox,
+    )
+    struct.pack_into(
+        "<iii",
+        component,
+        base + ENEMY_HITPOINTS_OFFSET,
+        hitpoints,
+        hitpoints,
+        0,
+    )
+
+
 def _native_root(enemy_component: bytes) -> object:
     return SimpleNamespace(
         components=(
@@ -573,6 +607,127 @@ class NativeCombatProjectionTests(unittest.TestCase):
         self.assertEqual(
             target["supported_resolved_hp_damage"]["hp_damage"],
             39,
+        )
+
+    def test_manager_order_propagates_shot_and_region_mutation(self) -> None:
+        pool = bytearray(PLAYER_SHOT_POOL_BYTES)
+        _install_shot(pool, 0, damage=20)
+        damage_regions = bytearray(PLAYER_DAMAGE_REGION_POOL_BYTES)
+        _install_damage_region(
+            damage_regions,
+            4,
+            damage=7,
+            accumulated=8,
+            damage_cap=12,
+        )
+        enemy_component = bytearray((ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE)
+        _install_enemy(enemy_component, 5)
+        _install_enemy(enemy_component, 2)
+
+        projection = capture_native_combat_projection(
+            _Reader(
+                pool=bytes(pool),
+                emission_timer=struct.pack("<iIi", 4, 0, 5),
+                damage_timer=struct.pack("<iIi", 8, 0, 9),
+                spell=bytes(SPELL_STATE_CAPTURE_SIZE),
+                player_context=bytes(PLAYER_BOMB_ACTIVE_OFFSET + 4),
+                damage_regions=bytes(damage_regions),
+            ),
+            native_root_projection=_native_root(bytes(enemy_component)),
+            compact_state={
+                "manager_frame": 100,
+                "input_current": 0x05,
+                "focus_logic": 1,
+            },
+        )
+
+        self.assertEqual(
+            projection.payload["enemy_manager_processing_order"]["slots"],
+            [2, 5],
+        )
+        first, second = projection.payload["enemy_targets"]
+        self.assertEqual(
+            first["ordinary_shot_passes"]["primary"][
+                "supported_return_damage_subtotal"
+            ],
+            20,
+        )
+        self.assertEqual(
+            second["ordinary_shot_passes"]["primary"][
+                "supported_return_damage_subtotal"
+            ],
+            0,
+        )
+        self.assertEqual(
+            first["damage_region_passes"]["primary"][
+                "return_damage_contribution"
+            ],
+            4,
+        )
+        self.assertEqual(
+            second["damage_region_passes"]["primary"][
+                "return_damage_contribution"
+            ],
+            0,
+        )
+        self.assertEqual(
+            projection.summary["supported_resolved_hp_damage_sum"],
+            24,
+        )
+
+    def test_closed_first_target_gate_does_not_consume_shared_state(self) -> None:
+        pool = bytearray(PLAYER_SHOT_POOL_BYTES)
+        _install_shot(pool, 0, damage=20)
+        damage_regions = bytearray(PLAYER_DAMAGE_REGION_POOL_BYTES)
+        _install_damage_region(
+            damage_regions,
+            4,
+            damage=7,
+            accumulated=8,
+            damage_cap=12,
+        )
+        enemy_component = bytearray((ENEMY_POOL_SIZE + 1) * ENEMY_STRIDE)
+        _install_enemy(enemy_component, 5)
+        _install_enemy(enemy_component, 2, flags=0x09)
+
+        projection = capture_native_combat_projection(
+            _Reader(
+                pool=bytes(pool),
+                emission_timer=struct.pack("<iIi", 4, 0, 5),
+                damage_timer=struct.pack("<iIi", 8, 0, 9),
+                spell=bytes(SPELL_STATE_CAPTURE_SIZE),
+                player_context=bytes(PLAYER_BOMB_ACTIVE_OFFSET + 4),
+                damage_regions=bytes(damage_regions),
+            ),
+            native_root_projection=_native_root(bytes(enemy_component)),
+            compact_state={
+                "manager_frame": 100,
+                "input_current": 0x05,
+                "focus_logic": 1,
+            },
+        )
+
+        first, second = projection.payload["enemy_targets"]
+        self.assertFalse(first["damage_gate"]["shot_collision_open"])
+        self.assertEqual(
+            first["ordinary_shot_passes"]["primary"]["numeric_authority"],
+            "not_evaluated_shot_collision_gate_closed",
+        )
+        self.assertEqual(
+            second["ordinary_shot_passes"]["primary"][
+                "supported_return_damage_subtotal"
+            ],
+            20,
+        )
+        self.assertEqual(
+            second["damage_region_passes"]["primary"][
+                "return_damage_contribution"
+            ],
+            4,
+        )
+        self.assertEqual(
+            second["supported_resolved_hp_damage"]["hp_damage"],
+            24,
         )
 
     def test_nonfinite_active_shot_fails_closed(self) -> None:

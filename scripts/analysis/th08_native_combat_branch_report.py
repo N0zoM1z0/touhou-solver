@@ -11,8 +11,8 @@ from typing import Any
 
 
 SCHEMA = "th08-native-combat-branch-comparison-v1"
-ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v8"
-CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v6"
+ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v9"
+CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v7"
 ROLLING_ACCEPTED_STATUS = "rolling_native_projection_snapshot_passed"
 CAUSAL_ACCEPTED_STATUS = "causal_secondary_search_passed"
 

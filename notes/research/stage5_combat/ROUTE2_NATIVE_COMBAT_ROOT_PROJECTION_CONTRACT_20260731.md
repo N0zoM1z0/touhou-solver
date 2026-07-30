@@ -43,6 +43,11 @@ IDA database:
   primary hitbox `+0x2D70`, alternate hitbox `+0x2D7C`, HP/max HP
   `+0x2DFC/+0x2E00`, flags/flags2 `+0x3324/+0x3328`, published frame damage
   `+0x3354`, and main-VM identity/timer at `+0x7F8/+0x804`.
+- The same manager initializes its current target at pool slot 0
+  (`manager + 0x53D0`) and advances by the fixed `0x53D0` enemy stride until
+  index `0x1E0`. Thus player-shot state and damage-region accounting mutated
+  for an earlier active slot are inputs to every later active slot in the
+  same ascending `0..479` manager pass.
 - `0x0042D0EE` enters the alternate collision pass only when the ordered
   alternate width is greater than positive zero. Positive or negative zero,
   negative values, and unordered NaN do not enter that pass.
@@ -56,8 +61,9 @@ IDA database:
 
 IDA comments retain the exact alternate-width condition at `0x0042D0EE`, the
 complete pool/slot boundary at `0x004516CF`, the update-callback/trajectory
-boundary at `0x004511C8`, and the distinct feedback/damage accumulators at
-`0x0042A1FA` and `0x004519A3`.
+boundary at `0x004511C8`, the distinct feedback/damage accumulators at
+`0x0042A1FA` and `0x004519A3`, and the ascending manager order at
+`0x0042C841`.
 
 The locally pinned `th08-decomp` commit
 `84738749bdcf6cffabe8d0d76e17f19253a20d50` provides address and extent
@@ -67,12 +73,14 @@ it supplies no shot lifecycle, callback, collision, or damage authority.
 ## Implemented Projection
 
 `scripts/th08_runtime/native_combat_projection.py` implements
-`th08-native-combat-root-projection-v5`. V1 established the complete
+`th08-native-combat-root-projection-v6`. V1 established the complete
 shot/target projection; V2 added normalized loaded-SHT identity and exact
 source-record provenance; V3 separates uncapped returned damage from the
 capped hit-feedback accumulator increment; V4 added the complete player
 damage-region pool and native-ordered supported pass; V5 captures the raw
-late-damage predicates and resolves the supported final HP value.
+late-damage predicates and resolves the supported final HP value; V6 carries
+supported shot and damage-region mutations across targets in native manager
+slot order.
 
 For every exact root or future tick it retains:
 
@@ -92,7 +100,10 @@ For every exact root or future tick it retains:
   optional alternate overlap;
 - native damage-region active/due/overlap/cap arithmetic, with primary region
   mutation carried into the optional alternate pass and Bomb-region overlap
-  retained separately for each target-local projection;
+  retained separately for each target;
+- the explicit ascending active-target slot order, with nonpiercing shot
+  state-2 transitions and damage-region accumulated/cap/disable mutation
+  carried from each executed target pass into the next;
 - route byte, global mode bits 0/7, signed 106%-threshold comparison, enemy
   `+0x2DA4`, timer `+0x535C`, and flags bit 1, followed by the supported final
   HP-damage arithmetic;
@@ -118,11 +129,15 @@ active shot differs. This may produce a fail-closed false negative, but it
 does not merge roots whose later initialization or callback behavior is not
 proved control-equivalent.
 
-The target records are instantaneous target-local projections from one
-captured pool state. They do not replay manager-wide enemy iteration, so a
-region consumed or capped by an earlier enemy is not propagated into a later
-target record. That omitted cross-target order has unknown directional error
-and remains outside delivered-damage, kill, and ranking authority.
+The target records remain instantaneous projections from one captured root,
+but their supported mutable state is evaluated sequentially in the shipped
+ascending manager order. A target whose shot-collision gate is closed neither
+consumes a nonpiercing shot nor mutates a damage region; a target whose gate
+executes carries both kinds of supported mutation into the next active slot.
+Unknown type-4/5 and nonzero-hit-callback behavior remains explicit and is not
+allowed to invent mutation. That unresolved behavior still has unknown
+directional error and remains outside delivered-damage, kill, and ranking
+authority.
 
 The subsequent pinned-content audit closes the normal Route-2 SHT subset:
 all 53 Power-selector-reachable records are type 0 with zero update and hit
@@ -135,7 +150,7 @@ contaminated roots still fail closed.
 ## Rolling And Causal Integration
 
 `scripts/tools/th08_native_snapshot_trial.py` schema
-`th08-native-snapshot-rolling-trial-v8` now:
+`th08-native-snapshot-rolling-trial-v9` now:
 
 - captures the combat projection at the root and every tick;
 - requires its SHA to agree in same-action replay and all-36 repeated-root
@@ -145,7 +160,7 @@ contaminated roots still fail closed.
 - retains compact combat summaries in the portfolio output.
 
 `scripts/tools/th08_native_snapshot_causal_search.py` schema
-`th08-native-snapshot-causal-secondary-search-v6` carries the same projection
+`th08-native-snapshot-causal-secondary-search-v7` carries the same projection
 through the origin, promoted subroots, future ticks, and parent-repeat
 transaction.
 
@@ -153,8 +168,8 @@ The older collision projection remains schema v7 and unchanged. Combat state
 is an independent projection so this checkpoint does not rewrite or weaken
 the retained H1/H8/H32 collision evidence boundary.
 
-`scripts/analysis/th08_native_combat_branch_report.py` lowers only accepted v8
-rolling transactions or accepted v6 causal-search transactions into
+`scripts/analysis/th08_native_combat_branch_report.py` lowers only accepted v9
+rolling transactions or accepted v7 causal-search transactions into
 `th08-native-combat-branch-comparison-v1`. It:
 
 - rejects every branch whose native compact history enters player phase 2;
@@ -255,25 +270,27 @@ frame sequence fails closed.
 This checkpoint grants:
 
 - revalidated native shot-pool, target-field, and alternate-pass semantics;
+- revalidated ascending enemy-manager target order;
 - exact-root player-shot/enemy-target capture identity;
-- synthetic parity for supported instantaneous ordinary-shot overlap;
+- synthetic parity for supported instantaneous ordinary-shot overlap and
+  cross-target shot/region mutation;
 - deterministic integration into rolling and causal snapshot transactions;
   and
 - a hard-survival-filtered, non-ranking offline comparison format.
 
 It grants no:
 
-- observed v8/v6 runtime sample;
+- observed v9/v7 runtime sample;
 - generation-safe HP delta or kill/end classification;
 - target-selection, Focus-switch, damage-ranking, or resource-ranking
   authority;
 - prevented hostile birth or shortened exposure claim;
 - physical predictive, shadow, or live action authority.
 
-Six focused projection tests, six focused report tests, three loaded-SHT
+Eight focused projection tests, six focused report tests, three loaded-SHT
 provenance tests, twelve rolling snapshot tests, and four causal-search tests
-pass. Complete discovery passes 1,522 tests in 14.637 seconds on Linux and
-31.108 seconds through the Windows UNC loader, with the three existing skips.
+pass. Complete discovery passes 1,524 tests in 14.760 seconds on Linux and
+30.694 seconds through the Windows UNC loader, with the three existing skips.
 
 The next authorized causal gate is a small immutable-root corpus spanning
 focused, unfocused, and dynamic-refocus complete-mask schedules. Each branch

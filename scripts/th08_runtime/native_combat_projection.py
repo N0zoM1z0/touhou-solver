@@ -65,7 +65,7 @@ from th08_runtime.route2_sht_provenance import (
 from th08_runtime.sensing import decode_spell_state
 
 
-NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v5"
+NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v6"
 PLAYER_SHOT_COMBAT_STATE_SCHEMA = "th08-player-shot-combat-state-v1"
 PLAYER_DAMAGE_REGION_STATE_SCHEMA = "th08-player-damage-region-state-v1"
 ENEMY_DAMAGE_TARGET_STATE_SCHEMA = "th08-enemy-damage-target-state-v1"
@@ -925,8 +925,8 @@ def _supported_damage_region_pass(
             "return_damage_contribution": contribution,
             "bomb_region_overlap_signal": bomb_overlap,
             "numeric_authority": (
-                "target_local_supported_active_due_overlap_and_per_region_"
-                "cap_before_cross_target_and_late_enemy_scaling"
+                "manager_ordered_supported_active_due_overlap_and_per_region_"
+                "cap_before_late_enemy_scaling"
             ),
         },
         tuple(updated),
@@ -936,7 +936,8 @@ def _supported_damage_region_pass(
 def _target_combat_record(
     target: EnemyDamageTarget,
     shot_state: PlayerShotCombatState,
-    damage_region_state: PlayerDamageRegionState,
+    shot_slots: tuple[PlayerShotCombatSlot, ...],
+    damage_region_slots: tuple[PlayerDamageRegionSlot, ...],
     *,
     bomb_active: bool,
     player_state: int,
@@ -945,7 +946,11 @@ def _target_combat_record(
     route_id: int,
     global_damage_mode_flags: int,
     player_damage_bonus_active: bool,
-) -> dict[str, object]:
+) -> tuple[
+    dict[str, object],
+    tuple[PlayerShotCombatSlot, ...],
+    tuple[PlayerDamageRegionSlot, ...],
+]:
     gate = evaluate_enemy_player_shot_damage_gate(
         EnemyPlayerShotDamageContext(
             flags=target.flags,
@@ -959,26 +964,61 @@ def _target_combat_record(
             ),
         )
     )
-    primary, after_primary = _supported_shot_pass(
-        shot_state.slots,
-        target,
-        width=target.primary_width,
-        height=target.primary_height,
-        bomb_active=bomb_active,
-        pass_name="primary",
-    )
-    primary_regions, after_primary_regions = _supported_damage_region_pass(
-        damage_region_state.slots,
-        target,
-        width=target.primary_width,
-        height=target.primary_height,
-        bomb_active=bomb_active,
-        pass_name="primary",
-    )
+    if gate.shot_collision_open:
+        primary, after_primary = _supported_shot_pass(
+            shot_slots,
+            target,
+            width=target.primary_width,
+            height=target.primary_height,
+            bomb_active=bomb_active,
+            pass_name="primary",
+        )
+        primary_regions, after_primary_regions = (
+            _supported_damage_region_pass(
+                damage_region_slots,
+                target,
+                width=target.primary_width,
+                height=target.primary_height,
+                bomb_active=bomb_active,
+                pass_name="primary",
+            )
+        )
+    else:
+        primary = {
+            "schema": SUPPORTED_SHOT_PASS_SCHEMA,
+            "pass": "primary",
+            "hitbox": {
+                "width": target.primary_width,
+                "height": target.primary_height,
+            },
+            "supported_hit_slots": [],
+            "callback_dependent_overlap_slots": [],
+            "type45_mode_dependent_overlap_slots": [],
+            "supported_return_damage_subtotal": 0,
+            "supported_feedback_accumulator_increment": 0,
+            "feedback_accumulator_increment_cap": (
+                PLAYER_SHOT_FEEDBACK_INCREMENT_CAP
+            ),
+            "numeric_authority": "not_evaluated_shot_collision_gate_closed",
+        }
+        primary_regions = {
+            "schema": SUPPORTED_DAMAGE_REGION_PASS_SCHEMA,
+            "pass": "primary",
+            "hitbox": {
+                "width": target.primary_width,
+                "height": target.primary_height,
+            },
+            "hit_slots": [],
+            "return_damage_contribution": 0,
+            "bomb_region_overlap_signal": False,
+            "numeric_authority": "not_evaluated_shot_collision_gate_closed",
+        }
+        after_primary = shot_slots
+        after_primary_regions = damage_region_slots
     alternate = None
     alternate_regions = None
-    if target.alternate_enabled:
-        alternate, _after_alternate = _supported_shot_pass(
+    if target.alternate_enabled and gate.shot_collision_open:
+        alternate, after_alternate = _supported_shot_pass(
             after_primary,
             target,
             width=target.alternate_width,
@@ -986,7 +1026,7 @@ def _target_combat_record(
             bomb_active=bomb_active,
             pass_name="alternate_after_supported_primary_mutation",
         )
-        alternate_regions, _after_alternate_regions = (
+        alternate_regions, after_alternate_regions = (
             _supported_damage_region_pass(
                 after_primary_regions,
                 target,
@@ -996,6 +1036,9 @@ def _target_combat_record(
                 pass_name="alternate_after_primary_region_mutation",
             )
         )
+    else:
+        after_alternate = after_primary
+        after_alternate_regions = after_primary_regions
     primary_supported = (
         int(primary["supported_return_damage_subtotal"])
         + int(primary_regions["return_damage_contribution"])
@@ -1033,7 +1076,7 @@ def _target_combat_record(
             post_damage_timer_reduction_enabled=bool(target.flags & 0x02),
         )
     )
-    return {
+    record = {
         **target.record(),
         "damage_gate": gate.record(),
         "ordinary_shot_passes": {
@@ -1047,11 +1090,12 @@ def _target_combat_record(
         "supported_resolved_hp_damage": {
             **resolved.record(),
             "authority": (
-                "supported_slots_and_target_local_regions_only_"
-                "unknown_direction_if_unresolved_or_cross_target_overlap"
+                "supported_slots_and_manager_ordered_regions_only_"
+                "unknown_direction_if_unresolved_overlap"
             ),
         },
     }
+    return record, after_alternate, after_alternate_regions
 
 
 @dataclass(frozen=True)
@@ -1170,11 +1214,19 @@ def capture_native_combat_projection(
                 ),
             }
         )
-    target_records = [
-        _target_combat_record(
+    target_records: list[dict[str, object]] = []
+    current_shot_slots = shot_state.slots
+    current_damage_region_slots = damage_region_state.slots
+    for target in targets:
+        (
+            target_record,
+            current_shot_slots,
+            current_damage_region_slots,
+        ) = _target_combat_record(
             target,
             shot_state,
-            damage_region_state,
+            current_shot_slots,
+            current_damage_region_slots,
             bomb_active=bomb_active,
             player_state=player_state,
             spell_active=bool(spell["active"]),
@@ -1183,8 +1235,7 @@ def capture_native_combat_projection(
             global_damage_mode_flags=global_damage_mode_flags,
             player_damage_bonus_active=player_damage_bonus_active,
         )
-        for target in targets
-    ]
+        target_records.append(target_record)
     payload: dict[str, object] = {
         "schema": NATIVE_COMBAT_PROJECTION_SCHEMA,
         "manager_frame": int(compact_state["manager_frame"]),
@@ -1209,6 +1260,12 @@ def capture_native_combat_projection(
         "player_damage_regions": damage_region_state.record(),
         "loaded_route2_sht": loaded_sht_state.record(),
         "player_shot_source_provenance": shot_source_provenance,
+        "enemy_manager_processing_order": {
+            "kind": "ascending_pool_slot",
+            "slots": [target.slot for target in targets],
+            "pool_size": ENEMY_POOL_SIZE,
+            "slot_stride": ENEMY_STRIDE,
+        },
         "enemy_targets": target_records,
         "scope": {
             "root_identity": (
@@ -1217,12 +1274,12 @@ def capture_native_combat_projection(
                 "and_active_enemy_causal_tail_digests"
             ),
             "pass_projection": (
-                "instantaneous_native_geometry_supported_slots_only"
+                "instantaneous_native_geometry_supported_slots_"
+                "manager_ordered_cross_target_mutation"
             ),
             "omitted": [
                 "future_action_delivery_and_focus_transition",
                 "future_player_shot_update_callbacks",
-                "cross_target_damage_region_mutation_order",
                 "type45_mode_predicate",
                 "nonzero_hit_callback_semantics",
                 "unresolved_ordinary_shot_callbacks",

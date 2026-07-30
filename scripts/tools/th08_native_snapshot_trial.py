@@ -85,7 +85,7 @@ from th08_runtime_agent import (  # noqa: E402
 from touhou_control.pipeline_identity import VersionIdentity  # noqa: E402
 
 
-SCHEMA = "th08-native-snapshot-rolling-trial-v8"
+SCHEMA = "th08-native-snapshot-rolling-trial-v9"
 DEFAULT_GAME_DIR = Path(
     "D:/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)__codex_wind_tunnel"
 )

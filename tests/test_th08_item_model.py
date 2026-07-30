@@ -21,6 +21,7 @@ from th08_item_model import (
     ItemState,
     collect_item,
     item_collection_overlaps,
+    item_should_home,
     point_extend_threshold,
     point_item_value,
     spawn_item_state,
@@ -36,7 +37,7 @@ STEP_ARGS = dict(
     player_state=0,
     focused=False,
     power=128,
-    stage_load_index=8,
+    route_id=2,
     point_value_line_y=128,
     homing_speed=10,
     fall_scale=0.9,
@@ -75,7 +76,7 @@ class ItemModelTests(unittest.TestCase):
             player_state=0,
             focused=True,
             power=0,
-            stage_load_index=8,
+            route_id=2,
             point_value_line_y=128,
             homing_speed=10,
             fall_scale=0.9,
@@ -85,6 +86,19 @@ class ItemModelTests(unittest.TestCase):
         self.assertAlmostEqual(result.velocity_y, 8)
         self.assertAlmostEqual(result.x, 6)
         self.assertAlmostEqual(result.y, 8)
+
+    def test_unfocused_low_power_homing_exception_uses_route_not_stage(self) -> None:
+        item = ItemState(0, 0, 0, -2.2)
+        common = {
+            "player_y": 64,
+            "player_state": 0,
+            "focused": False,
+            "power": 0,
+            "point_value_line_y": 128,
+        }
+        self.assertTrue(item_should_home(item, route_id=1, **common))
+        self.assertTrue(item_should_home(item, route_id=6, **common))
+        self.assertFalse(item_should_home(item, route_id=2, **common))
 
     def test_point_line_boundary_falls_with_sakuya_scale(self) -> None:
         item = ItemState(10, 20, 1, -2.2)

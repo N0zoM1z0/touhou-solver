@@ -51,6 +51,7 @@ This is the navigation index for repository evidence. It does not replace
 | [counterexamples](counterexamples/) | Source-preserved durable failures, split by CE range. |
 | [G5 research](research/g5/README.md) | Future-hazard, ECL, birth, source, and auxiliary-VM contracts/results. |
 | [Stage-5 combat](research/stage5_combat/README.md) | Enemy HP/damage, exposure, Power, and survival-filtered combat progress. |
+| [Route resources](research/route_resources/README.md) | Route-faithful Power, items, and survival-filtered resource policy. |
 | [architecture](architecture/README.md) | Refactor seams, native/Python boundaries, and implementation performance. |
 | [foundations](foundations/README.md) | Durable game, solver, hazard, viability, and strategy models. |
 | [operations](operations/README.md) | Practice and unattended-run protocols. |

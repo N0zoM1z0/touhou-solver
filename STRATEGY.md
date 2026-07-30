@@ -1750,6 +1750,17 @@ first.
   manager update. Therefore the old active-only trace grants zero verified
   kills and cannot test kill-before-saturation. This is an observer rejection,
   not a rejection of the strategy hypothesis.
+- **Observed route-resource limit (2026-07-31):** two accepted natural
+  Route-2/Lunatic Game Start prefixes, bounded strictly before their first
+  native hits, retain `Power 0 -> 5` across 789 decisions and `Power 0 -> 0`
+  across 712 decisions. At or before common clean horizon frame 1,692 they
+  hold Power 3 and 0. Both used the passive item policy with disabled item
+  objectives, come from different RNG/world roots, and neither crosses the
+  first shot threshold 8. This establishes route-faithful resource variance,
+  not causal collection, shot-effect, later-combat, or survival benefit. The
+  item auto-homing model was also corrected from stage index to the
+  revalidated native route/team ID selector; Route 2 stays on the ordinary
+  branch.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -1783,10 +1794,12 @@ first.
   `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`, and
   `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`, and
   `notes/research/stage5_combat/ROUTE2_FOCUS_SHOT_EMISSION_CONTRACT_20260731.md`, and
-  `notes/research/stage5_combat/STAGE5_ENEMY_PRESENCE_EPISODE_AUDIT_CONTRACT_20260731.md`.
+  `notes/research/stage5_combat/STAGE5_ENEMY_PRESENCE_EPISODE_AUDIT_CONTRACT_20260731.md`, and
+  `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
-  authority. Generation/end tracking, exposure causality, targeting, and S18
-  live action authority remain none.
+  authority. The Power-0 audit has first-hit-bounded route observation
+  authority. Generation/end tracking, exposure causality, causal collection,
+  targeting, and S18 live action authority remain none.
 
 ## Adding Or Changing A Strategy
 

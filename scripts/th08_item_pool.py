@@ -40,7 +40,7 @@ class ItemSlot:
 @dataclass(frozen=True)
 class ItemPoolConfig:
     difficulty_index: int
-    stage_load_index: int
+    route_id: int
     point_value_line_y: float = 128.0
     homing_speed: float = 10.0
     unfocused_fall_scale: float = 0.6499999761581421
@@ -165,7 +165,7 @@ def step_item_pool(
             player_state=player_state,
             focused=focused,
             power=resources.power,
-            stage_load_index=config.stage_load_index,
+            route_id=config.route_id,
             point_value_line_y=config.point_value_line_y,
             homing_speed=config.homing_speed,
             fall_scale=fall_scale,

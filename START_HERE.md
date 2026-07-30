@@ -19,11 +19,11 @@ historical handoff.
   (`Build rolling native snapshot iteration loop`).
 - H=32 causal-search checkpoint: `3d15953`
   (`Build causal native snapshot policy search`).
-- The WS-H route-2 Focus/Shot foundation, retained taskbook, and Stage-5
-  presence-episode audit are the current repository checkpoint; no new
-  physical trial was run.
-- Complete Linux discovery passes 1,382 tests in 13.002 seconds.
-- Complete Windows UNC discovery passes 1,382 tests in 27.356 seconds with
+- The WS-H route-2 Focus/Shot foundation, Stage-5 presence-episode audit, and
+  first-hit-bounded natural Power-0 audit are the current repository
+  checkpoint; no new physical trial was run.
+- Complete Linux discovery passes 1,385 tests in 13.048 seconds.
+- Complete Windows UNC discovery passes 1,385 tests in 27.239 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -59,6 +59,21 @@ historical handoff.
   `artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_224116.presence_episode_audit.json`,
   SHA-256
   `d483268f3e69443a5d36ace92b71e8da165f87b59e45d761bcdb99fcb2865162`.
+- `POWER-ROUTE-01` now has a deterministic audit of two accepted natural
+  Route-2/Lunatic Game Start prefixes, strictly before each first native hit.
+  The prefixes observe `Power 0 -> 5` over 789 decisions and `Power 0 -> 0`
+  over 712 decisions. At or before their common clean horizon frame 1,692
+  the values are 3 and 0.
+- This is route-faithful observation authority only: the roots differ, item
+  objectives were disabled, and neither prefix reaches the first normal-shot
+  threshold 8. It grants no causal collection, shot-effect, later-combat, or
+  live action authority.
+- Revalidation corrected the item auto-homing selector from inherited
+  `stage_load_index` to native `g_player_route_id`; Route-2 behavior remains
+  the ordinary branch. Retained Power-0 report:
+  `artifacts/runtime_reports/lunatic_route2_power0_clean_prefix_audit_20260731.json`,
+  SHA-256
+  `837244e9ca86bd70271cc4fa311bbeb67313e4d6c5281285de2872df5e791a6f`.
 - No live Focus/Shot ranking, combat objective, action authority, or physical
   promotion changed.
 
@@ -1205,11 +1220,14 @@ Do not resume broad G5 work first.
    Stage-5 trace is rejected as a kill-policy gate; do not relabel HP decrease
    or slot disappearance as kill. `COMBAT-KILL-01` next requires a same-update
    end event before slot reuse, with native clear path, damage, source birth,
-   drops, and RNG joins. Continue `POWER-ROUTE-01` from existing natural
-   Power-0 route-prefix evidence while that capture debt is open. A later
+   drops, and RNG joins. The retained `POWER-ROUTE-01` audit closes only the
+   existing-evidence inventory: its next causal gate needs same-root
+   survival-feasible collection branches, same-update pickup identity, a
+   Power-threshold crossing, and a later damage/kill/survival join. Continue
+   another high-ROI WS-H task while those capture debts are open. A later
    explicit v4 ordinary-enemy corpus may compare focused, unfocused, and
    causal refocus schedules only inside the unchanged survival-feasible set.
-   Do not launch a physical trial merely to fill either capture debt.
+   Do not launch a physical trial merely to fill any capture debt.
 1. Do not repeat C5, the 22-hit Stage-6B run, or the unchanged 74-hit full
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and

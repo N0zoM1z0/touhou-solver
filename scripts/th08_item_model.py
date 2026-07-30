@@ -126,7 +126,7 @@ def item_should_home(
     player_state: int,
     focused: bool,
     power: int,
-    stage_load_index: int,
+    route_id: int,
     point_value_line_y: float,
 ) -> bool:
     """Return the attraction branch selected by item_manager_update."""
@@ -137,7 +137,7 @@ def item_should_home(
         return True
     if player_y >= point_value_line_y:
         return False
-    if power < 128 and not focused and stage_load_index not in (1, 6):
+    if power < 128 and not focused and route_id not in (1, 6):
         return False
     return True
 
@@ -229,7 +229,7 @@ def step_item(
     player_state: int,
     focused: bool,
     power: int,
-    stage_load_index: int,
+    route_id: int,
     point_value_line_y: float,
     homing_speed: float,
     fall_scale: float,
@@ -322,7 +322,7 @@ def step_item(
         player_state=player_state,
         focused=focused,
         power=power,
-        stage_load_index=stage_load_index,
+        route_id=route_id,
         point_value_line_y=point_value_line_y,
     ):
         dx = player_x - current.x

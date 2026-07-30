@@ -193,7 +193,7 @@ class HostileBulletPoolTests(unittest.TestCase):
             rng_seed=0,
             active_timeline_difficulty_mask=1,
             item_resources=ItemResources(bombs=3),
-            item_config=ItemPoolConfig(difficulty_index=4, stage_load_index=8),
+            item_config=ItemPoolConfig(difficulty_index=4, route_id=2),
             hostile_bullet_player_config=HostileBulletPlayerConfig(),
             laser_player_config=LaserPlayerConfig(),
             short_spawn_mode=True,

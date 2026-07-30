@@ -35,7 +35,7 @@ from th08_simulator import (
 )
 
 
-CONFIG = ItemPoolConfig(difficulty_index=4, stage_load_index=8)
+CONFIG = ItemPoolConfig(difficulty_index=4, route_id=2)
 
 
 def _word(value: float) -> int:

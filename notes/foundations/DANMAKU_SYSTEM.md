@@ -857,9 +857,11 @@ shared Bomb gate; it is not a literal deathbomb-window duration.
   full-value flag at `+0x2D8`.
 - Free motion clamps vertical velocity to -2.2, moves by the character SHT
   fall scale and global time scale, and accelerates by 0.03 to a cap of 3.0.
-- Homing sets velocity toward the player at SHT speed 10. It is enabled above
-  y=128 when focused, at full power, or for stage-load indices 1/6. Player
-  state 1/2 releases a homing item with vertical velocity -0.7.
+- Homing sets velocity toward the player at SHT speed 10. Above the point
+  line, it is enabled when focused, at full power, or for player route/team
+  IDs 1/6. The exception reads `g_player_route_id` at `0x0164D0B1`, not the
+  stage load index. Player state 1/2 releases a homing item with vertical
+  velocity -0.7.
 - Route-2 item collection width is 24. The inclusive AABB test collects at
   center deltas `abs(dx) <= 24 && abs(dy) <= 24` in player states 0/3/4.
 - Motion state 2 chooses target x in `[48,336)` and y in `[-64,128)` using two

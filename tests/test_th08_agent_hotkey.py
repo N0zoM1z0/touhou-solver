@@ -230,7 +230,9 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.stop_after_hits, 0)
         self.assertTrue(parsed.no_bomb)
 
-    def test_enemy_mode_diagnostic_scale_continuation_is_scoped(self) -> None:
+    def test_diagnostic_scale_continuation_is_independent_of_observers(
+        self,
+    ) -> None:
         arguments = build_long_run_arguments(
             output=Path("trial.jsonl"),
             stop_file=Path("trial.stop"),
@@ -265,14 +267,21 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(publication_parsed.stop_after_hits, 0)
         self.assertTrue(publication_parsed.no_bomb)
 
-        with self.assertRaisesRegex(ValueError, "enemy-mode observer"):
-            build_long_run_arguments(
-                output=Path("trial.jsonl"),
-                stop_file=Path("trial.stop"),
-                pid=1234,
-                difficulty=3,
-                diagnostic_continue_root_only_scale=True,
-            )
+        standalone_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            diagnostic_continue_root_only_scale=True,
+        )
+        standalone_parsed = build_parser().parse_args(standalone_arguments)
+        self.assertFalse(standalone_parsed.trace_enemy_mode_transitions)
+        self.assertFalse(standalone_parsed.trace_priority17_publications)
+        self.assertTrue(
+            standalone_parsed.diagnostic_continue_root_only_scale
+        )
+        self.assertEqual(standalone_parsed.stop_after_hits, 0)
+        self.assertTrue(standalone_parsed.no_bomb)
 
     def test_runtime_ecl_identity_is_explicit_and_bound_to_stage(self) -> None:
         image = Path("artifacts/decoded/ecldata5.ecl")

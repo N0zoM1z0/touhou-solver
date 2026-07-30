@@ -87,9 +87,12 @@ CE-0199 retains the rejected no-extra-flag attempt `20260730_124635`. It
 entered Stage 5 but fail-closed on `time_scale_authority_unknown` at frame 1,
 before any decision. Its zero hits are not evidence and do not consume this
 gate. The next prelaunch attempt exposed and removed a stale supervisor
-restriction that coupled this continuation to unrelated trace observers; it
-did not launch the game. Focused Linux/Windows supervisor discovery and
-complete 1,298-test suites pass before the corrected physical retry.
+restriction that coupled this continuation to unrelated trace observers; the
+following prelaunch attempt exposed the same duplicated rule in the shared
+agent contract. Neither launched the game. Both restrictions are removed;
+focused Linux/Windows supervisor and agent/hotkey discovery pass before the
+corrected physical retry. Complete discovery passes 1,298 tests in
+14.387/32.480 seconds with the three existing Windows skips.
 
 ## Preregistered Interpretation
 

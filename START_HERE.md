@@ -20,11 +20,11 @@ historical handoff.
 - H=32 causal-search checkpoint: `3d15953`
   (`Build causal native snapshot policy search`).
 - The WS-H route-2 Focus/Shot foundation, Stage-5 presence-episode audit,
-  first-hit-bounded natural Power-0 audit, and `CONTENT-01` shipped content
-  manifest are the current repository checkpoint; no new physical trial was
-  run.
-- Complete Linux discovery passes 1,390 tests in 12.760 seconds.
-- Complete Windows UNC discovery passes 1,390 tests in 26.724 seconds with
+  first-hit-bounded natural Power-0 audit, `CONTENT-01` shipped content
+  manifest, and `CONTENT-02` static mandatory-event atlas are the current
+  repository checkpoint; no new physical trial was run.
+- Complete Linux discovery passes 1,393 tests in 12.715 seconds.
+- Complete Windows UNC discovery passes 1,393 tests in 27.3 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -101,6 +101,20 @@ historical handoff.
   `artifacts/runtime_reports/th08_immutable_content_manifest_20260731.json`,
   SHA-256
   `3a52b6f485ada63c833f77ae8cd1653f469ae4fadeef3c38336a737c7e753ae1`.
+- `CONTENT-02` now retains 2,885 classified ECL event occurrences across
+  Stage 3/4A/5/Final B. Known route/difficulty predicates are folded, other
+  branches remain conservative, and all four CFGs have zero unresolved
+  dynamic subroutine edges.
+- The 19 unknown eligible mandatory-route occurrences are all timeline opcode
+  `0x06` (4/4/2/9 by stage). Retained runs reach every workload but do not
+  prove individual event execution; event-level runtime image/program-counter
+  joins and native dispatcher revalidation remain open.
+- Retained atlas:
+  `artifacts/runtime_reports/th08_mandatory_event_atlas_20260731.json`,
+  SHA-256
+  `b8184692cd8a03e37ea5f233e6390b94f3319187e0742a1b48afbcffaad7680a`.
+  It grants static inventory authority only, not event timing, side-effect,
+  future-hazard, planner, or action authority.
 
 ### Latest physical and replay evidence
 
@@ -330,6 +344,10 @@ historical handoff.
 - Forty-two writable regions, external handle/device/audio/timer effects,
   and event classes outside this root remain unresolved. Preserve
   fail-closed `UNKNOWN` behavior on mapping/thread/stack/transition changes.
+- The mandatory-stage static event atlas is a reusable content index, not
+  runtime execution evidence. Its 19 opcode-`0x06` candidates need exact
+  runtime-image/program-counter joins before `CONTENT-02` can close, but that
+  capture debt must not block higher-ROI route/combat/resource work.
 - The rebuilt-model binding gate is now complete for the explicit
   player-mechanics layer, the slot-45 constant-velocity fixture, and the
   observed state-2 lifecycle cohort. It does not establish full hazard,

@@ -343,9 +343,12 @@ Passing claim 1 does not establish claims 2--4.
   current active input, priority 11 project body gates, and priority 17
   publish a nature-selected transaction prefix for the next step.
 - Connected IDA revalidation records this native order at `0x0044AEE8` and
-  `0x00452347`: priority-9 player movement consumes the previously published
-  `g_input_current`; priority-17 later copies `g_input_raw` into
-  `g_input_current`.
+  the priority-17 range `0x00452339..0x00452483`: priority-9 player movement
+  consumes the previously published `g_input_current`; priority-17 saves
+  previous once, writes current from a first raw sample at `0x00452347`, and
+  may overwrite current from a second raw sample at `0x004523C7` before all
+  paths converge at the common epilogue `0x00452480`. The callback-exit
+  current, not either store in isolation, is the next priority-9 input.
 - `th08_ordered_input_phase_report.py` audits the complete retained Stage-5
   source. It source-hashes the raw trace, validates all 6,423 ordered
   dispatches, brackets first observed final masks, censors discontinuities
@@ -354,6 +357,20 @@ Passing claim 1 does not establish claims 2--4.
   observations and retains the CE-0193 `0x65 -> 0x61` edge. The 120 final
   masks first observed outside their issued snapshot support are capture
   observations, not measured deadline violations.
+- `priority17_publication_probe.py` is a default-off, trace-only physical
+  observer for the still-open adapter. It records one committed serial/event
+  at the common callback exit and brackets only real ordered dispatches with
+  pre/post serial reads. No-write performs no serial sampling. Ring
+  overflow, unstable reads, and read errors mark intervals unknown without
+  changing the action. Installation/cleanup suspend all target threads and
+  verify no instruction pointer can consume the trampoline or remote stub
+  before restoring/freeing executable memory.
+- `th08_priority17_publication_report.py` accepts a negative publication
+  claim only when every serial in the interval is retained. It separately
+  counts native callback exits during a dispatch, intermediate ordered masks,
+  and serial advances while `enemy_manager_frame` is unchanged. The probe
+  and report remain preflight until a complete physical Stage-5 trace exists;
+  they do not yet instantiate `r`.
 - Lookup-only version/root checks are exact.  In the first physical shadow,
   every root that was both covered and completed was consumed; miss delivery,
   not lookup corruption, caused the low hit rate.

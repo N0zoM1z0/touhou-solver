@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from types import SimpleNamespace
 import unittest
 
@@ -231,6 +232,81 @@ class IssueStageTests(unittest.TestCase):
         self.assertEqual(committed.issue.dispatch.transitions, ())
         self.assertEqual(committed.previous_mask, 0x54)
         self.assertEqual(committed.previous_direction, 0x50)
+
+    def test_real_write_retains_complete_publication_serial_bracket(
+        self,
+    ) -> None:
+        controller = _IssueController((InputTransition(0x10, True),))
+        recorder = _DelayRecorder()
+        serials = iter((40, 41))
+        ticks = iter((1.001, 1.002))
+
+        committed = commit_physical_issue(
+            self._request(),
+            issue_controller=controller,  # type: ignore[arg-type]
+            delay_recorder=recorder,
+            publication_serial_sampler=lambda: next(serials),
+            clock=lambda: next(ticks),
+        )
+
+        bracket = committed.publication_serial_bracket
+        self.assertEqual(bracket.status, "complete")
+        self.assertEqual(bracket.pre_dispatch_serial, 40)
+        self.assertEqual(bracket.post_dispatch_serial, 41)
+        self.assertEqual(bracket.serial_advance_during_dispatch, 1)
+        self.assertFalse(bracket.compact_record()["action_authority"])
+
+    def test_publication_sampler_error_does_not_suppress_dispatch(
+        self,
+    ) -> None:
+        controller = _IssueController((InputTransition(0x10, True),))
+        recorder = _DelayRecorder()
+        ticks = iter((1.001, 1.002))
+
+        def unavailable() -> int:
+            raise OSError("diagnostic read failed")
+
+        committed = commit_physical_issue(
+            self._request(),
+            issue_controller=controller,  # type: ignore[arg-type]
+            delay_recorder=recorder,
+            publication_serial_sampler=unavailable,
+            clock=lambda: next(ticks),
+        )
+
+        self.assertEqual(controller.calls, [(0x45, 0x54)])
+        bracket = committed.publication_serial_bracket
+        self.assertEqual(bracket.status, "read_error")
+        self.assertIsNone(bracket.pre_dispatch_serial)
+        self.assertIsNone(bracket.post_dispatch_serial)
+        self.assertIn("pre:OSError", bracket.error)
+        self.assertIn("post:OSError", bracket.error)
+
+    def test_no_write_does_not_sample_publication_serial(self) -> None:
+        request = replace(self._request(), previous_mask=0x54)
+        controller = _IssueController(())
+        recorder = _DelayRecorder()
+        ticks = iter((1.001, 1.002))
+        samples = 0
+
+        def sample() -> int:
+            nonlocal samples
+            samples += 1
+            return 1
+
+        committed = commit_physical_issue(
+            request,
+            issue_controller=controller,  # type: ignore[arg-type]
+            delay_recorder=recorder,
+            publication_serial_sampler=sample,
+            clock=lambda: next(ticks),
+        )
+
+        self.assertEqual(samples, 0)
+        self.assertEqual(
+            committed.publication_serial_bracket.status,
+            "no_write",
+        )
 
 
 if __name__ == "__main__":

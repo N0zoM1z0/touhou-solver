@@ -90,6 +90,17 @@ class FullRouteSupervisorTests(unittest.TestCase):
         self.assertFalse(default_args.trace_enemy_mode_transitions)
         self.assertTrue(enabled_args.trace_enemy_mode_transitions)
 
+    def test_priority17_publication_capture_is_complete_route_opt_in(
+        self,
+    ) -> None:
+        default_args = build_parser().parse_args([])
+        enabled_args = build_parser().parse_args(
+            ["--trace-priority17-publications"]
+        )
+
+        self.assertFalse(default_args.trace_priority17_publications)
+        self.assertTrue(enabled_args.trace_priority17_publications)
+
     def test_enemy_mode_scale_continuation_is_explicit(self) -> None:
         enabled_args = build_parser().parse_args(
             [

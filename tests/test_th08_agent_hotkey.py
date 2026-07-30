@@ -203,6 +203,33 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertEqual(parsed.stop_after_hits, 0)
         self.assertTrue(parsed.no_bomb)
 
+    def test_priority17_publication_capture_is_diagnostic_opt_in(self) -> None:
+        default_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+        )
+        enabled_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_priority17_publications=True,
+        )
+        self.assertNotIn(
+            "--trace-priority17-publications",
+            default_arguments,
+        )
+        self.assertIn(
+            "--trace-priority17-publications",
+            enabled_arguments,
+        )
+        parsed = build_parser().parse_args(enabled_arguments)
+        self.assertTrue(parsed.trace_priority17_publications)
+        self.assertEqual(parsed.stop_after_hits, 0)
+        self.assertTrue(parsed.no_bomb)
+
     def test_enemy_mode_diagnostic_scale_continuation_is_scoped(self) -> None:
         arguments = build_long_run_arguments(
             output=Path("trial.jsonl"),

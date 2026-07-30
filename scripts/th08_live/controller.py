@@ -3,8 +3,10 @@
 
 The controller is a receding-horizon smoke agent, not the final global solver.
 It reads game state and projectile pools, then uses physical ``SendInput``
-events. It never writes target memory and aborts on identity, route, gameplay,
-or foreground-window divergence.
+events. Live action never writes target memory. One explicit default-off
+publication observer may install a reversible trace-only runtime hook; it has
+no action authority. The controller aborts on identity, route, gameplay, or
+foreground-window divergence.
 """
 
 from __future__ import annotations
@@ -408,6 +410,11 @@ from th08_runtime_agent import (
     observe_state,
     send_scan_key,
     verify_target,
+)
+from th08_runtime.priority17_publication_probe import (
+    Priority17PublicationBatch,
+    Priority17PublicationProbe,
+    Priority17ProbeUnsafeStateError,
 )
 from touhou_control import native_backend
 from touhou_control.async_policy import (
@@ -1791,6 +1798,17 @@ def _run_live_session(
     trace_enemy_mode_transitions = bool(
         getattr(args, "trace_enemy_mode_transitions", False)
     )
+    trace_priority17_publications = bool(
+        getattr(args, "trace_priority17_publications", False)
+    )
+    priority17_probe: Priority17PublicationProbe | None = None
+    priority17_probe_last_serial: int | None = None
+    priority17_probe_installation: dict[str, object] = {
+        "schema": "th08-priority17-publication-probe-v1",
+        "role": "trace_only_no_action_authority",
+        "status": "disabled",
+        "action_authority": False,
+    }
     diagnostic_continue_root_only_scale = bool(
         getattr(
             args,
@@ -1999,6 +2017,25 @@ def _run_live_session(
     try:
         identity = verify_target(reader)
         trace_sink.emit({"kind": "identity", **identity})
+        if trace_priority17_publications:
+            try:
+                priority17_probe = Priority17PublicationProbe.install(
+                    api,
+                    pid,
+                )
+                priority17_probe_installation = (
+                    priority17_probe.installation_record()
+                )
+            except Priority17ProbeUnsafeStateError:
+                raise
+            except Exception as error:
+                priority17_probe_installation = {
+                    "schema": "th08-priority17-publication-probe-v1",
+                    "role": "trace_only_no_action_authority",
+                    "status": "unavailable",
+                    "error": f"{type(error).__name__}: {error}",
+                    "action_authority": False,
+                }
         trace_sink.emit(
             {
                     "kind": "controller_config",
@@ -2044,6 +2081,9 @@ def _run_live_session(
                     "control_delay_window": LIVE_CONTROL_DELAY_WINDOW,
                     "control_delay_guard_frames": (
                         LIVE_CONTROL_DELAY_GUARD_FRAMES
+                    ),
+                    "priority17_publication_probe": (
+                        priority17_probe_installation
                     ),
                     "maximum_sensor_epoch_extent_frames": (
                         MAX_SENSOR_EPOCH_EXTENT_FRAMES
@@ -2285,6 +2325,18 @@ def _run_live_session(
             raise RuntimeError("physical gameplay input is already active")
         _require_foreground(api, pid)
         gameplay_armed = True
+        if priority17_probe is not None:
+            priority17_baseline = priority17_probe.read_since(None)
+            priority17_probe_last_serial = (
+                priority17_baseline.observed_serial
+            )
+            trace_sink.emit(
+                {
+                    "kind": "priority17_publication_probe_baseline",
+                    **priority17_baseline.compact_record(),
+                },
+                flush=True,
+            )
         scene_guard.observe(
             gameplay_active=True,
             current_stage=int(state["stage_route_index"]),
@@ -2643,6 +2695,22 @@ def _run_live_session(
             if not state["gameplay_active"]:
                 time.sleep(args.poll_ms / 1000.0)
                 continue
+            priority17_publication_batch: (
+                Priority17PublicationBatch | None
+            ) = None
+            if priority17_probe is not None:
+                priority17_publication_batch = (
+                    priority17_probe.read_since(
+                        priority17_probe_last_serial
+                    )
+                )
+                if (
+                    priority17_publication_batch.observed_serial
+                    is not None
+                ):
+                    priority17_probe_last_serial = (
+                        priority17_publication_batch.observed_serial
+                    )
             if state["route_id"] != 2:
                 termination_reason = "gameplay_ended"
                 break
@@ -4160,6 +4228,11 @@ def _run_live_session(
                 ),
                 issue_controller=issue_controller,
                 delay_recorder=delay_estimator,
+                publication_serial_sampler=(
+                    priority17_probe.sample_serial
+                    if priority17_probe is not None
+                    else None
+                ),
                 clock=time.perf_counter,
             )
             fresh_issue_result = physical_issue.issue
@@ -4497,6 +4570,7 @@ def _run_live_session(
             if (
                 trace_bullet_births
                 or trace_enemy_mode_transitions
+                or trace_priority17_publications
                 or trace_auxiliary_vm_batches
                 or iterations % args.log_every == 0
                 or decision.bomb
@@ -4641,6 +4715,22 @@ def _run_live_session(
                     ),
                 )
                 record.update(control_trace_fields)
+                if trace_priority17_publications:
+                    record["priority17_publication_probe"] = {
+                        "role": "trace_only_no_action_authority",
+                        "installation_status": (
+                            priority17_probe_installation["status"]
+                        ),
+                        "capture": (
+                            priority17_publication_batch.compact_record()
+                            if priority17_publication_batch is not None
+                            else None
+                        ),
+                        "issue": (
+                            physical_issue.publication_serial_bracket.compact_record()
+                        ),
+                        "action_authority": False,
+                    }
                 timing_trace_fields = build_decision_timing_trace_fields(
                     DecisionTimingTraceInput(
                         observe_ms=observe_ms,
@@ -4880,6 +4970,64 @@ def _run_live_session(
             session.release_keys()
         finally:
             try:
+                if priority17_probe is not None:
+                    try:
+                        final_batch = priority17_probe.read_since(
+                            priority17_probe_last_serial
+                        )
+                        if final_batch.observed_serial is not None:
+                            priority17_probe_last_serial = (
+                                final_batch.observed_serial
+                            )
+                        trace_sink.emit(
+                            {
+                                "kind": (
+                                    "priority17_publication_probe_final"
+                                ),
+                                "phase": "after_key_release",
+                                **final_batch.compact_record(),
+                            },
+                            flush=True,
+                        )
+                    except Exception as error:
+                        trace_sink.emit(
+                            {
+                                "kind": (
+                                    "priority17_publication_probe_final"
+                                ),
+                                "schema": (
+                                    "th08-priority17-publication-probe-v1"
+                                ),
+                                "phase": "after_key_release",
+                                "role": (
+                                    "trace_only_no_action_authority"
+                                ),
+                                "status": "read_error",
+                                "error": (
+                                    f"{type(error).__name__}: {error}"
+                                ),
+                                "action_authority": False,
+                            },
+                            flush=True,
+                        )
+                    try:
+                        priority17_probe.close()
+                    except Exception as error:
+                        trace_sink.emit(
+                            {
+                                "kind": (
+                                    "priority17_publication_probe_cleanup_error"
+                                ),
+                                "schema": (
+                                    "th08-priority17-publication-probe-v1"
+                                ),
+                                "error": (
+                                    f"{type(error).__name__}: {error}"
+                                ),
+                                "action_authority": False,
+                            },
+                            flush=True,
+                        )
                 should_pause = False
                 try:
                     should_pause = bool(

@@ -47,6 +47,7 @@ class Th08LiveCliTests(unittest.TestCase):
         self.assertEqual(arguments.terminal_inactive_grace, 6.0)
         self.assertEqual(arguments.auxiliary_vm_native_call_mode, "held")
         self.assertFalse(arguments.trace_auxiliary_ecl_events)
+        self.assertFalse(arguments.trace_priority17_publications)
         self.assertEqual(
             arguments.bullet_birth_native_call_mode,
             "released",
@@ -77,6 +78,13 @@ class Th08LiveCliTests(unittest.TestCase):
             self.assertRaises(SystemExit),
         ):
             parser.parse_args(["trace.jsonl", "--normal-bomb", "--no-bomb"])
+
+    def test_priority17_publication_probe_is_explicitly_opt_in(self) -> None:
+        arguments = controller.build_parser().parse_args(
+            ["trace.jsonl", "--trace-priority17-publications"]
+        )
+
+        self.assertTrue(arguments.trace_priority17_publications)
 
 
 if __name__ == "__main__":

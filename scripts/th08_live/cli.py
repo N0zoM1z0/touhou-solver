@@ -331,6 +331,15 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
+        "--trace-priority17-publications",
+        action="store_true",
+        help=(
+            "install the reversible bounded priority-17 callback-exit "
+            "publication ring and bracket real input dispatches with its "
+            "serial; trace only, runtime instrumentation, no action authority"
+        ),
+    )
+    parser.add_argument(
         "--diagnostic-continue-root-only-scale",
         action="store_true",
         help=(

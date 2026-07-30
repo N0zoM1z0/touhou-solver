@@ -68,6 +68,36 @@ class PhysicalIssueRequest:
 
 
 @dataclass(frozen=True)
+class PublicationSerialBracket:
+    """Trace-only callback serial samples around one physical dispatch."""
+
+    status: str
+    pre_dispatch_serial: int | None
+    post_dispatch_serial: int | None
+    error: str | None = None
+
+    @property
+    def serial_advance_during_dispatch(self) -> int | None:
+        if self.pre_dispatch_serial is None or self.post_dispatch_serial is None:
+            return None
+        return (
+            self.post_dispatch_serial - self.pre_dispatch_serial
+        ) & 0xFFFFFFFF
+
+    def compact_record(self) -> dict[str, object]:
+        return {
+            "status": self.status,
+            "pre_dispatch_serial": self.pre_dispatch_serial,
+            "post_dispatch_serial": self.post_dispatch_serial,
+            "serial_advance_during_dispatch": (
+                self.serial_advance_during_dispatch
+            ),
+            "error": self.error,
+            "action_authority": False,
+        }
+
+
+@dataclass(frozen=True)
 class PhysicalIssueCommit:
     """Committed issue result and next controller-owned actuator state."""
 
@@ -75,6 +105,7 @@ class PhysicalIssueCommit:
     previous_mask: int
     previous_direction: int
     direction_mask: int
+    publication_serial_bracket: PublicationSerialBracket
 
     def __post_init__(self) -> None:
         if self.previous_mask != self.issue.decision.mask:
@@ -114,13 +145,42 @@ def commit_physical_issue(
     *,
     issue_controller: IssueController,
     delay_recorder: DelayIssueRecorder,
+    publication_serial_sampler: Callable[[], int] | None = None,
     clock: Callable[[], float] = time.perf_counter,
 ) -> PhysicalIssueCommit:
     """Dispatch once, register writes only, and return next actuator state."""
 
+    write_required = request.previous_mask != request.decision.mask
+    pre_serial: int | None = None
+    post_serial: int | None = None
+    serial_errors: list[str] = []
+    if publication_serial_sampler is not None and write_required:
+        try:
+            pre_serial = publication_serial_sampler()
+        except Exception as error:
+            serial_errors.append(f"pre:{type(error).__name__}: {error}")
     dispatch = issue_controller.dispatch(
         request.previous_mask,
         request.decision.mask,
+    )
+    if publication_serial_sampler is not None and write_required:
+        try:
+            post_serial = publication_serial_sampler()
+        except Exception as error:
+            serial_errors.append(f"post:{type(error).__name__}: {error}")
+    if publication_serial_sampler is None:
+        serial_status = "disabled"
+    elif not write_required:
+        serial_status = "no_write"
+    elif not serial_errors:
+        serial_status = "complete"
+    else:
+        serial_status = "read_error"
+    publication_serial_bracket = PublicationSerialBracket(
+        status=serial_status,
+        pre_dispatch_serial=pre_serial,
+        post_dispatch_serial=post_serial,
+        error="; ".join(serial_errors) or None,
     )
     issue_path_ms = (clock() - request.issue_path_started) * 1000.0
     observe_to_issue_ms = (clock() - request.iteration_started) * 1000.0
@@ -156,6 +216,7 @@ def commit_physical_issue(
         previous_mask=request.decision.mask,
         previous_direction=request.decision.mask & request.direction_mask,
         direction_mask=request.direction_mask,
+        publication_serial_bracket=publication_serial_bracket,
     )
 
 
@@ -164,6 +225,7 @@ __all__ = [
     "DelayIssueRecorder",
     "PhysicalIssueCommit",
     "PhysicalIssueRequest",
+    "PublicationSerialBracket",
     "commit_physical_issue",
     "observe_action_issue",
 ]

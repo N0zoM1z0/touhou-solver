@@ -425,6 +425,30 @@ authority. The next model must carry ordered transition suffix and native
 active-mask observation on a revalidated player/input phase clock while
 preserving complete-mask no-write.
 
+## Priority-17 Publication Probe Preflight — 2026-07-30
+
+Connected IDA revalidation corrects the callback boundary used by the next
+physical test. `replay_record_input_frame` saves previous once at
+`0x00452339`, writes current at `0x00452347`, and may overwrite current from
+a second raw sample at `0x004523C7`. Five exits converge at the common
+epilogue `0x00452480`. Sampling only the first store would therefore
+misidentify full-path publication; the trace hook records the callback-exit
+state.
+
+The default-off ring increments one serial per priority-17 callback exit and
+records contemporaneous manager frame plus raw/current/previous. Controller
+real writes retain pre/post-dispatch serial brackets, while no-write samples
+no serial and preserves normal actuation. The compact report will directly
+count consecutive serials whose manager-frame delta is zero. Such an event
+is an observed callback-publication edge during a manager-frame freeze; its
+absence is meaningful only when the entire serial interval is retained.
+
+Overflow, unstable reads, or read failure remain unknown trace evidence and
+must not stop a whole stage. The hook is diagnostic and perturbing, so even a
+complete report cannot by itself promote hard survival. No physical trace
+has yet exercised this preflight; CE-0120 remains open and manager frame
+remains unauthorized as a universal input clock.
+
 ## Formal Review
 
 1. **State equivalence:** manager frame, cell, and input alone do not identify

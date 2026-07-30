@@ -17,6 +17,9 @@ from pathlib import Path
 from analysis.th08_finalb_scale_live_delivery_report import (
     build_report as build_finalb_scale_delivery_report,
 )
+from analysis.th08_priority17_publication_report import (
+    build_report as build_priority17_publication_report,
+)
 from th08_agent_hotkey import AgentHotkey
 from th08_live.bullet_birth_native import (
     NATIVE_CALL_MODES,
@@ -269,6 +272,9 @@ def run_trial(
         "trace_enemy_mode_transitions": (
             args.trace_enemy_mode_transitions
         ),
+        "trace_priority17_publications": (
+            args.trace_priority17_publications
+        ),
         "diagnostic_continue_root_only_scale": (
             args.diagnostic_continue_root_only_scale
         ),
@@ -343,6 +349,9 @@ def run_trial(
             ),
             trace_enemy_mode_transitions=(
                 args.trace_enemy_mode_transitions
+            ),
+            trace_priority17_publications=(
+                args.trace_priority17_publications
             ),
             diagnostic_continue_root_only_scale=(
                 args.diagnostic_continue_root_only_scale
@@ -546,6 +555,37 @@ def run_trial(
             stall_timeout_seconds=args.stall_timeout,
         )
         session["agent_summary"] = agent.last_summary
+        if args.trace_priority17_publications:
+            priority17_report_path = (
+                RUNTIME_REPORT_DIR
+                / f"{run_id}.priority17_publication_report.json"
+            )
+            try:
+                priority17_report = (
+                    build_priority17_publication_report(trace)
+                )
+                priority17_report_path.write_text(
+                    json.dumps(
+                        priority17_report,
+                        ensure_ascii=False,
+                        indent=2,
+                        sort_keys=True,
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+                session["priority17_publication_report"] = {
+                    "path": str(priority17_report_path),
+                    "integrity_passed": (
+                        priority17_report["integrity"]["passed"]
+                    ),
+                }
+            except (OSError, ValueError) as error:
+                session["priority17_publication_report"] = {
+                    "path": str(priority17_report_path),
+                    "integrity_passed": False,
+                    "error": f"{type(error).__name__}: {error}",
+                }
         focused_delivery_report = None
         focused_delivery_report_path = None
         if args.enable_finalb_scale_source_authority:
@@ -759,6 +799,14 @@ def build_parser() -> argparse.ArgumentParser:
             "frame-bracket player mode and first-64 enemy flags for the "
             "whole stage; no mode-conditioned action authority, but trace "
             "cost may perturb cadence"
+        ),
+    )
+    parser.add_argument(
+        "--trace-priority17-publications",
+        action="store_true",
+        help=(
+            "install the reversible bounded priority-17 callback-exit ring "
+            "for the whole stage; trace only, no action authority"
         ),
     )
     parser.add_argument(
@@ -1002,6 +1050,7 @@ def main(argv: list[str] | None = None) -> int:
             args.trace_nonspell_main_vms,
             args.trace_enemy_combat_progress,
             args.trace_enemy_mode_transitions,
+            args.trace_priority17_publications,
             args.diagnostic_continue_root_only_scale,
             args.trace_auxiliary_vm_batches,
             args.trace_auxiliary_ecl_events,

@@ -156,10 +156,21 @@ mask before the next controller choice.
 
 Connected IDA revalidation closes the callback order inside one native
 update: priority-9 player processing reads the current word at `0x0044AEE8`;
-priority-17 then copies raw input into current at `0x00452347`. It does not
-close where an asynchronous capture/issue falls relative to that callback
-pair, nor prove the scalar completion deadline against a native publication
-clock. Manager-frame delta remains invalid as a substitute.
+priority-17 saves previous once at `0x00452339`, writes current from the first
+raw sample at `0x00452347`, and on its full path overwrites current from a
+second raw sample at `0x004523C7`. All five exits converge at
+`0x00452480`. The callback-exit current is the publication observation; the
+first store alone is not. This does not close where an asynchronous
+capture/issue falls relative to that callback pair, nor prove the scalar
+completion deadline against a native publication clock. Manager-frame delta
+remains invalid as a substitute.
+
+The default-off priority-17 preflight probe therefore hooks only the common
+epilogue and records callback-exit raw/current/previous with a monotone
+serial. A real complete-mask transaction retains pre/post serial brackets;
+no-write samples nothing. This is trace-only instrumentation. Until a
+complete physical report retains every serial in an audited interval, it
+does not change the delay support or grant action authority.
 
 ## Uncertainty And Transitions
 

@@ -1103,6 +1103,37 @@ Overflow/read failure must produce unknown trace evidence without stopping
 the whole stage. Only that probe may justify an estimator-to-publication
 deadline adapter.
 
+2026-07-30 `SEM-MODE-C` priority-17 probe preflight: the default-off bounded
+native observer and compact report are implemented but not yet physically
+exercised. IDA revalidation corrected the callback to two possible current
+stores: previous is saved once at `0x00452339`, current receives the first
+raw sample at `0x00452347`, the full recording path samples raw again at
+`0x004523B8` and overwrites current at `0x004523C7`, and all five exits
+converge at `0x00452480`. The probe consequently records final callback-exit
+state at the common epilogue rather than treating the first store as the
+publication boundary.
+
+The hook uses a 256-event remote ring and one monotone serial per callback
+exit. Each event retains manager frame, engine flags, raw/current/previous,
+and the callback recording counter. Real complete-mask writes retain serial
+samples before and after the whole ordered dispatcher; complete-mask
+no-write samples nothing. Install/uninstall suspend and inspect target
+threads so executable memory is never freed while an EIP can still consume
+the trampoline/stub. Ordinary install/read/overflow failure is fail-open for
+gameplay and classifies only the affected evidence as unknown.
+
+The deterministic report validates serial continuity, callback-in-dispatch
+intermediate masks, same-manager-frame serial edges, ordered transaction
+identity, final-drain phase, hard no-Bomb, cleanup, and route completion.
+Practice/full-route supervisors retain it automatically under the explicit
+diagnostic flag. This checkpoint has implementation/preflight authority
+only. Next run exactly one complete original-game Lunatic Stage-5 workload
+with the probe enabled, no hit stop, and no Bomb; retain the full stage even
+if the probe becomes unavailable. Do not use THPRAC, named-spell activation,
+or manager-frame inference. Eighty-six focused tests pass; complete
+Linux/Windows discovery passes 1,226 tests in 14.104/30.564 seconds, with
+three existing Windows skips.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:
@@ -1359,7 +1390,8 @@ After that baseline, the next correction checkpoints should be:
 3. `SEM-MODE`: the independent CE-0193 ordered state and native
    priority-9-before-priority-17 composition are complete offline. The
    source-hashed post-hoc audit exhausts the current trace and proves exact
-   deadline unidentifiable. Implement the bounded priority-17 serial probe,
+   deadline unidentifiable. The bounded priority-17 serial probe is now
+   implemented and awaits one whole Stage-5 physical trace. Use that trace to
    close asynchronous capture/issue phase and physical delay support, then
    optimized/native parity, before exact future body/version integration;
 4. `SEM-GEOM`: exact player/laser geometry, bullet lifecycle/suppression, and

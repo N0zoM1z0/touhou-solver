@@ -666,6 +666,44 @@ pre/post-dispatch serial brackets. Probe overflow or read failure must mark
 only the interval unknown and continue the stage. Another unchanged Stage-5
 run or a manager-frame-only deadline inference is rejected.
 
+**2026-07-30 SEM-MODE-C priority-17 probe preflight:** connected-IDA
+revalidation corrected the inherited one-store description of
+`replay_record_input_frame`. On the active path it saves
+`previous <- current` once at `0x00452339`, publishes the first raw sample at
+`0x00452347`, and on the full recording path samples raw again at
+`0x004523B8` and overwrites current at `0x004523C7`. All five exits converge
+at the shipped `8B E5 5D C3` epilogue at `0x00452480`; therefore only
+callback-exit state is the native publication observation. Material IDA
+comments record the correction and common hook boundary.
+
+The default-off trace-only implementation now detours that common epilogue
+through five unreferenced shipped padding bytes into a bounded 256-event
+remote ring. Each event commits a monotone serial last and retains
+manager frame, engine flags, raw/current/previous, and the callback object's
+recording counter. Real complete-mask writes sample the serial immediately
+before and after the whole ordered dispatch; no-write samples nothing.
+Ordinary install/read/overflow errors remain observation-only and cannot
+stop a stage. Patch activation and cleanup suspend and inspect every target
+thread; remote code is freed only when no EIP can still consume the
+trampoline or stub. An unprovable partial activation aborts before gameplay,
+and an unprovable cleanup requires target termination after the trial.
+
+`th08_priority17_publication_report.py` validates serial continuity,
+ordered dispatch identity, callback-in-dispatch intermediate masks,
+same-manager-frame publication edges, final-drain provenance, hard no-Bomb,
+cleanup, and route completion. Missing/overflow intervals are unknown and
+cannot support negative claims. Practice and full-route supervisors retain
+this compact report automatically when the diagnostic flag is enabled.
+
+This is **Implemented preflight / not physically exercised**. It adds no
+live input, delay, survival, or NMNB authority. The next admissible physical
+gate is one complete original-game Lunatic Stage-5 run with the probe enabled,
+`stop-after-hits=0`, hard no-Bomb, and normal supervisor completion. Do not
+enable or disable behavior at a named spell, and do not stop the stage on a
+probe failure. Eighty-six focused tests pass; complete Linux/Windows
+discovery passes 1,226 tests in 14.104/30.564 seconds, with the three existing
+Windows skips.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

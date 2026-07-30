@@ -1,6 +1,6 @@
 # Touhou Solver Strategy Ledger
 
-Last updated: 2026-07-30.
+Last updated: 2026-07-31.
 
 This file records strategy identity and promotion status. It is not a
 chronological log. Derivations and measurements live in design notes,
@@ -1894,6 +1894,18 @@ first.
   observed pickup/resource delta, but grants no runtime execution,
   kill/deadline, prevented birth, observed allocation/pickup, causal benefit,
   phase-option edge, ranking, or action authority.
+- **Native combat root projection (2026-07-31, Offline):** rolling native
+  snapshot v5 and causal-search v3 retain the full 128-slot player-shot pool
+  identity, active shot fields, emission/damage timers, active enemy
+  HP/hitboxes/gates, and supported instantaneous ordinary-shot overlap at
+  every immutable root and tick. Deterministic repeats and natural same-seam
+  references require the new combat identity to agree. A strict lowerer first
+  rejects native player-phase-2 branches, then exposes published frame damage,
+  supported overlap subtotals, and cross-slot positive-HP change only as
+  observed/proxy metrics. Type-4/5 mode predicates, nonzero hit callbacks,
+  generation-safe HP attribution, prevented births, target selection, branch
+  ranking, physical prediction, and live authority remain unresolved. No new
+  runtime corpus was captured.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -1932,6 +1944,7 @@ first.
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_ENEMY_LIFECYCLE_TRACE_LOWERING_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md`, and
+  `notes/research/stage5_combat/ROUTE2_NATIVE_COMBAT_ROOT_PROJECTION_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and
@@ -1944,7 +1957,9 @@ first.
   authority. The enemy/damage/item lifecycle ring and lowerer have
   offline/synthetic implementation authority only. The damageability/coverage
   atlas has offline semantic/static
-  authority only. The source/emission atlas has shipped-content/static
+  authority only. The native combat projection has offline exact-root and
+  synthetic supported-overlap authority only. The source/emission atlas has
+  shipped-content/static
   candidate authority only. The item/drop atlas has shipped-native
   recurrence/static opportunity authority only. The cross-atlas board has
   immutable static-cohort authority only. The Boss configuration atlas has

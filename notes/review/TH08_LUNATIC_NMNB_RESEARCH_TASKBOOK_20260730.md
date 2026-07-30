@@ -1050,7 +1050,16 @@ Current execution checkpoint, 2026-07-31:
 - the joined candidate report retains observed damage count/total/frames and
   the downstream item/resource chain without treating occurrence as causal
   benefit;
+- rolling native snapshot v5 and causal-search v3 now retain the complete
+  128-slot player-shot pool identity, decoded active shot state, both shot
+  timers, active enemy HP/hitbox/gate state, and supported instantaneous
+  ordinary-shot overlaps from each immutable native root and future tick;
+- the strict combat branch lowerer admits only accepted deterministic
+  transactions, rejects native player-phase-2 branches as a hard survival
+  filter, and keeps HP-sum change, published frame damage, and supported
+  overlap as non-ranking observed/proxy metrics;
 - no runtime v4 event has been observed, so target-motion/action attribution,
+  no v5/v3 combat corpus has been captured, and generation-safe kill,
   prevented hostile births, safe collection, later benefit, and every exit
   gate above remain open; and
 - continue higher-ROI general WS-H foundations while runtime authorization is

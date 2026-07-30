@@ -46,6 +46,9 @@ from th08_runtime.native_snapshot import (  # noqa: E402
     suspend_non_owner_threads,
     verify_native_dirty_pages,
 )
+from th08_runtime.native_combat_projection import (  # noqa: E402
+    capture_native_combat_projection,
+)
 from th08_runtime.native_snapshot_projection import (  # noqa: E402
     capture_collision_control_projection,
     collision_control_projection_changes,
@@ -79,7 +82,7 @@ from tools.th08_native_snapshot_trial import (  # noqa: E402
 )
 
 
-SCHEMA = "th08-native-snapshot-causal-secondary-search-v2"
+SCHEMA = "th08-native-snapshot-causal-secondary-search-v3"
 DEFAULT_PREFIX_MASKS = (0x14, 0x15, 0x90, 0x91, 0x94, 0x95)
 DEFAULT_PREFIX_HORIZON = 8
 DEFAULT_SECONDARY_HORIZON = 8
@@ -122,10 +125,11 @@ def _first_hit_manager_frame(
 def _compact_tick(tick: dict[str, object]) -> dict[str, object]:
     native_projection = tick.get("native_projection")
     collision_projection = tick.get("collision_control_projection")
+    combat_projection = tick.get("native_combat_projection")
     if not isinstance(native_projection, dict) or not isinstance(
         collision_projection,
         dict,
-    ):
+    ) or not isinstance(combat_projection, dict):
         raise NativeSnapshotUnknownError(
             "causal-search tick omits a semantic projection"
         )
@@ -140,6 +144,8 @@ def _compact_tick(tick: dict[str, object]) -> dict[str, object]:
         "native_projection_sha256": native_projection["sha256"],
         "collision_control_projection_sha256": collision_projection["sha256"],
         "collision_control_summary": collision_projection["summary"],
+        "native_combat_projection_sha256": combat_projection["sha256"],
+        "native_combat_summary": combat_projection["summary"],
         "timing_ms": tick["timing_ms"],
     }
 
@@ -346,6 +352,11 @@ def _run_secondary_search(
             native_root_projection=origin_projection,
             compact_state=origin_compact,
         )
+        origin_combat = capture_native_combat_projection(
+            projection_reader,
+            native_root_projection=origin_projection,
+            compact_state=origin_compact,
+        )
 
         (
             _canary_endpoint,
@@ -454,6 +465,11 @@ def _run_secondary_search(
                 native_root_projection=subroot_projection,
                 compact_state=subroot_compact,
             )
+            subroot_combat = capture_native_combat_projection(
+                projection_reader,
+                native_root_projection=subroot_projection,
+                compact_state=subroot_compact,
+            )
             if subroot_compact != prefix_compact[-1]:
                 raise NativeSnapshotUnknownError(
                     "promoted subroot compact state changed after promotion"
@@ -554,6 +570,7 @@ def _run_secondary_search(
                         "action_carrier": subroot_carrier.record(),
                         "native_projection_sha256": subroot_projection.digest,
                         "collision_control_projection": (subroot_collision.record()),
+                        "native_combat_projection": subroot_combat.record(),
                         "compact_state": subroot_compact,
                     },
                     "continuation_count": len(continuations),
@@ -599,8 +616,18 @@ def _run_secondary_search(
             repeat_collision,
         )
         compact_exact = canary_compact == repeat_compact
+        native_combat_exact = tuple(
+            tick["native_combat_projection"]["sha256"]
+            for tick in canary_branch["ticks"]
+        ) == tuple(
+            tick["native_combat_projection"]["sha256"]
+            for tick in repeat_branch["ticks"]
+        )
         parent_repeat_exact = (
-            not projection_changes and not collision_changes and compact_exact
+            not projection_changes
+            and not collision_changes
+            and compact_exact
+            and native_combat_exact
         )
         status = (
             "causal_secondary_search_passed"
@@ -618,6 +645,7 @@ def _run_secondary_search(
                 "action_carrier": origin_carrier.record(),
                 "native_projection_sha256": origin_projection.digest,
                 "collision_control_projection": origin_collision.record(),
+                "native_combat_projection": origin_combat.record(),
                 "compact_state": origin_compact,
                 "baseline_capture_ms": baseline_capture_ms,
                 "baseline_mapping_stabilization": list(baseline_stabilization),
@@ -645,6 +673,7 @@ def _run_secondary_search(
                 "native_projection_changes": list(projection_changes),
                 "collision_control_changes": list(collision_changes),
                 "compact_exact": compact_exact,
+                "native_combat_projection_exact": native_combat_exact,
                 "canary": _compact_branch(
                     canary_branch,
                     first_hit_manager_frame=_first_hit_manager_frame(canary_compact),

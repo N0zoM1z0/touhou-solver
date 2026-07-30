@@ -31,12 +31,14 @@ historical handoff.
   atlas, exact stage/root-aware lifecycle ring diagnostic transport,
   fail-closed generation/damage/end lowerer, native resolved-HP-damage and
   successful-item-allocation/cull/pickup transaction tracing, and the
-  immutable candidate-to-enemy-to-damage-to-item-to-resource join,
+  immutable candidate-to-enemy-to-damage-to-item-to-resource join, complete
+  exact-root player-shot/enemy-damage combat projection, and
+  survival-filtered native branch lowerer,
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,500 tests in 13.953 seconds.
-- Complete Windows UNC discovery passes 1,500 tests in 31.615 seconds with
+- Complete Linux discovery passes 1,508 tests in 14.185 seconds.
+- Complete Windows UNC discovery passes 1,508 tests in 30.682 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -54,6 +56,19 @@ historical handoff.
   shot timer `(previous, fraction_bits, current)` and all 128 slot state
   words. Same-action and natural-frame acceptance now require this state to
   agree. The live sensing hot path is unchanged.
+- Rolling native snapshot schema v5 extends that boundary without changing
+  collision projection v7. Every root and tick now retains the full
+  `128 * 0x484` player-shot pool identity, decoded active shot geometry/
+  damage/state/type/callbacks, both emission and damage timers, active enemy
+  HP/hitboxes/gates, and supported instantaneous ordinary-shot overlaps.
+  Causal-search schema v3 carries the same projection through origins,
+  subroots, futures, and parent repeats. No v5/v3 native corpus has been
+  captured.
+- The strict offline combat branch report accepts only completed deterministic
+  transactions, treats native player phase 2 as a hard survival rejection,
+  and retains native frame damage, supported overlap, and positive-HP-sum
+  changes only as observed/proxy metrics. It grants no kill, prevented-birth,
+  ranking, physical prediction, or live authority.
 - Root 2,129's old four-u16 pre-hostile prefix is compatible with a due
   focused level-5 option pair, but the retained v3 capsule lacks timer/pool
   fields, so this remains inferred rather than observed. Hostile birth 1220
@@ -141,6 +156,9 @@ historical handoff.
   loaded normal-stage ECL table. IDA comments at `0x0042A55F` and
   `0x0042A6FF` retain this allocation-identity boundary. Comments at
   `0x0042D06D` and `0x0042D343` retain the damage begin/HP-commit boundary.
+  Comments at `0x0042D0EE`, `0x004516CF`, and `0x004511C8` retain the
+  alternate-hitbox ordered-positive-width condition, complete player-shot
+  pool/slot layout, and update-callback trajectory boundary.
   Comments at `0x0044044D`, `0x00440991`, `0x00440A39`, and `0x00440C1E`
   retain the successful item allocation, cull, and pickup transaction
   boundaries.
@@ -149,6 +167,8 @@ historical handoff.
 - Detailed lifecycle-ring contract:
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`.
   The old active-only observer must not be repeated.
+- Detailed native combat-root boundary:
+  `notes/research/stage5_combat/ROUTE2_NATIVE_COMBAT_ROOT_PROJECTION_CONTRACT_20260731.md`.
 - Detailed item-allocation/pickup boundary:
   `notes/research/route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.
 - `COMBAT-FAST-01` now has an executable native-ordered player-shot damage
@@ -584,10 +604,12 @@ historical handoff.
   actions. The complete v4 capture/lowering schema is implemented and
   synthetic-tested; runtime evidence is still absent. Until explicit
   authorization exists, continue the offline WS-H
-  foundations. Damageability and static shot coverage are now retained; the
-  next causal combat gate must join an immutable root to enemy generation,
-  the now-exact HP transaction, shot/option/RNG state, target-motion history,
-  and viable actions.
+  foundations. Damageability and static shot coverage are now retained. The
+  immutable-root shot/target/gate projection and survival-filtered branch
+  lowerer are implemented in rolling v5/causal-search v3, but have no
+  retained runtime sample. The next causal combat gate must join those
+  branches to enemy generation, the now-exact v4 HP transaction,
+  shot/option/RNG state, target-motion history, and viable actions.
   The drop/Power static ledger, native defeat-drop recurrence, and route-wide
   item/drop opportunity index are now complete for their declared boundaries,
   and the lowerer can represent exact
@@ -1538,8 +1560,10 @@ Do not resume broad G5 work first.
    survival-feasible collection branches, an observed Power-threshold
    crossing, and a later damage/kill/survival join. Continue another
    high-ROI offline WS-H task while runtime evidence is unauthorized. A later
-   explicit v4 ordinary-enemy corpus may compare focused, unfocused, and
-   causal refocus schedules only inside the unchanged survival-feasible set.
+   explicitly authorized v5/v3 native-root corpus may compare focused,
+   unfocused, and causal refocus schedules only inside the unchanged
+   survival-feasible set, then join the v4 lifecycle generation/damage stream
+   before calling any HP change a kill.
    Do not launch a physical trial merely to fill any capture debt.
    `CONTENT-01` is closed for shipped byte identity. `CONTENT-02` may now
    build the mandatory-stage symbolic ECL event atlas and join native events

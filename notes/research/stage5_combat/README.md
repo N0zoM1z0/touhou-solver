@@ -19,10 +19,14 @@ Read in order:
 11. [damageability and static shot-coverage contract](ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md)
 12. [source/emission program-atlas contract](ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md)
 13. [Boss phase-configuration atlas contract](ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md)
+14. [native combat root-projection contract](ROUTE2_NATIVE_COMBAT_ROOT_PROJECTION_CONTRACT_20260731.md)
 
 The raw first-64 observer is physically accepted for trace-only use. The v4
 lifecycle ring/lowerer has synthetic authority for exact generation,
 resolved-damage, end, item, and pickup/resource joins, but has never been
-installed. Runtime kill-versus-despawn, target-motion/action attribution,
+installed. Rolling v5 and causal-search v3 now retain a complete native
+player-shot pool identity plus active enemy damage-target projection and
+survival-filtered offline branch summaries, but no new runtime sample was
+captured. Runtime kill-versus-despawn, target-motion/action attribution,
 exposure causality, Power strategy, target selection, and action authority
 remain open.

@@ -64,6 +64,10 @@ from th08_runtime.native_snapshot import (  # noqa: E402
     verify_native_dirty_pages,
     write_native_replay_action,
 )
+from th08_runtime.native_combat_projection import (  # noqa: E402
+    NativeCombatProjection,
+    capture_native_combat_projection,
+)
 from th08_runtime.native_snapshot_projection import (  # noqa: E402
     CollisionControlProjection,
     capture_collision_control_projection,
@@ -81,7 +85,7 @@ from th08_runtime_agent import (  # noqa: E402
 from touhou_control.pipeline_identity import VersionIdentity  # noqa: E402
 
 
-SCHEMA = "th08-native-snapshot-rolling-trial-v4"
+SCHEMA = "th08-native-snapshot-rolling-trial-v5"
 DEFAULT_GAME_DIR = Path(
     "D:/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)__codex_wind_tunnel"
 )
@@ -542,6 +546,7 @@ def _compact_portfolio_branch_record(
                 "native_projection_sha256": native_projection["sha256"],
                 "native_projection_frame_bracket": native_projection["frame_bracket"],
                 "collision_control_projection": tick["collision_control_projection"],
+                "native_combat_projection": tick["native_combat_projection"],
                 "timing_ms": tick["timing_ms"],
             }
         )
@@ -910,6 +915,13 @@ def _rolling_branch(
         ).record()
         player_shot_emission_capture_ms = _duration_ms(started)
         started = time.perf_counter()
+        native_combat_projection = capture_native_combat_projection(
+            projection_reader,
+            native_root_projection=projection,
+            compact_state=compact_state,
+        )
+        native_combat_capture_ms = _duration_ms(started)
+        started = time.perf_counter()
         collision_control_projection = capture_collision_control_projection(
             projection_reader,
             native_root_projection=projection,
@@ -935,6 +947,9 @@ def _rolling_branch(
                 "endpoint_header": endpoint_header.record(),
                 "compact_state": compact_state,
                 "player_shot_emission_state": player_shot_emission_state,
+                "native_combat_projection": (
+                    native_combat_projection.record()
+                ),
                 "native_projection": projection.record(),
                 "collision_control_projection": (
                     collision_control_projection.record(
@@ -946,6 +961,9 @@ def _rolling_branch(
                     "native_projection_capture": projection_capture_ms,
                     "player_shot_emission_capture": (
                         player_shot_emission_capture_ms
+                    ),
+                    "native_combat_projection_capture": (
+                        native_combat_capture_ms
                     ),
                     "collision_control_projection_capture": (
                         collision_control_capture_ms
@@ -1129,6 +1147,11 @@ def _run_all36_portfolio(
             native_root_projection=root_projection,
             compact_state=root_compact_state,
         )
+        root_native_combat_projection = capture_native_combat_projection(
+            projection_reader,
+            native_root_projection=root_projection,
+            compact_state=root_compact_state,
+        )
         if int(root_compact_state["manager_frame"]) != target_manager_frame:
             raise NativeSnapshotUnknownError(
                 "compact gameplay state is not aligned to the all-36 root"
@@ -1255,13 +1278,24 @@ def _run_all36_portfolio(
                     )
                 )
                 compact_exact = canary_compact == compact_states
+                native_combat_exact = tuple(
+                    tick["native_combat_projection"]["sha256"]
+                    for tick in canary_branch["ticks"]
+                ) == tuple(
+                    tick["native_combat_projection"]["sha256"]
+                    for tick in branch["ticks"]
+                )
                 recorded_repeat_exact = (
-                    not projection_changes and not collision_changes and compact_exact
+                    not projection_changes
+                    and not collision_changes
+                    and compact_exact
+                    and native_combat_exact
                 )
                 recorded_repeat_changes = {
                     "native_projection_changes": list(projection_changes),
                     "collision_control_changes": list(collision_changes),
                     "compact_exact": compact_exact,
+                    "native_combat_projection_exact": native_combat_exact,
                 }
 
         portfolio_elapsed_ms = _duration_ms(portfolio_started)
@@ -1290,6 +1324,9 @@ def _run_all36_portfolio(
             "root_native_projection": root_projection.record(),
             "root_collision_control_projection": (
                 root_collision_control_projection.record()
+            ),
+            "root_native_combat_projection": (
+                root_native_combat_projection.record()
             ),
             "root_compact_state": root_compact_state,
             "root_player_shot_emission_state": (
@@ -1412,6 +1449,11 @@ def _run_transaction(
             native_root_projection=root_projection,
             compact_state=root_compact_state,
         )
+        root_native_combat_projection = capture_native_combat_projection(
+            projection_reader,
+            native_root_projection=root_projection,
+            compact_state=root_compact_state,
+        )
         if int(root_compact_state["manager_frame"]) != target_manager_frame:
             raise NativeSnapshotUnknownError(
                 "compact gameplay state is not aligned to the immutable root"
@@ -1506,11 +1548,19 @@ def _run_transaction(
         ) == tuple(
             tick["player_shot_emission_state"] for tick in branch_a2["ticks"]
         )
+        native_combat_aa_exact = tuple(
+            tick["native_combat_projection"]["sha256"]
+            for tick in branch_a1["ticks"]
+        ) == tuple(
+            tick["native_combat_projection"]["sha256"]
+            for tick in branch_a2["ticks"]
+        )
         if (
             projection_aa_changes
             or collision_control_aa_changes
             or not compact_aa_exact
             or not player_shot_emission_aa_exact
+            or not native_combat_aa_exact
         ):
             return {
                 "status": "same_action_rolling_native_nondeterministic",
@@ -1536,6 +1586,9 @@ def _run_transaction(
                     root_collision_control_projection.record(
                         include_model_payload=retain_collision_control_payload,
                     )
+                ),
+                "root_native_combat_projection": (
+                    root_native_combat_projection.record()
                 ),
                 "root_compact_state": root_compact_state,
                 "root_player_shot_emission_state": (
@@ -1564,6 +1617,9 @@ def _run_transaction(
                 "same_action_compact_exact": compact_aa_exact,
                 "same_action_player_shot_emission_exact": (
                     player_shot_emission_aa_exact
+                ),
+                "same_action_native_combat_projection_exact": (
+                    native_combat_aa_exact
                 ),
                 "same_action_compact_left": list(compact_a1),
                 "same_action_compact_right": list(compact_a2),
@@ -1638,6 +1694,9 @@ def _run_transaction(
                     "root_collision_control_projection": (
                         root_collision_control_projection
                     ),
+                    "root_native_combat_projection": (
+                        root_native_combat_projection
+                    ),
                     "root_player_shot_emission_state": (
                         root_player_shot_emission_state
                     ),
@@ -1673,6 +1732,9 @@ def _run_transaction(
                     include_model_payload=retain_collision_control_payload,
                 )
             ),
+            "root_native_combat_projection": (
+                root_native_combat_projection.record()
+            ),
             "root_compact_state": root_compact_state,
             "root_player_shot_emission_state": (
                 root_player_shot_emission_state
@@ -1690,6 +1752,9 @@ def _run_transaction(
             "same_action_full_endpoint_exact": not endpoint_aa_changes,
             "same_action_player_shot_emission_exact": (
                 player_shot_emission_aa_exact
+            ),
+            "same_action_native_combat_projection_exact": (
+                native_combat_aa_exact
             ),
             "same_action_full_endpoint_volatility": (
                 _group_changes_by_region(
@@ -1742,6 +1807,7 @@ def _run_natural_reference(
     expected_collision_control_projections: tuple[CollisionControlProjection, ...],
     expected_root_projection: Route2NativeFutureBodyRootSlice,
     expected_root_collision_control_projection: CollisionControlProjection,
+    expected_root_native_combat_projection: NativeCombatProjection,
     expected_root_compact_state: dict[str, object],
     expected_root_player_shot_emission_state: dict[str, object],
     retain_collision_control_payload: bool,
@@ -1786,10 +1852,19 @@ def _run_natural_reference(
         native_root_projection=root_projection,
         compact_state=root_compact_state,
     )
+    root_native_combat_projection = capture_native_combat_projection(
+        projection_reader,
+        native_root_projection=root_projection,
+        compact_state=root_compact_state,
+    )
     root_projection_exact = root_projection.digest == expected_root_projection.digest
     root_collision_control_exact = (
         root_collision_control_projection.sha256
         == expected_root_collision_control_projection.sha256
+    )
+    root_native_combat_exact = (
+        root_native_combat_projection.sha256
+        == expected_root_native_combat_projection.sha256
     )
     root_compact_exact = root_compact_state == expected_root_compact_state
     root_player_shot_emission_exact = (
@@ -1799,6 +1874,7 @@ def _run_natural_reference(
     if (
         not root_projection_exact
         or not root_collision_control_exact
+        or not root_native_combat_exact
         or not root_compact_exact
         or not root_player_shot_emission_exact
     ):
@@ -1903,6 +1979,11 @@ def _run_natural_reference(
             native_root_projection=projection,
             compact_state=compact_state,
         )
+        native_combat_projection = capture_native_combat_projection(
+            projection_reader,
+            native_root_projection=projection,
+            compact_state=compact_state,
+        )
         if int(compact_state["manager_frame"]) != expected_frame:
             raise NativeSnapshotUnknownError(
                 "natural compact state is not aligned to the trapped callsite"
@@ -1917,6 +1998,9 @@ def _run_natural_reference(
         expected_player_shot_emission = expected_tick.get(
             "player_shot_emission_state"
         )
+        expected_native_combat = expected_tick.get(
+            "native_combat_projection"
+        )
         projection_exact = (
             isinstance(expected_projection, dict)
             and projection.digest == expected_projection.get("sha256")
@@ -1925,6 +2009,11 @@ def _run_natural_reference(
         collision_control_exact = (
             collision_control_projection.sha256
             == expected_collision_control_projections[tick_index].sha256
+        )
+        native_combat_exact = (
+            isinstance(expected_native_combat, dict)
+            and native_combat_projection.sha256
+            == expected_native_combat.get("sha256")
         )
         compact_exact = compact_state == expected_compact
         player_shot_emission_exact = (
@@ -1949,6 +2038,7 @@ def _run_natural_reference(
         any_mismatch = (
             any_mismatch
             or not collision_control_exact
+            or not native_combat_exact
             or not compact_exact
             or not player_shot_emission_exact
         )
@@ -1978,6 +2068,9 @@ def _run_natural_reference(
                 },
                 "compact_state": compact_state,
                 "player_shot_emission_state": player_shot_emission_state,
+                "native_combat_projection": (
+                    native_combat_projection.record()
+                ),
                 "native_projection": projection.record(),
                 "collision_control_projection": (
                     collision_control_projection.record(
@@ -1987,6 +2080,9 @@ def _run_natural_reference(
                 "headless_broad_projection_exact": projection_exact,
                 "headless_collision_control_projection_exact": (
                     collision_control_exact
+                ),
+                "headless_native_combat_projection_exact": (
+                    native_combat_exact
                 ),
                 "headless_compact_exact": compact_exact,
                 "headless_player_shot_emission_exact": (
@@ -2012,6 +2108,7 @@ def _run_natural_reference(
         "hold_frames": min(hold_frames, horizon),
         "root_projection_exact": root_projection_exact,
         "root_collision_control_projection_exact": (root_collision_control_exact),
+        "root_native_combat_projection_exact": root_native_combat_exact,
         "root_compact_exact": root_compact_exact,
         "root_player_shot_emission_exact": (
             root_player_shot_emission_exact
@@ -2023,7 +2120,8 @@ def _run_natural_reference(
         ),
         "broad_projection_is_diagnostic_not_acceptance_authority": True,
         "acceptance_authority": (
-            "exact_collision_control_compact_and_player_shot_emission_state"
+            "exact_collision_control_native_combat_compact_"
+            "and_player_shot_emission_state"
         ),
         "physical_predictive_authority": False,
     }
@@ -2315,6 +2413,9 @@ def main(argv: list[str] | None = None) -> int:
             root_collision_control_projection = reference_store[
                 "root_collision_control_projection"
             ]
+            root_native_combat_projection = reference_store[
+                "root_native_combat_projection"
+            ]
             root_compact_state = transaction["root_compact_state"]
             root_player_shot_emission_state = transaction[
                 "root_player_shot_emission_state"
@@ -2331,6 +2432,10 @@ def main(argv: list[str] | None = None) -> int:
             assert isinstance(
                 root_collision_control_projection,
                 CollisionControlProjection,
+            )
+            assert isinstance(
+                root_native_combat_projection,
+                NativeCombatProjection,
             )
             assert isinstance(root_compact_state, dict)
             assert isinstance(root_player_shot_emission_state, dict)
@@ -2357,6 +2462,9 @@ def main(argv: list[str] | None = None) -> int:
                 expected_root_projection=root_projection,
                 expected_root_collision_control_projection=(
                     root_collision_control_projection
+                ),
+                expected_root_native_combat_projection=(
+                    root_native_combat_projection
                 ),
                 expected_root_compact_state=root_compact_state,
                 expected_root_player_shot_emission_state=(

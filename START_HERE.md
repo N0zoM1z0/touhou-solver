@@ -29,12 +29,14 @@ historical handoff.
   stable capture, route-wide static Boss
   phase-configuration atlas, route-wide static source/emission candidate
   atlas, exact stage/root-aware lifecycle ring diagnostic transport,
-  fail-closed generation/end lowerer, and immutable candidate-board join,
+  fail-closed generation/end lowerer, native successful-item-allocation/
+  cull/pickup transaction tracing, and the immutable
+  candidate-to-enemy-to-item-to-resource join,
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,491 tests in 14.072 seconds.
-- Complete Windows UNC discovery passes 1,491 tests in 31.252 seconds with
+- Complete Linux discovery passes 1,496 tests in 14.227 seconds.
+- Complete Windows UNC discovery passes 1,496 tests in 30.491 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -81,18 +83,23 @@ historical handoff.
   defeat mode 0, and the ordered active clear.
 - `scripts/th08_runtime/enemy_lifecycle_probe.py` now implements the missing
   default-off trace transport over two allocation edges, five exact
-  active-clear retirements, and the distinct forced-HP-zero write. Its
-  256-entry ring records before/after flags and HP, resolved frame damage,
-  the forced-zero caller, the native stage-route index, and the signed-word
-  allocation root passed unchanged to `ecl_start_subroutine`; overflow and
-  unstable reads are explicit `UNKNOWN`.
-- Fifteen focused tests pass on Linux and Windows, including allocation
-  program-identity validation, activation
-  quiescence before replacing an in-flight instruction span, full-ring
-  overwrite invalidation, multi-site activation rollback, reverse-order
-  cleanup, and unsafe restore retention. This is implementation/synthetic
-  authority only: it has not been installed in TH08 and grants no kill,
-  generation, strategy, or action authority.
+  active-clear retirements, the distinct forced-HP-zero write, successful item
+  allocation, non-pickup cull, and paired pickup begin/commit. Schema v3 uses
+  one 256-entry total-order ring of 128-byte typed events. Enemy allocations
+  retain exact stage/root identity; item events retain effective type/motion,
+  player/resource state, post-allocation RNG/cursor/list state, and
+  same-update pickup resource transaction.
+- Five defeat-helper allocation returns also retain exact source-enemy
+  pointer from the saved caller frame. The other 53 shipped direct item
+  callers may not invent an owner. Pre-allocation RNG and the original
+  pre-full-Power requested type are deliberately unavailable at the
+  successful-allocation hook.
+- Eighteen focused probe tests pass, including program/caller/source-owner
+  validation, paired pickup and cull transactions, bulk ring-wrap reads,
+  activation quiescence, overwrite invalidation, multi-site rollback,
+  reverse-order cleanup, and unsafe restore retention. This is
+  implementation/synthetic authority only: it has not been installed in TH08
+  and grants no kill, pickup, strategy, or action authority.
 - The ring now has an explicit default-off diagnostic transport through the
   live CLI, hotkey contract, stage-practice supervisor, and full-route
   supervisor. Each decision retains a pre-issue batch and commits its serial
@@ -101,24 +108,33 @@ historical handoff.
   TH08 image. The ring remains outside sensing, ranking, and issue authority.
 - `scripts/analysis/th08_enemy_lifecycle_trace_audit.py` now lowers only one
   continuous, zero-drop uint32 serial prefix into per-slot observed
-  generations and reuses the fail-closed end classifier. Nonadvancing
+  enemy/item generations and reuses the fail-closed end classifier.
+  Nonadvancing
   read/race failures may be recovered by a later exact batch; overflow,
   malformed advancement, or pointer/slot disagreement cuts authority.
   Baseline-active enemies remain explicit partial starts. Observed allocations
   retain exact `(stage_route_index, root_subroutine)` identity and can be
   joined only to the SHA-pinned combat/resource candidate board; non-timeline
-  child/phase roots remain explicit unmatched programs. Ten deterministic
-  tests pass, but no runtime ring batch has been observed.
+  child/phase roots remain explicit unmatched programs. Item allocation,
+  cull, pickup/resource delta, Power thresholds, and exact defeat-source
+  generation extend that join to
+  `candidate -> enemy generation -> item generation -> pickup`.
+  Twelve deterministic lowerer tests pass, but no runtime ring batch has been
+  observed.
 - Connected-IDB dataflow revalidation confirms both allocation hooks read
   signed word `[ebp+8]` before that same value is passed unchanged to
   `ecl_start_subroutine`. `g_stage_route_index` at `0x0164D2CC` selects the
   loaded normal-stage ECL table. IDA comments at `0x0042A55F` and
-  `0x0042A6FF` retain this allocation-identity boundary.
+  `0x0042A6FF` retain this allocation-identity boundary. Comments at
+  `0x0044044D`, `0x00440991`, `0x00440A39`, and `0x00440C1E` retain the
+  successful item allocation, cull, and pickup transaction boundaries.
 - Detailed lowering boundary:
   `notes/research/stage5_combat/ROUTE2_ENEMY_LIFECYCLE_TRACE_LOWERING_CONTRACT_20260731.md`.
 - Detailed lifecycle-ring contract:
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`.
   The old active-only observer must not be repeated.
+- Detailed item-allocation/pickup boundary:
+  `notes/research/route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.
 - `COMBAT-FAST-01` now has an executable native-ordered player-shot damage
   gate. It separates full manager update, damage block, shot collision, and
   the distinct flags-bit-`0x08` HP subtraction. Boss progress now includes
@@ -186,7 +202,10 @@ historical handoff.
 - This joins kill, Focus-conditioned homing, collection, Power thresholds,
   and later shot capability into one experiment family, but remains a static
   opportunity index. Runtime instruction execution, enemy end reason, item
-  allocation/pickup, safe collection, and later combat benefit are unobserved.
+  allocation/pickup, safe collection, and later combat benefit are
+  unobserved. The v3 lifecycle trace now implements the missing successful
+  allocation/pickup identity and resource-delta schema, but synthetic
+  implementation is not runtime observation.
   Retained atlas:
   `artifacts/runtime_reports/th08_route2_item_drop_opportunity_atlas_20260731.json`,
   SHA-256
@@ -544,15 +563,20 @@ historical handoff.
   hit detail behind general WS-H route/combat/resource work.
 - The next lifecycle gate requiring runtime authorization is one short,
   default-off trace bracketed by full-pool snapshots, proving exact ordered
-  allocation/retirement/forced-zero agreement without changing sensing or
-  actions. Until that authorization exists, continue the offline WS-H
+  enemy allocation/retirement/forced-zero and item
+  allocation/cull/pickup/resource/RNG agreement without changing sensing or
+  actions. The complete v3 capture/lowering schema is implemented and
+  synthetic-tested; runtime evidence is still absent. Until explicit
+  authorization exists, continue the offline WS-H
   foundations. Damageability and static shot coverage are now retained; the
   next causal combat gate must join an immutable root to enemy generation,
   HP delta, shot/option/RNG state, target motion, and viable actions.
   The drop/Power static ledger, native defeat-drop recurrence, and route-wide
   item/drop opportunity index are now complete for their declared boundaries,
-  but runtime instruction/end joins, same-update item allocation identity,
-  pickup attribution, and carried later benefit remain open.
+  and the lowerer can represent exact
+  `candidate -> enemy -> item -> pickup/Power-threshold` joins. Runtime
+  instruction/end/item observations, survival-feasible pickup attribution,
+  and carried later benefit remain open.
   The cross-atlas board narrows this gate to 39 immutable emitter/resource
   roots and three overlapping mechanism cohorts; it grants no phase-option
   edge. Select multiple roots across multiple mechanisms and compare
@@ -1487,11 +1511,14 @@ Do not resume broad G5 work first.
    Stage-5 trace is rejected as a kill-policy gate; do not relabel HP decrease
    or slot disappearance as kill. `COMBAT-KILL-01` next requires a same-update
    end event before slot reuse, with native clear path, damage, source birth,
-   drops, and RNG joins. The retained `POWER-ROUTE-01` audit closes only the
-   existing-evidence inventory: its next causal gate needs same-root
-   survival-feasible collection branches, same-update pickup identity, a
-   Power-threshold crossing, and a later damage/kill/survival join. Continue
-   another high-ROI WS-H task while those capture debts are open. A later
+   drops, and RNG joins. The v3 lifecycle ring/lowerer now implements the
+   required enemy-to-item allocation/pickup transaction schema, but no
+   runtime batch has exercised it. The retained `POWER-ROUTE-01` audit closes
+   only the existing-evidence inventory: its next causal gate needs an
+   explicitly authorized diagnostic bracket, then same-root
+   survival-feasible collection branches, an observed Power-threshold
+   crossing, and a later damage/kill/survival join. Continue another
+   high-ROI offline WS-H task while runtime evidence is unauthorized. A later
    explicit v4 ordinary-enemy corpus may compare focused, unfocused, and
    causal refocus schedules only inside the unchanged survival-feasible set.
    Do not launch a physical trial merely to fill any capture debt.

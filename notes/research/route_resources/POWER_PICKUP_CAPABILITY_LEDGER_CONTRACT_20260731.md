@@ -146,20 +146,29 @@ This checkpoint grants:
 
 It grants no:
 
-- same-update physical item identity or pickup attribution;
+- observed runtime item allocation or pickup attribution;
 - safe collection preference;
 - later HP, kill, emission-prevention, or first-hit-frontier benefit;
 - live or physical predictive authority.
 
-Focused Ruff and 25 targeted tests pass. Complete Linux discovery passes
-1,437 tests in 13.586 seconds. Complete Windows UNC discovery passes 1,437
-tests in 28.463 seconds with the three existing skips.
+The default-off v3 lifecycle ring and offline lowerer now implement the
+missing successful-allocation, cull, same-update pickup/resource, exact
+defeat-source, and candidate-board join schema. This is implementation and
+synthetic-test authority only; no runtime item event has been retained.
+Detailed boundary:
+`ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.
+
+Complete Linux discovery passes 1,496 tests in 14.227 seconds. Complete
+Windows UNC discovery passes 1,496 tests in 30.491 seconds with the three
+existing skips.
 
 The causal gate remains:
 
 1. retain a natural first-hit-bounded Power-0 root;
-2. capture generation, effective item type, allocation cursor/order, motion,
-   same-update pickup/retirement, resource delta, and shared RNG;
+2. on explicit runtime authorization, execute the v3 diagnostic and verify
+   generation, effective item type, allocation cursor/order, motion,
+   same-update pickup/retirement, resource delta, and shared RNG against an
+   independent full-pool bracket;
 3. branch only actions already in the unchanged exact viable set;
 4. carry the immutable world through a threshold; and
 5. join later shot schedule, target HP/kill timing, viable reserve, and

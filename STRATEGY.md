@@ -1779,16 +1779,17 @@ first.
   and unattributed HP defeat, but no ordered runtime capture exists yet.
 - **Implemented trace foundation (2026-07-31):** a default-off 256-entry
   native event ring now covers both ordinary-pool allocations, all five
-  revalidated active-bit retirements, and the distinct forced-HP-zero write.
-  It retains ordered before/after flags and HP, resolved frame damage, and the
-  four shipped forced-zero callers. Allocation events additionally retain
-  native stage-route index plus the signed-word root passed unchanged to
-  `ecl_start_subroutine`. Full-ring overwrite, overflow, unstable reads,
-  program-identity rejection, multi-site activation rollback, reverse
-  cleanup, and unsafe restore behavior pass 15 focused tests on Linux and
-  Windows. This is synthetic implementation authority only; no TH08 process
-  has installed it and no generation, kill, emission, strategy, or action
-  claim is promoted.
+  revalidated active-bit retirements, the distinct forced-HP-zero write,
+  successful item allocation, non-pickup cull, and paired pickup
+  begin/commit. Schema v3 retains total enemy/item order in 128-byte typed
+  events. Enemy allocations carry exact stage/root; item allocation carries
+  effective type/motion, player/resources, post-RNG/cursor/list state, and
+  exact source enemy at the five defeat-helper callers. Pickup carries one
+  same-update pre/post resource transaction. Full-ring overwrite, bulk wrap
+  reads, program/caller/owner/transaction rejection, multi-site rollback,
+  reverse cleanup, and unsafe restore pass 18 focused tests. This is
+  synthetic implementation authority only; no TH08 process has installed it
+  and no generation, kill, pickup, strategy, or action claim is promoted.
 - **Implemented lifecycle transport (2026-07-31):** the live CLI, hotkey
   contract, stage-practice supervisor, and full-route supervisor expose one
   explicit default-off lifecycle option. It installs only after target
@@ -1802,12 +1803,15 @@ first.
   accepts only a continuous zero-drop post-baseline uint32 serial chain.
   Nonadvancing read/race failures can be recovered by a later exact batch;
   overflow or malformed advancement cuts the authoritative prefix. It creates
-  per-slot observed generations, keeps baseline-active enemies as partial
-  starts, retains exact allocation `(stage, root)` identity, and reuses the
-  forced-zero/lethal-damage classifier. Its optional SHA-pinned candidate-board
-  join matches only exact timeline-root programs and reports child/phase roots
-  as unmatched. Ten adversarial tests pass, but no runtime batch has been
-  observed and no executed source program, prevented birth, exposure,
+  per-slot enemy and item generations, keeps baseline-active records as
+  partial starts, retains exact enemy `(stage, root)` identity, reuses the
+  forced-zero/lethal-damage classifier, and retains item cull or same-update
+  pickup/resource/Power-threshold termination. Its optional SHA-pinned
+  candidate-board join matches only exact timeline-root programs and can
+  extend an enemy generation through exact defeat-item generations to
+  pickup/resource delta. Child/phase roots remain unmatched. Twelve
+  adversarial tests pass, but no runtime batch has been observed and no
+  executed source program, prevented birth, causal collection, exposure,
   strategy, or action claim is promoted.
 - **Static source/emission candidate atlas (2026-07-31):** pinned Route-2
   Lunatic Final-B ECL across Stages 1/2/3/4A/5/Final B contains 991 eligible
@@ -1855,8 +1859,10 @@ first.
   full-Power conversion retains its conditional velocity rewrite. A complete
   387-row static ledger maps every Power 0..128 plus small, large, or Full
   Power pickup to both Focus-conditioned SHT capability bands. This closes
-  finite resource arithmetic, not physical pickup identity, safe collection,
-  or later causal benefit.
+  finite resource arithmetic. The v3 lifecycle trace/lowerer now implements
+  exact successful-allocation and same-update pickup identity, but no runtime
+  item event has exercised it. Safe collection and later causal benefit
+  remain open.
 - **Native defeat-drop recurrence and route opportunity atlas (2026-07-31):**
   shipped initialization gives ordinary enemy templates one primary small-
   Power request by default. Modes 0..2 consume the configured primary,
@@ -1876,8 +1882,10 @@ first.
   extra Power. Named overlapping cohorts retain 32 direct-emission, 14 child-
   emitter, and 13 periodic-control programs without assigning a scalar utility
   score. This is a mechanism-diverse fixed-root experiment board only. It
-  grants no runtime execution, kill/deadline, prevented birth, allocation,
-  pickup, causal benefit, phase-option edge, ranking, or action authority.
+  can now be lowered through observed enemy and defeat-item generations to an
+  observed pickup/resource delta, but grants no runtime execution,
+  kill/deadline, prevented birth, observed allocation/pickup, causal benefit,
+  phase-option edge, ranking, or action authority.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -1921,19 +1929,22 @@ first.
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`, and
   `notes/research/route_resources/ROUTE2_ITEM_DROP_OPPORTUNITY_ATLAS_CONTRACT_20260731.md`, and
-  `notes/research/route_resources/ROUTE2_COMBAT_RESOURCE_CANDIDATE_BOARD_CONTRACT_20260731.md`.
+  `notes/research/route_resources/ROUTE2_COMBAT_RESOURCE_CANDIDATE_BOARD_CONTRACT_20260731.md`, and
+  `notes/research/route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
-  authority. The lifecycle ring has offline/synthetic implementation
-  authority only. The damageability/coverage atlas has offline semantic/static
+  authority. The enemy/item lifecycle ring and lowerer have
+  offline/synthetic implementation authority only. The damageability/coverage
+  atlas has offline semantic/static
   authority only. The source/emission atlas has shipped-content/static
   candidate authority only. The item/drop atlas has shipped-native
   recurrence/static opportunity authority only. The cross-atlas board has
   immutable static-cohort authority only. The Boss configuration atlas has
   shipped-content/native-static full-configuration-mode authority only.
-  Runtime-observed generation/end tracking and candidate-board joins,
-  instruction execution, phase sequence, exposure causality, causal
-  collection, targeting, and S18 live action authority remain none.
+  Runtime-observed generation/end/item tracking and candidate-board joins,
+  instruction execution, phase sequence, exposure causality,
+  survival-feasible causal collection, targeting, and S18 live action
+  authority remain none.
 
 ## Adding Or Changing A Strategy
 

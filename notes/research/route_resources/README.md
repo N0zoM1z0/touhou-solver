@@ -10,10 +10,14 @@ Read:
 2. [Power pickup capability ledger contract](POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md)
 3. [Route-2 item/drop opportunity atlas contract](ROUTE2_ITEM_DROP_OPPORTUNITY_ATLAS_CONTRACT_20260731.md)
 4. [Route-2 combat/resource candidate board contract](ROUTE2_COMBAT_RESOURCE_CANDIDATE_BOARD_CONTRACT_20260731.md)
+5. [Route-2 item allocation and pickup trace contract](ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md)
 
 The retained audit has first-hit-bounded observation authority only. It grants
 no item-objective, collection-policy, later-combat, or live action authority.
 The ledgers and atlas add native recurrence and shipped-content/static
-opportunity authority only; allocation, pickup, causal benefit, and live
-action authority remain open. The candidate board joins static program
-families only; it adds no kill, pickup, option-edge, or planner authority.
+opportunity authority. The v3 lifecycle trace adds implementation/synthetic
+authority for successful item allocation, cull, same-update pickup/resource
+transactions, and exact defeat-source joins, but no runtime item event has
+been observed. The candidate board plus trace lowerer can represent the
+complete root-to-enemy-to-item-to-pickup chain; causal benefit, safe
+collection, option-edge, planner, and live action authority remain open.

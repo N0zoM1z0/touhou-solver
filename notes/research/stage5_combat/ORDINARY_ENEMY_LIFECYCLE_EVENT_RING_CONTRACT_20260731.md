@@ -1,4 +1,4 @@
-# TH08 Ordinary-Enemy Lifecycle Event-Ring Contract
+# TH08 Enemy And Item Lifecycle Event-Ring Contract
 
 Date: 2026-07-31
 Status: implemented and synthetic-tested; default-off trace-only; no runtime,
@@ -7,11 +7,13 @@ planner, live-action, or physical authority
 ## Question
 
 What is the smallest native observation boundary that can turn ordinary-enemy
-slot reuse, end reason, and forced-HP-zero ordering into reviewable evidence
-without repeating the rejected active-only observer?
+slot reuse, end reason, forced-HP-zero ordering, successful item allocation,
+and same-update item pickup into reviewable evidence without repeating the
+rejected active-only observer or treating a drop request as a pickup?
 
 This is the first WS-H foundation needed before testing kill-before-saturation,
-source-lifetime/emission causality, or action-conditioned combat progress.
+source-lifetime/emission causality, action-conditioned combat progress, or
+route-wide resource benefit.
 
 ## Revalidated Native Boundaries
 
@@ -29,6 +31,10 @@ byte reads:
 | manager offscreen-cull retirement | `0x0042CDFE` | `899024330000` | `eax` |
 | defeat-mode-0 retirement | `0x0042D899` | `898a24330000` | `edx` |
 | eligible-enemy forced HP zero | `0x0042F039` | `c781fc2d000000000000` | `ecx` |
+| successful item allocation | `0x0044044D` | `8b4df8894df0` | `[ebp-8]` |
+| non-pickup item cull | `0x00440991` | `8b4ddce8d70d0000` | `[ebp-0x24]` |
+| pickup begin | `0x00440A39` | `668990da000000` | `[ebp-0x24]` |
+| pickup commit | `0x00440C1E` | `8b4ddce84a0b0000` | `[ebp-0x24]` |
 
 At both allocation hooks, signed word `[ebp+8]` is the exact root ECL
 subroutine argument passed unchanged to `ecl_start_subroutine` later in the
@@ -51,29 +57,52 @@ The exact five-byte calls at the corresponding predecessor addresses were
 also re-read from the IDB. Inherited names and earlier prose are not used as
 authority for these boundaries.
 
+At the successful item-allocation hook, effective type, motion, position,
+velocity, callback RNG consumption, active-list append, and allocation-cursor
+update are complete. Exact caller return `[ebp+4]` distinguishes all 58
+shipped direct callers. At the five defeat-helper returns `0x0042BF0B`,
+`0x0042BF86`, `0x0042C087`, `0x0042C09B`, and `0x0042C166`, the saved caller
+frame exposes the exact source enemy at `[caller_ebp-0x14]`.
+
+At pickup begin, collection collision has returned true but reward dispatch
+has not executed. At pickup commit, type-specific resource effects are
+complete and the same item is about to be unlinked. The cull edge unlinks
+without a pickup reward. IDA comments at all four item hooks retain these
+boundaries.
+
 ## Event ABI And Publication
 
 `scripts/th08_runtime/enemy_lifecycle_probe.py` defines schema
-`th08-enemy-lifecycle-probe-v2`:
+`th08-enemy-item-lifecycle-probe-v3`:
 
 - one 32-byte identity/header record;
-- eight fixed, position-specific x86 stubs;
-- a power-of-two ring of 256 48-byte events;
+- twelve fixed, position-specific x86 stubs;
+- a power-of-two ring of 256 128-byte typed events;
+- one fixed scratch record pairing pickup begin with pickup commit;
+- a `0x10000` remote image whose ring ends at `0xA000`;
 - one unsigned 32-bit serial shared by the single native producer;
 - explicit site-set CRC, PID, version, capacity, event size, and hook count.
 
-Each event retains:
+Every event retains serial, `enemy_manager_frame`, kind, exact pool pointer,
+stage-route index, caller boundary where applicable, a typed 22-word payload,
+and explicit pre/post RNG fields. Enemy events retain:
 
-1. serial and `enemy_manager_frame`;
-2. exact event kind;
-3. ordinary-pool enemy pointer and decoder-validated slot;
-4. flags before and after the overwritten instruction;
-5. HP before and after it;
-6. the already-resolved frame damage at enemy `+0x3354`; and
-7. the forced-zero caller return address, or zero for every other kind;
-8. the signed allocation root subroutine, or `-1` for non-allocation events;
-   and
-9. native stage-route index `0..8`.
+1. decoder-validated ordinary-pool pointer/slot;
+2. flags and HP before/after the overwritten instruction;
+3. already-resolved frame damage at enemy `+0x3354`;
+4. forced-zero caller return, or zero for other enemy kinds; and
+5. signed allocation root subroutine, or `-1` for non-allocation events.
+
+Item-allocation events retain exact item pointer/slot, effective item
+type/motion/full-value state, position/velocity, player position/state/Focus/
+active input, Power/lives/Bombs, post-RNG state/calls, next allocation cursor,
+active-list predecessor, and exact source enemy only for the five
+defeat-helper callers. The hook is post-RNG, so pre-RNG is deliberately null.
+
+Pickup begin copies pre-reward item/player/resource/RNG state into scratch.
+Pickup commit publishes one transaction only when pointer and manager-frame
+identity agree, adding post-resource/RNG state. Cull publishes the terminal
+item state and requires unchanged resources and no RNG evidence.
 
 Each stub:
 
@@ -88,13 +117,14 @@ Each stub:
 8. restores state and jumps to the first untouched instruction.
 
 The implementation assumes one producer thread. This is **inferred** from the
-covered enemy-management call topology and must be checked in the first
+covered enemy/item-management call topology and must be checked in the first
 runtime trace. It is not a general multi-producer ring.
 
 ## Reader And Overflow Semantics
 
 The reader double-samples the identity/header serial and validates the serial
-stored in every selected slot. It returns:
+stored in every selected slot. It reads one contiguous span, or two spans
+across ring wrap, instead of one process-memory read per event. It returns:
 
 - `baseline`;
 - `no_events`;
@@ -106,8 +136,12 @@ stored in every selected slot. It returns:
 Overflow, unstable slots, invalid pool pointers, unknown event kinds, a
 nonzero caller on a non-forced event, or a forced-zero caller outside the four
 shipped call edges cannot become partial positive evidence.
-An allocation without a nonnegative signed-word root, a non-allocation with a
-root, or a stage-route index outside `0..8` is also rejected.
+An enemy allocation without a nonnegative signed-word root, an enemy
+non-allocation with a root, or a stage-route index outside `0..8` is also
+rejected. Item validation additionally rejects unknown direct callers,
+non-defeat allocations with invented owners, missing defeat owners,
+unsupported type/motion, broken pickup pointer/frame identity, cull resource
+changes, and absent or malformed declared RNG boundaries.
 
 For defeat-mode-0 retirement, the event exposes
 `post_damage_hp + resolved_frame_damage`, but that arithmetic alone is not
@@ -123,7 +157,7 @@ explicit `--trace-enemy-lifecycle-events` opt-in.
 
 Installation:
 
-- verifies all eight complete shipped instruction spans before allocation;
+- verifies all twelve complete shipped instruction spans before allocation;
 - writes the complete remote image before any code patch;
 - suspends and snapshots every target thread;
 - waits until no target instruction pointer lies inside any to-be-replaced
@@ -166,9 +200,9 @@ rows, but the ring is not an observation used by the planner or issue path.
 
 1. **Which physical histories map to one state?**
    The ring does not merge histories. It records ordered allocation,
-   forced-zero, and retirement edges. A downstream generation ledger may
-   merge only after applying every exact event in serial order. Any overflow
-   or unstable read is `UNKNOWN`.
+   forced-zero, retirement, successful item allocation, cull, and pickup
+   edges. A downstream generation ledger may merge only after applying every
+   exact event in serial order. Any overflow or unstable read is `UNKNOWN`.
 
 2. **Are all uncertainty branches present and nonclairvoyant?**
    This is an observer, not a control recurrence. It exposes no future
@@ -178,16 +212,20 @@ rows, but the ring is not an observation used by the planner or issue path.
 3. **Does an exact result answer the physical question?**
    An exact batch answers which covered native lifecycle edges executed, in
    order, for covered ordinary-pool records. Allocation events additionally
-   answer the loaded stage/root program identity. It does not by itself prove
-   player-shot causation, drop creation, future-emission suppression,
-   damageability, targeting, or survival benefit.
+   answer the loaded stage/root program identity. Item events answer covered
+   successful pool allocation and same-update pickup/resource commit; the
+   five defeat-helper callers also answer exact source-enemy identity. It does
+   not expose failed allocation attempts or by itself prove player-shot
+   causation, survival-feasible collection, future-emission suppression,
+   damageability, targeting, or later benefit.
 
 4. **What falsifies the claim?**
    A covered lifecycle transition without an event; an event from an
    uncovered thread/caller; a register/flag mismatch after replayed bytes;
-   a slot pointer outside the ordinary pool; multi-producer serial
-   corruption; or disagreement between ordered ring events and a bracketed
-   full-pool snapshot.
+   a slot pointer outside its pool; pickup pointer/frame/resource/RNG
+   disagreement; source-owner disagreement; multi-producer serial corruption;
+   or disagreement between ordered ring events and a bracketed full-pool
+   snapshot.
 
 5. **Can it be consumed before issue time?**
    No issue-time consumer exists. The ring is trace-only and must remain
@@ -197,15 +235,19 @@ rows, but the ring is not an observation used by the planner or issue path.
 
 ## Tests And Current Authority
 
-The focused probe suite now covers 15 tests:
+The focused probe suite now covers 18 tests:
 
 - all IDA-revalidated addresses and byte spans;
-- stub replay/return layout and fixed-slot bounds;
+- enemy and item stub replay/return layout and fixed-slot bounds;
 - direct activation targets and full-instruction padding;
 - cleanup quiescence over every patch and stub;
 - event and forced-caller validation;
 - exact allocation root/stage identity and invalid-identity rejection;
+- exact shipped item-allocation caller and defeat-source validation;
+- paired pickup resource/RNG/pointer/frame validation;
+- cull-without-resource-change validation;
 - exact, overflow, and unstable reads;
+- one- or two-span bulk ring reads across wrap;
 - activation-last install plus reverse-order cleanup;
 - activation quiescence before replacing any in-flight instruction span;
 - full rollback after a synthetic mid-activation failure; and
@@ -217,11 +259,8 @@ target termination on unsafe instrumentation state.
 
 No game, native replay, runtime installation, or physical trial was run. The
 ring and its transport currently have implementation/synthetic-test authority
-only. Complete discovery passes 1,491 tests in 14.072 seconds on Linux and
-31.252 seconds through the Windows UNC loader, with the three existing skips.
-The first Windows discovery failed only the pre-existing auxiliary-ECL timing
-gate at 30.903 seconds; its isolated two-test repeat passed in 0.217 seconds,
-and the subsequent complete discovery passed.
+only. Complete discovery passes 1,496 tests in 14.227 seconds on Linux and
+30.491 seconds through the Windows UNC loader, with the three existing skips.
 
 ## Next Gate
 
@@ -229,10 +268,15 @@ Before any strategy claim:
 
 1. on explicit runtime authorization, bracket one short native replay or
    diagnostic workload with full-pool snapshots;
-2. prove exact ordered agreement for allocation/retirement and forced zero;
+2. prove exact ordered agreement for enemy allocation/retirement/forced zero
+   and item allocation/cull/pickup/resource/RNG edges;
 3. run the fail-closed lifecycle lowerer with `--require-complete` and compare
-   its generation/end output to that independent bracket; and
+   its enemy/item generation output to that independent bracket; and
 4. join exact stage/root generations to the immutable combat/resource
    candidate board; then
-5. test whether an earlier verified kill actually prevents emissions,
-   creates/collects the declared Power opportunity, or shortens exposure.
+5. compare only unchanged-survival-feasible same-root branches to test
+   whether a verified kill prevents emissions, creates/collects the declared
+   Power opportunity, or shortens exposure.
+
+The exact route-resource boundary is
+`../route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.

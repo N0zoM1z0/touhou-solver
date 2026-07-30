@@ -13,6 +13,7 @@ import argparse
 from collections import Counter
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Iterable, Mapping
 
@@ -38,15 +39,20 @@ from th08_runtime.enemy_lifecycle_probe import (
     ENEMY_POOL_BASE,
     ENEMY_POOL_SIZE,
     ENEMY_STRIDE,
+    ENEMY_DEFEAT_ITEM_ALLOCATION_RETURN_ADDRESSES,
     FORCED_ZERO_RETURN_BOSS_DEFEAT,
     FORCED_ZERO_RETURN_MESSAGE_START,
     FORCED_ZERO_RETURN_OPCODE_5F,
     FORCED_ZERO_RETURN_SPELL_FINISH,
+    ITEM_ALLOCATION_RETURN_ADDRESSES,
+    ITEM_POOL_BASE,
+    ITEM_POOL_SIZE,
+    ITEM_STRIDE,
     PROBE_SCHEMA,
 )
 
 
-REPORT_SCHEMA = "th08-enemy-lifecycle-trace-audit-v2"
+REPORT_SCHEMA = "th08-enemy-item-lifecycle-trace-audit-v3"
 EXPECTED_CANDIDATE_BOARD_SHA256 = (
     "34e70a50e6c38c8241df0425be83367e6bf9e369106d600956d5a052dfa8cfea"
 )
@@ -68,6 +74,7 @@ _FORCED_ZERO_SOURCE = {
 _ALLOCATION_KINDS = frozenset(
     {"allocate_timeline", "allocate_inherited_registers"}
 )
+_ITEM_KINDS = frozenset({"item_allocate", "item_pickup", "item_cull"})
 
 
 def _exact_int(value: object, field: str) -> int:
@@ -83,6 +90,39 @@ def _optional_uint32(value: object, field: str) -> int | None:
     if not 0 <= parsed <= _UINT32_MASK:
         raise ValueError(f"{field} is outside uint32")
     return parsed
+
+
+def _exact_number(value: object, field: str) -> float:
+    if type(value) not in {int, float}:
+        raise ValueError(f"{field} must be numeric")
+    parsed = float(value)
+    if not math.isfinite(parsed):
+        raise ValueError(f"{field} must be finite")
+    return parsed
+
+
+def _exact_mapping(value: object, field: str) -> Mapping[str, object]:
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{field} must be an object")
+    return value
+
+
+def _validated_rng(
+    value: object,
+    *,
+    field: str,
+    required: bool,
+) -> dict[str, int] | None:
+    if value is None:
+        if required:
+            raise ValueError(f"{field} is missing")
+        return None
+    mapping = _exact_mapping(value, field)
+    state = _exact_int(mapping.get("state"), f"{field}.state")
+    calls = _exact_int(mapping.get("calls"), f"{field}.calls")
+    if not 0 <= state <= 0xFFFF or not 0 <= calls <= _UINT32_MASK:
+        raise ValueError(f"{field} is outside native RNG range")
+    return {"state": state, "calls": calls}
 
 
 def _batch_from_record(
@@ -197,8 +237,242 @@ def _validated_event(
         not in _ALLOCATION_KINDS
         | frozenset(_RETIREMENT_SOURCE)
         | {"forced_hp_zero"}
+        | _ITEM_KINDS
     ):
         raise ValueError(f"{location} lifecycle kind is unsupported")
+    stage_route_index = _exact_int(
+        event.get("stage_route_index"),
+        f"{location}.stage_route_index",
+    )
+    if not 0 <= stage_route_index <= 8:
+        raise ValueError(f"{location} stage-route index is outside 0..8")
+    parsed: dict[str, object] = {
+        "serial": serial,
+        "manager_frame": manager_frame,
+        "kind": kind,
+        "stage_route_index": stage_route_index,
+    }
+
+    if kind in _ITEM_KINDS:
+        slot = _exact_int(event.get("item_slot"), f"{location}.item_slot")
+        if not 0 <= slot < ITEM_POOL_SIZE:
+            raise ValueError(f"{location} slot is outside the item pool")
+        item_pointer = _exact_int(
+            event.get("item_pointer"),
+            f"{location}.item_pointer",
+        )
+        if item_pointer != ITEM_POOL_BASE + slot * ITEM_STRIDE:
+            raise ValueError(f"{location} item pointer and slot disagree")
+        item_type = _exact_int(
+            event.get("item_type"),
+            f"{location}.item_type",
+        )
+        motion_state = _exact_int(
+            event.get("motion_state"),
+            f"{location}.motion_state",
+        )
+        if item_type not in range(9):
+            raise ValueError(f"{location} item type is outside 0..8")
+        if motion_state not in {0, 1, 2, 3, 5}:
+            raise ValueError(f"{location} item motion state is unsupported")
+        full_value = event.get("full_value")
+        if type(full_value) is not bool:
+            raise ValueError(f"{location} full-value flag is not Boolean")
+        item_position = _exact_mapping(
+            event.get("item_position"),
+            f"{location}.item_position",
+        )
+        item_velocity = _exact_mapping(
+            event.get("item_velocity"),
+            f"{location}.item_velocity",
+        )
+        player_position = _exact_mapping(
+            event.get("player_position"),
+            f"{location}.player_position",
+        )
+        resources_before = _exact_mapping(
+            event.get("resources_before"),
+            f"{location}.resources_before",
+        )
+        resources_after = _exact_mapping(
+            event.get("resources_after"),
+            f"{location}.resources_after",
+        )
+        caller = event.get("caller_return_address")
+        caller_return_address = (
+            0
+            if caller is None
+            else _exact_int(caller, f"{location}.caller_return_address")
+        )
+        source_enemy = event.get("source_enemy_pointer")
+        source_enemy_pointer = (
+            None
+            if source_enemy is None
+            else _exact_int(
+                source_enemy,
+                f"{location}.source_enemy_pointer",
+            )
+        )
+        allocation_next = event.get("allocation_next_index")
+        allocation_next_index = (
+            None
+            if allocation_next is None
+            else _exact_int(
+                allocation_next,
+                f"{location}.allocation_next_index",
+            )
+        )
+        rng_before = _validated_rng(
+            event.get("rng_before"),
+            field=f"{location}.rng_before",
+            required=kind == "item_pickup",
+        )
+        rng_after = _validated_rng(
+            event.get("rng_after"),
+            field=f"{location}.rng_after",
+            required=kind in {"item_allocate", "item_pickup"},
+        )
+        active_previous = event.get("active_previous_pointer")
+        active_previous_pointer = (
+            0
+            if active_previous is None
+            else _exact_int(
+                active_previous,
+                f"{location}.active_previous_pointer",
+            )
+        )
+        if kind == "item_allocate":
+            if caller_return_address not in ITEM_ALLOCATION_RETURN_ADDRESSES:
+                raise ValueError(
+                    f"{location} item allocation caller is unsupported"
+                )
+            if rng_before is not None or rng_after is None:
+                raise ValueError(
+                    f"{location} item allocation RNG boundary is malformed"
+                )
+            if (
+                allocation_next_index is None
+                or not 0 <= allocation_next_index < ITEM_POOL_SIZE
+            ):
+                raise ValueError(
+                    f"{location} item allocation cursor is invalid"
+                )
+            if caller_return_address in (
+                ENEMY_DEFEAT_ITEM_ALLOCATION_RETURN_ADDRESSES
+            ):
+                if source_enemy_pointer is None:
+                    raise ValueError(
+                        f"{location} defeat allocation lacks source enemy"
+                    )
+                owner_offset = source_enemy_pointer - ENEMY_POOL_BASE
+                if (
+                    owner_offset < 0
+                    or owner_offset >= ENEMY_POOL_SIZE * ENEMY_STRIDE
+                    or owner_offset % ENEMY_STRIDE
+                ):
+                    raise ValueError(
+                        f"{location} source enemy is outside ordinary pool"
+                    )
+            elif source_enemy_pointer is not None:
+                raise ValueError(
+                    f"{location} non-defeat allocation invents source enemy"
+                )
+        elif kind == "item_pickup":
+            if (
+                caller_return_address
+                or source_enemy_pointer is not None
+                or allocation_next_index is not None
+                or rng_before is None
+                or rng_after is None
+            ):
+                raise ValueError(
+                    f"{location} item pickup boundary is malformed"
+                )
+        else:
+            if (
+                caller_return_address
+                or source_enemy_pointer is not None
+                or allocation_next_index is not None
+                or rng_before is not None
+                or rng_after is not None
+            ):
+                raise ValueError(f"{location} item cull boundary is malformed")
+
+        parsed.update(
+            {
+                "item_slot": slot,
+                "item_pointer": item_pointer,
+                "item_type": item_type,
+                "motion_state": motion_state,
+                "full_value": full_value,
+                "item_position": {
+                    axis: _exact_number(
+                        item_position.get(axis),
+                        f"{location}.item_position.{axis}",
+                    )
+                    for axis in ("x", "y")
+                },
+                "item_velocity": {
+                    axis: _exact_number(
+                        item_velocity.get(axis),
+                        f"{location}.item_velocity.{axis}",
+                    )
+                    for axis in ("x", "y")
+                },
+                "player_position": {
+                    axis: _exact_number(
+                        player_position.get(axis),
+                        f"{location}.player_position.{axis}",
+                    )
+                    for axis in ("x", "y")
+                },
+                "player_state": _exact_int(
+                    event.get("player_state"),
+                    f"{location}.player_state",
+                ),
+                "focus_logic": _exact_int(
+                    event.get("focus_logic"),
+                    f"{location}.focus_logic",
+                ),
+                "input_current": _exact_int(
+                    event.get("input_current"),
+                    f"{location}.input_current",
+                ),
+                "resources_before": {
+                    field: _exact_number(
+                        resources_before.get(field),
+                        f"{location}.resources_before.{field}",
+                    )
+                    for field in ("power", "lives", "bombs")
+                },
+                "resources_after": {
+                    field: _exact_number(
+                        resources_after.get(field),
+                        f"{location}.resources_after.{field}",
+                    )
+                    for field in ("power", "lives", "bombs")
+                },
+                "rng_before": rng_before,
+                "rng_after": rng_after,
+                "caller_return_address": caller_return_address,
+                "active_previous_pointer": active_previous_pointer,
+                "source_enemy_pointer": source_enemy_pointer,
+                "allocation_next_index": allocation_next_index,
+            }
+        )
+        if not 0 <= int(parsed["player_state"]) <= 0xFF:
+            raise ValueError(f"{location} player state is outside uint8")
+        if not 0 <= int(parsed["focus_logic"]) <= 0xFF:
+            raise ValueError(f"{location} focus logic is outside uint8")
+        if not 0 <= int(parsed["input_current"]) <= 0xFFFF:
+            raise ValueError(f"{location} active input is outside uint16")
+        if (
+            kind == "item_cull"
+            and parsed["resources_before"] != parsed["resources_after"]
+        ):
+            raise ValueError(f"{location} item cull changes resources")
+        return parsed
+
     slot = _exact_int(event.get("slot"), f"{location}.slot")
     if not 0 <= slot < ENEMY_POOL_SIZE:
         raise ValueError(f"{location} slot is outside the ordinary pool")
@@ -208,20 +482,7 @@ def _validated_event(
     )
     if enemy_pointer != ENEMY_POOL_BASE + slot * ENEMY_STRIDE:
         raise ValueError(f"{location} pointer and slot disagree")
-    parsed: dict[str, object] = {
-        "serial": serial,
-        "manager_frame": manager_frame,
-        "kind": kind,
-        "slot": slot,
-        "enemy_pointer": enemy_pointer,
-    }
-    stage_route_index = _exact_int(
-        event.get("stage_route_index"),
-        f"{location}.stage_route_index",
-    )
-    if not 0 <= stage_route_index <= 8:
-        raise ValueError(f"{location} stage-route index is outside 0..8")
-    parsed["stage_route_index"] = stage_route_index
+    parsed.update({"slot": slot, "enemy_pointer": enemy_pointer})
     for field in (
         "flags_before",
         "flags_after",
@@ -484,8 +745,10 @@ def _lower_generations(
     lowered_count = 0
 
     for event in events:
-        pointer = int(event["enemy_pointer"])
         kind = str(event["kind"])
+        if kind in _ITEM_KINDS:
+            continue
+        pointer = int(event["enemy_pointer"])
         lifetime = current.get(pointer)
         if kind in _ALLOCATION_KINDS:
             if lifetime is not None:
@@ -608,6 +871,243 @@ def _lower_generations(
     return lifetimes, errors, lowered_count
 
 
+def _source_enemy_generation_key(
+    lifetimes: list[dict[str, object]],
+    *,
+    pointer: int | None,
+    stage_route_index: int,
+    allocation_serial: int,
+) -> str | None:
+    if pointer is None:
+        return None
+    matches = []
+    for lifetime in lifetimes:
+        if (
+            int(lifetime["enemy_pointer"]) != pointer
+            or int(lifetime["stage_route_index"]) != stage_route_index
+        ):
+            continue
+        start = lifetime["start_serial"]
+        end = lifetime["end_serial"]
+        if start is not None and int(start) > allocation_serial:
+            continue
+        if end is not None and int(end) < allocation_serial:
+            continue
+        matches.append(str(lifetime["generation_key"]))
+    return matches[0] if len(matches) == 1 else None
+
+
+def _new_item_generation(
+    event: Mapping[str, object],
+    *,
+    observed_generation_index: int | None,
+    enemy_lifetimes: list[dict[str, object]],
+) -> dict[str, object]:
+    slot = int(event["item_slot"])
+    serial = int(event["serial"])
+    source_enemy_pointer = event.get("source_enemy_pointer")
+    source_pointer = (
+        int(source_enemy_pointer)
+        if source_enemy_pointer is not None
+        else None
+    )
+    generation_key = (
+        f"item-slot-{slot}:baseline-partial:{serial}"
+        if observed_generation_index is None
+        else f"item-slot-{slot}:observed-{observed_generation_index}"
+    )
+    return {
+        "generation_key": generation_key,
+        "item_slot": slot,
+        "item_pointer": int(event["item_pointer"]),
+        "stage_route_index": int(event["stage_route_index"]),
+        "observed_generation_index": observed_generation_index,
+        "allocation_observed": observed_generation_index is not None,
+        "allocation_serial": (
+            serial if observed_generation_index is not None else None
+        ),
+        "allocation_manager_frame": (
+            int(event["manager_frame"])
+            if observed_generation_index is not None
+            else None
+        ),
+        "allocation_caller_return_address": (
+            int(event["caller_return_address"])
+            if observed_generation_index is not None
+            else None
+        ),
+        "allocation_next_index": (
+            event["allocation_next_index"]
+            if observed_generation_index is not None
+            else None
+        ),
+        "allocation_rng_after": (
+            event["rng_after"]
+            if observed_generation_index is not None
+            else None
+        ),
+        "allocation_item_type": (
+            int(event["item_type"])
+            if observed_generation_index is not None
+            else None
+        ),
+        "allocation_motion_state": (
+            int(event["motion_state"])
+            if observed_generation_index is not None
+            else None
+        ),
+        "allocation_position": (
+            event["item_position"]
+            if observed_generation_index is not None
+            else None
+        ),
+        "allocation_velocity": (
+            event["item_velocity"]
+            if observed_generation_index is not None
+            else None
+        ),
+        "source_enemy_pointer": source_pointer,
+        "source_enemy_generation_key": _source_enemy_generation_key(
+            enemy_lifetimes,
+            pointer=source_pointer,
+            stage_route_index=int(event["stage_route_index"]),
+            allocation_serial=serial,
+        ),
+        "end_observed": False,
+        "end_kind": None,
+        "end_serial": None,
+        "end_manager_frame": None,
+        "end_item_type": None,
+        "end_motion_state": None,
+        "end_position": None,
+        "pickup_transaction": None,
+    }
+
+
+def _lower_item_generations(
+    events: list[dict[str, object]],
+    enemy_lifetimes: list[dict[str, object]],
+) -> tuple[list[dict[str, object]], list[str], int]:
+    generations: list[dict[str, object]] = []
+    current: dict[int, dict[str, object]] = {}
+    generation_counts: Counter[int] = Counter()
+    errors: list[str] = []
+    lowered_count = 0
+    thresholds = (8, 24, 48, 80, 128)
+
+    for event in events:
+        kind = str(event["kind"])
+        if kind not in _ITEM_KINDS:
+            continue
+        pointer = int(event["item_pointer"])
+        generation = current.get(pointer)
+        if kind == "item_allocate":
+            if generation is not None:
+                errors.append(
+                    f"serial {event['serial']} reallocates active "
+                    f"{generation['generation_key']}"
+                )
+                break
+            slot = int(event["item_slot"])
+            generation_counts[slot] += 1
+            generation = _new_item_generation(
+                event,
+                observed_generation_index=generation_counts[slot],
+                enemy_lifetimes=enemy_lifetimes,
+            )
+            generations.append(generation)
+            current[pointer] = generation
+            lowered_count += 1
+            continue
+
+        if generation is None:
+            generation = _new_item_generation(
+                event,
+                observed_generation_index=None,
+                enemy_lifetimes=enemy_lifetimes,
+            )
+            generations.append(generation)
+            current[pointer] = generation
+        elif int(generation["stage_route_index"]) != int(
+            event["stage_route_index"]
+        ):
+            errors.append(
+                f"serial {event['serial']} changes stage-route index inside "
+                f"{generation['generation_key']}"
+            )
+            break
+
+        allocation_type = generation["allocation_item_type"]
+        end_type = int(event["item_type"])
+        if (
+            allocation_type is not None
+            and end_type != int(allocation_type)
+            and not (
+                int(allocation_type) in {0, 2}
+                and end_type == 8
+            )
+        ):
+            errors.append(
+                f"serial {event['serial']} changes item type outside "
+                "full-Power conversion"
+            )
+            break
+
+        pickup_transaction: dict[str, object] | None = None
+        if kind == "item_pickup":
+            rng_before = event["rng_before"]
+            rng_after = event["rng_after"]
+            if rng_before != rng_after:
+                errors.append(
+                    f"serial {event['serial']} pickup changes gameplay RNG"
+                )
+                break
+            resources_before = event["resources_before"]
+            resources_after = event["resources_after"]
+            assert isinstance(resources_before, Mapping)
+            assert isinstance(resources_after, Mapping)
+            deltas = {
+                field: float(resources_after[field])
+                - float(resources_before[field])
+                for field in ("power", "lives", "bombs")
+            }
+            power_before = float(resources_before["power"])
+            power_after = float(resources_after["power"])
+            pickup_transaction = {
+                "player_position": event["player_position"],
+                "player_state": int(event["player_state"]),
+                "focus_logic": int(event["focus_logic"]),
+                "input_current": int(event["input_current"]),
+                "resources_before": dict(resources_before),
+                "resources_after": dict(resources_after),
+                "resource_delta": deltas,
+                "power_thresholds_crossed": [
+                    threshold
+                    for threshold in thresholds
+                    if power_before < threshold <= power_after
+                ],
+                "rng_before": rng_before,
+                "rng_after": rng_after,
+            }
+
+        generation.update(
+            {
+                "end_observed": True,
+                "end_kind": kind,
+                "end_serial": int(event["serial"]),
+                "end_manager_frame": int(event["manager_frame"]),
+                "end_item_type": end_type,
+                "end_motion_state": int(event["motion_state"]),
+                "end_position": event["item_position"],
+                "pickup_transaction": pickup_transaction,
+            }
+        )
+        current.pop(pointer)
+        lowered_count += 1
+
+    return generations, errors, lowered_count
+
+
 def audit_lifecycle_trace_rows(
     rows: Iterable[Mapping[str, object]],
 ) -> dict[str, object]:
@@ -617,7 +1117,10 @@ def audit_lifecycle_trace_rows(
     )
     events, chain = _continuous_prefix(batches, extraction_errors)
     lifetimes, lowering_errors, lowered_event_count = _lower_generations(events)
-    errors = [*chain["errors"], *lowering_errors]
+    item_generations, item_errors, lowered_item_event_count = (
+        _lower_item_generations(events, lifetimes)
+    )
+    errors = [*chain["errors"], *lowering_errors, *item_errors]
     completed = [
         lifetime for lifetime in lifetimes if lifetime["end_observed"]
     ]
@@ -659,7 +1162,23 @@ def audit_lifecycle_trace_rows(
         and continuous_after_baseline
         and final_seen
         and not lowering_errors
+        and not item_errors
     )
+    completed_items = [
+        generation
+        for generation in item_generations
+        if generation["end_observed"]
+    ]
+    pickups = [
+        generation
+        for generation in completed_items
+        if generation["end_kind"] == "item_pickup"
+    ]
+    defeat_allocations = [
+        generation
+        for generation in item_generations
+        if generation["source_enemy_pointer"] is not None
+    ]
     return {
         "schema": REPORT_SCHEMA,
         "role": "offline_trace_audit_no_action_authority",
@@ -674,7 +1193,9 @@ def audit_lifecycle_trace_rows(
         },
         "accepted_prefix_event_count": len(events),
         "lowered_event_count": lowered_event_count,
+        "lowered_item_event_count": lowered_item_event_count,
         "lifetimes": lifetimes,
+        "item_generations": item_generations,
         "summary": {
             "lifetime_count": len(lifetimes),
             "completed_lifetime_count": len(completed),
@@ -692,6 +1213,31 @@ def audit_lifecycle_trace_rows(
                 f"stage-{stage}:root-{root}": program_counts[(stage, root)]
                 for stage, root in sorted(program_counts)
             },
+            "item_generation_count": len(item_generations),
+            "completed_item_generation_count": len(completed_items),
+            "partial_item_start_count": sum(
+                not bool(generation["allocation_observed"])
+                for generation in item_generations
+            ),
+            "item_pickup_count": len(pickups),
+            "item_cull_count": sum(
+                generation["end_kind"] == "item_cull"
+                for generation in completed_items
+            ),
+            "defeat_item_allocation_count": len(defeat_allocations),
+            "defeat_item_generation_join_count": sum(
+                generation["source_enemy_generation_key"] is not None
+                for generation in defeat_allocations
+            ),
+            "power_threshold_crossing_count": sum(
+                bool(
+                    generation["pickup_transaction"]
+                    and generation["pickup_transaction"][
+                        "power_thresholds_crossed"
+                    ]
+                )
+                for generation in pickups
+            ),
         },
         "authority": {
             "continuous_native_event_stream_after_baseline": (
@@ -701,6 +1247,9 @@ def audit_lifecycle_trace_rows(
             "prefix_lifetimes_are_exact_only": True,
             "accepted_allocation_root_identity_exact": not lowering_errors,
             "accepted_program_identity_exact": not lowering_errors,
+            "accepted_item_generation_identity_exact": not item_errors,
+            "accepted_pickup_resource_transactions_exact": not item_errors,
+            "defeat_item_owner_pointer_captured": True,
             "runtime_installation_observed": False,
             "strategy_authority": False,
             "action_authority": False,
@@ -753,6 +1302,18 @@ def join_candidate_board(
     lifetimes = report.get("lifetimes")
     if not isinstance(lifetimes, list):
         raise ValueError("lifecycle report has no lifetime list")
+    raw_item_generations = report.get("item_generations")
+    if not isinstance(raw_item_generations, list):
+        raise ValueError("lifecycle report has no item-generation list")
+    items_by_source: dict[str, list[Mapping[str, object]]] = {}
+    for item_generation in raw_item_generations:
+        if not isinstance(item_generation, Mapping):
+            raise ValueError("item generation is not an object")
+        source_key = item_generation.get("source_enemy_generation_key")
+        if source_key is not None:
+            items_by_source.setdefault(str(source_key), []).append(
+                item_generation
+            )
     for lifetime in lifetimes:
         if not isinstance(lifetime, Mapping):
             raise ValueError("lifecycle report lifetime is not an object")
@@ -771,6 +1332,15 @@ def join_candidate_board(
             continue
         families = [str(value) for value in program["candidate_families"]]
         family_counts.update(families)
+        source_items = items_by_source.get(
+            str(lifetime["generation_key"]),
+            [],
+        )
+        pickup_transactions = [
+            item["pickup_transaction"]
+            for item in source_items
+            if isinstance(item.get("pickup_transaction"), Mapping)
+        ]
         matched.append(
             {
                 "generation_key": lifetime["generation_key"],
@@ -780,6 +1350,24 @@ def join_candidate_board(
                 "candidate_families": families,
                 "start_serial": lifetime["start_serial"],
                 "start_manager_frame": lifetime["start_manager_frame"],
+                "source_item_generation_keys": [
+                    item["generation_key"] for item in source_items
+                ],
+                "observed_item_allocation_count": len(source_items),
+                "observed_item_pickup_count": len(pickup_transactions),
+                "observed_power_delta": sum(
+                    float(transaction["resource_delta"]["power"])
+                    for transaction in pickup_transactions
+                ),
+                "observed_power_thresholds_crossed": sorted(
+                    {
+                        int(threshold)
+                        for transaction in pickup_transactions
+                        for threshold in transaction[
+                            "power_thresholds_crossed"
+                        ]
+                    }
+                ),
             }
         )
 
@@ -798,6 +1386,18 @@ def join_candidate_board(
             "partial_start_lifetime_count": partial_start_count,
             "candidate_family_lifetime_counts": dict(
                 sorted(family_counts.items())
+            ),
+            "matched_lifetime_item_allocation_count": sum(
+                int(item["observed_item_allocation_count"])
+                for item in matched
+            ),
+            "matched_lifetime_item_pickup_count": sum(
+                int(item["observed_item_pickup_count"])
+                for item in matched
+            ),
+            "matched_lifetime_power_delta": sum(
+                float(item["observed_power_delta"])
+                for item in matched
             ),
         },
         "matched_lifetimes": matched,

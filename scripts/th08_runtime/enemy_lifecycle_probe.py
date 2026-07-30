@@ -1,11 +1,12 @@
-"""Bounded trace-only native ring for TH08 ordinary-enemy lifecycles.
+"""Bounded trace-only native ring for TH08 enemy and item lifecycles.
 
 The probe covers the two shipped ordinary-enemy allocation paths, every
-revalidated active-bit clear, and the distinct global forced-HP-zero write.
-It is default-off infrastructure and has no action authority.  Installation
-and cleanup reuse the already tested Win32 remote-memory/thread primitives
-from the priority-17 publication probe; lifecycle-specific activation remains
-multi-site, exact-byte guarded, and reversible.
+revalidated active-bit clear, the distinct global forced-HP-zero write,
+successful item allocation, and the pre/post transaction of one native item
+pickup.  It is default-off infrastructure and has no action authority.
+Installation and cleanup reuse the already tested Win32 remote-memory/thread
+primitives from the priority-17 publication probe; lifecycle-specific
+activation remains multi-site, exact-byte guarded, and reversible.
 
 The native producer is single-threaded: every covered site executes on the
 enemy-management game thread.  Each stub writes pre-instruction fields into
@@ -19,12 +20,25 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import IntEnum
+import math
 import struct
 import time
 from typing import Any
 import zlib
 
-from .game_state import ADDR_ENEMY_MANAGER_FRAME, ADDR_STAGE_ROUTE_INDEX
+from .game_state import (
+    ADDR_CURRENT_INPUT,
+    ADDR_ENEMY_MANAGER_FRAME,
+    ADDR_GAMEPLAY_RNG,
+    ADDR_PLAYER,
+    ADDR_RUN_STATE_INNER_POINTER,
+    ADDR_STAGE_ROUTE_INDEX,
+    PLAYER_FOCUS_LOGIC_OFFSET,
+    PLAYER_POSITION_OFFSET,
+    RUN_STATE_BOMBS_OFFSET,
+    RUN_STATE_LIVES_OFFSET,
+    RUN_STATE_POWER_OFFSET,
+)
 from .priority17_publication_probe import (
     MEM_COMMIT,
     MEM_RELEASE,
@@ -45,17 +59,18 @@ from .priority17_publication_probe import (
 )
 
 
-PROBE_SCHEMA = "th08-enemy-lifecycle-probe-v2"
-PROBE_MAGIC = b"ELR2"
-PROBE_VERSION = 2
+PROBE_SCHEMA = "th08-enemy-item-lifecycle-probe-v3"
+PROBE_MAGIC = b"ELR3"
+PROBE_VERSION = 3
 PROBE_CAPACITY = 256
-PROBE_EVENT_SIZE = 48
-PROBE_ALLOCATION_SIZE = 0x4000
+PROBE_EVENT_SIZE = 128
+PROBE_ALLOCATION_SIZE = 0x10000
 PROBE_HEADER_SIZE = 32
 PROBE_SERIAL_OFFSET = 16
-PROBE_STUB_OFFSET = 0x100
-PROBE_STUB_STRIDE = 0x100
-PROBE_EVENT_OFFSET = 0x1000
+PROBE_PICKUP_SCRATCH_OFFSET = 0x40
+PROBE_STUB_OFFSET = 0x200
+PROBE_STUB_STRIDE = 0x200
+PROBE_EVENT_OFFSET = 0x2000
 
 ENEMY_POOL_BASE = 0x005826C0
 ENEMY_POOL_SIZE = 480
@@ -63,6 +78,20 @@ ENEMY_STRIDE = 0x53D0
 ENEMY_HP_OFFSET = 0x2DFC
 ENEMY_FLAGS_OFFSET = 0x3324
 ENEMY_FRAME_DAMAGE_OFFSET = 0x3354
+
+ITEM_POOL_BASE = 0x01653648
+ITEM_POOL_SIZE = 2096
+ITEM_STRIDE = 0x2E4
+ITEM_POSITION_OFFSET = 0x2A4
+ITEM_VELOCITY_OFFSET = 0x2B0
+ITEM_TYPE_OFFSET = 0x2D4
+ITEM_ACTIVE_OFFSET = 0x2D5
+ITEM_LISTED_OFFSET = 0x2D6
+ITEM_MOTION_STATE_OFFSET = 0x2D7
+ITEM_FULL_VALUE_OFFSET = 0x2D8
+ITEM_NEXT_OFFSET = 0x2DC
+ITEM_PREVIOUS_OFFSET = 0x2E0
+ITEM_MANAGER_NEXT_ALLOCATION_OFFSET = 0x17ADA4
 
 FORCED_ZERO_RETURN_SPELL_FINISH = 0x0041622A
 FORCED_ZERO_RETURN_OPCODE_5F = 0x0041DA8E
@@ -78,7 +107,84 @@ FORCED_ZERO_RETURN_ADDRESSES = frozenset(
 )
 
 _HEADER = struct.Struct("<4s7I")
-_EVENT = struct.Struct("<IIIIIIiiiIiI")
+_EVENT = struct.Struct("<32I")
+_EVENT_PAYLOAD_OFFSET = 0x28
+_EVENT_PAYLOAD_COUNT = 22
+_UNKNOWN_U32 = 0xFFFFFFFF
+
+# Every shipped direct caller of item_pool_spawn, represented by the return
+# address observed at the successful-allocation hook.
+ITEM_ALLOCATION_RETURN_ADDRESSES = frozenset(
+    {
+        0x00417622,
+        0x004176D6,
+        0x0041D35C,
+        0x0041D370,
+        0x0041D482,
+        0x0041D641,
+        0x004253BC,
+        0x004253D6,
+        0x0042B04D,
+        0x0042B1B6,
+        0x0042B2B3,
+        0x0042BF0B,
+        0x0042BF86,
+        0x0042C087,
+        0x0042C09B,
+        0x0042C166,
+        0x0042DA59,
+        0x0042F0A7,
+        0x0042F146,
+        0x004308EA,
+        0x0043091F,
+        0x00430A68,
+        0x00430B3F,
+        0x00430B61,
+        0x00430C7C,
+        0x00430CF5,
+        0x00430DEE,
+        0x00431655,
+        0x0043166D,
+        0x00431694,
+        0x0043170F,
+        0x00431727,
+        0x0043174E,
+        0x0043183C,
+        0x00431853,
+        0x0043187B,
+        0x0043194D,
+        0x00431965,
+        0x0043198C,
+        0x00431A5E,
+        0x00431A76,
+        0x00431A9D,
+        0x0044AACE,
+        0x0044AAF4,
+        0x0044AB14,
+        0x0044CDD3,
+        0x0044CDEB,
+        0x0044CE03,
+        0x0044CE1A,
+        0x0044CE32,
+        0x0044CE4A,
+        0x0044CE93,
+        0x0044CED8,
+        0x0044CEEF,
+        0x0044CF07,
+        0x0044CF1F,
+        0x0044CF36,
+        0x00451897,
+    }
+)
+ENEMY_DEFEAT_ITEM_ALLOCATION_RETURN_ADDRESSES = frozenset(
+    {
+        0x0042BF0B,
+        0x0042BF86,
+        0x0042C087,
+        0x0042C09B,
+        0x0042C166,
+    }
+)
 
 
 class EnemyLifecycleKind(IntEnum):
@@ -90,6 +196,9 @@ class EnemyLifecycleKind(IntEnum):
     RETIRE_OFFSCREEN_CULL = 6
     RETIRE_DEFEAT_MODE0 = 7
     FORCED_HP_ZERO = 8
+    ITEM_ALLOCATE = 9
+    ITEM_PICKUP = 10
+    ITEM_CULL = 11
 
 
 _ALLOCATION_KINDS = frozenset(
@@ -107,6 +216,16 @@ _RETIREMENT_KINDS = frozenset(
         EnemyLifecycleKind.RETIRE_DEFEAT_MODE0,
     }
 )
+_ENEMY_KINDS = _ALLOCATION_KINDS | _RETIREMENT_KINDS | {
+    EnemyLifecycleKind.FORCED_HP_ZERO
+}
+_ITEM_KINDS = frozenset(
+    {
+        EnemyLifecycleKind.ITEM_ALLOCATE,
+        EnemyLifecycleKind.ITEM_PICKUP,
+        EnemyLifecycleKind.ITEM_CULL,
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -116,6 +235,7 @@ class EnemyLifecycleHookSite:
     original: bytes
     kind: EnemyLifecycleKind
     pointer_source: str
+    role: str = "enemy_event"
     capture_return_address: bool = False
     capture_root_subroutine: bool = False
 
@@ -126,16 +246,49 @@ class EnemyLifecycleHookSite:
             raise ValueError("lifecycle hook address is outside uint32")
         if len(self.original) < 5:
             raise ValueError("lifecycle hook span cannot hold a rel32 detour")
-        if self.pointer_source not in {"ebp_minus_8", "eax", "ecx", "edx"}:
+        if self.pointer_source not in {
+            "ebp_minus_8",
+            "ebp_minus_24",
+            "eax",
+            "ecx",
+            "edx",
+        }:
             raise ValueError("unsupported lifecycle enemy-pointer source")
-        if self.capture_return_address != (
+        if self.role not in {
+            "enemy_event",
+            "item_allocate",
+            "item_cull",
+            "item_pickup_begin",
+            "item_pickup_commit",
+        }:
+            raise ValueError("unsupported lifecycle hook role")
+        expected_return_capture = (
             self.kind is EnemyLifecycleKind.FORCED_HP_ZERO
+            or self.role == "item_allocate"
+        )
+        if self.capture_return_address != expected_return_capture:
+            raise ValueError(
+                "return-address capture does not match lifecycle hook role"
+            )
+        if self.capture_root_subroutine != (
+            self.role == "enemy_event" and self.kind in _ALLOCATION_KINDS
         ):
-            raise ValueError("only forced-HP-zero hooks capture a return address")
-        if self.capture_root_subroutine != (self.kind in _ALLOCATION_KINDS):
             raise ValueError(
                 "only allocation hooks capture a root subroutine"
             )
+        expected_pointer_source = {
+            "item_allocate": "ebp_minus_8",
+            "item_cull": "ebp_minus_24",
+            "item_pickup_begin": "ebp_minus_24",
+            "item_pickup_commit": "ebp_minus_24",
+        }.get(self.role)
+        if (
+            expected_pointer_source is not None
+            and self.pointer_source != expected_pointer_source
+        ):
+            raise ValueError("item hook has the wrong pointer source")
+        if self.role != "enemy_event" and self.kind not in _ITEM_KINDS:
+            raise ValueError("item hook must use an item lifecycle kind")
 
     @property
     def return_address(self) -> int:
@@ -202,6 +355,39 @@ HOOK_SITES = (
         pointer_source="ecx",
         capture_return_address=True,
     ),
+    EnemyLifecycleHookSite(
+        name="item_allocate",
+        address=0x0044044D,
+        original=b"\x8b\x4d\xf8\x89\x4d\xf0",
+        kind=EnemyLifecycleKind.ITEM_ALLOCATE,
+        pointer_source="ebp_minus_8",
+        role="item_allocate",
+        capture_return_address=True,
+    ),
+    EnemyLifecycleHookSite(
+        name="item_cull",
+        address=0x00440991,
+        original=b"\x8b\x4d\xdc\xe8\xd7\x0d\x00\x00",
+        kind=EnemyLifecycleKind.ITEM_CULL,
+        pointer_source="ebp_minus_24",
+        role="item_cull",
+    ),
+    EnemyLifecycleHookSite(
+        name="item_pickup_begin",
+        address=0x00440A39,
+        original=b"\x66\x89\x90\xda\x00\x00\x00",
+        kind=EnemyLifecycleKind.ITEM_PICKUP,
+        pointer_source="ebp_minus_24",
+        role="item_pickup_begin",
+    ),
+    EnemyLifecycleHookSite(
+        name="item_pickup_commit",
+        address=0x00440C1E,
+        original=b"\x8b\x4d\xdc\xe8\x4a\x0b\x00\x00",
+        kind=EnemyLifecycleKind.ITEM_PICKUP,
+        pointer_source="ebp_minus_24",
+        role="item_pickup_commit",
+    ),
 )
 
 
@@ -213,6 +399,7 @@ def _site_digest() -> int:
         payload += site.original
         payload += site.name.encode("ascii") + b"\0"
         payload += site.pointer_source.encode("ascii") + b"\0"
+        payload += site.role.encode("ascii") + b"\0"
         payload += bytes(
             (site.capture_return_address, site.capture_root_subroutine)
         )
@@ -232,6 +419,14 @@ def _u32(value: int) -> bytes:
     return struct.pack("<I", value)
 
 
+def _signed_u32(value: int) -> int:
+    return value - 0x100000000 if value & 0x80000000 else value
+
+
+def _float_u32(value: int) -> float:
+    return struct.unpack("<f", struct.pack("<I", value))[0]
+
+
 def _relative_jump(source: int, target: int) -> bytes:
     displacement = target - (source + 5)
     if not -(1 << 31) <= displacement < (1 << 31):
@@ -239,9 +434,18 @@ def _relative_jump(source: int, target: int) -> bytes:
     return b"\xe9" + struct.pack("<i", displacement)
 
 
+def _relative_call(source: int, target: int) -> bytes:
+    displacement = target - (source + 5)
+    if not -(1 << 31) <= displacement < (1 << 31):
+        raise ValueError("relative call target is outside rel32 range")
+    return b"\xe8" + struct.pack("<i", displacement)
+
+
 def _load_enemy_pointer(pointer_source: str) -> bytes:
     if pointer_source == "ebp_minus_8":
         return b"\x8b\x5d\xf8"  # mov ebx, [ebp - 8]
+    if pointer_source == "ebp_minus_24":
+        return b"\x8b\x5d\xdc"  # mov ebx, [ebp - 0x24]
     if pointer_source == "eax":
         return b"\x89\xc3"  # mov ebx, eax
     if pointer_source == "ecx":
@@ -266,12 +470,159 @@ def _select_unpublished_event(
     return bytes(code)
 
 
-def build_site_stub(
+def _initialize_unpublished_event(
+    *,
+    serial_address: int,
+    event_base: int,
+) -> bytes:
+    """Select, invalidate, and zero one fixed-size unpublished event.
+
+    On return ESI is the next serial and ECX is the event pointer.  Callers
+    execute inside pushad/pushfd and may freely use the remaining registers.
+    """
+
+    code = bytearray(
+        _select_unpublished_event(
+            serial_address=serial_address,
+            event_base=event_base,
+        )
+    )
+    code += b"\x89\xc6"  # mov esi, eax
+    code += b"\x89\x01"  # event.serial = next serial (unpublished)
+    code += b"\x89\xca"  # mov edx, ecx
+    code += b"\x8d\x79\x04"  # lea edi, [ecx + 4]
+    code += b"\xb9" + _u32(PROBE_EVENT_SIZE // 4 - 1)
+    code += b"\x31\xc0\xf3\xab"  # xor eax, eax; rep stosd
+    code += b"\x89\xd1"  # mov ecx, edx
+    code += b"\x89\xf0"  # mov eax, esi
+    return bytes(code)
+
+
+def _commit_event(serial_address: int) -> bytes:
+    return (
+        b"\x89\x31"  # event.serial = esi
+        + b"\x89\xf0"  # mov eax, esi
+        + b"\xa3"
+        + _u32(serial_address)  # header.serial = esi
+    )
+
+
+def _fill_item_common_fields(
+    *,
+    event_pointer: str,
+    item_pointer: str,
+    include_resource_after: bool,
+) -> bytes:
+    """Fill shared item/player/resource payload fields.
+
+    ``event_pointer`` is either ``ecx`` for a ring event or ``edi`` for the
+    fixed pickup scratch. ``item_pointer`` is currently constrained to EBX.
+    """
+
+    if event_pointer not in {"ecx", "edi"} or item_pointer != "ebx":
+        raise ValueError("unsupported item field register assignment")
+    base = b"\x89\x91" if event_pointer == "ecx" else b"\x89\x97"
+    code = bytearray()
+
+    def store_edx(offset: int) -> None:
+        code.extend(base + _u32(offset))
+
+    for item_offset, payload_index, width in (
+        (ITEM_TYPE_OFFSET, 0, "byte"),
+        (ITEM_MOTION_STATE_OFFSET, 1, "byte"),
+        (ITEM_FULL_VALUE_OFFSET, 2, "byte"),
+    ):
+        if width == "byte":
+            code.extend(b"\x0f\xb6\x93" + _u32(item_offset))
+        store_edx(_EVENT_PAYLOAD_OFFSET + 4 * payload_index)
+    for item_offset, payload_index in (
+        (ITEM_POSITION_OFFSET, 3),
+        (ITEM_POSITION_OFFSET + 4, 4),
+        (ITEM_VELOCITY_OFFSET, 5),
+        (ITEM_VELOCITY_OFFSET + 4, 6),
+    ):
+        code.extend(b"\x8b\x93" + _u32(item_offset))
+        store_edx(_EVENT_PAYLOAD_OFFSET + 4 * payload_index)
+    for address, payload_index in (
+        (ADDR_PLAYER + PLAYER_POSITION_OFFSET, 7),
+        (ADDR_PLAYER + PLAYER_POSITION_OFFSET + 4, 8),
+    ):
+        code.extend(b"\x8b\x15" + _u32(address))
+        store_edx(_EVENT_PAYLOAD_OFFSET + 4 * payload_index)
+    for address, payload_index in (
+        (ADDR_PLAYER, 9),
+        (ADDR_PLAYER + PLAYER_FOCUS_LOGIC_OFFSET, 10),
+    ):
+        code.extend(b"\x0f\xb6\x15" + _u32(address))
+        store_edx(_EVENT_PAYLOAD_OFFSET + 4 * payload_index)
+    code.extend(b"\x0f\xb7\x15" + _u32(ADDR_CURRENT_INPUT))
+    store_edx(_EVENT_PAYLOAD_OFFSET + 4 * 11)
+
+    code.extend(b"\x8b\x15" + _u32(ADDR_RUN_STATE_INNER_POINTER))
+    for resource_offset, before_index, after_index in (
+        (RUN_STATE_POWER_OFFSET, 12, 13),
+        (RUN_STATE_LIVES_OFFSET, 14, 15),
+        (RUN_STATE_BOMBS_OFFSET, 16, 17),
+    ):
+        code.extend(b"\x8b\x82" + _u32(resource_offset))
+        if event_pointer == "ecx":
+            code.extend(b"\x89\x81" + _u32(
+                _EVENT_PAYLOAD_OFFSET + 4 * before_index
+            ))
+            if include_resource_after:
+                code.extend(b"\x89\x81" + _u32(
+                    _EVENT_PAYLOAD_OFFSET + 4 * after_index
+                ))
+        else:
+            code.extend(b"\x89\x87" + _u32(
+                _EVENT_PAYLOAD_OFFSET + 4 * before_index
+            ))
+            if include_resource_after:
+                code.extend(b"\x89\x87" + _u32(
+                    _EVENT_PAYLOAD_OFFSET + 4 * after_index
+                ))
+            else:
+                code.extend(b"\xc7\x87" + _u32(
+                    _EVENT_PAYLOAD_OFFSET + 4 * after_index
+                ) + _u32(_UNKNOWN_U32))
+    return bytes(code)
+
+
+def _capture_item_source_enemy_pointer() -> bytes:
+    """Store an exact defeat-helper owner pointer in payload[20], else zero."""
+
+    code = bytearray(b"\x8b\x55\x04")  # mov edx, [ebp + 4]
+    equal_jumps: list[int] = []
+    for return_address in sorted(
+        ENEMY_DEFEAT_ITEM_ALLOCATION_RETURN_ADDRESSES
+    ):
+        code += b"\x81\xfa" + _u32(return_address)  # cmp edx, imm32
+        equal_jumps.append(len(code))
+        code += b"\x74\x00"  # je capture_owner
+    code += b"\x31\xd2"  # xor edx, edx
+    no_owner_jump = len(code)
+    code += b"\xeb\x00"  # jmp store_owner
+    capture_owner = len(code)
+    code += b"\x8b\x45\x00"  # mov eax, [ebp]
+    code += b"\x8b\x50\xec"  # mov edx, [eax - 0x14]
+    store_owner = len(code)
+    code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 20)
+    for jump in equal_jumps:
+        displacement = capture_owner - (jump + 2)
+        if not -128 <= displacement <= 127:
+            raise ValueError("item source-owner branch exceeds rel8")
+        code[jump + 1] = displacement & 0xFF
+    displacement = store_owner - (no_owner_jump + 2)
+    if not -128 <= displacement <= 127:
+        raise ValueError("item no-owner branch exceeds rel8")
+    code[no_owner_jump + 1] = displacement & 0xFF
+    return bytes(code)
+
+
+def _build_enemy_site_stub(
     remote_base: int,
     site: EnemyLifecycleHookSite,
 ) -> bytes:
-    """Build one position-specific pre/replay/post/commit x86 site stub."""
-
     site_index = HOOK_SITES.index(site)
     stub_address = (
         remote_base + PROBE_STUB_OFFSET + site_index * PROBE_STUB_STRIDE
@@ -282,35 +633,35 @@ def build_site_stub(
     code = bytearray()
     code += b"\x9c\x60"  # pushfd; pushad
     code += _load_enemy_pointer(site.pointer_source)
-    code += _select_unpublished_event(
+    code += _initialize_unpublished_event(
         serial_address=serial_address,
         event_base=event_base,
     )
-    # Invalidate the overwritten old slot before changing any payload field.
-    # The header remains unchanged until all pre/post fields are complete.
-    code += b"\x89\x01"  # event.serial = next serial (unpublished)
     code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
     code += b"\x89\x51\x04"  # manager_frame
     code += b"\xc7\x41\x08" + _u32(int(site.kind))
     code += b"\x89\x59\x0c"  # enemy_pointer
+    code += b"\x8b\x15" + _u32(ADDR_STAGE_ROUTE_INDEX)
+    code += b"\x89\x51\x10"  # native stage-route index
+    code += b"\x83\xca\xff"  # or edx, -1
+    for offset in (0x18, 0x1C, 0x20, 0x24):
+        code += b"\x89\x51" + bytes((offset,))
     code += b"\x8b\x93" + _u32(ENEMY_FLAGS_OFFSET)
-    code += b"\x89\x51\x10"  # flags_before
+    code += b"\x89\x51\x28"  # flags_before
     code += b"\x8b\x93" + _u32(ENEMY_HP_OFFSET)
-    code += b"\x89\x51\x18"  # hp_before
+    code += b"\x89\x51\x30"  # hp_before
     code += b"\x8b\x93" + _u32(ENEMY_FRAME_DAMAGE_OFFSET)
-    code += b"\x89\x51\x20"  # frame_damage
+    code += b"\x89\x51\x38"  # frame_damage
     if site.capture_return_address:
         code += b"\x8b\x55\x04"  # mov edx, [ebp + 4]
     else:
         code += b"\x31\xd2"  # xor edx, edx
-    code += b"\x89\x51\x24"  # aux/caller return address
+    code += b"\x89\x51\x14"  # aux/caller return address
     if site.capture_root_subroutine:
         code += b"\x0f\xbf\x55\x08"  # movsx edx, word [ebp + 8]
     else:
         code += b"\x83\xca\xff"  # or edx, -1
-    code += b"\x89\x51\x28"  # root subroutine, or -1 when not an allocation
-    code += b"\x8b\x15" + _u32(ADDR_STAGE_ROUTE_INDEX)
-    code += b"\x89\x51\x2c"  # native stage-route index
+    code += b"\x89\x51\x3c"  # root subroutine, or -1 when not an allocation
     code += b"\x61\x9d"  # popad; popfd
 
     # Exact shipped bytes execute before publication of the event.
@@ -323,9 +674,9 @@ def build_site_stub(
         event_base=event_base,
     )
     code += b"\x8b\x93" + _u32(ENEMY_FLAGS_OFFSET)
-    code += b"\x89\x51\x14"  # flags_after
+    code += b"\x89\x51\x2c"  # flags_after
     code += b"\x8b\x93" + _u32(ENEMY_HP_OFFSET)
-    code += b"\x89\x51\x1c"  # hp_after
+    code += b"\x89\x51\x34"  # hp_after
     code += b"\x89\x01"  # event.serial = eax
     code += b"\xa3" + _u32(serial_address)  # header.serial = eax
     code += b"\x61\x9d"  # popad; popfd
@@ -335,6 +686,229 @@ def build_site_stub(
     if len(code) > PROBE_STUB_STRIDE:
         raise ValueError(f"lifecycle stub {site.name} exceeds its fixed slot")
     return bytes(code)
+
+
+def _build_item_allocate_stub(
+    remote_base: int,
+    site: EnemyLifecycleHookSite,
+) -> bytes:
+    site_index = HOOK_SITES.index(site)
+    stub_address = (
+        remote_base + PROBE_STUB_OFFSET + site_index * PROBE_STUB_STRIDE
+    )
+    serial_address = remote_base + PROBE_SERIAL_OFFSET
+    event_base = remote_base + PROBE_EVENT_OFFSET
+    code = bytearray(b"\x9c\x60")
+    code += _load_enemy_pointer(site.pointer_source)
+    code += _initialize_unpublished_event(
+        serial_address=serial_address,
+        event_base=event_base,
+    )
+    code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x89\x51\x04"
+    code += b"\xc7\x41\x08" + _u32(int(site.kind))
+    code += b"\x89\x59\x0c"
+    code += b"\x8b\x15" + _u32(ADDR_STAGE_ROUTE_INDEX)
+    code += b"\x89\x51\x10"
+    code += b"\x8b\x55\x04"  # caller return address
+    code += b"\x89\x51\x14"
+    code += b"\x83\xca\xff"
+    code += b"\x89\x51\x18"  # RNG-before state unavailable
+    code += b"\x89\x51\x1c"  # RNG-before calls unavailable
+    code += b"\x0f\xb7\x15" + _u32(ADDR_GAMEPLAY_RNG)
+    code += b"\x89\x51\x20"
+    code += b"\x8b\x15" + _u32(ADDR_GAMEPLAY_RNG + 4)
+    code += b"\x89\x51\x24"
+    code += _fill_item_common_fields(
+        event_pointer="ecx",
+        item_pointer="ebx",
+        include_resource_after=True,
+    )
+    code += b"\x8b\x55\xf4"  # item manager from [ebp - 0x0c]
+    code += b"\x8b\x82" + _u32(ITEM_MANAGER_NEXT_ALLOCATION_OFFSET)
+    code += b"\x89\x81" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 18)
+    code += b"\x8b\x93" + _u32(ITEM_PREVIOUS_OFFSET)
+    code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 19)
+    code += _capture_item_source_enemy_pointer()
+    code += b"\x8b\x55\x0c"  # effective/mutated item-type argument
+    code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 21)
+    code += _commit_event(serial_address)
+    code += b"\x61\x9d"
+    code += site.original
+    jump_source = stub_address + len(code)
+    code += _relative_jump(jump_source, site.return_address)
+    if len(code) > PROBE_STUB_STRIDE:
+        raise ValueError(f"lifecycle stub {site.name} exceeds its fixed slot")
+    return bytes(code)
+
+
+def _build_item_cull_stub(
+    remote_base: int,
+    site: EnemyLifecycleHookSite,
+) -> bytes:
+    site_index = HOOK_SITES.index(site)
+    stub_address = (
+        remote_base + PROBE_STUB_OFFSET + site_index * PROBE_STUB_STRIDE
+    )
+    serial_address = remote_base + PROBE_SERIAL_OFFSET
+    event_base = remote_base + PROBE_EVENT_OFFSET
+    code = bytearray(b"\x9c\x60")
+    code += _load_enemy_pointer(site.pointer_source)
+    code += _initialize_unpublished_event(
+        serial_address=serial_address,
+        event_base=event_base,
+    )
+    code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x89\x51\x04"
+    code += b"\xc7\x41\x08" + _u32(int(site.kind))
+    code += b"\x89\x59\x0c"
+    code += b"\x8b\x15" + _u32(ADDR_STAGE_ROUTE_INDEX)
+    code += b"\x89\x51\x10"
+    code += b"\x83\xca\xff"
+    for offset in (0x18, 0x1C, 0x20, 0x24):
+        code += b"\x89\x51" + bytes((offset,))
+    code += _fill_item_common_fields(
+        event_pointer="ecx",
+        item_pointer="ebx",
+        include_resource_after=True,
+    )
+    code += b"\x8b\x93" + _u32(ITEM_PREVIOUS_OFFSET)
+    code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 19)
+    code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 20)
+    code += b"\x89\x99" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 21)
+    code += _commit_event(serial_address)
+    code += b"\x61\x9d"
+    code += b"\x8b\x4d\xdc"
+    call_source = stub_address + len(code)
+    code += _relative_call(call_source, 0x00441770)
+    jump_source = stub_address + len(code)
+    code += _relative_jump(jump_source, site.return_address)
+    if len(code) > PROBE_STUB_STRIDE:
+        raise ValueError(f"lifecycle stub {site.name} exceeds its fixed slot")
+    return bytes(code)
+
+
+def _build_item_pickup_begin_stub(
+    remote_base: int,
+    site: EnemyLifecycleHookSite,
+) -> bytes:
+    site_index = HOOK_SITES.index(site)
+    stub_address = (
+        remote_base + PROBE_STUB_OFFSET + site_index * PROBE_STUB_STRIDE
+    )
+    scratch = remote_base + PROBE_PICKUP_SCRATCH_OFFSET
+    code = bytearray(b"\x9c\x60")
+    code += _load_enemy_pointer(site.pointer_source)
+    code += b"\xbf" + _u32(scratch)
+    code += b"\xb9" + _u32(PROBE_EVENT_SIZE // 4)
+    code += b"\x31\xc0\xf3\xab"  # zero complete scratch
+    code += b"\xbf" + _u32(scratch)
+    code += b"\xc7\x07" + _u32(0x49545042)  # "ITPB" valid-begin marker
+    code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x89\x57\x04"
+    code += b"\xc7\x47\x08" + _u32(int(site.kind))
+    code += b"\x89\x5f\x0c"
+    code += b"\x8b\x15" + _u32(ADDR_STAGE_ROUTE_INDEX)
+    code += b"\x89\x57\x10"
+    code += b"\x0f\xb7\x15" + _u32(ADDR_GAMEPLAY_RNG)
+    code += b"\x89\x57\x18"
+    code += b"\x8b\x15" + _u32(ADDR_GAMEPLAY_RNG + 4)
+    code += b"\x89\x57\x1c"
+    code += b"\xc7\x47\x20" + _u32(_UNKNOWN_U32)
+    code += b"\xc7\x47\x24" + _u32(_UNKNOWN_U32)
+    code += _fill_item_common_fields(
+        event_pointer="edi",
+        item_pointer="ebx",
+        include_resource_after=False,
+    )
+    code += b"\x8b\x93" + _u32(ITEM_PREVIOUS_OFFSET)
+    code += b"\x89\x97" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 19)
+    code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x89\x97" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 20)
+    # payload[21] remains zero until the matching commit site.
+    code += b"\x61\x9d"
+    code += site.original
+    jump_source = stub_address + len(code)
+    code += _relative_jump(jump_source, site.return_address)
+    if len(code) > PROBE_STUB_STRIDE:
+        raise ValueError(f"lifecycle stub {site.name} exceeds its fixed slot")
+    return bytes(code)
+
+
+def _build_item_pickup_commit_stub(
+    remote_base: int,
+    site: EnemyLifecycleHookSite,
+) -> bytes:
+    site_index = HOOK_SITES.index(site)
+    stub_address = (
+        remote_base + PROBE_STUB_OFFSET + site_index * PROBE_STUB_STRIDE
+    )
+    serial_address = remote_base + PROBE_SERIAL_OFFSET
+    event_base = remote_base + PROBE_EVENT_OFFSET
+    scratch = remote_base + PROBE_PICKUP_SCRATCH_OFFSET
+    code = bytearray(b"\x9c\x60")
+    code += _load_enemy_pointer(site.pointer_source)
+    code += _select_unpublished_event(
+        serial_address=serial_address,
+        event_base=event_base,
+    )
+    code += b"\x89\xc5"  # mov ebp, eax (saved next serial)
+    code += b"\x89\x01"  # invalidate selected event slot
+    code += b"\x89\xca"  # preserve event pointer in edx
+    code += b"\x8d\x79\x04"
+    code += b"\xbe" + _u32(scratch + 4)
+    code += b"\xb9" + _u32(PROBE_EVENT_SIZE // 4 - 1)
+    code += b"\xf3\xa5"  # rep movsd scratch[1:] -> event[1:]
+    code += b"\x89\xd1"  # restore event pointer
+    code += b"\x0f\xb7\x15" + _u32(ADDR_GAMEPLAY_RNG)
+    code += b"\x89\x51\x20"
+    code += b"\x8b\x15" + _u32(ADDR_GAMEPLAY_RNG + 4)
+    code += b"\x89\x51\x24"
+    code += b"\x8b\x15" + _u32(ADDR_RUN_STATE_INNER_POINTER)
+    for resource_offset, after_index in (
+        (RUN_STATE_POWER_OFFSET, 13),
+        (RUN_STATE_LIVES_OFFSET, 15),
+        (RUN_STATE_BOMBS_OFFSET, 17),
+    ):
+        code += b"\x8b\x82" + _u32(resource_offset)
+        code += b"\x89\x81" + _u32(
+            _EVENT_PAYLOAD_OFFSET + 4 * after_index
+        )
+    code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 20)
+    code += b"\x89\x99" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 21)
+    code += b"\x89\xe8"  # mov eax, ebp
+    code += b"\x89\x01"
+    code += b"\xa3" + _u32(serial_address)
+    code += b"\x61\x9d"
+    code += b"\x8b\x4d\xdc"  # replay mov ecx, [ebp - 0x24]
+    call_source = stub_address + len(code)
+    code += _relative_call(call_source, 0x00441770)
+    jump_source = stub_address + len(code)
+    code += _relative_jump(jump_source, site.return_address)
+    if len(code) > PROBE_STUB_STRIDE:
+        raise ValueError(f"lifecycle stub {site.name} exceeds its fixed slot")
+    return bytes(code)
+
+
+def build_site_stub(
+    remote_base: int,
+    site: EnemyLifecycleHookSite,
+) -> bytes:
+    """Build one role-specific replay-safe x86 hook stub."""
+
+    if site.role == "enemy_event":
+        return _build_enemy_site_stub(remote_base, site)
+    if site.role == "item_allocate":
+        return _build_item_allocate_stub(remote_base, site)
+    if site.role == "item_cull":
+        return _build_item_cull_stub(remote_base, site)
+    if site.role == "item_pickup_begin":
+        return _build_item_pickup_begin_stub(remote_base, site)
+    if site.role == "item_pickup_commit":
+        return _build_item_pickup_commit_stub(remote_base, site)
+    raise ValueError(f"unsupported lifecycle hook role {site.role}")
 
 
 def build_probe_image(remote_base: int, pid: int) -> bytes:
@@ -383,83 +957,254 @@ class EnemyLifecycleEvent:
     serial: int
     manager_frame: int
     kind: EnemyLifecycleKind
-    enemy_pointer: int
-    flags_before: int
-    flags_after: int
-    hp_before: int
-    hp_after: int
-    frame_damage: int
-    caller_return_address: int
-    root_subroutine: int | None
+    subject_pointer: int
     stage_route_index: int
+    caller_return_address: int
+    rng_state_before: int | None
+    rng_calls_before: int | None
+    rng_state_after: int | None
+    rng_calls_after: int | None
+    payload: tuple[int, ...]
 
     @classmethod
     def decode(cls, payload: bytes) -> EnemyLifecycleEvent:
         if len(payload) != PROBE_EVENT_SIZE:
             raise ValueError("enemy lifecycle event size is invalid")
+        words = _EVENT.unpack(payload)
         (
             serial,
             manager_frame,
             kind_value,
-            enemy_pointer,
-            flags_before,
-            flags_after,
-            hp_before,
-            hp_after,
-            frame_damage,
-            caller_return_address,
-            root_subroutine,
+            subject_pointer,
             stage_route_index,
-        ) = _EVENT.unpack(payload)
+            caller_return_address,
+            rng_state_before,
+            rng_calls_before,
+            rng_state_after,
+            rng_calls_after,
+            *event_payload,
+        ) = words
         try:
             kind = EnemyLifecycleKind(kind_value)
         except ValueError as error:
             raise ValueError("enemy lifecycle event kind is invalid") from error
-        offset = enemy_pointer - ENEMY_POOL_BASE
-        if (
-            offset < 0
-            or offset >= ENEMY_POOL_SIZE * ENEMY_STRIDE
-            or offset % ENEMY_STRIDE
-        ):
-            raise ValueError("enemy lifecycle pointer is outside the ordinary pool")
-        if kind is EnemyLifecycleKind.FORCED_HP_ZERO:
-            if caller_return_address not in FORCED_ZERO_RETURN_ADDRESSES:
-                raise ValueError("forced-HP-zero caller is not a shipped caller")
-        elif caller_return_address:
-            raise ValueError("non-forced lifecycle event has a caller address")
-        if kind in _ALLOCATION_KINDS:
-            if root_subroutine < 0:
-                raise ValueError(
-                    "allocation lifecycle event has no root subroutine"
-                )
-        elif root_subroutine != -1:
-            raise ValueError(
-                "non-allocation lifecycle event has a root subroutine"
-            )
         if not 0 <= stage_route_index <= 8:
             raise ValueError(
                 "lifecycle event stage-route index is outside 0..8"
             )
-        return cls(
+        event = cls(
             serial=serial,
             manager_frame=manager_frame,
             kind=kind,
-            enemy_pointer=enemy_pointer,
-            flags_before=flags_before,
-            flags_after=flags_after,
-            hp_before=hp_before,
-            hp_after=hp_after,
-            frame_damage=frame_damage,
-            caller_return_address=caller_return_address,
-            root_subroutine=(
-                root_subroutine if kind in _ALLOCATION_KINDS else None
-            ),
+            subject_pointer=subject_pointer,
             stage_route_index=stage_route_index,
+            caller_return_address=caller_return_address,
+            rng_state_before=(
+                None if rng_state_before == _UNKNOWN_U32 else rng_state_before
+            ),
+            rng_calls_before=(
+                None if rng_calls_before == _UNKNOWN_U32 else rng_calls_before
+            ),
+            rng_state_after=(
+                None if rng_state_after == _UNKNOWN_U32 else rng_state_after
+            ),
+            rng_calls_after=(
+                None if rng_calls_after == _UNKNOWN_U32 else rng_calls_after
+            ),
+            payload=tuple(event_payload),
         )
+        event._validate()
+        return event
+
+    def _validate(self) -> None:
+        if len(self.payload) != _EVENT_PAYLOAD_COUNT:
+            raise ValueError("lifecycle event payload size is invalid")
+        if self.kind in _ENEMY_KINDS:
+            offset = self.subject_pointer - ENEMY_POOL_BASE
+            if (
+                offset < 0
+                or offset >= ENEMY_POOL_SIZE * ENEMY_STRIDE
+                or offset % ENEMY_STRIDE
+            ):
+                raise ValueError(
+                    "enemy lifecycle pointer is outside the ordinary pool"
+                )
+            if any(
+                value is not None
+                for value in (
+                    self.rng_state_before,
+                    self.rng_calls_before,
+                    self.rng_state_after,
+                    self.rng_calls_after,
+                )
+            ):
+                raise ValueError("enemy lifecycle event unexpectedly carries RNG")
+            if self.kind is EnemyLifecycleKind.FORCED_HP_ZERO:
+                if self.caller_return_address not in (
+                    FORCED_ZERO_RETURN_ADDRESSES
+                ):
+                    raise ValueError(
+                        "forced-HP-zero caller is not a shipped caller"
+                    )
+            elif self.caller_return_address:
+                raise ValueError(
+                    "non-forced enemy lifecycle event has a caller address"
+                )
+            if self.kind in _ALLOCATION_KINDS:
+                root = _signed_u32(self.payload[5])
+                if not 0 <= root <= 0x7FFF:
+                    raise ValueError(
+                        "allocation lifecycle event has no root subroutine"
+                    )
+            elif _signed_u32(self.payload[5]) != -1:
+                raise ValueError(
+                    "non-allocation lifecycle event has a root subroutine"
+                )
+            if any(self.payload[6:]):
+                raise ValueError("enemy lifecycle event has nonzero tail payload")
+            return
+
+        offset = self.subject_pointer - ITEM_POOL_BASE
+        if (
+            offset < 0
+            or offset >= ITEM_POOL_SIZE * ITEM_STRIDE
+            or offset % ITEM_STRIDE
+        ):
+            raise ValueError("item lifecycle pointer is outside the item pool")
+        if self.item_type not in range(9):
+            raise ValueError("item lifecycle type is outside 0..8")
+        if self.item_motion_state not in {0, 1, 2, 3, 5}:
+            raise ValueError("item lifecycle motion state is unsupported")
+        if self.payload[2] not in {0, 1}:
+            raise ValueError("item lifecycle full-value flag is invalid")
+        for name, value in (
+            ("item_x", self.item_x),
+            ("item_y", self.item_y),
+            ("item_velocity_x", self.item_velocity_x),
+            ("item_velocity_y", self.item_velocity_y),
+            ("player_x", self.player_x),
+            ("player_y", self.player_y),
+            ("power_before", self.power_before),
+            ("power_after", self.power_after),
+            ("lives_before", self.lives_before),
+            ("lives_after", self.lives_after),
+            ("bombs_before", self.bombs_before),
+            ("bombs_after", self.bombs_after),
+        ):
+            if not math.isfinite(value):
+                raise ValueError(f"item lifecycle {name} is not finite")
+        if self.player_state not in range(256):
+            raise ValueError("item lifecycle player state is invalid")
+        if self.focus_logic not in range(256):
+            raise ValueError("item lifecycle focus state is invalid")
+        if self.input_current & ~0xFFFF:
+            raise ValueError("item lifecycle active input is invalid")
+        if self.kind is EnemyLifecycleKind.ITEM_ALLOCATE:
+            if self.rng_state_after is None or self.rng_state_after > 0xFFFF:
+                raise ValueError("item allocation post-RNG state is invalid")
+            if self.rng_calls_after is None:
+                raise ValueError("item allocation post-RNG calls are missing")
+            if self.caller_return_address not in (
+                ITEM_ALLOCATION_RETURN_ADDRESSES
+            ):
+                raise ValueError(
+                    "item allocation caller is not a shipped caller"
+                )
+            if self.rng_state_before is not None or self.rng_calls_before is not None:
+                raise ValueError(
+                    "post-only item allocation invents a pre-RNG state"
+                )
+            if not 0 <= self.allocation_next_index < ITEM_POOL_SIZE:
+                raise ValueError("item allocation cursor is outside the pool")
+            if self.payload[21] != self.item_type:
+                raise ValueError(
+                    "item allocation effective type disagrees with call argument"
+                )
+            owner = self.payload[20]
+            if self.caller_return_address in (
+                ENEMY_DEFEAT_ITEM_ALLOCATION_RETURN_ADDRESSES
+            ):
+                offset = owner - ENEMY_POOL_BASE
+                if (
+                    offset < 0
+                    or offset >= ENEMY_POOL_SIZE * ENEMY_STRIDE
+                    or offset % ENEMY_STRIDE
+                ):
+                    raise ValueError(
+                        "defeat-item allocation has no exact source enemy"
+                    )
+            elif owner:
+                raise ValueError(
+                    "non-defeat item allocation invents a source enemy"
+                )
+        elif self.kind is EnemyLifecycleKind.ITEM_PICKUP:
+            if self.caller_return_address:
+                raise ValueError("item pickup unexpectedly carries a caller")
+            if self.rng_state_before is None or self.rng_calls_before is None:
+                raise ValueError("item pickup pre-RNG state is missing")
+            if self.rng_state_before > 0xFFFF:
+                raise ValueError("item pickup pre-RNG state is invalid")
+            if self.rng_state_after is None or self.rng_state_after > 0xFFFF:
+                raise ValueError("item pickup post-RNG state is invalid")
+            if self.rng_calls_after is None:
+                raise ValueError("item pickup post-RNG calls are missing")
+            if self.payload[21] != self.subject_pointer:
+                raise ValueError(
+                    "item pickup begin/commit pointer identity disagrees"
+                )
+            if self.manager_frame != self.commit_manager_frame:
+                raise ValueError(
+                    "item pickup crossed an enemy-manager frame"
+                )
+        elif self.kind is EnemyLifecycleKind.ITEM_CULL:
+            if self.caller_return_address:
+                raise ValueError("item cull unexpectedly carries a caller")
+            if any(
+                value is not None
+                for value in (
+                    self.rng_state_before,
+                    self.rng_calls_before,
+                    self.rng_state_after,
+                    self.rng_calls_after,
+                )
+            ):
+                raise ValueError("item cull unexpectedly carries RNG")
+            if self.payload[21] != self.subject_pointer:
+                raise ValueError("item cull pointer identity disagrees")
+            if self.manager_frame != self.commit_manager_frame:
+                raise ValueError("item cull manager frame identity disagrees")
+            if (
+                self.power_before != self.power_after
+                or self.lives_before != self.lives_after
+                or self.bombs_before != self.bombs_after
+            ):
+                raise ValueError("item cull unexpectedly changes resources")
+        else:
+            raise ValueError("unsupported item lifecycle kind")
 
     @property
     def slot(self) -> int:
-        return (self.enemy_pointer - ENEMY_POOL_BASE) // ENEMY_STRIDE
+        if self.kind not in _ENEMY_KINDS:
+            raise ValueError("item event has no enemy slot")
+        return (self.subject_pointer - ENEMY_POOL_BASE) // ENEMY_STRIDE
+
+    @property
+    def item_slot(self) -> int:
+        if self.kind not in _ITEM_KINDS:
+            raise ValueError("enemy event has no item slot")
+        return (self.subject_pointer - ITEM_POOL_BASE) // ITEM_STRIDE
+
+    @property
+    def enemy_pointer(self) -> int:
+        if self.kind not in _ENEMY_KINDS:
+            raise ValueError("item event has no enemy pointer")
+        return self.subject_pointer
+
+    @property
+    def item_pointer(self) -> int:
+        if self.kind not in _ITEM_KINDS:
+            raise ValueError("enemy event has no item pointer")
+        return self.subject_pointer
 
     @property
     def is_allocation(self) -> bool:
@@ -474,28 +1219,220 @@ class EnemyLifecycleEvent:
         return self.kind is EnemyLifecycleKind.FORCED_HP_ZERO
 
     @property
+    def is_item_event(self) -> bool:
+        return self.kind in _ITEM_KINDS
+
+    @property
+    def flags_before(self) -> int:
+        return self.payload[0]
+
+    @property
+    def flags_after(self) -> int:
+        return self.payload[1]
+
+    @property
+    def hp_before(self) -> int:
+        return _signed_u32(self.payload[2])
+
+    @property
+    def hp_after(self) -> int:
+        return _signed_u32(self.payload[3])
+
+    @property
+    def frame_damage(self) -> int:
+        return _signed_u32(self.payload[4])
+
+    @property
+    def root_subroutine(self) -> int | None:
+        root = _signed_u32(self.payload[5])
+        return root if self.kind in _ALLOCATION_KINDS else None
+
+    @property
+    def item_type(self) -> int:
+        return self.payload[0]
+
+    @property
+    def item_motion_state(self) -> int:
+        return self.payload[1]
+
+    @property
+    def item_full_value(self) -> bool:
+        return bool(self.payload[2])
+
+    @property
+    def item_x(self) -> float:
+        return _float_u32(self.payload[3])
+
+    @property
+    def item_y(self) -> float:
+        return _float_u32(self.payload[4])
+
+    @property
+    def item_velocity_x(self) -> float:
+        return _float_u32(self.payload[5])
+
+    @property
+    def item_velocity_y(self) -> float:
+        return _float_u32(self.payload[6])
+
+    @property
+    def player_x(self) -> float:
+        return _float_u32(self.payload[7])
+
+    @property
+    def player_y(self) -> float:
+        return _float_u32(self.payload[8])
+
+    @property
+    def player_state(self) -> int:
+        return self.payload[9]
+
+    @property
+    def focus_logic(self) -> int:
+        return self.payload[10]
+
+    @property
+    def input_current(self) -> int:
+        return self.payload[11]
+
+    @property
+    def power_before(self) -> float:
+        return _float_u32(self.payload[12])
+
+    @property
+    def power_after(self) -> float:
+        return _float_u32(self.payload[13])
+
+    @property
+    def lives_before(self) -> float:
+        return _float_u32(self.payload[14])
+
+    @property
+    def lives_after(self) -> float:
+        return _float_u32(self.payload[15])
+
+    @property
+    def bombs_before(self) -> float:
+        return _float_u32(self.payload[16])
+
+    @property
+    def bombs_after(self) -> float:
+        return _float_u32(self.payload[17])
+
+    @property
+    def allocation_next_index(self) -> int:
+        return self.payload[18]
+
+    @property
+    def active_previous_pointer(self) -> int:
+        return self.payload[19]
+
+    @property
+    def commit_manager_frame(self) -> int:
+        return self.payload[20]
+
+    @property
+    def source_enemy_pointer(self) -> int | None:
+        if self.kind is not EnemyLifecycleKind.ITEM_ALLOCATE:
+            return None
+        return self.payload[20] or None
+
+    @property
     def reconstructed_pre_damage_hp(self) -> int | None:
         if self.kind is not EnemyLifecycleKind.RETIRE_DEFEAT_MODE0:
             return None
         return self.hp_before + self.frame_damage
 
     def compact_record(self) -> dict[str, object]:
-        return {
+        common: dict[str, object] = {
             "serial": self.serial,
             "manager_frame": self.manager_frame,
             "kind": self.kind.name.lower(),
-            "slot": self.slot,
-            "enemy_pointer": self.enemy_pointer,
-            "flags_before": self.flags_before,
-            "flags_after": self.flags_after,
-            "hp_before": self.hp_before,
-            "hp_after": self.hp_after,
-            "frame_damage": self.frame_damage,
-            "reconstructed_pre_damage_hp": self.reconstructed_pre_damage_hp,
-            "caller_return_address": self.caller_return_address or None,
-            "root_subroutine": self.root_subroutine,
             "stage_route_index": self.stage_route_index,
         }
+        if self.kind in _ENEMY_KINDS:
+            common.update(
+                {
+                    "slot": self.slot,
+                    "enemy_pointer": self.enemy_pointer,
+                    "flags_before": self.flags_before,
+                    "flags_after": self.flags_after,
+                    "hp_before": self.hp_before,
+                    "hp_after": self.hp_after,
+                    "frame_damage": self.frame_damage,
+                    "reconstructed_pre_damage_hp": (
+                        self.reconstructed_pre_damage_hp
+                    ),
+                    "caller_return_address": (
+                        self.caller_return_address or None
+                    ),
+                    "root_subroutine": self.root_subroutine,
+                }
+            )
+            return common
+        common.update(
+            {
+                "item_slot": self.item_slot,
+                "item_pointer": self.item_pointer,
+                "item_type": self.item_type,
+                "motion_state": self.item_motion_state,
+                "full_value": self.item_full_value,
+                "item_position": {
+                    "x": self.item_x,
+                    "y": self.item_y,
+                },
+                "item_velocity": {
+                    "x": self.item_velocity_x,
+                    "y": self.item_velocity_y,
+                },
+                "player_position": {
+                    "x": self.player_x,
+                    "y": self.player_y,
+                },
+                "player_state": self.player_state,
+                "focus_logic": self.focus_logic,
+                "input_current": self.input_current,
+                "resources_before": {
+                    "power": self.power_before,
+                    "lives": self.lives_before,
+                    "bombs": self.bombs_before,
+                },
+                "resources_after": {
+                    "power": self.power_after,
+                    "lives": self.lives_after,
+                    "bombs": self.bombs_after,
+                },
+                "rng_before": (
+                    None
+                    if self.rng_state_before is None
+                    else {
+                        "state": self.rng_state_before,
+                        "calls": self.rng_calls_before,
+                    }
+                ),
+                "rng_after": (
+                    None
+                    if self.rng_state_after is None
+                    else {
+                        "state": self.rng_state_after,
+                        "calls": self.rng_calls_after,
+                    }
+                ),
+                "caller_return_address": (
+                    self.caller_return_address or None
+                ),
+                "active_previous_pointer": (
+                    self.active_previous_pointer or None
+                ),
+                "source_enemy_pointer": self.source_enemy_pointer,
+                "allocation_next_index": (
+                    self.allocation_next_index
+                    if self.kind is EnemyLifecycleKind.ITEM_ALLOCATE
+                    else None
+                ),
+            }
+        )
+        return common
 
 
 @dataclass(frozen=True)
@@ -776,6 +1713,7 @@ class EnemyLifecycleProbe:
                     "name": site.name,
                     "address": site.address,
                     "kind": site.kind.name.lower(),
+                    "role": site.role,
                 }
                 for site in HOOK_SITES
             ],
@@ -795,7 +1733,7 @@ class EnemyLifecycleProbe:
         self,
         previous_serial: int | None,
         *,
-        maximum_events: int = 64,
+        maximum_events: int = PROBE_CAPACITY,
         retries: int = 3,
     ) -> EnemyLifecycleBatch:
         if maximum_events <= 0 or maximum_events > PROBE_CAPACITY:
@@ -832,16 +1770,34 @@ class EnemyLifecycleProbe:
                 dropped = distance - retained
                 first = (serial_before - retained + 1) & 0xFFFFFFFF
                 events: list[EnemyLifecycleEvent] = []
-                for offset in range(retained):
-                    expected = (first + offset) & 0xFFFFFFFF
-                    slot = (expected - 1) & (PROBE_CAPACITY - 1)
-                    payload = _read_memory(
+                raw_events = bytearray()
+                if retained:
+                    first_slot = (first - 1) & (PROBE_CAPACITY - 1)
+                    first_count = min(
+                        retained,
+                        PROBE_CAPACITY - first_slot,
+                    )
+                    raw_events += _read_memory(
                         self.api,
                         self.handle,
                         self.remote_base
                         + PROBE_EVENT_OFFSET
-                        + slot * PROBE_EVENT_SIZE,
-                        PROBE_EVENT_SIZE,
+                        + first_slot * PROBE_EVENT_SIZE,
+                        first_count * PROBE_EVENT_SIZE,
+                    )
+                    remaining = retained - first_count
+                    if remaining:
+                        raw_events += _read_memory(
+                            self.api,
+                            self.handle,
+                            self.remote_base + PROBE_EVENT_OFFSET,
+                            remaining * PROBE_EVENT_SIZE,
+                        )
+                for offset in range(retained):
+                    expected = (first + offset) & 0xFFFFFFFF
+                    start = offset * PROBE_EVENT_SIZE
+                    payload = bytes(
+                        raw_events[start : start + PROBE_EVENT_SIZE]
                     )
                     event = EnemyLifecycleEvent.decode(payload)
                     if event.serial != expected:
@@ -990,6 +1946,7 @@ class EnemyLifecycleProbe:
 
 
 __all__ = [
+    "ENEMY_DEFEAT_ITEM_ALLOCATION_RETURN_ADDRESSES",
     "ENEMY_FLAGS_OFFSET",
     "ENEMY_FRAME_DAMAGE_OFFSET",
     "ENEMY_HP_OFFSET",
@@ -998,10 +1955,16 @@ __all__ = [
     "ENEMY_STRIDE",
     "FORCED_ZERO_RETURN_ADDRESSES",
     "HOOK_SITES",
+    "ITEM_ALLOCATION_RETURN_ADDRESSES",
+    "ITEM_POOL_BASE",
+    "ITEM_POOL_SIZE",
+    "ITEM_STRIDE",
+    "PROBE_ALLOCATION_SIZE",
     "PROBE_CAPACITY",
     "PROBE_EVENT_OFFSET",
     "PROBE_EVENT_SIZE",
     "PROBE_HEADER_SIZE",
+    "PROBE_PICKUP_SCRATCH_OFFSET",
     "PROBE_SCHEMA",
     "PROBE_SERIAL_OFFSET",
     "PROBE_SITE_DIGEST",

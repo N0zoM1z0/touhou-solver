@@ -12,6 +12,10 @@ from th08_runtime.enemy_lifecycle_probe import (
     ENEMY_STRIDE,
     FORCED_ZERO_RETURN_SPELL_FINISH,
     HOOK_SITES,
+    ITEM_ALLOCATION_RETURN_ADDRESSES,
+    ITEM_POOL_BASE,
+    ITEM_STRIDE,
+    PROBE_ALLOCATION_SIZE,
     PROBE_CAPACITY,
     PROBE_EVENT_OFFSET,
     PROBE_EVENT_SIZE,
@@ -126,25 +130,136 @@ def _event(
             else -1
         )
     )
+    payload = [0] * 22
+    payload[0] = 0x101
+    payload[1] = 0x100
+    payload[2] = hp_before & 0xFFFFFFFF
+    payload[3] = hp_after & 0xFFFFFFFF
+    payload[4] = frame_damage & 0xFFFFFFFF
+    payload[5] = encoded_root & 0xFFFFFFFF
     return struct.pack(
-        "<IIIIIIiiiIiI",
+        "<32I",
         serial,
         1000 + serial,
         int(kind),
         ENEMY_POOL_BASE + slot * ENEMY_STRIDE,
-        0x101,
-        0x100,
-        hp_before,
-        hp_after,
-        frame_damage,
-        caller,
-        encoded_root,
         stage_route_index,
+        caller,
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        *payload,
+    )
+
+
+def _f32_bits(value: float) -> int:
+    return struct.unpack("<I", struct.pack("<f", value))[0]
+
+
+def _item_event(
+    serial: int,
+    *,
+    kind: EnemyLifecycleKind,
+    slot: int = 4,
+    caller: int = 0,
+    stage_route_index: int = 0,
+    item_type: int = 0,
+    motion_state: int = 1,
+    power_before: float = 7.0,
+    power_after: float = 8.0,
+    rng_state_before: int = 0x1234,
+    rng_calls_before: int = 100,
+    rng_state_after: int = 0x5678,
+    rng_calls_after: int = 100,
+    commit_pointer: int | None = None,
+    commit_frame: int | None = None,
+    source_enemy_pointer: int | None = None,
+) -> bytes:
+    item_pointer = ITEM_POOL_BASE + slot * ITEM_STRIDE
+    frame = 2000 + serial
+    payload = [
+        item_type,
+        motion_state,
+        0,
+        _f32_bits(100.0),
+        _f32_bits(80.0),
+        _f32_bits(0.5),
+        _f32_bits(-1.25),
+        _f32_bits(104.0),
+        _f32_bits(84.0),
+        0,
+        1,
+        0x10,
+        _f32_bits(power_before),
+        _f32_bits(power_after),
+        _f32_bits(2.0),
+        _f32_bits(2.0),
+        _f32_bits(3.0),
+        _f32_bits(3.0),
+        19 if kind is EnemyLifecycleKind.ITEM_ALLOCATE else 0,
+        0,
+        (
+            source_enemy_pointer or 0
+            if kind is EnemyLifecycleKind.ITEM_ALLOCATE
+            else (frame if commit_frame is None else commit_frame)
+        ),
+        (
+            item_type
+            if kind is EnemyLifecycleKind.ITEM_ALLOCATE
+            else (
+                item_pointer
+                if commit_pointer is None
+                else commit_pointer
+            )
+        ),
+    ]
+    before_state = (
+        0xFFFFFFFF
+        if kind
+        in {
+            EnemyLifecycleKind.ITEM_ALLOCATE,
+            EnemyLifecycleKind.ITEM_CULL,
+        }
+        else rng_state_before
+    )
+    before_calls = (
+        0xFFFFFFFF
+        if kind
+        in {
+            EnemyLifecycleKind.ITEM_ALLOCATE,
+            EnemyLifecycleKind.ITEM_CULL,
+        }
+        else rng_calls_before
+    )
+    after_state = (
+        0xFFFFFFFF
+        if kind is EnemyLifecycleKind.ITEM_CULL
+        else rng_state_after
+    )
+    after_calls = (
+        0xFFFFFFFF
+        if kind is EnemyLifecycleKind.ITEM_CULL
+        else rng_calls_after
+    )
+    return struct.pack(
+        "<32I",
+        serial,
+        frame,
+        int(kind),
+        item_pointer,
+        stage_route_index,
+        caller,
+        before_state,
+        before_calls,
+        after_state,
+        after_calls,
+        *payload,
     )
 
 
 def _probe(*, serial: int, base: int = 0x02000000):
-    memory = bytearray(0x4000)
+    memory = bytearray(PROBE_ALLOCATION_SIZE)
     image = build_probe_image(base, 1234)
     memory[: len(image)] = image
     struct.pack_into("<I", memory, PROBE_SERIAL_OFFSET, serial)
@@ -203,11 +318,53 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
                     EnemyLifecycleKind.FORCED_HP_ZERO,
                     bytes.fromhex("c781fc2d000000000000"),
                 ),
+                (
+                    0x0044044D,
+                    EnemyLifecycleKind.ITEM_ALLOCATE,
+                    bytes.fromhex("8b4df8894df0"),
+                ),
+                (
+                    0x00440991,
+                    EnemyLifecycleKind.ITEM_CULL,
+                    bytes.fromhex("8b4ddce8d70d0000"),
+                ),
+                (
+                    0x00440A39,
+                    EnemyLifecycleKind.ITEM_PICKUP,
+                    bytes.fromhex("668990da000000"),
+                ),
+                (
+                    0x00440C1E,
+                    EnemyLifecycleKind.ITEM_PICKUP,
+                    bytes.fromhex("8b4ddce84a0b0000"),
+                ),
             ],
         )
         self.assertEqual(
             [site.capture_root_subroutine for site in HOOK_SITES],
-            [True, True, False, False, False, False, False, False],
+            [
+                True,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+            ],
+        )
+        self.assertEqual(
+            [site.role for site in HOOK_SITES[-4:]],
+            [
+                "item_allocate",
+                "item_cull",
+                "item_pickup_begin",
+                "item_pickup_commit",
+            ],
         )
 
     def test_stubs_replay_original_then_return_and_fit_fixed_slots(self) -> None:
@@ -215,9 +372,36 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
         for index, site in enumerate(HOOK_SITES):
             stub = build_site_stub(remote_base, site)
             self.assertTrue(stub.startswith(b"\x9c\x60"))
-            self.assertIn(site.original, stub)
+            if site.role not in {"item_cull", "item_pickup_commit"}:
+                self.assertIn(site.original, stub)
+            else:
+                replay = stub.index(b"\x8b\x4d\xdc\xe8")
+                displacement = struct.unpack(
+                    "<i",
+                    stub[replay + 4 : replay + 8],
+                )[0]
+                call_source = (
+                    remote_base
+                    + PROBE_STUB_OFFSET
+                    + index * PROBE_STUB_STRIDE
+                    + replay
+                    + 3
+                )
+                self.assertEqual(
+                    call_source + 5 + displacement,
+                    0x00441770,
+                )
             if site.capture_root_subroutine:
-                self.assertIn(b"\x0f\xbf\x55\x08\x89\x51\x28", stub)
+                self.assertIn(b"\x0f\xbf\x55\x08\x89\x51\x3c", stub)
+            if site.role == "item_allocate":
+                self.assertIn(
+                    b"\x81\xfa\x0b\xbf\x42\x00",
+                    stub,
+                )
+                self.assertIn(
+                    b"\x8b\x45\x00\x8b\x50\xec",
+                    stub,
+                )
             self.assertLessEqual(len(stub), PROBE_STUB_STRIDE)
             self.assertEqual(stub[-5], 0xE9)
             displacement = struct.unpack("<i", stub[-4:])[0]
@@ -336,6 +520,106 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
                     root_subroutine=31,
                 )
             )
+
+    def test_item_allocation_retains_pool_rng_and_caller_identity(self) -> None:
+        caller = min(ITEM_ALLOCATION_RETURN_ADDRESSES)
+        event = EnemyLifecycleEvent.decode(
+            _item_event(
+                11,
+                kind=EnemyLifecycleKind.ITEM_ALLOCATE,
+                slot=9,
+                caller=caller,
+                item_type=2,
+                power_before=24.0,
+                power_after=24.0,
+            )
+        )
+        self.assertTrue(event.is_item_event)
+        self.assertEqual(event.item_slot, 9)
+        self.assertEqual(event.item_type, 2)
+        self.assertEqual(event.power_before, 24.0)
+        self.assertIsNone(event.rng_state_before)
+        self.assertEqual(event.rng_state_after, 0x5678)
+        self.assertEqual(
+            event.compact_record()["caller_return_address"],
+            caller,
+        )
+        defeat = EnemyLifecycleEvent.decode(
+            _item_event(
+                11,
+                kind=EnemyLifecycleKind.ITEM_ALLOCATE,
+                caller=0x0042BF0B,
+                source_enemy_pointer=ENEMY_POOL_BASE + 5 * ENEMY_STRIDE,
+            )
+        )
+        self.assertEqual(
+            defeat.source_enemy_pointer,
+            ENEMY_POOL_BASE + 5 * ENEMY_STRIDE,
+        )
+        with self.assertRaisesRegex(ValueError, "shipped caller"):
+            EnemyLifecycleEvent.decode(
+                _item_event(
+                    11,
+                    kind=EnemyLifecycleKind.ITEM_ALLOCATE,
+                    caller=0x00401000,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "source enemy"):
+            EnemyLifecycleEvent.decode(
+                _item_event(
+                    11,
+                    kind=EnemyLifecycleKind.ITEM_ALLOCATE,
+                    caller=0x0042BF0B,
+                )
+            )
+
+    def test_item_pickup_retains_same_update_resource_transaction(self) -> None:
+        event = EnemyLifecycleEvent.decode(
+            _item_event(
+                12,
+                kind=EnemyLifecycleKind.ITEM_PICKUP,
+                item_type=0,
+                power_before=7.0,
+                power_after=8.0,
+            )
+        )
+        record = event.compact_record()
+        self.assertEqual(record["resources_before"]["power"], 7.0)
+        self.assertEqual(record["resources_after"]["power"], 8.0)
+        self.assertEqual(record["rng_before"]["calls"], 100)
+        self.assertEqual(record["rng_after"]["calls"], 100)
+        with self.assertRaisesRegex(ValueError, "pointer identity"):
+            EnemyLifecycleEvent.decode(
+                _item_event(
+                    12,
+                    kind=EnemyLifecycleKind.ITEM_PICKUP,
+                    commit_pointer=ITEM_POOL_BASE,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "manager frame"):
+            EnemyLifecycleEvent.decode(
+                _item_event(
+                    12,
+                    kind=EnemyLifecycleKind.ITEM_PICKUP,
+                    commit_frame=999,
+                )
+            )
+
+    def test_item_cull_retires_the_exact_pool_generation(self) -> None:
+        event = EnemyLifecycleEvent.decode(
+            _item_event(
+                13,
+                kind=EnemyLifecycleKind.ITEM_CULL,
+                slot=17,
+                power_before=8.0,
+                power_after=8.0,
+            )
+        )
+        self.assertEqual(event.item_slot, 17)
+        self.assertIsNone(event.rng_state_before)
+        self.assertIsNone(event.rng_state_after)
+        self.assertEqual(event.power_before, event.power_after)
+        self.assertEqual(event.compact_record()["kind"], "item_cull")
 
     def test_forced_zero_requires_one_of_the_four_shipped_callers(self) -> None:
         event = EnemyLifecycleEvent.decode(

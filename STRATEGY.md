@@ -1863,6 +1863,15 @@ first.
   default-small-Power candidate. This statically couples kill, Focus/homing,
   pickup, Power threshold, and later combat, but grants no execution, end-
   reason, allocation, pickup, survival benefit, ranking, or action authority.
+- **Cross-atlas combat/resource candidate board (2026-07-31):** exact ECL
+  SHA/root joins cover all 70 timeline source programs. All 39 ordinary
+  emitter candidates also retain the default small-Power opportunity on an
+  eligible HP defeat, covering 909 spawns; 16 additionally configure positive
+  extra Power. Named overlapping cohorts retain 32 direct-emission, 14 child-
+  emitter, and 13 periodic-control programs without assigning a scalar utility
+  score. This is a mechanism-diverse fixed-root experiment board only. It
+  grants no runtime execution, kill/deadline, prevented birth, allocation,
+  pickup, causal benefit, phase-option edge, ranking, or action authority.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -1905,14 +1914,16 @@ first.
   `notes/research/stage5_combat/ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`, and
-  `notes/research/route_resources/ROUTE2_ITEM_DROP_OPPORTUNITY_ATLAS_CONTRACT_20260731.md`.
+  `notes/research/route_resources/ROUTE2_ITEM_DROP_OPPORTUNITY_ATLAS_CONTRACT_20260731.md`, and
+  `notes/research/route_resources/ROUTE2_COMBAT_RESOURCE_CANDIDATE_BOARD_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
   authority. The lifecycle ring has offline/synthetic implementation
   authority only. The damageability/coverage atlas has offline semantic/static
   authority only. The source/emission atlas has shipped-content/static
   candidate authority only. The item/drop atlas has shipped-native
-  recurrence/static opportunity authority only. The Boss configuration atlas has
+  recurrence/static opportunity authority only. The cross-atlas board has
+  immutable static-cohort authority only. The Boss configuration atlas has
   shipped-content/native-static full-configuration-mode authority only.
   Runtime generation/end tracking, instruction execution, phase sequence,
   exposure causality, causal collection, targeting, and S18 live action

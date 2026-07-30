@@ -24,16 +24,17 @@ historical handoff.
   correction, default-off native lifecycle event ring, native damageability/
   HP gate, action-conditioned static shot atlas, corrected item-pool
   recurrence/static Power ledger, executable enemy defeat-drop recurrence and
-  route-wide item/drop opportunity atlas, exact bounded Boss HP/timeout
-  transition prefix and five-successor stable capture, route-wide static Boss
+  route-wide item/drop opportunity atlas, immutable combat/resource candidate
+  board, exact bounded Boss HP/timeout transition prefix and five-successor
+  stable capture, route-wide static Boss
   phase-configuration atlas, route-wide static source/emission candidate
   atlas, exact lifecycle ring diagnostic transport and fail-closed
   generation/end lowerer,
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,484 tests in 14.807 seconds.
-- Complete Windows UNC discovery passes 1,484 tests in 30.415 seconds with
+- Complete Linux discovery passes 1,487 tests in 15.671 seconds.
+- Complete Windows UNC discovery passes 1,487 tests in 30.206 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -182,6 +183,21 @@ historical handoff.
   `0692985c579a3040def4e635115a3399c0e4323a338d5f03427c4930821dc0b0`.
   Detailed boundary:
   `notes/research/route_resources/ROUTE2_ITEM_DROP_OPPORTUNITY_ATLAS_CONTRACT_20260731.md`.
+- The immutable cross-atlas candidate board now intersects all 70
+  timeline-rooted source programs with their exact ECL-SHA/root item programs.
+  All 39 ordinary emitter candidates are also default-small-Power candidates,
+  covering 909 spawns; 16 additionally configure positive extra Power and
+  cover 97 spawns. The intersection spans 32 direct-emission, 14
+  child-emitter, and 13 periodic-control programs, so causal experiments can
+  rotate mechanism and Stage without inventing a scalar utility score.
+- The board is selection infrastructure only. A local VM timer is not a kill
+  deadline, a static item signal is not a pickup, and a static emission site
+  is not a prevented birth. Retained board:
+  `artifacts/runtime_reports/th08_route2_combat_resource_candidate_board_20260731.json`,
+  SHA-256
+  `34e70a50e6c38c8241df0425be83367e6bf9e369106d600956d5a052dfa8cfea`.
+  Detailed boundary:
+  `notes/research/route_resources/ROUTE2_COMBAT_RESOURCE_CANDIDATE_BOARD_CONTRACT_20260731.md`.
 - CE-0221 corrects Boss progress after a same-update HP-threshold overshoot.
   Native checks HP/timeout transitions before player-shot damage, so a stable
   post-damage sample may sit below a retained threshold until the next
@@ -527,6 +543,10 @@ historical handoff.
   item/drop opportunity index are now complete for their declared boundaries,
   but runtime instruction/end joins, same-update item allocation identity,
   pickup attribution, and carried later benefit remain open.
+  The cross-atlas board narrows this gate to 39 immutable emitter/resource
+  roots and three overlapping mechanism cohorts; it grants no phase-option
+  edge. Select multiple roots across multiple mechanisms and compare
+  same-root pure-survival versus survival-feasible damage/resource branches.
   The bounded Boss HP/timeout transition model and five-successor capture
   schema are complete, but no runtime successor sample is retained; stable
   engine mode/ECL PC, causal action-to-HP delta, successor effects, and

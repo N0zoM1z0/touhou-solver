@@ -227,7 +227,7 @@ entry records the component subroutines and edges plus per-subroutine counts of
 direct bullet emission, transform definition, laser spawn, and built-in
 callback operations.
 
-### Enemy Motion And Clear Opcodes
+### Enemy Motion And Forced-HP-Zero Opcodes
 
 **Observed** for ECL opcode `0xB2` at the VM dispatch site `0x00419FF6` and
 native handler `ecl_set_random_player_biased_motion` (`0x004224A0`):
@@ -255,10 +255,13 @@ The reusable IR and TH08 adapter are executable in `scripts/pattern_ir.py` and
 frame-by-frame x87/binary32 parity still requires a runtime differential trace.
 
 **Observed** for opcode `0x5F`: the VM calls
-`enemy_manager_clear_active_with_score_items` (`0x0042EFB0`) with popup cap
-8000. It removes every eligible active enemy, invokes configured end
-subroutines, and spawns type-6 scaled-score items for primary flag `0x80`, with
-the displayed/reward value rising by 30 up to the cap.
+`enemy_manager_zero_eligible_hp_with_score_items` (`0x0042EFB0`) with popup
+cap 8000. It writes current HP zero for every eligible active non-boss enemy,
+unlinks its parent relation, invokes configured end subroutines, and spawns
+type-6 scaled-score items for primary flag `0x80`, with the displayed/reward
+value rising by 30 up to the cap. It does not clear active bit 0x01; later
+manager defeat processing supplies any retirement. CE-0219 corrects the
+earlier immediate-removal interpretation.
 
 **Observed state mutation, inferred domain name** for opcode `0xB8`:
 `spell_state_set_end_transition_flag` (`0x0041F0E0`) assigns bit `0x800` in
@@ -1052,7 +1055,7 @@ Important renamed entry points include `enemy_manager_init_stage`,
 Enemy-motion and phase-cleanup names now include
 `ecl_set_random_player_biased_motion`,
 `enemy_start_timed_polar_displacement`, `enemy_motion_update`,
-`enemy_manager_clear_active_with_score_items`, and
+`enemy_manager_zero_eligible_hp_with_score_items`, and
 `spell_state_set_end_transition_flag`. Their selection, easing, expiry, item
 reward, and spell-state mutation sites are commented.
 

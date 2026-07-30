@@ -20,11 +20,12 @@ historical handoff.
 - H=32 causal-search checkpoint: `3d15953`
   (`Build causal native snapshot policy search`).
 - The WS-H route-2 Focus/Shot foundation, Stage-5 presence-episode audit,
-  first-hit-bounded natural Power-0 audit, `CONTENT-01` shipped content
-  manifest, and `CONTENT-02` static mandatory-event atlas are the current
-  repository checkpoint; no new physical trial was run.
-- Complete Linux discovery passes 1,393 tests in 12.715 seconds.
-- Complete Windows UNC discovery passes 1,393 tests in 27.3 seconds with
+  first-hit-bounded natural Power-0 audit, forced-HP-zero/end-semantics
+  correction, `CONTENT-01` shipped content manifest, and `CONTENT-02` static
+  mandatory-event atlas are the current repository checkpoint; no new
+  physical trial was run.
+- Complete Linux discovery passes 1,400 tests in 12.956 seconds.
+- Complete Windows UNC discovery passes 1,400 tests in 27.9 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -60,6 +61,16 @@ historical handoff.
   `artifacts/runtime_reports/lunatic_route2_stage5_unattended_20260728_224116.presence_episode_audit.json`,
   SHA-256
   `d483268f3e69443a5d36ace92b71e8da165f87b59e45d761bcdb99fcb2865162`.
+- CE-0219 corrects opcode `0x5F` and native `0x0042EFB0`: they force
+  eligible non-boss HP to zero, unlink parent state, handle score
+  items/end-subroutines, and do not immediately clear active bit 0x01.
+  Spell finish, boss cleanup, and message start use the same primitive, so
+  none of those effects is a player kill.
+- The fail-closed offline end classifier accepts only revalidated allocation
+  and active-clear control edges. It promotes player-shot kill only from
+  exact pre-HP/damage/post-HP arithmetic, absence of preceding forced zero,
+  defeat mode 0, and the ordered active clear. Runtime event-ring capture
+  remains open; the old active-only observer must not be repeated.
 - `POWER-ROUTE-01` now has a deterministic audit of two accepted natural
   Route-2/Lunatic Game Start prefixes, strictly before each first native hit.
   The prefixes observe `Power 0 -> 5` over 789 decisions and `Power 0 -> 0`
@@ -112,7 +123,7 @@ historical handoff.
 - Retained atlas:
   `artifacts/runtime_reports/th08_mandatory_event_atlas_20260731.json`,
   SHA-256
-  `b8184692cd8a03e37ea5f233e6390b94f3319187e0742a1b48afbcffaad7680a`.
+  `6b2580ebffa7658ede7ca756fb3718f969b2c365fa43f32c24e83b2733f16139`.
   It grants static inventory authority only, not event timing, side-effect,
   future-hazard, planner, or action authority.
 

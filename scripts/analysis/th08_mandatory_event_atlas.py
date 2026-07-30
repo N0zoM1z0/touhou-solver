@@ -65,7 +65,7 @@ STAGES = (
 SUB_EVENT_CLASSES = {
     "indexed_enemy_reference": frozenset(range(0x56, 0x5A)),
     "enemy_birth": frozenset(range(0x5A, 0x5F)),
-    "global_enemy_cleanup": frozenset({0x5F}),
+    "forced_enemy_hp_zero": frozenset({0x5F}),
     "hostile_fire": frozenset(range(0x60, 0x6E)),
     "emission_origin": frozenset({0x6E}),
     "bullet_transform": frozenset({0x6F}),

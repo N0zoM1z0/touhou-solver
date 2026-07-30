@@ -2442,7 +2442,7 @@
     "category": "enemy",
     "confidence": "observed",
     "corpus_count": 157,
-    "description": "Remove every eligible active enemy, invoke its end subroutine, and spawn type-6 scaled-score items for enemies carrying reward flag 0x80; the opcode uses a per-item popup cap of 8000.",
+    "description": "Set current HP to zero for every eligible active non-boss enemy, unlink its parent relation, start its configured end subroutine, and spawn type-6 scaled-score items for enemies carrying reward flag 0x80; active-bit retirement is deferred to later manager processing.",
     "files": [
       "ecldata1.ecl",
       "ecldata1sp.ecl",
@@ -2472,7 +2472,7 @@
     "instruction_sizes": {
       "12": 157
     },
-    "name": "clear_active_enemies_with_score_items",
+    "name": "zero_eligible_enemy_hp_with_score_items",
     "opcode": 95,
     "opcode_hex": "0x5f"
   },

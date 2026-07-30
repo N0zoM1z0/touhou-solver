@@ -818,7 +818,7 @@ header: subroutines=65 timelines=2 data_end=0x0000c82c
 
 ## sub 23 [0x0000284c, 0x00002eac)
 0x0000284c t=     0 op=0x0069 size=16 b08=0x00 diff=0xff pmask=0x0000  set_fire_delay args=[0x00000000(s=0,f=0)]
-0x0000285c t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  clear_active_enemies_with_score_items args=[]
+0x0000285c t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  zero_eligible_enemy_hp_with_score_items args=[]
 0x00002868 t=     0 op=0x0071 size=20 b08=0x00 diff=0xff pmask=0x0000  configure_bullet_sounds args=[0xffffffff(s=-1,f=nan), 0xffffffff(s=-1,f=nan)]
 0x0000287c t=     0 op=0x0050 size=16 b08=0x00 diff=0xff pmask=0x0000  clear_enemy_flags args=[0x00000004(s=4,f=5.605194e-45)]
 0x0000288c t=     0 op=0x006e size=20 b08=0x00 diff=0xff pmask=0x0000  set_emission_offset args=[0x00000000(s=0,f=0), 0x00000000(s=0,f=0)]
@@ -1175,7 +1175,7 @@ header: subroutines=65 timelines=2 data_end=0x0000c82c
 
 ## sub 33 [0x00004a8c, 0x000050b4)
 0x00004a8c t=     0 op=0x0069 size=16 b08=0x00 diff=0xff pmask=0x0000  set_fire_delay args=[0x00000000(s=0,f=0)]
-0x00004a9c t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  clear_active_enemies_with_score_items args=[]
+0x00004a9c t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  zero_eligible_enemy_hp_with_score_items args=[]
 0x00004aa8 t=     0 op=0x0071 size=20 b08=0x00 diff=0xff pmask=0x0000  configure_bullet_sounds args=[0xffffffff(s=-1,f=nan), 0xffffffff(s=-1,f=nan)]
 0x00004abc t=     0 op=0x0050 size=16 b08=0x00 diff=0xff pmask=0x0000  clear_enemy_flags args=[0x00000004(s=4,f=5.605194e-45)]
 0x00004acc t=     0 op=0x006e size=20 b08=0x00 diff=0xff pmask=0x0000  set_emission_offset args=[0x00000000(s=0,f=0), 0x00000000(s=0,f=0)]
@@ -1298,7 +1298,7 @@ header: subroutines=65 timelines=2 data_end=0x0000c82c
 
 ## sub 38 [0x000057b8, 0x00005bb4)
 0x000057b8 t=     0 op=0x0069 size=16 b08=0x00 diff=0xff pmask=0x0000  set_fire_delay args=[0x00000000(s=0,f=0)]
-0x000057c8 t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  clear_active_enemies_with_score_items args=[]
+0x000057c8 t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  zero_eligible_enemy_hp_with_score_items args=[]
 0x000057d4 t=     0 op=0x0071 size=20 b08=0x00 diff=0xff pmask=0x0000  configure_bullet_sounds args=[0xffffffff(s=-1,f=nan), 0xffffffff(s=-1,f=nan)]
 0x000057e8 t=     0 op=0x0050 size=16 b08=0x00 diff=0xff pmask=0x0000  clear_enemy_flags args=[0x00000004(s=4,f=5.605194e-45)]
 0x000057f8 t=     0 op=0x006e size=20 b08=0x00 diff=0xff pmask=0x0000  set_emission_offset args=[0x00000000(s=0,f=0), 0x00000000(s=0,f=0)]
@@ -1434,7 +1434,7 @@ header: subroutines=65 timelines=2 data_end=0x0000c82c
 0x00006400 t=     0 op=0x0081 size=16 b08=0x00 diff=0xff pmask=0x0000  set_enemy_defeat_mode args=[0x00000003(s=3,f=4.203895e-45)]
 0x00006410 t=     0 op=0x0082 size=16 b08=0x00 diff=0xff pmask=0x0000  set_enemy_end_subroutine args=[0x00000033(s=51,f=7.146622e-44)]
 0x00006420 t=     0 op=0x0069 size=16 b08=0x00 diff=0xff pmask=0x0000  set_fire_delay args=[0x00000000(s=0,f=0)]
-0x00006430 t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  clear_active_enemies_with_score_items args=[]
+0x00006430 t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  zero_eligible_enemy_hp_with_score_items args=[]
 0x0000643c t=     0 op=0x0071 size=20 b08=0x00 diff=0xff pmask=0x0000  configure_bullet_sounds args=[0xffffffff(s=-1,f=nan), 0xffffffff(s=-1,f=nan)]
 0x00006450 t=     0 op=0x0050 size=16 b08=0x00 diff=0xff pmask=0x0000  clear_enemy_flags args=[0x00000004(s=4,f=5.605194e-45)]
 0x00006460 t=     0 op=0x006e size=20 b08=0x00 diff=0xff pmask=0x0000  set_emission_offset args=[0x00000000(s=0,f=0), 0x00000000(s=0,f=0)]
@@ -1605,7 +1605,7 @@ header: subroutines=65 timelines=2 data_end=0x0000c82c
 
 ## sub 52 [0x00007540, 0x00007e34)
 0x00007540 t=     0 op=0x0069 size=16 b08=0x00 diff=0xff pmask=0x0000  set_fire_delay args=[0x00000000(s=0,f=0)]
-0x00007550 t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  clear_active_enemies_with_score_items args=[]
+0x00007550 t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  zero_eligible_enemy_hp_with_score_items args=[]
 0x0000755c t=     0 op=0x0071 size=20 b08=0x00 diff=0xff pmask=0x0000  configure_bullet_sounds args=[0xffffffff(s=-1,f=nan), 0xffffffff(s=-1,f=nan)]
 0x00007570 t=     0 op=0x0050 size=16 b08=0x00 diff=0xff pmask=0x0000  clear_enemy_flags args=[0x00000004(s=4,f=5.605194e-45)]
 0x00007580 t=     0 op=0x006e size=20 b08=0x00 diff=0xff pmask=0x0000  set_emission_offset args=[0x00000000(s=0,f=0), 0x00000000(s=0,f=0)]
@@ -1749,7 +1749,7 @@ header: subroutines=65 timelines=2 data_end=0x0000c82c
 
 ## sub 58 [0x0000851c, 0x00008d68)
 0x0000851c t=     0 op=0x0069 size=16 b08=0x00 diff=0xff pmask=0x0000  set_fire_delay args=[0x00000000(s=0,f=0)]
-0x0000852c t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  clear_active_enemies_with_score_items args=[]
+0x0000852c t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  zero_eligible_enemy_hp_with_score_items args=[]
 0x00008538 t=     0 op=0x0071 size=20 b08=0x00 diff=0xff pmask=0x0000  configure_bullet_sounds args=[0xffffffff(s=-1,f=nan), 0xffffffff(s=-1,f=nan)]
 0x0000854c t=     0 op=0x0050 size=16 b08=0x00 diff=0xff pmask=0x0000  clear_enemy_flags args=[0x00000004(s=4,f=5.605194e-45)]
 0x0000855c t=     0 op=0x006e size=20 b08=0x00 diff=0xff pmask=0x0000  set_emission_offset args=[0x00000000(s=0,f=0), 0x00000000(s=0,f=0)]

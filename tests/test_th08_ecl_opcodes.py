@@ -10,6 +10,17 @@ from th08_pattern_adapter import lower_opcode_9b, lower_opcode_9d, lower_opcode_
 
 
 class Th08EclOpcodeTests(unittest.TestCase):
+    def test_opcode_5f_is_forced_hp_zero_not_immediate_retirement(
+        self,
+    ) -> None:
+        spec = opcode_spec(0x5F)
+        self.assertEqual(
+            spec.name,
+            "zero_eligible_enemy_hp_with_score_items",
+        )
+        self.assertIn("active-bit retirement is deferred", spec.description)
+        self.assertEqual(spec.confidence, "observed")
+
     def test_boss_flag_is_not_an_opaque_secondary_flag(self) -> None:
         spec = opcode_spec(0x53)
         self.assertEqual(spec.name, "set_boss_flag")

@@ -25,7 +25,7 @@ header: subroutines=10 timelines=1 data_end=0x00001844
 ## sub 1 [0x00000154, 0x00000480)
 0x00000154 t=     0 op=0x004b size=28 b08=0x00 diff=0xff pmask=0x0000  set_movement_bounds args=[0x42000000(s=1107296256,f=32), 0x42800000(s=1115684864,f=64), 0x43b00000(s=1135607808,f=352), 0x43000000(s=1124073472,f=128)]
 0x00000170 t=     0 op=0x0069 size=16 b08=0x00 diff=0xff pmask=0x0000  set_fire_delay args=[0x00000000(s=0,f=0)]
-0x00000180 t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  clear_active_enemies_with_score_items args=[]
+0x00000180 t=     0 op=0x005f size=12 b08=0x00 diff=0xff pmask=0x0000  zero_eligible_enemy_hp_with_score_items args=[]
 0x0000018c t=     0 op=0x0071 size=20 b08=0x00 diff=0xff pmask=0x0000  configure_bullet_sounds args=[0xffffffff(s=-1,f=nan), 0xffffffff(s=-1,f=nan)]
 0x000001a0 t=     0 op=0x0050 size=16 b08=0x00 diff=0xff pmask=0x0000  clear_enemy_flags args=[0x00000004(s=4,f=5.605194e-45)]
 0x000001b0 t=     0 op=0x006e size=20 b08=0x00 diff=0xff pmask=0x0000  set_emission_offset args=[0x00000000(s=0,f=0), 0x00000000(s=0,f=0)]

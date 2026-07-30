@@ -100,7 +100,7 @@ Confidence values keep observed behavior separate from provisional naming and un
 | `0x5c` | `spawn_child_enemy_relative` | enemy | inferred | 425 | 36 | Spawn/link a child enemy relative to the parent position. |
 | `0x5d` | `spawn_enemy_from_vm_position` | enemy | inferred | 9 | 40 | Spawn an enemy through the timeline spawn primitive at an explicit position. |
 | `0x5e` | `spawn_enemy_from_vm_offset` | enemy | inferred | 152 | 40 | Spawn an enemy through the timeline primitive at current position plus offset. |
-| `0x5f` | `clear_active_enemies_with_score_items` | enemy | observed | 157 | 12 | Remove every eligible active enemy, invoke its end subroutine, and spawn type-6 scaled-score items for enemies carrying reward flag 0x80; the opcode uses a per-item popup cap of 8000. |
+| `0x5f` | `zero_eligible_enemy_hp_with_score_items` | enemy | observed | 157 | 12 | Set current HP to zero for every eligible active non-boss enemy, unlink its parent relation, start its configured end subroutine, and spawn type-6 scaled-score items for enemies carrying reward flag 0x80; active-bit retirement is deferred to later manager processing. |
 | `0x60` | `fire_pattern_mode_0` | bullet | observed | 352 | 44 | Emit the shared 44-byte bullet pattern using expansion mode 0. |
 | `0x61` | `fire_pattern_mode_1` | bullet | observed | 546 | 44 | Emit the shared 44-byte bullet pattern using expansion mode 1. |
 | `0x62` | `fire_pattern_mode_2` | bullet | observed | 241 | 44 | Emit the shared 44-byte bullet pattern using expansion mode 2. |

@@ -133,7 +133,7 @@ _KNOWN = {
     0x5C: ("spawn_child_enemy_relative", "enemy", "inferred", "Spawn/link a child enemy relative to the parent position."),
     0x5D: ("spawn_enemy_from_vm_position", "enemy", "inferred", "Spawn an enemy through the timeline spawn primitive at an explicit position."),
     0x5E: ("spawn_enemy_from_vm_offset", "enemy", "inferred", "Spawn an enemy through the timeline primitive at current position plus offset."),
-    0x5F: ("clear_active_enemies_with_score_items", "enemy", "observed", "Remove every eligible active enemy, invoke its end subroutine, and spawn type-6 scaled-score items for enemies carrying reward flag 0x80; the opcode uses a per-item popup cap of 8000."),
+    0x5F: ("zero_eligible_enemy_hp_with_score_items", "enemy", "observed", "Set current HP to zero for every eligible active non-boss enemy, unlink its parent relation, start its configured end subroutine, and spawn type-6 scaled-score items for enemies carrying reward flag 0x80; active-bit retirement is deferred to later manager processing."),
     0x69: ("set_fire_delay", "bullet", "observed", "Set rank-adjusted fire delay and reset its timer."),
     0x6A: ("set_fire_delay_random_phase", "bullet", "observed", "Set rank-adjusted fire delay and randomize the initial timer phase."),
     0x6B: ("enable_deferred_fire", "bullet", "observed", "Queue the next direct-fire instruction instead of emitting immediately."),

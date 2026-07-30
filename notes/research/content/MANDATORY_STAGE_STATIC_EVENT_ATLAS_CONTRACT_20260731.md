@@ -43,9 +43,9 @@ PYTHONPATH=scripts python3 \
 ```
 
 The retained output has SHA-256
-`b8184692cd8a03e37ea5f233e6390b94f3319187e0742a1b48afbcffaad7680a`
+`6b2580ebffa7658ede7ca756fb3718f969b2c365fa43f32c24e83b2733f16139`
 and internal pre-digest
-`2e2b33645bca24474a7cdc2a950e474135ad9dc46ddb146cb229c8fad7242a37`.
+`203693babf321706f96a26f5b024136f3f56c1e0dc9980b6930759d7600c78de`.
 A second generation was byte-identical.
 
 ## Result
@@ -74,7 +74,7 @@ effect. The retained matrix includes:
 | bullet transform | 179 | 151 | 28 |
 | laser lifecycle | 13 | 13 | 0 |
 | enemy birth | 277 | 259 | 18 |
-| global enemy cleanup | 33 | 30 | 3 |
+| forced enemy HP zero | 33 | 30 | 3 |
 | callback installation/use | 52 | 52 | 0 |
 | item/resource event | 81 | 78 | 3 |
 | movement redirect | 355 | 333 | 22 |
@@ -83,6 +83,11 @@ effect. The retained matrix includes:
 
 The route timelines add 519 enemy-birth schedule candidates, 71
 wait/marker candidates, 9 control candidates, and 19 unknown candidates.
+
+CE-0219 corrected the inherited opcode-`0x5F` label after revalidation of
+`0x0042EFB0`: the opcode forces eligible HP to zero but does not itself clear
+the active bit. The atlas class and retained digest above include that
+correction.
 
 ## Symbolic Runtime Join
 

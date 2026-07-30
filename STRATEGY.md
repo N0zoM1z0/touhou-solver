@@ -1750,6 +1750,14 @@ first.
   manager update. Therefore the old active-only trace grants zero verified
   kills and cannot test kill-before-saturation. This is an observer rejection,
   not a rejection of the strategy hypothesis.
+- **Observed end-semantics correction (2026-07-31):** inherited opcode-`0x5F`
+  and callee labels falsely implied immediate active-enemy removal. Shipped
+  instructions instead force eligible non-boss HP to zero, unlink parent
+  state, handle score items/end subroutines, and defer any active-bit clear to
+  later manager defeat processing. CE-0219 corrects the ECL catalog, static
+  atlas, and IDA names. A fail-closed offline classifier now distinguishes
+  VM end, offscreen cull, forced-zero defeat, exact lethal player-shot damage,
+  and unattributed HP defeat, but no ordered runtime capture exists yet.
 - **Observed route-resource limit (2026-07-31):** two accepted natural
   Route-2/Lunatic Game Start prefixes, bounded strictly before their first
   native hits, retain `Power 0 -> 5` across 789 decisions and `Power 0 -> 0`
@@ -1795,6 +1803,7 @@ first.
   `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`, and
   `notes/research/stage5_combat/ROUTE2_FOCUS_SHOT_EMISSION_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/STAGE5_ENEMY_PRESENCE_EPISODE_AUDIT_CONTRACT_20260731.md`, and
+  `notes/research/stage5_combat/ROUTE2_ENEMY_END_SEMANTICS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation

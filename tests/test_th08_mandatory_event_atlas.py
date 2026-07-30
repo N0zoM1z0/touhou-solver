@@ -18,10 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class MandatoryEventAtlasTests(unittest.TestCase):
-    def test_event_classes_keep_overlapping_resource_cleanup(self) -> None:
+    def test_event_classes_keep_overlapping_resource_effect(self) -> None:
         self.assertEqual(
             _event_classes("subroutine", 0x5F),
-            ("global_enemy_cleanup", "item_resource"),
+            ("forced_enemy_hp_zero", "item_resource"),
         )
         self.assertEqual(
             _event_classes("subroutine", 0x6F),

@@ -49,10 +49,15 @@ IDA database:
 - Ordinary eligibility remains `state != 0 && (state == 1 || type == 3)`.
   Types 4 and 5 depend on a still-unmodeled mode predicate, and any nonzero
   hit callback may veto or alter a geometric hit.
+- The loop accumulates ordinary-shot damage in `[ebp-0x34]`. At
+  `0x0045199F..0x004519BF`, `min([ebp-0x34], 50)` is added only to the
+  caller-owned enemy `+0x2E10` hit-feedback accumulator. The uncapped
+  `[ebp-0x34]` continues into the 192-slot damage-region pass and is returned.
 
 IDA comments retain the exact alternate-width condition at `0x0042D0EE`, the
-complete pool/slot boundary at `0x004516CF`, and the update-callback/trajectory
-boundary at `0x004511C8`.
+complete pool/slot boundary at `0x004516CF`, the update-callback/trajectory
+boundary at `0x004511C8`, and the distinct feedback/damage accumulators at
+`0x0042A1FA` and `0x004519A3`.
 
 The locally pinned `th08-decomp` commit
 `84738749bdcf6cffabe8d0d76e17f19253a20d50` provides address and extent
@@ -62,9 +67,10 @@ it supplies no shot lifecycle, callback, collision, or damage authority.
 ## Implemented Projection
 
 `scripts/th08_runtime/native_combat_projection.py` implements
-`th08-native-combat-root-projection-v2`. V1 established the complete
-shot/target projection; V2 adds normalized loaded-SHT identity and exact
-source-record provenance.
+`th08-native-combat-root-projection-v3`. V1 established the complete
+shot/target projection; V2 added normalized loaded-SHT identity and exact
+source-record provenance; V3 separates uncapped returned damage from the
+capped hit-feedback accumulator increment.
 
 For every exact root or future tick it retains:
 
@@ -85,11 +91,12 @@ For every exact root or future tick it retains:
   overlaps.
 
 The supported ordinary subtotal applies the native Bomb reduction, piercing
-set `{4, 5, 6}`, nonpiercing state-2 transition, and per-pass cap 50. Because
-type 4/5 overlap remains unresolved, those types never contribute to the
-numeric subtotal in this projection. Attack regions, later alternate-route
-scaling, spell/Boss/timeout scaling, and the final HP write are outside this
-subtotal.
+set `{4, 5, 6}`, and nonpiercing state-2 transition. It reports the uncapped
+return subtotal separately from the `min(subtotal, 50)` feedback-accumulator
+increment. Because type 4/5 overlap remains unresolved, those types never
+contribute to the numeric subtotal in this projection. Attack regions, later
+alternate-route scaling, spell/Boss/timeout scaling, and the final HP write
+are outside this subtotal.
 
 The full pool digest is deliberately stricter than the decoded active list.
 An inactive byte difference can reject deterministic equality even when no
@@ -245,9 +252,8 @@ It grants no:
 
 Five focused projection tests, six focused report tests, three loaded-SHT
 provenance tests, twelve rolling snapshot tests, and four causal-search tests
-pass. Ruff and diff checks pass. Complete discovery passes 1,517 tests in
-14.241 seconds on Linux and 31.181
-seconds through the Windows UNC loader, with the three existing skips.
+pass. Complete discovery passes 1,518 tests in 15.670 seconds on Linux and
+31.282 seconds through the Windows UNC loader, with the three existing skips.
 
 The next authorized causal gate is a small immutable-root corpus spanning
 focused, unfocused, and dynamic-refocus complete-mask schedules. Each branch

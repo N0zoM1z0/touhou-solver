@@ -17,6 +17,7 @@ from th08_player_shot_model import (
     player_shot_overlaps_enemy,
     remilia_bomb_sht_level,
     resolve_default_shot_damage,
+    player_shot_feedback_increment,
     select_player_shot_level,
     select_normal_sht_level,
     shot_damage_contribution,
@@ -313,7 +314,7 @@ class PlayerShotModelTests(unittest.TestCase):
             )
         )
 
-    def test_bomb_damage_scaling_type6_piercing_and_frame_cap(self) -> None:
+    def test_bomb_damage_scaling_type6_piercing_and_feedback_cap(self) -> None:
         self.assertEqual(shot_damage_contribution(45, bomb_active=True), 9)
         shots = tuple(
             spawn_player_shot(
@@ -331,8 +332,27 @@ class PlayerShotModelTests(unittest.TestCase):
             enemy_height=100.0,
             bomb_active=True,
         )
-        self.assertEqual(damage, 50)
+        self.assertEqual(damage, 54)
+        self.assertEqual(player_shot_feedback_increment(damage), 50)
         self.assertTrue(all(shot.state == 1 and shot.active for shot in updated))
+
+    def test_return_damage_is_not_feedback_capped(self) -> None:
+        base = spawn_player_shot(
+            self.normal.shots[8],
+            player_position=(0.0, 0.0),
+            option_positions=((0.0, 0.0),) * 4,
+        )
+        shots = (replace(base, damage=40), replace(base, damage=40))
+        _updated, damage = resolve_default_shot_damage(
+            shots,
+            enemy_x=0.0,
+            enemy_y=0.0,
+            enemy_width=100.0,
+            enemy_height=100.0,
+            bomb_active=False,
+        )
+        self.assertEqual(damage, 80)
+        self.assertEqual(player_shot_feedback_increment(damage), 50)
 
     def test_native_type3_state_and_type45_mode_gates(self) -> None:
         base = spawn_player_shot(

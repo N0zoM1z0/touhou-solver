@@ -127,10 +127,12 @@ are absent.
 
 The enumeration is exact for the declared integer pickup arithmetic and SHT
 selection. Nominal emission/base-damage values assume an empty shot pool and
-omit collision, the 50-damage frame cap, target motion, native damage scaling,
-and enemy lifetime. Their direction as delivered-damage estimates is unknown.
-A native result outside the capped transition table falsifies the resource
-recurrence; a physical route with no later benefit does not.
+omit collision, the separate 50-point hit-feedback increment cap, target
+motion, native damage scaling, and enemy lifetime. Returned ordinary-shot
+damage itself is not capped at 50. The nominal sums' direction as
+delivered-damage estimates is unknown. A native result outside the declared
+Power/SHT transition table falsifies the resource recurrence; a physical route
+with no later benefit does not.
 
 The ledger is offline and has no issue deadline or live consumer. The
 unchanged live Boolean policy plus fresh hard certificate remains the

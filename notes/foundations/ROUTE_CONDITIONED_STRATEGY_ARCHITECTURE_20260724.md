@@ -139,8 +139,8 @@ HP response, even in a run whose measured Power was higher.
 The repository already contains the correct starting point:
 
 - `th08_player_shot_model.py` implements default SHT cadence, source
-  positions, shot movement, collision, damage, piercing behavior, and the
-  shared 50-damage cap;
+  positions, shot movement, collision, uncapped returned damage, piercing
+  behavior, and the separate 50-point hit-feedback increment cap;
 - `th08_option_model.py` implements route-2 focus transitions and the four
   option positions;
 - decoded SHT levels provide Power-dependent shot records;

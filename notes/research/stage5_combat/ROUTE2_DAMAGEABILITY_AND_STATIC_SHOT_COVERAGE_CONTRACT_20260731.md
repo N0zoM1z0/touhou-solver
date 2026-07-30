@@ -36,8 +36,10 @@ callers/dataflow:
   the hit.
 - Collision uses the inclusive center/size AABB at `0x00451740`.
 - During Bomb, each ordinary-shot contribution is divided by five with a
-  minimum of one. The ordinary-shot subtotal is capped at 50 before the
-  separate damage-region pass.
+  minimum of one. The ordinary-shot subtotal remains uncapped in the return
+  accumulator used by the separate damage-region pass and later HP path.
+  `0x0045199F..0x004519BF` caps only the increment added to caller-owned enemy
+  `+0x2E10`, a hit-feedback accumulator initialized at `0x0042A1FA`.
 - Shot types 4, 5, and 6 pierce. Other hits enter state 2; their velocity is
   divided by eight except for shot type 3.
 - An active spell owned by the target plus an active Bomb forces this
@@ -51,8 +53,9 @@ arithmetic. Its result is normally divided by 1.7, or by 6.5 for Routes 3 and
 11, unless the second call reports Bomb-region overlap. Later spell/phase
 scaling and timeout/transition arithmetic remain outside the pure gate model.
 
-Seven durable IDA comments were added at `0x0042C936`, `0x0042C95D`,
-`0x0042CF47`, `0x0042D08B`, `0x0042D275`, `0x004516A9`, and `0x004518DC`.
+Nine durable IDA comments were added at `0x0042A1FA`, `0x0042C936`,
+`0x0042C95D`, `0x0042CF47`, `0x0042D08B`, `0x0042D275`, `0x004516A9`,
+`0x004518DC`, and `0x004519A3`.
 
 ## Executable Boundary
 
@@ -135,8 +138,8 @@ Nominal empty-pool 20-tick base-damage sums are:
 | 128+ | 572 | 616 |
 
 These sums are **not delivered damage**. They omit pool occupancy, target
-motion, target dimensions, collision timing, per-frame cap interactions,
-damage-region overlap, native scaling, and enemy lifetime.
+motion, target dimensions, collision timing, hit-feedback accumulator
+behavior, damage-region overlap, native scaling, and enemy lifetime.
 
 The general statement “release Focus for wider coverage” is rejected. Focus,
 Power, height, option/RNG state, and the target set must be modeled together.

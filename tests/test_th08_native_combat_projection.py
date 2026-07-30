@@ -431,11 +431,15 @@ class NativeCombatProjectionTests(unittest.TestCase):
         primary = target["ordinary_shot_passes"]["primary"]
         alternate = target["ordinary_shot_passes"]["alternate"]
         self.assertEqual(primary["supported_hit_slots"], [0, 1])
-        self.assertEqual(primary["supported_contribution_after_cap"], 30)
+        self.assertEqual(primary["supported_return_damage_subtotal"], 30)
+        self.assertEqual(
+            primary["supported_feedback_accumulator_increment"],
+            30,
+        )
         self.assertEqual(primary["type45_mode_dependent_overlap_slots"], [2])
         self.assertEqual(primary["callback_dependent_overlap_slots"], [3])
         self.assertEqual(alternate["supported_hit_slots"], [1])
-        self.assertEqual(alternate["supported_contribution_after_cap"], 10)
+        self.assertEqual(alternate["supported_return_damage_subtotal"], 10)
 
     def test_nonfinite_active_shot_fails_closed(self) -> None:
         pool = bytearray(PLAYER_SHOT_POOL_BYTES)

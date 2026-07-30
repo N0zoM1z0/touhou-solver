@@ -28,7 +28,7 @@ from th08_sht import ShtFile, ShtLevel, ShtShotRecord
 
 SHOT_CADENCE_LENGTH = 20
 PLAYER_SHOT_POOL_SIZE = 128
-PLAYER_SHOT_FRAME_DAMAGE_CAP = 50
+PLAYER_SHOT_FEEDBACK_INCREMENT_CAP = 50
 DEFAULT_SHOT_CALLBACK_INDEX = 0
 RANDOM_SPREAD_SHOT_CALLBACK_INDEX = 7
 RANDOM_SPREAD_PI_BITS = 0x40490FDB
@@ -384,11 +384,15 @@ def resolve_default_shot_damage(
     bomb_active: bool,
     type45_collision_suppressed: bool | None = None,
 ) -> tuple[tuple[PlayerShot, ...], int]:
-    """Resolve one enemy collision pass and the shared 50-damage shot cap.
+    """Resolve one enemy collision pass and return the uncapped damage subtotal.
 
     Shot types 4, 5, and 6 remain active after a hit. Other default shot types
     enter hit state 2 and have velocity divided by 8. Enemy-specific hit
     callbacks can override this path and are intentionally not modeled here.
+
+    The native `min(total, 50)` at 0x0045199F limits only the increment applied
+    to the enemy's hit-feedback accumulator at +0x2E10.  It does not replace
+    the damage accumulator returned to `enemy_manager_update`.
     """
 
     updated: list[PlayerShot] = []
@@ -424,4 +428,10 @@ def resolve_default_shot_damage(
                     ),
                 )
             )
-    return tuple(updated), min(total, PLAYER_SHOT_FRAME_DAMAGE_CAP)
+    return tuple(updated), total
+
+
+def player_shot_feedback_increment(damage_subtotal: int) -> int:
+    """Return the capped +0x2E10 feedback-meter increment for one pass."""
+
+    return min(damage_subtotal, PLAYER_SHOT_FEEDBACK_INCREMENT_CAP)

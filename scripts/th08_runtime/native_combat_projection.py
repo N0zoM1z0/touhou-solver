@@ -58,14 +58,14 @@ from th08_runtime.route2_sht_provenance import (
 from th08_runtime.sensing import decode_spell_state
 
 
-NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v2"
+NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v3"
 PLAYER_SHOT_COMBAT_STATE_SCHEMA = "th08-player-shot-combat-state-v1"
 ENEMY_DAMAGE_TARGET_STATE_SCHEMA = "th08-enemy-damage-target-state-v1"
-SUPPORTED_SHOT_PASS_SCHEMA = "th08-supported-ordinary-shot-pass-v1"
+SUPPORTED_SHOT_PASS_SCHEMA = "th08-supported-ordinary-shot-pass-v2"
 
 TH08_TIMER_SIZE = 12
 PLAYER_SHOT_POOL_BYTES = PLAYER_SHOT_POOL_SIZE * PLAYER_SHOT_SLOT_STRIDE
-PLAYER_SHOT_FRAME_DAMAGE_CAP = 50
+PLAYER_SHOT_FEEDBACK_INCREMENT_CAP = 50
 PIERCING_SHOT_TYPES = frozenset((4, 5, 6))
 
 ENEMY_DAMAGE_HITBOX_OFFSET = 0x2D70
@@ -643,7 +643,10 @@ def _supported_shot_pass(
             updated.append(shot)
         else:
             updated.append(replace(shot, state=2))
-    capped = min(contribution, PLAYER_SHOT_FRAME_DAMAGE_CAP)
+    feedback_increment = min(
+        contribution,
+        PLAYER_SHOT_FEEDBACK_INCREMENT_CAP,
+    )
     return (
         {
             "schema": SUPPORTED_SHOT_PASS_SCHEMA,
@@ -652,11 +655,13 @@ def _supported_shot_pass(
             "supported_hit_slots": supported_hits,
             "callback_dependent_overlap_slots": callback_unknown,
             "type45_mode_dependent_overlap_slots": type45_unknown,
-            "supported_contribution_before_cap": contribution,
-            "supported_contribution_after_cap": capped,
-            "ordinary_shot_frame_cap": PLAYER_SHOT_FRAME_DAMAGE_CAP,
+            "supported_return_damage_subtotal": contribution,
+            "supported_feedback_accumulator_increment": feedback_increment,
+            "feedback_accumulator_increment_cap": (
+                PLAYER_SHOT_FEEDBACK_INCREMENT_CAP
+            ),
             "numeric_authority": (
-                "supported_slot_subtotal_only_before_attack_regions_"
+                "supported_uncapped_return_subtotal_only_before_attack_regions_"
                 "alternate_scaling_spell_boss_and_hp_write"
             ),
         },
@@ -904,7 +909,7 @@ def capture_native_combat_projection(
         "supported_primary_contribution_sum": sum(
             int(
                 record["ordinary_shot_passes"]["primary"][
-                    "supported_contribution_after_cap"
+                    "supported_return_damage_subtotal"
                 ]
             )
             for record in target_records
@@ -912,7 +917,7 @@ def capture_native_combat_projection(
         "open_gate_supported_primary_contribution_sum": sum(
             int(
                 record["ordinary_shot_passes"]["primary"][
-                    "supported_contribution_after_cap"
+                    "supported_return_damage_subtotal"
                 ]
             )
             for record in target_records
@@ -920,7 +925,7 @@ def capture_native_combat_projection(
         ),
         "supported_alternate_contribution_sum": sum(
             int(
-                alternate["supported_contribution_after_cap"]
+                alternate["supported_return_damage_subtotal"]
             )
             for record in target_records
             if (

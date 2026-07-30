@@ -970,9 +970,11 @@ circle every active callback frame and periodically add perpendicular
   a 32 x 16 hitbox, and no custom callbacks.
 - Ordinary-shot collision is an inclusive AABB overlap. While a Bomb is active,
   damage is divided by 5 with a minimum of 1, so each of these records
-  contributes 9 per overlapping check. The 128-slot ordinary-shot subtotal is
-  capped at 50 per enemy check. Type 6 skips the hit-state transition and keeps
-  piercing.
+  contributes 9 per overlapping check. The 128-slot ordinary-shot subtotal
+  returned for later damage-region and HP arithmetic is not capped. The
+  `min(subtotal, 50)` at `0x0045199F` limits only the increment applied to the
+  enemy `+0x2E10` hit-feedback accumulator. Type 6 skips the hit-state
+  transition and keeps piercing.
 
 These executable rules are in `scripts/th08_player_shot_model.py` and
 `scripts/th08_option_model.py`; reusable movement geometry and the TH08 input

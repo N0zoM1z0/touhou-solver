@@ -1917,10 +1917,13 @@ first.
   root/tick slots, and no player phase 2. It grants no delivered-damage,
   generation, benefit, ranking, or live authority.
 - **Loaded Route-2 SHT provenance (2026-07-31, Offline):** combat projection
-  v2 reads both loaded SHT heap images, reverses level-pointer and callback
+  v3 reads both loaded SHT heap images, reverses level-pointer and callback
   relocation, and requires the normalized bytes to equal the pinned primary/
   secondary SHA-256 identities. Its exact 87-record pointer map separates 53
   normal records, 34 Bomb-only special records, and foreign/unknown pointers.
+  CE-0226 additionally corrects the ordinary-shot arithmetic: the native
+  return subtotal is uncapped; only the enemy `+0x2E10` hit-feedback increment
+  is limited to 50.
   Rolling v6 and causal-search v4 retain that identity at roots and ticks; the
   lowerer refuses to apply normal-content closure to any special or unknown
   source. No new native corpus exists. This grants loaded-content and source-
@@ -1983,7 +1986,9 @@ first.
   synthetic supported-overlap authority only. The normal-shot closure has
   pinned shipped-content/native-selector authority only. Loaded-SHT
   provenance has offline exact normalized-content/source-ownership authority
-  only. The source/emission atlas has
+  only. The uncapped ordinary return versus capped feedback split has shipped-
+  instruction/static-dataflow authority only; damage regions and later enemy
+  scaling remain outside the numeric projection. The source/emission atlas has
   shipped-content/static
   candidate authority only. The item/drop atlas has shipped-native
   recurrence/static opportunity authority only. The cross-atlas board has

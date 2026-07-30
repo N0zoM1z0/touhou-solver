@@ -92,14 +92,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `f737996`
-  (`Retain ordered input publication phase audit`).
-- Latest pre-trial repository/live code checkpoint: `60ae5b9`
-  (`Retain CE-0191 diagnostic scale continuation`).
+- Latest retained research checkpoint: `ca69ace`
+  (`Implement priority-17 publication probe`).
+- Latest pre-trial repository/live code checkpoint: `ca69ace`
+  (`Implement priority-17 publication probe`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
-- Latest native-semantic correction checkpoint: `f737996`. The original
+- Latest native-semantic correction checkpoint: `ca69ace`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest complete physical workload:
   `lunatic_route2_stage5_unattended_20260730_041408`. It is a complete
@@ -279,6 +279,31 @@ the raw source SHA-256 remains
 Five focused tests and complete 1,207-test Linux/Windows suites pass in
 14.280/30.116 seconds, with three existing Windows skips. No gameplay or live
 authority changed.
+
+Checkpoint `ca69ace` implements the default-off priority-17 physical
+publication preflight. Connected IDA corrects the inherited one-store
+description: priority 17 saves previous once at `0x00452339`, writes current
+from raw at `0x00452347`, and may overwrite it from a second raw sample at
+`0x004523C7`; all five exits converge at the common shipped epilogue
+`0x00452480`. Material comments at those stores, the second sample
+`0x004523B8`, and the epilogue record the correction.
+
+The trace-only hook uses the unreferenced padding at `0x00452484` and a
+256-event remote ring to retain callback-exit serial, manager frame, engine
+flags, raw/current/previous, and callback recording counter. Installation and
+cleanup suspend all target threads and inspect EIP before changing/freeing
+executable code. Real writes retain pre/post-dispatch serials; no-write
+samples nothing. Overflow/read failure is unknown trace evidence and does
+not stop the stage. Practice/full-route supervisors automatically retain the
+source-hashed compact publication report.
+
+Eighty-six focused tests pass. Complete discovery passes 1,226 tests in
+14.104 seconds on Linux and 30.564 seconds through the Windows UNC loader,
+with three existing skips. A preceding Windows run transiently missed the
+unrelated auxiliary-ECL timing gate; isolated p95/p99/max then passed at
+`0.311/0.318/0.320 ms`, and the subsequent complete suite passed. No game has
+yet exercised the probe. It has trace/preflight authority only and supplies
+no delay adapter, action, hard-survival, or NMNB authority.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -636,16 +661,18 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-C` from checkpoint `f737996`. The independent ordered
+2. Continue `SEM-MODE-C` from checkpoint `ca69ace`. The independent ordered
    transaction state and native priority-9-before-priority-17 composition are
    complete offline. The retained post-hoc audit exhausts the current trace
-   and proves exact publication deadline unidentifiable from it. Implement a
-   default-off bounded priority-17 serial/event ring plus pre/post-dispatch
-   serial brackets; overflow/read failure must mark only the interval unknown
-   and continue the stage. Use that evidence to close asynchronous
-   capture/issue phase and physical completion-delay support without using
-   manager frame as an input clock. Then build an optimized implementation
-   and run exact
+   and proves exact publication deadline unidentifiable from it. The bounded
+   priority-17 serial/event ring and pre/post-dispatch brackets now pass
+   preflight. Run one complete original-game Lunatic Stage-5 workload with
+   only `--trace-priority17-publications`; preserve hard no-Bomb,
+   `stop-after-hits=0`, stage-level scope, and normal completion even if the
+   probe becomes unavailable. Retain the compact report and use only
+   fully-covered serial intervals to close asynchronous capture/issue phase
+   and physical completion-delay support without treating manager frame as
+   an input clock. Then build an optimized implementation and run exact
    scalar/optimized parity for multi-release/press, reversal, Focus, Shot,
    overwrite, no-write, and every intermediate action identity. After that,
    build or conservatively version an exact future body/flag/geometry
@@ -2542,8 +2569,21 @@ entry, and never selects an exact spell. The scale proxy and extra
 reads/retries are unknown-direction and can perturb cadence, so this is
 diagnostic physical evidence rather than an observer-off survival comparator.
 Run `041408` closes this occurrence gate; do not repeat it unchanged. There is
-currently no authorized SEM-MODE-C physical command because exact
-body/version integration and differential gates come first.
+now one authorized SEM-MODE-C physical command:
+
+```bash
+/mnt/c/Windows/System32/cmd.exe /d /c call \
+  '\\wsl.localhost\ubuntu\home\pentester\coding\codex_ida\th08\run_th08_practice_agent.bat' \
+  --stage 5 --status-seconds 15 --stall-timeout 120 \
+  --trace-priority17-publications
+```
+
+This is one complete original-game Stage-5 diagnostic, not a named-spell
+gate. It keeps hard no-Bomb and `stop-after-hits=0`; probe
+unavailability/overflow/read failure must not abort the stage. Do not combine
+it with the enemy-mode/root-scale observer, THPRAC, or another experiment
+flag. The supervisor retains
+`*.priority17_publication_report.json` after ordinary whole-stage completion.
 
 The current explicit trace-only native birth-observer gate adds:
 

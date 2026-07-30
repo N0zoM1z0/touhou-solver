@@ -74,10 +74,23 @@ Stage-5 replay has an exact replay-input/native-manager alignment and one
 canonical first-hit root. Original TH08 has executed all 36 no-Bomb
 three-frame action branches from the same implicit replay root.
 
-The corrected short fence yielded six apparent local no-hit candidates, but
-all six hit four to six frames later under a longer fence. There is no exact
-no-hit witness and no strategy promotion. A same-frame manager/collision
-observer race also rejects the earlier stop-at-hit-frame pilot.
+The corrected short fence yielded six apparent local no-hit candidates, and
+all six single-intervention branches hit four to six frames later. That
+CE-0207 result remains valid. Promoted same-session subroots now add causal
+continuations rather than reusing an action-incompatible future:
+
+- all six prefixes received all 36 secondary actions, for 216 branches;
+- maximin selection chose `0x94 -> 0x44 -> 0x10 -> 0xA4` at manager frames
+  `2129/2137/2145/2153`;
+- the resulting exact H=32 original-engine witness remains unhit through
+  manager frame 2,161; and
+- an identical-seam natural frame-pump run matches all 32 headless
+  collision/control projections and compact states.
+
+This is an exact fixed-replay-root witness, not a complete spell, live, or
+physical survival claim, and it causes no strategy promotion. A same-frame
+manager/collision observer race still rejects the earlier stop-at-hit-frame
+pilot.
 
 Exhaustive native replay-prefix branching remains **rejected as the primary
 inner loop** because it repeats the whole stage prefix for every action.
@@ -98,13 +111,25 @@ and repeats the recorded branch exactly.
 Legacy polling is not an exact seam oracle: 31/36 endpoints match fully and
 36/36 hit-versus-survive classifications match. CE-0209 retains five
 non-atomic polling differences; same-seam natural H=8 captures for
-`0x14/0x61/0x44` match the rolling executor. This does not convert the six
-short-fence survivors into exact no-hit witnesses; CE-0207 still requires a
-causal continuation.
+`0x14/0x61/0x44` match the rolling executor. CE-0207's rejected
+single-intervention claim is now corrected through the declared H=32 horizon
+by observation-compatible causal continuation. The content-addressed report
+is
+`artifacts/runtime_reports/th08_native_snapshot_causal_policy_root2129_h32_20260730.json`.
+Its `ModelTrajectory` remains explicitly pending, so rebuilt-model parity and
+the model/native first mismatch are still open.
 
-The executor gains no live authority until additional event-class roots,
-complete causal coverage, delivery preflight, and focused physical
-validation pass.
+The executor gains no live authority until the rebuilt solver is bound to the
+retained root/schedule, additional event-class roots pass, complete causal
+coverage and delivery preflight hold, and focused physical validation passes.
+
+The next performance proposal is a supervised warm wind-tunnel service with
+a single-writer queue, immutable session/root IDs, branch-level root/FX/
+stack/thread/map validation, cooperative cancellation, idle TTL, poison
+state, cleanup, and automatic replay rebootstrap. The current batch executor
+already completed 180 branches in one warm session with an exact parent
+repeat. CE-0210 retains one intermittent mapping-epoch poison event; a warm
+service must recover from it rather than weakening the epoch check.
 
 Accepted replay saving, explicit-root limits, branch evidence, and the next
 gate are in

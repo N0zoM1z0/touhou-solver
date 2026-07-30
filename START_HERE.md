@@ -15,12 +15,12 @@ historical handoff.
 ### Exact checkpoint
 
 - Branch: `main`.
-- Base implementation checkpoint: `ae78095`
-  (`Build one-tick native snapshot executor`).
+- Base rolling implementation checkpoint: `cb6c59f`
+  (`Build rolling native snapshot iteration loop`).
 - The following retention/documentation checkpoint is the current repository
   HEAD.
-- Complete Linux discovery passes 1,334 tests in 15.050 seconds.
-- Complete Windows UNC discovery passes 1,334 tests in 28.467 seconds with
+- Complete Linux discovery passes 1,344 tests in 14.367 seconds.
+- Complete Windows UNC discovery passes 1,344 tests in 28.864 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -61,8 +61,13 @@ historical handoff.
   30 hit, six locally reached the fence.
 - Extending those six masks (`0x14/15/90/91/94/95`) to frame 2,257 produced
   first hits at `2141/2142/2140/2140/2141/2141`.
-- There is no exact no-hit witness. The current three-frame intervention only
-  delays the contact.
+- CE-0207's single three-frame interventions only delayed the contact, but
+  the promoted-subroot causal search now has an exact fixed-root H=32
+  no-hit witness through manager frame 2,161:
+  `0x94 -> 0x44 -> 0x10 -> 0xA4`, with decisions at
+  `2129/2137/2145/2153`.
+- This is a same-replay original-engine witness, not a full-spell, live, or
+  physical survival claim.
 - Stop-at-2,136 pilot reports are rejected: manager priority advances before
   same-frame collision, so an external observer must see a later fence.
 
@@ -119,6 +124,26 @@ historical handoff.
   `artifacts/runtime_reports/th08_native_snapshot_fast_iteration_root2129_h8_20260730.json`,
   SHA-256
   `ddd71ebf110207ef0baf098bfb3d9d710e5a403d08bcf5b1b09bda0eb8a000d7`.
+- Endpoint FX/root promotion now turns a causal endpoint into a same-session
+  subroot and can restore the parent root exactly. The six H=8 survivors each
+  received all 36 secondary actions: 216 causal continuations. The largest
+  one-session batch completed 180 branches in `309.089 s` and repeated the
+  parent root exactly.
+- Maximin signed-clearance selection produced `0x94` at 2,129, `0x44` at
+  2,137, `0x10` at 2,145, and `0xA4` at 2,153. The resulting H=32 schedule
+  remains unhit through 2,161. Its minimum clearance is `+1.471344` at
+  frame 2,135 against bullet slot 45.
+- The identical action schedule then advanced through the real frame pump.
+  All 32 collision/control projections and compact states matched the
+  headless native trajectory; no first mismatch exists through the declared
+  horizon.
+- Content-addressed causal report:
+  `artifacts/runtime_reports/th08_native_snapshot_causal_policy_root2129_h32_20260730.json`,
+  SHA-256
+  `69e6ec2db0f5415a6ee8231808be0669b0f80006faf299f2c90aeb27e221bbaa`.
+  It contains a `NativeRootCapsule`, `NativeTrajectory`,
+  pending `ModelTrajectory`, `FirstMismatchReport`, 324-branch
+  `ActionPortfolio` evidence, `CounterexampleCorpus`, and `ExactWitness`.
 
 ### Authority and next useful gate
 
@@ -128,21 +153,32 @@ historical handoff.
   candidate validator. Repeating a whole replay prefix for all 36 actions is
   rejected as the primary inner loop; the complete portfolio took roughly
   half an hour.
-- The rolling H=2/4/8 and all-36 construction gates are observed only at the
-  canonical frame-2,129 root. They have offline same-session diagnosis and
-  candidate-search authority, not live or physical predictive authority.
+- The rolling H=2/4/8/all-36 and H=32 causal-witness gates are observed only
+  at the canonical frame-2,129 replay root and its promoted same-session
+  subroots. They have offline diagnosis, candidate-search, and exact
+  fixed-root-witness authority, not live or physical predictive authority.
 - Forty-two writable regions, external handle/device/audio/timer effects,
   and event classes outside this root remain unresolved. Preserve
   fail-closed `UNKNOWN` behavior on mapping/thread/stack/transition changes.
-- The next useful gate is repeated rolling identity at distinct event classes
-  such as spawn, redirect, callback transition, and laser lifecycle. H=16 is
-  optional only if one of those roots or a selected continuation needs it;
-  H=2/4/8 and all 36 masks are complete at the canonical hit root.
+- The next useful semantic gate is binding the rebuilt solver to the retained
+  `NativeRootCapsule` and exact H=32 action schedule so it emits a
+  `ModelTrajectory` and a true model/native first mismatch. After that,
+  repeat rolling identity at distinct event classes such as spawn, redirect,
+  callback transition, and laser lifecycle.
+- The next performance architecture is a supervised warm wind-tunnel
+  service, not a portable cross-process snapshot. It must keep a single
+  writer, immutable session/root IDs, branch-level root/FX/stack/thread/map
+  verification, cancellation, idle TTL, poison state, cleanup, and automatic
+  replay rebootstrap. One interrupted 216-branch attempt observed a mapping
+  epoch change after 14 continuations and was correctly poisoned/cleaned;
+  CE-0210 preserves that limit.
 - Endpoint discovery still scans about 110 MB and costs 152--172 ms.
   Write-watch or guarded dirty-page tracking is a performance proposal, not
   correctness authority.
-- Only an exact causal no-hit witness returns to original replay and a
-  focused complete stage.
+- The H=32 exact causal witness now permits model differential work and a
+  later named original-replay falsifier. It still does not authorize a
+  complete physical stage until the solver integration, event-class, and
+  delivery gates pass.
 - Do not run another unchanged Stage-5 physical trial or another exhaustive
   replay-prefix portfolio. No THPRAC/exact-spell automation is assumed; the
   physical research unit remains a complete selected stage.

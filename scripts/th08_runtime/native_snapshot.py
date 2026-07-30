@@ -51,12 +51,13 @@ from .priority17_publication_probe import (
 )
 
 
-SNAPSHOT_SCHEMA = "th08-native-calculation-snapshot-v2"
+SNAPSHOT_SCHEMA = "th08-native-calculation-snapshot-v3"
 BARRIER_MAGIC = b"T8NS"
-BARRIER_VERSION = 2
+BARRIER_VERSION = 3
 BARRIER_ALLOCATION_SIZE = 0x2000
 BARRIER_ROOT_FX_OFFSET = 0x100
 BARRIER_ENDPOINT_FX_OFFSET = 0x300
+BARRIER_FX_SIZE = 0x200
 BARRIER_STUB_OFFSET = 0x600
 BARRIER_HEADER_SIZE = 0x80
 
@@ -362,6 +363,77 @@ class NativeBarrierHeader:
             "endpoint_ebp": self.endpoint_ebp,
             "root_manager_frame": self.root_manager_frame,
             "endpoint_manager_frame": self.endpoint_manager_frame,
+        }
+
+
+@dataclass(frozen=True)
+class NativeBarrierRootCheckpoint:
+    target_manager_frame: int
+    root_esp: int
+    root_ebp: int
+    root_manager_frame: int
+    fx_state: bytes
+
+    def __post_init__(self) -> None:
+        if (
+            self.target_manager_frame <= 0
+            or self.root_manager_frame <= 0
+            or self.root_esp <= 0
+            or self.root_ebp <= 0
+            or len(self.fx_state) != BARRIER_FX_SIZE
+        ):
+            raise ValueError("native barrier root checkpoint is invalid")
+
+    @classmethod
+    def from_endpoint(
+        cls,
+        header: NativeBarrierHeader,
+        fx_state: bytes,
+    ) -> NativeBarrierRootCheckpoint:
+        if header.status != STATUS_STEP_DONE or header.command != COMMAND_NONE:
+            raise NativeSnapshotUnknownError(
+                "only an idle completed endpoint can become a native subroot"
+            )
+        if (
+            header.endpoint_manager_frame <= header.root_manager_frame
+            or header.endpoint_esp != header.root_esp
+            or header.endpoint_ebp != header.root_ebp
+        ):
+            raise NativeSnapshotUnknownError(
+                "native endpoint cannot preserve the root stack/clock contract"
+            )
+        return cls(
+            target_manager_frame=header.endpoint_manager_frame,
+            root_esp=header.endpoint_esp,
+            root_ebp=header.endpoint_ebp,
+            root_manager_frame=header.endpoint_manager_frame,
+            fx_state=fx_state,
+        )
+
+    @property
+    def digest(self) -> str:
+        digest = hashlib.sha256()
+        digest.update(
+            struct.pack(
+                "<IIII",
+                self.target_manager_frame,
+                self.root_esp,
+                self.root_ebp,
+                self.root_manager_frame,
+            )
+        )
+        digest.update(self.fx_state)
+        return digest.hexdigest()
+
+    def record(self) -> dict[str, object]:
+        return {
+            "schema": "th08-native-barrier-root-checkpoint-v1",
+            "target_manager_frame": self.target_manager_frame,
+            "root_esp": self.root_esp,
+            "root_ebp": self.root_ebp,
+            "root_manager_frame": self.root_manager_frame,
+            "fx_state_sha256": hashlib.sha256(self.fx_state).hexdigest(),
+            "sha256": self.digest,
         }
 
 
@@ -1423,6 +1495,100 @@ class NativeCalculationBarrier:
             executable=False,
         )
 
+    def _write_root_checkpoint(
+        self,
+        checkpoint: NativeBarrierRootCheckpoint,
+    ) -> None:
+        _write_memory(
+            self.api,
+            self.handle,
+            self.remote_base + BARRIER_ROOT_FX_OFFSET,
+            checkpoint.fx_state,
+            executable=False,
+        )
+        for offset, value in (
+            (HEADER_TARGET_MANAGER, checkpoint.target_manager_frame),
+            (HEADER_ROOT_ESP, checkpoint.root_esp),
+            (HEADER_ROOT_EBP, checkpoint.root_ebp),
+            (HEADER_ROOT_MANAGER, checkpoint.root_manager_frame),
+        ):
+            _write_memory(
+                self.api,
+                self.handle,
+                self.remote_base + offset,
+                struct.pack("<I", value),
+                executable=False,
+            )
+
+    def capture_root_checkpoint(self) -> NativeBarrierRootCheckpoint:
+        header = self.header()
+        if header.status != STATUS_ROOT_WAIT or header.command != COMMAND_NONE:
+            raise NativeSnapshotUnknownError(
+                "native root checkpoint requires an idle restored root"
+            )
+        return NativeBarrierRootCheckpoint(
+            target_manager_frame=header.target_manager_frame,
+            root_esp=header.root_esp,
+            root_ebp=header.root_ebp,
+            root_manager_frame=header.root_manager_frame,
+            fx_state=_read_memory(
+                self.api,
+                self.handle,
+                self.remote_base + BARRIER_ROOT_FX_OFFSET,
+                BARRIER_FX_SIZE,
+            ),
+        )
+
+    def promote_endpoint_to_root(
+        self,
+        *,
+        timeout_seconds: float,
+    ) -> tuple[NativeBarrierRootCheckpoint, NativeBarrierHeader]:
+        endpoint_header = self.header()
+        checkpoint = NativeBarrierRootCheckpoint.from_endpoint(
+            endpoint_header,
+            _read_memory(
+                self.api,
+                self.handle,
+                self.remote_base + BARRIER_ENDPOINT_FX_OFFSET,
+                BARRIER_FX_SIZE,
+            ),
+        )
+        self._write_root_checkpoint(checkpoint)
+        promoted = self.mark_restore_ready(timeout_seconds=timeout_seconds)
+        if (
+            promoted.target_manager_frame != checkpoint.target_manager_frame
+            or promoted.root_esp != checkpoint.root_esp
+            or promoted.root_ebp != checkpoint.root_ebp
+            or promoted.root_manager_frame != checkpoint.root_manager_frame
+        ):
+            raise NativeSnapshotUnknownError(
+                "promoted native subroot header did not verify"
+            )
+        return checkpoint, promoted
+
+    def restore_root_checkpoint(
+        self,
+        checkpoint: NativeBarrierRootCheckpoint,
+    ) -> NativeBarrierHeader:
+        before = self.header()
+        if before.status != STATUS_ROOT_WAIT or before.command != COMMAND_NONE:
+            raise NativeSnapshotUnknownError(
+                "native root checkpoint restore requires idle root wait"
+            )
+        self._write_root_checkpoint(checkpoint)
+        restored = self.header()
+        if (
+            restored.target_manager_frame != checkpoint.target_manager_frame
+            or restored.root_esp != checkpoint.root_esp
+            or restored.root_ebp != checkpoint.root_ebp
+            or restored.root_manager_frame != checkpoint.root_manager_frame
+        ):
+            raise NativeSnapshotUnknownError(
+                "restored native root checkpoint header did not verify"
+            )
+        return restored
+
     def step(self, *, timeout_seconds: float) -> NativeBarrierHeader:
         before = self.header()
         if before.status != STATUS_ROOT_WAIT:
@@ -1488,6 +1654,7 @@ class NativeCalculationBarrier:
             "update_chain_head": UPDATE_CHAIN_HEAD,
             "render_chain_executed_inside_step": False,
             "rolling_endpoint_fx": True,
+            "promotable_endpoint_root": True,
             "natural_next_call_trap": True,
             "remote_base": self.remote_base,
             "action_authority": False,
@@ -1506,6 +1673,7 @@ class NativeCalculationBarrier:
 
 __all__ = [
     "BARRIER_ALLOCATION_SIZE",
+    "BARRIER_FX_SIZE",
     "BARRIER_HEADER_SIZE",
     "BARRIER_MAGIC",
     "BARRIER_STUB_OFFSET",
@@ -1516,6 +1684,7 @@ __all__ = [
     "COMMAND_RESTORE_READY",
     "COMMAND_STEP",
     "NativeBarrierHeader",
+    "NativeBarrierRootCheckpoint",
     "NativeCalculationBarrier",
     "NativeDirtyPage",
     "NativeReplayActionCarrier",

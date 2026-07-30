@@ -20,9 +20,11 @@ from tools.th08_native_snapshot_trial import (
     DEFAULT_TARGET_MANAGER_FRAME,
     PORTFOLIO_NO_BOMB_MASKS,
     _assert_action_carrier_epoch,
+    _assert_mapping_epoch,
     _compact_corpus_comparison,
     _compare_portfolio_branch_to_corpus,
     _load_portfolio_corpus,
+    _validate_action_schedule,
     build_parser,
 )
 
@@ -36,6 +38,7 @@ class NativeSnapshotTrialCliTests(unittest.TestCase):
             DEFAULT_TARGET_MANAGER_FRAME,
         )
         self.assertEqual(arguments.action_b, DEFAULT_ACTION_B)
+        self.assertIsNone(arguments.action_schedule)
         self.assertEqual(arguments.horizon, DEFAULT_HORIZON)
         self.assertEqual(arguments.hold_frames, DEFAULT_HOLD_FRAMES)
         self.assertEqual(arguments.natural_reference, "a")
@@ -84,6 +87,21 @@ class NativeSnapshotTrialCliTests(unittest.TestCase):
         self.assertEqual(arguments.hold_frames, 3)
         self.assertEqual(arguments.natural_reference, "b")
 
+    def test_parser_accepts_exact_action_schedule_with_recorded_ticks(self) -> None:
+        arguments = build_parser().parse_args(
+            [
+                "--output",
+                "native_snapshot.json",
+                "--action-schedule",
+                "0x94,0x94,recorded,r,-,0x44",
+            ]
+        )
+
+        self.assertEqual(
+            arguments.action_schedule,
+            (0x94, 0x94, None, None, None, 0x44),
+        )
+
     def test_action_carrier_epoch_requires_exact_per_tick_cursor(self) -> None:
         root = NativeReplayActionCarrier(1, 2, 0x1000, 2129, 0x05)
         second = NativeReplayActionCarrier(1, 2, 0x1002, 2130, 0x15)
@@ -93,6 +111,17 @@ class NativeSnapshotTrialCliTests(unittest.TestCase):
         wrong_cursor = NativeReplayActionCarrier(1, 2, 0x1004, 2130, 0x15)
         with self.assertRaises(NativeSnapshotUnknownError):
             _assert_action_carrier_epoch(root, wrong_cursor, tick_index=1)
+
+    def test_mapping_epoch_error_retains_bounded_region_differences(self) -> None:
+        with self.assertRaisesRegex(
+            NativeSnapshotUnknownError,
+            r"removed=.*4096.*added=.*8192",
+        ):
+            _assert_mapping_epoch(
+                ((4096, 4096, 4096, 4, 4096, 4, 131072),),
+                ((8192, 4096, 8192, 4, 4096, 4, 131072),),
+                context="mapping changed",
+            )
 
     def test_compact_corpus_comparison_is_field_exact(self) -> None:
         expected = {
@@ -150,6 +179,17 @@ class NativeSnapshotTrialCliTests(unittest.TestCase):
             PORTFOLIO_NO_BOMB_MASKS[:8],
             (0x00, 0x01, 0x04, 0x05, 0x10, 0x11, 0x14, 0x15),
         )
+
+    def test_action_schedule_is_exact_horizon_and_no_bomb(self) -> None:
+        _validate_action_schedule(
+            (0x14, 0x14, 0x14, None, 0x90),
+            horizon=5,
+        )
+
+        with self.assertRaises(ValueError):
+            _validate_action_schedule((0x14,), horizon=2)
+        with self.assertRaises(ValueError):
+            _validate_action_schedule((0x14, 0x02), horizon=2)
 
     def test_portfolio_branch_comparison_uses_first_hit_state(self) -> None:
         expected = {

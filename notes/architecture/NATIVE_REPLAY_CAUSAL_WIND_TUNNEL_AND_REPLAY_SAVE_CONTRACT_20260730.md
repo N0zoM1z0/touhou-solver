@@ -381,11 +381,110 @@ Compact evidence is
 SHA-256
 `ddd71ebf110207ef0baf098bfb3d9d710e5a403d08bcf5b1b09bda0eb8a000d7`.
 
-**Inferred:** this fixed-root loop is now suitable for rapid local hit-cause
-isolation and candidate ranking at the canonical replay seam. It does not
-show that `0x14` survives its later CE-0207 contact, generalize to spawn,
-redirect, callback, transform, or laser event roots, or grant live/physical
-authority.
+**Inferred at the H=8 checkpoint:** this fixed-root loop is suitable for
+rapid local hit-cause isolation and candidate ranking at the canonical replay
+seam. H=8 alone did not show that `0x14` survives its later CE-0207 contact.
+The promoted-subroot result below supersedes that horizon limit, but it still
+does not generalize to spawn, redirect, callback, transform, or laser event
+roots or grant live/physical authority.
+
+## Promoted Subroots And H32 Causal Witness
+
+**Observed implementation:** the rolling barrier schema is now v3. An idle
+endpoint records its exact owner stack/frame, manager clock, and 512-byte
+FXSAVE state as a content-addressed `NativeBarrierRootCheckpoint`.
+`promote_endpoint_to_root()` makes that endpoint the next calculation root;
+`restore_root_checkpoint()` returns from a promoted child to the immutable
+parent. Dirty pages, replay cursor, thread set, committed-map identity, owner
+stack/frame, and FX state remain fail-closed at every branch and restore.
+
+Exact per-tick schedules use either a declared complete no-Bomb mask or
+`null` for the native replay action at that tick. `null` is an action-input
+choice, not reuse of an action-incompatible future: every successor still
+executes the original update chain from the changed native predecessor.
+
+**Observed two-decision matrix:** the six H=8 survivors each received all 36
+secondary masks from their promoted frame-2,137 subroot. This produced 216
+causal continuations. The largest one-session batch evaluated 180 branches
+in `309.089 s`; its full transaction was `348.621 s`, and its recorded
+parent repeat was exact. Prefix survivor counts at frame 2,145 were:
+
+| Prefix | Secondary survivors |
+| ---: | ---: |
+| `0x14` | 16 |
+| `0x15` | 16 |
+| `0x90` | 16 |
+| `0x91` | 16 |
+| `0x94` | 12 |
+| `0x95` | 12 |
+
+Maximizing whole-segment minimum signed clearance, then endpoint clearance,
+then the lower equivalent Shot mask selects `0x94` for frames
+2,130--2,132 and `0x44` for frames 2,138--2,140. Replay actions are consumed
+for the five remaining ticks of each eight-tick segment.
+
+**Observed continued portfolios:**
+
+- from the frame-2,145 subroot, 26/36 third actions survive to 2,153;
+  `0x10` maximizes the segment minimum clearance at `+5.781158`;
+- from the frame-2,153 subroot, 30/36 fourth actions survive to 2,161;
+  `0xA4` maximizes the segment minimum clearance at `+8.864166`; and
+- every portfolio repeats its immutable parent projection, collision/control
+  history, and compact state exactly after restore.
+
+The resulting decision sequence is
+`0x94 -> 0x44 -> 0x10 -> 0xA4` at calculation roots
+`2129/2137/2145/2153`. Its exact 32-tick action schedule remains no-Bomb and
+unhit through manager frame 2,161. Whole-witness minimum signed clearance is
+`+1.471344` at frame 2,135 against hostile bullet slot 45. The recorded
+`0x05` branch instead hits slot 45 at frame 2,136 with separation
+`-0.966766`; at the same frame the witness keeps the bullet's world position
+exact and changes the player path enough to make its separation `+1.845795`.
+
+**Observed natural validation:** the exact H=32 schedule was then executed
+through the real frame pump at the same calculation-call seam. All 32
+collision/control projection digests and all 32 compact states match the
+headless native trajectory. No headless/native first mismatch exists through
+the declared endpoint.
+
+This corrects CE-0207 only through the declared H=32 fixed replay horizon. It
+does not prove a complete spell or stage, model parity, observation/delay
+delivery, or physical survival.
+
+The deterministic compact report is
+`artifacts/runtime_reports/th08_native_snapshot_causal_policy_root2129_h32_20260730.json`,
+SHA-256
+`69e6ec2db0f5415a6ee8231808be0669b0f80006faf299f2c90aeb27e221bbaa`.
+It emits content-addressed `NativeRootCapsule`, `NativeTrajectory`,
+`FirstMismatchReport`, `ActionPortfolio`, `CounterexampleCorpus`, and
+`ExactWitness` records. `ModelTrajectory` is deliberately
+`not_generated`; connecting the rebuilt solver to this immutable root and
+schedule is the next semantic gate.
+
+Complete Linux discovery passes 1,344 tests in 14.367 seconds. Complete
+Windows UNC discovery passes 1,344 tests in 28.864 seconds with the three
+existing skips.
+
+### Warm-session lifecycle
+
+The current CLI already amortizes one replay bootstrap across a batch; it
+does not require one process per branch. Persisting across independent solver
+queries is a sound performance proposal only as a supervised
+`NativeWindTunnelServer` with:
+
+- a single-writer transaction queue and immutable session/root IDs;
+- exact root hash, FX, stack, replay cursor, thread, and map verification
+  after every branch;
+- cooperative timeout/cancellation and newest-query selection;
+- explicit `healthy`/`poisoned` lifecycle states;
+- automatic key release, target cleanup, and replay rebootstrap; and
+- an idle TTL so no game or suspended thread set is left unattended.
+
+One attempted 216-branch batch detected a committed-map epoch change after 14
+continuations, returned `UNKNOWN`, cleaned the process, and discarded the
+partial result. A fresh batch then completed 180 branches without recurrence.
+CE-0210 retains this limit. A warm service must treat this as poison and
+rebootstrap; it must not weaken mapping identity merely to preserve uptime.
 
 ## Local Retention
 

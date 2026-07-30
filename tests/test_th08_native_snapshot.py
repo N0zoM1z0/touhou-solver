@@ -7,20 +7,25 @@ from unittest.mock import patch
 from th08_runtime.native_snapshot import (
     BARRIER_ALLOCATION_SIZE,
     BARRIER_ENDPOINT_FX_OFFSET,
+    BARRIER_FX_SIZE,
     BARRIER_HEADER_SIZE,
     BARRIER_ROOT_FX_OFFSET,
     BARRIER_STUB_OFFSET,
+    COMMAND_NONE,
     HEADER_STATUS,
     MEM_IMAGE,
     MEM_MAPPED,
     MEM_PRIVATE,
     NativeDirtyPage,
+    NativeBarrierHeader,
+    NativeBarrierRootCheckpoint,
     NativeSnapshot,
     NativeSnapshotRegion,
     NativeSnapshotUnknownError,
     NativeVirtualRegion,
     PAGE_READWRITE,
     STATUS_ARMED,
+    STATUS_STEP_DONE,
     UPDATE_CHAIN_CALLSITE,
     build_native_snapshot_image,
     build_native_snapshot_patch,
@@ -138,6 +143,49 @@ class NativeSnapshotBarrierEncodingTests(unittest.TestCase):
             parse_native_barrier_header(
                 bytes(image[:BARRIER_HEADER_SIZE]),
                 expected_pid=55,
+            )
+
+    def test_completed_endpoint_becomes_content_addressed_subroot(self) -> None:
+        endpoint = NativeBarrierHeader(
+            pid=55,
+            target_manager_frame=2129,
+            status=STATUS_STEP_DONE,
+            command=COMMAND_NONE,
+            owner_thread_id=77,
+            arrival_serial=1,
+            step_serial=8,
+            restore_serial=0,
+            last_chain_result=1,
+            error_code=0,
+            root_esp=0x1000,
+            root_ebp=0x2000,
+            endpoint_esp=0x1000,
+            endpoint_ebp=0x2000,
+            root_manager_frame=2129,
+            endpoint_manager_frame=2137,
+        )
+        fx_state = bytes(index & 0xFF for index in range(BARRIER_FX_SIZE))
+
+        checkpoint = NativeBarrierRootCheckpoint.from_endpoint(
+            endpoint,
+            fx_state,
+        )
+
+        self.assertEqual(checkpoint.target_manager_frame, 2137)
+        self.assertEqual(checkpoint.root_manager_frame, 2137)
+        self.assertEqual(checkpoint.fx_state, fx_state)
+        self.assertEqual(checkpoint.record()["sha256"], checkpoint.digest)
+
+        wrong_stack = NativeBarrierHeader(
+            **{
+                **endpoint.__dict__,
+                "endpoint_esp": 0x1004,
+            }
+        )
+        with self.assertRaises(NativeSnapshotUnknownError):
+            NativeBarrierRootCheckpoint.from_endpoint(
+                wrong_stack,
+                fx_state,
             )
 
 

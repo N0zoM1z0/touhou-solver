@@ -78,7 +78,7 @@ from th08_runtime_agent import (  # noqa: E402
 from touhou_control.pipeline_identity import VersionIdentity  # noqa: E402
 
 
-SCHEMA = "th08-native-snapshot-rolling-trial-v2"
+SCHEMA = "th08-native-snapshot-rolling-trial-v3"
 DEFAULT_GAME_DIR = Path(
     "D:/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)__codex_wind_tunnel"
 )
@@ -212,6 +212,22 @@ def _assert_thread_epoch(
             "target thread set changed inside the native snapshot epoch: "
             f"{expected_thread_ids!r} -> {actual!r}"
         )
+
+
+def _assert_mapping_epoch(
+    expected: tuple[tuple[int, ...], ...],
+    actual: tuple[tuple[int, ...], ...],
+    *,
+    context: str,
+) -> None:
+    if actual == expected:
+        return
+    expected_set = set(expected)
+    actual_set = set(actual)
+    raise NativeSnapshotUnknownError(
+        f"{context}; removed={sorted(expected_set - actual_set)[:8]!r}; "
+        f"added={sorted(actual_set - expected_set)[:8]!r}"
+    )
 
 
 def _assert_endpoint_stack_and_clock(
@@ -724,6 +740,39 @@ def _projection_byte_changes(
     return tuple(changes)
 
 
+def _validate_action_schedule(
+    schedule: tuple[int | None, ...],
+    *,
+    horizon: int,
+) -> None:
+    if len(schedule) != horizon:
+        raise ValueError("rolling action schedule must cover the exact horizon")
+    if any(
+        action is not None
+        and (action < 0 or action & ~SUPPORTED_INPUT_MASK or action & 0x02)
+        for action in schedule
+    ):
+        raise ValueError("rolling action schedule contains an unsupported or Bomb mask")
+
+
+def _parse_action_schedule(value: str) -> tuple[int | None, ...]:
+    schedule: list[int | None] = []
+    for raw_token in value.split(","):
+        token = raw_token.strip().lower()
+        if not token:
+            raise argparse.ArgumentTypeError("action schedule contains an empty tick")
+        if token in {"recorded", "r", "-"}:
+            schedule.append(None)
+            continue
+        try:
+            schedule.append(int(token, 0))
+        except ValueError as exc:
+            raise argparse.ArgumentTypeError(
+                f"invalid action schedule tick: {raw_token!r}"
+            ) from exc
+    return tuple(schedule)
+
+
 def _rolling_branch(
     api: object,
     barrier: NativeCalculationBarrier,
@@ -737,6 +786,7 @@ def _rolling_branch(
     action_override: int | None,
     horizon: int,
     hold_frames: int,
+    action_schedule: tuple[int | None, ...] | None = None,
 ) -> tuple[
     NativeSnapshot,
     tuple[Route2NativeFutureBodyRootSlice, ...],
@@ -749,6 +799,12 @@ def _rolling_branch(
         raise ValueError("rolling native horizon must be positive")
     if hold_frames <= 0:
         raise ValueError("rolling native hold length must be positive")
+    if action_schedule is not None:
+        if action_override is not None:
+            raise ValueError(
+                "rolling branch accepts either one hold or an action schedule"
+            )
+        _validate_action_schedule(action_schedule, horizon=horizon)
 
     projections: list[Route2NativeFutureBodyRootSlice] = []
     collision_control_projections: list[CollisionControlProjection] = []
@@ -766,10 +822,17 @@ def _rolling_branch(
             tick_index=tick_index,
         )
         recorded_action = int(carrier.recorded_mask)
+        scheduled_action = (
+            action_schedule[tick_index] if action_schedule is not None else None
+        )
         action = (
-            int(action_override)
-            if action_override is not None and tick_index < hold_frames
-            else recorded_action
+            int(scheduled_action)
+            if scheduled_action is not None
+            else (
+                int(action_override)
+                if action_override is not None and tick_index < hold_frames
+                else recorded_action
+            )
         )
         action_word_written = action != recorded_action
         if action_word_written:
@@ -799,10 +862,13 @@ def _rolling_branch(
         current_map = committed_map_identity(
             query_native_virtual_regions(api, barrier.handle)
         )
-        if current_map != baseline_root.committed_map:
-            raise NativeSnapshotUnknownError(
+        _assert_mapping_epoch(
+            baseline_root.committed_map,
+            current_map,
+            context=(
                 "parameterizing a rolling replay action changed the mapping epoch"
-            )
+            ),
+        )
 
         started = time.perf_counter()
         endpoint_header = (
@@ -820,10 +886,11 @@ def _rolling_branch(
         current_map = committed_map_identity(
             query_native_virtual_regions(api, barrier.handle)
         )
-        if current_map != baseline_root.committed_map:
-            raise NativeSnapshotUnknownError(
-                "native mapping epoch changed after a rolling calculation tick"
-            )
+        _assert_mapping_epoch(
+            baseline_root.committed_map,
+            current_map,
+            context="native mapping epoch changed after a rolling calculation tick",
+        )
 
         started = time.perf_counter()
         projection = _capture_native_projection(
@@ -886,6 +953,9 @@ def _rolling_branch(
         dirty_to_baseline,
         {
             "action_override": action_override,
+            "action_schedule": (
+                list(action_schedule) if action_schedule is not None else None
+            ),
             "hold_frames": min(hold_frames, horizon),
             "horizon": horizon,
             "parameterized_root_baseline_sha256": baseline_root.digest,
@@ -923,10 +993,11 @@ def _restore_baseline(
     current_map = committed_map_identity(
         query_native_virtual_regions(api, barrier.handle)
     )
-    if current_map != baseline_root.committed_map:
-        raise NativeSnapshotUnknownError(
-            "native mapping epoch changed during dirty-page restore"
-        )
+    _assert_mapping_epoch(
+        baseline_root.committed_map,
+        current_map,
+        context="native mapping epoch changed during dirty-page restore",
+    )
     verify_native_dirty_pages(
         api,
         barrier.handle,
@@ -1222,7 +1293,7 @@ def _run_all36_portfolio(
             "calculation_ticks_per_branch": horizon,
             "action_hold_frames": min(hold_frames, horizon),
             "render_ticks_per_branch": 0,
-            "recorded_future_world_reused": True,
+            "recorded_future_world_reused": False,
             "physical_predictive_authority": False,
             "authority": ("fixed_replay_root_collision_control_counterfactual_only"),
         }
@@ -1237,6 +1308,7 @@ def _run_transaction(
     projection_reader: object,
     target_manager_frame: int,
     action_b: int,
+    action_schedule: tuple[int | None, ...] | None,
     horizon: int,
     hold_frames: int,
     root_timeout_seconds: float,
@@ -1297,7 +1369,9 @@ def _run_transaction(
             raise NativeSnapshotUnknownError(
                 "canonical replay root unexpectedly contains Bomb"
             )
-        if action_b == action_a:
+        if action_schedule is not None:
+            _validate_action_schedule(action_schedule, horizon=horizon)
+        if action_schedule is None and action_b == action_a:
             raise ValueError("action B must differ from the recorded action A")
 
         root_projection = _capture_native_projection(
@@ -1411,7 +1485,13 @@ def _run_transaction(
                     "frozen_thread_count": len(frozen),
                 },
                 "action_carrier": carrier.record(),
-                "actions": {"a": action_a, "b_not_run": action_b},
+                "actions": {
+                    "a": action_a,
+                    "b_not_run": (action_b if action_schedule is None else None),
+                    "b_schedule_not_run": (
+                        list(action_schedule) if action_schedule is not None else None
+                    ),
+                },
                 "root_native_projection": root_projection.record(),
                 "root_collision_control_projection": (
                     root_collision_control_projection.record()
@@ -1442,7 +1522,7 @@ def _run_transaction(
                 "same_action_compact_right": list(compact_a2),
                 "calculation_ticks_per_branch": horizon,
                 "render_ticks_per_branch": 0,
-                "recorded_future_world_reused": True,
+                "recorded_future_world_reused": False,
                 "physical_predictive_authority": False,
                 "external_effect_coverage": "demonstrably_incomplete",
             }
@@ -1463,9 +1543,10 @@ def _run_transaction(
             root_header=root_header,
             expected_thread_ids=thread_ids,
             root_carrier=carrier,
-            action_override=action_b,
+            action_override=(action_b if action_schedule is None else None),
             horizon=horizon,
             hold_frames=hold_frames,
+            action_schedule=action_schedule,
         )
         endpoint_ab_changes = changed_byte_addresses(
             endpoint_a1,
@@ -1526,7 +1607,13 @@ def _run_transaction(
                 "frozen_thread_count": len(frozen),
             },
             "action_carrier": carrier.record(),
-            "actions": {"a": action_a, "b": action_b},
+            "actions": {
+                "a": action_a,
+                "b": (action_b if action_schedule is None else None),
+                "b_schedule": (
+                    list(action_schedule) if action_schedule is not None else None
+                ),
+            },
             "root_native_projection": root_projection.record(),
             "root_collision_control_projection": (
                 root_collision_control_projection.record()
@@ -1567,7 +1654,7 @@ def _run_transaction(
             "calculation_ticks_per_branch": horizon,
             "action_hold_frames": min(hold_frames, horizon),
             "render_ticks_per_branch": 0,
-            "recorded_future_world_reused": True,
+            "recorded_future_world_reused": False,
             "physical_predictive_authority": False,
             "external_effect_coverage": (
                 "peripheral_process_state_not_deterministic"
@@ -1588,6 +1675,7 @@ def _run_natural_reference(
     horizon: int,
     hold_frames: int,
     action_override: int | None,
+    action_schedule: tuple[int | None, ...] | None,
     expected_branch: dict[str, object],
     expected_projections: tuple[Route2NativeFutureBodyRootSlice, ...],
     expected_collision_control_projections: tuple[CollisionControlProjection, ...],
@@ -1614,6 +1702,12 @@ def _run_natural_reference(
         raise NativeSnapshotUnknownError(
             "natural reference collision/control history has the wrong horizon"
         )
+    if action_schedule is not None:
+        if action_override is not None:
+            raise ValueError(
+                "natural reference accepts either one hold or an action schedule"
+            )
+        _validate_action_schedule(action_schedule, horizon=horizon)
 
     root_projection = _capture_native_projection(
         projection_reader,
@@ -1680,10 +1774,17 @@ def _run_natural_reference(
             tick_index=tick_index,
         )
         recorded_action = int(carrier.recorded_mask)
+        scheduled_action = (
+            action_schedule[tick_index] if action_schedule is not None else None
+        )
         action = (
-            int(action_override)
-            if action_override is not None and tick_index < hold_frames
-            else recorded_action
+            int(scheduled_action)
+            if scheduled_action is not None
+            else (
+                int(action_override)
+                if action_override is not None and tick_index < hold_frames
+                else recorded_action
+            )
         )
         action_word_written = action != recorded_action
         if action_word_written:
@@ -1811,6 +1912,9 @@ def _run_natural_reference(
             else "natural_frame_differential_passed"
         ),
         "action_override": action_override,
+        "action_schedule": (
+            list(action_schedule) if action_schedule is not None else None
+        ),
         "horizon": horizon,
         "hold_frames": min(hold_frames, horizon),
         "root_projection_exact": root_projection_exact,
@@ -1851,6 +1955,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--action-b",
         type=lambda value: int(value, 0),
         default=DEFAULT_ACTION_B,
+    )
+    parser.add_argument(
+        "--action-schedule",
+        type=_parse_action_schedule,
+        help=(
+            "comma-separated exact per-tick B schedule; use recorded, r, or - "
+            "to consume the replay action for one tick"
+        ),
     )
     parser.add_argument("--horizon", type=int, default=DEFAULT_HORIZON)
     parser.add_argument(
@@ -1916,7 +2028,7 @@ def main(argv: list[str] | None = None) -> int:
         args.target_manager_frame <= 0
         or args.root_timeout <= 0.0
         or args.horizon <= 0
-        or args.horizon > 16
+        or args.horizon > 32
         or args.hold_frames <= 0
         or args.compact_corpus_ticks <= 0
         or args.action_b < 0
@@ -1924,11 +2036,15 @@ def main(argv: list[str] | None = None) -> int:
         or args.action_b & 0x02
     ):
         raise ValueError(
-            "rolling trial requires horizon 1..16, positive hold/frame, "
+            "rolling trial requires horizon 1..32, positive hold/frame, "
             "and a supported no-Bomb action B"
         )
+    if args.action_schedule is not None:
+        _validate_action_schedule(args.action_schedule, horizon=args.horizon)
     if args.portfolio_all36 and args.natural_reference != "none":
         raise ValueError("all-36 portfolio mode requires --natural-reference none")
+    if args.portfolio_all36 and args.action_schedule is not None:
+        raise ValueError("all-36 portfolio mode does not accept an action schedule")
 
     game_dir = args.game_dir.resolve()
     expected_exe = game_dir / TARGET_EXE
@@ -1948,6 +2064,9 @@ def main(argv: list[str] | None = None) -> int:
         "target_manager_frame": args.target_manager_frame,
         "horizon": args.horizon,
         "hold_frames": min(args.hold_frames, args.horizon),
+        "action_schedule": (
+            list(args.action_schedule) if args.action_schedule is not None else None
+        ),
         "natural_reference_branch": args.natural_reference,
         "compact_corpus": str(args.compact_corpus),
         "compact_corpus_ticks": args.compact_corpus_ticks,
@@ -1981,6 +2100,7 @@ def main(argv: list[str] | None = None) -> int:
         envelope["executable_identity"] = identity
         focus_target_window(api, pid, timeout_seconds=args.focus_timeout)
         time.sleep(args.startup_settle)
+        focus_target_window(api, pid, timeout_seconds=args.focus_timeout)
         envelope["menu_trace"] = list(
             drive_native_stage_replay_menu(
                 api,
@@ -2031,6 +2151,7 @@ def main(argv: list[str] | None = None) -> int:
                 projection_reader=reader,
                 target_manager_frame=args.target_manager_frame,
                 action_b=args.action_b,
+                action_schedule=args.action_schedule,
                 horizon=args.horizon,
                 hold_frames=args.hold_frames,
                 root_timeout_seconds=args.root_timeout,
@@ -2102,7 +2223,12 @@ def main(argv: list[str] | None = None) -> int:
                 horizon=args.horizon,
                 hold_frames=args.hold_frames,
                 action_override=(
-                    None if args.natural_reference == "a" else args.action_b
+                    None
+                    if args.natural_reference == "a" or args.action_schedule is not None
+                    else args.action_b
+                ),
+                action_schedule=(
+                    None if args.natural_reference == "a" else args.action_schedule
                 ),
                 expected_branch=expected_branch,
                 expected_projections=expected_projections,

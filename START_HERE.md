@@ -97,8 +97,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `14b5a84`
-  (`Add causal future body schedule families`).
+- Latest retained research checkpoint: `9305c1a`
+  (`Add generational future body identities`).
 - Latest pre-trial repository/live code checkpoint: `b2e1eff`
   (`Fix priority-17 physical preflight`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
@@ -433,13 +433,14 @@ Connected IDA revalidation also records
 internal motion `+0x2D34`; neither alone advances final lethal world position
 `+0x2D88`.
 
-CE-0198 now rejects pointer/slot and adjacent active-bit edges as cross-time
-body identity. Connected IDA confirms that `enemy_spawn_from_timeline` can
-select a slot at `0x0042A54E`, execute its initial VM, clear active bit 0 at
-`0x0042A5F5`, and permit later same-update reuse. The new root-relative
-generation ledger consumes ordered allocation/retirement events; endpoint
-active slots only reconcile a complete event stream. Generation zero retains
-legacy slot IDs, while reuse is injectively encoded.
+Checkpoint `9305c1a` records CE-0198 and rejects pointer/slot and adjacent
+active-bit edges as cross-time body identity. Connected IDA confirms that
+`enemy_spawn_from_timeline` can select a slot at `0x0042A54E`, execute its
+initial VM, clear active bit 0 at `0x0042A5F5`, and permit later same-update
+reuse. The new root-relative generation ledger consumes ordered allocation/
+retirement events; endpoint active slots only reconcile a complete event
+stream. Generation zero retains legacy slot IDs, while reuse is injectively
+encoded.
 
 The retained generation differential
 `artifacts/runtime_reports/th08_future_body_generation_differential_20260730.json`

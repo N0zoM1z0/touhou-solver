@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA = "th08-native-combat-branch-comparison-v1"
-ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v9"
-CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v7"
+SCHEMA = "th08-native-combat-branch-comparison-v2"
+ROLLING_SCHEMA = "th08-native-snapshot-rolling-trial-v10"
+CAUSAL_SEARCH_SCHEMA = "th08-native-snapshot-causal-secondary-search-v8"
 ROLLING_ACCEPTED_STATUS = "rolling_native_projection_snapshot_passed"
 CAUSAL_ACCEPTED_STATUS = "causal_secondary_search_passed"
 
@@ -59,6 +59,39 @@ def _integer(summary: dict[str, Any], field: str) -> int:
         raise NativeCombatBranchReportError(
             f"native combat summary {field!r} must be a nonnegative integer"
         )
+    return value
+
+
+def _boolean(summary: dict[str, Any], field: str) -> bool:
+    value = summary.get(field)
+    if type(value) is not bool:
+        raise NativeCombatBranchReportError(f"{field} is not a Boolean")
+    return value
+
+
+def _byte(summary: dict[str, Any], field: str) -> int:
+    value = _integer(summary, field)
+    if value > 0xFF:
+        raise NativeCombatBranchReportError(
+            f"native combat summary {field!r} must be a byte integer"
+        )
+    return value
+
+
+def _action_mask(tick: dict[str, Any], *, field: str) -> int:
+    value = tick.get("selected_action")
+    if type(value) is not int or not 0 <= value <= 0xFF:
+        raise NativeCombatBranchReportError(
+            f"{field}.selected_action is not a byte integer"
+        )
+    return value
+
+
+def _optional_action_mask(value: object, *, field: str) -> int | None:
+    if value is None:
+        return None
+    if type(value) is not int or not 0 <= value <= 0xFF:
+        raise NativeCombatBranchReportError(f"{field} is not a byte integer")
     return value
 
 
@@ -118,6 +151,64 @@ def _summarize_branch(
         _player_phase(state, field=f"{branch_id}.compact_state") == 2
         for state in compact_states
     )
+    selected_actions = [
+        _action_mask(tick, field=f"{branch_id}.ticks[{index}]")
+        for index, tick in enumerate(tick_objects)
+    ]
+    route_ids = [
+        _byte(summary, "route_id")
+        for summary in (root_summary, *summaries)
+    ]
+    route2_scope = all(route_id == 2 for route_id in route_ids)
+    bomb_active_frames = [
+        _integer(summary, "manager_frame")
+        for summary in (root_summary, *summaries)
+        if _boolean(summary, "bomb_active")
+    ]
+    bomb_active_input_frames = [
+        _integer(summary, "manager_frame")
+        for summary in (root_summary, *summaries)
+        if _byte(summary, "active_input") & 0x02
+    ]
+    bomb_action_indices = [
+        index for index, action in enumerate(selected_actions) if action & 0x02
+    ]
+    bomb_declared_action_fields: list[str] = []
+    checked_prefix_mask = _optional_action_mask(
+        prefix_mask,
+        field=f"{branch_id}.prefix_mask",
+    )
+    if checked_prefix_mask is not None and checked_prefix_mask & 0x02:
+        bomb_declared_action_fields.append("prefix_mask")
+    checked_prefix_schedule: list[int | None] | None = None
+    if prefix_schedule is not None:
+        checked_prefix_schedule = []
+        for index, value in enumerate(prefix_schedule):
+            mask = _optional_action_mask(
+                value,
+                field=f"{branch_id}.prefix_action_schedule[{index}]",
+            )
+            checked_prefix_schedule.append(mask)
+            if mask is not None and mask & 0x02:
+                bomb_declared_action_fields.append(
+                    f"prefix_action_schedule[{index}]"
+                )
+    checked_continuation_mask = _optional_action_mask(
+        continuation_mask,
+        field=f"{branch_id}.continuation_mask",
+    )
+    if (
+        checked_continuation_mask is not None
+        and checked_continuation_mask & 0x02
+    ):
+        bomb_declared_action_fields.append("continuation_mask")
+    no_bomb = (
+        not bomb_active_frames
+        and not bomb_active_input_frames
+        and not bomb_action_indices
+        and not bomb_declared_action_fields
+    )
+    route2_nmnb_eligible = survived and no_bomb and route2_scope
     endpoint = summaries[-1]
     unresolved_target_ticks = sum(
         _integer(summary, "unresolved_overlap_target_count")
@@ -141,31 +232,46 @@ def _summarize_branch(
         "rejected_hard_survival"
         if not survived
         else (
-            "survival_filtered_proxy_only_with_unresolved_overlap"
-            if unresolved_target_ticks
+            "rejected_hard_no_bomb"
+            if not no_bomb
             else (
-                "survival_filtered_proxy_only_non_normal_or_unknown_shot_source"
-                if route2_non_normal_or_unknown_source_active_shot_ticks
+                "out_of_scope_non_route2"
+                if not route2_scope
                 else (
-                    "survival_filtered_proxy_only_non_normal_shot_content"
-                    if route2_normal_incompatible_active_shot_ticks
-                    else "survival_filtered_proxy_only"
+                    "survival_filtered_proxy_only_with_unresolved_overlap"
+                    if unresolved_target_ticks
+                    else (
+                        "survival_filtered_proxy_only_"
+                        "non_normal_or_unknown_shot_source"
+                        if route2_non_normal_or_unknown_source_active_shot_ticks
+                        else (
+                            "survival_filtered_proxy_only_"
+                            "non_normal_shot_content"
+                            if route2_normal_incompatible_active_shot_ticks
+                            else "survival_filtered_proxy_only"
+                        )
+                    )
                 )
             )
         )
     )
     return {
         "branch_id": branch_id,
-        "prefix_mask": prefix_mask,
-        "prefix_action_schedule": prefix_schedule,
-        "continuation_mask": continuation_mask,
-        "selected_actions": [
-            int(tick["selected_action"]) for tick in tick_objects
-        ],
+        "prefix_mask": checked_prefix_mask,
+        "prefix_action_schedule": checked_prefix_schedule,
+        "continuation_mask": checked_continuation_mask,
+        "selected_actions": selected_actions,
         "root_manager_frame": root_frame,
         "root_player_phase": root_player_phase,
         "manager_frames": manager_frames,
         "survived_to_endpoint": survived,
+        "no_bomb_to_endpoint": no_bomb,
+        "route2_scope": route2_scope,
+        "route2_nmnb_eligible": route2_nmnb_eligible,
+        "bomb_active_manager_frames": bomb_active_frames,
+        "bomb_active_input_manager_frames": bomb_active_input_frames,
+        "bomb_action_tick_indices": bomb_action_indices,
+        "bomb_declared_action_fields": bomb_declared_action_fields,
         "candidate_status": candidate_status,
         "metrics": {
             "root_positive_hp_sum": _integer(root_summary, "positive_hp_sum"),
@@ -244,12 +350,23 @@ def _summarize_branch(
         },
         "authority": {
             "hard_survival_filter": "observed_native_player_phase_over_branch",
+            "hard_no_bomb_filter": (
+                "declared_and_selected_complete_masks_native_active_input_"
+                "and_observed_native_bomb_state"
+            ),
+            "route2_scope_filter": (
+                "exact_root_and_tick_native_route_id_equals_2"
+            ),
             "published_frame_damage": (
                 "observed_native_enemy_frame_damage_field_at_endpoint_seams"
             ),
             "supported_contribution": (
                 "instantaneous_supported_ordinary_shot_and_damage_region_"
-                "subtotal_proxy_before_late_enemy_scaling"
+                "pass_subtotals_before_late_enemy_scaling"
+            ),
+            "supported_resolved_hp_damage": (
+                "manager_ordered_supported_slots_plus_exact_root_raw_"
+                "predicate_arithmetic_synthetic_not_observed_transaction"
             ),
             "positive_hp_sum": (
                 "cross_slot_aggregate_not_generation_safe_or_birth_normalized"
@@ -316,8 +433,9 @@ def _causal_rows(result: dict[str, Any]) -> list[dict[str, object]]:
     ):
         prefix = _object(prefix_value, field=f"result.prefixes[{prefix_index}]")
         prefix_mask_value = prefix.get("prefix_mask")
-        prefix_mask = (
-            None if prefix_mask_value is None else int(prefix_mask_value)
+        prefix_mask = _optional_action_mask(
+            prefix_mask_value,
+            field=f"result.prefixes[{prefix_index}].prefix_mask",
         )
         prefix_schedule_value = prefix.get("prefix_action_schedule")
         prefix_schedule = (
@@ -364,7 +482,17 @@ def _causal_rows(result: dict[str, Any]) -> list[dict[str, object]]:
                 continuation_value,
                 field=f"result.prefixes[{prefix_index}].continuation",
             )
-            continuation_mask = int(continuation["complete_mask"])
+            continuation_mask = _optional_action_mask(
+                continuation.get("complete_mask"),
+                field=(
+                    f"result.prefixes[{prefix_index}].continuation."
+                    "complete_mask"
+                ),
+            )
+            if continuation_mask is None:
+                raise NativeCombatBranchReportError(
+                    "continuation complete_mask cannot be null"
+                )
             rows.append(
                 _summarize_branch(
                     branch_id=(
@@ -403,6 +531,11 @@ def build_report(
         for row in rows
         if bool(row["survived_to_endpoint"])
     ]
+    route2_nmnb_eligible = [
+        str(row["branch_id"])
+        for row in rows
+        if bool(row["route2_nmnb_eligible"])
+    ]
     return {
         "schema": SCHEMA,
         "taskbook_cards": ["COMBAT-FAST-01", "COMBAT-KILL-01"],
@@ -415,10 +548,15 @@ def build_report(
         "branch_count": len(rows),
         "survivor_count": len(survivors),
         "survival_filtered_candidate_ids": survivors,
+        "route2_nmnb_eligible_count": len(route2_nmnb_eligible),
+        "route2_nmnb_filtered_candidate_ids": route2_nmnb_eligible,
         "branches": rows,
         "result": {
             "status": "combat_branches_lowered_without_benefit_promotion",
             "survival_is_hard_filter": True,
+            "survivor_count_is_player_phase_only": True,
+            "no_bomb_is_hard_filter": True,
+            "route2_scope_is_required_for_combat_proxy": True,
             "combat_metrics_are_proxy_or_observed_state_only": True,
             "verified_generation_safe_hp_transactions": False,
             "verified_prevented_hostile_births": False,

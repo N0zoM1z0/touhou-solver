@@ -11,9 +11,20 @@ from analysis.th08_native_combat_branch_report import (
 )
 
 
-def _summary(frame: int, *, hp: int = 100, damage: int = 0) -> dict[str, int]:
+def _summary(
+    frame: int,
+    *,
+    hp: int = 100,
+    damage: int = 0,
+    route_id: int = 2,
+    bomb_active: bool = False,
+    active_input: int = 0x05,
+) -> dict[str, object]:
     return {
         "manager_frame": frame,
+        "route_id": route_id,
+        "bomb_active": bomb_active,
+        "active_input": active_input,
         "active_shot_count": 3,
         "damage_eligible_shot_count": 2,
         "hit_state_shot_count": 1,
@@ -37,10 +48,25 @@ def _summary(frame: int, *, hp: int = 100, damage: int = 0) -> dict[str, int]:
     }
 
 
-def _projection(frame: int, *, hp: int = 100, damage: int = 0) -> dict[str, object]:
+def _projection(
+    frame: int,
+    *,
+    hp: int = 100,
+    damage: int = 0,
+    route_id: int = 2,
+    bomb_active: bool = False,
+    active_input: int = 0x05,
+) -> dict[str, object]:
     return {
         "sha256": f"{frame:064x}",
-        "summary": _summary(frame, hp=hp, damage=damage),
+        "summary": _summary(
+            frame,
+            hp=hp,
+            damage=damage,
+            route_id=route_id,
+            bomb_active=bomb_active,
+            active_input=active_input,
+        ),
     }
 
 
@@ -51,6 +77,9 @@ def _tick(
     hp: int = 100,
     damage: int = 0,
     player_phase: int = 0,
+    route_id: int = 2,
+    bomb_active: bool = False,
+    active_input: int = 0x05,
 ) -> dict[str, object]:
     return {
         "selected_action": action,
@@ -62,6 +91,9 @@ def _tick(
             frame,
             hp=hp,
             damage=damage,
+            route_id=route_id,
+            bomb_active=bomb_active,
+            active_input=active_input,
         ),
     }
 
@@ -141,6 +173,95 @@ class NativeCombatBranchReportTests(unittest.TestCase):
         self.assertTrue(
             all(
                 row["candidate_status"] == "rejected_hard_survival"
+                for row in report["branches"]
+            )
+        )
+
+    def test_nmnb_and_route_scope_fail_closed_before_combat_proxy(self) -> None:
+        source = {
+            "schema": ROLLING_SCHEMA,
+            "result": {
+                "status": ROLLING_ACCEPTED_STATUS,
+                "root_native_combat_projection": _projection(100),
+                "root_compact_state": {"player_phase": 0},
+                "branches": {
+                    "a1": {"ticks": [_tick(101, action=0x05)]},
+                    "a2": {"ticks": [_tick(101, action=0x07)]},
+                    "b": {
+                        "ticks": [
+                            _tick(
+                                101,
+                                action=0x05,
+                                bomb_active=True,
+                                active_input=0x07,
+                            )
+                        ]
+                    },
+                },
+            },
+        }
+
+        report = build_report(
+            source,
+            source_path="fixture.json",
+            source_sha256="1" * 64,
+        )
+
+        self.assertEqual(report["survivor_count"], 3)
+        self.assertEqual(report["route2_nmnb_eligible_count"], 1)
+        self.assertEqual(
+            report["route2_nmnb_filtered_candidate_ids"],
+            ["a1"],
+        )
+        by_id = {row["branch_id"]: row for row in report["branches"]}
+        self.assertEqual(
+            by_id["a2"]["candidate_status"],
+            "rejected_hard_no_bomb",
+        )
+        self.assertEqual(
+            by_id["b"]["candidate_status"],
+            "rejected_hard_no_bomb",
+        )
+        self.assertEqual(by_id["a2"]["bomb_action_tick_indices"], [0])
+        self.assertEqual(
+            by_id["b"]["bomb_active_manager_frames"],
+            [101],
+        )
+        self.assertEqual(
+            by_id["b"]["bomb_active_input_manager_frames"],
+            [101],
+        )
+
+    def test_non_route2_branch_is_outside_combat_proxy_scope(self) -> None:
+        source = {
+            "schema": ROLLING_SCHEMA,
+            "result": {
+                "status": ROLLING_ACCEPTED_STATUS,
+                "root_native_combat_projection": _projection(100),
+                "root_compact_state": {"player_phase": 0},
+                "branches": {
+                    branch_id: {
+                        "ticks": [
+                            _tick(101, action=0x05, route_id=1)
+                        ]
+                    }
+                    for branch_id in ("a1", "a2", "b")
+                },
+            },
+        }
+
+        report = build_report(
+            source,
+            source_path="fixture.json",
+            source_sha256="2" * 64,
+        )
+
+        self.assertEqual(report["survivor_count"], 3)
+        self.assertEqual(report["route2_nmnb_eligible_count"], 0)
+        self.assertTrue(
+            all(
+                row["candidate_status"] == "out_of_scope_non_route2"
+                and not row["route2_scope"]
                 for row in report["branches"]
             )
         )
@@ -257,6 +378,54 @@ class NativeCombatBranchReportTests(unittest.TestCase):
                 source_path="fixture.json",
                 source_sha256="b" * 64,
             )
+
+    def test_causal_prefix_bomb_rejects_inherited_continuation(self) -> None:
+        source = {
+            "schema": CAUSAL_SEARCH_SCHEMA,
+            "result": {
+                "status": "causal_secondary_search_passed",
+                "origin": {
+                    "native_combat_projection": _projection(100),
+                    "compact_state": {"player_phase": 0},
+                },
+                "prefixes": [
+                    {
+                        "prefix_mask": 0x05,
+                        "prefix_action_schedule": [0x07],
+                        "prefix": {
+                            "ticks": [_tick(101, action=0x05)]
+                        },
+                        "subroot": {
+                            "native_combat_projection": _projection(101),
+                            "compact_state": {"player_phase": 0},
+                        },
+                        "continuations": [
+                            {
+                                "complete_mask": 0x05,
+                                "ticks": [_tick(102, action=0x05)],
+                            }
+                        ],
+                    }
+                ],
+            },
+        }
+
+        report = build_report(
+            source,
+            source_path="fixture.json",
+            source_sha256="3" * 64,
+        )
+
+        self.assertEqual(report["survivor_count"], 2)
+        self.assertEqual(report["route2_nmnb_eligible_count"], 0)
+        self.assertTrue(
+            all(
+                row["candidate_status"] == "rejected_hard_no_bomb"
+                and row["bomb_declared_action_fields"]
+                == ["prefix_action_schedule[0]"]
+                for row in report["branches"]
+            )
+        )
 
     def test_rejects_unaccepted_rolling_transaction(self) -> None:
         source = {

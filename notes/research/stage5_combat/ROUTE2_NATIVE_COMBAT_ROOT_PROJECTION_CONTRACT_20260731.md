@@ -73,14 +73,15 @@ it supplies no shot lifecycle, callback, collision, or damage authority.
 ## Implemented Projection
 
 `scripts/th08_runtime/native_combat_projection.py` implements
-`th08-native-combat-root-projection-v6`. V1 established the complete
+`th08-native-combat-root-projection-v7`. V1 established the complete
 shot/target projection; V2 added normalized loaded-SHT identity and exact
 source-record provenance; V3 separates uncapped returned damage from the
 capped hit-feedback accumulator increment; V4 added the complete player
 damage-region pool and native-ordered supported pass; V5 captures the raw
 late-damage predicates and resolves the supported final HP value; V6 carries
 supported shot and damage-region mutations across targets in native manager
-slot order.
+slot order; V7 carries exact Route ID, native active input, and Bomb-active
+state into the compact summary consumed by offline branch reports.
 
 For every exact root or future tick it retains:
 
@@ -150,7 +151,7 @@ contaminated roots still fail closed.
 ## Rolling And Causal Integration
 
 `scripts/tools/th08_native_snapshot_trial.py` schema
-`th08-native-snapshot-rolling-trial-v9` now:
+`th08-native-snapshot-rolling-trial-v10` now:
 
 - captures the combat projection at the root and every tick;
 - requires its SHA to agree in same-action replay and all-36 repeated-root
@@ -160,7 +161,7 @@ contaminated roots still fail closed.
 - retains compact combat summaries in the portfolio output.
 
 `scripts/tools/th08_native_snapshot_causal_search.py` schema
-`th08-native-snapshot-causal-secondary-search-v7` carries the same projection
+`th08-native-snapshot-causal-secondary-search-v8` carries the same projection
 through the origin, promoted subroots, future ticks, and parent-repeat
 transaction.
 
@@ -168,11 +169,17 @@ The older collision projection remains schema v7 and unchanged. Combat state
 is an independent projection so this checkpoint does not rewrite or weaken
 the retained H1/H8/H32 collision evidence boundary.
 
-`scripts/analysis/th08_native_combat_branch_report.py` lowers only accepted v9
-rolling transactions or accepted v7 causal-search transactions into
-`th08-native-combat-branch-comparison-v1`. It:
+`scripts/analysis/th08_native_combat_branch_report.py` lowers only accepted
+v10 rolling transactions or accepted v8 causal-search transactions into
+`th08-native-combat-branch-comparison-v2`. It:
 
 - rejects every branch whose native compact history enters player phase 2;
+- rejects every branch whose selected complete mask, native active input, or
+  native Bomb-active state contains Bomb;
+- carries the same hard rejection through a causal continuation when its
+  inherited prefix mask or explicit prefix schedule contains Bomb;
+- requires exact Route ID 2 at the root and every tick before applying the
+  Route-2 combat-proxy scope;
 - reports native published frame damage and instantaneous supported ordinary
   plus damage-region overlap subtotals;
 - reports unresolved-overlap counts rather than hiding them;
@@ -212,10 +219,11 @@ the exact lifecycle ring remains the required generation oracle.
 ### Actions and issue semantics
 
 Actions are the parent tools' complete no-Bomb masks and action schedules.
-The projection neither issues nor rewrites input. Pickup delay, held desired
-input, active input, no-write, and scheduler semantics remain governed by the
-unchanged native snapshot transaction. No result from this report reaches the
-issue thread.
+The projection neither issues nor rewrites input. The lowerer checks both
+selected masks and observed native active input instead of treating one as the
+other. Pickup delay, held desired input, no-write, and scheduler semantics
+remain governed by the unchanged native snapshot transaction. No result from
+this report reaches the issue thread.
 
 ### Uncertainty and transitions
 
@@ -274,23 +282,25 @@ This checkpoint grants:
 - exact-root player-shot/enemy-target capture identity;
 - synthetic parity for supported instantaneous ordinary-shot overlap and
   cross-target shot/region mutation;
+- fail-closed offline enforcement of the hard no-Bomb and exact Route-2
+  comparison scope from selected-mask and native-state evidence;
 - deterministic integration into rolling and causal snapshot transactions;
   and
 - a hard-survival-filtered, non-ranking offline comparison format.
 
 It grants no:
 
-- observed v9/v7 runtime sample;
+- observed v10/v8 runtime sample;
 - generation-safe HP delta or kill/end classification;
 - target-selection, Focus-switch, damage-ranking, or resource-ranking
   authority;
 - prevented hostile birth or shortened exposure claim;
 - physical predictive, shadow, or live action authority.
 
-Eight focused projection tests, six focused report tests, three loaded-SHT
+Eight focused projection tests, nine focused report tests, three loaded-SHT
 provenance tests, twelve rolling snapshot tests, and four causal-search tests
-pass. Complete discovery passes 1,524 tests in 14.760 seconds on Linux and
-30.694 seconds through the Windows UNC loader, with the three existing skips.
+pass. Complete discovery passes 1,527 tests in 14.682 seconds on Linux and
+31.066 seconds through the Windows UNC loader, with the three existing skips.
 
 The next authorized causal gate is a small immutable-root corpus spanning
 focused, unfocused, and dynamic-refocus complete-mask schedules. Each branch

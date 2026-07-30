@@ -1934,10 +1934,13 @@ first.
   V5 captures the exact raw mode bits, signed threshold operands, enemy
   blocker/timer fields, and publishes only a supported resolved HP subtotal.
   V6 carries supported nonpiercing-shot and damage-region mutation across
-  targets in revalidated ascending manager slot order. Rolling v9 and
-  causal-search v7 retain that identity at roots and ticks; the
+  targets in revalidated ascending manager slot order. V7 adds exact Route
+  ID, native active input, and Bomb-active state to compact summaries.
+  Rolling v10 and causal-search v8 retain that identity at roots and ticks; the
   lowerer refuses to apply normal-content closure to any special or unknown
-  source. No new native corpus exists. This grants loaded-content and source-
+  source. Branch report v2 rejects Bomb contamination as a hard NMNB failure
+  and treats non-Route-2 histories as out of scope. No new native corpus
+  exists. This grants loaded-content and source-
   ownership authority only, not damage, generation, combat benefit, ranking,
   physical prediction, or live authority.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
@@ -2001,7 +2004,8 @@ first.
   instruction/static-dataflow authority only. Damage-region roots and
   manager-ordered supported mutation have offline exact-capture and synthetic
   scalar authority only; late enemy scaling has shipped-instruction/synthetic
-  arithmetic and exact-root raw-predicate authority. The
+  arithmetic and exact-root raw-predicate authority. Route/Bomb filtering has
+  offline exact-field and hard-constraint enforcement authority only. The
   source/emission atlas has
   shipped-content/static
   candidate authority only. The item/drop atlas has shipped-native

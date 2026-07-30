@@ -65,7 +65,7 @@ from th08_runtime.route2_sht_provenance import (
 from th08_runtime.sensing import decode_spell_state
 
 
-NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v6"
+NATIVE_COMBAT_PROJECTION_SCHEMA = "th08-native-combat-root-projection-v7"
 PLAYER_SHOT_COMBAT_STATE_SCHEMA = "th08-player-shot-combat-state-v1"
 PLAYER_DAMAGE_REGION_STATE_SCHEMA = "th08-player-damage-region-state-v1"
 ENEMY_DAMAGE_TARGET_STATE_SCHEMA = "th08-enemy-damage-target-state-v1"
@@ -1291,6 +1291,9 @@ def capture_native_combat_projection(
     }
     summary = {
         "manager_frame": int(compact_state["manager_frame"]),
+        "route_id": route_id,
+        "bomb_active": bomb_active,
+        "active_input": int(compact_state["input_current"]),
         "active_shot_count": len(shot_state.slots),
         "damage_eligible_shot_count": len(
             shot_state.damage_eligible_slot_indices

@@ -295,6 +295,7 @@ class _Reader:
         spell: bytes,
         player_context: bytes,
         damage_regions: bytes = bytes(PLAYER_DAMAGE_REGION_POOL_BYTES),
+        route_id: int = 2,
     ) -> None:
         global_mode_state_pointer = 0x02000000
         self._memory = {
@@ -314,7 +315,7 @@ class _Reader:
                 len(damage_regions),
             ): damage_regions,
             (ADDR_GLOBAL_DAMAGE_MODE_FLAGS, 4): bytes(4),
-            (ADDR_ROUTE_ID, 1): bytes(1),
+            (ADDR_ROUTE_ID, 1): bytes((route_id,)),
             (
                 ADDR_GLOBAL_MODE_MANAGER + GLOBAL_MODE_STATE_POINTER_OFFSET,
                 4,
@@ -518,6 +519,9 @@ class NativeCombatProjectionTests(unittest.TestCase):
 
         self.assertEqual(projection.record()["schema"], NATIVE_COMBAT_PROJECTION_SCHEMA)
         self.assertEqual(projection.summary["active_shot_count"], 4)
+        self.assertEqual(projection.summary["route_id"], 2)
+        self.assertFalse(projection.summary["bomb_active"])
+        self.assertEqual(projection.summary["active_input"], 0x05)
         self.assertEqual(projection.summary["damage_eligible_shot_count"], 4)
         self.assertEqual(
             projection.summary[

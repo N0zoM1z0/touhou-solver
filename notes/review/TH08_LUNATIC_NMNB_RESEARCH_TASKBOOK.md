@@ -1042,10 +1042,13 @@ Current semantic correction (2026-07-31):
   Its five raw native predicate operands are captured at exact roots, but
   their inherited physical labels remain unproven. Keep them explicit until
   caller/dataflow/runtime evidence closes their physical meaning.
-- Combat projection v6 now captures those raw predicate operands at exact
+- Combat projection v7 now captures those raw predicate operands at exact
   roots, reports supported resolved HP damage, and carries nonpiercing-shot
   plus damage-region mutation through ascending native manager slot order.
-  Rolling v9 / causal v7 bind the new identity; unresolved callbacks/type-4/5
+  Rolling v10 / causal v8 bind exact Route ID, native active input, and
+  Bomb-active state. Branch report v2 hard-rejects every Bomb-contaminated
+  history, including inherited causal prefix schedules, and keeps non-Route-2
+  histories outside combat-proxy scope; unresolved callbacks/type-4/5
   mutation and runtime generation joins still bound authority.
 
 Exit gate:

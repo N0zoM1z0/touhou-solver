@@ -100,18 +100,23 @@ historical handoff.
   blocker/timer fields, and supported resolved HP damage. V6 follows the
   revalidated enemy-manager slot order `0..479`, carrying nonpiercing shot
   state and damage-region accumulated/cap/disable mutation across targets.
-- This identity change bumps rolling snapshot to v9 and causal search to v7.
+  V7 also carries exact Route ID, native active input, and Bomb-active state
+  into every compact combat summary.
+- This identity change bumps rolling snapshot to v10 and causal search to v8.
   The branch lowerer checks root plus every tick and preserves any special or
-  unknown source as non-normal; no v8/v6 artifact is reinterpreted and no
-  v9/v7 corpus has been captured.
+  unknown source as non-normal; no v9/v7 artifact is reinterpreted and no
+  v10/v8 corpus has been captured.
 - The shipped later-damage arithmetic is now executable with opaque predicates:
   optional per-call 106/100, route 3/11 alternate divisor 6.5 versus 1.7,
   actual resolved-damage cap 70, special-enemy `/7` or Bomb-region `/2.5`
   branches, optional post-timer `/9` or block, and final HP/frame-damage write.
-  Combat v6 now captures those raw predicates without guessing their physical
+  Combat v7 now captures those raw predicates without guessing their physical
   labels and applies supported cross-target mutation in native manager order.
-  The next general WS-H boundary is generation-safe runtime comparison before
-  any combat ranking.
+  Branch report v2 hard-rejects Bomb-selected, Bomb-active-input, or
+  Bomb-active-state histories, carries that rejection through inherited causal
+  prefix schedules, and keeps any non-Route-2 history outside its combat-proxy
+  scope. The next general WS-H boundary is generation-safe runtime comparison
+  before any combat ranking.
 - Root 2,129's old four-u16 pre-hostile prefix is compatible with a due
   focused level-5 option pair, but the retained v3 capsule lacks timer/pool
   fields, so this remains inferred rather than observed. Hostile birth 1220

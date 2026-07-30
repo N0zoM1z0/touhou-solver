@@ -15,6 +15,7 @@ from th08_boss_phase import (
     ENEMY_CURRENT_HEALTH_OFFSET,
     ENEMY_FLAGS_OFFSET,
     ENEMY_FRAME_DAMAGE_OFFSET,
+    ENEMY_HEALTH_SUCCESSORS_OFFSET,
     ENEMY_HEALTH_THRESHOLDS_OFFSET,
     ENEMY_HEALTH_WINDOW_SIZE,
     ENEMY_HP_SUBTRACTION_FLAG,
@@ -22,9 +23,11 @@ from th08_boss_phase import (
     ENEMY_PHASE_TIMER_FRACTION_OFFSET,
     ENEMY_PLAYER_SHOT_DAMAGE_FLAG,
     ENEMY_TIMEOUT_FRAME_OFFSET,
+    ENEMY_TIMEOUT_SUCCESSOR_OFFSET,
     boss_phase_successor_write_enabled,
     capture_boss_phase_snapshot,
     project_boss_phase_transition_prefix,
+    serialize_boss_phase_snapshot,
 )
 from th08_enemy_damage_model import (
     ENEMY_PAUSE_DURING_BOMB_OR_TRANSITION_FLAG,
@@ -81,6 +84,21 @@ class Reader:
             ENEMY_TIMEOUT_FRAME_OFFSET - ENEMY_FLAGS_OFFSET,
             1800,
         )
+        struct.pack_into(
+            "<iiii",
+            self.control,
+            ENEMY_HEALTH_SUCCESSORS_OFFSET - ENEMY_FLAGS_OFFSET,
+            51,
+            44,
+            -1,
+            -1,
+        )
+        struct.pack_into(
+            "<i",
+            self.control,
+            ENEMY_TIMEOUT_SUCCESSOR_OFFSET - ENEMY_FLAGS_OFFSET,
+            44,
+        )
 
     def u32(self, address: int) -> int:
         self.assert_address(address, ADDR_ENEMY_MANAGER_FRAME)
@@ -118,6 +136,17 @@ class BossPhaseTests(unittest.TestCase):
         self.assertTrue(snapshot.stable)
         self.assertEqual(snapshot.registry_slot, 0)
         self.assertEqual(snapshot.phase_end_health, 500)
+        self.assertEqual(
+            snapshot.health_successor_subroutines,
+            (51, 44, -1, -1),
+        )
+        self.assertEqual(snapshot.timeout_successor_subroutine, 44)
+        serialized = serialize_boss_phase_snapshot(snapshot)
+        self.assertEqual(
+            serialized["health_successor_subroutines"],
+            (51, 44, -1, -1),
+        )
+        self.assertEqual(serialized["timeout_successor_subroutine"], 44)
         self.assertEqual(snapshot.health_remaining, 220)
         self.assertEqual(snapshot.elapsed_frames, 125.5)
         self.assertEqual(snapshot.frame_damage, 12)
@@ -174,6 +203,7 @@ class BossPhaseTests(unittest.TestCase):
         projection = snapshot.transition_projection
         self.assertEqual(len(projection.steps), 1)
         self.assertEqual(projection.steps[0].health_threshold_index, 0)
+        self.assertEqual(projection.steps[0].successor_subroutine, 51)
         self.assertEqual(projection.current_health, 500)
         self.assertEqual(projection.phase_start_health, 500)
         self.assertEqual(projection.health_thresholds, (-1, 100, -1, -1))
@@ -187,8 +217,11 @@ class BossPhaseTests(unittest.TestCase):
             timer_elapsed=1800,
             timer_fraction=0.75,
             timeout_frame=1800,
+            health_successor_subroutines=(51, 44, -1, -1),
+            timeout_successor_subroutine=44,
         )
         self.assertEqual(tuple(step.kind for step in projection.steps), ("health",))
+        self.assertEqual(projection.steps[0].successor_subroutine, 51)
         self.assertEqual(projection.current_health, 500)
         self.assertEqual(projection.timer_elapsed, 1800)
         self.assertEqual(projection.timer_fraction, 0.75)
@@ -211,9 +244,11 @@ class BossPhaseTests(unittest.TestCase):
             timer_elapsed=1800,
             timer_fraction=0.25,
             timeout_frame=1800,
+            timeout_successor_subroutine=44,
         )
         self.assertEqual(tuple(step.kind for step in due.steps), ("timeout",))
         self.assertEqual(due.steps[0].health_threshold_index, 1)
+        self.assertEqual(due.steps[0].successor_subroutine, 44)
         self.assertEqual(due.current_health, 500)
         self.assertEqual(due.phase_start_health, 500)
         self.assertEqual(due.health_thresholds, (100, -1, -1, -1))
@@ -243,13 +278,18 @@ class BossPhaseTests(unittest.TestCase):
             timer_elapsed=10,
             timer_fraction=0.0,
             timeout_frame=None,
+            health_successor_subroutines=(51, 44, -1, -1),
         )
         self.assertEqual(
             tuple(
-                (step.health_threshold_index, step.health_threshold)
+                (
+                    step.health_threshold_index,
+                    step.health_threshold,
+                    step.successor_subroutine,
+                )
                 for step in projection.steps
             ),
-            ((0, 100), (1, 500)),
+            ((0, 100, 51), (1, 500, 44)),
         )
         self.assertEqual(projection.current_health, 500)
         self.assertEqual(projection.health_thresholds, (-1, -1, -1, -1))
@@ -261,6 +301,23 @@ class BossPhaseTests(unittest.TestCase):
         self.assertIsNotNone(snapshot)
         self.assertEqual(snapshot.current_health, -5)
         self.assertEqual(snapshot.completion_pending, "health")
+
+    def test_successor_registry_is_part_of_phase_identity(self) -> None:
+        reader = Reader(0x57D2F0)
+        first = capture_boss_phase_snapshot(reader)
+        self.assertIsNotNone(first)
+        struct.pack_into(
+            "<i",
+            reader.control,
+            ENEMY_HEALTH_SUCCESSORS_OFFSET - ENEMY_FLAGS_OFFSET,
+            99,
+        )
+        second = capture_boss_phase_snapshot(reader)
+        self.assertIsNotNone(second)
+        self.assertNotEqual(
+            first.as_progress_state().key,
+            second.as_progress_state().key,
+        )
 
 
 if __name__ == "__main__":

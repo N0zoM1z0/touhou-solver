@@ -247,5 +247,12 @@ content digest
 + pending/confirmed transition cause
 ```
 
+The read-only Boss snapshot now captures the four HP-successor registers and
+timeout-successor register in its existing manager-frame consistency bracket,
+adds them to phase identity, and reports the selected target in the bounded
+transition prefix. This is capture readiness only: no compatible runtime
+sample has been retained, engine-mode stability and ECL execution remain
+unjoined, and the static atlas artifact is unchanged.
+
 Only then may a pure-survival branch and a damage-oriented branch be compared
 from the same viable root. Physical gameplay remains separately authorized.

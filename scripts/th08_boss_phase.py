@@ -35,8 +35,10 @@ ENEMY_FLAGS_OFFSET = 0x3324
 ENEMY_FLAGS2_OFFSET = 0x3328
 ENEMY_FRAME_DAMAGE_OFFSET = 0x3354
 ENEMY_HEALTH_THRESHOLDS_OFFSET = 0x3358
+ENEMY_HEALTH_SUCCESSORS_OFFSET = 0x3368
 ENEMY_TIMEOUT_FRAME_OFFSET = 0x3378
-ENEMY_CONTROL_WINDOW_SIZE = 0x58
+ENEMY_TIMEOUT_SUCCESSOR_OFFSET = 0x337C
+ENEMY_CONTROL_WINDOW_SIZE = 0x5C
 
 # ECL opcode 0x53 writes bit index 2: the concrete mask is 1 << 2.
 ENEMY_BOSS_FLAG2 = 0x00000004
@@ -69,6 +71,7 @@ class BossPhaseTransitionStep:
     kind: str
     health_threshold_index: int | None
     health_threshold: int | None
+    successor_subroutine: int | None
     current_health_before: int
     current_health_after: int
     phase_start_health_before: int
@@ -106,6 +109,10 @@ def project_boss_phase_transition_prefix(
     timer_elapsed: int,
     timer_fraction: float,
     timeout_frame: int | None,
+    health_successor_subroutines: (
+        tuple[int, int, int, int] | None
+    ) = None,
+    timeout_successor_subroutine: int | None = None,
 ) -> BossPhaseTransitionProjection:
     """Project the native transition loop before player-shot damage.
 
@@ -114,9 +121,10 @@ def project_boss_phase_transition_prefix(
     no health transition fires can an elapsed integer timer trigger timeout;
     timeout restores the greatest positive retained threshold.
 
-    Starting the selected ECL subroutine has effects outside this bounded
-    field projection, so callers must not treat the returned state as a full
-    phase or hazard successor.
+    When supplied, the successor registers identify the ECL subroutine selected
+    by each boundary. Starting it has effects outside this bounded field
+    projection, so callers must not treat the returned state as a full phase
+    or hazard successor.
     """
 
     thresholds = list(health_thresholds)
@@ -142,6 +150,11 @@ def project_boss_phase_transition_prefix(
                 kind="health",
                 health_threshold_index=crossed_index,
                 health_threshold=threshold,
+                successor_subroutine=(
+                    health_successor_subroutines[crossed_index]
+                    if health_successor_subroutines is not None
+                    else None
+                ),
                 current_health_before=projected_health,
                 current_health_after=threshold,
                 phase_start_health_before=projected_phase_start,
@@ -183,6 +196,7 @@ def project_boss_phase_transition_prefix(
                         if restore_index is not None and restore_threshold > 0
                         else None
                     ),
+                    successor_subroutine=timeout_successor_subroutine,
                     current_health_before=projected_health,
                     current_health_after=health_after,
                     phase_start_health_before=projected_phase_start,
@@ -222,10 +236,12 @@ class BossPhaseSnapshot:
     maximum_health: int
     phase_start_health: int
     health_thresholds: tuple[int, int, int, int]
+    health_successor_subroutines: tuple[int, int, int, int]
     phase_end_health: int
     timer_elapsed: int
     timer_fraction: float
     timeout_frame: int | None
+    timeout_successor_subroutine: int
     frame_damage: int
     flags: int
     flags2: int
@@ -254,6 +270,8 @@ class BossPhaseSnapshot:
             timer_elapsed=self.timer_elapsed,
             timer_fraction=self.timer_fraction,
             timeout_frame=self.timeout_frame,
+            health_successor_subroutines=self.health_successor_subroutines,
+            timeout_successor_subroutine=self.timeout_successor_subroutine,
         )
 
     @property
@@ -304,7 +322,9 @@ class BossPhaseSnapshot:
                 self.pointer,
                 self.phase_start_health,
                 self.health_thresholds,
+                self.health_successor_subroutines,
                 self.timeout_frame,
+                self.timeout_successor_subroutine,
             ),
             frame=self.frame_after,
             current_health=self.current_health,
@@ -378,10 +398,20 @@ def _decode_snapshot(
         control,
         ENEMY_HEALTH_THRESHOLDS_OFFSET - ENEMY_FLAGS_OFFSET,
     )
+    health_successors = struct.unpack_from(
+        "<iiii",
+        control,
+        ENEMY_HEALTH_SUCCESSORS_OFFSET - ENEMY_FLAGS_OFFSET,
+    )
     timeout = struct.unpack_from(
         "<i",
         control,
         ENEMY_TIMEOUT_FRAME_OFFSET - ENEMY_FLAGS_OFFSET,
+    )[0]
+    timeout_successor = struct.unpack_from(
+        "<i",
+        control,
+        ENEMY_TIMEOUT_SUCCESSOR_OFFSET - ENEMY_FLAGS_OFFSET,
     )[0]
     if maximum_health < 0 or phase_start_health < 0 or not math.isfinite(
         timer_fraction
@@ -414,10 +444,12 @@ def _decode_snapshot(
         maximum_health=maximum_health,
         phase_start_health=phase_start_health,
         health_thresholds=thresholds,
+        health_successor_subroutines=health_successors,
         phase_end_health=phase_end_health,
         timer_elapsed=timer_elapsed,
         timer_fraction=timer_fraction,
         timeout_frame=timeout if timeout >= 0 else None,
+        timeout_successor_subroutine=timeout_successor,
         frame_damage=frame_damage,
         flags=flags,
         flags2=flags2,

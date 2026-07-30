@@ -81,7 +81,10 @@ The corrected adapter:
   sample as malformed;
 - projects the native slot-order/health-before-timeout loop;
 - exposes `completion_pending` as `health`, `timeout`, or null;
-- includes the complete four-slot threshold tuple in phase identity; and
+- captures the four HP-successor registers and timeout-successor register in
+  the same manager-frame bracket;
+- reports the selected successor on each projected transition step;
+- includes the complete threshold/successor registry in phase identity; and
 - attributes a later observed phase-key change to health or timeout only when
   the preceding stable sample carried that pending condition and both samples
   share gameplay epoch, stage, and Boss pointer continuity.
@@ -101,15 +104,20 @@ field mutations:
 - integer/fractional phase timer; and
 - timeout frame.
 
-Starting the selected ECL subroutine can change flags, health, callbacks,
-emissions, movement, spell state, or later control flow. Those effects are
-explicitly outside this projection. The returned state is not a complete
-phase or hazard successor.
+The projection now identifies the captured successor register selected by
+each health or timeout step. It does not execute that subroutine or model the
+timeout helper's later successor-register rewrite. Starting the selected ECL
+subroutine can change flags, health, callbacks, emissions, movement, spell
+state, registry fields, or later control flow. Those effects are explicitly
+outside this projection. The returned state is not a complete phase or hazard
+successor.
 
 The read-only sensing trace now records:
 
 - pending completion kind;
 - confirmed completion cause when bracketed;
+- four HP successors and one timeout successor;
+- the successor selected by a pending projected boundary;
 - health remaining and normalized health progress; and
 - remaining timeout time.
 
@@ -124,9 +132,11 @@ For this bounded recurrence, one model state is:
 (current_hp,
  phase_start_hp,
  threshold_slots[4],
+ health_successor_slots[4],
  timer_integer,
  timer_fraction,
- timeout_frame)
+ timeout_frame,
+ timeout_successor)
 ```
 
 Two captured histories map to the same state only for the immediate native
@@ -140,10 +150,12 @@ eligible update occurs before the next observation and all effects of the
 started ECL subroutine. The scalar prefix does not maximize hidden branches
 separately.
 
-If solved exactly, this finite model answers only which retained boundary
-fires and the known immediate writes before player-shot damage. It does not
-answer whether a Boss is damageable, how much damage an action delivers, how
-long a new phase lasts, or whether shortening it improves physical survival.
+If solved exactly, this finite model answers which retained boundary fires,
+which captured successor it selects, and the known immediate writes before
+player-shot damage. It does not answer whether the selected subroutine runs
+to completion, whether a Boss is damageable, how much damage an action
+delivers, how long a new phase lasts, or whether shortening it improves
+physical survival.
 
 The implementation is exact for the revalidated comparisons, priority,
 slot-order scan, threshold restoration, and timer reset. A shipped trace in
@@ -170,6 +182,8 @@ This checkpoint grants:
 
 - observed shipped ordering and field semantics;
 - deterministic implementation of the bounded transition prefix;
+- stable read-only capture of all five successor registers and exact selected
+  target attribution;
 - correct pending-boundary telemetry; and
 - bracketed health-versus-timeout cause attribution.
 
@@ -178,17 +192,19 @@ It grants no:
 - causal action-to-HP-delta or phase-duration result;
 - survival-equivalent damage ranking;
 - Boss attack-alignment or Focus-switch authority;
-- complete ECL transition successor; or
+- ECL successor execution or side effects; or
 - physical predictive authority.
 
-Seven focused Boss tests, four game-neutral progress tests, the sensing-trace
-regression, and Ruff pass. Complete discovery passes 1,444 tests in 13.482
-seconds on Linux and 28.529 seconds through the Windows UNC loader, with the
-three existing skips. No TH08, controller, replay, or physical trial was run.
+Nine focused Boss tests and Ruff pass. Complete discovery passes 1,471 tests
+in 14.568 seconds on Linux and 30.340 seconds through the Windows UNC loader,
+with the three existing skips. No TH08, controller, replay, or physical trial
+was run.
 
 The next causal S10/WS-H gate needs one immutable root with stable Boss
-generation/phase identity, exact flags, pre/post HP, frame damage, timer,
-thresholds, shot timer/pool/options/RNG, target geometry, and unchanged viable
-actions. Focused, unfocused, and dynamic schedules may be compared only inside
-the same exact survival-safe action set. Until that root exists, this model is
-read-only infrastructure.
+generation/phase identity, exact engine mode, ECL PC/call state, pre/post HP,
+frame damage, timer, thresholds and successors, shot timer/pool/options/RNG,
+target geometry, and unchanged viable actions. The capture implementation is
+ready, but no compatible runtime successor sample has been retained. Focused,
+unfocused, and dynamic schedules may be compared only inside the same exact
+survival-safe action set. Until that root exists, this model is read-only
+infrastructure.

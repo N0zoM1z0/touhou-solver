@@ -24,14 +24,15 @@ historical handoff.
   correction, default-off native lifecycle event ring, native damageability/
   HP gate, action-conditioned static shot atlas, corrected item-pool
   recurrence/static Power ledger, exact bounded Boss HP/timeout transition
-  prefix, route-wide static Boss phase-configuration atlas, route-wide static
-  source/emission candidate atlas, exact lifecycle ring diagnostic transport
-  and fail-closed generation/end lowerer,
+  prefix and five-successor stable capture, route-wide static Boss
+  phase-configuration atlas, route-wide static source/emission candidate
+  atlas, exact lifecycle ring diagnostic transport and fail-closed
+  generation/end lowerer,
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,470 tests in 14.450 seconds.
-- Complete Windows UNC discovery passes 1,470 tests in 30.425 seconds with
+- Complete Linux discovery passes 1,471 tests in 14.568 seconds.
+- Complete Windows UNC discovery passes 1,471 tests in 30.340 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -188,6 +189,11 @@ historical handoff.
   `95e872a31085b64e9660d9e488ffba16983a3cdb3d26e76a051a174e983bc837`.
   Detailed boundary:
   `notes/research/stage5_combat/ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md`.
+- The stable Boss snapshot now extends its existing manager-frame bracket
+  through `+0x337C`, retaining all four HP successors and the timeout
+  successor. Those five registers enter phase identity, and each bounded
+  transition step reports its selected target. This changes read-only
+  telemetry only; no compatible runtime successor sample has been retained.
 - `COMBAT-KILL-01` now has a pinned static source/emission program atlas for
   all six Route-2/Lunatic Final-B stages. It partitions same-enemy
   call/interrupt/auxiliary components from child, cross-enemy, and phase-exit
@@ -495,9 +501,11 @@ historical handoff.
   HP delta, shot/option/RNG state, target motion, and viable actions.
   The drop/Power static ledger is now complete, but same-update physical item
   identity, pickup attribution, and carried later benefit remain open.
-  The bounded Boss HP/timeout transition model is also complete, but causal
-  action-to-HP delta, ECL successor effects, and physical phase shortening
-  remain open. The source-lifetime-to-emission static candidate index is
+  The bounded Boss HP/timeout transition model and five-successor capture
+  schema are complete, but no runtime successor sample is retained; stable
+  engine mode/ECL PC, causal action-to-HP delta, successor effects, and
+  physical phase shortening remain open. The source-lifetime-to-emission
+  static candidate index is
   complete for its declared pinned CFG boundary, but its runtime generation,
   instruction, birth, and persistence join remains open. Do not infer events
   across ring overflow or install either probe as a live issue-time consumer.

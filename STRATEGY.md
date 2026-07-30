@@ -1824,6 +1824,13 @@ first.
   successor remains. The atlas is a full-configuration-mode static index, not
   runtime execution, eventual route divergence, damage benefit, or action
   authority.
+- **Implemented Boss successor capture (2026-07-31):** the stable read-only
+  Boss snapshot now retains all four HP-successor registers and the timeout
+  successor through `+0x337C`, includes them in phase identity, and attaches
+  the selected register to each bounded health/timeout transition step. This
+  closes the capture-schema omission only. No compatible runtime sample,
+  engine-mode/ECL-PC join, successor side effect, phase-duration benefit, or
+  S18 action authority is promoted.
 - **Observed route-resource limit (2026-07-31):** two accepted natural
   Route-2/Lunatic Game Start prefixes, bounded strictly before their first
   native hits, retain `Power 0 -> 5` across 789 decisions and `Power 0 -> 0`

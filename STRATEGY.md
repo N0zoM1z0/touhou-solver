@@ -1786,6 +1786,15 @@ first.
   behavior pass 14 focused tests on Linux and Windows. This is synthetic
   implementation authority only; no TH08 process has installed it and no
   generation, kill, emission, strategy, or action claim is promoted.
+- **Implemented lifecycle transport (2026-07-31):** the live CLI, hotkey
+  contract, stage-practice supervisor, and full-route supervisor expose one
+  explicit default-off lifecycle option. It installs only after target
+  identity verification, flushes a post-arming baseline, retains one
+  pre-issue batch per diagnostic decision, advances serial only after row
+  flush, and captures a final batch after key release. Priority-17 and
+  lifecycle probes cannot share a trial; an unsafe activation or cleanup
+  terminates the exact verified target. The batches do not enter sensing,
+  ranking, viability, or issue authority.
 - **Static source/emission candidate atlas (2026-07-31):** pinned Route-2
   Lunatic Final-B ECL across Stages 1/2/3/4A/5/Final B contains 991 eligible
   timeline spawns and 70 unique root programs. Conservative source ownership

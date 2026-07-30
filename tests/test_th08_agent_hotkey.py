@@ -41,6 +41,7 @@ class AgentHotkeyTests(unittest.TestCase):
         self.assertFalse(parsed.trace_transform_runtime)
         self.assertFalse(parsed.trace_bullet_births)
         self.assertFalse(parsed.trace_enemy_combat_progress)
+        self.assertFalse(parsed.trace_enemy_lifecycle_events)
         self.assertFalse(parsed.trace_auxiliary_vm_batches)
         self.assertFalse(parsed.trace_auxiliary_ecl_events)
         self.assertFalse(parsed.enable_finalb_scale_source_authority)
@@ -227,6 +228,33 @@ class AgentHotkeyTests(unittest.TestCase):
         )
         parsed = build_parser().parse_args(enabled_arguments)
         self.assertTrue(parsed.trace_priority17_publications)
+        self.assertEqual(parsed.stop_after_hits, 0)
+        self.assertTrue(parsed.no_bomb)
+
+    def test_enemy_lifecycle_capture_is_diagnostic_opt_in(self) -> None:
+        default_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+        )
+        enabled_arguments = build_long_run_arguments(
+            output=Path("trial.jsonl"),
+            stop_file=Path("trial.stop"),
+            pid=1234,
+            difficulty=3,
+            trace_enemy_lifecycle_events=True,
+        )
+        self.assertNotIn(
+            "--trace-enemy-lifecycle-events",
+            default_arguments,
+        )
+        self.assertIn(
+            "--trace-enemy-lifecycle-events",
+            enabled_arguments,
+        )
+        parsed = build_parser().parse_args(enabled_arguments)
+        self.assertTrue(parsed.trace_enemy_lifecycle_events)
         self.assertEqual(parsed.stop_after_hits, 0)
         self.assertTrue(parsed.no_bomb)
 

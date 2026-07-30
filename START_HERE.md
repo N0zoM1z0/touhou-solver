@@ -24,11 +24,12 @@ historical handoff.
   correction, default-off native lifecycle event ring, native damageability/
   HP gate, action-conditioned static shot atlas, corrected item-pool
   recurrence/static Power ledger, exact bounded Boss HP/timeout transition
-  prefix, route-wide static source/emission candidate atlas, `CONTENT-01`
-  shipped content manifest, and `CONTENT-02` static mandatory-event atlas are
-  the current repository checkpoint; no new physical trial was run.
-- Complete Linux discovery passes 1,447 tests in 15.217 seconds.
-- Complete Windows UNC discovery passes 1,447 tests in 29.408 seconds with
+  prefix, route-wide static source/emission candidate atlas, exact lifecycle
+  ring diagnostic transport, `CONTENT-01` shipped content manifest, and
+  `CONTENT-02` static mandatory-event atlas are the current repository
+  checkpoint; no new physical trial was run.
+- Complete Linux discovery passes 1,454 tests in 13.774 seconds.
+- Complete Windows UNC discovery passes 1,454 tests in 29.844 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -83,8 +84,14 @@ historical handoff.
   quiescence before replacing an in-flight instruction span, full-ring
   overwrite invalidation, multi-site activation rollback, reverse-order
   cleanup, and unsafe restore retention. This is implementation/synthetic
-  authority only: it has not been installed in TH08, is not wired into live
-  sensing, and grants no kill, generation, strategy, or action authority.
+  authority only: it has not been installed in TH08 and grants no kill,
+  generation, strategy, or action authority.
+- The ring now has an explicit default-off diagnostic transport through the
+  live CLI, hotkey contract, stage-practice supervisor, and full-route
+  supervisor. Each decision retains a pre-issue batch and commits its serial
+  only after the row flush; a final batch follows key release. Invasive probes
+  must use separate trials, and unsafe rollback terminates the exact verified
+  TH08 image. The ring remains outside sensing, ranking, and issue authority.
 - Detailed lifecycle-ring contract:
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`.
   The old active-only observer must not be repeated.

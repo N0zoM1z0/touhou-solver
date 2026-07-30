@@ -48,6 +48,7 @@ class Th08LiveCliTests(unittest.TestCase):
         self.assertEqual(arguments.auxiliary_vm_native_call_mode, "held")
         self.assertFalse(arguments.trace_auxiliary_ecl_events)
         self.assertFalse(arguments.trace_priority17_publications)
+        self.assertFalse(arguments.trace_enemy_lifecycle_events)
         self.assertTrue(arguments.losing_control_reserve)
         self.assertEqual(
             arguments.bullet_birth_native_call_mode,
@@ -86,6 +87,89 @@ class Th08LiveCliTests(unittest.TestCase):
         )
 
         self.assertTrue(arguments.trace_priority17_publications)
+
+    def test_enemy_lifecycle_probe_is_explicitly_opt_in(self) -> None:
+        arguments = controller.build_parser().parse_args(
+            ["trace.jsonl", "--trace-enemy-lifecycle-events"]
+        )
+
+        self.assertTrue(arguments.trace_enemy_lifecycle_events)
+
+    def test_runtime_probes_must_use_separate_trials(self) -> None:
+        arguments = controller.build_parser().parse_args(
+            [
+                "trace.jsonl",
+                "--armed",
+                "--trace-priority17-publications",
+                "--trace-enemy-lifecycle-events",
+            ]
+        )
+
+        with self.assertRaisesRegex(ValueError, "separate trials"):
+            controller._prepare_live_run(arguments)
+
+    def test_unsafe_lifecycle_cleanup_terminates_verified_target(self) -> None:
+        records: list[dict[str, object]] = []
+
+        class _Sink:
+            def emit(
+                self,
+                record: dict[str, object],
+                *,
+                flush: bool = False,
+            ) -> None:
+                self.assert_flush = flush
+                records.append(record)
+
+        api = object()
+        image = Path("C:/games/th08.exe")
+        with (
+            patch(
+                "th08_automation.practice_windows.configure_supervisor_api"
+            ) as configure,
+            patch(
+                "th08_automation.practice_windows.terminate_exact_target",
+                return_value=True,
+            ) as terminate,
+        ):
+            controller._terminate_unsafe_instrumented_target(
+                api=api,
+                verified_image_path=image,
+                trace_sink=_Sink(),
+                phase="cleanup",
+            )
+
+        configure.assert_called_once_with(api)
+        terminate.assert_called_once_with(api, image)
+        self.assertEqual(records[0]["terminated"], True)
+        self.assertEqual(records[0]["phase"], "cleanup")
+
+    def test_unsafe_lifecycle_cleanup_fails_if_target_is_missing(self) -> None:
+        class _Sink:
+            def emit(
+                self,
+                _record: dict[str, object],
+                *,
+                flush: bool = False,
+            ) -> None:
+                self.assert_flush = flush
+
+        with (
+            patch(
+                "th08_automation.practice_windows.configure_supervisor_api"
+            ),
+            patch(
+                "th08_automation.practice_windows.terminate_exact_target",
+                return_value=False,
+            ),
+            self.assertRaisesRegex(RuntimeError, "not available"),
+        ):
+            controller._terminate_unsafe_instrumented_target(
+                api=object(),
+                verified_image_path=Path("C:/games/th08.exe"),
+                trace_sink=_Sink(),
+                phase="activation",
+            )
 
     def test_losing_control_reserve_has_explicit_rollback(self) -> None:
         arguments = controller.build_parser().parse_args(

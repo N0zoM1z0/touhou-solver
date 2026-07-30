@@ -104,8 +104,9 @@ end-semantics classifier remains the authority boundary.
 
 ## Activation And Cleanup Safety
 
-The probe is not wired into default sensing or the controller. An explicit
-future caller must request installation.
+The probe remains outside default sensing. The live controller, hotkey
+contract, stage-practice supervisor, and full-route supervisor now expose one
+explicit `--trace-enemy-lifecycle-events` opt-in.
 
 Installation:
 
@@ -130,6 +131,23 @@ remote image allocated.
 
 This behavior is **implemented and synthetic-tested**, not yet observed
 against a TH08 process.
+
+Controller transport preserves the following fail-closed boundary:
+
+- installation occurs only after shipped-target identity verification;
+- priority-17 and lifecycle instrumentation are rejected in the same trial;
+- one baseline batch is flushed only after route, difficulty, stage, raw
+  input, and foreground arming checks pass;
+- every diagnostic decision reads one batch before physical issue and embeds
+  it in the flushed decision row;
+- the consumed serial advances only after that row flushes successfully;
+- after key release, a final batch is flushed before detour cleanup; and
+- an unsafe activation or cleanup result terminates the exact verified TH08
+  image rather than leaving an instrumented process available for gameplay.
+
+An unavailable ordinary installation is retained explicitly and grants no
+generation or end-reason authority. The trace option forces per-decision
+rows, but the ring is not an observation used by the planner or issue path.
 
 ## Formal Authority Questions
 
@@ -165,7 +183,7 @@ against a TH08 process.
 
 ## Tests And Current Authority
 
-Focused Linux and Windows discovery pass 14 tests covering:
+The original focused Linux and Windows discovery passes cover 14 probe tests:
 
 - all IDA-revalidated addresses and byte spans;
 - stub replay/return layout and fixed-slot bounds;
@@ -178,19 +196,21 @@ Focused Linux and Windows discovery pass 14 tests covering:
 - full rollback after a synthetic mid-activation failure; and
 - unsafe retention after a synthetic restore failure.
 
-No game, controller, supervisor, native replay, or physical trial was run.
-The ring currently has implementation/synthetic-test authority only.
+Additional controller/automation tests cover default-off CLI behavior,
+separate-probe rejection, supervisor and hotkey forwarding, and verified
+target termination on unsafe instrumentation state.
+
+No game, native replay, runtime installation, or physical trial was run. The
+ring and its transport currently have implementation/synthetic-test authority
+only.
 
 ## Next Gate
 
 Before any strategy claim:
 
-1. retain a Windows synthetic gate for this exact implementation;
-2. wire an explicit default-off trace owner without changing sensing cadence
-   or action publication;
-3. on explicit runtime authorization, bracket one short native replay or
+1. on explicit runtime authorization, bracket one short native replay or
    diagnostic workload with full-pool snapshots;
-4. prove exact ordered agreement for allocation/retirement and forced zero;
-5. lower only exact, nonoverflow batches into generation/end evidence; and
-6. then test whether an earlier verified kill actually prevents emissions or
+2. prove exact ordered agreement for allocation/retirement and forced zero;
+3. lower only exact, nonoverflow batches into generation/end evidence; and
+4. then test whether an earlier verified kill actually prevents emissions or
    shortens exposure.

@@ -279,6 +279,9 @@ def run_trial(
         "trace_priority17_publications": (
             args.trace_priority17_publications
         ),
+        "trace_enemy_lifecycle_events": (
+            args.trace_enemy_lifecycle_events
+        ),
         "diagnostic_continue_root_only_scale": (
             args.diagnostic_continue_root_only_scale
         ),
@@ -358,6 +361,9 @@ def run_trial(
             ),
             trace_priority17_publications=(
                 args.trace_priority17_publications
+            ),
+            trace_enemy_lifecycle_events=(
+                args.trace_enemy_lifecycle_events
             ),
             diagnostic_continue_root_only_scale=(
                 args.diagnostic_continue_root_only_scale
@@ -842,6 +848,14 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "install the reversible bounded priority-17 callback-exit ring "
+            "for the whole stage; trace only, no action authority"
+        ),
+    )
+    parser.add_argument(
+        "--trace-enemy-lifecycle-events",
+        action="store_true",
+        help=(
+            "install the reversible bounded ordinary-enemy lifecycle ring "
             "for the whole stage; trace only, no action authority"
         ),
     )

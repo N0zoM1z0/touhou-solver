@@ -66,6 +66,7 @@ def build_long_run_arguments(
     trace_enemy_combat_progress: bool = False,
     trace_enemy_mode_transitions: bool = False,
     trace_priority17_publications: bool = False,
+    trace_enemy_lifecycle_events: bool = False,
     diagnostic_continue_root_only_scale: bool = False,
     trace_auxiliary_vm_batches: bool = False,
     trace_auxiliary_ecl_events: bool = False,
@@ -234,6 +235,8 @@ def build_long_run_arguments(
         arguments.append("--trace-enemy-mode-transitions")
     if trace_priority17_publications:
         arguments.append("--trace-priority17-publications")
+    if trace_enemy_lifecycle_events:
+        arguments.append("--trace-enemy-lifecycle-events")
     if diagnostic_continue_root_only_scale:
         arguments.append("--diagnostic-continue-root-only-scale")
     if trace_auxiliary_vm_batches:

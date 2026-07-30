@@ -351,6 +351,15 @@ def build_live_parser(
         ),
     )
     parser.add_argument(
+        "--trace-enemy-lifecycle-events",
+        action="store_true",
+        help=(
+            "install the reversible bounded ordinary-enemy allocation, "
+            "retirement, and forced-HP-zero event ring; trace only, runtime "
+            "instrumentation, no action authority"
+        ),
+    )
+    parser.add_argument(
         "--diagnostic-continue-root-only-scale",
         action="store_true",
         help=(

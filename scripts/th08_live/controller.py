@@ -3,10 +3,10 @@
 
 The controller is a receding-horizon smoke agent, not the final global solver.
 It reads game state and projectile pools, then uses physical ``SendInput``
-events. Live action never writes target memory. One explicit default-off
-publication observer may install a reversible trace-only runtime hook; it has
-no action authority. The controller aborts on identity, route, gameplay, or
-foreground-window divergence.
+events. Live action never writes target memory. Explicit default-off
+diagnostic observers may install reversible trace-only runtime hooks; they
+have no action authority. The controller aborts on identity, route, gameplay,
+or foreground-window divergence.
 """
 
 from __future__ import annotations
@@ -415,6 +415,12 @@ from th08_runtime.priority17_publication_probe import (
     Priority17PublicationBatch,
     Priority17PublicationProbe,
     Priority17ProbeUnsafeStateError,
+)
+from th08_runtime.enemy_lifecycle_probe import (
+    EnemyLifecycleBatch,
+    EnemyLifecycleProbe,
+    EnemyLifecycleProbeUnsafeStateError,
+    PROBE_SCHEMA as ENEMY_LIFECYCLE_PROBE_SCHEMA,
 )
 from touhou_control import native_backend
 from touhou_control.async_policy import (
@@ -1474,6 +1480,40 @@ def _write_run_summary(
     )
 
 
+def _terminate_unsafe_instrumented_target(
+    *,
+    api: object,
+    verified_image_path: Path,
+    trace_sink: TraceSink,
+    phase: str,
+) -> None:
+    """Fail closed when a runtime hook cannot prove exact rollback."""
+
+    from th08_automation.practice_windows import (
+        configure_supervisor_api,
+        terminate_exact_target,
+    )
+
+    configure_supervisor_api(api)
+    terminated = terminate_exact_target(api, verified_image_path)
+    trace_sink.emit(
+        {
+            "kind": "enemy_lifecycle_probe_unsafe_target_termination",
+            "schema": ENEMY_LIFECYCLE_PROBE_SCHEMA,
+            "phase": phase,
+            "terminated": terminated,
+            "verified_image_path": str(verified_image_path),
+            "action_authority": False,
+        },
+        flush=True,
+    )
+    if not terminated:
+        raise RuntimeError(
+            "unsafe lifecycle instrumentation target was not available for "
+            "verified termination"
+        )
+
+
 def _prepare_live_run(args: argparse.Namespace) -> None:
     if not args.armed:
         raise RuntimeError("live control requires the explicit --armed flag")
@@ -1566,6 +1606,14 @@ def _prepare_live_run(args: argparse.Namespace) -> None:
         raise ValueError(
             "the contracted auxiliary ECL event service is limited to "
             "Lunatic Stage 5"
+        )
+    if (
+        getattr(args, "trace_priority17_publications", False)
+        and getattr(args, "trace_enemy_lifecycle_events", False)
+    ):
+        raise ValueError(
+            "priority-17 and enemy-lifecycle runtime probes must be captured "
+            "in separate trials"
         )
     enable_finalb_scale_source_authority = bool(
         getattr(args, "enable_finalb_scale_source_authority", False)
@@ -1809,6 +1857,18 @@ def _run_live_session(
         "status": "disabled",
         "action_authority": False,
     }
+    trace_enemy_lifecycle_events = bool(
+        getattr(args, "trace_enemy_lifecycle_events", False)
+    )
+    enemy_lifecycle_probe: EnemyLifecycleProbe | None = None
+    enemy_lifecycle_probe_last_serial: int | None = None
+    enemy_lifecycle_probe_installation: dict[str, object] = {
+        "schema": ENEMY_LIFECYCLE_PROBE_SCHEMA,
+        "role": "trace_only_no_action_authority",
+        "status": "disabled",
+        "action_authority": False,
+    }
+    verified_image_path: Path | None = None
     diagnostic_continue_root_only_scale = bool(
         getattr(
             args,
@@ -2016,6 +2076,7 @@ def _run_live_session(
 
     try:
         identity = verify_target(reader)
+        verified_image_path = Path(str(identity["image_path"]))
         trace_sink.emit({"kind": "identity", **identity})
         if trace_priority17_publications:
             try:
@@ -2031,6 +2092,46 @@ def _run_live_session(
             except Exception as error:
                 priority17_probe_installation = {
                     "schema": "th08-priority17-publication-probe-v1",
+                    "role": "trace_only_no_action_authority",
+                    "status": "unavailable",
+                    "error": f"{type(error).__name__}: {error}",
+                    "action_authority": False,
+                }
+        if trace_enemy_lifecycle_events:
+            try:
+                enemy_lifecycle_probe = EnemyLifecycleProbe.install(
+                    api,
+                    pid,
+                )
+                enemy_lifecycle_probe_installation = (
+                    enemy_lifecycle_probe.installation_record()
+                )
+            except EnemyLifecycleProbeUnsafeStateError as error:
+                trace_sink.emit(
+                    {
+                        "kind": "enemy_lifecycle_probe_activation_error",
+                        "schema": ENEMY_LIFECYCLE_PROBE_SCHEMA,
+                        "unsafe_target_state": True,
+                        "error": f"{type(error).__name__}: {error}",
+                        "action_authority": False,
+                    },
+                    flush=True,
+                )
+                if verified_image_path is None:
+                    raise RuntimeError(
+                        "unsafe lifecycle activation has no verified target "
+                        "identity"
+                    ) from error
+                _terminate_unsafe_instrumented_target(
+                    api=api,
+                    verified_image_path=verified_image_path,
+                    trace_sink=trace_sink,
+                    phase="activation",
+                )
+                raise
+            except Exception as error:
+                enemy_lifecycle_probe_installation = {
+                    "schema": ENEMY_LIFECYCLE_PROBE_SCHEMA,
                     "role": "trace_only_no_action_authority",
                     "status": "unavailable",
                     "error": f"{type(error).__name__}: {error}",
@@ -2084,6 +2185,9 @@ def _run_live_session(
                     ),
                     "priority17_publication_probe": (
                         priority17_probe_installation
+                    ),
+                    "enemy_lifecycle_probe": (
+                        enemy_lifecycle_probe_installation
                     ),
                     "maximum_sensor_epoch_extent_frames": (
                         MAX_SENSOR_EPOCH_EXTENT_FRAMES
@@ -2262,6 +2366,10 @@ def _run_live_session(
             },
             flush=True,
         )
+        if trace_enemy_lifecycle_events and enemy_lifecycle_probe is None:
+            raise RuntimeError(
+                "requested enemy lifecycle instrumentation is unavailable"
+            )
         state = observe_state(reader)
         if args.wait_gameplay:
             trace_sink.emit(
@@ -2337,6 +2445,22 @@ def _run_live_session(
                 },
                 flush=True,
             )
+        if enemy_lifecycle_probe is not None:
+            enemy_lifecycle_baseline = enemy_lifecycle_probe.read_since(None)
+            enemy_lifecycle_probe_last_serial = (
+                enemy_lifecycle_baseline.observed_serial
+            )
+            trace_sink.emit(
+                {
+                    "kind": "enemy_lifecycle_probe_baseline",
+                    **enemy_lifecycle_baseline.compact_record(),
+                },
+                flush=True,
+            )
+            if enemy_lifecycle_probe_last_serial is None:
+                raise RuntimeError(
+                    "enemy lifecycle probe could not establish its baseline"
+                )
         scene_guard.observe(
             gameplay_active=True,
             current_stage=int(state["stage_route_index"]),
@@ -2698,6 +2822,7 @@ def _run_live_session(
             priority17_publication_batch: (
                 Priority17PublicationBatch | None
             ) = None
+            enemy_lifecycle_batch: EnemyLifecycleBatch | None = None
             if state["route_id"] != 2:
                 termination_reason = "gameplay_ended"
                 break
@@ -4219,6 +4344,10 @@ def _run_live_session(
                         priority17_probe_last_serial
                     )
                 )
+            if enemy_lifecycle_probe is not None:
+                enemy_lifecycle_batch = enemy_lifecycle_probe.read_since(
+                    enemy_lifecycle_probe_last_serial
+                )
             physical_issue = commit_physical_issue(
                 PhysicalIssueRequest(
                     capture=captured_iteration,
@@ -4583,6 +4712,7 @@ def _run_live_session(
                 trace_bullet_births
                 or trace_enemy_mode_transitions
                 or trace_priority17_publications
+                or trace_enemy_lifecycle_events
                 or trace_auxiliary_vm_batches
                 or iterations % args.log_every == 0
                 or decision.bomb
@@ -4743,6 +4873,19 @@ def _run_live_session(
                         ),
                         "action_authority": False,
                     }
+                if trace_enemy_lifecycle_events:
+                    record["enemy_lifecycle_probe"] = {
+                        "role": "trace_only_no_action_authority",
+                        "installation_status": (
+                            enemy_lifecycle_probe_installation["status"]
+                        ),
+                        "capture": (
+                            enemy_lifecycle_batch.compact_record()
+                            if enemy_lifecycle_batch is not None
+                            else None
+                        ),
+                        "action_authority": False,
+                    }
                 timing_trace_fields = build_decision_timing_trace_fields(
                     DecisionTimingTraceInput(
                         observe_ms=observe_ms,
@@ -4881,6 +5024,13 @@ def _run_live_session(
                 priority17_probe_last_serial = (
                     priority17_publication_batch.observed_serial
                 )
+            if (
+                enemy_lifecycle_batch is not None
+                and enemy_lifecycle_batch.observed_serial is not None
+            ):
+                enemy_lifecycle_probe_last_serial = (
+                    enemy_lifecycle_batch.observed_serial
+                )
             if previous_counter is not None:
                 decision_delta = counter_at_action - previous_counter
                 if 0 < decision_delta < 120:
@@ -4989,6 +5139,83 @@ def _run_live_session(
             session.release_keys()
         finally:
             try:
+                if enemy_lifecycle_probe is not None:
+                    try:
+                        final_batch = enemy_lifecycle_probe.read_since(
+                            enemy_lifecycle_probe_last_serial
+                        )
+                        if final_batch.observed_serial is not None:
+                            enemy_lifecycle_probe_last_serial = (
+                                final_batch.observed_serial
+                            )
+                        trace_sink.emit(
+                            {
+                                "kind": "enemy_lifecycle_probe_final",
+                                "phase": "after_key_release",
+                                **final_batch.compact_record(),
+                            },
+                            flush=True,
+                        )
+                    except Exception as error:
+                        trace_sink.emit(
+                            {
+                                "kind": "enemy_lifecycle_probe_final",
+                                "schema": ENEMY_LIFECYCLE_PROBE_SCHEMA,
+                                "phase": "after_key_release",
+                                "role": (
+                                    "trace_only_no_action_authority"
+                                ),
+                                "status": "read_error",
+                                "error": (
+                                    f"{type(error).__name__}: {error}"
+                                ),
+                                "action_authority": False,
+                            },
+                            flush=True,
+                        )
+                    try:
+                        enemy_lifecycle_probe.close()
+                    except EnemyLifecycleProbeUnsafeStateError as error:
+                        trace_sink.emit(
+                            {
+                                "kind": (
+                                    "enemy_lifecycle_probe_cleanup_error"
+                                ),
+                                "schema": ENEMY_LIFECYCLE_PROBE_SCHEMA,
+                                "unsafe_target_state": True,
+                                "error": (
+                                    f"{type(error).__name__}: {error}"
+                                ),
+                                "action_authority": False,
+                            },
+                            flush=True,
+                        )
+                        if verified_image_path is None:
+                            raise RuntimeError(
+                                "unsafe lifecycle cleanup has no verified "
+                                "target identity"
+                            ) from error
+                        _terminate_unsafe_instrumented_target(
+                            api=api,
+                            verified_image_path=verified_image_path,
+                            trace_sink=trace_sink,
+                            phase="cleanup",
+                        )
+                        raise
+                    except Exception as error:
+                        trace_sink.emit(
+                            {
+                                "kind": (
+                                    "enemy_lifecycle_probe_cleanup_error"
+                                ),
+                                "schema": ENEMY_LIFECYCLE_PROBE_SCHEMA,
+                                "error": (
+                                    f"{type(error).__name__}: {error}"
+                                ),
+                                "action_authority": False,
+                            },
+                            flush=True,
+                        )
                 if priority17_probe is not None:
                     try:
                         final_batch = priority17_probe.read_since(

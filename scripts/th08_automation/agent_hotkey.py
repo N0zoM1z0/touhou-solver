@@ -73,6 +73,7 @@ class AgentHotkey:
         trace_enemy_combat_progress: bool = False,
         trace_enemy_mode_transitions: bool = False,
         trace_priority17_publications: bool = False,
+        trace_enemy_lifecycle_events: bool = False,
         diagnostic_continue_root_only_scale: bool = False,
         trace_auxiliary_vm_batches: bool = False,
         trace_auxiliary_ecl_events: bool = False,
@@ -217,6 +218,9 @@ class AgentHotkey:
         self.trace_enemy_mode_transitions = trace_enemy_mode_transitions
         self.trace_priority17_publications = (
             trace_priority17_publications
+        )
+        self.trace_enemy_lifecycle_events = (
+            trace_enemy_lifecycle_events
         )
         self.diagnostic_continue_root_only_scale = (
             diagnostic_continue_root_only_scale
@@ -399,6 +403,9 @@ class AgentHotkey:
                 ),
                 trace_priority17_publications=(
                     self.trace_priority17_publications
+                ),
+                trace_enemy_lifecycle_events=(
+                    self.trace_enemy_lifecycle_events
                 ),
                 diagnostic_continue_root_only_scale=(
                     self.diagnostic_continue_root_only_scale

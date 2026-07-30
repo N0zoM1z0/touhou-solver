@@ -1,0 +1,322 @@
+{
+  "all36_candidate_search": {
+    "branch_count": 36,
+    "classification": "observed",
+    "first_hit_frame_histogram": {
+      "2131": 4,
+      "2132": 2,
+      "2133": 2,
+      "2134": 2,
+      "2136": 20
+    },
+    "legacy_full_endpoint_exact_count": 31,
+    "legacy_outcome_class_exact_count": 36,
+    "recorded_action_repeat_exact": true,
+    "source": {
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h8_all36_v2_20260730.json",
+      "sha256": "e5583554cbf1e47bdb8ca9e8e80ef627948eef589038382c772b31fd96b49e80"
+    },
+    "status": "rolling_native_all36_outcome_portfolio_passed",
+    "survivor_masks": [
+      20,
+      21,
+      144,
+      145,
+      148,
+      149
+    ],
+    "survivor_masks_hex": [
+      "0x14",
+      "0x15",
+      "0x90",
+      "0x91",
+      "0x94",
+      "0x95"
+    ]
+  },
+  "authority": {
+    "accepted_for": "fixed-replay-root offline counterfactual diagnosis and candidate search",
+    "next_gate": "repeat on event-class roots, then use a named physical falsifier only for promoted immutable behavior",
+    "not_accepted_for": "live predictive authority, event-class generalization, or physical Lunatic/Extra promotion"
+  },
+  "causal_hit_localization": {
+    "candidate_0x14": {
+      "closest_hostile_bullet_at_2136": {
+        "half_height": 2.0,
+        "half_width": 2.0,
+        "signed_box_separation": 1.352203369140625,
+        "slot": 322,
+        "transform_flags": 0,
+        "vx": 0.7851950526237488,
+        "vy": 1.0509259700775146,
+        "x": 376.5237731933594,
+        "y": 419.5793151855469
+      },
+      "first_hit_through_manager_frame_2137": null,
+      "player_at_2136": {
+        "phase": 0,
+        "predeath_counter": 10,
+        "x": 373.17156982421875,
+        "y": 422.2716064453125
+      },
+      "player_y_delta_from_recorded_at_2136": -6.89996337890625,
+      "same_slot_45_signed_box_separation_at_2136": 3.866729736328125
+    },
+    "classification": "observed",
+    "recorded": {
+      "first_hit_manager_frame": 2136,
+      "hostile_bullet": {
+        "signed_box_separation": -0.966766357421875,
+        "slot": 45,
+        "x": 373.0491638183594,
+        "y": 428.1383361816406
+      },
+      "player": {
+        "phase": 2,
+        "predeath_counter": 15,
+        "x": 373.17156982421875,
+        "y": 429.17156982421875
+      }
+    },
+    "same_world_slot_45_position_exact_at_2136": true,
+    "source": {
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h8_b14_ref_20260730.json",
+      "sha256": "8278389243af5681aba83e341492b02b59c51a2c9590409de6f22f40b52ae556"
+    }
+  },
+  "claims": [
+    {
+      "claim": "one immutable native root produced 36 restored H8 counterfactuals with deterministic recorded-action repeat",
+      "classification": "observed"
+    },
+    {
+      "claim": "the recorded 0x05 branch hits at 2136 on hostile bullet slot 45; holding 0x14 for three ticks moves the player upward and preserves positive clearance through 2137",
+      "classification": "observed"
+    },
+    {
+      "claim": "the fixed-root loop is suitable for rapid local cause isolation and candidate ranking at this replay seam",
+      "classification": "inferred"
+    }
+  ],
+  "evidence_finished_at": "2026-07-30T19:07:51.460575+08:00",
+  "legacy_observer_differences": {
+    "classification": "observed_and_source_explained",
+    "differences": [
+      {
+        "complete_mask": 20,
+        "differing_fields": [
+          "rng_calls",
+          "rng_state"
+        ],
+        "expected_first_hit_manager_frame": null,
+        "first_hit_frame_delta": null,
+        "observed_first_hit_manager_frame": null
+      },
+      {
+        "complete_mask": 21,
+        "differing_fields": [
+          "rng_calls",
+          "rng_state"
+        ],
+        "expected_first_hit_manager_frame": null,
+        "first_hit_frame_delta": null,
+        "observed_first_hit_manager_frame": null
+      },
+      {
+        "complete_mask": 68,
+        "differing_fields": [
+          "input_previous",
+          "manager_frame",
+          "rng_calls",
+          "rng_state"
+        ],
+        "expected_first_hit_manager_frame": 2137,
+        "first_hit_frame_delta": -1,
+        "observed_first_hit_manager_frame": 2136
+      },
+      {
+        "complete_mask": 97,
+        "differing_fields": [
+          "manager_frame",
+          "rng_calls",
+          "rng_state"
+        ],
+        "expected_first_hit_manager_frame": 2132,
+        "first_hit_frame_delta": -1,
+        "observed_first_hit_manager_frame": 2131
+      },
+      {
+        "complete_mask": 165,
+        "differing_fields": [
+          "input_previous",
+          "manager_frame",
+          "rng_calls",
+          "rng_state"
+        ],
+        "expected_first_hit_manager_frame": 2137,
+        "first_hit_frame_delta": -1,
+        "observed_first_hit_manager_frame": 2136
+      }
+    ],
+    "full_endpoint_exact_count": 31,
+    "legacy_capture_model": "observe_state fields were polled without a manager-frame bracket; the game could advance between field reads",
+    "legacy_source": {
+      "path": "artifacts/runtime_reports/th08_native_branch_trials_latest_root2129_fence2137_all36_20260730.json",
+      "sha256": "c46a206d8aaf3916cdf5c2451fda9fc97c55fdf95a7978ffbd37b8b0642f128a"
+    },
+    "outcome_class_exact_count": 36,
+    "same_seam_natural_resolutions": [
+      {
+        "collision_control_exact_every_tick": true,
+        "complete_mask": 20,
+        "headless_first_hit_manager_frame": null,
+        "natural_first_hit_manager_frame": null,
+        "path": "artifacts/native_snapshot_rolling/raw/th08_h8_b14_ref_20260730.json",
+        "sha256": "8278389243af5681aba83e341492b02b59c51a2c9590409de6f22f40b52ae556"
+      },
+      {
+        "collision_control_exact_every_tick": true,
+        "complete_mask": 97,
+        "headless_first_hit_manager_frame": 2131,
+        "natural_first_hit_manager_frame": 2131,
+        "path": "artifacts/native_snapshot_rolling/raw/th08_h8_b61_ref_20260730.json",
+        "sha256": "533621cdd8c6bea6b2f21803f37997cbaf27d0fd5281a429f05a741478e4527c"
+      },
+      {
+        "collision_control_exact_every_tick": true,
+        "complete_mask": 68,
+        "headless_first_hit_manager_frame": 2136,
+        "natural_first_hit_manager_frame": 2136,
+        "path": "artifacts/native_snapshot_rolling/raw/th08_h8_b44_ref_20260730.json",
+        "sha256": "cbbc12340f71cbfdf8b5899d8dcd839c1fc5c804560fb66d0abdf27402b2828c"
+      }
+    ]
+  },
+  "progressive_gates": [
+    {
+      "action_b": 21,
+      "horizon": 2,
+      "name": "h2_recorded",
+      "natural_reference_status": "natural_frame_differential_passed",
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h2_a_ref_v4_20260730.json",
+      "recorded_2130_2131_corpus_exact": false,
+      "sha256": "cf10524b947a0b6d0867247e6751ee37f19777be7b177f536aae47ea44829618",
+      "status": "rolling_native_projection_snapshot_passed"
+    },
+    {
+      "action_b": 21,
+      "horizon": 2,
+      "name": "h2_movement",
+      "natural_reference_status": "natural_frame_differential_passed",
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h2_b15_ref_20260730.json",
+      "recorded_2130_2131_corpus_exact": true,
+      "sha256": "3c5b60fc41ee9d0ce1d9765755477a7dc18074107ce1f5bc1120b5623955cb65",
+      "status": "rolling_native_projection_snapshot_passed"
+    },
+    {
+      "action_b": 1,
+      "horizon": 2,
+      "name": "h2_focus",
+      "natural_reference_status": "natural_frame_differential_passed",
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h2_b01_ref_20260730.json",
+      "recorded_2130_2131_corpus_exact": true,
+      "sha256": "7f7741bdeb8a771212f5cf310f85a1093dfe8791d8838ded339147d2a609cbd6",
+      "status": "rolling_native_projection_snapshot_passed"
+    },
+    {
+      "action_b": 20,
+      "horizon": 2,
+      "name": "h2_fence",
+      "natural_reference_status": "natural_frame_differential_passed",
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h2_b14_ref_20260730.json",
+      "recorded_2130_2131_corpus_exact": true,
+      "sha256": "086f347ed448de22d5fa0187c48fc47362116f647f54f84d441ed1ed70236667",
+      "status": "rolling_native_projection_snapshot_passed"
+    },
+    {
+      "action_b": 20,
+      "horizon": 4,
+      "name": "h4_fence",
+      "natural_reference_status": "natural_frame_differential_passed",
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h4_b14_ref_v2_20260730.json",
+      "recorded_2130_2131_corpus_exact": true,
+      "sha256": "859b6fbd91cda3544fbd3e10ca10d6d07a05991bd6413ecebd2bff34c7d082f7",
+      "status": "rolling_native_projection_snapshot_passed"
+    },
+    {
+      "action_b": 20,
+      "horizon": 8,
+      "name": "h8_fence",
+      "natural_reference_status": "natural_frame_differential_passed",
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h8_b14_ref_20260730.json",
+      "recorded_2130_2131_corpus_exact": true,
+      "sha256": "8278389243af5681aba83e341492b02b59c51a2c9590409de6f22f40b52ae556",
+      "status": "rolling_native_projection_snapshot_passed"
+    },
+    {
+      "action_b": 97,
+      "horizon": 8,
+      "name": "h8_early_hit",
+      "natural_reference_status": "natural_frame_differential_passed",
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h8_b61_ref_20260730.json",
+      "recorded_2130_2131_corpus_exact": true,
+      "sha256": "533621cdd8c6bea6b2f21803f37997cbaf27d0fd5281a429f05a741478e4527c",
+      "status": "rolling_native_projection_snapshot_passed"
+    },
+    {
+      "action_b": 68,
+      "horizon": 8,
+      "name": "h8_late_hit",
+      "natural_reference_status": "natural_frame_differential_passed",
+      "path": "artifacts/native_snapshot_rolling/raw/th08_h8_b44_ref_20260730.json",
+      "recorded_2130_2131_corpus_exact": true,
+      "sha256": "cbbc12340f71cbfdf8b5899d8dcd839c1fc5c804560fb66d0abdf27402b2828c",
+      "status": "rolling_native_projection_snapshot_passed"
+    }
+  ],
+  "root": {
+    "action_hold_frames": 3,
+    "manager_frame": 2129,
+    "recorded_action": 5,
+    "rolling_horizon": 8,
+    "source_replay_sha256": "de1e4e941adc8c2899eb3ae1bedd2b4faaf14362d4ce2af984d1c9e5a32da613"
+  },
+  "schema": "th08-native-snapshot-fast-iteration-evidence-v1",
+  "status": "accepted_fixed_root_fast_iteration_evidence",
+  "timing": {
+    "all36_branch_and_restore_ms": {
+      "count": 36,
+      "maximum": 1916.698400000314,
+      "median": 1731.9953500000338,
+      "minimum": 1630.637400001433,
+      "p95_nearest_rank": 1897.487000000183
+    },
+    "all36_portfolio_subtotal_ms": 63583.4218,
+    "all36_process_wall_ms": 115238.32299999999,
+    "all36_transaction_including_root_and_canary_ms": 101527.25060000012,
+    "boundary": "portfolio timing includes eight native calculation ticks, per-tick broad and collision/control capture, full endpoint recapture, dirty-page restore, and verification for each branch; replay startup/root fast-forward is excluded from the 36-branch subtotal",
+    "broad_native_projection_capture_ms": {
+      "count": 24,
+      "maximum": 26.06180000020686,
+      "median": 17.558800000188057,
+      "minimum": 16.079299999546492,
+      "p95_nearest_rank": 21.501100000023143
+    },
+    "collision_control_capture_ms": {
+      "count": 24,
+      "maximum": 63.49709999994957,
+      "median": 46.66975000009188,
+      "minimum": 39.73660000065138,
+      "p95_nearest_rank": 53.559799999675306
+    },
+    "legacy_all36_report_wall_ms": 62402.018,
+    "native_calculation_step_wait_ms": {
+      "count": 24,
+      "maximum": 1.805400000193913,
+      "median": 0.9925000003931927,
+      "minimum": 0.7562999999208841,
+      "p95_nearest_rank": 1.565699999446224
+    },
+    "timing_comparison_claim": "the retained clocks have different capture boundaries and are reported separately; no direct speedup ratio is claimed"
+  }
+}

@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from th08_runtime.native_snapshot import (
     BARRIER_ALLOCATION_SIZE,
+    BARRIER_ENDPOINT_FX_OFFSET,
     BARRIER_HEADER_SIZE,
     BARRIER_ROOT_FX_OFFSET,
     BARRIER_STUB_OFFSET,
@@ -114,6 +115,11 @@ class NativeSnapshotBarrierEncodingTests(unittest.TestCase):
         )
         self.assertIn(
             b"\x0f\xae\x0d" + struct.pack("<I", remote_base + BARRIER_ROOT_FX_OFFSET),
+            stub,
+        )
+        self.assertIn(
+            b"\x0f\xae\x0d"
+            + struct.pack("<I", remote_base + BARRIER_ENDPOINT_FX_OFFSET),
             stub,
         )
 

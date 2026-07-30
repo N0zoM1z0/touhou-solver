@@ -79,14 +79,32 @@ all six hit four to six frames later under a longer fence. There is no exact
 no-hit witness and no strategy promotion. A same-frame manager/collision
 observer race also rejects the earlier stop-at-hit-frame pilot.
 
-Exhaustive native replay-prefix branching is now **rejected as the primary
+Exhaustive native replay-prefix branching remains **rejected as the primary
 inner loop** because it repeats the whole stage prefix for every action.
 Native replay remains an independent semantic oracle and sparse candidate
-validator. The **proposed** next research architecture is a fail-closed
-TH08-specific explicit-root restore-and-step executor. Its first gate is
-same-action determinism and declared-effect-point divergence over one native
-tick; it gains no live authority until complete causal coverage, native
-differential, delivery preflight, and focused physical validation pass.
+validator. The fail-closed TH08-specific explicit-root executor is now
+**Live for fixed-root offline diagnosis and candidate search only** at the
+canonical frame-2,129 root. H=2/4/8, same-seam natural differential, and one
+all-36 no-Bomb portfolio pass their declared gates.
+
+**Observed:** recorded `0x05` hits at manager frame 2,136 on hostile bullet
+slot 45 with signed box separation `-0.966766`. A three-tick `0x14`
+intervention moves the player `6.899963` pixels upward by that frame, makes
+the same slot-45 separation `+3.866730`, and remains unhit through 2,137.
+The all-36 fixed-root portfolio takes `63.583` seconds with semantic capture
+and verified restore, reproduces the six legacy short-fence survivor masks,
+and repeats the recorded branch exactly.
+
+Legacy polling is not an exact seam oracle: 31/36 endpoints match fully and
+36/36 hit-versus-survive classifications match. CE-0209 retains five
+non-atomic polling differences; same-seam natural H=8 captures for
+`0x14/0x61/0x44` match the rolling executor. This does not convert the six
+short-fence survivors into exact no-hit witnesses; CE-0207 still requires a
+causal continuation.
+
+The executor gains no live authority until additional event-class roots,
+complete causal coverage, delivery preflight, and focused physical
+validation pass.
 
 Accepted replay saving, explicit-root limits, branch evidence, and the next
 gate are in

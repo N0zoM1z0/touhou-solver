@@ -316,11 +316,76 @@ It replaces repeated full-stage/replay-prefix iteration for this scope.
 
 It has no live or physical predictive authority. Forty-two writable regions
 were excluded, external handle/device/audio/timer effects remain unresolved,
-only one event class and one tick were tested, and no survival witness was
-produced. The next gate is repeated A/A/B identity at additional event
-classes, followed by exact horizons `2/4/8/16`. Write-watch or guarded-page
-tracking may remove the remaining 152--172 ms endpoint scan, but is only a
-performance hypothesis.
+and only one event class was tested. The rolling extension below supersedes
+the one-tick horizon limit, but no long-horizon survival witness was produced.
+The next gate is repeated identity at additional event classes. Write-watch
+or guarded-page tracking may remove the remaining endpoint scan, but is only
+a performance hypothesis.
+
+## Rolling H2/H4/H8 And All-36 Result
+
+**Observed:** the executor now preserves root and endpoint FPU/SSE state,
+advances the replay action cursor by exactly two bytes per tick, and checks
+owner stack/frame, manager clock, thread epoch, and committed-map epoch at
+every H-step endpoint. Every branch restores all dirty spans before the next
+action.
+
+The progressive gate passed:
+
+- H=2 recorded `0x05`, movement `0x15`, focus toggle `0x01`, and fence
+  candidate `0x14`;
+- H=4 `0x14`; and
+- H=8 `0x14`, followed by the complete 36-mask no-Bomb portfolio.
+
+The recorded H=2 compact states exactly match the retained natural replay
+corpus at manager frames 2,130 and 2,131. Identical-seam natural-frame
+capture matches the rolling collision/control projection and compact state
+at every tick through H=8 for `0x14`, `0x61`, and `0x44`.
+
+The collision/control projection keeps native input/RNG, enemy ECL/callback
+tails, hostile bullet/laser pools, explicit player collision/control fields,
+resources, and route-2 option causal tails. It excludes ordinary-enemy
+render/ANM prefixes and the four FRScreen resource-notification bytes proved
+render-consumed/decremented at `0x004372A7`. CE-0208 retains the initial
+false mismatch before that correction. This is collision/control
+equivalence, not full process identity.
+
+**Observed causal witness:** the recorded `0x05` branch reaches player phase
+2 at manager frame 2,136. Hostile bullet slot 45 is at
+`(373.049164, 428.138336)` with signed box separation `-0.966766`. Holding
+`0x14` for frames 2,130--2,132 and then resuming the recorded suffix leaves
+the bullet at the same world position but moves the player from
+`y=429.171570` to `y=422.271606`. Slot-45 separation becomes `+3.866730`;
+the closest bullet is slot 322 at `+1.352203`. The candidate remains phase
+0 with unchanged predeath counter through manager frame 2,137.
+
+**Observed all-36 result:** one immutable root and one original-game replay
+launch executed all 36 no-Bomb masks through H=8 in `63.583` seconds,
+including per-tick native/collision capture and endpoint restore
+verification. Median branch-plus-restore time was `1,731.995 ms`. Native
+calculation step wait itself was `0.993 ms` median; broad and collision
+projection medians were `17.559` and `46.670 ms`. Recorded canary and repeat
+histories were exact. Thirty masks hit and the same six short-fence masks
+`0x14/15/90/91/94/95` survived through 2,137.
+
+The legacy polling corpus agrees on hit-versus-survive class for 36/36 masks
+but is full-endpoint exact for 31/36. CE-0209 records why exact long-tail
+comparison is diagnostic only: its `observe_state()` reads were not bracketed
+and could cross a manager-frame update. Same-seam natural H=8 captures
+resolve the `0x14` tail-RNG, `0x61` early-hit, and `0x44` late-hit
+representatives in favor of the rolling result. The five differences remain
+visible in the retained report.
+
+Compact evidence is
+`artifacts/runtime_reports/th08_native_snapshot_fast_iteration_root2129_h8_20260730.json`,
+SHA-256
+`ddd71ebf110207ef0baf098bfb3d9d710e5a403d08bcf5b1b09bda0eb8a000d7`.
+
+**Inferred:** this fixed-root loop is now suitable for rapid local hit-cause
+isolation and candidate ranking at the canonical replay seam. It does not
+show that `0x14` survives its later CE-0207 contact, generalize to spawn,
+redirect, callback, transform, or laser event roots, or grant live/physical
+authority.
 
 ## Local Retention
 
@@ -328,6 +393,8 @@ performance hypothesis.
   `artifacts/runtime_reports/`.
 - Large branch replays and child logs are retained locally under
   `artifacts/native_replay_wind_tunnel/raw/` and intentionally ignored.
+- Large rolling snapshot trials are retained locally under
+  `artifacts/native_snapshot_rolling/raw/` and intentionally ignored.
 - External primary-source clones are retained locally under
   `references/external/20260730/` and indexed by
   `notes/review/EXTERNAL_REFERENCE_SNAPSHOT_INDEX_20260730.md`.
@@ -350,7 +417,12 @@ Evidence-backed changes made on 2026-07-30:
 - commented the revalidated calculation callsite `0x00441F4D` with the
   one-tick manager `2129 -> 2130` barrier result; and
 - commented replay action load/store `0x004525BE/0x004525C1` with the
-  priority-6 explicit-root A=`0x05`, B=`0x15` evidence and authority limit.
+  priority-6 explicit-root A=`0x05`, B=`0x15` evidence and authority limit;
+- renamed `dword_160F42C` to
+  `g_frscreen_resource_notification_counters`; and
+- commented `0x004372A7` to record that FRScreen rendering consumes and
+  decrements the two-bit resource-notification counters at root
+  `+0x04..+0x07`.
 
 These annotations are native/menu semantics only. They grant no solver action
 or survival authority.

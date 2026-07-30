@@ -7,7 +7,7 @@ and design/run notes retain derivations and history.
 `notes/README.md` is the short topology index when a referenced note must be
 located; it does not change the authority order below.
 
-## Current Handoff — One-Tick Native Snapshot Closure
+## Current Handoff — Rolling Native Snapshot Fast Iteration
 
 This section supersedes older checkpoint/next-gate prose later in this
 historical handoff.
@@ -15,12 +15,12 @@ historical handoff.
 ### Exact checkpoint
 
 - Branch: `main`.
-- Latest implementation checkpoint: `ae78095`
+- Base implementation checkpoint: `ae78095`
   (`Build one-tick native snapshot executor`).
 - The following retention/documentation checkpoint is the current repository
   HEAD.
-- Complete Linux discovery passes 1,323 tests in 14.124 seconds.
-- Complete Windows UNC discovery passes 1,323 tests in 29.618 seconds with
+- Complete Linux discovery passes 1,334 tests in 15.050 seconds.
+- Complete Windows UNC discovery passes 1,334 tests in 28.467 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -66,7 +66,7 @@ historical handoff.
 - Stop-at-2,136 pilot reports are rejected: manager priority advances before
   same-frame collision, so an external observer must see a later fence.
 
-### One-tick native snapshot result
+### Rolling native snapshot result
 
 - `scripts/th08_runtime/native_snapshot.py` replaces only the fixed
   `0x00441F4D -> 0x0043CA50` calculation-chain call. At manager frame 2,129
@@ -89,6 +89,36 @@ historical handoff.
   `artifacts/runtime_reports/th08_native_snapshot_one_tick_20260730.json`,
   SHA-256
   `6144624093386619d0ac66b69da5bf90c84b88f158d4b4f5529f953d376585a9`.
+- The barrier now carries endpoint FPU/SSE state, a per-tick replay action
+  cursor, exact owner stack/frame checks, and thread/mapping epoch checks.
+  Same-root collision/control equivalence passed at H=2 for recorded
+  `0x05`, movement `0x15`, focus toggle `0x01`, and fence candidate `0x14`;
+  `0x14` then passed H=4 and H=8.
+- Natural-frame differentials at the identical calculation seam matched
+  every collision/control projection and compact state through H=8 for
+  `0x14`, legacy-early-hit mask `0x61`, and legacy-late-hit mask `0x44`.
+- **Observed causal localization:** recorded `0x05` enters hit phase at
+  manager frame 2,136 on hostile bullet slot 45 with signed box separation
+  `-0.966766`. Holding `0x14` for the first three ticks moves the player
+  `6.899963` pixels upward by that frame; the same slot-45 world position is
+  unchanged, its separation becomes `+3.866730`, the closest bullet remains
+  positive at `+1.352203`, and the branch remains unhit through 2,137.
+- One immutable root produced all 36 canonical no-Bomb H=8 branches in
+  `63.583` seconds including per-tick semantic captures and exact restore
+  verification. Recorded-action canary/repeat histories were exact. Hit
+  versus survive classification matched the legacy corpus 36/36 and the
+  survivor set remained `0x14/15/90/91/94/95`.
+- Legacy polling endpoints were byte/field exact for 31/36 masks. The five
+  differences are retained rather than normalized away: `0x14/15` differ
+  only in tail RNG samples, while `0x44/61/A5` report the hit one frame
+  earlier at the bracketed calculation seam. CE-0209 records that the legacy
+  observer read manager frame and other fields without an atomic bracket.
+  Same-seam natural captures resolve representative masks in favor of the
+  rolling result.
+- Compact rolling report:
+  `artifacts/runtime_reports/th08_native_snapshot_fast_iteration_root2129_h8_20260730.json`,
+  SHA-256
+  `ddd71ebf110207ef0baf098bfb3d9d710e5a403d08bcf5b1b09bda0eb8a000d7`.
 
 ### Authority and next useful gate
 
@@ -98,15 +128,16 @@ historical handoff.
   candidate validator. Repeating a whole replay prefix for all 36 actions is
   rejected as the primary inner loop; the complete portfolio took roughly
   half an hour.
-- The one-tick A/A/B construction gate is observed only at the canonical
-  frame-2,129 root. It has offline same-session iteration authority, not live
-  or physical predictive authority.
+- The rolling H=2/4/8 and all-36 construction gates are observed only at the
+  canonical frame-2,129 root. They have offline same-session diagnosis and
+  candidate-search authority, not live or physical predictive authority.
 - Forty-two writable regions, external handle/device/audio/timer effects,
   and event classes outside this root remain unresolved. Preserve
   fail-closed `UNKNOWN` behavior on mapping/thread/stack/transition changes.
-- The next useful gate is repeated one-tick A/A/B identity at distinct event
-  classes such as spawn, redirect, callback transition, and laser lifecycle.
-  Then grow exact horizons `2/4/8/16` and only afterward run all 36 masks.
+- The next useful gate is repeated rolling identity at distinct event classes
+  such as spawn, redirect, callback transition, and laser lifecycle. H=16 is
+  optional only if one of those roots or a selected continuation needs it;
+  H=2/4/8 and all 36 masks are complete at the canonical hit root.
 - Endpoint discovery still scans about 110 MB and costs 152--172 ms.
   Write-watch or guarded dirty-page tracking is a performance proposal, not
   correctness authority.
@@ -126,6 +157,9 @@ historical handoff.
   `notes/review/EXTERNAL_REFERENCE_SNAPSHOT_INDEX_20260730.md`.
 - Current accepted/rejected/legacy replay branch raw bundles are under
   `artifacts/native_replay_wind_tunnel/raw/`. They are local and ignored.
+- Rolling snapshot raw bundles are under
+  `artifacts/native_snapshot_rolling/raw/`. They are local and ignored; the
+  compact causal/timing report above is tracked.
 - Four large native-root byte directories remain local/ignored under
   `artifacts/runtime_reports/*.root/`; compact root reports are retained.
 - The isolated local game directory is
@@ -141,6 +175,11 @@ historical handoff.
 - `0x004584B0` is now `result_menu_update_dispatch`.
 - Comments record the heap `ResultSysInf`, update-node/context chain, save
   fields/states, and correction that `0x018B8A68` is not the object base.
+- `dword_160F42C` is now
+  `g_frscreen_resource_notification_counters`; the comment at `0x004372A7`
+  records the render-consumed/decremented HUD notification counters. CE-0208
+  uses this revalidation to exclude only root `+0x04..+0x07` from
+  collision/control equivalence.
 
 ## Read In This Order
 

@@ -1,9 +1,12 @@
-"""TH08-specific one-tick native snapshot and update-chain barrier.
+"""TH08-specific rolling native snapshot and update-chain barrier.
 
 The injected barrier replaces only the fixed call from the 60 Hz frame pump
 to the ordered calculation chain.  At one declared manager-frame root it
-holds the owning thread before calculation, runs exactly one original update
-chain on command, and holds again before the frame pump can enter rendering.
+holds the owning thread before calculation.  It can run the original update
+chain from either the immutable root FPU/SSE state or the preceding endpoint
+state, and holds again before the frame pump can enter rendering.  A separate
+natural-advance command returns through the original callsite and traps the
+next calculation call after the intervening frame-pump work.
 
 The Python side snapshots committed writable process bytes while every other
 target thread is suspended.  It rejects mapping or thread-set changes and
@@ -48,9 +51,9 @@ from .priority17_publication_probe import (
 )
 
 
-SNAPSHOT_SCHEMA = "th08-native-calculation-snapshot-v1"
+SNAPSHOT_SCHEMA = "th08-native-calculation-snapshot-v2"
 BARRIER_MAGIC = b"T8NS"
-BARRIER_VERSION = 1
+BARRIER_VERSION = 2
 BARRIER_ALLOCATION_SIZE = 0x2000
 BARRIER_ROOT_FX_OFFSET = 0x100
 BARRIER_ENDPOINT_FX_OFFSET = 0x300
@@ -77,11 +80,16 @@ STATUS_RUNNING = 3
 STATUS_STEP_DONE = 4
 STATUS_RELEASED = 5
 STATUS_ERROR = 6
+STATUS_NATURAL_WAIT = 7
+STATUS_NATURAL_RUNNING = 8
+STATUS_NATURAL_ARMED = 9
 
 COMMAND_NONE = 0
 COMMAND_STEP = 1
 COMMAND_RESTORE_READY = 2
 COMMAND_RESUME = 3
+COMMAND_CONTINUE = 4
+COMMAND_NATURAL_ADVANCE = 5
 
 ERROR_BAD_COMMAND_STATE = 1
 
@@ -454,22 +462,49 @@ def build_native_snapshot_stub(remote_base: int) -> bytes:
     endpoint_fx = remote_base + BARRIER_ENDPOINT_FX_OFFSET
 
     builder = _X86Builder()
+
+    def emit_arrival(wait_status: int) -> None:
+        builder.emit(b"\x64\xa1\x24\x00\x00\x00")
+        builder.emit(_mov_m32_eax(owner_tid))
+        builder.emit(b"\x89\x25" + _u32(root_esp))
+        builder.emit(b"\x89\x2d" + _u32(root_ebp))
+        builder.emit(_mov_eax_m32(0x0164D30C))
+        builder.emit(_mov_m32_eax(root_manager))
+        builder.emit(b"\x0f\xae\x05" + _u32(root_fx))  # fxsave
+        builder.emit(b"\xff\x05" + _u32(arrival_serial))
+        builder.emit(_mov_m32_imm32(status, wait_status))
+
+    def emit_headless_step(fx_source: int) -> None:
+        builder.emit(_mov_m32_imm32(command, COMMAND_NONE))
+        builder.emit(_mov_m32_imm32(status, STATUS_RUNNING))
+        builder.emit(b"\x0f\xae\x0d" + _u32(fx_source))  # fxrstor
+        builder.emit(b"\xb9" + _u32(UPDATE_CHAIN_HEAD))
+        call_source = stub_address + len(builder.code)
+        builder.emit(_relative_call(call_source, UPDATE_CHAIN_EXECUTE))
+        builder.emit(_mov_m32_eax(last_result))
+        builder.emit(b"\x89\x25" + _u32(endpoint_esp))
+        builder.emit(b"\x89\x2d" + _u32(endpoint_ebp))
+        builder.emit(_mov_eax_m32(0x0164D30C))
+        builder.emit(_mov_m32_eax(endpoint_manager))
+        builder.emit(b"\x0f\xae\x05" + _u32(endpoint_fx))
+        builder.emit(b"\xff\x05" + _u32(step_serial))
+        builder.emit(_mov_m32_imm32(status, STATUS_STEP_DONE))
+        builder.jmp("wait")
+
     builder.emit(_mov_eax_m32(status))
+    builder.emit(b"\x83\xf8" + bytes((STATUS_NATURAL_ARMED,)))
+    builder.jcc(0x84, "natural_arrival")  # je
     builder.emit(b"\x83\xf8" + bytes((STATUS_ARMED,)))
     builder.jcc(0x85, "pass_through")  # jne
     builder.emit(_mov_eax_m32(target_manager))
     builder.emit(b"\x3b\x05" + _u32(0x0164D30C))
     builder.jcc(0x85, "pass_through")
 
-    builder.emit(b"\x64\xa1\x24\x00\x00\x00")
-    builder.emit(_mov_m32_eax(owner_tid))
-    builder.emit(b"\x89\x25" + _u32(root_esp))
-    builder.emit(b"\x89\x2d" + _u32(root_ebp))
-    builder.emit(_mov_eax_m32(0x0164D30C))
-    builder.emit(_mov_m32_eax(root_manager))
-    builder.emit(b"\x0f\xae\x05" + _u32(root_fx))  # fxsave
-    builder.emit(b"\xff\x05" + _u32(arrival_serial))
-    builder.emit(_mov_m32_imm32(status, STATUS_ROOT_WAIT))
+    emit_arrival(STATUS_ROOT_WAIT)
+    builder.jmp("wait")
+
+    builder.label("natural_arrival")
+    emit_arrival(STATUS_NATURAL_WAIT)
 
     builder.label("wait")
     builder.emit(_mov_eax_m32(command))
@@ -481,6 +516,10 @@ def build_native_snapshot_stub(remote_base: int) -> bytes:
     builder.jcc(0x84, "restore")
     builder.emit(b"\x83\xf8" + bytes((COMMAND_RESUME,)))
     builder.jcc(0x84, "resume")
+    builder.emit(b"\x83\xf8" + bytes((COMMAND_CONTINUE,)))
+    builder.jcc(0x84, "continue")
+    builder.emit(b"\x83\xf8" + bytes((COMMAND_NATURAL_ADVANCE,)))
+    builder.jcc(0x84, "natural_advance")
     builder.jmp("bad_command")
 
     builder.label("pause")
@@ -491,21 +530,13 @@ def build_native_snapshot_stub(remote_base: int) -> bytes:
     builder.emit(_mov_eax_m32(status))
     builder.emit(b"\x83\xf8" + bytes((STATUS_ROOT_WAIT,)))
     builder.jcc(0x85, "bad_command")
-    builder.emit(_mov_m32_imm32(command, COMMAND_NONE))
-    builder.emit(_mov_m32_imm32(status, STATUS_RUNNING))
-    builder.emit(b"\x0f\xae\x0d" + _u32(root_fx))  # fxrstor
-    builder.emit(b"\xb9" + _u32(UPDATE_CHAIN_HEAD))
-    call_source = stub_address + len(builder.code)
-    builder.emit(_relative_call(call_source, UPDATE_CHAIN_EXECUTE))
-    builder.emit(_mov_m32_eax(last_result))
-    builder.emit(b"\x89\x25" + _u32(endpoint_esp))
-    builder.emit(b"\x89\x2d" + _u32(endpoint_ebp))
-    builder.emit(_mov_eax_m32(0x0164D30C))
-    builder.emit(_mov_m32_eax(endpoint_manager))
-    builder.emit(b"\x0f\xae\x05" + _u32(endpoint_fx))
-    builder.emit(b"\xff\x05" + _u32(step_serial))
-    builder.emit(_mov_m32_imm32(status, STATUS_STEP_DONE))
-    builder.jmp("wait")
+    emit_headless_step(root_fx)
+
+    builder.label("continue")
+    builder.emit(_mov_eax_m32(status))
+    builder.emit(b"\x83\xf8" + bytes((STATUS_STEP_DONE,)))
+    builder.jcc(0x85, "bad_command")
+    emit_headless_step(endpoint_fx)
 
     builder.label("restore")
     builder.emit(_mov_eax_m32(status))
@@ -529,6 +560,23 @@ def build_native_snapshot_stub(remote_base: int) -> bytes:
     builder.emit(_relative_call(call_source, UPDATE_CHAIN_EXECUTE))
     builder.emit(_mov_m32_eax(last_result))
     builder.emit(_mov_m32_imm32(status, STATUS_RELEASED))
+    builder.emit(b"\xc3")
+
+    builder.label("natural_advance")
+    builder.emit(_mov_eax_m32(status))
+    builder.emit(b"\x83\xf8" + bytes((STATUS_ROOT_WAIT,)))
+    builder.jcc(0x84, "natural_advance_ready")
+    builder.emit(b"\x83\xf8" + bytes((STATUS_NATURAL_WAIT,)))
+    builder.jcc(0x85, "bad_command")
+    builder.label("natural_advance_ready")
+    builder.emit(_mov_m32_imm32(command, COMMAND_NONE))
+    builder.emit(_mov_m32_imm32(status, STATUS_NATURAL_RUNNING))
+    builder.emit(b"\x0f\xae\x0d" + _u32(root_fx))
+    builder.emit(b"\xb9" + _u32(UPDATE_CHAIN_HEAD))
+    call_source = stub_address + len(builder.code)
+    builder.emit(_relative_call(call_source, UPDATE_CHAIN_EXECUTE))
+    builder.emit(_mov_m32_eax(last_result))
+    builder.emit(_mov_m32_imm32(status, STATUS_NATURAL_ARMED))
     builder.emit(b"\xc3")
 
     builder.label("bad_command")
@@ -1167,7 +1215,7 @@ def write_native_replay_action(
 
 
 class NativeCalculationBarrier:
-    """Installed update-chain call barrier for one manager-frame root."""
+    """Installed rolling update-chain call barrier for one manager-frame root."""
 
     def __init__(
         self,
@@ -1388,6 +1436,32 @@ class NativeCalculationBarrier:
             minimum_serial=("step_serial", before.step_serial + 1),
         )
 
+    def continue_step(self, *, timeout_seconds: float) -> NativeBarrierHeader:
+        before = self.header()
+        if before.status != STATUS_STEP_DONE:
+            raise NativeSnapshotUnknownError(
+                "rolling native step requires a completed endpoint"
+            )
+        self._command(COMMAND_CONTINUE)
+        return self.wait_for_status(
+            STATUS_STEP_DONE,
+            timeout_seconds=timeout_seconds,
+            minimum_serial=("step_serial", before.step_serial + 1),
+        )
+
+    def natural_advance(self, *, timeout_seconds: float) -> NativeBarrierHeader:
+        before = self.header()
+        if before.status not in (STATUS_ROOT_WAIT, STATUS_NATURAL_WAIT):
+            raise NativeSnapshotUnknownError(
+                "natural advance requires a trapped calculation-call boundary"
+            )
+        self._command(COMMAND_NATURAL_ADVANCE)
+        return self.wait_for_status(
+            STATUS_NATURAL_WAIT,
+            timeout_seconds=timeout_seconds,
+            minimum_serial=("arrival_serial", before.arrival_serial + 1),
+        )
+
     def mark_restore_ready(
         self,
         *,
@@ -1413,6 +1487,8 @@ class NativeCalculationBarrier:
             "original_target": UPDATE_CHAIN_EXECUTE,
             "update_chain_head": UPDATE_CHAIN_HEAD,
             "render_chain_executed_inside_step": False,
+            "rolling_endpoint_fx": True,
+            "natural_next_call_trap": True,
             "remote_base": self.remote_base,
             "action_authority": False,
             "external_effect_coverage": "unresolved",
@@ -1435,6 +1511,8 @@ __all__ = [
     "BARRIER_STUB_OFFSET",
     "BARRIER_VERSION",
     "COMMAND_NONE",
+    "COMMAND_CONTINUE",
+    "COMMAND_NATURAL_ADVANCE",
     "COMMAND_RESTORE_READY",
     "COMMAND_STEP",
     "NativeBarrierHeader",
@@ -1449,6 +1527,7 @@ __all__ = [
     "SNAPSHOT_SCHEMA",
     "STATUS_ROOT_WAIT",
     "STATUS_STEP_DONE",
+    "STATUS_NATURAL_WAIT",
     "UPDATE_CHAIN_CALLSITE",
     "UPDATE_CHAIN_CALL_ORIGINAL",
     "UPDATE_CHAIN_EXECUTE",

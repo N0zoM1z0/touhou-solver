@@ -15,9 +15,10 @@ Read:
 The retained audit has first-hit-bounded observation authority only. It grants
 no item-objective, collection-policy, later-combat, or live action authority.
 The ledgers and atlas add native recurrence and shipped-content/static
-opportunity authority. The v3 lifecycle trace adds implementation/synthetic
-authority for successful item allocation, cull, same-update pickup/resource
-transactions, and exact defeat-source joins, but no runtime item event has
-been observed. The candidate board plus trace lowerer can represent the
-complete root-to-enemy-to-item-to-pickup chain; causal benefit, safe
-collection, option-edge, planner, and live action authority remain open.
+opportunity authority. The v4 lifecycle trace adds implementation/synthetic
+authority for exact resolved HP damage, successful item allocation, cull,
+same-update pickup/resource transactions, and exact defeat-source joins, but
+no runtime damage or item event has been observed. The candidate board plus
+trace lowerer can represent the complete root-to-enemy-to-damage-to-item-to-
+pickup chain; causal benefit, target-motion attribution, safe collection,
+option-edge, planner, and live action authority remain open.

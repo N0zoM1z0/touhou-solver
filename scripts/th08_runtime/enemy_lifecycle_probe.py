@@ -2,8 +2,9 @@
 
 The probe covers the two shipped ordinary-enemy allocation paths, every
 revalidated active-bit clear, the distinct global forced-HP-zero write,
-successful item allocation, and the pre/post transaction of one native item
-pickup.  It is default-off infrastructure and has no action authority.
+successful item allocation, the pre/post transaction of one native item
+pickup, and actual resolved enemy-HP damage commits.  It is default-off
+infrastructure and has no action authority.
 Installation and cleanup reuse the already tested Win32 remote-memory/thread
 primitives from the priority-17 publication probe; lifecycle-specific
 activation remains multi-site, exact-byte guarded, and reversible.
@@ -31,10 +32,17 @@ from .game_state import (
     ADDR_ENEMY_MANAGER_FRAME,
     ADDR_GAMEPLAY_RNG,
     ADDR_PLAYER,
+    ADDR_ROUTE_ID,
     ADDR_RUN_STATE_INNER_POINTER,
     ADDR_STAGE_ROUTE_INDEX,
+    PLAYER_BOMB_ACTIVE_OFFSET,
     PLAYER_FOCUS_LOGIC_OFFSET,
     PLAYER_POSITION_OFFSET,
+    PLAYER_SHOT_POOL_OFFSET,
+    PLAYER_SHOT_POOL_SIZE,
+    PLAYER_SHOT_SLOT_STATE_OFFSET,
+    PLAYER_SHOT_SLOT_STRIDE,
+    PLAYER_SHOT_TIMER_OFFSET,
     RUN_STATE_BOMBS_OFFSET,
     RUN_STATE_LIVES_OFFSET,
     RUN_STATE_POWER_OFFSET,
@@ -59,25 +67,35 @@ from .priority17_publication_probe import (
 )
 
 
-PROBE_SCHEMA = "th08-enemy-item-lifecycle-probe-v3"
-PROBE_MAGIC = b"ELR3"
-PROBE_VERSION = 3
+PROBE_SCHEMA = "th08-enemy-item-damage-lifecycle-probe-v4"
+PROBE_MAGIC = b"ELR4"
+PROBE_VERSION = 4
 PROBE_CAPACITY = 256
 PROBE_EVENT_SIZE = 128
 PROBE_ALLOCATION_SIZE = 0x10000
 PROBE_HEADER_SIZE = 32
 PROBE_SERIAL_OFFSET = 16
 PROBE_PICKUP_SCRATCH_OFFSET = 0x40
+PROBE_DAMAGE_SCRATCH_OFFSET = 0xC0
 PROBE_STUB_OFFSET = 0x200
-PROBE_STUB_STRIDE = 0x200
-PROBE_EVENT_OFFSET = 0x2000
+PROBE_STUB_STRIDE = 0x240
+PROBE_EVENT_OFFSET = 0x2400
 
 ENEMY_POOL_BASE = 0x005826C0
 ENEMY_POOL_SIZE = 480
 ENEMY_STRIDE = 0x53D0
 ENEMY_HP_OFFSET = 0x2DFC
 ENEMY_FLAGS_OFFSET = 0x3324
+ENEMY_FLAGS2_OFFSET = 0x3328
 ENEMY_FRAME_DAMAGE_OFFSET = 0x3354
+ENEMY_POSITION_OFFSET = 0x2D88
+ENEMY_DAMAGE_HITBOX_OFFSET = 0x2D70
+ENEMY_ALTERNATE_HITBOX_OFFSET = 0x2D7C
+ENEMY_MAIN_VM_OFFSET = 0x7F8
+ENEMY_MAIN_VM_TIMER_CURRENT_OFFSET = ENEMY_MAIN_VM_OFFSET + 0x0C
+
+PLAYER_DAMAGE_TIMER_OFFSET = 0xE2AF4
+PLAYER_SHOT_SLOT_TYPE_OFFSET = PLAYER_SHOT_SLOT_STATE_OFFSET + 2
 
 ITEM_POOL_BASE = 0x01653648
 ITEM_POOL_SIZE = 2096
@@ -199,6 +217,7 @@ class EnemyLifecycleKind(IntEnum):
     ITEM_ALLOCATE = 9
     ITEM_PICKUP = 10
     ITEM_CULL = 11
+    ENEMY_DAMAGE = 12
 
 
 _ALLOCATION_KINDS = frozenset(
@@ -217,7 +236,8 @@ _RETIREMENT_KINDS = frozenset(
     }
 )
 _ENEMY_KINDS = _ALLOCATION_KINDS | _RETIREMENT_KINDS | {
-    EnemyLifecycleKind.FORCED_HP_ZERO
+    EnemyLifecycleKind.FORCED_HP_ZERO,
+    EnemyLifecycleKind.ENEMY_DAMAGE,
 }
 _ITEM_KINDS = frozenset(
     {
@@ -249,6 +269,7 @@ class EnemyLifecycleHookSite:
         if self.pointer_source not in {
             "ebp_minus_8",
             "ebp_minus_24",
+            "ebp_minus_38",
             "eax",
             "ecx",
             "edx",
@@ -260,6 +281,8 @@ class EnemyLifecycleHookSite:
             "item_cull",
             "item_pickup_begin",
             "item_pickup_commit",
+            "enemy_damage_begin",
+            "enemy_damage_commit",
         }:
             raise ValueError("unsupported lifecycle hook role")
         expected_return_capture = (
@@ -281,14 +304,24 @@ class EnemyLifecycleHookSite:
             "item_cull": "ebp_minus_24",
             "item_pickup_begin": "ebp_minus_24",
             "item_pickup_commit": "ebp_minus_24",
+            "enemy_damage_begin": "ebp_minus_38",
+            "enemy_damage_commit": "ebp_minus_38",
         }.get(self.role)
         if (
             expected_pointer_source is not None
             and self.pointer_source != expected_pointer_source
         ):
-            raise ValueError("item hook has the wrong pointer source")
-        if self.role != "enemy_event" and self.kind not in _ITEM_KINDS:
+            raise ValueError("specialized hook has the wrong pointer source")
+        if (
+            self.role.startswith("item_")
+            and self.kind not in _ITEM_KINDS
+        ):
             raise ValueError("item hook must use an item lifecycle kind")
+        if (
+            self.role.startswith("enemy_damage_")
+            and self.kind is not EnemyLifecycleKind.ENEMY_DAMAGE
+        ):
+            raise ValueError("damage hook must use the enemy-damage kind")
 
     @property
     def return_address(self) -> int:
@@ -354,6 +387,29 @@ HOOK_SITES = (
         kind=EnemyLifecycleKind.FORCED_HP_ZERO,
         pointer_source="ecx",
         capture_return_address=True,
+    ),
+    EnemyLifecycleHookSite(
+        name="enemy_damage_begin",
+        address=0x0042D06D,
+        original=(
+            b"\x8b\x4d\xc8"
+            b"\xc7\x81\x54\x33\x00\x00\x00\x00\x00\x00"
+        ),
+        kind=EnemyLifecycleKind.ENEMY_DAMAGE,
+        pointer_source="ebp_minus_38",
+        role="enemy_damage_begin",
+    ),
+    EnemyLifecycleHookSite(
+        name="enemy_damage_commit",
+        address=0x0042D343,
+        original=(
+            b"\x2b\x45\xe8"
+            b"\x8b\x4d\xc8"
+            b"\x89\x81\xfc\x2d\x00\x00"
+        ),
+        kind=EnemyLifecycleKind.ENEMY_DAMAGE,
+        pointer_source="ebp_minus_38",
+        role="enemy_damage_commit",
     ),
     EnemyLifecycleHookSite(
         name="item_allocate",
@@ -446,6 +502,8 @@ def _load_enemy_pointer(pointer_source: str) -> bytes:
         return b"\x8b\x5d\xf8"  # mov ebx, [ebp - 8]
     if pointer_source == "ebp_minus_24":
         return b"\x8b\x5d\xdc"  # mov ebx, [ebp - 0x24]
+    if pointer_source == "ebp_minus_38":
+        return b"\x8b\x5d\xc8"  # mov ebx, [ebp - 0x38]
     if pointer_source == "eax":
         return b"\x89\xc3"  # mov ebx, eax
     if pointer_source == "ecx":
@@ -852,6 +910,17 @@ def _build_item_pickup_commit_stub(
     scratch = remote_base + PROBE_PICKUP_SCRATCH_OFFSET
     code = bytearray(b"\x9c\x60")
     code += _load_enemy_pointer(site.pointer_source)
+    guard_jumps: list[int] = []
+    code += b"\x81\x3d" + _u32(scratch) + _u32(0x49545042)
+    guard_jumps.append(len(code))
+    code += b"\x0f\x85\x00\x00\x00\x00"
+    code += b"\x39\x1d" + _u32(scratch + 0x0C)
+    guard_jumps.append(len(code))
+    code += b"\x0f\x85\x00\x00\x00\x00"
+    code += b"\xa1" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x39\x05" + _u32(scratch + 0x04)
+    guard_jumps.append(len(code))
+    code += b"\x0f\x85\x00\x00\x00\x00"
     code += _select_unpublished_event(
         serial_address=serial_address,
         event_base=event_base,
@@ -881,6 +950,7 @@ def _build_item_pickup_commit_stub(
     code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
     code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 20)
     code += b"\x89\x99" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 21)
+    code += b"\xc7\x05" + _u32(scratch) + _u32(0)
     code += b"\x89\xe8"  # mov eax, ebp
     code += b"\x89\x01"
     code += b"\xa3" + _u32(serial_address)
@@ -890,6 +960,275 @@ def _build_item_pickup_commit_stub(
     code += _relative_call(call_source, 0x00441770)
     jump_source = stub_address + len(code)
     code += _relative_jump(jump_source, site.return_address)
+
+    replay_only = len(code)
+    code += b"\xc7\x05" + _u32(scratch) + _u32(0)
+    code += b"\x61\x9d"
+    code += b"\x8b\x4d\xdc"
+    call_source = stub_address + len(code)
+    code += _relative_call(call_source, 0x00441770)
+    jump_source = stub_address + len(code)
+    code += _relative_jump(jump_source, site.return_address)
+    for jump in guard_jumps:
+        displacement = replay_only - (jump + 6)
+        struct.pack_into("<i", code, jump + 2, displacement)
+    if len(code) > PROBE_STUB_STRIDE:
+        raise ValueError(f"lifecycle stub {site.name} exceeds its fixed slot")
+    return bytes(code)
+
+
+def _build_enemy_damage_begin_stub(
+    remote_base: int,
+    site: EnemyLifecycleHookSite,
+) -> bytes:
+    site_index = HOOK_SITES.index(site)
+    stub_address = (
+        remote_base + PROBE_STUB_OFFSET + site_index * PROBE_STUB_STRIDE
+    )
+    scratch = remote_base + PROBE_DAMAGE_SCRATCH_OFFSET
+    code = bytearray(b"\x9c\x60")
+    code += _load_enemy_pointer(site.pointer_source)
+    code += b"\xbf" + _u32(scratch)
+    code += b"\xb9" + _u32(PROBE_EVENT_SIZE // 4)
+    code += b"\x31\xc0\xf3\xab"  # zero complete scratch
+    code += b"\xbf" + _u32(scratch)
+    code += b"\xc7\x07" + _u32(0x42474D44)  # "DMGB" valid-begin marker
+    code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x89\x57\x04"
+    code += b"\xc7\x47\x08" + _u32(int(site.kind))
+    code += b"\x89\x5f\x0c"
+    code += b"\x8b\x15" + _u32(ADDR_STAGE_ROUTE_INDEX)
+    code += b"\x89\x57\x10"
+    code += b"\x0f\xb7\x15" + _u32(ADDR_GAMEPLAY_RNG)
+    code += b"\x89\x57\x18"
+    code += b"\x8b\x15" + _u32(ADDR_GAMEPLAY_RNG + 4)
+    code += b"\x89\x57\x1c"
+    code += b"\xc7\x47\x20" + _u32(_UNKNOWN_U32)
+    code += b"\xc7\x47\x24" + _u32(_UNKNOWN_U32)
+
+    for enemy_offset, payload_index in (
+        (ENEMY_FLAGS_OFFSET, 0),
+        (ENEMY_FLAGS2_OFFSET, 1),
+        (ENEMY_HP_OFFSET, 2),
+        (ENEMY_POSITION_OFFSET, 5),
+        (ENEMY_POSITION_OFFSET + 4, 6),
+        (ENEMY_MAIN_VM_OFFSET, 9),
+        (ENEMY_MAIN_VM_TIMER_CURRENT_OFFSET, 10),
+    ):
+        code += b"\x8b\x93" + _u32(enemy_offset)
+        code += b"\x89\x97" + _u32(
+            _EVENT_PAYLOAD_OFFSET + 4 * payload_index
+        )
+    for payload_index in (3, 4, 21):
+        code += b"\xc7\x87" + _u32(
+            _EVENT_PAYLOAD_OFFSET + 4 * payload_index
+        ) + _u32(_UNKNOWN_U32)
+
+    # Capture the exact hitbox pair selected by the native damage path.
+    # A nonzero-magnitude alternate width at +0x2d7c selects the alternate
+    # pair; both signed zero encodings select the primary pair at +0x2d70.
+    code += b"\x8b\x83" + _u32(ENEMY_ALTERNATE_HITBOX_OFFSET)
+    code += b"\x25\xff\xff\xff\x7f\x85\xc0"
+    primary_jump = len(code)
+    code += b"\x74\x00"
+    for enemy_offset, payload_index in (
+        (ENEMY_ALTERNATE_HITBOX_OFFSET, 7),
+        (ENEMY_ALTERNATE_HITBOX_OFFSET + 4, 8),
+    ):
+        code += b"\x8b\x93" + _u32(enemy_offset)
+        code += b"\x89\x97" + _u32(
+            _EVENT_PAYLOAD_OFFSET + 4 * payload_index
+        )
+    selected_jump = len(code)
+    code += b"\xeb\x00"
+    primary_hitbox = len(code)
+    for enemy_offset, payload_index in (
+        (ENEMY_DAMAGE_HITBOX_OFFSET, 7),
+        (ENEMY_DAMAGE_HITBOX_OFFSET + 4, 8),
+    ):
+        code += b"\x8b\x93" + _u32(enemy_offset)
+        code += b"\x89\x97" + _u32(
+            _EVENT_PAYLOAD_OFFSET + 4 * payload_index
+        )
+    selected_hitbox = len(code)
+    for jump, target in (
+        (primary_jump, primary_hitbox),
+        (selected_jump, selected_hitbox),
+    ):
+        displacement = target - (jump + 2)
+        if not -128 <= displacement <= 127:
+            raise ValueError("damage hitbox-selection branch exceeds rel8")
+        code[jump + 1] = displacement & 0xFF
+
+    # Pack focus/player-state/Bomb/alternate-hitbox/route context into one
+    # uint32.  The alternate-hitbox bit records nonzero float magnitude,
+    # treating both +0.0 and -0.0 as disabled.  Bit 18 is filled by the
+    # commit stub from [ebp-0x14].
+    code += b"\x0f\xb6\x15" + _u32(
+        ADDR_PLAYER + PLAYER_FOCUS_LOGIC_OFFSET
+    )
+    code += b"\x0f\xb6\x05" + _u32(ADDR_PLAYER)
+    code += b"\xc1\xe0\x08\x09\xc2"
+    code += b"\x83\x3d" + _u32(
+        ADDR_PLAYER + PLAYER_BOMB_ACTIVE_OFFSET
+    ) + b"\x00"
+    code += b"\x0f\x95\xc0\x0f\xb6\xc0\xc1\xe0\x10\x09\xc2"
+    code += b"\x8b\x83" + _u32(ENEMY_ALTERNATE_HITBOX_OFFSET)
+    code += b"\x25\xff\xff\xff\x7f"
+    code += b"\x85\xc0\x0f\x95\xc0\x0f\xb6\xc0\xc1\xe0\x11\x09\xc2"
+    code += b"\x0f\xb6\x05" + _u32(ADDR_ROUTE_ID)
+    code += b"\xc1\xe0\x18\x09\xc2"
+    code += b"\x89\x97" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 11)
+
+    code += b"\x0f\xb7\x15" + _u32(ADDR_CURRENT_INPUT)
+    code += b"\x89\x97" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 12)
+    code += b"\x8b\x15" + _u32(ADDR_RUN_STATE_INNER_POINTER)
+    code += b"\x8b\x82" + _u32(RUN_STATE_POWER_OFFSET)
+    code += b"\x89\x87" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 13)
+    for address, payload_index in (
+        (ADDR_PLAYER + PLAYER_SHOT_TIMER_OFFSET, 14),
+        (ADDR_PLAYER + PLAYER_SHOT_TIMER_OFFSET + 4, 15),
+        (ADDR_PLAYER + PLAYER_SHOT_TIMER_OFFSET + 8, 16),
+        (ADDR_PLAYER + PLAYER_DAMAGE_TIMER_OFFSET, 17),
+        (ADDR_PLAYER + PLAYER_DAMAGE_TIMER_OFFSET + 4, 18),
+        (ADDR_PLAYER + PLAYER_DAMAGE_TIMER_OFFSET + 8, 19),
+    ):
+        code += b"\x8b\x15" + _u32(address)
+        code += b"\x89\x97" + _u32(
+            _EVENT_PAYLOAD_OFFSET + 4 * payload_index
+        )
+
+    # Count occupied slots and slots satisfying the shipped damage-loop
+    # predicate: state != 0 and (state == 1 or type == 3).
+    code += b"\x31\xd2\x31\xdb"
+    code += b"\xbe" + _u32(ADDR_PLAYER + PLAYER_SHOT_POOL_OFFSET)
+    code += b"\xb9" + _u32(PLAYER_SHOT_POOL_SIZE)
+    loop_start = len(code)
+    code += b"\x0f\xb7\x86" + _u32(PLAYER_SHOT_SLOT_STATE_OFFSET)
+    code += b"\x85\xc0"
+    jump_zero = len(code)
+    code += b"\x74\x00"
+    code += b"\x42"  # inc edx (occupied)
+    code += b"\x83\xf8\x01"
+    jump_state_one = len(code)
+    code += b"\x74\x00"
+    code += (
+        b"\x66\x83\xbe"
+        + _u32(PLAYER_SHOT_SLOT_TYPE_OFFSET)
+        + b"\x03"
+    )
+    jump_not_type_three = len(code)
+    code += b"\x75\x00"
+    eligible = len(code)
+    code += b"\x43"  # inc ebx (eligible)
+    next_slot = len(code)
+    code += b"\x81\xc6" + _u32(PLAYER_SHOT_SLOT_STRIDE)
+    code += b"\x49"
+    loop_jump = len(code)
+    code += b"\x75\x00"
+    for jump, target in (
+        (jump_zero, next_slot),
+        (jump_state_one, eligible),
+        (jump_not_type_three, next_slot),
+        (loop_jump, loop_start),
+    ):
+        displacement = target - (jump + 2)
+        if not -128 <= displacement <= 127:
+            raise ValueError("damage shot-count branch exceeds rel8")
+        code[jump + 1] = displacement & 0xFF
+    code += b"\x89\xd8\xc1\xe0\x10\x09\xd0"
+    code += b"\xa3" + _u32(
+        scratch + _EVENT_PAYLOAD_OFFSET + 4 * 20
+    )
+
+    code += b"\x61\x9d"
+    code += site.original
+    jump_source = stub_address + len(code)
+    code += _relative_jump(jump_source, site.return_address)
+    if len(code) > PROBE_STUB_STRIDE:
+        raise ValueError(f"lifecycle stub {site.name} exceeds its fixed slot")
+    return bytes(code)
+
+
+def _build_enemy_damage_commit_stub(
+    remote_base: int,
+    site: EnemyLifecycleHookSite,
+) -> bytes:
+    site_index = HOOK_SITES.index(site)
+    stub_address = (
+        remote_base + PROBE_STUB_OFFSET + site_index * PROBE_STUB_STRIDE
+    )
+    serial_address = remote_base + PROBE_SERIAL_OFFSET
+    event_base = remote_base + PROBE_EVENT_OFFSET
+    scratch = remote_base + PROBE_DAMAGE_SCRATCH_OFFSET
+    code = bytearray(b"\x9c\x60")
+    code += _load_enemy_pointer(site.pointer_source)
+    guard_jumps: list[int] = []
+    code += b"\x81\x3d" + _u32(scratch) + _u32(0x42474D44)
+    guard_jumps.append(len(code))
+    code += b"\x0f\x85\x00\x00\x00\x00"
+    code += b"\x39\x1d" + _u32(scratch + 0x0C)
+    guard_jumps.append(len(code))
+    code += b"\x0f\x85\x00\x00\x00\x00"
+    code += b"\xa1" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x39\x05" + _u32(scratch + 0x04)
+    guard_jumps.append(len(code))
+    code += b"\x0f\x85\x00\x00\x00\x00"
+    code += _select_unpublished_event(
+        serial_address=serial_address,
+        event_base=event_base,
+    )
+    code += b"\x89\x01"  # invalidate selected event slot
+    code += b"\x89\xca"  # preserve event pointer in edx
+    code += b"\x8d\x79\x04"
+    code += b"\xbe" + _u32(scratch + 4)
+    code += b"\xb9" + _u32(PROBE_EVENT_SIZE // 4 - 1)
+    code += b"\xf3\xa5"
+    code += b"\x89\xd1"
+    code += b"\x89\x59\x14"  # exact commit enemy pointer
+    code += b"\x8b\x55\xe8"  # resolved damage [ebp - 0x18]
+    code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 4)
+    code += b"\x8b\x15" + _u32(ADDR_ENEMY_MANAGER_FRAME)
+    code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 21)
+    code += b"\x83\x7d\xec\x00"  # Bomb damage-region overlap flag
+    code += b"\x0f\x95\xc0\x0f\xb6\xc0\xc1\xe0\x12"
+    code += b"\x09\x81" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 11)
+    code += b"\x61\x9d"
+
+    # Exact shipped subtract/reload/write span executes before publication.
+    code += site.original
+
+    code += b"\x9c\x60"
+    code += _load_enemy_pointer(site.pointer_source)
+    code += _select_unpublished_event(
+        serial_address=serial_address,
+        event_base=event_base,
+    )
+    code += b"\x8b\x93" + _u32(ENEMY_HP_OFFSET)
+    code += b"\x89\x91" + _u32(_EVENT_PAYLOAD_OFFSET + 4 * 3)
+    code += b"\x0f\xb7\x15" + _u32(ADDR_GAMEPLAY_RNG)
+    code += b"\x89\x51\x20"
+    code += b"\x8b\x15" + _u32(ADDR_GAMEPLAY_RNG + 4)
+    code += b"\x89\x51\x24"
+    code += b"\xc7\x05" + _u32(scratch) + _u32(0)
+    code += b"\x89\x01"
+    code += b"\xa3" + _u32(serial_address)
+    code += b"\x61\x9d"
+    jump_source = stub_address + len(code)
+    code += _relative_jump(jump_source, site.return_address)
+
+    # Installation may occur while the game thread is already between the
+    # paired sites.  A missing/mismatched begin record must replay the shipped
+    # commit without consuming a ring serial or publishing stale scratch.
+    replay_only = len(code)
+    code += b"\xc7\x05" + _u32(scratch) + _u32(0)
+    code += b"\x61\x9d"
+    code += site.original
+    jump_source = stub_address + len(code)
+    code += _relative_jump(jump_source, site.return_address)
+    for jump in guard_jumps:
+        displacement = replay_only - (jump + 6)
+        struct.pack_into("<i", code, jump + 2, displacement)
     if len(code) > PROBE_STUB_STRIDE:
         raise ValueError(f"lifecycle stub {site.name} exceeds its fixed slot")
     return bytes(code)
@@ -911,6 +1250,10 @@ def build_site_stub(
         return _build_item_pickup_begin_stub(remote_base, site)
     if site.role == "item_pickup_commit":
         return _build_item_pickup_commit_stub(remote_base, site)
+    if site.role == "enemy_damage_begin":
+        return _build_enemy_damage_begin_stub(remote_base, site)
+    if site.role == "enemy_damage_commit":
+        return _build_enemy_damage_commit_stub(remote_base, site)
     raise ValueError(f"unsupported lifecycle hook role {site.role}")
 
 
@@ -919,6 +1262,13 @@ def build_probe_image(remote_base: int, pid: int) -> bytes:
 
     if not 0 < pid <= 0xFFFFFFFF:
         raise ValueError("pid is outside uint32")
+    if PROBE_DAMAGE_SCRATCH_OFFSET + PROBE_EVENT_SIZE > PROBE_STUB_OFFSET:
+        raise ValueError("lifecycle scratch records overlap the stub region")
+    if (
+        PROBE_STUB_OFFSET + len(HOOK_SITES) * PROBE_STUB_STRIDE
+        > PROBE_EVENT_OFFSET
+    ):
+        raise ValueError("lifecycle stubs overlap the event ring")
     if (
         PROBE_EVENT_OFFSET + PROBE_CAPACITY * PROBE_EVENT_SIZE
         > PROBE_ALLOCATION_SIZE
@@ -1032,6 +1382,72 @@ class EnemyLifecycleEvent:
                 raise ValueError(
                     "enemy lifecycle pointer is outside the ordinary pool"
                 )
+            if self.kind is EnemyLifecycleKind.ENEMY_DAMAGE:
+                if (
+                    self.rng_state_before is None
+                    or self.rng_calls_before is None
+                    or self.rng_state_after is None
+                    or self.rng_calls_after is None
+                ):
+                    raise ValueError(
+                        "enemy damage transaction has incomplete RNG identity"
+                    )
+                if (
+                    self.rng_state_before > 0xFFFF
+                    or self.rng_state_after > 0xFFFF
+                ):
+                    raise ValueError(
+                        "enemy damage transaction has invalid RNG state"
+                    )
+                if self.caller_return_address != self.subject_pointer:
+                    raise ValueError(
+                        "enemy damage begin/commit pointer identity disagrees"
+                    )
+                if self.damage_commit_manager_frame != self.manager_frame:
+                    raise ValueError(
+                        "enemy damage crossed an enemy-manager frame"
+                    )
+                if self.damage_resolved <= 0:
+                    raise ValueError(
+                        "enemy damage transaction has nonpositive damage"
+                    )
+                if self.hp_before - self.damage_resolved != self.hp_after:
+                    raise ValueError(
+                        "enemy damage transaction HP arithmetic disagrees"
+                    )
+                if not self.damage_flags & 0x01:
+                    raise ValueError(
+                        "enemy damage transaction begins on an inactive slot"
+                    )
+                if self.damage_context_word & ~0xFF07FFFF:
+                    raise ValueError(
+                        "enemy damage context has nonzero reserved bits"
+                    )
+                if self.damage_input_current & ~0xFFFF:
+                    raise ValueError(
+                        "enemy damage active input is invalid"
+                    )
+                if (
+                    self.damage_eligible_shot_count
+                    > self.damage_occupied_shot_count
+                    or self.damage_occupied_shot_count
+                    > PLAYER_SHOT_POOL_SIZE
+                ):
+                    raise ValueError(
+                        "enemy damage shot-pool counts are impossible"
+                    )
+                for name, value in (
+                    ("enemy_x", self.damage_enemy_x),
+                    ("enemy_y", self.damage_enemy_y),
+                    ("hitbox_width", self.damage_hitbox_width),
+                    ("hitbox_height", self.damage_hitbox_height),
+                    ("power", self.damage_power),
+                ):
+                    if not math.isfinite(value):
+                        raise ValueError(
+                            f"enemy damage {name} is not finite"
+                        )
+                return
             if any(
                 value is not None
                 for value in (
@@ -1222,6 +1638,10 @@ class EnemyLifecycleEvent:
         return self.kind is EnemyLifecycleKind.FORCED_HP_ZERO
 
     @property
+    def is_damage_event(self) -> bool:
+        return self.kind is EnemyLifecycleKind.ENEMY_DAMAGE
+
+    @property
     def is_item_event(self) -> bool:
         return self.kind in _ITEM_KINDS
 
@@ -1244,6 +1664,106 @@ class EnemyLifecycleEvent:
     @property
     def frame_damage(self) -> int:
         return _signed_u32(self.payload[4])
+
+    @property
+    def damage_flags(self) -> int:
+        return self.payload[0]
+
+    @property
+    def damage_flags2(self) -> int:
+        return self.payload[1]
+
+    @property
+    def damage_resolved(self) -> int:
+        return _signed_u32(self.payload[4])
+
+    @property
+    def damage_enemy_x(self) -> float:
+        return _float_u32(self.payload[5])
+
+    @property
+    def damage_enemy_y(self) -> float:
+        return _float_u32(self.payload[6])
+
+    @property
+    def damage_hitbox_width(self) -> float:
+        return _float_u32(self.payload[7])
+
+    @property
+    def damage_hitbox_height(self) -> float:
+        return _float_u32(self.payload[8])
+
+    @property
+    def damage_main_vm_pc(self) -> int:
+        return self.payload[9]
+
+    @property
+    def damage_main_vm_timer_current(self) -> int:
+        return _signed_u32(self.payload[10])
+
+    @property
+    def damage_context_word(self) -> int:
+        return self.payload[11]
+
+    @property
+    def damage_focus_logic(self) -> int:
+        return self.damage_context_word & 0xFF
+
+    @property
+    def damage_player_state(self) -> int:
+        return (self.damage_context_word >> 8) & 0xFF
+
+    @property
+    def damage_bomb_active(self) -> bool:
+        return bool(self.damage_context_word & (1 << 16))
+
+    @property
+    def damage_alternate_hitbox_nonzero(self) -> bool:
+        return bool(self.damage_context_word & (1 << 17))
+
+    @property
+    def damage_region_overlap(self) -> bool:
+        return bool(self.damage_context_word & (1 << 18))
+
+    @property
+    def damage_route_id(self) -> int:
+        return (self.damage_context_word >> 24) & 0xFF
+
+    @property
+    def damage_power(self) -> float:
+        return _float_u32(self.payload[13])
+
+    @property
+    def damage_input_current(self) -> int:
+        return self.payload[12]
+
+    @property
+    def damage_shot_emission_timer(self) -> dict[str, int]:
+        return {
+            "previous": _signed_u32(self.payload[14]),
+            "fraction_bits": self.payload[15],
+            "current": _signed_u32(self.payload[16]),
+        }
+
+    @property
+    def damage_timer(self) -> dict[str, int]:
+        return {
+            "previous": _signed_u32(self.payload[17]),
+            "fraction_bits": self.payload[18],
+            "current": _signed_u32(self.payload[19]),
+        }
+
+    @property
+    def damage_occupied_shot_count(self) -> int:
+        return self.payload[20] & 0xFFFF
+
+    @property
+    def damage_eligible_shot_count(self) -> int:
+        return self.payload[20] >> 16
+
+    @property
+    def damage_commit_manager_frame(self) -> int:
+        return self.payload[21]
 
     @property
     def root_subroutine(self) -> int | None:
@@ -1353,6 +1873,63 @@ class EnemyLifecycleEvent:
             "kind": self.kind.name.lower(),
             "stage_route_index": self.stage_route_index,
         }
+        if self.kind is EnemyLifecycleKind.ENEMY_DAMAGE:
+            common.update(
+                {
+                    "slot": self.slot,
+                    "enemy_pointer": self.enemy_pointer,
+                    "commit_enemy_pointer": self.caller_return_address,
+                    "flags": self.damage_flags,
+                    "flags2": self.damage_flags2,
+                    "hp_before": self.hp_before,
+                    "hp_after": self.hp_after,
+                    "resolved_damage": self.damage_resolved,
+                    "enemy_position": {
+                        "x": self.damage_enemy_x,
+                        "y": self.damage_enemy_y,
+                    },
+                    "damage_hitbox": {
+                        "width": self.damage_hitbox_width,
+                        "height": self.damage_hitbox_height,
+                    },
+                    "main_vm_pc": self.damage_main_vm_pc,
+                    "main_vm_timer_current": (
+                        self.damage_main_vm_timer_current
+                    ),
+                    "player_context": {
+                        "focus_logic": self.damage_focus_logic,
+                        "player_state": self.damage_player_state,
+                        "bomb_active": self.damage_bomb_active,
+                        "alternate_hitbox_nonzero": (
+                            self.damage_alternate_hitbox_nonzero
+                        ),
+                        "damage_region_overlap": self.damage_region_overlap,
+                        "route_id": self.damage_route_id,
+                        "input_current": self.damage_input_current,
+                        "power": self.damage_power,
+                    },
+                    "shot_emission_timer": self.damage_shot_emission_timer,
+                    "damage_timer": self.damage_timer,
+                    "shot_pool": {
+                        "occupied": self.damage_occupied_shot_count,
+                        "eligible_for_damage_loop": (
+                            self.damage_eligible_shot_count
+                        ),
+                    },
+                    "rng_before": {
+                        "state": self.rng_state_before,
+                        "calls": self.rng_calls_before,
+                    },
+                    "rng_after": {
+                        "state": self.rng_state_after,
+                        "calls": self.rng_calls_after,
+                    },
+                    "commit_manager_frame": (
+                        self.damage_commit_manager_frame
+                    ),
+                }
+            )
+            return common
         if self.kind in _ENEMY_KINDS:
             common.update(
                 {

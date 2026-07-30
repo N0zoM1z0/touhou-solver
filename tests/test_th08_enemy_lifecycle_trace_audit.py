@@ -115,6 +115,64 @@ def _item_event(
     }
 
 
+def _damage_event(
+    serial: int,
+    *,
+    slot: int = 3,
+    frame: int = 110,
+    hp_before: int = 7,
+    hp_after: int = 0,
+    resolved_damage: int = 7,
+    stage_route_index: int = 5,
+) -> dict[str, object]:
+    pointer = ENEMY_POOL_BASE + slot * ENEMY_STRIDE
+    return {
+        "serial": serial,
+        "manager_frame": frame,
+        "kind": "enemy_damage",
+        "stage_route_index": stage_route_index,
+        "slot": slot,
+        "enemy_pointer": pointer,
+        "commit_enemy_pointer": pointer,
+        "flags": 0x101,
+        "flags2": 0,
+        "hp_before": hp_before,
+        "hp_after": hp_after,
+        "resolved_damage": resolved_damage,
+        "enemy_position": {"x": 96.0, "y": 120.0},
+        "damage_hitbox": {"width": 24.0, "height": 16.0},
+        "main_vm_pc": 0x00510040,
+        "main_vm_timer_current": 223,
+        "player_context": {
+            "focus_logic": 1,
+            "player_state": 0,
+            "bomb_active": False,
+            "alternate_hitbox_nonzero": False,
+            "damage_region_overlap": False,
+            "route_id": 2,
+            "input_current": 0x11,
+            "power": 64.0,
+        },
+        "shot_emission_timer": {
+            "previous": 10,
+            "fraction_bits": 0x3E800000,
+            "current": 11,
+        },
+        "damage_timer": {
+            "previous": 21,
+            "fraction_bits": 0x3F000000,
+            "current": 22,
+        },
+        "shot_pool": {
+            "occupied": 12,
+            "eligible_for_damage_loop": 9,
+        },
+        "rng_before": {"state": 0x1234, "calls": 200},
+        "rng_after": {"state": 0x5678, "calls": 203},
+        "commit_manager_frame": frame,
+    }
+
+
 def _batch(
     status: str,
     previous: int | None,
@@ -572,39 +630,50 @@ class EnemyLifecycleTraceAuditTests(unittest.TestCase):
                     _batch(
                         "exact",
                         0,
-                        4,
+                        5,
                         [
                             _event(
                                 1,
                                 "allocate_timeline",
                                 root_subroutine=2,
                             ),
+                            _damage_event(2),
                             _item_event(
-                                2,
+                                3,
                                 "item_allocate",
+                                frame=110,
                                 caller=0x0042BF0B,
                                 source_enemy_pointer=enemy_pointer,
                             ),
                             _event(
-                                3,
+                                4,
                                 "retire_defeat_mode0",
+                                frame=110,
                                 flags_after=0,
                                 hp_before=0,
                                 hp_after=0,
+                                frame_damage=7,
                             ),
                             _item_event(
-                                4,
+                                5,
                                 "item_pickup",
+                                frame=120,
                                 power_before=7.0,
                                 power_after=8.0,
                             ),
                         ],
                     )
                 ],
-                final=_batch("no_events", 4, 4),
+                final=_batch("no_events", 5, 5),
             )
         )
 
+        self.assertEqual(report["summary"]["damage_transaction_count"], 1)
+        self.assertEqual(report["summary"]["total_resolved_damage"], 7)
+        self.assertEqual(
+            report["summary"]["verified_player_shot_kill_count"],
+            1,
+        )
         self.assertEqual(report["summary"]["item_generation_count"], 1)
         self.assertEqual(report["summary"]["item_pickup_count"], 1)
         self.assertEqual(
@@ -631,7 +700,20 @@ class EnemyLifecycleTraceAuditTests(unittest.TestCase):
         self.assertTrue(
             report["authority"]["accepted_item_generation_identity_exact"]
         )
+        self.assertTrue(
+            report["authority"]["accepted_damage_transactions_exact"]
+        )
         joined = join_candidate_board(report, CANDIDATE_BOARD)
+        self.assertEqual(
+            joined["summary"][
+                "matched_lifetime_damage_transaction_count"
+            ],
+            1,
+        )
+        self.assertEqual(
+            joined["summary"]["matched_lifetime_resolved_damage"],
+            7,
+        )
         self.assertEqual(
             joined["summary"]["matched_lifetime_item_allocation_count"],
             1,
@@ -649,6 +731,36 @@ class EnemyLifecycleTraceAuditTests(unittest.TestCase):
                 "observed_power_thresholds_crossed"
             ],
             [8],
+        )
+        self.assertTrue(
+            joined["authority"]["matched_damage_transactions_exact"]
+        )
+
+    def test_malformed_damage_transaction_invalidates_its_entire_batch(
+        self,
+    ) -> None:
+        damage = _damage_event(2)
+        damage["hp_after"] = 1
+        report = audit_lifecycle_trace_rows(
+            _rows(
+                [
+                    _batch(
+                        "exact",
+                        0,
+                        2,
+                        [
+                            _event(1, "allocate_timeline"),
+                            damage,
+                        ],
+                    )
+                ],
+                final=_batch("no_events", 2, 2),
+            )
+        )
+        self.assertEqual(report["accepted_prefix_event_count"], 0)
+        self.assertEqual(
+            report["serial_chain"]["irrecoverable_gap"]["reason"],
+            "invalid_event",
         )
 
     def test_item_cull_closes_generation_before_slot_reuse(self) -> None:

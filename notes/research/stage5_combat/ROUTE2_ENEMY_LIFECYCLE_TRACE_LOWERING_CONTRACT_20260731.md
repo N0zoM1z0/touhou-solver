@@ -1,30 +1,30 @@
-# Route-2 Enemy And Item Lifecycle Trace-Lowering Contract
+# Route-2 Enemy, Damage, And Item Lifecycle Trace-Lowering Contract
 
 Date: 2026-07-31
 
 ## Question
 
 Can one default-off lifecycle-ring JSONL trace be lowered into
-generation-aware ordinary-enemy lifetimes, exact end classifications, item
-generations, and same-update pickup/resource transactions without silently
-bridging dropped events, unstable reads, slot reuse, or a mid-stage
-attachment?
+generation-aware ordinary-enemy lifetimes, exact HP-damage transactions, end
+classifications, item generations, and same-update pickup/resource
+transactions without silently bridging dropped events, unstable reads, slot
+reuse, or a mid-stage attachment?
 
 ## Evidence Boundary
 
 **Revalidated native evidence** is inherited from
 `ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`: two ordinary-pool
 allocation edges, five exact active-bit clears, one distinct forced-HP-zero
-edge, native frame damage, the four shipped forced-zero callers, one
-successful item-allocation edge, one non-pickup cull, and the paired
-pickup-begin/commit boundary. Five defeat-helper allocation returns expose an
-exact source enemy.
+edge, paired exact HP-subtraction begin/commit, native frame damage, the four
+shipped forced-zero callers, one successful item-allocation edge, one
+non-pickup cull, and the paired pickup-begin/commit boundary. Five
+defeat-helper allocation returns expose an exact source enemy.
 
 **Implemented offline evidence:**
 
 - `scripts/analysis/th08_enemy_lifecycle_trace_audit.py`;
-- report schema `th08-enemy-item-lifecycle-trace-audit-v3`; and
-- twelve independent deterministic tests in
+- report schema `th08-enemy-item-damage-lifecycle-trace-audit-v4`; and
+- thirteen independent deterministic tests in
   `tests/test_th08_enemy_lifecycle_trace_audit.py`.
 
 No TH08 process, runtime hook, replay, controller, or physical trial was run
@@ -82,6 +82,21 @@ A forced-HP-zero event:
 - is mapped through one of the four shipped return addresses; and
 - remains an effect inside the current lifetime, not a retirement.
 
+An enemy-damage event:
+
+- requires one exact ordinary-pool pointer and unchanged stage identity;
+- retains exact positive `hp_before - resolved_damage == hp_after`;
+- appends the native same-frame player/target/timer/shot-pool/RNG context to
+  that open generation; and
+- increments exact per-generation and route-prefix damage totals without
+  ranking the action that happened to precede it.
+
+At a same-frame mode-0 retirement, exact damage events must agree with native
+`frame_damage` and the retirement HP. The end classifier uses that exact
+transition when available. A trace that began after the damage edge may still
+use the older aggregate frame-damage boundary, but it cannot invent the
+missing damage context.
+
 Each retirement must clear active bit 0x01. The lowerer reuses
 `classify_enemy_retirement`:
 
@@ -130,6 +145,7 @@ The optional immutable candidate-board join now follows:
 ```text
 candidate board stage/root
   -> exact enemy generation
+  -> exact HP-damage transactions
   -> exact source item generations
   -> pickup/resource delta/Power thresholds
 ```
@@ -148,16 +164,17 @@ candidate score and grants no action or strategy authority.
    Recoverable nonadvancing reads remain pending; dropped or malformed
    advancing intervals cut authority.
 3. **Does exact lowering answer the physical question?** It answers native
-   allocation/forced-zero/retirement order, concrete stage/root program
-   identity, the bounded end classifier, covered successful item allocation,
-   exact defeat-source identity, and covered same-update pickup/resource
-   commit. It does not prove child ownership, emitted-projectile persistence,
-   prevented births, failed allocation attempts, survival-feasible
+   allocation/forced-zero/damage/retirement order, concrete stage/root program
+   identity, exact positive HP subtraction and captured context, the bounded
+   end classifier, covered successful item allocation, exact defeat-source
+   identity, and covered same-update pickup/resource commit. It does not
+   prove child ownership, emitted-projectile persistence, prevented births,
+   target-motion history, failed allocation attempts, survival-feasible
    collection, causal action benefit, or later survival benefit.
 4. **What falsifies it?** A retained exact native capture whose ring serials,
-   pointer/slot relation, active transition, HP arithmetic, item owner,
-   pickup resource/RNG transaction, or independent full-pool bracket
-   disagrees with the lowerer.
+   pointer/slot relation, active transition, damage transaction/frame
+   arithmetic, item owner, pickup resource/RNG transaction, or independent
+   full-pool bracket disagrees with the lowerer.
 5. **Can live control consume it?** No. It is an offline report tool. Its
    output has no sensing, planner, strategy, publication, or issue authority.
 
@@ -170,12 +187,12 @@ unrecovered final read. New cases require allocation root identity, forbid a
 lifetime from crossing native stage identity, and join a Stage-5 root exactly
 to the pinned combat/resource candidate board while retaining non-timeline
 roots as explicit unmatched programs. Item cases cover exact source enemy
-generation to allocation to pickup/resource/Power-threshold to candidate
-join, plus cull followed by slot reuse. Decoder and lowerer failures cover
-unknown callers/owners, transaction identity, resource/RNG disagreement, and
-invalid type/stage transitions.
+generation to exact damage to allocation to pickup/resource/Power-threshold
+to candidate join, plus cull followed by slot reuse. Decoder and lowerer
+failures cover malformed HP transactions, unknown callers/owners, transaction
+identity, resource/RNG disagreement, and invalid type/stage transitions.
 
-Complete discovery passes 1,497 tests in 14.888 seconds on Linux and 30.680
+Complete discovery passes 1,500 tests in 13.953 seconds on Linux and 31.615
 seconds through the Windows UNC loader, with the three existing skips.
 
 On explicit runtime authorization, the next gate is one short diagnostic
@@ -185,15 +202,16 @@ capture with:
 2. compatible full-pool/main-VM observation;
 3. no concurrent priority-17 probe;
 4. exact post-run lowering with `--require-complete`; and
-5. independent agreement on enemy allocation/stage/root/forced-zero/
+5. independent agreement on enemy allocation/stage/root/forced-zero/damage/
    retirement and item allocation/cull/pickup/resource/RNG order.
 
 The optional `--candidate-board` join is now implemented and SHA-pinned.
 Only after runtime agreement may its matched generation labels be used to
-select same-root causal branches. The join schema can carry item pickup and
-Power threshold evidence, but no runtime item event has been observed.
-Prevented hostile birth, survival-feasible collection, causal Power benefit,
-and exposure reduction remain unresolved.
+select same-root causal branches. Join schema v2 carries observed damage
+count/total/manager frames before item pickup and Power-threshold evidence,
+but no runtime damage or item event has been observed. Prevented hostile
+birth, target-motion/action attribution, survival-feasible collection, causal
+Power benefit, and exposure reduction remain unresolved.
 
 The item-specific evidence boundary is
 `../route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.

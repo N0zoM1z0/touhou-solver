@@ -1041,6 +1041,21 @@ Exit gate:
 - route-prefix replay and original game agree on resources and phase entry;
 - no practice-injected state is used for route authority.
 
+Current execution checkpoint, 2026-07-31:
+
+- implemented offline/synthetic authority now spans exact stage/root enemy
+  generations, resolved HP-damage transactions, end reason, defeat-item
+  allocation, pickup/resource delta, and Power-threshold joins in one ordered
+  v4 lifecycle schema;
+- the joined candidate report retains observed damage count/total/frames and
+  the downstream item/resource chain without treating occurrence as causal
+  benefit;
+- no runtime v4 event has been observed, so target-motion/action attribution,
+  prevented hostile births, safe collection, later benefit, and every exit
+  gate above remain open; and
+- continue higher-ROI general WS-H foundations while runtime authorization is
+  absent rather than returning to isolated hit-producer detail.
+
 ### WS-I — Optional TAS Acceleration
 
 Goal: determine whether Hourglass or libTAS can cheaply generate native

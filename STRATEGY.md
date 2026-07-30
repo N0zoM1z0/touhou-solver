@@ -1780,19 +1780,23 @@ first.
 - **Implemented trace foundation (2026-07-31):** a default-off 256-entry
   native event ring now covers both ordinary-pool allocations, all five
   revalidated active-bit retirements, the distinct forced-HP-zero write,
-  successful item allocation, non-pickup cull, and paired pickup
-  begin/commit. Schema v3 retains total enemy/item order in 128-byte typed
-  events. Enemy allocations carry exact stage/root; item allocation carries
-  effective type/motion, player/resources, post-RNG/cursor/list state, and
-  exact source enemy at the five defeat-helper callers. Pickup carries one
-  same-update pre/post resource transaction. Full-ring overwrite, bulk wrap
-  reads, program/caller/owner/transaction rejection, multi-site rollback,
-  reverse cleanup, and unsafe restore pass 19 focused tests. CE-0224 corrects
-  the initial v3 slot selector's sign-extended `imul imm8`; the production
-  stub now uses an exact positive imm32 event stride, and no v3 probe was
-  installed before the correction. This is
-  synthetic implementation authority only; no TH08 process has installed it
-  and no generation, kill, pickup, strategy, or action claim is promoted.
+  paired exact resolved-HP damage, successful item allocation, non-pickup
+  cull, and paired pickup begin/commit. Schema v4 retains total enemy/damage/
+  item order in 128-byte typed events. Damage carries exact HP arithmetic,
+  target position/hitbox/main-VM identity, player Focus/state/Bomb/route/
+  input/Power, two timers, shot-pool eligibility counts, and pre/post RNG.
+  Enemy allocations carry exact stage/root; item allocation carries effective
+  type/motion, player/resources, post-RNG/cursor/list state, and exact source
+  enemy at the five defeat-helper callers. Pickup carries one same-update
+  pre/post resource transaction. Full-ring overwrite, bulk wrap reads,
+  program/caller/owner/transaction rejection, multi-site rollback, reverse
+  cleanup, and unsafe restore pass 21 focused tests. CE-0224 corrects the
+  v3 slot selector's sign-extended `imul imm8`; CE-0225 makes hot-installed
+  pickup/damage commits replay-only unless begin marker, pointer, and frame
+  agree.
+  No v3 or v4 probe was installed. This is synthetic implementation authority
+  only; no generation, damage, kill, pickup, strategy, or action claim is
+  promoted.
 - **Implemented lifecycle transport (2026-07-31):** the live CLI, hotkey
   contract, stage-practice supervisor, and full-route supervisor expose one
   explicit default-off lifecycle option. It installs only after target
@@ -1807,15 +1811,16 @@ first.
   Nonadvancing read/race failures can be recovered by a later exact batch;
   overflow or malformed advancement cuts the authoritative prefix. It creates
   per-slot enemy and item generations, keeps baseline-active records as
-  partial starts, retains exact enemy `(stage, root)` identity, reuses the
-  forced-zero/lethal-damage classifier, and retains item cull or same-update
-  pickup/resource/Power-threshold termination. Its optional SHA-pinned
-  candidate-board join matches only exact timeline-root programs and can
-  extend an enemy generation through exact defeat-item generations to
-  pickup/resource delta. Child/phase roots remain unmatched. Twelve
+  partial starts, retains exact enemy `(stage, root)` identity, attaches
+  exact HP-damage transactions, reuses the forced-zero/lethal-damage
+  classifier, and retains item cull or same-update pickup/resource/
+  Power-threshold termination. Its optional SHA-pinned candidate-board join
+  matches only exact timeline-root programs and extends an enemy generation
+  through observed damage count/total/frames and exact defeat-item generations
+  to pickup/resource delta. Child/phase roots remain unmatched. Thirteen
   adversarial tests pass, but no runtime batch has been observed and no
-  executed source program, prevented birth, causal collection, exposure,
-  strategy, or action claim is promoted.
+  executed source program, target-motion attribution, prevented birth,
+  causal collection, exposure, strategy, or action claim is promoted.
 - **Static source/emission candidate atlas (2026-07-31):** pinned Route-2
   Lunatic Final-B ECL across Stages 1/2/3/4A/5/Final B contains 991 eligible
   timeline spawns and 70 unique root programs. Conservative source ownership
@@ -1862,10 +1867,10 @@ first.
   full-Power conversion retains its conditional velocity rewrite. A complete
   387-row static ledger maps every Power 0..128 plus small, large, or Full
   Power pickup to both Focus-conditioned SHT capability bands. This closes
-  finite resource arithmetic. The v3 lifecycle trace/lowerer now implements
-  exact successful-allocation and same-update pickup identity, but no runtime
-  item event has exercised it. Safe collection and later causal benefit
-  remain open.
+  finite resource arithmetic. The v4 lifecycle trace/lowerer now implements
+  exact resolved damage, successful-allocation, and same-update pickup
+  identity, but no runtime damage or item event has exercised it. Safe
+  collection and later causal benefit remain open.
 - **Native defeat-drop recurrence and route opportunity atlas (2026-07-31):**
   shipped initialization gives ordinary enemy templates one primary small-
   Power request by default. Modes 0..2 consume the configured primary,
@@ -1936,7 +1941,7 @@ first.
   `notes/research/route_resources/ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
-  authority. The enemy/item lifecycle ring and lowerer have
+  authority. The enemy/damage/item lifecycle ring and lowerer have
   offline/synthetic implementation authority only. The damageability/coverage
   atlas has offline semantic/static
   authority only. The source/emission atlas has shipped-content/static
@@ -1944,8 +1949,8 @@ first.
   recurrence/static opportunity authority only. The cross-atlas board has
   immutable static-cohort authority only. The Boss configuration atlas has
   shipped-content/native-static full-configuration-mode authority only.
-  Runtime-observed generation/end/item tracking and candidate-board joins,
-  instruction execution, phase sequence, exposure causality,
+  Runtime-observed generation/damage/end/item tracking and candidate-board
+  joins, instruction execution, phase sequence, exposure causality,
   survival-feasible causal collection, targeting, and S18 live action
   authority remain none.
 

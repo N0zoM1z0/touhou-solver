@@ -58,13 +58,14 @@ boundary.
 ## Probe And Event Contract
 
 `scripts/th08_runtime/enemy_lifecycle_probe.py` now defines
-`th08-enemy-item-lifecycle-probe-v3`:
+`th08-enemy-item-damage-lifecycle-probe-v4`:
 
-- twelve exact-byte-guarded and reversible hook sites: the existing eight
-  enemy lifecycle edges plus four item edges;
+- fourteen exact-byte-guarded and reversible hook sites: eight enemy
+  allocation/end edges, paired resolved-damage begin/commit, and four item
+  edges;
 - one total uint32 serial order for enemy and item events;
 - 128-byte typed events in a 256-entry ring;
-- a `0x10000` remote image, with the ring ending at `0xA000`;
+- a `0x10000` remote image, with the ring ending at `0xA400`;
 - double-header validation and at most two contiguous process-memory reads
   for a wrapped event batch; and
 - the existing explicit default-off lifecycle option, priority-17 conflict,
@@ -100,13 +101,19 @@ same item pointer and `enemy_manager_frame`. It retains post Power, lives,
 Bombs, and RNG. The lowerer requires pickup RNG to be unchanged; a native
 counterexample cuts authority instead of being normalized.
 
+CE-0225 additionally guards hot installation between the paired sites.
+Commit requires the exact begin marker, item pointer, and manager frame before
+selecting a ring slot. A mismatch replays only the shipped unlink call and
+publishes nothing. Both paths clear the marker; success does so before
+publication.
+
 Cull publishes the terminal item state immediately before unlink and requires
 unchanged Power, lives, Bombs, and absent RNG evidence.
 
 ## Offline Lowering And Candidate Join
 
 `scripts/analysis/th08_enemy_lifecycle_trace_audit.py` defines report schema
-`th08-enemy-item-lifecycle-trace-audit-v3`.
+`th08-enemy-item-damage-lifecycle-trace-audit-v4`.
 
 It preserves the existing zero-drop serial-prefix and enemy-generation
 contract, then lowers item records per exact pool pointer:
@@ -128,13 +135,15 @@ With the SHA-pinned candidate board, the exact join chain is:
 ```text
 candidate-board (stage, root)
   -> observed enemy generation
+  -> observed resolved HP-damage transactions
   -> observed defeat-item generation
   -> observed pickup/resource delta/Power threshold
 ```
 
-The joined candidate row reports source-item allocation/pickup counts,
-observed Power delta, and thresholds. It does not compute candidate value,
-rank an action, or reinterpret an absent item event as evidence of no drop.
+The joined candidate row reports exact damage count/total/manager frames,
+source-item allocation/pickup counts, observed Power delta, and thresholds.
+It does not compute candidate value, rank an action, or reinterpret an absent
+item event as evidence of no drop.
 
 ## Formal Authority Answers
 
@@ -166,15 +175,15 @@ rank an action, or reinterpret an absent item event as evidence of no drop.
 
 Focused verification passes:
 
-- 19 probe/transport tests;
-- 12 lowerer/join tests;
+- 21 probe/transport tests;
+- 13 lowerer/join tests;
 - 20 live-agent hotkey tests;
 - 14 full-route supervisor tests;
 - 9 live-CLI tests; and
 - 35 practice-supervisor tests.
 
-Ruff passes. Complete Linux discovery passes 1,497 tests in 14.888 seconds.
-Complete Windows UNC discovery passes 1,497 tests in 30.680 seconds with the
+Ruff passes. Complete Linux discovery passes 1,500 tests in 13.953 seconds.
+Complete Windows UNC discovery passes 1,500 tests in 31.615 seconds with the
 three existing skips.
 
 No TH08 process, probe installation, runtime batch, replay, controller, or
@@ -184,11 +193,11 @@ implementation, and deterministic synthetic-lowering authority only.
 On explicit runtime authorization, the next evidence gate is one short
 diagnostic:
 
-1. bracket the v3 ring with compatible full-pool/main-VM observation;
+1. bracket the v4 ring with compatible full-pool/main-VM observation;
 2. run no concurrent priority-17 probe;
 3. require a complete post-release serial chain;
-4. compare enemy generation, item allocation, cull/pickup, resource, and RNG
-   order against the independent bracket; and
+4. compare enemy generation, exact damage, item allocation, cull/pickup,
+   resource, and RNG order against the independent bracket; and
 5. join the exact result to the immutable candidate board.
 
 Only after that agreement may same-root pure-survival and

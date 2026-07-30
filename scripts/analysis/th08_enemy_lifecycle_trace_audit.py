@@ -48,11 +48,12 @@ from th08_runtime.enemy_lifecycle_probe import (
     ITEM_POOL_BASE,
     ITEM_POOL_SIZE,
     ITEM_STRIDE,
+    PLAYER_SHOT_POOL_SIZE,
     PROBE_SCHEMA,
 )
 
 
-REPORT_SCHEMA = "th08-enemy-item-lifecycle-trace-audit-v3"
+REPORT_SCHEMA = "th08-enemy-item-damage-lifecycle-trace-audit-v4"
 EXPECTED_CANDIDATE_BOARD_SHA256 = (
     "34e70a50e6c38c8241df0425be83367e6bf9e369106d600956d5a052dfa8cfea"
 )
@@ -75,6 +76,7 @@ _ALLOCATION_KINDS = frozenset(
     {"allocate_timeline", "allocate_inherited_registers"}
 )
 _ITEM_KINDS = frozenset({"item_allocate", "item_pickup", "item_cull"})
+_DAMAGE_KIND = "enemy_damage"
 
 
 def _exact_int(value: object, field: str) -> int:
@@ -238,6 +240,7 @@ def _validated_event(
         | frozenset(_RETIREMENT_SOURCE)
         | {"forced_hp_zero"}
         | _ITEM_KINDS
+        | {_DAMAGE_KIND}
     ):
         raise ValueError(f"{location} lifecycle kind is unsupported")
     stage_route_index = _exact_int(
@@ -483,6 +486,208 @@ def _validated_event(
     if enemy_pointer != ENEMY_POOL_BASE + slot * ENEMY_STRIDE:
         raise ValueError(f"{location} pointer and slot disagree")
     parsed.update({"slot": slot, "enemy_pointer": enemy_pointer})
+    if kind == _DAMAGE_KIND:
+        commit_pointer = _exact_int(
+            event.get("commit_enemy_pointer"),
+            f"{location}.commit_enemy_pointer",
+        )
+        commit_frame = _exact_int(
+            event.get("commit_manager_frame"),
+            f"{location}.commit_manager_frame",
+        )
+        if commit_pointer != enemy_pointer:
+            raise ValueError(
+                f"{location} damage begin/commit pointer identity disagrees"
+            )
+        if commit_frame != manager_frame:
+            raise ValueError(
+                f"{location} damage begin/commit frame identity disagrees"
+            )
+        flags = _exact_int(event.get("flags"), f"{location}.flags")
+        flags2 = _exact_int(event.get("flags2"), f"{location}.flags2")
+        hp_before = _exact_int(
+            event.get("hp_before"),
+            f"{location}.hp_before",
+        )
+        hp_after = _exact_int(
+            event.get("hp_after"),
+            f"{location}.hp_after",
+        )
+        resolved_damage = _exact_int(
+            event.get("resolved_damage"),
+            f"{location}.resolved_damage",
+        )
+        if (
+            not 0 <= flags <= _UINT32_MASK
+            or not 0 <= flags2 <= _UINT32_MASK
+            or not -(1 << 31) <= hp_before < (1 << 31)
+            or not -(1 << 31) <= hp_after < (1 << 31)
+            or not 0 < resolved_damage < (1 << 31)
+        ):
+            raise ValueError(f"{location} damage scalar is outside native range")
+        if not flags & 0x01:
+            raise ValueError(f"{location} damage begins on an inactive slot")
+        if hp_before - resolved_damage != hp_after:
+            raise ValueError(f"{location} damage HP arithmetic disagrees")
+        enemy_position = _exact_mapping(
+            event.get("enemy_position"),
+            f"{location}.enemy_position",
+        )
+        damage_hitbox = _exact_mapping(
+            event.get("damage_hitbox"),
+            f"{location}.damage_hitbox",
+        )
+        player_context = _exact_mapping(
+            event.get("player_context"),
+            f"{location}.player_context",
+        )
+        shot_pool = _exact_mapping(
+            event.get("shot_pool"),
+            f"{location}.shot_pool",
+        )
+        occupied = _exact_int(
+            shot_pool.get("occupied"),
+            f"{location}.shot_pool.occupied",
+        )
+        eligible = _exact_int(
+            shot_pool.get("eligible_for_damage_loop"),
+            f"{location}.shot_pool.eligible_for_damage_loop",
+        )
+        if not 0 <= eligible <= occupied <= PLAYER_SHOT_POOL_SIZE:
+            raise ValueError(f"{location} damage shot counts are impossible")
+        focus_logic = _exact_int(
+            player_context.get("focus_logic"),
+            f"{location}.player_context.focus_logic",
+        )
+        player_state = _exact_int(
+            player_context.get("player_state"),
+            f"{location}.player_context.player_state",
+        )
+        route_id = _exact_int(
+            player_context.get("route_id"),
+            f"{location}.player_context.route_id",
+        )
+        input_current = _exact_int(
+            player_context.get("input_current"),
+            f"{location}.player_context.input_current",
+        )
+        if (
+            not 0 <= focus_logic <= 0xFF
+            or not 0 <= player_state <= 0xFF
+            or not 0 <= route_id <= 0xFF
+            or not 0 <= input_current <= 0xFFFF
+        ):
+            raise ValueError(f"{location} damage player context is invalid")
+        parsed_context: dict[str, object] = {
+            "focus_logic": focus_logic,
+            "player_state": player_state,
+            "route_id": route_id,
+            "input_current": input_current,
+            "power": _exact_number(
+                player_context.get("power"),
+                f"{location}.player_context.power",
+            ),
+        }
+        for field in (
+            "bomb_active",
+            "alternate_hitbox_nonzero",
+            "damage_region_overlap",
+        ):
+            value = player_context.get(field)
+            if type(value) is not bool:
+                raise ValueError(
+                    f"{location}.player_context.{field} is not Boolean"
+                )
+            parsed_context[field] = value
+
+        def validated_timer(field: str) -> dict[str, int]:
+            timer = _exact_mapping(
+                event.get(field),
+                f"{location}.{field}",
+            )
+            previous = _exact_int(
+                timer.get("previous"),
+                f"{location}.{field}.previous",
+            )
+            fraction_bits = _exact_int(
+                timer.get("fraction_bits"),
+                f"{location}.{field}.fraction_bits",
+            )
+            current = _exact_int(
+                timer.get("current"),
+                f"{location}.{field}.current",
+            )
+            if (
+                not -(1 << 31) <= previous < (1 << 31)
+                or not 0 <= fraction_bits <= _UINT32_MASK
+                or not -(1 << 31) <= current < (1 << 31)
+            ):
+                raise ValueError(f"{location}.{field} is outside native range")
+            return {
+                "previous": previous,
+                "fraction_bits": fraction_bits,
+                "current": current,
+            }
+
+        main_vm_pc = _exact_int(
+            event.get("main_vm_pc"),
+            f"{location}.main_vm_pc",
+        )
+        main_vm_timer = _exact_int(
+            event.get("main_vm_timer_current"),
+            f"{location}.main_vm_timer_current",
+        )
+        if not 0 <= main_vm_pc <= _UINT32_MASK:
+            raise ValueError(f"{location} main VM PC is outside uint32")
+        if not -(1 << 31) <= main_vm_timer < (1 << 31):
+            raise ValueError(f"{location} main VM timer is outside int32")
+        parsed.update(
+            {
+                "commit_enemy_pointer": commit_pointer,
+                "commit_manager_frame": commit_frame,
+                "flags": flags,
+                "flags2": flags2,
+                "hp_before": hp_before,
+                "hp_after": hp_after,
+                "resolved_damage": resolved_damage,
+                "enemy_position": {
+                    axis: _exact_number(
+                        enemy_position.get(axis),
+                        f"{location}.enemy_position.{axis}",
+                    )
+                    for axis in ("x", "y")
+                },
+                "damage_hitbox": {
+                    axis: _exact_number(
+                        damage_hitbox.get(axis),
+                        f"{location}.damage_hitbox.{axis}",
+                    )
+                    for axis in ("width", "height")
+                },
+                "main_vm_pc": main_vm_pc,
+                "main_vm_timer_current": main_vm_timer,
+                "player_context": parsed_context,
+                "shot_emission_timer": validated_timer(
+                    "shot_emission_timer"
+                ),
+                "damage_timer": validated_timer("damage_timer"),
+                "shot_pool": {
+                    "occupied": occupied,
+                    "eligible_for_damage_loop": eligible,
+                },
+                "rng_before": _validated_rng(
+                    event.get("rng_before"),
+                    field=f"{location}.rng_before",
+                    required=True,
+                ),
+                "rng_after": _validated_rng(
+                    event.get("rng_after"),
+                    field=f"{location}.rng_after",
+                    required=True,
+                ),
+            }
+        )
+        return parsed
     for field in (
         "flags_before",
         "flags_after",
@@ -726,6 +931,8 @@ def _new_lifetime(
         ),
         "first_observed_serial": serial,
         "first_observed_manager_frame": int(event["manager_frame"]),
+        "damage_transactions": [],
+        "total_resolved_damage": 0,
         "forced_hp_zero_events": [],
         "end_observed": False,
         "end_serial": None,
@@ -783,6 +990,38 @@ def _lower_generations(
             )
             break
 
+        if kind == _DAMAGE_KIND:
+            transactions = lifetime["damage_transactions"]
+            assert isinstance(transactions, list)
+            transaction = {
+                "serial": int(event["serial"]),
+                "manager_frame": int(event["manager_frame"]),
+                "hp_before": int(event["hp_before"]),
+                "hp_after": int(event["hp_after"]),
+                "resolved_damage": int(event["resolved_damage"]),
+                "flags": int(event["flags"]),
+                "flags2": int(event["flags2"]),
+                "enemy_position": event["enemy_position"],
+                "damage_hitbox": event["damage_hitbox"],
+                "main_vm_pc": int(event["main_vm_pc"]),
+                "main_vm_timer_current": int(
+                    event["main_vm_timer_current"]
+                ),
+                "player_context": event["player_context"],
+                "shot_emission_timer": event["shot_emission_timer"],
+                "damage_timer": event["damage_timer"],
+                "shot_pool": event["shot_pool"],
+                "rng_before": event["rng_before"],
+                "rng_after": event["rng_after"],
+            }
+            transactions.append(transaction)
+            lifetime["total_resolved_damage"] = (
+                int(lifetime["total_resolved_damage"])
+                + int(event["resolved_damage"])
+            )
+            lowered_count += 1
+            continue
+
         if kind == "forced_hp_zero":
             caller = int(event["caller_return_address"])
             source = _FORCED_ZERO_SOURCE.get(caller)
@@ -829,7 +1068,37 @@ def _lower_generations(
             defeat_mode = 0
             post_health = int(event["hp_after"])
             frame_damage = int(event["frame_damage"])
-            if frame_damage:
+            transactions = lifetime["damage_transactions"]
+            assert isinstance(transactions, list)
+            same_frame_damage = [
+                transaction
+                for transaction in transactions
+                if int(transaction["manager_frame"])
+                == int(event["manager_frame"])
+            ]
+            if same_frame_damage:
+                exact_damage = sum(
+                    int(transaction["resolved_damage"])
+                    for transaction in same_frame_damage
+                )
+                exact_before = int(same_frame_damage[0]["hp_before"])
+                exact_after = int(same_frame_damage[-1]["hp_after"])
+                if (
+                    exact_damage != frame_damage
+                    or exact_after != int(event["hp_before"])
+                    or exact_before - exact_damage != exact_after
+                ):
+                    errors.append(
+                        f"serial {event['serial']} retirement frame damage "
+                        "disagrees with exact damage transactions"
+                    )
+                    break
+                damage = PlayerShotDamageTransition(
+                    hp_before_damage=exact_before,
+                    resolved_damage=exact_damage,
+                    hp_after_damage=exact_after,
+                )
+            elif frame_damage:
                 damage = PlayerShotDamageTransition(
                     hp_before_damage=int(event["hp_before"]) + frame_damage,
                     resolved_damage=frame_damage,
@@ -1179,6 +1448,11 @@ def audit_lifecycle_trace_rows(
         for generation in item_generations
         if generation["source_enemy_pointer"] is not None
     ]
+    damage_transactions = [
+        transaction
+        for lifetime in lifetimes
+        for transaction in lifetime["damage_transactions"]
+    ]
     return {
         "schema": REPORT_SCHEMA,
         "role": "offline_trace_audit_no_action_authority",
@@ -1205,6 +1479,15 @@ def audit_lifecycle_trace_rows(
                 for lifetime in lifetimes
             ),
             "verified_player_shot_kill_count": len(verified_kills),
+            "damage_transaction_count": len(damage_transactions),
+            "lifetimes_with_damage_count": sum(
+                bool(lifetime["damage_transactions"])
+                for lifetime in lifetimes
+            ),
+            "total_resolved_damage": sum(
+                int(transaction["resolved_damage"])
+                for transaction in damage_transactions
+            ),
             "end_reason_counts": dict(sorted(reason_counts.items())),
             "observed_root_subroutine_counts": {
                 str(root): root_counts[root] for root in sorted(root_counts)
@@ -1247,6 +1530,7 @@ def audit_lifecycle_trace_rows(
             "prefix_lifetimes_are_exact_only": True,
             "accepted_allocation_root_identity_exact": not lowering_errors,
             "accepted_program_identity_exact": not lowering_errors,
+            "accepted_damage_transactions_exact": not lowering_errors,
             "accepted_item_generation_identity_exact": not item_errors,
             "accepted_pickup_resource_transactions_exact": not item_errors,
             "defeat_item_owner_pointer_captured": True,
@@ -1341,6 +1625,14 @@ def join_candidate_board(
             for item in source_items
             if isinstance(item.get("pickup_transaction"), Mapping)
         ]
+        damage_transactions = lifetime.get("damage_transactions")
+        if not isinstance(damage_transactions, list) or any(
+            not isinstance(transaction, Mapping)
+            for transaction in damage_transactions
+        ):
+            raise ValueError(
+                "lifecycle lifetime has no valid damage transaction list"
+            )
         matched.append(
             {
                 "generation_key": lifetime["generation_key"],
@@ -1355,6 +1647,19 @@ def join_candidate_board(
                 ],
                 "observed_item_allocation_count": len(source_items),
                 "observed_item_pickup_count": len(pickup_transactions),
+                "observed_damage_transaction_count": len(
+                    damage_transactions
+                ),
+                "observed_resolved_damage": sum(
+                    int(transaction["resolved_damage"])
+                    for transaction in damage_transactions
+                ),
+                "observed_damage_manager_frames": sorted(
+                    {
+                        int(transaction["manager_frame"])
+                        for transaction in damage_transactions
+                    }
+                ),
                 "observed_power_delta": sum(
                     float(transaction["resource_delta"]["power"])
                     for transaction in pickup_transactions
@@ -1372,7 +1677,7 @@ def join_candidate_board(
         )
 
     return {
-        "schema": "th08-enemy-lifecycle-candidate-board-join-v1",
+        "schema": "th08-enemy-lifecycle-candidate-board-join-v2",
         "role": "offline_trace_join_no_action_authority",
         "candidate_board": {
             "name": candidate_board_path.name,
@@ -1395,6 +1700,14 @@ def join_candidate_board(
                 int(item["observed_item_pickup_count"])
                 for item in matched
             ),
+            "matched_lifetime_damage_transaction_count": sum(
+                int(item["observed_damage_transaction_count"])
+                for item in matched
+            ),
+            "matched_lifetime_resolved_damage": sum(
+                int(item["observed_resolved_damage"])
+                for item in matched
+            ),
             "matched_lifetime_power_delta": sum(
                 float(item["observed_power_delta"])
                 for item in matched
@@ -1414,6 +1727,9 @@ def join_candidate_board(
             "immutable_candidate_board_identity": True,
             "matched_program_identity_exact": bool(
                 report["authority"]["accepted_program_identity_exact"]
+            ),
+            "matched_damage_transactions_exact": bool(
+                report["authority"]["accepted_damage_transactions_exact"]
             ),
             "runtime_installation_observed": bool(
                 report["authority"]["runtime_installation_observed"]

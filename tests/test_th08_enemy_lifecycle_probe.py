@@ -258,6 +258,64 @@ def _item_event(
     )
 
 
+def _damage_event(
+    serial: int,
+    *,
+    slot: int = 6,
+    stage_route_index: int = 5,
+    commit_pointer: int | None = None,
+    commit_frame: int | None = None,
+    hp_before: int = 150,
+    hp_after: int = 143,
+    damage: int = 7,
+    flags: int = 0x101,
+    flags2: int = 0,
+    context_word: int = (2 << 24) | (1 << 17) | 1,
+    occupied_shots: int = 12,
+    eligible_shots: int = 9,
+) -> bytes:
+    enemy_pointer = ENEMY_POOL_BASE + slot * ENEMY_STRIDE
+    frame = 3000 + serial
+    payload = [
+        flags,
+        flags2,
+        hp_before & 0xFFFFFFFF,
+        hp_after & 0xFFFFFFFF,
+        damage & 0xFFFFFFFF,
+        _f32_bits(96.0),
+        _f32_bits(120.0),
+        _f32_bits(24.0),
+        _f32_bits(16.0),
+        0x00510040,
+        223,
+        context_word,
+        0x11,
+        _f32_bits(64.0),
+        10,
+        _f32_bits(0.25),
+        11,
+        21,
+        _f32_bits(0.5),
+        22,
+        occupied_shots | (eligible_shots << 16),
+        frame if commit_frame is None else commit_frame,
+    ]
+    return struct.pack(
+        "<32I",
+        serial,
+        frame,
+        int(EnemyLifecycleKind.ENEMY_DAMAGE),
+        enemy_pointer,
+        stage_route_index,
+        enemy_pointer if commit_pointer is None else commit_pointer,
+        0x1234,
+        100,
+        0x5678,
+        103,
+        *payload,
+    )
+
+
 def _probe(*, serial: int, base: int = 0x02000000):
     memory = bytearray(PROBE_ALLOCATION_SIZE)
     image = build_probe_image(base, 1234)
@@ -319,6 +377,20 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
                     bytes.fromhex("c781fc2d000000000000"),
                 ),
                 (
+                    0x0042D06D,
+                    EnemyLifecycleKind.ENEMY_DAMAGE,
+                    bytes.fromhex(
+                        "8b4dc8c7815433000000000000"
+                    ),
+                ),
+                (
+                    0x0042D343,
+                    EnemyLifecycleKind.ENEMY_DAMAGE,
+                    bytes.fromhex(
+                        "2b45e88b4dc88981fc2d0000"
+                    ),
+                ),
+                (
                     0x0044044D,
                     EnemyLifecycleKind.ITEM_ALLOCATE,
                     bytes.fromhex("8b4df8894df0"),
@@ -355,7 +427,13 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
                 False,
                 False,
                 False,
+                False,
+                False,
             ],
+        )
+        self.assertEqual(
+            [site.role for site in HOOK_SITES[8:10]],
+            ["enemy_damage_begin", "enemy_damage_commit"],
         )
         self.assertEqual(
             [site.role for site in HOOK_SITES[-4:]],
@@ -369,6 +447,10 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
 
     def test_stubs_replay_original_then_return_and_fit_fixed_slots(self) -> None:
         remote_base = 0x02000000
+        self.assertLessEqual(
+            PROBE_STUB_OFFSET + len(HOOK_SITES) * PROBE_STUB_STRIDE,
+            PROBE_EVENT_OFFSET,
+        )
         for index, site in enumerate(HOOK_SITES):
             stub = build_site_stub(remote_base, site)
             self.assertTrue(stub.startswith(b"\x9c\x60"))
@@ -401,6 +483,144 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
                 self.assertIn(
                     b"\x8b\x45\x00\x8b\x50\xec",
                     stub,
+                )
+            if site.role == "enemy_damage_begin":
+                self.assertIn(
+                    b"\xc7\x07" + struct.pack("<I", 0x42474D44),
+                    stub,
+                )
+                self.assertIn(
+                    b"\x25\xff\xff\xff\x7f\x85\xc0",
+                    stub,
+                )
+                selection = stub.index(
+                    b"\x8b\x83"
+                    + struct.pack(
+                        "<I",
+                        lifecycle_probe.ENEMY_ALTERNATE_HITBOX_OFFSET,
+                    )
+                    + b"\x25\xff\xff\xff\x7f\x85\xc0\x74"
+                )
+                primary_branch = selection + 13
+                alternate_load = primary_branch + 2
+                self.assertEqual(
+                    stub[alternate_load : alternate_load + 6],
+                    b"\x8b\x93"
+                    + struct.pack(
+                        "<I",
+                        lifecycle_probe.ENEMY_ALTERNATE_HITBOX_OFFSET,
+                    ),
+                )
+                primary_target = (
+                    primary_branch
+                    + 2
+                    + struct.unpack(
+                        "<b",
+                        stub[primary_branch + 1 : primary_branch + 2],
+                    )[0]
+                )
+                self.assertEqual(
+                    stub[primary_target : primary_target + 6],
+                    b"\x8b\x93"
+                    + struct.pack(
+                        "<I",
+                        lifecycle_probe.ENEMY_DAMAGE_HITBOX_OFFSET,
+                    ),
+                )
+                for offset in (
+                    lifecycle_probe.ENEMY_DAMAGE_HITBOX_OFFSET,
+                    lifecycle_probe.ENEMY_DAMAGE_HITBOX_OFFSET + 4,
+                    lifecycle_probe.ENEMY_ALTERNATE_HITBOX_OFFSET,
+                    lifecycle_probe.ENEMY_ALTERNATE_HITBOX_OFFSET + 4,
+                ):
+                    self.assertIn(
+                        b"\x8b\x93" + struct.pack("<I", offset),
+                        stub,
+                    )
+                self.assertIn(
+                    b"\x0f\xb7\x86"
+                    + struct.pack(
+                        "<I",
+                        lifecycle_probe.PLAYER_SHOT_SLOT_STATE_OFFSET,
+                    ),
+                    stub,
+                )
+                self.assertIn(
+                    b"\x66\x83\xbe"
+                    + struct.pack(
+                        "<I",
+                        lifecycle_probe.PLAYER_SHOT_SLOT_TYPE_OFFSET,
+                    )
+                    + b"\x03",
+                    stub,
+                )
+            if site.role == "enemy_damage_commit":
+                scratch = (
+                    remote_base
+                    + lifecycle_probe.PROBE_DAMAGE_SCRATCH_OFFSET
+                )
+                self.assertIn(
+                    b"\x81\x3d"
+                    + struct.pack("<I", scratch)
+                    + struct.pack("<I", 0x42474D44),
+                    stub,
+                )
+                self.assertIn(
+                    b"\x39\x1d" + struct.pack("<I", scratch + 0x0C),
+                    stub,
+                )
+                self.assertEqual(
+                    stub.count(
+                        b"\xc7\x05"
+                        + struct.pack("<I", scratch)
+                        + struct.pack("<I", 0)
+                    ),
+                    2,
+                )
+                self.assertEqual(stub.count(site.original), 2)
+            if site.role == "item_pickup_commit":
+                scratch = (
+                    remote_base
+                    + lifecycle_probe.PROBE_PICKUP_SCRATCH_OFFSET
+                )
+                self.assertIn(
+                    b"\x81\x3d"
+                    + struct.pack("<I", scratch)
+                    + struct.pack("<I", 0x49545042),
+                    stub,
+                )
+                self.assertIn(
+                    b"\x39\x1d" + struct.pack("<I", scratch + 0x0C),
+                    stub,
+                )
+                self.assertEqual(
+                    stub.count(
+                        b"\xc7\x05"
+                        + struct.pack("<I", scratch)
+                        + struct.pack("<I", 0)
+                    ),
+                    2,
+                )
+                self.assertEqual(stub.count(b"\x8b\x4d\xdc\xe8"), 2)
+                first = stub.index(b"\x8b\x4d\xdc\xe8")
+                replay_only = stub.index(
+                    b"\x8b\x4d\xdc\xe8",
+                    first + 1,
+                )
+                displacement = struct.unpack(
+                    "<i",
+                    stub[replay_only + 4 : replay_only + 8],
+                )[0]
+                call_source = (
+                    remote_base
+                    + PROBE_STUB_OFFSET
+                    + index * PROBE_STUB_STRIDE
+                    + replay_only
+                    + 3
+                )
+                self.assertEqual(
+                    call_source + 5 + displacement,
+                    0x00441770,
                 )
             self.assertLessEqual(len(stub), PROBE_STUB_STRIDE)
             self.assertEqual(stub[-5], 0xE9)
@@ -493,6 +713,49 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
             "retire_defeat_mode0",
         )
         self.assertIsNone(event.root_subroutine)
+
+    def test_enemy_damage_retains_exact_same_frame_hp_transaction(self) -> None:
+        event = EnemyLifecycleEvent.decode(_damage_event(14))
+        record = event.compact_record()
+        self.assertTrue(event.is_damage_event)
+        self.assertEqual(event.slot, 6)
+        self.assertEqual(event.hp_before, 150)
+        self.assertEqual(event.hp_after, 143)
+        self.assertEqual(event.damage_resolved, 7)
+        self.assertEqual(event.damage_route_id, 2)
+        self.assertTrue(event.damage_alternate_hitbox_nonzero)
+        self.assertEqual(event.damage_occupied_shot_count, 12)
+        self.assertEqual(event.damage_eligible_shot_count, 9)
+        self.assertEqual(record["resolved_damage"], 7)
+        self.assertEqual(record["player_context"]["input_current"], 0x11)
+        self.assertEqual(record["rng_before"]["calls"], 100)
+        self.assertEqual(record["rng_after"]["calls"], 103)
+
+    def test_enemy_damage_rejects_torn_or_impossible_transactions(self) -> None:
+        with self.assertRaisesRegex(ValueError, "pointer identity"):
+            EnemyLifecycleEvent.decode(
+                _damage_event(15, commit_pointer=ENEMY_POOL_BASE)
+            )
+        with self.assertRaisesRegex(ValueError, "manager frame"):
+            EnemyLifecycleEvent.decode(
+                _damage_event(15, commit_frame=999)
+            )
+        with self.assertRaisesRegex(ValueError, "HP arithmetic"):
+            EnemyLifecycleEvent.decode(
+                _damage_event(15, hp_after=144)
+            )
+        with self.assertRaisesRegex(ValueError, "inactive"):
+            EnemyLifecycleEvent.decode(
+                _damage_event(15, flags=0x100)
+            )
+        with self.assertRaisesRegex(ValueError, "shot-pool counts"):
+            EnemyLifecycleEvent.decode(
+                _damage_event(15, occupied_shots=8, eligible_shots=9)
+            )
+        with self.assertRaisesRegex(ValueError, "reserved bits"):
+            EnemyLifecycleEvent.decode(
+                _damage_event(15, context_word=1 << 20)
+            )
 
     def test_allocation_event_retains_exact_root_subroutine(self) -> None:
         event = EnemyLifecycleEvent.decode(

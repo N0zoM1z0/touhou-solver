@@ -151,22 +151,24 @@ It grants no:
 - later HP, kill, emission-prevention, or first-hit-frontier benefit;
 - live or physical predictive authority.
 
-The default-off v3 lifecycle ring and offline lowerer now implement the
-missing successful-allocation, cull, same-update pickup/resource, exact
-defeat-source, and candidate-board join schema. This is implementation and
-synthetic-test authority only; no runtime item event has been retained.
+The default-off v4 lifecycle ring and offline lowerer now implement exact
+resolved damage plus the missing successful-allocation, cull, same-update
+pickup/resource, exact defeat-source, and candidate-board join schema. This
+is implementation and synthetic-test authority only; no runtime damage or
+item event has been retained.
 Detailed boundary:
 `ROUTE2_ITEM_ALLOCATION_PICKUP_TRACE_CONTRACT_20260731.md`.
 
-Complete Linux discovery passes 1,496 tests in 14.227 seconds. Complete
-Windows UNC discovery passes 1,496 tests in 30.491 seconds with the three
+Complete Linux discovery passes 1,500 tests in 13.953 seconds. Complete
+Windows UNC discovery passes 1,500 tests in 31.615 seconds with the three
 existing skips.
 
 The causal gate remains:
 
 1. retain a natural first-hit-bounded Power-0 root;
-2. on explicit runtime authorization, execute the v3 diagnostic and verify
-   generation, effective item type, allocation cursor/order, motion,
+2. on explicit runtime authorization, execute the v4 diagnostic and verify
+   generation, exact HP damage, effective item type, allocation cursor/order,
+   motion,
    same-update pickup/retirement, resource delta, and shared RNG against an
    independent full-pool bracket;
 3. branch only actions already in the unchanged exact viable set;

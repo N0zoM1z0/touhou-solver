@@ -1,0 +1,1036 @@
+{
+  "authority": {
+    "kind": "offline_static_data_plus_retained_native_compatibility_audit",
+    "physical_predictive_authority": false,
+    "physical_trial_run": false,
+    "planner_action_authority": false,
+    "random_spread_geometry_authority": "unknown_direction"
+  },
+  "focus_profile_comparison_at_power128": {
+    "conclusion": "Focus changes same-frame shot geometry and may change the gameplay RNG inherited by later enemy/ECL work",
+    "focused_secondary": {
+      "cadence_rows": [
+        {
+          "base_damage_sum": 82,
+          "cadence": 0,
+          "emitted_shot_count": 4,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372,
+            1484,
+            1540
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            0,
+            0,
+            2,
+            3
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 1,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 2,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 82,
+          "cadence": 3,
+          "emitted_shot_count": 4,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372,
+            1428,
+            1596
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            0,
+            0,
+            1,
+            4
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 4,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 42,
+          "cadence": 5,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1484,
+            1540
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            2,
+            3
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 40,
+          "cadence": 6,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [
+            0,
+            0
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 7,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 42,
+          "cadence": 8,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1428,
+            1596
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            1,
+            4
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 40,
+          "cadence": 9,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [
+            0,
+            0
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 42,
+          "cadence": 10,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1484,
+            1540
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            2,
+            3
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 11,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 40,
+          "cadence": 12,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [
+            0,
+            0
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 42,
+          "cadence": 13,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1428,
+            1596
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            1,
+            4
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 14,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 82,
+          "cadence": 15,
+          "emitted_shot_count": 4,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372,
+            1484,
+            1540
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            0,
+            0,
+            2,
+            3
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 16,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 17,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 82,
+          "cadence": 18,
+          "emitted_shot_count": 4,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372,
+            1428,
+            1596
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            0,
+            0,
+            1,
+            4
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 19,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 6,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        }
+      ],
+      "level": 5
+    },
+    "unfocused_primary": {
+      "cadence_rows": [
+        {
+          "base_damage_sum": 156,
+          "cadence": 0,
+          "emitted_shot_count": 7,
+          "free_slots": 128,
+          "record_offsets": [
+            1188,
+            1244,
+            1300,
+            1356,
+            1412,
+            1468,
+            1524
+          ],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 1,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 2,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 3,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 4,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 130,
+          "cadence": 5,
+          "emitted_shot_count": 5,
+          "free_slots": 128,
+          "record_offsets": [
+            1244,
+            1300,
+            1356,
+            1412,
+            1468
+          ],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 6,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 7,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 8,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 9,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 156,
+          "cadence": 10,
+          "emitted_shot_count": 7,
+          "free_slots": 128,
+          "record_offsets": [
+            1188,
+            1244,
+            1300,
+            1356,
+            1412,
+            1468,
+            1524
+          ],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 11,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 12,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 13,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 14,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 130,
+          "cadence": 15,
+          "emitted_shot_count": 5,
+          "free_slots": 128,
+          "record_offsets": [
+            1244,
+            1300,
+            1356,
+            1412,
+            1468
+          ],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 16,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 17,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 18,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        },
+        {
+          "base_damage_sum": 0,
+          "cadence": 19,
+          "emitted_shot_count": 0,
+          "free_slots": 128,
+          "record_offsets": [],
+          "records_evaluated": 7,
+          "rng_state_after": 45644,
+          "rng_u16_calls": 0,
+          "source_indices": [],
+          "stopped_for_pool_capacity": false
+        }
+      ],
+      "level": 5
+    }
+  },
+  "inputs": {
+    "h1_report_path": "artifacts/runtime_reports/th08_native_h1_ecl_source_differential_root2129_20260730.json",
+    "h1_report_sha256": "2df0b9b011e63a75894f1dbc8b4060b0abea6df32d4fc03265c922162162e22c",
+    "primary_sht": {
+      "normal_levels": [
+        {
+          "callback_0_counts": {
+            "0": 1
+          },
+          "level": 0,
+          "power_upper_bound": 8,
+          "record_count": 1
+        },
+        {
+          "callback_0_counts": {
+            "0": 3
+          },
+          "level": 1,
+          "power_upper_bound": 24,
+          "record_count": 3
+        },
+        {
+          "callback_0_counts": {
+            "0": 3
+          },
+          "level": 2,
+          "power_upper_bound": 48,
+          "record_count": 3
+        },
+        {
+          "callback_0_counts": {
+            "0": 5
+          },
+          "level": 3,
+          "power_upper_bound": 80,
+          "record_count": 5
+        },
+        {
+          "callback_0_counts": {
+            "0": 7
+          },
+          "level": 4,
+          "power_upper_bound": 128,
+          "record_count": 7
+        },
+        {
+          "callback_0_counts": {
+            "0": 7
+          },
+          "level": 5,
+          "power_upper_bound": 999,
+          "record_count": 7
+        }
+      ],
+      "path": "artifacts/decoded/ply02a.sht",
+      "sha256": "4765744ab5bbf797746469d5a6afc6ec7d4b0371422b5aa5a2e54ae668c48885"
+    },
+    "secondary_sht": {
+      "normal_levels": [
+        {
+          "callback_0_counts": {
+            "0": 1,
+            "7": 2
+          },
+          "level": 0,
+          "power_upper_bound": 8,
+          "record_count": 3
+        },
+        {
+          "callback_0_counts": {
+            "0": 1,
+            "7": 2
+          },
+          "level": 1,
+          "power_upper_bound": 24,
+          "record_count": 3
+        },
+        {
+          "callback_0_counts": {
+            "0": 1,
+            "7": 4
+          },
+          "level": 2,
+          "power_upper_bound": 48,
+          "record_count": 5
+        },
+        {
+          "callback_0_counts": {
+            "0": 1,
+            "7": 4
+          },
+          "level": 3,
+          "power_upper_bound": 80,
+          "record_count": 5
+        },
+        {
+          "callback_0_counts": {
+            "0": 1,
+            "7": 4
+          },
+          "level": 4,
+          "power_upper_bound": 128,
+          "record_count": 5
+        },
+        {
+          "callback_0_counts": {
+            "0": 2,
+            "7": 4
+          },
+          "level": 5,
+          "power_upper_bound": 999,
+          "record_count": 6
+        }
+      ],
+      "path": "artifacts/decoded/ply02as.sht",
+      "sha256": "f7554b3a32e16da01de9432e22609482a1c98a33212eb904ad47789079abebd3"
+    }
+  },
+  "promotion": {
+    "combat_fast_01_status": "semantic_foundation_only",
+    "live_focus_ranking_enabled": false,
+    "live_shot_ranking_enabled": false,
+    "next_gate": "capture a v4 identical-root ordinary-enemy corpus with shot timer/pool state, then compare focused, unfocused, and causal refocus schedules inside the unchanged survival-feasible set"
+  },
+  "revalidated_native_semantics": {
+    "capture_schema_for_future_roots": "th08-player-shot-emission-state-v1",
+    "player_emit_shot_level": "0x00450F60",
+    "player_update_shot_cadence": "0x00451500",
+    "random_spread_callback": "0x004501B0",
+    "rng_next_signed_unit": "0x0043ED80",
+    "shot_pool_slots": 128,
+    "supported_callback_0_indices": [
+      0,
+      7
+    ]
+  },
+  "root2129": {
+    "classification": "compatible_player_shot_prefix_not_unique_causal_proof",
+    "compatible_player_shot_states": [
+      {
+        "cadence": 0,
+        "free_slot_ranges": [
+          [
+            4,
+            128
+          ]
+        ],
+        "full_capacity": {
+          "base_damage_sum": 82,
+          "cadence": 0,
+          "emitted_shot_count": 4,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372,
+            1484,
+            1540
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            0,
+            0,
+            2,
+            3
+          ],
+          "stopped_for_pool_capacity": false
+        }
+      },
+      {
+        "cadence": 3,
+        "free_slot_ranges": [
+          [
+            4,
+            128
+          ]
+        ],
+        "full_capacity": {
+          "base_damage_sum": 82,
+          "cadence": 3,
+          "emitted_shot_count": 4,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372,
+            1428,
+            1596
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            0,
+            0,
+            1,
+            4
+          ],
+          "stopped_for_pool_capacity": false
+        }
+      },
+      {
+        "cadence": 5,
+        "free_slot_ranges": [
+          [
+            2,
+            128
+          ]
+        ],
+        "full_capacity": {
+          "base_damage_sum": 42,
+          "cadence": 5,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1484,
+            1540
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            2,
+            3
+          ],
+          "stopped_for_pool_capacity": false
+        }
+      },
+      {
+        "cadence": 8,
+        "free_slot_ranges": [
+          [
+            2,
+            128
+          ]
+        ],
+        "full_capacity": {
+          "base_damage_sum": 42,
+          "cadence": 8,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1428,
+            1596
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            1,
+            4
+          ],
+          "stopped_for_pool_capacity": false
+        }
+      },
+      {
+        "cadence": 10,
+        "free_slot_ranges": [
+          [
+            2,
+            128
+          ]
+        ],
+        "full_capacity": {
+          "base_damage_sum": 42,
+          "cadence": 10,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1484,
+            1540
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            2,
+            3
+          ],
+          "stopped_for_pool_capacity": false
+        }
+      },
+      {
+        "cadence": 13,
+        "free_slot_ranges": [
+          [
+            2,
+            128
+          ]
+        ],
+        "full_capacity": {
+          "base_damage_sum": 42,
+          "cadence": 13,
+          "emitted_shot_count": 2,
+          "free_slots": 128,
+          "record_offsets": [
+            1428,
+            1596
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            1,
+            4
+          ],
+          "stopped_for_pool_capacity": false
+        }
+      },
+      {
+        "cadence": 15,
+        "free_slot_ranges": [
+          [
+            4,
+            128
+          ]
+        ],
+        "full_capacity": {
+          "base_damage_sum": 82,
+          "cadence": 15,
+          "emitted_shot_count": 4,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372,
+            1484,
+            1540
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            0,
+            0,
+            2,
+            3
+          ],
+          "stopped_for_pool_capacity": false
+        }
+      },
+      {
+        "cadence": 18,
+        "free_slot_ranges": [
+          [
+            4,
+            128
+          ]
+        ],
+        "full_capacity": {
+          "base_damage_sum": 82,
+          "cadence": 18,
+          "emitted_shot_count": 4,
+          "free_slots": 128,
+          "record_offsets": [
+            1316,
+            1372,
+            1428,
+            1596
+          ],
+          "records_evaluated": 6,
+          "rng_state_after": 61701,
+          "rng_u16_calls": 4,
+          "source_indices": [
+            0,
+            0,
+            1,
+            4
+          ],
+          "stopped_for_pool_capacity": false
+        }
+      }
+    ],
+    "inference": "a due focused level-5 callback-7 option pair consumes the observed four-u16 prefix before priority-11 enemy work",
+    "observed": {
+      "already_attributed_hostile_u16_calls": 28,
+      "endpoint_total_u16_calls": 32,
+      "focus_logic": 1,
+      "hostile_birth_count": 7,
+      "input_current": 5,
+      "manager_frame": 2129,
+      "power": 128.0,
+      "pre_hostile_prefix_u16_calls": 4,
+      "rng_calls": 22684,
+      "rng_state": 45644,
+      "shot_pool_captured": false,
+      "shot_timer_captured": false
+    },
+    "remaining_unknown": "hostile birth slot 1220 still lacks an identified producer",
+    "selected_profile": {
+      "level": 5,
+      "native_power": 128,
+      "profile": "secondary",
+      "sht_sha256": "f7554b3a32e16da01de9432e22609482a1c98a33212eb904ad47789079abebd3"
+    }
+  },
+  "schema": "th08-route2-focus-shot-emission-audit-v1"
+}

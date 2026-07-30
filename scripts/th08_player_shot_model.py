@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """Executable TH08 player-shot rules recovered from ``th08.exe``.
 
-The model covers the default 56-byte SHT shot-record path. It is based on
+The model covers the shipped 56-byte SHT shot-record path for callback-0
+indices 0 and 7. It is based on
 player_emit_shot_level (0x00450F60), player_shot_initialize (0x0044FB70),
 player_shot_record_emit_if_due (0x0044FD80), player_update_shots
-(0x00451150), and player_compute_damage_to_enemy (0x00451670).
+(0x00451150), player_update_shot_cadence (0x00451500), and
+player_compute_damage_to_enemy (0x00451670).
 
-Custom SHT callbacks and enemy-specific hit callbacks remain outside this
-module. Route-2 Remilia Bomb levels 6 and 7 use neither, so their basic
-emission, motion, collision, and damage path is fully represented here.
+Callback 7 is the narrow random-spread option-shot callback used by the
+route-2 secondary normal SHT. Other custom SHT callbacks and enemy-specific
+hit callbacks remain outside this module. Random-spread RNG consumption and
+stored angle are represented, but native-bit trigonometric geometry remains
+outside exact authority.
 """
 
 from __future__ import annotations
@@ -17,15 +21,26 @@ import math
 from dataclasses import dataclass, replace
 from typing import Mapping, Sequence
 
-from th08_sht import ShtLevel, ShtShotRecord
+from th08_ecl_vm_state import float32_bits, float32_from_bits
+from th08_rng import Th08Rng
+from th08_sht import ShtFile, ShtLevel, ShtShotRecord
 
 
 SHOT_CADENCE_LENGTH = 20
 PLAYER_SHOT_POOL_SIZE = 128
 PLAYER_SHOT_FRAME_DAMAGE_CAP = 50
+DEFAULT_SHOT_CALLBACK_INDEX = 0
+RANDOM_SPREAD_SHOT_CALLBACK_INDEX = 7
+RANDOM_SPREAD_PI_BITS = 0x40490FDB
+RANDOM_SPREAD_DIVISOR_BITS = 0x42400000
+RANDOM_SPREAD_CENTER_BITS = 0x3FC90FDB
 REMILIA_NORMAL_BOMB_LEVEL = 6
 REMILIA_LAST_SPELL_LEVEL = 7
 PIERCING_SHOT_TYPES = frozenset((4, 5, 6))
+
+
+class UnsupportedPlayerShotCallback(ValueError):
+    """Raised when an SHT emission callback lacks executable semantics."""
 
 
 @dataclass(frozen=True)
@@ -34,6 +49,7 @@ class PlayerShot:
     y: float
     velocity_x: float
     velocity_y: float
+    angle: float
     hitbox_width: float
     hitbox_height: float
     damage: int
@@ -42,6 +58,24 @@ class PlayerShot:
     record_offset: int
     state: int = 1
     active: bool = True
+
+
+@dataclass(frozen=True)
+class PlayerShotLevelSelection:
+    profile: str
+    sht_sha256: str
+    native_power: int
+    level: ShtLevel
+
+
+@dataclass(frozen=True)
+class PlayerShotEmission:
+    shots: tuple[PlayerShot, ...]
+    records_evaluated: int
+    free_slots_before: int
+    pool_slots_used: int
+    stopped_for_pool_capacity: bool
+    rng_calls_consumed: int
 
 
 def remilia_bomb_sht_level(callback_index: int, bomb_frame: int) -> int | None:
@@ -61,6 +95,49 @@ def remilia_bomb_sht_level(callback_index: int, bomb_frame: int) -> int | None:
         REMILIA_LAST_SPELL_LEVEL
         if callback_index & 2
         else REMILIA_NORMAL_BOMB_LEVEL
+    )
+
+
+def select_normal_sht_level(sht: ShtFile, power: float) -> tuple[int, ShtLevel]:
+    """Match normal Power-threshold selection at 0x00451015.
+
+    ``get_player_power`` converts the stored float through ``__ftol2`` before
+    comparison. Supported gameplay Power is finite, non-negative, and below
+    the terminal threshold in the shipped SHT table.
+    """
+
+    if not math.isfinite(power) or power < 0.0:
+        raise ValueError("player Power must be finite and non-negative")
+    native_power = math.trunc(power)
+    for level in sht.levels:
+        if native_power < level.power_upper_bound:
+            return native_power, level
+    raise ValueError("player Power reaches no terminal SHT threshold")
+
+
+def select_player_shot_level(
+    primary_sht: ShtFile,
+    secondary_sht: ShtFile,
+    *,
+    focus_logic_value: int,
+    power: float,
+) -> PlayerShotLevelSelection:
+    """Select the active primary/secondary normal SHT level.
+
+    The native selector tests player byte ``+0x03`` directly: zero selects the
+    primary SHT, and any nonzero Focus-logic value selects the secondary SHT.
+    """
+
+    if not 0 <= focus_logic_value <= 0xFF:
+        raise ValueError("Focus-logic value must fit in one byte")
+    profile = "secondary" if focus_logic_value else "primary"
+    sht = secondary_sht if focus_logic_value else primary_sht
+    native_power, level = select_normal_sht_level(sht, power)
+    return PlayerShotLevelSelection(
+        profile=profile,
+        sht_sha256=sht.sha256,
+        native_power=native_power,
+        level=level,
     )
 
 
@@ -110,23 +187,110 @@ def spawn_player_shot(
     player_position: tuple[float, float],
     option_positions: Mapping[int, tuple[float, float]]
     | Sequence[tuple[float, float]],
+    angle_override: float | None = None,
 ) -> PlayerShot:
     """Initialize the solver-visible fields of one default SHT shot."""
 
     source_x, source_y = _source_position(
         record.source_index, player_position, option_positions
     )
+    angle = record.angle if angle_override is None else angle_override
+    if not math.isfinite(angle):
+        raise ValueError("player-shot angle must be finite")
     return PlayerShot(
         x=source_x + record.spawn_offset_x,
         y=source_y + record.spawn_offset_y,
-        velocity_x=math.cos(record.angle) * record.speed,
-        velocity_y=math.sin(record.angle) * record.speed,
+        velocity_x=math.cos(angle) * record.speed,
+        velocity_y=math.sin(angle) * record.speed,
+        angle=angle,
         hitbox_width=record.hitbox_width,
         hitbox_height=record.hitbox_height,
         damage=record.damage,
         shot_type=record.shot_type,
         source_index=record.source_index,
         record_offset=record.offset,
+    )
+
+
+def random_spread_shot_angle(rng: Th08Rng) -> float:
+    """Return callback 7's stored float32 angle and consume two u16 calls.
+
+    The x87 intermediate rounding and the native polar helper have not yet
+    received a native-bit differential. The returned binary32 angle is the
+    correctly ordered scalar projection of the revalidated formula, while
+    velocity geometry remains unknown-direction numerical approximation.
+    """
+
+    pi = float32_from_bits(RANDOM_SPREAD_PI_BITS)
+    divisor = float32_from_bits(RANDOM_SPREAD_DIVISOR_BITS)
+    center = float32_from_bits(RANDOM_SPREAD_CENTER_BITS)
+    projected = rng.next_signed_unit() * pi / divisor - center
+    return float32_from_bits(float32_bits(projected))
+
+
+def emit_player_shot_level(
+    level: ShtLevel,
+    *,
+    cadence_frame: int,
+    player_position: tuple[float, float],
+    option_positions: Mapping[int, tuple[float, float]]
+    | Sequence[tuple[float, float]],
+    free_slots: int,
+    rng: Th08Rng,
+) -> PlayerShotEmission:
+    """Evaluate one selected SHT level in native record/pool order.
+
+    Only the number of free slots affects emission order: every free native
+    slot consumes the next due record, while occupied slots do not advance the
+    SHT cursor. A full pool evaluates no callback and consumes no RNG.
+    """
+
+    if not 0 <= free_slots <= PLAYER_SHOT_POOL_SIZE:
+        raise ValueError("free player-shot slots must be in [0, 128]")
+    if not 0 <= cadence_frame < SHOT_CADENCE_LENGTH:
+        raise ValueError("cadence frame must be in [0, 20)")
+
+    calls_before = rng.calls
+    emitted: list[PlayerShot] = []
+    records_evaluated = 0
+    for record in level.shots:
+        if len(emitted) >= free_slots:
+            break
+        records_evaluated += 1
+        callback = record.callback_0_index
+        if callback not in (
+            DEFAULT_SHOT_CALLBACK_INDEX,
+            RANDOM_SPREAD_SHOT_CALLBACK_INDEX,
+        ):
+            raise UnsupportedPlayerShotCallback(
+                f"unsupported callback-0 index {callback} "
+                f"at SHT offset {record.offset:#x}"
+            )
+        if not shot_record_due(record, cadence_frame):
+            continue
+        angle_override = (
+            random_spread_shot_angle(rng)
+            if callback == RANDOM_SPREAD_SHOT_CALLBACK_INDEX
+            else None
+        )
+        emitted.append(
+            spawn_player_shot(
+                record,
+                player_position=player_position,
+                option_positions=option_positions,
+                angle_override=angle_override,
+            )
+        )
+
+    return PlayerShotEmission(
+        shots=tuple(emitted),
+        records_evaluated=records_evaluated,
+        free_slots_before=free_slots,
+        pool_slots_used=len(emitted),
+        stopped_for_pool_capacity=(
+            len(emitted) >= free_slots and records_evaluated < len(level.shots)
+        ),
+        rng_calls_consumed=rng.calls - calls_before,
     )
 
 

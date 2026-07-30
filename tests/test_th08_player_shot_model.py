@@ -2,31 +2,72 @@
 """Regression tests for the recovered default player-shot path."""
 
 import math
+import struct
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 from th08_player_shot_model import (
+    RANDOM_SPREAD_CENTER_BITS,
+    RANDOM_SPREAD_DIVISOR_BITS,
+    RANDOM_SPREAD_PI_BITS,
+    UnsupportedPlayerShotCallback,
     due_shot_records,
+    emit_player_shot_level,
     player_shot_overlaps_enemy,
     remilia_bomb_sht_level,
     resolve_default_shot_damage,
+    select_player_shot_level,
+    select_normal_sht_level,
     shot_damage_contribution,
     spawn_player_shot,
     step_player_shot,
 )
+from th08_rng import Th08Rng
 from th08_sht import parse_sht
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SAKUYA_SHT = ROOT / "artifacts" / "decoded" / "ply02a.sht"
 REMILIA_SHT = ROOT / "artifacts" / "decoded" / "ply02as.sht"
+
+
+def _f32_from_bits(bits: int) -> float:
+    return struct.unpack("<f", struct.pack("<I", bits))[0]
+
+
+def _f32(value: float) -> float:
+    return struct.unpack("<f", struct.pack("<f", value))[0]
+
+
+class _IndependentRng:
+    def __init__(self, state: int, calls: int = 0) -> None:
+        self.state = state
+        self.calls = calls
+
+    def next_u16(self) -> int:
+        mixed = ((self.state ^ 0x9630) - 0x6553) & 0xFFFF
+        self.state = ((mixed << 2) + ((mixed & 0xC000) >> 14)) & 0xFFFF
+        self.calls += 1
+        return self.state
+
+    def next_random_spread_angle(self) -> float:
+        value = (self.next_u16() << 16) | self.next_u16()
+        signed = value / 2147483648.0 - 1.0
+        return _f32(
+            signed * _f32_from_bits(RANDOM_SPREAD_PI_BITS)
+            / _f32_from_bits(RANDOM_SPREAD_DIVISOR_BITS)
+            - _f32_from_bits(RANDOM_SPREAD_CENTER_BITS)
+        )
 
 
 class PlayerShotModelTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.sht = parse_sht(REMILIA_SHT)
-        cls.normal = cls.sht.levels[6]
-        cls.last_spell = cls.sht.levels[7]
+        cls.primary_sht = parse_sht(SAKUYA_SHT)
+        cls.secondary_sht = parse_sht(REMILIA_SHT)
+        cls.normal = cls.secondary_sht.levels[6]
+        cls.last_spell = cls.secondary_sht.levels[7]
 
     def test_remilia_bomb_level_gate(self) -> None:
         self.assertIsNone(remilia_bomb_sht_level(1, 59))
@@ -52,6 +93,58 @@ class PlayerShotModelTests(unittest.TestCase):
                 (0, 0, 0, 0),
             )
 
+    def test_shipped_normal_callback_partition(self) -> None:
+        self.assertTrue(
+            all(
+                record.callback_0_index == 0
+                for level in self.primary_sht.levels[:6]
+                for record in level.shots
+            )
+        )
+        for level in self.secondary_sht.levels[:6]:
+            for record in level.shots:
+                self.assertEqual(
+                    record.callback_0_index,
+                    0 if record.source_index == 0 else 7,
+                )
+
+    def test_power_thresholds_and_focus_profile_selection(self) -> None:
+        expected = {
+            0.0: 0,
+            7.999: 0,
+            8.0: 1,
+            23.999: 1,
+            24.0: 2,
+            48.0: 3,
+            80.0: 4,
+            128.0: 5,
+        }
+        for power, index in expected.items():
+            native_power, level = select_normal_sht_level(
+                self.primary_sht,
+                power,
+            )
+            self.assertEqual(native_power, math.trunc(power))
+            self.assertEqual(level.index, index)
+
+        primary = select_player_shot_level(
+            self.primary_sht,
+            self.secondary_sht,
+            focus_logic_value=0,
+            power=128.0,
+        )
+        secondary = select_player_shot_level(
+            self.primary_sht,
+            self.secondary_sht,
+            focus_logic_value=2,
+            power=128.0,
+        )
+        self.assertEqual((primary.profile, primary.level.index), ("primary", 5))
+        self.assertEqual(
+            (secondary.profile, secondary.level.index),
+            ("secondary", 5),
+        )
+
     def test_cadence_zero_emissions(self) -> None:
         normal_due = due_shot_records(self.normal, 0)
         last_due = due_shot_records(self.last_spell, 0)
@@ -59,6 +152,125 @@ class PlayerShotModelTests(unittest.TestCase):
         self.assertEqual(len(last_due), 4)
         self.assertEqual([shot.source_index for shot in normal_due], [1, 1])
         self.assertEqual([shot.source_index for shot in last_due[:2]], [0, 0])
+
+    def test_focused_level5_callback7_rng_and_record_order(self) -> None:
+        level = self.secondary_sht.levels[5]
+        rng = Th08Rng(45644, 22684)
+        independent = _IndependentRng(45644, 22684)
+        expected_angles = (
+            independent.next_random_spread_angle(),
+            independent.next_random_spread_angle(),
+        )
+        result = emit_player_shot_level(
+            level,
+            cadence_frame=0,
+            player_position=(192.0, 432.0),
+            option_positions=((160.0, 420.0),) * 4,
+            free_slots=128,
+            rng=rng,
+        )
+        self.assertEqual(
+            [shot.record_offset for shot in result.shots],
+            [1316, 1372, 1484, 1540],
+        )
+        self.assertEqual(result.rng_calls_consumed, 4)
+        self.assertEqual(rng.calls, independent.calls)
+        self.assertEqual(rng.state, independent.state)
+        self.assertEqual(
+            tuple(shot.angle for shot in result.shots[2:]),
+            expected_angles,
+        )
+        half_width = _f32_from_bits(RANDOM_SPREAD_PI_BITS) / 48.0
+        center = -_f32_from_bits(RANDOM_SPREAD_CENTER_BITS)
+        self.assertTrue(
+            all(
+                center - half_width <= shot.angle < center + half_width
+                for shot in result.shots[2:]
+            )
+        )
+
+    def test_pool_capacity_controls_record_scan_and_rng(self) -> None:
+        level = self.secondary_sht.levels[5]
+        positions = ((0.0, 0.0),) * 4
+
+        full_rng = Th08Rng(45644, 22684)
+        full = emit_player_shot_level(
+            level,
+            cadence_frame=0,
+            player_position=(0.0, 0.0),
+            option_positions=positions,
+            free_slots=0,
+            rng=full_rng,
+        )
+        self.assertEqual((full.records_evaluated, full.rng_calls_consumed), (0, 0))
+        self.assertTrue(full.stopped_for_pool_capacity)
+        self.assertEqual((full_rng.state, full_rng.calls), (45644, 22684))
+
+        one = emit_player_shot_level(
+            level,
+            cadence_frame=0,
+            player_position=(0.0, 0.0),
+            option_positions=positions,
+            free_slots=1,
+            rng=Th08Rng(45644, 22684),
+        )
+        self.assertEqual(
+            (one.records_evaluated, one.pool_slots_used, one.rng_calls_consumed),
+            (1, 1, 0),
+        )
+
+        three = emit_player_shot_level(
+            level,
+            cadence_frame=0,
+            player_position=(0.0, 0.0),
+            option_positions=positions,
+            free_slots=3,
+            rng=Th08Rng(45644, 22684),
+        )
+        self.assertEqual(
+            (
+                three.records_evaluated,
+                three.pool_slots_used,
+                three.rng_calls_consumed,
+            ),
+            (4, 3, 2),
+        )
+
+        non_due = emit_player_shot_level(
+            level,
+            cadence_frame=1,
+            player_position=(0.0, 0.0),
+            option_positions=positions,
+            free_slots=128,
+            rng=Th08Rng(45644, 22684),
+        )
+        self.assertEqual(
+            (
+                non_due.records_evaluated,
+                non_due.pool_slots_used,
+                non_due.rng_calls_consumed,
+            ),
+            (len(level.shots), 0, 0),
+        )
+
+    def test_unknown_emission_callback_fails_closed(self) -> None:
+        level = self.secondary_sht.levels[5]
+        unknown = replace(
+            level,
+            shots=(
+                replace(level.shots[0], callback_0_index=8),
+                *level.shots[1:],
+            ),
+        )
+        with self.assertRaises(UnsupportedPlayerShotCallback):
+            emit_player_shot_level(
+                unknown,
+                cadence_frame=1,
+                player_position=(0.0, 0.0),
+                option_positions=((0.0, 0.0),) * 4,
+                free_slots=128,
+                rng=Th08Rng(45644, 22684),
+            )
 
     def test_spawn_uses_option_or_player_and_trigonometric_velocity(self) -> None:
         option_record = self.normal.shots[0]

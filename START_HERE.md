@@ -19,14 +19,37 @@ historical handoff.
   (`Build rolling native snapshot iteration loop`).
 - H=32 causal-search checkpoint: `3d15953`
   (`Build causal native snapshot policy search`).
-- The projection-v7 H1 ECL-source differential and the two user-authorized
-  physical baselines are the current repository HEAD.
-- Complete Linux discovery passes 1,371 tests in 13.925 seconds.
-- Complete Windows UNC discovery passes 1,371 tests in 28.485 seconds with
+- The WS-H route-2 Focus/Shot semantic foundation and retained taskbook are
+  the current repository HEAD; no new physical trial was run.
+- Complete Linux discovery passes 1,380 tests in 13.531 seconds.
+- Complete Windows UNC discovery passes 1,380 tests in 27.294 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
+
+### Current WS-H semantic checkpoint
+
+- The user reprioritized general, high-ROI route/combat/resource work ahead
+  of remaining individual-hit producer details.
+- `COMBAT-FAST-01` now has executable native-ordered normal SHT selection,
+  callback-7 RNG consumption, and pool-capacity semantics. Primary normal
+  shots consume no callback RNG; focused secondary normal option shots
+  consume two u16 calls each when due and when a free slot exists.
+- Rolling native snapshot schema v4 adds a dedicated non-live capture of the
+  shot timer `(previous, fraction_bits, current)` and all 128 slot state
+  words. Same-action and natural-frame acceptance now require this state to
+  agree. The live sensing hot path is unchanged.
+- Root 2,129's old four-u16 pre-hostile prefix is compatible with a due
+  focused level-5 option pair, but the retained v3 capsule lacks timer/pool
+  fields, so this remains inferred rather than observed. Hostile birth 1220
+  remains a separate unresolved producer and is deprioritized.
+- Deterministic offline report:
+  `artifacts/runtime_reports/th08_route2_focus_shot_emission_root2129_20260731.json`,
+  SHA-256
+  `f78e820fe7aeabd12d5c6b4a2fd901462a54ada26758f3ba11fae615318738e8`.
+- No live Focus/Shot ranking, combat objective, action authority, or physical
+  promotion changed.
 
 ### Latest physical and replay evidence
 
@@ -1167,6 +1190,13 @@ respawn, Power, position, damage, and route timing.
 
 Do not resume broad G5 work first.
 
+0. Continue the user-prioritized high-ROI WS-H line. Capture one explicit v4
+   identical-root ordinary-enemy corpus with shot timer/pool identity, then
+   compare focused, unfocused, and causal refocus schedules only inside the
+   unchanged survival-feasible set. Require exact RNG/shot ordering, native
+   HP/kill-end and later-hostile-birth attribution before calling a combat
+   benefit. Keep live Focus/Shot ranking disabled and do not launch a physical
+   trial merely to fill the old root-2,129 capture debt.
 1. Do not repeat C5, the 22-hit Stage-6B run, or the unchanged 74-hit full
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and

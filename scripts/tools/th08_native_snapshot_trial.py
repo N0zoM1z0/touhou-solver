@@ -39,6 +39,9 @@ from th08_native_future_body_root import (  # noqa: E402
     decode_route2_ordinary_pool_active_slots,
     route2_revalidated_native_root_component_specs,
 )
+from th08_player_shot_runtime import (  # noqa: E402
+    capture_player_shot_emission_state,
+)
 from th08_runtime.native_snapshot import (  # noqa: E402
     NativeBarrierHeader,
     NativeCalculationBarrier,
@@ -78,7 +81,7 @@ from th08_runtime_agent import (  # noqa: E402
 from touhou_control.pipeline_identity import VersionIdentity  # noqa: E402
 
 
-SCHEMA = "th08-native-snapshot-rolling-trial-v3"
+SCHEMA = "th08-native-snapshot-rolling-trial-v4"
 DEFAULT_GAME_DIR = Path(
     "D:/Entertainment/Game/Touhou/[th08] 东方永夜抄 (日文版)__codex_wind_tunnel"
 )
@@ -902,6 +905,11 @@ def _rolling_branch(
         projection_capture_ms = _duration_ms(started)
         compact_state = _compact_state(projection_reader)
         started = time.perf_counter()
+        player_shot_emission_state = capture_player_shot_emission_state(
+            projection_reader
+        ).record()
+        player_shot_emission_capture_ms = _duration_ms(started)
+        started = time.perf_counter()
         collision_control_projection = capture_collision_control_projection(
             projection_reader,
             native_root_projection=projection,
@@ -926,6 +934,7 @@ def _rolling_branch(
                 "action_carrier": carrier.record(),
                 "endpoint_header": endpoint_header.record(),
                 "compact_state": compact_state,
+                "player_shot_emission_state": player_shot_emission_state,
                 "native_projection": projection.record(),
                 "collision_control_projection": (
                     collision_control_projection.record(
@@ -935,6 +944,9 @@ def _rolling_branch(
                 "timing_ms": {
                     "step_wait": step_wait_ms,
                     "native_projection_capture": projection_capture_ms,
+                    "player_shot_emission_capture": (
+                        player_shot_emission_capture_ms
+                    ),
                     "collision_control_projection_capture": (
                         collision_control_capture_ms
                     ),
@@ -1109,6 +1121,9 @@ def _run_all36_portfolio(
             target_manager_frame=target_manager_frame,
         )
         root_compact_state = _compact_state(projection_reader)
+        root_player_shot_emission_state = (
+            capture_player_shot_emission_state(projection_reader).record()
+        )
         root_collision_control_projection = capture_collision_control_projection(
             projection_reader,
             native_root_projection=root_projection,
@@ -1277,6 +1292,9 @@ def _run_all36_portfolio(
                 root_collision_control_projection.record()
             ),
             "root_compact_state": root_compact_state,
+            "root_player_shot_emission_state": (
+                root_player_shot_emission_state
+            ),
             "corpus": corpus_record,
             "recorded_action_canary": canary_record,
             "recorded_action_repeat_exact": recorded_repeat_exact,
@@ -1386,6 +1404,9 @@ def _run_transaction(
             target_manager_frame=target_manager_frame,
         )
         root_compact_state = _compact_state(projection_reader)
+        root_player_shot_emission_state = (
+            capture_player_shot_emission_state(projection_reader).record()
+        )
         root_collision_control_projection = capture_collision_control_projection(
             projection_reader,
             native_root_projection=root_projection,
@@ -1480,10 +1501,16 @@ def _run_transaction(
             for change in collision_control_projection_changes(left, right)
         )
         compact_aa_exact = compact_a1 == compact_a2
+        player_shot_emission_aa_exact = tuple(
+            tick["player_shot_emission_state"] for tick in branch_a1["ticks"]
+        ) == tuple(
+            tick["player_shot_emission_state"] for tick in branch_a2["ticks"]
+        )
         if (
             projection_aa_changes
             or collision_control_aa_changes
             or not compact_aa_exact
+            or not player_shot_emission_aa_exact
         ):
             return {
                 "status": "same_action_rolling_native_nondeterministic",
@@ -1511,6 +1538,9 @@ def _run_transaction(
                     )
                 ),
                 "root_compact_state": root_compact_state,
+                "root_player_shot_emission_state": (
+                    root_player_shot_emission_state
+                ),
                 "branches": {
                     "a1": branch_a1,
                     "a2": branch_a2,
@@ -1532,6 +1562,9 @@ def _run_transaction(
                     collision_control_aa_changes
                 ),
                 "same_action_compact_exact": compact_aa_exact,
+                "same_action_player_shot_emission_exact": (
+                    player_shot_emission_aa_exact
+                ),
                 "same_action_compact_left": list(compact_a1),
                 "same_action_compact_right": list(compact_a2),
                 "calculation_ticks_per_branch": horizon,
@@ -1605,6 +1638,9 @@ def _run_transaction(
                     "root_collision_control_projection": (
                         root_collision_control_projection
                     ),
+                    "root_player_shot_emission_state": (
+                        root_player_shot_emission_state
+                    ),
                     "a1_projections": projections_a1,
                     "a1_collision_control_projections": (collision_control_a1),
                     "b_projections": projections_b,
@@ -1638,6 +1674,9 @@ def _run_transaction(
                 )
             ),
             "root_compact_state": root_compact_state,
+            "root_player_shot_emission_state": (
+                root_player_shot_emission_state
+            ),
             "branches": {
                 "a1": branch_a1,
                 "a2": branch_a2,
@@ -1649,6 +1688,9 @@ def _run_transaction(
                 "after_b": restore_b,
             },
             "same_action_full_endpoint_exact": not endpoint_aa_changes,
+            "same_action_player_shot_emission_exact": (
+                player_shot_emission_aa_exact
+            ),
             "same_action_full_endpoint_volatility": (
                 _group_changes_by_region(
                     baseline_root,
@@ -1701,6 +1743,7 @@ def _run_natural_reference(
     expected_root_projection: Route2NativeFutureBodyRootSlice,
     expected_root_collision_control_projection: CollisionControlProjection,
     expected_root_compact_state: dict[str, object],
+    expected_root_player_shot_emission_state: dict[str, object],
     retain_collision_control_payload: bool,
 ) -> dict[str, object]:
     """Advance through the real frame pump and trap the next callsite seam."""
@@ -1735,6 +1778,9 @@ def _run_natural_reference(
         target_manager_frame=target_manager_frame,
     )
     root_compact_state = _compact_state(projection_reader)
+    root_player_shot_emission_state = capture_player_shot_emission_state(
+        projection_reader
+    ).record()
     root_collision_control_projection = capture_collision_control_projection(
         projection_reader,
         native_root_projection=root_projection,
@@ -1746,10 +1792,15 @@ def _run_natural_reference(
         == expected_root_collision_control_projection.sha256
     )
     root_compact_exact = root_compact_state == expected_root_compact_state
+    root_player_shot_emission_exact = (
+        root_player_shot_emission_state
+        == expected_root_player_shot_emission_state
+    )
     if (
         not root_projection_exact
         or not root_collision_control_exact
         or not root_compact_exact
+        or not root_player_shot_emission_exact
     ):
         raise NativeSnapshotUnknownError(
             "restored root changed before the natural reference began"
@@ -1844,6 +1895,9 @@ def _run_natural_reference(
             target_manager_frame=target_manager_frame,
         )
         compact_state = _compact_state(projection_reader)
+        player_shot_emission_state = capture_player_shot_emission_state(
+            projection_reader
+        ).record()
         collision_control_projection = capture_collision_control_projection(
             projection_reader,
             native_root_projection=projection,
@@ -1860,6 +1914,9 @@ def _run_natural_reference(
             )
         expected_projection = expected_tick.get("native_projection")
         expected_compact = expected_tick.get("compact_state")
+        expected_player_shot_emission = expected_tick.get(
+            "player_shot_emission_state"
+        )
         projection_exact = (
             isinstance(expected_projection, dict)
             and projection.digest == expected_projection.get("sha256")
@@ -1870,6 +1927,9 @@ def _run_natural_reference(
             == expected_collision_control_projections[tick_index].sha256
         )
         compact_exact = compact_state == expected_compact
+        player_shot_emission_exact = (
+            player_shot_emission_state == expected_player_shot_emission
+        )
         projection_byte_changes = (
             ()
             if projection_exact
@@ -1886,7 +1946,12 @@ def _run_natural_reference(
                 collision_control_projection,
             )
         )
-        any_mismatch = any_mismatch or not collision_control_exact or not compact_exact
+        any_mismatch = (
+            any_mismatch
+            or not collision_control_exact
+            or not compact_exact
+            or not player_shot_emission_exact
+        )
         ticks.append(
             {
                 "tick_index": tick_index,
@@ -1912,6 +1977,7 @@ def _run_natural_reference(
                     "removed_first": sorted(map_before_set - map_after_set)[:8],
                 },
                 "compact_state": compact_state,
+                "player_shot_emission_state": player_shot_emission_state,
                 "native_projection": projection.record(),
                 "collision_control_projection": (
                     collision_control_projection.record(
@@ -1923,6 +1989,9 @@ def _run_natural_reference(
                     collision_control_exact
                 ),
                 "headless_compact_exact": compact_exact,
+                "headless_player_shot_emission_exact": (
+                    player_shot_emission_exact
+                ),
                 "headless_broad_projection_byte_changes": list(projection_byte_changes),
                 "headless_collision_control_changes": list(collision_control_changes),
                 "natural_advance_ms": natural_advance_ms,
@@ -1944,6 +2013,9 @@ def _run_natural_reference(
         "root_projection_exact": root_projection_exact,
         "root_collision_control_projection_exact": (root_collision_control_exact),
         "root_compact_exact": root_compact_exact,
+        "root_player_shot_emission_exact": (
+            root_player_shot_emission_exact
+        ),
         "ticks": ticks,
         "frame_pump_work_included": True,
         "comparison_boundary": (
@@ -1951,7 +2023,7 @@ def _run_natural_reference(
         ),
         "broad_projection_is_diagnostic_not_acceptance_authority": True,
         "acceptance_authority": (
-            "exact_collision_control_projection_and_compact_state"
+            "exact_collision_control_compact_and_player_shot_emission_state"
         ),
         "physical_predictive_authority": False,
     }
@@ -2244,6 +2316,9 @@ def main(argv: list[str] | None = None) -> int:
                 "root_collision_control_projection"
             ]
             root_compact_state = transaction["root_compact_state"]
+            root_player_shot_emission_state = transaction[
+                "root_player_shot_emission_state"
+            ]
             assert isinstance(
                 root_projection,
                 Route2NativeFutureBodyRootSlice,
@@ -2258,6 +2333,7 @@ def main(argv: list[str] | None = None) -> int:
                 CollisionControlProjection,
             )
             assert isinstance(root_compact_state, dict)
+            assert isinstance(root_player_shot_emission_state, dict)
             natural_reference = _run_natural_reference(
                 api,
                 barrier,
@@ -2283,6 +2359,9 @@ def main(argv: list[str] | None = None) -> int:
                     root_collision_control_projection
                 ),
                 expected_root_compact_state=root_compact_state,
+                expected_root_player_shot_emission_state=(
+                    root_player_shot_emission_state
+                ),
                 retain_collision_control_payload=(
                     args.retain_collision_control_payload
                 ),

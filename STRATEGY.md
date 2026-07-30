@@ -1734,6 +1734,14 @@ first.
   First verify native team/shot state, target coverage, damage/kill timing,
   and survival-equivalent eligibility; do not encode this as an unconditional
   focus toggle.
+- **Observed semantic foundation (2026-07-31):** native Focus-logic profile
+  selection, Power thresholds, shot cadence identity, 128-slot
+  capacity/record order, and normal callback-7 RNG consumption are now
+  executable and independently tested. Rolling snapshot v4 retains the
+  previously omitted shot timer and slot words. The old root-2,129 four-u16
+  prefix is compatible with a focused option-shot pair but is not unique
+  causal proof because its v3 capsule omitted those fields. This changes no
+  S18 status or live ranking authority.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -1765,7 +1773,8 @@ first.
   `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`,
   `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OBSERVATION_CONTRACT_20260728.md`,
   `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_OFFLINE_GATE_20260728.md`, and
-  `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`. The raw
+  `notes/research/stage5_combat/STAGE5_ENEMY_COMBAT_PROGRESS_STAGE5_RESULT_20260728.md`, and
+  `notes/research/stage5_combat/ROUTE2_FOCUS_SHOT_EMISSION_CONTRACT_20260731.md`. The raw
   first-64 inventory now has physical trace-only observation authority.
   Generation/end tracking, exposure causality, targeting, and S18 live action
   authority remain none.

@@ -100,10 +100,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `9305c1a`
-  (`Add generational future body identities`).
-- Latest pre-trial repository/live code checkpoint: `b2e1eff`
-  (`Fix priority-17 physical preflight`).
+- Latest retained research checkpoint: `22f002a`
+  (`Connect timeline spawn lifecycles and arm Stage 5 reserve gate`).
+- Latest pre-trial repository/live code checkpoint: `22f002a`.
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
@@ -458,6 +457,28 @@ hash them, label inherited/hypothesized layouts incomplete, and decode all
 physical root or allocation-event producer has been captured or connected.
 Twenty-two focused tests pass on Linux and Windows. Complete discovery passes
 1,288/1,288 in 14.102/31.159 seconds, with the three existing Windows skips.
+
+Checkpoint `22f002a` replaces that last allocation sentence with a narrower
+observed boundary. Concrete fixed native regions now inventory all ten root
+requirements, while dynamic ECL/callback/resource pointees remain explicitly
+partial. Timeline requests feed first-inactive allocation, one explicit
+initial main-VM execution, exact `-1` retirement, and same-update generational
+reuse into the ordered ledger. Four product/oracle lifecycle cases agree;
+the retained payload SHA-256 is
+`d5db9e32cf029249b17f3e99cf8b7782856bbdb128acf52e5f7538f827c2ac17`.
+
+The checkpoint also retains the offline-first causal-prefix research and
+first-hit NMNB perspective. Complete Linux discovery passes 1,297 tests in
+14.197 seconds; exact Windows UNC discovery passes 1,297 in 32.864 seconds
+with the three existing skips. Linux/Windows differential reports are
+LF-normalized-identical. No complete one-frame root/executor or predictive
+future-body authority exists.
+
+The live controller now enables `losing_control_reserve` after Boolean
+exhaustion for one preregistered complete Stage-5 physical falsifier.
+`--no-losing-control-reserve` is exact rollback. It preserves the screened
+fresh hard vectors but is not a viability certificate and has not yet been
+physically measured.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate

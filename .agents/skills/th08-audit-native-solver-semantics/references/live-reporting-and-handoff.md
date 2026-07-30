@@ -1,11 +1,17 @@
 # Live Reporting And Handoff
 
-Use this reference to write the audit continuously, make each finding
-actionable, and leave a report another agent can verify without hidden context.
+Use this reference only when the user requests a report, the active mode is
+explicitly comprehensive, or a durable multi-finding handoff is necessary.
+Do not create or enlarge a report merely because the audit skill triggered.
+
+Match the artifact to the requested scope. A focused check gets a focused
+report; the executive summary, consolidated backlogs, verification matrix,
+hash, and complete handoff below belong to comprehensive or explicitly durable
+audit work.
 
 ## Contents
 
-1. Start the report immediately
+1. Choose focused or comprehensive reporting
 2. Finding structure
 3. Positive validation and performance structure
 4. Executive summary and priority
@@ -13,9 +19,33 @@ actionable, and leave a report another agent can verify without hidden context.
 6. Final consistency pass
 7. Handoff template
 
-## 1. Start The Report Immediately
+## 1. Choose Focused Or Comprehensive Reporting
 
-Create the requested report before deep analysis. Use this initial skeleton:
+For a focused check that needs a report, create this compact artifact before
+deep analysis:
+
+```markdown
+# TH08 Focused Semantic Check
+
+Scope:
+Out of scope:
+Evidence identity:
+
+## Conclusion
+
+## Evidence
+
+## Validation Performed
+
+## Remaining Unknowns
+```
+
+Add numbered findings only when they make several independent conclusions
+easier to verify. Stop when the scoped question is answered; do not add a
+repository-wide inventory, generic backlog, or unrelated recommendations.
+
+For an explicitly comprehensive audit, create the following live report
+before deep analysis:
 
 ```markdown
 # TH08 IDA / Native-To-Solver Read-Only Audit (In Progress)
@@ -43,6 +73,9 @@ Non-actions:
 Write findings as soon as evidence is sufficient. Revise an earlier finding
 when later evidence narrows it. Do not keep a separate hidden conclusion that
 never reaches the file.
+
+Sections 2 through 6 below define the comprehensive format. A focused report
+uses only the pieces necessary for its declared scope.
 
 ## 2. Use A Complete Finding Record
 
@@ -199,7 +232,12 @@ the audit.
 
 ## 7. Finish The Handoff
 
-End the report with:
+For a focused report, end with validation performed and remaining unknowns.
+In the final response, link the report, answer the scoped question, and state
+the important exclusions. Do not manufacture three to seven findings or a
+full handoff when the evidence supports one conclusion.
+
+For a comprehensive or explicitly durable multi-finding report, end with:
 
 ```markdown
 ## Validation Performed
@@ -209,7 +247,7 @@ End the report with:
 ## Final Assessment
 ```
 
-In the final user response:
+In the comprehensive final user response:
 
 1. Link the report using its absolute path.
 2. State the most consequential three to seven findings.

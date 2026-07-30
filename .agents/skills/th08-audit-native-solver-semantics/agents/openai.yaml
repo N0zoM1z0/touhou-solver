@@ -1,4 +1,4 @@
 interface:
-  display_name: "TH08 Native-to-Solver Audit"
-  short_description: "Audit IDA semantics against Python and native solver code"
-  default_prompt: "Use $th08-audit-native-solver-semantics to audit TH08 IDA-to-solver semantics; keep investigation-only work read-only and apply evidence-backed corrections when the request authorizes fixes."
+  display_name: "TH08 Scoped Native-to-Solver Audit"
+  short_description: "Run focused TH08 native-to-solver semantic checks"
+  default_prompt: "Use $th08-audit-native-solver-semantics to investigate the smallest relevant TH08 native-to-solver semantic scope, reusing retained evidence; expand to a comprehensive audit only when I explicitly request it."

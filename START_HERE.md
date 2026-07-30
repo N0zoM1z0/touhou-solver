@@ -100,9 +100,9 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `02c1f89`
-  (`Retain Stage 5 scale fail-close preflight`).
-- Latest pre-trial repository/live code checkpoint: `22f002a`.
+- Latest retained research checkpoint: `ccb94eb`
+  (`Allow no-observer Stage 5 scale continuation`).
+- Latest pre-trial repository/live code checkpoint: `ccb94eb`.
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
   workload below. Its nested exact schedule-delivery gate passes, while the
   complete stage remains a 22-hit survival failure.
@@ -481,6 +481,15 @@ exhaustion for one preregistered complete Stage-5 physical falsifier.
 `--no-losing-control-reserve` is exact rollback. It preserves the screened
 fresh hard vectors but is not a viability certificate and has not yet been
 physically measured.
+
+CE-0199 then rejects the no-extra-flag launch: it entered Stage 5 but
+fail-closed at frame 1 before any decision because scale coverage was
+root-only. Checkpoint `ccb94eb` permits the explicit
+`--diagnostic-continue-root-only-scale` control without requiring an
+unrelated trace observer. The continuation remains unknown-direction with no
+hard scale/model authority. Focused supervisor discovery passes 33/33 on
+Linux and Windows; complete discovery passes 1,298 tests in 13.851/31.519
+seconds with the three existing Windows skips.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate

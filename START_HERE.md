@@ -23,11 +23,12 @@ historical handoff.
   first-hit-bounded natural Power-0 audit, forced-HP-zero/end-semantics
   correction, default-off native lifecycle event ring, native damageability/
   HP gate, action-conditioned static shot atlas, corrected item-pool
-  recurrence/static Power ledger, `CONTENT-01` shipped content manifest, and
-  `CONTENT-02` static mandatory-event atlas are the current repository
-  checkpoint; no new physical trial was run.
-- Complete Linux discovery passes 1,437 tests in 13.586 seconds.
-- Complete Windows UNC discovery passes 1,437 tests in 28.463 seconds with
+  recurrence/static Power ledger, exact bounded Boss HP/timeout transition
+  prefix, `CONTENT-01` shipped content manifest, and `CONTENT-02` static
+  mandatory-event atlas are the current repository checkpoint; no new
+  physical trial was run.
+- Complete Linux discovery passes 1,444 tests in 13.482 seconds.
+- Complete Windows UNC discovery passes 1,444 tests in 28.529 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -138,6 +139,18 @@ historical handoff.
   `06a12eb6f2de97823286613322f6da9fbeac7abec490099ee3298bc6acf1dcf9`.
   Detailed boundary:
   `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`.
+- CE-0221 corrects Boss progress after a same-update HP-threshold overshoot.
+  Native checks HP/timeout transitions before player-shot damage, so a stable
+  post-damage sample may sit below a retained threshold until the next
+  eligible update. The old decoder incorrectly discarded that threshold and
+  labeled the lower threshold as the current phase end.
+- The corrected bounded transition prefix preserves strict comparison,
+  slot-order health priority, timeout suppression/restoration, and integer
+  timer semantics. Sensing now separates pending health/timeout completion
+  from a later bracketed same-entity phase change. ECL successor effects and
+  causal phase-duration benefit remain unknown.
+- Detailed Boss boundary:
+  `notes/research/stage5_combat/BOSS_PHASE_TRANSITION_MODEL_CONTRACT_20260731.md`.
 - No live Focus/Shot ranking, combat objective, action authority, or physical
   promotion changed.
 
@@ -427,8 +440,11 @@ historical handoff.
   HP delta, shot/option/RNG state, target motion, and viable actions.
   The drop/Power static ledger is now complete, but same-update physical item
   identity, pickup attribution, and carried later benefit remain open.
-  Source-lifetime-to-emission linkage also remains open. Do not infer events
-  across ring overflow or install either probe as a live issue-time consumer.
+  The bounded Boss HP/timeout transition model is also complete, but causal
+  action-to-HP delta, ECL successor effects, and physical phase shortening
+  remain open. Source-lifetime-to-emission linkage also remains open. Do not
+  infer events across ring overflow or install either probe as a live
+  issue-time consumer.
 - A supervised warm wind-tunnel service remains deferred. If later branch
   throughput becomes the bottleneck, it must preserve a single writer,
   immutable session/root IDs, branch-level root/FX/stack/thread/map checks,
@@ -497,6 +513,10 @@ historical handoff.
   exact ordinary-enemy allocation, retirement, damage, and forced-zero
   event-ring boundaries. They document a default-off trace design, not an
   installed hook or action authority.
+- Comments at `0x0042CE31`, `0x0042B50B`, `0x0042B99C`, `0x0042BA15`, and
+  `0x0042D349` retain the Boss health-before-timeout transition order,
+  strict threshold comparison, integer-timer predicate, timeout restoration,
+  and the fact that player-shot HP subtraction occurs afterward.
 
 ## Read In This Order
 

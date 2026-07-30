@@ -68,7 +68,14 @@ class SensingTraceTests(unittest.TestCase):
             frame_delta=2,
             health_delta=-4.0,
             damage_per_frame=2.0,
-            state=SimpleNamespace(damageable=True),
+            completion_cause=None,
+            state=SimpleNamespace(
+                damageable=True,
+                completion_pending=None,
+                health_remaining=40,
+                health_progress=0.5,
+                time_remaining=120.0,
+            ),
         )
         ecl_snapshot = SimpleNamespace(
             instruction_pointer=0x5000,

@@ -2992,6 +2992,10 @@ def _run_live_session(
                 (
                     boss_phase_snapshot.as_progress_state(
                         context=corridor_context,
+                        continuity_context=(
+                            gameplay_epoch,
+                            int(state["stage_route_index"]),
+                        ),
                         bomb_active=bool(
                             state["player"]["bomb_active"]
                         ),

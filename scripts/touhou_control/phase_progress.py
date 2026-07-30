@@ -19,6 +19,8 @@ class PhaseProgressState:
     timeout_frames: int | None
     damageable: bool
     stable: bool = True
+    completion_pending: str | None = None
+    continuity_key: Hashable | None = None
 
     @property
     def health_span(self) -> int:
@@ -51,6 +53,7 @@ class PhaseProgressObservation:
     frame_delta: int | None = None
     health_delta: int | None = None
     damage_per_frame: float | None = None
+    completion_cause: str | None = None
 
 
 class PhaseProgressTracker:
@@ -76,7 +79,20 @@ class PhaseProgressTracker:
         if previous is None:
             return PhaseProgressObservation(state, "initial")
         if previous.key != state.key:
-            return PhaseProgressObservation(state, "phase_changed")
+            completion_cause = (
+                previous.completion_pending
+                if (
+                    previous.continuity_key is not None
+                    and previous.continuity_key == state.continuity_key
+                    and state.frame > previous.frame
+                )
+                else None
+            )
+            return PhaseProgressObservation(
+                state,
+                "phase_changed",
+                completion_cause=completion_cause,
+            )
         frame_delta = state.frame - previous.frame
         if (
             frame_delta <= 0

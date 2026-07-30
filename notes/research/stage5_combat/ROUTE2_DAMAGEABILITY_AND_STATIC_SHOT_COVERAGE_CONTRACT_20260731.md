@@ -21,7 +21,7 @@ viable and issue-safe.
 The following are **observed** in shipped instructions and relevant
 callers/dataflow:
 
-- `enemy_manager_update` (`0x0042C620`) enters the full update only when the
+- `enemy_manager_update` (`0x0042C660`) enters the full update only when the
   enemy is active, `flags2 & 0x80` is clear, and `flags & 0x40000000` does not
   coincide with either an active Bomb or nonzero player transition byte
   `g_player_state` at `0x017D5EF8`.

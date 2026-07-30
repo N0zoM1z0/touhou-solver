@@ -1572,10 +1572,17 @@ first.
   viable set.
 - **Current shadow:** stable boss health/timer progress and a
   survival-filtered horizontal alignment candidate are retained without
-  action authority. Ordinary-enemy HP, verified kill/despawn cause, and
-  hazard-exposure reduction remain unavailable.
+  action authority. The native HP-before-timeout transition prefix is now
+  exact for retained thresholds, integer timer, priority, slot order, and
+  immediate field writes. Telemetry distinguishes a pending boundary from a
+  bracketed same-entity health/timeout phase change. ECL successor effects,
+  causal action-to-HP delta, physical duration reduction, ordinary-enemy
+  verified kill/despawn cause, and hazard-exposure reduction remain
+  unavailable.
 - **Evidence:** damage-aware sections in `notes/research_log/2026-07-24.md` and
-  `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`.
+  `notes/research/stage5_combat/STAGE5_NONSPELL_COMBAT_PROGRESS_RESEARCH_CONTRACT_20260728.md`,
+  plus
+  `notes/research/stage5_combat/BOSS_PHASE_TRANSITION_MODEL_CONTRACT_20260731.md`.
 
 ### S11 — Delivery-Aware Hierarchical Planning
 

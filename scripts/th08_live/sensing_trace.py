@@ -168,6 +168,11 @@ def build_sensing_trace_fields(
                 "frame_delta": progress.frame_delta,
                 "health_delta": progress.health_delta,
                 "damage_per_frame": progress.damage_per_frame,
+                "completion_pending": progress.state.completion_pending,
+                "completion_cause": progress.completion_cause,
+                "health_remaining": progress.state.health_remaining,
+                "health_progress": progress.state.health_progress,
+                "time_remaining": progress.state.time_remaining,
                 "damage_per_second_60hz": (
                     progress.damage_per_frame * 60.0
                     if progress.damage_per_frame is not None

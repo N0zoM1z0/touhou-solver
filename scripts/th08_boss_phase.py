@@ -49,6 +49,156 @@ class MemoryReader(Protocol):
 
 
 @dataclass(frozen=True)
+class BossPhaseTransitionStep:
+    """One native-ordered phase-boundary mutation."""
+
+    kind: str
+    health_threshold_index: int | None
+    health_threshold: int | None
+    current_health_before: int
+    current_health_after: int
+    phase_start_health_before: int
+    phase_start_health_after: int
+    timer_elapsed_before: int
+    timer_elapsed_after: int
+    timeout_frame_before: int | None
+    timeout_frame_after: int | None
+
+
+@dataclass(frozen=True)
+class BossPhaseTransitionProjection:
+    """Known field effects of the manager's pre-damage transition loop."""
+
+    steps: tuple[BossPhaseTransitionStep, ...]
+    current_health: int
+    phase_start_health: int
+    health_thresholds: tuple[int, int, int, int]
+    timer_elapsed: int
+    timer_fraction: float
+    timeout_frame: int | None
+
+    @property
+    def completion_pending(self) -> str | None:
+        if not self.steps:
+            return None
+        return self.steps[0].kind
+
+
+def project_boss_phase_transition_prefix(
+    *,
+    current_health: int,
+    phase_start_health: int,
+    health_thresholds: tuple[int, int, int, int],
+    timer_elapsed: int,
+    timer_fraction: float,
+    timeout_frame: int | None,
+) -> BossPhaseTransitionProjection:
+    """Project the native transition loop before player-shot damage.
+
+    Health thresholds are tested in slot order with a strict ``health <
+    threshold`` predicate. A health transition clears the timeout. Only when
+    no health transition fires can an elapsed integer timer trigger timeout;
+    timeout restores the greatest positive retained threshold.
+
+    Starting the selected ECL subroutine has effects outside this bounded
+    field projection, so callers must not treat the returned state as a full
+    phase or hazard successor.
+    """
+
+    thresholds = list(health_thresholds)
+    projected_health = current_health
+    projected_phase_start = phase_start_health
+    projected_timer_elapsed = timer_elapsed
+    projected_timer_fraction = timer_fraction
+    projected_timeout = timeout_frame
+    steps: list[BossPhaseTransitionStep] = []
+
+    while True:
+        crossed_index = next(
+            (
+                index
+                for index, threshold in enumerate(thresholds)
+                if threshold >= 0 and projected_health < threshold
+            ),
+            None,
+        )
+        if crossed_index is not None:
+            threshold = thresholds[crossed_index]
+            step = BossPhaseTransitionStep(
+                kind="health",
+                health_threshold_index=crossed_index,
+                health_threshold=threshold,
+                current_health_before=projected_health,
+                current_health_after=threshold,
+                phase_start_health_before=projected_phase_start,
+                phase_start_health_after=threshold,
+                timer_elapsed_before=projected_timer_elapsed,
+                timer_elapsed_after=projected_timer_elapsed,
+                timeout_frame_before=projected_timeout,
+                timeout_frame_after=None,
+            )
+            steps.append(step)
+            projected_health = threshold
+            projected_phase_start = threshold
+            thresholds[crossed_index] = -1
+            projected_timeout = None
+            continue
+
+        if (
+            projected_timeout is not None
+            and projected_timer_elapsed >= projected_timeout
+        ):
+            restore_index: int | None = None
+            restore_threshold = 0
+            for index, threshold in enumerate(thresholds):
+                if restore_threshold < threshold:
+                    restore_index = index
+                    restore_threshold = threshold
+            health_after = projected_health
+            phase_start_after = projected_phase_start
+            if restore_index is not None and restore_threshold > 0:
+                health_after = restore_threshold
+                phase_start_after = restore_threshold
+                thresholds[restore_index] = -1
+            steps.append(
+                BossPhaseTransitionStep(
+                    kind="timeout",
+                    health_threshold_index=restore_index,
+                    health_threshold=(
+                        restore_threshold
+                        if restore_index is not None and restore_threshold > 0
+                        else None
+                    ),
+                    current_health_before=projected_health,
+                    current_health_after=health_after,
+                    phase_start_health_before=projected_phase_start,
+                    phase_start_health_after=phase_start_after,
+                    timer_elapsed_before=projected_timer_elapsed,
+                    timer_elapsed_after=0,
+                    timeout_frame_before=projected_timeout,
+                    timeout_frame_after=None,
+                )
+            )
+            projected_health = health_after
+            projected_phase_start = phase_start_after
+            projected_timer_elapsed = 0
+            projected_timer_fraction = 0.0
+            projected_timeout = None
+            continue
+        break
+
+    return BossPhaseTransitionProjection(
+        steps=tuple(steps),
+        current_health=projected_health,
+        phase_start_health=projected_phase_start,
+        health_thresholds=tuple(thresholds),
+        timer_elapsed=projected_timer_elapsed,
+        timer_fraction=projected_timer_fraction,
+        timeout_frame=projected_timeout,
+    )
+
+
+@dataclass(frozen=True)
 class BossPhaseSnapshot:
     frame_before: int
     frame_after: int
@@ -74,6 +224,36 @@ class BossPhaseSnapshot:
         return self.timer_elapsed + self.timer_fraction
 
     @property
+    def active_health_thresholds(self) -> tuple[tuple[int, int], ...]:
+        return tuple(
+            (index, threshold)
+            for index, threshold in enumerate(self.health_thresholds)
+            if threshold >= 0
+        )
+
+    @property
+    def transition_projection(self) -> BossPhaseTransitionProjection:
+        return project_boss_phase_transition_prefix(
+            current_health=self.current_health,
+            phase_start_health=self.phase_start_health,
+            health_thresholds=self.health_thresholds,
+            timer_elapsed=self.timer_elapsed,
+            timer_fraction=self.timer_fraction,
+            timeout_frame=self.timeout_frame,
+        )
+
+    @property
+    def completion_pending(self) -> str | None:
+        return self.transition_projection.completion_pending
+
+    @property
+    def timeout_condition_met(self) -> bool:
+        return (
+            self.timeout_frame is not None
+            and self.timer_elapsed >= self.timeout_frame
+        )
+
+    @property
     def health_remaining(self) -> int:
         return max(0, self.current_health - self.phase_end_health)
 
@@ -92,6 +272,7 @@ class BossPhaseSnapshot:
         self,
         *,
         context: object | None = None,
+        continuity_context: object | None = None,
         bomb_active: bool = False,
         player_transition_state: int = 0,
         spell_active: bool = False,
@@ -108,7 +289,7 @@ class BossPhaseSnapshot:
                 context,
                 self.pointer,
                 self.phase_start_health,
-                self.phase_end_health,
+                self.health_thresholds,
                 self.timeout_frame,
             ),
             frame=self.frame_after,
@@ -119,6 +300,8 @@ class BossPhaseSnapshot:
             timeout_frames=self.timeout_frame,
             damageable=damage_gate.hp_subtraction_open and self.stable,
             stable=self.stable,
+            completion_pending=self.completion_pending,
+            continuity_key=(continuity_context, self.pointer),
         )
 
     def player_shot_damage_gate(
@@ -186,19 +369,28 @@ def _decode_snapshot(
         control,
         ENEMY_TIMEOUT_FRAME_OFFSET - ENEMY_FLAGS_OFFSET,
     )[0]
-    if (
-        current_health < 0
-        or maximum_health < 0
-        or phase_start_health < 0
-        or not math.isfinite(timer_fraction)
+    if maximum_health < 0 or phase_start_health < 0 or not math.isfinite(
+        timer_fraction
     ):
         return None
     active_thresholds = tuple(
         threshold
         for threshold in thresholds
-        if 0 <= threshold <= current_health
+        if threshold >= 0
     )
-    phase_end_health = max(active_thresholds, default=0)
+    crossed_threshold = next(
+        (
+            threshold
+            for threshold in thresholds
+            if threshold >= 0 and current_health < threshold
+        ),
+        None,
+    )
+    phase_end_health = (
+        crossed_threshold
+        if crossed_threshold is not None
+        else max(active_thresholds, default=0)
+    )
     return BossPhaseSnapshot(
         frame_before=frame_before,
         frame_after=frame_after,
@@ -296,12 +488,20 @@ def serialize_boss_phase_snapshot(
     if snapshot is None:
         return None
     result = asdict(snapshot)
+    transition_projection = snapshot.transition_projection
     result.update(
         {
             "elapsed_frames": snapshot.elapsed_frames,
+            "active_health_thresholds": [
+                {"index": index, "health": health}
+                for index, health in snapshot.active_health_thresholds
+            ],
             "health_remaining": snapshot.health_remaining,
             "health_span": snapshot.health_span,
             "health_progress": snapshot.health_progress,
+            "timeout_condition_met": snapshot.timeout_condition_met,
+            "completion_pending": snapshot.completion_pending,
+            "transition_projection": asdict(transition_projection),
         }
     )
     return result

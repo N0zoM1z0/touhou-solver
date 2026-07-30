@@ -23,6 +23,7 @@ from th08_boss_phase import (
     ENEMY_PLAYER_SHOT_DAMAGE_FLAG,
     ENEMY_TIMEOUT_FRAME_OFFSET,
     capture_boss_phase_snapshot,
+    project_boss_phase_transition_prefix,
 )
 from th08_enemy_damage_model import (
     ENEMY_PAUSE_DURING_BOMB_OR_TRANSITION_FLAG,
@@ -137,6 +138,118 @@ class BossPhaseTests(unittest.TestCase):
                 player_transition_state=3,
             ).damageable
         )
+
+    def test_post_damage_threshold_overshoot_stays_in_current_phase(self) -> None:
+        reader = Reader(0x57D2F0)
+        struct.pack_into("<i", reader.health, 0, 490)
+        struct.pack_into(
+            "<iiii",
+            reader.control,
+            ENEMY_HEALTH_THRESHOLDS_OFFSET - ENEMY_FLAGS_OFFSET,
+            500,
+            100,
+            -1,
+            -1,
+        )
+        snapshot = capture_boss_phase_snapshot(reader)
+        self.assertIsNotNone(snapshot)
+        self.assertEqual(snapshot.phase_end_health, 500)
+        self.assertEqual(snapshot.health_remaining, 0)
+        self.assertEqual(snapshot.completion_pending, "health")
+        self.assertEqual(
+            snapshot.as_progress_state().completion_pending,
+            "health",
+        )
+        projection = snapshot.transition_projection
+        self.assertEqual(len(projection.steps), 1)
+        self.assertEqual(projection.steps[0].health_threshold_index, 0)
+        self.assertEqual(projection.current_health, 500)
+        self.assertEqual(projection.phase_start_health, 500)
+        self.assertEqual(projection.health_thresholds, (-1, 100, -1, -1))
+        self.assertIsNone(projection.timeout_frame)
+
+    def test_health_transition_precedes_due_timeout(self) -> None:
+        projection = project_boss_phase_transition_prefix(
+            current_health=490,
+            phase_start_health=1000,
+            health_thresholds=(500, 100, -1, -1),
+            timer_elapsed=1800,
+            timer_fraction=0.75,
+            timeout_frame=1800,
+        )
+        self.assertEqual(tuple(step.kind for step in projection.steps), ("health",))
+        self.assertEqual(projection.current_health, 500)
+        self.assertEqual(projection.timer_elapsed, 1800)
+        self.assertEqual(projection.timer_fraction, 0.75)
+        self.assertIsNone(projection.timeout_frame)
+
+    def test_timeout_uses_integer_timer_and_restores_largest_threshold(self) -> None:
+        not_due = project_boss_phase_transition_prefix(
+            current_health=720,
+            phase_start_health=1000,
+            health_thresholds=(100, 500, -1, -1),
+            timer_elapsed=1799,
+            timer_fraction=0.99,
+            timeout_frame=1800,
+        )
+        self.assertFalse(not_due.steps)
+        due = project_boss_phase_transition_prefix(
+            current_health=720,
+            phase_start_health=1000,
+            health_thresholds=(100, 500, -1, -1),
+            timer_elapsed=1800,
+            timer_fraction=0.25,
+            timeout_frame=1800,
+        )
+        self.assertEqual(tuple(step.kind for step in due.steps), ("timeout",))
+        self.assertEqual(due.steps[0].health_threshold_index, 1)
+        self.assertEqual(due.current_health, 500)
+        self.assertEqual(due.phase_start_health, 500)
+        self.assertEqual(due.health_thresholds, (100, -1, -1, -1))
+        self.assertEqual(due.timer_elapsed, 0)
+        self.assertEqual(due.timer_fraction, 0.0)
+        self.assertIsNone(due.timeout_frame)
+
+    def test_health_transition_loop_preserves_native_slot_order(self) -> None:
+        reader = Reader(0x57D2F0)
+        struct.pack_into("<i", reader.health, 0, 50)
+        struct.pack_into(
+            "<iiii",
+            reader.control,
+            ENEMY_HEALTH_THRESHOLDS_OFFSET - ENEMY_FLAGS_OFFSET,
+            100,
+            500,
+            -1,
+            -1,
+        )
+        snapshot = capture_boss_phase_snapshot(reader)
+        self.assertIsNotNone(snapshot)
+        self.assertEqual(snapshot.phase_end_health, 100)
+        projection = project_boss_phase_transition_prefix(
+            current_health=50,
+            phase_start_health=1000,
+            health_thresholds=(100, 500, -1, -1),
+            timer_elapsed=10,
+            timer_fraction=0.0,
+            timeout_frame=None,
+        )
+        self.assertEqual(
+            tuple(
+                (step.health_threshold_index, step.health_threshold)
+                for step in projection.steps
+            ),
+            ((0, 100), (1, 500)),
+        )
+        self.assertEqual(projection.current_health, 500)
+        self.assertEqual(projection.health_thresholds, (-1, -1, -1, -1))
+
+    def test_negative_post_damage_health_is_valid_telemetry(self) -> None:
+        reader = Reader(0x57D2F0)
+        struct.pack_into("<i", reader.health, 0, -5)
+        snapshot = capture_boss_phase_snapshot(reader)
+        self.assertIsNotNone(snapshot)
+        self.assertEqual(snapshot.current_health, -5)
+        self.assertEqual(snapshot.completion_pending, "health")
 
 
 if __name__ == "__main__":

@@ -37,6 +37,66 @@ class PhaseProgressTests(unittest.TestCase):
         self.assertIsNotNone(selected)
         self.assertEqual(selected.action, "safe")
 
+    def test_tracker_attributes_phase_change_to_pending_native_boundary(self) -> None:
+        tracker = PhaseProgressTracker()
+        pending = PhaseProgressState(
+            "phase-1",
+            100,
+            490,
+            1000,
+            500,
+            100.0,
+            1800,
+            True,
+            completion_pending="health",
+            continuity_key=("epoch", 5, 0x1234),
+        )
+        successor = PhaseProgressState(
+            "phase-2",
+            101,
+            500,
+            500,
+            100,
+            101.0,
+            None,
+            True,
+            continuity_key=("epoch", 5, 0x1234),
+        )
+        self.assertEqual(tracker.observe(pending).status, "initial")
+        observation = tracker.observe(successor)
+        self.assertEqual(observation.status, "phase_changed")
+        self.assertEqual(observation.completion_cause, "health")
+
+    def test_tracker_does_not_attribute_across_entity_change(self) -> None:
+        tracker = PhaseProgressTracker()
+        pending = PhaseProgressState(
+            "phase-1",
+            100,
+            490,
+            1000,
+            500,
+            100.0,
+            1800,
+            True,
+            completion_pending="health",
+            continuity_key=("epoch-1", 5, 0x1234),
+        )
+        other_entity = PhaseProgressState(
+            "phase-2",
+            101,
+            500,
+            500,
+            100,
+            101.0,
+            None,
+            True,
+            continuity_key=("epoch-2", 5, 0x1234),
+        )
+        tracker.observe(pending)
+        observation = tracker.observe(other_entity)
+        self.assertEqual(observation.status, "phase_changed")
+        self.assertIsNone(observation.completion_cause)
+
 
 if __name__ == "__main__":
     unittest.main()

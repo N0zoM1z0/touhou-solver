@@ -93,8 +93,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `a998f41`
-  (`Retain priority-17 Stage 5 physical gate`).
+- Latest retained research checkpoint: `229ab86`
+  (`Implement asynchronous ordered-input parity`).
 - Latest pre-trial repository/live code checkpoint: `b2e1eff`
   (`Fix priority-17 physical preflight`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
@@ -352,8 +352,8 @@ with three existing Windows skips. No unchanged physical repeat is
 authorized; asynchronous issue/publication recurrence and censored support
 come next.
 
-The current working checkpoint implements that asynchronous recurrence
-offline. The independent scalar oracle distinguishes masks consumed by
+Checkpoint `229ab86` implements that asynchronous recurrence offline. The
+independent scalar oracle distinguishes masks consumed by
 priority-9/11 during dispatch from masks published by priority 17, preserves
 older suffixes/no-write, and admits replacement-censored transient targets.
 The TH08 composition carries these histories through explicit total cadence

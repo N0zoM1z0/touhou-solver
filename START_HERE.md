@@ -24,11 +24,11 @@ historical handoff.
   correction, default-off native lifecycle event ring, native damageability/
   HP gate, action-conditioned static shot atlas, corrected item-pool
   recurrence/static Power ledger, exact bounded Boss HP/timeout transition
-  prefix, `CONTENT-01` shipped content manifest, and `CONTENT-02` static
-  mandatory-event atlas are the current repository checkpoint; no new
-  physical trial was run.
-- Complete Linux discovery passes 1,444 tests in 13.482 seconds.
-- Complete Windows UNC discovery passes 1,444 tests in 28.529 seconds with
+  prefix, route-wide static source/emission candidate atlas, `CONTENT-01`
+  shipped content manifest, and `CONTENT-02` static mandatory-event atlas are
+  the current repository checkpoint; no new physical trial was run.
+- Complete Linux discovery passes 1,447 tests in 15.217 seconds.
+- Complete Windows UNC discovery passes 1,447 tests in 29.408 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -151,6 +151,24 @@ historical handoff.
   causal phase-duration benefit remain unknown.
 - Detailed Boss boundary:
   `notes/research/stage5_combat/BOSS_PHASE_TRANSITION_MODEL_CONTRACT_20260731.md`.
+- `COMBAT-KILL-01` now has a pinned static source/emission program atlas for
+  all six Route-2/Lunatic Final-B stages. It partitions same-enemy
+  call/interrupt/auxiliary components from child, cross-enemy, and phase-exit
+  edges. Across 991 eligible spawns and 70 unique programs, 39
+  ordinary-compatible emitter candidates cover 909 spawn instances, 65
+  direct emission sites, 88 child-emitter sites, and 39 periodic-control
+  sites.
+- This is a causal-root selection index only. Local VM timer guards are not
+  manager-frame kill deadlines; runtime execution, generation/end reason,
+  birth ownership, and post-kill persistence remain unjoined. Same-update ECL
+  and staged-periodic fire precede player-shot HP subtraction, and ordinary
+  source death does not cancel existing projectiles.
+- Retained source/emission atlas:
+  `artifacts/runtime_reports/th08_source_emission_program_atlas_20260731.json`,
+  SHA-256
+  `6ae9494a40ff5a08143564c653b3c2007e1125063a16b1108854db84f74531b5`.
+  Detailed boundary:
+  `notes/research/stage5_combat/ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md`.
 - No live Focus/Shot ranking, combat objective, action authority, or physical
   promotion changed.
 
@@ -442,9 +460,10 @@ historical handoff.
   identity, pickup attribution, and carried later benefit remain open.
   The bounded Boss HP/timeout transition model is also complete, but causal
   action-to-HP delta, ECL successor effects, and physical phase shortening
-  remain open. Source-lifetime-to-emission linkage also remains open. Do not
-  infer events across ring overflow or install either probe as a live
-  issue-time consumer.
+  remain open. The source-lifetime-to-emission static candidate index is
+  complete for its declared pinned CFG boundary, but its runtime generation,
+  instruction, birth, and persistence join remains open. Do not infer events
+  across ring overflow or install either probe as a live issue-time consumer.
 - A supervised warm wind-tunnel service remains deferred. If later branch
   throughput becomes the bottleneck, it must preserve a single writer,
   immutable session/root IDs, branch-level root/FX/stack/thread/map checks,
@@ -517,6 +536,10 @@ historical handoff.
   `0x0042D349` retain the Boss health-before-timeout transition order,
   strict threshold comparison, integer-timer predicate, timeout restoration,
   and the fact that player-shot HP subtraction occurs afterward.
+- Comments at `0x0042C88D`, `0x0042C9A0`, `0x00423159`, and `0x0042D899`
+  retain the ordinary-source active gate, ECL-before-player-damage order,
+  positive-HP staged-periodic gate, and persistence of already-live
+  projectiles after mode-0 source retirement.
 
 ## Read In This Order
 

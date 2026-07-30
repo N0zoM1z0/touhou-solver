@@ -1786,6 +1786,17 @@ first.
   behavior pass 14 focused tests on Linux and Windows. This is synthetic
   implementation authority only; no TH08 process has installed it and no
   generation, kill, emission, strategy, or action claim is promoted.
+- **Static source/emission candidate atlas (2026-07-31):** pinned Route-2
+  Lunatic Final-B ECL across Stages 1/2/3/4A/5/Final B contains 991 eligible
+  timeline spawns and 70 unique root programs. Conservative source ownership
+  traverses only same-enemy call/interrupt/auxiliary edges and keeps child,
+  cross-enemy, and phase-exit targets separate. After conservatively excluding
+  22 Boss-possible programs, 39 ordinary-compatible emitter candidates cover
+  909 spawn instances, 65 direct emission sites, 88 child-emitter sites, and
+  39 periodic-control sites. These are symbolic static candidates: local VM
+  timers are not kill deadlines, runtime execution/generation/end reason are
+  absent, and already-live projectiles persist. No prevented-birth, exposure,
+  strategy, or action claim is promoted.
 - **Observed route-resource limit (2026-07-31):** two accepted natural
   Route-2/Lunatic Game Start prefixes, bounded strictly before their first
   native hits, retain `Power 0 -> 5` across 789 decisions and `Power 0 -> 0`
@@ -1843,14 +1854,17 @@ first.
   `notes/research/stage5_combat/ROUTE2_ENEMY_END_SEMANTICS_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ORDINARY_ENEMY_LIFECYCLE_EVENT_RING_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md`, and
+  `notes/research/stage5_combat/ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER_PICKUP_CAPABILITY_LEDGER_CONTRACT_20260731.md`.
   The raw first-64 inventory now has physical trace-only observation
   authority. The Power-0 audit has first-hit-bounded route observation
   authority. The lifecycle ring has offline/synthetic implementation
   authority only. The damageability/coverage atlas has offline semantic/static
-  authority only. Runtime generation/end tracking, exposure causality, causal
-  collection, targeting, and S18 live action authority remain none.
+  authority only. The source/emission atlas has shipped-content/static
+  candidate authority only. Runtime generation/end tracking, instruction
+  execution, exposure causality, causal collection, targeting, and S18 live
+  action authority remain none.
 
 ## Adding Or Changing A Strategy
 

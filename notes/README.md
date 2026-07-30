@@ -58,12 +58,13 @@ General control formalizations deliberately remain at stable root paths:
 2. [pipeline root and hazard coverage](PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md);
 3. [complete-mask issue action](COMPLETE_MASK_ISSUE_ACTION_CONTRACT_20260727.md);
 4. [asynchronous ordered input publication](ASYNC_ORDERED_INPUT_PUBLICATION_CONTRACT_20260730.md);
-5. [dual-bound query-local refinement](DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md);
-6. [budgeted belief refinement](BUDGETED_BELIEF_REFINEMENT_20260725.md);
-7. [exact augmented partial survival](EXACT_AUGMENTED_PARTIAL_SURVIVAL_WITNESS_CONTRACT_20260727.md);
-8. [frozen manager/input clock](FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md);
-9. [pre-loss continuation reserve](PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md); and
-10. [exact-version supplemental publication](EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md).
+5. [immutable future body/flag/geometry schedule](IMMUTABLE_FUTURE_BODY_FLAG_GEOMETRY_SCHEDULE_CONTRACT_20260730.md);
+6. [dual-bound query-local refinement](DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md);
+7. [budgeted belief refinement](BUDGETED_BELIEF_REFINEMENT_20260725.md);
+8. [exact augmented partial survival](EXACT_AUGMENTED_PARTIAL_SURVIVAL_WITNESS_CONTRACT_20260727.md);
+9. [frozen manager/input clock](FROZEN_MANAGER_INPUT_CLOCK_BOUNDARY_20260726.md);
+10. [pre-loss continuation reserve](PRELOSS_CONTINUATION_RESERVE_CONTRACT_20260726.md); and
+11. [exact-version supplemental publication](EXACT_VERSION_ASYNC_SUPPLEMENTAL_PUBLICATION_20260726.md).
 
 `START_HERE.md` remains authoritative for the exact subset and reading order
 required by the current checkpoint.

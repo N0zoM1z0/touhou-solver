@@ -665,19 +665,52 @@ retain the ordered transaction identity. Overflow or read failure marks only
 that interval unknown and must never stop a stage. This probe is required
 before mapping live estimator support into the oracle deadline.
 
+## Immutable Offline Future-Schedule Boundary
+
+The producer audit found no complete predictive body/flag/geometry producer.
+Current snapshots become `UNKNOWN` from root+1, retained body memory cannot
+enumerate unseen births or future state writes, and G5/Stage-5 evidence does
+not contain complete per-physical-update body geometry.
+
+The finite representation and composition boundary is nevertheless complete:
+
+- one schedule set content-addresses exact root/clock/source identity and
+  every equal-horizon nature branch;
+- every frame contains sorted unique body identities, mode-independent flags,
+  and canonical binary32 geometry;
+- asynchronous input/mode histories use one uniform controller action before
+  the hidden schedule choice;
+- the next observation key always contains the exact projected body flags and
+  geometry visible at that decision; and
+- hidden histories merge only after the complete scheduled body state and
+  actuator/mode observation converge.
+
+The deterministic report
+`artifacts/runtime_reports/th08_future_body_schedule_differential_20260730.json`
+hashes to
+`66f0105028451f84b01cdef7c7fe198d9a50d6114ca72df693aa0242da062ee8`.
+Linux and Windows bytes agree across three cases, eight branches, and 27
+per-update comparisons with zero mismatch. The retained CE-0176 flags/count
+open all 16 final contact/damage gates; its fixture geometry is synthetic.
+
+This is offline supplied-schedule authority only. It does not close the
+predictive producer, movement/collision, viability, damage, publication
+deadline, or physical stage gates.
+Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
+14.286/31.013 seconds, with the three existing Windows skips.
+
 ## Remaining Implementation And Promotion Plan
 
-1. **SEM-MODE-C phase/differential closure:** the independent ordered scalar
-   state and priority-9/11/17 composition are implemented. The retained
-   post-hoc audit closes what the current trace can identify and proves that
-   exact publication deadline is not identifiable from it. Implement and
-   validate the bounded priority-17 serial probe above, derive the physical
-   delay adapter, then build an optimized implementation and exact scalar
-   differential. Retain the atomic implementation only as a rejected
-   baseline.
-2. **SEM-MODE-C integration — exact hazard/version recurrence:** connect the
-   corrected primitive to a complete immutable body/flag/geometry schedule
-   and exact physical-update clock without changing live action authority.
+1. **SEM-MODE-C predictive schedule producer:** the asynchronous ordered
+   scalar/native recurrence and offline immutable schedule/body-set
+   differential are implemented. Next enumerate or conservatively envelope
+   unseen births, future non-mode flag writes, despawns/transforms,
+   per-update geometry, and their joint scheduler/cadence support. A missing
+   class remains `UNKNOWN`; never substitute a current snapshot or
+   retrospective fixture.
+2. **SEM-MODE-C survival integration:** bind one fixed predictive schedule
+   version to movement/collision, then publish viable-state and
+   safe-action-mask differentials without changing live action authority.
 3. **SEM-MODE-D — damage separation:** apply the projected damage body set to
    shadow damage objective without letting damage affect hard viability.
    Keep unfocused combat selection disabled.

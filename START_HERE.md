@@ -19,6 +19,8 @@ located; it does not change the authority order below.
 6. `notes/PIPELINE_ROOT_AND_HAZARD_COVERAGE_CONTRACT_20260727.md`
 7. `notes/COMPLETE_MASK_ISSUE_ACTION_CONTRACT_20260727.md`
 8. `notes/ASYNC_ORDERED_INPUT_PUBLICATION_CONTRACT_20260730.md`
+   and
+   `notes/IMMUTABLE_FUTURE_BODY_FLAG_GEOMETRY_SCHEDULE_CONTRACT_20260730.md`
 9. `notes/DUAL_BOUND_QUERY_LOCAL_REFINEMENT_CONTRACT_20260727.md`
 10. `notes/BUDGETED_BELIEF_REFINEMENT_20260725.md`
 11. `notes/EXACT_AUGMENTED_PARTIAL_SURVIVAL_WITNESS_CONTRACT_20260727.md`
@@ -374,6 +376,35 @@ future world schedules remain without physical universal authority.
 Focused, strict-compiler, and Linux sanitizer gates pass. Complete
 Linux/Windows discovery passes 1,247/1,247 in 14.990/30.874 seconds, with
 three existing Windows skips.
+
+The next finite SEM-MODE-C boundary is now implemented offline. An immutable
+schedule set binds root physical update, exact clock identity, source SHA,
+equal-horizon hidden branches, sorted body identities, mode-independent
+flags, and canonical binary32 geometry into one digest. The asynchronous
+composition carries that digest through every branch and forces the exact
+projected body flags/geometry visible at the next decision into its
+observation key. Thus different observed geometry cannot be merged by an
+incomplete caller observation, while hidden histories that converge before
+the next observation still merge non-clairvoyantly.
+
+The retained deterministic report
+`artifacts/runtime_reports/th08_future_body_schedule_differential_20260730.json`
+hashes to
+`66f0105028451f84b01cdef7c7fe198d9a50d6114ca72df693aa0242da062ee8`.
+Linux and Windows generate identical bytes. Three supplied-schedule cases
+cover eight branches and 27 per-update scalar/body-set comparisons with zero
+mismatch; the CE-0176 semantic capsule opens all 16 final contact and
+player-shot-damage gates. Its geometry is synthetic and has no physical
+authority.
+
+This closes only the offline schedule representation, immutable version, and
+body-set differential gates. The repository still has no complete predictive
+producer: unseen births, future non-mode flag writes, despawns/transforms,
+per-update geometry, and joint scheduler/cadence support remain absent, so
+live future coverage remains `UNKNOWN` from root+1. No physical run, live
+action, collision/viability, damage, or NMNB authority follows.
+Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
+14.286/31.013 seconds, with the three existing Windows skips.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -737,16 +768,18 @@ Do not resume broad G5 work first.
    observed callback-step values `1..5` remain proposal data, not a universal
    bound or direct mapping from `control_delay_candidates`; the independent
    callback/cadence supports also lack a verified joint scheduler automaton.
-   Next build or conservatively version a complete immutable future
-   body/flag/geometry producer before survival integration; do not substitute
-   the current `future hazard events unseen` trace snapshot. Publish exact
-   body-set differentials first, then viable-state and safe-action-mask
-   differentials, without granting live action authority. Only after the
-   immutable producer/model version exists may one new whole-stage physical
-   falsifier run without fail-close. Then complete SEM-MODE-D
-   damage-objective separation and SEM-MODE-E whole-model optimized/native
-   parity. Keep unfocused-combat promotion disabled and do not repeat the
-   unchanged priority-17 Stage-5 workload.
+   The offline immutable schedule/version representation and exact body-set
+   differential now pass, but no predictive producer exists. Next enumerate
+   or conservatively envelope unseen births, future non-mode flag writes,
+   despawns/transforms, per-update geometry, and their joint scheduler/
+   cadence support; do not substitute the current `future hazard events
+   unseen` snapshot or a retrospective fixture. Then publish viable-state and
+   safe-action-mask differentials without granting live action authority.
+   Only after that predictive producer/model version exists may one new
+   whole-stage physical falsifier run without fail-close. Then complete
+   SEM-MODE-D damage-objective separation and SEM-MODE-E whole-model
+   optimized/native parity. Keep unfocused-combat promotion disabled and do
+   not repeat the unchanged priority-17 Stage-5 workload.
 3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed

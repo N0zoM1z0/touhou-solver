@@ -422,6 +422,17 @@ Passing claim 1 does not establish claims 2--4.
   `f9fbe98bac5fe9481e8baf4bc09c51b328b12fb744d724132dd0d7adb7e3e4b0`
   and
   `91df49e10f919e4c1681cb617563c311c55902b0500ee2ba5b379a23b391885a`.
+- `th08_future_body_schedule.py` now supplies an offline-only immutable
+  body/flag/geometry schedule set. Its digest covers root physical update,
+  exact clock/provenance identity, every finite nature branch, body identity,
+  mode-independent flags, and binary32 geometry. The asynchronous
+  composition carries that version through hidden histories and includes
+  exact projected body flags/geometry in the next observation key. A
+  deterministic Linux/Windows-byte-identical report covers three supplied
+  schedule cases, eight branches, and 27 scalar/body-set comparisons with
+  zero mismatch. This is representation and composition authority only:
+  no predictive producer exists and physical future coverage remains
+  `UNKNOWN` from root+1.
 - Lookup-only version/root checks are exact.  In the first physical shadow,
   every root that was both covered and completed was consumed; miss delivery,
   not lookup corruption, caused the low hit rate.

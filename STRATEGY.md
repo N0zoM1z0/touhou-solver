@@ -800,6 +800,33 @@ action, damage/unfocused combat, survival, or NMNB authority is promoted.
 Continue with the complete immutable future producer and independent
 body-set differential; do not repeat the unchanged Stage-5 diagnostic.
 
+**2026-07-30 immutable future-schedule offline checkpoint:** the finite
+representation and body-set differential portions of the next gate now pass.
+One content-addressed schedule set carries exact root/clock/source identity,
+equal-horizon hidden branches, sorted body identities, mode-independent
+flags, and canonical binary32 geometry. Every asynchronous successor key
+automatically contains the projected body flags and geometry visible at the
+next decision, so a caller cannot omit differing observed geometry from an
+observation merge. Hidden histories may merge only after that body state and
+the remaining actuator/mode observation converge.
+
+The deterministic retained report hashes to
+`66f0105028451f84b01cdef7c7fe198d9a50d6114ca72df693aa0242da062ee8`.
+Linux/Windows bytes agree over three cases, eight branches, and 27 per-update
+comparisons with zero mismatch; the CE-0176 endpoint opens all 16 retained
+contact/damage gates. Its geometry is synthetic.
+
+Status remains **Offline**. The implementation accepts only deterministic
+fixtures or retrospective exact schedules and explicitly records no physical
+predictive authority. Current live future coverage remains `UNKNOWN` from
+root+1 because unseen births, non-mode flag writes, despawns/transforms,
+per-update geometry, and joint scheduler/cadence support have no complete
+producer. No live action, hard survival, damage/unfocused combat, physical,
+or NMNB promotion occurs. Build that predictive producer before viable-state
+or safe-action-mask integration and before any new stage-level falsifier.
+Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
+14.286/31.013 seconds, with the three existing Windows skips.
+
 The amendment and CE-0183/0184 override the numbered historical backlog
 below until the semantic correction/model-version gate is complete. Those
 rows retain evidence/status history; they are not permission to resume G5

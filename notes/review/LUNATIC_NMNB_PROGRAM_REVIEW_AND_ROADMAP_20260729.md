@@ -1247,6 +1247,46 @@ and its body-set differential. Only after that new model exists may a
 stage-level physical falsifier run without fail-close; do not repeat the
 unchanged priority-17 Stage-5 diagnostic.
 
+2026-07-30 immutable future body/flag/geometry **offline boundary**: a producer
+audit confirms that the repository still has no complete predictive
+producer. Current snapshots become `UNKNOWN` at root+1; enemy memory cannot
+enumerate unseen births, later non-mode flag writes, despawns/transforms, or
+per-update geometry; G5 event evidence does not complete those classes; and
+the retained Stage-5 trace is decision-bracketed rather than a native
+per-update geometry schedule.
+
+The finite part of the dependency is now explicit and tested.
+`scripts/th08_future_body_schedule.py` content-addresses root physical-update
+identity, clock version, provenance, equal-horizon nature branches, sorted
+body identities, mode-independent flags, and exact binary32 geometry. It
+composes each hidden schedule with the asynchronous ordered-input/mode
+recurrence under one controller action. The next observation key forcibly
+includes exact projected body flags and geometry, preventing an incomplete
+auxiliary observation from merging physically different endpoints. Hidden
+histories that differ internally but converge by the next decision still
+merge before the next maximization.
+
+The source-hashed report
+`artifacts/runtime_reports/th08_future_body_schedule_differential_20260730.json`
+has SHA-256
+`66f0105028451f84b01cdef7c7fe198d9a50d6114ca72df693aa0242da062ee8`.
+Linux and Windows generate byte-identical output. Three cases cover eight
+complete branches and 27 per-update comparisons with zero mismatch against a
+separate scalar mode/body-set oracle. The CE-0176 fixture opens all 16 final
+contact and damage bodies, but its geometry is synthetic and only the
+retained flags/count have physical semantic provenance.
+
+This completes the offline representation/version/body-set-differential
+subgate, not the predictive producer. Status remains **Offline / no live
+authority**. Next enumerate or conservatively envelope unseen births,
+non-mode flag writes, despawns/transforms, per-update geometry, and their
+joint scheduler/cadence support. Only a fixed predictive version can proceed
+to viable-state/safe-action-mask differentials and then one non-fail-close
+whole-stage physical falsifier. The mandatory promotion ring remains
+Lunatic Stage 3, Stage 4A, Stage 5, and Final B before a Power-0 full route.
+Ten focused tests and complete Linux/Windows discovery pass 1,257/1,257 in
+14.286/31.013 seconds, with the three existing Windows skips.
+
 ### Phase 2 — Repair collision geometry and lifecycle
 
 Implement as small, separately reviewable changes:

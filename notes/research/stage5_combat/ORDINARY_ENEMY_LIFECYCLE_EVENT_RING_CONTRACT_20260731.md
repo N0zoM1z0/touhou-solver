@@ -116,6 +116,12 @@ Each stub:
 7. commits the header serial; then
 8. restores state and jumps to the first untouched instruction.
 
+CE-0224 corrects the first v3 selector encoding. IA-32
+`imul r32, r/m32, imm8` sign-extends event-size byte `0x80` to `-128`; the
+stub now uses `imul r32, r/m32, imm32` with exact positive stride 128. A
+byte-level regression test decodes the signed immediate and rejects the old
+sequence. No v3 probe was installed before the correction.
+
 The implementation assumes one producer thread. This is **inferred** from the
 covered enemy/item-management call topology and must be checked in the first
 runtime trace. It is not a general multi-producer ring.
@@ -235,7 +241,7 @@ rows, but the ring is not an observation used by the planner or issue path.
 
 ## Tests And Current Authority
 
-The focused probe suite now covers 18 tests:
+The focused probe suite now covers 19 tests:
 
 - all IDA-revalidated addresses and byte spans;
 - enemy and item stub replay/return layout and fixed-slot bounds;
@@ -248,6 +254,7 @@ The focused probe suite now covers 18 tests:
 - cull-without-resource-change validation;
 - exact, overflow, and unstable reads;
 - one- or two-span bulk ring reads across wrap;
+- positive imm32 event-stride selection at the 128-byte sign boundary;
 - activation-last install plus reverse-order cleanup;
 - activation quiescence before replacing any in-flight instruction span;
 - full rollback after a synthetic mid-activation failure; and
@@ -259,8 +266,8 @@ target termination on unsafe instrumentation state.
 
 No game, native replay, runtime installation, or physical trial was run. The
 ring and its transport currently have implementation/synthetic-test authority
-only. Complete discovery passes 1,496 tests in 14.227 seconds on Linux and
-30.491 seconds through the Windows UNC loader, with the three existing skips.
+only. Complete discovery passes 1,497 tests in 14.888 seconds on Linux and
+30.680 seconds through the Windows UNC loader, with the three existing skips.
 
 ## Next Gate
 

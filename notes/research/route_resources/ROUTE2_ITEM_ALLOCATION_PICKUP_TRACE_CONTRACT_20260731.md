@@ -71,6 +71,11 @@ boundary.
   activation quiescence, reverse rollback, and unsafe-target termination
   boundary.
 
+CE-0224 corrects the initial v3 ring-selector encoding:
+`imul ..., imm8` sign-extended `0x80` to `-128`. The stub now uses an imm32
+positive stride, and a deterministic byte-level test rejects the old
+sequence. No v3 probe was installed before the correction.
+
 A successful item-allocation event retains:
 
 - item pointer and exact 2,096-slot index;
@@ -161,15 +166,15 @@ rank an action, or reinterpret an absent item event as evidence of no drop.
 
 Focused verification passes:
 
-- 18 probe/transport tests;
+- 19 probe/transport tests;
 - 12 lowerer/join tests;
 - 20 live-agent hotkey tests;
 - 14 full-route supervisor tests;
 - 9 live-CLI tests; and
 - 35 practice-supervisor tests.
 
-Ruff passes. Complete Linux discovery passes 1,496 tests in 14.227 seconds.
-Complete Windows UNC discovery passes 1,496 tests in 30.491 seconds with the
+Ruff passes. Complete Linux discovery passes 1,497 tests in 14.888 seconds.
+Complete Windows UNC discovery passes 1,497 tests in 30.680 seconds with the
 three existing skips.
 
 No TH08 process, probe installation, runtime batch, replay, controller, or

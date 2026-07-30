@@ -465,7 +465,10 @@ def _select_unpublished_event(
     code += b"\x40"  # inc eax
     code += b"\x89\xc1\x49"  # mov ecx, eax; dec ecx
     code += b"\x81\xe1" + _u32(PROBE_CAPACITY - 1)
-    code += b"\x6b\xc9" + bytes((PROBE_EVENT_SIZE,))
+    # IMUL r32, r/m32, imm8 sign-extends its immediate.  Event sizes at or
+    # above 0x80 therefore require the imm32 encoding or the selected slot
+    # walks backwards from the ring base.
+    code += b"\x69\xc9" + _u32(PROBE_EVENT_SIZE)
     code += b"\x81\xc1" + _u32(event_base)
     return bytes(code)
 

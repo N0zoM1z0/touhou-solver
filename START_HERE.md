@@ -35,8 +35,8 @@ historical handoff.
   `CONTENT-01` shipped content manifest, and `CONTENT-02` static
   mandatory-event atlas are the current repository checkpoint; no new
   physical trial was run.
-- Complete Linux discovery passes 1,496 tests in 14.227 seconds.
-- Complete Windows UNC discovery passes 1,496 tests in 30.491 seconds with
+- Complete Linux discovery passes 1,497 tests in 14.888 seconds.
+- Complete Windows UNC discovery passes 1,497 tests in 30.680 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -94,7 +94,11 @@ historical handoff.
   callers may not invent an owner. Pre-allocation RNG and the original
   pre-full-Power requested type are deliberately unavailable at the
   successful-allocation hook.
-- Eighteen focused probe tests pass, including program/caller/source-owner
+- CE-0224 corrects the initial v3 ring selector: x86 `imul ..., imm8`
+  sign-extended event size `0x80` to `-128`. The selector now uses the imm32
+  encoding and a deterministic byte-level regression test rejects the old
+  form. No v3 probe was installed before this correction.
+- Nineteen focused probe tests pass, including program/caller/source-owner
   validation, paired pickup and cull transactions, bulk ring-wrap reads,
   activation quiescence, overwrite invalidation, multi-site rollback,
   reverse-order cleanup, and unsafe restore retention. This is

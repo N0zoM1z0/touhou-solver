@@ -1787,7 +1787,10 @@ first.
   exact source enemy at the five defeat-helper callers. Pickup carries one
   same-update pre/post resource transaction. Full-ring overwrite, bulk wrap
   reads, program/caller/owner/transaction rejection, multi-site rollback,
-  reverse cleanup, and unsafe restore pass 18 focused tests. This is
+  reverse cleanup, and unsafe restore pass 19 focused tests. CE-0224 corrects
+  the initial v3 slot selector's sign-extended `imul imm8`; the production
+  stub now uses an exact positive imm32 event stride, and no v3 probe was
+  installed before the correction. This is
   synthetic implementation authority only; no TH08 process has installed it
   and no generation, kill, pickup, strategy, or action claim is promoted.
 - **Implemented lifecycle transport (2026-07-31):** the live CLI, hotkey

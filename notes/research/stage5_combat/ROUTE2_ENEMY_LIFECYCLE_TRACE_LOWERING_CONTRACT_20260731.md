@@ -175,7 +175,7 @@ join, plus cull followed by slot reuse. Decoder and lowerer failures cover
 unknown callers/owners, transaction identity, resource/RNG disagreement, and
 invalid type/stage transitions.
 
-Complete discovery passes 1,496 tests in 14.227 seconds on Linux and 30.491
+Complete discovery passes 1,497 tests in 14.888 seconds on Linux and 30.680
 seconds through the Windows UNC loader, with the three existing skips.
 
 On explicit runtime authorization, the next gate is one short diagnostic

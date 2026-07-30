@@ -417,6 +417,17 @@ class EnemyLifecycleProbeTests(unittest.TestCase):
                 site.return_address,
             )
 
+    def test_event_stride_uses_non_sign_extending_immediate(self) -> None:
+        stub = build_site_stub(0x02000000, HOOK_SITES[0])
+        multiply = stub.index(b"\x69\xc9")
+        immediate = struct.unpack("<i", stub[multiply + 2 : multiply + 6])[0]
+        self.assertEqual(immediate, PROBE_EVENT_SIZE)
+        self.assertGreaterEqual(PROBE_EVENT_SIZE, 0x80)
+        self.assertNotIn(
+            b"\x6b\xc9" + bytes((PROBE_EVENT_SIZE & 0xFF,)),
+            stub,
+        )
+
     def test_activation_patches_cover_complete_instruction_spans(self) -> None:
         remote_base = 0x02000000
         patches = build_probe_patches(remote_base)

@@ -86,7 +86,10 @@ The exact corrected launch is:
 CE-0199 retains the rejected no-extra-flag attempt `20260730_124635`. It
 entered Stage 5 but fail-closed on `time_scale_authority_unknown` at frame 1,
 before any decision. Its zero hits are not evidence and do not consume this
-gate.
+gate. The next prelaunch attempt exposed and removed a stale supervisor
+restriction that coupled this continuation to unrelated trace observers; it
+did not launch the game. Focused Linux/Windows supervisor discovery and
+complete 1,298-test suites pass before the corrected physical retry.
 
 ## Preregistered Interpretation
 

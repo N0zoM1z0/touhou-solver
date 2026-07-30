@@ -1068,18 +1068,6 @@ def main(argv: list[str] | None = None) -> int:
             "Final-B scale delivery cannot be combined with another "
             "experiment flag"
         )
-    if (
-        args.diagnostic_continue_root_only_scale
-        and not (
-            args.trace_enemy_mode_transitions
-            or args.trace_priority17_publications
-        )
-    ):
-        raise ValueError(
-            "diagnostic root-only scale continuation is scoped to the "
-            "whole-stage enemy-mode observer or priority-17 publication "
-            "observer"
-        )
     if min(
         args.cooldown,
         args.launch_timeout,

@@ -9,6 +9,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import th08_practice_supervisor as supervisor
@@ -278,6 +279,42 @@ class PracticeSupervisorTests(unittest.TestCase):
         self.assertTrue(enabled_args.trace_enemy_mode_transitions)
         self.assertTrue(
             enabled_args.diagnostic_continue_root_only_scale
+        )
+
+    def test_scale_continuation_does_not_require_a_trace_observer(
+        self,
+    ) -> None:
+        api = object()
+        with (
+            patch.object(supervisor.os, "name", "nt"),
+            patch.object(supervisor, "Win32", return_value=api),
+            patch.object(supervisor, "_configure_supervisor_api"),
+            patch.object(
+                supervisor,
+                "run_trial",
+                return_value=SimpleNamespace(run_id="stage5-reserve"),
+            ) as run_trial,
+        ):
+            self.assertEqual(
+                supervisor.main(
+                    [
+                        "--stage",
+                        "5",
+                        "--diagnostic-continue-root-only-scale",
+                        "--armed",
+                    ]
+                ),
+                0,
+            )
+
+        self.assertFalse(
+            run_trial.call_args.args[0].trace_enemy_mode_transitions
+        )
+        self.assertFalse(
+            run_trial.call_args.args[0].trace_priority17_publications
+        )
+        self.assertTrue(
+            run_trial.call_args.args[0].diagnostic_continue_root_only_scale
         )
 
     def test_parser_accepts_normal_and_hard_practice_difficulties(

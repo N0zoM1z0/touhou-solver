@@ -92,8 +92,8 @@ describe the same decision. Python/C++ parity is not physical correctness.
 ### Exact state
 
 - Branch: `main`.
-- Latest retained research checkpoint: `b2e1eff`
-  (`Fix priority-17 physical preflight`).
+- Latest retained research checkpoint: `a998f41`
+  (`Retain priority-17 Stage 5 physical gate`).
 - Latest pre-trial repository/live code checkpoint: `b2e1eff`
   (`Fix priority-17 physical preflight`).
 - The code at `3f0e56f` was physically exercised by the whole Stage-6B C5-2
@@ -102,16 +102,14 @@ describe the same decision. Python/C++ parity is not physical correctness.
 - Latest native-semantic correction checkpoint: `ca69ace`. The original
   review baseline remains `f28e13ca853280acec585f6296d947aafcabcaad`.
 - Latest complete physical workload:
-  `lunatic_route2_stage5_unattended_20260730_041408`. It is a complete
-  original-game hard-no-Bomb Lunatic Sakuya/Remilia Stage-5 diagnostic trace:
-  frames `1..42463`, 11,879 decisions, `route_complete`, and ten CE-0192
-  hit edges. It is not observer-off survival, a Power-0 route, or NMNB.
+  `lunatic_route2_stage5_unattended_20260730_083416`. It is a complete
+  original-game hard-no-Bomb Lunatic Sakuya/Remilia Stage-5 priority-17
+  diagnostic trace: frames `1..43376`, 12,109 decisions, `route_complete`,
+  and eleven CE-0196 hit edges. It is not observer-off survival, a Power-0
+  route, or NMNB.
 - Latest physical attempt:
-  `lunatic_route2_stage5_unattended_20260730_082428`. It installed and cleaned
-  the priority-17 hook, then stopped at gameplay frame 1 with
-  `time_scale_authority_unknown` before any decision or hit. CE-0194 retains
-  the command/trace-cursor counterexample. It is not a stage or survival
-  sample; the latest complete physical workload remains `041408`.
+  `lunatic_route2_stage5_unattended_20260730_083416`, the complete workload
+  above. CE-0194's preceding frame-1 attempt is physically revalidated.
 - No TH08, controller, practice supervisor, full-route supervisor, or test
   process is intentionally left running.
 - `audits/` is untracked user input. Never stage it.
@@ -319,6 +317,39 @@ serial cursor advances only after the containing decision row is flushed.
 Complete Linux/Windows discovery passes 1,226 tests in 14.851/30.813 seconds,
 with three existing Windows skips. Corrected physical revalidation is the
 next gate.
+
+Checkpoint `a998f41` retains that corrected physical gate. Run `083416`
+completed original-game Lunatic Stage 5 through frame 43,376 with 12,109
+decisions, hard no-Bomb, normal route completion, no-save, exact cleanup, and
+11 CE-0196 hits. The canonical fresh hit is nonspell frame 4,323, nine frames
+after robust-action exhaustion. Diagnostic scale continuation and hook
+perturbation have unknown direction, so this is not a survival comparator.
+
+The corrected source-hashed publication report retains 30,904 priority-17
+callback exits and all 6,565 real-write pre/post serial brackets. Callback
+exit occurs during 1,223 writes; 478 callbacks expose a non-final ordered
+dispatch mask. Another 122 consecutive callback serial edges retain zero
+`enemy_manager_frame` delta, physically rejecting manager frame as the
+universal publication clock.
+
+CE-0195 corrects the initial reporter's false `21 -> 1` rollback: old events
+outside a later transaction are filtered without weakening true bound/batch
+continuity checks, and first-final timing now requires a complete retained
+prefix. Four actual overflow batches remain explicit unknowns. Complete
+prefixes observe final masks after callback steps
+`{1:4893,2:1648,3:17,4:2,5:1}`, while one exact one-step interval is replaced
+without observing its transient target. That censor blocks an unconditional
+deadline bound and any live estimator adapter.
+
+The compact report SHA-256 is
+`395ce5384e14e815afe6a5ce1977b165a94344906f3eb483a56c2484056be9b8`;
+the ignored 501,784,095-byte source hashes to
+`319b22f94dfdb2ce5322a0779839f94e6d03b6866c2d985e75e7c323473cae2f`.
+Fresh regeneration is structurally identical. Five focused report tests and
+complete Linux/Windows discovery pass 1,227 tests in 14.858/30.896 seconds,
+with three existing Windows skips. No unchanged physical repeat is
+authorized; asynchronous issue/publication recurrence and censored support
+come next.
 
 Checkpoint `e309c81` passes the `SEM-TIMER` offline semantic gate: 17/17
 product/raw-oracle/Linux-and-Windows-native cases per platform, a separate
@@ -676,31 +707,26 @@ Do not resume broad G5 work first.
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
    non-aborting evidence.
-2. Continue `SEM-MODE-C` from checkpoint `b2e1eff`. The independent ordered
-   transaction state and native priority-9-before-priority-17 composition are
-   complete offline. The retained post-hoc audit exhausts the current trace
-   and proves exact publication deadline unidentifiable from it. The bounded
-   priority-17 serial/event ring and pre/post-dispatch brackets now pass
-   preflight. CE-0194 rejects the probe-only command because the existing
-   root-only scale authority check stops at frame 1. Run one complete
-   original-game Lunatic Stage-5 workload with
-   `--trace-priority17-publications` and the explicit
-   `--diagnostic-continue-root-only-scale`; preserve hard no-Bomb,
-   `stop-after-hits=0`, stage-level scope, and normal completion even if the
-   probe becomes unavailable. The scale proxy has unknown direction and no
-   survival authority. Retain the compact report and use only
-   fully-covered serial intervals to close asynchronous capture/issue phase
-   and physical completion-delay support without treating manager frame as
-   an input clock. Then build an optimized implementation and run exact
-   scalar/optimized parity for multi-release/press, reversal, Focus, Shot,
-   overwrite, no-write, and every intermediate action identity. After that,
-   build or conservatively version an exact future body/flag/geometry
-   producer before survival integration; do not substitute the current
-   `future hazard events unseen` trace snapshot. Publish body-set,
-   viable-state, and safe-action-mask differentials without granting live
-   action authority. Then complete SEM-MODE-D damage-objective separation
-   and SEM-MODE-E optimized/native parity. Keep unfocused-combat promotion
-   disabled.
+2. Continue `SEM-MODE-C` from checkpoint `a998f41`. The physical observer
+   closes existence of callback-in-dispatch publication and rejects manager
+   frame as its universal clock. Do not repeat the probe workload unchanged.
+   First extend the independent scalar transition so callback exits may occur
+   while ordered release/press dispatch is executing. Carry native active
+   input and latest held desired input separately; a newer write may
+   supersede an unobserved transient target. Preserve complete-mask no-write,
+   explicit serial gaps, replacement censoring, and observation-compatible
+   merging. Treat observed callback-step values `1..5` as proposal data, not
+   a universal upper bound or a direct mapping from
+   `control_delay_candidates`. Then build an optimized implementation and
+   run exact scalar/optimized parity for multi-release/press, reversal,
+   Focus, Shot, callbacks during dispatch, overwrite, no-write, and every
+   intermediate action identity. After that, build or conservatively version
+   an exact future body/flag/geometry producer before survival integration;
+   do not substitute the current `future hazard events unseen` trace
+   snapshot. Publish body-set, viable-state, and safe-action-mask
+   differentials without granting live action authority. Then complete
+   SEM-MODE-D damage-objective separation and SEM-MODE-E optimized/native
+   parity. Keep unfocused-combat promotion disabled.
 3. Then continue `SEM-GEOM`, `SEM-SOURCE`, and `SEM-ROBUST` in roadmap order.
    Take the smallest whole-stage falsifier applicable to each immutable model
    version. Stage 4A is the current highest-hit physical workload, followed
@@ -748,6 +774,16 @@ publication-phase reports. The supervisor selected no-save, so it is not
 replay-compatible. Do not remove it until the SEM-MODE physical evidence it
 supports has two newer compatible raw/compact-backed replacements.
 
+Also keep the newer complete priority-17 Stage-5 source
+`lunatic_route2_stage5_unattended_20260730_083416.jsonl` locally. It is
+501,784,095 bytes with SHA-256
+`319b22f94dfdb2ce5322a0779839f94e6d03b6866c2d985e75e7c323473cae2f`
+and is the source of the retained publication report, physical dossier, and
+CE-0195/0196 evidence. The supervisor selected no-save, so it is not
+replay-compatible. Runs `041408` and `083416` are the two current
+compact-backed Stage-5 SEM-MODE diagnostic bundles; do not remove either
+until two newer compatible bundles exist.
+
 Also keep the three current Final-B/full-route evidence bundles
 `lunatic_route2_stage6b_finalb_scale_delivery_20260729_233720` and
 `lunatic_route2_stage6b_finalb_scale_delivery_20260730_020015`, plus
@@ -765,8 +801,8 @@ non-raw-path-referenced candidates were permanently removed. The retained
 path/size/SHA-256 manifest is
 `notes/review/RAW_RUNTIME_REMOVAL_MANIFEST_20260729.json`; it records
 2,910,858,360 bytes (`2.710948102 GiB`) reclaimed. After the newest retained
-run, the directory uses 25G (`26,257,096,824` bytes), with 60 ignored raw
-JSONL files totaling `24.373398435 GiB`. Do not bulk-delete the remaining
+run, the directory uses `30,948,108,596` bytes, with 68 ignored raw JSONL
+files totaling `28.737107664 GiB`. Do not bulk-delete the remaining
 legacy/schema/singleton families without another explicit retention decision.
 New practice/full-route
 trials no longer create a duplicate artifact dossier Markdown; the generator
@@ -2588,7 +2624,7 @@ entry, and never selects an exact spell. The scale proxy and extra
 reads/retries are unknown-direction and can perturb cadence, so this is
 diagnostic physical evidence rather than an observer-off survival comparator.
 Run `041408` closes this occurrence gate; do not repeat it unchanged. There is
-now one authorized SEM-MODE-C physical command:
+one retained SEM-MODE-C physical command:
 
 ```bash
 /mnt/c/Windows/System32/cmd.exe /d /c call \
@@ -2598,14 +2634,13 @@ now one authorized SEM-MODE-C physical command:
   --diagnostic-continue-root-only-scale
 ```
 
-This is one complete original-game Stage-5 diagnostic, not a named-spell
-gate. It keeps hard no-Bomb and `stop-after-hits=0`; probe
-unavailability/overflow/read failure must not abort the stage. Do not combine
+Run `083416` closes this physical observer gate. The command is retained for
+exact reproduction but is no longer authorized unchanged. It is a whole-stage
+diagnostic, not a named-spell gate; it keeps hard no-Bomb and
+`stop-after-hits=0`, and probe failure cannot abort the stage. Do not combine
 it with the enemy-mode observer, THPRAC, or another experiment flag. The
 constant-root scale continuation is an explicit unknown-direction
-non-authoritative proxy required by CE-0194, not survival evidence. The
-supervisor retains
-`*.priority17_publication_report.json` after ordinary whole-stage completion.
+non-authoritative proxy required by CE-0194, not survival evidence.
 
 The current explicit trace-only native birth-observer gate adds:
 

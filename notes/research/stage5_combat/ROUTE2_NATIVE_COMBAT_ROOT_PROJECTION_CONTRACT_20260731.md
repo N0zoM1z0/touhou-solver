@@ -95,6 +95,14 @@ active shot differs. This may produce a fail-closed false negative, but it
 does not merge roots whose later initialization or callback behavior is not
 proved control-equivalent.
 
+The subsequent pinned-content audit closes the normal Route-2 SHT subset:
+all 53 Power-selector-reachable records are type 0 with zero update and hit
+callbacks. The projection now reports active slots compatible/incompatible
+with that subset. This removes type-4/5 and hit-callback uncertainty only when
+the exact Route-2/no-Bomb/root-history conditions in
+`ROUTE2_NORMAL_SHOT_CONTENT_CLOSURE_CONTRACT_20260731.md` hold; arbitrary or
+contaminated roots still fail closed.
+
 ## Rolling And Causal Integration
 
 `scripts/tools/th08_native_snapshot_trial.py` schema
@@ -233,9 +241,9 @@ It grants no:
 - prevented hostile birth or shortened exposure claim;
 - physical predictive, shadow, or live action authority.
 
-Four focused projection tests, four focused report tests, twelve rolling
+Four focused projection tests, five focused report tests, twelve rolling
 snapshot tests, and four causal-search tests pass. Ruff and diff checks pass.
-Complete discovery passes 1,508 tests in 14.185 seconds on Linux and 30.682
+Complete discovery passes 1,512 tests in 13.868 seconds on Linux and 31.165
 seconds through the Windows UNC loader, with the three existing skips.
 
 The next authorized causal gate is a small immutable-root corpus spanning

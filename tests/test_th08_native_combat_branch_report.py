@@ -17,6 +17,8 @@ def _summary(frame: int, *, hp: int = 100, damage: int = 0) -> dict[str, int]:
         "active_shot_count": 3,
         "damage_eligible_shot_count": 2,
         "hit_state_shot_count": 1,
+        "route2_normal_damage_path_compatible_active_shot_count": 3,
+        "route2_normal_damage_path_incompatible_active_shot_count": 0,
         "active_enemy_target_count": 1,
         "positive_hp_target_count": 1,
         "positive_hp_sum": hp,
@@ -134,6 +136,51 @@ class NativeCombatBranchReportTests(unittest.TestCase):
         self.assertTrue(
             all(
                 row["candidate_status"] == "rejected_hard_survival"
+                for row in report["branches"]
+            )
+        )
+
+    def test_non_normal_active_shot_keeps_content_boundary_open(self) -> None:
+        source = {
+            "schema": ROLLING_SCHEMA,
+            "result": {
+                "status": ROLLING_ACCEPTED_STATUS,
+                "root_native_combat_projection": _projection(100),
+                "root_compact_state": {"player_phase": 0},
+                "branches": {
+                    branch_id: {
+                        "ticks": [_tick(101, action=0x05)]
+                    }
+                    for branch_id in ("a1", "a2", "b")
+                },
+            },
+        }
+        source["result"]["root_native_combat_projection"]["summary"][
+            "route2_normal_damage_path_compatible_active_shot_count"
+        ] = 2
+        source["result"]["root_native_combat_projection"]["summary"][
+            "route2_normal_damage_path_incompatible_active_shot_count"
+        ] = 1
+
+        report = build_report(
+            source,
+            source_path="fixture.json",
+            source_sha256="e" * 64,
+        )
+
+        self.assertEqual(report["survivor_count"], 3)
+        self.assertTrue(
+            all(
+                row["candidate_status"]
+                == "survival_filtered_proxy_only_non_normal_shot_content"
+                for row in report["branches"]
+            )
+        )
+        self.assertTrue(
+            all(
+                not row["authority"][
+                    "route2_normal_damage_path_content_compatible"
+                ]
                 for row in report["branches"]
             )
         )

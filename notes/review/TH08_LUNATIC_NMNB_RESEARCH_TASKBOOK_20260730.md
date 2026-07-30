@@ -1058,6 +1058,13 @@ Current execution checkpoint, 2026-07-31:
   transactions, rejects native player-phase-2 branches as a hard survival
   filter, and keeps HP-sum change, published frame damage, and supported
   overlap as non-ranking observed/proxy metrics;
+- a SHA-pinned shipped-content audit proves all 53 Route-2 normal
+  Power-selector records are type 0 with zero update/hit callbacks; focused
+  callback 7 is emission-only, while secondary levels 6/7 remain a separate
+  Bomb-only override;
+- native roots now expose incompatible active slots, so this content closure
+  applies only to exact Route-2, zero-Bomb, no-hit histories whose root and
+  future slots stay compatible;
 - no runtime v4 event has been observed, so target-motion/action attribution,
   no v5/v3 combat corpus has been captured, and generation-safe kill,
   prevented hostile births, safe collection, later benefit, and every exit

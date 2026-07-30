@@ -1906,6 +1906,16 @@ first.
   generation-safe HP attribution, prevented births, target selection, branch
   ranking, physical prediction, and live authority remain unresolved. No new
   runtime corpus was captured.
+- **Route-2 normal-shot content closure (2026-07-31, Offline):** the pinned
+  primary/secondary SHTs contain 53 normal Power-selector-reachable records.
+  Every one is type 0 with zero update and hit callbacks; focused callback 7
+  is emission-only. Secondary levels 6/7 contain separate type-6 Bomb shots
+  and are reachable only through the revalidated Bomb override. Native combat
+  roots now count slots incompatible with the normal damage-path subset, and
+  the lowerer preserves a non-normal status instead of applying the content
+  proof. Closure requires exact Route 2, zero-Bomb history/actions, compatible
+  root/tick slots, and no player phase 2. It grants no delivered-damage,
+  generation, benefit, ranking, or live authority.
 - **Boundary:** first revalidate native HP/damageability/end-reason/drop
   semantics, retain trace-only exposure and damage attribution, and separate
   kill, timeout, scripted despawn, and unknown. Any shadow target may rank
@@ -1945,6 +1955,7 @@ first.
   `notes/research/stage5_combat/ROUTE2_ENEMY_LIFECYCLE_TRACE_LOWERING_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_DAMAGEABILITY_AND_STATIC_SHOT_COVERAGE_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_NATIVE_COMBAT_ROOT_PROJECTION_CONTRACT_20260731.md`, and
+  `notes/research/stage5_combat/ROUTE2_NORMAL_SHOT_CONTENT_CLOSURE_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/stage5_combat/ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md`, and
   `notes/research/route_resources/POWER0_CLEAN_PREFIX_AUDIT_CONTRACT_20260731.md`, and
@@ -1958,7 +1969,8 @@ first.
   offline/synthetic implementation authority only. The damageability/coverage
   atlas has offline semantic/static
   authority only. The native combat projection has offline exact-root and
-  synthetic supported-overlap authority only. The source/emission atlas has
+  synthetic supported-overlap authority only. The normal-shot closure has
+  pinned shipped-content/native-selector authority only. The source/emission atlas has
   shipped-content/static
   candidate authority only. The item/drop atlas has shipped-native
   recurrence/static opportunity authority only. The cross-atlas board has

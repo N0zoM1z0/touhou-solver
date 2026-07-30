@@ -1,0 +1,1032 @@
+{
+  "aggregate": {
+    "damage_path_incompatible_normal_record_count": 0,
+    "normal_damage_path_content_closed": true,
+    "normal_record_count": 53,
+    "runtime_slot_compatibility_criteria": {
+      "hit_callback_pointer": 0,
+      "shot_type": 0,
+      "update_callback_pointer": 0
+    },
+    "unsupported_emission_normal_record_count": 0
+  },
+  "authority": {
+    "combat_benefit_authority": false,
+    "generation_safe_damage_authority": false,
+    "kind": "pinned_shipped_sht_and_revalidated_native_selector",
+    "live_action_authority": false,
+    "physical_trial_run": false,
+    "runtime_closure_requires": [
+      "route_id_2",
+      "zero_bomb_history_and_branch_actions",
+      "root_active_slots_match_runtime_compatibility_criteria",
+      "no_player_phase_2_in_root_or_branch"
+    ]
+  },
+  "inputs": {
+    "primary_sht": {
+      "path": "artifacts/decoded/ply02a.sht",
+      "sha256": "4765744ab5bbf797746469d5a6afc6ec7d4b0371422b5aa5a2e54ae668c48885"
+    },
+    "secondary_sht": {
+      "path": "artifacts/decoded/ply02as.sht",
+      "sha256": "f7554b3a32e16da01de9432e22609482a1c98a33212eb904ad47789079abebd3"
+    }
+  },
+  "native_selector": {
+    "address": "0x00450F60",
+    "focus_profile_selector": "player_focus_logic_byte_plus_0x03",
+    "function": "player_emit_shot_level",
+    "normal_power_domain": [
+      0,
+      128
+    ],
+    "normal_power_upper_bounds": [
+      8,
+      24,
+      48,
+      80,
+      128,
+      999
+    ],
+    "normal_selection": "first level whose signed Power threshold exceeds truncated current Power",
+    "route2_special_override": "secondary level 6 or 7 only while Bomb callback is active, callback index is odd, and Bomb timer is at least 60"
+  },
+  "profiles": [
+    {
+      "damage_path_incompatible_normal_records": [],
+      "normal_callback_indices": {
+        "callback_0": [
+          0
+        ],
+        "callback_1": [
+          0
+        ],
+        "callback_2": [
+          0
+        ],
+        "callback_3": [
+          0
+        ]
+      },
+      "normal_level_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "normal_power_upper_bounds": [
+        8,
+        24,
+        48,
+        80,
+        128,
+        999
+      ],
+      "normal_record_count": 26,
+      "normal_records": [
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 0,
+          "offset": 104,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 1,
+          "offset": 164,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 1,
+          "offset": 220,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 1,
+          "offset": 276,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 2,
+          "offset": 336,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 2,
+          "offset": 392,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 2,
+          "offset": 448,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 508,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 564,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 620,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 676,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 732,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 792,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 848,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 904,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 960,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 1016,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 1072,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 1128,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1188,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1244,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1300,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1356,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1412,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1468,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1524,
+          "profile": "unfocused_primary",
+          "shot_type": 0
+        }
+      ],
+      "normal_shot_types": [
+        0
+      ],
+      "path": "artifacts/decoded/ply02a.sht",
+      "profile": "unfocused_primary",
+      "sha256": "4765744ab5bbf797746469d5a6afc6ec7d4b0371422b5aa5a2e54ae668c48885",
+      "special_level_indices": [],
+      "special_record_count": 0,
+      "special_records": [],
+      "unsupported_emission_normal_records": []
+    },
+    {
+      "damage_path_incompatible_normal_records": [],
+      "normal_callback_indices": {
+        "callback_0": [
+          0,
+          7
+        ],
+        "callback_1": [
+          0
+        ],
+        "callback_2": [
+          0
+        ],
+        "callback_3": [
+          0
+        ]
+      },
+      "normal_level_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "normal_power_upper_bounds": [
+        8,
+        24,
+        48,
+        80,
+        128,
+        999
+      ],
+      "normal_record_count": 27,
+      "normal_records": [
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 0,
+          "offset": 120,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 0,
+          "offset": 176,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 0,
+          "offset": 232,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 1,
+          "offset": 292,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 1,
+          "offset": 348,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 1,
+          "offset": 404,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 2,
+          "offset": 464,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 2,
+          "offset": 520,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 2,
+          "offset": 576,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 2,
+          "offset": 632,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 2,
+          "offset": 688,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 748,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 804,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 860,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 916,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 3,
+          "offset": 972,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 1032,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 1088,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 1144,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 1200,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 4,
+          "offset": 1256,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1316,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1372,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1428,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1484,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1540,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        },
+        {
+          "callback_0_index": 7,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 5,
+          "offset": 1596,
+          "profile": "focused_secondary",
+          "shot_type": 0
+        }
+      ],
+      "normal_shot_types": [
+        0
+      ],
+      "path": "artifacts/decoded/ply02as.sht",
+      "profile": "focused_secondary",
+      "sha256": "f7554b3a32e16da01de9432e22609482a1c98a33212eb904ad47789079abebd3",
+      "special_level_indices": [
+        6,
+        7
+      ],
+      "special_record_count": 34,
+      "special_records": [
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 1656,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 1712,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 1768,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 1824,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 1880,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 1936,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 1992,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 2048,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 2104,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 2160,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 2216,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 2272,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 2328,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 2384,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 2440,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 6,
+          "offset": 2496,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 2556,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 2612,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 2668,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 2724,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 2780,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 2836,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 2892,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 2948,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3004,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3060,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3116,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3172,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3228,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3284,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3340,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3396,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3452,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        },
+        {
+          "callback_0_index": 0,
+          "callback_1_index": 0,
+          "callback_2_index": 0,
+          "callback_3_index": 0,
+          "level": 7,
+          "offset": 3508,
+          "profile": "focused_secondary",
+          "shot_type": 6
+        }
+      ],
+      "unsupported_emission_normal_records": []
+    }
+  ],
+  "result": {
+    "nonzero_hit_callback_reachable_from_normal_selector": false,
+    "nonzero_update_callback_reachable_from_normal_selector": false,
+    "status": "route2_normal_damage_path_content_closed",
+    "type45_reachable_from_normal_selector": false
+  },
+  "schema": "th08-route2-normal-shot-content-audit-v1",
+  "taskbook_card": "COMBAT-FAST-01"
+}

@@ -20,6 +20,7 @@ Read in order:
 12. [source/emission program-atlas contract](ROUTE2_SOURCE_EMISSION_PROGRAM_ATLAS_CONTRACT_20260731.md)
 13. [Boss phase-configuration atlas contract](ROUTE2_BOSS_PHASE_CONFIGURATION_ATLAS_CONTRACT_20260731.md)
 14. [native combat root-projection contract](ROUTE2_NATIVE_COMBAT_ROOT_PROJECTION_CONTRACT_20260731.md)
+15. [Route-2 normal-shot content closure](ROUTE2_NORMAL_SHOT_CONTENT_CLOSURE_CONTRACT_20260731.md)
 
 The raw first-64 observer is physically accepted for trace-only use. The v4
 lifecycle ring/lowerer has synthetic authority for exact generation,

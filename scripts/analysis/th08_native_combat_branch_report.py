@@ -123,13 +123,24 @@ def _summarize_branch(
         _integer(summary, "unresolved_overlap_target_count")
         for summary in summaries
     )
+    route2_normal_incompatible_active_shot_ticks = sum(
+        _integer(
+            summary,
+            "route2_normal_damage_path_incompatible_active_shot_count",
+        )
+        for summary in (root_summary, *summaries)
+    )
     candidate_status = (
         "rejected_hard_survival"
         if not survived
         else (
             "survival_filtered_proxy_only_with_unresolved_overlap"
             if unresolved_target_ticks
-            else "survival_filtered_proxy_only"
+            else (
+                "survival_filtered_proxy_only_non_normal_shot_content"
+                if route2_normal_incompatible_active_shot_ticks
+                else "survival_filtered_proxy_only"
+            )
         )
     )
     return {
@@ -195,6 +206,9 @@ def _summarize_branch(
                 _integer(summary, "hit_state_shot_count")
                 for summary in summaries
             ),
+            "route2_normal_damage_path_incompatible_active_shot_ticks": (
+                route2_normal_incompatible_active_shot_ticks
+            ),
         },
         "authority": {
             "hard_survival_filter": "observed_native_player_phase_over_branch",
@@ -206,6 +220,9 @@ def _summarize_branch(
             ),
             "positive_hp_sum": (
                 "cross_slot_aggregate_not_generation_safe_or_birth_normalized"
+            ),
+            "route2_normal_damage_path_content_compatible": (
+                route2_normal_incompatible_active_shot_ticks == 0
             ),
             "combat_benefit_authority": False,
             "live_ranking_authority": False,

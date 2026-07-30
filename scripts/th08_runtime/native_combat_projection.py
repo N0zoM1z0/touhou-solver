@@ -191,6 +191,14 @@ class PlayerShotCombatSlot:
     def damage_loop_eligible(self) -> bool:
         return self.state != 0 and (self.state == 1 or self.shot_type == 3)
 
+    @property
+    def route2_normal_damage_path_compatible(self) -> bool:
+        return (
+            self.shot_type == 0
+            and self.update_callback_pointer == 0
+            and self.hit_callback_pointer == 0
+        )
+
     def record(self) -> dict[str, object]:
         return {
             "slot": self.slot,
@@ -212,6 +220,9 @@ class PlayerShotCombatSlot:
             "hit_callback_pointer": self.hit_callback_pointer,
             "source_record_pointer": self.source_record_pointer,
             "damage_loop_eligible": self.damage_loop_eligible,
+            "route2_normal_damage_path_compatible": (
+                self.route2_normal_damage_path_compatible
+            ),
             "raw_sha256": self.raw_sha256,
         }
 
@@ -805,6 +816,14 @@ def capture_native_combat_projection(
             shot_state.damage_eligible_slot_indices
         ),
         "hit_state_shot_count": sum(slot.state == 2 for slot in shot_state.slots),
+        "route2_normal_damage_path_compatible_active_shot_count": sum(
+            slot.route2_normal_damage_path_compatible
+            for slot in shot_state.slots
+        ),
+        "route2_normal_damage_path_incompatible_active_shot_count": sum(
+            not slot.route2_normal_damage_path_compatible
+            for slot in shot_state.slots
+        ),
         "active_enemy_target_count": len(targets),
         "positive_hp_target_count": sum(target.hitpoints > 0 for target in targets),
         "positive_hp_sum": sum(

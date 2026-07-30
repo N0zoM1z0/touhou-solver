@@ -50,6 +50,7 @@ This is the navigation index for repository evidence. It does not replace
 | [research log](research_log/) | Source-preserved chronological evidence, one shard per date. |
 | [counterexamples](counterexamples/) | Source-preserved durable failures, split by CE range. |
 | [G5 research](research/g5/README.md) | Future-hazard, ECL, birth, source, and auxiliary-VM contracts/results. |
+| [Content/event atlas](research/content/README.md) | Shipped asset identity, parser differentials, and symbolic event coverage. |
 | [Stage-5 combat](research/stage5_combat/README.md) | Enemy HP/damage, exposure, Power, and survival-filtered combat progress. |
 | [Route resources](research/route_resources/README.md) | Route-faithful Power, items, and survival-filtered resource policy. |
 | [architecture](architecture/README.md) | Refactor seams, native/Python boundaries, and implementation performance. |

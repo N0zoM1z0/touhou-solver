@@ -19,11 +19,12 @@ historical handoff.
   (`Build rolling native snapshot iteration loop`).
 - H=32 causal-search checkpoint: `3d15953`
   (`Build causal native snapshot policy search`).
-- The WS-H route-2 Focus/Shot foundation, Stage-5 presence-episode audit, and
-  first-hit-bounded natural Power-0 audit are the current repository
-  checkpoint; no new physical trial was run.
-- Complete Linux discovery passes 1,385 tests in 13.048 seconds.
-- Complete Windows UNC discovery passes 1,385 tests in 27.239 seconds with
+- The WS-H route-2 Focus/Shot foundation, Stage-5 presence-episode audit,
+  first-hit-bounded natural Power-0 audit, and `CONTENT-01` shipped content
+  manifest are the current repository checkpoint; no new physical trial was
+  run.
+- Complete Linux discovery passes 1,390 tests in 12.760 seconds.
+- Complete Windows UNC discovery passes 1,390 tests in 26.724 seconds with
   the three existing skips.
 - No TH08, controller, supervisor, native-replay runner, or Windows test
   process is intentionally left running.
@@ -76,6 +77,30 @@ historical handoff.
   `837244e9ca86bd70271cc4fa311bbeb67313e4d6c5281285de2872df5e791a6f`.
 - No live Focus/Shot ranking, combat objective, action authority, or physical
   promotion changed.
+
+### Current content checkpoint
+
+- `CONTENT-01` pins shipped `th08.dat` SHA-256
+  `9d7edf43b8ddd347cbb641836f6b5050745dd936f688daebbf9382ca557043bb`
+  to the accepted executable and clean
+  `thpatch/thtk@892114a0fcaa0bbdaaecf3cb4ad56f758683fb40`.
+- Pinned `thdat` and the independent native-derived repository archive parser
+  agree on all 317 directory rows. All 188 scoped ECL/STD/ANM/MSG decoded
+  payloads agree byte for byte; all 42 tracked wrapped and decoded pairs also
+  match.
+- Pinned `thecl` and the repository ECL parser agree on subroutine/timeline
+  counts and the complete 38,696-opcode sequence for all 24 ECL files.
+- Stage 3, Stage 4A, Stage 5, and Final-B filename-scoped content sets now
+  have immutable digests. This pins candidate versions but grants no runtime
+  resource-selection, event-reachability, opcode-side-effect, or action
+  authority.
+- Release-12 `thstd` succeeds only for the two Stage-3 mandatory STD files. It
+  receives signals on the Stage-4A/5/Final-B pairs. CE-0218 retains this as an
+  external-tool limitation; exact archive/resource identity remains passed.
+- Retained manifest:
+  `artifacts/runtime_reports/th08_immutable_content_manifest_20260731.json`,
+  SHA-256
+  `3a52b6f485ada63c833f77ae8cd1653f469ae4fadeef3c38336a737c7e753ae1`.
 
 ### Latest physical and replay evidence
 
@@ -1228,6 +1253,10 @@ Do not resume broad G5 work first.
    explicit v4 ordinary-enemy corpus may compare focused, unfocused, and
    causal refocus schedules only inside the unchanged survival-feasible set.
    Do not launch a physical trial merely to fill any capture debt.
+   `CONTENT-01` is closed for shipped byte identity. `CONTENT-02` may now
+   build the mandatory-stage symbolic ECL event atlas and join native events
+   only by exact image/PC identity; do not use `thtk` names as runtime
+   side-effect authority and do not block on the failed external STD printer.
 1. Do not repeat C5, the 22-hit Stage-6B run, or the unchanged 74-hit full
    route. C5 exact delivery is closed for its declared source-local contract;
    the two failed workloads already supply their reachability, resource, and
